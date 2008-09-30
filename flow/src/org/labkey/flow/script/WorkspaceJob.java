@@ -20,15 +20,16 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.GUID;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.FlowSettings;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 
 /**
  * User: kevink
@@ -40,24 +41,43 @@ public class WorkspaceJob extends FlowJob
 
     private final FlowExperiment _experiment;
     private final File _workspaceFile;
+    private final String _workspaceName;
     private final File _runFilePathRoot;
-    private final boolean _deleteWorkspaceFile;
+    private final boolean _failOnError;
 
     private final File _containerFolder;
     private FlowRun _run;
 
     public WorkspaceJob(ViewBackgroundInfo info,
                         FlowExperiment experiment,
-                        File workspaceFile, File runFilePathRoot,
-                        boolean deleteWorkspaceFile)
+                        WorkspaceData workspaceData,
+                        File runFilePathRoot,
+                        boolean failOnError)
             throws Exception
     {
         super(FlowPipelineProvider.NAME, info);
         _experiment = experiment;
-        _workspaceFile = workspaceFile;
         _runFilePathRoot = runFilePathRoot;
         _containerFolder = getWorkingFolder(getContainer());
-        _deleteWorkspaceFile = deleteWorkspaceFile;
+        _failOnError = failOnError;
+
+        String name = workspaceData.getName();
+        if (name == null && workspaceData.getPath() != null)
+        {
+            String[] parts = workspaceData.getPath().split(File.pathSeparator);
+            if (parts.length > 0)
+                name = parts[parts.length];
+        }
+        if (name == null)
+            name = "workspace";
+        _workspaceName = name;
+        _workspaceFile = File.createTempFile(_workspaceName, null, FlowSettings.getWorkingDirectory());
+        _workspaceFile.deleteOnExit();
+
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(_workspaceFile));
+        oos.writeObject(workspaceData.getWorkspaceObject());
+        oos.flush();
+        oos.close();
 
         initStatus();
     }
@@ -103,10 +123,13 @@ public class WorkspaceJob extends FlowJob
         setStatus("LOADING");
 
         boolean completeStatus = false;
+        ObjectInputStream ois = null;
         try
         {
-            FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(new FileInputStream(_workspaceFile));
-            _run = workspace.createExperimentRun(this, getUser(), getContainer(), _experiment, _workspaceFile, _runFilePathRoot);
+            ois = new ObjectInputStream(new FileInputStream(_workspaceFile));
+            FlowJoWorkspace workspace = (FlowJoWorkspace)ois.readObject();
+            
+            _run = workspace.createExperimentRun(this, getUser(), getContainer(), _experiment, _workspaceName, _workspaceFile, _runFilePathRoot, _failOnError);
             setStatus(PipelineJob.COMPLETE_STATUS);
             completeStatus = true;
         }
@@ -120,8 +143,8 @@ public class WorkspaceJob extends FlowJob
             {
                 setStatus(PipelineJob.ERROR_STATUS);
             }
+            PageFlowUtil.close(ois);
         }
-        if (_deleteWorkspaceFile)
-            _workspaceFile.delete();
+        _workspaceFile.delete();
     }
 }

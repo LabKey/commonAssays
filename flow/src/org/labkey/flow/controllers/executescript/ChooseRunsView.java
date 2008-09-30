@@ -33,6 +33,7 @@ public class ChooseRunsView extends FlowQueryView
         super(form);
         getSettings().setAllowChooseQuery(false);
         getSettings().setAllowChooseView(false);
+        getSettings().setMaxRows(0);
         _form = form;
     }
 

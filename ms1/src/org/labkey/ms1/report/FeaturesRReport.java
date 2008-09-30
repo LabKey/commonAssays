@@ -67,12 +67,13 @@ public class FeaturesRReport extends CustomRReport
         if(null != url.getParameter(MS1Controller.ShowFeaturesForm.ParamNames.runId.name()))
             filters.add(new RunFilter(Integer.valueOf(url.getParameter(MS1Controller.ShowFeaturesForm.ParamNames.runId.name())).intValue()));
 
-        //if featureId is there, it's a similar search view
-        if(null != url.getParameter(MS1Controller.SimilarSearchForm.ParamNames.featureId.name()))
+        //if mzSource is there, it's a similar search view
+        if(null != url.getParameter(MS1Controller.SimilarSearchForm.ParamNames.mzSource.name()))
         {
             forSearch = true;
             MS1Controller.SimilarSearchForm form = new MS1Controller.SimilarSearchForm();
-            form.setFeatureId(Integer.valueOf(url.getParameter(MS1Controller.SimilarSearchForm.ParamNames.featureId.name())));
+            if(null != url.getParameter(MS1Controller.SimilarSearchForm.ParamNames.featureId.name()))
+                form.setFeatureId(Integer.valueOf(url.getParameter(MS1Controller.SimilarSearchForm.ParamNames.featureId.name())));
             if(null != url.getParameter(MS1Controller.SimilarSearchForm.ParamNames.mzSource.name()))
                 form.setMzSource(Double.valueOf(url.getParameter(MS1Controller.SimilarSearchForm.ParamNames.mzSource.name())));
             if(null != url.getParameter(MS1Controller.SimilarSearchForm.ParamNames.mzOffset.name()))

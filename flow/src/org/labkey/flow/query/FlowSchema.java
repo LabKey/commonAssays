@@ -22,15 +22,15 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.GUID;
 import org.labkey.api.util.Cache;
+import org.labkey.api.util.GUID;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.StatisticSpec;
-import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -40,12 +40,11 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.view.FlowQueryView;
-import org.springframework.beans.PropertyValues;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Types;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 
 public class FlowSchema extends UserSchema

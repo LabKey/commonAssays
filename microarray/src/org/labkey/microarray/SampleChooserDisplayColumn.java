@@ -23,6 +23,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.view.GWTView;
 import org.labkey.microarray.sampleset.client.SampleChooser;
 import org.labkey.microarray.sampleset.client.SampleInfo;
@@ -78,51 +79,71 @@ class SampleChooserDisplayColumn extends SimpleDisplayColumn
 
         props.put(SampleChooser.PROP_NAME_MAX_SAMPLE_COUNT, Integer.toString(maxCount));
         props.put(SampleChooser.PROP_NAME_MIN_SAMPLE_COUNT, Integer.toString(minCount));
-        ExpSampleSet sampleSet = ExperimentService.get().lookupActiveSampleSet(ctx.getContainer());
-        ProtocolParameter selectedSampleSetLSIDParam = _protocol.getProtocolParameters().get(MicroarrayAssayDesigner.SAMPLE_SET_LSID_PARAMETER_URI);
-        if (selectedSampleSetLSIDParam != null)
+
+        String[] barcodeFieldNames = { "Barcode" };
+        ProtocolParameter barcodeFieldNamesParam = _protocol.getProtocolParameters().get(MicroarrayAssayDesigner.BARCODE_FIELD_NAMES_PARAMETER_URI);
+        if (barcodeFieldNamesParam != null && barcodeFieldNamesParam.getStringValue() != null)
         {
-            sampleSet = ExperimentService.get().getSampleSet(selectedSampleSetLSIDParam.getStringValue());
+            barcodeFieldNames = barcodeFieldNamesParam.getStringValue().split(",");
         }
 
-        if (sampleSet != null)
+        List<ExpMaterial> matchingMaterials = new ArrayList<ExpMaterial>();
+        if (barcodeFieldNames != null && _barcode != null)
         {
-            ProtocolParameter barcodeColumnNameParam = _protocol.getProtocolParameters().get(MicroarrayAssayDesigner.SAMPLE_BARCODE_COLUMN_NAME_PARAMETER_URI);
-            String barcodeColumnName = "Barcode";
-            if (barcodeColumnNameParam != null)
+            // Look through all the sample sets that are visible from this folder to check for samples where
+            // the barcode matches
+            for (ExpSampleSet sampleSet : ExperimentService.get().getSampleSets(ctx.getContainer(), true))
             {
-                barcodeColumnName = barcodeColumnNameParam.getStringValue();
-            }
-            if (_barcode != null)
-            {
-                List<ExpMaterial> matchingMaterials = new ArrayList<ExpMaterial>();
-                DomainProperty barcodeProperty = sampleSet.getType().getPropertyByName(barcodeColumnName);
-                if (barcodeProperty != null)
+                ExpMaterial[] materials = sampleSet.getSamples();
+                Domain domain = sampleSet.getType();
+                DomainProperty[] properties = domain == null ? new DomainProperty[0] : domain.getProperties();
+                // Check all of the possible barcode field names
+                for (String barcodeFieldName : barcodeFieldNames)
                 {
-                    for (ExpMaterial material : sampleSet.getSamples())
+                    barcodeFieldName = barcodeFieldName.trim();
+                    for (DomainProperty prop : properties)
                     {
-                        Object barcodeValue = material.getProperty(barcodeProperty);
-                        if (barcodeValue instanceof String && _barcode.equalsIgnoreCase((String)barcodeValue))
+                        // Look for fields with matching names
+                        if (barcodeFieldName.equalsIgnoreCase(prop.getName()) || barcodeFieldName.equalsIgnoreCase(prop.getLabel()))
                         {
-                            matchingMaterials.add(material);
+                            for (ExpMaterial material : materials)
+                            {
+                                // If the names match, check if the material has the desired barcode value
+                                Object propObj = material.getProperty(prop);
+                                if (propObj != null && _barcode.equals(propObj.toString()))
+                                {
+                                    // Add it to the list of matching materials
+                                    matchingMaterials.add(material);
+                                }
+                            }
                         }
                     }
                 }
-
-                if (matchingMaterials.size() <= maxCount)
-                {
-                    for (int i = 0; i < matchingMaterials.size(); i++)
-                    {
-                        ExpMaterial material = matchingMaterials.get(i);
-                        props.put(SampleChooser.PROP_PREFIX_SELECTED_SAMPLE_LSID + i, material.getLSID());
-                    }
-                }
             }
-
-            props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_SET_LSID, sampleSet.getLSID());
-            props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_SET_NAME, sampleSet.getName());
-            props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_SET_ROW_ID, Integer.toString(sampleSet.getRowId()));
         }
+
+        if (matchingMaterials.size() == maxCount)
+        {
+            // If we found exactly the right number of matches, lock the user into those materials
+            for (int i = 0; i < matchingMaterials.size(); i++)
+            {
+                ExpMaterial material = matchingMaterials.get(i);
+                props.put(SampleChooser.PROP_PREFIX_SELECTED_SAMPLE_LSID + i, material.getLSID());
+                props.put(SampleChooser.PROP_PREFIX_SELECTED_SAMPLE_SET_LSID + i, material.getSampleSet().getLSID());
+            }
+        }
+        else
+        {
+            // Otherwise, select the folder's active sample set as the default
+            ExpSampleSet sampleSet = ExperimentService.get().lookupActiveSampleSet(ctx.getContainer());
+            if (sampleSet != null)
+            {
+                props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_SET_LSID, sampleSet.getLSID());
+                props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_SET_NAME, sampleSet.getName());
+                props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_SET_ROW_ID, Integer.toString(sampleSet.getRowId()));
+            }
+        }
+
         GWTView view = new GWTView(SampleChooser.class, props);
         try
         {

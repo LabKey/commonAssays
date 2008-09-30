@@ -20,17 +20,18 @@
                     <property name="protocolObjectId" value="MS1.msInspectFeatureFindingAnalysis" />
                     <property name="protocolName" value="msInspect Feature Finding Analysis" />
                     <property name="protocolFactoryName" value="inspect"/>
+                    <property name="initialInputExt" ref="mzXMLFileType" />
                     <property name="fileExtHierarchy">
                         <map>
-                            <entry key=".mzXML"><list/></entry>
-                            <entry key=".mzXML.inspect"><list/></entry>
-                            <entry key=".mzXML.ms2.tsv"><list/></entry>
+                            <entry key-ref="mzXMLFileType"><list/></entry>
+                            <entry key-ref="mzXML_InspectFileType"><list/></entry>
+                            <entry key-ref="mzXML_MS2_TSVFileType"><list/></entry>
                         </map>
                     </property>
                     <property name="taskProgressionSpec">
                         <list>
                             <ref bean="mzxmlConverterId"/>
-<!--                            <ref bean="peakabooCommand"/> -->
+                            <ref bean="peakabooCommand"/> 
                             <ref bean="msInspectCommand"/>
                             <ref bean="xarGeneratorId"/>
                         </list>
@@ -43,23 +44,23 @@
                     <property name="protocolObjectId" value="MS1.msInspectFeaturePeptideMatchingAnalysis" />
                     <property name="protocolName" value="msInspect Feature Peptide Matching Analysis" />
                     <property name="protocolFactoryName" value="pepmatch"/>
-                    <property name="initialInputExt" value=".pep.xml"/>
+                    <property name="initialInputExt"><bean class="org.labkey.api.util.FileType"><constructor-arg value=".pep.xml"/></bean></property>
                     <property name="fileExtHierarchy">
                         <map>
-                            <entry key=".mzXML">
-                                <list><value>.pep.xml</value></list>
+                            <entry key-ref="mzXMLFileType">
+                                <list><bean class="org.labkey.api.util.FileType"><constructor-arg value=".pep.xml" /></bean></list>
                             </entry>
-                            <entry key=".mzXML.inspect">
-                                <list><value>.pep.xml</value></list>
+                            <entry key-ref="mzXML_InspectFileType">
+                                <list><bean class="org.labkey.api.util.FileType"><constructor-arg value=".pep.xml" /></bean></list>
                             </entry>
-                            <entry key=".mzXML.ms2.tsv">
-                                <list><value>.pep.xml</value></list>
+                            <entry key-ref="mzXML_MS2_TSVFileType">
+                                <list><bean class="org.labkey.api.util.FileType"><constructor-arg value=".pep.xml" /></bean></list>
                             </entry>
                         </map>
                     </property>
                     <property name="taskProgressionSpec">
                         <list>
-<!--                            <ref bean="peakabooCommand"/> -->
+                            <ref bean="peakabooCommand"/> 
                             <ref bean="msInspectCommand"/>
                             <ref bean="pepMatchCommand"/>
                             <ref bean="xarGeneratorId"/>
@@ -104,7 +105,7 @@
             <map>
                 <entry key="mzXMLFile">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg value=".mzXML"/>
+                        <constructor-arg ref="mzXMLFileType" />
                     </bean>
                 </entry>
             </map>
@@ -135,9 +136,9 @@
                     <property name="switchName" value="mzHigh"/>
                     <property name="help" value="Maximum M/Z Value (default: the maximum m/z value in the file)"/>
                 </bean>
-                <bean class="org.labkey.api.pipeline.cmd.ExtWithSwitch">
-                    <property name="function" value="output"/>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
                     <property name="switchName" value="e"/>
+                    <property name="value" value=".peaks.xml" />
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine">
                     <property name="key" value="mzXMLFile" />
@@ -157,7 +158,7 @@
             <map>
                 <entry key="mzXMLFile">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg value=".mzXML"/>
+                        <constructor-arg ref="mzXMLFileType" />
                     </bean>
                 </entry>
                 <entry key="mzXML cache" value-ref="mzXMLCache"/>
@@ -309,5 +310,22 @@
     <bean id="unixNewSwitch" class="org.labkey.api.pipeline.cmd.UnixNewSwitchFormat"/>
     <bean id="unixMixedSwitch" class="org.labkey.api.pipeline.cmd.UnixNewSwitchFormat">
         <property name="separator" value=" "/>
+    </bean>
+
+    <bean id="mzXMLFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg>
+            <list>
+                <value>.msprefix.mzXML</value>
+                <value>.mzXML</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg value=".mzXML"/>
+    </bean>
+
+    <bean id="mzXML_InspectFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value="mzXML.inspect" />
+    </bean>
+    <bean id="mzXML_MS2_TSVFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".mzXML.ms2.tsv" />
     </bean>
 </beans>

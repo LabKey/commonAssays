@@ -237,6 +237,13 @@ public class NabManager
         if (workbook.getNumberOfSheets() < 2)
             throw new IOException("Invalid file format: plate data was expected on worksheet 2, but only 1 worksheet was found.");
         Sheet plateSheet = workbook.getSheet(1);
+
+        if (plateSheet.getRows() < nabTemplate.getRows() + START_ROW || plateSheet.getColumns() < nabTemplate.getColumns() + START_COL)
+        {
+            throw new IOException("Invalid file format: expected " + (nabTemplate.getRows() + START_ROW) +
+                    " rows and " + (nabTemplate.getColumns() + START_COL) + " columns on sheet 2.");
+        }
+            
         for (int row = 0; row < nabTemplate.getRows(); row++)
         {
             for (int col = 0; col < nabTemplate.getColumns(); col++)

@@ -38,10 +38,12 @@ public class SampleInfo
     private boolean _selected;
     private GWTSampleSet _sampleSet;
     private final String _defaultSampleLSID;
+    private final String _defaultSampleSetLSID;
 
-    public SampleInfo(int index, SampleCache cache, String defaultSampleLSID)
+    public SampleInfo(int index, SampleCache cache, String defaultSampleLSID, String sampleSetLSID)
     {
         _defaultSampleLSID = defaultSampleLSID;
+        _defaultSampleSetLSID = sampleSetLSID;
         _name = "Sample " + (index + 1);
         _index = index;
         _cache = cache;
@@ -87,6 +89,15 @@ public class SampleInfo
     {
         _sampleSetListBox.clear();
         _sampleSetListBox.addItem(SampleChooser.NONE_SAMPLE_SET.getName(), SampleChooser.NONE_SAMPLE_SET.getLsid());
+        for (int i = 0; i < sets.length; i++)
+        {
+            // If we already know which material to reference, override the folder's default sample set
+            if (sets[i].getLsid().equals(_defaultSampleSetLSID))
+            {
+                selectedSet = sets[i];
+                break;
+            }
+        }
         for (int i = 0; i < sets.length; i++)
         {
             GWTSampleSet set = sets[i];

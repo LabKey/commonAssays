@@ -139,8 +139,21 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
             if (name.equals(fileInput.getName()))
                 return fileInput;
         }
-        
-        return new File(getAnalysisDirectory(), name);
+
+        // Check if there's an analysis-specific copy of the file
+        File analysisFile = new File(getAnalysisDirectory(), name);
+        if (NetworkDrive.exists(analysisFile))
+        {
+            return analysisFile;
+        }
+        // If not, check if there's a shared copy of the file in the data directory
+        File dataFile = new File(getDataDirectory(), name);
+        if (NetworkDrive.exists(dataFile))
+        {
+            return dataFile;
+        }
+        // Fall back to the analysis-specific file even if it doesn't exist
+        return analysisFile;
     }
 
     public File findOutputFile(String name)

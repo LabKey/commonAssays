@@ -35,7 +35,10 @@ public class SampleChooser implements EntryPoint
     public static final String PROP_NAME_DEFAULT_SAMPLE_SET_LSID = "defaultSampleSetLSID";
     public static final String PROP_NAME_DEFAULT_SAMPLE_SET_NAME = "defaultSampleSetName";
     public static final String PROP_NAME_DEFAULT_SAMPLE_SET_ROW_ID = "defaultSampleRowId";
+    // Prefix for sample LSIDs that match the barcode
     public static final String PROP_PREFIX_SELECTED_SAMPLE_LSID = "selectedSampleLSID";
+    // Prefix for sample set LSIDs for each material that matches the barcode
+    public static final String PROP_PREFIX_SELECTED_SAMPLE_SET_LSID = "selectedSampleSetLSID";
 
     public static final String SAMPLE_COUNT_ELEMENT_NAME = "__sampleCount";
 
@@ -83,7 +86,9 @@ public class SampleChooser implements EntryPoint
 
             for (int i = 0; i < _maxSampleCount; i++)
             {
-                _sampleInfos[i] = new SampleInfo(i, _cache, PropertyUtil.getServerProperty(PROP_PREFIX_SELECTED_SAMPLE_LSID + i));
+                String sampleLSID = PropertyUtil.getServerProperty(PROP_PREFIX_SELECTED_SAMPLE_LSID + i);
+                String sampleSetLSID = PropertyUtil.getServerProperty(PROP_PREFIX_SELECTED_SAMPLE_SET_LSID + i);
+                _sampleInfos[i] = new SampleInfo(i, _cache, sampleLSID, sampleSetLSID);
                 _sampleInfos[i].setVisible(i < _maxSampleCount);
 
                 int tableRow = i + 1;
@@ -93,6 +98,7 @@ public class SampleChooser implements EntryPoint
                 _table.setWidget(tableRow, 1, _sampleInfos[i].getSampleSetListBox());
 
                 HorizontalPanel materialPanel = new HorizontalPanel();
+                materialPanel.setVerticalAlignment(HasAlignment.ALIGN_MIDDLE);
                 materialPanel.add(_sampleInfos[i].getMaterialListBox());
                 materialPanel.add(_sampleInfos[i].getMaterialTextBox());
                 _table.setWidget(tableRow, 2, materialPanel);

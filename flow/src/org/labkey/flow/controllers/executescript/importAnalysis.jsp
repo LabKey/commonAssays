@@ -51,10 +51,14 @@
             boolean currentStep = step.getNumber() == form.getStep();
             boolean futureStep = step.getNumber() > form.getStep();
             if (step.getNumber() > 0) {
-                %><td style="border-bottom:1px solid <%=futureStep ? "silver" : "black"%>" width="40"/><%
+                %>
+                <td valign="middle">
+                    <img src="<%=context.getContextPath()%>/_.gif" style="background:<%=futureStep ? "silver" : "black"%>; width:40px; height:1px"/>
+                </td>
+                <%
             }
             %>
-            <td width="60" style="text-align:center;color:<%=futureStep ? "silver" : "black"%>" rowspan="2" valign="top">
+            <td width="60" style="text-align:center;color:<%=futureStep ? "silver" : "black"%>" valign="top">
                 <span style="font-size:2em;font-weight:<%=currentStep ? "bold":"normal"%>;<%=step.getNumber() == 0 ? "visibility:hidden;":""%>"><%=step.getNumber()%></span><br/>
                 <span style="font-weight:<%=currentStep ? "bold":"normal"%>"><%=step.getTitle()%></span>
                 <%--
@@ -70,14 +74,6 @@
             <%
         }
         %>
-    </tr>
-    <tr>
-        <% for (AnalysisScriptController.ImportAnalysisStep step : AnalysisScriptController.ImportAnalysisStep.values())
-        {
-            if (step.getNumber() > 0) {
-                %><td /><%
-            }
-        } %>
     </tr>
 </table>
 

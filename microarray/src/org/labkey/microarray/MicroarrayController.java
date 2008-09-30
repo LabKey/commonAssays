@@ -153,17 +153,20 @@ public class MicroarrayController extends SpringActionController
         public ModelAndView getView(UploadRedirectForm form, BindException errors) throws Exception
         {
             List<Map<String, File>> files = new ArrayList<Map<String, File>>();
-            if (form.getPath() != null)
+            // Can't trust the form's getPath() because it translates the empty string into null, and we
+            // need to know if the parameter was present
+            String path = getViewContext().getRequest().getParameter("path");
+            if (path != null)
             {
                 PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
                 if (root == null)
                 {
                     HttpView.throwNotFound("No pipeline root is available");
                 }
-                File f = root.resolvePath(form.getPath());
+                File f = root.resolvePath(path);
                 if (!NetworkDrive.exists(f))
                 {
-                    HttpView.throwNotFound("Unable to find file: " + form.getPath());
+                    HttpView.throwNotFound("Unable to find file: " + path);
                 }
 
                 File[] selectedFiles = f.listFiles(ArrayPipelineManager.getMageFileFilter());

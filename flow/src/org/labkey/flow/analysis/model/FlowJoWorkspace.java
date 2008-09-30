@@ -786,7 +786,7 @@ abstract public class FlowJoWorkspace implements Serializable
         return new PolygonGate(polygonGate.getXAxis(), polygonGate.getYAxis(), polygon);
     }
 
-    public FlowRun createExperimentRun(FlowJob job, User user, Container container, FlowExperiment experiment, File workspaceFile, File runFilePathRoot) throws Exception
+    public FlowRun createExperimentRun(FlowJob job, User user, Container container, FlowExperiment experiment, String workspaceName, File workspaceFile, File runFilePathRoot, boolean failOnError) throws Exception
     {
         URI dataFileURI = new File(workspaceFile.getParent(), "attributes.flowdata.xml").toURI();
         ExperimentService.Interface svc = ExperimentService.get();
@@ -809,9 +809,11 @@ abstract public class FlowJoWorkspace implements Serializable
 
             AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);
             URI uri = null;
+            File file = null;
             if (runFilePathRoot != null)
             {
-                uri = new File(runFilePathRoot, sample.getLabel()).toURI();
+                file = new File(runFilePathRoot, sample.getLabel());
+                uri = file.toURI();
                 attrs.setURI(uri);
             }
             attrs.setKeywords(sample.getKeywords());
@@ -831,17 +833,31 @@ abstract public class FlowJoWorkspace implements Serializable
                     FlowAnalyzer.makeAnalysisDef(scriptDef, analysis, EnumSet.of(StatisticSet.workspace, StatisticSet.count, StatisticSet.frequencyOfParent));
                     scriptDocs.put(analysis, scriptDoc);
 
-                    // XXX: check fcs file exists
-                    if (uri != null)
+                    if (file != null)
                     {
-                        job.addStatus("Generating graphs for " + description);
-                        List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(
-                                uri, comp, analysis, analysis.getGraphs());
-                        for (FCSAnalyzer.GraphResult graphResult : graphResults)
+                        if (file.exists())
                         {
-                            if (graphResult.exception == null)
+                            job.addStatus("Generating graphs for " + description);
+                            List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(
+                                    uri, comp, analysis, analysis.getGraphs());
+                            for (FCSAnalyzer.GraphResult graphResult : graphResults)
                             {
-                                results.setGraph(graphResult.spec, graphResult.bytes);
+                                if (graphResult.exception == null)
+                                {
+                                    results.setGraph(graphResult.spec, graphResult.bytes);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            String msg = "Can't generate graphs for sample. FCS File doesn't exist for " + description;
+                            if (failOnError)
+                            {
+                                job.addError(null, null, msg);
+                            }
+                            else
+                            {
+                                job.warn(msg);
                             }
                         }
                     }
@@ -867,11 +883,11 @@ abstract public class FlowJoWorkspace implements Serializable
         boolean transaction = false;
         try
         {
-            job.addStatus("Begin transaction for workspace " + workspaceFile.getName());
+            job.addStatus("Begin transaction for workspace " + workspaceName);
 
             svc.beginTransaction();
             transaction = true;
-            ExpRun run = svc.createExperimentRun(container, workspaceFile.getName());
+            ExpRun run = svc.createExperimentRun(container, workspaceName);
             FlowProtocol flowProtocol = FlowProtocol.ensureForContainer(user, container);
             ExpProtocol protocol = flowProtocol.getProtocol();
             run.setProtocol(protocol);
@@ -883,7 +899,7 @@ abstract public class FlowJoWorkspace implements Serializable
 
             ExpData workspaceData = svc.createData(container, new DataType("Flow-Workspace"));
             workspaceData.setDataFileURI(workspaceFile.toURI());
-            workspaceData.setName(workspaceFile.getName());
+            workspaceData.setName(workspaceName);
             workspaceData.save(user);
 
             ExpProtocolApplication startingInputs = run.addProtocolApplication(user, null, ExpProtocol.ApplicationType.ExperimentRun, null);
@@ -924,7 +940,7 @@ abstract public class FlowJoWorkspace implements Serializable
                 ExpProtocolApplication paComp = run.addProtocolApplication(user, FlowProtocolStep.calculateCompensation.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, null);
                 paComp.addDataInput(user, workspaceData, InputRole.Workspace.toString(), null);
                 flowComp.getData().setSourceApplication(paComp);
-                flowComp.getData().setName(compMatrix.getName() + " " + workspaceFile.getName());
+                flowComp.getData().setName(compMatrix.getName() + " " + workspaceName);
                 job.addStatus("Saving CompMatrix " + iComp + "/" + compMatrixMap.size() + ":" + flowComp.getName());
                 flowComp.getData().save(user);
                 flowCompMatrices.put(compMatrix, flowComp);
@@ -989,7 +1005,7 @@ abstract public class FlowJoWorkspace implements Serializable
 
             svc.commitTransaction();
             transaction = false;
-            job.addStatus("Transaction completed successfully for workspace " + workspaceFile.getName());
+            job.addStatus("Transaction completed successfully for workspace " + workspaceName);
 
             return new FlowRun(run);
         }
@@ -998,7 +1014,7 @@ abstract public class FlowJoWorkspace implements Serializable
             if (transaction)
             {
                 svc.rollbackTransaction();
-                job.addStatus("Transaction failed to complete for workspace " + workspaceFile.getName());
+                job.addStatus("Transaction failed to complete for workspace " + workspaceName);
             }
             FlowManager.analyze();
         }

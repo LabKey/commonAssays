@@ -149,7 +149,7 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
         if(_exact)
         {
             sql.append(null == pepDataAlias ? " AND Peptide LIKE '%" : " AND " + pepDataAlias + ".Peptide LIKE '%");
-            sql.append(sequence.trim());
+            sql.append(sequence.replace("'", "''").trim()); //FIX: 6679
             sql.append("%'");
         }
 

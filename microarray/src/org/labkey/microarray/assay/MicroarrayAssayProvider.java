@@ -324,17 +324,23 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         Pair<ExpProtocol, List<Domain>> result = super.getAssayTemplate(user, targetContainer);
         List<ProtocolParameter> params = new ArrayList<ProtocolParameter>(result.getKey().getProtocolParameters().values());
 
-        ProtocolParameter channelCountParam = new ProtocolParameter();
-        channelCountParam.setOntologyEntryURI(MicroarrayAssayDesigner.CHANNEL_COUNT_PARAMETER_URI);
-        channelCountParam.setName("ChannelCountXPath");
-        channelCountParam.setValue(SimpleTypeNames.STRING, DEFAULT_CHANNEL_COUNT_XPATH);
-        params.add(channelCountParam);
+        ProtocolParameter channelCountXPathParam = new ProtocolParameter();
+        channelCountXPathParam.setOntologyEntryURI(MicroarrayAssayDesigner.CHANNEL_COUNT_PARAMETER_URI);
+        channelCountXPathParam.setName("ChannelCountXPath");
+        channelCountXPathParam.setValue(SimpleTypeNames.STRING, DEFAULT_CHANNEL_COUNT_XPATH);
+        params.add(channelCountXPathParam);
 
-        ProtocolParameter barcodeParam = new ProtocolParameter();
-        barcodeParam.setOntologyEntryURI(MicroarrayAssayDesigner.BARCODE_PARAMETER_URI);
-        barcodeParam.setName("BarcodeXPath");
-        barcodeParam.setValue(SimpleTypeNames.STRING, DEFAULT_BARCODE_XPATH);
-        params.add(barcodeParam);
+        ProtocolParameter barcodeXPathParam = new ProtocolParameter();
+        barcodeXPathParam.setOntologyEntryURI(MicroarrayAssayDesigner.BARCODE_PARAMETER_URI);
+        barcodeXPathParam.setName("BarcodeXPath");
+        barcodeXPathParam.setValue(SimpleTypeNames.STRING, DEFAULT_BARCODE_XPATH);
+        params.add(barcodeXPathParam);
+
+        ProtocolParameter barcodeFieldNameParam = new ProtocolParameter();
+        barcodeFieldNameParam.setOntologyEntryURI(MicroarrayAssayDesigner.BARCODE_FIELD_NAMES_PARAMETER_URI);
+        barcodeFieldNameParam.setName("BarcodeFieldNames");
+        barcodeFieldNameParam.setValue(SimpleTypeNames.STRING, "Barcode");
+        params.add(barcodeFieldNameParam);
 
         result.getKey().setProtocolParameters(params);
         return result;

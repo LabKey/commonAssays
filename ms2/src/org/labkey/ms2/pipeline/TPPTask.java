@@ -385,7 +385,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                         fileWorkProtXML = _wd.newFile(FT_PROT_XML);
                     }
 
-                    fileProtXML = _wd.outputFile(fileWorkProtXML, FT_PROT_XML.getName(getJobSupport().getBaseName()));
+                    fileProtXML = _wd.outputFile(fileWorkProtXML, FT_PROT_XML.getName(_wd.getDir(), getJobSupport().getBaseName()));
 
                     // Second step optionally runs ProteinProphet on the pepXML
                     RecordedAction protXMLAction = new RecordedAction(PROTEIN_PROPHET_ACTION_NAME);
