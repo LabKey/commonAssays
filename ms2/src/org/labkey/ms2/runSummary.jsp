@@ -44,33 +44,35 @@ if (null != bean.quantAlgorithm)
 { %>
     <tr><td>Quantitation:</td><td><%=h(bean.quantAlgorithm)%></td></tr><%
 } %>
+    <tr><td colspan="2">
+        <div class="labkey-button-bar">
+        <%
+
+        if (bean.writePermissions)
+        { %>
+            <%=PageFlowUtil.generateButton("Rename", MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%><%
+        } %>
+            <%=bean.modHref%><%
+
+        if (null != run.getParamsFileName() && null != run.getPath())
+        { %>
+            <%=PageFlowUtil.generateButton("Show " + run.getParamsFileName(), "showParamsFile.view?run=" + run.getRun(), "", "target=\"paramFile\"")%><%
+        }
+
+        if (run.getHasPeptideProphet())
+        { %>
+            <%=PageFlowUtil.generateButton("Show Peptide Prophet Details", "showPeptideProphetDetails.view?run=" + run.getRun(), "", "target=\"peptideProphetSummary\"")%><%
+        }
+
+        if (run.hasProteinProphet())
+        { %>
+            <%=PageFlowUtil.generateButton("Show Protein Prophet Details", "showProteinProphetDetails.view?run=" + run.getRun(), "", "target=\"proteinProphetSummary\"")%><%
+        }
+
+        if(run.getNegativeHitCount() > run.getPeptideCount() / 3)
+        { %>
+            <%=PageFlowUtil.generateButton("Discriminate", "discriminateScore.view?run=" + run.getRun())%><%
+        } %>
+        </div>
+    </td></tr>
 </table>
-<div class="labkey-button-bar">
-<%
-
-if (bean.writePermissions)
-{ %>
-    <%=PageFlowUtil.generateButton("Rename", MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%><%
-} %>
-    <%=bean.modHref%><%
-
-if (null != run.getParamsFileName() && null != run.getPath())
-{ %>
-    <%=PageFlowUtil.generateButton("Show " + run.getParamsFileName(), "showParamsFile.view?run=" + run.getRun(), "", "target=\"paramFile\"")%><%
-}
-
-if (run.getHasPeptideProphet())
-{ %>
-    <%=PageFlowUtil.generateButton("Show Peptide Prophet Details", "showPeptideProphetDetails.view?run=" + run.getRun(), "", "target=\"peptideProphetSummary\"")%><%
-}
-
-if (run.hasProteinProphet())
-{ %>
-    <%=PageFlowUtil.generateButton("Show Protein Prophet Details", "showProteinProphetDetails.view?run=" + run.getRun(), "", "target=\"proteinProphetSummary\"")%><%
-}
-
-if(run.getNegativeHitCount() > run.getPeptideCount() / 3)
-{ %>
-    <%=PageFlowUtil.generateButton("Discriminate", "discriminateScore.view?run=" + run.getRun())%><%
-} %>
-</div>

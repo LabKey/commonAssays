@@ -47,8 +47,7 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
         Set<StatisticSpec> pct = new TreeSet<StatisticSpec>();
         for (StatisticSpec s : all)
         {
-            if (s.getStatistic() == StatisticSpec.STAT.Freq_Of_Parent)
-                pct.add(s);
+            pct.add(s);
         }
         return pct;
     }

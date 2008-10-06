@@ -530,9 +530,15 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
         String ver = params.get("pipeline, msinspect ver");
 
-        // TODO: Doesn't work when JAVA_HOME has a space in the path
+        // NOTE: Because the java command-line for msInspect gets passed as a
+        // single argument to xinteract, it cannot support spaces in any
+        // of its arguments. If the path to java.exe contains spaces,
+        // then just use "java", and rely on it being on the path.
+        String javaPath = PipelineJobService.get().getJavaPath();
+        if (javaPath.indexOf(' ') >= 0)
+            javaPath = "java";
         return new String[] {
-                "-C1" + PipelineJobService.get().getJavaPath() + " " +
+            "-C1" + javaPath + " " + 
                 (_factory.getJavaVMOptions() == null ? "-Xmx1024M" : _factory.getJavaVMOptions())
                 + " -jar " + PipelineJobService.get().getJarPath("viewerApp.jar", "msinspect", ver)
                 + " --q3 " + StringUtils.join(quantOpts.iterator(), ' ')
