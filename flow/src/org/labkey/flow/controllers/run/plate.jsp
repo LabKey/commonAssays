@@ -28,25 +28,20 @@ function parseParameters()
 		queryParams[kv[0]] = kv[1];
 	}
 };
+parseParameters();
 
 var options = {};
-options.RUNID = 533;
+options.RUNID = 0;
 options.STATISTIC = 'Statistic/Count';
 options.PLATENAME = "FCSFile/Keyword/PLATE NAME";
 options.PLATEID = "FCSFile/Keyword/PLATE ID";
 options.WELLID = "FCSFile/Keyword/WELL ID";
 options.STIM = "FCSFile/Keyword/stim";
 options.CONCENTRATION= "FCSFile/Keyword/concentration";
-
 if (queryParams['runId'])
 	options.RUNID = queryParams['runId'];
 
-
-function h(s)
-{
-    return Ext.util.Format.htmlEncode(s);
-}
-
+var h = Ext.util.Format.htmlEncode;
 function _id(s) {return document.getElementById(s);}
 function _div(node) { var div = document.createElement("DIV"); if (node) div.appendChild(node); return div; }
 function _tbody() { return document.createElement("TBODY"); }
@@ -213,7 +208,7 @@ function FCSAnalyses_Handler(responseObj)
         map[well.key] = well;
     }
 
-    Ext.get("plateDisplay").update(generateTables(plateSet),false);
+    generateTables(plateSet);
     updateHeapMap(plateSet, map);
 }
 
@@ -287,16 +282,37 @@ function getStatistics()
 
 var down = ["A","B","C","D","E","F","G","H"];
 var across = ["01","02","03","04","05","06","07","08","09","10","11","12"];
+var wellTDs = {};
+
+function tdForWell(id)
+{
+    var td = wellTDs[id];
+    if (!td)
+    {
+        td = document.getElementById(id);
+        wellTDs[id] = td;
+    }
+    return td;
+}
 
 function generateTables(plates)
 {
     var ret = [];
     var id;
 
+    var foundAll = true;
+    for (plate in plates)
+    {
+        if (!Ext.get("T" + plate))
+            foundAll = false;
+    }
+    if (foundAll)
+        return;
+
     for (plate in plates)
     {
         ret.push(plates[plate].name);
-        ret.push("<table class='normal' style='border:solid 1px black;'");
+        ret.push("<table id='T" + plate + "' class='normal' style='border:solid 1px black;'");
         for (var x=0 ; x<8 ; x++)
         {
             ret.push("<tr>");
@@ -309,7 +325,8 @@ function generateTables(plates)
         }
         ret.push("</table>");
     }
-    return ret.join("");
+    Ext.get("plateDisplay").update(ret.join(""),false);
+    wellTDs = {};
 }
 
 
@@ -317,7 +334,7 @@ function updateHeapMap(plates, map)
 {
 	var maxValue=0;
 	var minValue=10000000;
-	var id, well, value, scaled;
+	var well, value, scaled;
     var key, plate;
 
     for (key in map)
@@ -343,7 +360,7 @@ function updateHeapMap(plates, map)
             for (var y=0 ; y<12 ; y++)
             {
                 var wellid = plate + "-" + down[x] + across[y];
-                var td = _id(wellid);
+                var td = tdForWell(wellid);
                 td.className="wellEmpty";
                 td.style.backgroundColor = null;
                 td.style.color = null;
@@ -389,9 +406,15 @@ function updateHeapMap(plates, map)
 
 function showHeatMap(min,max)
 {
+    if (Ext.get("legendMax"))
+    {
+        Ext.get("legendMax").update(max);
+        Ext.get("legendMin").update(min);
+        return;
+    }
     var height=180;
     var html = [];
-    html.push("&nbsp;<br>" + max + "<br>");
+    html.push("&nbsp;<br><span id='legendMax'>" + max + "</span><br>");
 
     var img = "<img src='" + LABKEY.contextPath + "/_.gif' width=20 height=1 border=0 style='background-color:COLOR;'><br>";
 
@@ -400,7 +423,7 @@ function showHeatMap(min,max)
         var c = heatmap(i/height);
         html.push(img.replace("COLOR", c.toCSS()));
     }
-    html.push("" + min + "<br>");
+    html.push("<span id='legendMin'>" + min + "</span><br>");
     Ext.get("showMap").update(html.join(""));
 }
 
