@@ -955,12 +955,12 @@ public class MS2Controller extends SpringActionController
 
         private class GoView extends TabStripView
         {
-            protected List<TabInfo> getTabList()
+            public List<NavTree> getTabList()
             {
-                return Arrays.asList(new TabInfo("Automatic", "automatic", getLoadGoURL()), new TabInfo("Manual", "manual", getLoadGoURL()));
+                return Arrays.asList(new NavTree[]{new TabInfo("Automatic", "automatic", getLoadGoURL()), new TabInfo("Manual", "manual", getLoadGoURL())});
             }
 
-            protected HttpView getTabView(String tabId) throws Exception
+            public HttpView getTabView(String tabId) throws Exception
             {
                 if ("manual".equals(tabId))
                     return new JspView("/org/labkey/ms2/loadGoManual.jsp");
