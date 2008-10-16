@@ -37,10 +37,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.Portal;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.WebPartFactory;
-import org.labkey.api.view.WebPartView;
+import org.labkey.api.view.*;
 import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.pipeline.MS2PipelineProvider;
@@ -98,13 +95,13 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     public MS2Module()
     {
         super(NAME, 8.20, "/org/labkey/ms2", true,
-                new WebPartFactory("MS2 Runs"){
+                new BaseWebPartFactory("MS2 Runs"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
                         return new MS2WebPart();
                     }
                 },
-                new WebPartFactory(MS2_RUNS_ENHANCED_NAME){
+                new BaseWebPartFactory(MS2_RUNS_ENHANCED_NAME){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
                         WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _ms2SearchRunFilter, true, true);
@@ -112,7 +109,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                         return result;
                     }
                 },
-                new WebPartFactory(MS2_SAMPLE_PREPARATION_RUNS_NAME){
+                new BaseWebPartFactory(MS2_SAMPLE_PREPARATION_RUNS_NAME){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
                         WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _samplePrepRunFilter, true, true);
@@ -120,19 +117,19 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                         return result;
                     }
                 },
-                new WebPartFactory("MS2 Statistics", WebPartFactory.LOCATION_RIGHT){
+                new BaseWebPartFactory("MS2 Statistics", WebPartFactory.LOCATION_RIGHT){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
                         return new MS2StatsWebPart();
                     }
                 },
-                new WebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_RIGHT){
+                new BaseWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_RIGHT){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
                         return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));
                     }
                 },
-                new WebPartFactory(ProteinSearchWebPart.NAME){
+                new BaseWebPartFactory(ProteinSearchWebPart.NAME){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
                         return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));

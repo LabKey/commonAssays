@@ -20,9 +20,9 @@ import org.labkey.api.view.*;
 
 public class OverviewWebPart extends HtmlView
 {
-    static public final WebPartFactory FACTORY = new Factory();
+    static public final BaseWebPartFactory FACTORY = new Factory();
 
-    static class Factory extends WebPartFactory
+    static class Factory extends BaseWebPartFactory
     {
         Factory()
         {

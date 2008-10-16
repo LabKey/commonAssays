@@ -56,7 +56,7 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
     public MicroarrayModule()
     {
         super(NAME, 8.20, null, true,
-                new WebPartFactory(WEBPART_MICROARRAY_RUNS)
+                new BaseWebPartFactory(WEBPART_MICROARRAY_RUNS)
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
@@ -66,7 +66,7 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
                         return view;
                     }
                 },
-                new WebPartFactory(WEBPART_PENDING_FILES)
+                new BaseWebPartFactory(WEBPART_PENDING_FILES)
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
@@ -76,7 +76,7 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
                         return view;
                     }
                 },
-                new WebPartFactory(WEBPART_MICROARRAY_STATISTICS, WebPartFactory.LOCATION_RIGHT)
+                new BaseWebPartFactory(WEBPART_MICROARRAY_STATISTICS, WebPartFactory.LOCATION_RIGHT)
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {

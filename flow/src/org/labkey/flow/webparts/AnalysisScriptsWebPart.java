@@ -34,7 +34,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
 {
     static public final WebPartFactory FACTORY = new Factory();
 
-    static class Factory extends WebPartFactory
+    static class Factory extends BaseWebPartFactory
     {
         Factory()
         {

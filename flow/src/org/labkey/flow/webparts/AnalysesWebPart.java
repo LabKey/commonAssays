@@ -31,7 +31,7 @@ import org.labkey.flow.view.FlowQueryView;
 
 public class AnalysesWebPart extends FlowQueryView
 {
-    static public final WebPartFactory FACTORY = new WebPartFactory("Flow Analyses")
+    static public final WebPartFactory FACTORY = new BaseWebPartFactory("Flow Analyses")
     {
         public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart wp) throws Exception
         {

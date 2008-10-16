@@ -68,7 +68,7 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
     public MS1Module()
     {
         super(NAME, 8.20, "/org/labkey/ms1", true,
-                new WebPartFactory(WEBPART_MS1_RUNS)
+                new BaseWebPartFactory(WEBPART_MS1_RUNS)
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
@@ -81,7 +81,7 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
                         return view;
                     }
                 },
-                new WebPartFactory(WEBPART_PEP_SEARCH)
+                new BaseWebPartFactory(WEBPART_PEP_SEARCH)
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
@@ -91,7 +91,7 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
                         return view;
                     }
                 },
-                new WebPartFactory(WEBPART_FEATURE_SEARCH)
+                new BaseWebPartFactory(WEBPART_FEATURE_SEARCH)
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
