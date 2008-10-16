@@ -177,7 +177,7 @@ public class SpectraCountConfiguration
     {
         for (SpectraCountConfiguration config : VALID_CONFIGS)
         {
-            if (tableName.equalsIgnoreCase(config.getTableName()))
+            if (config.getTableName().equalsIgnoreCase(tableName))
             {
                 return config;
             }

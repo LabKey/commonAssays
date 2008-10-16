@@ -351,7 +351,6 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                     String algorithm = getQuantitionAlgorithm(params);
                     proteinQuantAction.setDescription(algorithm + " " + proteinQuantAction.getName());
                     proteinQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), algorithm);
-                    actions.add(proteinQuantAction);
                 }
             }
 
@@ -409,6 +408,8 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                     proteinQuantAction.addInput(fileProtXML, "ProtXML");
                     proteinQuantAction.addInput(filePepXML, "PepXML");
                     proteinQuantAction.addOutput(fileProtXML, "QuantProtXML", false);
+                    // Add this here so that it's the last step in the TPP sequence
+                    actions.add(proteinQuantAction);
                 }
             }
             finally
