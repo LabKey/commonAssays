@@ -30,7 +30,6 @@ public class OverviewWebPart extends HtmlView
             addLegacyNames("Flow Overview");
         }
 
-        @Override
         public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws Exception
         {
             return new OverviewWebPart(portalCtx);
