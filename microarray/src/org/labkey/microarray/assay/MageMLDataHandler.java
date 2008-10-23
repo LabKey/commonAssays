@@ -25,6 +25,7 @@ import org.labkey.api.study.assay.ParticipantVisitResolver;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.common.tools.SimpleXMLStreamReader;
 import org.labkey.common.tools.TabLoader;
+import org.labkey.common.tools.ColumnDescriptor;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
@@ -114,12 +115,12 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
                         Reader fileReader = new InputStreamReader(tsvIn);
 
                         TabLoader loader = new TabLoader(fileReader, false);
-                        TabLoader.ColumnDescriptor[] tabColumns = new TabLoader.ColumnDescriptor[columnNames.size()];
+                        ColumnDescriptor[] tabColumns = new ColumnDescriptor[columnNames.size()];
                         for (int i = 0; i < columnNames.size(); i++)
                         {
                             String name = columnNames.get(i);
                             Class colClass = expectedColumns.get(name.toLowerCase());
-                            tabColumns[i] = new TabLoader.ColumnDescriptor(name, colClass);
+                            tabColumns[i] = new ColumnDescriptor(name, colClass);
                             if (colClass == null)
                             {
                                 tabColumns[i].load = false;

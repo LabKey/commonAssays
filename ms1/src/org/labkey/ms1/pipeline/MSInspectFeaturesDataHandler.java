@@ -30,6 +30,7 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.common.tools.TabLoader;
+import org.labkey.common.tools.ColumnDescriptor;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.MS1Module;
 
@@ -238,11 +239,11 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             //open the tsv file using TabLoader for automatic parsing
             TabLoader tsvloader = new TabLoader(dataFile);
             TabLoader.TabLoaderIterator iter = tsvloader.iterator();
-            TabLoader.ColumnDescriptor[] coldescrs = tsvloader.getColumns();
+            ColumnDescriptor[] coldescrs = tsvloader.getColumns();
 
             //set the error value for each column descriptor so that we can
             //detect conversion errors as we process the rows
-            for(TabLoader.ColumnDescriptor coldescr : coldescrs)
+            for(ColumnDescriptor coldescr : coldescrs)
                 coldescr.errorValues = new ConversionError(coldescr.name);
 
             //insert information about the software used to produce the file
@@ -392,11 +393,11 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @param log       Log file
      * @return          The appropriate set of column bindings
      */
-    protected ArrayList<ColumnBinding> selectBindings(TabLoader.ColumnDescriptor[] coldescrs, Logger log)
+    protected ArrayList<ColumnBinding> selectBindings(ColumnDescriptor[] coldescrs, Logger log)
     {
         ArrayList<ColumnBinding> ret = new ArrayList<ColumnBinding>(coldescrs.length);
         ColumnBinding binding;
-        for(TabLoader.ColumnDescriptor coldescr : coldescrs)
+        for(ColumnDescriptor coldescr : coldescrs)
         {
             binding = _bindingMap.get(coldescr.name);
             if(null != binding)

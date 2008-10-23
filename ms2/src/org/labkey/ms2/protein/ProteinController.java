@@ -30,6 +30,7 @@ import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.common.tools.TabLoader;
+import org.labkey.common.tools.ColumnDescriptor;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.springframework.validation.BindException;
@@ -250,7 +251,7 @@ public class ProteinController extends SpringActionController
             tabLoader.setScanAheadLineCount(200);
 
             Map<String, Object>[] rows = (Map<String, Object>[]) tabLoader.load();
-            TabLoader.ColumnDescriptor[] columns = tabLoader.getColumns();
+            ColumnDescriptor[] columns = tabLoader.getColumns();
             String lookupStringColumnName = null;
 
             CustomAnnotationType type = CustomAnnotationType.valueOf(form.getAnnotationType());
@@ -262,7 +263,7 @@ public class ProteinController extends SpringActionController
             else
             {
                 Set<String> columnNames = new CaseInsensitiveHashSet();
-                for (TabLoader.ColumnDescriptor column : columns)
+                for (ColumnDescriptor column : columns)
                 {
                     if (!columnNames.add(column.name))
                     {
@@ -342,7 +343,7 @@ public class ProteinController extends SpringActionController
 
                 for (int i = 1; i < columns.length; i++)
                 {
-                    TabLoader.ColumnDescriptor cd = columns[i];
+                    ColumnDescriptor cd = columns[i];
                     PropertyDescriptor pd = new PropertyDescriptor();
                     DomainDescriptor dd = new DomainDescriptor();
                     dd.setDomainURI(annotationSet.getLsid());
