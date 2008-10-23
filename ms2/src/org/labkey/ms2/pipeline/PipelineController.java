@@ -296,7 +296,7 @@ public class PipelineController extends SpringActionController
         {
             PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
             if (pr == null || !URIUtil.exists(pr.getUri()))
-                return HttpView.throwNotFoundMV();
+                return HttpView.throwNotFound();
 
             _perlPipeline = pr.isPerlPipeline();
 
@@ -306,10 +306,10 @@ public class PipelineController extends SpringActionController
 
             URI uriData = URIUtil.resolve(uriRoot, form.getPath());
             if (uriData == null)
-                return HttpView.throwNotFoundMV();
+                return HttpView.throwNotFound();
             _dirData = new File(uriData);
             if (!NetworkDrive.exists(_dirData))
-                return HttpView.throwNotFoundMV();
+                return HttpView.throwNotFound();
 
             if (getProviderName() != null)
                 form.setSearchEngine(getProviderName());
@@ -317,7 +317,7 @@ public class PipelineController extends SpringActionController
             _provider =
                 (AbstractMS2SearchPipelineProvider)PipelineService.get().getPipelineProvider(form.getSearchEngine());
             if (_provider == null)
-                return HttpView.throwNotFoundMV();
+                return HttpView.throwNotFound();
             AbstractMS2SearchProtocolFactory protocolFactory = _provider.getProtocolFactory();
 
             if ("".equals(form.getProtocol()))
@@ -757,7 +757,7 @@ public class PipelineController extends SpringActionController
         {
             PipeRoot pr = PipelineService.get().getPipelineRootSetting(getContainer());
             if (pr == null)
-                return HttpView.throwNotFoundMV("A pipeline root is not set on this folder.");
+                return HttpView.throwNotFound("A pipeline root is not set on this folder.");
 
             _dirRoot = new File(pr.getUri());
             _provider = (AbstractMS2SearchPipelineProvider)
@@ -974,7 +974,7 @@ public class PipelineController extends SpringActionController
         {
             PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
             if (pr == null || !URIUtil.exists(pr.getUri()))
-                return HttpView.throwNotFoundMV();
+                return HttpView.throwNotFound();
 
 //            setHelpTopic(getHelpTopic("MS2-Pipeline/showCreateMS2Protocol"));
 
@@ -1280,7 +1280,7 @@ public class PipelineController extends SpringActionController
             {
                 String errorMessage = "While attempting retrieve information about an mzXML file there was an " +
                     "error interacting with the file system. " + ((e.getMessage() != null) ? "<br>\nDetails: " + e.getMessage() : "");
-                return HttpView.throwNotFoundMV(errorMessage);
+                return HttpView.throwNotFound(errorMessage);
             }
 
             URI uriRoot = form.getDirRoot().toURI();

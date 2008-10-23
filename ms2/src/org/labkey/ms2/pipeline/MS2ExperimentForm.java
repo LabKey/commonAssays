@@ -111,7 +111,7 @@ public class MS2ExperimentForm extends MS2PipelineForm
         PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
         if (pr == null || !URIUtil.exists(pr.getUri()))
         {
-            HttpView.throwNotFoundMV();
+            HttpView.throwNotFound();
             return;
         }
 
@@ -119,7 +119,7 @@ public class MS2ExperimentForm extends MS2PipelineForm
         URI uriData = URIUtil.resolve(pr.getUri(getContainer()), getPath());
         if (uriData == null)
         {
-            HttpView.throwNotFoundMV();
+            HttpView.throwNotFound();
             return;
         }
 
