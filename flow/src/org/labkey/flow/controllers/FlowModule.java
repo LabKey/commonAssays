@@ -100,36 +100,6 @@ public class FlowModule extends DefaultModule
         ContainerManager.addContainerListener(new FlowContainerListener());
     }
 
-    public void afterSchemaUpdate(ModuleContext moduleContext, ViewContext viewContext)
-    {
-        super.afterSchemaUpdate(moduleContext, viewContext);
-        if (moduleContext.getInstalledVersion() >= 1.54 && moduleContext.getInstalledVersion() < 1.71)
-        {
-            ensureDataInputRoles(viewContext);
-        }
-    }
-
-    @Override
-    public void beforeSchemaUpdate(ModuleContext moduleContext, ViewContext viewContext)
-    {
-        if (moduleContext.getInstalledVersion() >= .62 && moduleContext.getInstalledVersion() < 1.54)
-        {
-            try
-            {
-                DbSchema schema = DbSchema.createFromMetaData("flow");
-                if (schema != null)
-                {
-                    schema.getSqlDialect().dropSchema(schema, "flow");
-                }
-            }
-            catch (Exception e)
-            {
-                _log.debug("Exception trying to drop schema flow " + e);
-            }
-        }
-        super.beforeSchemaUpdate(moduleContext, viewContext);
-    }
-
     static public boolean isActive(Container container)
     {
         for (Module module : container.getActiveModules())
@@ -168,53 +138,5 @@ public class FlowModule extends DefaultModule
     public static String getLongProductName()
     {
         return "LabKey Flow";
-    }
-
-    /**
-     * Go through all data inputs, and make sure that the PropertyId column is set to a value
-     * which is appropriate for the type of input.
-     */
-    private void ensureDataInputRoles(ViewContext ctx)
-    {
-        try
-        {
-            DbSchema expSchema = ExperimentService.get().getSchema();
-            ResultSet rs = Table.executeQuery(expSchema,
-                    new SQLFragment("SELECT flow.object.typeid, exp.data.container, exp.datainput.dataid, exp.datainput.targetapplicationid" +
-                    "\nFROM exp.datainput INNER JOIN exp.data ON exp.datainput.dataid = exp.data.rowid" +
-                    "\nINNER JOIN flow.object ON exp.datainput.dataid = flow.object.dataid WHERE flow.object.typeid IS NOT NULL" +
-                    "\nAND exp.datainput.propertyid IS NULL"
-                    ));
-            while (rs.next())
-            {
-                String containerId = rs.getString("container");
-                int typeId = rs.getInt("typeid");
-                int dataId = rs.getInt("dataid");
-                int targetApplicationid = rs.getInt("targetApplicationId");
-
-                Container container = ContainerManager.getForId(containerId);
-                if (container == null)
-                {
-                    continue;
-                }
-                ObjectType type = ObjectType.fromTypeId(typeId);
-                if (type == null)
-                    continue;
-                InputRole role = type.getInputRole();
-                if (role == null)
-                    continue;
-                PropertyDescriptor pd = ExperimentService.get().ensureDataInputRole(ctx.getUser(), container, role.toString(), null);
-                if (pd != null)
-                {
-                    Table.execute(expSchema, "UPDATE exp.datainput SET propertyid = " + pd.getPropertyId() +
-                            "\nWHERE exp.datainput.dataid = " + dataId + " AND exp.datainput.targetapplicationid = " + targetApplicationid, null);
-                }
-            }
-            rs.close();
-        }
-        catch (Exception e)
-        {
-            _log.error("Error updating flow to add propertyid's to datainput's", e);
-        }
     }
 }
