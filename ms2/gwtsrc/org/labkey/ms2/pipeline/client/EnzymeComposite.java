@@ -48,18 +48,17 @@ public class EnzymeComposite extends SearchFormComposite implements SourcesChang
         labelWidget = new Label();
     }
 
-    public void update(Map enzymeMap)
+    public void update(Map<String, String> enzymeMap)
     {
         if(enzymeMap == null) return;
-        Set keySet =  enzymeMap.keySet();
-        ArrayList sorted = new ArrayList(keySet);
+        Set<String> keySet =  enzymeMap.keySet();
+        ArrayList<String> sorted = new ArrayList<String>(keySet);
         Collections.sort(sorted);
         enzymeListBox.clear();
 
-        for(Iterator it = sorted.iterator(); it.hasNext();)
+        for(String name : sorted)
         {
-            String name = (String)it.next();
-            String value = (String)enzymeMap.get(name);
+            String value = enzymeMap.get(name);
             enzymeListBox.addItem(name, value);
         }
         setSelectedEnzymeByName("Trypsin");

@@ -64,6 +64,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -492,7 +493,7 @@ public class MS2Controller extends SpringActionController
             bean.expanded = form.getExpanded();
 
             String chargeFilterParamName = run.getChargeFilterParamName();
-            ActionURL extraFilterURL = currentURL.clone().setAction("addExtraFilter.post");
+            ActionURL extraFilterURL = currentURL.clone().setAction(AddExtraFilterAction.class);
             extraFilterURL.deleteParameter(chargeFilterParamName + "1");
             extraFilterURL.deleteParameter(chargeFilterParamName + "2");
             extraFilterURL.deleteParameter(chargeFilterParamName + "3");
@@ -821,7 +822,7 @@ public class MS2Controller extends SpringActionController
                 showGzURL = getViewContext().cloneActionURL();
                 showGzURL.deleteParameter("seqId");
                 showGzURL.deleteParameter("rowIndex");
-                showGzURL.setAction("showGZFile");
+                showGzURL.setAction(ShowGZFileAction.class);
             }
 
             setTitle(peptide.toString());
@@ -957,7 +958,7 @@ public class MS2Controller extends SpringActionController
         {
             public List<NavTree> getTabList()
             {
-                return Arrays.asList(new NavTree[]{new TabInfo("Automatic", "automatic", getLoadGoURL()), new TabInfo("Manual", "manual", getLoadGoURL())});
+                return Arrays.<NavTree>asList(new TabInfo("Automatic", "automatic", getLoadGoURL()), new TabInfo("Manual", "manual", getLoadGoURL()));
             }
 
             public HttpView getTabView(String tabId) throws Exception
@@ -1342,7 +1343,7 @@ public class MS2Controller extends SpringActionController
         {
             JspView<CompareOptionsBean> extraCompareOptions = new JspView<CompareOptionsBean>(_optionsJSP);
 
-            ActionURL nextURL = getViewContext().cloneActionURL().setAction("applyCompareView");
+            ActionURL nextURL = getViewContext().cloneActionURL().setAction(ApplyCompareViewAction.class);
             return pickView(nextURL, "Select a view to apply a filter to all the runs.", extraCompareOptions, runListId);
         }
 
@@ -1410,7 +1411,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
         {
-            CompareOptionsBean bean = new CompareOptionsBean(new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId, form);
+            CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<PeptideFilteringComparisonForm>(new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp", bean);
         }
@@ -1634,7 +1635,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(RunListForm form, BindException errors, int runListId)
         {
             JspView extraExportView = new JspView("/org/labkey/ms2/extraExportOptions.jsp");
-            return pickView(getViewContext().cloneActionURL().setAction("applyExportRunsView"), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraExportView, runListId);
+            return pickView(getViewContext().cloneActionURL().setAction(ApplyExportRunsViewAction.class), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraExportView, runListId);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1701,7 +1702,7 @@ public class MS2Controller extends SpringActionController
                 }
             }
 
-            currentURL.setAction("showList");
+            currentURL.setAction(ShowListAction.class);
             currentURL.deleteParameter("moveRuns");
 
             return currentURL;
@@ -3178,7 +3179,7 @@ public class MS2Controller extends SpringActionController
             ContainerDisplayColumn cdc = new ContainerDisplayColumn(MS2Manager.getTableInfoRuns().getColumn("Container"));
             cdc.setCaption("Folder");
 
-            ActionURL containerURL = getViewContext().cloneActionURL().setAction("showList");
+            ActionURL containerURL = getViewContext().cloneActionURL().setAction(ShowListAction.class);
 
             // We don't want ActionURL to encode ${ContainerPath}, so set a dummy value and use string substitution
             String urlString = containerURL.setExtraPath("ContainerPath").getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/");
@@ -3229,7 +3230,6 @@ public class MS2Controller extends SpringActionController
     public static class ColumnForm extends RunForm
     {
         private boolean saveDefault = false;
-        private String columns;
 
         public boolean getSaveDefault()
         {
@@ -4413,7 +4413,7 @@ public class MS2Controller extends SpringActionController
         public ActionURL getRedirectURL(MS2ViewForm form) throws Exception
         {
             // Redirect to have Spring fill in the form and ensure that the DataRegion JavaScript sees the showRun action
-            return getApplyViewForwardURL(form, "showRun");
+            return getApplyViewForwardURL(form, ShowRunAction.class);
         }
     }
 
@@ -4424,7 +4424,7 @@ public class MS2Controller extends SpringActionController
         public ActionURL getForwardURL(MS2ViewForm form) throws Exception
         {
             // Forward without redirect: this lets Spring fill in the form but preserves the post data
-            return getApplyViewForwardURL(form, "exportRuns");
+            return getApplyViewForwardURL(form, ExportRunsAction.class);
         }
     }
 
@@ -4434,7 +4434,7 @@ public class MS2Controller extends SpringActionController
     {
         public ActionURL getRedirectURL(MS2ViewForm form) throws Exception
         {
-            ActionURL redirectURL = getApplyViewForwardURL(form, "showCompare");
+            ActionURL redirectURL = getApplyViewForwardURL(form, ShowCompareAction.class);
 
             redirectURL.deleteParameter("submit.x");
             redirectURL.deleteParameter("submit.y");
@@ -4445,7 +4445,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private ActionURL getApplyViewForwardURL(MS2ViewForm form, String action)
+    private ActionURL getApplyViewForwardURL(MS2ViewForm form, Class<? extends Controller> action)
     {
         // Add the "view params" (which were posted as a single param) to the URL params.
         ActionURL forwardURL = getViewContext().cloneActionURL();
@@ -4748,7 +4748,7 @@ public class MS2Controller extends SpringActionController
             ViewContext ctx = getViewContext();
             HttpServletRequest request = ctx.getRequest();
             ActionURL url = ctx.cloneActionURL();
-            url.setAction("showRun.view");
+            url.setAction(ShowRunAction.class);
 
             MS2Run run = MS2Manager.getRun(request.getParameter("run"));
             String paramName = run.getChargeFilterParamName();
@@ -4947,7 +4947,7 @@ public class MS2Controller extends SpringActionController
     {
         public ActionURL getRedirectURL(RunForm form) throws Exception
         {
-            ActionURL url = new ActionURL("MS2-Scoring", "discriminate", getContainer());
+            ActionURL url = new ActionURL(ScoringController.DiscriminateAction.class, getContainer());
             url.addParameter("runId", form.getRun());
             return url;
         }
@@ -5132,7 +5132,7 @@ public class MS2Controller extends SpringActionController
             String fname = form.getFileName();
             try
             {
-                File f = new File(fname).getCanonicalFile();
+                new File(fname).getCanonicalFile();
             }
             catch (IOException e)
             {
@@ -5203,7 +5203,6 @@ public class MS2Controller extends SpringActionController
         private String _defaultOrganism = "Unknown unknown";
         private String _shouldGuess = "1";
         private boolean _clearExisting;
-        private BindException _errors;
 
         public void setFileType(String ft)
         {
@@ -5605,7 +5604,7 @@ public class MS2Controller extends SpringActionController
         {
             ViewContext ctx = getViewContext();
 
-            ActionURL redirectURL = ctx.cloneActionURL().setAction("showPeptide");
+            ActionURL redirectURL = ctx.cloneActionURL().setAction(ShowPeptideAction.class);
             String queryString = (String)ctx.get("queryString");
             redirectURL.setRawQuery(queryString);
 

@@ -58,13 +58,13 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
         initWidget(instance);
     }
 
-    public void update(List files, List directories, String defaultDb, List taxonomy)
+    public void update(List<String> files, List<String> directories, String defaultDb, List<String> taxonomy)
     {
         setSequenceDbPathListBoxContents(directories,defaultDb);
         setSequenceDbsListBoxContents(files,defaultDb);
     }
 
-    public void setSequenceDbPathListBoxContents(List paths, String defaultDb)
+    public void setSequenceDbPathListBoxContents(List<String> paths, String defaultDb)
     {
         String defaultPath;
         if(defaultDb == null)
@@ -78,7 +78,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
         sequenceDbPathListBox.clear();
         if (paths == null)
         {
-            paths = new ArrayList();
+            paths = new ArrayList<String>();
         }
         hasDirectories = !paths.isEmpty();
 
@@ -103,12 +103,12 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
         }
     }
 
-    public void setSequenceDbsListBoxContents(List files, String defaultDb)
+    public void setSequenceDbsListBoxContents(List<String> files, String defaultDb)
     {
         if(defaultDb == null) defaultDb = "";
         if(files == null || files.size() == 0)
         {
-            files = new ArrayList();
+            files = new ArrayList<String>();
             int index = defaultDb.lastIndexOf("/");
             if(index != -1)
             {
@@ -120,23 +120,21 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
             }
         }
         sequenceDbListBox.clear();
-        if(files == null ||files.size() == 0) return;
+        if(files.isEmpty()) return;
         Collections.sort(files);
-        String fileName;
         String path;
-        for(Iterator it = files.iterator() ; it.hasNext(); )
+        for (String fileName : files)
         {
             path = "";
-            fileName = (String)it.next();
-            if(fileName == null||fileName.equals(""))
+            if (fileName == null || fileName.equals(""))
                 continue;
             int index = defaultDb.lastIndexOf("/");
-            if(index != -1)
+            if (index != -1)
             {
-                path = defaultDb.substring(0,index +1);
-                if(path.equals("/")) path = "";
+                path = defaultDb.substring(0, index + 1);
+                if (path.equals("/")) path = "";
             }
-            sequenceDbListBox.addItem(fileName, path  + fileName);
+            sequenceDbListBox.addItem(fileName, path + fileName);
         }
         setDefault(defaultDb);
     }
@@ -144,7 +142,6 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
     public boolean setDefault(String defaultDb)
     {
         String path = "/";
-        String name ="";
         if(defaultDb == null || defaultDb.length() == 0)
         {
             setFoundDefaultDb(false);
@@ -154,11 +151,6 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
         if(index != -1)
         {
             path = defaultDb.substring(0, defaultDb.lastIndexOf('/') + 1);
-            name = defaultDb.substring(defaultDb.lastIndexOf('/') + 1);
-        }
-        else
-        {
-            name = defaultDb;
         }
 
         int pathItemsCount = sequenceDbPathListBox.getItemCount();
@@ -344,7 +336,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
         return "";
     }
 
-    abstract public void setTaxonomyListBoxContents(List taxonomyList);
+    abstract public void setTaxonomyListBoxContents(List<String> taxonomyList);
     abstract public String getSelectedTaxonomy();
     abstract public String setDefaultTaxonomy(String name);
     abstract public void addTaxonomyChangeListener(ChangeListener listener);

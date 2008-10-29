@@ -62,7 +62,7 @@ public class Search implements EntryPoint
     private                 String                  dirSequenceRoot;
 
     /** Map from subdirectory path to FASTA files */
-    private Map databaseCache = new HashMap();
+    private Map<String, GWTSearchServiceResult> databaseCache = new HashMap<String, GWTSearchServiceResult>();
     private boolean sequencePathsLoaded = false;
 
     private SearchServiceAsync service = null;
@@ -346,8 +346,8 @@ public class Search implements EntryPoint
         String sequenceDb = sequenceDbComposite.getSelectedDb();
         String taxonomy   = sequenceDbComposite.getSelectedTaxonomy();
         String enzyme     = enzymeComposite.getSelectedEnzyme();
-        Map staticMods    = residueModComposite.getStaticMods();
-        Map dynamicMods   = residueModComposite.getDynamicMods();
+        Map<String, String> staticMods    = residueModComposite.getStaticMods();
+        Map<String, String> dynamicMods   = residueModComposite.getDynamicMods();
 
         try
         {
@@ -386,12 +386,12 @@ public class Search implements EntryPoint
 
     private String syncResidueMod2Form()
     {
-        Map modMap = residueModComposite.getModMap(residueModComposite.STATIC);
-        Map staticMods = inputXmlComposite.getStaticMods(modMap);
+        Map<String, String> modMap = residueModComposite.getModMap(residueModComposite.STATIC);
+        Map<String, String> staticMods = inputXmlComposite.getStaticMods(modMap);
         residueModComposite.setSelectedStaticMods(staticMods);
 
         modMap = residueModComposite.getModMap(residueModComposite.DYNAMIC);
-        Map dynamicMods = inputXmlComposite.getDynamicMods(modMap);
+        Map<String, String> dynamicMods = inputXmlComposite.getDynamicMods(modMap);
         residueModComposite.setSelectedDynamicMods(dynamicMods);
         try
         {
@@ -643,8 +643,8 @@ public class Search implements EntryPoint
         }
 
         sequenceDbComposite.setLoading(false);
-        List sequenceDbs = gwtResult.getSequenceDBs();
-        List sequenceDbPaths = gwtResult.getSequenceDbPaths();
+        List<String> sequenceDbs = gwtResult.getSequenceDBs();
+        List<String> sequenceDbPaths = gwtResult.getSequenceDbPaths();
 
         sequenceDbComposite.setSequenceDbPathListBoxContents(sequenceDbPaths,
                 gwtResult.getCurrentPath());
@@ -681,7 +681,7 @@ public class Search implements EntryPoint
             clearDisplay();
             GWTSearchServiceResult gwtResult = (GWTSearchServiceResult)result;
             appendError(gwtResult.getErrors());
-            List protocols = gwtResult.getProtocols();
+            List<String> protocols = gwtResult.getProtocols();
             String defaultProtocol = gwtResult.getSelectedProtocol();
             String protocolDescription = gwtResult.getProtocolDescription();
             protocolComposite.update(protocols, defaultProtocol, protocolDescription);
@@ -709,12 +709,12 @@ public class Search implements EntryPoint
         {
             setError(PropertyUtil.getServerProperty("errors"));
             GWTSearchServiceResult gwtResult = (GWTSearchServiceResult)result;
-            List sequenceDbs = gwtResult.getSequenceDBs();
-            List sequenceDbPaths = gwtResult.getSequenceDbPaths();
+            List<String> sequenceDbs = gwtResult.getSequenceDBs();
+            List<String> sequenceDbPaths = gwtResult.getSequenceDbPaths();
             String defaultDb = gwtResult.getDefaultSequenceDb();
-            List taxonomy = gwtResult.getMascotTaxonomyList();
+            List<String> taxonomy = gwtResult.getMascotTaxonomyList();
             sequenceDbComposite.update(sequenceDbs,sequenceDbPaths, defaultDb, taxonomy );
-            List protocols = gwtResult.getProtocols();
+            List<String> protocols = gwtResult.getProtocols();
             String defaultProtocol = gwtResult.getSelectedProtocol();
             String protocolDescription = gwtResult.getProtocolDescription();
             protocolComposite.update(protocols, defaultProtocol, protocolDescription);
@@ -744,7 +744,7 @@ public class Search implements EntryPoint
 
             if (databaseCache.containsKey(dbDirectory))
             {
-                final GWTSearchServiceResult gwtResult = (GWTSearchServiceResult) databaseCache.get(dbDirectory);
+                final GWTSearchServiceResult gwtResult = databaseCache.get(dbDirectory);
                 if (gwtResult != null)
                 {
                     updateDatabases(gwtResult);

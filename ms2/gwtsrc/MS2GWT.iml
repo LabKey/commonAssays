@@ -3,17 +3,18 @@
   <component name="FacetManager">
     <facet type="gwt" name="GWT">
       <configuration>
-        <setting name="gwtSdkUrl" value="file://$GWT_HOME$" />
+        <setting name="gwtSdkUrl" value="file://$GWT_15_HOME$" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="runGwtCompilerOnMake" value="true" />
+        <setting name="runGwtCompilerOnMake" value="false" />
         <setting name="compilerMaxHeapSize" value="128" />
         <packaging>
           <module name="org.labkey.ms2.MS2VennDiagramView" path="/org.labkey.ms2.MS2VennDiagramView" />
+          <module name="org.labkey.ms2.pipeline.Search" path="/org.labkey.ms2.pipeline.Search" />
         </packaging>
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_4" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/../../../../build/modules/ms2gwt" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">

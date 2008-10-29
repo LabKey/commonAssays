@@ -140,13 +140,11 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
         if(error.length()> 0) return error;
         error = validate(dynamicListBox, DYNAMIC);
         if(error.length()> 0) return error;
-        Map modMap = getStaticMods();
-        Collection values = modMap.values();
-        ArrayList al = new ArrayList();
+        Map<String, String> modMap = getStaticMods();
+        ArrayList<Character> al = new ArrayList<Character>();
 
-        for(Iterator it = values.iterator();it.hasNext(); )
+        for(String sig : modMap.values())
         {
-            String sig = (String)it.next();
             Character res = new Character(sig.charAt(sig.length()-1));
             if(al.contains(res)) return "Two static residue modifications for the same residue.";
             al.add(res);
@@ -192,31 +190,31 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
         //Not needed.
     }
 
-    public Map getStaticMods()
+    public Map<String, String> getStaticMods()
     {
         return getListBoxMap(staticListBox);
     }
 
-    public Map getDynamicMods()
+    public Map<String, String> getDynamicMods()
     {
         return getListBoxMap(dynamicListBox);
     }
 
-    public void setSelectedStaticMods(Map staticMods)
+    public void setSelectedStaticMods(Map<String, String> staticMods)
     {
         setListBoxMods(staticMods, staticListBox);
     }
 
-    public void setSelectedDynamicMods(Map dynamicMods)
+    public void setSelectedDynamicMods(Map<String, String> dynamicMods)
     {
         setListBoxMods(dynamicMods, dynamicListBox);
     }
 
-    protected void setListBoxMods(Map modMap, ListBox box)
+    protected void setListBoxMods(Map<String, String> modMap, ListBox box)
     {
         if(modMap == null) return;
-        Set keySet =  modMap.keySet();
-        ArrayList sorted = new ArrayList(keySet);
+        Set<String> keySet =  modMap.keySet();
+        ArrayList<String> sorted = new ArrayList<String>(keySet);
         Collections.sort(sorted);
         box.clear();
 
@@ -228,9 +226,9 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
         }
     }
 
-    protected Map getListBoxMap(ListBox box)
+    protected Map<String, String> getListBoxMap(ListBox box)
     {
-        Map modMap = new HashMap();
+        Map<String, String> modMap = new HashMap<String, String>();
         int modCount = box.getItemCount();
         for(int i = 0;i < modCount;i++)
         {
@@ -487,8 +485,8 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
         super.setReadOnly(readOnly);
         if(readOnly)
         {
-            Map modsMap = getListBoxMap(staticListBox);
-            Set mods = modsMap.keySet();
+            Map<String, String> modsMap = getListBoxMap(staticListBox);
+            Set<String> mods = modsMap.keySet();
             StringBuffer sb = new StringBuffer();
             sb.append("Fixed Modifications: ");
             int count = 0;
@@ -522,8 +520,8 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
         }
     }
 
-    abstract public void update(Map mod0Map, Map mod1Map);
+    abstract public void update(Map<String, String> mod0Map, Map<String, String> mod1Map);
 
-    abstract public Map getModMap(int modType);
+    abstract public Map<String, String> getModMap(int modType);
 
 }

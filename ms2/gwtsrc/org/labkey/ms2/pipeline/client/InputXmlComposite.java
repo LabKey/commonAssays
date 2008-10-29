@@ -148,22 +148,22 @@ public abstract class InputXmlComposite extends SearchFormComposite  implements 
         return params.getEnzyme();
     }
 
-    public Map getStaticMods(Map knownMods)
+    public Map<String, String> getStaticMods(Map<String, String> knownMods)
     {
         return mods2Map(params.getStaticMods(), knownMods);
     }
 
-    public void setStaticMods(Map mods) throws SearchFormException
+    public void setStaticMods(Map<String, String> mods) throws SearchFormException
     {
         params.setStaticMods(mods);
     }
 
-    public Map getDynamicMods(Map knownMods)
+    public Map<String, String> getDynamicMods(Map<String, String> knownMods)
     {
         return mods2Map(params.getDynamicMods(), knownMods);
     }
 
-    public void setDynamicMods(Map mods) throws SearchFormException
+    public void setDynamicMods(Map<String, String> mods) throws SearchFormException
     {
         params.setDynamicMods(mods);
     }
@@ -188,50 +188,48 @@ public abstract class InputXmlComposite extends SearchFormComposite  implements 
         params.writeXml();
     }
 
-    private Map mods2Map(String mods, Map knownMods)
+    private Map<String, String> mods2Map(String mods, Map<String, String> knownMods)
     {
         if(knownMods == null || mods == null) return null;
-        Map returnMap = new HashMap();
+        Map<String, String> returnMap = new HashMap<String, String>();
         if(mods.length() == 0) return returnMap;
         String[] modsArray = mods.split(",");
-        List modsList = new ArrayList();
-        for(int i = 0; i < modsArray.length; i++)
+        List<String> modsList = new ArrayList<String>();
+        for (String mod : modsArray)
         {
-            String checkMod = modsArray[i].trim();
-            if(checkMod.length() > 0)
-                modsList.add(checkMod);   
+            String checkMod = mod.trim();
+            if (checkMod.length() > 0)
+                modsList.add(checkMod);
         }
 
-        for(Iterator knownIt = knownMods.entrySet().iterator();knownIt.hasNext();)
+        for (Map.Entry<String, String> knownModEntry : knownMods.entrySet())
         {
-            Map.Entry  knownModEntry =  (Map.Entry)knownIt.next();
-            String[] sites = ((String)knownModEntry.getValue()).split(",");
+            String[] sites = knownModEntry.getValue().split(",");
             boolean found;
-            for(int i = 0; i < sites.length; i++)
+            for (int i = 0; i < sites.length; i++)
             {
                 found = false;
-                for(Iterator modsIt = modsList.iterator(); modsIt.hasNext();)
+                for (String mod : modsList)
                 {
-                    if(((String)modsIt.next()).equals(sites[i]))
+                    if (mod.equals(sites[i]))
                     {
                         found = true;
-                        if(i == (sites.length -1))
+                        if (i == (sites.length - 1))
                         {
-                            returnMap.put(knownModEntry.getKey(),knownModEntry.getValue());
-                            for(int y = 0; y < sites.length; y++)
+                            returnMap.put(knownModEntry.getKey(), knownModEntry.getValue());
+                            for (String site : sites)
                             {
-                                modsList.remove(sites[y]);
+                                modsList.remove(site);
                             }
                         }
                         break;
                     }
                 }
-                if(!found)break;
+                if (!found) break;
             }
         }
-        for(Iterator modsIt = modsList.iterator(); modsIt.hasNext();)
+        for (String mod : modsList)
         {
-            String mod = (String)modsIt.next();
             returnMap.put(mod, mod);
         }
         return returnMap;

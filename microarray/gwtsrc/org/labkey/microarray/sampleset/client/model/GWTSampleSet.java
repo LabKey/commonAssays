@@ -31,10 +31,7 @@ public class GWTSampleSet implements Serializable, IsSerializable
     private String _name;
     private int _rowId;
 
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    private List _columnNames;
+    private List<String> _columnNames;
 
     public GWTSampleSet() {}
 
@@ -74,12 +71,12 @@ public class GWTSampleSet implements Serializable, IsSerializable
         _rowId = rowId;
     }
 
-    public List getColumnNames()
+    public List<String> getColumnNames()
     {
         return _columnNames;
     }
 
-    public void setColumnNames(List columnNames)
+    public void setColumnNames(List<String> columnNames)
     {
         _columnNames = columnNames;
     }

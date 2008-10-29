@@ -3,10 +3,14 @@
   <component name="FacetManager">
     <facet type="gwt" name="GWT">
       <configuration>
-        <setting name="gwtSdkUrl" value="file://$GWT_HOME$" />
+        <setting name="gwtSdkUrl" value="file://$GWT_15_HOME$" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="runGwtCompilerOnMake" value="true" />
+        <setting name="runGwtCompilerOnMake" value="false" />
         <setting name="compilerMaxHeapSize" value="128" />
+        <packaging>
+          <module name="org.labkey.microarray.sampleset.SampleChooser" path="/org.labkey.microarray.sampleset.SampleChooser" />
+          <module name="org.labkey.microarray.designer.MicroarrayAssayDesigner" path="/org.labkey.microarray.designer.MicroarrayAssayDesigner" />
+        </packaging>
       </configuration>
     </facet>
   </component>
@@ -20,7 +24,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Internal" />
-    <orderEntry type="module" module-name="InternalGWT" />
     <orderEntryProperties />
   </component>
 </module>

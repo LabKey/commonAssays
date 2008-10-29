@@ -79,18 +79,18 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
         }
     }
 
-    public void update(List files, List directories, String defaultDb, List taxonomy)
+    public void update(List<String> files, List<String> directories, String defaultDb, List<String> taxonomy)
     {
         super.update(files, directories, defaultDb, taxonomy);
         setTaxonomyListBoxContents(taxonomy);
     }
 
-    public void setTaxonomyListBoxContents(List taxonomy)
+    public void setTaxonomyListBoxContents(List<String> taxonomy)
     {
         if(taxonomy == null) return;
-        for(int i = 0; i < taxonomy.size(); i++)
+        for (String s : taxonomy)
         {
-            taxonomyListBox.addItem((String)taxonomy.get(i));
+            taxonomyListBox.addItem(s);
         }
     }
 
@@ -119,7 +119,6 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
     public void setReadOnly(boolean readOnly)
     {
         super.setReadOnly(readOnly);
-        String path = "/";
         String sequenceDbName = " ";
         String dbWidgetName = "";
         String taxonomyName = "";

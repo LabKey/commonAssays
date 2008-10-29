@@ -27,55 +27,29 @@ import java.util.Map;
 
 public class GWTSearchServiceResult implements IsSerializable
 {
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    private List sequenceDBs;
+    private List<String> sequenceDBs;
     private String currentPath;
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    private List sequenceDbPaths;
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    private List mascotTaxonomyList;
 
-    /**
-     * @gwt.typeArgs <java.lang.String, java.lang.String>
-     */
-    private Map enzymeMap;
+    private List<String> sequenceDbPaths;
+    private List<String> mascotTaxonomyList;
 
-    /**
-     * @gwt.typeArgs <java.lang.String, java.lang.String>
-     */
-    private Map mod0Map;
+    private Map<String, String> enzymeMap;
 
-    /**
-     * @gwt.typeArgs <java.lang.String, java.lang.String>
-     */
-    private Map mod1Map;
+    private Map<String, String> mod0Map;
+
+    private Map<String, String> mod1Map;
 
     private String defaultSequenceDb;
 
     private String selectedProtocol;
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    private List protocols;
+    private List<String> protocols;
 
     private String protocolDescription;
 
     private String protocolXml;
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    private List fileInputNames;
+    private List<String> fileInputNames;
 
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    private List fileInputStatus;
+    private List<String> fileInputStatus;
 
     private boolean activeJobs;
 
@@ -92,17 +66,11 @@ public class GWTSearchServiceResult implements IsSerializable
         this.selectedProtocol = selectedProtocol;
     }
 
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    public List getSequenceDBs()
+    public List<String> getSequenceDBs()
     {
         return sequenceDBs;
     }
-    /**
-     * @gwt.typeArgs sequenceDbs <java.lang.String>
-     */
-    public void setSequenceDbs(List sequenceDbs, String currentPath)
+    public void setSequenceDbs(List<String> sequenceDbs, String currentPath)
     {
         this.sequenceDBs = sequenceDbs;
         this.currentPath = currentPath;
@@ -113,34 +81,22 @@ public class GWTSearchServiceResult implements IsSerializable
         return currentPath;
     }
 
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    public List getSequenceDbPaths()
+    public List<String> getSequenceDbPaths()
     {
         return sequenceDbPaths;
     }
 
-    /**
-     * @gwt.typeArgs sequenceDbPaths <java.lang.String>
-     */
-    public void setSequenceDbPaths(List sequenceDbPaths)
+    public void setSequenceDbPaths(List<String> sequenceDbPaths)
     {
         this.sequenceDbPaths = sequenceDbPaths;
     }
 
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    public List getProtocols()
+    public List<String> getProtocols()
     {
         return protocols;
     }
 
-    /**
-     * @gwt.typeArgs protocols <java.lang.String>
-     */
-    public void setProtocols(List protocols)
+    public void setProtocols(List<String> protocols)
     {
         this.protocols = protocols;
     }
@@ -190,34 +146,22 @@ public class GWTSearchServiceResult implements IsSerializable
         this.protocolDescription = protocolDescription;
     }
 
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    public List getFileInputNames()
+    public List<String> getFileInputNames()
     {
         return fileInputNames;
     }
 
-    /**
-     * @gwt.typeArgs names <java.lang.String>
-     */
-    public void setFileInputNames(List names)
+    public void setFileInputNames(List<String> names)
     {
         this.fileInputNames = names;
     }
 
-    /**
-     * @gwt.return <java.lang.String>
-     */
-    public List getFileInputStatus()
+    public List<String> getFileInputStatus()
     {
         return fileInputStatus;
     }
 
-    /**
-     * @gwt.typeArgs fileInputStatus <java.lang.String>
-     */
-    public void setFileInputStatus(List fileInputStatus)
+    public void setFileInputStatus(List<String> fileInputStatus)
     {
         this.fileInputStatus = fileInputStatus;
     }
@@ -232,67 +176,43 @@ public class GWTSearchServiceResult implements IsSerializable
         this.activeJobs = activeJobs;
     }
 
-    /**
-     * @gwt.typeArgs <java.lang.String, java.lang.String>
-     */
-    public Map getEnzymeMap()
+    public Map<String, String> getEnzymeMap()
     {
         return enzymeMap;
     }
 
-    /**
-     * @gwt.typeArgs  enzymeMap <java.lang.String, java.lang.String>
-     */
-    public void setEnzymeMap(Map enzymeMap)
+    public void setEnzymeMap(Map<String, String> enzymeMap)
     {
         this.enzymeMap = enzymeMap;
     }
 
-    /**
-     * @gwt.typeArgs <java.lang.String, java.lang.String>
-     */
-    public Map getMod0Map()
+    public Map<String, String> getMod0Map()
     {
         return mod0Map;
     }
 
-    /**
-     * @gwt.typeArgs  mod0Map <java.lang.String, java.lang.String>
-     */
-    public void setMod0Map(Map mod0Map)
+    public void setMod0Map(Map<String, String> mod0Map)
     {
         this.mod0Map = mod0Map;
     }
 
-    /**
-     * @gwt.typeArgs <java.lang.String, java.lang.String>
-     */
-    public Map getMod1Map()
+    public Map<String, String> getMod1Map()
     {
         return mod1Map;
     }
 
-    /**
-     * @gwt.typeArgs  mod1Map <java.lang.String, java.lang.String>
-     */
-    public void setMod1Map(Map mod1Map)
+    public void setMod1Map(Map<String, String> mod1Map)
     {
         this.mod1Map = mod1Map;
     }
 
 
-    /**
-     * @gwt.typeArgs <java.lang.String>
-     */
-    public List getMascotTaxonomyList()
+    public List<String> getMascotTaxonomyList()
     {
            return mascotTaxonomyList;
     }
     
-    /**
-     * @gwt.typeArgs mascotTaxonomyList <java.lang.String>
-     */
-    public void setMascotTaxonomyList(List mascotTaxonomyList)
+    public void setMascotTaxonomyList(List<String> mascotTaxonomyList)
     {
        this.mascotTaxonomyList = mascotTaxonomyList;
     }

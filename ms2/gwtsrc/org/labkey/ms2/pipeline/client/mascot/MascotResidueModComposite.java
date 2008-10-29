@@ -22,7 +22,6 @@ import org.labkey.ms2.pipeline.client.Search;
 import java.util.*;
 
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 
 /**
@@ -70,23 +69,21 @@ public class MascotResidueModComposite extends ResidueModComposite
 
     String validate(ListBox box)
     {
-        Map modMap = getListBoxMap(box);
-        Set keys = modMap.keySet();
+        Map<String, String> modMap = getListBoxMap(box);
 
-        for(Iterator it = keys.iterator(); it.hasNext();)
+        for(String modName : modMap.keySet())
         {
-            String modName = (String)it.next();
             if(find(modName, modStaticListBox) == -1) return "modification mass contained an invalid value(" + modName + ").";
         }
         return "";
     }
 
-    public Map getModMap(int modType)
+    public Map<String, String> getModMap(int modType)
     {
         return getListBoxMap(modStaticListBox);
     }
 
-    public void update(Map mod0Map, Map mod1Map)
+    public void update(Map<String, String> mod0Map, Map<String, String> mod1Map)
     {
         setListBoxMods(mod0Map, modStaticListBox);
         //there the same in mascot
@@ -95,13 +92,10 @@ public class MascotResidueModComposite extends ResidueModComposite
 
     protected String validate(ListBox box, int modType)
     {
-        Map modMap = getListBoxMap(box);
+        Map<String, String> modMap = getListBoxMap(box);
 
-        Set keys = modMap.keySet();
-
-        for(Iterator it = keys.iterator(); it.hasNext();)
+        for(String modName : modMap.keySet())
         {
-            String modName = (String)it.next();
             if(find(modName, modStaticListBox) != -1) continue;
             if (modName.charAt(modName.length() - 2) != '@' && modName.length() > 3)
             {
@@ -113,11 +107,10 @@ public class MascotResidueModComposite extends ResidueModComposite
                 return "modification mass contained an invalid residue(" + residue + ").";
             }
             String mass = modName.substring(0, modName.length() - 2);
-            float massF;
 
             try
             {
-                massF = Float.parseFloat(mass);
+                Float.parseFloat(mass);
             }
             catch (NumberFormatException e)
             {

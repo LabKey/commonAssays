@@ -225,38 +225,36 @@ public class ParamParser
         setInputParameter(ENZYME, enz);
     }
 
-    public void setStaticMods(Map mods) throws SearchFormException
+    public void setStaticMods(Map<String, String> mods) throws SearchFormException
     {
         if(mods.size() == 0)
         {
             removeStaticMods();
             return;
         }
-        Collection values = mods.values();
         StringBuffer valuesString = new StringBuffer();
-        for(Iterator it = values.iterator(); it.hasNext();)
+        for(String mod : mods.values())
         {
             if(valuesString.length() > 0)
                 valuesString.append(",");
-            valuesString.append((String)it.next());
+            valuesString.append(mod);
         }
         setInputParameter(STATIC_MOD, valuesString.toString());
     }
 
-    public void setDynamicMods(Map mods) throws SearchFormException
+    public void setDynamicMods(Map<String, String> mods) throws SearchFormException
     {
         if(mods.size() == 0)
         {
             removeDynamicMods();
             return;
         }
-        Collection values = mods.values();
         StringBuffer valuesString = new StringBuffer();
-        for(Iterator it = values.iterator(); it.hasNext();)
+        for(String mod : mods.values())
         {
             if(valuesString.length() > 0)
                 valuesString.append(",");
-            valuesString.append((String)it.next());
+            valuesString.append(mod);
         }
         setInputParameter(DYNAMIC_MOD, valuesString.toString());
     }
