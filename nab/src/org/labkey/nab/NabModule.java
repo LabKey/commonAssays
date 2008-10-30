@@ -47,6 +47,10 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
     public NabModule()
     {
         super(NAME, 8.20, null, false);
+    }
+
+    protected void init()
+    {
         addController("nab", NabController.class);
         addController("nabassay", NabAssayController.class);
 

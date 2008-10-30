@@ -44,6 +44,10 @@ public class ElispotModule extends DefaultModule implements ContainerManager.Con
     public ElispotModule()
     {
         super(NAME, 8.20, null, false);
+    }
+
+    protected void init()
+    {
         addController("elispot-assay", ElispotController.class);
     }
 

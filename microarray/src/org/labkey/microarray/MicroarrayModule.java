@@ -87,6 +87,10 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
                     }
                 }
         );
+    }
+
+    protected void init()
+    {
         addController(CONTROLLER_NAME, MicroarrayController.class);
         MicroarraySchema.register();
     }

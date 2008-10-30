@@ -22,7 +22,7 @@ import org.labkey.api.module.DefaultFolderType;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Portal;
-import org.labkey.flow.controllers.FlowModule;
+import org.labkey.flow.FlowModule;
 
 import java.util.Arrays;
 

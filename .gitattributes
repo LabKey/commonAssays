@@ -183,6 +183,7 @@ flow/src/META-INF/flow/scripts/sql[!!-~]server/flow-2.30-8.10.sql -text
 flow/src/META-INF/flow/scripts/sql[!!-~]server/flow-2.31-2.32.sql -text
 flow/src/META-INF/flow/scripts/sql[!!-~]server/obsolete/flow-1.53-1.54.sql -text
 flow/src/META-INF/flow/scripts/sql[!!-~]server/obsolete/flow-1.70-1.71.sql -text
+flow/src/org/labkey/flow/FlowModule.java -text
 flow/src/org/labkey/flow/FlowPreference.java -text
 flow/src/org/labkey/flow/FlowSettings.java -text
 flow/src/org/labkey/flow/ScriptParser.java -text
@@ -260,7 +261,6 @@ flow/src/org/labkey/flow/controllers/BaseFlowController.java -text
 flow/src/org/labkey/flow/controllers/BaseFlowPage.java -text
 flow/src/org/labkey/flow/controllers/FlowAdminForm.java -text
 flow/src/org/labkey/flow/controllers/FlowController.java -text
-flow/src/org/labkey/flow/controllers/FlowModule.java -text
 flow/src/org/labkey/flow/controllers/FlowParam.java -text
 flow/src/org/labkey/flow/controllers/IWorkspaceForm.java -text
 flow/src/org/labkey/flow/controllers/NewFolderForm.java -text

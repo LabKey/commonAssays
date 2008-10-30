@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.labkey.flow.controllers;
+package org.labkey.flow;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
@@ -39,14 +38,13 @@ import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.controllers.remote.FlowRemoteController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
+import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocolImplementation;
-import org.labkey.flow.data.InputRole;
 import org.labkey.flow.persist.FlowContainerListener;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.webparts.AnalysesWebPart;
@@ -54,7 +52,6 @@ import org.labkey.flow.webparts.AnalysisScriptsWebPart;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
 
-import java.sql.ResultSet;
 import java.util.Set;
 
 public class FlowModule extends DefaultModule
@@ -68,6 +65,10 @@ public class FlowModule extends DefaultModule
                 OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
                 AnalysisScriptsWebPart.FACTORY);
+    }
+
+    protected void init()
+    {
         DefaultSchema.registerProvider(FlowSchema.SCHEMANAME, new DefaultSchema.SchemaProvider()
         {
             public QuerySchema getSchema(DefaultSchema schema)
@@ -77,13 +78,13 @@ public class FlowModule extends DefaultModule
                 ViewContext c = HttpView.getRootContext();
                 if (null != c)
                 {
-                    fs = (FlowSchema)c.get("org.labkey.flow.controllers.FlowModule$FlowSchema");
+                    fs = (FlowSchema)c.get("org.labkey.flow.FlowModule$FlowSchema");
                     if (null != fs)
                         return fs;
                 }
                 fs = new FlowSchema(schema.getUser(), schema.getContainer());
                 if (null != c)
-                    c.put("org.labkey.flow.controllers.FlowModule$FlowSchema", fs);
+                    c.put("org.labkey.flow.FlowModule$FlowSchema", fs);
                 return fs;
             }
         });

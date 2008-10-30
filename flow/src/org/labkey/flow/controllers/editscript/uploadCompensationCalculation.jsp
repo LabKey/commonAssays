@@ -16,7 +16,7 @@
  */
 %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
-<%@ page import="org.labkey.flow.controllers.FlowModule" %>
+<%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <labkey:errors />

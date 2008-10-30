@@ -33,6 +33,7 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.webparts.FlowFolderType;
+import org.labkey.flow.FlowModule;
 import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;

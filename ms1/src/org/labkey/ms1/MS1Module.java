@@ -102,12 +102,16 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
                     }
                 }
         );
+    }
+
+    protected void init()
+    {
         addController(CONTROLLER_NAME, MS1Controller.class);
 
         MS1Schema.register();
 
         MS1Service.register(new MS1ServiceImpl());
-        
+
         //add the MS1 purge task to the list of system maintenance tasks
         SystemMaintenance.addTask(new PurgeTask());
     }

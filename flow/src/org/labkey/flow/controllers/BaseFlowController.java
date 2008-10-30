@@ -31,6 +31,7 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.script.FlowJob;
 import org.labkey.flow.webparts.FlowFolderType;
+import org.labkey.flow.FlowModule;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;

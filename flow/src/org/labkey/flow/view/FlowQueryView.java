@@ -31,7 +31,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.controllers.FlowModule;
+import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowRun;

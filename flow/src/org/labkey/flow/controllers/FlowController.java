@@ -37,6 +37,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
+import org.labkey.flow.FlowModule;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.script.FlowJob;
