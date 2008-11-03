@@ -217,8 +217,8 @@ public class MS1Manager
 
     public MinMaxScanInfo getMinMaxScanRT(int runId, int scanFirst, int scanLast) throws SQLException
     {
-        StringBuilder sql = new StringBuilder("SELECT MIN(s.Scan) AS MinScan, MAX(s.Scan) AS MaxScan");
-        sql.append(", MIN(s.RetentionTime) AS MinRetentionTime, MAX(s.RetentionTime) AS MaxRetentionTime FROM ");
+        StringBuilder sql = new StringBuilder("SELECT COALESCE(MIN(s.Scan),0) AS MinScan, COALESCE(MAX(s.Scan),0) AS MaxScan");
+        sql.append(", COALESCE(MIN(s.RetentionTime),0) AS MinRetentionTime, COALESCE(MAX(s.RetentionTime),0) AS MaxRetentionTime FROM ");
         sql.append(getSQLTableName(TABLE_PEAKS));
         sql.append(" AS p INNER JOIN ");
         sql.append(getSQLTableName(TABLE_SCANS));
@@ -226,7 +226,7 @@ public class MS1Manager
         sql.append(getSQLTableName(TABLE_FILES));
         sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
         sql.append(FILETYPE_PEAKS);
-        sql.append(" AND (s.Scan BETWEEN ? AND ?) AND f.Imported=? AND f.Deleted=?");
+        sql.append(" AND (s.Scan BETWEEN ? AND ?) AND f.Imported=? AND f.Deleted=? AND s.Scan IS NOT NULL and s.RetentionTime IS NOT NULL");
 
         MinMaxScanInfo[] result = Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, scanFirst, scanLast, true, false}, MinMaxScanInfo.class);
         return null == result || 0 == result.length ? null : result[0];

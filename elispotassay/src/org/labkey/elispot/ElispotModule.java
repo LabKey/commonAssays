@@ -43,7 +43,7 @@ public class ElispotModule extends DefaultModule implements ContainerManager.Con
 
     public ElispotModule()
     {
-        super(NAME, 8.20, null, false);
+        super(NAME, 8.30, null, false);
     }
 
     protected void init()

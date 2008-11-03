@@ -106,8 +106,6 @@ public class Search implements EntryPoint
         runSearch.setName("runSearch");
         runSearch.setValue("true");
 
-        clearDisplay();
-
         protocolComposite.setName("protocol");
         protocolComposite.setWidth(INPUT_WIDTH);
         protocolComposite.setVisibleLines(4);
