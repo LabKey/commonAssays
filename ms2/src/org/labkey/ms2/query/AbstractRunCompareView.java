@@ -88,7 +88,7 @@ public abstract class AbstractRunCompareView extends QueryView
             setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
         }
         // ExcelWebQueries won't be part of the same HTTP session so we won't have access to the run list anymore
-        setAllowExcelWebQuery(false);
+        setAllowExportExternalQuery(false);
     }
 
     public List<MS2Run> getRuns()

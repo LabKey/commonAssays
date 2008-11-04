@@ -64,7 +64,7 @@ public class ProteinProphetCrosstabView extends ComparisonCrosstabView
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
         setSettings(settings);
-        setAllowExcelWebQuery(false);
+        setAllowExportExternalQuery(false);
 
         setShowRecordSelectors(false);
     }

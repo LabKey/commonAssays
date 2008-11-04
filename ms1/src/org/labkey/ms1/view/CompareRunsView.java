@@ -52,6 +52,7 @@ public class CompareRunsView extends ComparisonCrosstabView
         setSettings(settings);
 
         setShowRecordSelectors(false);
+        setAllowExportExternalQuery(false);
     }
 
     protected TableInfo createTable()

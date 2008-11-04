@@ -1995,7 +1995,7 @@ public class MS2Controller extends SpringActionController
             schema.setRuns(_runs);
             QueryView view = new SpectraCountQueryView(schema, settings, _config, _form);
             // ExcelWebQueries won't be part of the same HTTP session so we won't have access to the run list anymore
-            view.setAllowExcelWebQuery(false);
+            view.setAllowExportExternalQuery(false);
             return view;
         }
 
