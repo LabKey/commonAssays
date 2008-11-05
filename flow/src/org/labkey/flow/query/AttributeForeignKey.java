@@ -24,7 +24,7 @@ import org.labkey.api.query.FieldKey;
 
 import java.util.Collection;
 
-abstract public class AttributeForeignKey<T> implements ForeignKey
+abstract public class AttributeForeignKey<T> extends AbstractForeignKey
 {
     public StringExpressionFactory.StringExpression getURL(ColumnInfo parent)
     {

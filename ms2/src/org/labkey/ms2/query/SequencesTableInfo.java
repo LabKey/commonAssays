@@ -78,7 +78,7 @@ public class SequencesTableInfo extends FilteredTable
 
         ColumnInfo annotationColumn = wrapColumn("CustomAnnotations", _rootTable.getColumn("SeqId"));
         annotationColumn.setIsUnselectable(true);
-        annotationColumn.setFk(new ForeignKey()
+        annotationColumn.setFk(new AbstractForeignKey()
         {
             public StringExpressionFactory.StringExpression getURL(ColumnInfo parent)
             {

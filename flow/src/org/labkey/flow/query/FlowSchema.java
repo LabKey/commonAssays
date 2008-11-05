@@ -281,7 +281,9 @@ public class FlowSchema extends UserSchema
             ColumnInfo colAnalysisScript;
             colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.getPropertyDescriptor(getContainer()));
             colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
-                    FlowParam.scriptId.toString(), "RowId", "Name"){
+                    FlowParam.scriptId.toString(),
+                    FlowTableType.AnalysisScripts.toString(),
+                    "RowId", "Name"){
                 public TableInfo getLookupTableInfo()
                 {
                     return detach().createAnalysisScriptTable("Lookup", true);
@@ -292,7 +294,9 @@ public class FlowSchema extends UserSchema
         {
             ColumnInfo colCompensationMatrix;
             colCompensationMatrix= ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.getPropertyDescriptor(getContainer()));
-            colCompensationMatrix.setFk(new LookupForeignKey(null, (String) null, "RowId", "Name") {
+            colCompensationMatrix.setFk(new LookupForeignKey(null, (String) null,
+                    FlowTableType.CompensationMatrices.toString(),
+                    "RowId", "Name") {
                 public TableInfo getLookupTableInfo()
                 {
                     return detach().createCompensationMatrixTable("Lookup");
@@ -927,13 +931,15 @@ public class FlowSchema extends UserSchema
         protocol.setIsHidden(true);
 
         ColumnInfo colRun = ret.addColumn(ExpDataTable.Column.Run);
-        colRun.setFk(new LookupForeignKey(PageFlowUtil.urlFor(RunController.Action.showRun, getContainer()), FlowParam.runId, "RowId", "Name")
+        colRun.setFk(new LookupForeignKey(PageFlowUtil.urlFor(RunController.Action.showRun, getContainer()), FlowParam.runId,
+                FlowTableType.Runs.toString(), "RowId", "Name")
         {
             public TableInfo getLookupTableInfo()
             {
                 return detach().createRunTable("run", type);
             }
         });
+
         if (_run != null)
         {
             ret.setRun(ExperimentService.get().getExpRun(_run.getRunId()));
@@ -1068,7 +1074,7 @@ public class FlowSchema extends UserSchema
         FlowDataTable ret = createDataTable(alias, type);
         ColumnInfo colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.getPropertyDescriptor(getContainer()));
         colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
-                FlowParam.scriptId.toString(), "RowId", "Name"){
+                FlowParam.scriptId.toString(), FlowTableType.AnalysisScripts.toString(), "RowId", "Name"){
             public TableInfo getLookupTableInfo()
             {
                 return detach().createAnalysisScriptTable("Lookup", true);
@@ -1076,7 +1082,7 @@ public class FlowSchema extends UserSchema
         });
         ColumnInfo colCompensationMatrix = ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.getPropertyDescriptor(getContainer()));
         colCompensationMatrix.setFk(new LookupForeignKey(PageFlowUtil.urlFor(CompensationController.Action.showCompensation, getContainer()), FlowParam.compId.toString(),
-                "RowId", "Name"){
+                FlowTableType.CompensationMatrices.toString(), "RowId", "Name"){
             public TableInfo getLookupTableInfo()
             {
                 return detach().createCompensationMatrixTable("Lookup");
@@ -1094,7 +1100,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.getPropertyDescriptor(getContainer()));
         colFCSFile.setFk(new LookupForeignKey(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()),
                 FlowParam.wellId.toString(),
-                "RowId", "Name") {
+                FlowTableType.FCSFiles.toString(), "RowId", "Name") {
                 public TableInfo getLookupTableInfo()
                 {
                     return detach().createFCSFileTable("FCSFile");

@@ -60,7 +60,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         SubsetSpec subset = _fps.simplifySubset(spec.getSubset());
         GraphSpec captionSpec = new GraphSpec(subset, spec.getParameters());
         column.setCaption(captionSpec.toString());
-        column.setFk(new ForeignKey() {
+        column.setFk(new AbstractForeignKey() {
             public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
             {
                 if (displayField != null)
