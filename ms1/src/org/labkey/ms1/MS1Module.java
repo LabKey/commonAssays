@@ -46,6 +46,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.Collection;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.sql.SQLException;
 
 
@@ -65,43 +66,14 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
     public static final String PROTOCOL_MS1 = "msInspect Feature Finding Analysis";
     public static final ExperimentRunFilter EXP_RUN_FILTER = new MS1ExperimentRunFilter();
 
-    public MS1Module()
+    public String getName()
     {
-        super(NAME, 8.30, "/org/labkey/ms1", true,
-                new BaseWebPartFactory(WEBPART_MS1_RUNS)
-                {
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MS1Module.EXP_RUN_FILTER, true, true);
-                        view.setTitle("MS1 Runs");
-                        ActionURL url = portalCtx.getActionURL().clone();
-                        url.setPageFlow(CONTROLLER_NAME);
-                        url.setAction("begin");
-                        view.setTitleHref(url.getLocalURIString());
-                        return view;
-                    }
-                },
-                new BaseWebPartFactory(WEBPART_PEP_SEARCH)
-                {
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        PepSearchModel model = new PepSearchModel(portalCtx.getContainer());
-                        JspView<PepSearchModel> view = new JspView<PepSearchModel>("/org/labkey/ms1/view/PepSearchView.jsp", model);
-                        view.setTitle(WEBPART_PEP_SEARCH);
-                        return view;
-                    }
-                },
-                new BaseWebPartFactory(WEBPART_FEATURE_SEARCH)
-                {
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        SimilarSearchModel searchModel = new SimilarSearchModel(portalCtx.getContainer(), false);
-                        JspView<SimilarSearchModel> searchView = new JspView<SimilarSearchModel>("/org/labkey/ms1/view/SimilarSearchView.jsp", searchModel);
-                        searchView.setTitle(WEBPART_FEATURE_SEARCH);
-                        return searchView;
-                    }
-                }
-        );
+        return "MS1";
+    }
+
+    public double getVersion()
+    {
+        return 8.30;
     }
 
     protected void init()
@@ -114,6 +86,49 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
 
         //add the MS1 purge task to the list of system maintenance tasks
         SystemMaintenance.addTask(new PurgeTask());
+    }
+
+    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    {
+        return Arrays.asList(new BaseWebPartFactory(WEBPART_MS1_RUNS)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MS1Module.EXP_RUN_FILTER, true, true);
+                    view.setTitle("MS1 Runs");
+                    ActionURL url = portalCtx.getActionURL().clone();
+                    url.setPageFlow(CONTROLLER_NAME);
+                    url.setAction("begin");
+                    view.setTitleHref(url.getLocalURIString());
+                    return view;
+                }
+            },
+            new BaseWebPartFactory(WEBPART_PEP_SEARCH)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    PepSearchModel model = new PepSearchModel(portalCtx.getContainer());
+                    JspView<PepSearchModel> view = new JspView<PepSearchModel>("/org/labkey/ms1/view/PepSearchView.jsp", model);
+                    view.setTitle(WEBPART_PEP_SEARCH);
+                    return view;
+                }
+            },
+            new BaseWebPartFactory(WEBPART_FEATURE_SEARCH)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    SimilarSearchModel searchModel = new SimilarSearchModel(portalCtx.getContainer(), false);
+                    JspView<SimilarSearchModel> searchView = new JspView<SimilarSearchModel>("/org/labkey/ms1/view/SimilarSearchView.jsp", searchModel);
+                    searchView.setTitle(WEBPART_FEATURE_SEARCH);
+                    return searchView;
+                }
+            }
+        );
+    }
+
+    public boolean hasScripts()
+    {
+        return true;
     }
 
     @Override

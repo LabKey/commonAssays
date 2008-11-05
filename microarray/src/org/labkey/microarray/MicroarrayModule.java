@@ -16,30 +16,28 @@
 
 package org.labkey.microarray;
 
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.security.User;
-import org.labkey.api.view.*;
-import org.labkey.api.query.QueryView;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.DataType;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.microarray.assay.MicroarrayAssayProvider;
+import org.labkey.api.query.QueryView;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.*;
 import org.labkey.microarray.assay.MageMLDataHandler;
+import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
 
-import java.beans.PropertyChangeEvent;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-public class MicroarrayModule extends DefaultModule implements ContainerManager.ContainerListener
+public class MicroarrayModule extends DefaultModule
 {
     public static final String NAME = "Microarray";
     public static final String WEBPART_MICROARRAY_RUNS = "Microarray Runs";
@@ -53,40 +51,14 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
     public static final DataType FEATURES_DATA_TYPE = new DataType("MicroarrayFeaturesData");
     public static final DataType GRID_DATA_TYPE = new DataType("MicroarrayGridData");
 
-    public MicroarrayModule()
+    public String getName()
     {
-        super(NAME, 8.30, null, true,
-                new BaseWebPartFactory(WEBPART_MICROARRAY_RUNS)
-                {
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayRunFilter.INSTANCE, true, false);
-                        view.setTitle(WEBPART_MICROARRAY_RUNS);
-                        view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
-                        return view;
-                    }
-                },
-                new BaseWebPartFactory(WEBPART_PENDING_FILES)
-                {
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        QueryView view = new PendingMageMLFilesView(portalCtx);
-                        view.setTitle("Pending MageML Files");
-                        view.setTitleHref(MicroarrayController.getPendingMageMLFilesURL(portalCtx.getContainer()));
-                        return view;
-                    }
-                },
-                new BaseWebPartFactory(WEBPART_MICROARRAY_STATISTICS, WebPartFactory.LOCATION_RIGHT)
-                {
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        WebPartView view = new MicroarrayStatisticsView(portalCtx);
-                        view.setTitle(WEBPART_MICROARRAY_STATISTICS);
-                        view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
-                        return view;
-                    }
-                }
-        );
+        return "Microarray";
+    }
+
+    public double getVersion()
+    {
+        return 8.30;
     }
 
     protected void init()
@@ -95,12 +67,45 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
         MicroarraySchema.register();
     }
 
-    public void containerCreated(Container c)
+    protected Collection<? extends WebPartFactory> createWebPartFactories()
     {
+        return Arrays.asList(
+            new BaseWebPartFactory(WEBPART_MICROARRAY_RUNS)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayRunFilter.INSTANCE, true, false);
+                    view.setTitle(WEBPART_MICROARRAY_RUNS);
+                    view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
+                    return view;
+                }
+            },
+            new BaseWebPartFactory(WEBPART_PENDING_FILES)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    QueryView view = new PendingMageMLFilesView(portalCtx);
+                    view.setTitle("Pending MageML Files");
+                    view.setTitleHref(MicroarrayController.getPendingMageMLFilesURL(portalCtx.getContainer()));
+                    return view;
+                }
+            },
+            new BaseWebPartFactory(WEBPART_MICROARRAY_STATISTICS, WebPartFactory.LOCATION_RIGHT)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    WebPartView view = new MicroarrayStatisticsView(portalCtx);
+                    view.setTitle(WEBPART_MICROARRAY_STATISTICS);
+                    view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
+                    return view;
+                }
+            }
+        );
     }
 
-    public void containerDeleted(Container c, User user)
+    public boolean hasScripts()
     {
+        return true;
     }
 
     public Collection<String> getSummary(Container c)
@@ -108,15 +113,10 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
         return Collections.emptyList();
     }
 
-    public void propertyChange(PropertyChangeEvent evt)
-    {
-    }
-
     public void startup(ModuleContext moduleContext)
     {
         super.startup(moduleContext);
-        // add a container listener so we'll know when our container is deleted:
-        ContainerManager.addContainerListener(this);
+
         ModuleLoader.getInstance().registerFolderType(new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());

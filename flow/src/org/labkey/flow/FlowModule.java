@@ -30,6 +30,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Search;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartFactory;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -53,18 +54,22 @@ import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
 
 import java.util.Set;
+import java.util.Collection;
+import java.util.Arrays;
 
 public class FlowModule extends DefaultModule
 {
     static final private Logger _log = Logger.getLogger(FlowModule.class);
     public static final String NAME = "Flow";
 
-    public FlowModule()
+    public String getName()
     {
-        super(NAME, 8.30, "/org/labkey/flow", true,
-                OverviewWebPart.FACTORY,
-                AnalysesWebPart.FACTORY,
-                AnalysisScriptsWebPart.FACTORY);
+        return "Flow";
+    }
+
+    public double getVersion()
+    {
+        return 8.30;
     }
 
     protected void init()
@@ -99,6 +104,18 @@ public class FlowModule extends DefaultModule
         addController("flow-remote", FlowRemoteController.class);
         FlowProperty.register();
         ContainerManager.addContainerListener(new FlowContainerListener());
+    }
+
+    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    {
+        return Arrays.asList(OverviewWebPart.FACTORY,
+                AnalysesWebPart.FACTORY,
+                AnalysisScriptsWebPart.FACTORY);
+    }
+
+    public boolean hasScripts()
+    {
+        return true;
     }
 
     static public boolean isActive(Container container)

@@ -65,8 +65,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 {
     private static final Logger _log = Logger.getLogger(MS2Module.class);
 
-    public static final String NAME = "MS2";
-
     private static MS2SearchExperimentRunFilter _ms2SearchRunFilter = new MS2SearchExperimentRunFilter("MS2 Searches", MS2Schema.GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME, Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX);
     private static ExperimentRunFilter _samplePrepRunFilter = new ExperimentRunFilter("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.SAMPLE_PREP_EXPERIMENT_RUNS_TABLE_NAME)
     {
@@ -85,49 +83,71 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     public static final String MS2_SAMPLE_PREPARATION_RUNS_NAME = "MS2 Sample Preparation Runs";
     public static final String MS2_RUNS_ENHANCED_NAME = "MS2 Runs (Enhanced)";
 
-    public MS2Module()
+    public String getName()
     {
-        super(NAME, 8.30, "/org/labkey/ms2", true,
-                new BaseWebPartFactory("MS2 Runs"){
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        return new MS2WebPart();
-                    }
-                },
-                new BaseWebPartFactory(MS2_RUNS_ENHANCED_NAME){
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _ms2SearchRunFilter, true, true);
-                        result.setTitle("MS2 Runs");
-                        return result;
-                    }
-                },
-                new BaseWebPartFactory(MS2_SAMPLE_PREPARATION_RUNS_NAME){
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _samplePrepRunFilter, true, true);
-                        result.setTitle(MS2_SAMPLE_PREPARATION_RUNS_NAME);
-                        return result;
-                    }
-                },
-                new BaseWebPartFactory("MS2 Statistics", WebPartFactory.LOCATION_RIGHT){
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        return new MS2StatsWebPart();
-                    }
-                },
-                new BaseWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_RIGHT){
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));
-                    }
-                },
-                new BaseWebPartFactory(ProteinSearchWebPart.NAME){
-                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                    {
-                        return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));
-                    }
-                });
+        return "MS2";
+    }
+
+    public double getVersion()
+    {
+        return 8.30;
+    }
+
+    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    {
+        return Arrays.asList(
+            new BaseWebPartFactory("MS2 Runs")
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    return new MS2WebPart();
+                }
+            },
+            new BaseWebPartFactory(MS2_RUNS_ENHANCED_NAME)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _ms2SearchRunFilter, true, true);
+                    result.setTitle("MS2 Runs");
+                    return result;
+                }
+            },
+            new BaseWebPartFactory(MS2_SAMPLE_PREPARATION_RUNS_NAME)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _samplePrepRunFilter, true, true);
+                    result.setTitle(MS2_SAMPLE_PREPARATION_RUNS_NAME);
+                    return result;
+                }
+            },
+            new BaseWebPartFactory("MS2 Statistics", WebPartFactory.LOCATION_RIGHT)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    return new MS2StatsWebPart();
+                }
+            },
+            new BaseWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_RIGHT)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));
+                }
+            },
+            new BaseWebPartFactory(ProteinSearchWebPart.NAME)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));
+                }
+            }
+        );
+    }
+
+    public boolean hasScripts()
+    {
+        return true;
     }
 
     protected void init()

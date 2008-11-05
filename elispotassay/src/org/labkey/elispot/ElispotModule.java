@@ -22,28 +22,31 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.security.User;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartFactory;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
 
-import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
-public class ElispotModule extends DefaultModule implements ContainerManager.ContainerListener
+public class ElispotModule extends DefaultModule
 {
     public static final String NAME = "ELISpotAssay";
     private static final Logger _log = Logger.getLogger(ElispotModule.class);
 
-    public ElispotModule()
+    public String getName()
     {
-        super(NAME, 8.30, null, false);
+        return "ELISpotAssay";
+    }
+
+    public double getVersion()
+    {
+        return 8.30;
     }
 
     protected void init()
@@ -51,12 +54,14 @@ public class ElispotModule extends DefaultModule implements ContainerManager.Con
         addController("elispot-assay", ElispotController.class);
     }
 
-    public void containerCreated(Container c)
+    protected Collection<? extends WebPartFactory> createWebPartFactories()
     {
+        return Collections.emptyList();
     }
 
-    public void containerDeleted(Container c, User user)
+    public boolean hasScripts()
     {
+        return false;
     }
 
     public Collection<String> getSummary(Container c)
@@ -64,15 +69,9 @@ public class ElispotModule extends DefaultModule implements ContainerManager.Con
         return Collections.emptyList();
     }
 
-    public void propertyChange(PropertyChangeEvent evt)
-    {
-    }
-
     public void startup(ModuleContext moduleContext)
     {
         super.startup(moduleContext);
-        // add a container listener so we'll know when our container is deleted:
-        ContainerManager.addContainerListener(this);
 
         PlateService.get().registerPlateTypeHandler(new ElispotPlateTypeHandler());
         ExperimentService.get().registerExperimentDataHandler(new ElispotDataHandler());

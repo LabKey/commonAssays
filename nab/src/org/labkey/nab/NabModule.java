@@ -25,15 +25,16 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.WebPartFactory;
 import org.labkey.nab.query.NabSchema;
 
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * User: migra
@@ -42,11 +43,14 @@ import java.util.Set;
  */
 public class NabModule extends DefaultModule implements ContainerManager.ContainerListener
 {
-    private static final String NAME = "Nab";
-
-    public NabModule()
+    public String getName()
     {
-        super(NAME, 8.30, null, false);
+        return "Nab";
+    }
+
+    public double getVersion()
+    {
+        return 8.30;
     }
 
     protected void init()
@@ -55,6 +59,16 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
         addController("nabassay", NabAssayController.class);
 
         NabSchema.register();
+    }
+
+    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    {
+        return Collections.emptyList();
+    }
+
+    public boolean hasScripts()
+    {
+        return false;
     }
 
     //void wantsToDelete(Container c, List<String> messages);

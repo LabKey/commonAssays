@@ -25,6 +25,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
+import org.labkey.api.view.WebPartFactory;
 import org.apache.log4j.Logger;
 
 import java.beans.PropertyChangeEvent;
@@ -32,14 +33,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-public class LuminexModule extends DefaultModule implements ContainerManager.ContainerListener
+public class LuminexModule extends DefaultModule
 {
     private static final Logger _log = Logger.getLogger(LuminexModule.class);
-    public static final String NAME = "Luminex";
 
-    public LuminexModule()
+    public String getName()
     {
-        super(NAME, 8.30, null, true);
+        return "Luminex";
+    }
+
+    public double getVersion()
+    {
+        return 8.30;
     }
 
     protected void init()
@@ -47,12 +52,14 @@ public class LuminexModule extends DefaultModule implements ContainerManager.Con
         addController("luminex", LuminexController.class);
     }
 
-    public void containerCreated(Container c)
+    protected Collection<? extends WebPartFactory> createWebPartFactories()
     {
+        return Collections.emptyList();
     }
 
-    public void containerDeleted(Container c, User user)
+    public boolean hasScripts()
     {
+        return true;
     }
 
     public Collection<String> getSummary(Container c)
@@ -60,15 +67,9 @@ public class LuminexModule extends DefaultModule implements ContainerManager.Con
         return Collections.emptyList();
     }
 
-    public void propertyChange(PropertyChangeEvent evt)
-    {
-    }
-
     public void startup(ModuleContext moduleContext)
     {
         super.startup(moduleContext);
-        // add a container listener so we'll know when our container is deleted:
-        ContainerManager.addContainerListener(this);
 
         AssayService.get().registerAssayProvider(new LuminexAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new LuminexExcelDataHandler());
