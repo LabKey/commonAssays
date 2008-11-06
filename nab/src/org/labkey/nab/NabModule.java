@@ -17,7 +17,6 @@ package org.labkey.nab;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -31,8 +30,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.nab.query.NabSchema;
 
-import java.beans.PropertyChangeEvent;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -41,7 +38,7 @@ import java.util.Collections;
  * Date: Feb 15, 2006
  * Time: 10:39:44 PM
  */
-public class NabModule extends DefaultModule implements ContainerManager.ContainerListener
+public class NabModule extends DefaultModule
 {
     public String getName()
     {
@@ -71,28 +68,6 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
         return false;
     }
 
-    //void wantsToDelete(Container c, List<String> messages);
-    public void containerCreated(Container c)
-    {
-    }
-
-    public void containerDeleted(Container c, User user)
-    {
-        try
-        {
-            NabManager.get().deleteContainerData(c);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-    }
-
-    public void propertyChange(PropertyChangeEvent evt)
-    {
-    }
-
-
     @Override
     public void startup(ModuleContext moduleContext)
     {
@@ -110,11 +85,13 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
         PlateService.get().registerPlateTypeHandler(new NabPlateTypeHandler());
         AssayService.get().registerAssayProvider(new NabAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new NabDataHandler());
+        ContainerManager.addContainerListener(new NabContainerListener());
 
         super.startup(moduleContext);
     }
 
 
+    @Override
     public ActionURL getTabURL(Container c, User user)
     {
         ActionURL defaultURL = super.getTabURL(c, user);

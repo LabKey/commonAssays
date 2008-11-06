@@ -50,7 +50,7 @@ public class FlowManager
     private static final String SCHEMA_NAME = "flow";
 
     // NOTE: don't use a LimitedCacheMap, blowing it out kills performance
-    private final Map<String, Integer> _attridCacheMap = new CacheMap(1000);
+    private final Map<String, Integer> _attridCacheMap = new CacheMap<String, Integer>(1000);
     class AttrNameCacheMap extends CacheMap<Integer, String>
     {
         public AttrNameCacheMap(int initialSize)

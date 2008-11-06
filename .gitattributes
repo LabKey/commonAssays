@@ -1156,6 +1156,7 @@ nab/src/org/labkey/nab/DilutionSummary.java -text
 nab/src/org/labkey/nab/Luc5Assay.java -text
 nab/src/org/labkey/nab/NabAssayController.java -text
 nab/src/org/labkey/nab/NabAssayProvider.java -text
+nab/src/org/labkey/nab/NabContainerListener.java -text
 nab/src/org/labkey/nab/NabController.java -text
 nab/src/org/labkey/nab/NabDataHandler.java -text
 nab/src/org/labkey/nab/NabManager.java -text
