@@ -92,7 +92,7 @@ class SampleChooserDisplayColumn extends SimpleDisplayColumn
         {
             // Look through all the sample sets that are visible from this folder to check for samples where
             // the barcode matches
-            for (ExpSampleSet sampleSet : ExperimentService.get().getSampleSets(ctx.getContainer(), true))
+            for (ExpSampleSet sampleSet : ExperimentService.get().getSampleSets(ctx.getContainer(), ctx.getViewContext().getUser(), true))
             {
                 ExpMaterial[] materials = sampleSet.getSamples();
                 Domain domain = sampleSet.getType();

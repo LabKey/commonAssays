@@ -29,6 +29,7 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.MS1Controller;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -125,7 +126,6 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         if(null == data || null == container || null == user)
             return;
 
-        int expDataFileID = data.getRowId();
         try
         {
             MS1Manager.get().deletePeakData(data.getRowId());
@@ -154,7 +154,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
 
     public URLHelper getContentURL(Container container, ExpData data)
     {
-        ActionURL url = new ActionURL("ms1", "showPeaks.view", container);
+        ActionURL url = new ActionURL(MS1Controller.ShowPeaksAction.class, container);
         url.addParameter("dataRowId", Integer.toString(data.getRowId()));
         return url;
     } //getContentURL()

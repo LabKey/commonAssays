@@ -584,7 +584,7 @@ ms1/src/org/labkey/ms1/pipeline/templates/msInspectFeatures.xml -text
 ms1/src/org/labkey/ms1/pipeline/templates/msInspectFeaturesPeaks.xml -text
 ms1/src/org/labkey/ms1/pipeline/templates/msInspectPeptides.xml -text
 ms1/src/org/labkey/ms1/pipeline/templates/msInspectPeptidesPeaks.xml -text
-ms1/src/org/labkey/ms1/query/ContainerFilter.java -text
+ms1/src/org/labkey/ms1/query/ContainerFeaturesFilter.java -text
 ms1/src/org/labkey/ms1/query/FeaturesFilter.java -text
 ms1/src/org/labkey/ms1/query/FeaturesFilterFactory.java -text
 ms1/src/org/labkey/ms1/query/FeaturesLinkDisplayColumn.java -text

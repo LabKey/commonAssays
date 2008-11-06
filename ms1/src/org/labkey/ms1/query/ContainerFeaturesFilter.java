@@ -33,21 +33,21 @@ import java.util.Map;
  * Date: Jan 14, 2008
  * Time: 9:58:27 AM
  */
-public class ContainerFilter implements FeaturesFilter
+public class ContainerFeaturesFilter implements FeaturesFilter
 {
     private Container[] _containers;
 
-    public ContainerFilter(Container container)
+    public ContainerFeaturesFilter(Container container)
     {
         _containers = new Container[]{container};
     }
     
-    public ContainerFilter(Container[] containers)
+    public ContainerFeaturesFilter(Container[] containers)
     {
         _containers = containers;
     }
 
-    public ContainerFilter(Container container, boolean includeDescendants, User user)
+    public ContainerFeaturesFilter(Container container, boolean includeDescendants, User user)
     {
         if(includeDescendants)
         {

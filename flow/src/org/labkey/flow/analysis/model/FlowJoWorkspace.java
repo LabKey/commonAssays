@@ -903,7 +903,7 @@ abstract public class FlowJoWorkspace implements Serializable
             workspaceData.save(user);
 
             ExpProtocolApplication startingInputs = run.addProtocolApplication(user, null, ExpProtocol.ApplicationType.ExperimentRun, null);
-            startingInputs.addDataInput(user, workspaceData, InputRole.Workspace.toString(), null);
+            startingInputs.addDataInput(user, workspaceData, InputRole.Workspace.toString());
             Map<FlowJoWorkspace.SampleInfo, FlowFCSFile> fcsFiles = new HashMap();
             iSample = 0;
             for (FlowJoWorkspace.SampleInfo sample : samples)
@@ -913,7 +913,7 @@ abstract public class FlowJoWorkspace implements Serializable
 
                 iSample++;
                 ExpProtocolApplication paSample = run.addProtocolApplication(user, FlowProtocolStep.keywords.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, null);
-                paSample.addDataInput(user, workspaceData, InputRole.Workspace.toString(), InputRole.Workspace.getPropertyDescriptor(container));
+                paSample.addDataInput(user, workspaceData, InputRole.Workspace.toString());
                 ExpData fcsFile = svc.createData(container, FlowDataType.FCSFile);
                 fcsFile.setName(sample.getLabel());
                 fcsFile.setDataFileURI(dataFileURI);
@@ -938,7 +938,7 @@ abstract public class FlowJoWorkspace implements Serializable
                 AttributeSet compAttrs = entry.getValue();
                 FlowCompensationMatrix flowComp = FlowCompensationMatrix.create(user, container, null, compAttrs);
                 ExpProtocolApplication paComp = run.addProtocolApplication(user, FlowProtocolStep.calculateCompensation.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, null);
-                paComp.addDataInput(user, workspaceData, InputRole.Workspace.toString(), null);
+                paComp.addDataInput(user, workspaceData, InputRole.Workspace.toString());
                 flowComp.getData().setSourceApplication(paComp);
                 flowComp.getData().setName(compMatrix.getName() + " " + workspaceName);
                 job.addStatus("Saving CompMatrix " + iComp + "/" + compMatrixMap.size() + ":" + flowComp.getName());
@@ -960,7 +960,7 @@ abstract public class FlowJoWorkspace implements Serializable
                             FlowProtocolStep.analysis.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, null);
                     FlowFCSFile fcsFile = entry.getValue();
                     results.setURI(fcsFile.getFCSURI());
-                    paAnalysis.addDataInput(user, fcsFile.getData(), InputRole.FCSFile.toString(), InputRole.FCSFile.getPropertyDescriptor(container));
+                    paAnalysis.addDataInput(user, fcsFile.getData(), InputRole.FCSFile.toString());
                     ExpData fcsAnalysis = svc.createData(container, FlowDataType.FCSAnalysis);
                     fcsAnalysis.setName(flowProtocol.getFCSAnalysisName(fcsFile));
                     fcsAnalysis.setSourceApplication(paAnalysis);
@@ -981,14 +981,14 @@ abstract public class FlowJoWorkspace implements Serializable
                         }
                         else
                         {
-                            well.getProtocolApplication().addDataInput(user, script.getData(), InputRole.AnalysisScript.toString(), null);
+                            well.getProtocolApplication().addDataInput(user, script.getData(), InputRole.AnalysisScript.toString());
                         }
                     }
                     CompensationMatrix comp = entry.getKey().getCompensationMatrix();
                     if (comp != null)
                     {
                         FlowCompensationMatrix flowComp = flowCompMatrices.get(comp);
-                        paAnalysis.addDataInput(user, flowComp.getData(), InputRole.CompensationMatrix.toString(), null);
+                        paAnalysis.addDataInput(user, flowComp.getData(), InputRole.CompensationMatrix.toString());
                     }
                 }
             }

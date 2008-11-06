@@ -19,11 +19,13 @@ package org.labkey.ms1.query;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.exp.api.ExpSchema;
-import org.labkey.api.data.Container;
+import org.labkey.api.exp.api.ContainerFilter;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.ms1.MS1Manager;
+
+import java.util.Collection;
 
 /**
  * User schema table info for the ms1.Files table
@@ -34,7 +36,7 @@ import org.labkey.ms1.MS1Manager;
  */
 public class FilesTableInfo extends FilteredTable
 {
-    public FilesTableInfo(ExpSchema expSchema, Container container)
+    public FilesTableInfo(ExpSchema expSchema, ContainerFilter filter)
     {
         super(MS1Manager.get().getTable(MS1Manager.TABLE_FILES));
 
@@ -53,14 +55,24 @@ public class FilesTableInfo extends FilteredTable
 
         //add a condition that excludes deleted and not full-imported files
         //also limit to the passed container if not null
-        SQLFragment sf;
-        if(null != container)
-            sf = new SQLFragment("Imported=? AND Deleted=? AND ExpDataFileId IN (SELECT RowId FROM Exp.Data WHERE Container=?)",
-                                            true, false, container.getId());
-        else
-            sf = new SQLFragment("Imported=? AND Deleted=?", true, false);
-        addCondition(sf, "FileId");
-
+        SQLFragment sf = new SQLFragment("Imported=? AND Deleted=?");
+        sf.add(true);
+        sf.add(false);
+        Collection<String> containerIds = filter.getIds(_expSchema.getContainer(), _expSchema.getUser());
+        if (containerIds != null)
+        {
+            sf.append(" AND ExpDataFileId IN (SELECT RowId FROM Exp.Data WHERE Container IN (");
+            String separator = "";
+            for (String containerId : containerIds)
+            {
+                sf.append(separator);
+                separator = ", ";
+                sf.append("?");
+                sf.add(containerId);
+            }
+            sf.append("))");
+        }
+        addCondition(sf, "Imported", "Deleted", "ExpDataFileId");
     }
 
     private ExpSchema _expSchema;

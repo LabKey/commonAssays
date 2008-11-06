@@ -94,7 +94,7 @@ public class FeaturesRReport extends CustomRReport
                 restrictContainer = false;
             }
 
-            filters.add(new ContainerFilter(context.getContainer(), form.isSubfolders(), context.getUser()));
+            filters.add(new ContainerFeaturesFilter(context.getContainer(), form.isSubfolders(), context.getUser()));
             filters.add(new MzFilter(form.getMzSource().doubleValue(), form.getMzOffset(), form.getMzUnits()));
             if(MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt == form.getTimeUnits())
                 filters.add(new RetentionTimeFilter(form.getTimeSource().doubleValue() - form.getTimeOffset(),
@@ -119,7 +119,7 @@ public class FeaturesRReport extends CustomRReport
                 restrictContainer = false;
             }
 
-            filters.add(new ContainerFilter(context.getContainer(), form.isSubfolders(), context.getUser()));
+            filters.add(new ContainerFeaturesFilter(context.getContainer(), form.isSubfolders(), context.getUser()));
             if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
                 filters.add(new PeptideFilter(form.getPepSeq(), form.isExact()));
         }

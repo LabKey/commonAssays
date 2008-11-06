@@ -187,7 +187,7 @@ public class FlowWell extends FlowDataObject
         ExpProtocolApplication app = getProtocolApplication();
         if (app == null)
             return null;
-        for (ExpDataInput input : app.getDataInputs())
+        for (ExpDataRunInput input : app.getDataInputs())
         {
             if (input.getData().getDataType() == FlowDataType.CompensationMatrix)
             {

@@ -17,10 +17,7 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpRunTable;
-import org.labkey.api.exp.api.ExpSchema;
-import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.query.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
@@ -56,6 +53,7 @@ public class MS1Schema extends UserSchema
 
     private ExpSchema _expSchema;
     private boolean _restrictContainer = true;
+    private final ContainerFilter _containerFilter;
 
     public MS1Schema(User user, Container container)
     {
@@ -65,9 +63,19 @@ public class MS1Schema extends UserSchema
     public MS1Schema(User user, Container container, boolean restrictContainer)
     {
         super(SCHEMA_NAME, user, container, MS1Manager.get().getSchema());
-        _expSchema = new ExpSchema(user, container);
-        _expSchema.setRestrictContainer(restrictContainer);
         _restrictContainer = restrictContainer;
+
+        if (_restrictContainer)
+        {
+            _containerFilter = ContainerFilter.CURRENT;
+        }
+        else
+        {
+            _containerFilter = ContainerFilter.CURRENT_AND_SUBFOLDERS;
+        }
+
+        _expSchema = new ExpSchema(user, container);
+        _expSchema.setContainerFilter(_containerFilter);
     }
 
     public boolean isRestrictContainer()
@@ -194,7 +202,7 @@ public class MS1Schema extends UserSchema
 
         //change the default visible columnset
         ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(table.getDefaultVisibleColumns());
-        visibleColumns.add(2, FieldKey.fromParts("FileId","ExpDataFileId","Run","Name"));
+        visibleColumns.add(2, FieldKey.fromParts("FileId","ExpDataFileId","Run"));
         visibleColumns.remove(FieldKey.fromParts("AccurateMz"));
         visibleColumns.remove(FieldKey.fromParts("Mass"));
         visibleColumns.remove(FieldKey.fromParts("Peaks"));
@@ -221,7 +229,7 @@ public class MS1Schema extends UserSchema
 
     public FilesTableInfo getFilesTableInfo()
     {
-        return new FilesTableInfo(_expSchema, _restrictContainer ? getContainer() : null);
+        return new FilesTableInfo(_expSchema, _containerFilter);
     }
 
     public ScansTableInfo getScansTableInfo()

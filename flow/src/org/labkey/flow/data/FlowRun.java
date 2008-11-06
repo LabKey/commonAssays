@@ -169,10 +169,7 @@ public class FlowRun extends FlowObject<ExpRun>
         {
             return new FlowCompensationMatrix(outputs[0]);
         }
-        PropertyDescriptor inputRole = InputRole.CompensationMatrix.getPropertyDescriptor(getContainer());
-        if (inputRole == null)
-            return null;
-        ExpData[] datas = getExperimentRun().getInputDatas(inputRole, ExpProtocol.ApplicationType.ExperimentRun);
+        ExpData[] datas = getExperimentRun().getInputDatas(InputRole.CompensationMatrix.toString(), ExpProtocol.ApplicationType.ExperimentRun);
         if (datas.length == 0)
             return null;
         return new FlowCompensationMatrix(datas[0]);
@@ -257,10 +254,7 @@ public class FlowRun extends FlowObject<ExpRun>
 
     public FlowScript getScript()
     {
-        PropertyDescriptor pd = InputRole.AnalysisScript.getPropertyDescriptor(getContainer());
-        if (pd == null)
-            return null;
-        ExpData[] datas = getExperimentRun().getInputDatas(pd, ExpProtocol.ApplicationType.ExperimentRun);
+        ExpData[] datas = getExperimentRun().getInputDatas(InputRole.AnalysisScript.toString(), ExpProtocol.ApplicationType.ExperimentRun);
         if (datas.length == 0)
             return null;
         return (FlowScript) FlowDataObject.fromData(datas[0]);
@@ -273,10 +267,7 @@ public class FlowRun extends FlowObject<ExpRun>
 
     public ActionURL getDownloadWorkspaceURL()
     {
-        PropertyDescriptor pd = InputRole.Workspace.getPropertyDescriptor(getContainer());
-        if (pd == null)
-            return null;
-        ExpData[] datas = getExperimentRun().getInputDatas(pd, ExpProtocol.ApplicationType.ExperimentRun);
+        ExpData[] datas = getExperimentRun().getInputDatas(InputRole.Workspace.toString(), ExpProtocol.ApplicationType.ExperimentRun);
         if (datas.length == 0 || !datas[0].isFileOnDisk())
             return null;
         ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer(), datas[0]);

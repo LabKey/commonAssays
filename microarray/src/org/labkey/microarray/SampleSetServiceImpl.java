@@ -43,7 +43,7 @@ public class SampleSetServiceImpl extends BaseRemoteService implements SampleSet
 
     public GWTSampleSet[] getSampleSets()
     {
-        ExpSampleSet[] sets = ExperimentService.get().getSampleSets(getContainer(), true);
+        ExpSampleSet[] sets = ExperimentService.get().getSampleSets(getContainer(), _context.getUser(), true);
         GWTSampleSet[] result = new GWTSampleSet[sets.length];
         for (int i = 0; i < sets.length; i++)
         {

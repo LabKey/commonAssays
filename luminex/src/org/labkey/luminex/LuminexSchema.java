@@ -106,8 +106,7 @@ public class LuminexSchema extends UserSchema
 
     public ExpDataTable createDataTable(String alias)
     {
-        ExpDataTable ret = ExperimentService.get().createDataTable(alias);
-        ret.setContainer(getContainer());
+        ExpDataTable ret = ExperimentService.get().createDataTable(alias, this);
         ret.addColumn(ExpDataTable.Column.RowId);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);

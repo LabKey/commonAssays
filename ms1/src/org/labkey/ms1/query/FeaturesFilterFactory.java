@@ -49,7 +49,7 @@ public class FeaturesFilterFactory
         Container root = null != scParam && scParam.length() > 0 
                 ? ContainerManager.getForPath(scParam)
                 : ContainerManager.getForPath(url.getExtraPath());
-        filters.add(new ContainerFilter(root, null != subfoldersParam && subfoldersParam.length() > 0, user));
+        filters.add(new ContainerFeaturesFilter(root, null != subfoldersParam && subfoldersParam.length() > 0, user));
 
         //RunFilter
         String runParam = url.getParameter(NAMESPACE_PREFIX + MS1Controller.ShowFeaturesForm.ParamNames.runId.name());

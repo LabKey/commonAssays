@@ -20,6 +20,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ContainerFilter;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
@@ -118,19 +119,19 @@ public class MS2Schema extends UserSchema
         }
         else if (XTANDEM_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createSearchTable(alias, true, XTANDEM_PROTOCOL_OBJECT_PREFIX);
+            return createSearchTable(alias, ContainerFilter.CURRENT, XTANDEM_PROTOCOL_OBJECT_PREFIX);
         }
         else if (MASCOT_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createSearchTable(alias, true, MASCOT_PROTOCOL_OBJECT_PREFIX);
+            return createSearchTable(alias, ContainerFilter.CURRENT, MASCOT_PROTOCOL_OBJECT_PREFIX);
         }
         else if (SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createSearchTable(alias, true, SEQUEST_PROTOCOL_OBJECT_PREFIX);
+            return createSearchTable(alias, ContainerFilter.CURRENT, SEQUEST_PROTOCOL_OBJECT_PREFIX);
         }
         else if (GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createRunsTable(alias, true);
+            return createRunsTable(alias, ContainerFilter.CURRENT);
         }
         else if (PEPTIDES_TABLE_NAME.equalsIgnoreCase(name) || PEPTIDES_FILTER_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -190,9 +191,9 @@ public class MS2Schema extends UserSchema
         return new CompareProteinProphetTableInfo(alias, this, _runs, false, request, peptideViewName);
     }
 
-    public TableInfo createRunsTable(String alias, boolean restrictContainer)
+    public ExpRunTable createRunsTable(String alias, ContainerFilter filter)
     {
-        return createSearchTable(alias, restrictContainer, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX);
+        return createSearchTable(alias, filter, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX);
     }
 
     public SpectraCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, ViewContext context, MS2Controller.SpectraCountForm form)
@@ -422,12 +423,10 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    private TableInfo createSearchTable(String alias, boolean restrictContainer, String... protocolObjectPrefix)
+    private ExpRunTable createSearchTable(String alias, ContainerFilter filter, String... protocolObjectPrefix)
     {
-        boolean originalRestrictContainer = _expSchema.isRestrictContainer();
-        _expSchema.setRestrictContainer(restrictContainer);
+        _expSchema.setContainerFilter(filter);
         final ExpRunTable result = _expSchema.createRunsTable(alias);
-        _expSchema.setRestrictContainer(originalRestrictContainer);
         String[] protocolPatterns = new String[protocolObjectPrefix.length];
         for (int i = 0; i < protocolObjectPrefix.length; i++)
         {

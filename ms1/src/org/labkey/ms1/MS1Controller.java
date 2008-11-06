@@ -657,7 +657,7 @@ public class MS1Controller extends SpringActionController
         protected FeaturesView getFeaturesView(PepSearchForm form, BindException bindErrors, boolean forExport) throws Exception
         {
             ArrayList<FeaturesFilter> baseFilters = new ArrayList<FeaturesFilter>();
-            baseFilters.add(new ContainerFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
+            baseFilters.add(new ContainerFeaturesFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
             if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
                 baseFilters.add(new PeptideFilter(form.getPepSeq(), form.isExact()));
             if(null != form.getRunIds() && form.getRunIds().length() > 0)
@@ -873,7 +873,7 @@ public class MS1Controller extends SpringActionController
         protected FeaturesView getFeaturesView(SimilarSearchForm form, BindException bindErrors, boolean forExport) throws Exception
         {
             ArrayList<FeaturesFilter> baseFilters = new ArrayList<FeaturesFilter>();
-            baseFilters.add(new ContainerFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
+            baseFilters.add(new ContainerFeaturesFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
             baseFilters.add(new MzFilter(form.getMzSource().doubleValue(), form.getMzOffset(), form.getMzUnits()));
             if(SimilarSearchForm.TimeOffsetUnits.rt == form.getTimeUnits())
                 baseFilters.add(new RetentionTimeFilter(form.getTimeSource().doubleValue() - form.getTimeOffset(),

@@ -254,12 +254,8 @@ public class FlowSchema extends UserSchema
 
     public ExpRunTable createRunTable(String alias, FlowDataType type)
     {
-        ExpRunTable ret = ExperimentService.get().createRunTable(alias);
+        ExpRunTable ret = ExperimentService.get().createRunTable(alias, this);
 
-        if (_container != null)
-        {
-            ret.setContainer(_container);
-        }
         if (_experiment != null)
         {
             ret.setExperiment(_experiment.getExpObject());
@@ -279,7 +275,7 @@ public class FlowSchema extends UserSchema
         if (type != FlowDataType.FCSFile)
         {
             ColumnInfo colAnalysisScript;
-            colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.getPropertyDescriptor(getContainer()));
+            colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.toString());
             colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
                     FlowParam.scriptId.toString(),
                     FlowTableType.AnalysisScripts.toString(),
@@ -293,7 +289,7 @@ public class FlowSchema extends UserSchema
         if (type != FlowDataType.CompensationMatrix && type != FlowDataType.FCSFile)
         {
             ColumnInfo colCompensationMatrix;
-            colCompensationMatrix= ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.getPropertyDescriptor(getContainer()));
+            colCompensationMatrix= ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.toString());
             colCompensationMatrix.setFk(new LookupForeignKey(null, (String) null,
                     FlowTableType.CompensationMatrices.toString(),
                     "RowId", "Name") {
@@ -303,7 +299,7 @@ public class FlowSchema extends UserSchema
                 }
             });
         }
-        ret.addDataCountColumn("WellCount", InputRole.FCSFile.getPropertyDescriptor(getContainer()));
+        ret.addDataCountColumn("WellCount", InputRole.FCSFile.toString());
         ret.addColumn(ExpRunTable.Column.Created);
         ret.addColumn(ExpRunTable.Column.CreatedBy);
         addDataCountColumn(ret, "FCSFileCount", ObjectType.fcsKeywords);
@@ -353,7 +349,7 @@ public class FlowSchema extends UserSchema
             super(getDbSchema());
             setAlias(alias);
             _expDataAlias = "_expdata_";
-            _expData = ExperimentService.get().createDataTable(_expDataAlias);
+            _expData = ExperimentService.get().createDataTable(_expDataAlias, FlowSchema.this);
             _flowObject = DbSchema.get("flow").getTable("object");
             _type = type;
             _fps = new FlowPropertySet(_expData);
@@ -444,9 +440,9 @@ public class FlowSchema extends UserSchema
         }
 
         /* ExpDataTable */
-        public void populate(ExpSchema schema)
+        public void populate()
         {
-            _expData.populate(schema);
+            _expData.populate();
             for (ColumnInfo col : _expData.getColumns())
             {
                 if (null == getColumn(col.getName()))
@@ -484,15 +480,15 @@ public class FlowSchema extends UserSchema
             return _expData.getDataType();
         }
 
-        public ColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, PropertyDescriptor inputRole, ExpSampleSet sampleSet)
+        public ColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
         {
             ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole,sampleSet);
             return addExpColumn(col);
         }
 
-        public ColumnInfo addDataInputColumn(String alias, PropertyDescriptor role)
+        public ColumnInfo addDataInputColumn(String alias, String role)
         {
-            ColumnInfo col = _expData.addDataInputColumn(alias,role);
+            ColumnInfo col = _expData.addDataInputColumn(alias, role);
             return addExpColumn(col);
         }
 
@@ -504,14 +500,14 @@ public class FlowSchema extends UserSchema
 
         /* ExpTable */
 
-        public void setContainer(Container container)
-        {
-            _expData.setContainer(container);
-        }
-
         public Container getContainer()
         {
             return _expData.getContainer();
+        }
+
+        public void setContainerFilter(ContainerFilter filter)
+        {
+            _expData.setContainerFilter(filter);
         }
 
         public ColumnInfo addColumn(Column column)
@@ -601,7 +597,7 @@ public class FlowSchema extends UserSchema
             super(getDbSchema());
             setAlias(alias);
             _expDataAlias = "_expdata_";
-            _expData = ExperimentService.get().createDataTable(_expDataAlias);
+            _expData = ExperimentService.get().createDataTable(_expDataAlias, FlowSchema.this);
             _expData.setDataType(type);
             _flowObject = DbSchema.get("flow").getTable("object");
             _type = type;
@@ -721,9 +717,9 @@ public class FlowSchema extends UserSchema
 
 
         /* ExpDataTable */
-        public void populate(ExpSchema schema)
+        public void populate()
         {
-            _expData.populate(schema);
+            _expData.populate();
             throw new UnsupportedOperationException();
         }
 
@@ -753,23 +749,28 @@ public class FlowSchema extends UserSchema
             assert type == _type;
         }
 
+        public void setContainerFilter(ContainerFilter filter)
+        {
+            _expData.setContainerFilter(filter);
+        }
+
         public DataType getDataType()
         {
             return _type;
         }
 
-        public ColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, PropertyDescriptor inputRole, ExpSampleSet sampleSet)
+        public ColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
         {
             ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole,sampleSet);
             col.setParentTable(this);
             return addColumn(col);
         }
 
-        public ColumnInfo addDataInputColumn(String alias, PropertyDescriptor role)
+        public ColumnInfo addDataInputColumn(String alias, String role)
         {
 //UNDONE
             assert false;
-            ColumnInfo col = _expData.addDataInputColumn(alias,role);
+            ColumnInfo col = _expData.addDataInputColumn(alias, role);
             return addExpColumn(col);
         }
 
@@ -887,7 +888,6 @@ public class FlowSchema extends UserSchema
     public FlowDataTable createDataTable(String alias, final FlowDataType type)
     {
         FlowDataTable ret = new FlowDataTable(alias, type);
-        ret.setContainer(getContainer());
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.RowId).setIsHidden(true);
         ret.addColumn(ExpDataTable.Column.LSID).setIsHidden(true);
@@ -1055,7 +1055,7 @@ public class FlowSchema extends UserSchema
         {
             ss = _protocol.getSampleSet();
         }
-        ColumnInfo colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), null, ss);
+        ColumnInfo colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), ExpMaterialRunInput.DEFAULT_ROLE, ss);
         if (ss == null)
         {
             colMaterialInput.setIsHidden(true);
@@ -1072,7 +1072,7 @@ public class FlowSchema extends UserSchema
             return createFCSAnalysisTableNEW(alias, type);
 
         FlowDataTable ret = createDataTable(alias, type);
-        ColumnInfo colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.getPropertyDescriptor(getContainer()));
+        ColumnInfo colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.toString());
         colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
                 FlowParam.scriptId.toString(), FlowTableType.AnalysisScripts.toString(), "RowId", "Name"){
             public TableInfo getLookupTableInfo()
@@ -1080,7 +1080,7 @@ public class FlowSchema extends UserSchema
                 return detach().createAnalysisScriptTable("Lookup", true);
             }
         });
-        ColumnInfo colCompensationMatrix = ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.getPropertyDescriptor(getContainer()));
+        ColumnInfo colCompensationMatrix = ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.toString());
         colCompensationMatrix.setFk(new LookupForeignKey(PageFlowUtil.urlFor(CompensationController.Action.showCompensation, getContainer()), FlowParam.compId.toString(),
                 FlowTableType.CompensationMatrices.toString(), "RowId", "Name"){
             public TableInfo getLookupTableInfo()
@@ -1097,7 +1097,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
         ColumnInfo colBackground = ret.addBackgroundColumn("Background");
         ColumnInfo colGraph = ret.addGraphColumn("Graph");
-        ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.getPropertyDescriptor(getContainer()));
+        ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.toString());
         colFCSFile.setFk(new LookupForeignKey(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()),
                 FlowParam.wellId.toString(),
                 FlowTableType.FCSFiles.toString(), "RowId", "Name") {
@@ -1200,11 +1200,10 @@ public class FlowSchema extends UserSchema
 
     public ExpExperimentTable createAnalysesTable(String alias)
     {
-        ExpExperimentTable ret = ExperimentService.get().createExperimentTable(alias);
-        ret.setContainer(getContainer());
+        ExpExperimentTable ret = ExperimentService.get().createExperimentTable(alias, new ExpSchema(getUser(), getContainer()));
+        ret.populate();
         FlowProtocol compensationProtocol = FlowProtocolStep.calculateCompensation.getForContainer(getContainer());
         FlowProtocol analysisProtocol = FlowProtocolStep.analysis.getForContainer(getContainer());
-        ret.populate(new ExpSchema(getUser(), getContainer()));
         if (compensationProtocol != null)
         {
             ColumnInfo colCompensationCount = ret.createRunCountColumn("CompensationRunCount", null, compensationProtocol.getProtocol());

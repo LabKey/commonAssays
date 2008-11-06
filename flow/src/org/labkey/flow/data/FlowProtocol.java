@@ -286,8 +286,6 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             boolean fTransaction = false;
             try
             {
-                PropertyDescriptor pdInputRole = null;
-
                 if (!svc.isTransactionActive())
                 {
                     svc.beginTransaction();
@@ -340,7 +338,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     }
                     if (!found && sample != null)
                     {
-                        pdInputRole = app.addMaterialInput(user, sample, null, pdInputRole);
+                        app.addMaterialInput(user, sample, null);
                         ret ++;
                     }
                 }

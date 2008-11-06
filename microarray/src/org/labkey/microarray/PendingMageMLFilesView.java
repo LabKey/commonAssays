@@ -135,10 +135,10 @@ public class PendingMageMLFilesView extends QueryView
 
     protected TableInfo createTable()
     {
-        ExpDataTable table = ExperimentService.get().createDataTable("pendingFile");
+        ExpDataTable table = ExperimentService.get().createDataTable("pendingFile", getSchema());
         table.setRun(null);
         table.setDataType(MicroarrayModule.MAGE_ML_DATA_TYPE);
-        table.populate(getSchema());
+        table.populate();
         return table;
     }
 

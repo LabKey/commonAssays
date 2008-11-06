@@ -621,7 +621,8 @@ public class MS2Controller extends SpringActionController
         // The defaultView parameter isn't used directly - it's just something on the URL so that it's clear
         // that the user has explicitly requested the standard view and therefore prevent us from
         // bouncing to the user's defined default
-        viewSelect.append("\n<option value=\"doNotApplyDefaultView=yes\">Choose A View</option>\n");
+        viewSelect.append("\n<option value=\"doNotApplyDefaultView=yes\">&lt;Select a saved view&gt;</option>\n");
+        viewSelect.append("\n<option value=\"doNotApplyDefaultView=yes\">&lt;Standard View&gt;</option>\n");
 
         String currentViewParams = getViewContext().cloneActionURL().deleteParameter("run").getRawQuery();
 

@@ -29,9 +29,4 @@ public enum InputRole
     FCSFile,
     Sample,
     Workspace,
-    ;
-    public PropertyDescriptor getPropertyDescriptor(Container container)
-    {
-        return OntologyManager.getPropertyDescriptor(ExperimentService.get().getDataInputRolePropertyURI(container, name()), container);
-    }
 }
