@@ -195,7 +195,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             {
                 RecordedAction xtandemAction = new RecordedAction(X_TANDEM_ACTION_NAME);
                 xtandemAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(xTandemPB.command(), ' '));
-                xtandemAction.addInput(fileMzXML, "mzXML");
+                xtandemAction.addInput(fileMzXML, SPECTRA_INPUT_ROLE);
                 for (File sequenceFile : getJobSupport().getSequenceFiles())
                 {
                     xtandemAction.addInput(sequenceFile, "FASTA");

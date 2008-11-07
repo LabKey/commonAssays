@@ -20,13 +20,13 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.data.Container;
-import org.labkey.api.util.URLHelper;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.flowdata.xml.FlowdataDocument;
@@ -76,7 +76,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public URLHelper getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(Container container, ExpData data)
     {
         return null;
     }

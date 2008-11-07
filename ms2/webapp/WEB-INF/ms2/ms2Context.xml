@@ -201,9 +201,7 @@
         <property name="outputType" ref="mzXMLFileType" />
         <property name="inputPaths">
             <map>
-                <!-- Confusingly call this mzXML so that the input role is the same for the specta source
-                regardless of whether it came from a RAW file or a mzXML file -->
-                <entry key="mzXML">
+                <entry key="Spectra">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg value=".RAW"/>
                     </bean>
@@ -239,7 +237,7 @@
                                                 <property name="switchName" value="verbose"/>
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                                                <property name="key" value="mzXML" />
+                                                <property name="key" value="Spectra" />
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.PathInLine">
                                                 <property name="function" value="output"/>
@@ -253,7 +251,7 @@
                                     <property name="converters">
                                         <list>
                                             <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                                                <property name="key" value="mzXML" />
+                                                <property name="key" value="Spectra" />
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.RequiredInLine">
                                                 <property name="value" value="p"/>
@@ -277,7 +275,7 @@
         <property name="outputExtension" value=".msprefix.mzXML"/>
         <property name="inputPaths">
             <map>
-                <entry key="mzXML">
+                <entry key="Spectra">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg value=".mzXML"/>
                     </bean>
@@ -317,7 +315,7 @@
                                                 <property name="switchFormat" ref="unixDefaultSwitch" />
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                                                <property name="key" value="mzXML" />
+                                                <property name="key" value="Spectra" />
                                             </bean>
                                         </list>
                                     </property>

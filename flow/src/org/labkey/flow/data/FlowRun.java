@@ -18,7 +18,6 @@ package org.labkey.flow.data;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
@@ -270,7 +269,7 @@ public class FlowRun extends FlowObject<ExpRun>
         ExpData[] datas = getExperimentRun().getInputDatas(InputRole.Workspace.toString(), ExpProtocol.ApplicationType.ExperimentRun);
         if (datas.length == 0 || !datas[0].isFileOnDisk())
             return null;
-        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer(), datas[0]);
+        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer(), datas[0], false);
         return url;
     }
 

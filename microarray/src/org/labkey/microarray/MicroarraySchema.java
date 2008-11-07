@@ -131,25 +131,4 @@ public class MicroarraySchema extends UserSchema
     {
         return getSchema().getSqlDialect();
     }
-
-    public static class IconLinksDisplayColumn extends DataColumn
-    {
-        public IconLinksDisplayColumn(ColumnInfo info)
-        {
-            super(info);
-            setCaption("");
-            setWidth("18");
-        }
-
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-        {
-            ActionURL graphURL = new ActionURL("experiment", "showData.view", ctx.getContainer());
-            Object runId = ctx.getRow().get(getColumnInfo().getAlias());
-            if (runId != null)
-            {
-                graphURL.addParameter("rowId", runId.toString());
-                out.write("<a href=\"" + graphURL.getLocalURIString() + "\" title=\"Thumbnail image\"><img src=\"" + AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif\" height=\"18\" width=\"18\"/></a>");
-            }
-        }
-    }
 }

@@ -103,7 +103,7 @@
         <property name="switchFormat" ref="unixMixedSwitch"/>
         <property name="inputPaths">
             <map>
-                <entry key="mzXMLFile">
+                <entry key="spectra">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg ref="mzXMLFileType" />
                     </bean>
@@ -141,7 +141,7 @@
                     <property name="value" value=".peaks.xml" />
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                    <property name="key" value="mzXMLFile" />
+                    <property name="key" value="spectra" />
                 </bean>
             </list>
         </property>
@@ -153,10 +153,10 @@
         <property name="groupParameterName" value="msinspect" />
         <property name="protocolActionName" value="msInspect Find Features" />
         <property name="outputExtension" value=".peptides.tsv"/>
-        <property name="actionableInput" value="mzXMLFile" />
+        <property name="actionableInput" value="spectra" />
         <property name="inputPaths">
             <map>
-                <entry key="mzXMLFile">
+                <entry key="spectra">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg ref="mzXMLFileType" />
                     </bean>
@@ -230,7 +230,7 @@
                     <property name="switchName" value="out"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                    <property name="key" value="mzXMLFile" />
+                    <property name="key" value="spectra" />
                 </bean>
             </list>
         </property>

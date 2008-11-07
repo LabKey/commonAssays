@@ -19,7 +19,7 @@ package org.labkey.nab;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.*;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.util.URLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
@@ -441,7 +441,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         return prop;
     }
 
-    public URLHelper getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(Container container, ExpData data)
     {
         ExpRun run = data.getRun();
         if (run != null)

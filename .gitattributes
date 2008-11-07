@@ -542,6 +542,7 @@ ms1/src/META-INF/ms1/scripts/postgresql/ms1-2.20-2.30.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/ms1-2.30-2.31.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/ms1-2.30-8.10.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/ms1-2.31-2.32.sql -text
+ms1/src/META-INF/ms1/scripts/postgresql/ms1-8.30-8.31.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/obsolete/ms1-0.00-0.01.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/obsolete/ms1-2.20-2.21.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/obsolete/ms1-2.21-2.22.sql -text
@@ -553,6 +554,7 @@ ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.20-2.30.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.30-2.31.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.30-8.10.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.31-2.32.sql -text
+ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-8.30-8.31.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/obsolete/ms1-0.00-0.01.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/obsolete/ms1-2.20-2.21.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/obsolete/ms1-2.21-2.22.sql -text
@@ -580,10 +582,6 @@ ms1/src/org/labkey/ms1/model/SoftwareParam.java -text
 ms1/src/org/labkey/ms1/pipeline/MSInspectFeaturesDataHandler.java -text
 ms1/src/org/labkey/ms1/pipeline/PeaksFileDataHandler.java -text
 ms1/src/org/labkey/ms1/pipeline/PeaksFileImporter.java -text
-ms1/src/org/labkey/ms1/pipeline/templates/msInspectFeatures.xml -text
-ms1/src/org/labkey/ms1/pipeline/templates/msInspectFeaturesPeaks.xml -text
-ms1/src/org/labkey/ms1/pipeline/templates/msInspectPeptides.xml -text
-ms1/src/org/labkey/ms1/pipeline/templates/msInspectPeptidesPeaks.xml -text
 ms1/src/org/labkey/ms1/query/ContainerFeaturesFilter.java -text
 ms1/src/org/labkey/ms1/query/FeaturesFilter.java -text
 ms1/src/org/labkey/ms1/query/FeaturesFilterFactory.java -text
@@ -680,6 +678,7 @@ ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.34-2.35.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-8.10-8.11.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-8.10-8.20.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-8.19-8.20.sql -text
+ms2/src/META-INF/ms2/scripts/postgresql/ms2-8.30-8.31.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-create.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-drop.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.00-1.01.sql -text
@@ -749,6 +748,7 @@ ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.34-2.35.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.10-8.11.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.10-8.20.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.19-8.20.sql -text
+ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.30-8.31.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-create.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-drop.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.62.sql -text

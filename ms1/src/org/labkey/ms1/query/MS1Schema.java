@@ -281,7 +281,7 @@ public class MS1Schema extends UserSchema
         columns.remove(FieldKey.fromParts("Features Link"));
         columns.add(2, FieldKey.fromParts("Features Link"));
 
-        columns.add(FieldKey.fromParts("Input", "mzXMLFile"));
+        columns.add(FieldKey.fromParts("Input", "Spectra"));
         result.setDefaultVisibleColumns(columns);
 
         return result;

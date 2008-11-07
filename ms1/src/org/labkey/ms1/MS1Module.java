@@ -73,7 +73,7 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
 
     public double getVersion()
     {
-        return 8.30;
+        return 8.31;
     }
 
     protected void init()

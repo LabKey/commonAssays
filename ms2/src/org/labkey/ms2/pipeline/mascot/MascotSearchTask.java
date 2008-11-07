@@ -347,7 +347,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                 lock = _wd.ensureCopyingLock();
 
                 mzxml2SearchAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(argsM2S, " "));
-                mzxml2SearchAction.addInput(fileMzXML, "mzXML");
+                mzxml2SearchAction.addInput(fileMzXML, SPECTRA_INPUT_ROLE);
                 mzxml2SearchAction.addOutput(fileMGF, "MGF", false);
 
                 for (File file : getJobSupport().getSequenceFiles())

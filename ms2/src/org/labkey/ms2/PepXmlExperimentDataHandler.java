@@ -21,7 +21,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
-import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -134,7 +133,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         return MS2Manager.getRunByFileName(dataFile.getParent(), dataFile.getName(), c);
     }
 
-    public URLHelper getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(Container container, ExpData data)
     {
         File dataFile = data.getDataFile();
         MS2Run run = getMS2Run(dataFile, container);
@@ -142,7 +141,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         {
             return null;
         }
-        return new ActionURL("MS2", "showRun", container.getPath()).addParameter("run", Integer.toString(run.getRun()));
+        return MS2Controller.MS2UrlsImpl.get().getShowRunUrl(run);
     }
 
     public void deleteData(ExpData data, Container container, User user) throws ExperimentException

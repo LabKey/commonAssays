@@ -27,8 +27,8 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.ValidationException;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 
@@ -179,7 +179,7 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
         return prop;
     }
 
-    public URLHelper getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(Container container, ExpData data)
     {
         return null;
     }

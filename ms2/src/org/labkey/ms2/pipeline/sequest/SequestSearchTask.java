@@ -200,7 +200,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             {
                 action.addInput(file, "FASTA");
             }
-            action.addInput(fileMzXML, "mzXML");
+            action.addInput(fileMzXML, SPECTRA_INPUT_ROLE);
             
             return Collections.singletonList(action);
         }

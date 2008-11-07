@@ -25,7 +25,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
-import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms1.MS1Manager;
@@ -152,7 +151,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         }
     } //runMoved()
 
-    public URLHelper getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(Container container, ExpData data)
     {
         ActionURL url = new ActionURL(MS1Controller.ShowPeaksAction.class, container);
         url.addParameter("dataRowId", Integer.toString(data.getRowId()));

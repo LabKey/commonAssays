@@ -26,13 +26,12 @@ import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
-import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.common.tools.TabLoader;
 import org.labkey.common.tools.ColumnDescriptor;
 import org.labkey.ms1.MS1Manager;
-import org.labkey.ms1.MS1Module;
+import org.labkey.ms1.MS1Controller;
 
 import java.io.File;
 import java.io.IOException;
@@ -611,11 +610,10 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @param container     The current container
      * @param data          The experiment data object
      * @return              The URL the user should be redirected to
-     * @throws ExperimentException Thrown if there's a problem
      */
-    public URLHelper getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(Container container, ExpData data)
     {
-        ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showFeatures.view", container);
+        ActionURL url = new ActionURL(MS1Controller.ShowFeaturesAction.class, container);
         url.addParameter("runId", Integer.toString(data.getRun().getRowId()));
         return url;
     }

@@ -19,7 +19,6 @@ package org.labkey.ms2;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
-import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.view.ActionURL;
@@ -60,7 +59,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         }
     }
 
-    public URLHelper getContentURL(Container container, ExpData data)
+    public ActionURL getContentURL(Container container, ExpData data)
     {
         File dataFile = data.getDataFile();
         MS2Run run = null;
@@ -81,8 +80,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         {
             return null;
         }
-        ActionURL result = new ActionURL("MS2", "showRun", container.getPath());
-        result.addParameter("run", Integer.toString(run.getRun()));
+        ActionURL result = MS2Controller.MS2UrlsImpl.get().getShowRunUrl(run);
         result.addParameter("expanded", "1");
         result.addParameter("grouping", "proteinprophet");
         return result;
