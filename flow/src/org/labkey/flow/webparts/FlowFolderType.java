@@ -30,13 +30,14 @@ public class FlowFolderType extends DefaultFolderType
 {
     public FlowFolderType(FlowModule module)
     {
-        super("Flow",
-                "Perform statistical analysis and create graphs for high-volume, highly standardized flow experiments. Organize, archive and track statistics and keywords for FlowJo experiments.",
-                Arrays.asList(OverviewWebPart.FACTORY.createWebPart()),
-                Arrays.asList(AnalysesWebPart.FACTORY.createWebPart(),
+        super("Flow", "Perform statistical analysis and create graphs for high-volume, highly standardized flow experiments. Organize, archive and track statistics and keywords for FlowJo experiments.");
+        
+        requiredParts = Arrays.asList(OverviewWebPart.FACTORY.createWebPart());
+        preferredParts = Arrays.asList(AnalysesWebPart.FACTORY.createWebPart(),
                         AnalysisScriptsWebPart.FACTORY.createWebPart(),
-                        Portal.getPortalPart("Messages").createWebPart()),
-                getDefaultModuleSet(module, getModule("Pipeline")), module);
+                        Portal.getPortalPart("Messages").createWebPart());
+        activeModules = getDefaultModuleSet(module, getModule("Pipeline"));
+        defaultModule = module;
     }
 
     public ActionURL getStartURL(Container c, User user)

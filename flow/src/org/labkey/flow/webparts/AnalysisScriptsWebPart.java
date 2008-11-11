@@ -30,32 +30,24 @@ import org.labkey.api.util.PageFlowUtil;
 import java.util.List;
 import java.util.ArrayList;
 
+
 public class AnalysisScriptsWebPart extends FlowQueryView
 {
-    static public final WebPartFactory FACTORY = new Factory();
-
-    static class Factory extends BaseWebPartFactory
+    static public final SimpleWebPartFactory FACTORY = new SimpleWebPartFactory("Flow Scripts", AnalysisScriptsWebPart.class);
+    static
     {
-        Factory()
-        {
-            super("Flow Scripts");
-            addLegacyNames("Flow Analysis Scripts");
-        }
-
-        public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart wp) throws Exception
-        {
-            FlowSchema schema = new FlowSchema(portalCtx.getUser(), portalCtx.getContainer());
-            FlowQuerySettings settings = (FlowQuerySettings)schema.getSettings(wp, portalCtx);
-            settings.setAllowChooseQuery(false);
-            settings.setAllowChooseView(false);
-            settings.setQueryName(FlowTableType.AnalysisScripts.toString());
-            return new AnalysisScriptsWebPart(new ViewContext(portalCtx), schema, settings);
-        }
+        FACTORY.addLegacyNames("Flow Analysis Scripts");
     }
 
-    public AnalysisScriptsWebPart(ViewContext context, FlowSchema schema, FlowQuerySettings settings)
+    public AnalysisScriptsWebPart(ViewContext portalCtx, Portal.WebPart wp) throws Exception
     {
-        super(context, schema, settings);
+        super(portalCtx, new FlowSchema(portalCtx.getUser(), portalCtx.getContainer()), null);
+        FlowQuerySettings settings = (FlowQuerySettings)getSchema().getSettings(wp, portalCtx);
+        settings.setAllowChooseQuery(false);
+        settings.setAllowChooseView(false);
+        settings.setQueryName(FlowTableType.AnalysisScripts.toString());
+        setSettings(settings);
+        
         setTitle("Flow Scripts");
         setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
     }

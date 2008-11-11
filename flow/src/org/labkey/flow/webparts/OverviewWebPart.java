@@ -20,20 +20,10 @@ import org.labkey.api.view.*;
 
 public class OverviewWebPart extends HtmlView
 {
-    static public final BaseWebPartFactory FACTORY = new Factory();
-
-    static class Factory extends BaseWebPartFactory
+    static public final BaseWebPartFactory FACTORY = new SimpleWebPartFactory("Flow Experiment Management", OverviewWebPart.class);
+    static
     {
-        Factory()
-        {
-            super("Flow Experiment Management");
-            addLegacyNames("Flow Overview");
-        }
-
-        public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws Exception
-        {
-            return new OverviewWebPart(portalCtx);
-        }
+        FACTORY.addLegacyNames("Flow Overview");
     }
 
     public OverviewWebPart(ViewContext portalCtx) throws Exception

@@ -31,22 +31,17 @@ import org.labkey.flow.view.FlowQueryView;
 
 public class AnalysesWebPart extends FlowQueryView
 {
-    static public final WebPartFactory FACTORY = new BaseWebPartFactory("Flow Analyses")
-    {
-        public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart wp) throws Exception
-        {
-            FlowSchema schema = new FlowSchema(portalCtx.getUser(), portalCtx.getContainer());
-            FlowQuerySettings settings = (FlowQuerySettings)schema.getSettings(wp, portalCtx);
-            settings.setAllowChooseQuery(false);
-            settings.setAllowChooseView(false);
-            settings.setQueryName(FlowTableType.Analyses.toString());
-            return new AnalysesWebPart(new ViewContext(portalCtx), schema, settings);
-        }
-    };
+    static public final WebPartFactory FACTORY = new SimpleWebPartFactory("Flow Analyses", AnalysesWebPart.class);
 
-    public AnalysesWebPart(ViewContext context, FlowSchema schema, FlowQuerySettings settings)
+    public AnalysesWebPart(ViewContext context, Portal.WebPart wp)
     {
-        super(context, schema, settings);
+        super(context, new FlowSchema(context.getUser(), context.getContainer()), null);
+        FlowQuerySettings settings = (FlowQuerySettings) getSchema().getSettings(wp, context);
+        settings.setAllowChooseQuery(false);
+        settings.setAllowChooseView(false);
+        settings.setQueryName(FlowTableType.Analyses.toString());
+        setSettings(settings);
+        
         setTitle("Flow Analyses");
         setShowExportButtons(false);
         setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
@@ -72,6 +67,5 @@ public class AnalysesWebPart extends FlowQueryView
         }
         ActionButton btnAnalyze = new ActionButton("Choose runs to analyze", analysisScript.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze));
         bar.add(btnAnalyze);
-        return;
     }
 }
