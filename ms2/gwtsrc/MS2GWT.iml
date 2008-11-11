@@ -3,10 +3,12 @@
   <component name="FacetManager">
     <facet type="gwt" name="GWT">
       <configuration>
-        <setting name="gwtSdkUrl" value="file://$GWT_15_HOME$" />
-        <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="runGwtCompilerOnMake" value="false" />
+        <setting name="additionalCompilerParameters" value="" />
         <setting name="compilerMaxHeapSize" value="128" />
+        <setting name="compilerOutputPath" value="" />
+        <setting name="gwtScriptOutputStyle" value="DETAILED" />
+        <setting name="gwtSdkUrl" value="file://$GWT_15_HOME$" />
+        <setting name="runGwtCompilerOnMake" value="false" />
         <packaging>
           <module name="org.labkey.ms2.MS2VennDiagramView" path="/org.labkey.ms2.MS2VennDiagramView" />
           <module name="org.labkey.ms2.pipeline.Search" path="/org.labkey.ms2.pipeline.Search" />
@@ -24,7 +26,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="InternalGWT" />
     <orderEntry type="library" name="gwt-user" level="project" />
-    <orderEntryProperties />
   </component>
 </module>
 

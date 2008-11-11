@@ -677,7 +677,7 @@ ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.33-2.34.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.34-2.35.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-8.10-8.11.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-8.10-8.20.sql -text
-ms2/src/META-INF/ms2/scripts/postgresql/ms2-8.19-8.20.sql -text
+ms2/src/META-INF/ms2/scripts/postgresql/ms2-8.29-8.30.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-8.30-8.31.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-create.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-drop.sql -text
@@ -747,7 +747,7 @@ ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.33-2.34.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.34-2.35.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.10-8.11.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.10-8.20.sql -text
-ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.19-8.20.sql -text
+ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.29-8.30.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.30-8.31.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-create.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-drop.sql -text

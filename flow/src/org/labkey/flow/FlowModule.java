@@ -128,14 +128,12 @@ public class FlowModule extends DefaultModule
         return false;
     }
 
-    @Override
     public void startup(ModuleContext moduleContext)
     {
         PipelineService.get().registerPipelineProvider(new FlowPipelineProvider());
         FlowDataType.register();
         ExperimentService.get().registerExperimentDataHandler(FlowDataHandler.instance);
         FlowProtocolImplementation.register();
-        super.startup(moduleContext);
         ModuleLoader.getInstance().registerFolderType(new FlowFolderType(this));
         Search.register(new FlowManager.FCSFileSearch(null,null));
         FlowController.registerAdminConsoleLinks();

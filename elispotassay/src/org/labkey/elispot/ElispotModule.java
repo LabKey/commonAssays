@@ -24,7 +24,6 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.labkey.elispot.plate.ExcelPlateReader;
@@ -71,8 +70,6 @@ public class ElispotModule extends DefaultModule
 
     public void startup(ModuleContext moduleContext)
     {
-        super.startup(moduleContext);
-
         PlateService.get().registerPlateTypeHandler(new ElispotPlateTypeHandler());
         ExperimentService.get().registerExperimentDataHandler(new ElispotDataHandler());
         AssayService.get().registerAssayProvider(new ElispotAssayProvider());
@@ -81,7 +78,7 @@ public class ElispotModule extends DefaultModule
         ElispotPlateReaderService.registerProvider(new TextPlateReader());
     }
 
-    public void afterSchemaUpdate(ModuleContext moduleContext, ViewContext viewContext)
+    public void afterSchemaUpdate(ModuleContext moduleContext)
     {
         // Issue #5689, module was renamed to avoid a collision with a 3rd party module,
         // need to clean up the module entry

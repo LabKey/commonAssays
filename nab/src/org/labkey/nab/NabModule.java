@@ -68,7 +68,6 @@ public class NabModule extends DefaultModule
         return false;
     }
 
-    @Override
     public void startup(ModuleContext moduleContext)
     {
         PlateService.get().registerDetailsLinkResolver(new PlateService.PlateDetailsResolver()
@@ -86,8 +85,6 @@ public class NabModule extends DefaultModule
         AssayService.get().registerAssayProvider(new NabAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new NabDataHandler());
         ContainerManager.addContainerListener(new NabContainerListener());
-
-        super.startup(moduleContext);
     }
 
 

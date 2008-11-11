@@ -115,13 +115,10 @@ public class MicroarrayModule extends DefaultModule
 
     public void startup(ModuleContext moduleContext)
     {
-        super.startup(moduleContext);
-
         ModuleLoader.getInstance().registerFolderType(new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
         ExperimentService.get().registerExperimentRunFilter(MicroarrayRunFilter.INSTANCE);
-
         PipelineService.get().registerPipelineProvider(new MicroarrayPipelineProvider());
     }
 

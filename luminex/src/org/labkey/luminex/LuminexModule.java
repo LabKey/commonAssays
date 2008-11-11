@@ -69,8 +69,6 @@ public class LuminexModule extends DefaultModule
 
     public void startup(ModuleContext moduleContext)
     {
-        super.startup(moduleContext);
-
         AssayService.get().registerAssayProvider(new LuminexAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new LuminexExcelDataHandler());
     }

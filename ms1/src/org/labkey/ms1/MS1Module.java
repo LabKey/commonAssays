@@ -172,7 +172,6 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
     @Override
     public void startup(ModuleContext moduleContext)
     {
-        super.startup(moduleContext);
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(this);
 
