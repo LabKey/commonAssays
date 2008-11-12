@@ -18,7 +18,6 @@ package org.labkey.ms1;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.exp.api.ExperimentService;
@@ -28,7 +27,6 @@ import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
-import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SystemMaintenance;
 import org.labkey.api.view.*;
@@ -42,12 +40,11 @@ import org.labkey.ms1.report.FeaturesRReport;
 import org.labkey.ms1.report.MS1ReportUIProvider;
 import org.labkey.ms1.report.PeaksRReport;
 
-import java.beans.PropertyChangeEvent;
-import java.util.Collection;
-import java.util.Set;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Set;
 
 
 /**
@@ -55,7 +52,7 @@ import java.sql.SQLException;
  * it provides with CPAS.
  */
 
-public class MS1Module extends SpringModule implements ContainerManager.ContainerListener
+public class MS1Module extends SpringModule
 {
     private static final Logger _log = Logger.getLogger(MS1Module.class);
     public static final String NAME = "MS1";
@@ -137,20 +134,10 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
         return ContextType.config;
     }
 
-    public void containerCreated(Container c)
-    {
-    }
-
-    public void containerDeleted(Container c, User user)
-    {
-        // If the module starts loading data into its own database tables,
-        // it needs to clean up the relevant rows when a container
-        // that holds MS1 data is deleted
-    }
-
+    @Override
     public Collection<String> getSummary(Container c)
     {
-        Collection<String> ret = null;
+        Collection<String> ret;
         try
         {
             ret = MS1Manager.get().getContainerSummary(c);
@@ -164,16 +151,10 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
         return ret;
     }
 
-    public void propertyChange(PropertyChangeEvent evt)
-    {
-    }
-
-
     @Override
     public void startup(ModuleContext moduleContext)
     {
-        // add a container listener so we'll know when our container is deleted:
-        ContainerManager.addContainerListener(this);
+        super.startup(moduleContext);
 
         // Tell the pipeline that we know how to handle msInspect files
         ExperimentService.get().registerExperimentDataHandler(new MSInspectFeaturesDataHandler());
