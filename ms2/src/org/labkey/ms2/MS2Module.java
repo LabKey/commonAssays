@@ -169,7 +169,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         return ContextType.config;
     }
 
-    @Override
     public void startup(ModuleContext context)
     {
         PipelineService service = PipelineService.get();
@@ -199,7 +198,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         ReportService.get().addUIProvider(new MS2ReportUIProvider());
         MS2Controller.registerAdminConsoleLinks();
 
-        super.startup(context);
+        initWebApplicationContext();
     }
 
     @Override
@@ -248,6 +247,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     }
 
 
+    @Override
     public Set<String> getSchemaNames()
     {
         return PageFlowUtil.set(MS2Schema.SCHEMA_NAME, ProteinManager.getSchemaName());

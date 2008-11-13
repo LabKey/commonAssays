@@ -151,10 +151,9 @@ public class MS1Module extends SpringModule
         return ret;
     }
 
-    @Override
     public void startup(ModuleContext moduleContext)
     {
-        super.startup(moduleContext);
+        initWebApplicationContext();
 
         // Tell the pipeline that we know how to handle msInspect files
         ExperimentService.get().registerExperimentDataHandler(new MSInspectFeaturesDataHandler());

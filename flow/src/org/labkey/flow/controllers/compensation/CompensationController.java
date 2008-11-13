@@ -72,12 +72,6 @@ public class CompensationController extends SpringFlowController<CompensationCon
     }
 
 
-    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws MultipartException
-    {
-        return super.handleRequest(request, response);
-    }
-
-
     @RequiresPermission(ACL.PERM_READ)
     public class BeginAction extends SimpleViewAction<QueryForm>
     {
