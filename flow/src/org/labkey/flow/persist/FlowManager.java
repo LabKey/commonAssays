@@ -123,7 +123,7 @@ public class FlowManager
             
             Integer ret = _attridCacheMap.get(attr);
             if (ret != null)
-                return ret;
+                return ret.intValue();
 
             try
             {
@@ -132,7 +132,7 @@ public class FlowManager
                 if (i == null)
                     return 0;
                 _attrNameCacheMap.put(i, attr);
-                return i;
+                return i.intValue();
             }
             catch (SQLException e)
             {
@@ -536,37 +536,65 @@ public class FlowManager
         }
     }
 
-    public int getObjectCount(Container container, ObjectType type) throws SQLException
+    public int getObjectCount(Container container, ObjectType type)
     {
-        String sqlFCSFileCount = "SELECT COUNT(flow.object.rowid) FROM flow.object\n" +
-                "WHERE flow.object.container = ? AND flow.object.typeid = ?";
-        return Table.executeSingleton(getSchema(), sqlFCSFileCount, new Object[] { container.getId(), type.getTypeId() }, Integer.class);
+        try
+        {
+            String sqlFCSFileCount = "SELECT COUNT(flow.object.rowid) FROM flow.object\n" +
+                    "WHERE flow.object.container = ? AND flow.object.typeid = ?";
+            return Table.executeSingleton(getSchema(), sqlFCSFileCount, new Object[] { container.getId(), type.getTypeId() }, Integer.class);
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
     }
 
-    public int getRunCount(Container container, ObjectType type) throws SQLException
+    public int getRunCount(Container container, ObjectType type)
     {
-        String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
-                "WHERE exp.ExperimentRun.RowId IN (" +
-                "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
-                "AND flow.object.container = ?\n" +
-                "AND flow.object.typeid = ?)";
-        return Table.executeSingleton(getSchema(), sqlFCSRunCount, new Object[] { container.getId(), type.getTypeId() }, Integer.class);
+        try
+        {
+            String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
+                    "WHERE exp.ExperimentRun.RowId IN (" +
+                    "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
+                    "AND flow.object.container = ?\n" +
+                    "AND flow.object.typeid = ?)";
+            return Table.executeSingleton(getSchema(), sqlFCSRunCount, new Object[] { container.getId(), type.getTypeId() }, Integer.class);
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
     }
 
-    public int getFCSRunCount(Container container) throws SQLException
+    public int getFCSRunCount(Container container)
     {
-        String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
-                "WHERE exp.ExperimentRun.RowId IN (" +
-                "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
-                "AND flow.object.container = ?\n" +
-                "AND flow.object.typeid = ?) AND exp.ExperimentRun.FilePathRoot IS NOT NULL";
-        return Table.executeSingleton(getSchema(), sqlFCSRunCount, new Object[] { container.getId(), ObjectType.fcsKeywords.getTypeId() }, Integer.class);
+        try
+        {
+            String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
+                    "WHERE exp.ExperimentRun.RowId IN (" +
+                    "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
+                    "AND flow.object.container = ?\n" +
+                    "AND flow.object.typeid = ?) AND exp.ExperimentRun.FilePathRoot IS NOT NULL";
+            return Table.executeSingleton(getSchema(), sqlFCSRunCount, new Object[] { container.getId(), ObjectType.fcsKeywords.getTypeId() }, Integer.class);
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
     }
 
-    public void deleteContainer(Container container) throws SQLException
+    public void deleteContainer(Container container)
     {
-        SQLFragment sqlOIDs = new SQLFragment("(SELECT flow.object.rowid FROM flow.object INNER JOIN exp.data ON flow.object.dataid = exp.data.rowid AND exp.data.container = ?)", container.getId());
-        deleteObjectIds(sqlOIDs, Collections.singleton(container));
+        try
+        {
+            SQLFragment sqlOIDs = new SQLFragment("(SELECT flow.object.rowid FROM flow.object INNER JOIN exp.data ON flow.object.dataid = exp.data.rowid AND exp.data.container = ?)", container.getId());
+            deleteObjectIds(sqlOIDs, Collections.singleton(container));
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
     }
 
 

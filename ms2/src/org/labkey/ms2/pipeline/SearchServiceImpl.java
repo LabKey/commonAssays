@@ -501,10 +501,6 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                     results.getFileInputStatus().add(getInputStatus(protocol, dirData, dirAnalysis, null, false));
             }
         }
-        catch (SQLException e)
-        {
-            results.appendError(e.getMessage());
-        }
         catch (IOException e)
         {
             results.appendError(e.getMessage());

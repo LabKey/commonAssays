@@ -43,14 +43,7 @@ public class FlowContainerListener implements ContainerManager.ContainerListener
      */
     public void containerDeleted(Container c, User user)
     {
-        try
-        {
-            FlowManager.get().deleteContainer(c);
-        }
-        catch (SQLException sqlE)
-        {
-            _log.error("Error deleting container", sqlE);
-        }
+        FlowManager.get().deleteContainer(c);
     }
 
     public void propertyChange(PropertyChangeEvent evt)

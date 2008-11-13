@@ -16,7 +16,7 @@
 
 package org.labkey.flow;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
@@ -31,6 +31,7 @@ import org.labkey.api.util.Search;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.SimpleWebPartFactory;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -48,10 +49,7 @@ import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowPipelineProvider;
-import org.labkey.flow.webparts.AnalysesWebPart;
-import org.labkey.flow.webparts.AnalysisScriptsWebPart;
-import org.labkey.flow.webparts.FlowFolderType;
-import org.labkey.flow.webparts.OverviewWebPart;
+import org.labkey.flow.webparts.*;
 
 import java.util.Set;
 import java.util.Collection;
@@ -59,7 +57,7 @@ import java.util.Arrays;
 
 public class FlowModule extends DefaultModule
 {
-    static final private Logger _log = Logger.getLogger(FlowModule.class);
+//    static final private Logger _log = Logger.getLogger(FlowModule.class);
     public static final String NAME = "Flow";
 
     public String getName()
@@ -110,7 +108,9 @@ public class FlowModule extends DefaultModule
     {
         return Arrays.asList(OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
-                AnalysisScriptsWebPart.FACTORY);
+                AnalysisScriptsWebPart.FACTORY
+//                ,FlowFrontPage.FACTORY,FlowFiles.FACTORY
+                );
     }
 
     public boolean hasScripts()

@@ -47,34 +47,27 @@ public class MicroarrayPipelineProvider extends PipelineProvider
         if (!context.hasPermission(ACL.PERM_INSERT))
             return;
 
-        try
+        PipeRoot root = PipelineService.get().findPipelineRoot(context.getContainer());
+        for (FileEntry entry : entries)
         {
-            PipeRoot root = PipelineService.get().findPipelineRoot(context.getContainer());
-            for (FileEntry entry : entries)
+            File[] files = entry.listFiles(ArrayPipelineManager.getImageFileFilter());
+            if (files != null)
+                addAction(MicroarrayController.ImportImageFilesAction.class, "Import Images",
+                        entry, files);
+
+            files = entry.listFiles(ArrayPipelineManager.getMageFileFilter());
+            if (files != null)
             {
-                File[] files = entry.listFiles(ArrayPipelineManager.getImageFileFilter());
-                if (files != null)
-                    addAction(MicroarrayController.ImportImageFilesAction.class, "Import Images",
-                            entry, files);
-                
-                files = entry.listFiles(ArrayPipelineManager.getMageFileFilter());
-                if (files != null)
+                for (ExpProtocol protocol : AssayService.get().getAssayProtocols(context.getContainer()))
                 {
-                    for (ExpProtocol protocol : AssayService.get().getAssayProtocols(context.getContainer()))
+                    if (AssayService.get().getProvider(protocol) instanceof MicroarrayAssayProvider)
                     {
-                        if (AssayService.get().getProvider(protocol) instanceof MicroarrayAssayProvider)
-                        {
-                            ActionURL url = MicroarrayController.getUploadRedirectAction(context.getContainer(), protocol, root.relativePath(new File(entry.getURI())));
-                            addAction(url, "Import MAGEML using " + protocol.getName(),
-                                    entry, files);
-                        }
+                        ActionURL url = MicroarrayController.getUploadRedirectAction(context.getContainer(), protocol, root.relativePath(new File(entry.getURI())));
+                        addAction(url, "Import MAGEML using " + protocol.getName(),
+                                entry, files);
                     }
                 }
             }
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
         }
     }
 

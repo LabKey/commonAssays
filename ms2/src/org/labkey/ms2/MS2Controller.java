@@ -5487,16 +5487,7 @@ public class MS2Controller extends SpringActionController
             {
                 protected void renderCellContents(StringBuilder html, Container c, ActionURL url)
                 {
-                    boolean hasRoot = false;
-                    try
-                    {
-                        hasRoot = PipelineService.get().findPipelineRoot(c) != null;
-                    }
-                    catch (SQLException e)
-                    {
-                        _log.error("Unable to determine pipeline root", e);
-                    }
-
+                    boolean hasRoot = PipelineService.get().findPipelineRoot(c) != null;
                     if (hasRoot && !c.equals(originalContainer))
                     {
                         super.renderCellContents(html, c, url);

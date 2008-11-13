@@ -16,7 +16,7 @@
 
 package org.labkey.flow.data;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import org.fhcrc.cpas.flow.script.xml.ChannelDef;
 import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
@@ -52,7 +52,7 @@ import java.util.Map;
 
 public class FlowScript extends FlowDataObject
 {
-    private static final Logger _log = Logger.getLogger(FlowScript.class);
+//    private static final Logger _log = Logger.getLogger(FlowScript.class);
     public static final String STAT_COLUMN_PREFIX = "statistic.";
     public static final String KEYWORD_COLUMN_PREFIX = "keyword.";
     public static final String DEFAULT_UPLOAD_PROTOCOL_NAME = "Default Upload Settings";
@@ -99,30 +99,30 @@ public class FlowScript extends FlowDataObject
     static public FlowScript[] getScripts(Container container)
     {
         ExpData[] datas = ExperimentService.get().getExpDatas(container, FlowDataType.Script);
-        List<FlowScript> ret = new ArrayList();
-        for (int i = 0; i < datas.length; i ++)
+        List<FlowScript> ret = new ArrayList<FlowScript>();
+        for (ExpData data : datas)
         {
-            FlowScript script = new FlowScript(datas[i]);
+            FlowScript script = new FlowScript(data);
             if (script.isPrivate())
                 continue;
             ret.add(script);
         }
-        return ret.toArray(new FlowScript[0]);
+        return ret.toArray(new FlowScript[ret.size()]);
     }
 
     static public FlowScript[] getUploadRunProtocols(Container container) throws SQLException
     {
         FlowScript[] all = getScripts(container);
-        List<FlowScript> ret = new ArrayList();
+        List<FlowScript> ret = new ArrayList<FlowScript>();
         for (FlowScript prot : all)
         {
             if (prot.hasStep(FlowProtocolStep.keywords))
                 ret.add(prot);
         }
-        return ret.toArray(new FlowScript[0]);
+        return ret.toArray(new FlowScript[ret.size()]);
     }
 
-    static public FlowScript[] getAnalysisScripts(Container container) throws SQLException
+    static public FlowScript[] getAnalysisScripts(Container container)
     {
         return getScripts(container);
     }
@@ -244,7 +244,7 @@ public class FlowScript extends FlowDataObject
     {
         try
         {
-            ArrayList<String> ret = new ArrayList();
+            ArrayList<String> ret = new ArrayList<String>();
             CompensationCalculationDef calc = getAnalysisScriptDocument().getScript().getCompensationCalculation();
             if (calc == null)
                 return null;
@@ -252,7 +252,7 @@ public class FlowScript extends FlowDataObject
             {
                 ret.add(channel.getName());
             }
-            return ret.toArray(new String[0]);
+            return ret.toArray(new String[ret.size()]);
         }
         catch (Exception e)
         {
@@ -262,7 +262,7 @@ public class FlowScript extends FlowDataObject
 
     public boolean hasStep(FlowProtocolStep step)
     {
-        ScriptDocument doc = null;
+        ScriptDocument doc;
         try
         {
             doc = getAnalysisScriptDocument();
@@ -288,7 +288,7 @@ public class FlowScript extends FlowDataObject
     static public List<FlowScript> getProtocolsWithStep(Container container, FlowProtocolStep step) throws SQLException
     {
         FlowScript[] protocols = getScripts(container);
-        List<FlowScript> ret = new ArrayList();
+        List<FlowScript> ret = new ArrayList<FlowScript>();
         for (FlowScript analysisScript : protocols)
         {
             if (analysisScript.hasStep(step))

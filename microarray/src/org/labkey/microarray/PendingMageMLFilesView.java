@@ -74,15 +74,7 @@ public class PendingMageMLFilesView extends QueryView
             }
         }
 
-        PipeRoot root;
-        try
-        {
-            root = PipelineService.get().findPipelineRoot(getContainer());
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
 
         ActionButton deleteButton = new ActionButton("placeholder", "Delete");
         ActionURL deleteURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getDeleteDatasURL(view.getViewContext().getContainer(), view.getViewContext().getActionURL());

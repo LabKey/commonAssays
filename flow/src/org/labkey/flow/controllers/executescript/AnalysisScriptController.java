@@ -487,14 +487,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             if (foundRoot)
                 return root;
             foundRoot = true;
-            try
-            {
-                root = PipelineService.get().findPipelineRoot(getContainer());
-            }
-            catch (SQLException e)
-            {
-                _log.error("resolving pipeline root", e);
-            }
+            root = PipelineService.get().findPipelineRoot(getContainer());
             return root;
         }
 
