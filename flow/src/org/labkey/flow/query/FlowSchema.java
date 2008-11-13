@@ -107,7 +107,7 @@ public class FlowSchema extends UserSchema
         return _protocol;
     }
 
-    public TableInfo getTable(String name, String alias)
+    public TableInfo createTable(String name, String alias)
     {
         try
         {
@@ -118,7 +118,7 @@ public class FlowSchema extends UserSchema
         {
             // ignore
         }
-        return super.getTable(name, alias);
+        return null;
     }
 
     public TableInfo getTable(FlowTableType type, String alias)
@@ -254,7 +254,7 @@ public class FlowSchema extends UserSchema
 
     public ExpRunTable createRunTable(String alias, FlowDataType type)
     {
-        ExpRunTable ret = ExperimentService.get().createRunTable(alias, this);
+        ExpRunTable ret = ExperimentService.get().createRunTable(FlowTableType.Runs.toString(), alias, this);
 
         if (_experiment != null)
         {
@@ -349,7 +349,7 @@ public class FlowSchema extends UserSchema
             super(getDbSchema());
             setAlias(alias);
             _expDataAlias = "_expdata_";
-            _expData = ExperimentService.get().createDataTable(_expDataAlias, FlowSchema.this);
+            _expData = ExperimentService.get().createDataTable(alias, _expDataAlias, FlowSchema.this);
             _flowObject = DbSchema.get("flow").getTable("object");
             _type = type;
             _fps = new FlowPropertySet(_expData);
@@ -597,7 +597,7 @@ public class FlowSchema extends UserSchema
             super(getDbSchema());
             setAlias(alias);
             _expDataAlias = "_expdata_";
-            _expData = ExperimentService.get().createDataTable(_expDataAlias, FlowSchema.this);
+            _expData = ExperimentService.get().createDataTable(alias, _expDataAlias, FlowSchema.this);
             _expData.setDataType(type);
             _flowObject = DbSchema.get("flow").getTable("object");
             _type = type;
@@ -1200,7 +1200,7 @@ public class FlowSchema extends UserSchema
 
     public ExpExperimentTable createAnalysesTable(String alias)
     {
-        ExpExperimentTable ret = ExperimentService.get().createExperimentTable(alias, new ExpSchema(getUser(), getContainer()));
+        ExpExperimentTable ret = ExperimentService.get().createExperimentTable(ExpSchema.TableType.Experiments.toString(), alias, new ExpSchema(getUser(), getContainer()));
         ret.populate();
         FlowProtocol compensationProtocol = FlowProtocolStep.calculateCompensation.getForContainer(getContainer());
         FlowProtocol analysisProtocol = FlowProtocolStep.analysis.getForContainer(getContainer());

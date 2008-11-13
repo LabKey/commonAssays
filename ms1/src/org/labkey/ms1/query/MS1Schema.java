@@ -95,7 +95,7 @@ public class MS1Schema extends UserSchema
         return ret;
     }
 
-    public TableInfo getTable(String name, String alias)
+    public TableInfo createTable(String name, String alias)
     {
         if (TABLE_FEATURE_RUNS.equalsIgnoreCase(name))
             return getMS1ExpRunsTableInfo(alias);
@@ -111,8 +111,8 @@ public class MS1Schema extends UserSchema
             return getScansTableInfo();
         else if(TABLE_COMPARE_PEP.equalsIgnoreCase(name))
             return getComparePeptideTableInfo(null);
-        else
-            return super.getTable(name, alias);
+
+        return null;
     } //getTable()
 
     public CrosstabTableInfo getComparePeptideTableInfo(int[] runIds)

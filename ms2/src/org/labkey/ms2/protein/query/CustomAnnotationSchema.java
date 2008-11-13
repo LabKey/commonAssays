@@ -74,7 +74,7 @@ public class CustomAnnotationSchema extends UserSchema
         return getAnnotationSets().keySet();
     }
     
-    public TableInfo getTable(String name, String alias)
+    public TableInfo createTable(String name, String alias)
     {
         CustomAnnotationSet annotationSet = getAnnotationSets().get(name);
         if (annotationSet == null)

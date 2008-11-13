@@ -19,6 +19,7 @@ package org.labkey.elispot.query;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.study.query.PlateBasedAssayRunDataTable;
 import org.labkey.elispot.ElispotDataHandler;
 import org.labkey.elispot.ElispotSchema;
@@ -32,7 +33,7 @@ import java.sql.SQLException;
  */
 public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 {
-    public ElispotRunDataTable(final QuerySchema schema, String alias, final ExpProtocol protocol)
+    public ElispotRunDataTable(final UserSchema schema, String alias, final ExpProtocol protocol)
     {
         super(schema, alias, protocol);
     }

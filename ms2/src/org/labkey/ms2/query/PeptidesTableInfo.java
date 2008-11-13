@@ -433,6 +433,6 @@ public class PeptidesTableInfo extends FilteredTable
 
     public String getPublicName()
     {
-        return MS2Schema.PEPTIDES_TABLE_NAME;
+        return MS2Schema.TableType.Peptides.toString();
     }
 }

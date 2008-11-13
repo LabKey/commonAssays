@@ -55,7 +55,7 @@ public class ElispotSchema extends UserSchema
         return new HashSet<String>(Arrays.asList(DATA_ROW_TABLE_NAME));
     }
 
-    public TableInfo getTable(String name, String alias)
+    public TableInfo createTable(String name, String alias)
     {
         for (ExpProtocol protocol : AssayService.get().getAssayProtocols(getContainer()))
         {
@@ -68,10 +68,10 @@ public class ElispotSchema extends UserSchema
                 }
             }
         }
-        return super.getTable(name, alias);
+        return null;
     }
 
-    public static TableInfo getDataRowTable(QuerySchema schema, ExpProtocol protocol, String alias)
+    public static TableInfo getDataRowTable(UserSchema schema, ExpProtocol protocol, String alias)
     {
         return new ElispotRunDataTable(schema, alias, protocol);
     }

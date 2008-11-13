@@ -51,7 +51,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
         settings.setSchemaName(schema.getSchemaName());
-        settings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
+        settings.setQueryName(MS2Schema.TableType.Peptides.toString());
         settings.setDataRegionName(MS2Manager.getDataRegionNamePeptides());
         String columnNames = _url.getParameter("columns");
         if (columnNames != null)

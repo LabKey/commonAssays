@@ -29,8 +29,8 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
-import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.NetworkDrive;
@@ -91,7 +91,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         return new HtmlView("The MAGEML data file is an XML file that contains the results of the microarray run.");
     }
 
-    public TableInfo createDataTable(QuerySchema schema, String alias, ExpProtocol protocol)
+    public TableInfo createDataTable(UserSchema schema, String alias, ExpProtocol protocol)
     {
         RunDataTable result = new RunDataTable(schema, alias, protocol);
         List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
@@ -217,7 +217,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
     }
 
-    public ExpRunTable createRunTable(QuerySchema schema, String alias, ExpProtocol protocol)
+    public ExpRunTable createRunTable(UserSchema schema, String alias, ExpProtocol protocol)
     {
         ExpRunTable result = new MicroarraySchema(schema.getUser(), schema.getContainer()).createRunsTable(alias);
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();

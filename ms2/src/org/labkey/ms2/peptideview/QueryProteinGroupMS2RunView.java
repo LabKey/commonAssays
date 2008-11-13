@@ -51,7 +51,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
         settings.setSchemaName(schema.getSchemaName());
-        settings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_RUN_TABLE_NAME);
+        settings.setQueryName(MS2Schema.HiddenTableType.ProteinGroupsForRun.toString());
         settings.setMaxRows(maxRows);
 
         return settings;

@@ -22,6 +22,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpDataTable;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.study.assay.AssayService;
@@ -52,7 +53,7 @@ public class LuminexSchema extends UserSchema
         return new HashSet<String>(Arrays.asList(ANALYTE_TABLE_NAME, DATA_ROW_TABLE_NAME));
     }
 
-    public TableInfo getTable(String name, String alias)
+    public TableInfo createTable(String name, String alias)
     {
         if (ANALYTE_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -62,7 +63,7 @@ public class LuminexSchema extends UserSchema
         {
             return createDataRowTable(alias);
         }
-        return super.getTable(name, alias);
+        return null;
     }
 
     private TableInfo createAnalyteTable(String alias)
@@ -106,7 +107,7 @@ public class LuminexSchema extends UserSchema
 
     public ExpDataTable createDataTable(String alias)
     {
-        ExpDataTable ret = ExperimentService.get().createDataTable(alias, this);
+        ExpDataTable ret = ExperimentService.get().createDataTable(ExpSchema.TableType.Datas.toString(), alias, this);
         ret.addColumn(ExpDataTable.Column.RowId);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);

@@ -88,7 +88,7 @@ public class NabSchema extends UserSchema
         return protocol.getName() + " " + DATA_ROW_TABLE_NAME;
     }
 
-    public TableInfo getTable(String name, String alias)
+    public TableInfo createTable(String name, String alias)
     {
         if (SAMPLE_PREPARATION_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -116,7 +116,7 @@ public class NabSchema extends UserSchema
                 }
             }
         }
-        return super.getTable(name, alias);
+        return null;
     }
 
     public static TableInfo getDataRowTable(Container container, User user, ExpProtocol protocol, String alias)

@@ -30,7 +30,7 @@ public class ComparePeptidesView extends AbstractRunCompareView
 {
     public ComparePeptidesView(ViewContext context, int runListIndex, boolean forExport, String peptideViewName) throws ServletException
     {
-        super(context, runListIndex, forExport, MS2Schema.COMPARE_PEPTIDES_TABLE_NAME, peptideViewName);
+        super(context, runListIndex, forExport, MS2Schema.HiddenTableType.ComparePeptides.toString(), peptideViewName);
     }
 
     protected String getGroupingColumnName()

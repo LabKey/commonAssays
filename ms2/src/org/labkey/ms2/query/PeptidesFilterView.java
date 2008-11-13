@@ -37,7 +37,7 @@ public class PeptidesFilterView extends QueryView
 
     public PeptidesFilterView(ViewContext context, MS2Controller.PeptideFilteringComparisonForm form)
     {
-        super(new MS2Schema(context.getUser(), context.getContainer()), new QuerySettings(context, MS2Controller.PEPTIDES_FILTER, MS2Schema.PEPTIDES_FILTER_TABLE_NAME));
+        super(new MS2Schema(context.getUser(), context.getContainer()), new QuerySettings(context, MS2Controller.PEPTIDES_FILTER, MS2Schema.HiddenTableType.PeptidesFilter.toString()));
         _form = form;
     }
 

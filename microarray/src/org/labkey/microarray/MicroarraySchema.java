@@ -66,13 +66,13 @@ public class MicroarraySchema extends UserSchema
         return PageFlowUtil.set(TABLE_RUNS);
     }
 
-    public TableInfo getTable(String name, String alias)
+    public TableInfo createTable(String name, String alias)
     {
         if (TABLE_RUNS.equalsIgnoreCase(name))
         {
             return createRunsTable(alias);
         }
-        return super.getTable(name, alias);
+        return null;
     }
 
     public ExpRunTable createRunsTable(String alias)

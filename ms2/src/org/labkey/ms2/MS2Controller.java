@@ -2562,7 +2562,7 @@ public class MS2Controller extends SpringActionController
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
             QuerySettings proteinsSettings = schema.getSettings(getViewContext(), POTENTIAL_PROTEIN_DATA_REGION);
-            proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
+            proteinsSettings.setQueryName(MS2Schema.TableType.Sequences.toString());
             proteinsSettings.setAllowChooseQuery(false);
             QueryView proteinsView = new QueryView(schema, proteinsSettings);
             // Disable R and other reporting until there's an implementation that respects the search criteria
@@ -2592,7 +2592,7 @@ public class MS2Controller extends SpringActionController
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
             QuerySettings groupsSettings = new QuerySettings(getViewContext(), PROTEIN_DATA_REGION);
             groupsSettings.setSchemaName(schema.getSchemaName());
-            groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME);
+            groupsSettings.setQueryName(MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
             groupsSettings.setAllowChooseQuery(false);
             QueryView groupsView = new QueryView(schema, groupsSettings)
             {

@@ -33,7 +33,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
@@ -102,7 +102,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return result.toArray(new PropertyDescriptor[result.size()]);
     }
 
-    public TableInfo createDataTable(QuerySchema schema, String alias, ExpProtocol protocol)
+    public TableInfo createDataTable(UserSchema schema, String alias, ExpProtocol protocol)
     {
         return new LuminexSchema(schema.getUser(), schema.getContainer(), protocol).createDataRowTable(alias);
     }

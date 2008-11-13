@@ -109,7 +109,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
         return new HtmlView("The Elispot data file is the output file from the plate reader that has been selected.");
     }
 
-    public TableInfo createDataTable(QuerySchema schema, String alias, ExpProtocol protocol)
+    public TableInfo createDataTable(UserSchema schema, String alias, ExpProtocol protocol)
     {
         return ElispotSchema.getDataRowTable(schema, protocol, alias);
     }
