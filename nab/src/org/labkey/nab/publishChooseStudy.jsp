@@ -53,5 +53,5 @@
             </td>
         </tr>
     </table>
-    <%= generateButton("Cancel", "begin.view") %> <%= generateSubmitButton("Next") %>
+     <%= generateSubmitButton("Next") %> <%= generateButton("Cancel", "begin.view") %>
 </form>
