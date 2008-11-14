@@ -16,42 +16,44 @@
 
 package org.labkey.microarray;
 
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.view.*;
-import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.SimpleErrorView;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegionSelection;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.util.URIUtil;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.query.QueryView;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.PipelineDataCollector;
-import org.labkey.api.study.actions.ProtocolIdForm;
-import org.labkey.api.gwt.server.BaseRemoteService;
-import org.labkey.api.query.QueryView;
-import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
-import org.labkey.microarray.pipeline.ArrayPipelineManager;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.URIUtil;
+import org.labkey.api.view.*;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
-import org.springframework.web.servlet.ModelAndView;
+import org.labkey.microarray.pipeline.ArrayPipelineManager;
+import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
-import org.apache.beehive.netui.pageflow.FormData;
+import org.springframework.web.servlet.ModelAndView;
 
-import java.net.URI;
-import java.io.FileNotFoundException;
 import java.io.File;
-import java.util.*;
+import java.io.FileNotFoundException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class MicroarrayController extends SpringActionController
 {
@@ -271,7 +273,7 @@ public class MicroarrayController extends SpringActionController
         }
     }
 
-    public static class ExtractionForm extends FormData
+    public static class ExtractionForm
     {
         private String _path;
         private int _protocolId;
