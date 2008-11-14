@@ -1794,7 +1794,11 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            compareRuns(form.getRunList(), true, null, form.getColumn(), errors);
+            ModelAndView view = compareRuns(form.getRunList(), true, null, form.getColumn(), errors);
+            if (view != null)
+            {
+                throw new ExportException(view);
+            }
         }
     }
 

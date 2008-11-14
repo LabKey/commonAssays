@@ -25,6 +25,7 @@ import org.labkey.common.util.Pair;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
+import org.labkey.ms2.MS2Controller;
 import org.springframework.validation.BindException;
 
 import java.sql.ResultSet;
@@ -370,8 +371,8 @@ public abstract class CompareQuery extends SQLFragment
 
         ActionURL excelUrl = _currentUrl.clone();
         ActionButton exportAll = new ActionButton("ExportAll", "Export to Excel");
-        excelUrl.setAction("exportCompareToExcel");
-        exportAll.setURL(excelUrl.getEncodedLocalURIString());
+        excelUrl.setAction(MS2Controller.ExportCompareToExcel.class);
+        exportAll.setURL(excelUrl);
         exportAll.setActionType(ActionButton.Action.LINK);
         bb.add(exportAll);
 

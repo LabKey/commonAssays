@@ -308,7 +308,8 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
                 if (!"2.9.9".equals(ver))
                 {
-                    interactCmd.add("-x20");    // 20 iterations extra for good measure.
+                    if (params.get("pipeline prophet, peptide extra iterations") == null)
+                        interactCmd.add("-x20");    // 20 iterations extra for good measure if the user hasn't specified a count
                     
                     if (!"3.0.2".equals(ver))
                     {
@@ -322,6 +323,9 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                             interactCmd.add("-d" + decoyTag);
                     }
                 }
+
+                if (params.get("pipeline prophet, peptide extra iterations") != null)
+                    interactCmd.add("-x" + params.get("pipeline prophet, peptide extra iterations"));
 
                 interactCmd.add(prophetOpts.toString());
 
