@@ -27,8 +27,11 @@ Ext.onReady(function ()
    var tree = new LABKEY.ext.FileTree({
      id : 'tree',
      path: <%=PageFlowUtil.jsString(path)%>,
-     renderTo : 'tree',
+     renderTo : 'fileTree',
      title : "Files",
+       autoHeight:false,
+     height:400,
+     width:600,
 //     inputId : "???",
      dirsSelectable : false,
      browsePipeline : true,
@@ -43,7 +46,33 @@ Ext.onReady(function ()
    });
    tree.render();
    tree.root.expand();
+
+    // second tabs built from JS
+    var tabs = new Ext.TabPanel({
+        renderTo: 'fileProperties',
+        activeTab: 0,
+        width:300,
+        height:400,
+        plain:true,
+        defaults:{autoScroll: true},
+        items:[{
+                title: 'Properties',
+                html: "My content was added during construction."
+            },{
+                title: 'Audit',
+                autoLoad:'ajax1.htm'
+            },{
+                title: 'Analyze',
+                autoLoad: {url: 'ajax2.htm', params: 'foo=bar&wtf=1'}
+            }
+        ]
+    });
+    tabs.render();
 });
 </script>
 
-<div id='tree' class='extContainer'></div>
+<table><tr>
+    <td valign="top"><div id='fileTree' class='extContainer'></div></td>
+    <td valign="top"><div id="fileProperties" class='extContainer'></div></td>
+</tr></table>
+
