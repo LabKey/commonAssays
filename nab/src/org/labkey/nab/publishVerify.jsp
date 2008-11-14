@@ -126,5 +126,5 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
     }
 %>
     </table>
-    <%= generateButton("Cancel", "begin.view") %> <%= generateSubmitButton("Copy to Study")%>
+     <%= generateSubmitButton("Copy to Study")%> <%= generateButton("Cancel", "begin.view") %>
 </form>
