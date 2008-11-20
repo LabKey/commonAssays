@@ -22,6 +22,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.ms1.MS1Urls;
+import org.labkey.api.services.ServiceRegistry;
 
 /**
  * User: jeckels
@@ -58,7 +59,7 @@ public class ShowPeptideContext
         this.showGzUrl = showGzUrl;
         this.modificationHref = modHref;
 
-        MS1Urls ms1Urls = PageFlowUtil.urlProvider(MS1Urls.class);
+        MS1Urls ms1Urls = ServiceRegistry.get().getService(MS1Urls.class);
         if(null != ms1Urls)
             pepSearchHref = ms1Urls.getPepSearchUrl(container, peptide.getTrimmedPeptide()).getLocalURIString();
 

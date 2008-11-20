@@ -25,6 +25,7 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms1.MS1Service;
+import org.labkey.api.ms1.MS1Urls;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.util.PageFlowUtil;
@@ -80,7 +81,9 @@ public class MS1Module extends SpringModule
 
         MS1Schema.register();
 
-        ServiceRegistry.get().registerService(MS1Service.class, new MS1ServiceImpl());
+        ServiceRegistry svcReg = ServiceRegistry.get();
+        svcReg.registerService(MS1Service.class, new MS1ServiceImpl());
+        svcReg.registerService(MS1Urls.class, new MS1Controller.MS1UrlsImpl());
 
         //add the MS1 purge task to the list of system maintenance tasks
         SystemMaintenance.addTask(new PurgeTask());
