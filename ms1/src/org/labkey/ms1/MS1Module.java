@@ -30,6 +30,7 @@ import org.labkey.api.reports.ReportService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SystemMaintenance;
 import org.labkey.api.view.*;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.model.PepSearchModel;
 import org.labkey.ms1.model.SimilarSearchModel;
@@ -79,7 +80,7 @@ public class MS1Module extends SpringModule
 
         MS1Schema.register();
 
-        MS1Service.register(new MS1ServiceImpl());
+        ServiceRegistry.get().registerService(MS1Service.class, new MS1ServiceImpl());
 
         //add the MS1 purge task to the list of system maintenance tasks
         SystemMaintenance.addTask(new PurgeTask());

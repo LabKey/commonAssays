@@ -16,10 +16,10 @@
 
 package org.labkey.ms1;
 
-import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
+import org.labkey.api.ms1.MS1Service;
 import org.labkey.ms1.query.MS1Schema;
 
 /**
@@ -29,7 +29,7 @@ import org.labkey.ms1.query.MS1Schema;
  * Date: Oct 26, 2007
  * Time: 10:41:11 AM
  */
-public class MS1ServiceImpl implements MS1Service.Service
+public class MS1ServiceImpl implements MS1Service
 {
 
     public TableInfo createFeaturesTableInfo(User user, Container container)

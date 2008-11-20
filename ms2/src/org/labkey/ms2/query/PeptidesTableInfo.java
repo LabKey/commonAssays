@@ -24,6 +24,7 @@ import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.common.util.Pair;
 import org.labkey.ms2.*;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
@@ -259,7 +260,8 @@ public class PeptidesTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return MS1Service.get().createFeaturesTableInfo(_schema.getUser(), _schema.getContainer(), false);
+                MS1Service ms1svc = ServiceRegistry.get().getService(MS1Service.class);
+                return null == ms1svc ? null : ms1svc.createFeaturesTableInfo(_schema.getUser(), _schema.getContainer(), false);
             }
         });
     }
