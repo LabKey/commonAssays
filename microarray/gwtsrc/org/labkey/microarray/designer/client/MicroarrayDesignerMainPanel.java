@@ -20,6 +20,7 @@ import org.labkey.api.gwt.client.assay.AssayDesignerMainPanel;
 import org.labkey.api.gwt.client.assay.model.GWTProtocol;
 import org.labkey.api.gwt.client.ui.*;
 import org.labkey.api.gwt.client.model.GWTDomain;
+import org.labkey.api.gwt.client.model.GWTPropertyDescriptor;
 import com.google.gwt.user.client.ui.*;
 
 /**
@@ -88,7 +89,7 @@ public class MicroarrayDesignerMainPanel extends AssayDesignerMainPanel
         return result;
     }
 
-    protected PropertiesEditor createPropertiesEditor(GWTDomain domain)
+    protected PropertiesEditor<GWTDomain<GWTPropertyDescriptor>, GWTPropertyDescriptor> createPropertiesEditor(GWTDomain domain)
     {
         return super.createPropertiesEditor(domain);
     }
