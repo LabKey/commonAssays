@@ -178,16 +178,6 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
-    public Container getContainer()
-    {
-        return _container;
-    }
-
-    public User getUser()
-    {
-        return _user;
-    }
-
     public void setExperiment(FlowExperiment experiment)
     {
         _experiment = experiment;
