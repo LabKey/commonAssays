@@ -19,13 +19,15 @@
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
 <%@ page import="java.util.Collection" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.flow.controllers.editscript.AnalysisForm" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%=pageHeader(ScriptController.Action.editAnalysis)%>
-<% ScriptController.AnalysisForm bean = (ScriptController.AnalysisForm) form; %>
+<% AnalysisForm bean = (AnalysisForm) form; %>
 <%Map<String, String> params = form.getParameters();
     Collection<SubsetSpec> subsets = form.analysisScript.getSubsets();
 %>
+<labkey:errors/>
 <script>
     function addStat()
     {

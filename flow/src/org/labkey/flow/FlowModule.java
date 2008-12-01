@@ -34,7 +34,6 @@ import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.SimpleWebPartFactory;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
-import org.labkey.flow.controllers.editscript.SpringScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.log.LogController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
@@ -95,7 +94,7 @@ public class FlowModule extends DefaultModule
         addController("flow", FlowController.class);
         addController("flow-executescript", AnalysisScriptController.class);
         addController("flow-run", RunController.class);
-        addController("flow-editscript", SpringScriptController.class);
+        addController("flow-editscript", ScriptController.class);
         addController("flow-well", WellController.class);
         addController("flow-log", LogController.class);
         addController("flow-compensation", CompensationController.class);

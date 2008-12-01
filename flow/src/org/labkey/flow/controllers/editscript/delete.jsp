@@ -22,6 +22,7 @@
 <%  FlowScript script = getForm().analysisScript;
     int runCount = script.getRunCount();
 %>
+<labkey:errors/>
 <% if (runCount > 0) { %>
 <p>This analysis script cannot be deleted because it has been used by <%=runCount%> runs.  You must delete the runs that use this script before it can be deleted.<br>
 <labkey:button text="Go Back" href="<%=script.urlShow()%>" />

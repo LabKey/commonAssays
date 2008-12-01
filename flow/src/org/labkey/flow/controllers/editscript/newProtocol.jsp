@@ -24,7 +24,7 @@
 <%
     NewProtocolForm form = (NewProtocolForm) __form;
 %>
-<%=PageFlowUtil.getStrutsError(request, null)%>
+<labkey:errors/>
 
 <form method="post">
     <p>What do you want to call this analysis script?<br>

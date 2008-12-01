@@ -17,11 +17,11 @@
 %>
 <%@ page import="org.labkey.flow.data.FlowScript" %>
 <%@ page import="org.fhcrc.cpas.flow.script.xml.ScriptDocument" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
-<%@ page import="org.labkey.api.security.ACL" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController.Action" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page extends="org.labkey.flow.controllers.executescript.AnalysisScriptController.Page" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     FlowScript analysisScript = getScript();
 %>

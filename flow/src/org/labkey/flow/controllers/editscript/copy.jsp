@@ -17,8 +17,11 @@
 %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep"%>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="org.labkey.flow.controllers.editscript.CopyProtocolForm" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
-<% ScriptController.CopyProtocolForm form = (ScriptController.CopyProtocolForm) this.form; %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<% CopyProtocolForm form = (CopyProtocolForm) this.form; %>
+<labkey:errors/>
 <form action="<%=urlFor(ScriptController.Action.copy)%>" method="POST">
     <p>
         What do you want to call the new script?<br>

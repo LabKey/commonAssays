@@ -18,15 +18,17 @@
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
 <%@ page import="org.labkey.flow.analysis.web.SubsetSpec"%>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.flow.controllers.editscript.EditGateTreeForm" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
 <%! String indent(SubsetSpec subset)
     {
         return StringUtils.repeat("+", subset.getSubsets().length);
     }
     %>
-<% ScriptController.EditGateTreeForm form = (ScriptController.EditGateTreeForm) getForm(); %>
+<% EditGateTreeForm form = (EditGateTreeForm) getForm(); %>
+<labkey:errors/>
 <p>
     Use this page to rename populations.  To delete a population, delete its name.<br>
     Use the <a href="<%=urlFor(ScriptController.Action.gateEditor)%>">edit gates</a> page to define new populations.

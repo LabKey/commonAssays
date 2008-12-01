@@ -30,6 +30,7 @@
     Map<String, String> opOptions = form.getOpOptions();
     int clauseCount = Math.max(form.ff_filter_field.length, 3);
 %>
+<labkey:errors/>
 <script type="text/javascript" src="<%=request.getContextPath()%>/Flow/editCompensationCalculation.js"></script>
 <script type="text/javascript">
 function o() { var o = {}; for (var i = 0; i < arguments.length; i += 2) o[arguments[i]] = arguments[i + 1]; return o; }

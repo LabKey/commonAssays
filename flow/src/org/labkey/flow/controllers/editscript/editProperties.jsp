@@ -20,6 +20,7 @@
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% EditPropertiesForm form = (EditPropertiesForm) getForm(); %>
+<labkey:errors/>
 <form action="<%=h(form.urlFor(Action.editProperties))%>" method="POST">
     <p>Description:<br>
         <textarea rows="5" cols="40" name="ff_description"><%=h(form.ff_description)%></textarea>

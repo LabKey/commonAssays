@@ -20,7 +20,7 @@
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <labkey:errors />
-<form method="POST" action="<%=formAction(ScriptController.Action.uploadCompensationCalculation)%>"
+<form method="POST" action="<%=formAction(ScriptController.Action.editCompensationCalculation)%>"
       enctype="multipart/form-data">
     <p>
         The compensation calculation tells <%=FlowModule.getLongProductName()%> how

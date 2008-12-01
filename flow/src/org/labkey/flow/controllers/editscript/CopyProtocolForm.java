@@ -16,20 +16,26 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.labkey.flow.controllers.editscript.ScriptController.Action;
-import org.labkey.flow.controllers.editscript.ScriptController.Page;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.JspView;
-
-import java.io.Writer;
-
-abstract public class TemplatePage extends Page
+/**
+ * User: kevink
+* Date: Nov 27, 2008 11:29:10 AM
+*/
+public class CopyProtocolForm extends EditScriptForm
 {
-    public Page body;
-    public Action curAction;
-    public void renderBody(Writer out) throws Exception
+    public String name;
+    public boolean copyCompensationCalculation;
+    public boolean copyAnalysis;
+
+    public void setName(String name)
     {
-        HttpView view = new JspView(body);
-        ((HttpView) HttpView.currentView()).include(view, out);
+        this.name = name;
+    }
+    public void setCopyCompensationCalculation(boolean b)
+    {
+        this.copyCompensationCalculation = b;
+    }
+    public void setCopyAnalysis(boolean b)
+    {
+        this.copyAnalysis = b;
     }
 }

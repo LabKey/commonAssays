@@ -34,7 +34,6 @@ import java.util.List;
 
 public class EditCompensationCalculationForm extends EditSettingsForm
 {
-    public FormFile workspaceFile;
     public int selectedRunId;
     public FlowJoWorkspace workspace;
     public String selectGroupName;
@@ -46,11 +45,6 @@ public class EditCompensationCalculationForm extends EditSettingsForm
     public String[] negativeKeywordName;
     public String[] negativeKeywordValue;
     public String[] negativeSubset;
-
-    public void setWorkspaceFile(FormFile file)
-    {
-        this.workspaceFile = file;
-    }
 
     public void setSelectedRunId(int runId)
     {

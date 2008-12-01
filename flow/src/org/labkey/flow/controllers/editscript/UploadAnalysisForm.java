@@ -33,7 +33,6 @@ public class UploadAnalysisForm extends EditScriptForm
     private static final Logger _log = Logger.getLogger(UploadAnalysisForm.class);
 
     private int existingStatCount = 0;
-    public FormFile workspaceFile;
     public FlowJoWorkspace workspaceObject;
     public Set<StatisticSet> ff_statisticSet;
 
@@ -60,10 +59,6 @@ public class UploadAnalysisForm extends EditScriptForm
         }
     }
 
-    public void setWorkspaceFile(FormFile file)
-    {
-        workspaceFile = file;
-    }
     public void setWorkspaceObject(String object) throws Exception
     {
         workspaceObject = (FlowJoWorkspace) PageFlowUtil.decodeObject(object);

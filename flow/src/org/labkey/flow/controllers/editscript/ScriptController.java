@@ -16,63 +16,60 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.beehive.netui.pageflow.Forward;
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.apache.struts.action.ActionError;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.upload.FormFile;
-import org.apache.xmlbeans.XmlCursor;
-import org.apache.xmlbeans.XmlObject;
-import org.fhcrc.cpas.flow.script.xml.*;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.jsp.FormPage;
-import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.security.ACL;
-import org.labkey.api.util.ExceptionUtil;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.URIUtil;
-import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.view.*;
-import org.labkey.api.view.template.HomeTemplate;
-import org.labkey.flow.ScriptParser;
-import org.labkey.flow.analysis.model.*;
-import org.labkey.flow.analysis.model.Polygon;
-import org.labkey.flow.analysis.web.GraphSpec;
-import org.labkey.flow.analysis.web.PlotInfo;
-import org.labkey.flow.analysis.web.StatisticSpec;
-import org.labkey.flow.analysis.web.SubsetSpec;
-import org.labkey.flow.controllers.BaseFlowController;
+import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.*;
-import org.labkey.flow.gateeditor.client.model.GWTEditingMode;
+import org.labkey.flow.ScriptParser;
 import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
 import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.analysis.web.PlotInfo;
+import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.model.Polygon;
+import org.labkey.api.action.*;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.ACL;
+import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
+import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.data.Container;
+import org.labkey.api.jsp.FormPage;
+import org.labkey.api.query.FieldKey;
+import org.apache.log4j.Logger;
+import org.apache.beehive.netui.pageflow.Forward;
+import org.apache.commons.lang.StringUtils;
+import org.apache.xmlbeans.XmlObject;
+import org.apache.xmlbeans.XmlCursor;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.validation.BindException;
+import org.fhcrc.cpas.flow.script.xml.*;
 import org.w3c.dom.Element;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import java.awt.*;
-import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
+import java.awt.image.BufferedImage;
+import java.awt.*;
+import java.awt.geom.Point2D;
+import java.io.ByteArrayOutputStream;
 
-@Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
-public class ScriptController extends BaseFlowController
+/**
+ * User: kevink
+ * Date: Nov 25, 2008 5:27:35 PM
+ */
+public class ScriptController extends SpringFlowController<ScriptController.Action>
 {
-    public static final int MAX_CHANNELS = 20;
-    public static final int MAX_POINTS = 100;
-    private static Logger _log = Logger.getLogger(ScriptController.class);
+    static Logger _log = Logger.getLogger(ScriptController.class);
 
     public enum Action
     {
@@ -94,130 +91,138 @@ public class ScriptController extends BaseFlowController
         gateEditor,
     }
 
-    @Jpf.Action
-    protected Forward begin(EditScriptForm form) throws Exception
+    static SpringActionController.DefaultActionResolver _actionResolver =
+            new SpringActionController.DefaultActionResolver(ScriptController.class);
+
+    public ScriptController() throws Exception
     {
-        FlowScript script = form.analysisScript;
-        if (script == null)
-        {
-            return new ViewForward(PageFlowUtil.urlFor(FlowController.Action.begin, getContainer()));
-        }
-        return new ViewForward(script.urlShow());
+        super();
+        setActionResolver(_actionResolver);
     }
 
-    @Jpf.Action
-    protected Forward editScript(EditScriptForm form) throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class BeginAction extends SimpleViewAction<EditScriptForm>
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        ScriptParser.Error error = null;
-        FlowScript script = getScript();
-        if (isPost())
+        public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
         {
-            if (safeSetAnalysisScript(script, getRequest().getParameter("script")))
+            FlowScript script = form.analysisScript;
+            if (script == null)
             {
-                error = validateScript(script);
-                if (error == null)
+                return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
+            }
+            return HttpView.redirect(script.urlShow());
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class EditScriptAction extends SimpleViewAction<EditScriptForm>
+    {
+        public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
+        {
+            ScriptParser.Error error = null;
+            FlowScript script = getScript();
+            if (isPost())
+            {
+                if (safeSetAnalysisScript(script, getRequest().getParameter("script"), errors))
                 {
-                    ActionURL forward = form.urlFor(Action.editScript);
-                    return new ViewForward(forward);
+                    error = validateScript(script);
+                    if (error == null)
+                    {
+                        ActionURL forward = form.urlFor(ScriptController.Action.editScript);
+                        return HttpView.redirect(forward);
+                    }
                 }
             }
+            else if (getRequest().getParameter("checkSyntax") != null)
+            {
+                error = validateScript(script);
+            }
+
+            EditPage page = (EditPage)getPage("editScript.jsp", form);
+            page.scriptParseError = error;
+            return new JspView<EditScriptForm>(page, form, errors);
         }
-        else if (getRequest().getParameter("checkSyntax") != null)
+
+        public NavTree appendNavTrail(NavTree root)
         {
-            error = validateScript(script);
+            root.addChild("Source Editor", new ActionURL(EditScriptAction.class, getContainer()));
+            return root;
         }
 
-        EditPage page = (EditPage) getPage("editScript.jsp", form);
-        page.scriptParseError = error;
-        return renderInTemplate(page, "Source Editor", Action.editScript);
-    }
-
-    protected ScriptParser.Error validateScript(FlowScript script) throws SQLException
-    {
-        ScriptParser parser = new ScriptParser();
-        parser.parse(script.getAnalysisScript());
-        if (parser.getErrors() != null)
-            return parser.getErrors()[0];
-        return null;
-    }
-
-
-    @Jpf.Action
-    protected Forward newProtocol(NewProtocolForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (getRequest().getMethod().equalsIgnoreCase("post"))
+        ScriptParser.Error validateScript(FlowScript script) throws SQLException
         {
-            Forward forward = createScript(form);
-            if (forward != null)
-                return forward;
+            ScriptParser parser = new ScriptParser();
+            parser.parse(script.getAnalysisScript());
+            if (parser.getErrors() != null)
+                return parser.getErrors()[0];
+            return null;
         }
-
-        HomeTemplate template = new HomeTemplate(getViewContext(),
-                FormPage.getView(ScriptController.class, form, "newProtocol.jsp"),
-                getNavTrailConfig(null, "New Analysis Script", Action.newProtocol));
-        template.getModelBean().setFocus("forms[0].ff_name");
-
-        return includeView(template);
     }
 
-    protected boolean isScriptNameUnique(String name) throws Exception
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class NewProtocolAction extends SimpleViewAction<NewProtocolForm>
     {
-        String lsid = FlowScript.lsidForName(getContainer(), name);
+        public ModelAndView getView(NewProtocolForm form, BindException errors) throws Exception
+        {
+            if (isPost())
+            {
+                ActionURL forward = createScript(form, errors);
+                if (forward != null)
+                    return HttpView.redirect(forward);
+            }
+
+            JspView<NewProtocolForm> page = FormPage.getView(ScriptController.class, form, errors, "newProtocol.jsp");
+            HomeTemplate template = new HomeTemplate(getViewContext(), getContainer(), page);
+            template.getModelBean().setFocus("forms[0].ff_name");
+            return page;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("New Analysis Script", new ActionURL(NewProtocolAction.class, getContainer()));
+            return root;
+        }
+
+        protected ActionURL createScript(NewProtocolForm form, BindException errors) throws Exception
+        {
+            if (form.ff_name == null || form.ff_name.length() == 0)
+            {
+                errors.reject(ERROR_MSG, "The name cannot be blank.");
+                return null;
+            }
+            if (!isScriptNameUnique(getContainer(), form.ff_name))
+            {
+                errors.reject(ERROR_MSG, "The name '" + form.ff_name + "' is already in use.  Please choose a unique name.");
+                return null;
+            }
+
+            ScriptDocument doc = ScriptDocument.Factory.newInstance();
+            doc.addNewScript();
+
+            FlowScript script = FlowScript.create(getUser(), getContainer(), form.ff_name, doc.toString());
+
+
+            ActionURL forward = script.urlShow();
+            putParam(forward, FlowParam.scriptId, script.getScriptId());
+            return forward;
+        }
+
+    }
+
+    protected boolean isScriptNameUnique(Container c, String name) throws Exception
+    {
+        String lsid = FlowScript.lsidForName(c, name);
         return ExperimentService.get().getExpData(lsid) == null;
-    }
-
-    public boolean isEmptyScript(FlowScript analysisScript)
-    {
-        try
-        {
-            ScriptDocument doc = analysisScript.getAnalysisScriptDocument();
-            ScriptDef script = doc.getScript();
-            return script.getCompensationCalculation() == null && script.getAnalysis() == null;
-        }
-        catch (Exception e)
-        {
-            return true;
-        }
-    }
-
-    protected Forward createScript(NewProtocolForm form) throws Exception
-    {
-        if (form.ff_name == null || form.ff_name.length() == 0)
-        {
-            addError("The name cannot be blank.");
-            return null;
-        }
-        if (!isScriptNameUnique(form.ff_name))
-        {
-            addError("The name '" + form.ff_name + "' is already in use.  Please choose a unique name.");
-            return null;
-        }
-
-        ScriptDocument doc = ScriptDocument.Factory.newInstance();
-        doc.addNewScript();
-
-        FlowScript script = FlowScript.create(getUser(), getContainer(), form.ff_name, doc.toString());
-
-
-        ActionURL forward = script.urlShow();
-        putParam(forward, FlowParam.scriptId, script.getScriptId());
-        return new ViewForward(forward);
-    }
-
-    protected String readTemplate(String name) throws Exception
-    {
-        URI base = new URI("Flow/templates/");
-        URI uri = URIUtil.resolve(base, name);
-        InputStream stream = ModuleLoader.getServletContext().getResourceAsStream(uri.toString());
-
-        return PageFlowUtil.getStreamContentsAsString(stream);
     }
 
     public Page getPage(String name, EditScriptForm form) throws Exception
     {
-        Page ret = (Page) getFlowPage(name);
+        Page ret = (Page)getFlowPage(name);
         ret.setForm(form);
         return ret;
     }
@@ -237,7 +242,7 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    protected void setAttribute(XmlObject obj, String attribute, String value)
+    static void setAttribute(XmlObject obj, String attribute, String value)
     {
         Element el = (Element) obj.getDomNode();
         value = StringUtils.trimToNull(value);
@@ -251,113 +256,111 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @Jpf.Action
-    protected Forward editAnalysis(AnalysisForm form) throws Exception
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class EditAnalysisAction extends SimpleViewAction<AnalysisForm>
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        Page page = getPage("editAnalysis.jsp", form);
-
-        if (isPost())
+        public ModelAndView getView(AnalysisForm form, BindException errors) throws Exception
         {
-            Forward forward = updateAnalysis(form);
-            if (forward != null)
-                return forward;
+            if (isPost())
+            {
+                ActionURL forward = updateAnalysis(form, errors);
+                if (forward != null)
+                    return HttpView.redirect(forward);
+            }
+
+            return new JspView<AnalysisForm>(getPage("editAnalysis.jsp", form), form, errors);
         }
-        return renderInTemplate(page, "Choose statistics and graphs", Action.editAnalysis);
-    }
 
-    protected Forward updateAnalysis(AnalysisForm form) throws Exception
-    {
-        try
+        public NavTree appendNavTrail(NavTree root)
         {
-            Set<StatisticSpec> stats = new LinkedHashSet();
-            StringTokenizer stStats = new StringTokenizer(StringUtils.trimToEmpty(form.statistics), "\n");
-            while (stStats.hasMoreElements())
+            root.addChild("Choose statistics and graphs", new ActionURL(EditAnalysisAction.class, getContainer()));
+            return root;
+        }
+
+        protected ActionURL updateAnalysis(AnalysisForm form, BindException errors) throws Exception
+        {
+            try
             {
-                String strStat = StringUtils.trimToNull(stStats.nextToken());
-                if (strStat != null)
+                Set<StatisticSpec> stats = new LinkedHashSet();
+                StringTokenizer stStats = new StringTokenizer(StringUtils.trimToEmpty(form.statistics), "\n");
+                while (stStats.hasMoreElements())
                 {
-                    stats.add(new StatisticSpec(strStat));
+                    String strStat = StringUtils.trimToNull(stStats.nextToken());
+                    if (strStat != null)
+                    {
+                        stats.add(new StatisticSpec(strStat));
+                    }
                 }
-            }
-            Set<GraphSpec> graphs = new LinkedHashSet();
-            StringTokenizer stGraphs = new StringTokenizer(StringUtils.trimToEmpty(form.graphs), "\n");
-            while (stGraphs.hasMoreElements())
-            {
-                String strGraph = StringUtils.trimToNull(stGraphs.nextToken());
-                if (strGraph != null)
+                Set<GraphSpec> graphs = new LinkedHashSet();
+                StringTokenizer stGraphs = new StringTokenizer(StringUtils.trimToEmpty(form.graphs), "\n");
+                while (stGraphs.hasMoreElements())
                 {
-                    graphs.add(new GraphSpec(strGraph));
+                    String strGraph = StringUtils.trimToNull(stGraphs.nextToken());
+                    if (strGraph != null)
+                    {
+                        graphs.add(new GraphSpec(strGraph));
+                    }
                 }
-            }
-            Set<SubsetSpec> subsets = new LinkedHashSet();
-            StringTokenizer stSubsets = new StringTokenizer(StringUtils.trimToEmpty(form.subsets), "\n");
-            while (stSubsets.hasMoreElements())
-            {
-                String strSubset = StringUtils.trimToNull(stSubsets.nextToken());
-                if (strSubset != null)
+                Set<SubsetSpec> subsets = new LinkedHashSet();
+                StringTokenizer stSubsets = new StringTokenizer(StringUtils.trimToEmpty(form.subsets), "\n");
+                while (stSubsets.hasMoreElements())
                 {
-                    subsets.add(SubsetSpec.fromString(strSubset));
+                    String strSubset = StringUtils.trimToNull(stSubsets.nextToken());
+                    if (strSubset != null)
+                    {
+                        subsets.add(SubsetSpec.fromString(strSubset));
+                    }
                 }
-            }
-            ScriptDocument doc = form.analysisScript.getAnalysisScriptDocument();
-            ScriptDef script = doc.getScript();
-            AnalysisDef analysis = script.getAnalysis();
-            if (analysis == null)
-            {
-                analysis = script.addNewAnalysis();
-            }
-            while (analysis.getStatisticArray().length > 0)
-            {
-                analysis.removeStatistic(0);
-            }
-            while (analysis.getGraphArray().length > 0)
-            {
-                analysis.removeGraph(0);
-            }
-            while (analysis.getSubsetArray().length > 0)
-            {
-                analysis.removeSubset(0);
-            }
-            for (StatisticSpec stat : stats)
-            {
-                StatisticDef statDef = analysis.addNewStatistic();
-                statDef.setName(stat.getStatistic().toString());
-                if (stat.getSubset() != null)
+                ScriptDocument doc = form.analysisScript.getAnalysisScriptDocument();
+                ScriptDef script = doc.getScript();
+                AnalysisDef analysis = script.getAnalysis();
+                if (analysis == null)
                 {
-                    statDef.setSubset(stat.getSubset().toString());
+                    analysis = script.addNewAnalysis();
                 }
-                if (stat.getParameter() != null)
-                    statDef.setParameter(stat.getParameter());
+                while (analysis.getStatisticArray().length > 0)
+                {
+                    analysis.removeStatistic(0);
+                }
+                while (analysis.getGraphArray().length > 0)
+                {
+                    analysis.removeGraph(0);
+                }
+                while (analysis.getSubsetArray().length > 0)
+                {
+                    analysis.removeSubset(0);
+                }
+                for (StatisticSpec stat : stats)
+                {
+                    StatisticDef statDef = analysis.addNewStatistic();
+                    statDef.setName(stat.getStatistic().toString());
+                    if (stat.getSubset() != null)
+                    {
+                        statDef.setSubset(stat.getSubset().toString());
+                    }
+                    if (stat.getParameter() != null)
+                        statDef.setParameter(stat.getParameter());
+                }
+                for (GraphSpec graph : graphs)
+                {
+                    addGraph(analysis, graph);
+                }
+                for (SubsetSpec subset : subsets)
+                {
+                    SubsetDef subsetDef = analysis.addNewSubset();
+                    subsetDef.setSubset(subset.toString());
+                }
+                if (!safeSetAnalysisScript(form.analysisScript, doc.toString(), errors))
+                    return null;
+                return form.analysisScript.urlShow();
             }
-            for (GraphSpec graph : graphs)
+            catch (FlowException e)
             {
-                addGraph(analysis, graph);
-            }
-            for (SubsetSpec subset : subsets)
-            {
-                SubsetDef subsetDef = analysis.addNewSubset();
-                subsetDef.setSubset(subset.toString());
-            }
-            if (!safeSetAnalysisScript(form.analysisScript, doc.toString()))
+                errors.reject(ERROR_MSG, e.getMessage());
+                ExceptionUtil.logExceptionToMothership(form.getRequest(), e);
                 return null;
-            return new ViewForward(form.analysisScript.urlShow());
+            }
         }
-        catch (FlowException e)
-        {
-            addError(e.getMessage());
-            ExceptionUtil.logExceptionToMothership(form.getRequest(), e);
-            return null;
-        }
-    }
-
-    protected Forward renderInTemplate(Page page, String title, Action action) throws Exception
-    {
-        NavTrailConfig ntc = getFlowNavConfig(getViewContext(), page.getScript(), title, action);
-        TemplatePage templatePage = (TemplatePage) getPage("template.jsp", page.form);
-        templatePage.body = page;
-        templatePage.curAction = action;
-        return renderInTemplate(new JspView(templatePage), getContainer(), ntc);
     }
 
     public ActionURL urlFor(Enum action)
@@ -366,67 +369,12 @@ public class ScriptController extends BaseFlowController
         throw new UnsupportedOperationException();
     }
 
-    public static class AnalysisForm extends EditScriptForm
-    {
-        public String subsets;
-        public String statistics;
-        public String graphs;
-
-        public void reset(ActionMapping mapping, HttpServletRequest request)
-        {
-            super.reset(mapping, request);
-            if (analysisDocument == null)
-                return;
-            ScriptDef script = analysisDocument.getScript();
-            if (script == null)
-                return;
-            AnalysisDef analysis = script.getAnalysis();
-            if (analysis == null)
-                return;
-            List<SubsetSpec> subsets = new ArrayList();
-            for (SubsetDef subset : analysis.getSubsetArray())
-            {
-                subsets.add(SubsetSpec.fromString(subset.getSubset()));
-            }
-            this.subsets = StringUtils.join(subsets.iterator(), "\n");
-            List<StatisticSpec> stats = new ArrayList();
-            for (StatisticDef stat : analysis.getStatisticArray())
-            {
-                stats.add(FlowAnalyzer.makeStatisticSpec(stat));
-            }
-            statistics = StringUtils.join(stats.iterator(), "\n");
-            List<GraphSpec> graphs = new ArrayList();
-            for (GraphDef graph : analysis.getGraphArray())
-            {
-                graphs.add(FlowAnalyzer.makeGraphSpec(graph));
-            }
-            this.graphs = StringUtils.join(graphs.iterator(), "\n");
-        }
-
-        public void setSubsets(String subsets)
-        {
-            this.subsets = subsets;
-        }
-        
-        public void setGraphs(String graphs)
-        {
-            this.graphs = graphs;
-        }
-
-        public void setStatistics(String statistics)
-        {
-            this.statistics = statistics;
-        }
-
-
-    }
-
     abstract static public class EditPage extends Page
     {
         public ScriptParser.Error scriptParseError;
     }
 
-    abstract static public class Page<F extends EditScriptForm> extends FlowPage<ScriptController>
+    abstract static public class Page<F extends EditScriptForm> extends SpringFlowController.FlowPage<ScriptController>
     {
         public F form;
 
@@ -464,6 +412,7 @@ public class ScriptController extends BaseFlowController
         {
             return urlFor(action).toString();
         }
+
         public ActionURL urlFor(Action action)
         {
             return form.urlFor(action);
@@ -503,31 +452,128 @@ public class ScriptController extends BaseFlowController
             return ret;
         }
     }
-    @Jpf.Action
-    protected Forward uploadAnalysis(UploadAnalysisForm form) throws Exception
+
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class UploadAnalysisAction extends SimpleViewAction<UploadAnalysisForm>
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (isPost())
+        public ModelAndView getView(UploadAnalysisForm form, BindException errors) throws Exception
         {
-            Forward fwd = doUploadAnalysis(form);
-            if (fwd != null)
-                return fwd;
+            if (isPost())
+            {
+                Map<String, MultipartFile> files = getFileMap(getViewContext());
+                MultipartFile file = files.get("workspaceFile");
+                ActionURL forward = doUploadAnalysis(form, file, errors);
+                if (forward != null)
+                    return HttpView.redirect(forward);
+            }
+
+            UploadAnalysisPage page = (UploadAnalysisPage) getPage("uploadAnalysis.jsp", form);
+            page.form = form;
+            return new JspView<UploadAnalysisForm>(page, form, errors);
         }
-        UploadAnalysisPage page = (UploadAnalysisPage) getPage("uploadAnalysis.jsp", form);
-        page.form = form;
-        return renderInTemplate(page, "Upload FlowJo Analysis", Action.uploadAnalysis);
 
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Upload FlowJo Analysis", new ActionURL(UploadAnalysisAction.class, getContainer()));
+            return root;
+        }
+
+        protected ActionURL doUploadAnalysis(UploadAnalysisForm form, MultipartFile file, BindException errors) throws Exception
+        {
+            FlowJoWorkspace newWorkspace = handleWorkspaceUpload(file, errors);
+            if (newWorkspace != null)
+            {
+                form.workspaceObject = newWorkspace;
+            }
+            if (form.workspaceObject == null)
+            {
+                errors.reject(ERROR_MSG, "No workspace was uploaded.");
+                return null;
+            }
+            FlowJoWorkspace workspace = form.workspaceObject;
+            String groupName = form.groupName;
+            String sampleId= form.sampleId;
+            Analysis analysis = null;
+            if (groupName != null)
+            {
+                analysis = workspace.getGroupAnalyses().get(groupName);
+                if (analysis == null)
+                {
+                    errors.reject(ERROR_MSG, "No group analysis with the name '" + groupName + "' could be found.");
+                    return null;
+                }
+            }
+            else if (sampleId != null)
+            {
+                FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleId);
+                if (sample == null)
+                {
+                    errors.reject(ERROR_MSG, "Cannot find sample '" + sampleId);
+                    return null;
+                }
+                analysis = workspace.getSampleAnalysis(sample);
+                if (analysis == null)
+                {
+                    errors.reject(ERROR_MSG, "Cannot find analysis for sample " + sampleId);
+                    return null;
+                }
+            }
+            else
+            {
+                for (Analysis analysisTry : workspace.getGroupAnalyses().values())
+                {
+                    if (analysisTry.getPopulations().size() > 0)
+                    {
+                        if (analysis != null)
+                        {
+                            errors.reject(ERROR_MSG, "There is more than one group analysis in this workspace.  Please specify which one to use.");
+                            return null;
+                        }
+                        analysis = analysisTry;
+                    }
+                }
+                if (analysis == null)
+                {
+                    for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples())
+                    {
+                        Analysis analysisTry = workspace.getSampleAnalysis(sample);
+                        if (analysisTry == null)
+                            continue;
+                        if (analysisTry.getPopulations().size() > 0)
+                        {
+                            if (analysis != null)
+                            {
+                                errors.reject(ERROR_MSG, "There is more than one sample analysis in this workspace.  Please specify which one to use.");
+                                return null;
+                            }
+                            analysis = analysisTry;
+                        }
+                    }
+                }
+            }
+            if (analysis == null)
+            {
+                errors.reject(ERROR_MSG, "No analyses were found in this workspace.");
+                return null;
+            }
+            FlowScript analysisScript = getScript();
+            ScriptDocument doc = analysisScript.getAnalysisScriptDocument();
+            AnalysisDef analysisElement = doc.getScript().getAnalysis();
+            if (analysisElement == null)
+            {
+                analysisElement = doc.getScript().addNewAnalysis();
+            }
+
+            FlowAnalyzer.makeAnalysisDef(doc.getScript(), analysis, form.ff_statisticSet);
+            if (!safeSetAnalysisScript(analysisScript, doc.toString(), errors))
+                return null;
+            return analysisScript.urlShow();
+        }
     }
 
-    protected boolean addError(String error)
+    protected FlowJoWorkspace handleWorkspaceUpload(MultipartFile file, BindException errors)
     {
-        PageFlowUtil.getActionErrors(getRequest(), true).add("main", new ActionError("Error", error));
-        return true;
-    }
-
-    protected FlowJoWorkspace handleWorkspaceUpload(FormFile file)
-    {
-        if (file != null && file.getFileSize() > 0)
+        if (file != null && !file.isEmpty())
         {
             try
             {
@@ -535,142 +581,50 @@ public class ScriptController extends BaseFlowController
             }
             catch (Exception e)
             {
-                addError("Exception parsing workspace: " + e);
+                errors.reject(ERROR_MSG, "Exception parsing workspace: " + e);
                 return null;
             }
         }
         return null;
     }
 
-    protected FlowJoWorkspace handleCompWorkspaceUpload(EditCompensationCalculationForm form)
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class UploadCompensationCalculationAction extends SimpleViewAction<EditCompensationCalculationForm>
     {
-        if (form.selectedRunId != 0)
+        public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
         {
-            try
+            if (isPost())
             {
-                return new FlowRunWorkspace(form.analysisScript, form.step, FlowRun.fromRunId(form.selectedRunId));
+                throw new UnsupportedOperationException("should call post on EditCompensationCalculationAction");
             }
-            catch (Exception e)
-            {
-                addError("Exception reading run:" + e);
-                ExceptionUtil.logExceptionToMothership(form.getRequest(), e);
-            }
+            return new JspView<EditCompensationCalculationForm>(getPage("uploadCompensationCalculation.jsp", form), form, errors);
         }
-        return handleWorkspaceUpload(form.workspaceFile);
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Upload FlowJo Workspace compensation", new ActionURL(UploadCompensationCalculationAction.class, getContainer()));
+            return root;
+        }
+
     }
 
-    @Jpf.Action
-    protected Forward uploadCompensationCalculation(EditCompensationCalculationForm form) throws Exception
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class ChooseCompensationRunAction extends SimpleViewAction<EditCompensationCalculationForm>
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (isPost())
+        public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
         {
-            return editCompensationCalculation(form);
-        }
-        return renderInTemplate(getPage("uploadCompensationCalculation.jsp", form), "Upload FlowJo Workspace compensation", Action.uploadCompensationCalculation);
-    }
-
-    @Jpf.Action
-    protected Forward chooseCompensationRun(EditCompensationCalculationForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (isPost())
-        {
-            return editCompensationCalculation(form);
-        }
-        return renderInTemplate(getPage("chooseCompensationRun.jsp", form), "Choose run for compensation", Action.chooseCompensationRun);
-    }
-
-    protected Forward doUploadAnalysis(UploadAnalysisForm form) throws Exception
-    {
-        FlowJoWorkspace newWorkspace = handleWorkspaceUpload(form.workspaceFile);
-        if (newWorkspace != null)
-        {
-            form.workspaceObject = newWorkspace;
-        }
-        if (form.workspaceObject == null)
-        {
-            addError("No workspace was uploaded.");
-            return null;
-        }
-        FlowJoWorkspace workspace = form.workspaceObject;
-        String groupName = form.groupName;
-        String sampleId= form.sampleId;
-        Analysis analysis = null;
-        if (groupName != null)
-        {
-            analysis = workspace.getGroupAnalyses().get(groupName);
-            if (analysis == null)
+            if (isPost())
             {
-                addError("No group analysis with the name '" + groupName + "' could be found.");
-                return null;
+                throw new UnsupportedOperationException("should call post on EditCompensationCalculationAction");
             }
-        }
-        else if (sampleId != null)
-        {
-            FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleId);
-            if (sample == null)
-            {
-                addError("Cannot find sample '" + sampleId);
-                return null;
-            }
-            analysis = workspace.getSampleAnalysis(sample);
-            if (analysis == null)
-            {
-                addError("Cannot find analysis for sample " + sampleId);
-                return null;
-            }
-        }
-        else
-        {
-            for (Analysis analysisTry : workspace.getGroupAnalyses().values())
-            {
-                if (analysisTry.getPopulations().size() > 0)
-                {
-                    if (analysis != null)
-                    {
-                        addError("There is more than one group analysis in this workspace.  Please specify which one to use.");
-                        return null;
-                    }
-                    analysis = analysisTry;
-                }
-            }
-            if (analysis == null)
-            {
-                for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples())
-                {
-                    Analysis analysisTry = workspace.getSampleAnalysis(sample);
-                    if (analysisTry == null)
-                        continue;
-                    if (analysisTry.getPopulations().size() > 0)
-                    {
-                        if (analysis != null)
-                        {
-                            addError("There is more than one sample analysis in this workspace.  Please specify which one to use.");
-                            return null;
-                        }
-                        analysis = analysisTry;
-                    }
-                }
-            }
-        }
-        if (analysis == null)
-        {
-            addError("No analyses were found in this workspace.");
-            return null;
-        }
-        FlowScript analysisScript = getScript();
-        ScriptDocument doc = analysisScript.getAnalysisScriptDocument();
-        AnalysisDef analysisElement = doc.getScript().getAnalysis();
-        if (analysisElement == null)
-        {
-            analysisElement = doc.getScript().addNewAnalysis();
+            return new JspView<EditCompensationCalculationForm>(getPage("chooseCompensationRun.jsp", form), form, errors);
         }
 
-        FlowAnalyzer.makeAnalysisDef(doc.getScript(), analysis, form.ff_statisticSet);
-        if (!safeSetAnalysisScript(analysisScript, doc.toString()))
-            return null;
-        return new ViewForward(analysisScript.urlShow());
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Choose run for compensation", new ActionURL(ChooseCompensationRunAction.class, getContainer()));
+            return root;
+        }
     }
 
     public GraphDef addGraph(AnalysisDef analysis, GraphSpec graph)
@@ -686,77 +640,115 @@ public class ScriptController extends BaseFlowController
         return graphDef;
     }
 
-    @Jpf.Action
-    protected Forward editCompensationCalculation(EditCompensationCalculationForm form) throws Exception
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class EditCompensationCalculationAction extends SimpleViewAction<EditCompensationCalculationForm>
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (isPost())
+        public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
         {
-            Forward forward = doEditCompensationCalculation(form);
-            if (forward != null)
-                return forward;
+            if (isPost())
+            {
+                ActionURL forward = doEditCompensationCalculation(form, errors);
+                if (forward != null)
+                    return HttpView.redirect(forward);
+            }
+
+            String pageName = form.workspace == null ? "showCompensationCalculation.jsp" : "editCompensationCalculation.jsp";
+            CompensationCalculationPage page = (CompensationCalculationPage) getPage(pageName, form);
+            return new JspView<EditCompensationCalculationForm>(page, form, errors);
         }
-        String pageName = form.workspace == null ? "showCompensationCalculation.jsp" : "editCompensationCalculation.jsp";
-        CompensationCalculationPage page = (CompensationCalculationPage) getPage(pageName, form);
-        return renderInTemplate(page, "Compensation Calculation Editor", Action.editCompensationCalculation);
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Compensation Calculation Editor", new ActionURL(EditCompensationCalculationAction.class, getContainer()));
+            return root;
+        }
+
+        protected FlowJoWorkspace handleCompWorkspaceUpload(EditCompensationCalculationForm form, BindException errors)
+        {
+            if (form.selectedRunId != 0)
+            {
+                try
+                {
+                    return new FlowRunWorkspace(form.analysisScript, form.step, FlowRun.fromRunId(form.selectedRunId));
+                }
+                catch (Exception e)
+                {
+                    errors.reject(ERROR_MSG, "Exception reading run:" + e);
+                    ExceptionUtil.logExceptionToMothership(form.getRequest(), e);
+                }
+            }
+            Map<String, MultipartFile> files = getFileMap(getViewContext());
+            MultipartFile file = files.get("workspaceFile");
+            return handleWorkspaceUpload(file, errors);
+        }
+
+        protected ActionURL doEditCompensationCalculation(EditCompensationCalculationForm form, BindException errors) throws Exception
+        {
+            FlowJoWorkspace workspace = handleCompWorkspaceUpload(form, errors);
+            if (workspace != null)
+            {
+                form.initSettings();
+                form.setWorkspace(workspace);
+                return null;
+            }
+            if (form.workspace == null)
+                return null;
+            workspace = form.workspace;
+            Map<String, FlowJoWorkspace.CompensationChannelData> dataMap = new HashMap();
+            for (int i = 0; i < form.parameters.length; i ++)
+            {
+                String parameter = form.parameters[i];
+                FlowJoWorkspace.CompensationChannelData cd = new FlowJoWorkspace.CompensationChannelData();
+                cd.positiveKeywordName = StringUtils.trimToNull(form.positiveKeywordName[i]);
+                cd.negativeKeywordName = StringUtils.trimToNull(form.negativeKeywordName[i]);
+                if (cd.positiveKeywordName == null)
+                {
+                    continue;
+                }
+                cd.positiveKeywordValue = StringUtils.trimToNull(form.positiveKeywordValue[i]);
+                cd.positiveSubset = StringUtils.trimToNull(form.positiveSubset[i]);
+                cd.negativeKeywordValue = StringUtils.trimToNull(form.negativeKeywordValue[i]);
+                cd.negativeSubset = StringUtils.trimToNull(form.negativeSubset[i]);
+                dataMap.put(parameter, cd);
+            }
+            List<String> errorslist = new ArrayList();
+            CompensationCalculation calc = workspace.makeCompensationCalculation(dataMap, form.selectGroupName, errorslist);
+            if (errorslist.size() > 0)
+            {
+                for (String error : errorslist)
+                {
+                    errors.reject(ERROR_MSG, error);
+                }
+                return null;
+            }
+
+            ScriptDocument doc = form.analysisDocument;
+            if (!updateSettingsFilter(form, doc))
+                return null;
+
+            FlowAnalyzer.makeCompensationCalculationDef(doc, calc);
+            if (!safeSetAnalysisScript(form.analysisScript, doc.toString(), errors))
+                return null;
+            return form.urlFor(Action.editCompensationCalculation);
+        }
     }
-    
-    protected Forward doEditCompensationCalculation(EditCompensationCalculationForm form) throws Exception
+
+    /**
+     * @return a map from form element name to uploaded files
+     */
+    protected static Map<String, MultipartFile> getFileMap(ViewContext context)
     {
-        FlowJoWorkspace workspace = handleCompWorkspaceUpload(form);
-        if (workspace != null)
-        {
-            form.initSettings();
-            form.setWorkspace(workspace);
-            return null;
-        }
-        if (form.workspace == null)
-            return null;
-        workspace = form.workspace;
-        Map<String, FlowJoWorkspace.CompensationChannelData> dataMap = new HashMap();
-        for (int i = 0; i < form.parameters.length; i ++)
-        {
-            String parameter = form.parameters[i];
-            FlowJoWorkspace.CompensationChannelData cd = new FlowJoWorkspace.CompensationChannelData();
-            cd.positiveKeywordName = StringUtils.trimToNull(form.positiveKeywordName[i]);
-            cd.negativeKeywordName = StringUtils.trimToNull(form.negativeKeywordName[i]);
-            if (cd.positiveKeywordName == null)
-            {
-                continue;
-            }
-            cd.positiveKeywordValue = StringUtils.trimToNull(form.positiveKeywordValue[i]);
-            cd.positiveSubset = StringUtils.trimToNull(form.positiveSubset[i]);
-            cd.negativeKeywordValue = StringUtils.trimToNull(form.negativeKeywordValue[i]);
-            cd.negativeSubset = StringUtils.trimToNull(form.negativeSubset[i]);
-            dataMap.put(parameter, cd);
-        }
-        List<String> errors = new ArrayList();
-        CompensationCalculation calc = workspace.makeCompensationCalculation(dataMap, form.selectGroupName, errors);
-        if (errors.size() > 0)
-        {
-            for (String error : errors)
-            {
-                addError(error);
-            }
-            return null;
-        }
-
-        ScriptDocument doc = form.analysisDocument;
-        if (!updateSettingsFilter(form, doc))
-            return null;
-
-        FlowAnalyzer.makeCompensationCalculationDef(doc, calc);
-        if (!safeSetAnalysisScript(form.analysisScript, doc.toString()))
-            return null;
-        return new ViewForward(form.urlFor(Action.editCompensationCalculation));
+        if (context.getRequest() instanceof MultipartHttpServletRequest)
+            return (Map<String, MultipartFile>)((MultipartHttpServletRequest)context.getRequest()).getFileMap();
+        return Collections.emptyMap();
     }
 
-    protected boolean safeSetAnalysisScript(FlowScript script, String str)
+    protected boolean safeSetAnalysisScript(FlowScript script, String str, BindException errors)
     {
         int runCount = script.getRunCount();
         if (runCount != 0)
         {
-            addError("This analysis script cannot be edited because it has been used in the analysis of " + runCount + " runs.");
+            errors.reject(ERROR_MSG, "This analysis script cannot be edited because it has been used in the analysis of " + runCount + " runs.");
             return false;
         }
         try
@@ -765,572 +757,405 @@ public class ScriptController extends BaseFlowController
         }
         catch (SQLException e)
         {
-            addError("An exception occurred: " + e);
+            errors.reject(ERROR_MSG, "An exception occurred: " + e);
             _log.error("Error", e);
             return false;
         }
         return true;
     }
 
-    static public class GraphForm extends EditScriptForm
+    @RequiresPermission(ACL.PERM_READ)
+    public class GraphImageAction extends SimpleViewAction<GraphForm>
     {
-        public GWTEditingMode editingMode;
-        public int height = 300;
-        public int width = 300;
-        public boolean open;
-        public String subset;
-        public String xAxis;
-        public String yAxis;
-        public double[] ptX;
-        public double[] ptY;
-
-        public void setEditingMode(String editingMode)
+        public ModelAndView getView(GraphForm form, BindException errors) throws Exception
         {
-            this.editingMode = GWTEditingMode.valueOf(editingMode);
-        }
-
-        public void setWidth(int width)
-        {
-            this.width = width;
-        }
-        public void setHeight(int height)
-        {
-            this.height = height;
-        }
-        public void setOpen(boolean open)
-        {
-            this.open = open;
-        }
-        public GWTGraphOptions getGraphOptions() throws Exception
-        {
-            GWTGraphOptions ret = new GWTGraphOptions();
             GateEditorServiceImpl service = new GateEditorServiceImpl(getViewContext());
-            ret.script = service.makeGWTScript(analysisScript);
-            ret.compensation = editingMode.isCompensation();
-            ret.editingMode = editingMode;
-            FlowCompensationMatrix m = getCompensationMatrix();
-            if (null != m)
-                ret.compensationMatrix = service.makeCompensationMatrix(m, false);
-            ret.well = service.makeWell(getWell());
-            ret.width = width;
-            ret.height = height;
-            ret.xAxis = xAxis;
-            if (!StringUtils.isEmpty(yAxis))
-                ret.yAxis = yAxis;
-            ret.subset = subset;
-            return ret;
-        }
+            GraphCache cache = GraphCache.get(getRequest());
+            GWTGraphOptions options = form.getGraphOptions();
+            service.getGraphInfo(options);
+            cache.getGraphInfo(options);
 
-        public void setSubset(String subset)
-        {
-            this.subset = subset;
-        }
-
-        public void setXaxis(String axis)
-        {
-            this.xAxis = axis;
-        }
-
-        public void setYaxis(String axis)
-        {
-            this.yAxis = axis;
-        }
-
-        public void setPtX(double[] ptX)
-        {
-            this.ptX = ptX;
-        }
-
-        public void setPtY(double[] ptY)
-        {
-            this.ptY = ptY;
-        }
-
-        public FlowWell getWell() throws Exception
-        {
-            return FlowWell.fromURL(getContext().getActionURL(), getRequest());
-        }
-    }
-
-    protected Forward streamImage(BufferedImage image) throws Exception
-    {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", baos);
-        PageFlowUtil.streamFileBytes(getResponse(), "graph.png", baos.toByteArray(), false);
-        return null;
-    }
-
-    Point[] decodePoints(String str)
-    {
-        if (StringUtils.isEmpty(str))
-            return new Point[0];
-        String[] strPts = StringUtils.splitPreserveAllTokens(str, ',');
-        int cPts = strPts.length / 2;
-        Point[] ret = new Point[cPts];
-        for (int i = 0; i < cPts; i ++)
-        {
-            ret[i] = new Point(Integer.valueOf(strPts[i * 2]), Integer.valueOf(strPts[i * 2 + 1]));
-        }
-        return ret;
-    }
-
-    @Jpf.Action
-    protected Forward graphImage(GraphForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-        GateEditorServiceImpl service = new GateEditorServiceImpl(getViewContext());
-        GraphCache cache = GraphCache.get(getRequest());
-        GWTGraphOptions options = form.getGraphOptions();
-        service.getGraphInfo(options);
-        cache.getGraphInfo(options);
-
-        service.getGraphInfo(form.getGraphOptions());
-        PlotInfo info = cache.getPlotInfo(options);
-        if (info == null)
-        {
-            // unexpected
-            return null;
-        }
-        BufferedImage image = info.getImage();
-        Gate gate = gateFromPoints(form.xAxis, form.yAxis, form.ptX, form.ptY, form.open);
-        image = addSelection(image, info, gate, !form.open, true, form.xAxis, form.yAxis);
-        SubsetSpec subset = SubsetSpec.fromString(form.subset);
-        SubsetSpec parent = subset.getParent();
-        PopulationSet popset;
-        if (parent != null)
-        {
-            popset = form.getPopulations().get(parent);
-        }
-        else
-        {
-            popset = form.getAnalysis();
-        }
-        if (popset != null && !StringUtils.isEmpty(form.yAxis))
-        {
-            for (Population childPop : popset.getPopulations())
+            service.getGraphInfo(form.getGraphOptions());
+            PlotInfo info = cache.getPlotInfo(options);
+            if (info == null)
             {
-                if (childPop.getGates().size() != 1)
-                    continue;
-                if (!(childPop.getGates().get(0) instanceof RegionGate))
-                    continue;
-                RegionGate regionGate = (RegionGate) childPop.getGates().get(0);
-                
-                // PolygonGates are editable, skip if it is being edited
-                if (childPop.getName().equals(subset.getSubset()) && gate instanceof PolygonGate)
-                    continue;
-
-                if (StringUtils.equals(regionGate.getXAxis(), form.xAxis) && (regionGate.getYAxis()==null||StringUtils.equals(regionGate.getYAxis(), form.yAxis)))
-                {
-                    // nothing to do
-                }
-                else if (StringUtils.equals(regionGate.getXAxis(), form.yAxis) && (regionGate.getYAxis()==null||StringUtils.equals(regionGate.getYAxis(), form.xAxis)))
-                {
-                    if (regionGate instanceof PolygonGate)
-                    {
-                        // XXX: negate
-                        Polygon newPoly = new Polygon(((PolygonGate)regionGate).getPolygon().Y, ((PolygonGate)regionGate).getPolygon().X);
-                        regionGate = new PolygonGate(regionGate.getYAxis(), regionGate.getXAxis(), newPoly);
-                    }
-                }
-                else
-                {
-                    // doesn't match
-                    continue;
-                }
-                image = addSelection(image, info, regionGate, true, false, form.xAxis, form.yAxis);
+                // unexpected
+                return null;
             }
-        }
-        return streamImage(image);
-    }
-
-
-    protected BufferedImage addSelection(BufferedImage imageIn, PlotInfo info, Gate gate, boolean closePoly, boolean primaryGate, String xAxis, String yAxis)
-    {
-        if (gate == null)
-            return imageIn;
-        BufferedImage image = new BufferedImage(imageIn.getWidth(), imageIn.getHeight(), imageIn.getType());
-        imageIn.copyData(image.getRaster());
-        Graphics2D g = image.createGraphics();
-        g.setColor(primaryGate ? Color.BLACK : Color.GRAY);
-        if (gate instanceof RegionGate)
-        {
-            RegionGate regionGate = (RegionGate) gate;
-            Polygon polygon;
-
-            if (regionGate instanceof PolygonGate)
+            BufferedImage image = info.getImage();
+            Gate gate = gateFromPoints(form.xAxis, form.yAxis, form.ptX, form.ptY, form.open);
+            image = addSelection(image, info, gate, !form.open, true, form.xAxis, form.yAxis);
+            SubsetSpec subset = SubsetSpec.fromString(form.subset);
+            SubsetSpec parent = subset.getParent();
+            PopulationSet popset;
+            if (parent != null)
             {
-                polygon = ((PolygonGate)regionGate).getPolygon();
+                popset = form.getPopulations().get(parent);
             }
             else
             {
-                List<Polygon> list = new ArrayList<Polygon>();
-                gate.getPolygons(list, xAxis, yAxis);
-                if (list.size() != 1)
-                    return imageIn;
-                polygon = list.get(0);
+                popset = form.getAnalysis();
             }
-            Point[] pts = new Point[polygon.X.length];
-            for (int i = 0; i < pts.length; i ++)
+            if (popset != null && !StringUtils.isEmpty(form.yAxis))
             {
-                pts[i] = info.toScreenCoordinates(new Point2D.Double(polygon.X[i], polygon.Y[i]));
+                for (Population childPop : popset.getPopulations())
+                {
+                    if (childPop.getGates().size() != 1)
+                        continue;
+                    if (!(childPop.getGates().get(0) instanceof RegionGate))
+                        continue;
+                    RegionGate regionGate = (RegionGate) childPop.getGates().get(0);
+
+                    // PolygonGates are editable, skip if it is being edited
+                    if (childPop.getName().equals(subset.getSubset()) && gate instanceof PolygonGate)
+                        continue;
+
+                    if (StringUtils.equals(regionGate.getXAxis(), form.xAxis) && (regionGate.getYAxis()==null||StringUtils.equals(regionGate.getYAxis(), form.yAxis)))
+                    {
+                        // nothing to do
+                    }
+                    else if (StringUtils.equals(regionGate.getXAxis(), form.yAxis) && (regionGate.getYAxis()==null||StringUtils.equals(regionGate.getYAxis(), form.xAxis)))
+                    {
+                        if (regionGate instanceof PolygonGate)
+                        {
+                            // XXX: negate
+                            Polygon newPoly = new Polygon(((PolygonGate)regionGate).getPolygon().Y, ((PolygonGate)regionGate).getPolygon().X);
+                            regionGate = new PolygonGate(regionGate.getYAxis(), regionGate.getXAxis(), newPoly);
+                        }
+                    }
+                    else
+                    {
+                        // doesn't match
+                        continue;
+                    }
+                    image = addSelection(image, info, regionGate, true, false, form.xAxis, form.yAxis);
+                }
             }
-
-            for (int i = 0; i < polygon.X.length - 1; i ++)
-            {
-                g.drawLine(pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y);
-            }
-            if (closePoly)
-            {
-                g.drawLine(pts[pts.length - 1].x, pts[pts.length- 1].y, pts[0].x, pts[0].y);
-            }
-        }
-        if (primaryGate)
-        {
-            String strFreq = info.getFrequency(gate);
-            g.drawString(strFreq, 0, image.getHeight() - g.getFontMetrics().getDescent());
-        }
-        g.dispose();
-        
-        return image;
-    }
-
-    static class GraphCacheKey
-    {
-        GraphSpec graph;
-        int wellId;
-        int height;
-        int width;
-        boolean emptyDataset;
-
-        public GraphCacheKey(GraphSpec graph, FlowWell well, PopulationSet analysis, int width, int height, boolean emptyDataset)
-        {
-            this.graph = graph;
-            this.wellId = well.getWellId();
-            this.width = width;
-            this.height = height;
-            this.emptyDataset = emptyDataset;
-        }
-
-        public boolean isCompatibleWith(Object o)
-        {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            final GraphCacheKey that = (GraphCacheKey) o;
-            if (!this.emptyDataset && that.emptyDataset)
-                return false;
-
-            if (height != that.height) return false;
-            if (wellId != that.wellId) return false;
-            if (width != that.width) return false;
-            if (!graph.equals(that.graph)) return false;
-
-            return true;
-        }
-
-        public int hashCode()
-        {
-            int result;
-            result = graph.hashCode();
-            result = 29 * result + wellId;
-            result = 29 * result + height;
-            result = 29 * result + width;
-            return result;
-        }
-    }
-    protected Population findPopulation(PopulationSet root, SubsetSpec subset)
-    {
-        PopulationSet parent;
-        if (subset.getParent() == null)
-        {
-            parent = root;
-        }
-        else
-        {
-            parent = findPopulation(root, subset.getParent());
-        }
-        if (parent == null)
+            streamImage(image);
             return null;
-        return parent.getPopulation(subset.getSubset());
-    }
+        }
 
-    protected Gate gateFromPoints(String xAxis, String yAxis, double[] arrX, double[] arrY, boolean unfinishedGate)
-    {
-        if (arrX == null || arrX.length < 2)
+        public NavTree appendNavTrail(NavTree root)
         {
             return null;
         }
-        if (StringUtils.isEmpty(yAxis) || arrX.length == 2 && !unfinishedGate)
+
+        protected Forward streamImage(BufferedImage image) throws Exception
         {
-            double min = Math.min(arrX[0], arrX[1]);
-            double max = Math.max(arrX[0], arrX[1]);
-            return new IntervalGate(xAxis, min, max);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", baos);
+            PageFlowUtil.streamFileBytes(getViewContext().getResponse(), "graph.png", baos.toByteArray(), false);
+            return null;
         }
-        // UNDONE: negate the gate
-        PolygonGate poly = new PolygonGate(xAxis, yAxis, new Polygon(arrX, arrY));
-        return poly;
+
+        protected Gate gateFromPoints(String xAxis, String yAxis, double[] arrX, double[] arrY, boolean unfinishedGate)
+        {
+            if (arrX == null || arrX.length < 2)
+            {
+                return null;
+            }
+            if (StringUtils.isEmpty(yAxis) || arrX.length == 2 && !unfinishedGate)
+            {
+                double min = Math.min(arrX[0], arrX[1]);
+                double max = Math.max(arrX[0], arrX[1]);
+                return new IntervalGate(xAxis, min, max);
+            }
+            // UNDONE: negate the gate
+            PolygonGate poly = new PolygonGate(xAxis, yAxis, new Polygon(arrX, arrY));
+            return poly;
+        }
+
+        protected BufferedImage addSelection(BufferedImage imageIn, PlotInfo info, Gate gate, boolean closePoly, boolean primaryGate, String xAxis, String yAxis)
+        {
+            if (gate == null)
+                return imageIn;
+            BufferedImage image = new BufferedImage(imageIn.getWidth(), imageIn.getHeight(), imageIn.getType());
+            imageIn.copyData(image.getRaster());
+            Graphics2D g = image.createGraphics();
+            g.setColor(primaryGate ? Color.BLACK : Color.GRAY);
+            if (gate instanceof RegionGate)
+            {
+                RegionGate regionGate = (RegionGate) gate;
+                org.labkey.flow.analysis.model.Polygon polygon;
+
+                if (regionGate instanceof PolygonGate)
+                {
+                    polygon = ((PolygonGate)regionGate).getPolygon();
+                }
+                else
+                {
+                    java.util.List<org.labkey.flow.analysis.model.Polygon> list = new ArrayList<org.labkey.flow.analysis.model.Polygon>();
+                    gate.getPolygons(list, xAxis, yAxis);
+                    if (list.size() != 1)
+                        return imageIn;
+                    polygon = list.get(0);
+                }
+                Point[] pts = new Point[polygon.X.length];
+                for (int i = 0; i < pts.length; i ++)
+                {
+                    pts[i] = info.toScreenCoordinates(new Point2D.Double(polygon.X[i], polygon.Y[i]));
+                }
+
+                for (int i = 0; i < polygon.X.length - 1; i ++)
+                {
+                    g.drawLine(pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y);
+                }
+                if (closePoly)
+                {
+                    g.drawLine(pts[pts.length - 1].x, pts[pts.length- 1].y, pts[0].x, pts[0].y);
+                }
+            }
+            if (primaryGate)
+            {
+                String strFreq = info.getFrequency(gate);
+                g.drawString(strFreq, 0, image.getHeight() - g.getFontMetrics().getDescent());
+            }
+            g.dispose();
+
+            return image;
+        }
     }
 
-    String checkValidPopulationName(String name)
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class EditGateTreeAction extends SimpleViewAction<EditGateTreeForm>
     {
-        if (StringUtils.indexOfAny(name, "/<'") >= 0)
+        public ModelAndView getView(EditGateTreeForm form, BindException errors) throws Exception
         {
-            return "Population names cannot contain the characters / ' \" or <";
-        }
-        return null;
-    }
+            if (isPost())
+            {
+                Map<SubsetSpec, String> newNames = new HashMap();
+                for (int i = 0; i < form.populationNames.length; i ++)
+                {
+                    newNames.put(form.subsets[i], form.populationNames[i]);
+                }
+                ScriptComponent oldAnalysis = form.getAnalysis();
+                ScriptComponent newAnalysis = form.getAnalysis();
+                // form.getAnalysis should create a new copy each time it's called.
+                assert oldAnalysis != newAnalysis;
+                newAnalysis.getPopulations().clear();
+                boolean fSuccess = true;
+                for (Population pop : oldAnalysis.getPopulations())
+                {
+                    fSuccess = renamePopulations(pop, newAnalysis, null, newNames, errors);
+                }
+                if (fSuccess)
+                {
+                    ScriptDocument doc = form.analysisScript.getAnalysisScriptDocument();
+                    fSuccess = saveAnalysisOrComp(form.analysisScript, doc, newAnalysis, errors);
+                }
+                if (fSuccess)
+                {
+                    return HttpView.redirect(form.urlFor(Action.editGateTree));
+                }
+            }
 
-    private boolean renamePopulations(Population pop, PopulationSet newParent, SubsetSpec subsetParent, Map<SubsetSpec, String> newNames)
-    {
-        SubsetSpec subset = new SubsetSpec(subsetParent, pop.getName());
-        String newName = newNames.get(subset);
-        boolean fSuccess = true;
-        if (StringUtils.isEmpty(newName))
+            return new JspView<EditGateTreeForm>(getPage("editGateTree.jsp", form), form, errors);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
         {
-            // deleted
+            root.addChild("Population Names Editor", new ActionURL(EditGateTreeAction.class, getContainer()));
+            return root;
+        }
+
+        String checkValidPopulationName(String name)
+        {
+            if (StringUtils.indexOfAny(name, "/<'") >= 0)
+            {
+                return "Population names cannot contain the characters / ' \" or <";
+            }
+            return null;
+        }
+
+        private boolean renamePopulations(Population pop, PopulationSet newParent, SubsetSpec subsetParent, Map<SubsetSpec, String> newNames, BindException errors)
+        {
+            SubsetSpec subset = new SubsetSpec(subsetParent, pop.getName());
+            String newName = newNames.get(subset);
+            boolean fSuccess = true;
+            if (StringUtils.isEmpty(newName))
+            {
+                // deleted
+                return fSuccess;
+            }
+            Population newPop = new Population();
+            String nameError = checkValidPopulationName(newName);
+            if (nameError != null)
+            {
+                errors.reject(ERROR_MSG, nameError);
+                fSuccess = false;
+            }
+            newPop.setName(newName);
+            newPop.getGates().addAll(pop.getGates());
+            if (newParent.getPopulation(newName) != null)
+            {
+                errors.reject(ERROR_MSG, "There are two populations called '" + new SubsetSpec(subsetParent, newName) + "'");
+                fSuccess = false;
+            }
+
+            newParent.addPopulation(newPop);
+
+            for (Population child : pop.getPopulations())
+            {
+                fSuccess = renamePopulations(child, newPop, subset, newNames, errors) && fSuccess;
+            }
             return fSuccess;
         }
-        Population newPop = new Population();
-        String nameError = checkValidPopulationName(newName);
-        if (nameError != null)
-        {
-            addError(nameError);
-            fSuccess = false;
-        }
-        newPop.setName(newName);
-        newPop.getGates().addAll(pop.getGates());
-        if (newParent.getPopulation(newName) != null)
-        {
-            addError("There are two populations called '" + new SubsetSpec(subsetParent, newName) + "'");
-            fSuccess = false;
-        }
 
-        newParent.addPopulation(newPop);
-
-        for (Population child : pop.getPopulations())
+        protected boolean saveAnalysisOrComp(FlowScript analysisScript, ScriptDocument doc, ScriptComponent popset, BindException errors) throws SQLException
         {
-            fSuccess = renamePopulations(child, newPop, subset, newNames) && fSuccess;
+            if (popset instanceof CompensationCalculation)
+            {
+                FlowAnalyzer.makeCompensationCalculationDef(doc, (CompensationCalculation) popset);
+            }
+            else
+            {
+                FlowAnalyzer.makeAnalysisDef(doc.getScript(), (Analysis) popset, null);
+            }
+            return safeSetAnalysisScript(analysisScript, doc.toString(), errors);
         }
-        return fSuccess;
     }
 
-    static public class EditGateTreeForm extends EditScriptForm
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class CopyAction extends SimpleViewAction<CopyProtocolForm>
     {
-        public SubsetSpec[] subsets;
-        public String[] populationNames;
+        String scriptName;
 
-        public void reset(ActionMapping mapping, HttpServletRequest request)
+        public ModelAndView getView(CopyProtocolForm form, BindException errors) throws Exception
         {
-            super.reset(mapping, request);
-            try
+            if (isPost())
             {
-                Map<SubsetSpec,Population> pops = getPopulations();
-                Map.Entry<SubsetSpec,Population>[] entries = pops.entrySet().toArray(new Map.Entry[0]);
-                populationNames = new String[entries.length];
-                subsets = new SubsetSpec[entries.length];
-                for (int i = 0; i < entries.length; i ++)
+                ActionURL forward = doCopy(form, errors);
+                if (forward != null)
+                    return HttpView.redirect(forward);
+            }
+
+            scriptName = form.analysisScript.getName();
+            return new JspView<CopyProtocolForm>(getPage("copy.jsp", form), form, errors);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Make a copy of '" + scriptName + "'", new ActionURL(CopyAction.class, getContainer()));
+            return root;
+        }
+
+        protected void addChild(XmlObject parent, XmlObject child)
+        {
+            if (child == null)
+                return;
+            parent.getDomNode().appendChild(parent.getDomNode().getOwnerDocument().importNode(child.getDomNode(), true));
+        }
+
+        protected ActionURL doCopy(CopyProtocolForm form, BindException errors) throws Exception
+        {
+            if (StringUtils.isEmpty(form.name))
+            {
+                errors.reject(ERROR_MSG, "The name cannot be blank.");
+                return null;
+            }
+            if (!isScriptNameUnique(getContainer(), form.name))
+            {
+                errors.reject(ERROR_MSG, "There is already a protocol named '" + form.name + "'");
+                return null;
+            }
+            ScriptDef src = form.analysisScript.getAnalysisScriptDocument().getScript();
+            ScriptDocument doc = ScriptDocument.Factory.newInstance();
+            ScriptDef script = doc.addNewScript();
+            addChild(script, src.getSettings());
+            if (form.copyCompensationCalculation)
+            {
+                addChild(script, src.getCompensationCalculation());
+            }
+            if (form.copyAnalysis)
+            {
+                addChild(script, src.getAnalysis());
+            }
+            FlowScript newAnalysisScript = FlowScript.create(getUser(), getContainer(), form.name, doc.toString());
+            return newAnalysisScript.urlShow();
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class EditPropertiesAction extends SimpleViewAction<EditPropertiesForm>
+    {
+        public ModelAndView getView(EditPropertiesForm form, BindException errors) throws Exception
+        {
+            if (isPost())
+            {
+                ExpData protocol = form.analysisScript.getExpObject();
+                protocol.setComment(getUser(), form.ff_description);
+                return HttpView.redirect(form.urlFor(Action.begin));
+            }
+            return new JspView<EditPropertiesForm>(getPage("editProperties.jsp", form), form, errors);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Edit Properties", new ActionURL(EditPropertiesAction.class, getContainer()));
+            return root;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class EditSettingsAction extends SimpleViewAction<EditSettingsForm>
+    {
+        public ModelAndView getView(EditSettingsForm form, BindException errors) throws Exception
+        {
+            if (isPost() && form.canEdit())
+            {
+                ScriptDocument doc = form.analysisDocument;
+                if (updateSettingsMinValues(form, doc, errors) &&
+                    updateSettingsFilter(form, doc) &&
+                    safeSetAnalysisScript(form.analysisScript, doc.toString(), errors))
                 {
-                    populationNames[i] = entries[i].getValue().getName();
-                    subsets[i] = entries[i].getKey();
+                    return HttpView.redirect(form.urlFor(Action.begin));
                 }
             }
-            catch (Exception e)
-            {
-                UnexpectedException.rethrow(e);
-            }
-        }
-        public String[] getPopulationNames()
-        {
-            return populationNames;
-        }
-        public void setPopulationNames(String[] names)
-        {
-            // This method just needs to be here so struts knows populationNames is not read only.
-            throw new UnsupportedOperationException();
-        }
-    }
-    @Jpf.Action
-    protected Forward editGateTree(EditGateTreeForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        Page page = getPage("editGateTree.jsp", form);
-        if (isPost())
-        {
-            Map<SubsetSpec, String> newNames = new HashMap();
-            for (int i = 0; i < form.populationNames.length; i ++)
-            {
-                newNames.put(form.subsets[i], form.populationNames[i]);
-            }
-            ScriptComponent oldAnalysis = form.getAnalysis();
-            ScriptComponent newAnalysis = form.getAnalysis();
-            // form.getAnalysis should create a new copy each time it's called.
-            assert oldAnalysis != newAnalysis;
-            newAnalysis.getPopulations().clear();
-            boolean fSuccess = true;
-            for (Population pop : oldAnalysis.getPopulations())
-            {
-                fSuccess = renamePopulations(pop, newAnalysis, null, newNames);
-            }
-            if (fSuccess)
-            {
-                ScriptDocument doc = form.analysisScript.getAnalysisScriptDocument();
-                fSuccess = saveAnalysisOrComp(form.analysisScript, doc, newAnalysis);
-            }
-            if (fSuccess)
-            {
-                return new ViewForward(form.urlFor(Action.editGateTree));
-            }
-        }
-        return renderInTemplate(page, "Population Names Editor", Action.editGateTree);
-    }
 
-    protected boolean saveAnalysisOrComp(FlowScript analysisScript, ScriptDocument doc, ScriptComponent popset) throws SQLException
-    {
-        if (popset instanceof CompensationCalculation)
-        {
-            FlowAnalyzer.makeCompensationCalculationDef(doc, (CompensationCalculation) popset);
+            return new JspView<EditSettingsForm>(getPage("editSettings.jsp", form), form, errors);
         }
-        else
-        {
-            FlowAnalyzer.makeAnalysisDef(doc.getScript(), (Analysis) popset, null);
-        }
-        return safeSetAnalysisScript(analysisScript, doc.toString());
-    }
 
-    static public class CopyProtocolForm extends EditScriptForm
-    {
-        public String name;
-        public boolean copyCompensationCalculation;
-        public boolean copyAnalysis;
-
-        public void setName(String name)
+        public NavTree appendNavTrail(NavTree root)
         {
-            this.name = name;
-        }
-        public void setCopyCompensationCalculation(boolean b)
-        {
-            this.copyCompensationCalculation = b;
-        }
-        public void setCopyAnalysis(boolean b)
-        {
-            this.copyAnalysis = b;
-        }
-    }
-
-    @Jpf.Action
-    protected Forward copy(CopyProtocolForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        Page page = getPage("copy.jsp", form);
-        if (isPost())
-        {
-            Forward fwd = doCopy(form);
-            if (fwd != null)
-                return fwd;
-        }
-        return renderInTemplate(page, "Make a copy of '" + form.analysisScript.getName() + "'", Action.copy);
-    }
-
-    protected void addChild(XmlObject parent, XmlObject child)
-    {
-        if (child == null)
-            return;
-        parent.getDomNode().appendChild(parent.getDomNode().getOwnerDocument().importNode(child.getDomNode(), true));
-    }
-
-    protected Forward doCopy(CopyProtocolForm form) throws Exception
-    {
-        if (StringUtils.isEmpty(form.name))
-        {
-            addError("The name cannot be blank.");
             return null;
         }
-        if (!isScriptNameUnique(form.name))
-        {
-            addError("There is already a protocol named '" + form.name + "'");
-            return null;
-        }
-        ScriptDef src = form.analysisScript.getAnalysisScriptDocument().getScript();
-        ScriptDocument doc = ScriptDocument.Factory.newInstance();
-        ScriptDef script = doc.addNewScript();
-        addChild(script, src.getSettings());
-        if (form.copyCompensationCalculation)
-        {
-            addChild(script, src.getCompensationCalculation());
-        }
-        if (form.copyAnalysis)
-        {
-            addChild(script, src.getAnalysis());
-        }
-        FlowScript newAnalysisScript = FlowScript.create(getUser(), getContainer(), form.name, doc.toString());
-        ActionURL forward = newAnalysisScript.urlShow();
-        return new ViewForward(forward);
-    }
 
-    @Jpf.Action
-    protected Forward editProperties(EditPropertiesForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (isPost())
+        protected boolean updateSettingsMinValues(EditSettingsForm form, ScriptDocument doc, BindException errors)
         {
-            ExpData protocol = form.analysisScript.getExpObject();
-            protocol.setComment(getUser(), form.ff_description);
-            return new ViewForward(form.urlFor(Action.begin));
-        }
-        return renderInTemplate(getPage("editProperties.jsp", form), "Edit Properties", Action.editProperties);
-    }
+            boolean success = true;
+            SettingsDef settingsDef = doc.getScript().getSettings();
+            if (settingsDef == null)
+                settingsDef = doc.getScript().addNewSettings();
 
-    @Jpf.Action
-    protected Forward editSettings(EditSettingsForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (isPost() && form.canEdit())
-        {
-            ScriptDocument doc = form.analysisDocument;
-            if (updateSettingsMinValues(form, doc) &&
-                updateSettingsFilter(form, doc) &&
-                safeSetAnalysisScript(form.analysisScript, doc.toString()))
+            while (settingsDef.sizeOfParameterArray() > 0)
+                settingsDef.removeParameter(0);
+
+            for (int i = 0; i < form.ff_parameter.length; i++)
             {
-                    return new ViewForward(form.urlFor(Action.begin));
-            }
-        }
-        return renderInTemplate(getPage("editSettings.jsp", form), "Edit Settings", Action.editSettings);
-    }
-
-    protected boolean updateSettingsMinValues(EditSettingsForm form, ScriptDocument doc)
-    {
-        boolean success = true;
-        SettingsDef settingsDef = doc.getScript().getSettings();
-        if (settingsDef == null)
-            settingsDef = doc.getScript().addNewSettings();
-
-        while (settingsDef.sizeOfParameterArray() > 0)
-            settingsDef.removeParameter(0);
-
-        for (int i = 0; i < form.ff_parameter.length; i++)
-        {
-            String value = form.ff_minValue[i];
-            if (value != null)
-            {
-                double val;
-                try
+                String value = form.ff_minValue[i];
+                if (value != null)
                 {
-                    val = Double.valueOf(value);
+                    double val;
+                    try
+                    {
+                        val = Double.valueOf(value);
+                    }
+                    catch (Exception e)
+                    {
+                        errors.reject(ERROR_MSG, "Error converting '" + value + "' to a number.");
+                        success = false;
+                        continue;
+                    }
+                    String name = form.ff_parameter[i];
+                    ParameterDef param = settingsDef.addNewParameter();
+                    param.setName(name);
+                    param.setMinValue(val);
                 }
-                catch (Exception e)
-                {
-                    addError("Error converting '" + value + "' to a number.");
-                    success = false;
-                    continue;
-                }
-                String name = form.ff_parameter[i];
-                ParameterDef param = settingsDef.addNewParameter();
-                param.setName(name);
-                param.setMinValue(val);
             }
+
+            return success;
         }
 
-        return success;
     }
 
     protected boolean updateSettingsFilter(EditSettingsForm form, ScriptDocument doc) throws Exception
@@ -1376,49 +1201,74 @@ public class ScriptController extends BaseFlowController
         return success;
     }
 
-    @Jpf.Action
-    protected Forward delete(EditScriptForm form) throws Exception
+    @RequiresPermission(ACL.PERM_DELETE)
+    public class DeleteAction extends SimpleViewAction<EditScriptForm>
     {
-        requiresPermission(ACL.PERM_DELETE);
-        if (isPost())
+        public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
         {
-            ExpData protocol = form.analysisScript.getExpObject();
-            protocol.delete(getUser());
-            return new ViewForward(PageFlowUtil.urlFor(FlowController.Action.begin, getContainer()));
+            if (isPost())
+            {
+                ExpData protocol = form.analysisScript.getExpObject();
+                protocol.delete(getUser());
+                return HttpView.redirect(PageFlowUtil.urlFor(FlowController.Action.begin, getContainer()));
+            }
+            return new JspView<EditScriptForm>(getPage("delete.jsp", form), form, errors);
         }
-        return renderInTemplate(getPage("delete.jsp", form), "Confirm Delete", Action.delete);
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Confirm Delete", new ActionURL(DeleteAction.class, getContainer()));
+            return root;
+        }
     }
 
-    @Jpf.Action
-    protected Forward gateEditor(GateEditorForm form) throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class GateEditorAction extends SimpleViewAction<GateEditorForm>
     {
-        requiresPermission(ACL.PERM_READ);
-        Map<String, String> props = new HashMap();
-        int scriptId = form.getScriptId();
-        if (scriptId != 0)
+        FlowObject object;
+
+        public ModelAndView getView(GateEditorForm form, BindException errors) throws Exception
         {
-            props.put("scriptId", Integer.toString(scriptId));
+            object = form.getFlowObject();
+            Map<String, String> props = new HashMap();
+            int scriptId = form.getScriptId();
+            if (scriptId != 0)
+            {
+                props.put("scriptId", Integer.toString(scriptId));
+            }
+            int runId = form.getRunId();
+            if (runId != 0)
+            {
+                props.put("runId", Integer.toString(runId));
+            }
+            props.put("editingMode", form.getEditingMode().toString());
+            if (form.getSubset() != null)
+            {
+                props.put("subset", form.getSubset());
+            }
+            return new GWTView("org.labkey.flow.gateeditor.GateEditor", props);
         }
-        int runId = form.getRunId();
-        if (runId != 0)
+
+        public NavTree appendNavTrail(NavTree root)
         {
-            props.put("runId", Integer.toString(runId));
+            return appendFlowNavTrail(root, object, "Gate Editor", Action.gateEditor);
         }
-        props.put("editingMode", form.getEditingMode().toString());
-        if (form.getSubset() != null)
-        {
-            props.put("subset", form.getSubset());
-        }
-        GWTView view = new GWTView("org.labkey.flow.gateeditor.GateEditor", props);
-        return renderInTemplate(view, form.getFlowObject(), "Gate Editor", Action.gateEditor);
     }
 
-    @Jpf.Action
-    protected Forward gateEditorService() throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class GateEditorService extends SimpleViewAction
     {
-        requiresPermission(ACL.PERM_READ);
-        GateEditorServiceImpl service = new GateEditorServiceImpl(getViewContext());
-        service.doPost(getRequest(), getResponse());
-        return null;
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            GateEditorServiceImpl service = new GateEditorServiceImpl(getViewContext());
+            service.doPost(getRequest(), getViewContext().getResponse());
+            return null;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 }
+

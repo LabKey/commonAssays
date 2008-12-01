@@ -38,6 +38,7 @@
     }
 %>
 
+<labkey:errors/>
 <%  CompensationCalculationDef calc = compensationCalculationDef();
     if (calc != null)
     {
