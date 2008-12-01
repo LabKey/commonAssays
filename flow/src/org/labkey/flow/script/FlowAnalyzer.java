@@ -453,7 +453,7 @@ public class FlowAnalyzer
         script.setSettings(settings.toSettingsDef());
     }
 
-    static public URI getFCSUri(FlowWell well) throws Exception
+    static public URI getFCSUri(FlowWell well)
     {
         return well.getFCSURI();
     }

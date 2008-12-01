@@ -21,10 +21,7 @@ import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.JspView;
-import org.labkey.api.view.NavTree;
+import org.labkey.api.view.*;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
@@ -46,6 +43,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -105,67 +104,94 @@ public class RunController extends SpringFlowController<RunController.Action>
         }
     }
 
-    
+
     @RequiresPermission(ACL.PERM_READ)
     public class DownloadAction extends SimpleViewAction<DownloadRunForm>
     {
-        public ModelAndView getView(DownloadRunForm form, BindException errors) throws Exception
+        private FlowRun _run;
+        private Map<String, File> _files = new TreeMap<String, File>();
+        private List<File> _missing = new LinkedList<File>();
+
+        @Override
+        public void validate(DownloadRunForm form, BindException errors)
         {
-            HttpServletResponse response = getViewContext().getResponse();
-            FlowRun run = form.getRun();
-            if (run == null)
+            _run = form.getRun();
+            if (_run == null)
             {
-                response.getWriter().write("Error: no run found");
-                return null;
+                errors.reject(ERROR_MSG, "run not found");
+                return;
             }
 
-            Map<String, File> files = new TreeMap<String, File>();
-            FlowWell[] wells = run.getWells(true);
+            FlowWell[] wells = _run.getWells(true);
             if (wells.length == 0)
             {
-                response.getWriter().write("Error: no wells in run");
-                return null;
+                errors.reject(ERROR_MSG, "no wells in run: " + _run.getName());
+                return;
             }
 
             for (FlowWell well : wells)
             {
                 URI uri = FlowAnalyzer.getFCSUri(well);
                 File file = new File(uri);
-                files.put(file.getName(), file);
-            }
-
-            response.reset();
-            response.setContentType("application/zip");
-            response.setHeader("Content-Disposition", "attachment; filename=\"" + run.getName() + ".zip\"");
-            ZipOutputStream stream = new ZipOutputStream(response.getOutputStream());
-            byte[] buffer = new byte[524288];
-            for (File file : files.values())
-            {
-                ZipEntry entry = new ZipEntry(file.getName());
-                stream.putNextEntry(entry);
-                InputStream is;
-                if (form.getEventCount() == null)
-                {
-                    is = new FileInputStream(file);
-                }
+                if (file.exists() && file.canRead())
+                    _files.put(file.getName(), file);
                 else
-                {
-                    is = new ByteArrayInputStream(new FCS(file).getFCSBytes(file, form.getEventCount().intValue()));
-                }
-                int cb;
-                while((cb = is.read(buffer)) > 0)
-                {
-                    stream.write(buffer, 0, cb);
-                }
+                    _missing.add(file);
             }
-            stream.close();
 
-            return null;
+            if (_missing.size() > 0 && !form.isSkipMissing())
+            {
+                errors.reject(ERROR_MSG, "files missing from run: " + _run.getName());
+            }
+        }
+
+        public ModelAndView getView(DownloadRunForm form, BindException errors) throws Exception
+        {
+            if (errors.hasErrors())
+            {
+                return new JspView<DownloadRunBean>("/org/labkey/flow/controllers/run/download.jsp", new DownloadRunBean(_run, _files, _missing), errors);
+            }
+            else
+            {
+                HttpServletResponse response = getViewContext().getResponse();
+
+                response.reset();
+                response.setContentType("application/zip");
+                response.setHeader("Content-Disposition", "attachment; filename=\"" + _run.getName() + ".zip\"");
+                ZipOutputStream stream = new ZipOutputStream(response.getOutputStream());
+                byte[] buffer = new byte[524288];
+                for (File file : _files.values())
+                {
+                    if (file.canRead())
+                    {
+                        ZipEntry entry = new ZipEntry(file.getName());
+                        stream.putNextEntry(entry);
+                        InputStream is;
+                        if (form.getEventCount() == null)
+                        {
+                            is = new FileInputStream(file);
+                        }
+                        else
+                        {
+                            is = new ByteArrayInputStream(new FCS(file).getFCSBytes(file, form.getEventCount().intValue()));
+                        }
+                        int cb;
+                        while((cb = is.read(buffer)) > 0)
+                        {
+                            stream.write(buffer, 0, cb);
+                        }
+                    }
+                }
+                stream.close();
+
+                return null;
+            }
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return null;
+            root.addChild("Download Run");
+            return root;
         }
     }
 

@@ -23,6 +23,7 @@ package org.labkey.flow.controllers.run;
 public class DownloadRunForm extends RunForm
 {
     private Integer eventCount;
+    private boolean skipMissing;
 
     public Integer getEventCount()
     {
@@ -32,6 +33,16 @@ public class DownloadRunForm extends RunForm
     public void setEventCount(Integer eventCount)
     {
         this.eventCount = eventCount;
+    }
+
+    public boolean isSkipMissing()
+    {
+        return skipMissing;
+    }
+
+    public void setSkipMissing(boolean skipMissing)
+    {
+        this.skipMissing = skipMissing;
     }
 }
 
