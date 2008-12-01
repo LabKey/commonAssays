@@ -17,11 +17,10 @@
 package org.labkey.elispot;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.WebPartFactory;
@@ -29,7 +28,6 @@ import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -76,23 +74,5 @@ public class ElispotModule extends DefaultModule
 
         ElispotPlateReaderService.registerProvider(new ExcelPlateReader());
         ElispotPlateReaderService.registerProvider(new TextPlateReader());
-    }
-
-    public void afterSchemaUpdate(ModuleContext moduleContext)
-    {
-        // Issue #5689, module was renamed to avoid a collision with a 3rd party module,
-        // need to clean up the module entry
-        if (moduleContext.getModuleState() == ModuleLoader.ModuleState.InstallRequired)
-        {
-            try {
-                SimpleFilter filter = new SimpleFilter("Name", "Elispot");
-                filter.addCondition("ClassName", ElispotModule.class.getName());
-                Table.delete(CoreSchema.getInstance().getTableInfoModules(), filter);
-            }
-            catch (SQLException e)
-            {
-                _log.error("Unable to remove old Elispot module entry", e);
-            }
-        }
     }
 }
