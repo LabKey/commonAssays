@@ -15,15 +15,16 @@
  */
 package org.labkey.ms1;
 
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.DataRegion;
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.api.ContainerFilter;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.DataView;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.ActionButton;
-import org.labkey.api.data.DataRegion;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms1.query.MS1Schema;
 
 /**
@@ -39,10 +40,9 @@ public class MS1ExperimentRunFilter extends ExperimentRunFilter
         super(MS1Module.PROTOCOL_MS1, MS1Schema.SCHEMA_NAME, MS1Schema.TABLE_FEATURE_RUNS);
     }
 
-    public void populateButtonBar(ViewContext context, ButtonBar bar, DataView view)
+    @Override
+    public void populateButtonBar(ViewContext context, ButtonBar bar, DataView view, ContainerFilter containerFilter)
     {
-        super.populateButtonBar(context, bar, view);
-
         ActionURL compareUrl = new ActionURL(MS1Controller.CompareRunsSetupAction.class, context.getContainer());
         bar.add(new ActionButton(MS1Controller.createVerifySelectedScript(view, compareUrl),
                 "Compare", DataRegion.MODE_ALL, ActionButton.Action.LINK));

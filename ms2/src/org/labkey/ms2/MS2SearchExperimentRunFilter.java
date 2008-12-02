@@ -16,15 +16,19 @@
 
 package org.labkey.ms2;
 
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.MenuButton;
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.api.ContainerFilter;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.ms2.query.MS2Schema;
-import org.labkey.api.data.*;
-import org.labkey.api.view.ViewContext;
+import org.labkey.api.security.ACL;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
-import org.labkey.api.security.ACL;
+import org.labkey.api.view.ViewContext;
+import org.labkey.ms2.query.MS2Schema;
 
 /**
  * User: jeckels
@@ -53,7 +57,8 @@ public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
         return button;
     }
 
-    public void populateButtonBar(ViewContext context, ButtonBar bar, DataView view)
+    @Override
+    public void populateButtonBar(ViewContext context, ButtonBar bar, DataView view, ContainerFilter containerFilter)
     {
         MenuButton compareMenu = MS2Controller.createCompareMenu(context.getContainer(), view, true);
 
