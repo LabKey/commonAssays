@@ -104,28 +104,28 @@ public class MS2Schema extends UserSchema
         {
             public ExpRunTable createTable(String alias, MS2Schema ms2Schema)
             {
-                return ms2Schema.createSearchTable(XTandemSearchRuns.toString(), alias, ContainerFilter.CURRENT, XTANDEM_PROTOCOL_OBJECT_PREFIX);
+                return ms2Schema.createSearchTable(XTandemSearchRuns.toString(), alias, ContainerFilter.Filters.CURRENT, XTANDEM_PROTOCOL_OBJECT_PREFIX);
             }
         },
         MascotSearchRuns
         {
             public ExpRunTable createTable(String alias, MS2Schema ms2Schema)
             {
-                return ms2Schema.createSearchTable(MascotSearchRuns.toString(), alias, ContainerFilter.CURRENT, MASCOT_PROTOCOL_OBJECT_PREFIX);
+                return ms2Schema.createSearchTable(MascotSearchRuns.toString(), alias, ContainerFilter.Filters.CURRENT, MASCOT_PROTOCOL_OBJECT_PREFIX);
             }
         },
         SequestSearchRuns
         {
             public ExpRunTable createTable(String alias, MS2Schema ms2Schema)
             {
-                return ms2Schema.createSearchTable(SequestSearchRuns.toString(), alias, ContainerFilter.CURRENT, SEQUEST_PROTOCOL_OBJECT_PREFIX);
+                return ms2Schema.createSearchTable(SequestSearchRuns.toString(), alias, ContainerFilter.Filters.CURRENT, SEQUEST_PROTOCOL_OBJECT_PREFIX);
             }
         },
         MS2SearchRuns
         {
             public ExpRunTable createTable(String alias, MS2Schema ms2Schema)
             {
-                return ms2Schema.createRunsTable(MS2SearchRuns.toString(), alias, ContainerFilter.CURRENT);
+                return ms2Schema.createRunsTable(MS2SearchRuns.toString(), alias, ContainerFilter.Filters.CURRENT);
             }
         },
         Peptides
