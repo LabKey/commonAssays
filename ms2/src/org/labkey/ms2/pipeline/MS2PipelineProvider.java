@@ -50,7 +50,7 @@ public class MS2PipelineProvider extends PipelineProvider
             if (!entry.isDirectory())
                 continue;
 
-            addFileActions(PipelineController.UploadAction.class, "Import Peptides",
+            addFileActions(PipelineController.UploadAction.class, "Import Results",
                     entry, entry.listFiles(MS2PipelineManager.getUploadFilter()));
 
             addAction(PipelineController.ShowDescribeMS2RunAction.class, "Describe Samples",

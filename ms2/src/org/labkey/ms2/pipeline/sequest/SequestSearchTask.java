@@ -198,7 +198,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
             for (File file : getJobSupport().getSequenceFiles())
             {
-                action.addInput(file, "FASTA");
+                action.addInput(file, FASTA_INPUT_ROLE);
             }
             action.addInput(fileMzXML, SPECTRA_INPUT_ROLE);
             

@@ -50,6 +50,7 @@ public class MS2Schema extends UserSchema
     public static final String MASCOT_PROTOCOL_OBJECT_PREFIX = "MS2.Mascot";
     public static final String SEQUEST_PROTOCOL_OBJECT_PREFIX = "MS2.Sequest";
     public static final String XTANDEM_PROTOCOL_OBJECT_PREFIX = "MS2.XTandem";
+    public static final String IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX = "MS2.ImportedSearch";
     public static final String SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX = "MS2.PreSearch.";
 
     private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("PeptideId");
@@ -98,6 +99,13 @@ public class MS2Schema extends UserSchema
                 result.populate();
                 result.setProtocolPatterns(PROTOCOL_PATTERN_PREFIX + SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX + "%");
                 return result;
+            }
+        },
+        ImportedSearchRuns
+        {
+            public ExpRunTable createTable(String alias, MS2Schema ms2Schema)
+            {
+                return ms2Schema.createSearchTable(ImportedSearchRuns.toString(), alias, ContainerFilter.Filters.CURRENT, IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
             }
         },
         XTandemSearchRuns
@@ -254,7 +262,7 @@ public class MS2Schema extends UserSchema
 
     public ExpRunTable createRunsTable(String name, String alias, ContainerFilter filter)
     {
-        return createSearchTable(name, alias, filter, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX);
+        return createSearchTable(name, alias, filter, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX , IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
     }
 
     public SpectraCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, ViewContext context, MS2Controller.SpectraCountForm form)

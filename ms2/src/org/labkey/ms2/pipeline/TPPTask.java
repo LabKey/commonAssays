@@ -51,6 +51,9 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
     private static final String PEPTIDE_QUANITATION_ACTION_NAME = "Peptide Quantitation";
     private static final String PROTEIN_QUANITATION_ACTION_NAME = "Protein Quantitation";
 
+    public static final String PEP_XML_INPUT_ROLE = "PepXML";
+    public static final String PROT_XML_INPUT_ROLE = "ProtXML";
+
     public static String getTPPVersion(PipelineJob job)
     {
         return job.getParameters().get("pipeline tpp, version");
@@ -372,7 +375,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 File filePepXML = _wd.outputFile(fileWorkPepXML);
 
                 // Set up the first step with the right outputs
-                pepXMLAction.addOutput(filePepXML, "PepXML", false);
+                pepXMLAction.addOutput(filePepXML, PEP_XML_INPUT_ROLE, false);
 
                 File fileProtXML = null;
 
@@ -392,8 +395,8 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
                     // Second step optionally runs ProteinProphet on the pepXML
                     RecordedAction protXMLAction = new RecordedAction(PROTEIN_PROPHET_ACTION_NAME);
-                    protXMLAction.addInput(filePepXML, "PepXML");
-                    protXMLAction.addOutput(fileProtXML, "ProtXML", false);
+                    protXMLAction.addInput(filePepXML, PEP_XML_INPUT_ROLE);
+                    protXMLAction.addOutput(fileProtXML, PROT_XML_INPUT_ROLE, false);
                     actions.add(protXMLAction);
                 }
 
@@ -403,14 +406,14 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                     {
                         peptideQuantAction.addInput(file, "mzXML");
                     }
-                    peptideQuantAction.addInput(filePepXML, "PepXML");
+                    peptideQuantAction.addInput(filePepXML, PEP_XML_INPUT_ROLE);
                     peptideQuantAction.addOutput(filePepXML, "QuantPepXML", false);
                 }
 
                 if (proteinQuantAction != null && fileProtXML != null)
                 {
-                    proteinQuantAction.addInput(fileProtXML, "ProtXML");
-                    proteinQuantAction.addInput(filePepXML, "PepXML");
+                    proteinQuantAction.addInput(fileProtXML, PROT_XML_INPUT_ROLE);
+                    proteinQuantAction.addInput(filePepXML, PEP_XML_INPUT_ROLE);
                     proteinQuantAction.addOutput(fileProtXML, "QuantProtXML", false);
                     // Add this here so that it's the last step in the TPP sequence
                     actions.add(proteinQuantAction);

@@ -26,6 +26,7 @@ import org.labkey.api.util.FileType;
 public abstract class AbstractMS2SearchTask<FactoryType extends AbstractMS2SearchTaskFactory> extends WorkDirectoryTask<FactoryType>
 {
     public static final String SPECTRA_INPUT_ROLE = "Spectra";
+    public static final String FASTA_INPUT_ROLE = "FASTA";
 
     public AbstractMS2SearchTask(FactoryType factory, PipelineJob job)
     {

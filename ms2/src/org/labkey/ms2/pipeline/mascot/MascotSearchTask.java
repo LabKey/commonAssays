@@ -352,7 +352,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
 
                 for (File file : getJobSupport().getSequenceFiles())
                 {
-                    mascotAction.addInput(file, "FASTA");
+                    mascotAction.addInput(file, FASTA_INPUT_ROLE);
                 }
                 mascotAction.addInput(fileMGF, "MGF");
                 mascotAction.addOutput(_wd.outputFile(fileWorkDAT), "DAT", false);

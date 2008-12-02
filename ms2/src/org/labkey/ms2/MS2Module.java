@@ -23,6 +23,7 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.ModuleContext;
@@ -90,7 +91,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public double getVersion()
     {
-        return 8.31;
+        return 8.32;
     }
 
     protected Collection<? extends WebPartFactory> createWebPartFactories()
@@ -182,6 +183,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         ExperimentService.get().registerExperimentRunFilter(_samplePrepRunFilter);
         ExperimentService.get().registerExperimentRunFilter(_ms2SearchRunFilter);
+        ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("Imported Searches", MS2Schema.TableType.ImportedSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX));
         ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("X!Tandem Searches", MS2Schema.TableType.XTandemSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX));
         ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("Mascot Searches", MS2Schema.TableType.MascotSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX));
         ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("Sequest Searches", MS2Schema.TableType.SequestSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX));
@@ -199,6 +201,40 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         MS2Controller.registerAdminConsoleLinks();
 
         initWebApplicationContext();
+
+        if (context.getOriginalVersion() < 8.32 && !context.isNewInstall())
+        {
+            // Wrap any plain MS2 runs with an experiment run
+            wrapRuns(context);
+        }
+    }
+
+    private void wrapRuns(ModuleContext context)
+    {
+        int attemptCount = 0;
+        int successCount = 0;
+        MS2Run[] runs = MS2Manager.getUnwrappedRuns();
+        for (MS2Run run : runs)
+        {
+            if (++attemptCount % 500 == 0)
+            {
+                _log.info("Wrapping MS2 run " + attemptCount + " of " + runs.length);
+            }
+            try
+            {
+                MS2Manager.ensureWrapped(run, context.getUpgradeUser());
+                successCount++;
+            }
+            catch (ExperimentException e)
+            {
+                _log.error("Failed to wrap MS2 run " + run.getRun(), e);
+            }
+            catch (Exception e)
+            {
+                _log.error("Failed to wrap MS2 run " + run.getRun(), e);
+            }
+        }
+        _log.info("Successfully wrapped " + successCount + " of " + attemptCount + " attempted MS2 runs");
     }
 
     @Override

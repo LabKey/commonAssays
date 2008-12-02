@@ -26,6 +26,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Importer;
 import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -82,7 +83,8 @@ public class MS2ImportPipelineJob extends PipelineJob
         boolean completeStatus = false;
         try
         {
-            MS2Manager.importRun(getInfo(), getLogger(), _file, _runInfo, new XarContext(getDescription(), getContainer(), getUser()));
+            MS2Run run = MS2Manager.importRun(getInfo(), getLogger(), _file, _runInfo, new XarContext(getDescription(), getContainer(), getUser()));
+            MS2Manager.ensureWrapped(run, getUser());
             setStatus(PipelineJob.COMPLETE_STATUS);
             completeStatus = true;
         }

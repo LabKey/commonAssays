@@ -18,6 +18,7 @@ package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.apache.xmlbeans.XmlException;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.plot.XYPlot;
@@ -26,11 +27,8 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.XarContext;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
@@ -47,10 +45,14 @@ import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.RelativeQuantAnalysisSummary;
 import org.labkey.common.util.Pair;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
+import org.labkey.ms2.pipeline.TPPTask;
+import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
 import org.labkey.ms2.reader.SimpleScan;
+import org.labkey.ms2.query.MS2Schema;
+import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 
 import javax.servlet.ServletException;
 import javax.xml.stream.XMLStreamException;
@@ -60,6 +62,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -261,6 +264,151 @@ public class MS2Manager
         throw new IllegalStateException("There is more than one non-deleted MS2Run for " + path + "/" + fileName);
     }
 
+    public static ExpRun ensureWrapped(MS2Run run, User user) throws ExperimentException
+    {
+        ExpRun expRun;
+        if (run.getExperimentRunLSID() != null)
+        {
+            expRun = ExperimentService.get().getExpRun(run.getExperimentRunLSID());
+            if (expRun != null && expRun.getContainer().getId().equals(run.getContainer()))
+            {
+                return expRun;
+            }
+        }
+        return wrapRun(run, user);
+    }
+
+    private static ExpRun wrapRun(MS2Run run, User user) throws ExperimentException
+    {
+        try
+        {
+            ExperimentService.get().getSchema().getScope().beginTransaction();
+
+            Container container = ContainerManager.getForId(run.getContainer());
+            final File pepXMLFile = new File(run.getPath(), run.getFileName());
+
+            // Check if this 
+            ExpData existingPepXmlData = ExperimentService.get().getExpDataByURL(pepXMLFile, container);
+            if (existingPepXmlData == null)
+            {
+                // Maybe the casing on one of the parent directories has changed
+                existingPepXmlData = ExperimentService.get().getExpDataByURL(pepXMLFile.toURI().toString(), container);
+            }
+            if (existingPepXmlData != null)
+            {
+                ExpRun existingRun = existingPepXmlData.getRun();
+                if (existingRun != null)
+                {
+                    // There's an existing experiment run but somehow it got disconnected
+                    run.setExperimentRunLSID(existingRun.getLSID());
+                    MS2Manager.updateRun(run, user);
+                    return existingRun;
+                }
+            }
+
+            // Make sure that we have a protocol in this folder
+            Lsid lsid = new Lsid("Protocol.Folder-" + container.getRowId(), MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
+            ExpProtocol protocol = ExperimentService.get().getExpProtocol(lsid.toString());
+            if (protocol == null)
+            {
+                protocol = ExperimentService.get().createExpProtocol(container, ExpProtocol.ApplicationType.ProtocolApplication, "MS2 Import", lsid.toString());
+                protocol.setMaxInputMaterialPerInstance(0);
+                protocol = ExperimentService.get().insertSimpleProtocol(protocol, user);
+            }
+
+            ExpRun expRun = ExperimentService.get().createExperimentRun(container, run.getDescription());
+            expRun.setProtocol(protocol);
+            Map<ExpData, String> inputDatas = new HashMap<ExpData, String>();
+            Map<ExpData, String> outputDatas = new HashMap<ExpData, String>();
+            XarSource source = new AbstractFileXarSource("Wrap MS2 Run", container, user)
+            {
+                public File getLogFile() throws IOException
+                {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public File getRoot()
+                {
+                    return pepXMLFile.getParentFile(); 
+                }
+
+                @Override
+                public ExperimentArchiveDocument getDocument() throws XmlException, IOException
+                {
+                    throw new UnsupportedOperationException();
+                }
+            };
+            
+            File fastaFile = new File(run.getFastaFileName());
+            ExpData fastaData = ExperimentService.get().getExpDataByURL(fastaFile, container);
+            if (fastaData == null)
+            {
+                fastaData = ExperimentService.get().createData(fastaFile.toURI(), source);
+            }
+            inputDatas.put(fastaData, AbstractMS2SearchTask.FASTA_INPUT_ROLE);
+
+            for (MS2Fraction fraction : run.getFractions())
+            {
+                if (fraction.getMzXmlURL() != null)
+                {
+                    URI mzXMLURI = new URI(fraction.getMzXmlURL());
+                    ExpData mzXmlData = ExperimentService.get().getExpDataByURL(new File(mzXMLURI), container);
+                    if (mzXmlData == null)
+                    {
+                        mzXmlData = ExperimentService.get().createData(mzXMLURI, source);
+                    }
+                    inputDatas.put(mzXmlData, AbstractMS2SearchTask.SPECTRA_INPUT_ROLE);
+                }
+            }
+
+            ExpData pepXMLData = ExperimentService.get().getExpDataByURL(pepXMLFile, container);
+            if (pepXMLData == null)
+            {
+                pepXMLData = ExperimentService.get().createData(pepXMLFile.toURI(), source);
+            }
+            outputDatas.put(pepXMLData, TPPTask.PEP_XML_INPUT_ROLE);
+
+            if (run.hasProteinProphet())
+            {
+                ProteinProphetFile proteinProphet = run.getProteinProphetFile();
+                File protXMLFile = new File(proteinProphet.getFilePath());
+                ExpData protXMLData = ExperimentService.get().getExpDataByURL(protXMLFile, container);
+                if (protXMLData == null)
+                {
+                    protXMLData = ExperimentService.get().createData(protXMLFile.toURI(), source);
+                }
+                outputDatas.put(protXMLData, TPPTask.PROT_XML_INPUT_ROLE);
+            }
+
+            expRun.setFilePathRoot(pepXMLFile.getParentFile());
+            ViewBackgroundInfo info = new ViewBackgroundInfo(container, user, null);
+            expRun = ExperimentService.get().insertSimpleExperimentRun(expRun, Collections.<ExpMaterial, String>emptyMap(), inputDatas, Collections.<ExpMaterial, String>emptyMap(), outputDatas, info, _log, false);
+
+            // Set the MS2 run to point at this experiment run
+            run.setExperimentRunLSID(expRun.getLSID());
+            MS2Manager.updateRun(run, user);
+
+            ExperimentService.get().getSchema().getScope().commitTransaction();
+            return expRun;
+        }
+        catch (SQLException e)
+        {
+            throw new ExperimentException(e);
+        }
+        catch (IOException e)
+        {
+            throw new ExperimentException(e);
+        }
+        catch (URISyntaxException e)
+        {
+            throw new ExperimentException(e);
+        }
+        finally
+        {
+            ExperimentService.get().getSchema().getScope().closeConnection();
+        }
+    }
 
     public static List<Integer> getRunIds(List<MS2Run> runs)
     {
@@ -338,6 +486,11 @@ public class MS2Manager
         throw new IllegalStateException("Expected a zero or one matching ProteinProphetFiles");
     }
 
+    public static MS2Run[] getUnwrappedRuns()
+    {
+        return getRuns("deleted = ? AND statusid = " + MS2Importer.STATUS_SUCCESS + " AND (experimentrunlsid IS NULL OR experimentrunlsid NOT IN (SELECT lsid FROM " + ExperimentService.get().getTinfoExperimentRun() + " WHERE container = runs.container))", false);
+    }
+
     private static MS2Run[] getRuns(String whereClause, Object... params)
     {
         ResultSet rs = null;
@@ -407,7 +560,7 @@ public class MS2Manager
         return runInfo;
     }
 
-    public static int addRun(ViewBackgroundInfo info, Logger log,
+    public static MS2Run addRun(ViewBackgroundInfo info, Logger log,
                              File file,
                              boolean restart, XarContext context) throws SQLException, IOException, XMLStreamException
     {
@@ -417,7 +570,7 @@ public class MS2Manager
         return importRun(info, log, file, runInfo, context);
     }
 
-    public static int importRun(ViewBackgroundInfo info, Logger log,
+    public static MS2Run importRun(ViewBackgroundInfo info, Logger log,
                              File file,
                              MS2Importer.RunInfo runInfo,
                              XarContext context) throws SQLException, IOException, XMLStreamException
@@ -891,8 +1044,7 @@ public class MS2Manager
         }
         catch (SQLException e)
         {
-            _log.error("getFractions", e);
-            return new MS2Fraction[0];
+            throw new RuntimeSQLException(e);
         }
     }
 

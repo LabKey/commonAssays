@@ -159,7 +159,7 @@ public abstract class MS2Importer
         }
     }
 
-    protected int upload(RunInfo info) throws SQLException, IOException, XMLStreamException
+    protected MS2Run upload(RunInfo info) throws SQLException, IOException, XMLStreamException
     {
         _runId = info.getRunId();
 
@@ -169,7 +169,7 @@ public abstract class MS2Importer
         if (info.isAlreadyImported() && run != null && run.getStatusId() == MS2Importer.STATUS_SUCCESS)
         {
             _log.info(_fileName + " has already been imported so it does not need to be imported again");
-            return info.getRunId();
+            return run;
         }
 
         MS2Progress progress = new MS2Progress();
@@ -221,7 +221,7 @@ public abstract class MS2Importer
 
         MS2Manager.computeBasicMS2Stats();       // Update runs/peptides statistics
         progress.getCumulativeTimer().logSummary("import \"" + _fileName + "\"" + (progress.getCumulativeTimer().hasTask(Tasks.ImportSpectra) ? " and import spectra" : ""));
-        return info.getRunId();
+        return MS2Manager.getRun(info.getRunId());
     }
 
 

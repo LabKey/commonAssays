@@ -57,7 +57,7 @@ public class ProteinProphetImporter
         _context = context;
     }
 
-    public void importFile(ViewBackgroundInfo info, Logger log) throws SQLException, XMLStreamException, IOException, ExperimentException
+    public MS2Run importFile(ViewBackgroundInfo info, Logger log) throws SQLException, XMLStreamException, IOException, ExperimentException
     {
         long startTime = System.currentTimeMillis();
         log.info("Starting to load ProteinProphet file " + _file.getPath());
@@ -67,12 +67,13 @@ public class ProteinProphetImporter
             throw new FileNotFoundException(_file.toString());
         }
 
-        if (!shouldImportFile(log, info.getContainer()))
+        MS2Run run = findExistingRun(log, info.getContainer());
+        if (run != null)
         {
-            return;
+            return run;
         }
 
-        MS2Run run = importRun(info, log);
+        run = importRun(info, log);
 
         if (run == null)
         {
@@ -251,9 +252,10 @@ public class ProteinProphetImporter
         }
         long endTime = System.currentTimeMillis();
         log.info("ProteinProphet import took " + ((endTime - startTime) / 1000) + " seconds.");
+        return run;
     }
 
-    private boolean shouldImportFile(Logger logger, Container c) throws SQLException, IOException
+    private MS2Run findExistingRun(Logger logger, Container c) throws SQLException, IOException
     {
         ProteinProphetFile ppFile = MS2Manager.getProteinProphetFile(_file, c);
         if (ppFile != null)
@@ -261,7 +263,7 @@ public class ProteinProphetImporter
             if (ppFile.isUploadCompleted())
             {
                 logger.info(_file.getPath() + " had already been uploaded successfully, not uploading again.");
-                return false;
+                return MS2Manager.getRun(ppFile.getRun());
             }
             else
             {
@@ -269,7 +271,7 @@ public class ProteinProphetImporter
                 MS2Manager.purgeProteinProphetFile(ppFile.getRowId());
             }
         }
-        return true;
+        return null;
     }
 
     private ProteinProphetFile insertProteinProphetFile(ViewBackgroundInfo info, MS2Run run, SimpleXMLStreamReader parser)
@@ -310,8 +312,7 @@ public class ProteinProphetImporter
         }
 
         log.info("Resolved referenced PepXML file to " + pepXMLFile.getPath());
-        int runId = MS2Manager.addRun(info, log, pepXMLFile, false, _context);
-        MS2Run run = MS2Manager.getRun(runId);
+        MS2Run run = MS2Manager.addRun(info, log, pepXMLFile, false, _context);
         if (_experimentRunLSID != null && run.getExperimentRunLSID() == null)
         {
             run.setExperimentRunLSID(_experimentRunLSID);

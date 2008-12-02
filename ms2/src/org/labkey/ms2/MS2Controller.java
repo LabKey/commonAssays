@@ -27,6 +27,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.*;
@@ -340,6 +341,12 @@ public class MS2Controller extends SpringActionController
         deleteRuns.setActionType(ActionButton.Action.GET);
         deleteRuns.setDisplayPermission(ACL.PERM_DELETE);
         bb.add(deleteRuns);
+
+        ActionButton wrapRuns = new ActionButton("", "Wrap");
+        wrapRuns.setScript("return verifySelected(this.form, \"wrapRun.view\", \"post\", \"runs\")");
+        wrapRuns.setActionType(ActionButton.Action.POST);
+        wrapRuns.setDisplayPermission(ACL.PERM_INSERT);
+        bb.add(wrapRuns);
 
         return bb;
     }
@@ -5861,6 +5868,32 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    @RequiresPermission(ACL.PERM_INSERT)
+    public class WrapRunAction extends FormHandlerAction<RunForm>
+    {
+        private ExpRun _expRun;
+        public void validateCommand(RunForm target, Errors errors)
+        {
+
+        }
+
+        public boolean handlePost(RunForm runForm, BindException errors) throws Exception
+        {
+            Set<String> ids = DataRegionSelection.getSelected(getViewContext(), true);
+            for (String id : ids)
+            {
+                int runId = Integer.parseInt(id);
+                MS2Run run = MS2Manager.getRun(runId);
+                _expRun = MS2Manager.ensureWrapped(run, getUser());
+            }
+            return true;
+        }
+
+        public ActionURL getSuccessURL(RunForm runForm)
+        {
+            return PageFlowUtil.urlProvider(ExperimentUrls.class).getRunGraphURL(_expRun);
+        }
+    }
 
     @RequiresPermission(ACL.PERM_UPDATE)
     public class EditElutionGraphAction extends SimpleViewAction<DetailsForm>
