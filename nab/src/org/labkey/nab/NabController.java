@@ -1339,7 +1339,7 @@ public class NabController extends ViewController
         }
     }
 
-    public static class UploadAssayForm extends ViewForm
+    public static class UploadAssayForm extends ViewFormData
     {
         private SampleInfo[] _sampleInfos;
         private String _fileName;

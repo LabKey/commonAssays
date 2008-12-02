@@ -16,7 +16,7 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.labkey.api.view.ViewForm;
+import org.labkey.api.view.ViewFormData;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.module.ModuleLoader;
 import org.apache.struts.action.ActionMapping;
@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.ArrayList;
 import java.net.URI;
 
-public class NewProtocolForm extends ViewForm
+public class NewProtocolForm extends ViewFormData
 {
     public String ff_name;
 

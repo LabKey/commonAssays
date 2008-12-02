@@ -15,8 +15,6 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.view.ViewForm;
-
 /**
  * <code>MS2SearchForm</code>
 */

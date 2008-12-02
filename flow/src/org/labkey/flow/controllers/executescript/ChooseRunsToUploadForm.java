@@ -17,14 +17,14 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.view.ViewForm;
+import org.labkey.api.view.ViewFormData;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowScript;
 
 import java.util.List;
 import java.util.Map;
 
-public class ChooseRunsToUploadForm extends ViewForm
+public class ChooseRunsToUploadForm extends ViewFormData
 {
     public int ff_protocolId;
     public String[] ff_path;

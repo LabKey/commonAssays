@@ -16,9 +16,9 @@
 
 package org.labkey.flow.controllers.compensation;
 
-import org.labkey.api.view.ViewForm;
+import org.labkey.api.view.ViewFormData;
 
-public class UploadCompensationForm extends ViewForm
+public class UploadCompensationForm extends ViewFormData
 {
     public String ff_compensationMatrixName;
 

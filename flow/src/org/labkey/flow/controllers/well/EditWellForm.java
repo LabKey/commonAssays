@@ -17,11 +17,11 @@
 package org.labkey.flow.controllers.well;
 
 import org.labkey.flow.data.FlowWell;
-import org.labkey.api.view.ViewForm;
+import org.labkey.api.view.ViewFormData;
 
 import java.util.Map;
 
-public class EditWellForm extends ViewForm
+public class EditWellForm extends ViewFormData
 {
     private FlowWell _well;
     public String ff_name;

@@ -4506,7 +4506,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class AddRunForm extends ViewForm
+    public static class AddRunForm extends ViewFormData
     {
         private String fileName;
         private String protocol;

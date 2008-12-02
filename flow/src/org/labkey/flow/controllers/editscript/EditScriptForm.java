@@ -22,7 +22,7 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.ViewForm;
+import org.labkey.api.view.ViewFormData;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.analysis.model.Population;
 import org.labkey.flow.analysis.model.PopulationSet;
@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-public class EditScriptForm extends ViewForm
+public class EditScriptForm extends ViewFormData
 {
     static private Logger _log = Logger.getLogger(EditScriptForm.class);
     private static int MAX_WELLS_TO_POLL = 15;

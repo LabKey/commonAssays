@@ -729,7 +729,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static class SetDefaultsForm extends ViewForm
+    public static class SetDefaultsForm extends ViewFormData
     {
         private String configureXml;
 
@@ -812,7 +812,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static class SequenceDBForm extends ViewForm
+    public static class SequenceDBForm extends ViewFormData
     {
         private FormFile sequenceDBFile;
 
@@ -1423,7 +1423,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static class SequenceDBRootForm extends ViewForm
+    public static class SequenceDBRootForm extends ViewFormData
     {
         private String _localPathRoot;
         private boolean _allowUpload;

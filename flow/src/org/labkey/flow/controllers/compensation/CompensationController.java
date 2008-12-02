@@ -29,7 +29,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NavTree;
-import org.labkey.api.view.ViewForm;
+import org.labkey.api.view.ViewFormData;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.data.FlowCompensationMatrix;
@@ -39,12 +39,8 @@ import org.labkey.flow.query.FlowSchema;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 
 public class CompensationController extends SpringFlowController<CompensationController.Action>
@@ -182,11 +178,11 @@ public class CompensationController extends SpringFlowController<CompensationCon
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowCompensationAction extends SimpleViewAction<ViewForm>
+    public class ShowCompensationAction extends SimpleViewAction<ViewFormData>
     {
         FlowCompensationMatrix _comp;
 
-        public ModelAndView getView(ViewForm form, BindException errors) throws Exception
+        public ModelAndView getView(ViewFormData form, BindException errors) throws Exception
         {
             _comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
             return FormPage.getView(CompensationController.class, form, "showCompensation.jsp");
@@ -208,13 +204,13 @@ public class CompensationController extends SpringFlowController<CompensationCon
 
 
     @RequiresPermission(ACL.PERM_DELETE)
-    public class DeleteAction extends ConfirmAction<ViewForm>
+    public class DeleteAction extends ConfirmAction<ViewFormData>
     {
-        public void validateCommand(ViewForm target, Errors errors)
+        public void validateCommand(ViewFormData target, Errors errors)
         {
         }
 
-        public ModelAndView getConfirmView(ViewForm form, BindException errors) throws Exception
+        public ModelAndView getConfirmView(ViewFormData form, BindException errors) throws Exception
         {
             FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
             if (null == comp)
@@ -222,7 +218,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
             return FormPage.getView(CompensationController.class, form, "delete.jsp");
         }
 
-        public boolean handlePost(ViewForm viewForm, BindException errors) throws Exception
+        public boolean handlePost(ViewFormData viewForm, BindException errors) throws Exception
         {
             FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
             if (null == comp)
@@ -257,12 +253,12 @@ public class CompensationController extends SpringFlowController<CompensationCon
         }
 
 
-        public ActionURL getFailURL(ViewForm viewForm, BindException errors)
+        public ActionURL getFailURL(ViewFormData viewForm, BindException errors)
         {
             return urlFor(Action.begin);
         }
 
-        public ActionURL getSuccessURL(ViewForm viewForm)
+        public ActionURL getSuccessURL(ViewFormData viewForm)
         {
             return urlFor(Action.begin);
         }
