@@ -42,6 +42,7 @@ import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.reports.ReportService;
+import org.labkey.api.portal.ProjectUrls;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.SensitivitySummary;
@@ -3135,7 +3136,7 @@ public class MS2Controller extends SpringActionController
 
     private ActionURL showRunsURL(Boolean deleted, Integer statusId)
     {
-        ActionURL url = new ActionURL("MS2", "showAllRuns", (String)null);
+        ActionURL url = new ActionURL(ShowAllRunsAction.class, ContainerManager.getRoot());
 
         if (null != deleted)
             url.addParameter(MS2Manager.getDataRegionNameRuns() + ".Deleted~eq", deleted.booleanValue() ? "1" : "0");
@@ -3207,9 +3208,12 @@ public class MS2Controller extends SpringActionController
                         out.write(getFormattedValue(ctx));
                 }
             };
-            ActionURL showRunURL = new ActionURL("MS2", "showRun", "ContainerPath");
-            String showURLString = showRunURL.getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/") + "run=${Run}";
-            descriptionColumn.setURLExpression(StringExpressionFactory.create(showURLString, false));
+            ActionURL showRunURL = new ActionURL(ShowRunAction.class, ContainerManager.getRoot());
+            StringBuilder sb = new StringBuilder(showRunURL.getLocalURIString());
+            int i = sb.lastIndexOf("/");
+            sb.replace(i, i, "\\$\\{ContainerPath}/");
+            sb.append("run=${Run}");
+            descriptionColumn.setURLExpression(StringExpressionFactory.create(sb.toString(), false));
             rgn.addDisplayColumn(descriptionColumn);
 
             rgn.addColumns(MS2Manager.getTableInfoRuns().getColumns("Path, Created, Deleted, StatusId, Status, PeptideCount, SpectrumCount, FastaId"));
@@ -4647,11 +4651,12 @@ public class MS2Controller extends SpringActionController
 
                     url = getShowListURL(c);
                     url.addParameter(MS2Manager.getDataRegionNameExperimentRuns() + ".Run~eq", Integer.toString(run));
+
+                    return url;
                 }
                 else if (!PipelineService.get().usePerlPipeline(c))
                 {
-                    url = new ActionURL("MS2", "addFileRunStatus", "");
-                    url.addParameter("error", "Automated upload disabled.");
+                    return getAddFileRunStatusErrorURL("Automated upload disabled.");
                 }
                 else
                 {
@@ -4662,8 +4667,7 @@ public class MS2Controller extends SpringActionController
                         if (run == -1)
                             HttpView.throwNotFound();
 
-                        url = new ActionURL("MS2", "addFileRunStatus", "");
-                        url.addParameter("run", Integer.toString(run));
+                        return getAddFileRunStatusRunURL(run);
                     }
                     else
                     {
@@ -4725,28 +4729,23 @@ public class MS2Controller extends SpringActionController
 
                             PipelineService.get().queueJob(job);
 
-                            url = new ActionURL("MS2", "addFileRunStatus", "");
-                            url.addParameter("path", job.getLogFile().getAbsolutePath());
+                            return getAddFileRunStatusPathURL(job.getLogFile().getAbsolutePath());
                         }
                         catch (PipelineProtocol.PipelineValidationException e)
                         {
-                            url = new ActionURL("MS2", "addFileRunStatus", "");
-                            url.addParameter("error", e.getMessage());
+                            return getAddFileRunStatusErrorURL(e.getMessage());
                         }
                         catch (IOException e)
                         {
-                            url = new ActionURL("MS2", "addFileRunStatus", "");
-                            url.addParameter("error", e.getMessage());                            
+                            return getAddFileRunStatusErrorURL(e.getMessage());
                         }
                     }
                 }
             }
             else
             {
-                url = new ActionURL("MS2", "addFileRunStatus", "");
+                return getAddFileRunStatusURL();
             }
-
-            return url;
         }
     }
 
@@ -4933,7 +4932,7 @@ public class MS2Controller extends SpringActionController
                 HttpView.throwNotFound("Unable to open the file '" + form.getPath() + "' to load as a ProteinProphet file");
             }
 
-            return new ActionURL("Project", "begin", c.getPath());
+            return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(c);
         }
     }
 
@@ -5334,6 +5333,36 @@ public class MS2Controller extends SpringActionController
     }
 
 
+    private ActionURL getAddFileRunStatusURL()
+    {
+        return new ActionURL(AddFileRunStatusAction.class, ContainerManager.getRoot());
+    }
+
+
+    private ActionURL getAddFileRunStatusErrorURL(String message)
+    {
+        ActionURL url = getAddFileRunStatusURL();
+        url.addParameter("error", message);
+        return url;
+    }
+
+
+    private ActionURL getAddFileRunStatusPathURL(String path)
+    {
+        ActionURL url = getAddFileRunStatusURL();
+        url.addParameter("path", path);
+        return url;
+    }
+
+
+    private ActionURL getAddFileRunStatusRunURL(int run)
+    {
+        ActionURL url = getAddFileRunStatusURL();
+        url.addParameter("run", run);
+        return url;
+    }
+
+
     @RequiresPermission(ACL.PERM_NONE)
     public class AddFileRunStatusAction extends ExportAction
     {
@@ -5356,7 +5385,7 @@ public class MS2Controller extends SpringActionController
                 {
                     String[] parts = (sf.getInfo() == null ?
                             new String[0] : sf.getInfo().split(","));
-                    StringBuffer sb = new StringBuffer(sf.getStatus());
+                    StringBuilder sb = new StringBuilder(sf.getStatus());
                     sb.append("->path=").append(sf.getFilePath());
                     for (String part : parts)
                     {
