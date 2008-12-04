@@ -16,10 +16,9 @@
 
 package org.labkey.ms2;
 
-import org.labkey.api.view.WebPartView;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.GridView;
 import org.labkey.api.data.*;
+import org.labkey.api.view.GridView;
+import org.labkey.api.view.WebPartView;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -44,8 +43,8 @@ public class MS2WebPart extends WebPartView
             return;
         }
 
-        DataRegion rgn = getGridRegionWebPart(c);
-        rgn.getDisplayColumn(0).setURL(ActionURL.toPathString("MS2", "showRun", c.getPath()) + "?run=${Run}");
+        DataRegion rgn = getGridRegionWebPart();
+        rgn.getDisplayColumn(0).setURL(MS2Controller.getShowRunSubstitutionURL(c));
 
         GridView gridView = new GridView(rgn);
         gridView.setCustomizeLinks(getCustomizeLinks());
@@ -58,7 +57,7 @@ public class MS2WebPart extends WebPartView
     }
 
 
-    private DataRegion getGridRegionWebPart(Container c)
+    private DataRegion getGridRegionWebPart()
     {
         DataRegion rgn = new DataRegion();
         rgn.setName(MS2Manager.getDataRegionNameExperimentRuns());

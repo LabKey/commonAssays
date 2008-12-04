@@ -361,6 +361,14 @@ public class MS2Controller extends SpringActionController
     }
 
 
+    public static String getShowRunSubstitutionURL(Container c)
+    {
+        ActionURL url = new ActionURL(ShowRunAction.class, c);
+
+        return url.getPath() + "?run=${Run}";
+    }
+
+
     @RequiresPermission(ACL.PERM_READ)
     public class ShowRunAction extends SimpleViewAction<RunForm>
     {

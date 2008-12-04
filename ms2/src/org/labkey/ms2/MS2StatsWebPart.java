@@ -17,6 +17,7 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.ActionURL;
 
@@ -35,7 +36,7 @@ public class MS2StatsWebPart extends JspView<MS2StatsWebPart.StatsBean>
         setTitle("MS2 Statistics");
 
         if (!getViewContext().getUser().isGuest())
-            setTitleHref(ActionURL.toPathString("MS2", "exportHistory", ""));
+            setTitleHref(new ActionURL(MS2Controller.ExportHistoryAction.class, ContainerManager.getRoot()));
     }
 
 
