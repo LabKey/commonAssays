@@ -20,7 +20,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.query.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.exp.api.ContainerFilter;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
@@ -134,7 +134,7 @@ public class SpectraCountTableInfo extends VirtualTable
             public TableInfo getLookupTableInfo()
             {
                 ExpRunTable result = (ExpRunTable)MS2Schema.TableType.MS2SearchRuns.createTable(null, _ms2Schema);
-                result.setContainerFilter(ContainerFilter.Filters.EVERYTHING);
+                result.setContainerFilter(ContainerFilter.Filters.EVERYTHING, _ms2Schema.getUser());
                 return result;
             }
         });

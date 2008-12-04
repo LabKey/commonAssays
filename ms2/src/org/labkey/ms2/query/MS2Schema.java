@@ -20,7 +20,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ContainerFilter;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
@@ -495,7 +495,7 @@ public class MS2Schema extends UserSchema
     private ExpRunTable createSearchTable(String name, String alias, ContainerFilter filter, String... protocolObjectPrefix)
     {
         final ExpRunTable result = ExperimentService.get().createRunTable(name, alias, this);
-        result.setContainerFilter(filter);
+        result.setContainerFilter(filter, getUser());
         result.populate();
         String[] protocolPatterns = new String[protocolObjectPrefix.length];
         for (int i = 0; i < protocolObjectPrefix.length; i++)

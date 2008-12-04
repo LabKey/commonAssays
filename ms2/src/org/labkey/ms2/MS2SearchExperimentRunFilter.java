@@ -22,7 +22,7 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.MenuButton;
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.api.ContainerFilter;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.ActionURL;
