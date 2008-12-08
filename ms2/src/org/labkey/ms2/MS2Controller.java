@@ -190,7 +190,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private AbstractMS2RunView getPeptideView(String grouping, MS2Run... runs) throws ServletException
+    private AbstractMS2RunView<? extends WebPartView> getPeptideView(String grouping, MS2Run... runs) throws ServletException
     {
         return MS2RunViewType.getViewType(grouping).createView(getViewContext(), runs);
     }
@@ -252,7 +252,7 @@ public class MS2Controller extends SpringActionController
             rgn.addDisplayColumn(new HideShowScoringColumn(bb));
             rgn.setButtonBar(bb, DataRegion.MODE_GRID);
 
-            ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
+            ProteinSearchWebPart searchView = new ProteinSearchWebPart(true, ProteinSearchForm.createDefault());
 
             return new VBox(searchView, gridView);
         }
@@ -797,7 +797,7 @@ public class MS2Controller extends SpringActionController
 
             MS2Run run = MS2Manager.getRun(runId);
             long[] peptideIndex = null;
-            
+
             //if no row index was passed, don't try to look it up, as it always results
             //in an error being written to the log. There are now other instances where
             //peptide sequences are displayed with hyperlinks to this action, and they
@@ -1047,7 +1047,7 @@ public class MS2Controller extends SpringActionController
             {
                 return HttpView.throwNotFound("No run specified");
             }
-            
+
             int runId;
             try
             {
@@ -1065,7 +1065,7 @@ public class MS2Controller extends SpringActionController
 
             _goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
 
-            AbstractMS2RunView peptideView = getPeptideView(queryURL.getParameter("grouping"), run);
+            AbstractMS2RunView<? extends WebPartView> peptideView = getPeptideView(queryURL.getParameter("grouping"), run);
 
             Map<String, SimpleFilter> filters = peptideView.getFilter(queryURL, run);
             String peptideFilterInfo = "";
@@ -1444,7 +1444,12 @@ public class MS2Controller extends SpringActionController
         peptideFilterType, peptideProphetProbability, orCriteriaForEachRun, runList, spectraConfig
     }
 
-    public static class PeptideFilteringComparisonForm extends RunListForm
+    public enum PeptideFilterType
+    {
+        none, peptideProphet, customView
+    }
+
+    public static class PeptideFilteringComparisonForm extends RunListForm implements PeptideFilter
     {
         private String _peptideFilterType = "none";
         private Float _peptideProphetProbability;
@@ -1463,12 +1468,12 @@ public class MS2Controller extends SpringActionController
 
         public boolean isPeptideProphetFilter()
         {
-            return "peptideProphet".equals(getPeptideFilterType());
+            return PeptideFilterType.peptideProphet.toString().equals(getPeptideFilterType());
         }
 
         public boolean isCustomViewPeptideFilter()
         {
-            return "customView".equals(getPeptideFilterType());
+            return PeptideFilterType.customView.toString().equals(getPeptideFilterType());
         }
 
         public void setPeptideFilterType(String peptideFilterType)
@@ -1564,7 +1569,7 @@ public class MS2Controller extends SpringActionController
                 prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
                 PropertyManager.saveProperties(prefs);
             }
-            
+
 
             HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein columns under the <em>Protein</em> node in the tree, or expand <em>Protein Group</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>");
 
@@ -1861,7 +1866,7 @@ public class MS2Controller extends SpringActionController
 
     public static final String PEPTIDES_FILTER = "PeptidesFilter";
     public static final String PEPTIDES_FILTER_VIEW_NAME = PEPTIDES_FILTER + "." + QueryParam.viewName.toString();
-    
+
     @RequiresPermission(ACL.PERM_READ)
     public abstract class AbstractRunListCreationAction<FormType extends RunListForm> extends SimpleViewAction<FormType>
     {
@@ -2295,7 +2300,7 @@ public class MS2Controller extends SpringActionController
         {
             DataRegion rgn = new DataRegion();
             rgn.setColumns(ProteinManager.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
-            String runsURL = ActionURL.toPathString("MS2", "showAllRuns", (String)null) + "?" + MS2Manager.getDataRegionNameRuns() + ".FastaId~eq=${FastaId}";
+            String runsURL = new ActionURL(ShowAllRunsAction.class, ContainerManager.getRoot()) + "?" + MS2Manager.getDataRegionNameRuns() + ".FastaId~eq=${FastaId}";
             rgn.getDisplayColumn("Runs").setURL(runsURL);
             rgn.setFixedWidthColumns(false);
             rgn.setShowRecordSelectors(true);
@@ -2619,6 +2624,7 @@ public class MS2Controller extends SpringActionController
                 protected TableInfo createTable()
                 {
                     ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
+                    table.addPeptideFilter(form, getViewContext());
                     Integer[] seqIds = getSeqIds(form);
                     if (seqIds.length <= 500)
                     {
@@ -2687,16 +2693,12 @@ public class MS2Controller extends SpringActionController
             QueryView proteinsView = createInitializedQueryView(form, errors, false, POTENTIAL_PROTEIN_DATA_REGION);
             QueryView groupsView = createInitializedQueryView(form, errors, false, PROTEIN_DATA_REGION);
 
-            ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
-            searchView.getModelBean().setIdentifier(form.getIdentifier());
-            searchView.getModelBean().setIncludeSubfolders(form.isIncludeSubfolders());
-            searchView.getModelBean().setExactMatch(form.isExactMatch());
-            searchView.getModelBean().setRestrictProteins(form.isRestrictProteins());
+            ProteinSearchWebPart searchView = new ProteinSearchWebPart(true, form);
             if (getViewContext().getRequest().getParameter("ProteinSearchResults.GroupProbability~gte") != null)
             {
                 try
                 {
-                    searchView.getModelBean().setMinProbability(Float.parseFloat(request.getParameter("ProteinSearchResults.GroupProbability~gte")));
+                    form.setMinimumProbability(Float.parseFloat(request.getParameter("ProteinSearchResults.GroupProbability~gte")));
                 }
                 catch (NumberFormatException e) {}
             }
@@ -2704,10 +2706,12 @@ public class MS2Controller extends SpringActionController
             {
                 try
                 {
-                    searchView.getModelBean().setMaxErrorRate(Float.parseFloat(request.getParameter("ProteinSearchResults.ErrorRate~lte")));
+                    form.setMaximumErrorRate(Float.parseFloat(request.getParameter("ProteinSearchResults.ErrorRate~lte")));
                 }
                 catch (NumberFormatException e) {}
             }
+            proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
+            groupsView.enableExpandCollapse("ProteinSearchGroupMatches", false);
 
             return new VBox(searchView, proteinsView, groupsView);
         }
@@ -2723,9 +2727,22 @@ public class MS2Controller extends SpringActionController
         private String _identifier;
         private Float _minimumProbability;
         private Float _maximumErrorRate;
+        private String _peptideFilterType = "none";
+        private Float _peptideProphetProbability;
         private boolean _includeSubfolders;
         private boolean _exactMatch;
         private boolean _restrictProteins;
+        private String _defaultCustomView;
+
+        public String getDefaultCustomView()
+        {
+            return _defaultCustomView;
+        }
+
+        public void setDefaultCustomView(String defaultCustomView)
+        {
+            _defaultCustomView = defaultCustomView;
+        }
 
         public boolean isExactMatch()
         {
@@ -2735,6 +2752,41 @@ public class MS2Controller extends SpringActionController
         public void setExactMatch(boolean exactMatch)
         {
             _exactMatch = exactMatch;
+        }
+
+        public String getPeptideFilterType()
+        {
+            return _peptideFilterType;
+        }
+
+        public void setPeptideFilterType(String peptideFilterType)
+        {
+            _peptideFilterType = peptideFilterType;
+        }
+
+        public Float getPeptideProphetProbability()
+        {
+            return _peptideProphetProbability;
+        }
+
+        public void setPeptideProphetProbability(Float peptideProphetProbability)
+        {
+            _peptideProphetProbability = peptideProphetProbability;
+        }
+
+        public boolean isNoPeptideFilter()
+        {
+            return !isCustomViewPeptideFilter() && !isPeptideProphetFilter();
+        }
+
+        public boolean isPeptideProphetFilter()
+        {
+            return PeptideFilterType.peptideProphet.toString().equals(getPeptideFilterType());
+        }
+
+        public boolean isCustomViewPeptideFilter()
+        {
+            return PeptideFilterType.customView.toString().equals(getPeptideFilterType());
         }
 
         public String getIdentifier()
@@ -2786,8 +2838,30 @@ public class MS2Controller extends SpringActionController
         {
             _restrictProteins = restrictProteins;
         }
-    }
 
+        public String getCustomViewName(ViewContext context)
+        {
+            String result = context.getRequest().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME);
+            if (result == null)
+            {
+                result = _defaultCustomView;
+            }
+            if ("".equals(result))
+            {
+                return null;
+            }
+            return result;
+        }
+
+        public static ProteinSearchForm createDefault()
+        {
+            ProteinSearchForm result = new ProteinSearchForm();
+            result.setIncludeSubfolders(true);
+            result.setRestrictProteins(true);
+            result.setExactMatch(true);
+            return result;
+        }
+    }
 
     @RequiresPermission(ACL.PERM_READ)
     public class ExportAllPeptidesAction extends ExportAction<ExportForm>
@@ -4241,6 +4315,10 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    private static String trimSafe(String s)
+    {
+        return (s == null ? "" : s.trim());
+    }
 
     public static class TestMascotForm extends FormData
     {
@@ -4251,11 +4329,6 @@ public class MS2Controller extends SpringActionController
         private int status;
         private String parameters;
         private String message;
-
-        private String trimSafe(String s)
-        {
-            return (s == null ? "" : s.trim());
-        }
 
         public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
         {
@@ -4374,7 +4447,7 @@ public class MS2Controller extends SpringActionController
             return null;
         }
     }
-    
+
 
     public static class TestSequestForm extends FormData
     {
@@ -4385,7 +4458,7 @@ public class MS2Controller extends SpringActionController
 
         public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
         {
-            setSequestServer(httpServletRequest.getParameter("sequestServer").trim());
+            setSequestServer(trimSafe(httpServletRequest.getParameter("sequestServer")));
             super.reset(actionMapping, httpServletRequest);
         }
 
@@ -5980,7 +6053,7 @@ public class MS2Controller extends SpringActionController
 
     public class CompareOptionsBean<Form extends PeptideFilteringComparisonForm>
     {
-        private final QueryView _peptideView;
+        private final PeptidesFilterView _peptideView;
         private final ActionURL _targetURL;
         private final int _runList;
         private final Form _form;
@@ -5993,7 +6066,7 @@ public class MS2Controller extends SpringActionController
             _peptideView = new PeptidesFilterView(getViewContext(), _form);
         }
 
-        public QueryView getPeptideView()
+        public PeptidesFilterView getPeptideView()
         {
             return _peptideView;
         }

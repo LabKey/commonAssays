@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.ms2.query.SpectraCountConfiguration" %>
-<%@ page import="java.io.PrintWriter" %>
-<%@ page import="org.labkey.api.query.QueryPicker" %>
-<%@ page import="org.labkey.api.query.QueryView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
@@ -40,13 +36,9 @@ MS2Controller.PeptideFilteringComparisonForm form = bean.getForm();
     <p class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="customViewRadioButton" value="customView" <%= form.isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>
         Use a customized Peptides view to establish criteria for which peptides to include in the comparison.
         <%
-        QueryPicker picker = bean.getPeptideView().getColumnListPicker(request);
-        picker.setAutoRefresh(false);
-        PrintWriter writer = new PrintWriter(out);
-        bean.getPeptideView().renderCustomizeViewLink(writer);
-        writer.flush();
+            bean.getPeptideView().renderCustomizeViewLink(out);
+            bean.getPeptideView().renderViewList(request, out);
         %>
-        <%= picker.toString()%>
     </p>
     <p>There are two options for how to use the protein group filters:</p>
     <p class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.orCriteriaForEachRun %>" value="false" <%= !form.isOrCriteriaForEachRun() ? " checked=\"true\"" : "" %> /> For each run, only show the protein if the run contains that protein and it meets the filter criteria in that run.</p>

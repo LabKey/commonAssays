@@ -61,40 +61,7 @@ public class ProteinController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            DataRegion rgn = new DataRegion();
-            rgn.setColumns(ProteinManager.getTableInfoCustomAnnotationSet().getColumns("Name, Created, CreatedBy, CustomAnnotationSetId"));
-            rgn.getDisplayColumn("Name").setURL("showAnnotationSet.view?CustomAnnotation.queryName=${Name}");
-            rgn.getDisplayColumn("CustomAnnotationSetId").setVisible(false);
-            GridView gridView = new GridView(rgn);
-            rgn.setShowRecordSelectors(getContainer().hasPermission(getUser(), ACL.PERM_INSERT) || getContainer().hasPermission(getUser(), ACL.PERM_DELETE));
-            gridView.setSort(new Sort("Name"));
-
-            ButtonBar buttonBar = new ButtonBar();
-
-            ActionButton deleteButton = new ActionButton("", "Delete");
-            ActionURL deleteURL = new ActionURL(DeleteCustomAnnotationSetsAction.class, getContainer());
-            deleteButton.setScript("return verifySelected(this.form, \"" + deleteURL.getLocalURIString() + "\", \"post\", \"Custom Protein Lists\")");
-            deleteButton.setActionType(ActionButton.Action.POST);
-            deleteButton.setDisplayPermission(ACL.PERM_DELETE);
-            buttonBar.add(deleteButton);
-
-            ActionButton addButton = new ActionButton(new ActionURL(UploadCustomProteinAnnotations.class, getContainer()), "Import Custom Protein List");
-            addButton.setDisplayPermission(ACL.PERM_INSERT);
-            addButton.setActionType(ActionButton.Action.LINK);
-            buttonBar.add(addButton);
-
-            rgn.setButtonBar(buttonBar);
-
-            VBox box = new VBox();
-
-            if (!getContainer().isProject())
-            {
-                ActionURL link = getBeginURL(getContainer().getProject());
-                HtmlView noteView = new HtmlView("This list only shows protein lists that have been loaded into this folder. When constructing queries, <a href=\"" + link + "\">annotations in the project</a> are visible from all the folders in that project.");
-                box.addView(noteView);
-            }
-            box.addView(gridView);
-            return box;
+            return new CustomProteinListView(getViewContext(), true);
         }
 
         public NavTree appendNavTrail(NavTree root)

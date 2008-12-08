@@ -20,6 +20,7 @@
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.ms2.search.ProteinSearchBean" %>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
@@ -27,44 +28,53 @@
     JspView<ProteinSearchBean> me = (JspView<ProteinSearchBean>) HttpView.currentView();
     ProteinSearchBean bean = me.getModelBean();
     ViewContext ctx = me.getViewContext();
-    ActionURL url = ctx.getActionURL().clone();
-    url.setPageFlow("MS2");
-    url.setAction("doProteinSearch.view");
-    url.deleteParameters();
 
-    ActionURL annotationsURL = ctx.getActionURL().clone();
-    annotationsURL.setPageFlow("protein");
-    annotationsURL.setAction("begin.view");
-    annotationsURL.deleteParameters();
+    ActionURL url = new ActionURL(MS2Controller.DoProteinSearchAction.class, ctx.getContainer());
 
     String separator = bean.isHorizontal() ? "<td>&nbsp;</td>" : "</tr><tr>";
 %>
 <form action="<%= url %>" method="get">
     <table>
         <tr>
-            <td>Name:</td>
-            <td nowrap><input size="12" type="text" name="identifier" value="<%= h(bean.getIdentifier()) %>"/><%= helpPopup("Protein Search: Name", "Required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from an annotations file. You may comma separate multiple names.") %></td>
+            <td>Protein name:</td>
+            <td nowrap><input size="12" type="text" name="identifier" value="<%= h(bean.getForm().getIdentifier()) %>"/><%= helpPopup("Protein Search: Name", "Required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from an annotations file. You may comma separate multiple names.") %></td>
         <%= separator %>
             <td nowrap>Prob &ge;</td>
-            <td nowrap><input type="text" size="1" name="minimumProbability" <% if (bean.getMinProbability() != null ) { %>value="<%= bean.getMinProbability()%>"<% } %>/><%= helpPopup("Protein Search: Probability", "If entered, only ProteinProphet protein groups that have an associated probability greater than or equal to the value will be included.") %></td>
+            <td nowrap><input type="text" size="1" name="minimumProbability" <% if (bean.getForm().getMinimumProbability() != null ) { %>value="<%= bean.getForm().getMinimumProbability() %>"<% } %>/><%= helpPopup("Protein Search: Probability", "If entered, only ProteinProphet protein groups that have an associated probability greater than or equal to the value will be included.") %></td>
         <%= separator %>
             <td nowrap>Error &le;</td>
-            <td nowrap><input type="text" size="1" name="maximumErrorRate"  <% if (bean.getMaxErrorRate() != null ) { %>value="<%= bean.getMaxErrorRate()%>"<% } %>/><%= helpPopup("Protein Search: Error Rate", "If entered, only ProteinProphet protein groups that have an associated error rate less than or equal to the value will be included.") %></td>
+            <td nowrap><input type="text" size="1" name="maximumErrorRate"  <% if (bean.getForm().getMaximumErrorRate() != null ) { %>value="<%= bean.getForm().getMaximumErrorRate() %>"<% } %>/><%= helpPopup("Protein Search: Error Rate", "If entered, only ProteinProphet protein groups that have an associated error rate less than or equal to the value will be included.") %></td>
         <%= separator %>
             <td>Subfolders:</td>
-            <td nowrap><input type="checkbox" name="includeSubfolders" <% if (bean.isIncludeSubfolders()) { %>checked="true" <% } %> /><%= helpPopup("Protein Search: Subfolders", "If checked, the search will also look in all of this folder's children.") %></td>
+            <td nowrap><input type="checkbox" name="includeSubfolders" <% if (bean.getForm().isIncludeSubfolders()) { %>checked="true" <% } %> /><%= helpPopup("Protein Search: Subfolders", "If checked, the search will also look in all of this folder's children.") %></td>
         <%= separator %>
             <td>Exact:</td>
-            <td nowrap><input type="checkbox" name="exactMatch" <% if (bean.isExactMatch()) { %>checked="true" <% } %> /><%= helpPopup("Protein Search: Exact Match", "If checked, the search will only find proteins with an exact name match. If not checked, proteins that start with the name entered will also match, but the search may be significantly slower.") %></td>
+            <td nowrap><input type="checkbox" name="exactMatch" <% if (bean.getForm().isExactMatch()) { %>checked="true" <% } %> /><%= helpPopup("Protein Search: Exact Match", "If checked, the search will only find proteins with an exact name match. If not checked, proteins that start with the name entered will also match, but the search may be significantly slower.") %></td>
         <%= separator %>
             <td>Restrict:</td>
-            <td nowrap><input type="checkbox" name="restrictProteins" <% if (bean.isRestrictProteins()) { %>checked="true" <% } %> /><%= helpPopup("Protein Search: Restrict Proteins", "If checked, the search will only look for proteins that are in FASTA files that have been searched by the included runs. If not checked, the list of Matching Proteins will include all proteins that match the criteria.") %></td>
+            <td nowrap><input type="checkbox" name="restrictProteins" <% if (bean.getForm().isRestrictProteins()) { %>checked="true" <% } %> /><%= helpPopup("Protein Search: Restrict Proteins", "If checked, the search will only look for proteins that are in FASTA files that have been searched by the included runs. If not checked, the list of Matching Proteins will include all proteins that match the criteria.") %></td>
         <%= separator %>
-            <td></td>
+            <td />
             <td><labkey:button text="Search" /></td>
         <%= separator %>
-            <td></td>
-            <td>[<a href="<%= annotationsURL.getLocalURIString() %>">manage custom protein lists</a>]</td>
         </tr>
     </table>
+    <% if (bean.isHorizontal()) { %>
+        <table>
+            <tr>
+                <td valign="center" height="100%">
+                    <span style="padding-right: 10px">Peptide filter: <input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" value="none" <%= bean.getForm().isNoPeptideFilter() ? "checked=\"true\"" : "" %> />None<%= helpPopup("Peptide Filter: None", "Do not filter the protein results based on peptide criteria.") %></span>
+                    <span style="padding-right: 10px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="peptideProphetRadioButton" value="peptideProphet" <%= bean.getForm().isPeptideProphetFilter() ? "checked=\"true\"" : "" %>/>Pep prob &ge; <input onfocus="document.getElementById('peptideProphetRadioButton').checked=true;" type="text" size="1" name="<%= MS2Controller.PeptideFilteringFormElements.peptideProphetProbability %>" value="<%= bean.getForm().getPeptideProphetProbability() == null ? "" : bean.getForm().getPeptideProphetProbability() %>" /><%= helpPopup("Peptide Filter: PeptideProphet", "Only show protein groups where at least one peptide has a PeptideProphet probability above some threshold.") %></span>
+                    <span style="padding-right: 10px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="customViewRadioButton" value="customView" <%= bean.getForm().isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>Custom
+                        <%
+                        bean.getPeptideView(ctx).renderViewList(request, out);
+                        %><%= helpPopup("Peptide Filter: Custom", "Only show protein groups where at least one peptide meets a custom filter.") %>
+                        <%
+                        bean.getPeptideView(ctx).renderCustomizeViewLink(out);
+                        %>
+                    </span>
+                </td>
+            </tr>
+        </table>
+    <% } %>
 </form>

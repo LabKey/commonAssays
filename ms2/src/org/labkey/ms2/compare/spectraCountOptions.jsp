@@ -16,8 +16,6 @@
  */
 %>
 <%@ page import="org.labkey.ms2.query.SpectraCountConfiguration" %>
-<%@ page import="java.io.PrintWriter" %>
-<%@ page import="org.labkey.api.query.QueryPicker" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
@@ -56,13 +54,9 @@ MS2Controller.SpectraCountForm form = bean.getForm();
     <p class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="customViewRadioButton" value="customView" <%= form.isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>
         Use a customized Peptides view to establish criteria for which peptides to include in the comparison.
         <%
-        QueryPicker picker = bean.getPeptideView().getColumnListPicker(request);
-        picker.setAutoRefresh(false);
-        PrintWriter writer = new PrintWriter(out);
-        bean.getPeptideView().renderCustomizeViewLink(writer);
-        writer.flush();
+        bean.getPeptideView().renderCustomizeViewLink(out);
+        bean.getPeptideView().renderViewList(request, out);
         %>
-        <%= picker.toString()%>
     </p>
     <p><labkey:button text="Go"/></p>
 </form>

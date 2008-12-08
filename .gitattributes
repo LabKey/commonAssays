@@ -1053,6 +1053,7 @@ ms2/src/org/labkey/ms2/protein/CharactersParseActions.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationImportHelper.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationSet.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationType.java -text
+ms2/src/org/labkey/ms2/protein/CustomProteinListView.java -text
 ms2/src/org/labkey/ms2/protein/DefaultAnnotationLoader.java -text
 ms2/src/org/labkey/ms2/protein/FastaDbLoader.java -text
 ms2/src/org/labkey/ms2/protein/FastaReloader.java -text
@@ -1118,6 +1119,7 @@ ms2/src/org/labkey/ms2/query/MS2Schema.java -text
 ms2/src/org/labkey/ms2/query/OrganismTableInfo.java -text
 ms2/src/org/labkey/ms2/query/PeptideAggregrationDisplayColumn.java -text
 ms2/src/org/labkey/ms2/query/PeptideCountCoverageColumn.java -text
+ms2/src/org/labkey/ms2/query/PeptideFilter.java -text
 ms2/src/org/labkey/ms2/query/PeptidesFilterView.java -text
 ms2/src/org/labkey/ms2/query/PeptidesTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinGroupTableInfo.java -text

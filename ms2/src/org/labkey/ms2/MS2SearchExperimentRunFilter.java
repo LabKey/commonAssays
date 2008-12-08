@@ -29,6 +29,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.query.MS2Schema;
+import org.springframework.web.servlet.mvc.Controller;
 
 /**
  * User: jeckels
@@ -46,12 +47,9 @@ public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
         _protocolPrefixes = protocolPrefixes;
     }
 
-    private ActionButton createButton(ViewContext context, String actionName, String description, ActionButton.Action method)
+    private ActionButton createButton(ViewContext context, Class<? extends Controller> action, String description, ActionButton.Action method)
     {
-        ActionURL url = context.getActionURL().clone();
-        url.deleteParameters();
-        url.setPageFlow("MS2");
-        url.setAction(actionName + ".view");
+        ActionURL url = new ActionURL(action, context.getContainer());
         ActionButton button = new ActionButton(url.getLocalURIString() + "ExperimentRunIds=true", description, ACL.PERM_READ, method);
         button.setDisplayModes(DataRegion.MODE_GRID);
         return button;
@@ -61,20 +59,16 @@ public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
     public void populateButtonBar(ViewContext context, ButtonBar bar, DataView view, ContainerFilter containerFilter)
     {
         MenuButton compareMenu = MS2Controller.createCompareMenu(context.getContainer(), view, true);
-
         bar.add(compareMenu);
 
         ActionButton exportRuns = new ActionButton("button", "MS2 Export");
-        ActionURL url = context.getActionURL().clone();
-        url.deleteParameters();
-        url.setPageFlow("MS2");
-        url.setAction("pickExportRunsView.view");
+        ActionURL url = new ActionURL(MS2Controller.PickExportRunsView.class, context.getContainer());
         exportRuns.setScript("return verifySelected(this.form, \"" + url.getLocalURIString() + "experimentRunIds=true\", \"post\", \"runs\")");
         exportRuns.setActionType(ActionButton.Action.GET);
         exportRuns.setDisplayPermission(ACL.PERM_READ);
         bar.add(exportRuns);
 
-        bar.add(createButton(context, "showHierarchy", "Show Hierarchy", ActionButton.Action.LINK));
+        bar.add(createButton(context, MS2Controller.ShowHierarchyAction.class, "Show Hierarchy", ActionButton.Action.LINK));
     }
 
     public Priority getPriority(ExpProtocol protocol)

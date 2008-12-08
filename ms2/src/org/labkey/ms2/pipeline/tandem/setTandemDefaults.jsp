@@ -24,9 +24,9 @@ PipelineController.SetDefaultsForm form = (PipelineController.SetDefaultsForm) g
 %>
 <form method="post" action="<%=urlFor(PipelineController.SetTandemDefaultsAction.class)%>">
 <labkey:errors />
-<table>
+<table width="100%">
     <tr><td class='labkey-form-label'>X!Tandem<br>Default XML:</td>
-        <td><textarea name="configureXml" cols="90" rows="20"><%=form.getConfigureXml()%></textarea><br>
+        <td><textarea name="configureXml" cols="90" rows="25" style="width: 100%"><%=form.getConfigureXml()%></textarea><br>
                     For detailed explanations of all available input parameters, see the
                     <a href="http://www.thegpm.org/TANDEM/api/index.html" target="_api">X!Tandem API Documentation</a> on-line.</td></tr>
     <tr><td colspan="2"><labkey:button text="Set Defaults"/>&nbsp;<labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(getContainer())%>"/></td></tr>

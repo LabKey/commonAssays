@@ -18,6 +18,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.ms2.MS2Run;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartView;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public enum MS2RunViewType
 {
     NONE("None", "none")
     {
-        public AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs)
+        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
         {
             return new FlatPeptideView(viewContext, runs);
         }
@@ -53,7 +54,7 @@ public enum MS2RunViewType
     },
     PROTEIN("Protein", "protein")
     {
-        public AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs)
+        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
         {
             return new StandardProteinPeptideView(viewContext, runs);
         }
@@ -75,7 +76,7 @@ public enum MS2RunViewType
     },
     PROTEIN_PROPHET("Protein Prophet", "proteinprophet")
     {
-        public AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs)
+        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
         {
             return new ProteinProphetPeptideView(viewContext, runs);
         }
@@ -102,14 +103,14 @@ public enum MS2RunViewType
     },
     QUERY_PEPTIDES("Query - Peptides", "query")
     {
-        public AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs)
+        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
         {
             return new QueryPeptideMS2RunView(viewContext, runs);
         }
     },
     QUERY_PROTEIN_GROUPS("Query - Protein Groups", "queryproteingroups")
     {
-        public AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs)
+        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
         {
             return new QueryProteinGroupMS2RunView(viewContext, runs);
         }
@@ -175,7 +176,7 @@ public enum MS2RunViewType
         return false;
     }
 
-    public abstract AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs);
+    public abstract AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs);
 
     public static MS2RunViewType getViewType(String urlName)
     {

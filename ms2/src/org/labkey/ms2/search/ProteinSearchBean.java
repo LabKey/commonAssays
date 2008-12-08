@@ -16,87 +16,48 @@
 
 package org.labkey.ms2.search;
 
+import org.labkey.ms2.query.PeptideFilter;
+import org.labkey.ms2.query.PeptidesFilterView;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.api.view.ViewContext;
+
 /**
  * User: jeckels
  * Date: Feb 26, 2007
  */
-public class ProteinSearchBean
+public class ProteinSearchBean implements PeptideFilter
 {
-    private boolean _includeSubfolders = true;
-    private boolean _exactMatch = true;
-    private boolean _restrictProteins = true;
-    private Float _minProbability;
-    private Float _maxErrorRate;
-    private String _identifier = "";
     private boolean _horizontal;
-
-    public ProteinSearchBean(boolean horizontal)
+    private final MS2Controller.ProteinSearchForm _form;
+    private PeptidesFilterView _peptideView;
+    
+    public ProteinSearchBean(boolean horizontal, MS2Controller.ProteinSearchForm form)
     {
         _horizontal = horizontal;
+        _form = form;
     }
 
+    public PeptidesFilterView getPeptideView(ViewContext viewContext)
+    {
+        if (_peptideView == null)
+        {
+            _peptideView = new PeptidesFilterView(viewContext, this);
+        }
+        return _peptideView;
+    }
+    
+    public String getCustomViewName(ViewContext context)
+    {
+        return _form.getCustomViewName(context);
+    }
+    
     public boolean isHorizontal()
     {
         return _horizontal;
     }
 
-    public String getIdentifier()
+    public MS2Controller.ProteinSearchForm getForm()
     {
-        return _identifier;
-    }
-
-    public boolean isExactMatch()
-    {
-        return _exactMatch;
-    }
-
-    public void setExactMatch(boolean exactMatch)
-    {
-        _exactMatch = exactMatch;
-    }
-
-    public void setIdentifier(String identifier)
-    {
-        _identifier = identifier;
-    }
-
-    public boolean isIncludeSubfolders()
-    {
-        return _includeSubfolders;
-    }
-
-    public void setIncludeSubfolders(boolean includeSubfolders)
-    {
-        _includeSubfolders = includeSubfolders;
-    }
-
-    public Float getMaxErrorRate()
-    {
-        return _maxErrorRate;
-    }
-
-    public void setMaxErrorRate(Float maxErrorRate)
-    {
-        _maxErrorRate = maxErrorRate;
-    }
-
-    public Float getMinProbability()
-    {
-        return _minProbability;
-    }
-
-    public void setMinProbability(Float minProbability)
-    {
-        _minProbability = minProbability;
-    }
-
-    public boolean isRestrictProteins()
-    {
-        return _restrictProteins;
-    }
-
-    public void setRestrictProteins(boolean restrictProteins)
-    {
-        _restrictProteins = restrictProteins;
+        return _form;
     }
 }

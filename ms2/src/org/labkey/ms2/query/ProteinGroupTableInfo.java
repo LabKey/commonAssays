@@ -22,6 +22,7 @@ import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.*;
 import org.labkey.ms2.protein.ProteinManager;
 
@@ -141,6 +142,36 @@ public class ProteinGroupTableInfo extends FilteredTable
         defaultColumns.add(FieldKey.fromParts("TotalNumberPeptides"));
 
         setDefaultVisibleColumns(defaultColumns);
+    }
+
+    public void addPeptideFilter(MS2Controller.ProteinSearchForm form, ViewContext context)
+    {
+        if (form.isNoPeptideFilter())
+        {
+            return;
+        }
+
+        SQLFragment peptidesSQL;
+
+        Set<FieldKey> peptideFieldKeys = Collections.singleton(FieldKey.fromParts("RowId"));
+        if (form.isCustomViewPeptideFilter())
+        {
+            peptidesSQL = _schema.getPeptideSelectSQL(context.getRequest(), form.getCustomViewName(context), peptideFieldKeys);
+        }
+        else
+        {
+            SimpleFilter filter = new SimpleFilter();
+            if (form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
+            {
+                filter.addClause(new CompareType.CompareClause("PeptideProphet", CompareType.GTE, form.getPeptideProphetProbability()));
+            }
+            peptidesSQL = _schema.getPeptideSelectSQL(filter, peptideFieldKeys);
+        }
+        SQLFragment condition = new SQLFragment();
+        condition.append("RowId IN (SELECT ProteinGroupId FROM " + MS2Manager.getTableInfoPeptideMemberships() + " WHERE PeptideId IN (");
+        condition.append(peptidesSQL);
+        condition.append("))");
+        addCondition(condition, "RowId");
     }
 
     public void addProteinsColumn()

@@ -16,48 +16,32 @@
 
 package org.labkey.ms2;
 
-import org.labkey.api.data.*;
 import org.labkey.api.view.GridView;
-import org.labkey.api.view.WebPartView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.data.*;
 
-import java.io.PrintWriter;
 import java.util.List;
 
 /**
  * User: jeckels
 * Date: Feb 6, 2007
 */
-public class MS2WebPart extends WebPartView
+public class MS2WebPart extends GridView
 {
-    public MS2WebPart()
+    public MS2WebPart(ViewContext viewContext)
     {
+        super(getGridRegionWebPart());
+
+        DataRegion rgn = getDataRegion();
+        rgn.getDisplayColumn(0).setURL(MS2Controller.getShowRunSubstitutionURL(viewContext.getContainer()));
+
+        setTitle("MS2 Runs");
+        setTitleHref(MS2Controller.getShowListURL(viewContext.getContainer()));
+        setFilter(new SimpleFilter("Deleted", Boolean.FALSE));
+        setSort(MS2Manager.getRunsBaseSort());
     }
 
-
-    @Override
-    public void renderView(Object model, PrintWriter out) throws Exception
-    {
-        Container c = hasAccess(getViewContext(), "MS2 Runs");
-        if (c == null)
-        {
-            return;
-        }
-
-        DataRegion rgn = getGridRegionWebPart();
-        rgn.getDisplayColumn(0).setURL(MS2Controller.getShowRunSubstitutionURL(c));
-
-        GridView gridView = new GridView(rgn);
-        gridView.setCustomizeLinks(getCustomizeLinks());
-        gridView.setTitle("MS2 Runs");
-        gridView.setTitleHref(MS2Controller.getShowListURL(c));
-        gridView.setFilter(new SimpleFilter("Deleted", Boolean.FALSE));
-        gridView.setSort(MS2Manager.getRunsBaseSort());
-
-        include(gridView);
-    }
-
-
-    private DataRegion getGridRegionWebPart()
+    private static DataRegion getGridRegionWebPart()
     {
         DataRegion rgn = new DataRegion();
         rgn.setName(MS2Manager.getDataRegionNameExperimentRuns());

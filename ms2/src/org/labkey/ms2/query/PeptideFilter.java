@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008 LabKey Corporation
+ * Copyright (c) 2008 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.labkey.ms2.query;
 
-package org.labkey.ms2.search;
-
-import org.labkey.api.view.JspView;
-import org.labkey.ms2.MS2Controller;
+import org.labkey.api.view.ViewContext;
 
 /**
  * User: jeckels
- * Date: Feb 6, 2007
+ * Date: Dec 3, 2008
  */
-public class ProteinSearchWebPart extends JspView<ProteinSearchBean>
+public interface PeptideFilter
 {
-    public static final String NAME = "Protein Search";
-
-    public ProteinSearchWebPart(boolean horizontal, MS2Controller.ProteinSearchForm form)
-    {
-        super("/org/labkey/ms2/search/searchProteins.jsp");
-        setTitle(NAME);
-        setModelBean(new ProteinSearchBean(horizontal, form));
-    }
+    public String getCustomViewName(ViewContext viewContext);
 }

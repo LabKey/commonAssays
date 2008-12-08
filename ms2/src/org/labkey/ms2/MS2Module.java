@@ -35,6 +35,7 @@ import org.labkey.api.reports.ReportService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.query.QueryView;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
@@ -48,6 +49,7 @@ import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.CustomProteinListView;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.scoring.ScoringController;
@@ -82,7 +84,9 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     };
 
     public static final String MS2_SAMPLE_PREPARATION_RUNS_NAME = "MS2 Sample Preparation Runs";
-    public static final String MS2_RUNS_ENHANCED_NAME = "MS2 Runs (Enhanced)";
+    public static final String MS2_EXPERIMENT_RUNS_NAME = "MS2 Experiment Runs";
+    public static final String MS2_RUNS_ENHANCED_LEGACY_NAME = "MS2 Runs (Enhanced)";
+    private static final String MS2_RUNS_DEPRECATED_NAME = "MS2 Runs (Deprecated)";
 
     public String getName()
     {
@@ -96,23 +100,32 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     protected Collection<? extends WebPartFactory> createWebPartFactories()
     {
+        BaseWebPartFactory legacyRunsFactory = new BaseWebPartFactory(MS2_RUNS_DEPRECATED_NAME)
+        {
+            public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+            {
+                MS2WebPart part = new MS2WebPart(portalCtx);
+                part.setTitle(MS2_RUNS_DEPRECATED_NAME);
+                part.setTitlePopupHelp(MS2_RUNS_DEPRECATED_NAME, "The MS2 Experiment Runs web part replaces this MS2 Runs web part and adds significant new functionality.");
+                return part;
+            }
+        };
+        legacyRunsFactory.addLegacyNames("MS2 Runs");
+
+        BaseWebPartFactory runsFactory = new BaseWebPartFactory(MS2_EXPERIMENT_RUNS_NAME)
+        {
+            public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+            {
+                QueryView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _ms2SearchRunFilter, true, true);
+                result.setTitle("MS2 Experiment Runs");
+                return result;
+            }
+        };
+        runsFactory.addLegacyNames(MS2_RUNS_ENHANCED_LEGACY_NAME);
+        
         return Arrays.asList(
-            new BaseWebPartFactory("MS2 Runs")
-            {
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                {
-                    return new MS2WebPart();
-                }
-            },
-            new BaseWebPartFactory(MS2_RUNS_ENHANCED_NAME)
-            {
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-                {
-                    WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _ms2SearchRunFilter, true, true);
-                    result.setTitle("MS2 Runs");
-                    return result;
-                }
-            },
+                legacyRunsFactory,
+                runsFactory,
             new BaseWebPartFactory(MS2_SAMPLE_PREPARATION_RUNS_NAME)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
@@ -133,14 +146,25 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));
+                    return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProteinSearchForm.createDefault());
                 }
             },
             new BaseWebPartFactory(ProteinSearchWebPart.NAME)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));
+                    return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProteinSearchForm.createDefault());
+                }
+            },
+            new BaseWebPartFactory(CustomProteinListView.NAME)
+            {
+                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                {
+                    CustomProteinListView result = new CustomProteinListView(portalCtx, false);
+                    result.setFrame(WebPartView.FrameType.PORTAL);
+                    result.setTitle(CustomProteinListView.NAME);
+                    result.setTitleHref(ProteinController.getBeginURL(portalCtx.getContainer()));
+                    return result;
                 }
             }
         );

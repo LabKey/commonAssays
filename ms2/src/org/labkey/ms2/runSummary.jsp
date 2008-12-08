@@ -44,7 +44,7 @@ if (null != bean.quantAlgorithm)
 { %>
     <tr><td>Quantitation:</td><td><%=h(bean.quantAlgorithm)%></td></tr><%
 } %>
-    <tr><td colspan="2">
+    <tr><td colspan="4">
         <div class="labkey-button-bar">
         <%
 

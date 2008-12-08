@@ -17,11 +17,12 @@
 package org.labkey.ms2;
 
 import org.labkey.api.module.DefaultFolderType;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
-import static org.labkey.api.util.PageFlowUtil.set;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.data.Container;
 import org.labkey.ms2.search.ProteinSearchWebPart;
+import org.labkey.ms2.protein.ProteinController;
 
 import java.util.Arrays;
 
@@ -36,7 +37,7 @@ public class MS2FolderType extends DefaultFolderType
                         "Use existing analytic tools like PeptideProphet and ProteinProphet.",
             Arrays.asList(
                 Portal.getPortalPart("Data Pipeline").createWebPart(),
-                Portal.getPortalPart(MS2Module.MS2_RUNS_ENHANCED_NAME).createWebPart()
+                Portal.getPortalPart(MS2Module.MS2_RUNS_ENHANCED_LEGACY_NAME).createWebPart()
             ),
             Arrays.asList(
                 Portal.getPortalPart(ProteinSearchWebPart.NAME).createWebPart(),
@@ -54,5 +55,12 @@ public class MS2FolderType extends DefaultFolderType
     public String getStartPageLabel(ViewContext ctx)
     {
         return super.getStartPageLabel(ctx);
+    }
+
+    @Override
+    public void addManageLinks(NavTree adminNavTree, Container container)
+    {
+        super.addManageLinks(adminNavTree, container);
+        adminNavTree.addChild(new NavTree("Manage Custom Protein Lists", ProteinController.getBeginURL(container)));
     }
 }
