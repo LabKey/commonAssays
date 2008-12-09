@@ -16,17 +16,17 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.struts.upload.FormFile;
-import org.apache.struts.action.ActionMapping;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.struts.action.ActionMapping;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.Analysis;
+import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.StatisticSet;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.EnumSet;
+import java.util.Set;
 
 public class UploadAnalysisForm extends EditScriptForm
 {

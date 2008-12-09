@@ -17,7 +17,6 @@
 package org.labkey.flow.controllers.editscript;
 
 import org.apache.struts.action.ActionMapping;
-import org.apache.struts.upload.FormFile;
 import org.fhcrc.cpas.flow.script.xml.ChannelDef;
 import org.fhcrc.cpas.flow.script.xml.ChannelSubsetDef;
 import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;

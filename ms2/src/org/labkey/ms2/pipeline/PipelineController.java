@@ -15,20 +15,25 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.struts.upload.FormFile;
+import org.apache.commons.lang.StringUtils;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
+import org.labkey.api.action.*;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.*;
-import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
@@ -42,11 +47,9 @@ import org.labkey.ms2.pipeline.tandem.XTandemSearchProtocolFactory;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
-import org.labkey.api.action.*;
-import org.labkey.api.gwt.server.BaseRemoteService;
-import org.labkey.api.settings.AppProps;
 
 import java.io.*;
 import java.net.URI;
@@ -58,7 +61,7 @@ import java.util.*;
  */
 public class PipelineController extends SpringActionController
 {
-    private static DefaultActionResolver _resolver = new DefaultActionResolver(PipelineController.class);
+    private static final DefaultActionResolver _resolver = new DefaultActionResolver(PipelineController.class);
 
     private static HelpTopic getHelpTopic(String topic)
     {
@@ -814,14 +817,14 @@ public class PipelineController extends SpringActionController
 
     public static class SequenceDBForm extends ViewFormData
     {
-        private FormFile sequenceDBFile;
+        private MultipartFile sequenceDBFile;
 
-        public FormFile getSequenceDBFile()
+        public MultipartFile getSequenceDBFile()
         {
             return sequenceDBFile;
         }
 
-        public void setSequenceDBFile(FormFile sequenceDBFile)
+        public void setSequenceDBFile(MultipartFile sequenceDBFile)
         {
             this.sequenceDBFile = sequenceDBFile;
         }
@@ -842,9 +845,11 @@ public class PipelineController extends SpringActionController
 
         public boolean handlePost(SequenceDBForm form, BindException errors) throws Exception
         {
-            FormFile ff = form.getSequenceDBFile();
-            String name = (ff == null ? "" : ff.getFileName());
-            if (ff == null || ff.getFileSize() == 0)
+            Map<String, MultipartFile> fileMap = getFileMap();
+            MultipartFile ff = fileMap.get("sequenceDBFile");
+
+            String name = (ff == null ? "" : ff.getOriginalFilename());
+            if (ff == null || ff.getSize() == 0)
             {
                 errors.reject(ERROR_MSG, "Please specify a FASTA file.");
                 return false;
