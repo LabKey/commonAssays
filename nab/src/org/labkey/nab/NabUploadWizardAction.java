@@ -119,7 +119,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
         return "" + (obj != null ? obj.toString() : "");
     }
 */
-    protected StepHandler getRunStepHandler()
+    protected StepHandler<NabRunUploadForm> getRunStepHandler()
     {
         return new NabRunStepHandler();
     }
@@ -137,7 +137,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
             PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(form, _protocol,
                     getSelectedParticipantVisitResolverType(provider, form));
             _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
-            boolean samplePropsValid = validatePostedProperties(_postedSampleProperties, getViewContext().getRequest(), errors);
+            boolean samplePropsValid = validatePostedProperties(_postedSampleProperties, errors);
             return runPropsValid && samplePropsValid;
         }
 
@@ -154,7 +154,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
             return super.afterRunCreation(form, run, errors);
         else
         {
-            HttpView.throwRedirect(new ActionURL("NabAssay", "details",
+            HttpView.throwRedirect(new ActionURL(NabAssayController.DetailsAction.class,
                     run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true"));
             return null;
         }

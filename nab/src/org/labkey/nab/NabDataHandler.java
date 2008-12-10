@@ -90,7 +90,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
                 results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), WELLGROUP_NAME_PROPERTY, group.getName(), PropertyType.STRING));
 
                 OntologyManager.ensureObject(container.getId(), dataRowLsid.toString(),  data.getLSID());
-                OntologyManager.insertProperties(container.getId(), results.toArray(new ObjectProperty[results.size()]), dataRowLsid.toString());
+                OntologyManager.insertProperties(container, dataRowLsid.toString(), results.toArray(new ObjectProperty[results.size()]));
             }
         }
         catch (ValidationException ve)

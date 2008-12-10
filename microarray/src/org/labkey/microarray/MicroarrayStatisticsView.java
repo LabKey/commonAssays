@@ -18,7 +18,7 @@ package org.labkey.microarray;
 
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.exp.ExperimentRunType;
 
 /**
  * User: jeckels
@@ -45,8 +45,8 @@ public class MicroarrayStatisticsView extends JspView<MicroarrayStatisticsView.M
     {
         super("/org/labkey/microarray/statistics.jsp");
 
-        ExperimentRunFilter filter = MicroarrayRunFilter.INSTANCE;
-        int runCount = filter.getRunCount(ctx.getUser(), ctx.getContainer());
+        ExperimentRunType type = MicroarrayRunType.INSTANCE;
+        int runCount = type.getRunCount(ctx.getUser(), ctx.getContainer());
 
         setModelBean(new MicroarraySummaryBean(runCount));
     }

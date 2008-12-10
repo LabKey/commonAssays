@@ -456,7 +456,7 @@ public class FlowRun extends FlowObject<ExpRun>
                 experiment.removeRun(user, getExperimentRun());
             }
             FlowExperiment workspace = FlowExperiment.ensureWorkspace(user, getContainer());
-            workspace.getExperiment().addRun(user, run);
+            workspace.getExperiment().addRuns(user, run);
             if (transaction)
             {
                 ExperimentService.get().commitTransaction();

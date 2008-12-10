@@ -20,6 +20,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.ExperimentRunTypeSource;
+import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
@@ -74,7 +76,7 @@ public class MicroarrayModule extends DefaultModule
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayRunFilter.INSTANCE, true, false);
+                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayRunType.INSTANCE, true, false);
                     view.setTitle(WEBPART_MICROARRAY_RUNS);
                     view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
                     return view;
@@ -118,7 +120,17 @@ public class MicroarrayModule extends DefaultModule
         ModuleLoader.getInstance().registerFolderType(new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
-        ExperimentService.get().registerExperimentRunFilter(MicroarrayRunFilter.INSTANCE);
+        ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
+        {
+            public Set<ExperimentRunType> getExperimentRunTypes(Container container)
+            {
+                if (container.getActiveModules().contains(MicroarrayModule.this))
+                {
+                    return Collections.<ExperimentRunType>singleton(MicroarrayRunType.INSTANCE);
+                }
+                return Collections.emptySet();
+            }
+        });
         PipelineService.get().registerPipelineProvider(new MicroarrayPipelineProvider());
     }
 

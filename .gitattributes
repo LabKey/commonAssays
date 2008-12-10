@@ -521,7 +521,7 @@ microarray/src/org/labkey/microarray/MicroarrayFolderType.java -text
 microarray/src/org/labkey/microarray/MicroarrayManager.java -text
 microarray/src/org/labkey/microarray/MicroarrayModule.java -text
 microarray/src/org/labkey/microarray/MicroarrayRun.java -text
-microarray/src/org/labkey/microarray/MicroarrayRunFilter.java -text
+microarray/src/org/labkey/microarray/MicroarrayRunType.java -text
 microarray/src/org/labkey/microarray/MicroarraySchema.java -text
 microarray/src/org/labkey/microarray/MicroarrayStatisticsView.java -text
 microarray/src/org/labkey/microarray/MicroarrayUploadWizardAction.java -text
@@ -571,7 +571,7 @@ ms1/src/META-INF/ms1/scripts/sql[!!-~]server/obsolete/ms1-2.30-2.31.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/obsolete/ms1-2.31-2.32.sql -text
 ms1/src/org/labkey/ms1/CompareServiceImpl.java -text
 ms1/src/org/labkey/ms1/MS1Controller.java -text
-ms1/src/org/labkey/ms1/MS1ExperimentRunFilter.java -text
+ms1/src/org/labkey/ms1/MS1ExperimentRunType.java -text
 ms1/src/org/labkey/ms1/MS1FolderType.java -text
 ms1/src/org/labkey/ms1/MS1Manager.java -text
 ms1/src/org/labkey/ms1/MS1Module.java -text
@@ -840,7 +840,7 @@ ms2/src/org/labkey/ms2/MS2Manager.java -text
 ms2/src/org/labkey/ms2/MS2Module.java -text
 ms2/src/org/labkey/ms2/MS2RunHierarchyTree.java -text
 ms2/src/org/labkey/ms2/MS2RunType.java -text
-ms2/src/org/labkey/ms2/MS2SearchExperimentRunFilter.java -text
+ms2/src/org/labkey/ms2/MS2SearchExperimentRunType.java -text
 ms2/src/org/labkey/ms2/MS2ServiceImpl.java -text
 ms2/src/org/labkey/ms2/MS2StatsWebPart.java -text
 ms2/src/org/labkey/ms2/MS2WebPart.java -text

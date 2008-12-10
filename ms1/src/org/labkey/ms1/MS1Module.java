@@ -19,7 +19,8 @@ package org.labkey.ms1;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.exp.ExperimentRunType;
+import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
@@ -43,10 +44,7 @@ import org.labkey.ms1.report.MS1ReportUIProvider;
 import org.labkey.ms1.report.PeaksRReport;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -63,7 +61,7 @@ public class MS1Module extends SpringModule
     public static final String WEBPART_PEP_SEARCH = "Peptide Search";
     public static final String WEBPART_FEATURE_SEARCH = "MS1 Feature Search";
     public static final String PROTOCOL_MS1 = "msInspect Feature Finding Analysis";
-    public static final ExperimentRunFilter EXP_RUN_FILTER = new MS1ExperimentRunFilter();
+    public static final ExperimentRunType EXP_RUN_TYPE = new MS1ExperimentRunType();
 
     public String getName()
     {
@@ -95,7 +93,7 @@ public class MS1Module extends SpringModule
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MS1Module.EXP_RUN_FILTER, true, true);
+                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MS1Module.EXP_RUN_TYPE, true, true);
                     view.setTitle("MS1 Runs");
                     ActionURL url = portalCtx.getActionURL().clone();
                     url.setPageFlow(CONTROLLER_NAME);
@@ -163,7 +161,17 @@ public class MS1Module extends SpringModule
         ExperimentService.get().registerExperimentDataHandler(new MSInspectFeaturesDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new PeaksFileDataHandler());
 
-        ExperimentService.get().registerExperimentRunFilter(EXP_RUN_FILTER);
+        ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
+        {
+            public Set<ExperimentRunType> getExperimentRunTypes(Container container)
+            {
+                if (container.getActiveModules().contains(MS1Module.this))
+                {
+                    return Collections.singleton(EXP_RUN_TYPE);
+                }
+                return Collections.emptySet();
+            }
+        });
 
         //register the MS1 folder type
         ModuleLoader.getInstance().registerFolderType(new MS1FolderType(this));

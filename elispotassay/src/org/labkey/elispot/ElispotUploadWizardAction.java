@@ -95,19 +95,6 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
     }
 
-    protected ModelAndView afterRunCreation(ElispotRunUploadForm form, ExpRun run, BindException errors) throws ServletException, SQLException
-    {
-        PropertyDescriptor[] antigenColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
-        if (antigenColumns.length == 0)
-        {
-            return super.afterRunCreation(form, run, errors);
-        }
-        else
-        {
-            return getAntigenView(form, false, errors);
-        }
-    }
-
     private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean reshow, BindException errors) throws ServletException
     {
         Map<PropertyDescriptor, String> map = new LinkedHashMap<PropertyDescriptor, String>();
@@ -182,7 +169,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         return null;
     }
 
-    protected StepHandler getRunStepHandler()
+    protected StepHandler<ElispotRunUploadForm> getRunStepHandler()
     {
         return new ElispotRunStepHandler();
     }
@@ -205,7 +192,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(form, _protocol,
                             getSelectedParticipantVisitResolverType(provider, form));
                     _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
-                    samplePropsValid = validatePostedProperties(_postedSampleProperties, getViewContext().getRequest(), errors);
+                    samplePropsValid = validatePostedProperties(_postedSampleProperties, errors);
                 }
                 catch (ExperimentException e)
                 {
@@ -219,18 +206,20 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         @Override
         protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
-            saveDefaultValues(_postedSampleProperties, form.getRequest(), form.getProvider(), RunStepHandler.NAME);
-            return super.handleSuccessfulPost(form, errors);
-        }
-
-        protected ExpRun saveExperimentRun(ElispotRunUploadForm form) throws ExperimentException
-        {
-            // dont save until after the antigen step
-            return null;
+            PropertyDescriptor[] antigenColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+            if (antigenColumns.length == 0)
+            {
+                saveDefaultValues(_postedSampleProperties, form.getRequest(), form.getProvider(), RunStepHandler.NAME);
+                return super.handleSuccessfulPost(form, errors);
+            }
+            else
+            {
+                return getAntigenView(form, false, errors);
+            }
         }
     }
 
-    public class AntigenStepHandler extends StepHandler<ElispotRunUploadForm>
+    public class AntigenStepHandler extends RunStepHandler
     {
         public static final String NAME = "ANTIGEN";
         private Map<PropertyDescriptor, String> _postedAntigenProperties = null;
@@ -256,10 +245,10 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
         protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
-            ExpRun run = null;
-            try {
+            try
+            {
                 AssayProvider provider = form.getProvider();
-                run = provider.saveExperimentRun(form);
+                ExpRun run = saveExperimentRun(form);
 
                 saveDefaultValues(_postedAntigenProperties, form.getRequest(), provider, getName());
 
@@ -319,7 +308,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                             if (!results.isEmpty())
                             {
                                 OntologyManager.ensureObject(form.getContainer().getId(), dataRowLsid.toString(),  data[0].getLSID());
-                                OntologyManager.insertProperties(form.getContainer().getId(), results.toArray(new ObjectProperty[results.size()]), dataRowLsid.toString());
+                                OntologyManager.insertProperties(form.getContainer(), dataRowLsid.toString(), results.toArray(new ObjectProperty[results.size()]));
                             }
                         }
                     }

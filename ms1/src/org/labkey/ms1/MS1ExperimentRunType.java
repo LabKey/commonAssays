@@ -19,7 +19,7 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.view.ActionURL;
@@ -33,9 +33,9 @@ import org.labkey.ms1.query.MS1Schema;
  * Date: Jan 28, 2008
  * Time: 2:24:01 PM
  */
-public class MS1ExperimentRunFilter extends ExperimentRunFilter
+public class MS1ExperimentRunType extends ExperimentRunType
 {
-    public MS1ExperimentRunFilter()
+    public MS1ExperimentRunType()
     {
         super(MS1Module.PROTOCOL_MS1, MS1Schema.SCHEMA_NAME, MS1Schema.TABLE_FEATURE_RUNS);
     }

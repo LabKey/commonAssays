@@ -16,7 +16,7 @@
 
 package org.labkey.microarray;
 
-import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
@@ -25,11 +25,11 @@ import org.labkey.microarray.assay.MicroarrayAssayProvider;
  * User: jeckels
 * Date: Feb 7, 2008
 */
-public class MicroarrayRunFilter extends ExperimentRunFilter
+public class MicroarrayRunType extends ExperimentRunType
 {
-    public static final MicroarrayRunFilter INSTANCE = new MicroarrayRunFilter();
+    public static final MicroarrayRunType INSTANCE = new MicroarrayRunType();
 
-    private MicroarrayRunFilter()
+    private MicroarrayRunType()
     {
         super("Microarray", MicroarraySchema.SCHEMA_NAME, MicroarraySchema.TABLE_RUNS);
     }

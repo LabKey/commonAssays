@@ -1718,9 +1718,9 @@ public class MS2Controller extends SpringActionController
                 {
                     ExperimentService.get().moveRuns(info, sourceContainer, expRuns);
                 }
-                catch (FileNotFoundException e)
+                catch (IOException e)
                 {
-                    HttpView.throwNotFound(e.getMessage());
+                    HttpView.throwNotFound("Failed to initialize move. Check that the pipeline root is configured correctly. " + e);
                 }
             }
 

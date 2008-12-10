@@ -220,7 +220,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     {
                         Map<PropertyDescriptor, String> properties = form.getAnalyteProperties(analyte.getRowId());
 
-                        validatePostedProperties(properties, getViewContext().getRequest(), errors);
+                        validatePostedProperties(properties, errors);
                     }
                 }
 
@@ -245,7 +245,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                             objProperties[i++] = property;
                         }
                         try {
-                            OntologyManager.insertProperties(getContainer().getId(), objProperties, analyte.getLsid());
+                            OntologyManager.insertProperties(getContainer(), analyte.getLsid(), objProperties);
                         }
                         catch (ValidationException ve)
                         {

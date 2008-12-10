@@ -20,7 +20,7 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.MenuButton;
-import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -35,12 +35,12 @@ import org.springframework.web.servlet.mvc.Controller;
  * User: jeckels
  * Date: Nov 7, 2006
  */
-public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
+public class MS2SearchExperimentRunType extends ExperimentRunType
 {
     private Priority _priority;
     private String[] _protocolPrefixes;
 
-    public MS2SearchExperimentRunFilter(String name, String tableName, Priority priority, String... protocolPrefixes)
+    public MS2SearchExperimentRunType(String name, String tableName, Priority priority, String... protocolPrefixes)
     {
         super(name, MS2Schema.SCHEMA_NAME, tableName);
         _priority = priority;

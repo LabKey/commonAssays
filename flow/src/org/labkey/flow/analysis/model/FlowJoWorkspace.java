@@ -998,7 +998,7 @@ abstract public class FlowJoWorkspace implements Serializable
 
             if (experiment != null)
             {
-                experiment.getExperiment().addRun(user, run);
+                experiment.getExperiment().addRuns(user, run);
             }
             
             FlowManager.get().updateFlowObjectCols(container);

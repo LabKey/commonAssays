@@ -382,7 +382,8 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             Map<String, Object> excelRunProps = new HashMap<String, Object>();
 
             ParticipantVisitResolver resolver = null;
-            AssayProvider provider = AssayService.get().getProvider(expRun.getProtocol());
+            ExpProtocol protocol = expRun.getProtocol();
+            AssayProvider provider = AssayService.get().getProvider(protocol);
             for (ObjectProperty objectProperty : expRun.getObjectProperties().values())
             {
                 if (AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(objectProperty.getName()))
@@ -610,7 +611,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             Integer objectId = OntologyManager.ensureObject(container.getId(), expRun.getLSID());
             for (PropertyDescriptor excelRunColumn : excelRunColumns)
             {
-                OntologyManager.deleteProperty(container.getId(), expRun.getLSID(), excelRunColumn.getPropertyURI());
+                OntologyManager.deleteProperty(expRun.getLSID(), excelRunColumn.getPropertyURI(), container, protocol.getContainer());
             }
 
             OntologyManager.insertTabDelimited(container, objectId, new OntologyManager.ImportHelper()
@@ -911,7 +912,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
     {
         try
         {
-            OntologyManager.deleteOntologyObject(container.getId(), data.getLSID());
+            OntologyManager.deleteOntologyObjects(container, data.getLSID());
         }
         catch (SQLException e)
         {
