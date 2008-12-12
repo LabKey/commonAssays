@@ -16,52 +16,52 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.labkey.flow.controllers.SpringFlowController;
-import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.data.*;
-import org.labkey.flow.ScriptParser;
-import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
-import org.labkey.flow.script.FlowAnalyzer;
-import org.labkey.flow.analysis.web.StatisticSpec;
-import org.labkey.flow.analysis.web.GraphSpec;
-import org.labkey.flow.analysis.web.SubsetSpec;
-import org.labkey.flow.analysis.web.PlotInfo;
-import org.labkey.flow.analysis.model.*;
-import org.labkey.flow.analysis.model.Polygon;
-import org.labkey.api.action.*;
-import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.ACL;
-import org.labkey.api.view.*;
-import org.labkey.api.view.template.HomeTemplate;
-import org.labkey.api.util.ExceptionUtil;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.data.Container;
-import org.labkey.api.jsp.FormPage;
-import org.labkey.api.query.FieldKey;
-import org.apache.log4j.Logger;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.commons.lang.StringUtils;
-import org.apache.xmlbeans.XmlObject;
+import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlCursor;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.validation.BindException;
+import org.apache.xmlbeans.XmlObject;
 import org.fhcrc.cpas.flow.script.xml.*;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
+import org.labkey.api.data.Container;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.jsp.FormPage;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
+import org.labkey.flow.ScriptParser;
+import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.model.Polygon;
+import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.PlotInfo;
+import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.SpringFlowController;
+import org.labkey.flow.data.*;
+import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
+import org.labkey.flow.script.FlowAnalyzer;
+import org.springframework.validation.BindException;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.Element;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
+import java.awt.*;
+import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
-import java.awt.image.BufferedImage;
-import java.awt.*;
-import java.awt.geom.Point2D;
-import java.io.ByteArrayOutputStream;
 
 /**
  * User: kevink
@@ -460,7 +460,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         {
             if (isPost())
             {
-                Map<String, MultipartFile> files = getFileMap(getViewContext());
+                Map<String, MultipartFile> files = getFileMap();
                 MultipartFile file = files.get("workspaceFile");
                 ActionURL forward = doUploadAnalysis(form, file, errors);
                 if (forward != null)
@@ -677,8 +677,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
                     ExceptionUtil.logExceptionToMothership(form.getRequest(), e);
                 }
             }
-            Map<String, MultipartFile> files = getFileMap(getViewContext());
-            MultipartFile file = files.get("workspaceFile");
+            MultipartFile file = getFileMap().get("workspaceFile");
             return handleWorkspaceUpload(file, errors);
         }
 
@@ -731,16 +730,6 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
                 return null;
             return form.urlFor(Action.editCompensationCalculation);
         }
-    }
-
-    /**
-     * @return a map from form element name to uploaded files
-     */
-    protected static Map<String, MultipartFile> getFileMap(ViewContext context)
-    {
-        if (context.getRequest() instanceof MultipartHttpServletRequest)
-            return (Map<String, MultipartFile>)((MultipartHttpServletRequest)context.getRequest()).getFileMap();
-        return Collections.emptyMap();
     }
 
     protected boolean safeSetAnalysisScript(FlowScript script, String str, BindException errors)
