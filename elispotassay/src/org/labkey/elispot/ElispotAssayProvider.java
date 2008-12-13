@@ -389,7 +389,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
         }
     }
 
-    public ElispotRunDataQueryView createRunDataView(ViewContext context, ExpProtocol protocol)
+    public ElispotRunDataQueryView createRunDataQueryView(ViewContext context, ExpProtocol protocol)
     {
         String name = getRunDataTableName(protocol);
         QuerySettings settings = new QuerySettings(context, name);
@@ -398,7 +398,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
         return new ElispotRunDataQueryView(protocol, context, settings);
     }
 
-    public RunListDetailsQueryView createRunView(ViewContext context, ExpProtocol protocol)
+    public RunListDetailsQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
     {
         return new RunListDetailsQueryView(protocol, context,
                 ElispotController.RunDetailsAction.class, "rowId", ExpRunTable.Column.RowId.toString());

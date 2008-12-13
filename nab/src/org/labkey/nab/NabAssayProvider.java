@@ -423,7 +423,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         }
     }
 
-    public NabRunDataQueryView createRunDataView(ViewContext context, ExpProtocol protocol)
+    public NabRunDataQueryView createRunDataQueryView(ViewContext context, ExpProtocol protocol)
     {
         return new NabRunDataQueryView(protocol, context, this);
     }
@@ -436,7 +436,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         }
     }
 
-    public NabRunListQueryView createRunView(ViewContext context, ExpProtocol protocol)
+    public NabRunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
     {
         return new NabRunListQueryView(protocol, context);
     }
