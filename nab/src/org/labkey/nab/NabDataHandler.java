@@ -64,7 +64,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
             ExpRun run = data.getRun();
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
             Container container = data.getContainer();
-            Luc5Assay assayResults = getAssayResults(run, dataFile);
+            Luc5Assay assayResults = getAssayResults(run, info.getUser(), dataFile);
             OntologyManager.ensureObject(container.getId(), data.getLSID());
             for (int summaryIndex = 0; summaryIndex < assayResults.getSummaries().length; summaryIndex++)
             {
@@ -107,7 +107,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public static List<DilutionSummary> getDilutionSummaries(int... dataObjectIds) throws ExperimentException, SQLException
+    public static List<DilutionSummary> getDilutionSummaries(User user, int... dataObjectIds) throws ExperimentException, SQLException
     {
         Map<String, Luc5Assay> dataToAssay = new HashMap<String, Luc5Assay>();
         List<DilutionSummary> summaries = new ArrayList<DilutionSummary>();
@@ -139,7 +139,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
                 ExpData dataObject = ExperimentService.get().getExpData(dataLsid);
                 if (dataObject == null)
                     continue;
-                assay = getAssayResults(dataObject.getRun());
+                assay = getAssayResults(dataObject.getRun(), user);
                 if (assay == null)
                     continue;
                 dataToAssay.put(dataLsid, assay);
@@ -199,19 +199,19 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public static Luc5Assay getAssayResults(ExpRun run) throws ExperimentException
+    public static NabAssayRun getAssayResults(ExpRun run, User user) throws ExperimentException
     {
         File dataFile = getDataFile(run);
         if (dataFile == null)
             throw new MissingDataFileException("Nab data file could not be found for run " + run.getName() + ".  Deleted from file system?");
-        return getAssayResults(run, dataFile);
+        return getAssayResults(run, user, dataFile);
     }
 
-    private static Luc5Assay getAssayResults(ExpRun run, File dataFile) throws ExperimentException
+    private static NabAssayRun getAssayResults(ExpRun run, User user, File dataFile) throws ExperimentException
     {
         ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
         Container container = run.getContainer();
-        AssayProvider provider = AssayService.get().getProvider(protocol);
+        PlateBasedAssayProvider provider = (PlateBasedAssayProvider) AssayService.get().getProvider(protocol);
         PlateTemplate nabTemplate = provider.getPlateTemplate(container, protocol);
 
         Map<String, PropertyDescriptor> runProperties = new HashMap<String, PropertyDescriptor>();
@@ -273,33 +273,12 @@ public class NabDataHandler extends AbstractExperimentDataHandler
                 lockAxes = lock.booleanValue();
         }
 
-        Luc5Assay assay = new Luc5Assay(plate, sortedCutoffs, fit);
+        NabAssayRun assay = new NabAssayRun(provider, run, plate, user, sortedCutoffs, fit);
         assay.setCutoffFormats(cutoffs);
         assay.setWellGroupMaterialMapping(inputs);
         assay.setDataFile(dataFile);
         assay.setLockAxes(lockAxes);
         return assay;
-    }
-
-    public static Map<WellGroup, Map<PropertyDescriptor, Object>> getWellGroupProperties(ExpRun run) throws ExperimentException
-    {
-        ExpProtocol protocol = run.getProtocol();
-        AssayProvider provider = AssayService.get().getProvider(protocol);
-        Luc5Assay assay = getAssayResults(run);
-        List<WellGroup> wellgroups = new ArrayList<WellGroup>();
-        for (DilutionSummary summary : assay.getSummaries())
-            wellgroups.add(summary.getWellGroup());
-        Map<WellGroup, ExpMaterial> materials = getWellGroupMaterialPairings(run.getMaterialInputs().keySet(), wellgroups);
-        PropertyDescriptor[] sampleProperties = ((PlateBasedAssayProvider) provider).getSampleWellGroupColumns(protocol);
-        Map<WellGroup, Map<PropertyDescriptor, Object>> ret = new HashMap<WellGroup, Map<PropertyDescriptor, Object>>();
-        for (Map.Entry<WellGroup,  ExpMaterial> entry : materials.entrySet())
-        {
-            Map<PropertyDescriptor, Object> properties = new HashMap<PropertyDescriptor, Object>();
-            for (PropertyDescriptor pd : sampleProperties)
-                properties.put(pd, entry.getValue().getProperty(pd));
-            ret.put(entry.getKey(), properties);
-        }
-        return ret;
     }
 
     private static Map<WellGroup, ExpMaterial> getWellGroupMaterialPairings(Collection<ExpMaterial> sampleInputs, List<? extends WellGroup> wellgroups)

@@ -24,6 +24,7 @@ import java.util.Map;
 import org.labkey.api.study.*;
 import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpRun;
 
 /**
  * User: migra
@@ -245,4 +246,5 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
     {
         _lockAxes = lockAxes;
     }
+
 }

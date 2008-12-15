@@ -33,7 +33,6 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -68,7 +67,8 @@ import java.util.List;
 public class NabAssayController extends SpringActionController
 {
     private static final DefaultActionResolver _resolver = new DefaultActionResolver(NabAssayController.class,
-            NabUploadWizardAction.class
+            NabUploadWizardAction.class,
+            GetNabRunsAction.class
         );
 
     public NabAssayController()
@@ -169,30 +169,42 @@ public class NabAssayController extends SpringActionController
 
     public static class RenderAssayBean
     {
-        private Luc5Assay _assay;
+        private NabAssayRun _assay;
         private boolean _newRun;
         private boolean _printView;
-        private ExpProtocol _protocol;
-        private PlateBasedAssayProvider _provider;
-        private ExpRun _run;
-        private Map<PropertyDescriptor, Object> _runProperties;
         private Set<String> _hiddenRunColumns;
-        List<SampleResult> _sampleResults;
-        private ViewContext _viewContext;
+        private Map<PropertyDescriptor, Object> _displayProperties;
 
-        public RenderAssayBean(Luc5Assay assay, boolean newRun, boolean printView, ExpProtocol protocol, PlateBasedAssayProvider provider, ExpRun run, ViewContext viewContext)
+
+        public RenderAssayBean(NabAssayRun assay, boolean newRun, boolean printView)
         {
-            _run = run;
-            _provider = provider;
-            _protocol = protocol;
             _assay = assay;
             _newRun = newRun;
             _printView = printView;
-            _viewContext = viewContext;
             _hiddenRunColumns = new HashSet<String>();
             _hiddenRunColumns.add(AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME);
             _hiddenRunColumns.add(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME);
             _hiddenRunColumns.addAll(Arrays.asList(NabAssayProvider.CUTOFF_PROPERTIES));
+        }
+
+        public Map<PropertyDescriptor, Object> getRunProperties()
+        {
+            if (_displayProperties == null)
+            {
+                Map<PropertyDescriptor, Object> allProperties = _assay.getRunProperties();
+                _displayProperties = new LinkedHashMap<PropertyDescriptor, Object>();
+                for (Map.Entry<PropertyDescriptor, Object> entry : allProperties.entrySet())
+                {
+                    if (!_hiddenRunColumns.contains(entry.getKey().getName()))
+                        _displayProperties.put(entry.getKey(), entry.getValue());
+                }
+            }
+            return _displayProperties;
+        }
+
+        public List<NabAssayRun.SampleResult> getSampleResults()
+        {
+            return _assay.getSampleResults();
         }
 
         public Luc5Assay getAssay()
@@ -210,9 +222,9 @@ public class NabAssayController extends SpringActionController
             ResultSet rs = null;
             try
             {
-                SimpleFilter filter = new SimpleFilter("ProtocolLsid", _protocol.getLSID());
+                SimpleFilter filter = new SimpleFilter("ProtocolLsid", _assay.getProtocol().getLSID());
                 filter.addCondition("Name", _assay.getDataFile().getName());
-                filter.addCondition("RowId", _run.getRowId(), CompareType.NEQ);
+                filter.addCondition("RowId", _assay.getRun().getRowId(), CompareType.NEQ);
                 rs = Table.select(ExperimentService.get().getTinfoExperimentRun(), Table.ALL_COLUMNS, filter, null);
                 return rs.next();
             }
@@ -231,7 +243,7 @@ public class NabAssayController extends SpringActionController
         {
             if (isDuplicateDataFile())
             {
-                return new DuplicateDataFileRunView(_assay, _run, _protocol, context);
+                return new DuplicateDataFileRunView(_assay, _assay.getRun(), _assay.getProtocol(), context);
             }
             else
                 return null;
@@ -244,214 +256,24 @@ public class NabAssayController extends SpringActionController
 
         public HttpView getDiscussionView(ViewContext context)
         {
-            ActionURL pageUrl = new ActionURL("NabAssay", "details", _run.getContainer());
-            pageUrl.addParameter("rowId", "" + _run.getRowId());
-            String discussionTitle = "Discuss Run " + _run.getRowId() + ": " + _run.getName();
-            String entityId = _run.getLSID();
+            ExpRun run = _assay.getRun();
+            ActionURL pageUrl = new ActionURL("NabAssay", "details", run.getContainer());
+            pageUrl.addParameter("rowId", "" + run.getRowId());
+            String discussionTitle = "Discuss Run " + run.getRowId() + ": " + run.getName();
+            String entityId = run.getLSID();
             DiscussionService.Service service = DiscussionService.get();
             return service.getDisussionArea(context,
                     entityId, pageUrl, discussionTitle, true, false);
         }
 
-        private class PropertyDescriptorComparator implements Comparator<PropertyDescriptor>
-        {
-            public int compare(PropertyDescriptor o1, PropertyDescriptor o2)
-            {
-                String o1Str = o1.getLabel();
-                if (o1Str == null)
-                    o1Str = o1.getName();
-                String o2Str = o2.getLabel();
-                if (o2Str == null)
-                    o2Str = o2.getName();
-                return o1Str.compareToIgnoreCase(o2Str);
-            }
-        }
-
-        public Map<PropertyDescriptor, Object> getRunProperties()
-        {
-            if (_runProperties == null)
-            {
-                _runProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
-                ResultSet rs = null;
-                try
-                {
-                    Map<FieldKey, PropertyDescriptor> fieldKeys = new HashMap<FieldKey, PropertyDescriptor>();
-                    for (PropertyDescriptor property : _provider.getUploadSetColumns(_protocol))
-                    {
-                        if (!_hiddenRunColumns.contains(property.getName()))
-                            fieldKeys.put(FieldKey.fromParts("Run Properties", property.getName()), property);
-                    }
-                    for (PropertyDescriptor property : _provider.getRunPropertyColumns(_protocol))
-                    {
-                        if (!_hiddenRunColumns.contains(property.getName()))
-                            fieldKeys.put(FieldKey.fromParts("Run Properties", property.getName()), property);
-                    }
-
-                    TableInfo runTable = AssayService.get().createRunTable(null, _protocol, _provider, _viewContext.getUser(), _run.getContainer());
-                    SimpleFilter filter = new SimpleFilter("RowId", _run.getRowId());
-                    Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(runTable, fieldKeys.keySet());
-                    rs = Table.selectForDisplay(runTable, new ArrayList<ColumnInfo>(cols.values()), filter, null, 1, 0);
-                    if (!rs.next())
-                        HttpView.throwNotFound("Run " + _run.getRowId() + " was not found.");
-
-                    for (Map.Entry<FieldKey, ColumnInfo> entry : cols.entrySet())
-                    {
-                        ColumnInfo column = entry.getValue();
-                        ColumnInfo displayField = column.getDisplayField();
-                        if (column.getDisplayField() != null)
-                            column = displayField;
-                        _runProperties.put(fieldKeys.get(entry.getKey()), column.getValue(rs));
-                    }
-                }
-                catch (SQLException e)
-                {
-                    throw new RuntimeSQLException(e);
-                }
-                finally
-                {
-                    if (rs != null)
-                        try { rs.close(); } catch (SQLException e) { /* do nothing */ }
-                }
-                ColumnInfo runName = ExperimentService.get().getTinfoExperimentRun().getColumn("Name");
-                if (runName != null)
-                    _runProperties.put(new PropertyDescriptor(runName, _run.getContainer()), _run.getName());
-            }
-            return Collections.unmodifiableMap(_runProperties);
-        }
-
-        public List<SampleResult> getSampleResults()
-        {
-            if (_sampleResults == null)
-            {
-                _sampleResults = new ArrayList<SampleResult>();
-                Map<String, Map<PropertyDescriptor, Object>> sampleProperties = getSampleProperties();
-                for (DilutionSummary summary : _assay.getSummaries())
-                {
-                    String specimenId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-                    Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-                    String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-                    Date visitDate = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
-                    String key = getMaterialKey(specimenId, participantId, visitId, visitDate);
-                    Map<PropertyDescriptor, Object> properties = sampleProperties.get(key);
-                    _sampleResults.add(new SampleResult(summary, key, properties));
-                }
-            }
-            return _sampleResults;
-        }
-
-        private Map<String, Map<PropertyDescriptor, Object>> getSampleProperties()
-        {
-            Map<String, Map<PropertyDescriptor, Object>> samplePropertyMap = new HashMap<String, Map<PropertyDescriptor, Object>>();
-
-            Collection<ExpMaterial> inputs = _run.getMaterialInputs().keySet();
-            PropertyDescriptor[] samplePropertyDescriptors = _provider.getSampleWellGroupColumns(_protocol);
-
-            PropertyDescriptor sampleIdPD = null;
-            PropertyDescriptor visitIdPD = null;
-            PropertyDescriptor participantIdPD = null;
-            PropertyDescriptor datePD = null;
-            for (PropertyDescriptor property : samplePropertyDescriptors)
-            {
-                if (property.getName().equals(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME))
-                    sampleIdPD = property;
-                else if (property.getName().equals(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME))
-                    participantIdPD = property;
-                else if (property.getName().equals(AbstractAssayProvider.VISITID_PROPERTY_NAME))
-                    visitIdPD = property;
-                else if (property.getName().equals(AbstractAssayProvider.DATE_PROPERTY_NAME))
-                    datePD = property;
-            }
-
-            for (ExpMaterial material : inputs)
-            {
-                Map<PropertyDescriptor, Object> sampleProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
-                for (PropertyDescriptor property : _provider.getSampleWellGroupColumns(_protocol))
-                {
-                    if (property != sampleIdPD && property != visitIdPD && property != participantIdPD && property != datePD)
-                        sampleProperties.put(property, material.getProperty(property));
-                }
-                String key = getMaterialKey((String) material.getProperty(sampleIdPD),
-                        (String) material.getProperty(participantIdPD), (Double) material.getProperty(visitIdPD), (Date) material.getProperty(datePD));
-                samplePropertyMap.put(key, sampleProperties);
-            }
-            return samplePropertyMap;
-        }
-
         public int getRunId()
         {
-            return _run.getRowId();
+            return _assay.getRun().getRowId();
         }
 
     }
 
-    public static class SampleResult
-    {
-        private DilutionSummary _dilutionSummary;
-        private String _materialKey;
-        private Map<PropertyDescriptor, Object> _properties;
-
-        public SampleResult(DilutionSummary dilutionSummary, String materialKey, Map<PropertyDescriptor, Object> properties)
-        {
-            _dilutionSummary = dilutionSummary;
-            _materialKey = materialKey;
-            _properties = sortProperties(properties);
-        }
-
-        public DilutionSummary getDilutionSummary()
-        {
-            return _dilutionSummary;
-        }
-
-        public String getKey()
-        {
-            return _materialKey;
-        }
-
-        public Map<PropertyDescriptor, Object> getProperties()
-        {
-            return _properties;
-        }
-
-        private Map<PropertyDescriptor, Object> sortProperties(Map<PropertyDescriptor, Object> properties)
-        {
-            Map<PropertyDescriptor, Object> sortedProperties = new LinkedHashMap<PropertyDescriptor, Object>();
-            Map.Entry<PropertyDescriptor, Object> sampleIdEntry =
-                    findPropertyDescriptor(properties, AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-            Map.Entry<PropertyDescriptor, Object> ptidEntry =
-                    findPropertyDescriptor(properties, AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-            Map.Entry<PropertyDescriptor, Object> visitEntry =
-                    findPropertyDescriptor(properties, AbstractAssayProvider.VISITID_PROPERTY_NAME);
-            if (sampleIdEntry != null)
-                sortedProperties.put(sampleIdEntry.getKey(), sampleIdEntry.getValue());
-            if (ptidEntry != null)
-                sortedProperties.put(ptidEntry.getKey(), ptidEntry.getValue());
-            if (visitEntry != null)
-                sortedProperties.put(visitEntry.getKey(), visitEntry.getValue());
-            for (Map.Entry<PropertyDescriptor, Object> entry : properties.entrySet())
-            {
-                if (sampleIdEntry != null && entry.getKey() == sampleIdEntry.getKey() ||
-                    ptidEntry != null && entry.getKey() == ptidEntry.getKey() ||
-                    visitEntry != null && entry.getKey() == visitEntry.getKey())
-                {
-                    continue;
-                }
-                sortedProperties.put(entry.getKey(), entry.getValue());
-            }
-            return sortedProperties;
-        }
-
-        private Map.Entry<PropertyDescriptor, Object> findPropertyDescriptor(Map<PropertyDescriptor, Object> properties, String propertyName)
-        {
-            for (Map.Entry<PropertyDescriptor, Object> entry : properties.entrySet())
-            {
-                if (entry.getKey().getName().equals(propertyName))
-                    return entry;
-            }
-            return null;
-        }
-    }
-
-    protected static String getMaterialKey(String specimenId, String participantId, Double visitId, Date date)
+    public static String getMaterialKey(String specimenId, String participantId, Double visitId, Date date)
     {
         if (specimenId != null)
             return specimenId;
@@ -548,10 +370,10 @@ public class NabAssayController extends SpringActionController
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             if (run == null || !run.getContainer().equals(getContainer()))
                 HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
-            Luc5Assay assay = null;
+            NabAssayRun assay = null;
             try
             {
-                assay = NabDataHandler.getAssayResults(run);
+                assay = NabDataHandler.getAssayResults(run, getUser());
             }
             catch (NabDataHandler.MissingDataFileException e)
             {
@@ -562,7 +384,7 @@ public class NabAssayController extends SpringActionController
             PlateBasedAssayProvider provider = (PlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
 
             HttpView view = new JspView<RenderAssayBean>("/org/labkey/nab/runDetails.jsp",
-                    new RenderAssayBean(assay, form.isNewRun(), isPrint(), _protocol, provider, _run, getViewContext()));
+                    new RenderAssayBean(assay, form.isNewRun(), isPrint()));
             if (!isPrint())
                 view = new VBox(new NabDetailsHeaderView(_protocol, provider, _run.getRowId()), view);
             return view;
@@ -716,7 +538,7 @@ public class NabAssayController extends SpringActionController
             }
 
             Set<Integer> cutoffSet = new HashSet<Integer>();
-            List<DilutionSummary> summaries = NabDataHandler.getDilutionSummaries(objectIds);
+            List<DilutionSummary> summaries = NabDataHandler.getDilutionSummaries(getUser(), objectIds);
             for (DilutionSummary summary :summaries)
             {
                 for (int cutoff : summary.getAssay().getCutoffs())
@@ -815,7 +637,7 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(GraphSelectedForm form, BindException errors) throws Exception
         {
             int[] ids = form.getId();
-            List<DilutionSummary> summaries = NabDataHandler.getDilutionSummaries(ids);
+            List<DilutionSummary> summaries = NabDataHandler.getDilutionSummaries(getUser(), ids);
             Set<Integer> cutoffSet = new HashSet<Integer>();
             for (DilutionSummary summary :summaries)
             {
@@ -838,7 +660,7 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
-            Luc5Assay assay = NabDataHandler.getAssayResults(run);
+            Luc5Assay assay = NabDataHandler.getAssayResults(run, getUser());
             renderChartPNG(getViewContext().getResponse(), assay, assay.isLockAxes());
             return null;
         }

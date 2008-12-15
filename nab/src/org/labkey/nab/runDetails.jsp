@@ -21,7 +21,6 @@
 <%@ page import="org.labkey.api.query.QueryView"%>
 <%@ page import="org.labkey.api.security.ACL" %>
 <%@ page import="org.labkey.api.study.WellData" %>
-<%@ page import="org.labkey.api.study.assay.AbstractAssayProvider" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -38,7 +37,7 @@
     Luc5Assay assay = bean.getAssay();
     ViewContext context = me.getViewContext();
 
-    List<NabAssayController.SampleResult> sampleInfos = bean.getSampleResults();
+    List<NabAssayRun.SampleResult> sampleInfos = bean.getSampleResults();
     Map<PropertyDescriptor, Object> firstSample = sampleInfos.get(0).getProperties();
     Set<PropertyDescriptor> samplePropertyDescriptors = firstSample.keySet();
 
@@ -163,7 +162,7 @@
                                 %>
                             </tr>
                             <%
-                                for (NabAssayController.SampleResult results : bean.getSampleResults())
+                                for (NabAssayRun.SampleResult results : bean.getSampleResults())
                                 {
                                     DilutionSummary summary = results.getDilutionSummary();
                             %>
@@ -233,7 +232,7 @@
                 <table class="labkey-data-region labkey-show-borders">
                     <colgroup><%
                         Set<String> pdsWithData = new HashSet<String>();
-                        for (NabAssayController.SampleResult results : bean.getSampleResults())
+                        for (NabAssayRun.SampleResult results : bean.getSampleResults())
                         {
                             for (Map.Entry<PropertyDescriptor, Object> entry : results.getProperties().entrySet())
                             {
@@ -269,7 +268,7 @@
                     </tr>
                     <%
                         int rowNumber = 0;
-                        for (NabAssayController.SampleResult results : bean.getSampleResults())
+                        for (NabAssayRun.SampleResult results : bean.getSampleResults())
                         {
                             rowNumber++;
                     %>
@@ -302,7 +301,7 @@
             <table>
                 <tr>
                     <%
-                        for (NabAssayController.SampleResult results : bean.getSampleResults())
+                        for (NabAssayRun.SampleResult results : bean.getSampleResults())
                         {
                             DilutionSummary summary = results.getDilutionSummary();
                     %>
