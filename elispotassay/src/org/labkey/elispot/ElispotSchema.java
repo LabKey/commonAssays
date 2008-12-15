@@ -22,12 +22,10 @@ import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.elispot.query.ElispotRunDataTable;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -64,16 +62,11 @@ public class ElispotSchema extends UserSchema
             {
                 if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
                 {
-                    return getDataRowTable(this, protocol, alias);
+                    return provider.createDataTable(this, alias, protocol);
                 }
             }
         }
         return null;
-    }
-
-    public static TableInfo getDataRowTable(UserSchema schema, ExpProtocol protocol, String alias)
-    {
-        return new ElispotRunDataTable(schema, alias, protocol);
     }
 
 /*

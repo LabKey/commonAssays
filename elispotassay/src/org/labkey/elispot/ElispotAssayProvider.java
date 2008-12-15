@@ -35,6 +35,7 @@ import org.labkey.api.view.*;
 import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
+import org.labkey.elispot.query.ElispotRunDataTable;
 
 import javax.servlet.ServletException;
 import java.util.*;
@@ -111,7 +112,9 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
 
     public TableInfo createDataTable(UserSchema schema, String alias, ExpProtocol protocol)
     {
-        return ElispotSchema.getDataRowTable(schema, protocol, alias);
+        ElispotRunDataTable table = new ElispotRunDataTable(schema, alias, protocol);
+        addCopiedToStudyColumns(table, protocol, schema.getUser(), "objectId", true);
+        return table;
     }
 
     protected Domain createSampleWellGroupDomain(Container c, User user)

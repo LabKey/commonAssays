@@ -34,6 +34,7 @@ import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
@@ -104,7 +105,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public TableInfo createDataTable(UserSchema schema, String alias, ExpProtocol protocol)
     {
-        return new LuminexSchema(schema.getUser(), schema.getContainer(), protocol).createDataRowTable(alias);
+        FilteredTable table = new LuminexSchema(schema.getUser(), schema.getContainer(), protocol).createDataRowTable(alias);
+        addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
+        return table;
     }
 
     public PropertyDescriptor[] getRunDataColumns(ExpProtocol protocol)
