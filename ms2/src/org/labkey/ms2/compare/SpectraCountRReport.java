@@ -56,7 +56,7 @@ public class SpectraCountRReport extends RReport
         SpectraCountQueryView view = getQueryView(context);
         QuerySettings settings = view.getSettings();
         // need to reset the report id since we want to render the data grid, not the report
-        settings.setReportId(-1);
+        settings.setReportId(null);
 
         view.setButtonBarPosition(DataRegion.ButtonBarPosition.NONE);
 
