@@ -17,6 +17,7 @@
 package org.labkey.ms1.view;
 
 import org.labkey.api.view.ActionURL;
+import org.labkey.ms1.MS1Controller;
 
 /**
  * Context object for AdminView.jsp
@@ -34,7 +35,7 @@ public class AdminViewContext
     public AdminViewContext(int numDeleted)
     {
         _numDeleted = numDeleted;
-        _purgeNowUrl = new ActionURL("ms1", "showAdmin.view", "");
+        _purgeNowUrl = MS1Controller.getShowAdminURL();
         _purgeNowUrl.addParameter("purgeNow", "true");
     }
 

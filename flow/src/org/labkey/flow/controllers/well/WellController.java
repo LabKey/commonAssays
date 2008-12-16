@@ -29,10 +29,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Table;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.*;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.FCSViewer;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -73,7 +70,7 @@ public class WellController extends SpringFlowController<WellController.Action>
         keywords,
     }
 
-    static DefaultActionResolver _actionResolver = new DefaultActionResolver(WellController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WellController.class);
 
     public WellController() throws Exception
     {
@@ -108,6 +105,11 @@ public class WellController extends SpringFlowController<WellController.Action>
             HttpView.throwNotFound("well not found");
         ret.setWell(well);
         return ret;
+    }
+
+    public static ActionURL getShowWellURL()
+    {
+        return new ActionURL(ShowWellAction.class, ContainerManager.getRoot());
     }
 
     @RequiresPermission(ACL.PERM_READ)

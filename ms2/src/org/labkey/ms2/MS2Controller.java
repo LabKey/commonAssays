@@ -86,8 +86,8 @@ import java.util.List;
  */
 public class MS2Controller extends SpringActionController
 {
-    private static DefaultActionResolver _actionResolver = new DefaultActionResolver(MS2Controller.class);
-    private static Logger _log = Logger.getLogger(MS2Controller.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(MS2Controller.class);
+    private static final Logger _log = Logger.getLogger(MS2Controller.class);
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";
     private static final String MS2_DEFAULT_VIEW_CATEGORY = "MS2DefaultView";
     private static final String DEFAULT_VIEW_NAME = "DefaultViewName";

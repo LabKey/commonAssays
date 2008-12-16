@@ -40,6 +40,7 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.portal.ProjectUrls;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
@@ -354,7 +355,7 @@ public class MicroarrayController extends SpringActionController
                 PipelineJob job = new FeatureExtractionPipelineJob(getViewBackgroundInfo(), form.getProtocolName(), uriData, form.getExtractionEngine());
                 PipelineService.get().queueJob(job);
 
-                HttpView.throwRedirect(ActionURL.toPathString("Project", "begin", c.getPath()));
+                HttpView.throwRedirect(PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(c));
             }
             catch (FileNotFoundException e)
             {

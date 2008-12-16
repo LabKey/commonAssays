@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.data.ContainerManager"%>
 <%@ page import="org.labkey.api.security.ACL"%>
-<%@ page import="org.labkey.api.view.ActionURL"%>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.data.FlowObject" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     FlowObject flowObj = (FlowObject)getModelBean();
-    ActionURL setFlagUrl = new ActionURL("Experiment", "setFlag", "");
-    setFlagUrl.addParameter("flagSessionId", request.getSession().getId());
+    ActionURL setFlagUrl = urlProvider(ExperimentUrls.class).getSetFlagURL(request);
     setFlagUrl.addParameter("lsid", flowObj.getLSID());
     setFlagUrl.addParameter("redirect", false);
 

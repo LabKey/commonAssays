@@ -98,7 +98,7 @@ public class MS1Module extends SpringModule
                     ActionURL url = portalCtx.getActionURL().clone();
                     url.setPageFlow(CONTROLLER_NAME);
                     url.setAction("begin");
-                    view.setTitleHref(url.getLocalURIString());
+                    view.setTitleHref(url);
                     return view;
                 }
             },

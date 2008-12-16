@@ -73,7 +73,7 @@ public class MS1Controller extends SpringActionController
 
     public static void registerAdminConsoleLinks()
     {
-        AdminConsole.addLink(SettingsLinkType.Management, "ms1", new ActionURL(ShowAdminAction.class, ContainerManager.getRoot()));
+        AdminConsole.addLink(SettingsLinkType.Management, "ms1", getShowAdminURL());
     }
 
     /**
@@ -556,6 +556,11 @@ public class MS1Controller extends SpringActionController
         {
             return null;
         }
+    }
+
+    public static ActionURL getShowAdminURL()
+    {
+        return new ActionURL(ShowAdminAction.class, ContainerManager.getRoot());
     }
 
     @RequiresPermission(ACL.PERM_ADMIN)

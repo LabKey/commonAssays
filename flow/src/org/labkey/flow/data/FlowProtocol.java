@@ -204,7 +204,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public ActionURL urlUploadSamples(boolean importMoreSamples)
     {
-        ActionURL ret = new ActionURL("Experiment", "showUploadMaterials", getContainerPath());
+        ActionURL ret = new ActionURL("Experiment", "showUploadMaterials", getContainer());
         ret.addParameter("name", SAMPLESET_NAME);
         ret.addParameter("nameReadOnly", "true");
         if (importMoreSamples)

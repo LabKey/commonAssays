@@ -34,6 +34,7 @@ import org.labkey.api.view.HttpView;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.query.AttributeCache;
+import org.labkey.flow.controllers.well.WellController;
 
 import java.io.File;
 import java.net.URI;
@@ -634,7 +635,7 @@ public class FlowManager
 
             ResultSet rs = null;
 
-            ActionURL url = new ActionURL("flow-well", "showWell", "");
+            ActionURL url = WellController.getShowWellURL();
 
             try
             {
@@ -686,7 +687,7 @@ public class FlowManager
             MultiMap<String, String> map = new MultiHashMap<String, String>();
             ResultSet rs = null;
 
-            ActionURL url = new ActionURL("flow-well", "showWell", "");
+            ActionURL url = WellController.getShowWellURL();
             StringBuilder link = new StringBuilder(200);
 
             try
