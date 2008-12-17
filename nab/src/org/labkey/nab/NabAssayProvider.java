@@ -86,6 +86,12 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                 ActionURL dataURL = new ActionURL("NabAssay", "details", run.getContainer()).addParameter("rowId", run.getRowId());
                 return dataURL.getLocalURIString();
             }
+
+            public Container getContainer(Lsid lsid)
+            {
+                ExpRun run = getObject(lsid);
+                return run == null ? null : run.getContainer();
+            }
         });
     }
 

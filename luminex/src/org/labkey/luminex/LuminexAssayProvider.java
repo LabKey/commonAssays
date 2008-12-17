@@ -92,6 +92,12 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 ActionURL dataURL = AssayService.get().getAssayDataURL(expRun.getContainer(), protocol, expRun.getRowId());
                 return dataURL.getLocalURIString();
             }
+
+            public Container getContainer(Lsid lsid)
+            {
+                ExpData data = getObject(lsid);
+                return data == null ? null : data.getContainer();
+            }
         });
     }
 
