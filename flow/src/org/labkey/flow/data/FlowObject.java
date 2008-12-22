@@ -193,7 +193,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     {
         if (pd == null)
             return null;
-        Map<String, Object> props = OntologyManager.getProperties(getContainerId(), getLSID());
+        Map<String, Object> props = OntologyManager.getProperties(getContainer(), getLSID());
         return props.get(pd.getPropertyURI());
     }
 

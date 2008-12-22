@@ -90,7 +90,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     String objectURI = Table.executeSingleton(LuminexSchema.getSchema(), sql.getSQL(), sql.getParamsArray(), String.class, true);
                     if (objectURI != null)
                     {
-                        Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer().getId(), objectURI);
+                        Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer(), objectURI);
                         for (PropertyDescriptor analytePD : analyteColumns)
                         {
                             String name = getAnalytePropertyName(analyte, analytePD);
@@ -240,7 +240,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         for (Map.Entry<PropertyDescriptor, String> entry : properties.entrySet())
                         {
                             ObjectProperty property = new ObjectProperty(analyte.getLsid(),
-                                    getContainer().getId(), entry.getKey().getPropertyURI(),
+                                    getContainer(), entry.getKey().getPropertyURI(),
                                     entry.getValue(), entry.getKey().getPropertyType());
                             objProperties[i++] = property;
                         }

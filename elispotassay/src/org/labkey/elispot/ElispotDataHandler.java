@@ -134,7 +134,7 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
                         results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "WellgroupName", group.getName(), PropertyType.STRING));
                         results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "WellLocation", pos.toString(), PropertyType.STRING));
 
-                        OntologyManager.ensureObject(container.getId(), dataRowLsid.toString(),  data.getLSID());
+                        OntologyManager.ensureObject(container, dataRowLsid.toString(),  data.getLSID());
                         OntologyManager.insertProperties(container, dataRowLsid.toString(), results.toArray(new ObjectProperty[results.size()]));
                     }
                 }
@@ -174,7 +174,7 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
                                                    String propertyName, Object value, PropertyType type, String format)
     {
         Lsid propertyURI = new Lsid(ELISPOT_PROPERTY_LSID_PREFIX, protocol.getName(), propertyName);
-        ObjectProperty prop = new ObjectProperty(objectURI, container.getId(), propertyURI.toString(), value, type, propertyName);
+        ObjectProperty prop = new ObjectProperty(objectURI, container, propertyURI.toString(), value, type, propertyName);
         prop.setFormat(format);
         return prop;
     }

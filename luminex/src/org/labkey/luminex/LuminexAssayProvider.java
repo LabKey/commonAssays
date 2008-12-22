@@ -406,7 +406,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         if (analyteInfo == null)
         {
             analyte = Table.selectObject(LuminexSchema.getTableInfoAnalytes(), luminexDataRow.getAnalyteId(), Analyte.class);
-            analyteProps = OntologyManager.getPropertyObjects(container.getId(), analyte.getLsid());
+            analyteProps = OntologyManager.getPropertyObjects(container, analyte.getLsid());
             analytes.put(analyte.getRowId(), new Pair<Analyte, Map<String, ObjectProperty>>(analyte, analyteProps));
         }
         else

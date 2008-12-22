@@ -307,7 +307,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
                             if (!results.isEmpty())
                             {
-                                OntologyManager.ensureObject(form.getContainer().getId(), dataRowLsid.toString(),  data[0].getLSID());
+                                OntologyManager.ensureObject(form.getContainer(), dataRowLsid.toString(),  data[0].getLSID());
                                 OntologyManager.insertProperties(form.getContainer(), dataRowLsid.toString(), results.toArray(new ObjectProperty[results.size()]));
                             }
                         }

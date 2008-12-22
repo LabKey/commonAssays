@@ -120,7 +120,7 @@ public class ElispotController extends SpringActionController
                     Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data[0].getLSID(), position);
                     String specimenGroup = "";
 
-                    for (ObjectProperty prop : OntologyManager.getPropertyObjects(getContainer().getId(), dataRowLsid.toString()).values())
+                    for (ObjectProperty prop : OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString()).values())
                     {
                         wellInfo.addWellProperty(prop);
                         if (ElispotDataHandler.WELLGROUP_PROPERTY_NAME.equals(prop.getName()))

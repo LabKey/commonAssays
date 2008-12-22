@@ -65,7 +65,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
             Container container = data.getContainer();
             Luc5Assay assayResults = getAssayResults(run, info.getUser(), dataFile);
-            OntologyManager.ensureObject(container.getId(), data.getLSID());
+            OntologyManager.ensureObject(container, data.getLSID());
             for (int summaryIndex = 0; summaryIndex < assayResults.getSummaries().length; summaryIndex++)
             {
                 DilutionSummary dilution = assayResults.getSummaries()[summaryIndex];
@@ -89,7 +89,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
                 results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), NAB_INPUT_MATERIAL_DATA_PROPERTY, sampleInput.getLSID(), PropertyType.STRING));
                 results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), WELLGROUP_NAME_PROPERTY, group.getName(), PropertyType.STRING));
 
-                OntologyManager.ensureObject(container.getId(), dataRowLsid.toString(),  data.getLSID());
+                OntologyManager.ensureObject(container, dataRowLsid.toString(),  data.getLSID());
                 OntologyManager.insertProperties(container, dataRowLsid.toString(), results.toArray(new ObjectProperty[results.size()]));
             }
         }
@@ -415,7 +415,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
                                                    String propertyName, Object value, PropertyType type, String format)
     {
         Lsid propertyURI = new Lsid(NAB_PROPERTY_LSID_PREFIX, protocol.getName(), propertyName);
-        ObjectProperty prop = new ObjectProperty(objectURI, container.getId(), propertyURI.toString(), value, type, propertyName);
+        ObjectProperty prop = new ObjectProperty(objectURI, container, propertyURI.toString(), value, type, propertyName);
         prop.setFormat(format);
         return prop;
     }

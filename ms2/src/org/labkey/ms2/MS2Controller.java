@@ -4737,7 +4737,7 @@ public class MS2Controller extends SpringActionController
                 }
                 else if (!PipelineService.get().usePerlPipeline(c))
                 {
-                    return getAddFileRunStatusErrorURL("Automated upload disabled.");
+                    return getAddFileRunStatusErrorURL("Automated upload disabled, the Perl pipeline is not enabled for " + c.getPath());
                 }
                 else
                 {
