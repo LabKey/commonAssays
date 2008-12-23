@@ -135,7 +135,7 @@ public class MS2Controller extends SpringActionController
             else
             {
                 ActionURL url = getViewContext().getActionURL().clone();
-                url.setExtraPath(ContainerManager.getForId(run.getContainer()).getPath());
+                url.setContainer(ContainerManager.getForId(run.getContainer()));
                 HttpView.throwRedirect(url);
             }
         }
@@ -3271,7 +3271,9 @@ public class MS2Controller extends SpringActionController
         {
             DataRegion rgn = new DataRegion();
             rgn.setName(MS2Manager.getDataRegionNameRuns());
-            ContainerDisplayColumn cdc = new ContainerDisplayColumn(MS2Manager.getTableInfoRuns().getColumn("Container"));
+            ColumnInfo containerColumnInfo = MS2Manager.getTableInfoRuns().getColumn("Container");
+            ContainerDisplayColumn cdc = new ContainerDisplayColumn(containerColumnInfo, true);
+            cdc.setEntityIdColumn(containerColumnInfo);
             cdc.setCaption("Folder");
 
             ActionURL containerURL = getViewContext().cloneActionURL().setAction(ShowListAction.class);
@@ -3851,7 +3853,7 @@ public class MS2Controller extends SpringActionController
                         url.replaceParameter("run", Integer.toString(form.run));
                         url.replaceParameter("groupNumber", Integer.toString(group.getGroupNumber()));
                         url.replaceParameter("indistinguishableCollectionId", Integer.toString(group.getIndistinguishableCollectionId()));
-                        url.setExtraPath(c.getPath());
+                        url.setContainer(c);
 
                         return HttpView.redirect(url);
                     }
@@ -4769,6 +4771,11 @@ public class MS2Controller extends SpringActionController
 
                         AbstractMS2SearchProtocolFactory protocolFactory =
                                 AbstractMS2SearchProtocolFactory.fromFile(AbstractMS2SearchPipelineProvider.class, f);
+
+                        if (protocolFactory == null)
+                        {
+                            HttpView.throwNotFound("Could not open protocol " + form.getFileName());
+                        }
 
                         File dirSeqRoot = new File(MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()));
                         File dirAnalysis = protocolFactory.getAnalysisDir(dirData, protocolName);

@@ -225,7 +225,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         return getJob().getJobSupport(JobSupport.class);
     }
 
-    public List<RecordedAction> run() throws PipelineJobException
+    public RecordedActionSet run() throws PipelineJobException
     {
         try
         {
@@ -447,7 +447,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 action.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(interactCmd, " "));
             }
 
-            return actions;
+            return new RecordedActionSet(actions);
         }
         catch (IOException e)
         {

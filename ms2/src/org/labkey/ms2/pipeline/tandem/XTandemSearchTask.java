@@ -108,7 +108,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
         return getJob().getJobSupport(JobSupport.class);
     }
 
-    public List<RecordedAction> run() throws PipelineJobException
+    public RecordedActionSet run() throws PipelineJobException
     {
         try
         {
@@ -210,7 +210,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             tandem2XmlAction.addOutput(filePepXMLRaw, "RawPepXML", true);
             actions.add(tandem2XmlAction);
 
-            return actions;
+            return new RecordedActionSet(actions);
         }
         catch (IOException e)
         {

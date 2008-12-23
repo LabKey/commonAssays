@@ -143,7 +143,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
         return getJob().getJobSupport(JobSupport.class);
     }
 
-    public List<RecordedAction> run() throws PipelineJobException
+    public RecordedActionSet run() throws PipelineJobException
     {
         try
         {
@@ -170,7 +170,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             if (databases.length > 1)
             {
                 getJob().error("Mascot does not support multiple databases searching. ("+paramDatabase+")");
-                return Collections.emptyList();
+                return new RecordedActionSet();
             }
 
             params.put("pipeline, user name", "LabKey User");
@@ -369,7 +369,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
 
             _wd.discardFile(fileWorkInputXML);
 
-            return Arrays.asList(mzxml2SearchAction, mascotAction, mascot2XMLAction);
+            return new RecordedActionSet(mzxml2SearchAction, mascotAction, mascot2XMLAction);
         }
         catch (IOException e)
         {
@@ -446,7 +446,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
         Map<String,String> returns=new HashMap<String,String>();
 
         if (hashFile.exists()) {
-            InputStream datIn = null;
+            InputStream datIn;
             try
             {
                 datIn = new FileInputStream(hashFile);
@@ -498,7 +498,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
         hashes.put(KEY_TIMESTAMP, sb.toString());
 
         final File hashFile = new File(filepath);
-        OutputStream datOut = null;
+        OutputStream datOut;
         try
         {
             datOut = new FileOutputStream(hashFile);

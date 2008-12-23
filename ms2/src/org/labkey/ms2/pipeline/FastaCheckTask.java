@@ -85,7 +85,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         return getJob().getJobSupport(MS2SearchJobSupport.class);
     }
 
-    public List<RecordedAction> run() throws PipelineJobException
+    public RecordedActionSet run() throws PipelineJobException
     {
         try
         {
@@ -108,12 +108,12 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
                 if (errors.length() > 0)
                 {
                     getJob().error(errors);
-                    return Collections.emptyList();
+                    return new RecordedActionSet();
                 }
             }
 
             getJob().info("");  // blank line
-            return Collections.singletonList(action);
+            return new RecordedActionSet(action);
         }
         catch (IOException e)
         {

@@ -102,7 +102,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         return getJob().getJobSupport(JobSupport.class);
     }
 
-    public List<RecordedAction> run() throws PipelineJobException
+    public RecordedActionSet run() throws PipelineJobException
     {
         try
         {
@@ -202,7 +202,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             }
             action.addInput(fileMzXML, SPECTRA_INPUT_ROLE);
             
-            return Collections.singletonList(action);
+            return new RecordedActionSet(action);
         }
         catch(IOException e)
         {

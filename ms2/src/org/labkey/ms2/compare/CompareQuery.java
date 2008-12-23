@@ -341,7 +341,7 @@ public abstract class CompareQuery extends SQLFragment
         for (int i = 0; i < _runs.size(); i++)
         {
             ActionURL linkURL = originalLinkURL.clone();
-            linkURL.setExtraPath(ContainerManager.getForId(_runs.get(i).getContainer()).getPath());
+            linkURL.setContainer(ContainerManager.getForId(_runs.get(i).getContainer()));
             linkURL.replaceParameter("run", String.valueOf(_runs.get(i).getRun()));
 
             _columnsPerRun = 0;

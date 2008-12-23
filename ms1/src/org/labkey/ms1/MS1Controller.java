@@ -335,7 +335,7 @@ public class MS1Controller extends SpringActionController
             if(!(expRun.getContainer().equals(getViewContext().getContainer())))
             {
                 ActionURL redir = getViewContext().getActionURL().clone();
-                redir.setExtraPath(expRun.getContainer().getPath());
+                redir.setContainer(expRun.getContainer());
                 return HttpView.redirect(redir);
             }
 
@@ -462,7 +462,7 @@ public class MS1Controller extends SpringActionController
             if(!(run.getContainer().equals(getViewContext().getContainer())))
             {
                 ActionURL redir = getViewContext().getActionURL().clone();
-                redir.setExtraPath(run.getContainer().getPath());
+                redir.setContainer(run.getContainer());
                 return HttpView.redirect(redir);
             }
 

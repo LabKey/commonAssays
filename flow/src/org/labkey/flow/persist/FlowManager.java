@@ -660,7 +660,7 @@ public class FlowManager
                         }
                     }
                     Container c = ContainerManager.getForId(containerId);
-                    url.setExtraPath(c.getPath());
+                    url.setContainer(c);
                     url.replaceParameter("wellId", wellId);
 
                     SimpleSearchHit hit = new SimpleSearchHit(SEARCH_DOMAIN, c.getPath(), path != null ? path : name,
@@ -713,7 +713,7 @@ public class FlowManager
                         }
                     }
                     Container c = ContainerManager.getForId(containerId);
-                    url.setExtraPath(c.getPath());
+                    url.setContainer(c);
                     url.replaceParameter("wellId", wellId);
                     link.append("<a href=\"");
                     link.append(url.getEncodedLocalURIString());

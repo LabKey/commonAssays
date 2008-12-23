@@ -29,6 +29,9 @@ import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.exp.api.ExperimentUrls;
+import org.labkey.api.exp.api.ExperimentService;
 import com.ice.tar.TarInputStream;
 import com.ice.tar.TarEntry;
 
@@ -57,20 +60,13 @@ public class FeatureExtractionPipelineJob extends PipelineJob
     {
         if (_extractionRowId != null)
         {
-            ActionURL ret = getActionURL().clone();
-            ret.setPageFlow("Experiment");
-            ret.setAction("details");
-            ret.setExtraPath(getContainer().getPath());
-            ret.deleteParameters();
-            ret.addParameter("rowId", _extractionRowId.toString());
-            return ret;
+            return PageFlowUtil.urlProvider(ExperimentUrls.class).getExperimentDetailsURL(getContainer(), ExperimentService.get().getExpExperiment(_extractionRowId.intValue()));
         }
         return null;
     }
 
     public String getDescription()
     {
-        String baseName = null;
         String dataName = "";
         if (_dirImages != null)
         {
@@ -85,12 +81,6 @@ public class FeatureExtractionPipelineJob extends PipelineJob
 
         StringBuilder description = new StringBuilder("TIFF processing for ");
         description.append(dataName);
-        if (baseName != null)
-        {
-            if (description.length() > 0)
-                description.append("/");
-            description.append(baseName);
-        }
         if (_protocol != null)
         {
             description.append(" (").append(_protocol).append(")");

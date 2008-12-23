@@ -54,7 +54,7 @@ public class MS2RunHierarchyTree extends ContainerTree
         if (isAuthorized)
         {
             html.append("<a href=\"");
-            url.setExtraPath(parent.getPath());
+            url.setContainer(parent);
             html.append(url.getEncodedLocalURIString());
             html.append("\">");
         }
