@@ -42,7 +42,7 @@ public abstract class MS2Run implements Serializable
                     /* Z */   0.00000};
 
     protected int run;
-    protected String container;
+    protected Container container;
     protected String description;
     protected String path;
     protected String fileName;
@@ -364,13 +364,13 @@ public abstract class MS2Run implements Serializable
     }
 
 
-    public String getContainer()
+    public Container getContainer()
     {
         return container;
     }
 
 
-    public void setContainer(String container)
+    public void setContainer(Container container)
     {
         this.container = container;
     }

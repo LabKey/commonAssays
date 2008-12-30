@@ -128,14 +128,14 @@ public class MS2Controller extends SpringActionController
             message = "Run failed loading.  Status: " + run.getStatus();
         else
         {
-            String cId = run.getContainer();
+            Container container = run.getContainer();
 
-            if (null != cId && cId.equals(c.getId()))
+            if (null != container && container.equals(c))
                 success = true;
             else
             {
                 ActionURL url = getViewContext().getActionURL().clone();
-                url.setContainer(ContainerManager.getForId(run.getContainer()));
+                url.setContainer(run.getContainer());
                 HttpView.throwRedirect(url);
             }
         }
@@ -1698,7 +1698,7 @@ public class MS2Controller extends SpringActionController
                 if (run.getExperimentRunLSID() != null)
                 {
                     ExpRun expRun = ExperimentService.get().getExpRun(run.getExperimentRunLSID());
-                    if (expRun != null && expRun.getContainer().getId().equals(run.getContainer()))
+                    if (expRun != null && expRun.getContainer().equals(run.getContainer()))
                     {
                         sourceContainer = expRun.getContainer();
                         expRuns.add(expRun);
@@ -2068,7 +2068,7 @@ public class MS2Controller extends SpringActionController
 
         for (MS2Run run : runs)
         {
-            Container c = ContainerManager.getForId(run.getContainer());
+            Container c = run.getContainer();
             if (c == null || !c.hasPermission(getUser(), ACL.PERM_READ))
             {
                 return HttpView.throwUnauthorized();
@@ -3847,13 +3847,12 @@ public class MS2Controller extends SpringActionController
                             return null;
 
                         MS2Run run = MS2Manager.getRun(form.run);
-                        Container c = ContainerManager.getForId(run.getContainer());
                         ActionURL url = getViewContext().cloneActionURL();
                         url.deleteParameter("proteinGroupId");
                         url.replaceParameter("run", Integer.toString(form.run));
                         url.replaceParameter("groupNumber", Integer.toString(group.getGroupNumber()));
                         url.replaceParameter("indistinguishableCollectionId", Integer.toString(group.getIndistinguishableCollectionId()));
-                        url.setContainer(c);
+                        url.setContainer(run.getContainer());
 
                         return HttpView.redirect(url);
                     }
@@ -6043,7 +6042,7 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getShowRunUrl(MS2Run run)
         {
-            return new ActionURL(ShowRunAction.class, ContainerManager.getForId(run.getContainer())).addParameter("run", run.getRun());
+            return new ActionURL(ShowRunAction.class, run.getContainer()).addParameter("run", run.getRun());
         }
 
         public ActionURL getShowProteinAdminUrl()

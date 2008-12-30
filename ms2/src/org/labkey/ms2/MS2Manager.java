@@ -270,7 +270,7 @@ public class MS2Manager
         if (run.getExperimentRunLSID() != null)
         {
             expRun = ExperimentService.get().getExpRun(run.getExperimentRunLSID());
-            if (expRun != null && expRun.getContainer().getId().equals(run.getContainer()))
+            if (expRun != null && expRun.getContainer().equals(run.getContainer()))
             {
                 return expRun;
             }
@@ -284,7 +284,7 @@ public class MS2Manager
         {
             ExperimentService.get().getSchema().getScope().beginTransaction();
 
-            Container container = ContainerManager.getForId(run.getContainer());
+            Container container = run.getContainer();
             final File pepXMLFile = new File(run.getPath(), run.getFileName());
 
             // Check if this 
@@ -1932,42 +1932,50 @@ public class MS2Manager
 
     public static List<MS2Run> lookupRuns(List<Integer> runIds, boolean requireSameType, User user) throws ServletException, RunListException
     {
-        List<String> errors = new ArrayList<String>();
         List<MS2Run> runs = new ArrayList<MS2Run>(runIds.size());
-        String type = null;
 
         for (Integer runId : runIds)
         {
-            MS2Run run = MS2Manager.getRun(runId.intValue());
+            runs.add(MS2Manager.getRun(runId.intValue()));
+        }
 
+        validateRuns(runs, requireSameType, user);
+
+        return runs;
+    }
+
+    public static void validateRuns(List<MS2Run> runs, boolean requireSameType, User user) throws UnauthorizedException, RunListException
+    {
+        String type = null;
+        List<String> errors = new ArrayList<String>();
+
+        for (MS2Run run : runs)
+        {
             if (null == run)
             {
-                errors.add("Run " + runId + ": Not found");
+                errors.add("Run not found");
                 continue;
             }
 
             // Authorize this run
-            Container c = ContainerManager.getForId(run.getContainer());
+            Container c = run.getContainer();
 
             if (!c.hasPermission(user, ACL.PERM_READ))
             {
                 if (user.isGuest())
                     HttpView.throwUnauthorized();
 
-                errors.add("Run " + runId + ": Not authorized");
-                continue;
+                errors.add("Run " + run.getRun() + ": Not authorized");
             }
 
             if (run.getStatusId() == MS2Importer.STATUS_RUNNING)
             {
                 errors.add(run.getDescription() + " is still importing");
-                continue;
             }
 
             if (run.getStatusId() == MS2Importer.STATUS_FAILED)
             {
                 errors.add(run.getDescription() + " did not import successfully");
-                continue;
             }
 
             if (requireSameType)
@@ -1977,18 +1985,13 @@ public class MS2Manager
                 else if (!type.equals(run.getType()))
                 {
                     errors.add("Can't mix " + type + " and " + run.getType() + " runs.");
-                    continue;
                 }
             }
-
-            runs.add(run);
         }
 
         if (!errors.isEmpty())
         {
             throw new RunListException(errors);
         }
-
-        return runs;
     }
 }

@@ -58,7 +58,7 @@ public class SingleMS2RunRReport extends CustomRReport
             HttpView.throwNotFound("No such run: " + runString);
             return null;
         }
-        if (run == null || !run.getContainer().equals(context.getContainer().getId()))
+        if (run == null || !run.getContainer().equals(context.getContainer()))
         {
             HttpView.throwNotFound("No such run: " + runString);
         }

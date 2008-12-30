@@ -20,6 +20,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpExperiment;
 
 import javax.servlet.ServletException;
 import java.util.*;
@@ -30,37 +31,28 @@ import java.util.*;
  */
 public class RunListCache
 {
-
-    private static final String NO_RUNS_MESSAGE = "Run list is empty; session may have timed out.  Please reselect the runs.";
-    private static final String RUN_LIST_CACHE_KEY = MS2Controller.class.getName() + ":RunListCache";
-
-    private static Map<Integer, List<Integer>> getRunListCache(ViewContext context)
-    {
-        Map<Integer, List<Integer>> cache = (Map<Integer, List<Integer>>)context.getRequest().getSession(true).getAttribute(RUN_LIST_CACHE_KEY);
-        if (cache == null)
-        {
-            cache = new HashMap<Integer, List<Integer>>();
-            context.getRequest().getSession(true).setAttribute(RUN_LIST_CACHE_KEY, cache);
-        }
-        return cache;
-    }
+    private static final String NO_RUNS_MESSAGE = "Run list is empty. Please reselect the runs.";
 
     public static List<MS2Run> getCachedRuns(int index, boolean requireSameType, ViewContext ctx) throws RunListException, ServletException
     {
-        List<Integer> runIds = getRunListCache(ctx).get(index);
-
-        if (null == runIds)
+        ExpExperiment group = ExperimentService.get().getExpExperiment(index);
+        if (group == null || !group.getContainer().equals(ctx.getContainer()))
         {
             throw new RunListException(NO_RUNS_MESSAGE);
         }
+        ExpRun[] expRuns = group.getRuns();
+        List<MS2Run> ms2Runs = new ArrayList<MS2Run>();
+        for (ExpRun expRun : expRuns)
+        {
+            ms2Runs.add(MS2Manager.getRunByExperimentRunLSID(expRun.getLSID()));
+        }
 
-        return MS2Manager.lookupRuns(runIds, requireSameType, ctx.getUser());
+        MS2Manager.validateRuns(ms2Runs, requireSameType, ctx.getUser());
+        return ms2Runs;
     }
 
-    private static int RUN_LIST_ID = 0;
-
-    // We cache just the list of run IDs, not the runs themselves.  This keeps things small and eases mem tracking.  Even though we're
-    // just caching the list, we do all error & security checks upfront to alert the user early.
+    // We store just the list of run IDs, not the runs themselves. Even though we're
+    // just storing the list, we do all error & security checks upfront to alert the user early.
     public static int cacheSelectedRuns(boolean requireSameType, MS2Controller.RunListForm form, ViewContext ctx) throws ServletException, RunListException
     {
         String selectionKey = ctx.getRequest().getParameter(DataRegionSelection.DATA_REGION_SELECTION_KEY);
@@ -76,9 +68,11 @@ public class RunListCache
             throw new RunListException(NO_RUNS_MESSAGE);
         }
 
-        List<Integer> runIds = new ArrayList<Integer>(stringIds.size());
-
         List<String> parseErrors = new ArrayList<String>();
+
+        List<ExpRun> expRuns = new ArrayList<ExpRun>();
+        List<MS2Run> ms2Runs = new ArrayList<MS2Run>();
+
         for (String stringId : stringIds)
         {
             try
@@ -89,14 +83,11 @@ public class RunListCache
                     ExpRun expRun = ExperimentService.get().getExpRun(id);
                     if (expRun != null)
                     {
-                        MS2Run run = MS2Manager.getRunByExperimentRunLSID(expRun.getLSID());
-                        if (run == null)
+                        expRuns.add(expRun);
+                        MS2Run ms2Run = MS2Manager.getRunByExperimentRunLSID(expRun.getLSID());
+                        if (ms2Run == null)
                         {
-                            parseErrors.add("Could not find run with id " + id);
-                        }
-                        else
-                        {
-                            runIds.add(run.getRun());
+                            parseErrors.add("Could not find MS2 run for run LSID" + expRun.getLSID());
                         }
                     }
                     else
@@ -106,7 +97,24 @@ public class RunListCache
                 }
                 else
                 {
-                    runIds.add(id);
+                    MS2Run ms2Run = MS2Manager.getRun(id);
+                    if (ms2Run == null)
+                    {
+                        parseErrors.add("Could not find MS2 run with id " + id);
+                    }
+                    else
+                    {
+                        ms2Runs.add(ms2Run);
+                        ExpRun expRun = ExperimentService.get().getExpRun(ms2Run.getExperimentRunLSID());
+                        if (expRun == null)
+                        {
+                            parseErrors.add("Could not find experiment run with LSID " + ms2Run.getExperimentRunLSID());
+                        }
+                        else
+                        {
+                            expRuns.add(expRun);
+                        }
+                    }
                 }
             }
             catch (NumberFormatException e)
@@ -119,19 +127,10 @@ public class RunListCache
             throw new RunListException(parseErrors);
         }
 
-        MS2Manager.lookupRuns(runIds, requireSameType, ctx.getUser());
+        MS2Manager.validateRuns(ms2Runs, requireSameType, ctx.getUser());
 
-        int index;
-        synchronized(RunListCache.class)
-        {
-            index = RUN_LIST_ID++;
-        }
+        ExpExperiment group = ExperimentService.get().createHiddenRunGroup(ctx.getContainer(), ctx.getUser(), expRuns.toArray(new ExpRun[expRuns.size()]));
 
-        getRunListCache(ctx).put(index, runIds);
-        return index;
+        return group.getRowId();
     }
-
-
-
-
 }
