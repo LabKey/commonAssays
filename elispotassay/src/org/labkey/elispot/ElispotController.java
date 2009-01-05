@@ -30,10 +30,12 @@ import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.PlateBasedAssayProvider;
+import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.util.PageFlowUtil;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -57,7 +59,7 @@ public class ElispotController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return HttpView.redirect(new ActionURL("assay", "begin.view", getViewContext().getContainer()));
+            return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getViewContext().getContainer()));
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -88,9 +90,7 @@ public class ElispotController extends SpringActionController
             bean.setTemplate(template);
             bean.setWellInfoMap(wellInfoMap);
 
-            ModelAndView view = new JspView<PlateSummaryBean>("/org/labkey/elispot/view/plateSummary.jsp", bean);
-
-            return view;
+            return new JspView<PlateSummaryBean>("/org/labkey/elispot/view/plateSummary.jsp", bean);
         }
 
         private Map<Position, WellInfo> createWellInfoMap(ExpRun run, ExpProtocol protocol, PlateBasedAssayProvider provider,
@@ -154,9 +154,9 @@ public class ElispotController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            ActionURL assayListURL = AssayService.get().getAssayListURL(_run.getContainer());
-            ActionURL runListURL = AssayService.get().getAssayRunsURL(_run.getContainer(), _protocol);
-            ActionURL runDataURL = AssayService.get().getAssayDataURL(_run.getContainer(), _protocol, _run.getRowId());
+            ActionURL assayListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(_run.getContainer());
+            ActionURL runListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(_run.getContainer(), _protocol);
+            ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayDataURL(_run.getContainer(), _protocol, _run.getRowId());
             return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
                     " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _run.getRowId() + " Details");
         }

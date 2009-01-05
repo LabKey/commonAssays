@@ -35,6 +35,7 @@ import org.labkey.api.study.ParticipantVisit;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -406,6 +407,8 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                 }
             }
 
+            Set<ExpMaterial> inputMaterials = new LinkedHashSet<ExpMaterial>();
+
             for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
             {
                 Sheet sheet = workbook.getSheet(sheetIndex);
@@ -441,7 +444,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                     do
                     {
                         Map<String, Object> dataRowProps = new LinkedHashMap<String, Object>();
-                        LuminexDataRow dataRow = createDataRow(data, sheet, colNames, row, resolver);
+                        LuminexDataRow dataRow = createDataRow(data, sheet, colNames, row, resolver, inputMaterials);
                         dataRows.add(dataRow);
                         dataRowsProps.add(dataRowProps);
                     }
@@ -606,6 +609,13 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                 }
             }
 
+            if (inputMaterials.isEmpty())
+            {
+                throw new ExperimentException("Could not find any input samples in the data");
+            }
+            
+            AbstractAssayProvider.addInputMaterials(expRun, user, inputMaterials);
+
             // Clear out the values - this is necessary if this is a XAR import where the run properties would
             // have been loaded as part of the ExperimentRun itself.
             Integer objectId = OntologyManager.ensureObject(container, expRun.getLSID());
@@ -643,8 +653,8 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             }
         }
     }
-
-    private LuminexDataRow createDataRow(ExpData data, Sheet sheet, List<String> colNames, int row, ParticipantVisitResolver resolver)
+    
+    private LuminexDataRow createDataRow(ExpData data, Sheet sheet, List<String> colNames, int row, ParticipantVisitResolver resolver, Set<ExpMaterial> materialInputs)
     {
         LuminexDataRow dataRow = new LuminexDataRow();
         dataRow.setDataId(data.getRowId());
@@ -722,6 +732,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                             }
                             extraSpecimenInfo = sb.toString();
                         }
+                        match = resolver.resolve(null, participantId, visitId, date);
                     }
                     else
                     {
@@ -733,6 +744,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                     dataRow.setVisitID(visitId);
                     dataRow.setDate(date);
                     dataRow.setExtraSpecimenInfo(extraSpecimenInfo);
+                    materialInputs.add(match.getMaterial());
                 }
             }
             else if ("Std Dev".equalsIgnoreCase(columnName))
@@ -884,7 +896,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         {
             ExpProtocol protocol = run.getProtocol();
             ExpProtocol p = ExperimentService.get().getExpProtocol(protocol.getRowId());
-            return AssayService.get().getAssayDataURL(container, p, run.getRowId());
+            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayDataURL(container, p, run.getRowId());
         }
         return null;
     }

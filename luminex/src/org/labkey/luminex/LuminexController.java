@@ -22,7 +22,8 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ActionURL;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.study.assay.AssayUrls;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
 
@@ -47,7 +48,7 @@ public class LuminexController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return HttpView.redirect(new ActionURL("assay", "begin.view", getViewContext().getContainer()));
+            return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getViewContext().getContainer()));
         }
 
         public NavTree appendNavTrail(NavTree root)

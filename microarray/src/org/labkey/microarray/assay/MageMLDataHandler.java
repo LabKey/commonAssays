@@ -21,7 +21,6 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
-import org.labkey.api.study.assay.ParticipantVisitResolver;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.common.tools.SimpleXMLStreamReader;
 import org.labkey.common.tools.TabLoader;
@@ -54,7 +53,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
         return true;
     }
 
-    protected Map<String, Object>[] loadFileData(PropertyDescriptor[] columns, File dataFile, ParticipantVisitResolver resolver) throws IOException, ExperimentException
+    protected Map<String, Object>[] loadFileData(PropertyDescriptor[] columns, File dataFile) throws IOException, ExperimentException
     {
         if (columns.length == 0)
         {

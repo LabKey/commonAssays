@@ -34,8 +34,8 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.actions.ProtocolIdForm;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.PipelineDataCollector;
+import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
@@ -219,7 +219,7 @@ public class MicroarrayController extends SpringActionController
                 return new SimpleErrorView(errors);
             }
             PipelineDataCollector.setFileCollection(getViewContext().getRequest().getSession(true), getContainer(), form.getProtocol(), files);
-            HttpView.throwRedirect(AssayService.get().getUploadWizardURL(getContainer(), form.getProtocol()));
+            HttpView.throwRedirect(PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), form.getProtocol(), MicroarrayUploadWizardAction.class));
             return null;
         }
 

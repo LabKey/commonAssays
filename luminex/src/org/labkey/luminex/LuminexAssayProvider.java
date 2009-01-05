@@ -42,7 +42,9 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.common.util.Pair;
+import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -89,7 +91,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 ExpProtocol protocol = expRun.getProtocol();
                 if (protocol == null)
                     return null;
-                ActionURL dataURL = AssayService.get().getAssayDataURL(expRun.getContainer(), protocol, expRun.getRowId());
+                ActionURL dataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayDataURL(expRun.getContainer(), protocol, expRun.getRowId());
                 return dataURL.getLocalURIString();
             }
 
@@ -216,13 +218,11 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return new HtmlView("Currently the only supported file type is the multi-sheet BioPlex Excel file format.");
     }
 
-    public ActionURL getUploadWizardURL(Container container, ExpProtocol protocol)
+    public Map<String, Class<? extends Controller>> getImportActions()
     {
-        ActionURL url = new ActionURL(LuminexUploadWizardAction.class, container);
-        url.addParameter("rowId", protocol.getRowId());
-        return url;
+        return Collections.<String, Class<? extends Controller>>singletonMap(IMPORT_DATA_LINK_NAME, LuminexUploadWizardAction.class);
     }
-
+    
     public ExpData getDataForDataRow(Object dataRowId)
     {
         LuminexDataRow dataRow = Table.selectObject(LuminexSchema.getTableInfoDataRow(), dataRowId, LuminexDataRow.class);
@@ -261,7 +261,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return FieldKey.fromParts("Description");
     }
 
-    public ActionURL publish(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {

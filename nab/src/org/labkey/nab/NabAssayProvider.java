@@ -32,6 +32,7 @@ import org.labkey.api.security.User;
 import org.labkey.nab.query.NabSchema;
 import org.labkey.nab.query.NabRunDataTable;
 import org.labkey.common.util.Pair;
+import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
 import java.util.*;
@@ -249,7 +250,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         return PropertyType.INTEGER;
     }
     
-    public ActionURL publish(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {
@@ -374,11 +375,9 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         }
     }
 
-    public ActionURL getUploadWizardURL(Container container, ExpProtocol protocol)
+    public Map<String, Class<? extends Controller>> getImportActions()
     {
-        ActionURL url = new ActionURL("NabAssay", "nabUploadWizard.view", container);
-        url.addParameter("rowId", protocol.getRowId());
-        return url;
+        return Collections.<String, Class<? extends Controller>>singletonMap(IMPORT_DATA_LINK_NAME, NabUploadWizardAction.class);
     }
     
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()

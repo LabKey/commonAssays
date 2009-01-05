@@ -25,6 +25,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.common.util.Pair;
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
@@ -427,7 +428,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         {
             ExpProtocol protocol = run.getProtocol();
             ExpProtocol p = ExperimentService.get().getExpProtocol(protocol.getRowId());
-            return AssayService.get().getAssayDataURL(container, p, run.getRowId());
+            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayDataURL(container, p, run.getRowId());
         }
         return null;
     }

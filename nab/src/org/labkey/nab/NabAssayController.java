@@ -50,6 +50,7 @@ import org.labkey.api.view.*;
 import org.labkey.common.util.Pair;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
@@ -82,7 +83,7 @@ public class NabAssayController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return HttpView.redirect(new ActionURL("assay", "begin.view", getViewContext().getContainer()));
+            return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getViewContext().getContainer()));
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -257,7 +258,7 @@ public class NabAssayController extends SpringActionController
         public HttpView getDiscussionView(ViewContext context)
         {
             ExpRun run = _assay.getRun();
-            ActionURL pageUrl = new ActionURL("NabAssay", "details", run.getContainer());
+            ActionURL pageUrl = new ActionURL(DetailsAction.class, run.getContainer());
             pageUrl.addParameter("rowId", "" + run.getRowId());
             String discussionTitle = "Discuss Run " + run.getRowId() + ": " + run.getName();
             String entityId = run.getLSID();
@@ -351,8 +352,13 @@ public class NabAssayController extends SpringActionController
         {
             super(protocol, provider, false, null);
             if (getViewContext().hasPermission(ACL.PERM_INSERT))
-                _links.put("new run", provider.getUploadWizardURL(getContainer(), protocol));
-            ActionURL downloadURL = new ActionURL("NabAssay", "downloadDatafile", getContainer()).addParameter("rowId", runId);
+            {
+                for (Map.Entry<String, Class<? extends Controller>> entry : provider.getImportActions().entrySet())
+                {
+                    _links.put(entry.getKey().toLowerCase(), PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), protocol, entry.getValue()));
+                }
+            }
+            ActionURL downloadURL = new ActionURL(DownloadDatafileAction.class, getContainer()).addParameter("rowId", runId);
             _links.put("download datafile", downloadURL);
             _links.put("print", getViewContext().cloneActionURL().addParameter("_print", "true"));
         }
@@ -392,9 +398,9 @@ public class NabAssayController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            ActionURL assayListURL = AssayService.get().getAssayListURL(_run.getContainer());
-            ActionURL runListURL = AssayService.get().getAssayRunsURL(_run.getContainer(), _protocol);
-            ActionURL runDataURL = AssayService.get().getAssayDataURL(_run.getContainer(), _protocol, _run.getRowId());
+            ActionURL assayListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(_run.getContainer());
+            ActionURL runListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(_run.getContainer(), _protocol);
+            ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayDataURL(_run.getContainer(), _protocol, _run.getRowId());
             return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
                     " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _run.getRowId() + " Details");
         }
@@ -552,8 +558,8 @@ public class NabAssayController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            ActionURL assayListURL = AssayService.get().getAssayListURL(getContainer());
-            ActionURL runListURL = AssayService.get().getAssayRunsURL(getContainer(), _protocol);
+            ActionURL assayListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer());
+            ActionURL runListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol);
             return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
                     " Runs", runListURL).addChild("Graph Selected Specimens");
         }
@@ -607,12 +613,12 @@ public class NabAssayController extends SpringActionController
 
             if (deleteRunForm.isReupload())
             {
-                ActionURL reuploadURL = new ActionURL("NabAssay", "nabUploadWizard", getContainer());
+                ActionURL reuploadURL = new ActionURL(NabUploadWizardAction.class, getContainer());
                 reuploadURL.addParameter("dataFile", file.getPath());
                 HttpView.throwRedirect(reuploadURL);
             }
             else
-                HttpView.throwRedirect(AssayService.get().getAssayRunsURL(getContainer(), run.getProtocol()));
+                HttpView.throwRedirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), run.getProtocol()));
             return null;
         }
 

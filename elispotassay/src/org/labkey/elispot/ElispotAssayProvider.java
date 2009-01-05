@@ -36,6 +36,7 @@ import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.labkey.elispot.query.ElispotRunDataTable;
+import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
 import java.util.*;
@@ -229,7 +230,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
                 ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property", SPECIMENID_PROPERTY_NAME);
     }
 
-    public ActionURL publish(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try {
             int rowIndex = 0;
@@ -365,11 +366,9 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
         return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
     }
 
-    public ActionURL getUploadWizardURL(Container container, ExpProtocol protocol)
+    public Map<String, Class<? extends Controller>> getImportActions()
     {
-        ActionURL url = new ActionURL(ElispotUploadWizardAction.class, container);
-        url.addParameter("rowId", protocol.getRowId());
-        return url;
+        return Collections.<String, Class<? extends Controller>>singletonMap(IMPORT_DATA_LINK_NAME, ElispotUploadWizardAction.class);
     }
 
     public PropertyDescriptor[] getAntigenWellGroupColumns(ExpProtocol protocol)

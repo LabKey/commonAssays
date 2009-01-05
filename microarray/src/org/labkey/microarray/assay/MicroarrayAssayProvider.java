@@ -46,6 +46,7 @@ import org.labkey.microarray.sampleset.client.SampleInfo;
 import org.labkey.microarray.sampleset.client.SampleChooser;
 import org.labkey.common.util.Pair;
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
+import org.springframework.web.servlet.mvc.Controller;
 
 import java.util.*;
 import java.io.File;
@@ -139,7 +140,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         throw new UnsupportedOperationException();
     }
 
-    public boolean canPublish()
+    public boolean canCopyToStudy()
     {
         return false;
     }
@@ -202,7 +203,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         }
     }
 
-    public ActionURL publish(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         throw new UnsupportedOperationException();
     }
@@ -231,11 +232,9 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         return result;
     }
 
-    public ActionURL getUploadWizardURL(Container container, ExpProtocol protocol)
+    public Map<String, Class<? extends Controller>> getImportActions()
     {
-        ActionURL url = new ActionURL(MicroarrayUploadWizardAction.class, container);
-        url.addParameter("rowId", protocol.getRowId());
-        return url;
+        return Collections.<String, Class<? extends Controller>>singletonMap(IMPORT_DATA_LINK_NAME, MicroarrayUploadWizardAction.class);
     }
 
     protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
@@ -312,11 +311,9 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         return result;
     }
 
-    public ActionURL getDesignerURL(Container container, ExpProtocol protocol, boolean copy)
+    public Class<? extends Controller> getDesignerAction()
     {
-        ActionURL result = super.getDesignerURL(container, protocol, copy);
-        result.setAction(MicroarrayController.DesignerAction.class);
-        return result;
+        return MicroarrayController.DesignerAction.class;
     }
 
     public Pair<ExpProtocol, List<Domain>> getAssayTemplate(User user, Container targetContainer)

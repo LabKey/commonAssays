@@ -21,6 +21,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.data.*;
@@ -226,7 +227,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
                 if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
                 {
-                    HttpView.throwRedirect(AssayService.get().getUploadWizardURL(getContainer(), _protocol));
+                    HttpView.throwRedirect(PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), _protocol, LuminexUploadWizardAction.class));
                 }
 
                 if (!form.isResetDefaultValues() && errors.getErrorCount() == 0)
