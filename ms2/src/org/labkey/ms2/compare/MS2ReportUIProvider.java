@@ -18,6 +18,7 @@ package org.labkey.ms2.compare;
 import org.labkey.api.reports.report.view.DefaultReportUIProvider;
 import org.labkey.api.reports.report.view.RReportBean;
 import org.labkey.api.reports.report.view.ReportUtil;
+import org.labkey.api.reports.ReportService;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.QuerySettings;
@@ -33,15 +34,19 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
 {
     private static final Set<String> R_REPORT_TYPES = new HashSet<String>(Arrays.asList(SpectraCountRReport.TYPE, SingleMS2RunRReport.TYPE));
 
-    public void getReportDesignURL(ViewContext context, QuerySettings settings, Map<String, String> designers)
+    public List<ReportService.DesignerInfo> getReportDesignURL(ViewContext context, QuerySettings settings)
     {
-        addDesignerURL(context, settings, designers, SingleMS2RunRReport.TYPE, SingleMS2RunRReport.PARAMS);
+        List<ReportService.DesignerInfo> reportDesigners = new ArrayList<ReportService.DesignerInfo>();
+
+        addDesignerURL(context, settings, reportDesigners, SingleMS2RunRReport.TYPE, SingleMS2RunRReport.PARAMS);
 
         RReportBean bean = new RReportBean(settings);
         bean.setReportType(SpectraCountRReport.TYPE);
         bean.setRedirectUrl(context.getActionURL().toString());
 
-        designers.put(SpectraCountRReport.TYPE, ReportUtil.getRReportDesignerURL(context, bean).getLocalURIString());
+        reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R View", ReportUtil.getRReportDesignerURL(context, bean)));
+
+        return reportDesigners;
     }
 
     public String getReportIcon(ViewContext context, String reportType)

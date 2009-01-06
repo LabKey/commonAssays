@@ -19,10 +19,13 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.reports.report.view.DefaultReportUIProvider;
 import org.labkey.api.reports.report.view.RReportBean;
 import org.labkey.api.reports.report.view.ReportUtil;
+import org.labkey.api.reports.ReportService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 /*
 * User: Dave
@@ -31,10 +34,14 @@ import java.util.Map;
 */
 public class MS1ReportUIProvider extends DefaultReportUIProvider
 {
-    public void getReportDesignURL(ViewContext context, QuerySettings settings, Map<String, String> designers)
+    public List<ReportService.DesignerInfo> getReportDesignURL(ViewContext context, QuerySettings settings)
     {
-        addDesignerURL(context, settings, designers, FeaturesRReport.TYPE, FeaturesRReport.PARAMS);
-        addDesignerURL(context, settings, designers, PeaksRReport.TYPE, PeaksRReport.PARAMS);
+        List<ReportService.DesignerInfo> reportDesigners = new ArrayList<ReportService.DesignerInfo>();
+
+        addDesignerURL(context, settings, reportDesigners, FeaturesRReport.TYPE, FeaturesRReport.PARAMS);
+        addDesignerURL(context, settings, reportDesigners, PeaksRReport.TYPE, PeaksRReport.PARAMS);
+
+        return reportDesigners;
     }
 
     public String getReportIcon(ViewContext context, String reportType)
