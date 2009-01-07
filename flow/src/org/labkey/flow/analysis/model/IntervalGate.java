@@ -27,6 +27,7 @@ import org.labkey.flow.analysis.data.NumberArray;
  */
 public class IntervalGate extends RegionGate
 {
+    static final double MAX_VALUE = Float.MAX_VALUE;    // using Double.MAX_VALUE is likely to cause errors if anytone tries arithmetic
     String _axis;
     double _min;
     double _max;
@@ -120,11 +121,11 @@ public class IntervalGate extends RegionGate
         }
         if (X == null)
         {
-            X = new double[]{-Double.MAX_VALUE, -Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE};
+            X = new double[]{-MAX_VALUE, -MAX_VALUE, MAX_VALUE, MAX_VALUE};
         }
         if (Y == null)
         {
-            Y = new double[]{-Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE};
+            Y = new double[]{-MAX_VALUE, MAX_VALUE, MAX_VALUE, -MAX_VALUE};
         }
         polys.add(new Polygon(X, Y));
     }

@@ -60,19 +60,29 @@ public class DensityPlot extends ContourPlot
 
     protected void drawLine(Graphics2D g2, Rectangle2D dataArea, double x1, double y1, double x2, double y2)
     {
+        int prevX, prevY, nextX, nextY;
+        if (x1 == x2 || y1 == y2)
+        {
+            prevX = (int)getDomainAxis().valueToJava2D(x1, dataArea, RectangleEdge.BOTTOM);
+            prevY = (int)getRangeAxis().valueToJava2D(y1, dataArea, RectangleEdge.LEFT);
+            nextX = (int)getDomainAxis().valueToJava2D(x2, dataArea, RectangleEdge.BOTTOM);
+            nextY = (int)getRangeAxis().valueToJava2D(y2, dataArea, RectangleEdge.LEFT);
+            g2.drawLine(prevX, prevY, nextX, nextY);
+            return;
+        }
+
         int nSegments = 10;
-        Point2D.Double prev = new Point2D.Double();
-        prev.x = getDomainAxis().valueToJava2D(x1, dataArea, RectangleEdge.BOTTOM);
-        prev.y = getRangeAxis().valueToJava2D(y1, dataArea, RectangleEdge.LEFT);
+        prevX = (int)getDomainAxis().valueToJava2D(x1, dataArea, RectangleEdge.BOTTOM);
+        prevY = (int)getRangeAxis().valueToJava2D(y1, dataArea, RectangleEdge.LEFT);
         for (int i = 1; i <= nSegments; i ++)
         {
             double x = x2 * i / nSegments + x1 * (nSegments - i) / nSegments;
             double y = y2 * i / nSegments + y1 * (nSegments - i) / nSegments;
-            Point2D.Double next = new Point2D.Double();
-            next.x = getDomainAxis().valueToJava2D(x, dataArea, RectangleEdge.BOTTOM);
-            next.y = getRangeAxis().valueToJava2D(y, dataArea, RectangleEdge.LEFT);
-            g2.drawLine((int) prev.x, (int) prev.y, (int) next.x, (int) next.y);
-            prev = next;
+            nextX = (int)getDomainAxis().valueToJava2D(x, dataArea, RectangleEdge.BOTTOM);
+            nextY = (int)getRangeAxis().valueToJava2D(y, dataArea, RectangleEdge.LEFT);
+            g2.drawLine(prevX, prevY, nextX, nextY);
+            prevX = nextX;
+            prevY = nextY;
         }
     }
 
