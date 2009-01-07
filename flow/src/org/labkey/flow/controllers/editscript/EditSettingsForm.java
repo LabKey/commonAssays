@@ -18,7 +18,6 @@ package org.labkey.flow.controllers.editscript;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.struts.action.ActionMapping;
 import org.fhcrc.cpas.flow.script.xml.FilterDef;
 import org.fhcrc.cpas.flow.script.xml.FiltersDef;
 import org.fhcrc.cpas.flow.script.xml.ParameterDef;
@@ -26,7 +25,6 @@ import org.fhcrc.cpas.flow.script.xml.SettingsDef;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.query.FieldKey;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,9 +38,10 @@ public class EditSettingsForm extends EditScriptForm
     public String[] ff_filter_op = new String[0];
     public String[] ff_filter_value = new String[0];
 
-    public void reset(ActionMapping mapping, HttpServletRequest request)
+    @Override
+    public void reset()
     {
-        super.reset(mapping, request);
+        super.reset();
         initSettings();
     }
 

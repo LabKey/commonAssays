@@ -16,13 +16,13 @@
 
 package org.labkey.flow.controllers.well;
 
-import org.labkey.api.view.ViewFormData;
 import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.api.view.ViewForm;
 
-public class ChooseGraphForm extends ViewFormData
+public class ChooseGraphForm extends ViewForm
 {
     private int _wellId;
     private int _compId;

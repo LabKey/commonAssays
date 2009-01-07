@@ -37,9 +37,10 @@ public class UploadAnalysisForm extends EditScriptForm
     public Set<StatisticSet> ff_statisticSet;
 
 
-    public void reset(ActionMapping actionMapping, HttpServletRequest servletRequest)
+    @Override
+    public void reset()
     {
-        super.reset(actionMapping, servletRequest);
+        super.reset();
         ff_statisticSet = EnumSet.of(StatisticSet.existing, StatisticSet.workspace, StatisticSet.count, StatisticSet.frequencyOfParent);
         try
         {

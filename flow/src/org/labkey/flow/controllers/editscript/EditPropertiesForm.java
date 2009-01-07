@@ -16,17 +16,14 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.struts.action.ActionMapping;
-
-import javax.servlet.http.HttpServletRequest;
-
 public class EditPropertiesForm extends EditScriptForm
 {
     public String ff_description;
 
-    public void reset(ActionMapping mapping, HttpServletRequest request)
+    @Override
+    public void reset()
     {
-        super.reset(mapping, request);
+        super.reset();
         ff_description = analysisScript.getExpObject().getComment();
     }
 

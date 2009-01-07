@@ -18,19 +18,15 @@ package org.labkey.flow.controllers.executescript;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.struts.action.ActionError;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.flow.data.*;
 import org.labkey.flow.query.FlowQueryForm;
-import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.springframework.validation.BindException;
 

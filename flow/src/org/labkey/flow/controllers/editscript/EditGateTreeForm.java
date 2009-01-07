@@ -16,12 +16,10 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.labkey.flow.analysis.web.SubsetSpec;
-import org.labkey.flow.analysis.model.Population;
 import org.labkey.api.util.UnexpectedException;
-import org.apache.struts.action.ActionMapping;
+import org.labkey.flow.analysis.model.Population;
+import org.labkey.flow.analysis.web.SubsetSpec;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -33,9 +31,10 @@ public class EditGateTreeForm extends EditScriptForm
     public SubsetSpec[] subsets;
     public String[] populationNames;
 
-    public void reset(ActionMapping mapping, HttpServletRequest request)
+    @Override
+    public void reset()
     {
-        super.reset(mapping, request);
+        super.reset();
         try
         {
             Map<SubsetSpec,Population> pops = getPopulations();
@@ -56,10 +55,5 @@ public class EditGateTreeForm extends EditScriptForm
     public String[] getPopulationNames()
     {
         return populationNames;
-    }
-    public void setPopulationNames(String[] names)
-    {
-        // This method just needs to be here so struts knows populationNames is not read only.
-        throw new UnsupportedOperationException();
     }
 }

@@ -16,7 +16,6 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.struts.action.ActionMapping;
 import org.fhcrc.cpas.flow.script.xml.ChannelDef;
 import org.fhcrc.cpas.flow.script.xml.ChannelSubsetDef;
 import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
@@ -26,7 +25,6 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.data.FlowProtocolStep;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -194,14 +192,15 @@ public class EditCompensationCalculationForm extends EditSettingsForm
 
     }
 
-    public void reset(ActionMapping actionMapping, HttpServletRequest request)
+    @Override
+    public void reset()
     {
-        super.reset(actionMapping, request);
+        super.reset();
         this.step = FlowProtocolStep.calculateCompensation;
 
         try
         {
-            setWorkspace((FlowJoWorkspace) PageFlowUtil.decodeObject(request.getParameter("workspaceObject")));
+            setWorkspace((FlowJoWorkspace) PageFlowUtil.decodeObject(getRequest().getParameter("workspaceObject")));
         }
         catch (Exception e)
         {

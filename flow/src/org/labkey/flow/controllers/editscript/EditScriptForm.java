@@ -17,12 +17,12 @@
 package org.labkey.flow.controllers.editscript;
 
 import org.apache.log4j.Logger;
-import org.apache.struts.action.ActionMapping;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.ViewFormData;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ViewForm;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.analysis.model.Population;
 import org.labkey.flow.analysis.model.PopulationSet;
@@ -34,11 +34,11 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.query.FlowPropertySet;
 import org.labkey.flow.query.FlowSchema;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-public class EditScriptForm extends ViewFormData
+
+public class EditScriptForm extends ViewForm
 {
     static private Logger _log = Logger.getLogger(EditScriptForm.class);
     private static int MAX_WELLS_TO_POLL = 15;
@@ -50,30 +50,36 @@ public class EditScriptForm extends ViewFormData
     private FlowCompensationMatrix _comp;
     private FlowRun _run;
 
-    public void reset(ActionMapping mapping, HttpServletRequest request)
+    @Override
+    public void setViewContext(ViewContext context)
+    {
+        super.setViewContext(context);
+        reset();
+    }
+
+    public void reset()
     {
         try
         {
-            super.reset(mapping, request);
-            analysisScript = FlowScript.fromScriptId(Integer.valueOf(request.getParameter("scriptId")));
+            analysisScript = FlowScript.fromScriptId(Integer.valueOf(getRequest().getParameter("scriptId")));
             if (analysisScript == null || analysisScript.getExpObject() == null)
-                throw new IllegalArgumentException("scriptId not found: " + request.getParameter("scriptId"));
+                throw new IllegalArgumentException("scriptId not found: " + getRequest().getParameter("scriptId"));
             _runCount = analysisScript.getRunCount();
-            step = FlowProtocolStep.fromRequest(request);
-            _run = FlowRun.fromURL(getContext().getActionURL(), getRequest());
+            step = FlowProtocolStep.fromRequest(getRequest());
+            _run = FlowRun.fromURL(getViewContext().getActionURL(), getRequest());
             if (_run != null)
             {
-                FlowPreference.editScriptRunId.setValue(request, Integer.toString(_run.getRunId()));
+                FlowPreference.editScriptRunId.setValue(getRequest(), Integer.toString(_run.getRunId()));
             }
-            _comp = FlowCompensationMatrix.fromURL(getContext().getActionURL(), getRequest());
+            _comp = FlowCompensationMatrix.fromURL(getViewContext().getActionURL(), getRequest());
             if (_comp != null)
             {
-                FlowPreference.editScriptCompId.setValue(request, Integer.toString(_comp.getRowId()));
+                FlowPreference.editScriptCompId.setValue(getRequest(), Integer.toString(_comp.getRowId()));
             }
-            String strWellId = request.getParameter(FlowParam.wellId.toString());
+            String strWellId = getRequest().getParameter(FlowParam.wellId.toString());
             if (strWellId != null)
             {
-                FlowPreference.editScriptWellId.setValue(request, strWellId);
+                FlowPreference.editScriptWellId.setValue(getRequest(), strWellId);
             }
         }
         catch (Exception e)
@@ -107,7 +113,7 @@ public class EditScriptForm extends ViewFormData
 
     public Map<SubsetSpec, Population> getPopulations() throws Exception
     {
-        LinkedHashMap<SubsetSpec, Population> ret = new LinkedHashMap();
+        LinkedHashMap<SubsetSpec, Population> ret = new LinkedHashMap<SubsetSpec, Population>();
         PopulationSet popset = getAnalysis();
         for (Population child : popset.getPopulations())
         {
@@ -200,7 +206,7 @@ public class EditScriptForm extends ViewFormData
 
     static public Map<String, String> getParameterNames(FlowRun run, String[] compChannels)
     {
-        Map<String, String> ret = new LinkedHashMap();
+        Map<String, String> ret = new LinkedHashMap<String, String>();
         if (run == null)
             return ret;
 
@@ -253,7 +259,7 @@ public class EditScriptForm extends ViewFormData
 
     public String[] getAvailableKeywords()
     {
-        HashSet<String> keywords = new HashSet();
+        HashSet<String> keywords = new HashSet<String>();
         try
         {
             FlowRun run = getRun();
@@ -267,7 +273,7 @@ public class EditScriptForm extends ViewFormData
         {
             _log.error("Error", t);
         }
-        String[] ret = keywords.toArray(new String[0]);
+        String[] ret = keywords.toArray(new String[keywords.size()]);
         Arrays.sort(ret);
         return ret;
     }
@@ -284,7 +290,7 @@ public class EditScriptForm extends ViewFormData
 
     public Map<Integer, String> getExperimentRuns(boolean realFiles) throws Exception
     {
-        LinkedHashMap<Integer, String> ret = new LinkedHashMap();
+        LinkedHashMap<Integer, String> ret = new LinkedHashMap<Integer, String>();
         for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
         {
             if (!realFiles || run.hasRealWells())

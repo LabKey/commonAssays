@@ -19,7 +19,7 @@ package org.labkey.flow.controllers.protocol;
 import org.labkey.api.exp.api.ExpDataTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.UnauthorizedException;
-import org.labkey.api.view.ViewFormData;
+import org.labkey.api.view.ViewForm;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.query.FlowPropertySet;
 import org.labkey.flow.query.FlowSchema;
@@ -27,7 +27,7 @@ import org.labkey.flow.query.FlowSchema;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ProtocolForm extends ViewFormData
+public class ProtocolForm extends ViewForm
 {
     private FlowProtocol _protocol;
 
@@ -35,13 +35,13 @@ public class ProtocolForm extends ViewFormData
     {
         if (_protocol != null)
             return _protocol;
-        _protocol = FlowProtocol.fromURL(getUser(), getContext().getActionURL(), getRequest());
+        _protocol = FlowProtocol.fromURL(getUser(), getViewContext().getActionURL(), getRequest());
         return _protocol;
     }
 
     public Map<FieldKey, String> getKeywordFieldMap()
     {
-        Map<FieldKey, String> options = new LinkedHashMap();
+        Map<FieldKey, String> options = new LinkedHashMap<FieldKey, String>();
         options.put(FieldKey.fromParts("Name"), "FCS file name");
         options.put(FieldKey.fromParts("Run", "Name"), "Run name");
         FlowSchema schema = new FlowSchema(getUser(), getContainer());

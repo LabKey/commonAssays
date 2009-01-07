@@ -16,18 +16,18 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.labkey.api.view.ViewFormData;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.flow.data.FlowRun;
-import org.labkey.flow.data.FlowProtocolStep;
-import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.FlowObject;
+import org.labkey.api.view.ViewForm;
 import org.labkey.flow.FlowPreference;
+import org.labkey.flow.data.FlowObject;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.gateeditor.client.model.GWTEditingMode;
 
 import java.sql.SQLException;
 
-public class GateEditorForm extends ViewFormData
+public class GateEditorForm extends ViewForm
 {
     int runId;
     int scriptId;

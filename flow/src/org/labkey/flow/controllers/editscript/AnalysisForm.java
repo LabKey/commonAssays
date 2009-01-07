@@ -16,7 +16,6 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.struts.action.ActionMapping;
 import org.apache.commons.lang.StringUtils;
 import org.fhcrc.cpas.flow.script.xml.*;
 import org.labkey.flow.analysis.web.SubsetSpec;
@@ -38,9 +37,10 @@ public class AnalysisForm extends EditScriptForm
     public String statistics;
     public String graphs;
 
-    public void reset(ActionMapping mapping, HttpServletRequest request)
+    @Override
+    public void reset()
     {
-        super.reset(mapping, request);
+        super.reset();
         if (analysisDocument == null)
             return;
         ScriptDef script = analysisDocument.getScript();
