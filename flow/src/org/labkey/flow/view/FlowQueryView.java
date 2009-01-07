@@ -139,18 +139,6 @@ public class FlowQueryView extends QueryView
         super.renderView(model, out);
     }
 
-    protected Object renderErrors(PrintWriter out, String message, List<String> errors)
-    {
-        out.print("<p class=\"labkey-error\" style=\"padding-left:1em; text-indent:-1em;\">");
-        out.print(PageFlowUtil.filter(message));
-        for (String e : errors)
-        {
-            out.append("<br>").append(PageFlowUtil.filter(e)).append("</span>");
-        }
-        out.print("</p>");
-        return null;
-    }
-
     public FlowQuerySettings getSettings()
     {
         return (FlowQuerySettings) super.getSettings();
