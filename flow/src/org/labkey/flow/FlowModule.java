@@ -67,7 +67,7 @@ public class FlowModule extends DefaultModule
 
     public double getVersion()
     {
-        return 8.30;
+        return 8.31;
     }
 
     protected void init()
@@ -109,7 +109,7 @@ public class FlowModule extends DefaultModule
         return Arrays.asList(OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
                 AnalysisScriptsWebPart.FACTORY
-//                ,FlowFrontPage.FACTORY,FlowFiles.FACTORY
+                ,FlowFrontPage.FACTORY,FlowFiles.FACTORY
                 );
     }
 
