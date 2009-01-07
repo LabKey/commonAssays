@@ -122,6 +122,7 @@ public class FlowPipelineProvider extends PipelineProvider
 
         try
         {
+            // UNDONE: is this ever different than pr???
             root = PipelineService.get().findPipelineRoot(context.getContainer());
             for (FlowRun run : FlowRun.getRunsForContainer(context.getContainer(), FlowProtocolStep.keywords))
                 usedPaths.add(run.getExperimentRun().getFilePathRoot());
@@ -134,7 +135,7 @@ public class FlowPipelineProvider extends PipelineProvider
         ActionURL url = PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
         String srcURL = context.getActionURL().toString();
         url.replaceParameter("srcURL", srcURL);
-        URI rootURI = root.getUri();
+        URI rootURI = root != null ? root.getUri() : pr.getUri();
 
         boolean hasFlowDir = false;
         
