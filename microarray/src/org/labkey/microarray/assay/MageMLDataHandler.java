@@ -53,7 +53,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
         return true;
     }
 
-    protected Map<String, Object>[] loadFileData(PropertyDescriptor[] columns, File dataFile) throws IOException, ExperimentException
+    public Map<String, Object>[] loadFileData(PropertyDescriptor[] columns, File dataFile) throws IOException, ExperimentException
     {
         if (columns.length == 0)
         {
