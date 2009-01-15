@@ -31,6 +31,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.query.ValidationException;
 import org.labkey.flow.controllers.FlowParam;
 
 import javax.servlet.ServletException;
@@ -225,9 +226,9 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         {
             getExpObject().setProperty(user, pd, value);
         }
-        catch (SQLException e)
+        catch (ValidationException e)
         {
-            throw e;
+            throw (SQLException)new SQLException().initCause(e);
         }
         catch (Exception e)
         {
