@@ -266,11 +266,11 @@ public class NabAssayProvider extends PlateBasedAssayProvider
             typeSet.add(createPublishPropertyDescriptor(study, getDataRowIdFieldKey().toString(), getDataRowIdType()));
             typeSet.add(createPublishPropertyDescriptor(study, "SourceLSID", getDataRowIdType()));
 
-            PropertyDescriptor[] samplePDs = getSampleWellGroupColumns(protocol);
+            Domain sampleDomain = getSampleWellGroupDomain(protocol);
+            DomainProperty[] samplePDs = sampleDomain.getProperties();
+
             PropertyDescriptor[] dataPDs = NabSchema.getExistingDataProperties(protocol);
-            List<PropertyDescriptor> runPDs = new ArrayList<PropertyDescriptor>();
-            runPDs.addAll(Arrays.asList(getRunPropertyColumns(protocol)));
-            runPDs.addAll(Arrays.asList(getUploadSetColumns(protocol)));
+            List<PropertyDescriptor> runPDs = getRunTableColumns(protocol);
 
             SimpleFilter filter = new SimpleFilter();
             filter.addInClause(getDataRowIdFieldKey().toString(), dataKeys.keySet());
@@ -303,13 +303,13 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                 ExpMaterial material = ExperimentService.get().getExpMaterial(materialLsid);
                 if (material != null)
                 {
-                    for (PropertyDescriptor pd : samplePDs)
+                    for (DomainProperty pd : samplePDs)
                     {
                         if (!PARTICIPANTID_PROPERTY_NAME.equals(pd.getName()) &&
                                 !VISITID_PROPERTY_NAME.equals(pd.getName()) &&
                                 !DATE_PROPERTY_NAME.equals(pd.getName()))
                         {
-                            addProperty(pd, material.getProperty(pd), dataMap, tempTypes);
+                            addProperty(pd.getPropertyDescriptor(), material.getProperty(pd), dataMap, tempTypes);
                         }
                     }
                 }

@@ -240,11 +240,11 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
             Map<Integer, ExpRun> runCache = new HashMap<Integer, ExpRun>();
             Map<Integer, Map<String, Object>> runPropertyCache = new HashMap<Integer, Map<String, Object>>();
 
-            List<PropertyDescriptor> runPDs = new ArrayList<PropertyDescriptor>();
-            runPDs.addAll(Arrays.asList(getRunPropertyColumns(protocol)));
-            runPDs.addAll(Arrays.asList(getUploadSetColumns(protocol)));
+            List<DomainProperty> runPDs = new ArrayList<DomainProperty>();
+            runPDs.addAll(Arrays.asList(getRunDomain(protocol).getProperties()));
+            runPDs.addAll(Arrays.asList(getUploadSetDomain(protocol).getProperties()));
 
-            PropertyDescriptor[] samplePDs = getSampleWellGroupColumns(protocol);
+            PropertyDescriptor[] samplePDs = getPropertyDescriptors(getSampleWellGroupDomain(protocol));
             PropertyDescriptor[] dataPDs = ElispotSchema.getExistingDataProperties(protocol);
 
             SimpleFilter filter = new SimpleFilter();
@@ -315,14 +315,14 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
                     runPropertyCache.put(run.getRowId(), runProperties);
                 }
 
-                for (PropertyDescriptor pd : runPDs)
+                for (DomainProperty dp : runPDs)
                 {
-                    if (!TARGET_STUDY_PROPERTY_NAME.equals(pd.getName()) &&
-                            !PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(pd.getName()))
+                    if (!TARGET_STUDY_PROPERTY_NAME.equals(dp.getName()) &&
+                            !PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(dp.getName()))
                     {
-                        PropertyDescriptor publishPd = pd.clone();
-                        publishPd.setName("Run " + pd.getName());
-                        addProperty(publishPd, runProperties.get(pd.getPropertyURI()), dataMap, tempTypes);
+                        PropertyDescriptor publishPd = dp.getPropertyDescriptor().clone();
+                        publishPd.setName("Run " + dp.getName());
+                        addProperty(publishPd, runProperties.get(dp.getPropertyURI()), dataMap, tempTypes);
                     }
                 }
 
@@ -371,9 +371,9 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
         return Collections.<String, Class<? extends Controller>>singletonMap(IMPORT_DATA_LINK_NAME, ElispotUploadWizardAction.class);
     }
 
-    public PropertyDescriptor[] getAntigenWellGroupColumns(ExpProtocol protocol)
+    public Domain getAntigenWellGroupDomain(ExpProtocol protocol)
     {
-        return getPropertiesForDomainPrefix(protocol, ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+        return getDomainByPrefix(protocol, ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
     }
 
     private static final class ElispotRunDataQueryView extends RunDataQueryView

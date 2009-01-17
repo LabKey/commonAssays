@@ -103,12 +103,12 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         });
     }
 
-    public PropertyDescriptor[] getRunPropertyColumns(ExpProtocol protocol)
+    @Override
+    public List<PropertyDescriptor> getRunTableColumns(ExpProtocol protocol)
     {
-        List<PropertyDescriptor> result = new ArrayList<PropertyDescriptor>(Arrays.asList(super.getRunPropertyColumns(protocol)));
-        result.addAll(Arrays.asList(getPropertiesForDomainPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN)));
-
-        return result.toArray(new PropertyDescriptor[result.size()]);
+        List<PropertyDescriptor> cols = super.getRunTableColumns(protocol);
+        Collections.addAll(cols, getPropertyDescriptors(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN)));
+        return cols;        
     }
 
     public TableInfo createDataTable(UserSchema schema, String alias, ExpProtocol protocol)
@@ -118,7 +118,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return table;
     }
 
-    public PropertyDescriptor[] getRunDataColumns(ExpProtocol protocol)
+    public Domain getRunDataDomain(ExpProtocol protocol)
     {
         throw new UnsupportedOperationException();
     }
@@ -225,7 +225,25 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     
     public ExpData getDataForDataRow(Object dataRowId)
     {
-        LuminexDataRow dataRow = Table.selectObject(LuminexSchema.getTableInfoDataRow(), dataRowId, LuminexDataRow.class);
+        // on Postgres 8.3, we must pass in an integer row ID; passing a string that happens to be all digits isn't
+        // sufficient, since 8.3 no longer does implicit type casting in this situation.
+        Integer dataRowIdInt = null;
+        if (dataRowId instanceof Integer)
+            dataRowIdInt = ((Integer) dataRowId).intValue();
+        else if (dataRowId instanceof String)
+        {
+            try
+            {
+                dataRowIdInt = Integer.parseInt((String) dataRowId);
+            }
+            catch (NumberFormatException e)
+            {
+                // we'll error out below...
+            }
+        }
+        if (dataRowIdInt == null)
+            throw new IllegalArgumentException("Luminex data rows must have integer primary keys.  PK provided: " + dataRowId);
+        LuminexDataRow dataRow = Table.selectObject(LuminexSchema.getTableInfoDataRow(), dataRowIdInt, LuminexDataRow.class);
         if (dataRow == null)
         {
             return null;
@@ -279,11 +297,13 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             // Map from run to run properties
             Map<ExpRun, Map<String, ObjectProperty>> runProperties = new HashMap<ExpRun, Map<String, ObjectProperty>>();
 
-            PropertyDescriptor[] runPDs = getRunPropertyColumns(protocol);
-            PropertyDescriptor[] uploadSetPDs = getUploadSetColumns(protocol);
+            PropertyDescriptor[] runPDs = getPropertyDescriptors(getRunDomain(protocol));
+            PropertyDescriptor[] excelRunPDs = getPropertyDescriptors(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN));
+            PropertyDescriptor[] uploadSetPDs = getPropertyDescriptors(getUploadSetDomain(protocol));
 
             List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
             pds.addAll(Arrays.asList(runPDs));
+            pds.addAll(Arrays.asList(excelRunPDs));
             pds.addAll(Arrays.asList(uploadSetPDs));
 
             TimepointType timepointType = AssayPublishService.get().getTimepointType(study);
@@ -425,8 +445,10 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         addProperty(study, "Analyte MaxStandardRecovery", analyte.getMaxStandardRecovery(), dataMap, tempTypes);
 
         // Handle the configurable properties
-        for (PropertyDescriptor pd : AbstractAssayProvider.getPropertiesForDomainPrefix(protocol, ASSAY_DOMAIN_ANALYTE))
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(protocol, ASSAY_DOMAIN_ANALYTE);
+        for (DomainProperty dp : analyteDomain.getProperties())
         {
+            PropertyDescriptor pd = dp.getPropertyDescriptor();
             ObjectProperty prop = analyteProps.get(pd.getPropertyURI());
             PropertyDescriptor publishPD = pd.clone();
             publishPD.setName("Analyte" + pd.getName());

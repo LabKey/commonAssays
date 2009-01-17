@@ -23,6 +23,8 @@ import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
@@ -101,10 +103,8 @@ public class ElispotController extends SpringActionController
             ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
             assert(data.length == 1);
 
-            PropertyDescriptor[] sampleProperties = provider.getSampleWellGroupColumns(protocol);
-            Map<String, PropertyDescriptor> samplePropertyMap = new HashMap<String, PropertyDescriptor>();
-            for (PropertyDescriptor sampleProperty : sampleProperties)
-                samplePropertyMap.put(sampleProperty.getName(), sampleProperty);
+            Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);
+            DomainProperty[] sampleProperties = sampleDomain.getProperties();
 
             Map<String, ExpMaterial> inputs = new HashMap<String, ExpMaterial>();
             for (ExpMaterial material : run.getMaterialInputs().keySet())
@@ -139,10 +139,10 @@ public class ElispotController extends SpringActionController
                         ExpMaterial material = inputs.get(specimenGroup);
                         if (material != null)
                         {
-                            for (PropertyDescriptor pd : sampleProperties)
+                            for (DomainProperty dp : sampleProperties)
                             {
-                                Object value = material.getProperty(pd);
-                                wellInfo.addSpecimenProperty(pd, String.valueOf(value));
+                                Object value = material.getProperty(dp);
+                                wellInfo.addSpecimenProperty(dp, String.valueOf(value));
                             }
                         }
                     }
@@ -182,7 +182,7 @@ public class ElispotController extends SpringActionController
         private String _dataRowLsid;
         private String _title = "";
         private Map<String, ObjectProperty> _wellProperties = new LinkedHashMap<String, ObjectProperty>();
-        private Map<PropertyDescriptor, String> _specimenProperties = new LinkedHashMap<PropertyDescriptor, String>();
+        private Map<DomainProperty, String> _specimenProperties = new LinkedHashMap<DomainProperty, String>();
 
         public String getDataRowLsid()
         {
@@ -199,7 +199,7 @@ public class ElispotController extends SpringActionController
             _wellProperties.put(prop.getName(), prop);
         }
 
-        public void addSpecimenProperty(PropertyDescriptor pd, String value)
+        public void addSpecimenProperty(DomainProperty pd, String value)
         {
             _specimenProperties.put(pd, value);
         }
@@ -209,7 +209,7 @@ public class ElispotController extends SpringActionController
             return _wellProperties;
         }
 
-        public Map<PropertyDescriptor, String> getSpecimenProperties()
+        public Map<DomainProperty, String> getSpecimenProperties()
         {
             return _specimenProperties;
         }

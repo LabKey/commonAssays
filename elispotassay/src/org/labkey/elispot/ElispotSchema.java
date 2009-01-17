@@ -88,7 +88,7 @@ public class ElispotSchema extends UserSchema
                 ExprColumn.STR_TABLE_ALIAS + ".lsid)";
 
         ColumnInfo colProperty = new ExprColumn(result, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
-        PropertyDescriptor[] pds = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
+        PropertyDescriptor[] pds = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
         Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
         FieldKey keyProp = new FieldKey(null, "Property");
         for(PropertyDescriptor pd : pds)

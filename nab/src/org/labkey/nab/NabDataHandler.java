@@ -18,6 +18,7 @@ package org.labkey.nab;
 
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
@@ -215,19 +216,19 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         PlateBasedAssayProvider provider = (PlateBasedAssayProvider) AssayService.get().getProvider(protocol);
         PlateTemplate nabTemplate = provider.getPlateTemplate(container, protocol);
 
-        Map<String, PropertyDescriptor> runProperties = new HashMap<String, PropertyDescriptor>();
-        for (PropertyDescriptor column : provider.getRunPropertyColumns(protocol))
+        Map<String, DomainProperty> runProperties = new HashMap<String, DomainProperty>();
+        for (DomainProperty column : provider.getRunDomain(protocol).getProperties())
             runProperties.put(column.getName(), column);
-        for (PropertyDescriptor column : provider.getUploadSetColumns(protocol))
+        for (DomainProperty column : provider.getUploadSetDomain(protocol).getProperties())
             runProperties.put(column.getName(), column);
 
         Map<Integer, String> cutoffs = new HashMap<Integer, String>();
         for (String cutoffPropName : NabAssayProvider.CUTOFF_PROPERTIES)
         {
-            PropertyDescriptor cutoffProp = runProperties.get(cutoffPropName);
+            DomainProperty cutoffProp = runProperties.get(cutoffPropName);
             Integer cutoff = (Integer) run.getProperty(cutoffProp);
             if (cutoff != null)
-                cutoffs.put(cutoff, cutoffProp.getFormat());
+                cutoffs.put(cutoff, cutoffProp.getPropertyDescriptor().getFormat());
         }
 
         if (cutoffs.isEmpty())
@@ -240,9 +241,9 @@ public class NabDataHandler extends AbstractExperimentDataHandler
 
         // UNDONE: Eliminate cast to NabAssayProvider here: there needs to be a more general way of retrieving
         // sample preparation information from a protocol/provider.
-        PropertyDescriptor[] sampleProperties = ((PlateBasedAssayProvider) provider).getSampleWellGroupColumns(protocol);
-        Map<String, PropertyDescriptor> samplePropertyMap = new HashMap<String, PropertyDescriptor>();
-        for (PropertyDescriptor sampleProperty : sampleProperties)
+        DomainProperty[] sampleProperties = ((PlateBasedAssayProvider) provider).getSampleWellGroupDomain(protocol).getProperties();
+        Map<String, DomainProperty> samplePropertyMap = new HashMap<String, DomainProperty>();
+        for (DomainProperty sampleProperty : sampleProperties)
             samplePropertyMap.put(sampleProperty.getName(), sampleProperty);
 
 
@@ -256,7 +257,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         List<Integer> sortedCutoffs = new ArrayList<Integer>(cutoffs.keySet());
         Collections.sort(sortedCutoffs);
 
-        PropertyDescriptor curveFitPd = runProperties.get(NabAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME);
+        DomainProperty curveFitPd = runProperties.get(NabAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME);
         DilutionCurve.FitType fit = DilutionCurve.FitType.FIVE_PARAMETER;
         if (curveFitPd != null)
         {
@@ -266,7 +267,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         }
 
         boolean lockAxes = false;
-        PropertyDescriptor lockAxesProperty = runProperties.get(NabAssayProvider.LOCK_AXES_PROPERTY_NAME);
+        DomainProperty lockAxesProperty = runProperties.get(NabAssayProvider.LOCK_AXES_PROPERTY_NAME);
         if (lockAxesProperty != null)
         {
             Boolean lock = (Boolean) run.getProperty(lockAxesProperty);
@@ -373,13 +374,13 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         return cellValues;
     }
 
-    private static void prepareWellGroups(Map<WellGroup, ExpMaterial> inputs, Map<String, PropertyDescriptor> properties)
+    private static void prepareWellGroups(Map<WellGroup, ExpMaterial> inputs, Map<String, DomainProperty> properties)
     {
         for (Map.Entry<WellGroup, ExpMaterial> input : inputs.entrySet())
         {
             WellGroup group = input.getKey();
             ExpMaterial sampleInput = input.getValue();
-            for (PropertyDescriptor property : properties.values())
+            for (DomainProperty property : properties.values())
                 group.setProperty(property.getName(), sampleInput.getProperty(property));
 
             List<WellData> wells = group.getWellData(true);

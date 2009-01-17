@@ -25,6 +25,8 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 
@@ -89,11 +91,11 @@ public class LuminexSchema extends UserSchema
                 ExprColumn.STR_TABLE_ALIAS + ".lsid)";
 
         ColumnInfo colProperty = new ExprColumn(result, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
-        PropertyDescriptor[] pds = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
-        for(PropertyDescriptor pd : pds)
+        for(DomainProperty pd : analyteDomain.getProperties())
         {
-            map.put(pd.getName(), pd);
+            map.put(pd.getName(), pd.getPropertyDescriptor());
         }
         colProperty.setFk(new PropertyForeignKey(map, this));
         colProperty.setIsUnselectable(true);

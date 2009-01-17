@@ -18,8 +18,9 @@ package org.labkey.microarray.assay;
 
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.common.tools.SimpleXMLStreamReader;
@@ -53,8 +54,9 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
         return true;
     }
 
-    public Map<String, Object>[] loadFileData(PropertyDescriptor[] columns, File dataFile) throws IOException, ExperimentException
+    public Map<String, Object>[] loadFileData(Domain dataDomain, File dataFile) throws IOException, ExperimentException
     {
+        DomainProperty[] columns = dataDomain.getProperties();
         if (columns.length == 0)
         {
             return new Map[0];
@@ -102,13 +104,13 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
                     try
                     {
                         Map<String, Class> expectedColumns = new HashMap<String, Class>(columns.length);
-                        for (PropertyDescriptor col : columns)
-                            expectedColumns.put(col.getName().toLowerCase(), col.getPropertyType().getJavaType());
-                        for (PropertyDescriptor col : columns)
+                        for (DomainProperty col : columns)
+                            expectedColumns.put(col.getName().toLowerCase(), col.getPropertyDescriptor().getPropertyType().getJavaType());
+                        for (DomainProperty col : columns)
                         {
                             if (col.getLabel() != null && !expectedColumns.containsKey(col.getLabel().toLowerCase()))
                             {
-                                expectedColumns.put(col.getLabel().toLowerCase(), col.getPropertyType().getJavaType());
+                                expectedColumns.put(col.getLabel().toLowerCase(), col.getPropertyDescriptor().getPropertyType().getJavaType());
                             }
                         }
                         Reader fileReader = new InputStreamReader(tsvIn);

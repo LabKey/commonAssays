@@ -17,7 +17,7 @@
 package org.labkey.nab;
 
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
@@ -53,7 +53,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
     }
 
     @Override
-    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, Map<PropertyDescriptor, String> propertyDescriptors, boolean reshow, boolean resetDefaultValues, String uploadStepName, NabRunUploadForm form, BindException errors)
+    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, Map<DomainProperty, String> propertyDescriptors, boolean reshow, boolean resetDefaultValues, String uploadStepName, NabRunUploadForm form, BindException errors)
     {
         InsertView view = super.createInsertView(baseTable, lsidCol, propertyDescriptors, reshow, resetDefaultValues, uploadStepName, form, errors);
         if (form.getReplaceRunId() != null)
@@ -72,10 +72,10 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
         return parent;
     }
 /*
-    protected Map<String, String> getDefaultValues(String suffix, NabRunUploadForm form)
+    protected Map<String, String> getDefaultValuesByInputName(String suffix, NabRunUploadForm form)
     {
         if (form.getReplaceRunId() == null)
-            return super.getDefaultValues(suffix, form);
+            return super.getDefaultValuesByInputName(suffix, form);
         else
         {
             ExpRun run = ExperimentService.get().getExpRun(form.getReplaceRunId());
@@ -88,9 +88,9 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
             properties.put("comments", run.getComments());
             properties.put("uploadedFile", NabDataHandler.getDataFile(run).getPath());
             
-            for (PropertyDescriptor column : provider.getRunPropertyColumns(protocol))
+            for (PropertyDescriptor column : provider.getRunDomain(protocol))
                 properties.put(ColumnInfo.propNameFromName(column.getName()), nullSafeToStr(run.getProperty(column)));
-            for (PropertyDescriptor column : provider.getUploadSetColumns(protocol))
+            for (PropertyDescriptor column : provider.getUploadSetDomain(protocol))
                 properties.put(ColumnInfo.propNameFromName(column.getName()), nullSafeToStr(run.getProperty(column)));
 
             try
@@ -126,7 +126,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
     
     protected class NabRunStepHandler extends RunStepHandler
     {
-        private Map<PropertyDescriptor, String> _postedSampleProperties = null;
+        private Map<String, Map<DomainProperty, String>> _postedSampleProperties = null;
 
         @Override
         protected boolean validatePost(NabRunUploadForm form, BindException errors)
@@ -136,14 +136,22 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
             NabAssayProvider provider = (NabAssayProvider) getProvider(form);
             PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(form, _protocol,
                     getSelectedParticipantVisitResolverType(provider, form));
+
+            boolean samplePropsValid = true;
             _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
-            boolean samplePropsValid = validatePostedProperties(_postedSampleProperties, errors);
+            for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
+            {
+                // if samplePropsValid flips to false, we want to leave it false (via the "&&" below).  We don't
+                // short-circuit the loop because we want to run through all samples every time, so all errors can be reported.
+                samplePropsValid = validatePostedProperties(entry.getValue(), errors) && samplePropsValid;
+            }
             return runPropsValid && samplePropsValid;
         }
 
         protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException error) throws SQLException, ServletException
         {
-            saveDefaultValues(_postedSampleProperties, form.getRequest(), form.getProvider(), RunStepHandler.NAME);
+            for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
+                saveDefaultValues(entry.getValue(), form.getRequest(), form.getProvider(), RunStepHandler.NAME, entry.getKey());
             return super.handleSuccessfulPost(form, error);
         }
     }

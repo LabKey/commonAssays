@@ -20,6 +20,8 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.assay.AssayService;
@@ -68,10 +70,10 @@ public class NabAssayRun extends Luc5Assay
             try
             {
                 Map<FieldKey, PropertyDescriptor> fieldKeys = new HashMap<FieldKey, PropertyDescriptor>();
-                for (PropertyDescriptor property : _provider.getUploadSetColumns(_protocol))
-                    fieldKeys.put(FieldKey.fromParts("Run Properties", property.getName()), property);
-                for (PropertyDescriptor property : _provider.getRunPropertyColumns(_protocol))
-                    fieldKeys.put(FieldKey.fromParts("Run Properties", property.getName()), property);
+                for (DomainProperty property : _provider.getUploadSetDomain(_protocol).getProperties())
+                    fieldKeys.put(FieldKey.fromParts("Run Properties", property.getName()), property.getPropertyDescriptor());
+                for (DomainProperty property : _provider.getRunDomain(_protocol).getProperties())
+                    fieldKeys.put(FieldKey.fromParts("Run Properties", property.getName()), property.getPropertyDescriptor());
 
                 TableInfo runTable = AssayService.get().createRunTable(null, _protocol, _provider, _user, _run.getContainer());
                 SimpleFilter filter = new SimpleFilter("RowId", _run.getRowId());
@@ -130,30 +132,32 @@ public class NabAssayRun extends Luc5Assay
         Map<String, Map<PropertyDescriptor, Object>> samplePropertyMap = new HashMap<String, Map<PropertyDescriptor, Object>>();
 
         Collection<ExpMaterial> inputs = _run.getMaterialInputs().keySet();
-        PropertyDescriptor[] samplePropertyDescriptors = _provider.getSampleWellGroupColumns(_protocol);
+        Domain sampleDomain = _provider.getSampleWellGroupDomain(_protocol);
+        DomainProperty[] sampleDomainProperties = sampleDomain.getProperties();
 
         PropertyDescriptor sampleIdPD = null;
         PropertyDescriptor visitIdPD = null;
         PropertyDescriptor participantIdPD = null;
         PropertyDescriptor datePD = null;
-        for (PropertyDescriptor property : samplePropertyDescriptors)
+        for (DomainProperty property : sampleDomainProperties)
         {
             if (property.getName().equals(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME))
-                sampleIdPD = property;
+                sampleIdPD = property.getPropertyDescriptor();
             else if (property.getName().equals(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME))
-                participantIdPD = property;
+                participantIdPD = property.getPropertyDescriptor();
             else if (property.getName().equals(AbstractAssayProvider.VISITID_PROPERTY_NAME))
-                visitIdPD = property;
+                visitIdPD = property.getPropertyDescriptor();
             else if (property.getName().equals(AbstractAssayProvider.DATE_PROPERTY_NAME))
-                datePD = property;
+                datePD = property.getPropertyDescriptor();
         }
 
         for (ExpMaterial material : inputs)
         {
             Map<PropertyDescriptor, Object> sampleProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
-            for (PropertyDescriptor property : _provider.getSampleWellGroupColumns(_protocol))
+            for (DomainProperty dp : sampleDomainProperties)
             {
-                if (property != sampleIdPD && property != visitIdPD && property != participantIdPD && property != datePD)
+                PropertyDescriptor property = dp.getPropertyDescriptor();
+                if (!property.equals(sampleIdPD) && !property.equals(visitIdPD) && !property.equals(participantIdPD) && !property.equals(datePD))
                     sampleProperties.put(property, material.getProperty(property));
             }
             String key = NabAssayController.getMaterialKey((String) material.getProperty(sampleIdPD),

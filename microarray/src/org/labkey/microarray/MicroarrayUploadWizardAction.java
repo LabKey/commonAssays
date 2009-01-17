@@ -21,6 +21,7 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.ProtocolParameter;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.RequiresPermission;
@@ -64,8 +65,8 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
 
     protected InsertView createRunInsertView(AssayRunUploadForm form, boolean reshow, BindException errors)
     {
-        Map<PropertyDescriptor, String> allProperties = form.getRunProperties();
-        Map<PropertyDescriptor, String> userProperties = new HashMap<PropertyDescriptor, String>();
+        Map<DomainProperty, String> allProperties = form.getRunProperties();
+        Map<DomainProperty, String> userProperties = new HashMap<DomainProperty, String>();
 
         // We want to split the run properties into the ones that come from the user directly and the ones that
         // come from the MageML - hide the ones from the MageML so the user doesn't edit the value
@@ -97,9 +98,9 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
             errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
         }
 
-        for (Map.Entry<PropertyDescriptor, String> entry : allProperties.entrySet())
+        for (Map.Entry<DomainProperty, String> entry : allProperties.entrySet())
         {
-            PropertyDescriptor runPD = entry.getKey();
+            DomainProperty runPD = entry.getKey();
             String expression = runPD.getDescription();
             if (expression != null)
             {

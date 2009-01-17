@@ -36,6 +36,7 @@
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="org.labkey.api.study.Position" %>
 <%@ page import="org.labkey.api.exp.PropertyDescriptor" %>
+<%@ page import="org.labkey.api.exp.property.DomainProperty" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ElispotController.PlateSummaryBean> me = (JspView<ElispotController.PlateSummaryBean>)HttpView.currentView();
@@ -139,7 +140,7 @@
                     <%
                 }
 
-                for (Map.Entry<PropertyDescriptor, String> entry : info.getSpecimenProperties().entrySet())
+                for (Map.Entry<DomainProperty, String> entry : info.getSpecimenProperties().entrySet())
                 {
                     %>
                     <tr id="<%=id%>" style="display:none;">

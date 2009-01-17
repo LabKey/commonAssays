@@ -20,12 +20,13 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -60,7 +61,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     protected void addRunActionButtons(LuminexRunUploadForm newRunForm, InsertView insertView, ButtonBar bbar)
     {
-        PropertyDescriptor[] analyteColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        DomainProperty[] analyteColumns = analyteDomain.getProperties();
         if (analyteColumns.length == 0)
         {
             super.addRunActionButtons(newRunForm, insertView, bbar);
@@ -73,14 +75,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     }
 
 
-    protected Map<String, String> getDefaultValues(String suffix, LuminexRunUploadForm form) throws ExperimentException
+    protected Map<String, String> getDefaultValuesByInputName(String suffix, LuminexRunUploadForm form) throws ExperimentException
     {
         if (!form.isResetDefaultValues() && AnalyteStepHandler.NAME.equals(suffix))
         {
             Map<String, String> result = new HashMap<String, String>();
             Analyte[] analytes = getAnalytes(form.getDataId());
-            PropertyDescriptor[] analyteColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
-
+            Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+            DomainProperty[] analyteColumns = analyteDomain.getProperties();
             try
             {
                 for (Analyte analyte : analytes)
@@ -92,10 +94,10 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     if (objectURI != null)
                     {
                         Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer(), objectURI);
-                        for (PropertyDescriptor analytePD : analyteColumns)
+                        for (DomainProperty analyteDP : analyteColumns)
                         {
-                            String name = getAnalytePropertyName(analyte, analytePD);
-                            ObjectProperty objectProp = values.get(analytePD.getPropertyURI());
+                            String name = getAnalytePropertyName(analyte, analyteDP);
+                            ObjectProperty objectProp = values.get(analyteDP.getPropertyURI());
                             if (objectProp != null && objectProp.value() != null)
                             {
                                 result.put(name, objectProp.value().toString());
@@ -112,13 +114,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
         else
         {
-            return super.getDefaultValues(suffix, form);
+            return super.getDefaultValuesByInputName(suffix, form);
         }
     }
 
     protected ModelAndView afterRunCreation(LuminexRunUploadForm form, ExpRun run, BindException errors) throws ServletException, SQLException
     {
-        PropertyDescriptor[] analyteColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        DomainProperty[] analyteColumns = analyteDomain.getProperties();
         if (analyteColumns.length == 0)
         {
             return super.afterRunCreation(form, run, errors);
@@ -134,7 +137,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     private ModelAndView getAnalytesView(int dataRowId, LuminexRunUploadForm form, boolean reshow, BindException errors)
             throws SQLException
     {
-        Map<PropertyDescriptor, String> map = new LinkedHashMap<PropertyDescriptor, String>();
+        Map<DomainProperty, String> map = new LinkedHashMap<DomainProperty, String>();
 
         String lsidColumn = "RowId";
         form.setDataId(dataRowId);
@@ -143,21 +146,22 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         view.getDataRegion().addHiddenFormField("dataId", Integer.toString(dataRowId));
 
         Analyte[] analytes = getAnalytes(dataRowId);
-        PropertyDescriptor[] pds = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        DomainProperty[] analyteColumns = analyteDomain.getProperties();
         if (reshow && !form.isResetDefaultValues())
         {
             view.setInitialValues(getViewContext().getRequest().getParameterMap());
         }
-        for (PropertyDescriptor pd : pds)
+        for (DomainProperty analyteDP : analyteColumns)
         {
             List<DisplayColumn> cols = new ArrayList<DisplayColumn>();
             for (Analyte analyte : analytes)
             {
-                ColumnInfo info = pd.createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getViewContext().getUser());
-                info.setName(getAnalytePropertyName(analyte, pd));
+                ColumnInfo info = analyteDP.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getViewContext().getUser());
+                info.setName(getAnalytePropertyName(analyte, analyteDP));
                 cols.add(info.getRenderer());
             }
-            view.getDataRegion().addGroup(new DisplayColumnGroup(cols, pd.getName(), true));
+            view.getDataRegion().addGroup(new DisplayColumnGroup(cols, analyteDP.getName(), true));
         }
         view.getDataRegion().setHorizontalGroups(false);
         List<String> analyteNames = new ArrayList<String>();
@@ -183,9 +187,9 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return view;
     }
 
-    private String getAnalytePropertyName(Analyte analyte, PropertyDescriptor pd)
+    private String getAnalytePropertyName(Analyte analyte, DomainProperty dp)
     {
-        return "_analyte_" + analyte.getRowId() + "_" + ColumnInfo.propNameFromName(pd.getName());
+        return "_analyte_" + analyte.getRowId() + "_" + ColumnInfo.propNameFromName(dp.getName());
     }
 
     private Analyte[] getAnalytes(int dataRowId)
@@ -219,7 +223,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     for (Analyte analyte : getAnalytes(form.getDataId()))
                     {
-                        Map<PropertyDescriptor, String> properties = form.getAnalyteProperties(analyte.getRowId());
+                        Map<DomainProperty, String> properties = form.getAnalyteProperties(analyte.getRowId());
 
                         validatePostedProperties(properties, errors);
                     }
@@ -234,15 +238,15 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     for (Analyte analyte : getAnalytes(form.getDataId()))
                     {
-                        Map<PropertyDescriptor, String> properties = form.getAnalyteProperties(analyte.getRowId());
+                        Map<DomainProperty, String> properties = form.getAnalyteProperties(analyte.getRowId());
 
                         ObjectProperty[] objProperties = new ObjectProperty[properties.size()];
                         int i = 0;
-                        for (Map.Entry<PropertyDescriptor, String> entry : properties.entrySet())
+                        for (Map.Entry<DomainProperty, String> entry : properties.entrySet())
                         {
                             ObjectProperty property = new ObjectProperty(analyte.getLsid(),
                                     getContainer(), entry.getKey().getPropertyURI(),
-                                    entry.getValue(), entry.getKey().getPropertyType());
+                                    entry.getValue(), entry.getKey().getPropertyDescriptor().getPropertyType());
                             objProperties[i++] = property;
                         }
                         try {
