@@ -18,7 +18,7 @@ package org.labkey.nab.query;
 
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SimpleDisplayColumn;
-import org.labkey.api.exp.api.ExpRunTable;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.view.ActionURL;
 
 import java.io.Writer;

@@ -17,8 +17,8 @@
 package org.labkey.microarray;
 
 import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExpRunTable;
-import org.labkey.api.exp.api.ExpSchema;
+import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.query.*;
@@ -28,8 +28,6 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;

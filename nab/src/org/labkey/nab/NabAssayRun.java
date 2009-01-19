@@ -26,7 +26,7 @@ import org.labkey.api.study.Plate;
 import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.PlateBasedAssayProvider;
+import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.data.*;
@@ -46,13 +46,13 @@ import java.sql.SQLException;
 public class NabAssayRun extends Luc5Assay
 {
     private ExpProtocol _protocol;
-    private PlateBasedAssayProvider _provider;
+    private AbstractPlateBasedAssayProvider _provider;
     private Map<PropertyDescriptor, Object> _runProperties;
     List<SampleResult> _sampleResults;
     private ExpRun _run;
     private User _user;
 
-    public NabAssayRun(PlateBasedAssayProvider provider, ExpRun run, Plate plate, User user, List<Integer> cutoffs, DilutionCurve.FitType fitType)
+    public NabAssayRun(AbstractPlateBasedAssayProvider provider, ExpRun run, Plate plate, User user, List<Integer> cutoffs, DilutionCurve.FitType fitType)
     {
         super(plate, cutoffs, fitType);
         _run = run;

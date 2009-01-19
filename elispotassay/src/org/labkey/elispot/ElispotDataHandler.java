@@ -61,7 +61,7 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
         ExpRun run = data.getRun();
         ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
         Container container = data.getContainer();
-        AssayProvider provider = AssayService.get().getProvider(protocol);
+        ElispotAssayProvider provider = (ElispotAssayProvider)AssayService.get().getProvider(protocol);
         PlateTemplate template = provider.getPlateTemplate(container, protocol);
 
         for (ObjectProperty property : run.getObjectProperties().values())

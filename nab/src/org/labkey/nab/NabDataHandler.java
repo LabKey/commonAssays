@@ -213,7 +213,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
     {
         ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
         Container container = run.getContainer();
-        PlateBasedAssayProvider provider = (PlateBasedAssayProvider) AssayService.get().getProvider(protocol);
+        NabAssayProvider provider = (NabAssayProvider) AssayService.get().getProvider(protocol);
         PlateTemplate nabTemplate = provider.getPlateTemplate(container, protocol);
 
         Map<String, DomainProperty> runProperties = new HashMap<String, DomainProperty>();
@@ -241,7 +241,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
 
         // UNDONE: Eliminate cast to NabAssayProvider here: there needs to be a more general way of retrieving
         // sample preparation information from a protocol/provider.
-        DomainProperty[] sampleProperties = ((PlateBasedAssayProvider) provider).getSampleWellGroupDomain(protocol).getProperties();
+        DomainProperty[] sampleProperties = provider.getSampleWellGroupDomain(protocol).getProperties();
         Map<String, DomainProperty> samplePropertyMap = new HashMap<String, DomainProperty>();
         for (DomainProperty sampleProperty : sampleProperties)
             samplePropertyMap.put(sampleProperty.getName(), sampleProperty);

@@ -30,6 +30,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
+import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
@@ -53,7 +54,7 @@ import java.io.FileInputStream;
  * Date: Feb 6, 2008
  */
 @RequiresPermission(ACL.PERM_INSERT)
-public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUploadForm>
+public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUploadForm<MicroarrayAssayProvider>, MicroarrayAssayProvider>
 {
     private Integer _channelCount;
     private String _barcode;

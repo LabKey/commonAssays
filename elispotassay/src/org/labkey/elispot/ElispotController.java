@@ -31,7 +31,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.PlateBasedAssayProvider;
+import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -83,7 +83,7 @@ public class ElispotController extends SpringActionController
                 HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
 
             _protocol = _run.getProtocol();
-            PlateBasedAssayProvider provider = (PlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
+            ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(_protocol);
             PlateTemplate template = provider.getPlateTemplate(getContainer(), _protocol);
 
             Map<Position, WellInfo> wellInfoMap = createWellInfoMap(_run, _protocol, provider, template);
@@ -95,7 +95,7 @@ public class ElispotController extends SpringActionController
             return new JspView<PlateSummaryBean>("/org/labkey/elispot/view/plateSummary.jsp", bean);
         }
 
-        private Map<Position, WellInfo> createWellInfoMap(ExpRun run, ExpProtocol protocol, PlateBasedAssayProvider provider,
+        private Map<Position, WellInfo> createWellInfoMap(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
                                                           PlateTemplate template) throws SQLException
         {
             Map<Position, WellInfo> map = new HashMap<Position, WellInfo>();

@@ -19,6 +19,7 @@ package org.labkey.flow.query;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.query.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;

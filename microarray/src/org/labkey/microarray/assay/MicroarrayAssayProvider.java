@@ -22,6 +22,7 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.ProtocolParameter;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.view.HttpView;
@@ -162,7 +163,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
             Map<String, File> files = context.getUploadedData();
             assert files.size() == 1;
             File mageMLFile = files.values().iterator().next();
-            ExpData mageData = createData(context.getContainer(), mageMLFile, MicroarrayModule.MAGE_ML_DATA_TYPE);
+            ExpData mageData = createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_DATA_TYPE);
 
             outputDatas.put(mageData, "MageML");
             String baseName = ArrayPipelineManager.getBaseMageName(mageMLFile.getName());
@@ -171,28 +172,28 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
                 File imageFile = new File(mageMLFile.getParentFile(), baseName + ".jpg");
                 if (NetworkDrive.exists(imageFile))
                 {
-                    ExpData imageData = createData(context.getContainer(), imageFile, MicroarrayModule.IMAGE_DATA_TYPE);
+                    ExpData imageData = createData(context.getContainer(), imageFile, imageFile.getName(), MicroarrayModule.IMAGE_DATA_TYPE);
                     outputDatas.put(imageData, "ThumbnailImage");
                 }
 
                 File qcFile = new File(mageMLFile.getParentFile(), baseName + ".pdf");
                 if (NetworkDrive.exists(qcFile))
                 {
-                    ExpData qcData = createData(context.getContainer(), qcFile, MicroarrayModule.QC_REPORT_DATA_TYPE);
+                    ExpData qcData = createData(context.getContainer(), qcFile, qcFile.getName(), MicroarrayModule.QC_REPORT_DATA_TYPE);
                     outputDatas.put(qcData, "QCReport");
                 }
 
                 File featuresFile = new File(mageMLFile.getParentFile(), baseName + "_feat.csv");
                 if (NetworkDrive.exists(featuresFile))
                 {
-                    ExpData featuresData = createData(context.getContainer(), featuresFile, MicroarrayModule.FEATURES_DATA_TYPE);
+                    ExpData featuresData = createData(context.getContainer(), featuresFile, featuresFile.getName(), MicroarrayModule.FEATURES_DATA_TYPE);
                     outputDatas.put(featuresData, "Features");
                 }
 
                 File gridFile = new File(mageMLFile.getParentFile(), baseName + "_grid.csv");
                 if (NetworkDrive.exists(gridFile))
                 {
-                    ExpData gridData = createData(context.getContainer(), gridFile, MicroarrayModule.GRID_DATA_TYPE);
+                    ExpData gridData = createData(context.getContainer(), gridFile, gridFile.getName(), MicroarrayModule.GRID_DATA_TYPE);
                     outputDatas.put(gridData, "Grid");
                 }
             }

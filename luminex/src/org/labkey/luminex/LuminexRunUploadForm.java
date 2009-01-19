@@ -31,7 +31,7 @@ import java.util.Arrays;
  * User: jeckels
  * Date: Aug 8, 2007
  */
-public class LuminexRunUploadForm extends AssayRunUploadForm
+public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvider>
 {
     private int _dataId;
 

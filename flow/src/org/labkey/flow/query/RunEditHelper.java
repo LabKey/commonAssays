@@ -18,7 +18,7 @@ package org.labkey.flow.query;
 
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.TableEditHelper;
+import org.labkey.api.exp.query.TableEditHelper;
 import org.labkey.api.query.QueryUpdateForm;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;

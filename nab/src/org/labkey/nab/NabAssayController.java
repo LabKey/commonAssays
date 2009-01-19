@@ -387,7 +387,7 @@ public class NabAssayController extends SpringActionController
             }
             _run = ExperimentService.get().getExpRun(form.getRowId());
             _protocol = _run.getProtocol();
-            PlateBasedAssayProvider provider = (PlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
+            AbstractPlateBasedAssayProvider provider = (AbstractPlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
 
             HttpView view = new JspView<RenderAssayBean>("/org/labkey/nab/runDetails.jsp",
                     new RenderAssayBean(assay, form.isNewRun(), isPrint()));

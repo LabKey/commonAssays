@@ -23,6 +23,6 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
  * User: Karl Lum
  * Date: Jan 9, 2008
  */
-public class ElispotRunUploadForm extends AssayRunUploadForm
+public class ElispotRunUploadForm extends AssayRunUploadForm<ElispotAssayProvider>
 {
 }

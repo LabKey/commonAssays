@@ -16,7 +16,7 @@
 
 package org.labkey.flow.controllers.protocol;
 
-import org.labkey.api.exp.api.ExpDataTable;
+import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewForm;

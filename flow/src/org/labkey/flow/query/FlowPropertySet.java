@@ -16,7 +16,7 @@
 
 package org.labkey.flow.query;
 
-import org.labkey.api.exp.api.ExpDataTable;
+import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;

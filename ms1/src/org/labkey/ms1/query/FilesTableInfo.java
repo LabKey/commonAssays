@@ -18,7 +18,7 @@ package org.labkey.ms1.query;
 
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.exp.api.ExpSchema;
+import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;

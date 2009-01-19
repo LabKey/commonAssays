@@ -21,7 +21,7 @@ import org.labkey.api.query.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.exp.api.ExpRunTable;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Controller;

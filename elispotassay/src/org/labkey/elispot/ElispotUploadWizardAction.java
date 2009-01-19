@@ -56,7 +56,7 @@ import java.util.*;
  */
 
 @RequiresPermission(ACL.PERM_INSERT)
-public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUploadForm>
+public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUploadForm, ElispotAssayProvider>
 {
     public ElispotUploadWizardAction()
     {
@@ -144,7 +144,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     private ModelAndView getPlateSummary(ElispotRunUploadForm form, ExpRun run)
     {
         try {
-            AssayProvider provider = form.getProvider();
+            ElispotAssayProvider provider = form.getProvider();
             PlateTemplate template = provider.getPlateTemplate(form.getContainer(), form.getProtocol());
 
             if (run != null)
@@ -258,7 +258,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         {
             try
             {
-                AssayProvider provider = form.getProvider();
+                ElispotAssayProvider provider = form.getProvider();
                 ExpRun run = saveExperimentRun(form);
 
                 for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAntigenProperties.entrySet())

@@ -21,6 +21,7 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.query.RunDataQueryView;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -45,7 +46,7 @@ import java.io.Writer;
  * Date: Sep 21, 2007
  * Time: 2:33:52 PM
  */
-public class NabAssayProvider extends PlateBasedAssayProvider
+public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 {
     public static final String[] CUTOFF_PROPERTIES = { "Cutoff1", "Cutoff2", "Cutoff3" };
     public static final String SAMPLE_METHOD_PROPERTY_NAME = "Method";
@@ -394,7 +395,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
 
         private static QuerySettings getDefaultSettings(ExpProtocol protocol, ViewContext context, AssayProvider provider)
         {
-            String name = provider.getRunDataTableName(protocol);
+            String name = AssayService.get().getRunDataTableName(protocol);
             QuerySettings settings = new QuerySettings(context, name);
             settings.setSchemaName(AssayService.ASSAY_SCHEMA_NAME);
             settings.setQueryName(name);

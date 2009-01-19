@@ -17,8 +17,8 @@
 package org.labkey.ms2.query;
 
 import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExpRunTable;
-import org.labkey.api.exp.api.ExpSchema;
+import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.query.*;

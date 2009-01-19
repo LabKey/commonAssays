@@ -46,7 +46,7 @@ import java.util.*;
 * Date: Aug 8, 2007
 */
 @RequiresPermission(ACL.PERM_INSERT)
-public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUploadForm>
+public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUploadForm, LuminexAssayProvider>
 {
     public LuminexUploadWizardAction()
     {

@@ -25,6 +25,7 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.list.ListDefinition;
 import org.labkey.api.exp.list.ListItem;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
@@ -48,7 +49,7 @@ import java.sql.SQLException;
  * User: Karl Lum
  * Date: Jan 7, 2008
  */
-public class ElispotAssayProvider extends PlateBasedAssayProvider
+public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
 {
     public static final String NAME = "ELISpot";
     public static final String ASSAY_DOMAIN_ANTIGEN_WELLGROUP = ExpProtocol.ASSAY_DOMAIN_PREFIX + "AntigenWellGroup";
@@ -393,7 +394,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
 
     public ElispotRunDataQueryView createRunDataQueryView(ViewContext context, ExpProtocol protocol)
     {
-        String name = getRunDataTableName(protocol);
+        String name = AssayService.get().getRunDataTableName(protocol);
         QuerySettings settings = new QuerySettings(context, name);
         settings.setSchemaName(AssayService.ASSAY_SCHEMA_NAME);
         settings.setQueryName(name);

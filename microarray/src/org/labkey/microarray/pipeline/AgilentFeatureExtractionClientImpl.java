@@ -475,7 +475,7 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         {
             try
             {
-                ExpData data = AbstractAssayProvider.createData(c, mage, MicroarrayModule.MAGE_ML_DATA_TYPE);
+                ExpData data = AbstractAssayProvider.createData(c, mage, mage.getName(), MicroarrayModule.MAGE_ML_DATA_TYPE);
                 data.save(u);
 
                 runs++;

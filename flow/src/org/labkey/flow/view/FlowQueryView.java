@@ -18,7 +18,7 @@ package org.labkey.flow.view;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExpRunTable;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.portal.ProjectUrls;

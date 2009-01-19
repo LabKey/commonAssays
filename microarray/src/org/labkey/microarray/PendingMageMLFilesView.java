@@ -19,6 +19,8 @@ package org.labkey.microarray;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.study.assay.AssayService;
@@ -32,7 +34,6 @@ import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.sql.SQLException;
 
 /**
  * User: jeckels

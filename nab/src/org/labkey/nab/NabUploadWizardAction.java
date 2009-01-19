@@ -40,7 +40,7 @@ import java.util.Map;
  * Time: 3:48:53 PM
  */
 @RequiresPermission(ACL.PERM_INSERT)
-public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
+public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, NabAssayProvider>
 {
     public NabUploadWizardAction()
     {
