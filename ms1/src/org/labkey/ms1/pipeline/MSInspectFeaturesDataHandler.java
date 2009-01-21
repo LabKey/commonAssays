@@ -625,7 +625,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @param user          The user deleting it
      * @throws ExperimentException  Thrown if something goes wrong
      */
-    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user)
     {
         // Delete the database records for this features file
         if(null == data || null == user)
@@ -640,7 +640,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         }
         catch(SQLException e)
         {
-            throw new ExperimentException(MS1Manager.get().getAllErrors(e));
+            throw new RuntimeSQLException(e);
         }
     } //deleteData()
 

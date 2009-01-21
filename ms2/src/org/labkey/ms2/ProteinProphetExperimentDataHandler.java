@@ -86,7 +86,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         return result;
     }
 
-    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user)
     {
         // For now, let the PepXML file control when the data is deleted
     }

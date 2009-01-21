@@ -18,6 +18,7 @@ package org.labkey.elispot;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.list.ListDefinition;
@@ -184,14 +185,14 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
-    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user)
     {
         try {
             OntologyManager.deleteOntologyObject(data.getLSID(), container, true);
         }
         catch (SQLException e)
         {
-            throw new ExperimentException(e);
+            throw new RuntimeSQLException(e);
         }
     }
 

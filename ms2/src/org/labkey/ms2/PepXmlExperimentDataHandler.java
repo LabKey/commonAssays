@@ -16,6 +16,7 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
@@ -25,6 +26,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
+import org.labkey.api.util.UnexpectedException;
 import org.apache.log4j.Logger;
 
 import javax.xml.stream.XMLStreamException;
@@ -142,7 +144,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         return MS2Controller.MS2UrlsImpl.get().getShowRunUrl(run);
     }
 
-    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user)
     {
         try
         {
@@ -156,11 +158,11 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         }
         catch (URISyntaxException e)
         {
-            throw new ExperimentException(e);
+            throw new UnexpectedException(e);
         }
         catch (SQLException e)
         {
-            throw new ExperimentException(e);
+            throw new RuntimeSQLException(e);
         }
     }
 

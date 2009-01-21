@@ -18,6 +18,7 @@ package org.labkey.ms1.pipeline;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
@@ -120,7 +121,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         return null;
     } //getMzXmlFilePath()
 
-    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user)
     {
         if(null == data || null == container || null == user)
             return;
@@ -131,7 +132,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         }
         catch(SQLException e)
         {
-            throw new ExperimentException(e);
+            throw new RuntimeSQLException(e);
         }
     } //deleteData()
 

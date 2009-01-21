@@ -803,18 +803,7 @@ public class MS2Manager
 
         for (Integer experimentRunId : experimentRunsToDelete)
         {
-            try
-            {
-                ExperimentService.get().deleteExperimentRunsByRowIds(c, user, experimentRunId);
-            }
-            catch (SQLException e)
-            {
-                _log.error("markAsDeleted", e);
-            }
-            catch (ExperimentException e)
-            {
-                _log.error("markAsDeleted", e);
-            }
+            ExperimentService.get().deleteExperimentRunsByRowIds(c, user, experimentRunId);
         }
     }
 

@@ -22,6 +22,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.*;
@@ -434,7 +435,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
-    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user)
     {
         try
         {
@@ -442,7 +443,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         }
         catch (SQLException e)
         {
-            throw new ExperimentException(e);
+            throw new RuntimeSQLException(e);
         }
     }
 

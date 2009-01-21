@@ -25,6 +25,7 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
@@ -920,7 +921,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user)
     {
         try
         {
@@ -928,7 +929,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
         catch (SQLException e)
         {
-            throw new ExperimentException(e);
+            throw new RuntimeSQLException(e);
         }
     }
 

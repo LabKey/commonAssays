@@ -122,7 +122,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user)
     {
     }
 
