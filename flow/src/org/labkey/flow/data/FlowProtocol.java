@@ -501,7 +501,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         if (fs == null)
             return well.getName();
         Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(table, Arrays.asList(fs.getFieldKeys()));
-        ResultSet rs = Table.select(table, new ArrayList<ColumnInfo>(columns.values()), filter, null);
+		ArrayList<ColumnInfo> sel = new ArrayList<ColumnInfo>(columns.values());
+		sel.add(colRowId);
+        ResultSet rs = Table.select(table, sel, filter, null);
         try
         {
             if (rs.next())

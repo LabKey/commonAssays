@@ -296,7 +296,7 @@ public abstract class MS2Importer
         filter.addCondition("FileName", _fileName);
         filter.addCondition("Container", _container.getId());
         filter.addCondition("Deleted", Boolean.FALSE);
-        ResultSet rs = Table.select(MS2Manager.getTableInfoRuns(), new CsvSet("Run"), filter, null);
+        ResultSet rs = Table.select(MS2Manager.getTableInfoRuns(), new CsvSet("Run,Path,FileName,Container,Deleted"), filter, null);
 
         int runId = -1;
 
