@@ -399,7 +399,6 @@ flow/src/org/labkey/flow/query/KeywordMethod.java -text
 flow/src/org/labkey/flow/query/RunEditHelper.java -text
 flow/src/org/labkey/flow/query/StatisticForeignKey.java -text
 flow/src/org/labkey/flow/query/StatisticMethod.java -text
-flow/src/org/labkey/flow/query/SubtractBackgroundQuery.java -text
 flow/src/org/labkey/flow/script/AddRunsJob.java -text
 flow/src/org/labkey/flow/script/AnalysisHandler.java -text
 flow/src/org/labkey/flow/script/AnalyzeJob.java -text

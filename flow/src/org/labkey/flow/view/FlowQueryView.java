@@ -38,7 +38,6 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
-import org.labkey.flow.query.SubtractBackgroundQuery;
 import org.labkey.flow.webparts.FlowFolderType;
 
 import java.io.PrintWriter;
@@ -48,7 +47,6 @@ public class FlowQueryView extends QueryView
 {
     List<DisplayColumn> _displayColumns;
     boolean __hasGraphs;
-    private SubtractBackgroundQuery _subtractQuery;
 
     public FlowQueryView(FlowQueryForm form)
     {
