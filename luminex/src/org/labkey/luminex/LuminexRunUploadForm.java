@@ -17,15 +17,20 @@
 package org.labkey.luminex;
 
 import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.RuntimeSQLException;
+import org.springframework.validation.BindException;
 
-import java.util.Map;
-import java.util.List;
-import java.util.LinkedHashMap;
-import java.util.Arrays;
+import java.util.*;
+import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -51,7 +56,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         Map<DomainProperty, String> properties = new LinkedHashMap<DomainProperty, String>();
         for (DomainProperty dp : columns)
         {
-            String propName = getFormElementName(dp);
+            String propName = UploadWizardAction.getInputName(dp);
             String value = getRequest().getParameter("_analyte_" + analyteId + "_" + propName);
             if (dp.isRequired() && dp.getPropertyDescriptor().getPropertyType() == PropertyType.BOOLEAN &&
                     (value == null || value.length() == 0))
@@ -66,5 +71,44 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         List<DomainProperty> domainProperties = Arrays.asList(analyteDomain.getProperties());
         return getAnalytePropertyMapFromRequest(domainProperties, analyteId);
+    }
+
+    @Override
+    public Map<DomainProperty, String> getDefaultValues(Domain domain, BindException errors, String disambiguationId)
+    {
+        if (!isResetDefaultValues() && LuminexUploadWizardAction.AnalyteStepHandler.NAME.equals(getUploadStep()))
+        {
+            Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+            DomainProperty[] analyteColumns = analyteDomain.getProperties();
+            try
+            {
+                SQLFragment sql = new SQLFragment("SELECT ObjectURI FROM " + OntologyManager.getTinfoObject() + " WHERE Container = ? AND ObjectId = (SELECT MAX(ObjectId) FROM " + OntologyManager.getTinfoObject() + " o, " + LuminexSchema.getTableInfoAnalytes() + " a WHERE o.ObjectURI = a.LSID AND a.Name = ?)");
+                sql.add(getContainer().getId());
+                sql.add(disambiguationId);
+                String objectURI = Table.executeSingleton(LuminexSchema.getSchema(), sql.getSQL(), sql.getParamsArray(), String.class, true);
+                if (objectURI != null)
+                {
+                    Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer(), objectURI);
+                    Map<DomainProperty, String> ret = new HashMap<DomainProperty, String>();
+                    for (DomainProperty analyteDP : analyteColumns)
+                    {
+                        ObjectProperty objectProp = values.get(analyteDP.getPropertyURI());
+                        ret.put(analyteDP,  objectProp.value().toString());
+                    }
+                    return ret;
+                }
+                else
+                    return Collections.emptyMap();
+
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+        else
+        {
+            return super.getDefaultValues(domain, errors, disambiguationId);
+        }
     }
 }

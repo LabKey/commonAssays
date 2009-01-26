@@ -18,6 +18,7 @@ package org.labkey.nab;
 
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
@@ -53,9 +54,9 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
     }
 
     @Override
-    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, Map<DomainProperty, String> propertyDescriptors, boolean reshow, boolean resetDefaultValues, String uploadStepName, NabRunUploadForm form, BindException errors)
+    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, DomainProperty[] properties, boolean resetDefaultValues, String uploadStepName, NabRunUploadForm form, BindException errors)
     {
-        InsertView view = super.createInsertView(baseTable, lsidCol, propertyDescriptors, reshow, resetDefaultValues, uploadStepName, form, errors);
+        InsertView view = super.createInsertView(baseTable, lsidCol, properties, resetDefaultValues, uploadStepName, form, errors);
         if (form.getReplaceRunId() != null)
             view.getDataRegion().addHiddenFormField("replaceRunId", "" + form.getReplaceRunId());
         return view;
@@ -68,57 +69,10 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         InsertView parent = super.createRunInsertView(newRunForm, reshow, errors);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
         PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm, newRunForm.getProtocol(), resolverType);
-        helper.addSampleColumns(parent.getDataRegion(), getViewContext().getUser());
+        helper.addSampleColumns(parent, newRunForm.getUser(), newRunForm, reshow);
         return parent;
     }
-/*
-    protected Map<String, String> getDefaultValuesByInputName(String suffix, NabRunUploadForm form)
-    {
-        if (form.getReplaceRunId() == null)
-            return super.getDefaultValuesByInputName(suffix, form);
-        else
-        {
-            ExpRun run = ExperimentService.get().getExpRun(form.getReplaceRunId());
-            NabAssayProvider provider = (NabAssayProvider) form.getProvider();
-            ExpProtocol protocol = run.getProtocol();
 
-            Map<String, String> properties = new HashMap<String, String>();
-
-            properties.put("name", run.getName());
-            properties.put("comments", run.getComments());
-            properties.put("uploadedFile", NabDataHandler.getDataFile(run).getPath());
-            
-            for (PropertyDescriptor column : provider.getRunDomain(protocol))
-                properties.put(ColumnInfo.propNameFromName(column.getName()), nullSafeToStr(run.getProperty(column)));
-            for (PropertyDescriptor column : provider.getUploadSetDomain(protocol))
-                properties.put(ColumnInfo.propNameFromName(column.getName()), nullSafeToStr(run.getProperty(column)));
-
-            try
-            {
-                Map<WellGroup, Map<PropertyDescriptor, Object>> wellgroups = NabDataHandler.getWellGroupProperties(run);
-                for (Map.Entry<WellGroup, Map<PropertyDescriptor, Object>> wellGroupMapEntry : wellgroups.entrySet())
-                {
-                    WellGroup group = wellGroupMapEntry.getKey();
-                    for (Map.Entry<PropertyDescriptor, Object> wellgroupProperty : wellGroupMapEntry.getValue().entrySet())
-                    {
-                        PropertyDescriptor property = wellgroupProperty.getKey();
-                        properties.put(SamplePropertyHelper.getSpecimenPropertyInputName(group.getName(), property), nullSafeToStr(wellgroupProperty.getValue()));
-                    }
-                }
-            }
-            catch (ExperimentException e)
-            {
-                throw new RuntimeException(e);
-            }
-            return properties;
-        }
-    }
-
-    private String nullSafeToStr(Object obj)
-    {
-        return "" + (obj != null ? obj.toString() : "");
-    }
-*/
     protected StepHandler<NabRunUploadForm> getRunStepHandler()
     {
         return new NabRunStepHandler();
@@ -151,7 +105,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException error) throws SQLException, ServletException
         {
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
-                saveDefaultValues(entry.getValue(), form.getRequest(), form.getProvider(), RunStepHandler.NAME, entry.getKey());
+                form.saveDefaultValues(entry.getValue(), form.getRequest(), form.getProvider(), entry.getKey());
             return super.handleSuccessfulPost(form, error);
         }
     }

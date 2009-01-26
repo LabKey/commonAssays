@@ -74,50 +74,6 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
     }
 
-
-    protected Map<String, String> getDefaultValuesByInputName(String suffix, LuminexRunUploadForm form) throws ExperimentException
-    {
-        if (!form.isResetDefaultValues() && AnalyteStepHandler.NAME.equals(suffix))
-        {
-            Map<String, String> result = new HashMap<String, String>();
-            Analyte[] analytes = getAnalytes(form.getDataId());
-            Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
-            DomainProperty[] analyteColumns = analyteDomain.getProperties();
-            try
-            {
-                for (Analyte analyte : analytes)
-                {
-                    SQLFragment sql = new SQLFragment("SELECT ObjectURI FROM " + OntologyManager.getTinfoObject() + " WHERE Container = ? AND ObjectId = (SELECT MAX(ObjectId) FROM " + OntologyManager.getTinfoObject() + " o, " + LuminexSchema.getTableInfoAnalytes() + " a WHERE o.ObjectURI = a.LSID AND a.Name = ?)");
-                    sql.add(form.getContainer().getId());
-                    sql.add(analyte.getName());
-                    String objectURI = Table.executeSingleton(LuminexSchema.getSchema(), sql.getSQL(), sql.getParamsArray(), String.class, true);
-                    if (objectURI != null)
-                    {
-                        Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer(), objectURI);
-                        for (DomainProperty analyteDP : analyteColumns)
-                        {
-                            String name = getAnalytePropertyName(analyte, analyteDP);
-                            ObjectProperty objectProp = values.get(analyteDP.getPropertyURI());
-                            if (objectProp != null && objectProp.value() != null)
-                            {
-                                result.put(name, objectProp.value().toString());
-                            }
-                        }
-                    }
-                }
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
-            return result;
-        }
-        else
-        {
-            return super.getDefaultValuesByInputName(suffix, form);
-        }
-    }
-
     protected ModelAndView afterRunCreation(LuminexRunUploadForm form, ExpRun run, BindException errors) throws ServletException, SQLException
     {
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
@@ -137,29 +93,45 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     private ModelAndView getAnalytesView(int dataRowId, LuminexRunUploadForm form, boolean reshow, BindException errors)
             throws SQLException
     {
-        Map<DomainProperty, String> map = new LinkedHashMap<DomainProperty, String>();
-
         String lsidColumn = "RowId";
         form.setDataId(dataRowId);
-        InsertView view = createInsertView(LuminexSchema.getTableInfoAnalytes(), lsidColumn, map, reshow, form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
+        InsertView view = createInsertView(LuminexSchema.getTableInfoAnalytes(), lsidColumn, new DomainProperty[0], form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
 
         view.getDataRegion().addHiddenFormField("dataId", Integer.toString(dataRowId));
 
         Analyte[] analytes = getAnalytes(dataRowId);
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         DomainProperty[] analyteColumns = analyteDomain.getProperties();
+        
         if (reshow && !form.isResetDefaultValues())
-        {
             view.setInitialValues(getViewContext().getRequest().getParameterMap());
-        }
+        else if (form.isResetDefaultValues())
+            form.clearDefaultValues(analyteDomain);
+
+        // each analyte may have a different set of default values.  Because it may be expensive to query for the
+        // entire set of values for every property, we use the following map to cache the default value sets by analyte name.
+        Map<String, Map<DomainProperty, String>> domains = new HashMap<String, Map<DomainProperty, String>>();
         for (DomainProperty analyteDP : analyteColumns)
         {
             List<DisplayColumn> cols = new ArrayList<DisplayColumn>();
             for (Analyte analyte : analytes)
             {
+                // from SamplePropertyHelper:
+                // get the map of default values that corresponds to our current sample:
+                String defaultValueKey = analyte.getName() + "_" + analyteDP.getDomain().getName();
+                Map<DomainProperty, String> defaultValues = domains.get(defaultValueKey);
+                if (defaultValues == null)
+                {
+                    defaultValues = form.getDefaultValues(analyteDP.getDomain(), errors, analyte.getName());
+                    domains.put(defaultValueKey,  defaultValues);
+                }
+                String inputName = getAnalytePropertyName(analyte, analyteDP);
+                view.setInitialValue(inputName, defaultValues.get(analyteDP));
+                
                 ColumnInfo info = analyteDP.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getViewContext().getUser());
-                info.setName(getAnalytePropertyName(analyte, analyteDP));
+                info.setName(inputName);
                 cols.add(info.getRenderer());
+
             }
             view.getDataRegion().addGroup(new DisplayColumnGroup(cols, analyteDP.getName(), true));
         }
@@ -257,6 +229,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                             for (ValidationError error : ve.getErrors())
                                 errors.reject(SpringActionController.ERROR_MSG, PageFlowUtil.filter(error.getMessage()));
                         }
+
+                        form.saveDefaultValues(properties, getViewContext().getRequest(), form.getProvider(), analyte.getName());
                     }
 
                     LuminexSchema.getSchema().getScope().commitTransaction();

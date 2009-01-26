@@ -72,7 +72,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
 
         PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm, newRunForm.getProtocol(), resolverType);
-        helper.addSampleColumns(parent.getDataRegion(), getViewContext().getUser());
+        helper.addSampleColumns(parent, newRunForm.getUser(), newRunForm, reshow);
 
         return parent;
     }
@@ -100,13 +100,12 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
     private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean reshow, BindException errors) throws ServletException
     {
-        Map<DomainProperty, String> map = new LinkedHashMap<DomainProperty, String>();
         InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
-                "lsid", map, reshow, form.isResetDefaultValues(), AntigenStepHandler.NAME, form, errors);
+                "lsid", new DomainProperty[0], reshow, AntigenStepHandler.NAME, form, errors);
 
         try {
             PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), (ElispotAssayProvider)form.getProvider());
-            antigenHelper.addSampleColumns(view.getDataRegion(), getViewContext().getUser());
+            antigenHelper.addSampleColumns(view, form.getUser(), form, reshow);
 
             // add existing page properties
             addHiddenUploadSetProperties(form, view);
@@ -215,12 +214,13 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         @Override
         protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
+            for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
+                form.saveDefaultValues(entry.getValue(), form.getRequest(), form.getProvider(), entry.getKey());
+
             Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
             DomainProperty[] antigenColumns = antigenDomain.getProperties();
             if (antigenColumns.length == 0)
             {
-                for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
-                    saveDefaultValues(entry.getValue(), form.getRequest(), form.getProvider(), RunStepHandler.NAME, entry.getKey());
                 return super.handleSuccessfulPost(form, errors);
             }
             else
@@ -262,7 +262,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 ExpRun run = saveExperimentRun(form);
 
                 for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAntigenProperties.entrySet())
-                    saveDefaultValues(entry.getValue(), form.getRequest(), provider, getName(), entry.getKey());
+                    form.saveDefaultValues(entry.getValue(), form.getRequest(), provider, entry.getKey());
 
                 ExperimentService.get().getSchema().getScope().beginTransaction();
                 ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);

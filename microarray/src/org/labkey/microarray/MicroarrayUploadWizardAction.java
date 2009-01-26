@@ -17,125 +17,78 @@
 package org.labkey.microarray;
 
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-import org.xml.sax.InputSource;
 import org.springframework.validation.BindException;
-import org.springframework.validation.ObjectError;
 
 import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
 import java.util.Map;
 import java.util.HashMap;
-import java.io.IOException;
-import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: jeckels
  * Date: Feb 6, 2008
  */
 @RequiresPermission(ACL.PERM_INSERT)
-public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUploadForm<MicroarrayAssayProvider>, MicroarrayAssayProvider>
+public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayRunUploadForm, MicroarrayAssayProvider>
 {
     private Integer _channelCount;
     private String _barcode;
+
+    public MicroarrayUploadWizardAction()
+    {
+        super(MicroarrayRunUploadForm.class);
+    }
 
     protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
     {
         insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(protocol, _channelCount, _barcode));
     }
 
-    protected InsertView createRunInsertView(AssayRunUploadForm form, boolean reshow, BindException errors)
+    protected InsertView createRunInsertView(MicroarrayRunUploadForm form, boolean reshow, BindException errors)
     {
-        Map<DomainProperty, String> allProperties = form.getRunProperties();
-        Map<DomainProperty, String> userProperties = new HashMap<DomainProperty, String>();
+        List<DomainProperty> userProperties = new ArrayList<DomainProperty>();
+        Map<DomainProperty, String> mageMLProperties = form.getMageMLProperties(errors);
 
-        // We want to split the run properties into the ones that come from the user directly and the ones that
-        // come from the MageML - hide the ones from the MageML so the user doesn't edit the value
-        Map<String, String> hiddenElements = new HashMap<String, String>();
-
-        Document document = null;
-        try
-        {
-            // Create a document for the MageML
-            DocumentBuilderFactory dbfact = DocumentBuilderFactory.newInstance();
-            dbfact.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd",false);
-            DocumentBuilder builder = dbfact.newDocumentBuilder();
-            document = builder.parse(new InputSource(new FileInputStream(form.getSelectedDataCollector().createData(form).values().iterator().next())));
-        }
-        catch (IOException e)
-        {
-            errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
-        }
-        catch (SAXException e)
-        {
-            errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
-        }
-        catch (ExperimentException e)
-        {
-            errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
-        }
-        catch (ParserConfigurationException e)
-        {
-            errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
-        }
-
-        for (Map.Entry<DomainProperty, String> entry : allProperties.entrySet())
+        for (Map.Entry<DomainProperty, String> entry : form.getRunProperties().entrySet())
         {
             DomainProperty runPD = entry.getKey();
-            String expression = runPD.getDescription();
-            if (expression != null)
-            {
-                // We use the description of the property descriptor as the XPath. Far from ideal.
-                try
-                {
-                    String value = evaluateXPath(document, expression);
-                    hiddenElements.put(ColumnInfo.propNameFromName(runPD.getName()), value);
-                }
-                catch (XPathExpressionException e)
-                {
-                    // User isn't required to use the description as an XPath
-                    userProperties.put(runPD, entry.getValue());
-                }
-            }
-            else
-            {
-                userProperties.put(runPD, entry.getValue());
-            }
+            String mageMLValue = mageMLProperties.get(runPD);
+            if (mageMLValue == null)
+                userProperties.add(runPD);
         }
 
         InsertView result = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
-                "lsid", userProperties, reshow, form.isResetDefaultValues(), RunStepHandler.NAME, form, errors);
-
-        for (Map.Entry<String, String> hiddenElement : hiddenElements.entrySet())
+                "lsid", userProperties.toArray(new DomainProperty[userProperties.size()]),
+                reshow, RunStepHandler.NAME, form, errors);
+        
+        for (Map.Entry<DomainProperty, String> entry : mageMLProperties.entrySet())
         {
-            result.getDataRegion().addHiddenFormField(hiddenElement.getKey(), hiddenElement.getValue());
+            DomainProperty runPD = entry.getKey();
+            result.getDataRegion().addHiddenFormField(getInputName(runPD), entry.getValue());
         }
+
+        Document mageML = form.getMageML(errors);
 
         try
         {
             ProtocolParameter channelCountParam = form.getProtocol().getProtocolParameters().get(MicroarrayAssayDesigner.CHANNEL_COUNT_PARAMETER_URI);
             String channelCountXPath = channelCountParam == null ? null : channelCountParam.getStringValue();
-            String channelCountString = evaluateXPath(document, channelCountXPath);
+            String channelCountString = evaluateXPath(mageML, channelCountXPath);
             if (channelCountString != null)
             {
                 try
@@ -157,7 +110,7 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
         {
             ProtocolParameter barcodeParam = form.getProtocol().getProtocolParameters().get(MicroarrayAssayDesigner.BARCODE_PARAMETER_URI);
             String barcodeXPath = barcodeParam == null ? null : barcodeParam.getStringValue();
-            _barcode = evaluateXPath(document, barcodeXPath);
+            _barcode = evaluateXPath(mageML, barcodeXPath);
         }
         catch (XPathExpressionException e)
         {
