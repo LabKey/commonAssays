@@ -347,8 +347,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         }
         catch (SQLException se)
         {
-            errors.add(se.getMessage());
-            return null;
+            throw new RuntimeSQLException(se);
         }
         catch (IOException e)
         {

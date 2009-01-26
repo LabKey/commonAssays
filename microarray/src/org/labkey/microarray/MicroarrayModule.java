@@ -60,7 +60,7 @@ public class MicroarrayModule extends DefaultModule
 
     public double getVersion()
     {
-        return 8.30;
+        return 8.31;
     }
 
     protected void init()

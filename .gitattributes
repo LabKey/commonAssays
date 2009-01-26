@@ -513,8 +513,10 @@ microarray/gwtsrc/org/labkey/microarray/sampleset/client/model/GWTSampleSet.java
 microarray/module.properties -text
 microarray/src/META-INF/microarray.xml -text
 microarray/src/META-INF/microarray/scripts/postgresql/microarray-0.00-8.10.sql -text
+microarray/src/META-INF/microarray/scripts/postgresql/microarray-8.30-8.31.sql -text
 microarray/src/META-INF/microarray/scripts/postgresql/obsolete/microarray-0.00-0.01.sql -text
 microarray/src/META-INF/microarray/scripts/sql[!!-~]server/microarray-0.00-8.10.sql -text
+microarray/src/META-INF/microarray/scripts/sql[!!-~]server/microarray-8.30-8.31.sql -text
 microarray/src/META-INF/microarray/scripts/sql[!!-~]server/obsolete/microarray-0.00-0.01.sql -text
 microarray/src/org/labkey/microarray/FeatureExtractionRun.java -text
 microarray/src/org/labkey/microarray/MicroarrayController.java -text

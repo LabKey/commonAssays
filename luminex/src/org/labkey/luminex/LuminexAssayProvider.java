@@ -258,15 +258,15 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public FieldKey getParticipantIDFieldKey()
     {
-        return FieldKey.fromParts("ParticipantID");
+        return FieldKey.fromParts(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
     }
 
     public FieldKey getVisitIDFieldKey(Container container)
     {
         if (AssayPublishService.get().getTimepointType(container) == TimepointType.VISIT)
-            return FieldKey.fromParts("VisitID");
+            return FieldKey.fromParts(AbstractAssayProvider.VISITID_PROPERTY_NAME);
         else
-            return FieldKey.fromParts("Date");
+            return FieldKey.fromParts(AbstractAssayProvider.DATE_PROPERTY_NAME);
     }
 
     public FieldKey getDataRowIdFieldKey()

@@ -59,7 +59,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
         DomainProperty[] columns = dataDomain.getProperties();
         if (columns.length == 0)
         {
-            return new Map[0];
+            return new Map[] { new HashMap<String, Object>() };
         }
         FileInputStream fIn = null;
         try

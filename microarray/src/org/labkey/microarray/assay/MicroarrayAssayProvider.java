@@ -57,7 +57,7 @@ import java.io.IOException;
  * User: jeckels
  * Date: Jan 2, 2008
  */
-public class MicroarrayAssayProvider extends AbstractAssayProvider
+public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 {
     public static final String PROTOCOL_PREFIX = "MicroarrayAssayProtocol";
     public static final String NAME = "Microarray";
@@ -71,11 +71,6 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
     public MicroarrayAssayProvider()
     {
         super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_DATA_TYPE);
-    }
-
-    public ExpData getDataForDataRow(Object dataRowId)
-    {
-        throw new UnsupportedOperationException();
     }
 
     protected Domain createUploadSetDomain(Container c, User user)
@@ -96,17 +91,21 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
     public TableInfo createDataTable(UserSchema schema, String alias, ExpProtocol protocol)
     {
         RunDataTable result = new RunDataTable(schema, alias, protocol);
-        List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
-        Iterator<FieldKey> iterator = cols.iterator();
-        while (iterator.hasNext())
+        if (getDomainByPrefix(protocol, ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().length > 0)
         {
-            FieldKey key = iterator.next();
-            if ("Run".equals(key.getParts().get(0)))
+            List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+            Iterator<FieldKey> iterator = cols.iterator();
+            while (iterator.hasNext())
             {
-                iterator.remove();
+                FieldKey key = iterator.next();
+                if ("Run".equals(key.getParts().get(0)))
+                {
+                    iterator.remove();
+                }
             }
+            result.setDefaultVisibleColumns(cols);
         }
-        result.setDefaultVisibleColumns(cols);
+
         return result;
     }
 
@@ -128,22 +127,22 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
 
     public FieldKey getParticipantIDFieldKey()
     {
-        throw new UnsupportedOperationException();
+        return FieldKey.fromParts(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
     }
 
     public FieldKey getVisitIDFieldKey(Container targetStudy)
     {
-        throw new UnsupportedOperationException();
+        return FieldKey.fromParts(AbstractAssayProvider.VISITID_PROPERTY_NAME);
     }
 
     public FieldKey getSpecimenIDFieldKey()
     {
-        throw new UnsupportedOperationException();
+        return FieldKey.fromParts("SpecimenId");
     }
 
     public boolean canCopyToStudy()
     {
-        return false;
+        return true;
     }
 
     public FieldKey getRunIdFieldKeyFromDataRow()
@@ -202,11 +201,6 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         {
             throw new ExperimentException(e);
         }
-    }
-
-    public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
-    {
-        throw new UnsupportedOperationException();
     }
 
     public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles)
