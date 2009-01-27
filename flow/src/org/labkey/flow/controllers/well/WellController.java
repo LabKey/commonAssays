@@ -312,7 +312,7 @@ public class WellController extends SpringFlowController<WellController.Action>
             }
             catch (FileNotFoundException fnfe)
             {
-                errors.reject(ERROR_MSG, "The specified FCS file could not be found.");
+                errors.reject(ERROR_MSG, "FCS File not found at this location: " + well.getFCSURI());
                 return new SimpleErrorView(errors);
             }
         }

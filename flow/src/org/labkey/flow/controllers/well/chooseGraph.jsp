@@ -28,6 +28,7 @@
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page import="org.labkey.flow.controllers.FlowParam" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -211,5 +212,18 @@
         urlGenerateGraph.addParameter("graph", graphspec.toString());
 
 %>
-<p><img src="<%=h(urlGenerateGraph)%>"></p>
+<script type="text/javascript">
+    function imgError(img)
+    {
+        img.onerror = null;
+        img.src = '<%=AppProps.getInstance().getContextPath()%>/_images/exclaim.gif';
+
+        var msg = 'There was an error generating the graph.  See the server log for more information.';
+        var node = document.createElement("span");
+        node.className = 'labkey-error';
+        node.innerHTML = msg;
+        img.parentNode.appendChild(node);
+    }
+</script>
+<p><img src="<%=h(urlGenerateGraph)%>" onerror="imgError(this);"></p>
 <% } %>

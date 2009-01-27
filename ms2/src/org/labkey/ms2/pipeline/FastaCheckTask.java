@@ -95,13 +95,13 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
 
             for (File sequenceFile : getJobSupport().getSequenceFiles())
             {
+                action.addInput(sequenceFile, "FASTA");
+                
                 // todo: NetworkDrive access on PipelineJobService
                 // If the file does not exist, assume something else will fail fairly quickly.
                 if (!sequenceFile.exists())
                     continue;
                 getJob().info("Checking sequence file validity of " + sequenceFile);
-
-                action.addInput(sequenceFile, "FASTA");
 
                 FastaValidator validator = new FastaValidator(sequenceFile);
                 String errors = StringUtils.join(validator.validate(), "\n");

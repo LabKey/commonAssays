@@ -16,6 +16,8 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.labkey.api.util.NetworkDrive;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -52,6 +54,7 @@ public class FCSHeader
     protected void load(File file) throws IOException
     {
         _file = file;
+        NetworkDrive.ensureDrive(file.getPath());
         InputStream is = new FileInputStream(file);
         try
         {

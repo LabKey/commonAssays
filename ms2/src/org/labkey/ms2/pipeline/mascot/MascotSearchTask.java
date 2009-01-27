@@ -179,7 +179,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             getJobSupport().createParamParser().writeFromMap(params, fileWorkInputXML);
 
             File fileMzXML = _factory.findInputFile(getJobSupport().getDataDirectory(), getJobSupport().getBaseName());
-            File fileMGF = new File(fileMzXML.getParentFile(), fileWorkMGF.getName());
+            File fileMGF = new File(_wd.getDir(), fileWorkMGF.getName());
 
             // 0. pre-Mascot search: c) translate the mzXML file to mgf for Mascot (msxml2other)
             File fileWorkSpectra = _wd.inputFile(fileMzXML, false);
@@ -207,7 +207,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                     fileMGF.getAbsolutePath(), fileWorkDAT.getAbsolutePath());
             if (iReturn != 0)
             {
-                throw new IOException("Error code " + mascotClient.getErrorString());
+                throw new IOException("Error code " + iReturn + " " + mascotClient.getErrorString());
             }
             if (!fileWorkDAT.exists())
             {

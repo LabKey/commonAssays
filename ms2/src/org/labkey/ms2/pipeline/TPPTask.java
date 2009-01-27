@@ -521,7 +521,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 quantOpts.add("-N");
         }
 
-        quantOpts.add("\"-d" + pathMzXml + "\"");
+        quantOpts.add("-d\"" + pathMzXml + "\"");
 
         if ("xpress".equals(paramAlgorithm))
             return new String[] { "-X" + StringUtils.join(quantOpts.iterator(), ' ') };

@@ -235,43 +235,41 @@ public class PepXmlImporter extends MS2Importer
     {
         String dataSuffix = fraction.getDataSuffix();
         String baseName = fraction.getDataBasename();
-
+        String newFilename = new File(baseName).getName();
         // Build the name of the tgz file
         if(fraction.getSearchEngine().equalsIgnoreCase("sequest"))
         {
-            String newFilename = new File(baseName).getName();
-           _gzFileName =  newFilename + "." + "pep." + dataSuffix;
-
-            // No spectrumPath in a sequest pepXML file.
-            if (fraction.getSpectrumPath() == null)
-            {
-                // First, check two directories up from the MS2 results. This is where searches done through the CPAS
-                // pipeline will be
-                File pepXmlDir = new File(_path);
-                File mzXMLFile = null;
-                if (pepXmlDir.getParentFile() != null && pepXmlDir.getParentFile().getParentFile() != null)
-                {
-                    mzXMLFile = new File(pepXmlDir.getParentFile().getParentFile(), newFilename + ".mzXML");
-                }
-
-                if (mzXMLFile == null || !NetworkDrive.exists(mzXMLFile))
-                {
-                    // If not there, look in the same directory as the MS2 results
-                    mzXMLFile = new File(pepXmlDir, newFilename + ".mzXML");
-                }
-                fraction.setSpectrumPath(mzXMLFile.getAbsolutePath());
-            }
+           _gzFileName = newFilename + "." + "pep." + dataSuffix;
         }
         else
         {
             _gzFileName = switchSuffix(_fileName, dataSuffix);
+        }
+       // No spectrumPath in a sequest or Mascot pepXML file.
+        if (fraction.getSpectrumPath() == null)
+        {
+            // First, check two directories up from the MS2 results. This is where searches done through the CPAS
+            // pipeline will be
+            File pepXmlDir = new File(_path);
+            File mzXMLFile = null;
+            if (pepXmlDir.getParentFile() != null && pepXmlDir.getParentFile().getParentFile() != null)
+            {
+                mzXMLFile = new File(pepXmlDir.getParentFile().getParentFile(), newFilename + ".mzXML");
+            }
+
+            if (mzXMLFile == null || !NetworkDrive.exists(mzXMLFile))
+            {
+                // If not there, look in the same directory as the MS2 results
+                mzXMLFile = new File(pepXmlDir, newFilename + ".mzXML");
+            }
+            fraction.setSpectrumPath(mzXMLFile.getAbsolutePath());
         }
         if (! NetworkDrive.exists(new File(_path + "/" + _gzFileName)) &&
                 baseName != null)
         {
             // Try using the base_name from the input file
             int i = baseName.lastIndexOf("/");
-            String newFilename =
+            newFilename =
                     (i < 0 ? baseName : baseName.substring(i + 1));
             //newFilename = switchSuffix(newFilename, dataSuffix);
             newFilename += "." + dataSuffix;
