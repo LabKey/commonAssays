@@ -1195,8 +1195,7 @@ nab/src/org/labkey/nab/runProperties.jsp -text
 nab/src/org/labkey/nab/runResults.jsp -text
 portal/module.properties -text
 portal/src/org/labkey/portal/PortalModule.java -text
-portal/src/org/labkey/portal/customizeSearchWebPart.gm -text
-portal/src/org/labkey/portal/customizeWebPart.gm -text
+portal/src/org/labkey/portal/customizeSearchWebPart.jsp -text
 portal/src/org/labkey/portal/search.jsp -text
 xarassay/ListTableData.xls -text
 xarassay/build.xml -text
