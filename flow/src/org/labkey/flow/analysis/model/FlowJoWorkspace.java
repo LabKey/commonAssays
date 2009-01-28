@@ -36,6 +36,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -180,9 +182,39 @@ abstract public class FlowJoWorkspace implements Serializable
         public CalibrationTable calibrationTable;
     }
 
+
+	static class FJErrorHandler implements ErrorHandler
+	{
+		public void warning(SAXParseException exception) throws SAXException
+		{
+			// ignore
+		}
+
+		public void error(SAXParseException exception) throws SAXException
+		{
+			throw exception;
+		}
+
+		public void fatalError(SAXParseException exception) throws SAXException
+		{
+			String msg = exception.getLocalizedMessage();
+			if (msg != null)
+			{
+				// ignore malformed XML in <OverlayGraphs> element
+				if (msg.contains("OverlayGraphs") && (msg.contains("xParameter") || msg.contains("yParameter")))
+					return;
+			}
+			throw exception;
+		}
+	}
+
+
     static public FlowJoWorkspace readWorkspace(InputStream stream) throws Exception
     {
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+		f.setFeature("http://apache.org/xml/features/continue-after-fatal-error",true);
+        DocumentBuilder builder = f.newDocumentBuilder();
+		builder.setErrorHandler(new FJErrorHandler());
         Document doc = builder.parse(stream);
         Element elDoc = doc.getDocumentElement();
         if ("1.4".equals(elDoc.getAttribute("version")))
