@@ -30,7 +30,7 @@ import java.util.TreeMap;
  */
 public class FCSHeader
 {
-    private Map<String, String> keywords = new TreeMap();
+    private Map<String, String> keywords = new TreeMap<String,  String>();
     int dataLast;
     int dataOffset;
     int textOffset;
@@ -113,12 +113,11 @@ public class FCSHeader
         {
             assert cbRead <= textOffset;
             cbRead += is.skip(textOffset - cbRead);
-            byte[] textBuf = new byte[(int) (textLast - textOffset + 1)];
+            byte[] textBuf = new byte[(textLast - textOffset + 1)];
             long read = is.read(textBuf, 0, textBuf.length);
             assert read == textBuf.length;
             cbRead += read;
             String fullText = new String(textBuf);
-            textBuf = null;
 //            assert fullText.charAt(0) == fullText.charAt(fullText.length() - 1);
             chDelimiter = fullText.charAt(0);
             int ichStart = 0;
@@ -143,10 +142,12 @@ public class FCSHeader
         _parameterCount = Integer.parseInt(getKeyword("$PAR"));
     }
 
+
     int getParameterCount()
     {
         return _parameterCount;
     }
+
 
     protected DataFrame createDataFrame(float[][] data)
     {
@@ -162,7 +163,7 @@ public class FCSHeader
             final double scale = Double.parseDouble(E.substring(E.indexOf(',') + 1));
             DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
             f.setDescription(getKeyword(key + "S"));
-            f.setScalingFunction(new ScalingFunction(decade, scale, range));
+            f.setScalingFunction(ScalingFunction.makeFunction(decade, scale, range));
             fields[i] = f;
         }
         return new DataFrame(fields, data);

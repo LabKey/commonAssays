@@ -75,4 +75,9 @@ public class FloatArray implements NumberArray
         {
         return _array.length * 4;
         }
+
+	public float[] getArray()
+		{
+		return _array;
+		}
     }

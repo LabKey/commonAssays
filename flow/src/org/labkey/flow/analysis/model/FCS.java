@@ -255,7 +255,7 @@ public class FCS extends FCSHeader
         return value;
     }
 
-    protected int unsigned(byte b)
+    protected final int unsigned(byte b)
     {
         return ((int) b) & 0x000000ff;
     }
@@ -275,13 +275,23 @@ public class FCS extends FCSHeader
         public boolean accept(File file)
         {
             int i;
-            if (-1 != (i= file.getName().indexOf(".")))
+            if (-1 != (i= file.getName().lastIndexOf(".")))
             {
                 String ext = file.getName().substring(i).toLowerCase();
-                return ext.equals(".fcs") || ext.equals(".facs");
-            }
-            else
-                return isFCSFile(file);
+                if (ext.equals(".fcs") || ext.equals(".facs"))
+					return true;
+
+				// fall through if this look like a bogus numeric extension e.g. .001
+				try
+				{
+					Integer.parseInt(ext.substring(1));
+				}
+				catch (NumberFormatException x)
+				{
+					return false;
+				}
+	        }
+			return isFCSFile(file);
         }
 
         public boolean accept(File dir, String name)

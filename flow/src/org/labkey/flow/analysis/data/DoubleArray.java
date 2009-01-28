@@ -63,4 +63,8 @@ public class DoubleArray implements NumberArray
         {
         return _array.length * 8;
         }
+	public double[] getArray()
+		{
+		return _array;
+		}
     }

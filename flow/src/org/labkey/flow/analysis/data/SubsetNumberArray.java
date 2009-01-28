@@ -22,6 +22,7 @@ public class SubsetNumberArray implements NumberArray
     {
     NumberArray _array;
     IntArray _subset;
+		
     public SubsetNumberArray(NumberArray array, IntArray subset)
         {
         _array = array;
@@ -72,6 +73,7 @@ public class SubsetNumberArray implements NumberArray
         {
         return _array;
         }
+		
     public IntArray getSubset()
         {
         return _subset;

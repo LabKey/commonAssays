@@ -16,7 +16,6 @@
 package org.labkey.flow.analysis.model;
 
 import org.labkey.flow.analysis.data.*;
-import org.labkey.flow.analysis.web.StatisticSpec;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,10 +23,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.BitSet;
-import java.util.Arrays;
 
 import Jama.Matrix;
-import org.labkey.api.view.Stats;
 
 
 /**
@@ -43,7 +40,7 @@ public class DataFrame
 {
     protected NumberArray[] data;
     protected Field[] fields;
-    protected HashMap<String, Field> fieldsMap = new HashMap();
+    protected HashMap<String, Field> fieldsMap = new HashMap<String,Field>();
     protected String version = "";
 
 
@@ -71,9 +68,9 @@ public class DataFrame
     private void init(Field[] fields, NumberArray[] data)
     {
         assert fields.length == data.length;
-        this.fields = (Field[]) fields.clone();
-        for (int i = 0; i < fields.length; i++)
-            fieldsMap.put(fields[i].getName(), fields[i]);
+        this.fields = fields.clone();
+		for (Field field : fields)
+			fieldsMap.put(field.getName(), field);
         this.data = data;
     }
 
@@ -94,7 +91,7 @@ public class DataFrame
             }
             if (paramInfo != null && paramInfo.getMinValue() != null)
             {
-                fn = new ScalingFunction(fn, paramInfo.getMinValue());
+                fn = ScalingFunction.makeFunction(fn, paramInfo.getMinValue().intValue());
             }
             NumberArray from = data[p];
 
@@ -106,22 +103,12 @@ public class DataFrame
             else
             {
                 fields[p] = new Field(p, getField(p), fn);
-                if (fn.isIdentity())
-                {
-                    out[p] = new ConstrainedNumberArray(from, fn.getMinValue(), fn.getMaxValue());
-                }
-                else
-                {
-                    int len = from.size();
-                    float[] to = new float[len];
-                    out[p] = new FloatArray(to);
-                    for (int e = 0; e < len; e++)
-                        to[e] = (float) fn.translate(from.getDouble(e));
-                }
+				out[p] = fn.translate(from);
             }
         }
         return new DataFrame(fields, out);
     }
+
 
     public DataFrame multiply(Matrix mul)
     {
@@ -146,6 +133,7 @@ public class DataFrame
         return out;
     }
 
+
     /**
      * For data which comes from a scaling of a discrete set of integer values,
      * randomly change the data within each range.  This is done so that, after
@@ -162,22 +150,20 @@ public class DataFrame
         {
             Field field = getField(c);
             ScalingFunction function = field.getScalingFunction();
-            if (function == null || !function.isLogarithmic())
+            if (function == null)
             {
                 cols[c] = getColumn(c);
-                continue;
             }
-            cols[c] = new FloatArray(new float[getRowCount()]);
-            for (int r = 0; r < cRow; r++)
-            {
-                double value = getColumn(c).getDouble(r);
-                double newVal = function.dither(value);
-                cols[c].set(r, newVal);
-            }
+			else
+			{
+				cols[c] = function.dither(getColumn(c));
+			}
         }
-        DataFrame out = new DataFrame(fields, cols);
+        DataFrame out;
+		out = new DataFrame(fields, cols);
         return out;
     }
+
 
     public DataFrame filter(BitSet bs)
     {
@@ -204,7 +190,8 @@ public class DataFrame
                 cols[i] = new SubsetNumberArray(getColumn(i), subset);
             }
         }
-        DataFrame out = new DataFrame(fields, cols);
+        DataFrame out;
+		out = new DataFrame(fields, cols);
         return out;
     }
 
@@ -229,7 +216,7 @@ public class DataFrame
 
     public Field getField(String s)
     {
-        return (Field) fieldsMap.get(s);
+        return fieldsMap.get(s);
     }
 
     public NumberArray getColumn(String s)
@@ -386,7 +373,13 @@ public class DataFrame
         {
             return _scalingFunction.getMaxValue();
         }
-    }
+
+		@Override
+		public String toString()
+		{
+			return _name + "[" + _index + "]";
+		}
+	}
 
 
 }
