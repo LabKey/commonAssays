@@ -18,7 +18,8 @@ package org.labkey.ms2.pipeline;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProvider;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.TaskPipeline;
-import org.fhcrc.cpas.util.NetworkDrive;
+import org.labkey.api.util.NetworkDrive;
+
 import java.io.IOException;
 import java.io.File;
 import java.net.URI;

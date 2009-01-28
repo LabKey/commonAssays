@@ -17,7 +17,6 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewForm;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowScript;
@@ -27,8 +26,6 @@ import java.util.Map;
 
 public class ChooseRunsToUploadForm extends ViewForm
 {
-    ViewContext context;
-    
     public int ff_protocolId;
     public String[] ff_path;
     public String path;
@@ -37,16 +34,6 @@ public class ChooseRunsToUploadForm extends ViewForm
     private Map<String, String> newPaths;
     private PipeRoot pipeRoot;
 
-
-    public void setViewContext(ViewContext context)
-    {
-        this.context = context;
-    }
-
-    public ViewContext getViewContext()
-    {
-        return context;
-    }
 
     public void setFf_protocolId(int id)
     {
