@@ -38,7 +38,7 @@ public class AnalyteImportHelper implements OntologyManager.ImportHelper
         _namePropertyURI = namePropertyURI;
     }
 
-    public String beforeImportObject(Map map) throws SQLException
+    public String beforeImportObject(Map<String, Object> map) throws SQLException
     {
         String name = (String)map.get(_namePropertyURI);
         for (Analyte analyte : _analytes)

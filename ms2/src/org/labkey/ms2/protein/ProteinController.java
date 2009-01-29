@@ -217,13 +217,13 @@ public class ProteinController extends SpringActionController
             TabLoader tabLoader = new TabLoader(form.getAnnotationsText(), true);
             tabLoader.setScanAheadLineCount(200);
 
-            Map<String, Object>[] rows = (Map<String, Object>[]) tabLoader.load();
+            List<Map<String, Object>> rows = tabLoader.load();
             ColumnDescriptor[] columns = tabLoader.getColumns();
             String lookupStringColumnName = null;
 
             CustomAnnotationType type = CustomAnnotationType.valueOf(form.getAnnotationType());
 
-            if (rows.length < 1)
+            if (rows.size() < 1)
             {
                 errors.addError(new ObjectError("main", null, null, "Your protein list must have at least one protein, plus the header line"));
             }
@@ -329,12 +329,12 @@ public class ProteinController extends SpringActionController
                     descriptors.add(pd);
                 }
 
-                rows = (Map<String, Object>[])tabLoader.load();
+                rows = tabLoader.load();
 
                 int ownerObjectId = OntologyManager.ensureObject(getContainer(), annotationSet.getLsid());
                 OntologyManager.ImportHelper helper = new CustomAnnotationImportHelper(stmt, connection, annotationSet.getLsid(), lookupStringColumnName);
 
-                OntologyManager.insertTabDelimited(getContainer(), ownerObjectId, helper, descriptors.toArray(new PropertyDescriptor[0]), rows, false);
+                OntologyManager.insertTabDelimited(getContainer(), ownerObjectId, helper, descriptors.toArray(new PropertyDescriptor[descriptors.size()]), rows, false);
 
                 stmt.executeBatch();
                 connection.commit();

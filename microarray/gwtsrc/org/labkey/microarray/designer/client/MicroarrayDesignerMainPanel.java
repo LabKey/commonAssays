@@ -43,43 +43,34 @@ public class MicroarrayDesignerMainPanel extends AssayDesignerMainPanel
         FlexTable result = super.createAssayInfoTable(assay);
         int row = result.getRowCount();
 
-        final String channelCountValue = (String)assay.getProtocolParameters().get(MicroarrayAssayDesigner.CHANNEL_COUNT_PARAMETER_URI);
+        final String channelCountValue = assay.getProtocolParameters().get(MicroarrayAssayDesigner.CHANNEL_COUNT_PARAMETER_URI);
         _channelCountTextBox = new BoundTextAreaBox("Channel Count XPath", "ChannelCountXPath", channelCountValue, new WidgetUpdatable()
         {
             public void update(Widget widget)
             {
-                assay.getProtocolParameters().put(MicroarrayAssayDesigner.CHANNEL_COUNT_PARAMETER_URI, ((TextBox) widget).getText());
-                if (!((TextBox) widget).getText().equals(channelCountValue))
-                {
-                    setDirty(true);
-                }
+                assay.getProtocolParameters().put(MicroarrayAssayDesigner.CHANNEL_COUNT_PARAMETER_URI, _channelCountTextBox.getBox().getText());
             }
         }, this);
         result.setHTML(row, 0, "Channel Count XPath");
         result.setWidget(row++, 1, _channelCountTextBox);
 
-        final String barcodeXPathValue = (String)assay.getProtocolParameters().get(MicroarrayAssayDesigner.BARCODE_PARAMETER_URI);
+        final String barcodeXPathValue = assay.getProtocolParameters().get(MicroarrayAssayDesigner.BARCODE_PARAMETER_URI);
         _barcodeTextBox = new BoundTextAreaBox("Barcode XPath", "BarcodeXPath", barcodeXPathValue, new WidgetUpdatable()
         {
             public void update(Widget widget)
             {
-                assay.getProtocolParameters().put(MicroarrayAssayDesigner.BARCODE_PARAMETER_URI, ((TextBox) widget).getText());
-                if (!((TextBox) widget).getText().equals(barcodeXPathValue))
-                {
-                    setDirty(true);
-                }
+                assay.getProtocolParameters().put(MicroarrayAssayDesigner.BARCODE_PARAMETER_URI, _barcodeTextBox.getBox().getText());
             }
         }, this);
         result.setHTML(row, 0, "Barcode XPath");
         result.setWidget(row++, 1, _barcodeTextBox);
 
-        String barcodeFieldNames = (String)assay.getProtocolParameters().get(MicroarrayAssayDesigner.BARCODE_FIELD_NAMES_PARAMETER_URI);
+        String barcodeFieldNames = assay.getProtocolParameters().get(MicroarrayAssayDesigner.BARCODE_FIELD_NAMES_PARAMETER_URI);
         _sampleSetBarcodeFieldNames = new BoundTextBox("Barcode Field Names", "barcodeFieldNames", barcodeFieldNames, new WidgetUpdatable()
         {
             public void update(Widget widget)
             {
-                TextBox textBox = (TextBox)widget;
-                assay.getProtocolParameters().put(MicroarrayAssayDesigner.BARCODE_FIELD_NAMES_PARAMETER_URI, textBox.getText());
+                assay.getProtocolParameters().put(MicroarrayAssayDesigner.BARCODE_FIELD_NAMES_PARAMETER_URI, _sampleSetBarcodeFieldNames.getBox().getText());
             }
         }, this);
 

@@ -263,7 +263,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
-    public int updateSampleIds(User user) throws Exception
+    public int updateSampleIds(User user) throws SQLException
     {
         ExperimentService.Interface svc = ExperimentService.get();
         Map<String, FieldKey> joinFields = getSampleSetJoinFields();
@@ -283,86 +283,75 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         ColumnInfo colSampleId = columns.get(fieldSampleRowId);
         int ret = 0;
         ResultSet rs = Table.select(fcsFilesTable, new ArrayList<ColumnInfo>(columns.values()), null, null);
+        boolean fTransaction = false;
         try
         {
-            boolean fTransaction = false;
-            try
+            if (!svc.isTransactionActive())
             {
-                if (!svc.isTransactionActive())
+                svc.beginTransaction();
+                fTransaction = true;
+            }
+            while (rs.next())
+            {
+                int fcsFileId = ((Number) colRowId.getValue(rs)).intValue();
+                ExpData fcsFile = svc.getExpData(fcsFileId);
+                if (fcsFile == null)
+                    continue;
+                SampleKey key = new SampleKey();
+                for (FieldKey fieldKey : joinFields.values())
                 {
-                    svc.beginTransaction();
-                    fTransaction = true;
+                    ColumnInfo column = columns.get(fieldKey);
+                    Object value = null;
+                    if (column != null)
+                    {
+                        value = column.getValue(rs);
+                    }
+                    key.addValue(value);
                 }
-                while (rs.next())
+                ExpMaterial sample = sampleMap.get(key);
+                Integer newSampleId = sample == null ? null : sample.getRowId();
+                Object oldSampleId = colSampleId.getValue(rs);
+                if (ObjectUtils.equals(newSampleId, oldSampleId))
+                    continue;
+                ExpProtocolApplication app = fcsFile.getSourceApplication();
+                if (app == null)
                 {
-                    int fcsFileId = ((Number) colRowId.getValue(rs)).intValue();
-                    ExpData fcsFile = svc.getExpData(fcsFileId);
-                    if (fcsFile == null)
-                        continue;
-                    SampleKey key = new SampleKey();
-                    for (FieldKey fieldKey : joinFields.values())
-                    {
-                        ColumnInfo column = columns.get(fieldKey);
-                        Object value = null;
-                        if (column != null)
-                        {
-                            value = column.getValue(rs);
-                        }
-                        key.addValue(value);
-                    }
-                    ExpMaterial sample = sampleMap.get(key);
-                    Integer newSampleId = sample == null ? null : sample.getRowId();
-                    Object oldSampleId = colSampleId.getValue(rs);
-                    if (ObjectUtils.equals(newSampleId, oldSampleId))
-                        continue;
-                    ExpProtocolApplication app = fcsFile.getSourceApplication();
-                    if (app == null)
-                    {
-                        // This will happen for orphaned FCSFiles (where the ExperimentRun has been deleted).
-                        continue;
-                    }
+                    // This will happen for orphaned FCSFiles (where the ExperimentRun has been deleted).
+                    continue;
+                }
 
-                    boolean found = false;
-                    for (ExpMaterial material : app.getInputMaterials())
-                    {
-                        if (material.getSampleSet() == null || material.getSampleSet().getRowId() != ss.getRowId())
-                            continue;
-                        if (sample != null)
-                        {
-                            if (material.equals(sample))
-                            {
-                                found = true;
-                                ret ++;
-                                break;
-                            }
-                        }
-                        app.removeMaterialInput(user, material);
-                    }
-                    if (!found && sample != null)
-                    {
-                        app.addMaterialInput(user, sample, null);
-                        ret ++;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                if (fTransaction)
+                boolean found = false;
+                for (ExpMaterial material : app.getInputMaterials())
                 {
-                    svc.rollbackTransaction();
-                    fTransaction = false;
+                    if (material.getSampleSet() == null || material.getSampleSet().getRowId() != ss.getRowId())
+                        continue;
+                    if (sample != null)
+                    {
+                        if (material.equals(sample))
+                        {
+                            found = true;
+                            ret ++;
+                            break;
+                        }
+                    }
+                    app.removeMaterialInput(user, material);
                 }
-                throw e;
+                if (!found && sample != null)
+                {
+                    app.addMaterialInput(user, sample, null);
+                    ret ++;
+                }
             }
-            finally
+            if (fTransaction)
             {
-                if (fTransaction)
-                    svc.commitTransaction();
+                svc.commitTransaction();
             }
         }
         finally
         {
             rs.close();
+            if (fTransaction)
+                svc.closeTransaction();
         }
         return ret;
     }

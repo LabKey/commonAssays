@@ -625,9 +625,11 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                 OntologyManager.deleteProperty(expRun.getLSID(), excelRunColumn.getPropertyURI(), container, protocol.getContainer());
             }
 
+            List<Map<String, Object>> excelRunPropsList = new ArrayList<Map<String, Object>>();
+            excelRunPropsList.add(excelRunProps);
             OntologyManager.insertTabDelimited(container, objectId, new OntologyManager.ImportHelper()
             {
-                public String beforeImportObject(Map map) throws SQLException
+                public String beforeImportObject(Map<String, Object> map) throws SQLException
                 {
                     return expRun.getLSID();
                 }
@@ -635,7 +637,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                 public void afterImportObject(String lsid, ObjectProperty[] props) throws SQLException
                 {
                 }
-            }, excelRunColumns, new Map[] { excelRunProps }, true);
+            }, excelRunColumns, excelRunPropsList, true);
             if (ownTransaction)
             {
                 ExperimentService.get().commitTransaction();

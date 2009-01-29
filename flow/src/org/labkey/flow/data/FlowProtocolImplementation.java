@@ -23,6 +23,7 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.security.User;
 
 import java.util.List;
+import java.sql.SQLException;
 
 public class FlowProtocolImplementation extends ProtocolImplementation
 {
@@ -36,7 +37,7 @@ public class FlowProtocolImplementation extends ProtocolImplementation
         super(NAME);
     }
 
-    public void onSamplesChanged(User user, ExpProtocol expProtocol, ExpMaterial[] materials) throws Exception
+    public void onSamplesChanged(User user, ExpProtocol expProtocol, ExpMaterial[] materials) throws SQLException
     {
         FlowProtocol protocol = new FlowProtocol(expProtocol);
         protocol.updateSampleIds(user);

@@ -29,10 +29,7 @@ import org.labkey.common.tools.ColumnDescriptor;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -54,12 +51,12 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
         return true;
     }
 
-    public Map<String, Object>[] loadFileData(Domain dataDomain, File dataFile) throws IOException, ExperimentException
+    public List<Map<String, Object>> loadFileData(Domain dataDomain, File dataFile) throws IOException, ExperimentException
     {
         DomainProperty[] columns = dataDomain.getProperties();
         if (columns.length == 0)
         {
-            return new Map[] { new HashMap<String, Object>() };
+            return Collections.singletonList((Map<String, Object>)new HashMap<String, Object>());
         }
         FileInputStream fIn = null;
         try
@@ -129,7 +126,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
                             tabColumns[i].errorValues = ERROR_VALUE;
                         }
                         loader.setColumns(tabColumns);
-                        return (Map<String, Object>[]) loader.load();
+                        return loader.load();
                     }
                     finally
                     {

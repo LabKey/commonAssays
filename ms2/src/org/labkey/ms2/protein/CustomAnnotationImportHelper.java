@@ -56,7 +56,7 @@ public class CustomAnnotationImportHelper implements OntologyManager.ImportHelpe
         return lookup.toString().trim();
     }
 
-    public String beforeImportObject(Map map) throws SQLException
+    public String beforeImportObject(Map<String, Object> map) throws SQLException
     {
         String lookupString = convertLookup(map.get(_lookupStringColumnName));
 
