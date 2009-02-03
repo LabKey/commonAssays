@@ -18,7 +18,6 @@ package org.labkey.nab;
 
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
@@ -73,7 +72,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         return parent;
     }
 
-    protected StepHandler<NabRunUploadForm> getRunStepHandler()
+    protected NabRunStepHandler getRunStepHandler()
     {
         return new NabRunStepHandler();
     }
@@ -110,7 +109,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         }
     }
 
-    protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ServletException, SQLException
+    protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ServletException
     {
         if (form.isMultiRunUpload())
             return super.afterRunCreation(form, run, errors);

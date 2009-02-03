@@ -51,6 +51,12 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
         return true;
     }
 
+    @Override
+    protected boolean shouldAddInputMaterials()
+    {
+        return false;
+    }
+
     public List<Map<String, Object>> loadFileData(Domain dataDomain, File dataFile) throws IOException, ExperimentException
     {
         DomainProperty[] columns = dataDomain.getProperties();

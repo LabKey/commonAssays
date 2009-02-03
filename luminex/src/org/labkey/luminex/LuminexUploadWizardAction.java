@@ -74,7 +74,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
     }
 
-    protected ModelAndView afterRunCreation(LuminexRunUploadForm form, ExpRun run, BindException errors) throws ServletException, SQLException
+    protected ModelAndView afterRunCreation(LuminexRunUploadForm form, ExpRun run, BindException errors) throws ServletException
     {
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         DomainProperty[] analyteColumns = analyteDomain.getProperties();
@@ -91,7 +91,6 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     }
 
     private ModelAndView getAnalytesView(int dataRowId, LuminexRunUploadForm form, boolean reshow, BindException errors)
-            throws SQLException
     {
         String lsidColumn = "RowId";
         form.setDataId(dataRowId);

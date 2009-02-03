@@ -172,7 +172,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         return null;
     }
 
-    protected StepHandler<ElispotRunUploadForm> getRunStepHandler()
+    protected ElispotRunStepHandler getRunStepHandler()
     {
         return new ElispotRunStepHandler();
     }

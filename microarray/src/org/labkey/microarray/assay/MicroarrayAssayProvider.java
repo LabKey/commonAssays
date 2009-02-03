@@ -25,8 +25,8 @@ import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
@@ -38,17 +38,16 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
-import org.labkey.microarray.MicroarrayModule;
-import org.labkey.microarray.MicroarraySchema;
-import org.labkey.microarray.MicroarrayUploadWizardAction;
-import org.labkey.microarray.MicroarrayController;
+import org.labkey.microarray.*;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
-import org.labkey.microarray.sampleset.client.SampleInfo;
-import org.labkey.microarray.sampleset.client.SampleChooser;
 import org.labkey.common.util.Pair;
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.springframework.web.servlet.mvc.Controller;
 
+import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import java.util.*;
 import java.io.File;
 import java.io.IOException;
@@ -234,28 +233,11 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 
     protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
-        String countString = context.getRequest().getParameter(SampleChooser.SAMPLE_COUNT_ELEMENT_NAME);
-        int count;
-        if (countString != null)
-        {
-            try
-            {
-                count = Integer.parseInt(countString);
-            }
-            catch (NumberFormatException e)
-            {
-                count = MAX_SAMPLE_COUNT;
-            }
-        }
-        else
-        {
-            count = MAX_SAMPLE_COUNT;
-        }
-
+        MicroarrayRunUploadForm form = (MicroarrayRunUploadForm)context;
+        int count = form.getSampleCount(form.getCurrentMageML());
         for (int i = 0; i < count; i++)
         {
-            String lsid = context.getRequest().getParameter(SampleInfo.getLsidFormElementID(i));
-            String name = context.getRequest().getParameter(SampleInfo.getNameFormElementID(i));
+            String lsid = form.getSampleLSID(i);
             ExpMaterial material;
             if (lsid != null && !"".equals(lsid))
             {
@@ -264,13 +246,18 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
                 {
                     throw new ExperimentException("Please choose a sample");
                 }
-                if (material != null && !material.getContainer().hasPermission(context.getUser(), ACL.PERM_READ))
+                if (!material.getContainer().hasPermission(context.getUser(), ACL.PERM_READ))
                 {
                     throw new ExperimentException("You do not have permission to reference the sample with LSID " + lsid);
                 }
             }
+            else if (form.isBulkUploadAttempted())
+            {
+                throw new ExperimentException("Could not find sample '" + form.getSampleName(i) + "'");
+            }
             else
             {
+                String name = form.getSampleName(i);
                 if (name == null)
                 {
                     name = "Unknown";
@@ -335,6 +322,34 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         params.add(barcodeFieldNameParam);
 
         result.getKey().setProtocolParameters(params);
+        return result;
+    }
+
+    public Map<DomainProperty, XPathExpression> getXpathExpressions(ExpProtocol protocol)
+    {
+        Map<DomainProperty, XPathExpression> result = new HashMap<DomainProperty, XPathExpression>();
+
+        Domain domain = getRunInputDomain(protocol);
+        for (DomainProperty runPD : domain.getProperties())
+        {
+            String expression = runPD.getDescription();
+            if (expression != null)
+            {
+                // We use the description of the property descriptor as the XPath. Far from ideal.
+                try
+                {
+                    XPathFactory factory = XPathFactory.newInstance();
+                    XPath xPath = factory.newXPath();
+                    XPathExpression xPathExpression = xPath.compile(expression);
+
+                    result.put(runPD, xPathExpression);
+                }
+                catch (XPathExpressionException e)
+                {
+                    // User isn't required to use the description as an XPath
+                }
+            }
+        }
         return result;
     }
 }

@@ -519,6 +519,8 @@ microarray/src/META-INF/microarray/scripts/sql[!!-~]server/microarray-0.00-8.10.
 microarray/src/META-INF/microarray/scripts/sql[!!-~]server/microarray-8.30-8.31.sql -text
 microarray/src/META-INF/microarray/scripts/sql[!!-~]server/obsolete/microarray-0.00-0.01.sql -text
 microarray/src/org/labkey/microarray/FeatureExtractionRun.java -text
+microarray/src/org/labkey/microarray/MicroarrayBulkPropertiesDisplayColumn.java -text
+microarray/src/org/labkey/microarray/MicroarrayBulkPropertiesTemplateAction.java -text
 microarray/src/org/labkey/microarray/MicroarrayController.java -text
 microarray/src/org/labkey/microarray/MicroarrayFolderType.java -text
 microarray/src/org/labkey/microarray/MicroarrayManager.java -text
@@ -535,6 +537,7 @@ microarray/src/org/labkey/microarray/SampleSetServiceImpl.java -text
 microarray/src/org/labkey/microarray/assay/MageMLDataHandler.java -text
 microarray/src/org/labkey/microarray/assay/MicroarrayAssayProvider.java -text
 microarray/src/org/labkey/microarray/assay/TrimmedFileInputStream.java -text
+microarray/src/org/labkey/microarray/bulkPropertiesInput.jsp -text
 microarray/src/org/labkey/microarray/pipeline/AgilentFeatureExtractionClientImpl.java -text
 microarray/src/org/labkey/microarray/pipeline/ArrayPipelineManager.java -text
 microarray/src/org/labkey/microarray/pipeline/FeatureExtractionPipelineJob.java -text

@@ -16,10 +16,7 @@
 
 package org.labkey.microarray;
 
-import org.labkey.api.action.GWTServiceAction;
-import org.labkey.api.action.SimpleErrorView;
-import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.exp.ExperimentException;
@@ -58,7 +55,10 @@ import java.util.Map;
 
 public class MicroarrayController extends SpringActionController
 {
-    static DefaultActionResolver _actionResolver = new DefaultActionResolver(MicroarrayController.class, MicroarrayUploadWizardAction.class);
+    static DefaultActionResolver _actionResolver = new DefaultActionResolver(
+            MicroarrayController.class,
+            MicroarrayBulkPropertiesTemplateAction.class,
+            MicroarrayUploadWizardAction.class);
 
     public MicroarrayController() throws Exception
     {
@@ -211,7 +211,7 @@ public class MicroarrayController extends SpringActionController
                 ExpData data = ExperimentService.get().getExpDataByURL(f, getContainer());
                 if (data != null && data.getRun() != null)
                 {
-                    errors.addError(new ObjectError("main", null, null, "The file " + f.getAbsolutePath() + " has already been uploaded"));
+                    errors.addError(new LabkeyError("The file " + f.getAbsolutePath() + " has already been uploaded"));
                 }
             }
             if (errors.getErrorCount() > 0)
