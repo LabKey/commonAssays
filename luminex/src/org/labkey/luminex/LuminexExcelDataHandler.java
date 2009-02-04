@@ -899,7 +899,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         {
             ExpProtocol protocol = run.getProtocol();
             ExpProtocol p = ExperimentService.get().getExpProtocol(protocol.getRowId());
-            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayDataURL(container, p, run.getRowId());
+            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(container, p, run.getRowId());
         }
         return null;
     }

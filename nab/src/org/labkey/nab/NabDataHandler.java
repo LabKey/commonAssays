@@ -220,7 +220,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         Map<String, DomainProperty> runProperties = new HashMap<String, DomainProperty>();
         for (DomainProperty column : provider.getRunDomain(protocol).getProperties())
             runProperties.put(column.getName(), column);
-        for (DomainProperty column : provider.getUploadSetDomain(protocol).getProperties())
+        for (DomainProperty column : provider.getBatchDomain(protocol).getProperties())
             runProperties.put(column.getName(), column);
 
         Map<Integer, String> cutoffs = new HashMap<Integer, String>();
@@ -430,7 +430,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         {
             ExpProtocol protocol = run.getProtocol();
             ExpProtocol p = ExperimentService.get().getExpProtocol(protocol.getRowId());
-            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayDataURL(container, p, run.getRowId());
+            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(container, p, run.getRowId());
         }
         return null;
     }

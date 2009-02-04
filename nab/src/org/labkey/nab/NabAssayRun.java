@@ -70,7 +70,7 @@ public class NabAssayRun extends Luc5Assay
             try
             {
                 Map<FieldKey, PropertyDescriptor> fieldKeys = new HashMap<FieldKey, PropertyDescriptor>();
-                for (DomainProperty property : _provider.getUploadSetDomain(_protocol).getProperties())
+                for (DomainProperty property : _provider.getBatchDomain(_protocol).getProperties())
                     fieldKeys.put(FieldKey.fromParts("Run Properties", property.getName()), property.getPropertyDescriptor());
                 for (DomainProperty property : _provider.getRunDomain(_protocol).getProperties())
                     fieldKeys.put(FieldKey.fromParts("Run Properties", property.getName()), property.getPropertyDescriptor());

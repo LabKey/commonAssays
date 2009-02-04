@@ -31,7 +31,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.TimepointType;
-import org.labkey.api.study.query.RunDataQueryView;
+import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.view.*;
 import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
@@ -243,7 +243,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
 
             List<DomainProperty> runPDs = new ArrayList<DomainProperty>();
             runPDs.addAll(Arrays.asList(getRunDomain(protocol).getProperties()));
-            runPDs.addAll(Arrays.asList(getUploadSetDomain(protocol).getProperties()));
+            runPDs.addAll(Arrays.asList(getBatchDomain(protocol).getProperties()));
 
             PropertyDescriptor[] samplePDs = getPropertyDescriptors(getSampleWellGroupDomain(protocol));
             PropertyDescriptor[] dataPDs = ElispotSchema.getExistingDataProperties(protocol);
@@ -376,9 +376,9 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return getDomainByPrefix(protocol, ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
     }
 
-    private static final class ElispotRunDataQueryView extends RunDataQueryView
+    private static final class ElispotResultsQueryView extends ResultsQueryView
     {
-        public ElispotRunDataQueryView(ExpProtocol protocol, ViewContext context, QuerySettings settings)
+        public ElispotResultsQueryView(ExpProtocol protocol, ViewContext context, QuerySettings settings)
         {
             super(protocol, context, settings);
         }
@@ -391,13 +391,13 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         }
     }
 
-    public ElispotRunDataQueryView createRunDataQueryView(ViewContext context, ExpProtocol protocol)
+    public ElispotResultsQueryView createResultsQueryView(ViewContext context, ExpProtocol protocol)
     {
-        String name = AssayService.get().getRunDataTableName(protocol);
+        String name = AssayService.get().getResultsTableName(protocol);
         QuerySettings settings = new QuerySettings(context, name);
         settings.setSchemaName(AssayService.ASSAY_SCHEMA_NAME);
         settings.setQueryName(name);
-        return new ElispotRunDataQueryView(protocol, context, settings);
+        return new ElispotResultsQueryView(protocol, context, settings);
     }
 
     public RunListDetailsQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)

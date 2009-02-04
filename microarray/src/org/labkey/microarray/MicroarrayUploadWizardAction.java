@@ -132,7 +132,7 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayR
         @Override
         public ModelAndView handleStep(MicroarrayRunUploadForm form, BindException errors) throws ServletException
         {
-            if (validatePostedProperties(form.getUploadSetProperties(), errors) && form.isBulkUploadAttempted())
+            if (validatePostedProperties(form.getBatchProperties(), errors) && form.isBulkUploadAttempted())
             {
                 List<ExpRun> runs = insertRuns(form, errors);
                 if (errors.getErrorCount() == 0 && !runs.isEmpty())

@@ -400,7 +400,7 @@ public class NabAssayController extends SpringActionController
         {
             ActionURL assayListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(_run.getContainer());
             ActionURL runListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(_run.getContainer(), _protocol);
-            ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayDataURL(_run.getContainer(), _protocol, _run.getRowId());
+            ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(_run.getContainer(), _protocol, _run.getRowId());
             return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
                     " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _run.getRowId() + " Details");
         }
@@ -496,7 +496,7 @@ public class NabAssayController extends SpringActionController
             if (_queryView == null)
             {
                 AssayProvider provider = AssayService.get().getProvider(_protocol);
-                QueryView dataView = new NabAssayProvider.NabRunDataQueryView(_protocol, _context, provider)
+                QueryView dataView = new NabAssayProvider.NabResultsQueryView(_protocol, _context, provider)
                 {
                     public DataView createDataView()
                     {

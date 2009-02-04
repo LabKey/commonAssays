@@ -72,9 +72,9 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_DATA_TYPE);
     }
 
-    protected Domain createUploadSetDomain(Container c, User user)
+    protected Domain createBatchDomain(Container c, User user)
     {
-        return PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_UPLOAD_SET), "Run Set Fields");
+        return PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_BATCH), "Batch Fields");
     }
 
     public String getName()

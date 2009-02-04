@@ -91,7 +91,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 ExpProtocol protocol = expRun.getProtocol();
                 if (protocol == null)
                     return null;
-                ActionURL dataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayDataURL(expRun.getContainer(), protocol, expRun.getRowId());
+                ActionURL dataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(expRun.getContainer(), protocol, expRun.getRowId());
                 return dataURL.getLocalURIString();
             }
 
@@ -124,9 +124,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
 
-    protected Domain createUploadSetDomain(Container c, User user)
+    protected Domain createBatchDomain(Container c, User user)
     {
-        Domain uploadSetDomain = super.createUploadSetDomain(c, user);
+        Domain uploadSetDomain = super.createBatchDomain(c, user);
 
         addProperty(uploadSetDomain, "Species", PropertyType.STRING);
         addProperty(uploadSetDomain, "LabID", "Lab ID", PropertyType.STRING);
@@ -299,7 +299,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
             PropertyDescriptor[] runPDs = getPropertyDescriptors(getRunDomain(protocol));
             PropertyDescriptor[] excelRunPDs = getPropertyDescriptors(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN));
-            PropertyDescriptor[] uploadSetPDs = getPropertyDescriptors(getUploadSetDomain(protocol));
+            PropertyDescriptor[] uploadSetPDs = getPropertyDescriptors(getBatchDomain(protocol));
 
             List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
             pds.addAll(Arrays.asList(runPDs));

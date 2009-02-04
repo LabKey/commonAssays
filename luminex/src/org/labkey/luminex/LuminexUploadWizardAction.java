@@ -54,11 +54,6 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         addStepHandler(new AnalyteStepHandler());
     }
 
-    public ModelAndView getView(LuminexRunUploadForm assayRunUploadForm, BindException errors) throws Exception
-    {
-        return super.getView(assayRunUploadForm, errors);
-    }
-
     protected void addRunActionButtons(LuminexRunUploadForm newRunForm, InsertView insertView, ButtonBar bbar)
     {
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);

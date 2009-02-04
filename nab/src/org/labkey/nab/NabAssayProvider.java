@@ -19,7 +19,7 @@ package org.labkey.nab;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.TimepointType;
-import org.labkey.api.study.query.RunDataQueryView;
+import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.api.*;
@@ -132,9 +132,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return runDomain;
     }
 
-    protected Domain createUploadSetDomain(Container c, User user)
+    protected Domain createBatchDomain(Container c, User user)
     {
-        return super.createUploadSetDomain(c, user);
+        return super.createBatchDomain(c, user);
     }
 
     protected Domain createSampleWellGroupDomain(Container c, User user)
@@ -386,16 +386,16 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
     }
 
-    public static class NabRunDataQueryView extends RunDataQueryView
+    public static class NabResultsQueryView extends ResultsQueryView
     {
-        public NabRunDataQueryView(ExpProtocol protocol, ViewContext context, AssayProvider provider)
+        public NabResultsQueryView(ExpProtocol protocol, ViewContext context, AssayProvider provider)
         {
             super(protocol, context, getDefaultSettings(protocol, context, provider));
         }
 
         private static QuerySettings getDefaultSettings(ExpProtocol protocol, ViewContext context, AssayProvider provider)
         {
-            String name = AssayService.get().getRunDataTableName(protocol);
+            String name = AssayService.get().getResultsTableName(protocol);
             QuerySettings settings = new QuerySettings(context, name);
             settings.setSchemaName(AssayService.ASSAY_SCHEMA_NAME);
             settings.setQueryName(name);
@@ -431,9 +431,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         }
     }
 
-    public NabRunDataQueryView createRunDataQueryView(ViewContext context, ExpProtocol protocol)
+    public NabResultsQueryView createResultsQueryView(ViewContext context, ExpProtocol protocol)
     {
-        return new NabRunDataQueryView(protocol, context, this);
+        return new NabResultsQueryView(protocol, context, this);
     }
 
     public static class NabRunListQueryView extends RunListDetailsQueryView
