@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -68,7 +67,7 @@
         <tr><td>Analysis folder to put results in:</td>
             <td><select name="ff_targetExperimentId" onchange="this.form.submit()">
                 <labkey:options value="<%=form.ff_targetExperimentId == null ? null : Integer.valueOf(form.ff_targetExperimentId)%>"
-                              map="<%=FlowObject.idLabelsFor(targetExperiments, "<create new>")%>"/>
+                              map="<%=FlowObject.idLabelsFor(targetExperiments, \"<create new>\")%>"/>
             </select></td>
         </tr>
         <% if (analysis.requiresCompensationMatrix())
