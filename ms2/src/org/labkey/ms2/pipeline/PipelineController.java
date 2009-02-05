@@ -787,14 +787,14 @@ public class PipelineController extends SpringActionController
             catch (FileNotFoundException e)
             {
                 if (e.getMessage().indexOf("Access") != -1)
-                    errors.reject("Access denied attempting to write defaults. Contact the server administrator.");
+                    errors.addError(new LabkeyError("Access denied attempting to write defaults. Contact the server administrator."));
                 else
-                    errors.reject("Failure attempting to write defaults.  Please try again.");
+                    errors.addError(new LabkeyError("Failure attempting to write defaults.  Please try again."));
                 return false;
             }
             catch (IOException eio)
             {
-                errors.reject("Failure attempting to write defaults.  Please try again.");
+                errors.addError(new LabkeyError("Failure attempting to write defaults.  Please try again."));
                 return false;
             }
 
@@ -851,7 +851,7 @@ public class PipelineController extends SpringActionController
             String name = (ff == null ? "" : ff.getOriginalFilename());
             if (ff == null || ff.getSize() == 0)
             {
-                errors.reject(ERROR_MSG, "Please specify a FASTA file.");
+                errors.addError(new LabkeyError("Please specify a FASTA file."));
                 return false;
             }
             else if (name.indexOf(File.separatorChar) != -1 || name.indexOf('/') != -1)
@@ -875,7 +875,7 @@ public class PipelineController extends SpringActionController
                 }
                 catch (IOException e)
                 {
-                    errors.reject(e.getMessage());
+                    errors.reject(ERROR_MSG, e.getMessage());
                     return false;
                 }
                 finally
