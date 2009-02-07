@@ -92,7 +92,7 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
             return null;
 
         // OR together the sequence conditions
-        StringBuilder sql = new StringBuilder();
+        SQLFragment sql = new SQLFragment();
         for(int idx = 0; idx < _sequences.length; ++idx)
         {
             if(idx > 0)
@@ -100,7 +100,7 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
 
             sql.append(genSeqPredicate(_sequences[idx], null));
         }
-        return new SQLFragment(sql.toString());
+        return sql;
     }
 
     public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect)
@@ -112,7 +112,7 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
         assert(null != pepDataAlias);
 
         // OR together the sequence conditions
-        StringBuilder sql = new StringBuilder();
+        SQLFragment sql = new SQLFragment();
         for (int idx = 0; idx < _sequences.length; ++idx)
         {
             if (idx > 0)
@@ -120,41 +120,38 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
 
             sql.append(genSeqPredicate(_sequences[idx], pepDataAlias));
         }
-        return new SQLFragment(sql.toString());
+        return sql;
     }
 
-    private String genSeqPredicate(String sequence, String pepDataAlias)
+    private SQLFragment genSeqPredicate(String sequence, String pepDataAlias)
     {
         //force sequence to upper-case for case-sensitive DBs like PostgreSQL
         sequence = sequence.toUpperCase();
         
         //always add a condition for pd.TrimmedPeptide using normalized version of sequence
-        StringBuilder sql = new StringBuilder(null == pepDataAlias ? "(TrimmedPeptide"
+        SQLFragment sql = new SQLFragment(null == pepDataAlias ? "(TrimmedPeptide"
                 : "(" + pepDataAlias + ".TrimmedPeptide");
 
         if (_exact)
         {
-            sql.append("='");
-            sql.append(normalizeSequence(sequence));
-            sql.append("'");
+            sql.append("=?");
+            sql.add(normalizeSequence(sequence));
         }
         else
         {
-            sql.append(" LIKE '");
-            sql.append(normalizeSequence(sequence));
-            sql.append("%'");
+            sql.append(" LIKE ?");
+            sql.add(normalizeSequence(sequence) + '%');
         }
 
         //if _exact, AND another contains condition against pd.Peptide
         if(_exact)
         {
-            sql.append(null == pepDataAlias ? " AND Peptide LIKE '%" : " AND " + pepDataAlias + ".Peptide LIKE '%");
-            sql.append(sequence.replace("'", "''").trim()); //FIX: 6679
-            sql.append("%'");
+            sql.append(null == pepDataAlias ? " AND Peptide LIKE ?" : " AND " + pepDataAlias + ".Peptide LIKE ?");
+            sql.add('%' + sequence.replace("'", "''").trim() + '%'); //FIX: 6679
         }
 
         sql.append(")");
 
-        return sql.toString();
+        return sql;
     }
 }
