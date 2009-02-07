@@ -43,6 +43,7 @@ import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.springframework.validation.BindException;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
@@ -64,15 +65,22 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         addStepHandler(new AntigenStepHandler());
     }
 
-    protected InsertView createRunInsertView(ElispotRunUploadForm newRunForm, boolean reshow, BindException errors)
+    protected InsertView createRunInsertView(ElispotRunUploadForm newRunForm, boolean errorReshow, BindException errors)
     {
-        InsertView parent = super.createRunInsertView(newRunForm, reshow, errors);
+        InsertView parent = super.createRunInsertView(newRunForm, errorReshow, errors);
 
         ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(newRunForm);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
 
         PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm, newRunForm.getProtocol(), resolverType);
-        helper.addSampleColumns(parent, newRunForm.getUser(), newRunForm, reshow);
+        try
+        {
+            helper.addSampleColumns(parent, newRunForm.getUser(), newRunForm, errorReshow);
+        }
+        catch (ExperimentException e)
+        {
+            errors.addError(new ObjectError("main", null, null, e.toString()));
+        }
 
         return parent;
     }
@@ -98,14 +106,14 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
     }
 
-    private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean reshow, BindException errors) throws ServletException
+    private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean errorReshow, BindException errors) throws ServletException
     {
         InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
-                "lsid", new DomainProperty[0], reshow, AntigenStepHandler.NAME, form, errors);
+                "lsid", new DomainProperty[0], errorReshow, AntigenStepHandler.NAME, form, errors);
 
         try {
             PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), (ElispotAssayProvider)form.getProvider());
-            antigenHelper.addSampleColumns(view, form.getUser(), form, reshow);
+            antigenHelper.addSampleColumns(view, form.getUser(), form, errorReshow);
 
             // add existing page properties
             addHiddenUploadSetProperties(form, view);
@@ -215,7 +223,16 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
-                form.saveDefaultValues(entry.getValue(), form.getRequest(), form.getProvider(), entry.getKey());
+            {
+                try
+                {
+                    form.saveDefaultValues(entry.getValue(), entry.getKey());
+                }
+                catch (ExperimentException e)
+                {
+                    errors.addError(new ObjectError("main", null, null, e.toString()));
+                }
+            }
 
             Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
             DomainProperty[] antigenColumns = antigenDomain.getProperties();
@@ -262,7 +279,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 ExpRun run = saveExperimentRun(form);
 
                 for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAntigenProperties.entrySet())
-                    form.saveDefaultValues(entry.getValue(), form.getRequest(), provider, entry.getKey());
+                    form.saveDefaultValues(entry.getValue(), entry.getKey());
 
                 ExperimentService.get().getSchema().getScope().beginTransaction();
                 ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);

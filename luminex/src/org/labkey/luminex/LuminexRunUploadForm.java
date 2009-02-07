@@ -22,12 +22,12 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.RuntimeSQLException;
-import org.springframework.validation.BindException;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -74,7 +74,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
     }
 
     @Override
-    public Map<DomainProperty, String> getDefaultValues(Domain domain, BindException errors, String disambiguationId)
+    public Map<DomainProperty, Object> getDefaultValues(Domain domain, String disambiguationId) throws ExperimentException
     {
         if (!isResetDefaultValues() && LuminexUploadWizardAction.AnalyteStepHandler.NAME.equals(getUploadStep()))
         {
@@ -89,11 +89,11 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
                 if (objectURI != null)
                 {
                     Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer(), objectURI);
-                    Map<DomainProperty, String> ret = new HashMap<DomainProperty, String>();
+                    Map<DomainProperty, Object> ret = new HashMap<DomainProperty, Object>();
                     for (DomainProperty analyteDP : analyteColumns)
                     {
                         ObjectProperty objectProp = values.get(analyteDP.getPropertyURI());
-                        ret.put(analyteDP,  objectProp.value().toString());
+                        ret.put(analyteDP,  objectProp.value());
                     }
                     return ret;
                 }
@@ -108,7 +108,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         }
         else
         {
-            return super.getDefaultValues(domain, errors, disambiguationId);
+            return super.getDefaultValues(domain, disambiguationId);
         }
     }
 }

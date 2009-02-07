@@ -36,6 +36,7 @@ import org.labkey.api.query.ValidationError;
 import org.labkey.api.action.SpringActionController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
+import org.springframework.validation.ObjectError;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
@@ -85,7 +86,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
     }
 
-    private ModelAndView getAnalytesView(int dataRowId, LuminexRunUploadForm form, boolean reshow, BindException errors)
+    private ModelAndView getAnalytesView(int dataRowId, LuminexRunUploadForm form, boolean errorReshow, BindException errors)
     {
         String lsidColumn = "RowId";
         form.setDataId(dataRowId);
@@ -96,15 +97,10 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         Analyte[] analytes = getAnalytes(dataRowId);
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         DomainProperty[] analyteColumns = analyteDomain.getProperties();
-        
-        if (reshow && !form.isResetDefaultValues())
-            view.setInitialValues(getViewContext().getRequest().getParameterMap());
-        else if (form.isResetDefaultValues())
-            form.clearDefaultValues(analyteDomain);
 
         // each analyte may have a different set of default values.  Because it may be expensive to query for the
         // entire set of values for every property, we use the following map to cache the default value sets by analyte name.
-        Map<String, Map<DomainProperty, String>> domains = new HashMap<String, Map<DomainProperty, String>>();
+        Map<String, Map<DomainProperty, Object>> domains = new HashMap<String, Map<DomainProperty, Object>>();
         for (DomainProperty analyteDP : analyteColumns)
         {
             List<DisplayColumn> cols = new ArrayList<DisplayColumn>();
@@ -113,14 +109,22 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 // from SamplePropertyHelper:
                 // get the map of default values that corresponds to our current sample:
                 String defaultValueKey = analyte.getName() + "_" + analyteDP.getDomain().getName();
-                Map<DomainProperty, String> defaultValues = domains.get(defaultValueKey);
+                Map<DomainProperty, Object> defaultValues = domains.get(defaultValueKey);
                 if (defaultValues == null)
                 {
-                    defaultValues = form.getDefaultValues(analyteDP.getDomain(), errors, analyte.getName());
+                    try
+                    {
+                        defaultValues = form.getDefaultValues(analyteDP.getDomain(), analyte.getName());
+                    }
+                    catch (ExperimentException e)
+                    {
+                        errors.addError(new ObjectError("main", null, null, e.toString()));
+                    }
                     domains.put(defaultValueKey,  defaultValues);
                 }
                 String inputName = getAnalytePropertyName(analyte, analyteDP);
-                view.setInitialValue(inputName, defaultValues.get(analyteDP));
+                if (defaultValues != null)
+                    view.setInitialValue(inputName, defaultValues.get(analyteDP));
                 
                 ColumnInfo info = analyteDP.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getViewContext().getUser());
                 info.setName(inputName);
@@ -129,6 +133,10 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
             view.getDataRegion().addGroup(new DisplayColumnGroup(cols, analyteDP.getName(), true));
         }
+
+        if (errorReshow)
+            view.setInitialValues(getViewContext().getRequest().getParameterMap());
+        
         view.getDataRegion().setHorizontalGroups(false);
         List<String> analyteNames = new ArrayList<String>();
         for (Analyte analyte : analytes)
@@ -224,7 +232,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                                 errors.reject(SpringActionController.ERROR_MSG, PageFlowUtil.filter(error.getMessage()));
                         }
 
-                        form.saveDefaultValues(properties, getViewContext().getRequest(), form.getProvider(), analyte.getName());
+                        try
+                        {
+                            form.saveDefaultValues(properties, analyte.getName());
+                        }
+                        catch (ExperimentException e)
+                        {
+                            errors.addError(new ObjectError("main", null, null, e.toString()));
+                        }
                     }
 
                     LuminexSchema.getSchema().getScope().commitTransaction();

@@ -357,6 +357,14 @@ public class NabAssayController extends SpringActionController
                 {
                     _links.put(entry.getKey().toLowerCase(), PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), protocol, entry.getValue()));
                 }
+
+                if (getViewContext().hasPermission(ACL.PERM_DELETE))
+                {
+                    ActionURL reRunURL = new ActionURL(NabUploadWizardAction.class, getContainer());
+                    reRunURL.addParameter("rowId", protocol.getRowId());
+                    reRunURL.addParameter("reRunId", runId);
+                    _links.put("delete and re-import", reRunURL);
+                }
             }
             ActionURL downloadURL = new ActionURL(DownloadDatafileAction.class, getContainer()).addParameter("rowId", runId);
             _links.put("download datafile", downloadURL);

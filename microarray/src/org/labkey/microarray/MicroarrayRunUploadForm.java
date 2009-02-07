@@ -25,7 +25,6 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.action.LabkeyError;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.sampleset.client.SampleChooser;
 import org.labkey.microarray.sampleset.client.SampleInfo;
@@ -34,7 +33,6 @@ import org.labkey.common.tools.TabLoader;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.springframework.validation.BindException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -133,20 +131,13 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
     }
 
     @Override
-    public Map<DomainProperty, String> getDefaultValues(Domain domain, BindException errors)
+    public Map<DomainProperty, Object> getDefaultValues(Domain domain) throws ExperimentException
     {
-        Map<DomainProperty, String> defaults = super.getDefaultValues(domain, errors);
+        Map<DomainProperty, Object> defaults = super.getDefaultValues(domain);
         if (!isResetDefaultValues() && UploadWizardAction.RunStepHandler.NAME.equals(getUploadStep()))
         {
-            try
-            {
-                for (Map.Entry<DomainProperty, String> entry : getMageMLProperties().entrySet())
-                    defaults.put(entry.getKey(), entry.getValue());
-            }
-            catch (ExperimentException e)
-            {
-                errors.addError(new LabkeyError(e));
-            }
+            for (Map.Entry<DomainProperty, String> entry : getMageMLProperties().entrySet())
+                defaults.put(entry.getKey(), entry.getValue());
         }
         return defaults;
     }

@@ -19,6 +19,8 @@ package org.labkey.nab;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.actions.UploadWizardAction;
@@ -28,6 +30,7 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.ActionURL;
 import org.springframework.validation.BindException;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
@@ -53,22 +56,29 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
     }
 
     @Override
-    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, DomainProperty[] properties, boolean resetDefaultValues, String uploadStepName, NabRunUploadForm form, BindException errors)
+    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, DomainProperty[] properties, boolean errorReshow, String uploadStepName, NabRunUploadForm form, BindException errors)
     {
-        InsertView view = super.createInsertView(baseTable, lsidCol, properties, resetDefaultValues, uploadStepName, form, errors);
-        if (form.getReplaceRunId() != null)
-            view.getDataRegion().addHiddenFormField("replaceRunId", "" + form.getReplaceRunId());
+        InsertView view = super.createInsertView(baseTable, lsidCol, properties, errorReshow, uploadStepName, form, errors);
+        if (form.getReRunId() != null)
+            view.getDataRegion().addHiddenFormField("reRunId", "" + form.getReRunId());
         return view;
     }
 
     @Override
-    protected InsertView createRunInsertView(NabRunUploadForm newRunForm, boolean reshow, BindException errors)
+    protected InsertView createRunInsertView(NabRunUploadForm newRunForm, boolean errorReshow, BindException errors)
     {
         NabAssayProvider provider = (NabAssayProvider) getProvider(newRunForm);
-        InsertView parent = super.createRunInsertView(newRunForm, reshow, errors);
+        InsertView parent = super.createRunInsertView(newRunForm, errorReshow, errors);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
         PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm, newRunForm.getProtocol(), resolverType);
-        helper.addSampleColumns(parent, newRunForm.getUser(), newRunForm, reshow);
+        try
+        {
+            helper.addSampleColumns(parent, newRunForm.getUser(), newRunForm, errorReshow);
+        }
+        catch (ExperimentException e)
+        {
+            errors.addError(new ObjectError("main", null, null, e.toString()));
+        }
         return parent;
     }
 
@@ -101,16 +111,27 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
             return runPropsValid && samplePropsValid;
         }
 
-        protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException error) throws SQLException, ServletException
+        protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
-                form.saveDefaultValues(entry.getValue(), form.getRequest(), form.getProvider(), entry.getKey());
-            return super.handleSuccessfulPost(form, error);
+            {
+                try
+                {
+                    form.saveDefaultValues(entry.getValue(), entry.getKey());
+                }
+                catch (org.labkey.api.exp.ExperimentException e)
+                {
+                    errors.addError(new ObjectError("main", null, null, e.toString()));
+                }
+            }
+            return super.handleSuccessfulPost(form, errors);
         }
     }
 
     protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ServletException
     {
+        if (form.getReRunId() != null)
+            ExperimentService.get().deleteExperimentRunsByRowIds(getContainer(), getViewContext().getUser(), form.getReRunId().intValue());
         if (form.isMultiRunUpload())
             return super.afterRunCreation(form, run, errors);
         else

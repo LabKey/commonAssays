@@ -66,7 +66,7 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayR
         return result;
     }
 
-    protected InsertView createRunInsertView(MicroarrayRunUploadForm form, boolean reshow, BindException errors)
+    protected InsertView createRunInsertView(MicroarrayRunUploadForm form, boolean errorReshow, BindException errors)
     {
         List<DomainProperty> userProperties = new ArrayList<DomainProperty>();
         Map<DomainProperty, String> mageMLProperties;
@@ -90,7 +90,7 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayR
 
         InsertView result = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
                 "lsid", userProperties.toArray(new DomainProperty[userProperties.size()]),
-                reshow, RunStepHandler.NAME, form, errors);
+                errorReshow, RunStepHandler.NAME, form, errors);
         
         for (Map.Entry<DomainProperty, String> entry : mageMLProperties.entrySet())
         {
