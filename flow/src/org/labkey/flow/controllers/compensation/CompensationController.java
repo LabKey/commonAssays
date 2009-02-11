@@ -274,7 +274,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
     UserSchema getFlowSchema()
     {
         if (null == _flowUserSchema)
-            _flowUserSchema = (UserSchema) DefaultSchema.get(getUser(), getContainer()).getSchema(FlowSchema.SCHEMANAME);
+            _flowUserSchema = (UserSchema) DefaultSchema.get(getUser(), getContainer()).getSchema(FlowSchema.SCHEMANAME.toString());
         return _flowUserSchema;
     }
 

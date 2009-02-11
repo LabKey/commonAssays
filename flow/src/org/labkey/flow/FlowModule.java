@@ -31,7 +31,6 @@ import org.labkey.api.util.Search;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
-import org.labkey.api.view.SimpleWebPartFactory;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -72,7 +71,7 @@ public class FlowModule extends DefaultModule
 
     protected void init()
     {
-        DefaultSchema.registerProvider(FlowSchema.SCHEMANAME, new DefaultSchema.SchemaProvider()
+        DefaultSchema.registerProvider(FlowSchema.SCHEMANAME.toString(), new DefaultSchema.SchemaProvider()
         {
             public QuerySchema getSchema(DefaultSchema schema)
             {

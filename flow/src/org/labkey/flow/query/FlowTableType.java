@@ -61,7 +61,7 @@ public enum FlowTableType
 
     public ActionURL urlFor(Container container, QueryAction action)
     {
-        return QueryService.get().urlFor(container, action, FlowSchema.SCHEMANAME, toString());
+        return QueryService.get().urlFor(container, action, FlowSchema.SCHEMANAME.toString(), toString());
     }
 
     public ActionURL urlFor(Container container, SimpleFilter filter)

@@ -25,11 +25,11 @@ public class FlowQueryForm extends QueryForm
 {
     public FlowQueryForm()
     {
-        super(FlowSchema.SCHEMANAME, null);
+        super(FlowSchema.SCHEMANAME.toString(), null);
     }
 
     public FlowQueryForm(String queryName)
     {
-        super(FlowSchema.SCHEMANAME, queryName);
+        super(FlowSchema.SCHEMANAME.toString(), queryName);
     }
 }
