@@ -128,9 +128,13 @@ public class StatisticSpec implements Serializable, Comparable
         return _parameter;
     }
 
+	private transient String _toString = null;
+	
     public String toString()
     {
-        return toString(_statistic.toString());
+		if (null == _toString)
+			_toString = toString(_statistic.toString());
+		return _toString;
     }
 
     private String toString(String strStat)

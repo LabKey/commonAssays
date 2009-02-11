@@ -19,7 +19,6 @@ package org.labkey.flow.analysis.web;
 import org.labkey.flow.analysis.model.FlowException;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Comparator;
 
 public class SubsetSpec implements Serializable
@@ -141,11 +140,13 @@ public class SubsetSpec implements Serializable
         return _subset.equals(other._subset);
     }
 
+	private transient String _toString = null;
+	
     public String toString()
     {
-        if (_parent == null)
-            return _subset;
-        return _parent.toString() + "/" + _subset;
+		if (_toString == null)
+			_toString = (_parent == null) ? _subset : _parent.toString() + "/" + _subset;
+		return _toString;
     }
 
     public SubsetSpec removeRoot()
@@ -183,6 +184,7 @@ public class SubsetSpec implements Serializable
                 return -1;
             if (spec2 == null)
                 return 1;
+
             return spec1.toString().compareTo(spec2.toString());
         }
     };
