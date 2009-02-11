@@ -24,6 +24,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.util.DateUtil;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -60,6 +61,8 @@ public class MicroarrayBulkPropertiesTemplateAction extends BaseAssayAction<Micr
 
         // First, set the content-type, so that your browser knows which application to launch
         getViewContext().getResponse().setContentType("application/vnd.ms-excel");
+        String filename = protocol.getName() + "Template" + DateUtil.formatDate() + ".xls";
+        getViewContext().getResponse().setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
         WritableWorkbook workbook = Workbook.createWorkbook(getViewContext().getResponse().getOutputStream());
         WritableSheet sheet = workbook.createSheet("MicroarrayTemplate", 0);
@@ -94,7 +97,6 @@ public class MicroarrayBulkPropertiesTemplateAction extends BaseAssayAction<Micr
                 sheet.addCell(new Label(0, row++, form.getBarcode(doc)));
             }
         }
-
 
         workbook.write();
         getViewContext().getResponse().getOutputStream().flush();

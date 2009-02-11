@@ -21,10 +21,13 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ProtocolParameter;
+import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.data.Container;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.sampleset.client.SampleChooser;
 import org.labkey.microarray.sampleset.client.SampleInfo;
@@ -147,7 +150,7 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
     {
         if (_runProperties == null)
         {
-            _runProperties = super.getRunProperties();
+            _runProperties = new HashMap<DomainProperty, String>(super.getRunProperties());
             if (isBulkUploadAttempted())
             {
                 try
@@ -255,25 +258,87 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
         }
     }
 
-    public String getSampleLSID(int index) throws ExperimentException
+    public ExpMaterial getSample(int index) throws ExperimentException
     {
         if (isBulkUploadAttempted())
         {
             String name = getSampleName(index);
             if (name != null)
             {
-                ExpMaterial material = ExperimentService.get().getExpMaterialByName(name, getContainer(), getUser());
-                if (material != null)
+                List<? extends ExpMaterial> materials = ExperimentService.get().getExpMaterialsByName(name, getContainer(), getUser());
+                if (materials.size() == 1)
                 {
-                    return material.getLSID();
+                    return materials.get(0);
                 }
+                // Couldn't find exactly one match, check if it might be of the form <SAMPLE_SET_NAME>.<SAMPLE_NAME>
+                int dotIndex = name.indexOf(".");
+                if (dotIndex != -1)
+                {
+                    String sampleSetName = name.substring(0, dotIndex);
+                    String sampleName = name.substring(dotIndex + 1);
+                    // Could easily do some caching here, but probably not a significant perf issue
+                    ExpSampleSet[] sampleSets = ExperimentService.get().getSampleSets(getContainer(), getUser(), true);
+                    for (ExpSampleSet sampleSet : sampleSets)
+                    {
+                        // Look for a sample set with the right name
+                        if (sampleSetName.equals(sampleSet.getName()))
+                        {
+                            for (ExpMaterial sample : sampleSet.getSamples())
+                            {
+                                // Look for a sample with the right name
+                                if (sample.getName().equals(sampleName))
+                                {
+                                    return sample;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // If we can't find a <SAMPLE_SET_NAME>.<SAMPLE_NAME> match, then fall back on the original results
+                if (materials.isEmpty())
+                {
+                    throw new ExperimentException("No sample with name '" + name + "' was found.");
+                }
+                // Must be more than one match
+                throw new ExperimentException("Expected to find one sample with name '" + name + "', but found " + materials.size() + ".");
             }
-            return null;
+            throw new ExperimentException("No sample name was specified for sample " + (index + 1));
         }
         else
         {
-            return getRequest().getParameter(SampleInfo.getLsidFormElementID(index));
+            String lsid = getRequest().getParameter(SampleInfo.getLsidFormElementID(index));
+            if (SampleChooser.DUMMY_LSID.equals(lsid))
+            {
+                throw new ExperimentException("Please select a sample");
+            }
+            if (lsid != null && !"".equals(lsid))
+            {
+                ExpMaterial material = ExperimentService.get().getExpMaterial(lsid);
+                if (material == null)
+                {
+                    throw new ExperimentException("Could not find sample with LSID " + lsid);
+                }
+                return material;
+            }
+            String name = getSampleName(index);
+            if (name == null)
+            {
+                name = "Unknown";
+            }
+            return createSampleMaterial(getContainer(), name);
         }
+    }
+
+    protected ExpMaterial createSampleMaterial(Container currentContainer, String sampleId)
+    {
+        String materialLSID = new Lsid("AssayRunMaterial", "Folder-" + currentContainer.getRowId(), sampleId).toString();
+        ExpMaterial material = ExperimentService.get().getExpMaterial(materialLSID);
+        if (material == null)
+        {
+            material = ExperimentService.get().createExpMaterial(currentContainer, materialLSID, sampleId);
+        }
+        return material;
     }
 
     public String getSampleName(int index) throws ExperimentException

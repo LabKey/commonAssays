@@ -39,6 +39,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
     public static final FileType FT_PEP_XML = new FileType(".pep.xml");
     public static final FileType FT_PROT_XML = new FileType(".prot.xml");
     public static final FileType FT_INTERMEDIATE_PROT_XML = new FileType(".pep-prot.xml");
+    public static final FileType FT_TPP_PROT_SENSERR_XML = new FileType(".pep-prot.xml_senserr.txt");
     public static final FileType FT_TPP_PROT_XML = new FileType("-prot.xml");
 
     private static final FileType FT_PEP_XSL = new FileType(".pep.xsl");
@@ -53,6 +54,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
     public static final String PEP_XML_INPUT_ROLE = "PepXML";
     public static final String PROT_XML_INPUT_ROLE = "ProtXML";
+    public static final String PROT_SENS_ERR_INPUT_ROLE = "ProtSensErr";
 
     public static String getTPPVersion(PipelineJob job)
     {
@@ -398,6 +400,23 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                     protXMLAction.addInput(filePepXML, PEP_XML_INPUT_ROLE);
                     protXMLAction.addOutput(fileProtXML, PROT_XML_INPUT_ROLE, false);
                     actions.add(protXMLAction);
+
+                    // As of version 4 of the TPP has started writing out a .pep-prot.xml_senserr.txt file
+                    File fileSensErrorWork = _wd.newFile(FT_TPP_PROT_SENSERR_XML);
+                    {
+                        // Check if it exists
+                        if (!NetworkDrive.exists(fileSensErrorWork))
+                        {
+                            // If not, that's OK
+                            _wd.discardFile(fileSensErrorWork);
+                        }
+                        else
+                        {
+                            // If so, then grab it and mark as an output
+                            File fileSensError = _wd.outputFile(fileSensErrorWork);
+                            protXMLAction.addOutput(fileSensError, PROT_SENS_ERR_INPUT_ROLE, false);
+                        }
+                    }
                 }
 
                 if (peptideQuantAction != null)

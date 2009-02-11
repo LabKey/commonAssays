@@ -237,32 +237,10 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         int count = form.getSampleCount(form.getCurrentMageML());
         for (int i = 0; i < count; i++)
         {
-            String lsid = form.getSampleLSID(i);
-            ExpMaterial material;
-            if (lsid != null && !"".equals(lsid))
+            ExpMaterial material = form.getSample(i);
+            if (!material.getContainer().hasPermission(context.getUser(), ACL.PERM_READ))
             {
-                material = ExperimentService.get().getExpMaterial(lsid);
-                if (material == null)
-                {
-                    throw new ExperimentException("Please choose a sample");
-                }
-                if (!material.getContainer().hasPermission(context.getUser(), ACL.PERM_READ))
-                {
-                    throw new ExperimentException("You do not have permission to reference the sample with LSID " + lsid);
-                }
-            }
-            else if (form.isBulkUploadAttempted())
-            {
-                throw new ExperimentException("Could not find sample '" + form.getSampleName(i) + "'");
-            }
-            else
-            {
-                String name = form.getSampleName(i);
-                if (name == null)
-                {
-                    name = "Unknown";
-                }
-                material = createSampleMaterial(context.getContainer(), context.getProtocol(), name);
+                throw new ExperimentException("You do not have permission to reference the sample '" + material.getName() + ".");
             }
             if (inputMaterials.containsKey(material))
             {

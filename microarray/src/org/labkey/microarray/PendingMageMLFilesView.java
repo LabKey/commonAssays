@@ -24,6 +24,7 @@ import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
@@ -94,35 +95,41 @@ public class PendingMageMLFilesView extends QueryView
         {
             if (microarrayProtocols.size() == 0)
             {
-                SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to import, no microarray assay definitions found", false);
+                StringBuilder message = new StringBuilder("To import MageML files, <a href=\"");
+                message.append(PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(getContainer(), MicroarrayAssayProvider.NAME));
+                message.append("\">create a microarray microarray assay definition</a>.");
+                SimpleTextDisplayElement element = new SimpleTextDisplayElement(message.toString(), true);
                 element.setDisplayPermission(ACL.PERM_INSERT);
                 bar.add(element);
             }
-            else if (microarrayProtocols.size() == 1)
-            {
-                ExpProtocol protocol = protocols.get(0);
-                ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
-                ActionButton button = new ActionButton(url, "Import selected using " + protocol.getName());
-                button.setScript("if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(true) + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference(true) + ".submit(); } return false;");
-                button.setActionType(ActionButton.Action.POST);
-                button.setDisplayPermission(ACL.PERM_INSERT);
-                bar.add(button);
-            }
             else
             {
-                MenuButton menu = new MenuButton("Import selected using...");
-                menu.setDisplayPermission(ACL.PERM_INSERT);
-                bar.add(menu);
-                for (ExpProtocol protocol : microarrayProtocols)
+                if (microarrayProtocols.size() == 1)
                 {
+                    ExpProtocol protocol = protocols.get(0);
                     ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
-                    menu.addMenuItem("Import using " + protocol.getName(), "javascript: if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(false) + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference(false) + ".submit(); }");
+                    ActionButton button = new ActionButton(url, "Import selected using " + protocol.getName());
+                    button.setScript("if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(true) + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference(true) + ".submit(); } return false;");
+                    button.setActionType(ActionButton.Action.POST);
+                    button.setDisplayPermission(ACL.PERM_INSERT);
+                    bar.add(button);
                 }
+                else
+                {
+                    MenuButton menu = new MenuButton("Import selected using...");
+                    menu.setDisplayPermission(ACL.PERM_INSERT);
+                    bar.add(menu);
+                    for (ExpProtocol protocol : microarrayProtocols)
+                    {
+                        ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
+                        menu.addMenuItem("Import using " + protocol.getName(), "javascript: if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(false) + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference(false) + ".submit(); }");
+                    }
+                }
+                ActionURL browseURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), getViewContext().getActionURL().toString());
+                ActionButton browseButton = new ActionButton(browseURL, "Browse for MageML Files");
+                browseButton.setDisplayPermission(ACL.PERM_INSERT);
+                bar.add(browseButton);
             }
-            ActionURL browseURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), getViewContext().getActionURL().toString());
-            ActionButton browseButton = new ActionButton(browseURL, "Browse for MageML Files");
-            browseButton.setDisplayPermission(ACL.PERM_INSERT);
-            bar.add(browseButton);
         }
     }
 

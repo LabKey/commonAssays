@@ -163,6 +163,7 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayR
                     do
                     {
                         hasMoreRuns = collector.allowAdditionalUpload(form);
+                        form.getUploadedData();
                         validatePostedProperties(form.getRunProperties(), errors);
                         if (errors.getErrorCount() > 0)
                         {
