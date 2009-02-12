@@ -18,6 +18,7 @@ package org.labkey.microarray.assay;
 
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
@@ -28,6 +29,7 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.query.FieldKey;
@@ -328,6 +330,14 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
                 }
             }
         }
+        return result;
+    }
+
+    @Override
+    public RunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
+    {
+        RunListQueryView result = super.createRunQueryView(context, protocol);
+        result.setShowAddToRunGroupButton(true);
         return result;
     }
 }

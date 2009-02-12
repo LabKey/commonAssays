@@ -25,6 +25,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.CsvSet;
+import org.labkey.api.util.FileUtil;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.xml.stream.XMLStreamException;
@@ -332,7 +333,7 @@ public abstract class MS2Importer
         // Old Comet runs won't have an mzXmlFile
         if (null != mzXmlFile)
         {
-            fractionMap.put("MzXMLURL", mzXmlFile.getCanonicalFile().toURI().toString());
+            fractionMap.put("MzXMLURL", FileUtil.getAbsoluteCaseSensitiveFile(mzXmlFile).toURI().toString());
             String mzXmlFileName  = mzXmlFile.getName();
             int extensionIndex = mzXmlFileName.lastIndexOf('.');
 

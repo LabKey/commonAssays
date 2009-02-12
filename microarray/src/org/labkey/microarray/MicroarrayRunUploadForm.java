@@ -192,6 +192,19 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
 
     private Map<String, Object> getBulkProperties() throws ExperimentException
     {
+        String barcode = getBarcode(getCurrentMageML());
+        for (Map<String, Object> props : getParsedBulkProperties())
+        {
+            if (barcode.equals(props.get("barcode")))
+            {
+                return props;
+            }
+        }
+        throw new ExperimentException("Could not find a row for barcode '" + barcode + "'.");
+    }
+
+    private List<Map<String, Object>> getParsedBulkProperties() throws ExperimentException
+    {
         if (_bulkProperties == null)
         {
             String tsv = getRawBulkProperties();
@@ -207,18 +220,25 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
             }
             catch (IOException e)
             {
+                // Shouldn't get this from an in-memory TSV parse
                 throw new UnexpectedException(e);
             }
-        }
-        String barcode = getBarcode(getCurrentMageML());
-        for (Map<String, Object> props : _bulkProperties)
-        {
-            if (barcode.equals(props.get("barcode")))
+
+            Set<String> barcodes = new HashSet<String>();
+            for (Map<String, Object> row : _bulkProperties)
             {
-                return props;
+                String barcode = row.get("barcode") == null ? null : row.get("barcode").toString();
+                if (barcode == null || barcode.equals(""))
+                {
+                    throw new ExperimentException("All entries must have a barcode value.");
+                }
+                if (!barcodes.add(barcode))
+                {
+                    throw new ExperimentException("Duplicate barcode value '" + barcode + "' was found. All barcode entries must be unique.");
+                }
             }
         }
-        return Collections.emptyMap();
+        return _bulkProperties;
     }
 
     public String getRawBulkProperties()
@@ -345,16 +365,24 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
     {
         if (isBulkUploadAttempted())
         {
-            Object result = getBulkProperties().get("sample" + index);
+            Object result = getBulkProperties().get("sample" + (index + 1));
             if (result == null)
             {
                 // Try some other column names values
                 if (index == 0)
                 {
+                    if (!getBulkProperties().containsKey("ProbeID_Cy3"))
+                    {
+                        throw new ExperimentException("Could not find a 'ProbeID_Cy3' or 'Sample1' column.");
+                    }
                     result = getBulkProperties().get("ProbeID_Cy3");
                 }
                 else if (index == 1)
                 {
+                    if (!getBulkProperties().containsKey("ProbeID_Cy5"))
+                    {
+                        throw new ExperimentException("Could not find a 'ProbeID_Cy5' or 'Sample2' column.");
+                    }
                     result = getBulkProperties().get("ProbeID_Cy5");
                 }
             }
@@ -407,5 +435,11 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
             throw new ExperimentException("Failed to evaluate channel count XPath", e);
         }
         return null;
+    }
+
+    public void checkBulkProperties() throws ExperimentException
+    {
+        // getBulkProperties() handles all the checks that we do right now and throws exceptions directly
+        getBulkProperties();
     }
 }

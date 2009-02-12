@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.*;
+import org.labkey.api.util.FileUtil;
 
 
 public class ArrayPipelineManager {
@@ -243,7 +244,7 @@ public class ArrayPipelineManager {
         Set<File> knownFiles = new HashSet<File>();
         Set<File> checkedDirectories = new HashSet<File>();
         
-        File dirData = new File(uriData).getCanonicalFile();
+        File dirData = FileUtil.getAbsoluteCaseSensitiveFile(new File(uriData));
         File[] mageFiles = dirData.listFiles(getMageFileFilter());
 
         Map<File, FileStatus> mageFileMap = new LinkedHashMap<File, FileStatus>();
