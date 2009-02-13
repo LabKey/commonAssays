@@ -382,8 +382,18 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
-            if (run == null || !run.getContainer().equals(getContainer()))
+            if (run == null)
+            {
                 HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
+                return null;
+            }
+            if (!run.getContainer().equals(getContainer()))
+            {
+                // Need to redirect
+                ActionURL newURL = getViewContext().getActionURL().clone();
+                newURL.setContainer(run.getContainer());
+                HttpView.throwRedirect(newURL);
+            }
             NabAssayRun assay = null;
             try
             {
