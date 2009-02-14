@@ -4901,41 +4901,6 @@ public class MS2Controller extends SpringActionController
             url.addParameter(paramName + digit, Formats.chargeFilter.format(value));
     }
 
-
-    @RequiresPermission(ACL.PERM_UPDATE)
-    public class SaveElutionProfileAction extends SimpleRedirectAction<ElutionProfileForm>
-    {
-        public ActionURL getRedirectURL(ElutionProfileForm form) throws Exception
-        {
-            if (!isAuthorized(form.run))
-                return null;
-
-            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
-            if (peptide == null)
-            {
-                throw new NotFoundException();
-            }
-            Quantitation quant = peptide.getQuantitation();
-            if (quant == null)
-            {
-                throw new NotFoundException();
-            }
-
-            boolean validRanges = quant.resetRanges(form.getLightFirstScan(), form.getLightLastScan(), form.getHeavyFirstScan(), form.getHeavyLastScan(), peptide.getCharge());
-            Table.update(getUser(), MS2Manager.getTableInfoQuantitation(), quant, quant.getPeptideId(), null);
-
-            ActionURL url = getViewContext().getActionURL().clone();
-            url.setAction(ShowPeptideAction.class);
-            if (!validRanges)
-            {
-                url.addParameter("elutionProfileError", "Invalid elution profile range");
-            }
-
-            return url;
-        }
-    }
-
-
     public static class ElutionProfileForm extends DetailsForm
     {
         private int _lightFirstScan;
@@ -6012,9 +5977,13 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ACL.PERM_UPDATE)
-    public class EditElutionGraphAction extends SimpleViewAction<DetailsForm>
+    public class EditElutionGraphAction extends FormViewAction<ElutionProfileForm>
     {
-        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
+        public void validateCommand(ElutionProfileForm target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(ElutionProfileForm form, boolean reshow, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return null;
@@ -6023,12 +5992,48 @@ public class MS2Controller extends SpringActionController
             Quantitation quant = peptide.getQuantitation();
 
             EditElutionGraphContext ctx = new EditElutionGraphContext(quant.getLightElutionProfile(peptide.getCharge()), quant.getHeavyElutionProfile(peptide.getCharge()), quant, getViewContext().getActionURL(), peptide);
-            return new JspView<EditElutionGraphContext>("/org/labkey/ms2/editElution.jsp", ctx);
+            return new JspView<EditElutionGraphContext>("/org/labkey/ms2/editElution.jsp", ctx, errors);
+        }
+
+        public boolean handlePost(ElutionProfileForm form, BindException errors) throws Exception
+        {
+            if (!isAuthorized(form.run))
+                return false;
+
+            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
+            if (peptide == null)
+            {
+                throw new NotFoundException();
+            }
+            Quantitation quant = peptide.getQuantitation();
+            if (quant == null)
+            {
+                throw new NotFoundException();
+            }
+
+            boolean validRanges = quant.resetRanges(form.getLightFirstScan(), form.getLightLastScan(), form.getHeavyFirstScan(), form.getHeavyLastScan(), peptide.getCharge());
+            if (validRanges)
+            {
+                Table.update(getUser(), MS2Manager.getTableInfoQuantitation(), quant, quant.getPeptideId(), null);
+                return true;
+            }
+            else
+            {
+                errors.addError(new LabkeyError("Invalid elution profile range"));
+                return false;
+            }
+        }
+
+        public ActionURL getSuccessURL(ElutionProfileForm detailsForm)
+        {
+            ActionURL url = getViewContext().getActionURL().clone();
+            url.setAction(ShowPeptideAction.class);
+            return url;
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return null;
+            return root.addChild("Edit Elution Profile");
         }
     }
 

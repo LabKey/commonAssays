@@ -193,6 +193,10 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
     private Map<String, Object> getBulkProperties() throws ExperimentException
     {
         String barcode = getBarcode(getCurrentMageML());
+        if (barcode == null || "".equals(barcode))
+        {
+            throw new ExperimentException("Could not find a barcode value in " + getUploadedData().values().iterator().next().getName());
+        }
         for (Map<String, Object> props : getParsedBulkProperties())
         {
             if (barcode.equals(props.get("barcode")))
@@ -200,7 +204,7 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
                 return props;
             }
         }
-        throw new ExperimentException("Could not find a row for barcode '" + barcode + "'.");
+        throw new ExperimentException("Could not find a row for barcode '" + barcode + "' specified in " + getUploadedData().values().iterator().next().getName());
     }
 
     private List<Map<String, Object>> getParsedBulkProperties() throws ExperimentException

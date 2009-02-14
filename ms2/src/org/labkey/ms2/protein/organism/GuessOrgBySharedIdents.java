@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.io.IOException;
 
 /**
  * User: brittp
@@ -94,14 +95,8 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
         {
             if (Table.isEmpty(ProteinManager.getTableInfoSprotOrgMap()))
             {
-                if (!ProteinDictionaryHelpers.loadProtSprotOrgMap())
-                {
-                    sprotLoadStatus = SPROTload.tried_and_failed;
-                }
-                else
-                {
-                    sprotLoadStatus = SPROTload.tried_and_succeeded;
-                }
+                ProteinDictionaryHelpers.loadProtSprotOrgMap();
+                sprotLoadStatus = SPROTload.tried_and_succeeded;
             }
             else
             {

@@ -403,6 +403,7 @@ public class Quantitation
         if (_heavyArea == 0)
         {
             _decimalRatio = Float.POSITIVE_INFINITY;
+            return false;
         }
         else
         {

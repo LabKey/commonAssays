@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Table;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.common.tools.TabLoader;
 import org.labkey.ms2.MS2Manager;
@@ -28,6 +29,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.*;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * User: tholzman
@@ -38,51 +41,84 @@ public class ProteinDictionaryHelpers
 {
     private static Logger _log = Logger.getLogger(ProteinDictionaryHelpers.class);
 
-    public static final String WEBAPP_ROOT = "/MS2/externalData/";
-    private static final String PROTSPROTORGMAP_FILE = ProteinDictionaryHelpers.WEBAPP_ROOT + "ProtSprotOrgMap.txt";
+    private static final String FILE = "/MS2/externalData/ProtSprotOrgMap.txt";
     private static final int SPOM_BATCH_SIZE = 1000;
 
-    public static boolean loadProtSprotOrgMap(String fname) throws SQLException, IOException
+    public static void loadProtSprotOrgMap() throws SQLException
     {
         int orgLineCount = 0;
-        TabLoader t;
         PreparedStatement ps = null;
         Connection conn = null;
         TabLoader.TabLoaderIterator it = null;
-        DbScope scope = null;
+        DbScope scope = ProteinManager.getSchema().getScope();
         try
         {
             Table.execute(ProteinManager.getSchema(), "DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap(), null);
 
-            t = new TabLoader(new InputStreamReader(ViewServlet.getViewServletContext().getResourceAsStream(fname)));
-            scope = ProteinManager.getSchema().getScope();
+            TabLoader t = new TabLoader(new InputStreamReader(ViewServlet.getViewServletContext().getResourceAsStream(FILE)));
             conn = scope.getConnection();
             ps = conn.prepareStatement(
                     "INSERT INTO " + ProteinManager.getTableInfoSprotOrgMap() +
                             " (SprotSuffix,SuperKingdomCode,TaxonId,FullName,Genus,Species,CommonName,Synonym) " +
-                            " VALUES (?,?,?,?,?,?,?,?)"
-            );
+                            " VALUES (?,?,?,?,?,?,?,?)");
+
+            Set<String> sprotSuffixes = new HashSet<String>();
 
             for (it = t.iterator(); it.hasNext();)
             {
-                Map curRec = (Map)it.next();
+                Map<String, Object> curRec = it.next();
 
-                // Set nullable parameters to NULL, using correct types
-                ps.setNull(2, Types.CHAR);
-                ps.setNull(3, Types.INTEGER);
+                // SprotSuffix
+                String sprotSuffix = (String) curRec.get("column0");
+                if (sprotSuffix == null)
+                {
+                    throw new IllegalArgumentException("Sprot suffix was blank on line " + (orgLineCount + 1));
+                }
+                ps.setString(1, sprotSuffix);
+
+                if (!sprotSuffixes.add(sprotSuffix))
+                {
+                    throw new IllegalArgumentException("Duplicate SprotSuffix: " + sprotSuffix);
+                }
+
+
+                // SuperKingdomCode
+                ps.setString(2, (String)curRec.get("column1"));
+                // TaxonId
+                if (curRec.get("column2") == null)
+                {
+                    ps.setNull(3, Types.INTEGER);
+                }
+                else
+                {
+                    ps.setInt(3, ((Number)curRec.get("column2")).intValue());
+                }
+                String fullName = (String) curRec.get("column3");
+                if (fullName == null)
+                {
+                    throw new IllegalArgumentException("Full name was blank on line " + (orgLineCount + 1));
+                }
+                ps.setString(4, fullName);
+
+                String genus = (String) curRec.get("column4");
+                if (genus == null)
+                {
+                    throw new IllegalArgumentException("Genus was blank on line " + (orgLineCount + 1));
+                }
+                ps.setString(5, genus);
+
+                String species = (String) curRec.get("column5");
+                if (species == null)
+                {
+                    throw new IllegalArgumentException("Species was blank on line " + (orgLineCount + 1));
+                }
+                ps.setString(6, species);
+
+                // CommonName
                 ps.setNull(7, Types.VARCHAR);
+                // Synonym
                 ps.setNull(8, Types.VARCHAR);
 
-                for (Object key : curRec.keySet())
-                {
-                    String k = (String) key;
-                    int kindex = Integer.parseInt(k.substring(6)) + 1;
-                    Object val = curRec.get(key);
-                    if (val != null)
-                    {
-                        ps.setObject(kindex, val);
-                    }
-                }
                 ps.addBatch();
                 orgLineCount++;
 
@@ -96,29 +132,15 @@ public class ProteinDictionaryHelpers
 
             ps.executeBatch();
         }
-        catch (SQLException e)
+        catch (IOException e)
         {
-            _log.debug("Problem loading ProtSprotOrgMap from " + fname + " on line " + orgLineCount + ": " + e);
-            throw e;
+            throw new UnexpectedException(e, "Problem loading ProtSprotOrgMap on line " + (orgLineCount + 1));
         }
         finally
         {
-            try{ps.close();}catch(Exception e){}
-            try{scope.releaseConnection(conn);}catch(Exception e){}
-            try{it.close();}catch(Exception e){}
-        }
-        return true;
-    }
-
-    public static boolean loadProtSprotOrgMap() throws SQLException
-    {
-        try
-        {
-            return loadProtSprotOrgMap(PROTSPROTORGMAP_FILE);
-        }
-        catch(IOException e)
-        {
-            throw new RuntimeException(e);
+            if (ps != null) { try{ ps.close(); } catch (SQLException e) {} }
+            try{ scope.releaseConnection(conn); } catch (SQLException e) {}
+            if (it != null) { it.close(); }
         }
     }
 

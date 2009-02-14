@@ -34,23 +34,62 @@
     DecimalFormat format = new DecimalFormat();
     DecimalFormat decimalRatioFormat = new DecimalFormat();
     decimalRatioFormat.setMaximumFractionDigits(2);
-    ActionURL saveUrl = ctx.getUrl().clone();
-    saveUrl.setAction("saveElutionProfile.post");
     Container c = me.getViewContext().getContainer();
 %>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<%= PageFlowUtil.getStandardIncludes(c) %>
-<title>Edit Elution Profile - <%=p%></title>
-</head>
-<body onload="updateRange('light'); updateRange('heavy');">
-<b><%=p.getPeptide()%></b>
+<labkey:errors />
+<form name="elutionForm" method="post">
 
-<form name="elutionForm" method="post" action="<%= saveUrl %>">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr class="labkey-wp-header">
+        <th class="labkey-wp-title-left" colspan="2" align="center">Peptide Summary</th>
+        <th class="labkey-wp-title-right">&nbsp;</th>
+    </tr>
+    <tr>
+        <td>
+           <table>
+               <tr>
+                   <td class="labkey-form-label">Sequence</td>
+                   <td><%=PageFlowUtil.filter(p.getPeptide())%></td>
+               </tr>
+               <tr>
+                   <td class="labkey-form-label">Charge</td>
+                   <td>+<%=PageFlowUtil.filter(p.getCharge())%></td>
+               </tr>
+               <tr>
+                   <td class="labkey-form-label">Scan</td>
+                   <td>+<%=PageFlowUtil.filter(p.getScan())%></td>
+               </tr>
+               <tr>
+                   <td class="labkey-form-label">Light to heavy ratio</td>
+                   <td><strong><div id="ratio"><%= quant.getRatio() %></div></strong></td>
+               </tr>
+               <tr>
+                   <td class="labkey-form-label">Heavy to light ratio</td>
+                   <td><strong><div id="heavy2LightRatio"><%= quant.getHeavy2LightRatio() %></div></strong></td>
+               </tr>
+               <tr>
+                   <td class="labkey-form-label">Decimal ratio</td>
+                   <td><strong><div id="decimalRatio"><%= decimalRatioFormat.format(quant.getDecimalRatio()) %></div></strong></td>
+               </tr>
+               <tr>
+                   <td/>
+                   <td>
+                       <labkey:button text="Save Profiles" onclick="var valuesOK = (document.elutionForm.lightFirstScan.value <= document.elutionForm.lightLastScan.value && document.elutionForm.heavyFirstScan.value <= document.elutionForm.heavyLastScan.value); if (!valuesOK) { alert('The first scan must come before the last scan.'); } return valuesOK;" />
+                   </td>
+               </tr>
+           </table>
+        </td>
+    </tr>
+</table>
 
-<table>
-<tr><td colspan="2" align="center"><strong>Light</strong></td></tr>
+<p/>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr class="labkey-wp-header">
+        <th class="labkey-wp-title-left" colspan="2" align="center">Light Elution Profile</th>
+        <th class="labkey-wp-title-right">&nbsp;</th>
+    </tr>
+    <tr><td><br/></td></tr>
 <tr>
     <td>
         <table>
@@ -103,27 +142,18 @@ for (int i = quant.getMinDisplayScan(); i <= quant.getMaxDisplayScan(); i++)
 </td>
     <td><table height="250"><tr><td valign="top" height="100%"><%= format.format(ctx.getMaxLightIntensity()) %></td></tr><tr><td valign="bottom">0</td></tr></table></td>
 </tr>
-<tr><td></td><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
-<tr><td>&nbsp;</td></tr>
-<tr><td colspan="2" align="center">
-    <table>
-        <tr>
-            <td>Light to heavy ratio:</td>
-            <td><strong><div id="ratio"><%= quant.getRatio() %></div></strong></td>
-        </tr>
-        <tr>
-            <td>Heavy to light ratio:</td>
-            <td><strong><div id="heavy2LightRatio"><%= quant.getHeavy2LightRatio() %></div></strong></td>
-        </tr>
-        <tr>
-            <td>Decimal ratio:</td>
-            <td><strong><div id="decimalRatio"><%= decimalRatioFormat.format(quant.getDecimalRatio()) %></div></strong></td>
-        </tr>
-    </table>
-</td></tr>
-<tr><td>&nbsp;</td></tr>
-<tr><td colspan="2" align="center"><strong>Heavy</strong></td></tr>
-<tr>
+<tr><td/><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
+</table>
+
+    <p/>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr class="labkey-wp-header">
+        <th class="labkey-wp-title-left" colspan="2" align="center">Heavy Elution Profile</th>
+        <th class="labkey-wp-title-right">&nbsp;</th>
+    </tr>
+    <tr><td><br/></td></tr>
+    <tr>
     <td>
         <table>
             <tr>
@@ -177,9 +207,6 @@ for (int i = quant.getMinDisplayScan(); i <= quant.getMaxDisplayScan(); i++)
 </tr>
 <tr><td></td><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
 </table>
-
-<labkey:button text="Save Elution Profiles" onclick="var valuesOK = (document.elutionForm.lightFirstScan.value <= document.elutionForm.lightLastScan.value && document.elutionForm.heavyFirstScan.value <= document.elutionForm.heavyLastScan.value); if (!valuesOK) { alert('The first scan must come before the last scan.'); } return valuesOK;" />
-
 
 </form>
 
@@ -278,6 +305,7 @@ function updateRange(prefix)
     var decimalRatio = areas.light / areas.heavy;
     document.getElementById("decimalRatio").innerHTML = decimalRatio.toFixed(2);
 }
+
+updateRange('light');
+updateRange('heavy');
 </script>
-</body>
-</html>

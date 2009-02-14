@@ -85,7 +85,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                 ExpProtocol protocol = run.getProtocol();
                 if (protocol == null)
                     return null;
-                ActionURL dataURL = new ActionURL("NabAssay", "details", run.getContainer()).addParameter("rowId", run.getRowId());
+                ActionURL dataURL = new ActionURL(NabAssayController.DetailsAction.class, run.getContainer()).addParameter("rowId", run.getRowId());
                 return dataURL.getLocalURIString();
             }
 
@@ -409,7 +409,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             rgn.setRecordSelectorValueColumns("ObjectId");
             rgn.addHiddenFormField("protocolId", "" + _protocol.getRowId());
             ButtonBar bbar = view.getDataRegion().getButtonBar(DataRegion.MODE_GRID);
-            ActionURL graphSelectedURL = new ActionURL("NabAssay", "graphSelected", getContainer());
+            ActionURL graphSelectedURL = new ActionURL(NabAssayController.GraphSelectedAction.class, getContainer());
             ActionButton graphSelectedButton = new ActionButton("button", "Graph Selected");
             graphSelectedButton.setScript("return verifySelected(this.form, \"" + graphSelectedURL.getLocalURIString() + "\", \"get\", \"rows\")");
             graphSelectedButton.setActionType(ActionButton.Action.GET);
@@ -422,7 +422,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                     Object runId = ctx.getRow().get(NabRunDataTable.RUN_ID_COLUMN_NAME);
                     if (runId != null)
                     {
-                        ActionURL url = new ActionURL("NabAssay", "details", ctx.getContainer()).addParameter("rowId", "" + runId);
+                        ActionURL url = new ActionURL(NabAssayController.DetailsAction.class, ctx.getContainer()).addParameter("rowId", "" + runId);
                         out.write("[<a href=\"" + url.getLocalURIString() + "\" title=\"View run details\">run&nbsp;details</a>]");
                     }
                 }
