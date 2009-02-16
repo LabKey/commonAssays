@@ -266,9 +266,16 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         {
             PlateAntigenPropertyHelper helper = createAntigenPropertyHelper(form.getContainer(),
                     form.getProtocol(), (ElispotAssayProvider)form.getProvider());
-            _postedAntigenProperties = helper.getPostedPropertyValues(form.getRequest());
 
-            return true;
+            boolean antigenPropsValid = true;
+            _postedAntigenProperties = helper.getPostedPropertyValues(form.getRequest());
+            for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAntigenProperties.entrySet())
+            {
+                // if samplePropsValid flips to false, we want to leave it false (via the "&&" below).  We don't
+                // short-circuit the loop because we want to run through all samples every time, so all errors can be reported.
+                antigenPropsValid = validatePostedProperties(entry.getValue(), errors) && antigenPropsValid;
+            }
+            return antigenPropsValid;
         }
 
         protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException
