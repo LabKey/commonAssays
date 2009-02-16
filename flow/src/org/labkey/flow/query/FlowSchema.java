@@ -497,14 +497,19 @@ public class FlowSchema extends UserSchema
             return _expData.getContainer();
         }
 
-        public void setContainerFilter(ContainerFilter filter, User user)
+        public void setContainerFilter(ContainerFilter filter)
         {
-            _expData.setContainerFilter(filter, user);
+            _expData.setContainerFilter(filter);
         }
 
         public ContainerFilter getContainerFilter()
         {
             return _expData.getContainerFilter();
+        }
+
+        public boolean hasDefaultContainerFilter()
+        {
+            return _expData.hasDefaultContainerFilter();
         }
 
         public ColumnInfo addColumn(Column column)
@@ -746,14 +751,19 @@ public class FlowSchema extends UserSchema
             assert type == _type;
         }
 
-        public void setContainerFilter(ContainerFilter filter, User user)
+        public void setContainerFilter(ContainerFilter filter)
         {
-            _expData.setContainerFilter(filter, user);
+            _expData.setContainerFilter(filter);
         }
 
         public ContainerFilter getContainerFilter()
         {
             return _expData.getContainerFilter();
+        }
+
+        public boolean hasDefaultContainerFilter()
+        {
+            return _expData.hasDefaultContainerFilter();
         }
 
         public DataType getDataType()
