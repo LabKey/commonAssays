@@ -264,6 +264,7 @@ public class FlowSchema extends UserSchema
         ret.addColumn(ExpRunTable.Column.FilePathRoot).setIsHidden(true);
         ret.addColumn(ExpRunTable.Column.LSID).setIsHidden(true);
         ret.addColumn(ExpRunTable.Column.ProtocolStep);
+        ret.addColumn(ExpRunTable.Column.RunGroups).setCaption("Analysis Folder");
         if (type != FlowDataType.FCSFile)
         {
             ColumnInfo colAnalysisScript;
