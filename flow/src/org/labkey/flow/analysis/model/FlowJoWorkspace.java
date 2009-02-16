@@ -212,7 +212,11 @@ abstract public class FlowJoWorkspace implements Serializable
     static public FlowJoWorkspace readWorkspace(InputStream stream) throws Exception
     {
 		DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
-		f.setFeature("http://apache.org/xml/features/continue-after-fatal-error",true);
+        try
+        {
+		    f.setFeature("http://apache.org/xml/features/continue-after-fatal-error",true);
+        }
+        catch (AbstractMethodError ame) { }
         DocumentBuilder builder = f.newDocumentBuilder();
 		builder.setErrorHandler(new FJErrorHandler());
         Document doc = builder.parse(stream);
