@@ -58,7 +58,7 @@ public class FilesTableInfo extends FilteredTable
         SQLFragment sf = new SQLFragment("Imported=? AND Deleted=?");
         sf.add(true);
         sf.add(false);
-        Collection<String> containerIds = filter.getIds(_expSchema.getContainer());
+        Collection<String> containerIds = filter.getIds(_expSchema.getContainer(), _expSchema.getUser());
         if (containerIds != null)
         {
             sf.append(" AND ExpDataFileId IN (SELECT RowId FROM Exp.Data WHERE Container IN (");
