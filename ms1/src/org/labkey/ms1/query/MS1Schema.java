@@ -69,11 +69,11 @@ public class MS1Schema extends UserSchema
 
         if (_restrictContainer)
         {
-            _containerFilter = ContainerFilter.Filters.CURRENT;
+            _containerFilter = ContainerFilter.CURRENT;
         }
         else
         {
-            _containerFilter = ContainerFilter.Filters.CURRENT_AND_SUBFOLDERS;
+            _containerFilter = new ContainerFilter.CurrentAndSubfolders(user);
         }
 
         _expSchema = new ExpSchema(user, container);
