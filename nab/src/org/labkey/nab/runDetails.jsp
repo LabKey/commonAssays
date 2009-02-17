@@ -30,6 +30,7 @@
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.*" %>
+<%@ page import="org.labkey.api.study.DilutionCurve" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();
@@ -164,7 +165,17 @@
                             <%
                                 for (NabAssayRun.SampleResult results : bean.getSampleResults())
                                 {
+                                    String unableToFitMessage = null;
+
                                     DilutionSummary summary = results.getDilutionSummary();
+                                    try
+                                    {
+                                        summary.getCurve();
+                                    }
+                                    catch (DilutionCurve.FitFailedException e)
+                                    {
+                                        unableToFitMessage = e.getMessage();
+                                    }
                             %>
                             <tr>
                                 <td class="labkey-header">
@@ -180,25 +191,34 @@
                                             <%
                                             boolean curveBased = set == 0;
 
-                                            double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0) :
-                                                    summary.getInterpolatedCutoffDilution(cutoff / 100.0);
-                                            if (val == Double.NEGATIVE_INFINITY)
-                                                out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution()));
-                                            else if (val == Double.POSITIVE_INFINITY)
-                                                out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution()));
+                                            if (curveBased && unableToFitMessage != null)
+                                            {
+                                    %>
+                                        N/A<%= helpPopup("Unable to fit curve", unableToFitMessage)%>
+                                    <%
+                                            }
                                             else
                                             {
-                                                DecimalFormat shortDecFormat;
-                                                if (summary.getMethod() == SampleInfo.Method.Concentration)
-                                                    shortDecFormat = new DecimalFormat("0.###");
+                                                double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0) :
+                                                        summary.getInterpolatedCutoffDilution(cutoff / 100.0);
+                                                if (val == Double.NEGATIVE_INFINITY)
+                                                    out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution()));
+                                                else if (val == Double.POSITIVE_INFINITY)
+                                                    out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution()));
                                                 else
-                                                    shortDecFormat = new DecimalFormat("0");
+                                                {
+                                                    DecimalFormat shortDecFormat;
+                                                    if (summary.getMethod() == SampleInfo.Method.Concentration)
+                                                        shortDecFormat = new DecimalFormat("0.###");
+                                                    else
+                                                        shortDecFormat = new DecimalFormat("0");
 
-                                                out.write(shortDecFormat.format(val));
-                                            %>
-                                </td>
-                                            <%
+                                                    out.write(shortDecFormat.format(val));
+                                                }
                                             }
+                                                %>
+                                    </td>
+                                                <%
                                         }
                                     }
                                 %>

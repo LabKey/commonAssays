@@ -762,13 +762,20 @@ public class NabAssayController extends SpringActionController
             else
                 currentColor = (Color) plot.getRenderer(0).getSeriesPaint(pointDatasetCount - 1);
 
-            XYSeries curvedSeries = new XYSeries(sampleId);
-            DilutionCurve.DoublePoint[] curve = summary.getCurve();
-            for (DilutionCurve.DoublePoint point : curve)
-                curvedSeries.add(point.getX(), point.getY());
-            curvesDataset.addSeries(curvedSeries);
-            if (currentColor != null)
-                plot.getRenderer(1).setSeriesPaint(curvesDataset.getSeriesCount() - 1, currentColor);
+            try
+            {
+                DilutionCurve.DoublePoint[] curve = summary.getCurve();
+                XYSeries curvedSeries = new XYSeries(sampleId);
+                for (DilutionCurve.DoublePoint point : curve)
+                    curvedSeries.add(point.getX(), point.getY());
+                curvesDataset.addSeries(curvedSeries);
+                if (currentColor != null)
+                    plot.getRenderer(1).setSeriesPaint(curvesDataset.getSeriesCount() - 1, currentColor);
+            }
+            catch (DilutionCurve.FitFailedException e)
+            {
+                // fall through; we'll just graph those that can be graphed.
+            }
         }
 
         chart.getXYPlot().setDomainAxis(new LogarithmicAxis("Dilution/Concentration"));
