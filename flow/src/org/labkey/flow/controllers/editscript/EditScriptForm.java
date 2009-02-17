@@ -20,9 +20,11 @@ import org.apache.log4j.Logger;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.util.HString;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewForm;
+import org.labkey.api.view.HttpView;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.analysis.model.Population;
 import org.labkey.flow.analysis.model.PopulationSet;
@@ -61,9 +63,21 @@ public class EditScriptForm extends ViewForm
     {
         try
         {
-            analysisScript = FlowScript.fromScriptId(Integer.valueOf(getRequest().getParameter("scriptId")));
+            HString scriptIdStr = new HString(getRequest().getParameter("scriptId"));
+            if (scriptIdStr == null)
+                HttpView.throwNotFound("scriptId required");
+            int scriptId = 0;
+            try
+            {
+                scriptId = scriptIdStr.parseInt();
+            }
+            catch (NumberFormatException nfe)
+            {
+                HttpView.throwNotFound("scriptId must be an integer");
+            }
+            analysisScript = FlowScript.fromScriptId(scriptId);
             if (analysisScript == null || analysisScript.getExpObject() == null)
-                throw new IllegalArgumentException("scriptId not found: " + getRequest().getParameter("scriptId"));
+                HttpView.throwNotFound("scriptId not found: " + scriptIdStr);
             _runCount = analysisScript.getRunCount();
             step = FlowProtocolStep.fromRequest(getRequest());
             _run = FlowRun.fromURL(getViewContext().getActionURL(), getRequest());
