@@ -1213,7 +1213,7 @@ public class FlowSchema extends UserSchema
 
     public ExpExperimentTable createAnalysesTable(String alias)
     {
-        ExpExperimentTable ret = ExperimentService.get().createExperimentTable(ExpSchema.TableType.Experiments.toString(), alias, new ExpSchema(getUser(), getContainer()));
+        ExpExperimentTable ret = ExperimentService.get().createExperimentTable(ExpSchema.TableType.RunGroups.toString(), alias, new ExpSchema(getUser(), getContainer()));
         ret.populate();
         FlowProtocol compensationProtocol = FlowProtocolStep.calculateCompensation.getForContainer(getContainer());
         FlowProtocol analysisProtocol = FlowProtocolStep.analysis.getForContainer(getContainer());

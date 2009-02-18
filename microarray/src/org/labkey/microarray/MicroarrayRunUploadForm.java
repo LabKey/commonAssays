@@ -325,7 +325,7 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
                     throw new ExperimentException("No sample with name '" + name + "' was found.");
                 }
                 // Must be more than one match
-                throw new ExperimentException("Expected to find one sample with name '" + name + "', but found " + materials.size() + ".");
+                throw new ExperimentException("Found samples with name '" + name + "' in multiple sample sets. Please prefix the name with the desired sample set, in the format 'SAMPLE_SET.SAMPLE'.");
             }
             throw new ExperimentException("No sample name was specified for sample " + (index + 1));
         }

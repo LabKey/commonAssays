@@ -144,7 +144,7 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider>
                 {
                     AssayFileWriter writer = new AssayFileWriter();
                     File dup = writer.safeDuplicate(getViewContext(), dataFile);
-                    return Collections.singletonMap(dup.getPath(), dup);
+                    return Collections.singletonMap(inputs.get(0).getName(), dup);
                 }
             }
         }

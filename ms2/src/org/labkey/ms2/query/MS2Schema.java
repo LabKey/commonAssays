@@ -553,7 +553,7 @@ public class MS2Schema extends UserSchema
 
                     public String getURL(RenderContext ctx)
                     {
-                        if (_runCol.getValue(ctx) != null)
+                        if (_runCol != null && _runCol.getValue(ctx) != null)
                         {
                             // In rare cases we'll have something that qualifies as an MS2 run
                             // based on its protocol LSID but that doesn't actually have a MS2 run
@@ -574,7 +574,10 @@ public class MS2Schema extends UserSchema
                         FieldKey key = new FieldKey(FieldKey.fromString(getBoundColumn().getName()).getParent(),  "MS2Details");
                         Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(getBoundColumn().getParentTable(), Collections.singleton(key));
                         _runCol = cols.get(key);
-                        columns.add(_runCol);
+                        if (_runCol != null)
+                        {
+                            columns.add(_runCol);
+                        }
                     }
                 };
             }
