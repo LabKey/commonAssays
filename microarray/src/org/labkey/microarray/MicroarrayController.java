@@ -42,7 +42,6 @@ import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
 import org.springframework.validation.BindException;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
@@ -151,8 +150,6 @@ public class MicroarrayController extends SpringActionController
     @RequiresPermission(ACL.PERM_INSERT)
     public class UploadRedirectAction extends SimpleViewAction<UploadRedirectForm>
     {
-        private static final String FILE_DESCRIPTION = "File";
-
         public ModelAndView getView(UploadRedirectForm form, BindException errors) throws Exception
         {
             List<Map<String, File>> files = new ArrayList<Map<String, File>>();
@@ -177,7 +174,7 @@ public class MicroarrayController extends SpringActionController
                 {
                     for (File selectedFile : selectedFiles)
                     {
-                        files.add(Collections.singletonMap(FILE_DESCRIPTION, selectedFile));
+                        files.add(Collections.singletonMap(selectedFile.getName(), selectedFile));
                     }
                 }
             }
@@ -196,7 +193,7 @@ public class MicroarrayController extends SpringActionController
                     File f = data.getFile();
                     if (f != null && f.isFile())
                     {
-                        files.add(Collections.singletonMap(FILE_DESCRIPTION, f));
+                        files.add(Collections.singletonMap(f.getName(), f));
                     }
                 }
             }
@@ -207,7 +204,8 @@ public class MicroarrayController extends SpringActionController
             }
             for (Map<String, File> fileMap : files)
             {
-                File f = fileMap.get(FILE_DESCRIPTION);
+                assert fileMap.size() == 1;
+                File f = fileMap.values().iterator().next();
                 ExpData data = ExperimentService.get().getExpDataByURL(f, getContainer());
                 if (data != null && data.getRun() != null)
                 {
