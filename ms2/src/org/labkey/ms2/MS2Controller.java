@@ -314,14 +314,15 @@ public class MS2Controller extends SpringActionController
         bb.add(createCompareMenu(c, view, false));
 
         ActionButton compareScoring = new ActionButton("", CAPTION_SCORING_BUTTON);
-        compareScoring.setScript("return verifySelected(this.form, \"" + new ActionURL(ScoringController.CompareAction.class, c) + "\", \"get\", \"runs\")");
+        compareScoring.setURL(new ActionURL(ScoringController.CompareAction.class, c));
+        compareScoring.setRequiresSelection(true);
         compareScoring.setActionType(ActionButton.Action.GET);
         compareScoring.setDisplayPermission(ACL.PERM_READ);
         compareScoring.setVisible(false);   // Hidden unless turned on during grid rendering.
         bb.add(compareScoring);
 
-        ActionButton exportRuns = new ActionButton("button", "MS2 Export");
-        exportRuns.setScript("return verifySelected(this.form, \"pickExportRunsView.view\", \"post\", \"runs\")");
+        ActionButton exportRuns = new ActionButton("pickExportRunsView.view", "MS2 Export");
+        exportRuns.setRequiresSelection(true);
         exportRuns.setActionType(ActionButton.Action.GET);
         exportRuns.setDisplayPermission(ACL.PERM_READ);
         bb.add(exportRuns);
@@ -331,20 +332,20 @@ public class MS2Controller extends SpringActionController
         showHierarchy.setDisplayPermission(ACL.PERM_READ);
         bb.add(showHierarchy);
 
-        ActionButton moveRuns = new ActionButton("", "Move");
-        moveRuns.setScript("return verifySelected(this.form, \"selectMoveLocation.view\", \"get\", \"runs\")");
+        ActionButton moveRuns = new ActionButton("selectMoveLocation.view", "Move");
+        moveRuns.setRequiresSelection(true);
         moveRuns.setActionType(ActionButton.Action.GET);
         moveRuns.setDisplayPermission(ACL.PERM_DELETE);
         bb.add(moveRuns);
 
-        ActionButton deleteRuns = new ActionButton("", "Delete");
-        deleteRuns.setScript("return verifySelected(this.form, \"deleteRuns.view\", \"post\", \"runs\")");
-        deleteRuns.setActionType(ActionButton.Action.GET);
+        ActionButton deleteRuns = new ActionButton("deleteRuns.view", "Delete");
+        deleteRuns.setRequiresSelection(true);
+        deleteRuns.setActionType(ActionButton.Action.POST);
         deleteRuns.setDisplayPermission(ACL.PERM_DELETE);
         bb.add(deleteRuns);
 
-        ActionButton wrapRuns = new ActionButton("", "Wrap");
-        wrapRuns.setScript("return verifySelected(this.form, \"wrapRun.view\", \"post\", \"runs\")");
+        ActionButton wrapRuns = new ActionButton("wrapRun.view", "Wrap");
+        wrapRuns.setRequiresSelection(true);
         wrapRuns.setActionType(ActionButton.Action.POST);
         wrapRuns.setDisplayPermission(ACL.PERM_INSERT);
         bb.add(wrapRuns);
@@ -2277,8 +2278,8 @@ public class MS2Controller extends SpringActionController
 
             ButtonBar bb = new ButtonBar();
 
-            ActionButton delete = new ActionButton("", "Delete Selected");
-            delete.setScript("alert(\"Note: this will not delete actual annotations,\\njust the entries on this list.\"); return verifySelected(this.form, \"deleteAnnotInsertEntries.post\", \"post\", \"annotations\")");
+            ActionButton delete = new ActionButton("deleteAnnotInsertEntries.post", "Delete");
+            delete.setRequiresSelection(true, "Are you sure you want to remove the entries on this list?\\n(Note: actual annotations won't be deleted.)");
             delete.setActionType(ActionButton.Action.GET);
             bb.add(delete);
 
@@ -2311,13 +2312,15 @@ public class MS2Controller extends SpringActionController
             ButtonBar bb = new ButtonBar();
 
             ActionButton delete = new ActionButton("", "Delete");
-            delete.setScript(result.createVerifySelectedScript(new ActionURL(DeleteDataBasesAction.class, getContainer()), "FASTA files", true));
+            delete.setURL(new ActionURL(DeleteDataBasesAction.class, getContainer()));
             delete.setActionType(ActionButton.Action.GET);
+            delete.setRequiresSelection(true);
             bb.add(delete);
 
             ActionButton reload = new ActionButton("button", "Reload FASTA");
-            reload.setScript(result.createVerifySelectedScript(new ActionURL(ReloadFastaAction.class, getContainer()), "FASTA files", true));
+            reload.setURL(new ActionURL(ReloadFastaAction.class, getContainer()));
             reload.setActionType(ActionButton.Action.GET);
+            reload.setRequiresSelection(true);
             bb.add(reload);
 
             MenuButton setBestNameMenu = new MenuButton("Set Protein Best Name...");
@@ -4141,9 +4144,9 @@ public class MS2Controller extends SpringActionController
 
         bb.add(createCompareMenu(getContainer(), view, false));
 
-        ActionButton exportRuns = new ActionButton("button", "MS2 Export");
-        exportRuns.setScript("return verifySelected(this.form, \"pickExportRunsView.view\", \"post\", \"runs\")");
-        exportRuns.setActionType(ActionButton.Action.GET);
+        ActionButton exportRuns = new ActionButton("pickExportRunsView.view", "MS2 Export");
+        exportRuns.setRequiresSelection(true);
+        exportRuns.setActionType(ActionButton.Action.POST);
         exportRuns.setDisplayPermission(ACL.PERM_READ);
         bb.add(exportRuns);
 

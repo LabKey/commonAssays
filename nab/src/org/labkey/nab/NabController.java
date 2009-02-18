@@ -150,14 +150,16 @@ public class NabController extends ViewController
         clearButton.setDisplayPermission(ACL.PERM_INSERT);
         buttons.add(clearButton);
 
-        ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
+        ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
         deleteButton.setDisplayPermission(ACL.PERM_DELETE);
+        deleteButton.setRequiresSelection(true);
         buttons.add(deleteButton);
 
         if (!AssayPublishService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
         {
-            ActionButton publishButton = new ActionButton("publishPlatesChooseStudy.view", "Copy Selected to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            ActionButton publishButton = new ActionButton("publishPlatesChooseStudy.view", "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
             publishButton.setDisplayPermission(ACL.PERM_INSERT);
+            publishButton.setRequiresSelection(true);
             buttons.add(publishButton);
         }
         
@@ -294,7 +296,8 @@ public class NabController extends ViewController
             clearButton.setDisplayPermission(ACL.PERM_INSERT);
             buttons.add(clearButton);
 
-            ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            deleteButton.setRequiresSelection(true);
             deleteButton.setDisplayPermission(ACL.PERM_DELETE);
             buttons.add(deleteButton);
             duplicateDataFileView.setButtons(buttons);
@@ -1249,15 +1252,16 @@ public class NabController extends ViewController
         clearButton.setDisplayPermission(ACL.PERM_INSERT);
         buttons.add(clearButton);
 
-        ActionButton graphSelectedButton = new ActionButton("button", "Graph Selected");
-        graphSelectedButton.setScript("return verifySelected(this.form, \"graphSelected.view\", \"post\", \"rows\")");
-        graphSelectedButton.setActionType(ActionButton.Action.GET);
+        ActionButton graphSelectedButton = new ActionButton("graphSelected.view", "Graph Selected");
+        graphSelectedButton.setActionType(ActionButton.Action.POST);
+        graphSelectedButton.setRequiresSelection(true);
         buttons.add(graphSelectedButton);
 
         if (!AssayPublishService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
         {
-            ActionButton publishButton = new ActionButton("publishWellGroupsChooseStudy.view", "Copy Selected to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            ActionButton publishButton = new ActionButton("publishWellGroupsChooseStudy.view", "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
             publishButton.setDisplayPermission(ACL.PERM_INSERT);
+            publishButton.setRequiresSelection(true);
             buttons.add(publishButton);
         }
         

@@ -33,6 +33,7 @@ public class CustomProteinListView extends VBox
     public CustomProteinListView(ViewContext context, boolean includeButtons)
     {
         DataRegion rgn = new DataRegion();
+        rgn.setName(NAME);
         rgn.setColumns(ProteinManager.getTableInfoCustomAnnotationSet().getColumns("Name, Created, CreatedBy, CustomAnnotationSetId"));
         rgn.getDisplayColumn("Name").setURL("showAnnotationSet.view?CustomAnnotation.queryName=${Name}");
         rgn.getDisplayColumn("CustomAnnotationSetId").setVisible(false);
@@ -46,7 +47,8 @@ public class CustomProteinListView extends VBox
         {
             ActionButton deleteButton = new ActionButton("", "Delete");
             ActionURL deleteURL = new ActionURL(ProteinController.DeleteCustomAnnotationSetsAction.class, context.getContainer());
-            deleteButton.setScript("return verifySelected(this.form, \"" + deleteURL.getLocalURIString() + "\", \"post\", \"Custom Protein Lists\")");
+            deleteButton.setURL(deleteURL);
+            deleteButton.setRequiresSelection(true);
             deleteButton.setActionType(ActionButton.Action.POST);
             deleteButton.setDisplayPermission(ACL.PERM_DELETE);
             buttonBar.add(deleteButton);

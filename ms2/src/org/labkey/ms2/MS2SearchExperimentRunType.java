@@ -63,8 +63,10 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
 
         ActionButton exportRuns = new ActionButton("button", "MS2 Export");
         ActionURL url = new ActionURL(MS2Controller.PickExportRunsView.class, context.getContainer());
-        exportRuns.setScript("return verifySelected(this.form, \"" + url.getLocalURIString() + "experimentRunIds=true\", \"post\", \"runs\")");
-        exportRuns.setActionType(ActionButton.Action.GET);
+        url.addParameter("experimentRunIds", "true");
+        exportRuns.setURL(url);
+        exportRuns.setActionType(ActionButton.Action.POST);
+        exportRuns.setRequiresSelection(true);
         exportRuns.setDisplayPermission(ACL.PERM_READ);
         bar.add(exportRuns);
 

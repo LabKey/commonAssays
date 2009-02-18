@@ -410,8 +410,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             rgn.addHiddenFormField("protocolId", "" + _protocol.getRowId());
             ButtonBar bbar = view.getDataRegion().getButtonBar(DataRegion.MODE_GRID);
             ActionURL graphSelectedURL = new ActionURL(NabAssayController.GraphSelectedAction.class, getContainer());
-            ActionButton graphSelectedButton = new ActionButton("button", "Graph Selected");
-            graphSelectedButton.setScript("return verifySelected(this.form, \"" + graphSelectedURL.getLocalURIString() + "\", \"get\", \"rows\")");
+            ActionButton graphSelectedButton = new ActionButton("button", "Graph");
+            graphSelectedButton.setURL(graphSelectedURL);
+            graphSelectedButton.setRequiresSelection(true);
             graphSelectedButton.setActionType(ActionButton.Action.GET);
             bbar.add(graphSelectedButton);
 

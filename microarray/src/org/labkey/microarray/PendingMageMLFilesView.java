@@ -80,7 +80,8 @@ public class PendingMageMLFilesView extends QueryView
 
         ActionButton deleteButton = new ActionButton("placeholder", "Delete");
         ActionURL deleteURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getDeleteDatasURL(view.getViewContext().getContainer(), view.getViewContext().getActionURL());
-        deleteButton.setScript("if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(true) + ", \"" + deleteURL + "\", \"post\", \"MageML files\")) {" + view.getDataRegion().getJavascriptFormReference(true) + ".submit();} return false;");
+        deleteButton.setURL(deleteURL);
+        deleteButton.setRequiresSelection(true, null, view.getDataRegion().getJavascriptFormReference(true));
         deleteButton.setActionType(ActionButton.Action.POST);
         deleteButton.setDisplayPermission(ACL.PERM_DELETE);
         bar.add(deleteButton);
@@ -108,8 +109,8 @@ public class PendingMageMLFilesView extends QueryView
                 {
                     ExpProtocol protocol = protocols.get(0);
                     ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
-                    ActionButton button = new ActionButton(url, "Import selected using " + protocol.getName());
-                    button.setScript("if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(true) + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference(true) + ".submit(); } return false;");
+                    ActionButton button = new ActionButton(url, "Import using " + protocol.getName());
+                    button.setRequiresSelection(true, null, view.getDataRegion().getJavascriptFormReference(true));
                     button.setActionType(ActionButton.Action.POST);
                     button.setDisplayPermission(ACL.PERM_INSERT);
                     bar.add(button);
