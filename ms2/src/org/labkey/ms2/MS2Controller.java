@@ -4144,9 +4144,9 @@ public class MS2Controller extends SpringActionController
 
         bb.add(createCompareMenu(getContainer(), view, false));
 
-        ActionButton exportRuns = new ActionButton("pickExportRunsView.view", "MS2 Export");
-        exportRuns.setRequiresSelection(true);
-        exportRuns.setActionType(ActionButton.Action.POST);
+        ActionButton exportRuns = new ActionButton("button", "MS2 Export");
+        exportRuns.setScript("return verifySelected(this.form, \"pickExportRunsView.view\", \"post\", \"runs\")");
+        exportRuns.setActionType(ActionButton.Action.GET);
         exportRuns.setDisplayPermission(ACL.PERM_READ);
         bb.add(exportRuns);
 
