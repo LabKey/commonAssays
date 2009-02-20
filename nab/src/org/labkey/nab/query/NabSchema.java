@@ -46,6 +46,7 @@ public class NabSchema extends UserSchema
     public static final String SAMPLE_PREPARATION_METHOD_TABLE_NAME = "SamplePreparationMethod";
     public static final String CURVE_FIT_METHOD_TABLE_NAME = "CurveFitMethod";
     private static final String DATA_ROW_TABLE_NAME = "Data";
+    private List<ExpProtocol> _protocols;
 
     static public void register()
     {
@@ -72,7 +73,7 @@ public class NabSchema extends UserSchema
             }
         });
 
-        for (ExpProtocol protocol : AssayService.get().getAssayProtocols(getContainer()))
+        for (ExpProtocol protocol : getProtocols())
         {
             AssayProvider provider = AssayService.get().getProvider(protocol);
             if (provider != null && provider instanceof NabAssayProvider)
@@ -105,7 +106,7 @@ public class NabSchema extends UserSchema
             });
         }
 
-        for (ExpProtocol protocol : AssayService.get().getAssayProtocols(getContainer()))
+        for (ExpProtocol protocol : getProtocols())
         {
             AssayProvider provider = AssayService.get().getProvider(protocol);
             if (provider != null && provider instanceof NabAssayProvider)
@@ -117,6 +118,15 @@ public class NabSchema extends UserSchema
             }
         }
         return null;
+    }
+
+    private List<ExpProtocol> getProtocols()
+    {
+        if (_protocols == null)
+        {
+            _protocols = AssayService.get().getAssayProtocols(getContainer());
+        }
+        return _protocols;
     }
 
     public static TableInfo getDataRowTable(Container container, User user, ExpProtocol protocol, String alias)
