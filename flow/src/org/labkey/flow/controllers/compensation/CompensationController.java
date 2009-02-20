@@ -74,17 +74,8 @@ public class CompensationController extends SpringFlowController<CompensationCon
             return new CompensationListView(settings);
         }
 
-        public ActionURL queryURL()
-        {
-            ActionURL q = new ActionURL("query", "executeQuery", CompensationController.this.getContainer());
-            q.addParameter("schemaName", "flow");
-            q.addParameter("query.queryName", "CompensationMatrices");
-            return q;            
-        }
-
         public NavTree appendNavTrail(NavTree root)
         {
-//          root.addChild("Compensation Matrices", queryURL());
             root.addChild("Compensation Matrices", actionURL(Action.begin));
             return root;
         }

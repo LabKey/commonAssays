@@ -35,6 +35,7 @@ import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.model.ScriptComponent;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
@@ -348,7 +349,15 @@ public class FlowScript extends FlowDataObject
 
     public ActionURL getRunsUrl()
     {
-        ActionURL runsUrl = FlowTableType.Runs.urlFor(getContainer(), QueryAction.executeQuery);
+        return getRunsUrl(null);
+    }
+
+    public ActionURL getRunsUrl(ActionURL runsUrl)
+    {
+        if (runsUrl == null)
+            runsUrl = pfURL(RunController.Action.showRuns);
+        if (runsUrl.isReadOnly())
+            runsUrl = runsUrl.clone();
         FieldKey key = FieldKey.fromParts("AnalysisScript", "RowId");
         runsUrl.addFilter("query", key, CompareType.EQUAL, this.getScriptId());
         return runsUrl;

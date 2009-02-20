@@ -166,10 +166,12 @@ public class FlowQueryView extends QueryView
 
     protected void populateButtonBar(DataView view, ButtonBar bar,  boolean exportAsWebPage)
     {
-        if (getSchema().getRun() == null)
+        if (getSchema().getRun() == null /*&& getSchema().getScript() == null*/)
         {
             FlowExperiment[] experiments = FlowExperiment.getAnalysesAndWorkspace(getContainer());
             ActionURL target = urlChangeView();
+//            if (getSchema().getScript() != null)
+//                getSchema().getScript().addParams(target);
             MenuButton button = new MenuButton("Analysis Folder");
 
             Map<Integer, String> availableExperiments = new LinkedHashMap();
@@ -186,8 +188,11 @@ public class FlowQueryView extends QueryView
 
             for (Map.Entry<Integer, String> entry : availableExperiments.entrySet())
             {
+                ActionURL url = target.clone();
+                if (entry.getKey().intValue() != 0)
+                    url.replaceParameter(FlowParam.experimentId, String.valueOf(entry.getKey()));
                 button.addMenuItem(entry.getValue(),
-                        target.clone().replaceParameter(FlowParam.experimentId, String.valueOf(entry.getKey())).toString(),
+                        url.toString(),
                         null,
                         currentId == entry.getKey());
             }

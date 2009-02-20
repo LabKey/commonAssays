@@ -16,22 +16,24 @@
  */
 %>
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.labkey.api.data.ShowRows" %>
-<%@ page import="org.labkey.api.data.SimpleFilter" %>
-<%@ page import="org.labkey.api.query.QueryForm" %>
-<%@ page import="org.labkey.api.query.QueryView" %>
 <%@ page import="org.labkey.api.security.ACL" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.DataView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ScriptOverview" %>
 <%@ page import="org.labkey.flow.data.FlowScript" %>
-<%@ page import="org.labkey.flow.query.FlowSchema" %>
-<%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
-<%@ page import="org.labkey.api.query.QuerySettings" %>
+<%@ page import="org.labkey.flow.view.FlowQueryView" %>
+<%@ page import="org.labkey.flow.controllers.run.RunsForm" %>
+<%@ page import="org.labkey.flow.data.FlowObject" %>
+<%@ page import="org.labkey.flow.controllers.FlowParam" %>
+<%@ page import="org.labkey.api.query.QueryView" %>
+<%@ page import="org.labkey.api.view.DataView" %>
+<%@ page import="org.labkey.api.data.SimpleFilter" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.flow.query.FlowTableType" %>
+<%@ page import="org.labkey.flow.query.FlowSchema" %>
+<%@ page import="org.labkey.api.query.QueryForm" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -46,7 +48,7 @@ The compensation calculation describes how to locate the compensation controls i
 The analysis section describes which gates in the analysis, as well as the statistics that need to be calculated, and the graphs that need to be drawn.
 <p>
 <% if (canEdit || script.getExpObject().getComment() != null) { %>
-    Comment: <% include(new SetCommentView(script), out); %>
+    Script Comment: <% include(new SetCommentView(script), out); %>
 <% } %>
 </p>
 <%
@@ -63,8 +65,8 @@ The analysis section describes which gates in the analysis, as well as the stati
         form.setViewContext(context);
         form.setSchemaName(FlowSchema.SCHEMANAME);
         form.setQueryName(FlowTableType.Runs.toString());
-        //form.bindParameters(script.getRunsUrl().getPropertyValues());
 
+        // HACK: work around for bug 6520 : can't set filter/sort on QuerySettings progamatically
         QueryView view = new QueryView(form) {
             protected void setupDataView(DataView ret)
             {
@@ -85,6 +87,24 @@ The analysis section describes which gates in the analysis, as well as the stati
         view.getSettings().setAllowChooseQuery(false);
         view.getSettings().setAllowChooseView(false);
         view.getSettings().setAllowCustomizeView(false);
+
+//        RunsForm runsForm = new RunsForm();
+//        runsForm.setViewContext(getViewContext());
+//        runsForm.setScriptId(script.getScriptId());
+//        runsForm.setExperimentId(FlowObject.getIntParam(url, request, FlowParam.experimentId));
+//        FlowQueryView view = new FlowQueryView(runsForm);
+//        // HACK: work around for bug 6520 : can't set filter/sort on QuerySettings progamatically
+//        view.getViewContext().setActionURL(script.getRunsUrl(getViewContext().getActionURL()));
+//    view.setShadeAlternatingRows(true);
+//    view.setShowPagination(false);
+//    view.setShowBorders(true);
+//    view.setShowRecordSelectors(false);
+//    view.setShowExportButtons(false);
+//    view.getSettings().setMaxRows(0);
+//    view.getSettings().setAllowChooseQuery(false);
+//    view.getSettings().setAllowChooseView(false);
+//    view.getSettings().setAllowCustomizeView(false);
+
         include(view, out);
     } else {
         %><labkey:link href='<%=url.clone().replaceParameter("showRuns", "1")%>' text="Show Runs"/><%

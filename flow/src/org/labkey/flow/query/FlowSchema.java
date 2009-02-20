@@ -23,10 +23,7 @@ import org.labkey.api.exp.query.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
-import org.labkey.api.util.Cache;
-import org.labkey.api.util.GUID;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.IdentifierString;
+import org.labkey.api.util.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
@@ -54,6 +51,7 @@ public class FlowSchema extends UserSchema
     static public final IdentifierString SCHEMANAME = new IdentifierString("flow",false);
     private FlowExperiment _experiment;
     private FlowRun _run;
+//    private FlowScript _script;
     private FlowProtocol _protocol = null;
 
     public FlowSchema(User user, Container container)
@@ -66,6 +64,7 @@ public class FlowSchema extends UserSchema
         this(context.getUser(), context.getContainer());
         setExperiment(FlowExperiment.fromURL(context.getActionURL(), context.getRequest()));
         setRun(FlowRun.fromURL(context.getActionURL()));
+//        setScript(FlowScript.fromURL(context.getActionURL(), context.getRequest()));
     }
 
     // FlowSchema.createView()
@@ -85,8 +84,16 @@ public class FlowSchema extends UserSchema
             assert _run.getRunId() == getIntParam(context.getRequest(), FlowParam.runId);
         }
 
+//        if (from._script != null)
+//        {
+//            _script = from._script;
+//            assert _script.getScriptId() == getIntParam(context.getRequest(), FlowParam.scriptId);
+//        }
+
         if (null == _experiment)
             setExperiment(FlowExperiment.fromURL(context.getActionURL(), context.getRequest()));
+//        if (null == _script)
+//            setScript(FlowScript.fromURL(context.getActionURL(), context.getRequest()));
         if (null == _run)
             setRun(FlowRun.fromURL(context.getActionURL()));
     }
@@ -99,7 +106,7 @@ public class FlowSchema extends UserSchema
 
     public FlowSchema detach()
     {
-        if (_experiment == null && _run == null)
+        if (_experiment == null && _run == null /*&& _script == null*/)
             return this;
         return new FlowSchema(_user, _container, _protocol);
     }
@@ -190,6 +197,11 @@ public class FlowSchema extends UserSchema
         _run = run;
     }
 
+//    public void setScript(FlowScript script)
+//    {
+//        _script = script;
+//    }
+
     public FlowExperiment getExperiment()
     {
         return _experiment;
@@ -199,6 +211,11 @@ public class FlowSchema extends UserSchema
     {
         return _run;
     }
+
+//    public FlowScript getScript()
+//    {
+//        return _script;
+//    }
 
     public ActionURL urlFor(QueryAction action, FlowTableType type)
     {
@@ -229,6 +246,10 @@ public class FlowSchema extends UserSchema
         {
             _experiment.addParams(url);
         }
+//        if (_script != null)
+//        {
+//            _script.addParams(url);
+//        }
     }
 
     public QueryView createView(ViewContext context, QuerySettings settings) throws ServletException
@@ -252,6 +273,11 @@ public class FlowSchema extends UserSchema
         {
             ret.setExperiment(_experiment.getExpObject());
         }
+//        if (_script != null)
+//        {
+//            ret.setInputData(_script.getExpObject());
+//        }
+
         ret.addColumn(ExpRunTable.Column.RowId);
         ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(RunController.Action.showRun, _container), Collections.singletonMap(FlowParam.runId.toString(), ExpRunTable.Column.RowId.toString())));
         if (type == null || type == FlowDataType.FCSFile || type == FlowDataType.FCSAnalysis)
@@ -264,7 +290,12 @@ public class FlowSchema extends UserSchema
         ret.addColumn(ExpRunTable.Column.FilePathRoot).setIsHidden(true);
         ret.addColumn(ExpRunTable.Column.LSID).setIsHidden(true);
         ret.addColumn(ExpRunTable.Column.ProtocolStep);
-        ret.addColumn(ExpRunTable.Column.RunGroups).setCaption("Analysis Folder");
+
+        ColumnInfo analysisFolder = ret.addColumn(ExpRunTable.Column.RunGroups);
+        analysisFolder.setCaption("Analysis Folder");
+        ActionURL url = PageFlowUtil.urlFor(RunController.Action.showRuns, getContainer()).addParameter(FlowQueryView.DATAREGIONNAME_DEFAULT + ".sort", "ProtocolStep");
+        analysisFolder.setURL(StringExpressionFactory.create(url.getLocalURIString() + "&experimentId=${experimentId}"));
+
         if (type != FlowDataType.FCSFile)
         {
             ColumnInfo colAnalysisScript;
@@ -1231,8 +1262,10 @@ public class FlowSchema extends UserSchema
             colAnalysisRunCount.setURL(detailsURL + "&" + FlowParam.experimentId.toString() + "=${RowId}");
             ret.addColumn(colAnalysisRunCount);
         }
-        ret.setDetailsURL(new DetailsURL(FlowTableType.Runs.urlFor(getContainer(), (SimpleFilter) null, new Sort("ProtocolStep")),
-                Collections.singletonMap(FlowParam.experimentId.toString(), ExpExperimentTable.Column.RowId.toString())));
+
+        DetailsURL detailsUrl = new DetailsURL(PageFlowUtil.urlFor(RunController.Action.showRuns, getContainer()).addParameter(FlowQueryView.DATAREGIONNAME_DEFAULT + ".sort", "ProtocolStep"),
+                Collections.singletonMap(FlowParam.experimentId.toString(), ExpExperimentTable.Column.RowId.toString()));
+        ret.setDetailsURL(detailsUrl);
         SQLFragment lsidCondition = new SQLFragment("LSID <> ");
         lsidCondition.appendStringLiteral(FlowExperiment.getExperimentRunExperimentLSID(getContainer()));
         ret.addCondition(lsidCondition);

@@ -25,10 +25,7 @@ import org.labkey.api.view.*;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
-import org.labkey.flow.data.FlowExperiment;
-import org.labkey.flow.data.FlowProtocolStep;
-import org.labkey.flow.data.FlowRun;
-import org.labkey.flow.data.FlowWell;
+import org.labkey.flow.data.*;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.MoveRunFromWorkspaceJob;
 import org.springframework.validation.BindException;
@@ -55,6 +52,7 @@ public class RunController extends SpringFlowController<RunController.Action>
     {
         begin,
         showRun,
+        showRuns,
         showCompensation,
         export,
         details,
@@ -101,6 +99,34 @@ public class RunController extends SpringFlowController<RunController.Action>
         {
             String label = run != null ? null : "Run not found";
             return appendFlowNavTrail(root, run, label, Action.showRun);
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowRunsAction extends SimpleViewAction<RunsForm>
+    {
+        FlowExperiment experiment;
+//        FlowScript script;
+
+        public ModelAndView getView(RunsForm form, BindException errors) throws Exception
+        {
+            experiment = form.getExperiment();
+//            script = form.getScript();
+            return new JspView<RunsForm>(RunController.class, "showRuns.jsp", form, errors);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            if (experiment == null)
+                root.addChild("All Analysis Folders", new ActionURL(ShowRunsAction.class, getContainer()));
+            else
+                root.addChild(experiment.getLabel(), experiment.urlShow());
+
+//            if (script != null)
+//                root.addChild(script.getLabel(), script.urlShow());
+
+            root.addChild("Runs");
+            return root;
         }
     }
 

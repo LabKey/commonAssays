@@ -70,7 +70,7 @@
 <table>
     <tr><td>Compensation Matrix:</td><td><%=h(comp.getName())%></td></tr>
     <% if (canEdit || flowComp.getExpObject().getComment() != null) { %>
-        <tr><td>Comment:</td>
+        <tr><td>Compensation Comment:</td>
             <td><%include(new SetCommentView(flowComp), out);%></td>
         </tr>
     <% } %>

@@ -339,11 +339,13 @@ flow/src/org/labkey/flow/controllers/run/DownloadRunForm.java -text
 flow/src/org/labkey/flow/controllers/run/MoveToAnalysisForm.java -text
 flow/src/org/labkey/flow/controllers/run/RunController.java -text
 flow/src/org/labkey/flow/controllers/run/RunForm.java -text
+flow/src/org/labkey/flow/controllers/run/RunsForm.java -text
 flow/src/org/labkey/flow/controllers/run/download.jsp -text
 flow/src/org/labkey/flow/controllers/run/moveToAnalysis.jsp -text
 flow/src/org/labkey/flow/controllers/run/moveToWorkspace.jsp -text
 flow/src/org/labkey/flow/controllers/run/plate.jsp -text
 flow/src/org/labkey/flow/controllers/run/showRun.jsp -text
+flow/src/org/labkey/flow/controllers/run/showRuns.jsp -text
 flow/src/org/labkey/flow/controllers/runningJobs.jsp -text
 flow/src/org/labkey/flow/controllers/well/ChooseGraphForm.java -text
 flow/src/org/labkey/flow/controllers/well/EditWellForm.java -text

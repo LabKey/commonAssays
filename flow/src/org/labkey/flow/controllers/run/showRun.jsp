@@ -43,7 +43,7 @@
 %>
 <% if (canEdit || run.getExpObject().getComment() != null) { %>
 <p>
-    Comment: <% include(new SetCommentView(run), out); %>
+    Run Comment: <% include(new SetCommentView(run), out); %>
 </p>
 <% } %>
 <%

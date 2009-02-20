@@ -16,8 +16,8 @@
 
 package org.labkey.flow.query;
 
-import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.view.FlowQueryView;
+import org.labkey.flow.controllers.FlowController;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.query.QueryService;
@@ -61,7 +61,10 @@ public enum FlowTableType
 
     public ActionURL urlFor(Container container, QueryAction action)
     {
-        return QueryService.get().urlFor(container, action, FlowSchema.SCHEMANAME.toString(), toString());
+        ActionURL url = QueryService.get().urlFor(container, action, FlowSchema.SCHEMANAME.toString(), toString());
+        if (action == QueryAction.executeQuery)
+            url.setAction(FlowController.QueryAction.class);
+        return url;
     }
 
     public ActionURL urlFor(Container container, SimpleFilter filter)

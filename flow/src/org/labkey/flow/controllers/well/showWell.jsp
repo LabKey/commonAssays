@@ -309,7 +309,7 @@ if (fcsFile != null && fcsFile != well)
 {
     %><tr><td>FCS File:</td><td><a href="<%=h(fcsFile.urlShow())%>"><%=h(fcsFile.getName())%></a></td></tr><%
 }
-    %><tr><td>Comment:</td>
+    %><tr><td>Well Comment:</td>
         <td><%include(new SetCommentView(well), out);%></td>
     </tr><%
 

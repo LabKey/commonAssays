@@ -38,8 +38,12 @@ import org.labkey.api.view.*;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.FlowModule;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.script.FlowJob;
 import org.labkey.flow.view.JobStatusView;
 import org.labkey.flow.webparts.FlowFolderType;
@@ -100,6 +104,44 @@ public class FlowController extends SpringFlowController<FlowController.Action>
         public NavTree appendNavTrail(NavTree root)
         {
             return getFlowNavStart(getViewContext());
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class QueryAction extends SimpleViewAction
+    {
+        String query;
+        FlowExperiment experiment;
+//        FlowScript script;
+        FlowRun run;
+
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            FlowQuerySettings settings = new FlowQuerySettings(getViewContext().getBindPropertyValues(), "query");
+            query = settings.getQueryName();
+            FlowSchema schema = new FlowSchema(getViewContext());
+            experiment = schema.getExperiment();
+            run = schema.getRun();
+//            script = schema.getScript();
+
+            return schema.createView(getViewContext(), settings);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            if (experiment == null)
+                root.addChild("All Analysis Folders", new ActionURL(QueryAction.class, getContainer()));
+            else
+                root.addChild(experiment.getLabel(), experiment.urlShow());
+
+//            if (script != null)
+//                root.addChild(script.getLabel(), script.urlShow());
+
+            if (run != null)
+                root.addChild(run.getLabel(), run.urlShow());
+
+            root.addChild(query);
+            return root;
         }
     }
 
