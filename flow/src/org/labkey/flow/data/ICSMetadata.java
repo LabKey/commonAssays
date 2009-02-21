@@ -16,9 +16,9 @@
 package org.labkey.flow.data;
 
 import org.apache.xmlbeans.XmlException;
-import org.apache.xmlbeans.XmlOptions;
 import org.fhcrc.cpas.flow.script.xml.FilterDef;
 import org.fhcrc.cpas.flow.script.xml.OpDef;
+import org.fhcrc.cpas.flow.script.xml.FiltersDef;
 import org.labkey.api.query.FieldKey;
 import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.icsmetadata.xml.ICSMetadataDocument;
@@ -81,8 +81,8 @@ public class ICSMetadata
 
     public String toXmlString()
     {
-        ICSMetadataDocument doc = ICSMetadataDocument.Factory.newInstance();
-        ICSMetadataType.Background background = doc.addNewICSMetadata().addNewBackground();
+        ICSMetadataDocument xDoc = ICSMetadataDocument.Factory.newInstance();
+        ICSMetadataType.Background xBackground = xDoc.addNewICSMetadata().addNewBackground();
 
         if (getMatchColumns() != null && getMatchColumns().size() > 0)
         {
@@ -92,32 +92,38 @@ public class ICSMetadata
                 if (fieldKey != null)
                     matchColumns.add(fieldKey.toString());
             }
-            background.addNewMatchColumns().setFieldArray(matchColumns.toArray(new String[matchColumns.size()]));
+            xBackground.addNewMatchColumns().setFieldArray(matchColumns.toArray(new String[matchColumns.size()]));
         }
 
-        if (this.getBackgroundFilter() != null && this.getBackgroundFilter().size() > 0)
+        if (getBackgroundFilter() != null && getBackgroundFilter().size() > 0)
         {
-            FilterDef backgroundColumn = background.addNewBackgroundColumn();
-            ScriptSettings.FilterInfo filter = this.getBackgroundFilter().get(0);
-            if (filter != null)
+            FiltersDef xBackgroundFilter = null;
+            for (ScriptSettings.FilterInfo filterInfo : getBackgroundFilter())
             {
-                backgroundColumn.setField(filter.getField().toString());
-                backgroundColumn.setOp(OpDef.Enum.forString(filter.getOp().getUrlKey()));
-                if (filter.getValue() != null)
-                    backgroundColumn.setValue(filter.getValue());
+                if (filterInfo != null && filterInfo.getField() != null && filterInfo.getOp() != null)
+                {
+                    if (xBackgroundFilter == null)
+                        xBackgroundFilter = xBackground.addNewBackgroundFilter();
+                    FilterDef xFilterDef = xBackgroundFilter.addNewFilter();
+
+                    xFilterDef.setField(filterInfo.getField().toString());
+                    xFilterDef.setOp(OpDef.Enum.forString(filterInfo.getOp().getUrlKey()));
+                    if (filterInfo.getValue() != null)
+                        xFilterDef.setValue(filterInfo.getValue());
+                }
             }
         }
 
-        return doc.toString();
+        return xDoc.toString();
     }
 
     public static ICSMetadata fromXmlString(String value)
     {
         ICSMetadata result = new ICSMetadata();
-        ICSMetadataDocument doc;
+        ICSMetadataDocument xDoc;
         try
         {
-            doc = ICSMetadataDocument.Factory.parse(value);
+            xDoc = ICSMetadataDocument.Factory.parse(value);
         }
         catch (XmlException ex)
         {
@@ -125,25 +131,47 @@ public class ICSMetadata
             return result;
         }
 
-        ICSMetadataType metadata = doc.getICSMetadata();
-        ICSMetadataType.Background background = metadata.getBackground();
+        ICSMetadataType xMetadata = xDoc.getICSMetadata();
+        ICSMetadataType.Background xBackground = xMetadata.getBackground();
 
-        if (background.getMatchColumns() != null)
+        if (xBackground.getMatchColumns() != null)
         {
             List<FieldKey> matchColumns = new LinkedList<FieldKey>();
-            for (Object field : background.getMatchColumns().getFieldArray())
+            for (Object field : xBackground.getMatchColumns().getFieldArray())
             {
                 matchColumns.add(FieldKey.fromString((String)field));
             }
             result.setMatchColumns(matchColumns);
         }
 
-        FilterDef backgroundColumn = background.getBackgroundColumn();
-        if (backgroundColumn != null)
+        List<ScriptSettings.FilterInfo> backgroundFilters = new ArrayList<ScriptSettings.FilterInfo>();
+
+        // 'backgroundColumn' element is deprecated
+        FilterDef xBackgroundColumn = xBackground.getBackgroundColumn();
+        if (xBackgroundColumn != null)
         {
-            ScriptSettings.FilterInfo filter = ScriptSettings.FilterInfo.fromFilterDef(backgroundColumn);
-            result.setBackgroundFilter(Collections.singletonList(filter));
+            ScriptSettings.FilterInfo filter = ScriptSettings.FilterInfo.fromFilterDef(xBackgroundColumn);
+            backgroundFilters.add(filter);
         }
+
+        FiltersDef xBackgroundFilter = xBackground.getBackgroundFilter();
+        if (xBackgroundFilter != null)
+        {
+            FilterDef[] xFilters = xBackgroundFilter.getFilterArray();
+            if (xFilters != null && xFilters.length > 0)
+            {
+                for (FilterDef xFilter : xFilters)
+                {
+                    if (xFilter == null)
+                        continue;
+                    ScriptSettings.FilterInfo filter = ScriptSettings.FilterInfo.fromFilterDef(xFilter);
+                    backgroundFilters.add(filter);
+                }
+            }
+        }
+
+        result.setBackgroundFilter(backgroundFilters);
+
         return result;
     }
 }

@@ -83,6 +83,11 @@ public class ScriptSettings implements Serializable
         CompareType op;
         String value;
 
+        public FilterInfo(String field, String op, String value)
+        {
+            this(FieldKey.fromString(field), CompareType.getByURLKey(op), value);
+        }
+
         public FilterInfo(FieldKey field, CompareType op, String value)
         {
             this.field = field;
@@ -130,11 +135,10 @@ public class ScriptSettings implements Serializable
 
         public static FilterInfo fromFilterDef(FilterDef filter)
         {
-            FieldKey field = FieldKey.fromString(filter.getField());
-            CompareType op = CompareType.getByURLKey(filter.getOp().toString());
-            String value = filter.getValue();
-
-            return new FilterInfo(field, op, value);
+            return new FilterInfo(
+                    filter.getField(),
+                    filter.getOp() == null ? CompareType.NONBLANK.getUrlKey() : filter.getOp().toString(),
+                    filter.getValue());
         }
     }
 

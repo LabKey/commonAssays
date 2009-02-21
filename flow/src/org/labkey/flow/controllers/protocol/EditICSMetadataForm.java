@@ -27,8 +27,8 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.analysis.model.ScriptSettings;
 
 import javax.servlet.ServletException;
-import java.util.Map;
-import java.util.LinkedHashMap;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * User: kevink
@@ -36,16 +36,23 @@ import java.util.LinkedHashMap;
  */
 public class EditICSMetadataForm extends ProtocolForm
 {
-    public static final int MATCH_COLUMNS_MAX = 3;
-    
+    public static final int MATCH_COLUMNS_MAX = 4;
+    public static final int BACKGROUND_COLUMNS_MAX = 5;
+
+    // from form posted values
+    public String[] matchColumnFields;
+    public String[] backgroundFilterFields;
+    public String[] backgroundFilterOps;
+    public String[] backgroundFilterValues;
+
+    // from FlowProtocol's ICSMetadata
     public FieldKey[] matchColumn;
-    public FieldKey backgroundField;
-    public CompareType backgroundOp;
-    public String backgroundValue;
+    public ScriptSettings.FilterInfo[] backgroundFilter;
 
     public void init(FlowProtocol protocol)
     {
         matchColumn = new FieldKey[MATCH_COLUMNS_MAX];
+        backgroundFilter = new ScriptSettings.FilterInfo[BACKGROUND_COLUMNS_MAX];
 
         ICSMetadata icsmetadata = protocol.getICSMetadata();
         if (icsmetadata != null)
@@ -58,36 +65,82 @@ public class EditICSMetadataForm extends ProtocolForm
 
             if (icsmetadata.getBackgroundFilter() != null && icsmetadata.getBackgroundFilter().size() > 0)
             {
-                ScriptSettings.FilterInfo backgroundFilter = icsmetadata.getBackgroundFilter().get(0);
-                backgroundField = backgroundFilter.getField();
-                backgroundOp = backgroundFilter.getOp();
-                backgroundValue = backgroundFilter.getValue();
+                for (int i = 0; i < icsmetadata.getBackgroundFilter().size(); i++)
+                {
+                    ScriptSettings.FilterInfo filter = icsmetadata.getBackgroundFilter().get(i);
+                    backgroundFilter[i] = new ScriptSettings.FilterInfo(filter.getField(), filter.getOp(), filter.getValue());
+                }
             }
+        }
+
+        if (matchColumn[0] == null)
+        {
+            // default the form to include Run
+            matchColumn[0] = new FieldKey(null, "Run");
         }
     }
 
     public void setMatchColumn(String[] fields)
     {
-        matchColumn = new FieldKey[fields.length];
-        for (int i = 0; i < fields.length; i ++)
+        matchColumnFields = fields;
+    }
+
+    public void setBackgroundField(String[] fields)
+    {
+        backgroundFilterFields = fields;
+    }
+
+    public void setBackgroundOp(String[] ops)
+    {
+        backgroundFilterOps = ops;
+    }
+
+    public void setBackgroundValue(String[] values)
+    {
+        backgroundFilterValues = values;
+    }
+
+    /** Get match columns from form posted values. */
+    public List<FieldKey> getMatchColumns()
+    {
+        List<FieldKey> matchColumns = new ArrayList<FieldKey>(matchColumnFields.length);
+        for (String field : matchColumnFields)
         {
-            matchColumn[i] = fields[i] == null ? null : FieldKey.fromString(fields[i]);
+            if (field != null)
+                matchColumns.add(FieldKey.fromString(field));
         }
+        return matchColumns;
     }
 
-    public void setBackgroundField(String field)
+    /** Get background filters from form posted values. */
+    public List<ScriptSettings.FilterInfo> getBackgroundFilters()
     {
-        backgroundField = field == null ? null : FieldKey.fromString(field);
-    }
+        List<ScriptSettings.FilterInfo> filters = new ArrayList<ScriptSettings.FilterInfo>(backgroundFilterFields.length);
+        if (backgroundFilterFields != null && backgroundFilterOps != null)
+        {
+            for (int i = 0; i < backgroundFilterFields.length; i++)
+            {
+                String field = backgroundFilterFields[i];
+                if (field == null)
+                    continue;
+                
+                String op;
+                if (backgroundFilterOps.length < i || backgroundFilterOps[i] == null)
+                    op = CompareType.NONBLANK.getUrlKey();
+                else
+                    op = backgroundFilterOps[i];
 
-    public void setBackgroundOp(String op)
-    {
-        backgroundOp = op == null ? null : CompareType.getByURLKey(op);
-    }
+                String value;
+                if (backgroundFilterValues.length < i || backgroundFilterValues[i] == null)
+                    value = null;
+                else
+                    value = backgroundFilterValues[i];
 
-    public void setBackgroundValue(String value)
-    {
-        backgroundValue = value;
+                ScriptSettings.FilterInfo filter = new ScriptSettings.FilterInfo(field, op, value);
+                filters.add(filter);
+            }
+        }
+        return filters;
     }
 
     public Map<FieldKey, String> getKeywordAndSampleFieldMap() throws ServletException
@@ -102,9 +155,26 @@ public class EditICSMetadataForm extends ProtocolForm
         FieldKey keyword = FieldKey.fromParts("FCSFile", "Keyword");
         ColumnInfo colKeyword = tableFCSFiles.getColumn("Keyword");
         TableInfo tableKeywords = colKeyword.getFk().getLookupTableInfo();
+
+        Pattern skipKeyword = Pattern.compile("^(" +
+                "\\$BEGINANALYSIS|\\$BEGINDATA|\\$BEGINSTEXT|" +
+                "\\$ENDANALYSIS|\\$ENDDATA|\\$ENDSTEXT|" +
+                "\\$BYTEORD|\\$DATATYPE|\\$MODE|\\$NEXTDATA|" +
+                "\\$P\\d+.|\\$PAR|\\$TOT|" +
+                "\\$ABRT|\\$BTIM|\\$ETIM|" +
+                "\\$CSMODE|\\$CSVBITS|" +
+                "\\$CSV\\d+FLAG|" +
+                "\\$GATING|\\$LOST|" +
+                "\\$PK\\d+.|" +
+                "\\$G\\d+.|\\$R\\d.|" +
+                "\\$TIMESTEP|" +
+                "WINDOW EXTENSION)$", Pattern.CASE_INSENSITIVE);
         for (ColumnInfo column : tableKeywords.getColumns())
         {
-            ret.put(new FieldKey(keyword, column.getName()), "Keyword " + column.getCaption());
+            String name = column.getName();
+            if (skipKeyword.matcher(name).matches())
+                continue;
+            ret.put(new FieldKey(keyword, name), "Keyword " + column.getCaption());
         }
 
         FieldKey sampleProperty = FieldKey.fromParts("FCSFile", "Sample", "Property");

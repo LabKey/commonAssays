@@ -246,19 +246,8 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
         public boolean handlePost(EditICSMetadataForm form, BindException errors) throws Exception
         {
             ICSMetadata metadata = new ICSMetadata();
-            if (form.matchColumn != null && form.matchColumn.length > 0)
-            {
-                List<FieldKey> matchColumns = new ArrayList<FieldKey>(form.matchColumn.length);
-                for (FieldKey field : form.matchColumn)
-                    if (field != null)
-                        matchColumns.add(field);
-                metadata.setMatchColumns(matchColumns);
-            }
-            if (form.backgroundField != null && form.backgroundOp != null)
-            {
-                ScriptSettings.FilterInfo filter = new ScriptSettings.FilterInfo(form.backgroundField, form.backgroundOp, form.backgroundValue);
-                metadata.setBackgroundFilter(Collections.singletonList(filter));
-            }
+            metadata.setMatchColumns(form.getMatchColumns());
+            metadata.setBackgroundFilter(form.getBackgroundFilters());
 
             if (metadata.isEmpty())
             {
@@ -270,7 +259,7 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
                 if (metadata.getMatchColumns() == null || metadata.getMatchColumns().size() == 0)
                     errors.reject(ERROR_MSG, "At least one match column is required");
                 if (metadata.getBackgroundFilter() == null || metadata.getBackgroundFilter().size() == 0)
-                    errors.reject(ERROR_MSG, "A background filter is required");
+                    errors.reject(ERROR_MSG, "At least one background filter is required");
 
                 if (errors.hasErrors())
                     return false;
