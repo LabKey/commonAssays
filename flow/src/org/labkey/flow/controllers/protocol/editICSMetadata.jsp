@@ -101,7 +101,7 @@
                 <tr>
                     <td><%=i == 0 ? "&nbsp;" : "and"%></td>
                     <td><select name="backgroundField"><labkey:options value="<%=filter == null ? null : filter.getField()%>" map="<%=fieldOptions%>" /></select></td>
-                    <td><select name="backgroundOp"><labkey:options value="<%=filter == null ? null : filter.getOp()%>" map="<%=opOptions%>" /></select></td>
+                    <td><select name="backgroundOp"><labkey:options value="<%=filter == null ? null : filter.getOp().getUrlKey()%>" map="<%=opOptions%>" /></select></td>
                     <td><input name="backgroundValue" type="text" value="<%=h(filter == null ? null : filter.getValue())%>"></td>
                 </tr>
                 <%
