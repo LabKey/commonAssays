@@ -34,6 +34,11 @@ public class RunForm extends FlowQueryForm
         _runid = id;
     }
 
+    public int getRunId()
+    {
+        return _runid;
+    }
+
     protected FlowSchema createSchema()
     {
         FlowSchema ret = (FlowSchema)super.createSchema();

@@ -22,6 +22,7 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.view.*;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
@@ -92,6 +93,8 @@ public class RunController extends SpringFlowController<RunController.Action>
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             run = form.getRun();
+            if (run == null)
+                return new HtmlView("Run not found: " + PageFlowUtil.filter(form.getRunId()));
             return new JspView<RunForm>(RunController.class, "showRun.jsp", form, errors);
         }
 
