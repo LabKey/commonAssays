@@ -58,7 +58,7 @@
         <tr><td>
             Select the columns that match between both the foreground and background wells.<br><br>
             For example, you usually want to match wells from the same FCSAnalysis Run and from
-            the sample sample draw.
+            the sample draw.
         </td></tr>
     </table>
     <br>
@@ -83,7 +83,7 @@
             For example, if your background wells may have either "neg" or "NegControl" for
             the "Peptide" keyword then select column "Keyword Peptide", select operator "Equals One Of",
             and set the value to "neg;NegControl".
-            Multiple values are combined with ';' for the "Equals One Of" operator.
+            Multiple values are combined with ';' when using the "Equals One Of" operator.
         </td></tr>
     </table>
     <br>
