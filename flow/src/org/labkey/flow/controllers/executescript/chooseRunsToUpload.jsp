@@ -25,6 +25,7 @@
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToUploadForm" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ChooseRunsToUploadForm> me = (JspView<ChooseRunsToUploadForm>) HttpView.currentView();
@@ -43,7 +44,7 @@
         %><form method="POST" action="<%=org.labkey.api.util.PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer())%>">
         <input type="hidden" name="path" value="<%=h(form.path)%>">
         <p>
-            Choose which directories in '<%=h(PageFlowUtil.decode(form.path))%>' contain the FCS files for your experiment runs.
+            Choose which directories within <%=StringUtils.isEmpty(form.path) ? "this directory" : h("'" + PageFlowUtil.decode(form.path) + "'")%> contain the FCS files for your experiment runs.
             <%=FlowModule.getLongProductName()%> will read the keywords from these FCS files into the database.  The FCS files
             themselves will not be modified, and will remain in the file system.
         </p>
