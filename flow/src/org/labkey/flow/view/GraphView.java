@@ -23,6 +23,7 @@ import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.GridView;
+import org.labkey.api.security.ACL;
 import org.labkey.flow.controllers.well.WellController;
 
 import java.io.IOException;
@@ -67,12 +68,18 @@ public class GraphView extends GridView
 
     protected void _renderDataRegion(RenderContext ctx, Writer out) throws IOException, SQLException
     {
+        if (!ctx.getViewContext().hasPermission(ACL.PERM_READ))
+        {
+            out.write("You do not have permission to read this data");
+            return;
+        }
+
         DataRegion oldRegion = ctx.getCurrentRegion();
         try
         {
             DataRegion region = getDataRegion();
             ctx.setCurrentRegion(region);
-            region.checkResultSet(ctx, out);
+            ResultSet rs = region.getResultSet(ctx);
             region.writeFilterHtml(ctx, out);
             List<DisplayColumn> dataColumns = new ArrayList();
             List<GraphColumn> graphColumns = new ArrayList();
@@ -92,7 +99,6 @@ public class GraphView extends GridView
             region.getButtonBar(DataRegion.MODE_GRID).render(ctx, out);
 
             out.write("<table class=\"labkey-data-region\">\n");
-            ResultSet rs = ctx.getResultSet();
             Map rowMap = null;
             while (rs.next())
             {
