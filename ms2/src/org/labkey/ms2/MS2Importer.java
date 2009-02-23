@@ -220,7 +220,7 @@ public abstract class MS2Importer
 
         updateRunStatus(IMPORT_SUCCEEDED, STATUS_SUCCESS);
 
-        MS2Manager.computeBasicMS2Stats();       // Update runs/peptides statistics
+        MS2Manager.recomputeBasicStats();       // Update runs/peptides statistics
         progress.getCumulativeTimer().logSummary("import \"" + _fileName + "\"" + (progress.getCumulativeTimer().hasTask(Tasks.ImportSpectra) ? " and import spectra" : ""));
         return MS2Manager.getRun(info.getRunId());
     }

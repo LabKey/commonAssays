@@ -16,12 +16,10 @@
 
 package org.labkey.ms2;
 
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.ActionURL;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -47,16 +45,9 @@ public class MS2StatsWebPart extends JspView<MS2StatsWebPart.StatsBean>
 
         private StatsBean()
         {
-            try
-            {
-                Map<String, String> stats = MS2Manager.getBasicStats();
-                runs = stats.get("Runs");
-                peptides = stats.get("Peptides");
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
+            Map<String, String> stats = MS2Manager.getBasicStats();
+            runs = stats.get("Runs");
+            peptides = stats.get("Peptides");
         }
     }
 }

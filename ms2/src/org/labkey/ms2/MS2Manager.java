@@ -32,10 +32,7 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
-import org.labkey.api.util.Cache;
-import org.labkey.api.util.Formats;
-import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.util.*;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -795,11 +792,11 @@ public class MS2Manager
         }
         catch (SQLException e)
         {
-            _log.error("markAsDeleted", e);
+            throw new RuntimeSQLException(e);
         }
 
         _removeRunsFromCache(runIds);
-        computeBasicMS2Stats();  // Update runs/peptides statistics
+        recomputeBasicStats();  // Update runs/peptides statistics
 
         for (Integer experimentRunId : experimentRunsToDelete)
         {
@@ -1234,7 +1231,7 @@ public class MS2Manager
 
     private static DecimalFormat df = new DecimalFormat("#,##0");
 
-    public static Map<String, String> getStats(int days) throws SQLException
+    public static Map<String, String> getStats(int days)
     {
         Map<String, String> stats = new HashMap<String, String>(20);
 
@@ -1256,40 +1253,56 @@ public class MS2Manager
 
     public static void updateMS2Application(int ms2RunId, String LSID) throws SQLException
     {
-        String sql = " UPDATE " + getTableInfoRuns() + " SET ExperimentRunLSID = ? "
-                + " WHERE Run = ? ;";
+        String sql = " UPDATE " + getTableInfoRuns() + " SET ExperimentRunLSID = ? WHERE Run = ? ;";
 
         Table.execute(getSchema(), sql, new Object[]{LSID, ms2RunId});
     }
 
-    private static void addStats(Map<String, String> stats, String prefix, String whereSql, Object[] params) throws SQLException
+    private static void addStats(Map<String, String> stats, String prefix, String whereSql, Object[] params)
     {
-        ResultSet rs = Table.executeQuery(getSchema(), "SELECT COUNT(*) AS Runs, COALESCE(SUM(PeptideCount),0) AS Peptides, COALESCE(SUM(SpectrumCount),0) AS Spectra FROM " + getTableInfoRuns() + " WHERE " + whereSql, params);
-        rs.next();
+        ResultSet rs = null;
+        try
+        {
+            rs = Table.executeQuery(getSchema(), "SELECT COUNT(*) AS Runs, COALESCE(SUM(PeptideCount),0) AS Peptides, COALESCE(SUM(SpectrumCount),0) AS Spectra FROM " + getTableInfoRuns() + " WHERE " + whereSql, params);
+            rs.next();
 
-        stats.put(prefix + "Runs", df.format(rs.getObject(1)));
-        stats.put(prefix + "Peptides", df.format(rs.getObject(2)));
-        stats.put(prefix + "Spectra", df.format(rs.getObject(3)));
-
-        rs.close();
+            stats.put(prefix + "Runs", df.format(rs.getObject(1)));
+            stats.put(prefix + "Peptides", df.format(rs.getObject(2)));
+            stats.put(prefix + "Spectra", df.format(rs.getObject(3)));
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        finally
+        {
+            if (rs != null) { try { rs.close(); } catch (SQLException e) {} }
+        }
     }
 
 
-    private static void addStatsWithCounting(Map<String, String> stats, String prefix, String whereSql, Object[] params) throws SQLException
+    private static void addStatsWithCounting(Map<String, String> stats, String prefix, String whereSql, Object[] params)
     {
-        Long inProcessRuns = Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoRuns() + " WHERE " + whereSql, params, Long.class);
-        Long inProcessPeptides = Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoPeptides() + " WHERE Run IN (SELECT Run FROM " + getTableInfoRuns() + " WHERE " + whereSql + ")", params, Long.class);
-        Long inProcessSpectra = Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoSpectra() + " WHERE Run IN (SELECT Run FROM " + getTableInfoRuns() + " WHERE " + whereSql + ")", params, Long.class);
+        try
+        {
+            Long inProcessRuns = Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoRuns() + " WHERE " + whereSql, params, Long.class);
+            Long inProcessPeptides = Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoPeptides() + " WHERE Run IN (SELECT Run FROM " + getTableInfoRuns() + " WHERE " + whereSql + ")", params, Long.class);
+            Long inProcessSpectra = Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoSpectra() + " WHERE Run IN (SELECT Run FROM " + getTableInfoRuns() + " WHERE " + whereSql + ")", params, Long.class);
 
-        stats.put(prefix + "Runs", df.format(inProcessRuns));
-        stats.put(prefix + "Peptides", df.format(inProcessPeptides));
-        stats.put(prefix + "Spectra", df.format(inProcessSpectra));
+            stats.put(prefix + "Runs", df.format(inProcessRuns));
+            stats.put(prefix + "Peptides", df.format(inProcessPeptides));
+            stats.put(prefix + "Spectra", df.format(inProcessSpectra));
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
     }
 
 
-    public static void computeBasicMS2Stats()
+    public static void recomputeBasicStats()
     {
-        _basicStats = null;
+        _basicStats = computeBasicStats();
 
         try
         {
@@ -1298,13 +1311,9 @@ public class MS2Manager
             long peptides = df.parse(stats.get("Peptides")).longValue();
             insertStats(runs, peptides);
         }
-        catch (SQLException e)
-        {
-            _log.error("computeBasicMS2Stats", e);
-        }
         catch (ParseException e)
         {
-            _log.error("computeBasicMS2Stats", e);
+            throw new UnexpectedException(e);
         }
     }
 
@@ -1312,7 +1321,7 @@ public class MS2Manager
     // Cache the basic stats for the MS2 stats web part
     private static Map<String, String> _basicStats = null;
 
-    public static synchronized Map<String, String> getBasicStats() throws SQLException
+    public static synchronized Map<String, String> getBasicStats()
     {
         if (null == _basicStats)
             _basicStats = computeBasicStats();
@@ -1321,13 +1330,12 @@ public class MS2Manager
     }
 
 
-    private static Map<String, String> computeBasicStats() throws SQLException
+    private static Map<String, String> computeBasicStats()
     {
         Map<String, String> stats = new HashMap<String, String>();
         addStats(stats, "", "DELETED = ? AND StatusId = 1", new Object[]{Boolean.FALSE});
         return stats;
     }
-
 
     private static void insertStats(long runs, long peptides)
     {
@@ -1342,7 +1350,7 @@ public class MS2Manager
         }
         catch (SQLException e)
         {
-            _log.error("insertStats", e);
+            throw new RuntimeSQLException(e);
         }
     }
 
