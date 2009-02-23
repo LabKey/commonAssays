@@ -116,13 +116,13 @@ public class LuminexProtocolUpgrader
                     rs.close();
                     if (needsUpgrade)
                     {
-                        SQLFragment updateSql = new SQLFragment("UPDATE study.dataset d SET protocolId = ?\n" +
+                        SQLFragment updateSql = new SQLFragment("UPDATE study.dataset SET protocolId = ?\n" +
                                 "WHERE\n" +
-                                "d.protocolId IS NULL\n" +
+                                "protocolId IS NULL\n" +
                                 "AND\n" +
-                                "d.container = ?\n" +
+                                "container = ?\n" +
                                 "AND\n" +
-                                "d.datasetid = ?",
+                                "datasetid = ?",
                                 protocolId, container, datasetId);
 
                         Table.execute(LuminexSchema.getSchema(), updateSql);
