@@ -88,8 +88,8 @@ public class LuminexProtocolUpgrader
                             "AND ed.runid = er.rowid\n" +
                             "AND er.protocollsid = p.lsid";
                     rs = Table.executeQuery(LuminexSchema.getSchema(), protocolSql, new Object[] {lumKey});
-                    rs.next();
-                    Integer protocolId = (Integer)rs.getRowMap().get("rowid");
+                    boolean foundRowId = rs.next();
+                    Integer protocolId = foundRowId ? (Integer)rs.getRowMap().get("rowid") : null;
                     rs.close();
                     if (protocolId == null)
                         continue;
