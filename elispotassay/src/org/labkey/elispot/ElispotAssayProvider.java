@@ -405,4 +405,9 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return new RunListDetailsQueryView(protocol, context,
                 ElispotController.RunDetailsAction.class, "rowId", ExpRunTable.Column.RowId.toString());
     }
+
+    public String getDescription()
+    {
+        return "Imports raw data files from CTL and AID instruments.";
+    }
 }

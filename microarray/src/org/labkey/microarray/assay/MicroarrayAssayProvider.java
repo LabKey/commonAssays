@@ -278,6 +278,11 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return MicroarrayController.DesignerAction.class;
     }
 
+    public String getDescription()
+    {
+        return "Imports microarray runs from MageML files.";
+    }
+
     public Pair<ExpProtocol, List<Domain>> getAssayTemplate(User user, Container targetContainer)
     {
         Pair<ExpProtocol, List<Domain>> result = super.getAssayTemplate(user, targetContainer);

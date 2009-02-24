@@ -30,6 +30,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.query.*;
 import org.labkey.api.view.*;
 import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.nab.query.NabSchema;
 import org.labkey.nab.query.NabRunDataTable;
 import org.labkey.common.util.Pair;
@@ -448,6 +449,17 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     public NabRunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
     {
         return new NabRunListQueryView(protocol, context);
+    }
+
+    public String getDescription()
+    {
+        return "Imports a specially formatted Excel 1997-2003 file (.xls). " +
+                "Measures neutralization in TZM-bl cells as a function of a reduction in Tat-induced luciferase (Luc) " +
+                "reporter gene expression after a single round of infection. Montefiori, D.C. 2004" +
+                PageFlowUtil.helpPopup("NAb", "<a href=\"http://www.ncbi.nlm.nih.gov/pubmed/18432938\">" +
+                        "Evaluating neutralizing antibodies against HIV, SIV and SHIV in luciferase " +
+                        "reporter gene assays</a>.  Current Protocols in Immunology, (Coligan, J.E., " +
+                        "A.M. Kruisbeek, D.H. Margulies, E.M. Shevach, W. Strober, and R. Coico, eds.), John Wiley & Sons, 12.11.1-12.11.15.", true);
     }
 
     public Pair<ExpProtocol, List<Domain>> getAssayTemplate(User user, Container targetContainer, ExpProtocol toCopy)

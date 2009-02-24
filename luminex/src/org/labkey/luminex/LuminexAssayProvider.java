@@ -485,4 +485,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
         return result;
     }
+
+    public String getDescription()
+    {
+        return "Imports data in the multi-sheet BioPlex Excel file format.";
+    }
 }
