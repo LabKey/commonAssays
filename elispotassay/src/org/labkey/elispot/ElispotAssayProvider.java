@@ -337,7 +337,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
                 dataMap.put("SourceLSID", run.getLSID());
                 dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
 
-                addStandardRunPublishProperties(study, tempTypes, dataMap, run);
+                addStandardRunPublishProperties(user, study, tempTypes, dataMap, run);
 
                 dataMaps[rowIndex++] = dataMap;
                 tempTypes = null;

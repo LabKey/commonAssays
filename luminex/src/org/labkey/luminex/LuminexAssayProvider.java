@@ -349,7 +349,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 addProperty(study, "ExtraSpecimenInfo", luminexDataRow.getExtraSpecimenInfo(), dataMap, tempTypes);
                 addProperty(study, "SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, tempTypes);
 
-                ExpRun run = copyRunProperties(study, runs, runProperties, pds, tempTypes, luminexDataRow, dataMap);
+                ExpRun run = copyRunProperties(user, study, runs, runProperties, pds, tempTypes, luminexDataRow, dataMap);
                 sourceContainer = run.getContainer();
                 copyAnalyteProperties(study, analytes, tempTypes, luminexDataRow, dataMap, sourceContainer, protocol);
 
@@ -385,7 +385,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
     }
 
-    private ExpRun copyRunProperties(Container study, Map<Integer, ExpRun> runs, Map<ExpRun, Map<String, ObjectProperty>> runProperties, List<PropertyDescriptor> pds, List<PropertyDescriptor> tempTypes, LuminexDataRow luminexDataRow, Map<String, Object> dataMap)
+    private ExpRun copyRunProperties(User user, Container study, Map<Integer, ExpRun> runs, Map<ExpRun, Map<String, ObjectProperty>> runProperties, List<PropertyDescriptor> pds, List<PropertyDescriptor> tempTypes, LuminexDataRow luminexDataRow, Map<String, Object> dataMap)
     {
         ExpRun run = runs.get(luminexDataRow.getDataId());
         if (run == null)
@@ -394,7 +394,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             run = data.getRun();
             runs.put(luminexDataRow.getDataId(), run);
         }
-        addStandardRunPublishProperties(study, tempTypes, dataMap, run);
+        addStandardRunPublishProperties(user, study, tempTypes, dataMap, run);
 
         Map<String, ObjectProperty> props = runProperties.get(run);
         if (props == null)
