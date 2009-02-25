@@ -37,27 +37,19 @@ public class EditFCSAnalysisFilterForm extends ProtocolForm
         List<FieldKey> fields = new ArrayList();
         List<String> ops = new ArrayList();
         List<String> values = new ArrayList();
-        try
+        String prop = getProtocol().getFCSAnalysisFilterString();
+        for (Map.Entry<String, String> entry : PageFlowUtil.fromQueryString(prop))
         {
-            String prop = getProtocol().getFCSAnalysisFilterString();
-            for (Map.Entry<String, String> entry : PageFlowUtil.fromQueryString(prop))
+            String[] parts = StringUtils.split(entry.getKey(), "~");
+            if (parts.length != 2)
             {
-                String[] parts = StringUtils.split(entry.getKey(), "~");
-                if (parts.length != 2)
-                {
-                    continue;
-                }
-                fields.add(FieldKey.fromString(parts[0]));
-                ops.add(parts[1]);
-                values.add(entry.getValue());
+                continue;
             }
-            ff_field = fields.toArray(new FieldKey[0]);
-
+            fields.add(FieldKey.fromString(parts[0]));
+            ops.add(parts[1]);
+            values.add(entry.getValue());
         }
-        catch (ServletException e)
-        {
-            // probably user has to be logged in-- will be caught later
-        }
+        ff_field = fields.toArray(new FieldKey[0]);
         ff_field = fields.toArray(new FieldKey[0]);
         ff_op = ops.toArray(new String[0]);
         ff_value = values.toArray(new String[0]);

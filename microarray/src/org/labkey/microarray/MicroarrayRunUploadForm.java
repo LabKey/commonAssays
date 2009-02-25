@@ -350,6 +350,10 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
             {
                 name = "Unknown";
             }
+            if (name.length() >= 200)
+            {
+                throw new ExperimentException("Sample names are limited to 200 characters");
+            }
             return createSampleMaterial(getContainer(), name);
         }
     }
