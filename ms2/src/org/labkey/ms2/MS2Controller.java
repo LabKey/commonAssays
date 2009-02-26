@@ -2313,13 +2313,13 @@ public class MS2Controller extends SpringActionController
 
             ActionButton delete = new ActionButton("", "Delete");
             delete.setURL(new ActionURL(DeleteDataBasesAction.class, getContainer()));
-            delete.setActionType(ActionButton.Action.GET);
+            delete.setActionType(ActionButton.Action.POST);
             delete.setRequiresSelection(true);
             bb.add(delete);
 
             ActionButton reload = new ActionButton("button", "Reload FASTA");
             reload.setURL(new ActionURL(ReloadFastaAction.class, getContainer()));
-            reload.setActionType(ActionButton.Action.GET);
+            reload.setActionType(ActionButton.Action.POST);
             reload.setRequiresSelection(true);
             bb.add(reload);
 
