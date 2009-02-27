@@ -35,10 +35,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -506,14 +503,48 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     protected List<String> getRunSummaryHeaders(MS2Run run)
     {
+        MS2Controller.ModificationBean mods = new MS2Controller.ModificationBean(run);
+        List<String> modHeaders = new ArrayList<String>(10);
+
+        formatModifications("Fixed", mods.fixed, modHeaders);
+        formatModifications("Variable", mods.var, modHeaders);
+
+        List<String> runHeaders = new ArrayList<String>(3);
+        runHeaders.add("Search Enzyme: " + naForNull(run.getSearchEnzyme()) + "\tFile Name: " + naForNull(run.getFileName()));
+        runHeaders.add("Search Engine: " + naForNull(run.getSearchEngine()) + "\tPath: " + naForNull(run.getPath()));
+        runHeaders.add("Mass Spec Type: " + naForNull(run.getMassSpecType()) + "\tFasta File: " + naForNull(run.getFastaFileName()));
+
         List<String> headers = new ArrayList<String>();
         headers.add("Run: " + naForNull(run.getDescription()));
         headers.add("");
-        headers.add("Search Enzyme: " + naForNull(run.getSearchEnzyme()) + "\tFile Name: " + naForNull(run.getFileName()));
-        headers.add("Search Engine: " + naForNull(run.getSearchEngine()) + "\tPath: " + naForNull(run.getPath()));
-        headers.add("Mass Spec Type: " + naForNull(run.getMassSpecType()) + "\tFasta File: " + naForNull(run.getFastaFileName()));
+
+        if (modHeaders.isEmpty())
+        {
+            headers.addAll(runHeaders);
+        }
+        else
+        {
+            // Merge modifications list and standard run headers into a single list
+            for (int i = 0; i < Math.max(modHeaders.size(), runHeaders.size()); i++)
+                headers.add((i < modHeaders.size() ? modHeaders.get(i) : "") + "\t" + (i < runHeaders.size() ? runHeaders.get(i) : ""));
+        }
+
         headers.add("");
+
         return headers;
+    }
+
+    private void formatModifications(String label, Map<String, String> mods, List<String> modHeaders)
+    {
+        if (!mods.isEmpty())
+        {
+            modHeaders.add(label + " Modifications");
+
+            for (Map.Entry<String, String> mod : mods.entrySet())
+            {
+                modHeaders.add(mod.getKey() + " @ " + mod.getValue());
+            }
+        }
     }
 
     protected List<String> getAMTFileHeader()

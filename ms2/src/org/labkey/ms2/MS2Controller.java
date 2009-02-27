@@ -874,26 +874,11 @@ public class MS2Controller extends SpringActionController
 
             MS2Run run = MS2Manager.getRun(form.run);
 
-            Map<String, String> fixed = new TreeMap<String, String>();
-            Map<String, String> var = new TreeMap<String, String>();
-
-            for (MS2Modification mod : run.getModifications())
-            {
-                if (mod.getVariable())
-                    var.put(mod.getAminoAcid() + mod.getSymbol(), Formats.f3.format(mod.getMassDiff()));
-                else
-                    fixed.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
-            }
-
             getPageConfig().setTemplate(PageConfig.Template.Print);
             getPageConfig().setTitle("Modifications");
             getPageConfig().setMinimumWidth(100);
 
-            ModificationBean bean = new ModificationBean();
-            bean.fixed = fixed;
-            bean.var = var;
-
-            JspView view = new JspView<ModificationBean>("/org/labkey/ms2/modifications.jsp", bean);
+            JspView view = new JspView<ModificationBean>("/org/labkey/ms2/modifications.jsp", new ModificationBean(run));
             view.setFrame(WebPartView.FrameType.NONE);
             return view;
         }
@@ -909,6 +894,20 @@ public class MS2Controller extends SpringActionController
     {
         public Map<String, String> fixed;
         public Map<String, String> var;
+
+        public ModificationBean(MS2Run run)
+        {
+            fixed = new TreeMap<String, String>();
+            var = new TreeMap<String, String>();
+
+            for (MS2Modification mod : run.getModifications())
+            {
+                if (mod.getVariable())
+                    var.put(mod.getAminoAcid() + mod.getSymbol(), Formats.f3.format(mod.getMassDiff()));
+                else
+                    fixed.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
+            }
+        }
     }
 
 
