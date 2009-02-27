@@ -227,9 +227,12 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         for (String cutoffPropName : NabAssayProvider.CUTOFF_PROPERTIES)
         {
             DomainProperty cutoffProp = runProperties.get(cutoffPropName);
-            Integer cutoff = (Integer) run.getProperty(cutoffProp);
-            if (cutoff != null)
-                cutoffs.put(cutoff, cutoffProp.getPropertyDescriptor().getFormat());
+            if (cutoffProp != null)
+            {
+                Integer cutoff = (Integer) run.getProperty(cutoffProp);
+                if (cutoff != null)
+                    cutoffs.put(cutoff, cutoffProp.getPropertyDescriptor().getFormat());
+            }
         }
 
         if (cutoffs.isEmpty())
