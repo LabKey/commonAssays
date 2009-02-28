@@ -74,9 +74,12 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_DATA_TYPE);
     }
 
-    protected Domain createBatchDomain(Container c, User user)
+    @Override
+    protected Pair<Domain, Map<DomainProperty, Object>> createBatchDomain(Container c, User user)
     {
-        return PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_BATCH), "Batch Fields");
+        return new Pair<Domain, Map<DomainProperty, Object>>(
+            PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_BATCH), "Batch Fields"),
+            Collections.<DomainProperty, Object>emptyMap());
     }
 
     public String getName()
@@ -110,19 +113,19 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return result;
     }
 
-    protected Domain createRunDomain(Container c, User user)
+    protected Pair<Domain, Map<DomainProperty, Object>> createRunDomain(Container c, User user)
     {
-        Domain result = super.createRunDomain(c, user);
-        result.setDescription(result.getDescription() + " You may enter an XPath expression in the description for the property. If you do, when uploading a run the server will look in the MAGEML file for the value.");
+        Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
+        result.getKey().setDescription(result.getKey().getDescription() + " You may enter an XPath expression in the description for the property. If you do, when uploading a run the server will look in the MAGEML file for the value.");
         return result;
     }
 
-    public List<Domain> createDefaultDomains(Container c, User user)
+    public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
     {
-        List<Domain> result = super.createDefaultDomains(c, user);
+        List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
         Domain dataDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ExpProtocol.ASSAY_DOMAIN_DATA + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":" + ASSAY_NAME_SUBSTITUTION, "Data Properties");
         dataDomain.setDescription("The user is prompted to select a MAGEML file that contains the data values. If the spot-level data within the file contains a column that matches the data column name here, it will be imported.");
-        result.add(dataDomain);
+        result.add(new Pair<Domain, Map<DomainProperty,  Object>>(dataDomain, Collections.<DomainProperty, Object>emptyMap()));
         return result;
     }
 
@@ -283,9 +286,9 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return "Imports microarray runs from MageML files.";
     }
 
-    public Pair<ExpProtocol, List<Domain>> getAssayTemplate(User user, Container targetContainer)
+    public Pair<ExpProtocol, List<Pair<Domain, Map<DomainProperty, Object>>>> getAssayTemplate(User user, Container targetContainer)
     {
-        Pair<ExpProtocol, List<Domain>> result = super.getAssayTemplate(user, targetContainer);
+        Pair<ExpProtocol, List<Pair<Domain, Map<DomainProperty, Object>>>> result = super.getAssayTemplate(user, targetContainer);
         List<ProtocolParameter> params = new ArrayList<ProtocolParameter>(result.getKey().getProtocolParameters().values());
 
         ProtocolParameter channelCountXPathParam = new ProtocolParameter();

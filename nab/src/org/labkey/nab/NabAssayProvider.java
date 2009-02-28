@@ -98,9 +98,10 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         });
     }
 
-    protected Domain createRunDomain(Container c, User user)
+    protected Pair<Domain, Map<DomainProperty, Object>> createRunDomain(Container c, User user)
     {
-        Domain runDomain = super.createRunDomain(c, user);
+        Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
+        Domain runDomain = result.getKey();
         boolean first = true;
         for (int i = 0; i < CUTOFF_PROPERTIES.length; i++)
         {
@@ -130,17 +131,13 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         DomainProperty method = addProperty(runDomain, CURVE_FIT_METHOD_PROPERTY_NAME, CURVE_FIT_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
         method.setLookup(new Lookup(lookupContainer, NabSchema.SCHEMA_NAME, NabSchema.CURVE_FIT_METHOD_TABLE_NAME));
         method.setRequired(true);
-        return runDomain;
+        return result;
     }
 
-    protected Domain createBatchDomain(Container c, User user)
+    protected Pair<Domain, Map<DomainProperty, Object>> createSampleWellGroupDomain(Container c, User user)
     {
-        return super.createBatchDomain(c, user);
-    }
-
-    protected Domain createSampleWellGroupDomain(Container c, User user)
-    {
-        Domain sampleWellGroupDomain = super.createSampleWellGroupDomain(c, user);
+        Pair<Domain, Map<DomainProperty, Object>> result = super.createSampleWellGroupDomain(c, user);
+        Domain sampleWellGroupDomain = result.getKey();
         Container lookupContainer = c.getProject();
         addProperty(sampleWellGroupDomain, SPECIMENID_PROPERTY_NAME, SPECIMENID_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(sampleWellGroupDomain, PARTICIPANTID_PROPERTY_NAME, PARTICIPANTID_PROPERTY_CAPTION, PropertyType.STRING);
@@ -152,7 +149,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         DomainProperty method = addProperty(sampleWellGroupDomain, SAMPLE_METHOD_PROPERTY_NAME, SAMPLE_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
         method.setLookup(new Lookup(lookupContainer, NabSchema.SCHEMA_NAME, NabSchema.SAMPLE_PREPARATION_METHOD_TABLE_NAME));
         method.setRequired(true);
-        return sampleWellGroupDomain;
+        return result;
     }
 
     protected Map<String, Set<String>> getRequiredDomainProperties()
@@ -462,7 +459,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                         "A.M. Kruisbeek, D.H. Margulies, E.M. Shevach, W. Strober, and R. Coico, eds.), John Wiley & Sons, 12.11.1-12.11.15.", true);
     }
 
-    public Pair<ExpProtocol, List<Domain>> getAssayTemplate(User user, Container targetContainer, ExpProtocol toCopy)
+    public Pair<ExpProtocol, List<Pair<Domain, Map<DomainProperty, Object>>>> getAssayTemplate(User user, Container targetContainer, ExpProtocol toCopy)
     {
         try
         {
@@ -475,7 +472,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return super.getAssayTemplate(user, targetContainer, toCopy);
     }
 
-    public Pair<ExpProtocol, List<Domain>> getAssayTemplate(User user, Container targetContainer)
+    public Pair<ExpProtocol, List<Pair<Domain, Map<DomainProperty, Object>>>> getAssayTemplate(User user, Container targetContainer)
     {
         try
         {

@@ -124,32 +124,35 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
 
-    protected Domain createBatchDomain(Container c, User user)
+    @Override
+    protected Pair<Domain, Map<DomainProperty, Object>> createBatchDomain(Container c, User user)
     {
-        Domain uploadSetDomain = super.createBatchDomain(c, user);
+        Pair<Domain, Map<DomainProperty, Object>> result = super.createBatchDomain(c, user);
+        Domain domain = result.getKey();
 
-        addProperty(uploadSetDomain, "Species", PropertyType.STRING);
-        addProperty(uploadSetDomain, "LabID", "Lab ID", PropertyType.STRING);
-        addProperty(uploadSetDomain, "AnalysisSoftware", "Analysis Software", PropertyType.STRING);
+        addProperty(domain, "Species", PropertyType.STRING);
+        addProperty(domain, "LabID", "Lab ID", PropertyType.STRING);
+        addProperty(domain, "AnalysisSoftware", "Analysis Software", PropertyType.STRING);
 
-        return uploadSetDomain;
+        return result;
     }
 
-    protected Domain createRunDomain(Container c, User user)
+    protected Pair<Domain, Map<DomainProperty, Object>> createRunDomain(Container c, User user)
     {
-        Domain runDomain = super.createRunDomain(c, user);
+        Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
+        Domain runDomain = result.getKey();
         addProperty(runDomain, "ReplacesPreviousFile", "Replaces Previous File", PropertyType.BOOLEAN);
         addProperty(runDomain, "DateModified", "Date file was modified", PropertyType.DATE_TIME);
         addProperty(runDomain, "SpeciminType", "Specimen Type", PropertyType.STRING);
         addProperty(runDomain, "Additive", PropertyType.STRING);
         addProperty(runDomain, "Derivative", PropertyType.STRING);
 
-        return runDomain;
+        return result;
     }
 
-    public List<Domain> createDefaultDomains(Container c, User user)
+    public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
     {
-        List<Domain> result = super.createDefaultDomains(c, user);
+        List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
 
         Container lookupContainer = c.getProject();
         Map<String, ListDefinition> lists = ListService.get().getLists(lookupContainer);
@@ -198,7 +201,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         addProperty(analyteDomain, "BeadDist", "Bead Dist", PropertyType.STRING);
         addProperty(analyteDomain, "BeadCatalogNumber", "Bead Catalog Number", PropertyType.STRING);
         
-        result.add(analyteDomain);
+        result.add(new Pair<Domain, Map<DomainProperty, Object>>(analyteDomain, Collections.<DomainProperty, Object>emptyMap()));
 
         Domain excelRunDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_EXCEL_RUN + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":${AssayName}", "Excel File Run Properties");
         excelRunDomain.setDescription("When the user uploads a Luminex data file, the server will try to find these properties in the header and footer of the spreadsheet, and does not prompt the user to enter them. This is part of the second step of the upload process.");
@@ -208,7 +211,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         addProperty(excelRunDomain, "PlateID", "Plate ID", PropertyType.STRING);
         addProperty(excelRunDomain, "RP1PMTvolts", "RP1 PMT (Volts)", PropertyType.DOUBLE);
         addProperty(excelRunDomain, "RP1Target", "RP1 Target", PropertyType.STRING);
-        result.add(excelRunDomain);
+        result.add(new Pair<Domain, Map<DomainProperty, Object>>(excelRunDomain, Collections.<DomainProperty, Object>emptyMap()));
 
         return result;
     }

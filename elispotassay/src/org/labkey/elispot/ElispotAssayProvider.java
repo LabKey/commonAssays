@@ -37,6 +37,7 @@ import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.labkey.elispot.query.ElispotRunDataTable;
+import org.labkey.common.util.Pair;
 import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
@@ -100,9 +101,9 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return NAME;
     }
 
-    public List<Domain> createDefaultDomains(Container c, User user)
+    public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
     {
-        List<Domain> result = super.createDefaultDomains(c, user);
+        List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
         result.add(createAntigenWellGroupDomain(c, user));
         return result;
     }
@@ -119,22 +120,23 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return table;
     }
 
-    protected Domain createSampleWellGroupDomain(Container c, User user)
+    protected Pair<Domain, Map<DomainProperty, Object>> createSampleWellGroupDomain(Container c, User user)
     {
-        Domain sampleWellGroupDomain = super.createSampleWellGroupDomain(c, user);
+        Pair<Domain, Map<DomainProperty, Object>> result = super.createSampleWellGroupDomain(c, user);
 
-        addProperty(sampleWellGroupDomain, SPECIMENID_PROPERTY_NAME, SPECIMENID_PROPERTY_CAPTION, PropertyType.STRING);
-        addProperty(sampleWellGroupDomain, PARTICIPANTID_PROPERTY_NAME, PARTICIPANTID_PROPERTY_CAPTION, PropertyType.STRING);
-        addProperty(sampleWellGroupDomain, VISITID_PROPERTY_NAME, VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE);
-        addProperty(sampleWellGroupDomain, DATE_PROPERTY_NAME, DATE_PROPERTY_CAPTION, PropertyType.DATE_TIME);
-        addProperty(sampleWellGroupDomain, SAMPLE_DESCRIPTION_PROPERTY_NAME, SAMPLE_DESCRIPTION_PROPERTY_CAPTION, PropertyType.STRING);
+        Domain domain = result.getKey();
+        addProperty(domain, SPECIMENID_PROPERTY_NAME, SPECIMENID_PROPERTY_CAPTION, PropertyType.STRING);
+        addProperty(domain, PARTICIPANTID_PROPERTY_NAME, PARTICIPANTID_PROPERTY_CAPTION, PropertyType.STRING);
+        addProperty(domain, VISITID_PROPERTY_NAME, VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE);
+        addProperty(domain, DATE_PROPERTY_NAME, DATE_PROPERTY_CAPTION, PropertyType.DATE_TIME);
+        addProperty(domain, SAMPLE_DESCRIPTION_PROPERTY_NAME, SAMPLE_DESCRIPTION_PROPERTY_CAPTION, PropertyType.STRING);
         //addProperty(sampleWellGroupDomain, EFFECTOR_PROPERTY_NAME, EFFECTOR_PROPERTY_CAPTION, PropertyType.STRING);
         //addProperty(sampleWellGroupDomain, STCL_PROPERTY_NAME, STCL_PROPERTY_CAPTION, PropertyType.STRING);
 
-        return sampleWellGroupDomain;
+        return result;
     }
 
-    protected Domain createAntigenWellGroupDomain(Container c, User user)
+    protected Pair<Domain, Map<DomainProperty, Object>> createAntigenWellGroupDomain(Container c, User user)
     {
         String domainLsid = getPresubstitutionLsid(ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
         Domain antigenWellGroupDomain = PropertyService.get().createDomain(c, domainLsid, "Antigen Fields");
@@ -145,12 +147,13 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         addProperty(antigenWellGroupDomain, CELLWELL_PROPERTY_NAME, CELLWELL_PROPERTY_CAPTION, PropertyType.INTEGER);
         //addProperty(antigenWellGroupDomain, PEPTIDE_CONCENTRATION_NAME, PEPTIDE_CONCENTRATION_CAPTION, PropertyType.DOUBLE);
 
-        return antigenWellGroupDomain;
+        return new Pair<Domain, Map<DomainProperty, Object>>(antigenWellGroupDomain, Collections.<DomainProperty, Object>emptyMap());
     }
 
-    protected Domain createRunDomain(Container c, User user)
+    protected Pair<Domain,Map<DomainProperty,Object>> createRunDomain(Container c, User user)
     {
-        Domain runDomain =  super.createRunDomain(c, user);
+        Pair<Domain, Map<DomainProperty, Object>> result =  super.createRunDomain(c, user);
+        Domain runDomain = result.getKey();
 
         addProperty(runDomain, "Protocol", "Protocol", PropertyType.STRING);
         addProperty(runDomain, "LabID", "Lab ID", PropertyType.STRING);
@@ -163,7 +166,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         reader.setLookup(new Lookup(c.getProject(), "lists", plateReaderList.getName()));
         reader.setRequired(true);
 
-        return runDomain;
+        return result;
     }
 
     private ListDefinition createPlateReaderList(Container c, User user)

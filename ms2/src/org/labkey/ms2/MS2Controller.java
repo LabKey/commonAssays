@@ -4766,6 +4766,15 @@ public class MS2Controller extends SpringActionController
                             HttpView.throwUnauthorized();
 
                         String protocolName = form.getProtocol();
+                        if (protocolName == null)
+                        {
+                            HttpView.throwNotFound("No protocol parameter specified");
+                        }
+
+                        if (form.getDataDir() == null)
+                        {
+                            HttpView.throwNotFound("No dataDir parameter specified");
+                        }
                         File dirData = new File(form.getDataDir());
                         if (!NetworkDrive.exists(dirData))
                             HttpView.throwNotFound();
@@ -4775,12 +4784,16 @@ public class MS2Controller extends SpringActionController
 
                         if (protocolFactory == null)
                         {
-                            HttpView.throwNotFound("Could not open protocol " + form.getFileName());
+                            HttpView.throwNotFound("Could not open protocol for file " + f);
                         }
 
                         File dirSeqRoot = new File(MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()));
                         File dirAnalysis = protocolFactory.getAnalysisDir(dirData, protocolName);
                         File fileParameters = protocolFactory.getParametersFile(dirData, protocolName);
+                        if (!NetworkDrive.exists(fileParameters))
+                        {
+                            throw new NotFoundException("Could not find file " + fileParameters);
+                        }
                         AbstractMS2SearchProtocol protocol = protocolFactory.loadInstance(fileParameters);
                         String baseName = FileUtil.getBaseName(f, 2);
 
