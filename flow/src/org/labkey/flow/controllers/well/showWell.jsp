@@ -34,6 +34,13 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.regex.Pattern" %>
 <%@ page import="java.util.regex.Matcher" %>
+<%@ page import="org.labkey.api.pipeline.PipelineService" %>
+<%@ page import="org.labkey.api.pipeline.PipeRoot" %>
+<%@ page import="java.net.URI" %>
+<%@ page import="org.labkey.api.util.URIUtil" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.api.webdav.WebdavService" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <style type="text/css">
     .right {text-align:right;}
@@ -44,6 +51,7 @@ LABKEY.requiresClientAPI(true);
 LABKEY.requiresScript("ColumnTree.js");
 </script>
 <%
+    ViewContext context = HttpView.currentContext();
     FlowWell well = getWell();
     FlowWell fcsFile = well.getFCSFile();
     FlowScript script = well.getScript();
@@ -365,15 +373,34 @@ if (analyses.size() > 0)
     %></table><%
 }
 
-if (well.getFCSURI() == null)
+URI fileURI = well.getFCSURI();
+if (null == fileURI)
 {
     %><p>There is no file on disk for this well.</p><%
 }
 else
 {
     %><p><a href="<%=h(getWell().urlFor(WellController.Action.chooseGraph))%>">More Graphs</a><br>
-    <a href="<%=h(getWell().urlFor(WellController.Action.keywords))%>">Keywords from the FCS file</a></p><%
-} 
+    <a href="<%=h(getWell().urlFor(WellController.Action.keywords))%>">Keywords from the FCS file</a><br><%
+
+    PipeRoot r = PipelineService.get().findPipelineRoot(well.getContainer());
+    if (null != r)
+    {
+        // UNDONE: PipeRoot should have wrapper for this
+        ACL acl = org.labkey.api.security.SecurityManager.getACL(r.getContainer(), r.getEntityId());
+        if (null != acl && acl.hasPermission(context.getUser(), ACL.PERM_READ))
+        {
+            URI rootURI = r.getUri();
+            URI rel = URIUtil.relativize(r.getUri(), fileURI);
+            if (null != rel)
+            {
+                String url = context.getContextPath() + "/" + WebdavService.getServletPath() + r.getContainer().getPath() + "/@pipeline/" + rel.toString();
+                %><a href="<%=h(url)%>">Download FCS file</a><%
+            }
+        }
+    }
+    %></p><%
+}
     DiscussionService.Service service = DiscussionService.get();
     DiscussionService.DiscussionView discussion = service.getDisussionArea(
             getViewContext(),
