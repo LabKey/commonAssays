@@ -120,7 +120,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public Domain getRunDataDomain(ExpProtocol protocol)
     {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
 

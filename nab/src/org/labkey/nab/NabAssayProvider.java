@@ -181,6 +181,11 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return domainMap;
     }
 
+    public Domain getRunDataDomain(ExpProtocol protocol)
+    {
+        return null;
+    }
+
     public ExpData getDataForDataRow(Object dataRowId)
     {
         if (!(dataRowId instanceof Integer))
