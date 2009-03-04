@@ -59,9 +59,9 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayR
         insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(protocol, _channelCount, _barcode));
     }
 
-    protected InsertView createUploadSetInsertView(MicroarrayRunUploadForm form, boolean reshow, BindException errors)
+    protected InsertView createBatchInsertView(MicroarrayRunUploadForm form, boolean reshow, BindException errors)
     {
-        InsertView result = super.createUploadSetInsertView(form, reshow, errors);
+        InsertView result = super.createBatchInsertView(form, reshow, errors);
         result.getDataRegion().addDisplayColumn(new MicroarrayBulkPropertiesDisplayColumn(form));
         return result;
     }
@@ -116,18 +116,18 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayR
     }
 
     @Override
-    protected boolean showUploadSetStep(MicroarrayRunUploadForm runForm, Domain uploadDomain)
+    protected boolean showBatchStep(MicroarrayRunUploadForm runForm, Domain uploadDomain)
     {
         return true;
     }
 
     @Override
-    protected StepHandler<MicroarrayRunUploadForm> getUploadSetStepHandler()
+    protected StepHandler<MicroarrayRunUploadForm> getBatchStepHandler()
     {
-        return new MicroarrayUploadSetStepHandler();
+        return new MicroarrayBatchStepHandler();
     }
 
-    private class MicroarrayUploadSetStepHandler extends UploadSetStepHandler
+    private class MicroarrayBatchStepHandler extends BatchStepHandler
     {
         @Override
         public ModelAndView handleStep(MicroarrayRunUploadForm form, BindException errors) throws ServletException

@@ -242,11 +242,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
             TimepointType studyType = AssayPublishService.get().getTimepointType(study);
 
             Map<Integer, ExpRun> runCache = new HashMap<Integer, ExpRun>();
-            Map<Integer, Map<String, Object>> runPropertyCache = new HashMap<Integer, Map<String, Object>>();
-
-            List<DomainProperty> runPDs = new ArrayList<DomainProperty>();
-            runPDs.addAll(Arrays.asList(getRunDomain(protocol).getProperties()));
-            runPDs.addAll(Arrays.asList(getBatchDomain(protocol).getProperties()));
+            CopyToStudyContext context = new CopyToStudyContext(protocol);
 
             PropertyDescriptor[] samplePDs = getPropertyDescriptors(getSampleWellGroupDomain(protocol));
             PropertyDescriptor[] dataPDs = ElispotSchema.getExistingDataProperties(protocol);
@@ -311,25 +307,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
                     runCache.put(row.getOwnerObjectId(), run);
                 }
 
-                // add the run level properties
-                Map<String, Object> runProperties = runPropertyCache.get(run.getRowId());
-                if (runProperties == null)
-                {
-                    runProperties = OntologyManager.getProperties(run.getContainer(), run.getLSID());
-                    runPropertyCache.put(run.getRowId(), runProperties);
-                }
-
-                for (DomainProperty dp : runPDs)
-                {
-                    if (!TARGET_STUDY_PROPERTY_NAME.equals(dp.getName()) &&
-                            !PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(dp.getName()))
-                    {
-                        PropertyDescriptor publishPd = dp.getPropertyDescriptor().clone();
-                        publishPd.setName("Run " + dp.getName());
-                        addProperty(publishPd, runProperties.get(dp.getPropertyURI()), dataMap, tempTypes);
-                    }
-                }
-
                 AssayPublishKey publishKey = dataKeys.get(row.getObjectId());
                 dataMap.put("ParticipantID", publishKey.getParticipantId());
                 dataMap.put("SequenceNum", publishKey.getVisitId());
@@ -340,7 +317,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
                 dataMap.put("SourceLSID", run.getLSID());
                 dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
 
-                addStandardRunPublishProperties(user, study, tempTypes, dataMap, run);
+                addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
 
                 dataMaps[rowIndex++] = dataMap;
                 tempTypes = null;

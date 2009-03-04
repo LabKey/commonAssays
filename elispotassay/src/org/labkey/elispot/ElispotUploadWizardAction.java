@@ -116,7 +116,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             antigenHelper.addSampleColumns(view, form.getUser(), form, errorReshow);
 
             // add existing page properties
-            addHiddenUploadSetProperties(form, view);
+            addHiddenBatchProperties(form, view);
             addHiddenRunProperties(form, view);
 
             ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(form);

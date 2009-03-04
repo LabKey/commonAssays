@@ -145,7 +145,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
         view.getDataRegion().setGroupHeadings(analyteNames);
 
-        addHiddenUploadSetProperties(form, view);
+        addHiddenBatchProperties(form, view);
 
         ButtonBar bbar = new ButtonBar();
         addFinishButtons(form, view, bbar);

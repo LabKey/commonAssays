@@ -386,7 +386,14 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             ParticipantVisitResolver resolver = null;
             ExpProtocol protocol = expRun.getProtocol();
             AssayProvider provider = AssayService.get().getProvider(protocol);
-            for (ObjectProperty objectProperty : expRun.getObjectProperties().values())
+            Map<String, ObjectProperty> mergedProperties = new HashMap<String, ObjectProperty>();
+            mergedProperties.putAll(expRun.getObjectProperties());
+            ExpExperiment batch = AssayService.get().findBatch(expRun);
+            if (batch != null)
+            {
+                mergedProperties.putAll(batch.getObjectProperties());
+            }
+            for (ObjectProperty objectProperty : mergedProperties.values())
             {
                 if (AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(objectProperty.getName()))
                 {

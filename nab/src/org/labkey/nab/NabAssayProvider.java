@@ -265,7 +265,6 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             Set<PropertyDescriptor> typeSet = new LinkedHashSet<PropertyDescriptor>();
 
             Map<Integer, ExpRun> runCache = new HashMap<Integer, ExpRun>();
-            Map<Integer, Map<String, Object>> runPropertyCache = new HashMap<Integer, Map<String, Object>>();
 
             typeSet.add(createPublishPropertyDescriptor(study, getDataRowIdFieldKey().toString(), getDataRowIdType()));
             typeSet.add(createPublishPropertyDescriptor(study, "SourceLSID", getDataRowIdType()));
@@ -274,7 +273,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             DomainProperty[] samplePDs = sampleDomain.getProperties();
 
             PropertyDescriptor[] dataPDs = NabSchema.getExistingDataProperties(protocol);
-            List<PropertyDescriptor> runPDs = getRunTableColumns(protocol);
+            CopyToStudyContext context = new CopyToStudyContext(protocol);
 
             SimpleFilter filter = new SimpleFilter();
             filter.addInClause(getDataRowIdFieldKey().toString(), dataKeys.keySet());
@@ -328,24 +327,6 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                     runCache.put(row.getOwnerObjectId(), run);
                 }
 
-                Map<String, Object> runProperties = runPropertyCache.get(run.getRowId());
-                if (runProperties == null)
-                {
-                    runProperties = OntologyManager.getProperties(run.getContainer(), run.getLSID());
-                    runPropertyCache.put(run.getRowId(), runProperties);
-                }
-
-                for (PropertyDescriptor pd : runPDs)
-                {
-                    if (!TARGET_STUDY_PROPERTY_NAME.equals(pd.getName()) &&
-                            !PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(pd.getName()))
-                    {
-                        PropertyDescriptor publishPd = pd.clone();
-                        publishPd.setName("Run " + pd.getName());
-                        addProperty(publishPd, runProperties.get(pd.getPropertyURI()), dataMap, tempTypes);
-                    }
-                }
-
                 AssayPublishKey publishKey = dataKeys.get(row.getObjectId());
                 dataMap.put("ParticipantID", publishKey.getParticipantId());
                 dataMap.put("SequenceNum", publishKey.getVisitId());
@@ -355,7 +336,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                 }
                 dataMap.put("SourceLSID", run.getLSID());
                 dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
-                addStandardRunPublishProperties(user, study, tempTypes, dataMap, run);
+                addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
                 dataMaps[rowIndex++] = dataMap;
                 tempTypes = null;
             }

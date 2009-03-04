@@ -143,7 +143,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         Domain runDomain = result.getKey();
         addProperty(runDomain, "ReplacesPreviousFile", "Replaces Previous File", PropertyType.BOOLEAN);
         addProperty(runDomain, "DateModified", "Date file was modified", PropertyType.DATE_TIME);
-        addProperty(runDomain, "SpeciminType", "Specimen Type", PropertyType.STRING);
+        addProperty(runDomain, "SpecimenType", "Specimen Type", PropertyType.STRING);
         addProperty(runDomain, "Additive", PropertyType.STRING);
         addProperty(runDomain, "Derivative", PropertyType.STRING);
 
@@ -297,17 +297,8 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             // Map from data id to experiment run source
             Map<Integer, ExpRun> runs = new HashMap<Integer, ExpRun>();
 
-            // Map from run to run properties
-            Map<ExpRun, Map<String, ObjectProperty>> runProperties = new HashMap<ExpRun, Map<String, ObjectProperty>>();
-
-            PropertyDescriptor[] runPDs = getPropertyDescriptors(getRunDomain(protocol));
             PropertyDescriptor[] excelRunPDs = getPropertyDescriptors(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN));
-            PropertyDescriptor[] uploadSetPDs = getPropertyDescriptors(getBatchDomain(protocol));
-
-            List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
-            pds.addAll(Arrays.asList(runPDs));
-            pds.addAll(Arrays.asList(excelRunPDs));
-            pds.addAll(Arrays.asList(uploadSetPDs));
+            CopyToStudyContext context = new CopyToStudyContext(protocol, excelRunPDs);
 
             TimepointType timepointType = AssayPublishService.get().getTimepointType(study);
 
@@ -352,21 +343,21 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 addProperty(study, "ExtraSpecimenInfo", luminexDataRow.getExtraSpecimenInfo(), dataMap, tempTypes);
                 addProperty(study, "SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, tempTypes);
 
-                ExpRun run = copyRunProperties(user, study, runs, runProperties, pds, tempTypes, luminexDataRow, dataMap);
+                ExpRun run = copyRunProperties(user, study, runs, tempTypes, luminexDataRow, dataMap, context);
                 sourceContainer = run.getContainer();
                 copyAnalyteProperties(study, analytes, tempTypes, luminexDataRow, dataMap, sourceContainer, protocol);
 
                 AssayPublishKey dataKey = dataKeys.get(luminexDataRow.getRowId());
-                addProperty(sourceContainer, "ParticipantID", dataKey.getParticipantId(), dataMap, tempTypes);
+                addProperty(sourceContainer, AssayPublishService.PARTICIPANTID_PROPERTY_NAME, dataKey.getParticipantId(), dataMap, tempTypes);
                 if (timepointType == TimepointType.VISIT)
                 {
-                    addProperty(sourceContainer, "SequenceNum", (double)dataKey.getVisitId(), dataMap, tempTypes);
-                    addProperty(sourceContainer, "Date", luminexDataRow.getDate(), dataMap, tempTypes);
+                    addProperty(sourceContainer, AssayPublishService.SEQUENCENUM_PROPERTY_NAME, (double)dataKey.getVisitId(), dataMap, tempTypes);
+                    addProperty(sourceContainer, AssayPublishService.DATE_PROPERTY_NAME, luminexDataRow.getDate(), dataMap, tempTypes);
                 }
                 else
                 {
-                    addProperty(sourceContainer, "SequenceNum", luminexDataRow.getVisitID(), dataMap, tempTypes);
-                    addProperty(sourceContainer, "Date", dataKey.getDate(), dataMap, tempTypes);
+                    addProperty(sourceContainer, AssayPublishService.SEQUENCENUM_PROPERTY_NAME, luminexDataRow.getVisitID(), dataMap, tempTypes);
+                    addProperty(sourceContainer, AssayPublishService.DATE_PROPERTY_NAME, dataKey.getDate(), dataMap, tempTypes);
                 }
 
                 dataMaps[index++] = dataMap;
@@ -388,7 +379,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
     }
 
-    private ExpRun copyRunProperties(User user, Container study, Map<Integer, ExpRun> runs, Map<ExpRun, Map<String, ObjectProperty>> runProperties, List<PropertyDescriptor> pds, List<PropertyDescriptor> tempTypes, LuminexDataRow luminexDataRow, Map<String, Object> dataMap)
+    private ExpRun copyRunProperties(User user, Container study, Map<Integer, ExpRun> runs, List<PropertyDescriptor> tempTypes, LuminexDataRow luminexDataRow, Map<String, Object> dataMap, CopyToStudyContext context) throws SQLException
     {
         ExpRun run = runs.get(luminexDataRow.getDataId());
         if (run == null)
@@ -397,24 +388,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             run = data.getRun();
             runs.put(luminexDataRow.getDataId(), run);
         }
-        addStandardRunPublishProperties(user, study, tempTypes, dataMap, run);
-
-        Map<String, ObjectProperty> props = runProperties.get(run);
-        if (props == null)
-        {
-            props = run.getObjectProperties();
-            runProperties.put(run, props);
-        }
-        for (PropertyDescriptor pd : pds)
-        {
-            ObjectProperty prop = props.get(pd.getPropertyURI());
-            if (!TARGET_STUDY_PROPERTY_NAME.equals(pd.getName()) && !PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(pd.getName()))
-            {
-                PropertyDescriptor publishPD = pd.clone();
-                publishPD.setName("Run " + pd.getName());
-                addProperty(publishPD, prop, dataMap, tempTypes);
-            }
-        }
+        addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
         return run;
     }
 
