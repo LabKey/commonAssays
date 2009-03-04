@@ -31,6 +31,8 @@ public class SampleCriteria
     String _keyword;
     String _strPattern;
     Pattern _pattern;
+    String _strPatternCanon;
+    Pattern _patternCanon;
 
     static public SampleCriteria fromCriteriaDef(CriteriaDef criteria)
     {
@@ -69,6 +71,8 @@ public class SampleCriteria
     {
         _strPattern = pattern;
         _pattern = Pattern.compile(pattern);
+        _strPatternCanon = DataFrame.canonicalFieldName(pattern);
+        _patternCanon = Pattern.compile(_strPatternCanon);
     }
 
     public String getKeyword()
@@ -86,7 +90,10 @@ public class SampleCriteria
         String value = fcs.getKeyword(_keyword);
         if (value == null)
             value = "";
-        return _pattern.matcher(value).matches();
+        String valueCanon = DataFrame.canonicalFieldName(value);
+        return _pattern.matcher(value).matches() ||
+            _pattern.matcher(valueCanon).matches() ||
+            _patternCanon.matcher(valueCanon).matches();
     }
 
     public FCSKeywordData find(List<FCSKeywordData> fcsRefs)

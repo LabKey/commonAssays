@@ -65,12 +65,30 @@ public class DataFrame
         init(fields, data);
     }
 
+
+    public static String canonicalFieldName(String name)
+    {
+        name = name.toLowerCase().replace(" ", "").replace("-","");
+        // UNDONE: these aliases should be configured in admin pages
+        name = name.replace("petexasred","petr");
+        name = name.replace("petxrd", "petr");
+        name = name.replace("cy5.5","cy55");
+        return name;
+    }
+
+
     private void init(Field[] fields, NumberArray[] data)
     {
         assert fields.length == data.length;
         this.fields = fields.clone();
-		for (Field field : fields)
-			fieldsMap.put(field.getName(), field);
+        for (Field field : fields)
+        {
+            String name = field.getName();
+            fieldsMap.put(name, field);
+            name = canonicalFieldName(name);
+            if (!fieldsMap.containsKey(name))
+                fieldsMap.put(name, field);
+        }
         this.data = data;
     }
 
@@ -216,8 +234,13 @@ public class DataFrame
 
     public Field getField(String s)
     {
+        Field f = fieldsMap.get(s);
+        if (f != null)
+            return f;
+            s = canonicalFieldName(s);
         return fieldsMap.get(s);
     }
+
 
     public NumberArray getColumn(String s)
     {

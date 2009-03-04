@@ -118,7 +118,7 @@ public abstract class FlowJob extends PipelineJob
     public void addError(String lsid, String propertyURI, String message)
     {
         _errors = true;
-        addStatus(message);
+        error(message);
     }
 
     public boolean isStarted()
