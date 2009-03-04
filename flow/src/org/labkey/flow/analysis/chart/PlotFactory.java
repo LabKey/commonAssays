@@ -155,6 +155,8 @@ public class PlotFactory
     static public String getLabel(Subset subset, String fieldName)
     {
         DataFrame.Field field = subset.getDataFrame().getField(fieldName);
+        if (field == null)
+            throw new IllegalArgumentException("No such field '" + fieldName + "'");
         boolean compensated = field.getOrigIndex() != field.getIndex();
         return getLabel(subset.getFCSHeader(), field.getOrigIndex(), compensated);
     }

@@ -205,7 +205,10 @@ public class CompensationMatrix implements Serializable
         return _name;
     }
 
-    public Matrix getMatrix(DataFrame data)
+    /**
+     * @throws FlowException if a channel required by the compensation matrix is not found in the DataFrame.
+     */
+    public Matrix getMatrix(DataFrame data) throws FlowException
     {
         Matrix ret = new Matrix(data.getColCount(), data.getColCount());
         for (int i = 0; i < data.getColCount(); i ++)
@@ -214,11 +217,17 @@ public class CompensationMatrix implements Serializable
         }
         for (int i = 0; i < _channelNames.length; i ++)
         {
-            int irow = data.getField(_channelNames[i]).getIndex();
+            DataFrame.Field ifield = data.getField(_channelNames[i]);
+            if (ifield == null)
+                throw new FlowException("Channel '" + _channelNames[i] + "' not found");
+            int irow = ifield.getIndex();
             double[] row = _rows[i];
             for (int j = 0; j < _channelNames.length; j ++)
             {
-                int icol = data.getField(_channelNames[j]).getIndex();
+                DataFrame.Field jfield = data.getField(_channelNames[j]);
+                if (jfield == null)
+                    throw new FlowException("Channel '" + _channelNames[j] + "' not found");
+                int icol = jfield.getIndex();
                 ret.set(icol, irow, row[j]);
             }
         }
@@ -235,7 +244,7 @@ public class CompensationMatrix implements Serializable
         return _rows[irow];
     }
 
-    public DataFrame getCompensatedData(DataFrame data, boolean dither)
+    public DataFrame getCompensatedData(DataFrame data, boolean dither) throws FlowException
     {
         Matrix matrix = getMatrix(data);
         matrix = matrix.inverse();
@@ -245,7 +254,7 @@ public class CompensationMatrix implements Serializable
         return data;
     }
 
-    public DataFrame getCompensatedData(DataFrame data)
+    public DataFrame getCompensatedData(DataFrame data) throws FlowException
     {
         DataFrame comp = getCompensatedData(data, false);
         DataFrame compDithered = getCompensatedData(data, true);
@@ -260,6 +269,8 @@ public class CompensationMatrix implements Serializable
         for (int i = 0; i < _channelNames.length; i ++)
         {
             DataFrame.Field origField = data.getField(_channelNames[i]);
+            if (origField == null)
+                throw new FlowException("Channel '" + _channelNames[i] + "' not found");
             DataFrame.Field compField = new DataFrame.Field(data.getColCount() + i, origField, _prefix + _channelNames[i] + _suffix);
             DataFrame.Field ditheredField = new DataFrame.Field(data.getColCount() + _channelNames.length + i, origField, DITHERED_PREFIX + _prefix + _channelNames[i] + _suffix);
             fields[compField.getIndex()] = compField;
@@ -319,6 +330,7 @@ public class CompensationMatrix implements Serializable
         }
         doc.appendChild(doc.createElement("CompensationMatrix"));
         Element elRoot = doc.getDocumentElement();
+        elRoot.setAttribute("name", _name);
         elRoot.setAttribute("prefix", _prefix);
         elRoot.setAttribute("suffix", _suffix);
         for (int i = 0; i < _channelNames.length; i ++)

@@ -63,7 +63,7 @@ public class GraphForm extends EditScriptForm
         ret.compensation = editingMode.isCompensation();
         ret.editingMode = editingMode;
         FlowCompensationMatrix m = getCompensationMatrix();
-        if (null != m)
+        if (m != null)
             ret.compensationMatrix = service.makeCompensationMatrix(m, false);
         ret.well = service.makeWell(getWell());
         ret.width = width;

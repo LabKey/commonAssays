@@ -439,8 +439,17 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         }
         catch (Exception e)
         {
-            _log.error("Error", e);
-            throw UnexpectedException.wrap(e);
+            // rethrow with more information for mothership
+            // CONSIDER: instead just add error details in GateCallback.onFailure()
+            String msg = "Failed to get graph info: " + e.getMessage();
+            if (graphOptions.well != null && graphOptions.well.getName() != null)
+                msg += "\n  FCS file: " + graphOptions.well.getName();
+            if (graphOptions.compensationMatrix != null && graphOptions.compensationMatrix.getName() != null)
+                msg += "\n  Comp Matrix: " + graphOptions.compensationMatrix.getName();
+            if (graphOptions.subset != null)
+                msg += "\n  Subset: " + graphOptions.subset;
+            _log.error(msg, e);
+            throw new UnexpectedException(e, msg);
         }
     }
 
