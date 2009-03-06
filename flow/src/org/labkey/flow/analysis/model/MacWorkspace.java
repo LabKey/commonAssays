@@ -184,7 +184,7 @@ public class MacWorkspace extends FlowJoWorkspace
         Element elStringArray = getElementsByTagName(elGatePaths, "StringArray").get(0);
         for (Element elString : getElementsByTagName(elStringArray, "String"))
         {
-            String string = cleanPopName(getTextValue(elString));
+            String string = cleanName(getTextValue(elString));
             gatePaths.add(string);
         }
         StringTokenizer st = new StringTokenizer(specification, "&|", true);
@@ -245,7 +245,7 @@ public class MacWorkspace extends FlowJoWorkspace
             String parameter = StringUtils.trimToNull(elStat.getAttribute("parameter"));
             if (parameter != null)
             {
-                parameter = cleanPopName(parameter);
+                parameter = cleanName(parameter);
             }
             String percentile = StringUtils.trimToNull(elStat.getAttribute("statisticVariable"));
             StatisticSpec spec;
@@ -277,8 +277,8 @@ public class MacWorkspace extends FlowJoWorkspace
 
     protected PolygonGate readPolygon(Element el)
     {
-        String xAxis = cleanPopName(el.getAttribute("xAxisName"));
-        String yAxis = cleanPopName(el.getAttribute("yAxisName"));
+        String xAxis = cleanName(el.getAttribute("xAxisName"));
+        String yAxis = cleanName(el.getAttribute("yAxisName"));
 
         List<Double> lstX = new ArrayList<Double>();
         List<Double> lstY = new ArrayList<Double>();
@@ -311,7 +311,7 @@ public class MacWorkspace extends FlowJoWorkspace
         }
 
         Population ret = new Population();
-        ret.setName(cleanPopName(elPopulation.getAttribute("name")));
+        ret.setName(cleanName(elPopulation.getAttribute("name")));
         SubsetSpec subset = new SubsetSpec(parentSubset, ret.getName());
         Set<String> gatedParams = new LinkedHashSet<String>();
 
@@ -333,7 +333,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 }
                 else if ("Range".equals(el.getTagName()))
                 {
-                    String axis = cleanPopName(el.getAttribute("xAxisName"));
+                    String axis = cleanName(el.getAttribute("xAxisName"));
                     gatedParams.add(axis);
                     List<Double> lstValues = new ArrayList<Double>();
                     for (Element elPolygon : getElementsByTagName(el, "Polygon"))
