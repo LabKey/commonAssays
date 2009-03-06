@@ -245,7 +245,7 @@ public class MacWorkspace extends FlowJoWorkspace
             String parameter = StringUtils.trimToNull(elStat.getAttribute("parameter"));
             if (parameter != null)
             {
-                parameter = cleanName(parameter);
+                parameter = cleanPopName(parameter);
             }
             String percentile = StringUtils.trimToNull(elStat.getAttribute("statisticVariable"));
             StatisticSpec spec;
@@ -311,7 +311,7 @@ public class MacWorkspace extends FlowJoWorkspace
         }
 
         Population ret = new Population();
-        ret.setName(cleanName(elPopulation.getAttribute("name")));
+        ret.setName(cleanPopName(elPopulation.getAttribute("name")));
         SubsetSpec subset = new SubsetSpec(parentSubset, ret.getName());
         Set<String> gatedParams = new LinkedHashSet<String>();
 

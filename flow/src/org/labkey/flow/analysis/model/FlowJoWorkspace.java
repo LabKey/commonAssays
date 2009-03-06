@@ -339,6 +339,8 @@ abstract public class FlowJoWorkspace implements Serializable
     {
         name = cleanName(name);
         name = StringUtils.replaceChars(name, '/', '_');
+        name = StringUtils.replaceChars(name, '(', '[');
+        name = StringUtils.replaceChars(name, ')', ']');
         return name;
     }
 
@@ -636,7 +638,8 @@ abstract public class FlowJoWorkspace implements Serializable
                 newParent = findPopulation(ret, newParentSubset);
             }
             Population newPop = new Population();
-            newPop.setName(cleanName(newSubset.getSubset()));
+            String subset = cleanPopName(newSubset.getSubset());
+            newPop.setName(subset);
             newPop.getGates().addAll(oldPop.getGates());
             assert newParent.getPopulation(newPop.getName()) == null;
             newParent.addPopulation(newPop);

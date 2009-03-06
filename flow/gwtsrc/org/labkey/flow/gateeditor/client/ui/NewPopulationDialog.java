@@ -65,6 +65,7 @@ public class NewPopulationDialog extends GateComponent
         dialog.setText("New Population");
         VerticalPanel verticalPanel = new VerticalPanel();
         verticalPanel.add(new Label("What do you want to call the new population?"));
+        // XXX: disallow '/', '(', and ')' characters in population name
         nameBox = new TextBox();
         nameBox.addKeyboardListener(keyboardListener);
         verticalPanel.add(nameBox);
