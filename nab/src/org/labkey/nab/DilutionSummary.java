@@ -73,12 +73,12 @@ public class DilutionSummary implements Serializable
         return (String) _sampleGroup.getProperty(NabManager.SampleProperty.SampleDescription.name());
     }
 
-    public double getPercent(WellData data)
+    public double getPercent(WellData data) throws DilutionCurve.FitFailedException
     {
         return _assay.getPercent(_sampleGroup, data);
     }
 
-    private DilutionCurve getDilutionCurve()
+    private DilutionCurve getDilutionCurve() throws DilutionCurve.FitFailedException
     {
         if (_dilutionCurve == null)
         {
@@ -87,7 +87,7 @@ public class DilutionSummary implements Serializable
         return _dilutionCurve;
     }
 
-    public double getPlusMinus(WellData data)
+    public double getPlusMinus(WellData data) throws DilutionCurve.FitFailedException
     {
         if (getPercent(data) == 0)
             return 0;
@@ -121,7 +121,7 @@ public class DilutionSummary implements Serializable
         return getDilutionCurve().getCutoffDilution(cutoff);
     }
 
-    public double getInterpolatedCutoffDilution(double cutoff)
+    public double getInterpolatedCutoffDilution(double cutoff) throws DilutionCurve.FitFailedException
     {
         return getDilutionCurve().getInterpolatedCutoffDilution(cutoff);
     }
@@ -160,4 +160,9 @@ public class DilutionSummary implements Serializable
     {
         return _sampleGroup;
     }
+
+    public DilutionCurve.Parameters getCurveParameters() throws DilutionCurve.FitFailedException
+    {
+        return getDilutionCurve().getParameters();
     }
+}

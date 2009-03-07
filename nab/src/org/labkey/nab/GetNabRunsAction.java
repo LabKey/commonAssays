@@ -24,6 +24,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
@@ -58,6 +59,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         private String _assayName;
         private boolean _includeStats = true;
         private boolean _includeWells = true;
+        private boolean _includeFitParameters = true;
         private boolean _calculateNeut = true;
         private Integer _start;
         private Integer _limit;
@@ -112,6 +114,16 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         public void setCalculateNeut(boolean calculateNeut)
         {
             _calculateNeut = calculateNeut;
+        }
+
+        public boolean isIncludeFitParameters()
+        {
+            return _includeFitParameters;
+        }
+
+        public void setIncludeFitParameters(boolean includeFitParameters)
+        {
+            _includeFitParameters = includeFitParameters;
         }
 
         public Integer getStart()
@@ -191,7 +203,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
 
     private class NabRun extends HashMap<String, Object>
     {
-        public NabRun(NabAssayRun assay, boolean includeStats, boolean includeWells, boolean calculateNeut)
+        public NabRun(NabAssayRun assay, boolean includeStats, boolean includeWells, boolean calculateNeut, boolean includeFitParameters)
         {
             put("runId", assay.getRun().getRowId());
             put("properties", new PropertyNameMap(assay.getRunProperties()));
@@ -220,6 +232,17 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
                             sample.put("curveIC" + cutoff, dilutionSummary.getCutoffDilution(cutoff/100.0));
                             sample.put("pointIC" + cutoff, dilutionSummary.getInterpolatedCutoffDilution(cutoff/100.0));
                         }
+                    }
+                    if (includeFitParameters)
+                    {
+                        Map<String, Object> curveProperties = new HashMap<String, Object>();
+                        DilutionCurve.Parameters parameters = dilutionSummary.getCurveParameters();
+                        curveProperties.put("asymmetry", parameters.getAsymmetry());
+                        curveProperties.put("inflection", parameters.getInflection());
+                        curveProperties.put("slope", parameters.getSlope());
+                        curveProperties.put("max", parameters.getMax());
+                        curveProperties.put("min", parameters.getMin());
+                        sample.put("fitParameters", curveProperties);
                     }
                     List<Map<String, Object>> replicates = new ArrayList<Map<String, Object>>();
                     for (WellGroup replicate : dilutionSummary.getWellGroup().getOverlappingGroups(WellGroup.Type.REPLICATE))
@@ -261,10 +284,15 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
     {
         QuerySettings settings = new QuerySettings(form.getViewContext(), QueryView.DATAREGIONNAME_DEFAULT);
         //show all rows by default
-        if(null == form.getLimit())
+       if(null == form.getLimit()
+            && null == getViewContext().getRequest().getParameter(QueryView.DATAREGIONNAME_DEFAULT + "." + QueryParam.maxRows))
+        {
             settings.setShowRows(ShowRows.ALL);
-        else
+        }
+        else if (form.getLimit() != null)
+        {
             settings.setMaxRows(form.getLimit().intValue());
+        }
 
         if (form.getStart() != null)
             settings.setOffset(form.getStart().intValue());
@@ -277,16 +305,16 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
             settings.setSortFilterURL(sortFilterURL); //this isn't working!
         }
 
-
         settings.setQueryName(tableName);
 
         UserSchema assaySchema = QueryService.get().getUserSchema(form.getViewContext().getUser(),
                 form.getViewContext().getContainer(), AssayService.ASSAY_SCHEMA_NAME);
 
-        QueryView view;
+        DataView dataView;
         try
         {
-            view = QueryView.create(getViewContext(), assaySchema, settings);
+            QueryView queryView = QueryView.create(getViewContext(), assaySchema, settings);
+            dataView = queryView.createDataView();
         }
         catch (ServletException e)
         {
@@ -296,7 +324,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         List<Integer> rowIds = new ArrayList<Integer>();
         try
         {
-            rs = view.getResultset();
+            rs = dataView.getDataRegion().getResultSet(dataView.getRenderContext());
             while (rs.next())
                 rowIds.add(rs.getInt("RowId"));
         }
@@ -352,7 +380,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         for (ExpRun run : getRuns(tableName, form))
         {
             runList.add(new NabRun(NabDataHandler.getAssayResults(run, form.getViewContext().getUser()),
-                    form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut()));
+                    form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut(), form.isIncludeFitParameters()));
 
         }
         return new ApiResponse()

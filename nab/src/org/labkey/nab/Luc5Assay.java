@@ -117,10 +117,14 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
         return virusControl.getMean() - cellControl.getMean();
     }
 
-    public double getPercent(WellGroup group, WellData data)
+    public double getPercent(WellGroup group, WellData data) throws DilutionCurve.FitFailedException
     {
         WellData cellControl = _plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
+        if (cellControl == null)
+            throw new DilutionCurve.FitFailedException("Invalid plate template: no cell control well group was found.");
         WellData virusControl = _plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
+        if (virusControl == null)
+            throw new DilutionCurve.FitFailedException("Invalid plate template: no virus control well group was found.");
         double controlRange = virusControl.getMean() - cellControl.getMean();
         double cellControlMean = cellControl.getMean();
         if (data.getMean() < cellControlMean)
