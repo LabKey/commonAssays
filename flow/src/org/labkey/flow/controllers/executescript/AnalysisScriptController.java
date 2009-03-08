@@ -444,7 +444,6 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
         public ModelAndView getView(ImportAnalysisForm form, boolean reshow, BindException errors) throws Exception
         {
             return new JspView<ImportAnalysisForm>(AnalysisScriptController.class, "importAnalysis.jsp", form, errors);
-//            return new GroovyView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysis.jsp", form, errors);
         }
 
         public boolean handlePost(ImportAnalysisForm form, BindException errors) throws Exception

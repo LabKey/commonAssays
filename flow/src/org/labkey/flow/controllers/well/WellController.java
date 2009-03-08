@@ -431,7 +431,6 @@ public class WellController extends SpringFlowController<WellController.Action>
         public ModelAndView getView(UpdateKeywordsForm form, boolean reshow, BindException errors) throws Exception
         {
             return new JspView<UpdateKeywordsForm>(WellController.class, "bulkUpdate.jsp", form, errors);
-            //return new GroovyView<UpdateKeywordsForm>("/org/labkey/flow/controllers/well/bulkUpdate.jsp", form);
         }
 
         public NavTree appendNavTrail(NavTree root)
