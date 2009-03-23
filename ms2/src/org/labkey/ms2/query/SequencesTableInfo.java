@@ -41,15 +41,17 @@ public class SequencesTableInfo extends FilteredTable
     private final Container _container;
     private final QuerySchema _schema;
 
-    public SequencesTableInfo(String alias, QuerySchema schema)
+    protected SequencesTableInfo(String name, QuerySchema schema)
+    {
+        this(schema);
+        setName(name);
+    }
+
+    public SequencesTableInfo(QuerySchema schema)
     {
         super(ProteinManager.getTableInfoSequences());
         _schema = schema;
         _container = schema.getContainer();
-        if (alias != null)
-        {
-            setAlias(alias);
-        }
         setTitleColumn("BestName");
         wrapAllColumns(true);
 
@@ -234,10 +236,10 @@ public class SequencesTableInfo extends FilteredTable
         Set<Container> containers = ContainerManager.getAllChildren(c, u, ACL.PERM_READ);
         SQLFragment sql = new SQLFragment();
         sql.append("SeqId IN (SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoFastaSequences());
-        sql.append(" fs, ");
-        sql.append(MS2Manager.getTableInfoRuns());
-        sql.append(" r WHERE fs.FastaId = r.FastaId AND r.Deleted = ? AND r.Container IN ");
+        sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+        sql.append(", ");
+        sql.append(MS2Manager.getTableInfoRuns(), "r");
+        sql.append(" WHERE fs.FastaId = r.FastaId AND r.Deleted = ? AND r.Container IN ");
         sql.add(Boolean.FALSE);
         if (includeSubfolders)
         {
@@ -259,20 +261,20 @@ public class SequencesTableInfo extends FilteredTable
         SQLFragment sql = new SQLFragment();
         sql.append("SeqId IN (\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoAnnotations());
-        sql.append(" a WHERE ");
+        sql.append(ProteinManager.getTableInfoAnnotations(), "a");
+        sql.append(" WHERE ");
         sql.append(SequencesTableInfo.getIdentifierClause(params, "a.AnnotVal", exactMatch));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoFastaSequences());
-        sql.append(" fs WHERE ");
+        sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+        sql.append(" WHERE ");
         sql.append(SequencesTableInfo.getIdentifierClause(params, "fs.lookupstring", exactMatch));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoIdentifiers());
-        sql.append(" i WHERE ");
+        sql.append(ProteinManager.getTableInfoIdentifiers(), "i");
+        sql.append(" WHERE ");
         sql.append(SequencesTableInfo.getIdentifierClause(params, "i.Identifier", exactMatch));
         sql.append("\n");
         sql.append(")");

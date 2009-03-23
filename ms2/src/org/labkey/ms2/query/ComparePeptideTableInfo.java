@@ -137,10 +137,10 @@ public class ComparePeptideTableInfo extends VirtualTable
     }
 
 
-    public SQLFragment getFromSQL(String alias)
+    public SQLFragment getFromSQL()
     {
         SQLFragment result = new SQLFragment();
-        result.append("(SELECT InnerPeptide");
+        result.append("SELECT InnerPeptide");
         for (MS2Run run : _runs)
         {
             result.append(",\n");
@@ -161,8 +161,8 @@ public class ComparePeptideTableInfo extends VirtualTable
             result.append("PeptideId");
         }
         result.append( "\nFROM ");
-        result.append(MS2Manager.getTableInfoFractions());
-        result.append(" f, (");
+        result.append(MS2Manager.getTableInfoFractions(), "f");
+        result.append(", (");
         List<FieldKey> fieldKeys = Arrays.asList(
                 FieldKey.fromParts("Fraction"),
                 FieldKey.fromParts("Peptide"),
@@ -178,9 +178,7 @@ public class ComparePeptideTableInfo extends VirtualTable
             separator = ", ";
             result.append(run.getRun());
         }
-        result.append(") AND p.Fraction = f.Fraction GROUP BY f.Run, p.Peptide, p.RowId) x GROUP BY InnerPeptide)\n");
-        result.append(" AS ");
-        result.append(alias);
+        result.append(") AND p.Fraction = f.Fraction GROUP BY f.Run, p.Peptide, p.RowId) x GROUP BY InnerPeptide");
         return result;
     }
 }

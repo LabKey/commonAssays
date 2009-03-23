@@ -18,6 +18,7 @@ package org.labkey.flow.query;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 
@@ -51,6 +52,7 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
 
     protected void initColumn(StatisticSpec stat, ColumnInfo column)
     {
+
         SubsetSpec subset = _fps.simplifySubset(stat.getSubset());
         stat = new StatisticSpec(subset, stat.getStatistic(), stat.getParameter());
         column.setCaption(stat.toShortString());
@@ -61,7 +63,7 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, StatisticSpec attrName, int attrId)
     {
         SQLFragment ret = new SQLFragment("(SELECT flow.Statistic.Value FROM flow.Statistic WHERE flow.Statistic.ObjectId = ");
-        ret.append(objectIdColumn.getValueSql());
+        ret.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         ret.append(" AND flow.Statistic.StatisticId = ");
         ret.append(attrId);
         ret.append(")");

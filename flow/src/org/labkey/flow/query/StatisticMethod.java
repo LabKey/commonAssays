@@ -18,10 +18,12 @@ package org.labkey.flow.query;
 
 import org.labkey.api.data.*;
 import org.labkey.api.query.AbstractMethodInfo;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.snapshot.AbstractTableMethodInfo;
 
 import java.sql.Types;
 
-public class StatisticMethod extends AbstractMethodInfo
+public class StatisticMethod extends AbstractTableMethodInfo
 {
     ColumnInfo _objectIdColumn;
     public StatisticMethod(ColumnInfo objectIdColumn)
@@ -37,7 +39,7 @@ public class StatisticMethod extends AbstractMethodInfo
         return ret;
     }
 
-    public SQLFragment getSQL(DbSchema schema, SQLFragment[] arguments)
+    public SQLFragment getSQL(String tableAlias, DbSchema schema, SQLFragment[] arguments)
     {
         if (arguments.length != 1)
         {
@@ -46,8 +48,8 @@ public class StatisticMethod extends AbstractMethodInfo
         SQLFragment ret = new SQLFragment("(SELECT flow.statistic.value FROM flow.statistic" +
                 "\nINNER JOIN flow.attribute ON flow.statistic.statisticid = flow.attribute.rowid AND flow.attribute.name = ");
         ret.append(arguments[0]);
-        ret.append("\nWHERE flow.statistic.objectId = ");
-        ret.append(_objectIdColumn.getValueSql());
+        ret.append("\nWHERE flow.statistic.objectId = " + tableAlias + ".Statistic");
+//        ret.append(_objectIdColumn.getValueSql(tableAlias));
         ret.append(")");
         return ret;
     }

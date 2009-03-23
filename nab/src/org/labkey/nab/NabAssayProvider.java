@@ -209,9 +209,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return new HtmlView("The NAb data file is a specially formatted Excel 1997-2003 file with a .xls extension.");
     }
 
-    public TableInfo createDataTable(UserSchema schema, String alias, ExpProtocol protocol)
+    public TableInfo createDataTable(UserSchema schema, ExpProtocol protocol)
     {
-        AbstractTableInfo table = (AbstractTableInfo)NabSchema.getDataRowTable(schema.getContainer(), schema.getUser(), protocol, alias);
+        AbstractTableInfo table = (AbstractTableInfo)NabSchema.getDataRowTable(schema.getContainer(), schema.getUser(), protocol);
         addCopiedToStudyColumns(table, protocol, schema.getUser(), "objectId", true);
         return table;
     }

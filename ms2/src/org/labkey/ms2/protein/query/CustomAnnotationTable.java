@@ -81,13 +81,13 @@ public class CustomAnnotationTable extends FilteredTable
 
     private void addProteinDetailsColumn()
     {
-        SQLFragment sql = new SQLFragment(getAliasName() + ".SeqId");
+        SQLFragment sql = new SQLFragment(getName() + ".SeqId");
         ColumnInfo col = new ExprColumn(this, "Protein", sql, Types.INTEGER);
         col.setFk(new LookupForeignKey("SeqId")
         {
             public TableInfo getLookupTableInfo()
             {
-                return new SequencesTableInfo(null, _schema);
+                return new SequencesTableInfo(_schema);
             }
         });
         addColumn(col);
@@ -102,20 +102,17 @@ public class CustomAnnotationTable extends FilteredTable
     }
 
 
-    public SQLFragment getFromSQL(String alias)
+    public SQLFragment getFromSQL()
     {
+        SQLFragment sql = super.getFromSQL();
         if (!_includeSeqId)
-        {
-            return super.getFromSQL(alias);
-        }
-        SQLFragment sql = super.getFromSQL("CustomAnnotationWithoutSeqId");
-
-        SQLFragment result = new SQLFragment("(SELECT CustomAnnotationWithoutSeqId.*, i.seqId FROM ");
+            return sql;
+        
+        SQLFragment result = new SQLFragment("SELECT CustomAnnotationWithoutSeqId.*, i.seqId FROM (");
         result.append(sql);
-        result.append(" LEFT OUTER JOIN (");
+        result.append(") CustomAnnotationWithoutSeqId LEFT OUTER JOIN (");
         result.append(_annotationSet.lookupCustomAnnotationType().getSeqIdSelect());
-        result.append(") i ON (CustomAnnotationWithoutSeqId.LookupString = i.ident)) ");
-        result.append(alias);
+        result.append(") i ON (CustomAnnotationWithoutSeqId.LookupString = i.ident)");
         return result;
     }
 }

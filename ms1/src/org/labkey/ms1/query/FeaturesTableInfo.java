@@ -186,11 +186,12 @@ public class FeaturesTableInfo extends VirtualTable
         _includePepFk = includePepFk;
     }
 
-    public SQLFragment getFromSQL(String alias)
+
+    public SQLFragment getFromSQL()
     {
         assert null != getSourceTable();
 
-        SQLFragment sql = new SQLFragment("(SELECT\n");
+        SQLFragment sql = new SQLFragment("SELECT\n");
         String sep = "";
 
         //all base-table columns
@@ -261,12 +262,9 @@ public class FeaturesTableInfo extends VirtualTable
             }
         }
 
-        //alias
-        sql.append(") AS ");
-        sql.append(alias);
-
         return sql;
     }
+
 
     public Map<String,String> getAliasMap()
     {

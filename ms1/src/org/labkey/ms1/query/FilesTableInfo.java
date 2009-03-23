@@ -49,7 +49,7 @@ public class FilesTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return _expSchema.createDatasTable(null);
+                return _expSchema.createDatasTable();
             }
         });
 

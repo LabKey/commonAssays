@@ -97,6 +97,11 @@ abstract public class FlowDataType extends DataType
         return _label;
     }
 
+    public String getName()
+    {
+        return _name;
+    }
+
     public String urlFlag(boolean flagged)
     {
         StringBuilder ret = new StringBuilder();

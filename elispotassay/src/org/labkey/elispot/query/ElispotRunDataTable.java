@@ -33,9 +33,9 @@ import java.sql.SQLException;
  */
 public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 {
-    public ElispotRunDataTable(final UserSchema schema, String alias, final ExpProtocol protocol)
+    public ElispotRunDataTable(final UserSchema schema, final ExpProtocol protocol)
     {
-        super(schema, alias, protocol);
+        super(schema, protocol);
     }
 
     public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException

@@ -136,7 +136,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
 
         protected ProteinGroupTableInfo createTable()
         {
-            ProteinGroupTableInfo result = ((MS2Schema)getSchema()).createProteinGroupsForRunTable(null, false);
+            ProteinGroupTableInfo result = ((MS2Schema)getSchema()).createProteinGroupsForRunTable(false);
             result.setRunFilter(Arrays.asList(_runs));
             return result;
         }

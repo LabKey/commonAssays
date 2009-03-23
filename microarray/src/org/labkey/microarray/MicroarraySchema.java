@@ -64,18 +64,18 @@ public class MicroarraySchema extends UserSchema
         return PageFlowUtil.set(TABLE_RUNS);
     }
 
-    public TableInfo createTable(String name, String alias)
+    public TableInfo createTable(String name)
     {
         if (TABLE_RUNS.equalsIgnoreCase(name))
         {
-            return createRunsTable(alias);
+            return createRunsTable();
         }
         return null;
     }
 
-    public ExpRunTable createRunsTable(String alias)
+    public ExpRunTable createRunsTable()
     {
-        ExpRunTable result = _expSchema.createRunsTable(alias);
+        ExpRunTable result = _expSchema.createRunsTable();
         ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getRunTextURL(getContainer(), -1);
         result.getColumn(ExpRunTable.Column.Name).setURL(url.toString().replace("-1", "${RowId}"));
 

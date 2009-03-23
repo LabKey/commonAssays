@@ -68,7 +68,6 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
                 SQLFragment sqlExpr = new SQLFragment();
                 sqlExpr.appendStringLiteral(spec.toString());
                 ColumnInfo ret = new ExprColumn(parent.getParentTable(), parent.getName() + "$", sqlExpr, Types.VARCHAR);
-                ret.setAlias(parent.getAlias() + "$");
                 return ret;
             }
 

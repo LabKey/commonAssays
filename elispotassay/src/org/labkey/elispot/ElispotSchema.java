@@ -53,7 +53,7 @@ public class ElispotSchema extends UserSchema
         return new HashSet<String>(Arrays.asList(DATA_ROW_TABLE_NAME));
     }
 
-    public TableInfo createTable(String name, String alias)
+    public TableInfo createTable(String name)
     {
         for (ExpProtocol protocol : AssayService.get().getAssayProtocols(getContainer()))
         {
@@ -62,7 +62,7 @@ public class ElispotSchema extends UserSchema
             {
                 if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
                 {
-                    return provider.createDataTable(this, alias, protocol);
+                    return provider.createDataTable(this, protocol);
                 }
             }
         }

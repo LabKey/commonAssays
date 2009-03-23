@@ -133,7 +133,7 @@ public class SpectraCountTableInfo extends VirtualTable
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpRunTable result = (ExpRunTable)MS2Schema.TableType.MS2SearchRuns.createTable(null, _ms2Schema);
+                ExpRunTable result = (ExpRunTable)MS2Schema.TableType.MS2SearchRuns.createTable(_ms2Schema);
                 result.setContainerFilter(ContainerFilter.EVERYTHING);
                 return result;
             }
@@ -161,7 +161,7 @@ public class SpectraCountTableInfo extends VirtualTable
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return _ms2Schema.createSequencesTable(null);
+                    return _ms2Schema.createSequencesTable();
                 }
             });
             addColumn(col);
@@ -200,10 +200,10 @@ public class SpectraCountTableInfo extends VirtualTable
     }
 
     @Override
-    public SQLFragment getFromSQL(String alias)
+    public SQLFragment getFromSQL()
     {
         SQLFragment sql = new SQLFragment();
-        sql.append("(SELECT\n");
+        sql.append("SELECT\n");
         sql.append("f.run\n"); // FK
         if (_config.isGroupedByPeptide())
         {
@@ -333,8 +333,6 @@ public class SpectraCountTableInfo extends VirtualTable
                 sql.append(", pd.SeqId");
             }
         }
-        sql.append(") AS ");
-        sql.append(alias);
         return sql;
     }
 }

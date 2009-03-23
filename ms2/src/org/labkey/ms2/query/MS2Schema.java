@@ -93,9 +93,9 @@ public class MS2Schema extends UserSchema
     {
         SamplePrepRuns
         {
-            public ExpRunTable createTable(String alias, MS2Schema ms2Schema)
+            public ExpRunTable createTable(MS2Schema ms2Schema)
             {
-                ExpRunTable result = ExperimentService.get().createRunTable(SamplePrepRuns.toString(), alias, ms2Schema);
+                ExpRunTable result = ExperimentService.get().createRunTable(SamplePrepRuns.toString(), ms2Schema);
                 result.populate();
                 result.setProtocolPatterns(PROTOCOL_PATTERN_PREFIX + SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX + "%");
                 return result;
@@ -103,114 +103,113 @@ public class MS2Schema extends UserSchema
         },
         ImportedSearchRuns
         {
-            public ExpRunTable createTable(String alias, MS2Schema ms2Schema)
+            public ExpRunTable createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createSearchTable(ImportedSearchRuns.toString(), alias, ContainerFilter.CURRENT, IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
+                return ms2Schema.createSearchTable(ImportedSearchRuns.toString(), ContainerFilter.CURRENT, IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
             }
         },
         XTandemSearchRuns
         {
-            public ExpRunTable createTable(String alias, MS2Schema ms2Schema)
+            public ExpRunTable createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createSearchTable(XTandemSearchRuns.toString(), alias, ContainerFilter.CURRENT, XTANDEM_PROTOCOL_OBJECT_PREFIX);
+                return ms2Schema.createSearchTable(XTandemSearchRuns.toString(), ContainerFilter.CURRENT, XTANDEM_PROTOCOL_OBJECT_PREFIX);
             }
         },
         MascotSearchRuns
         {
-            public ExpRunTable createTable(String alias, MS2Schema ms2Schema)
+            public ExpRunTable createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createSearchTable(MascotSearchRuns.toString(), alias, ContainerFilter.CURRENT, MASCOT_PROTOCOL_OBJECT_PREFIX);
+                return ms2Schema.createSearchTable(MascotSearchRuns.toString(), ContainerFilter.CURRENT, MASCOT_PROTOCOL_OBJECT_PREFIX);
             }
         },
         SequestSearchRuns
         {
-            public ExpRunTable createTable(String alias, MS2Schema ms2Schema)
+            public ExpRunTable createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createSearchTable(SequestSearchRuns.toString(), alias, ContainerFilter.CURRENT, SEQUEST_PROTOCOL_OBJECT_PREFIX);
+                return ms2Schema.createSearchTable(SequestSearchRuns.toString(), ContainerFilter.CURRENT, SEQUEST_PROTOCOL_OBJECT_PREFIX);
             }
         },
         MS2SearchRuns
         {
-            public ExpRunTable createTable(String alias, MS2Schema ms2Schema)
+            public ExpRunTable createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createRunsTable(MS2SearchRuns.toString(), alias, ContainerFilter.CURRENT);
+                return ms2Schema.createRunsTable(MS2SearchRuns.toString(), ContainerFilter.CURRENT);
             }
         },
         Peptides
         {
-            public TableInfo createTable(String alias, MS2Schema ms2Schema)
+            public TableInfo createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createPeptidesTable(alias, true);
+                return ms2Schema.createPeptidesTable(true);
             }
         },
         ProteinGroups
         {
-            public TableInfo createTable(String alias, MS2Schema ms2Schema)
+            public TableInfo createTable(MS2Schema ms2Schema)
             {
-                ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, ms2Schema);
+                ProteinGroupTableInfo result = new ProteinGroupTableInfo(ms2Schema);
                 result.addContainerCondition(ms2Schema.getContainer(), ms2Schema.getUser(), false);
                 return result;
             }
         },
         Sequences
         {
-            public TableInfo createTable(String alias, MS2Schema ms2Schema)
+            public TableInfo createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createSequencesTable(alias);
+                return ms2Schema.createSequencesTable();
             }
         };
 
-        public abstract TableInfo createTable(String alias, MS2Schema ms2Schema);
+        public abstract TableInfo createTable(MS2Schema ms2Schema);
     }
 
     public enum HiddenTableType
     {
         PeptidesFilter
         {
-            public TableInfo createTable(String alias, MS2Schema ms2Schema)
+            public TableInfo createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createPeptidesTable(alias, true);
+                return ms2Schema.createPeptidesTable(true);
             }
         },
         ProteinGroupsForSearch
         {
-            public TableInfo createTable(String alias, MS2Schema ms2Schema)
+            public TableInfo createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createProteinGroupsForSearchTable(alias);
+                return ms2Schema.createProteinGroupsForSearchTable();
             }
         },
         ProteinGroupsForRun
         {
-            public TableInfo createTable(String alias, MS2Schema ms2Schema)
+            public TableInfo createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createProteinGroupsForRunTable(alias, false);
+                return ms2Schema.createProteinGroupsForRunTable(false);
             }
         },
         CompareProteinProphet
         {
-            public TableInfo createTable(String alias, MS2Schema ms2Schema)
+            public TableInfo createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createProteinProphetCompareTable(alias, null, null);
+                return ms2Schema.createProteinProphetCompareTable(null, null);
             }
         },
         ComparePeptides
         {
-            public TableInfo createTable(String alias, MS2Schema ms2Schema)
+            public TableInfo createTable(MS2Schema ms2Schema)
             {
                 ComparePeptideTableInfo result = ms2Schema.createPeptidesCompareTable(false, null, null);
-                result.setAlias(alias);
                 return result;
             }
         },
         ProteinProphetCrosstab
         {
-            public TableInfo createTable(String alias, MS2Schema ms2Schema)
+            public TableInfo createTable(MS2Schema ms2Schema)
             {
                 return ms2Schema.createProteinProphetCrosstabTable(null, null);
             }
         };
 
-        public abstract TableInfo createTable(String alias, MS2Schema ms2Schema);
+        public abstract TableInfo createTable(MS2Schema ms2Schema);
 
     }
 
@@ -224,20 +223,20 @@ public class MS2Schema extends UserSchema
         return _proteinGroupProteins;
     }
 
-    public TableInfo createTable(String name, String alias)
+    public TableInfo createTable(String name)
     {
         for (TableType tableType : TableType.values())
         {
             if (tableType.toString().equalsIgnoreCase(name))
             {
-                return tableType.createTable(alias, this);
+                return tableType.createTable(this);
             }
         }
         for (HiddenTableType tableType : HiddenTableType.values())
         {
             if (tableType.toString().equalsIgnoreCase(name))
             {
-                return tableType.createTable(alias, this);
+                return tableType.createTable(this);
             }
         }
 
@@ -255,14 +254,14 @@ public class MS2Schema extends UserSchema
         return new ComparePeptideTableInfo(this, _runs, forExport, request, peptideViewName);
     }
 
-    public CompareProteinProphetTableInfo createProteinProphetCompareTable(String alias, HttpServletRequest request, String peptideViewName)
+    public CompareProteinProphetTableInfo createProteinProphetCompareTable(HttpServletRequest request, String peptideViewName)
     {
-        return new CompareProteinProphetTableInfo(alias, this, _runs, false, request, peptideViewName);
+        return new CompareProteinProphetTableInfo(this, _runs, false, request, peptideViewName);
     }
 
-    public ExpRunTable createRunsTable(String name, String alias, ContainerFilter filter)
+    public ExpRunTable createRunsTable(String name, ContainerFilter filter)
     {
-        return createSearchTable(name, alias, filter, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX , IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
+        return createSearchTable(name, filter, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX , IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
     }
 
     public SpectraCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, ViewContext context, MS2Controller.SpectraCountForm form)
@@ -270,9 +269,9 @@ public class MS2Schema extends UserSchema
         return new SpectraCountTableInfo(this, config, context, form);
     }
 
-    public ProteinGroupTableInfo createProteinGroupsForSearchTable(String alias)
+    public ProteinGroupTableInfo createProteinGroupsForSearchTable()
     {
-        ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, this);
+        ProteinGroupTableInfo result = new ProteinGroupTableInfo(this);
         List<FieldKey> defaultColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
         defaultColumns.add(0, FieldKey.fromParts("ProteinProphet","Run"));
         defaultColumns.add(0, FieldKey.fromParts("ProteinProphet", "Run", "Folder"));
@@ -282,12 +281,12 @@ public class MS2Schema extends UserSchema
 
     public ProteinGroupTableInfo createProteinGroupsForRunTable(String alias)
     {
-        return createProteinGroupsForRunTable(alias, true);
+        return createProteinGroupsForRunTable(true);
     }
 
-    public ProteinGroupTableInfo createProteinGroupsForRunTable(String alias, boolean includeFirstProteinColumn)
+    public ProteinGroupTableInfo createProteinGroupsForRunTable(boolean includeFirstProteinColumn)
     {
-        ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, this, includeFirstProteinColumn);
+        ProteinGroupTableInfo result = new ProteinGroupTableInfo(this, includeFirstProteinColumn);
         result.addProteinsColumn();
         List<FieldKey> defaultColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
         defaultColumns.add(FieldKey.fromParts("Proteins", "Protein"));
@@ -358,7 +357,7 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                SequencesTableInfo result = createSequencesTable(null);
+                SequencesTableInfo result = createSequencesTable();
                 // This is a horrible hack to try to deal with https://www.labkey.org/issues/home/Developer/issues/details.view?issueId=5237
                 // Performance on a SQLServer installation with a large number of runs and sequences is much better with
                 // this condition because it causes the query plan to flip to something that does a much more efficient
@@ -443,7 +442,7 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                ProteinGroupTableInfo result = new ProteinGroupTableInfo(null, MS2Schema.this);
+                ProteinGroupTableInfo result = new ProteinGroupTableInfo(MS2Schema.this);
                 result.getColumn("ProteinProphet").setIsHidden(true);
                 result.addProteinDetailColumns();
 
@@ -480,21 +479,20 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    public SequencesTableInfo createSequencesTable(String aliasName)
+    public SequencesTableInfo createSequencesTable()
     {
-        return new SequencesTableInfo(aliasName, this);
+        return new SequencesTableInfo(this);
     }
 
-    public TableInfo createPeptidesTable(final String alias, boolean restrictContainer)
+    public TableInfo createPeptidesTable(boolean restrictContainer)
     {
         PeptidesTableInfo result = new PeptidesTableInfo(this, true, restrictContainer);
-        result.setAlias(alias);
         return result;
     }
 
-    private ExpRunTable createSearchTable(String name, String alias, ContainerFilter filter, String... protocolObjectPrefix)
+    private ExpRunTable createSearchTable(String name, ContainerFilter filter, String... protocolObjectPrefix)
     {
-        final ExpRunTable result = ExperimentService.get().createRunTable(name, alias, this);
+        final ExpRunTable result = ExperimentService.get().createRunTable(name, this);
         result.setContainerFilter(filter);
         result.populate();
         String[] protocolPatterns = new String[protocolObjectPrefix.length];
@@ -660,7 +658,7 @@ public class MS2Schema extends UserSchema
 
     protected SQLFragment getPeptideSelectSQL(SimpleFilter filter, Collection<FieldKey> fieldKeys)
     {
-        TableInfo peptidesTable = createPeptidesTable("PeptidesAlias", false);
+        TableInfo peptidesTable = createPeptidesTable(false);
 
         Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(peptidesTable, fieldKeys);
 

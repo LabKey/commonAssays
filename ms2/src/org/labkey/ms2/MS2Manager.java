@@ -1548,7 +1548,7 @@ public class MS2Manager
                         rs = Table.executeQuery(getSchema(),
                                                     "SELECT Protein, " + discriminate + " as Expression, " +
                                                             " CASE substring(Protein, 1, 4) WHEN 'rev_' THEN 1 ELSE 0 END as FP " +
-                                                    "FROM " + getTableInfoPeptides().getFromSQL() + " " +
+                                                    "FROM " + getTableInfoPeptides().getSelectName() + " " +
                                                     "WHERE Run = ? " +
                                                     "ORDER BY Expression, FP",
                                                     new Object[] { run.getRun() });
@@ -1640,13 +1640,13 @@ public class MS2Manager
             try
             {
                 runRows = Table.executeSingleton(getSchema(),
-                                "SELECT count(*) " +
-                                    "FROM " + getTableInfoRuns().getFromSQL("r") + " " +
-                                        "inner join " + getTableInfoProteinProphetFiles().getFromSQL("f") + " on r.Run = f.Run " +
-                                        "inner join " + getTableInfoProteinGroups().getFromSQL("g") + " on f.RowId = g.ProteinProphetFileId " +
-                                    "WHERE r.Run = ? ",
-                                    new Object[] { run.getRun() },
-                                    Integer.class).longValue();
+                    "SELECT count(*) " +
+                        "FROM " + getTableInfoRuns().getSelectName() + " r " +
+                            "inner join " + getTableInfoProteinProphetFiles().getSelectName() + " f on r.Run = f.Run " +
+                            "inner join " + getTableInfoProteinGroups().getSelectName() + " g on f.RowId = g.ProteinProphetFileId " +
+                        "WHERE r.Run = ? ",
+                        new Object[] { run.getRun() },
+                        Integer.class).longValue();
             }
             catch (SQLException e)
             {
@@ -1666,11 +1666,11 @@ public class MS2Manager
                     rs = Table.executeQuery(getSchema(),
                                 "SELECT GroupNumber, -max(GroupProbability) as Expression, min(BestName) as Protein, " +
                                         " CASE substring(min(BestName), 1, 4) WHEN 'rev_' THEN 1 ELSE 0 END as FP " +
-                                "FROM " + getTableInfoRuns().getFromSQL("r") + " " +
-                                    "inner join " + getTableInfoProteinProphetFiles().getFromSQL("f") + " on r.Run = f.Run " +
-                                    "inner join " + getTableInfoProteinGroups().getFromSQL("g") + " on f.RowId = g.ProteinProphetFileId " +
-                                    "inner join " + getTableInfoProteinGroupMemberships().getFromSQL("m") + " on g.RowId = m.ProteinGroupId " +
-                                    "inner join " + ProteinManager.getTableInfoSequences().getFromSQL("s") + " on m.SeqId = s.SeqId " +
+                                "FROM " + getTableInfoRuns().getSelectName() + " r " +
+                                    "inner join " + getTableInfoProteinProphetFiles().getSelectName() + " f on r.Run = f.Run " +
+                                    "inner join " + getTableInfoProteinGroups().getSelectName() + " g on f.RowId = g.ProteinProphetFileId " +
+                                    "inner join " + getTableInfoProteinGroupMemberships().getSelectName() + " m on g.RowId = m.ProteinGroupId " +
+                                    "inner join " + ProteinManager.getTableInfoSequences().getSelectName() + " s on m.SeqId = s.SeqId " +
                                 "WHERE r.Run = ? " +
                                 "GROUP BY GroupNumber " +
                                 "ORDER BY Expression, FP",
@@ -1760,7 +1760,7 @@ public class MS2Manager
                                                     " when Charge = 2 then " + expressions[1] +
                                                     " else " + expressions[2] +
                                                 " end as Expression " +
-                                            "FROM " + getTableInfoPeptides().getFromSQL() + " " +
+                                            "FROM " + getTableInfoPeptides().getSelectName() + " " +
                                             "WHERE Run = ? " +
                                             "ORDER BY Expression DESC",
                                             new Object[] { new Integer(runId) });
@@ -1843,11 +1843,11 @@ public class MS2Manager
             try
             {
                 rs = Table.executeQuery(getSchema(),
-                                            "SELECT Fraction, Scan, Charge, Protein, " + expression + " as Expression " +
-                                            "FROM " + getTableInfoPeptides().getFromSQL() + " " +
-                                            "WHERE Run = ? " +
-                                            "ORDER BY Expression",
-                                            new Object[] { new Integer(runId) });
+                        "SELECT Fraction, Scan, Charge, Protein, " + expression + " as Expression " +
+                        "FROM " + getTableInfoPeptides().getSelectName() + " " +
+                        "WHERE Run = ? " +
+                        "ORDER BY Expression",
+                        new Object[] { new Integer(runId) });
                 if (!rs.next())
                     return collection;
 

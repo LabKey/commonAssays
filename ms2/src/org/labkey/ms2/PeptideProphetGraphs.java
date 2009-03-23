@@ -140,7 +140,7 @@ public class PeptideProphetGraphs
     public static void renderObservedVsPPScore(HttpServletResponse response, Container c, int runId, int charge, boolean cumulative) throws IOException, SQLException
     {
         String chargeSQL = "SELECT count(*) " +
-                        "FROM " + MS2Manager.getTableInfoPeptides().getFromSQL() + " " +
+                        "FROM " + MS2Manager.getTableInfoPeptides().getSelectName() + " " +
                         "WHERE Run = ? AND Charge = ?";
         String negHitPrefix = MS2Manager.getNegativeHitPrefix(c);
 
@@ -159,11 +159,11 @@ public class PeptideProphetGraphs
 
         XYSeries series = new XYSeries("xy");
         ResultSet rs = Table.executeQuery(MS2Manager.getSchema(),
-                                    "SELECT Protein, PeptideProphet " +
-                                    "FROM " + MS2Manager.getTableInfoPeptides().getFromSQL() + " " +
-                                    "WHERE Run = ? AND Charge = ? " +
-                                    "ORDER BY PeptideProphet",
-                                    new Object[] { runId, charge });
+                "SELECT Protein, PeptideProphet " +
+                "FROM " + MS2Manager.getTableInfoPeptides().getSelectName() + " " +
+                "WHERE Run = ? AND Charge = ? " +
+                "ORDER BY PeptideProphet",
+                new Object[] { runId, charge });
 
         int increment = total / 250;
         if (increment < 50)

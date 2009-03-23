@@ -226,7 +226,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             return Collections.emptyMap();
         SamplesSchema schema = new SamplesSchema(null, getContainer());
 
-        ExpMaterialTable sampleTable = schema.getSampleTable("samples", ss);
+        ExpMaterialTable sampleTable = schema.getSampleTable(ss);
         List<ColumnInfo> selectedColumns = new ArrayList<ColumnInfo>();
         ColumnInfo colProperty = sampleTable.getColumn(ExpMaterialTable.Column.Property.toString());
         ColumnInfo colRowId = sampleTable.getColumn(ExpMaterialTable.Column.RowId.toString());
@@ -271,7 +271,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         ExpSampleSet ss = getSampleSet();
 
         FlowSchema schema = new FlowSchema(user, getContainer());
-        TableInfo fcsFilesTable = schema.getTable("FCSFiles", "FCSFiles");
+        TableInfo fcsFilesTable = schema.getTable("FCSFiles");
         List<FieldKey> fields = new ArrayList();
         FieldKey fieldRowId = new FieldKey(null, "RowId");
         FieldKey fieldSampleRowId = new FieldKey(null, "Sample");

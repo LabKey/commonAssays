@@ -65,7 +65,7 @@ public class RunTableInfo extends FilteredTable
             public TableInfo getLookupTableInfo()
             {
                 ExpSchema schema = new ExpSchema(_schema.getUser(), _schema.getContainer());
-                return schema.createRunsTable(null);
+                return schema.createRunsTable();
             }
         });
     }

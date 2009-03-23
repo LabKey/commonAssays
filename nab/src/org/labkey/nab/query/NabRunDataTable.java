@@ -32,9 +32,9 @@ import java.sql.SQLException;
  */
 public class NabRunDataTable extends PlateBasedAssayRunDataTable
 {
-    public NabRunDataTable(final UserSchema schema, String alias, final ExpProtocol protocol)
+    public NabRunDataTable(final UserSchema schema, final ExpProtocol protocol)
     {
-        super(schema, alias, protocol);
+        super(schema, protocol);
     }
 
     public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException

@@ -89,7 +89,7 @@ public class NabSchema extends UserSchema
         return protocol.getName() + " " + DATA_ROW_TABLE_NAME;
     }
 
-    public TableInfo createTable(String name, String alias)
+    public TableInfo createTable(String name)
     {
         if (SAMPLE_PREPARATION_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -113,7 +113,7 @@ public class NabSchema extends UserSchema
             {
                 if (getTableName(protocol).equalsIgnoreCase(name))
                 {
-                    return new NabRunDataTable(this, alias, protocol);
+                    return new NabRunDataTable(this, protocol);
                 }
             }
         }
@@ -129,9 +129,9 @@ public class NabSchema extends UserSchema
         return _protocols;
     }
 
-    public static TableInfo getDataRowTable(Container container, User user, ExpProtocol protocol, String alias)
+    public static TableInfo getDataRowTable(Container container, User user, ExpProtocol protocol)
     {
-        return new NabSchema(user, container).getTable(getTableName(protocol), alias);        
+        return new NabSchema(user, container).getTable(getTableName(protocol));        
     }
 
     public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException

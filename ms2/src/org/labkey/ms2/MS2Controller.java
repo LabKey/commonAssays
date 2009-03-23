@@ -2625,7 +2625,7 @@ public class MS2Controller extends SpringActionController
             {
                 protected TableInfo createTable()
                 {
-                    ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
+                    ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable();
                     table.addPeptideFilter(form, getViewContext());
                     Integer[] seqIds = getSeqIds(form);
                     if (seqIds.length <= 500)
@@ -2652,7 +2652,7 @@ public class MS2Controller extends SpringActionController
 
         private Integer[] getSeqIds(ProteinSearchForm form)
         {
-            SequencesTableInfo tableInfo = new SequencesTableInfo(null, new MS2Schema(getUser(), getContainer()));
+            SequencesTableInfo tableInfo = new SequencesTableInfo(new MS2Schema(getUser(), getContainer()));
             tableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
             if (form.isRestrictProteins())
             {

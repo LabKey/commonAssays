@@ -92,9 +92,9 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return new HtmlView("The MAGEML data file is an XML file that contains the results of the microarray run.");
     }
 
-    public TableInfo createDataTable(UserSchema schema, String alias, ExpProtocol protocol)
+    public TableInfo createDataTable(UserSchema schema, ExpProtocol protocol)
     {
-        RunDataTable result = new RunDataTable(schema, alias, protocol);
+        RunDataTable result = new RunDataTable(schema, protocol);
         if (getDomainByPrefix(protocol, ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().length > 0)
         {
             List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
@@ -217,9 +217,9 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
     }
 
-    public ExpRunTable createRunTable(UserSchema schema, String alias, ExpProtocol protocol)
+    public ExpRunTable createRunTable(UserSchema schema, ExpProtocol protocol)
     {
-        ExpRunTable result = new MicroarraySchema(schema.getUser(), schema.getContainer()).createRunsTable(alias);
+        ExpRunTable result = new MicroarraySchema(schema.getUser(), schema.getContainer()).createRunsTable();
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Flag.name()));
         defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Links.name()));

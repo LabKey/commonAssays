@@ -18,10 +18,11 @@ package org.labkey.flow.query;
 
 import org.labkey.api.data.*;
 import org.labkey.api.query.AbstractMethodInfo;
+import org.labkey.api.query.snapshot.AbstractTableMethodInfo;
 
 import java.sql.Types;
 
-public class KeywordMethod extends AbstractMethodInfo
+public class KeywordMethod extends AbstractTableMethodInfo
 {
     ColumnInfo _objectIdColumn;
     public KeywordMethod(ColumnInfo objectIdColumn)
@@ -30,7 +31,7 @@ public class KeywordMethod extends AbstractMethodInfo
         _objectIdColumn = objectIdColumn;
     }
 
-    public SQLFragment getSQL(DbSchema schema, SQLFragment[] arguments)
+    public SQLFragment getSQL(String tableAlias, DbSchema schema, SQLFragment[] arguments)
     {
         if (arguments.length != 1)
         {
@@ -39,8 +40,8 @@ public class KeywordMethod extends AbstractMethodInfo
         SQLFragment ret = new SQLFragment("(SELECT flow.keyword.value FROM flow.keyword" +
                 "\nINNER JOIN flow.attribute ON flow.statistic.keywordid = flow.attribute.rowid AND flow.attribute.name = ");
         ret.append(arguments[0]);
-        ret.append("\nWHERE flow.keyword.objectId = ");
-        ret.append(_objectIdColumn.getValueSql());
+        ret.append("\nWHERE flow.keyword.objectId = " + tableAlias + ".Keyword");
+//        ret.append(_objectIdColumn.getValueSql(tableAlias));
         ret.append(")");
         return ret;
     }

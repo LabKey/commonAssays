@@ -174,9 +174,9 @@ abstract public class AttributeCache<T>
         sql.append("SELECT DISTINCT ");
         sql.append(_attrIdColumn.getValueSql("property"));
         sql.append(" AS attrId\nFROM ");
-        sql.append("flow.Object INNER JOIN ");
-        sql.append(_table.getFromSQL("property"));
-        sql.append(" ON flow.Object.RowId = ");
+        sql.append("flow.Object INNER JOIN (");
+        sql.append(_table.getFromSQL());
+        sql.append(") property ON flow.Object.RowId = ");
         sql.append(_objectIdColumn.getValueSql("property"));
         sql.append(" WHERE flow.Object.container=?");
         sql.add(container.getId());

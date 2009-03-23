@@ -155,8 +155,8 @@ public class ProteinCompareQuery extends CompareQuery
         outdent();
         appendNewLine();
         append(") grouped INNER JOIN ");
-        append(ProteinManager.getTableInfoSequences());
-        append(" seq ON grouped.SeqId = seq.SeqId");
+        append(ProteinManager.getTableInfoSequences(), "seq");
+        append(" ON grouped.SeqId = seq.SeqId");
     }
 
     protected String setupComparisonColumnLink(ActionURL linkURL, String columnName, String runPrefix)

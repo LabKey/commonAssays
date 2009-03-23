@@ -55,20 +55,20 @@ public class LuminexSchema extends UserSchema
         return new HashSet<String>(Arrays.asList(ANALYTE_TABLE_NAME, DATA_ROW_TABLE_NAME));
     }
 
-    public TableInfo createTable(String name, String alias)
+    public TableInfo createTable(String name)
     {
         if (ANALYTE_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createAnalyteTable(alias);
+            return createAnalyteTable();
         }
         else if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createDataRowTable(alias);
+            return createDataRowTable();
         }
         return null;
     }
 
-    private TableInfo createAnalyteTable(String alias)
+    private TableInfo createAnalyteTable()
     {
         FilteredTable result = new FilteredTable(getTableInfoAnalytes());
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Name")));
@@ -76,7 +76,7 @@ public class LuminexSchema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return createDataTable(null);
+                return createDataTable();
             }
         });
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RowId"))).setIsHidden(true);
@@ -103,13 +103,12 @@ public class LuminexSchema extends UserSchema
 
         addDataFilter(result);
         result.setTitleColumn("Name");
-        result.setAlias(alias);
         return result;
     }
 
-    public ExpDataTable createDataTable(String alias)
+    public ExpDataTable createDataTable()
     {
-        ExpDataTable ret = ExperimentService.get().createDataTable(ExpSchema.TableType.Datas.toString(), alias, this);
+        ExpDataTable ret = ExperimentService.get().createDataTable(ExpSchema.TableType.Datas.toString(), this);
         ret.addColumn(ExpDataTable.Column.RowId);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
@@ -125,7 +124,7 @@ public class LuminexSchema extends UserSchema
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return AssayService.get().createRunTable(null, _protocol, AssayService.get().getProvider(_protocol), _user, _container);
+                    return AssayService.get().createRunTable(_protocol, AssayService.get().getProvider(_protocol), _user, _container);
                 }
             });
         }
@@ -133,7 +132,7 @@ public class LuminexSchema extends UserSchema
         return ret;
     }
 
-    public FilteredTable createDataRowTable(String alias)
+    public FilteredTable createDataRowTable()
     {
         final FilteredTable result = new FilteredTable(getTableInfoDataRow());
         result.addColumn(result.wrapColumn("Analyte", result.getRealTable().getColumn("AnalyteId")));
@@ -142,7 +141,7 @@ public class LuminexSchema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return createDataTable(null);
+                return createDataTable();
             }
         });
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RowId"))).setIsHidden(true);
@@ -194,11 +193,10 @@ public class LuminexSchema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return createAnalyteTable(null);
+                return createAnalyteTable();
             }
         });
         addDataFilter(result);
-        result.setAlias(alias);
         return result;
     }
 

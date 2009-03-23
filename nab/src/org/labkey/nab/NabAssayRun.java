@@ -75,7 +75,7 @@ public class NabAssayRun extends Luc5Assay
                 for (DomainProperty property : _provider.getRunDomain(_protocol).getProperties())
                     fieldKeys.put(FieldKey.fromParts(AssayService.RUN_PROPERTIES_COLUMN_NAME, property.getName()), property.getPropertyDescriptor());
 
-                TableInfo runTable = AssayService.get().createRunTable(null, _protocol, _provider, _user, _run.getContainer());
+                TableInfo runTable = AssayService.get().createRunTable(_protocol, _provider, _user, _run.getContainer());
                 SimpleFilter filter = new SimpleFilter("RowId", _run.getRowId());
                 Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(runTable, fieldKeys.keySet());
                 rs = Table.selectForDisplay(runTable, new ArrayList<ColumnInfo>(cols.values()), filter, null, 1, 0);

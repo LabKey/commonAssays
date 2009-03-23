@@ -829,8 +829,8 @@ public class ProteinManager
         sql.append("SELECT Protein, SequenceMass, Peptides, UniquePeptides, SeqId, ProtSequence AS Sequence, Description, BestName, BestGeneName FROM\n(");
         addProteinQuery(sql, run, currentUrl, extraPeptideWhere, maxRows, offset, false);
         sql.append("\n) X LEFT OUTER JOIN ");
-        sql.append(getTableInfoSequences());
-        sql.append(" seq ON seq.SeqId = sSeqId\n");
+        sql.append(getTableInfoSequences(), "seq");
+        sql.append(" ON seq.SeqId = sSeqId\n");
 
         // Have to sort again to ensure correct order after the join
         Sort proteinSort = new Sort("Protein");

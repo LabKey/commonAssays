@@ -111,9 +111,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return cols;        
     }
 
-    public TableInfo createDataTable(UserSchema schema, String alias, ExpProtocol protocol)
+    public TableInfo createDataTable(UserSchema schema, ExpProtocol protocol)
     {
-        FilteredTable table = new LuminexSchema(schema.getUser(), schema.getContainer(), protocol).createDataRowTable(alias);
+        FilteredTable table = new LuminexSchema(schema.getUser(), schema.getContainer(), protocol).createDataRowTable();
         addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
         return table;
     }

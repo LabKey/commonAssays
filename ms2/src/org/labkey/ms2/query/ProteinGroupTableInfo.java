@@ -40,19 +40,16 @@ public class ProteinGroupTableInfo extends FilteredTable
     private final MS2Schema _schema;
     private List<MS2Run> _runs;
 
-    public ProteinGroupTableInfo(String alias, MS2Schema schema)
+    public ProteinGroupTableInfo(MS2Schema schema)
     {
-        this(alias, schema, true);
+        this(schema, true);
     }
 
-    public ProteinGroupTableInfo(String alias, MS2Schema schema, boolean includeFirstProteinColumn)
+    public ProteinGroupTableInfo(MS2Schema schema, boolean includeFirstProteinColumn)
     {
         super(MS2Manager.getTableInfoProteinGroups());
         _schema = schema;
-        if (alias != null)
-        {
-            setAlias(alias);
-        }
+
 
         ColumnInfo groupNumberColumn = wrapColumn("Group", getRealTable().getColumn("GroupNumber"));
         groupNumberColumn.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -104,10 +101,10 @@ public class ProteinGroupTableInfo extends FilteredTable
         {
             SQLFragment firstProteinSQL = new SQLFragment();
             firstProteinSQL.append("SELECT s.SeqId FROM ");
-            firstProteinSQL.append(MS2Manager.getTableInfoProteinGroupMemberships());
-            firstProteinSQL.append(" pgm, ");
-            firstProteinSQL.append(ProteinManager.getTableInfoSequences());
-            firstProteinSQL.append(" s WHERE s.SeqId = pgm.SeqId AND pgm.ProteinGroupId = ");
+            firstProteinSQL.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
+            firstProteinSQL.append(", ");
+            firstProteinSQL.append(ProteinManager.getTableInfoSequences(), "s");
+            firstProteinSQL.append(" WHERE s.SeqId = pgm.SeqId AND pgm.ProteinGroupId = ");
             firstProteinSQL.append(ExprColumn.STR_TABLE_ALIAS);
             firstProteinSQL.append(".RowId ORDER BY s.Length, s.BestName");
             ProteinManager.getSqlDialect().limitRows(firstProteinSQL, 1);
@@ -218,12 +215,11 @@ public class ProteinGroupTableInfo extends FilteredTable
                         SequencesTableInfo result = new SequencesTableInfo(null, _schema);
                         SQLFragment sql = new SQLFragment();
                         sql.append("(SELECT Min(LookupString) FROM ");
-                        sql.append(ProteinManager.getTableInfoFastaSequences());
-                        sql.append(" fs, ");
-                        sql.append(MS2Manager.getTableInfoRuns());
-                        sql.append(" r, ");
-                        sql.append(MS2Manager.getTableInfoProteinProphetFiles());
-                        sql.append(" ppf ");
+                        sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+                        sql.append(", ");
+                        sql.append(MS2Manager.getTableInfoRuns(), "r");
+                        sql.append(", ");
+                        sql.append(MS2Manager.getTableInfoProteinProphetFiles(), "ppf");
                         sql.append("\nWHERE fs.SeqId = ");
                         sql.append(ExprColumn.STR_TABLE_ALIAS);
                         sql.append(".SeqId AND fs.FastaId = r.FastaId AND r.Run = ppf.Run AND ppf.RowId = ");
@@ -307,10 +303,10 @@ public class ProteinGroupTableInfo extends FilteredTable
     {
         SQLFragment sql = new SQLFragment();
         sql.append("ProteinProphetFileId IN (SELECT ppf.RowId FROM ");
-        sql.append(MS2Manager.getTableInfoProteinProphetFiles());
-        sql.append(" ppf, ");
-        sql.append(MS2Manager.getTableInfoRuns());
-        sql.append(" r WHERE ppf.run = r.run AND r.Deleted = ? AND r.Container IN ");
+        sql.append(MS2Manager.getTableInfoProteinProphetFiles(), "ppf");
+        sql.append(", ");
+        sql.append(MS2Manager.getTableInfoRuns(), "r");
+        sql.append(" WHERE ppf.run = r.run AND r.Deleted = ? AND r.Container IN ");
         sql.add(Boolean.FALSE);
         if (includeSubfolders)
         {
@@ -332,8 +328,8 @@ public class ProteinGroupTableInfo extends FilteredTable
         SQLFragment sql = new SQLFragment();
         sql.append("RowId IN (\n");
         sql.append("SELECT ProteinGroupId FROM ");
-        sql.append(MS2Manager.getTableInfoProteinGroupMemberships());
-        sql.append(" pgm WHERE pgm.SeqId IN (\n");
+        sql.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
+        sql.append(" WHERE pgm.SeqId IN (\n");
         if (seqIds.length == 0)
         {
             sql.append("NULL");
@@ -359,23 +355,23 @@ public class ProteinGroupTableInfo extends FilteredTable
         SQLFragment sql = new SQLFragment();
         sql.append("RowId IN (\n");
         sql.append("SELECT ProteinGroupId FROM ");
-        sql.append(MS2Manager.getTableInfoProteinGroupMemberships());
-        sql.append(" pgm WHERE pgm.SeqId IN (\n");
+        sql.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
+        sql.append(" WHERE pgm.SeqId IN (\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoAnnotations());
-        sql.append(" a WHERE ");
+        sql.append(ProteinManager.getTableInfoAnnotations(), "a");
+        sql.append(" WHERE ");
         sql.append(SequencesTableInfo.getIdentifierClause(params, "a.AnnotVal", exactMatch));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoFastaSequences());
-        sql.append(" fs WHERE ");
+        sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+        sql.append(" WHERE ");
         sql.append(SequencesTableInfo.getIdentifierClause(params, "fs.LookupString", exactMatch));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoIdentifiers());
-        sql.append(" i WHERE ");
+        sql.append(ProteinManager.getTableInfoIdentifiers(), "i");
+        sql.append(" WHERE ");
         sql.append(SequencesTableInfo.getIdentifierClause(params, "i.Identifier", exactMatch));
         sql.append("\n");
         sql.append("))");

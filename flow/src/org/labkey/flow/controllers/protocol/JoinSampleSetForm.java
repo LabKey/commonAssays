@@ -85,7 +85,7 @@ public class JoinSampleSetForm extends ProtocolForm
     {
         LinkedHashMap<FieldKey, String> ret = new LinkedHashMap<FieldKey, String>();
         FlowSchema schema = new FlowSchema(getUser(), getContainer());
-        TableInfo tableFCSFiles = schema.getTable(FlowTableType.FCSFiles.toString(), "Foo");
+        TableInfo tableFCSFiles = schema.getTable(FlowTableType.FCSFiles.toString());
 
         ret.put(null, "");
         ret.put(new FieldKey(null, "Name"), "Name");

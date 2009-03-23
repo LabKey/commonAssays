@@ -204,8 +204,8 @@ public class PeptidesTableInfo extends FilteredTable
 
         SQLFragment spectrumSQL = new SQLFragment();
         spectrumSQL.append("(SELECT Spectrum FROM ");
-        spectrumSQL.append(MS2Manager.getTableInfoSpectraData());
-        spectrumSQL.append(" sd WHERE sd.Fraction = ");
+        spectrumSQL.append(MS2Manager.getTableInfoSpectraData(), "sd");
+        spectrumSQL.append(" WHERE sd.Fraction = ");
         spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
         spectrumSQL.append(".fraction AND sd.Scan = ");
         spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
@@ -273,7 +273,7 @@ public class PeptidesTableInfo extends FilteredTable
             public TableInfo getLookupTableInfo()
             {
                 SequencesTableInfo sequenceTable = new SequencesTableInfo(null, _schema);
-                SQLFragment fastaNameSQL = new SQLFragment(getAliasName() + ".Protein");
+                SQLFragment fastaNameSQL = new SQLFragment(getName() + ".Protein");
                 ExprColumn fastaNameColumn = new ExprColumn(PeptidesTableInfo.this, "Database Sequence Name", fastaNameSQL, Types.VARCHAR);
                 sequenceTable.addColumn(fastaNameColumn);
 
@@ -333,10 +333,10 @@ public class PeptidesTableInfo extends FilteredTable
         for (Map.Entry<String, List<Pair<MS2RunType, Integer>>> entry : columnMap.entrySet())
         {
             SQLFragment sql = new SQLFragment("CASE (SELECT r.Type FROM ");
-            sql.append(MS2Manager.getTableInfoRuns());
-            sql.append(" r, ");
-            sql.append(MS2Manager.getTableInfoFractions());
-            sql.append(" f WHERE r.Run = f.Run AND f.Fraction = ");
+            sql.append(MS2Manager.getTableInfoRuns(), "r");
+            sql.append(", ");
+            sql.append(MS2Manager.getTableInfoFractions(), "f");
+            sql.append(" WHERE r.Run = f.Run AND f.Fraction = ");
             sql.append(ExprColumn.STR_TABLE_ALIAS);
             sql.append(".Fraction) ");
             for (Pair<MS2RunType, Integer> typeInfo : entry.getValue())

@@ -43,9 +43,9 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
     private final HttpServletRequest _request;
     private final String _peptideViewName;
 
-    public CompareProteinProphetTableInfo(String alias, MS2Schema schema, List<MS2Run> runs, boolean forExport, HttpServletRequest request, String peptideViewName)
+    public CompareProteinProphetTableInfo(MS2Schema schema, List<MS2Run> runs, boolean forExport, HttpServletRequest request, String peptideViewName)
     {
-        super(alias, schema);
+        super(MS2Schema.HiddenTableType.CompareProteinProphet.toString(), schema);
 
         _schema = schema;
         _runs = runs;
@@ -62,12 +62,12 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         {
             SQLFragment seqIdCondition = new SQLFragment();
             seqIdCondition.append("SeqId IN (SELECT DISTINCT(SeqId) FROM ");
-            seqIdCondition.append(MS2Manager.getTableInfoProteinGroupMemberships());
-            seqIdCondition.append(" pgm, ");
-            seqIdCondition.append(MS2Manager.getTableInfoProteinGroups());
-            seqIdCondition.append(" pg, ");
-            seqIdCondition.append(MS2Manager.getTableInfoProteinProphetFiles());
-            seqIdCondition.append(" ppf\nWHERE ppf.Run IN (");
+            seqIdCondition.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
+            seqIdCondition.append(", ");
+            seqIdCondition.append(MS2Manager.getTableInfoProteinGroups(), "pg");
+            seqIdCondition.append(", ");
+            seqIdCondition.append(MS2Manager.getTableInfoProteinProphetFiles(), "ppf");
+            seqIdCondition.append("\nWHERE ppf.Run IN (");
             String separator = "";
             for (MS2Run run : runs)
             {
@@ -92,7 +92,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
                 {
                     public TableInfo getLookupTableInfo()
                     {
-                        return new ProteinGroupTableInfo(null, _schema, false);
+                        return new ProteinGroupTableInfo(_schema, false);
                     }
                 };
                 if (!_forExport)
@@ -112,7 +112,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return new ProteinGroupTableInfo(null, _schema, false);
+                    return new ProteinGroupTableInfo(_schema, false);
                 }
             });
             addColumn(proteinGroupIdColumn);
@@ -159,13 +159,13 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
     }
 
 
-    public SQLFragment getFromSQL(String alias)
+    public SQLFragment getFromSQL()
     {
-        String innerAlias = "Inner" + alias;
+        String innerAlias = "_innerCPP";
         SQLFragment result = new SQLFragment();
-        result.append("(SELECT * FROM ");
-        result.append(super.getFromSQL(innerAlias));
-        result.append(", (SELECT InnerSeqId ");
+        result.append("SELECT * FROM (");
+        result.append(super.getFromSQL());
+        result.append(") " + innerAlias + ", (SELECT InnerSeqId ");
         for (MS2Run run : _runs)
         {
             result.append(",\n");
@@ -187,14 +187,14 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
             result.append("ProteinGroupId");
         }
         result.append( "\nFROM ");
-        result.append(MS2Manager.getTableInfoProteinProphetFiles());
-        result.append(" ppf, ");
-        result.append(MS2Manager.getTableInfoProteinGroups());
-        result.append(" pg, ");
-        result.append(MS2Manager.getTableInfoPeptideMemberships());
-        result.append(" pm, ");
-        result.append(MS2Manager.getTableInfoProteinGroupMemberships());
-        result.append(" pgm, (");
+        result.append(MS2Manager.getTableInfoProteinProphetFiles(), "ppf");
+        result.append(", ");
+        result.append(MS2Manager.getTableInfoProteinGroups(), "pg");
+        result.append(", ");
+        result.append(MS2Manager.getTableInfoPeptideMemberships(), "pm");
+        result.append(", ");
+        result.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
+        result.append(", (");
         result.append(_schema.getPeptideSelectSQL(_request, _peptideViewName, Collections.singletonList(FieldKey.fromParts("RowId"))));
         result.append(" ) pep WHERE ppf.Run IN (");
         String separator = "";
@@ -208,8 +208,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         result.append("GROUP BY Run, SeqId) x GROUP BY InnerSeqId)\n");
         result.append(" AS RunProteinGroups WHERE RunProteinGroups.InnerSeqId = ");
         result.append(innerAlias);
-        result.append(".SeqId) AS ");
-        result.append(alias);
+        result.append(".SeqId");
         return result;
     }
     

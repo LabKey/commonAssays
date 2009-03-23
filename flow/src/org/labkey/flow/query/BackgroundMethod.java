@@ -18,11 +18,12 @@ package org.labkey.flow.query;
 
 import org.labkey.api.data.*;
 import org.labkey.api.query.AbstractMethodInfo;
+import org.labkey.api.query.snapshot.AbstractTableMethodInfo;
 import org.labkey.flow.data.ICSMetadata;
 
 import java.sql.Types;
 
-public class BackgroundMethod extends AbstractMethodInfo
+public class BackgroundMethod extends AbstractTableMethodInfo
 {
     FlowSchema _schema;
     ColumnInfo _objectIdColumn;
@@ -41,7 +42,7 @@ public class BackgroundMethod extends AbstractMethodInfo
         return ret;
     }
 
-    public SQLFragment getSQL(DbSchema schema, SQLFragment[] arguments)
+    public SQLFragment getSQL(String tableAlias, DbSchema schema, SQLFragment[] arguments)
     {
         if (arguments.length != 1)
             throw new IllegalArgumentException("The statistic method requires 1 argument");
@@ -58,7 +59,8 @@ public class BackgroundMethod extends AbstractMethodInfo
                 "(SELECT AVG(flow.Statistic.Value) " +
                 "FROM flow.Statistic INNER JOIN " + junctionTable + " J ON flow.Statistic.ObjectId = J.bg " +
                 "INNER JOIN flow.attribute ON flow.statistic.statisticid = flow.attribute.rowid AND flow.attribute.name = " + arguments[0] + " " +
-                "WHERE J.fg = " + _objectIdColumn.getValueSql() + ")");
+                "WHERE J.fg = " + tableAlias + ".Background"); 
+                        // + _objectIdColumn.getValueSql(tableAlias) + ")");
         return ret;
     }
 }

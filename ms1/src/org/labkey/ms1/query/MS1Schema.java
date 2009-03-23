@@ -97,10 +97,10 @@ public class MS1Schema extends UserSchema
         return ret;
     }
 
-    public TableInfo createTable(String name, String alias)
+    public TableInfo createTable(String name)
     {
         if (TABLE_FEATURE_RUNS.equalsIgnoreCase(name))
-            return getMS1ExpRunsTableInfo(alias);
+            return getMS1ExpRunsTableInfo();
         else if(TABLE_FEATURES.equalsIgnoreCase(name))
             return getFeaturesTableInfo();
         else if(TABLE_FEATURES_SEARCH.equalsIgnoreCase(name))
@@ -239,10 +239,10 @@ public class MS1Schema extends UserSchema
         return new ScansTableInfo(this, getContainer());
     }
 
-    public ExpRunTable getMS1ExpRunsTableInfo(String alias)
+    public ExpRunTable getMS1ExpRunsTableInfo()
     {
         // Start with a standard experiment run table
-        ExpRunTable result = _expSchema.createRunsTable(alias);
+        ExpRunTable result = _expSchema.createRunsTable();
 
         // Filter to just the runs with the MS1 protocol
         result.setProtocolPatterns("urn:lsid:%:Protocol.%:MS1.%");
