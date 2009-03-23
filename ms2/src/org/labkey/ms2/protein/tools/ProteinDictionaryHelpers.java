@@ -139,7 +139,7 @@ public class ProteinDictionaryHelpers
         finally
         {
             if (ps != null) { try{ ps.close(); } catch (SQLException e) {} }
-            try{ scope.releaseConnection(conn); } catch (SQLException e) {}
+            try{ if (null != conn) scope.releaseConnection(conn); } catch (SQLException e) {}
             if (it != null) { it.close(); }
         }
     }
