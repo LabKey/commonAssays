@@ -63,6 +63,7 @@ public class FeaturesTableInfo extends VirtualTable
     public FeaturesTableInfo(MS1Schema schema, boolean includePepFk, Boolean peaksAvailable)
     {
         super(schema.getDbSchema());
+        setName("Features");
 
         _schema = schema;
         _sourceTable = MS1Manager.get().getTable(MS1Service.Tables.Features.name());

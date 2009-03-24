@@ -23,6 +23,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.CaseInsensitiveHashMap;
+import org.labkey.api.query.FieldKey;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -58,7 +59,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
 
     public ProteinListDisplayColumn(String sequenceColumn, ProteinGroupProteins proteins)
     {
-        _sequenceColumn = ALL_SEQUENCE_COLUMNS_MAP.get(sequenceColumn);
+        _sequenceColumn = ALL_SEQUENCE_COLUMNS_MAP.get(FieldKey.fromString(sequenceColumn).getName());
         _proteins = proteins;
         setNoWrap(true);
         setCaption(_sequenceColumn);
