@@ -47,7 +47,7 @@ import java.util.zip.GZIPInputStream;
  */
 public abstract class GoLoader
 {
-    private static Logger _log = Logger.getLogger(GoLoader.class);
+    private static final Logger _log = Logger.getLogger(GoLoader.class);
 
     private static final String GOTERM_FILE = "term.txt";
     private static final String GOTERM2TERM_FILE = "term2term.txt";
@@ -59,7 +59,7 @@ public abstract class GoLoader
     private static GoLoader _currentLoader = null;
 
     private TarInputStream _tis = null;
-    private StringBuffer _status = new StringBuffer();  // Can't use StringBuilder -- needs to be synchronized
+    private final StringBuffer _status = new StringBuffer();  // Can't use StringBuilder -- needs to be synchronized
     private boolean _complete = false;
 
     public static WebPartView getCurrentStatus(String message)
@@ -212,14 +212,14 @@ public abstract class GoLoader
             ps = conn.prepareStatement(SQLCommand + QMarkPart);
             for (it = t.iterator(); it.hasNext();)
             {
-                Map curRec = (Map)it.next();
+                Map<String, Object> curRec = it.next();
                 boolean addRow = true;
                 for (int i = 0; i < cols.length; i++)
                     ps.setNull(i + 1, columns.get(i).getSqlTypeInt());
 
-                for (Object key : curRec.keySet())
+                for (String key : curRec.keySet())
                 {
-                    int kindex = Integer.parseInt(((String) key).substring(6));
+                    int kindex = Integer.parseInt(key.substring(6));
 
                     // bug #6085 -- ignore any columns that we don't know about, e.g., term_synonym.synonym_category_id that was added recently
                     if (kindex >= columns.size())
