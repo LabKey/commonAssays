@@ -17,7 +17,6 @@ package org.labkey.microarray;
 
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.ParticipantVisit;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.ExperimentException;
@@ -361,7 +360,7 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
 
     protected ExpMaterial createSampleMaterial(Container currentContainer, String sampleId)
     {
-        String materialLSID = new Lsid(ParticipantVisit.ASSAY_RUN_MATERIAL_NAMESPACE, "Folder-" + currentContainer.getRowId(), sampleId).toString();
+        String materialLSID = new Lsid("AssayRunMaterial", "Folder-" + currentContainer.getRowId(), sampleId).toString();
         ExpMaterial material = ExperimentService.get().getExpMaterial(materialLSID);
         if (material == null)
         {
@@ -374,31 +373,28 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
     {
         if (isBulkUploadAttempted())
         {
-            ProtocolParameter param = null;
-            if (index == 0)
-            {
-                param = getProtocol().getProtocolParameters().get(MicroarrayAssayDesigner.CY3_SAMPLE_NAME_COLUMN_PARAMETER_URI);
-            }
-            else if (index == 1)
-            {
-                param = getProtocol().getProtocolParameters().get(MicroarrayAssayDesigner.CY5_SAMPLE_NAME_COLUMN_PARAMETER_URI);
-            }
-
-            String columnName;
-            if (param == null)
-            {
-                columnName = "sample" + (index + 1);
-            }
-            else
-            {
-                columnName = param.getStringValue();
-            }
-            Object result = getBulkProperties().get(columnName);
+            Object result = getBulkProperties().get("sample" + (index + 1));
             if (result == null)
             {
-                throw new ExperimentException("Could not find a '" + columnName + "' column for sample information.");
+                // Try some other column names values
+                if (index == 0)
+                {
+                    if (!getBulkProperties().containsKey("ProbeID_Cy3"))
+                    {
+                        throw new ExperimentException("Could not find a 'ProbeID_Cy3' or 'Sample1' column.");
+                    }
+                    result = getBulkProperties().get("ProbeID_Cy3");
+                }
+                else if (index == 1)
+                {
+                    if (!getBulkProperties().containsKey("ProbeID_Cy5"))
+                    {
+                        throw new ExperimentException("Could not find a 'ProbeID_Cy5' or 'Sample2' column.");
+                    }
+                    result = getBulkProperties().get("ProbeID_Cy5");
+                }
             }
-            return result.toString();
+            return result == null ? null : result.toString();
         }
         else
         {

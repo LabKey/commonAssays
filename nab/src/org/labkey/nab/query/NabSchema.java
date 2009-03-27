@@ -139,7 +139,6 @@ public class NabSchema extends UserSchema
         String propPrefix = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, protocol.getName(), "").toString();
         SimpleFilter propertyFilter = new SimpleFilter();
         propertyFilter.addCondition("PropertyURI", propPrefix, CompareType.STARTS_WITH);
-        propertyFilter.addCondition("Project", protocol.getContainer().getProject());
         return Table.select(OntologyManager.getTinfoPropertyDescriptor(), Table.ALL_COLUMNS,
                 propertyFilter, null, PropertyDescriptor.class);
     }

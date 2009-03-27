@@ -30,8 +30,6 @@ public class MicroarrayAssayDesigner implements EntryPoint
     public static final String CHANNEL_COUNT_PARAMETER_URI = "labkey.org#MicroarrayAssay.ChannelCountXPath";
     public static final String BARCODE_PARAMETER_URI = "labkey.org#MicroarrayAssay.BarcodeXPath";
     public static final String BARCODE_FIELD_NAMES_PARAMETER_URI = "labkey.org#MicroarrayAssay.SampleSetBarcodeFieldNames";
-    public static final String CY3_SAMPLE_NAME_COLUMN_PARAMETER_URI = "labkey.org#MicroarrayAssay.Cy3SampleNameColumn";
-    public static final String CY5_SAMPLE_NAME_COLUMN_PARAMETER_URI = "labkey.org#MicroarrayAssay.Cy5SampleNameColumn";
 
     public void onModuleLoad()
     {

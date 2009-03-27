@@ -32,8 +32,6 @@ public class MicroarrayDesignerMainPanel extends AssayDesignerMainPanel
     private BoundTextAreaBox _channelCountTextBox;
     private BoundTextAreaBox _barcodeTextBox;
     private BoundTextBox _sampleSetBarcodeFieldNames;
-    private BoundTextBox _cy3SampleFieldNameTextBox;
-    private BoundTextBox _cy5SampleFieldNameTextBox;
 
     public MicroarrayDesignerMainPanel(RootPanel panel, String providerName, Integer protocolId, boolean copyAssay)
     {
@@ -75,30 +73,9 @@ public class MicroarrayDesignerMainPanel extends AssayDesignerMainPanel
                 assay.getProtocolParameters().put(MicroarrayAssayDesigner.BARCODE_FIELD_NAMES_PARAMETER_URI, _sampleSetBarcodeFieldNames.getBox().getText());
             }
         }, this);
+
         result.setHTML(row, 0, "Barcode Field Names");
         result.setWidget(row++, 1, _sampleSetBarcodeFieldNames);
-
-        String cy3Column = assay.getProtocolParameters().get(MicroarrayAssayDesigner.CY3_SAMPLE_NAME_COLUMN_PARAMETER_URI);
-        _cy3SampleFieldNameTextBox = new BoundTextBox("Cy3 Sample Field Name", "cy3SampleFieldName", cy3Column, new WidgetUpdatable()
-        {
-            public void update(Widget widget)
-            {
-                assay.getProtocolParameters().put(MicroarrayAssayDesigner.CY3_SAMPLE_NAME_COLUMN_PARAMETER_URI, _cy3SampleFieldNameTextBox.getBox().getText());
-            }
-        }, this);
-        result.setHTML(row, 0, "Cy3 Sample Field Name");
-        result.setWidget(row++, 1, _cy3SampleFieldNameTextBox);
-
-        String cy5Column = assay.getProtocolParameters().get(MicroarrayAssayDesigner.CY5_SAMPLE_NAME_COLUMN_PARAMETER_URI);
-        _cy5SampleFieldNameTextBox = new BoundTextBox("Cy5 Sample Field Name", "cy5SampleFieldName", cy5Column, new WidgetUpdatable()
-        {
-            public void update(Widget widget)
-            {
-                assay.getProtocolParameters().put(MicroarrayAssayDesigner.CY5_SAMPLE_NAME_COLUMN_PARAMETER_URI, _cy5SampleFieldNameTextBox.getBox().getText());
-            }
-        }, this);
-        result.setHTML(row, 0, "Cy5 Sample Field Name");
-        result.setWidget(row++, 1, _cy5SampleFieldNameTextBox);
 
         return result;
     }

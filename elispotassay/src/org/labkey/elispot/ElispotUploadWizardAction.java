@@ -200,13 +200,6 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 try {
                     form.getUploadedData();
                     ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(form);
-
-                    PlateTemplate template = provider.getPlateTemplate(getContainer(), form.getProtocol());
-                    if (template == null)
-                    {
-                        errors.reject(SpringActionController.ERROR_MSG, "The template for this assay is either missing or invalid.");
-                        return false;
-                    }
                     PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(form, _protocol,
                             getSelectedParticipantVisitResolverType(provider, form));
                     _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());

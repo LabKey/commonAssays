@@ -366,7 +366,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                 if (lock != null) { lock.release(); }
             }
 
-            _wd.discardFile(fileWorkMGF);
+
             _wd.discardFile(fileWorkInputXML);
 
             return new RecordedActionSet(mzxml2SearchAction, mascotAction, mascot2XMLAction);

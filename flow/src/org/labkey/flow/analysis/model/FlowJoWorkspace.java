@@ -17,9 +17,6 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.xerces.parsers.DOMParser;
-import org.apache.xerces.util.SymbolTable;
-import org.apache.log4j.Category;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
@@ -33,20 +30,25 @@ import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.FlowJob;
-import org.w3c.dom.*;
-import org.w3c.dom.traversal.NodeFilter;
-import org.w3c.dom.ls.LSParserFilter;
-import org.xml.sax.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.*;
-
-import com.sun.org.apache.xerces.internal.impl.Constants;
-
 
 abstract public class FlowJoWorkspace implements Serializable
 {
@@ -169,7 +171,6 @@ abstract public class FlowJoWorkspace implements Serializable
         return recognizer.isWorkspace();
     }
 
-
     public class ParameterInfo implements Serializable
     {
         public String name;
@@ -208,280 +209,18 @@ abstract public class FlowJoWorkspace implements Serializable
 	}
 
 
-
-    final static String[] parsedElements =
-    {
-        "AutoCompensationScripts",
-        "Axis",
-        "BooleanGate",
-        "CalibrationTables",
-        "Channel",
-        "ChannelValue",
-        "CompensationMatrices",
-        "CompensationMatrix",
-        "Ellipse",
-        "FCSHeader",
-        "GatePaths",
-        "Group",
-        "GroupAnalyses",
-        "GroupNode",
-        "Groups",
-        "Keyword",
-        "Keywords",
-        "MatchingCriteria",
-        "Parameter",
-        "ParameterDefinition",
-        "Point",
-        "PolyRect",
-        "Polygon",
-        "PolygonGate",
-        "Population",
-        "Range",
-        "RangeGate",
-        "RectangleGate",
-        "Sample",
-        "SampleAnalyses",
-        "SampleList",
-        "SampleNode",
-        "Samples",
-        "Script",
-        "Statistic",
-        "String",
-        "StringArray",
-        "Subpopulations",
-        "Table",
-        "ValidateCompensation",
-        "Vertex",
-        "Workspace",
-        "and",
-        "ellipse",
-        "focus",
-        "interval",
-        "not",
-        "or",
-        "point",
-        "polygon"
-    };
-
-
-    final static String[] rejectElements =
-    {
-        "Layout",
-        "LayoutEditor",
-        "LayoutGraph",
-        "OverlayGraphs",
-        "TableEditor"
-    };
-
-
-    final static String[] knownElements =
-    {
-        "Annotation",
-        "AnnotationTextTraits",
-        "AutoCompensationScripts",
-        "Axis",
-        "AxisLabelText",
-        "AxisText",
-        "BooleanGate",
-        "CalibrationTables",
-        "Channel",
-        "ChannelValue",
-        "Column",
-        "Columns",
-        "CompensationMatrices",
-        "CompensationMatrix",
-        "Contents",
-        "Criteria",
-        "CriteriaFormula",
-        "Criterion",
-        "DT_32BitKeepAsLinear",
-        "DataSet",
-        "EventLimit",
-        "GatePaths",
-        "GateText",
-        "Graph",
-        "Group",
-        "GroupNode",
-        "Groups",
-        "Keyword",
-        "Keywords",
-        "Layer",
-        "Layout",
-        "LayoutEditor",
-        "LayoutGraph",
-        "Legend",
-        "LegendTextTraits",
-        "OverlayGraphs",
-        "PCPlotBlueControl",
-        "PCPlotGreenControl",
-        "PCPlotRedControl",
-        "Parameter",
-        "ParameterNames",
-        "PolyChromaticPlot",
-        "PolyRect",
-        "Polygon",
-        "PolygonGate",
-        "Population",
-        "Preferences",
-        "Sample",
-        "SampleList",
-        "SampleNode",
-        "SampleRef",
-        "SampleRefs",
-        "SampleSortCriteria",
-        "SciBook",
-        "StainChannelList",
-        "StainCriterion",
-        "String",
-        "StringArray",
-        "Table",
-        "TableEditor",
-        "Text",
-        "TextTraits",
-        "Vertex",
-        "WindowPosition",
-        "Workspace",
-        "graphList",
-        "subsetList"
-    };
-
-
-    static final short defaultFilter = LSParserFilter.FILTER_SKIP;
-    
-    final static HashMap<String,Short> elements = new HashMap<String, Short>(100);
-    static
-    {
-        for (String s : knownElements)
-            elements.put(s, defaultFilter);
-        for (String s : rejectElements)
-            elements.put(s, LSParserFilter.FILTER_REJECT);
-        for (String s : parsedElements)
-            elements.put(s, LSParserFilter.FILTER_ACCEPT);
-    }
-
-    static class FJParseFilter implements LSParserFilter
-    {
-        SymbolTable fSymbolTable = new SymbolTable();
-        Set<String> rejected = new HashSet<String>();
-        
-        public short startElement(Element element)
-        {
-            Short s = elements.get(element.getNodeName());
-            short filter = null == s ? defaultFilter : s.shortValue();
-//            if (filter != FILTER_ACCEPT && rejected.add(element.getNodeName())) System.err.println((filter == FILTER_SKIP ? "SKIPPED:  " : "REJECTED: ") + element.getNodeName());
-            return filter;
-        }
-
-        public short acceptNode(Node node)
-        {
-            if (node instanceof Text)
-            {
-                String data = ((Text)node).getData();
-                if (data.length() < 10 && data.trim().length() == 0)
-                    return FILTER_REJECT;
-                else
-                    return FILTER_ACCEPT;
-            }
-            if (node instanceof Element)
-            {
-                int len = node.getAttributes().getLength();
-                for (int i=0 ; i<len ; i++)
-                {
-                    Attr a = (Attr)node.getAttributes().item(i);
-                    a.setValue(fSymbolTable.addSymbol(a.getValue()));
-                }
-            }
-            return FILTER_ACCEPT;
-        }
-
-        public int getWhatToShow()
-        {
-            return NodeFilter.SHOW_ALL;
-        }
-    }
-
-
-/*
-    static class FJSymbolTable extends SymbolTable
-    {
-        int sizeIn = 0;
-        int sizeOut = 0;
-        
-        @Override
-        public String addSymbol(String symbol)
-        {
-            assert (sizeIn += symbol.length()) > -1;
-            assert (sizeOut += (containsSymbol(symbol) ? 0 : symbol.length())) > -1;
-            return super.addSymbol(symbol);
-        }
-
-        @Override
-        public String addSymbol(char[] buffer, int offset, int length)
-        {
-            assert (sizeIn += length) > -1;
-            assert (sizeOut += (containsSymbol(buffer, offset, length) ? 0 : length)) > -1;
-            return super.addSymbol(buffer, offset, length);
-        }
-    }
-*/
-
-    static class FJDOMParser extends DOMParser
-    {
-        SymbolTable fSymbolTable;
-
-        static FJDOMParser create()
-        {
-            SymbolTable fj = new SymbolTable();
-            return new FJDOMParser(fj);
-        }
-
-        FJDOMParser(SymbolTable st)
-        {
-            super(st);
-            fSymbolTable = st;
-            fSkippedElemStack = new Stack();
-            fDOMFilter = new FJParseFilter();
-            try
-            {
-                setFeature(Constants.SAX_FEATURE_PREFIX + Constants.VALIDATION_FEATURE, false);
-                setFeature(DEFER_NODE_EXPANSION, false);
-                setFeature(NAMESPACES, false);
-                setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.CONTINUE_AFTER_FATAL_ERROR_FEATURE, true);
-                setErrorHandler(new FJErrorHandler());
-            }
-            catch (SAXNotSupportedException x)
-            {
-                throw new RuntimeException(x);
-            }
-            catch (SAXNotRecognizedException x)
-            {
-                throw new RuntimeException(x);
-            }
-        }
-
-        @Override
-        public void parse(InputSource inputSource) throws SAXException, IOException
-        {
-            try
-            {
-                super.parse(inputSource);
-            }
-            catch (RuntimeException x)
-            {
-                Category.getInstance(FlowJoWorkspace.class).error("Unexpected error", x);
-                throw x;
-            }
-        }
-    }
-    
-
     static public FlowJoWorkspace readWorkspace(InputStream stream) throws Exception
     {
-        DOMParser p = FJDOMParser.create();
-        p.parse(new InputSource(stream));
-        Document doc = p.getDocument();
+		DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+        try
+        {
+		    f.setFeature("http://apache.org/xml/features/continue-after-fatal-error",true);
+        }
+        catch (AbstractMethodError ame) { }
+        DocumentBuilder builder = f.newDocumentBuilder();
+		builder.setErrorHandler(new FJErrorHandler());
+        Document doc = builder.parse(stream);
         Element elDoc = doc.getDocumentElement();
-//        System.err.println("DOCUMENT SIZE: " + debugComputeSize(elDoc));
         if ("1.4".equals(elDoc.getAttribute("version")))
         {
             return new PCWorkspace(elDoc);
@@ -492,43 +231,6 @@ abstract public class FlowJoWorkspace implements Serializable
         }
         return new MacWorkspace(elDoc);
     }
-
-
-    static long debugComputeSize(Object doc)
-    {
-        try
-        {
-            final long[] len = new long[1];
-            OutputStream counterStream = new OutputStream()
-            {
-                public void write(int i) throws IOException
-                {
-                    len[0] += 4;
-                }
-
-                @Override
-                public void write(byte[] bytes) throws IOException
-                {
-                    len[0] += bytes.length;
-                }
-
-                @Override
-                public void write(byte[] bytes, int off, int l) throws IOException
-                {
-                    len[0] += l;
-                }
-            };
-            ObjectOutputStream os = new ObjectOutputStream(counterStream);
-            os.writeObject(doc);
-            os.close();
-            return len[0];
-        }
-        catch (IOException x)
-        {
-            return -1;
-        }
-    }
-
 
     protected FlowJoWorkspace()
     {
@@ -592,14 +294,11 @@ abstract public class FlowJoWorkspace implements Serializable
     static String getInnerText(Element el)
     {
         NodeList nl = el.getChildNodes();
-        int len = nl.getLength();
-        if (len == 0)
-            return "";
-        if (len == 1)
-            return nl.item(0).getNodeValue();
         StringBuilder ret = new StringBuilder();
         for (int i = 0; i < nl.getLength(); i ++)
+        {
             ret.append(nl.item(i).getNodeValue());
+        }
         return ret.toString();
     }
 
@@ -640,6 +339,8 @@ abstract public class FlowJoWorkspace implements Serializable
     {
         name = cleanName(name);
         name = StringUtils.replaceChars(name, '/', '_');
+        name = StringUtils.replaceChars(name, '(', '[');
+        name = StringUtils.replaceChars(name, ')', ']');
         return name;
     }
 
@@ -852,7 +553,6 @@ abstract public class FlowJoWorkspace implements Serializable
         }
         return prefix + suffix;
     }
-
     /**
      * Initially, each channel has a unique gating tree with a root population with a name like "FITC+", or something.
      * This walks through one of these trees, and figures out if the gates within them (e.g. "FITC+/L") is the same
@@ -938,7 +638,8 @@ abstract public class FlowJoWorkspace implements Serializable
                 newParent = findPopulation(ret, newParentSubset);
             }
             Population newPop = new Population();
-            newPop.setName(cleanName(newSubset.getSubset()));
+            String subset = cleanPopName(newSubset.getSubset());
+            newPop.setName(subset);
             newPop.getGates().addAll(oldPop.getGates());
             assert newParent.getPopulation(newPop.getName()) == null;
             newParent.addPopulation(newPop);

@@ -16,11 +16,10 @@
 
 package org.labkey.flow.analysis.model;
 
-import org.labkey.common.tools.DoubleArray;
-
 import java.util.List;
 import java.util.Arrays;
 import java.util.StringTokenizer;
+import java.util.ArrayList;
 
 public class FixedCalibrationTable implements CalibrationTable
 {
@@ -29,11 +28,6 @@ public class FixedCalibrationTable implements CalibrationTable
     public FixedCalibrationTable(double[] values)
     {
         this.values = values;
-    }
-
-    public FixedCalibrationTable(DoubleArray values)
-    {
-        this.values = values.toArray(new double[values.size()]);
     }
 
     public FixedCalibrationTable(List<Double> values)
@@ -104,14 +98,15 @@ public class FixedCalibrationTable implements CalibrationTable
     static public FixedCalibrationTable fromString(String str)
     {
         StringTokenizer tok = new StringTokenizer(str, ",");
-        DoubleArray values = new DoubleArray();
+        List<Double> values = new ArrayList();
         while (tok.hasMoreElements())
         {
             tok.nextElement();
             if (!tok.hasMoreElements())
                 break;
-            values.add(Double.parseDouble(tok.nextToken()));
+            values.add(Double.valueOf(tok.nextToken()));
         }
         return new FixedCalibrationTable(values);
     }
+
 }

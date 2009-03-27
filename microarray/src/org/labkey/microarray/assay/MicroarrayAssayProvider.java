@@ -309,18 +309,6 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         barcodeFieldNameParam.setValue(SimpleTypeNames.STRING, "Barcode");
         params.add(barcodeFieldNameParam);
 
-        ProtocolParameter cy3Param = new ProtocolParameter();
-        cy3Param.setOntologyEntryURI(MicroarrayAssayDesigner.CY3_SAMPLE_NAME_COLUMN_PARAMETER_URI);
-        cy3Param.setName("Cy3SampleNameColumn");
-        cy3Param.setValue(SimpleTypeNames.STRING, "ProbeID_Cy3");
-        params.add(cy3Param);
-
-        ProtocolParameter cy5Param = new ProtocolParameter();
-        cy5Param.setOntologyEntryURI(MicroarrayAssayDesigner.CY5_SAMPLE_NAME_COLUMN_PARAMETER_URI);
-        cy5Param.setName("Cy5SampleNameColumn");
-        cy5Param.setValue(SimpleTypeNames.STRING, "ProbeID_Cy5");
-        params.add(cy5Param);
-
         result.getKey().setProtocolParameters(params);
         return result;
     }

@@ -157,7 +157,8 @@ public class NabAssayRun extends Luc5Assay
             for (DomainProperty dp : sampleDomainProperties)
             {
                 PropertyDescriptor property = dp.getPropertyDescriptor();
-                sampleProperties.put(property, material.getProperty(property));
+                if (!property.equals(sampleIdPD) && !property.equals(visitIdPD) && !property.equals(participantIdPD) && !property.equals(datePD))
+                    sampleProperties.put(property, material.getProperty(property));
             }
             String key = NabAssayController.getMaterialKey((String) material.getProperty(sampleIdPD),
                     (String) material.getProperty(participantIdPD), (Double) material.getProperty(visitIdPD), (Date) material.getProperty(datePD));
