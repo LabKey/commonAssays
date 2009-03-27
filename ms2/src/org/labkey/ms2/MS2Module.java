@@ -16,11 +16,14 @@
 package org.labkey.ms2;
 
 import junit.framework.TestCase;
-import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.exp.*;
+import org.labkey.api.data.UpgradeCode;
+import org.labkey.api.exp.ExperimentRunType;
+import org.labkey.api.exp.ExperimentRunTypeSource;
+import org.labkey.api.exp.Handler;
+import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.ModuleContext;
@@ -28,11 +31,11 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.query.QueryView;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
@@ -44,13 +47,14 @@ import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.*;
 import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
 import org.labkey.ms2.protein.CustomAnnotationSet;
+import org.labkey.ms2.protein.CustomProteinListView;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.protein.CustomProteinListView;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
+import org.labkey.common.tools.MS2Modification;
 
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
@@ -63,8 +67,6 @@ import java.util.*;
  */
 public class MS2Module extends SpringModule implements ContainerManager.ContainerListener
 {
-    private static final Logger _log = Logger.getLogger(MS2Module.class);
-
     private static MS2SearchExperimentRunType _ms2SearchRunFilter = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX);
     private static ExperimentRunType _samplePrepRunType = new ExperimentRunType("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.TableType.SamplePrepRuns.toString())
     {
@@ -92,7 +94,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public double getVersion()
     {
-        return 8.34;
+        return 8.35;
     }
 
     protected Collection<? extends WebPartFactory> createWebPartFactories()
@@ -235,40 +237,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         MS2Controller.registerAdminConsoleLinks();
 
         initWebApplicationContext();
-
-        if (context.getOriginalVersion() < 8.32 && !context.isNewInstall())
-        {
-            // Wrap any plain MS2 runs with an experiment run
-            wrapRuns(context);
-        }
-    }
-
-    private void wrapRuns(ModuleContext context)
-    {
-        int attemptCount = 0;
-        int successCount = 0;
-        MS2Run[] runs = MS2Manager.getUnwrappedRuns();
-        for (MS2Run run : runs)
-        {
-            if (++attemptCount % 500 == 0)
-            {
-                _log.info("Wrapping MS2 run " + attemptCount + " of " + runs.length);
-            }
-            try
-            {
-                MS2Manager.ensureWrapped(run, context.getUpgradeUser());
-                successCount++;
-            }
-            catch (ExperimentException e)
-            {
-                _log.error("Failed to wrap MS2 run " + run.getRun(), e);
-            }
-            catch (Exception e)
-            {
-                _log.error("Failed to wrap MS2 run " + run.getRun(), e);
-            }
-        }
-        _log.info("Successfully wrapped " + successCount + " of " + attemptCount + " attempted MS2 runs");
     }
 
     @Override
@@ -342,6 +310,14 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             PositiveIntegerParamsValidator.TestCase.class,
             ListParamsValidator.TestCase.class,
             org.labkey.ms2.protein.FastaDbLoader.TestCase.class,                
-            org.labkey.ms2.reader.RandomAccessMzxmlIterator.TestCase.class));
+            org.labkey.ms2.reader.RandomAccessMzxmlIterator.TestCase.class,
+            MS2Modification.MS2ModificationTest.class
+        ));
+    }
+
+    @Override
+    public UpgradeCode getUpgradeCode()
+    {
+        return new MS2UpgradeCode();
     }
 }

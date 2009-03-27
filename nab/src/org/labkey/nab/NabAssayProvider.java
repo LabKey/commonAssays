@@ -411,6 +411,15 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                         out.write("[<a href=\"" + url.getLocalURIString() + "\" title=\"View run details\">run&nbsp;details</a>]");
                     }
                 }
+
+                @Override
+                public void addQueryColumns(Set<ColumnInfo> set)
+                {
+                    super.addQueryColumns(set);
+                    ColumnInfo runIdColumn = getTable().getColumn(NabRunDataTable.RUN_ID_COLUMN_NAME);
+                    if (runIdColumn != null)
+                        set.add(runIdColumn);
+                }
             });
             return view;
         }

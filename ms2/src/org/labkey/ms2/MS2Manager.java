@@ -375,6 +375,11 @@ public class MS2Manager
                 {
                     protXMLData = ExperimentService.get().createData(protXMLFile.toURI(), source);
                 }
+                else
+                {
+                    // If it's somehow connected with an existing run, break the old association
+                    protXMLData.setSourceApplication(null);
+                }
                 outputDatas.put(protXMLData, TPPTask.PROT_XML_INPUT_ROLE);
             }
 
@@ -485,7 +490,7 @@ public class MS2Manager
 
     public static MS2Run[] getUnwrappedRuns()
     {
-        return getRuns("deleted = ? AND statusid = " + MS2Importer.STATUS_SUCCESS + " AND (experimentrunlsid IS NULL OR experimentrunlsid NOT IN (SELECT lsid FROM " + ExperimentService.get().getTinfoExperimentRun() + " WHERE container = runs.container))", false);
+        return getRuns("deleted = ? AND statusid = " + MS2Importer.STATUS_SUCCESS + " AND path IS NOT NULL AND (experimentrunlsid IS NULL OR experimentrunlsid NOT IN (SELECT lsid FROM " + ExperimentService.get().getTinfoExperimentRun() + " WHERE container = runs.container))", false);
     }
 
     private static MS2Run[] getRuns(String whereClause, Object... params)

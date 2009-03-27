@@ -56,6 +56,9 @@ public class ParserTree
         new ParserTreeNode(organismNode, "name", new uniprot_entry_organism_name());
         ParserTreeNode proteinNode = new ParserTreeNode(entryNode, "protein");
         new ParserTreeNode(proteinNode, "name", new uniprot_entry_protein_name());
+        ParserTreeNode recommendedNameNode = new ParserTreeNode(proteinNode, "recommendedName", new uniprot_entry_protein_recommendedName());
+        new ParserTreeNode(recommendedNameNode, "fullName", new uniprot_entry_protein_recommendedName_fullName());
+        new ParserTreeNode(recommendedNameNode, "shortName", new uniprot_entry_protein_recommendedName_shortName());
         new ParserTreeNode(entryNode, "sequence", new uniprot_entry_sequence());
     }
 

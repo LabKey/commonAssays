@@ -23,9 +23,11 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.util.DateUtil;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
+import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.Document;
@@ -73,9 +75,31 @@ public class MicroarrayBulkPropertiesTemplateAction extends BaseAssayAction<Micr
         cellFormat.setWrap(false);
         cellFormat.setVerticalAlignment(jxl.format.VerticalAlignment.TOP);
 
+        ProtocolParameter cy3Param = protocol.getProtocolParameters().get(MicroarrayAssayDesigner.CY3_SAMPLE_NAME_COLUMN_PARAMETER_URI);
+        String cy3Name;
+        if (cy3Param != null)
+        {
+            cy3Name = cy3Param.getStringValue();
+        }
+        else
+        {
+            cy3Name = "Sample1";
+        }
+
+        ProtocolParameter cy5Param = protocol.getProtocolParameters().get(MicroarrayAssayDesigner.CY5_SAMPLE_NAME_COLUMN_PARAMETER_URI);
+        String cy5Name;
+        if (cy5Param != null)
+        {
+            cy5Name = cy5Param.getStringValue();
+        }
+        else
+        {
+            cy5Name = "Sample2";
+        }
+
         sheet.addCell(new Label(col++, 0, "Barcode", cellFormat));
-        sheet.addCell(new Label(col++, 0, "ProbeID_Cy3", cellFormat));
-        sheet.addCell(new Label(col++, 0, "ProbeID_Cy5", cellFormat));
+        sheet.addCell(new Label(col++, 0, cy3Name, cellFormat));
+        sheet.addCell(new Label(col++, 0, cy5Name, cellFormat));
 
         for (DomainProperty domainProperty : propertiesToCollect)
         {

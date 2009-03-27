@@ -79,7 +79,7 @@ public class PendingMageMLFilesView extends QueryView
         PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
 
         ActionButton deleteButton = new ActionButton("placeholder", "Delete");
-        ActionURL deleteURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getDeleteDatasURL(view.getViewContext().getContainer(), view.getViewContext().getActionURL());
+        ActionURL deleteURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getDeleteDatasURL(view.getViewContext().getContainer(), getReturnURL());
         deleteButton.setURL(deleteURL);
         deleteButton.setRequiresSelection(true, null, view.getDataRegion().getJavascriptFormReference(true));
         deleteButton.setActionType(ActionButton.Action.POST);
@@ -126,7 +126,7 @@ public class PendingMageMLFilesView extends QueryView
                         menu.addMenuItem("Import using " + protocol.getName(), "javascript: if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(false) + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference(false) + ".submit(); }");
                     }
                 }
-                ActionURL browseURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), getViewContext().getActionURL().toString());
+                ActionURL browseURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), getReturnURL().toString());
                 ActionButton browseButton = new ActionButton(browseURL, "Browse for MageML Files");
                 browseButton.setDisplayPermission(ACL.PERM_INSERT);
                 bar.add(browseButton);
