@@ -47,10 +47,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MicroarrayController extends SpringActionController
 {
@@ -152,16 +149,16 @@ public class MicroarrayController extends SpringActionController
     {
         public ModelAndView getView(UploadRedirectForm form, BindException errors) throws Exception
         {
-            List<Map<String, File>> files = new ArrayList<Map<String, File>>();
             // Can't trust the form's getPath() because it translates the empty string into null, and we
             // need to know if the parameter was present
             String path = getViewContext().getRequest().getParameter("path");
+            List<File> files = new ArrayList<File>();
             if (path != null)
             {
                 PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
                 if (root == null)
                 {
-                    HttpView.throwNotFound("No pipeline root is available");
+                    throw new NotFoundException("No pipeline root is available");
                 }
                 File f = root.resolvePath(path);
                 if (!NetworkDrive.exists(f))
@@ -172,10 +169,7 @@ public class MicroarrayController extends SpringActionController
                 File[] selectedFiles = f.listFiles(ArrayPipelineManager.getMageFileFilter());
                 if (selectedFiles != null)
                 {
-                    for (File selectedFile : selectedFiles)
-                    {
-                        files.add(Collections.singletonMap(selectedFile.getName(), selectedFile));
-                    }
+                    files.addAll(Arrays.asList(selectedFiles));
                 }
             }
             else
@@ -187,13 +181,13 @@ public class MicroarrayController extends SpringActionController
                     ExpData data = ExperimentService.get().getExpData(dataId);
                     if (data == null || !data.getContainer().equals(getContainer()))
                     {
-                        HttpView.throwNotFound("Could not find all selected datas");
+                        throw new NotFoundException("Could not find all selected datas");
                     }
 
                     File f = data.getFile();
                     if (f != null && f.isFile())
                     {
-                        files.add(Collections.singletonMap(f.getName(), f));
+                        files.add(f);
                     }
                 }
             }
@@ -202,21 +196,22 @@ public class MicroarrayController extends SpringActionController
             {
                 HttpView.throwNotFound("Could not find any matching files");
             }
-            for (Map<String, File> fileMap : files)
+            Collections.sort(files);
+            List<Map<String, File>> maps = new ArrayList<Map<String, File>>();
+            for (File file : files)
             {
-                assert fileMap.size() == 1;
-                File f = fileMap.values().iterator().next();
-                ExpData data = ExperimentService.get().getExpDataByURL(f, getContainer());
+                ExpData data = ExperimentService.get().getExpDataByURL(file, getContainer());
                 if (data != null && data.getRun() != null)
                 {
-                    errors.addError(new LabkeyError("The file " + f.getAbsolutePath() + " has already been uploaded"));
+                    errors.addError(new LabkeyError("The file " + file.getAbsolutePath() + " has already been uploaded"));
                 }
+                maps.add(Collections.singletonMap(file.getName(), file));
             }
             if (errors.getErrorCount() > 0)
             {
                 return new SimpleErrorView(errors);
             }
-            PipelineDataCollector.setFileCollection(getViewContext().getRequest().getSession(true), getContainer(), form.getProtocol(), files);
+            PipelineDataCollector.setFileCollection(getViewContext().getRequest().getSession(true), getContainer(), form.getProtocol(), maps);
             HttpView.throwRedirect(PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), form.getProtocol(), MicroarrayUploadWizardAction.class));
             return null;
         }
@@ -340,7 +335,7 @@ public class MicroarrayController extends SpringActionController
 
             PipeRoot pr = service.findPipelineRoot(c);
             if (pr == null || !URIUtil.exists(pr.getUri()))
-                HttpView.throwNotFound();
+                throw new NotFoundException("No pipeline root configured for this folder");
 
             URI uriData = URIUtil.resolve(pr.getUri(c), form.getPath());
             if (uriData == null)

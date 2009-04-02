@@ -393,10 +393,14 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
             {
                 columnName = param.getStringValue();
             }
+            if (!getBulkProperties().containsKey(columnName))
+            {
+                throw new ExperimentException("Could not find a '" + columnName + "' column for sample information.");
+            }
             Object result = getBulkProperties().get(columnName);
             if (result == null)
             {
-                throw new ExperimentException("Could not find a '" + columnName + "' column for sample information.");
+                throw new ExperimentException("No sample information specified for '" + columnName + "'.");
             }
             return result.toString();
         }
