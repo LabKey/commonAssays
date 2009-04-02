@@ -21,12 +21,15 @@ import org.labkey.api.data.Table;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewServlet;
+import org.labkey.api.webdav.ModuleStaticResolverImpl;
+import org.labkey.api.webdav.WebdavResolver;
 import org.labkey.common.tools.TabLoader;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.ProteinManager;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.Map;
 import java.util.Set;
@@ -55,7 +58,7 @@ public class ProteinDictionaryHelpers
         {
             Table.execute(ProteinManager.getSchema(), "DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap(), null);
 
-            TabLoader t = new TabLoader(new InputStreamReader(ViewServlet.getViewServletContext().getResourceAsStream(FILE)));
+            TabLoader t = new TabLoader(new InputStreamReader(getFASTA()));
             conn = scope.getConnection();
             ps = conn.prepareStatement(
                     "INSERT INTO " + ProteinManager.getTableInfoSprotOrgMap() +
@@ -143,6 +146,20 @@ public class ProteinDictionaryHelpers
             if (it != null) { it.close(); }
         }
     }
+
+
+    private static InputStream getFASTA() throws IOException
+    {
+        WebdavResolver.Resource r = ModuleStaticResolverImpl.get().lookup(FILE);
+        if (null != r)
+        {
+            InputStream is = r.getInputStream(null);
+            if (null != is)
+                return is;
+        }
+        return ViewServlet.getViewServletContext().getResourceAsStream(FILE);
+    }
+
 
     public static String getGONameFromId(int id) throws SQLException
     {
