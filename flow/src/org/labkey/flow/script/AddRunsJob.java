@@ -24,6 +24,7 @@ import org.labkey.api.exp.api.ExpMaterial;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 public class AddRunsJob extends ScriptJob
 {
@@ -40,15 +41,21 @@ public class AddRunsJob extends ScriptJob
 
     public void doRun() throws Exception
     {
+        go();
+    }
+
+    List<FlowRun> go() throws Exception
+    {
+        List<FlowRun> runs = new ArrayList<FlowRun>();
         for (File path : _paths)
         {
             if (checkInterrupted())
-                return;
+                return runs;
             if (!checkProcessPath(path, FlowProtocolStep.keywords))
                 continue;
             try
             {
-                getRunHandler().run(path);
+                runs.add(getRunHandler().run(path));
             }
             catch (Throwable t)
             {
@@ -56,5 +63,6 @@ public class AddRunsJob extends ScriptJob
                 addStatus("Exception:" + t.toString());
             }
         }
+        return runs;
     }
 }

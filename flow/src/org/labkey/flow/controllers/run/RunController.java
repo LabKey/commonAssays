@@ -296,7 +296,7 @@ public class RunController extends SpringFlowController<RunController.Action>
             }
 
             FlowExperiment experiment = FlowExperiment.fromExperimentId(form.getExperimentId());
-            if (experiment.findRun(new File(run.getPath()), FlowProtocolStep.analysis).length != 0)
+            if (experiment.hasRun(new File(run.getPath()), FlowProtocolStep.analysis))
             {
                 errors.reject(ERROR_MSG, "This run cannot be moved to this analysis because there is already a run there.");
                 return false;

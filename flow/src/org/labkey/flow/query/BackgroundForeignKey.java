@@ -26,6 +26,7 @@ import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.data.ICSMetadata;
+import org.labkey.flow.data.FlowDataType;
 
 import java.util.*;
 
@@ -33,12 +34,14 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
 {
     FlowSchema _schema;
     FlowPropertySet _fps;
+    FlowDataType _type;
 
-    public BackgroundForeignKey(FlowSchema schema, FlowPropertySet fps)
+    public BackgroundForeignKey(FlowSchema schema, FlowPropertySet fps, FlowDataType type)
     {
         super();
         _schema = schema;
         _fps = fps;
+        _type = type;
     }
 
     protected Collection<StatisticSpec> getAttributes()
@@ -68,6 +71,12 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
     {
         SubsetSpec subset = _fps.simplifySubset(stat.getSubset());
         stat = new StatisticSpec(subset, stat.getStatistic(), stat.getParameter());
+        // Hide spill stats be default for all tables except CompensationMatrix.
+        // Hide non-spill stats from the CompensationMatrix table.
+        if (_type == FlowDataType.CompensationMatrix)
+            column.setIsHidden(stat.getStatistic() != StatisticSpec.STAT.Spill);
+        else
+            column.setIsHidden(stat.getStatistic() == StatisticSpec.STAT.Spill);
         column.setCaption("BG " + stat.toShortString());
         column.setSqlTypeName("DOUBLE");
         column.setFormatString("#,##0.###");

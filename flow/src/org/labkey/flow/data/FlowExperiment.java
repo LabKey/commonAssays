@@ -214,6 +214,17 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return ret.toArray(new String[0]);
     }
 
+    public boolean hasRun(File filePath, FlowProtocolStep step) throws SQLException
+    {
+        FlowRun[] runs = getRuns(step);
+        for (FlowRun run : runs)
+        {
+            if (filePath.toString().equals(run.getExperimentRun().getFilePathRoot()))
+                return true;
+        }
+        return false;
+    }
+
     public FlowRun[] findRun(File filePath, FlowProtocolStep step) throws SQLException
     {
         List<FlowRun> ret = new ArrayList();
@@ -256,9 +267,14 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return FlowRun.fromRuns(getExperiment().getRuns(null, protocol));
     }
 
+    public boolean isKeywords()
+    {
+        return FlowExperimentRunExperimentName.equals(getName());
+    }
+    
     public boolean isAnalysis()
     {
-        return !FlowExperimentRunExperimentName.equals(getName()) && !isWorkspace();
+        return !isKeywords() && !isWorkspace(); 
     }
 
     public boolean isWorkspace()

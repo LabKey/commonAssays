@@ -84,7 +84,7 @@ public class KeywordsHandler extends BaseHandler
         _job.addStatus(status);
     }
 
-    protected void addRun(File directory, List<FCSKeywordData> data) throws Exception
+    protected FlowRun addRun(File directory, List<FCSKeywordData> data) throws Exception
     {
         ExperimentArchiveDocument xarDoc = _job.createExperimentArchive();
         ExperimentArchiveType xar = xarDoc.getExperimentArchive();
@@ -126,9 +126,11 @@ public class KeywordsHandler extends BaseHandler
         _job.finishExperimentRun(xar, run);
         _job.importRuns(xarDoc, directory, runDirectory, FlowProtocolStep.keywords);
         _job.deleteAnalysisDirectory(runDirectory);
+
+        return FlowRun.fromLSID(run.getAbout());
     }
 
-    protected void importRun(File directory) throws Exception
+    protected FlowRun importRun(File directory) throws Exception
     {
         File[] files = directory.listFiles();
         List<FCSKeywordData> lstFileData = new ArrayList();
@@ -144,9 +146,9 @@ public class KeywordsHandler extends BaseHandler
         if (lstFileData.size() == 0)
         {
             addStatus("No FCS files found");
-            return;
+            return null;
         }
-        addRun(directory, lstFileData);
+        return addRun(directory, lstFileData);
     }
 
     protected FCSAnalyzer getAnalyzer()
@@ -159,9 +161,9 @@ public class KeywordsHandler extends BaseHandler
         throw new UnsupportedOperationException();
     }
 
-    public void run(File directory) throws Exception
+    public FlowRun run(File directory) throws Exception
     {
-        importRun(directory);
+        return importRun(directory);
     }
 
 

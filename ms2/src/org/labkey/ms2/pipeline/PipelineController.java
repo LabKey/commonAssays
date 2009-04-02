@@ -522,11 +522,7 @@ public class PipelineController extends SpringActionController
                     // a Perl-driven cluster.  These are not queued, but simply set
                     // status to show to the user.
                     
-                    // If this is a single file job, or a factions job, then it requires its own processing.
-                    if (mzXMLFiles.length == 1 || job.isFractions())
-                    {
-                        job.setStatus(PipelineJob.WAITING_STATUS);
-                    }
+                    job.setStatus(PipelineJob.WAITING_STATUS);
 
                     if (mzXMLFiles.length > 1)
                     {

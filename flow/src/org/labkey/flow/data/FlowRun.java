@@ -38,6 +38,7 @@ import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.io.File;
 
 public class FlowRun extends FlowObject<ExpRun>
 {
@@ -314,6 +315,11 @@ public class FlowRun extends FlowObject<ExpRun>
 
     static public FlowRun[] getRunsForContainer(Container container, FlowProtocolStep step) throws SQLException
     {
+        return getRunsForPath(container, step, null);
+    }
+
+    static public FlowRun[] getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot) throws SQLException
+    {
         List<FlowRun> ret = new ArrayList();
         ExpProtocol childProtocol = null;
         if (step != null)
@@ -327,7 +333,8 @@ public class FlowRun extends FlowObject<ExpRun>
         }
         for (ExpRun run : ExperimentService.get().getExpRuns(container, null, childProtocol))
         {
-            ret.add(new FlowRun(run));
+            if (runFilePathRoot == null || (run.getFilePathRoot() != null && runFilePathRoot.equals(new File(run.getFilePathRoot()))))
+                ret.add(new FlowRun(run));
         }
         sortRuns(ret);
         return ret.toArray(new FlowRun[0]);

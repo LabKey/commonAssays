@@ -382,7 +382,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addStatisticColumn(String columnAlias)
         {
             ColumnInfo colStatistic = addObjectIdColumn(columnAlias);
-            colStatistic.setFk(new StatisticForeignKey(_fps));
+            colStatistic.setFk(new StatisticForeignKey(_fps, _type));
             colStatistic.setIsUnselectable(true);
             addMethod(columnAlias, new StatisticMethod(colStatistic));
             return colStatistic;
@@ -639,7 +639,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addStatisticColumn(String columnAlias)
         {
             ColumnInfo colStatistic = addObjectIdColumn(columnAlias);
-            colStatistic.setFk(new StatisticForeignKey(_fps));
+            colStatistic.setFk(new StatisticForeignKey(_fps, _type));
             colStatistic.setIsUnselectable(true);
             addMethod(columnAlias, new StatisticMethod(colStatistic));
             return colStatistic;
@@ -686,7 +686,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addBackgroundColumn(String columnAlias)
         {
             ColumnInfo colBackground = addObjectIdColumn(columnAlias);
-            colBackground.setFk(new BackgroundForeignKey(FlowSchema.this, _fps));
+            colBackground.setFk(new BackgroundForeignKey(FlowSchema.this, _fps, _type));
             colBackground.setIsUnselectable(true);
             addMethod(columnAlias, new BackgroundMethod(FlowSchema.this, colBackground));
             return colBackground;
@@ -1057,18 +1057,23 @@ public class FlowSchema extends UserSchema
                         break;
                 }
             }
-            lookup = _colBackground.getFk().getLookupTableInfo();
-            if (lookup != null)
+
+            if (_colBackground != null)
             {
-                int count = 0;
-                FieldKey keyStatistic = new FieldKey(null, _colBackground.getName());
-                for (FieldKey key : lookup.getDefaultVisibleColumns())
+                lookup = _colBackground.getFk().getLookupTableInfo();
+                if (lookup != null)
                 {
-                    ret.add(FieldKey.fromParts(keyStatistic, key));
-                    if (++count > 3)
-                        break;
+                    int count = 0;
+                    FieldKey keyStatistic = new FieldKey(null, _colBackground.getName());
+                    for (FieldKey key : lookup.getDefaultVisibleColumns())
+                    {
+                        ret.add(FieldKey.fromParts(keyStatistic, key));
+                        if (++count > 3)
+                            break;
+                    }
                 }
             }
+            
             lookup = _colGraph.getFk().getLookupTableInfo();
             if (lookup != null)
             {
@@ -1135,7 +1140,10 @@ public class FlowSchema extends UserSchema
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
         ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
-        ColumnInfo colBackground = ret.addBackgroundColumn("Background");
+        FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+        ColumnInfo colBackground = null;
+        if (protocol != null && protocol.hasICSMetadata())
+            colBackground = ret.addBackgroundColumn("Background");
         ColumnInfo colGraph = ret.addGraphColumn("Graph");
         ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.toString());
         colFCSFile.setFk(new LookupForeignKey(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()),
@@ -1182,7 +1190,11 @@ public class FlowSchema extends UserSchema
         }
 
         ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
-        ColumnInfo colBackground = ret.addBackgroundColumn("Background");
+
+        FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+        ColumnInfo colBackground = null;
+        if (protocol != null && protocol.hasICSMetadata())
+            colBackground = ret.addBackgroundColumn("Background");
 
         ColumnInfo colGraph = ret.addGraphColumn("Graph");
 

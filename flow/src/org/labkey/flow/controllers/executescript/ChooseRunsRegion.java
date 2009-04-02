@@ -98,7 +98,7 @@ public class ChooseRunsRegion extends DataRegion
             {
                 return null;
             }
-            if (experiment != null && experiment.findRun(new File(run.getPath()), _form.getProtocolStep()).length > 0)
+            if (experiment != null && experiment.hasRun(new File(run.getPath()), _form.getProtocolStep()))
             {
                 return "The '" + experiment.getName() + "' analysis folder already contains this run.";
             }

@@ -27,9 +27,12 @@ import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.FlowSettings;
 
 import java.io.*;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * User: kevink
@@ -43,6 +46,7 @@ public class WorkspaceJob extends FlowJob
     private final File _workspaceFile;
     private final String _workspaceName;
     private final File _runFilePathRoot;
+    private final boolean _createKeywordRun;
     private final boolean _failOnError;
 
     private final File _containerFolder;
@@ -52,14 +56,17 @@ public class WorkspaceJob extends FlowJob
                         FlowExperiment experiment,
                         WorkspaceData workspaceData,
                         File runFilePathRoot,
+                        boolean createKeywordRun,
                         boolean failOnError)
             throws Exception
     {
         super(FlowPipelineProvider.NAME, info);
         _experiment = experiment;
+        _createKeywordRun = createKeywordRun;
         _runFilePathRoot = runFilePathRoot;
         _containerFolder = getWorkingFolder(getContainer());
         _failOnError = failOnError;
+        assert !_createKeywordRun || _runFilePathRoot != null;
 
         String name = workspaceData.getName();
         if (name == null && workspaceData.getPath() != null)
@@ -126,12 +133,36 @@ public class WorkspaceJob extends FlowJob
         ObjectInputStream ois = null;
         try
         {
+            // Create a new keyword run job for the selected FCS file directory
+            if (_createKeywordRun)
+            {
+                FlowProtocol protocol = FlowProtocol.ensureForContainer(getInfo().getUser(), getInfo().getContainer());
+                AddRunsJob addruns = new AddRunsJob(getInfo(), protocol, Collections.singletonList(_runFilePathRoot));
+                addruns.setLogFile(getLogFile());
+                addruns.setLogLevel(getLogLevel());
+                addruns.setStatus(getStatusText());
+                addruns.setStatusFile(getStatusFile());
+                addruns.setSubmitted();
+
+                List<FlowRun> runs = addruns.go();
+                if (runs == null || runs.size() == 0 || addruns.hasErrors())
+                {
+                    getLogger().error("Failed to import keywords from '" + _runFilePathRoot + "'.");
+                    setStatus(PipelineJob.ERROR_STATUS);
+                }
+            }
+
             ois = new ObjectInputStream(new FileInputStream(_workspaceFile));
             FlowJoWorkspace workspace = (FlowJoWorkspace)ois.readObject();
-            
-            _run = workspace.createExperimentRun(this, getUser(), getContainer(), _experiment, _workspaceName, _workspaceFile, _runFilePathRoot, _failOnError);
-            setStatus(PipelineJob.COMPLETE_STATUS);
-            completeStatus = true;
+
+            _run = workspace.createExperimentRun(this, getUser(), getContainer(),
+                    _experiment, _workspaceName, _workspaceFile,
+                    _runFilePathRoot, _failOnError);
+            if (_run != null)
+            {
+                setStatus(PipelineJob.COMPLETE_STATUS);
+                completeStatus = true;
+            }
         }
         catch (Exception ex)
         {

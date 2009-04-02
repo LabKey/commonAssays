@@ -19,12 +19,14 @@ import org.labkey.flow.controllers.WorkspaceData;
 
 /**
  * User: kevink
-* Date: Jul 14, 2008 4:06:04 PM
-*/
+ * Date: Jul 14, 2008 4:06:04 PM
+ */
 public class ImportAnalysisForm
 {
     private int step;
     private WorkspaceData workspace = new WorkspaceData();
+    private int existingKeywordRunId;
+    private boolean createAnalysis;
     private String newAnalysisName;
     private int existingAnalysisId;
     private String runFilePathRoot;
@@ -53,6 +55,26 @@ public class ImportAnalysisForm
     public WorkspaceData getWorkspace()
     {
         return workspace;
+    }
+
+    public int getExistingKeywordRunId()
+    {
+        return existingKeywordRunId;
+    }
+
+    public void setExistingKeywordRunId(int existingKeywordRunId)
+    {
+        this.existingKeywordRunId = existingKeywordRunId;
+    }
+
+    public boolean isCreateAnalysis()
+    {
+        return createAnalysis;
+    }
+
+    public void setCreateAnalysis(boolean createAnalysis)
+    {
+        this.createAnalysis = createAnalysis;
     }
 
     public String getNewAnalysisName()

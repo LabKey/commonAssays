@@ -21,16 +21,20 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.data.FlowDataType;
 
 import java.util.Collection;
 
 public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
 {
     FlowPropertySet _fps;
-    public StatisticForeignKey(FlowPropertySet fps)
+    FlowDataType _type;
+
+    public StatisticForeignKey(FlowPropertySet fps, FlowDataType type)
     {
         super();
         _fps = fps;
+        _type = type;
     }
 
     protected Collection<StatisticSpec> getAttributes()
@@ -55,6 +59,12 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
 
         SubsetSpec subset = _fps.simplifySubset(stat.getSubset());
         stat = new StatisticSpec(subset, stat.getStatistic(), stat.getParameter());
+        // Hide spill stats be default for all tables except CompensationMatrix.
+        // Hide non-spill stats from the CompensationMatrix table.
+        if (_type == FlowDataType.CompensationMatrix)
+            column.setIsHidden(stat.getStatistic() != StatisticSpec.STAT.Spill);
+        else
+            column.setIsHidden(stat.getStatistic() == StatisticSpec.STAT.Spill);
         column.setCaption(stat.toShortString());
         column.setSqlTypeName("DOUBLE");
         column.setFormatString("#,##0.###");

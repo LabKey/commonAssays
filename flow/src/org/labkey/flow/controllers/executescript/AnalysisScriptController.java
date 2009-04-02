@@ -34,7 +34,6 @@ import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
 import org.labkey.common.util.Pair;
 import org.labkey.flow.FlowPreference;
-import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.FlowController;
@@ -52,7 +51,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.*;
 
 public class AnalysisScriptController extends SpringFlowController<AnalysisScriptController.Action>
@@ -501,12 +499,60 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             workspace.validate(getContainer(), errors, getRequest());
         }
 
+        private FlowRun getExistingKeywordRun(ImportAnalysisForm form, Errors errors)
+        {
+            int keywordRunId = form.getExistingKeywordRunId();
+            if (keywordRunId > 0 && form.getRunFilePathRoot() != null)
+            {
+                errors.reject(ERROR_MSG, "Can't select both an existing run and a file path.");
+                return null;
+            }
+
+            if (keywordRunId > 0)
+                return FlowRun.fromRunId(keywordRunId);
+            return null;
+        }
+
+        // get the path to either the previously imported keyword run or
+        // to the selected directory under the pipeline root.
         private File getRunPathRoot(ImportAnalysisForm form, Errors errors) throws Exception
         {
-            if (form.getRunFilePathRoot() != null)
+            FlowRun keywordRun = getExistingKeywordRun(form, errors);
+            if (errors.hasErrors())
+                return null;
+
+            String path = null;
+            if (keywordRun != null)
+            {
+                String keywordRunPath = keywordRun.getPath();
+                if (keywordRunPath == null)
+                {
+                    assert false; // form shouldn't allow user to select a keyword run without a path
+                    errors.reject(ERROR_MSG, "Selected FCS File run doesn't have a path.");
+                    return null;
+                }
+                PipeRoot root = getPipeRoot();
+                File keywordRunFile = new File(keywordRunPath);
+                if (!root.isUnderRoot(keywordRunFile))
+                {
+                    errors.reject(ERROR_MSG, "Selected FCS File run isn't under the current pipeline root.");
+                    return null;
+                }
+                path = root.relativePath(keywordRunFile);
+                if (path == null)
+                {
+                    errors.reject(ERROR_MSG, "Couldn't relativize the selected FCS File run path");
+                    return null;
+                }
+            }
+            else if (form.getRunFilePathRoot() != null)
+            {
+                path = PageFlowUtil.decode(form.getRunFilePathRoot());
+            }
+
+            if (path != null)
             {
                 PipeRoot root = getPipeRoot();
-                String path = PageFlowUtil.decode(form.getRunFilePathRoot());
                 File runFilePathRoot = root.resolvePath(path);
 
                 if (runFilePathRoot == null)
@@ -535,18 +581,35 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
                 return;
             }
 
-            // guess the FCS files are in the same directory as the workspace
-            if (form.getRunFilePathRoot() == null)
+            PipeRoot root = null;
+            String path = workspaceData.getPath();
+            File workspaceFile = null;
+            if (path != null)
             {
-                PipeRoot root = null;
-                String path = workspaceData.getPath();
-                File workspaceFile = null;
-                if (path != null)
-                {
-                    root = getPipeRoot();
-                    workspaceFile = root.resolvePath(path);
-                }
+                root = getPipeRoot();
+                workspaceFile = root.resolvePath(path);
+            }
 
+            // first, try to find an existing run in the same directory as the workspace
+            if (form.getExistingKeywordRunId() == 0)
+            {
+                FlowRun[] keywordRuns = FlowRun.getRunsForPath(getContainer(), FlowProtocolStep.keywords, workspaceFile.getParentFile());
+                if (keywordRuns != null && keywordRuns.length > 0)
+                {
+                    for (FlowRun keywordRun : keywordRuns)
+                    {
+                        if (keywordRun.getExperiment().isKeywords())
+                        {
+                            form.setExistingKeywordRunId(keywordRun.getRunId());
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // otherwise, guess the FCS files are in the same directory as the workspace
+            if (form.getExistingKeywordRunId() == 0 && form.getRunFilePathRoot() == null)
+            {
                 if (workspaceFile != null)
                 {
                     File runFilePathRoot = null;
@@ -582,6 +645,24 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
 
             if (runFilePathRoot != null)
             {
+                if (form.getExistingKeywordRunId() == 0)
+                {
+                    // try to use an existing run for the path if possible
+                    FlowRun[] keywordRuns = FlowRun.getRunsForPath(getContainer(), FlowProtocolStep.keywords, runFilePathRoot);
+                    if (keywordRuns != null && keywordRuns.length > 0)
+                    {
+                        for (FlowRun keywordRun : keywordRuns)
+                        {
+                            if (keywordRun.getExperiment().isKeywords())
+                            {
+                                form.setExistingKeywordRunId(keywordRun.getRunId());
+                                form.setRunFilePathRoot(null);
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 boolean found = false;
                 WorkspaceData workspaceData = form.getWorkspace();
                 FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
@@ -613,46 +694,79 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
                 return;
 
             FlowExperiment experiment;
-            if (StringUtils.isEmpty(form.getNewAnalysisName()))
+            if (form.isCreateAnalysis())
             {
-                experiment = FlowExperiment.fromExperimentId(form.getExistingAnalysisId());
+                if (StringUtils.isEmpty(form.getNewAnalysisName()))
+                {
+                    errors.reject(ERROR_MSG, "Missing analysis folder name");
+                    return;
+                }
+                experiment = FlowExperiment.getForName(getUser(), getContainer(), form.getNewAnalysisName());
+                if (experiment != null)
+                {
+                    // just use the existing analysis instead
+                    form.setExistingAnalysisId(experiment.getExperimentId());
+                    form.setCreateAnalysis(false);
+                }
+                else
+                {
+                    form.setExistingAnalysisId(0);
+                }
             }
             else
             {
-                experiment = FlowExperiment.getForName(getUser(), getContainer(), form.getNewAnalysisName());
+                experiment = FlowExperiment.fromExperimentId(form.getExistingAnalysisId());
+                if (experiment == null)
+                {
+                    errors.reject(ERROR_MSG, "Analysis folder for id '" + form.getExistingAnalysisId() + "' doesn't exist.");
+                    return;
+                }
+                form.setNewAnalysisName(null);
             }
+
             if (experiment != null)
             {
                 if (!experiment.getContainer().equals(getContainer()))
                     throw new IllegalArgumentException("Wrong container");
 
-                if (runFilePathRoot != null)
+                if (runFilePathRoot != null && experiment.hasRun(runFilePathRoot, null))
                 {
-                    FlowRun[] existing = experiment.findRun(runFilePathRoot, null);
-                    if (existing.length != 0)
-                    {
-                        errors.reject(ERROR_MSG, "This analysis folder already contains this path.");
-                        return;
-                    }
+                    errors.reject(ERROR_MSG, "The '" + experiment.getName() + "' analysis folder already contains the FCS files from '" + runFilePathRoot + "'.");
+                    return;
                 }
             }
+
             form.setWizardStep(ImportAnalysisStep.CONFIRM);
         }
 
         private void stepConfirm(ImportAnalysisForm form, BindException errors) throws Exception
         {
+            FlowRun keywordRun = getExistingKeywordRun(form, errors);
+            if (errors.hasErrors())
+                return;
+
             File runFilePathRoot = getRunPathRoot(form, errors);
             if (errors.hasErrors())
                 return;
 
             FlowExperiment experiment;
-            if (StringUtils.isEmpty(form.getNewAnalysisName()))
+            if (form.isCreateAnalysis())
             {
-                experiment = FlowExperiment.fromExperimentId(form.getExistingAnalysisId());
+                if (StringUtils.isEmpty(form.getNewAnalysisName()))
+                {
+                    errors.reject(ERROR_MSG, "Missing analysis folder name");
+                    return;
+                }
+                experiment = FlowExperiment.createForName(getUser(), getContainer(), form.getNewAnalysisName());
             }
             else
             {
-                experiment = FlowExperiment.createForName(getUser(), getContainer(), form.getNewAnalysisName());
+                experiment = FlowExperiment.fromExperimentId(form.getExistingAnalysisId());
+                if (experiment == null)
+                {
+                    errors.reject(ERROR_MSG, "Analysis folder for id '" + form.getExistingAnalysisId() + "' doesn't exist.");
+                    return;
+                }
             }
             if (!experiment.getContainer().equals(getContainer()))
                 throw new IllegalArgumentException("Wrong container");
@@ -665,7 +779,9 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
                 info.setUrlHelper(null);
             }
 
-            WorkspaceJob job = new WorkspaceJob(info, experiment, workspaceData, runFilePathRoot, false);
+            boolean createKeywordRun = keywordRun == null && runFilePathRoot != null;
+            WorkspaceJob job = new WorkspaceJob(info, experiment,
+                    workspaceData, runFilePathRoot, createKeywordRun, false);
             HttpView.throwRedirect(executeScript(job));
         }
 

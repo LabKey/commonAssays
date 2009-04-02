@@ -540,6 +540,12 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         setProperty(user, FlowProperty.ICSMetadata.getPropertyDescriptor(), value);
     }
 
+    public boolean hasICSMetadata()
+    {
+        String metadata = getICSMetadataString();
+        return metadata != null && metadata.length() > 0;
+    }
+
     public ICSMetadata getICSMetadata()
     {
         String metadata = getICSMetadataString();
