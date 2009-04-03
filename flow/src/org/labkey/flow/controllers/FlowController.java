@@ -127,7 +127,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
                 return null;
             }
             FlowSchema schema = new FlowSchema(getViewContext());
-            if (schema.getTable(settings.getQueryName(), null) == null)
+            if (schema.getTable(settings.getQueryName(), false) == null)
             {
                 HttpView.throwNotFound("Query '" + settings.getQueryName() + "' in flow schema not found");
             }
