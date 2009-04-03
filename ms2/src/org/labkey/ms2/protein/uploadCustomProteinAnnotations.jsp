@@ -80,7 +80,10 @@
                 Annotations:
             </td>
             <td width="100%">
-                <textarea style="width: 100%" rows="15" cols="50" name="annotationsText"><%= h(bean.getAnnotationsText()) %></textarea>
+                <textarea id="annotationsText" style="width: 100%" rows="15" cols="50" name="annotationsText"><%= h(bean.getAnnotationsText()) %></textarea>
+                <script type="text/javascript">
+                    Ext.EventManager.on('annotationsText', 'keydown', handleTabsInTextArea);
+                </script>
             </td>
         </tr>
         <tr>
