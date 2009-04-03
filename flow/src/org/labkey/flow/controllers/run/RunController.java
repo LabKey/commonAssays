@@ -94,7 +94,7 @@ public class RunController extends SpringFlowController<RunController.Action>
         {
             run = form.getRun();
             if (run == null)
-                return new HtmlView("Run not found: " + PageFlowUtil.filter(form.getRunId()));
+                HttpView.throwNotFound("Run not found: " + PageFlowUtil.filter(form.getRunId()));
             return new JspView<RunForm>(RunController.class, "showRun.jsp", form, errors);
         }
 
