@@ -35,6 +35,7 @@ import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.query.QueryView;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.FlowModule;
@@ -46,6 +47,7 @@ import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.script.FlowJob;
 import org.labkey.flow.view.JobStatusView;
+import org.labkey.flow.view.FlowQueryView;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
 import org.springframework.validation.BindException;
@@ -119,12 +121,27 @@ public class FlowController extends SpringFlowController<FlowController.Action>
         {
             FlowQuerySettings settings = new FlowQuerySettings(getViewContext().getBindPropertyValues(), "query");
             query = settings.getQueryName();
+            if (null == query)
+            {
+                HttpView.throwNotFound("Query name required.");
+                return null;
+            }
             FlowSchema schema = new FlowSchema(getViewContext());
+            if (schema.getTable(settings.getQueryName(), null) == null)
+            {
+                HttpView.throwNotFound("Query '" + settings.getQueryName() + "' in flow schema not found");
+            }
+
             experiment = schema.getExperiment();
             run = schema.getRun();
 //            script = schema.getScript();
 
-            return schema.createView(getViewContext(), settings);
+            QueryView view = schema.createView(getViewContext(), settings);
+            if (view.getQueryDef() == null)
+            {
+                HttpView.throwNotFound("Query '" + settings.getQueryName() + "' in flow schema not found");
+            }
+            return view;
         }
 
         public NavTree appendNavTrail(NavTree root)
