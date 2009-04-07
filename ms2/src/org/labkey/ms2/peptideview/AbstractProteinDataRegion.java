@@ -179,7 +179,7 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         int colspan = 0;
         for (DisplayColumn dc : getDisplayColumns())
         {
-            if (dc.getVisible(ctx))
+            if (dc.isVisible(ctx))
             {
                 colspan++;
             }

@@ -207,7 +207,6 @@ flow/src/org/labkey/flow/analysis/data/FloatArray.java -text
 flow/src/org/labkey/flow/analysis/data/IntArray.java -text
 flow/src/org/labkey/flow/analysis/data/NumberArray.java -text
 flow/src/org/labkey/flow/analysis/data/SubsetNumberArray.java -text
-flow/src/org/labkey/flow/analysis/groovy/FCSExpression.java -text
 flow/src/org/labkey/flow/analysis/model/Analysis.java -text
 flow/src/org/labkey/flow/analysis/model/AndGate.java -text
 flow/src/org/labkey/flow/analysis/model/AutoCompensationScript.java -text

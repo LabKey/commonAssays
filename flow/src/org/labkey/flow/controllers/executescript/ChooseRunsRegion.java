@@ -82,7 +82,7 @@ public class ChooseRunsRegion extends DataRegion
 
         String style = null;
         for (DisplayColumn renderer : renderers)
-            if (renderer.getVisible(ctx))
+            if (renderer.isVisible(ctx))
                 renderer.renderGridDataCell(ctx, out, style);
 
         out.write("</tr>\n");
