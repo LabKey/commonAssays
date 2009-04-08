@@ -58,6 +58,9 @@ window.setTimeout(positionCursor, 1);
 
 
 <textarea id="scriptTextArea" wrap="off" rows="20" cols="80" name="script"><%=h(script.getAnalysisScript())%></textarea>
+    <script type="text/javascript">
+        Ext.EventManager.on('scriptTextArea', 'keydown', handleTabsInTextArea);
+    </script>
 <br>
 <input type="submit" value="Submit">
 </form>
