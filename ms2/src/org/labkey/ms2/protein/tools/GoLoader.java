@@ -20,6 +20,7 @@ import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
+import org.labkey.api.util.CloseableIterator;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FTPUtil;
 import org.labkey.api.util.JobRunner;
@@ -170,7 +171,7 @@ public abstract class GoLoader
     private void loadSingleGoFile(GoLoadBean bean, String filename, InputStream is) throws SQLException, IOException, ServletException
     {
         int orgLineCount = 0;
-        TabLoader.TabLoaderIterator it = null;
+        CloseableIterator<Map<String, Object>> it = null;
         String[] cols = bean.cols;
         TableInfo ti = bean.tinfo;
         Connection conn = null;

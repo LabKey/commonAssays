@@ -41,10 +41,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This data handler loads msInspect feature files, which use a tsv format.
@@ -237,7 +234,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
             //open the tsv file using TabLoader for automatic parsing
             TabLoader tsvloader = new TabLoader(dataFile);
-            TabLoader.TabLoaderIterator iter = tsvloader.iterator();
+            Iterator<Map<String, Object>> iter = tsvloader.iterator();
             ColumnDescriptor[] coldescrs = tsvloader.getColumns();
 
             //set the error value for each column descriptor so that we can
@@ -269,7 +266,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             while(iter.hasNext())
             {
                 //get a row
-                row = (Map)iter.next();
+                row = iter.next();
                 ++numRows;
 
                 validateRow(row, numRows);

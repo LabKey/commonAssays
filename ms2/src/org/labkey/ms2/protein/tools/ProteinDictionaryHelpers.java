@@ -20,6 +20,7 @@ import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Table;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.util.CloseableIterator;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.api.webdav.ModuleStaticResolverImpl;
 import org.labkey.api.webdav.WebdavResolver;
@@ -42,8 +43,7 @@ import java.util.HashSet;
  */
 public class ProteinDictionaryHelpers
 {
-    private static Logger _log = Logger.getLogger(ProteinDictionaryHelpers.class);
-
+    private static final Logger _log = Logger.getLogger(ProteinDictionaryHelpers.class);
     private static final String FILE = "/MS2/externalData/ProtSprotOrgMap.txt";
     private static final int SPOM_BATCH_SIZE = 1000;
 
@@ -52,7 +52,7 @@ public class ProteinDictionaryHelpers
         int orgLineCount = 0;
         PreparedStatement ps = null;
         Connection conn = null;
-        TabLoader.TabLoaderIterator it = null;
+        CloseableIterator<Map<String, Object>> it = null;
         DbScope scope = ProteinManager.getSchema().getScope();
         try
         {
@@ -83,7 +83,6 @@ public class ProteinDictionaryHelpers
                 {
                     throw new IllegalArgumentException("Duplicate SprotSuffix: " + sprotSuffix);
                 }
-
 
                 // SuperKingdomCode
                 ps.setString(2, (String)curRec.get("column1"));
@@ -141,9 +140,9 @@ public class ProteinDictionaryHelpers
         }
         finally
         {
-            if (ps != null) { try{ ps.close(); } catch (SQLException e) {} }
+            if (ps != null) { try { ps.close(); } catch (SQLException e) {} }
             try{ if (null != conn) scope.releaseConnection(conn); } catch (SQLException e) {}
-            if (it != null) { it.close(); }
+            if (it != null) { try { it.close(); } catch (IOException e) {} }
         }
     }
 
