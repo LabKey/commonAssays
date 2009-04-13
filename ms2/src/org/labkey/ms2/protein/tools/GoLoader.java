@@ -132,16 +132,15 @@ public abstract class GoLoader
 
     private void loadGoFromGz() throws SQLException, IOException, ServletException
     {
-        clearGoLoaded();
-
         InputStream is = getInputStream();
         _tis = new TarInputStream(new GZIPInputStream(is));
         TarEntry te = _tis.getNextEntry();
 
         DbSchema schema = ProteinManager.getSchema();
-        Table.execute(schema, schema.getSqlDialect().execute(schema, "drop_go_indexes", ""), null);
-
         Map<String, GoLoadBean> map = getGoLoadMap();
+
+        clearGoLoaded();
+        Table.execute(schema, schema.getSqlDialect().execute(schema, "drop_go_indexes", ""), null);
 
         logStatus("Starting to load GO annotation files");
         logStatus("");

@@ -27,6 +27,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.Filter;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.pipeline.PipelineService;
