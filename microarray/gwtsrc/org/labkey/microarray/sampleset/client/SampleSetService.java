@@ -30,9 +30,9 @@ import java.util.List;
  */
 public interface SampleSetService extends RemoteService
 {
-    public GWTSampleSet[] getSampleSets();
+    public List<GWTSampleSet> getSampleSets();
 
-    public GWTMaterial[] getMaterials(GWTSampleSet sampleSet);
+    public List<GWTMaterial> getMaterials(GWTSampleSet sampleSet);
 
     /**
      * Utility/Convenience class.
@@ -47,7 +47,7 @@ public interface SampleSetService extends RemoteService
             if (_service == null)
             {
                 _service = (SampleSetServiceAsync) GWT.create(SampleSetService.class);
-                ServiceUtil.configureEndpoint(_service, "sampleSetService");
+                ServiceUtil.configureEndpoint(_service, "sampleSetService", "microarray");
             }
             return _service;
         }

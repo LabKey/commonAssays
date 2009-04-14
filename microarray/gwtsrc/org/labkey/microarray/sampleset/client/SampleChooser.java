@@ -22,27 +22,18 @@ import com.google.gwt.user.client.DOM;
 import org.labkey.api.gwt.client.util.ServiceUtil;
 import org.labkey.api.gwt.client.util.PropertyUtil;
 import org.labkey.api.gwt.client.ui.FormUtil;
+import org.labkey.api.gwt.client.assay.SampleChooserUtils;
 import org.labkey.microarray.sampleset.client.model.GWTSampleSet;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * User: jeckels
  * Date: Feb 8, 2008
  */
-public class SampleChooser implements EntryPoint
+public class SampleChooser extends SampleChooserUtils implements EntryPoint
 {
-    public static final String PROP_NAME_MAX_SAMPLE_COUNT = "maxSampleCount";
-    public static final String PROP_NAME_MIN_SAMPLE_COUNT = "minSampleCount";
-    public static final String PROP_NAME_DEFAULT_SAMPLE_SET_LSID = "defaultSampleSetLSID";
-    public static final String PROP_NAME_DEFAULT_SAMPLE_SET_NAME = "defaultSampleSetName";
-    public static final String PROP_NAME_DEFAULT_SAMPLE_SET_ROW_ID = "defaultSampleRowId";
-    // Prefix for sample LSIDs that match the barcode
-    public static final String PROP_PREFIX_SELECTED_SAMPLE_LSID = "selectedSampleLSID";
-    // Prefix for sample set LSIDs for each material that matches the barcode
-    public static final String PROP_PREFIX_SELECTED_SAMPLE_SET_LSID = "selectedSampleSetLSID";
-
-    public static final String SAMPLE_COUNT_ELEMENT_NAME = "__sampleCount";
-
-    public static final String DUMMY_LSID = "--DUMMY-LSID--";
     public static final GWTSampleSet NONE_SAMPLE_SET = new GWTSampleSet("<None>", DUMMY_LSID);
 
     private SampleInfo[] _sampleInfos;
@@ -112,10 +103,10 @@ public class SampleChooser implements EntryPoint
                 GWTSampleSet activeSampleSet = new GWTSampleSet(activeSampleSetName, activeSampleSetLSID);
                 activeSampleSet.setRowId(activeSampleSetRowId);
                 _cache.addSampleSet(activeSampleSet);
-                GWTSampleSet[] sets = new GWTSampleSet[] { activeSampleSet };
-                for (int i = 0; i < _sampleInfos.length; i++)
+                List<GWTSampleSet> sets = Collections.singletonList(activeSampleSet);
+                for (SampleInfo _sampleInfo : _sampleInfos)
                 {
-                    _sampleInfos[i].setSampleSets(sets, activeSampleSet);
+                    _sampleInfo.setSampleSets(sets, activeSampleSet);
                 }
             }
 

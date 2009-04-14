@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.xarassay;
+package org.labkey.ms2.xarassay;
 
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SpringActionController;
@@ -24,7 +24,10 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.PipelineDataCollectorRedirectAction;
+import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.*;
+import org.labkey.api.util.PageFlowUtil;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -32,6 +35,8 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.io.FileFilter;
+import java.io.File;
 
 
 public class XarAssayController extends SpringActionController
@@ -47,6 +52,24 @@ public class XarAssayController extends SpringActionController
         setActionResolver(_resolver);
     }
 
+    public class UploadRedirectAction extends PipelineDataCollectorRedirectAction
+    {
+        protected FileFilter getFileFilter()
+        {
+            return new XarAssayProvider.AnalyzeFileFilter();
+        }
+
+        protected ActionURL getUploadURL(ExpProtocol protocol)
+        {
+            return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), protocol, XarAssayUploadAction.class);
+        }
+
+        protected List<File> validateFiles(BindException errors, List<File> files)
+        {
+            return files;
+        }
+    }
+
     /*
     builds up a list of Assay providers that extend the XarAssay provider
      */
@@ -57,7 +80,7 @@ public class XarAssayController extends SpringActionController
 
         public ModelAndView getView(XarChooseAssayForm form, boolean reshow, BindException errors) throws Exception
         {
-            return new JspView<XarChooseAssayForm>("/org/labkey/xarassay/view/chooseAssay.jsp",form) ;
+            return new JspView<XarChooseAssayForm>("/org/labkey/ms2/xarassay/view/chooseAssay.jsp",form) ;
         }
         public NavTree appendNavTrail(NavTree root)
         {
@@ -88,7 +111,7 @@ public class XarAssayController extends SpringActionController
                 ActionURL helper = form.getViewContext().getActionURL().clone();
                 helper.setAction(XarAssayUploadAction.class);
                 helper.addParameter("referer", "pipeline");
-                helper.addParameter("rowId",form.getRowId());
+                helper.addParameter("rowId", form.getRowId());
 
                 //TODO  encode?
                 if (null!= form.getPath())

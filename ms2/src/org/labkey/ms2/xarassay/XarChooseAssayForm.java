@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.xarassay;
+package org.labkey.ms2.xarassay;
 
 import org.labkey.api.action.FormArrayList;
 import org.labkey.api.exp.api.ExpProtocol;

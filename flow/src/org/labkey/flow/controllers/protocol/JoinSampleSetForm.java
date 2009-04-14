@@ -18,7 +18,7 @@ package org.labkey.flow.controllers.protocol;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.UnauthorizedException;
@@ -68,14 +68,14 @@ public class JoinSampleSetForm extends ProtocolForm
 
     public Map<String, String> getAvailableSampleKeyFields() throws ServletException
     {
-        LinkedHashMap<String,String> ret = new LinkedHashMap();
+        LinkedHashMap<String,String> ret = new LinkedHashMap<String, String>();
         ret.put("", "");
         ExpSampleSet sampleSet = getProtocol().getSampleSet();
         if (sampleSet != null)
         {
-            for (PropertyDescriptor pd : sampleSet.getPropertiesForType())
+            for (DomainProperty property : sampleSet.getPropertiesForType())
             {
-                ret.put(pd.getName(), pd.getName());
+                ret.put(property.getName(), property.getName());
             }
         }
         return ret;

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.labkey.xarassay;
+package org.labkey.ms2.xarassay;
 
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.api.ExpMaterialTable;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
@@ -51,37 +51,28 @@ public class MsFractionRunDataTable extends FilteredTable
 //    public abstract String getInputMaterialPropertyName();
 //    public abstract String getDataRowLsidPrefix();
 //
-    public MsFractionRunDataTable(final QuerySchema schema, String alias, final ExpProtocol protocol)
+    public MsFractionRunDataTable(final QuerySchema schema, final ExpProtocol protocol)
     {
         super(OntologyManager.getTinfoObject(), schema.getContainer());
 
         final AssayProvider provider = AssayService.get().getProvider(protocol);
-        setAlias(alias);
         List<FieldKey> visibleColumns = new ArrayList<FieldKey>();
 
-        try
+        // add material lookup columns to the view first, so they appear at the left:
+        String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, MsFractionAssayProvider.FRACTION_DOMAIN_PREFIX);
+        final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
+        if (sampleSet != null)
         {
-            // add material lookup columns to the view first, so they appear at the left:
-            String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, MsFractionAssayProvider.FRACTION_DOMAIN_PREFIX);
-            final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
-            if (sampleSet != null)
+            for (DomainProperty pd : sampleSet.getPropertiesForType())
             {
-                for (PropertyDescriptor pd : sampleSet.getPropertiesForType())
-                {
-                    visibleColumns.add(FieldKey.fromParts("Properties", getInputMaterialPropertyName(),
-                            ExpMaterialTable.Column.Property.toString(), pd.getName()));
-                }
+                visibleColumns.add(FieldKey.fromParts("Properties", getInputMaterialPropertyName(),
+                        ExpMaterialTable.Column.Property.toString(), pd.getName()));
             }
-            PropertyDescriptor[] pds = getExistingDataProperties(protocol);
+        }
 
-            // add object ID to this tableinfo and set it as a key field:
-            ColumnInfo objectIdColumn = addWrapColumn(_rootTable.getColumn("ObjectId"));
-            objectIdColumn.setKeyField(true);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        // add object ID to this tableinfo and set it as a key field:
+        ColumnInfo objectIdColumn = addWrapColumn(_rootTable.getColumn("ObjectId"));
+        objectIdColumn.setKeyField(true);
 
         SQLFragment filterClause = new SQLFragment("OwnerObjectId IN (\n" +
                 "SELECT ObjectId FROM exp.Object o, exp.Data d, exp.ExperimentRun r WHERE o.ObjectURI = d.lsid AND \n" +
@@ -106,7 +97,7 @@ public class MsFractionRunDataTable extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return AssayService.get().createRunTable(null, protocol, provider, schema.getUser(), schema.getContainer());
+                return AssayService.get().createRunTable(protocol, provider, schema.getUser(), schema.getContainer());
             }
         });
         addColumn(runColumn);
@@ -126,22 +117,17 @@ public class MsFractionRunDataTable extends FilteredTable
 
         Set<String> hiddenProperties = new HashSet<String>();
         hiddenProperties.add(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-        for (PropertyDescriptor prop : provider.getRunPropertyColumns(protocol))
+        for (DomainProperty prop : provider.getRunDataDomain(protocol).getProperties())
         {
             if (!hiddenProperties.contains(prop.getName()))
                 visibleColumns.add(FieldKey.fromParts("Run", AssayService.RUN_PROPERTIES_COLUMN_NAME, prop.getName()));
         }
-        for (PropertyDescriptor prop : provider.getUploadSetColumns(protocol))
+        for (DomainProperty prop : provider.getBatchDomain(protocol).getProperties())
         {
             if (!hiddenProperties.contains(prop.getName()))
                 visibleColumns.add(FieldKey.fromParts("Run", AssayService.RUN_PROPERTIES_COLUMN_NAME, prop.getName()));
         }
         setDefaultVisibleColumns(visibleColumns);
-    }
-
-    public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException
-    {
-        return MsAssaySchema.getExistingDataProperties(protocol);
     }
 
     public String getInputMaterialPropertyName()

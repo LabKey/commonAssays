@@ -17,21 +17,17 @@ package org.labkey.microarray;
 
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.ParticipantVisit;
+import org.labkey.api.study.assay.SampleChooserDisplayColumn;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ProtocolParameter;
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.data.Container;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
-import org.labkey.microarray.sampleset.client.SampleChooser;
-import org.labkey.microarray.sampleset.client.SampleInfo;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.common.tools.TabLoader;
 import org.w3c.dom.Document;
@@ -264,22 +260,7 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
         }
         else
         {
-            String countString = getRequest().getParameter(SampleChooser.SAMPLE_COUNT_ELEMENT_NAME);
-            if (countString != null)
-            {
-                try
-                {
-                    return Integer.parseInt(countString);
-                }
-                catch (NumberFormatException e)
-                {
-                    return MicroarrayAssayProvider.MAX_SAMPLE_COUNT;
-                }
-            }
-            else
-            {
-                return MicroarrayAssayProvider.MAX_SAMPLE_COUNT;
-            }
+            return SampleChooserDisplayColumn.getSampleCount(getRequest(), MicroarrayAssayProvider.MAX_SAMPLE_COUNT);
         }
     }
 
@@ -332,42 +313,8 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
         }
         else
         {
-            String lsid = getRequest().getParameter(SampleInfo.getLsidFormElementID(index));
-            if (SampleChooser.DUMMY_LSID.equals(lsid))
-            {
-                throw new ExperimentException("Please select a sample");
-            }
-            if (lsid != null && !"".equals(lsid))
-            {
-                ExpMaterial material = ExperimentService.get().getExpMaterial(lsid);
-                if (material == null)
-                {
-                    throw new ExperimentException("Could not find sample with LSID " + lsid);
-                }
-                return material;
-            }
-            String name = getSampleName(index);
-            if (name == null)
-            {
-                name = "Unknown";
-            }
-            if (name.length() >= 200)
-            {
-                throw new ExperimentException("Sample names are limited to 200 characters");
-            }
-            return createSampleMaterial(getContainer(), name);
+            return SampleChooserDisplayColumn.getMaterial(index, getContainer(), getRequest());
         }
-    }
-
-    protected ExpMaterial createSampleMaterial(Container currentContainer, String sampleId)
-    {
-        String materialLSID = new Lsid(ParticipantVisit.ASSAY_RUN_MATERIAL_NAMESPACE, "Folder-" + currentContainer.getRowId(), sampleId).toString();
-        ExpMaterial material = ExperimentService.get().getExpMaterial(materialLSID);
-        if (material == null)
-        {
-            material = ExperimentService.get().createExpMaterial(currentContainer, materialLSID, sampleId);
-        }
-        return material;
     }
 
     public String getSampleName(int index) throws ExperimentException
@@ -406,7 +353,7 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
         }
         else
         {
-            return getRequest().getParameter(SampleInfo.getNameFormElementID(index));
+            return SampleChooserDisplayColumn.getSampleName(index, getRequest());
         }
     }
 

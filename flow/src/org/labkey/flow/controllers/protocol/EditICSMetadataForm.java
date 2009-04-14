@@ -19,7 +19,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
-import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.data.ICSMetadata;
@@ -180,7 +180,7 @@ public class EditICSMetadataForm extends ProtocolForm
         FieldKey sampleProperty = FieldKey.fromParts("FCSFile", "Sample", "Property");
         if (getProtocol().getSampleSet() != null)
         {
-            for (PropertyDescriptor pd : getProtocol().getSampleSet().getPropertiesForType())
+            for (DomainProperty pd : getProtocol().getSampleSet().getPropertiesForType())
             {
                 ret.put(new FieldKey(sampleProperty, pd.getName()), "Sample " + pd.getName());
             }

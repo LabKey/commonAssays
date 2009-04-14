@@ -32,10 +32,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public class SampleCache
 {
-    /** String (SampleSet LSID) -> GWTSampleSet */
-    private Map _sampleSets = new HashMap();
-    /** String (SampleSet LSID) -> GWTMaterial[] */
-    private Map _sampleSetMembers = new HashMap();
+    /** Map from SampleSet LSID to sample set */
+    private Map<String, GWTSampleSet> _sampleSets = new HashMap<String, GWTSampleSet>();
+    /** Map from SampleSet LSID to its materials */
+    private Map<String, List<GWTMaterial>> _sampleSetMembers = new HashMap<String, List<GWTMaterial>>();
 
     private SampleInfo[] _sampleInfos;
 
@@ -46,24 +46,22 @@ public class SampleCache
         _sampleSets.put(SampleChooser.NONE_SAMPLE_SET.getLsid(), SampleChooser.NONE_SAMPLE_SET);
 
         SampleSetServiceAsync service = SampleSetService.App.getService();
-        service.getSampleSets(new AsyncCallback()
+        service.getSampleSets(new AsyncCallback<List<GWTSampleSet>>()
         {
             public void onFailure(Throwable caught)
             {
                 ExceptionUtil.showDialog(caught);
             }
 
-            public void onSuccess(Object result)
+            public void onSuccess(List<GWTSampleSet> sets)
             {
-                GWTSampleSet[] sets = (GWTSampleSet[])result;
-
-                for (int i = 0; i < sets.length; i++)
+                for (GWTSampleSet set : sets)
                 {
-                    _sampleSets.put(sets[i].getLsid(), sets[i]);
+                    _sampleSets.put(set.getLsid(), set);
                 }
-                for (int i = 0; i < _sampleInfos.length; i++)
+                for (SampleInfo _sampleInfo : _sampleInfos)
                 {
-                    _sampleInfos[i].updateSampleSets(sets);
+                    _sampleInfo.updateSampleSets(sets);
                 }
             }
         });
@@ -72,34 +70,33 @@ public class SampleCache
 
     public GWTSampleSet getSampleSet(String lsid)
     {
-        return (GWTSampleSet)_sampleSets.get(lsid);
+        return _sampleSets.get(lsid);
     }
 
-    public GWTMaterial[] getMaterials(final GWTSampleSet sampleSet)
+    public List<GWTMaterial> getMaterials(final GWTSampleSet sampleSet)
     {
         if (!_sampleSetMembers.containsKey(sampleSet.getLsid()))
         {
             _sampleSetMembers.put(sampleSet.getLsid(), null);
-            SampleSetService.App.getService().getMaterials(sampleSet, new AsyncCallback()
+            SampleSetService.App.getService().getMaterials(sampleSet, new AsyncCallback<List<GWTMaterial>>()
             {
                 public void onFailure(Throwable caught)
                 {
                     ExceptionUtil.showDialog(caught);
                 }
 
-                public void onSuccess(Object result)
+                public void onSuccess(List<GWTMaterial> materials)
                 {
-                    GWTMaterial[] materials = (GWTMaterial[]) result;
                     _sampleSetMembers.put(sampleSet.getLsid(), materials);
 
-                    for (int i = 0; i < _sampleInfos.length; i++)
+                    for (SampleInfo _sampleInfo : _sampleInfos)
                     {
-                        _sampleInfos[i].updateMaterials(sampleSet, materials);
+                        _sampleInfo.updateMaterials(sampleSet, materials);
                     }
                 }
             });
         }
-        return (GWTMaterial[])_sampleSetMembers.get(sampleSet.getLsid());
+        return _sampleSetMembers.get(sampleSet.getLsid());
     }
 
     public void addSampleSet(GWTSampleSet sampleSet)

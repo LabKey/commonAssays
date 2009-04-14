@@ -21,6 +21,10 @@ import com.google.gwt.user.client.DOM;
 import org.labkey.microarray.sampleset.client.model.GWTSampleSet;
 import org.labkey.microarray.sampleset.client.model.GWTMaterial;
 import org.labkey.api.gwt.client.ui.FormUtil;
+import org.labkey.api.gwt.client.assay.SampleChooserUtils;
+
+import java.util.List;
+import java.util.Collections;
 
 /**
  * User: jeckels
@@ -82,25 +86,24 @@ public class SampleInfo
         };
         _materialTextBox.addKeyboardListener(keyListener);
 
-        setSampleSets(new GWTSampleSet[0], SampleChooser.NONE_SAMPLE_SET);
+        setSampleSets(Collections.<GWTSampleSet>emptyList(), SampleChooser.NONE_SAMPLE_SET);
     }
 
-    public void setSampleSets(GWTSampleSet[] sets, GWTSampleSet selectedSet)
+    public void setSampleSets(List<GWTSampleSet> sets, GWTSampleSet selectedSet)
     {
         _sampleSetListBox.clear();
         _sampleSetListBox.addItem(SampleChooser.NONE_SAMPLE_SET.getName(), SampleChooser.NONE_SAMPLE_SET.getLsid());
-        for (int i = 0; i < sets.length; i++)
+        for (GWTSampleSet set : sets)
         {
             // If we already know which material to reference, override the folder's default sample set
-            if (sets[i].getLsid().equals(_defaultSampleSetLSID))
+            if (set.getLsid().equals(_defaultSampleSetLSID))
             {
-                selectedSet = sets[i];
+                selectedSet = set;
                 break;
             }
         }
-        for (int i = 0; i < sets.length; i++)
+        for (GWTSampleSet set : sets)
         {
-            GWTSampleSet set = sets[i];
             _sampleSetListBox.addItem(set.getName(), set.getLsid());
             if (set.equals(selectedSet))
             {
@@ -150,8 +153,8 @@ public class SampleInfo
             name = _materialTextBox.getText();
         }
         
-        FormUtil.setValueInForm(lsid, DOM.getElementById(getLsidFormElementID(_index)));
-        FormUtil.setValueInForm(name, DOM.getElementById(getNameFormElementID(_index)));
+        FormUtil.setValueInForm(lsid, DOM.getElementById(SampleChooserUtils.getLsidFormElementID(_index)));
+        FormUtil.setValueInForm(name, DOM.getElementById(SampleChooserUtils.getNameFormElementID(_index)));
     }
 
     private void updateMaterialListBox(final GWTSampleSet sampleSet)
@@ -197,7 +200,7 @@ public class SampleInfo
         }
     }
 
-    private void populateMaterials(GWTMaterial[] materials)
+    private void populateMaterials(List<GWTMaterial> materials)
     {
         if (materials == null)
         {
@@ -210,10 +213,10 @@ public class SampleInfo
             _materialListBox.addItem("<None>", SampleChooser.DUMMY_LSID);
             _materialListBox.setSelectedIndex(0);
             _materialListBox.setEnabled(true);
-            for (int i = 0; i < materials.length; i++)
+            for (GWTMaterial material : materials)
             {
-                _materialListBox.addItem(materials[i].getName(), materials[i].getLsid());
-                if (materials[i].getLsid().equals(_defaultSampleLSID))
+                _materialListBox.addItem(material.getName(), material.getLsid());
+                if (material.getLsid().equals(_defaultSampleLSID))
                 {
                     _materialListBox.setSelectedIndex(_materialListBox.getItemCount() - 1);
                     _materialListBox.setEnabled(false);
@@ -234,7 +237,7 @@ public class SampleInfo
         return null;
     }
 
-    public void updateMaterials(GWTSampleSet sampleSet, GWTMaterial[] materials)
+    public void updateMaterials(GWTSampleSet sampleSet, List<GWTMaterial> materials)
     {
         if (sampleSet.equals(getSelectedSampleSet()))
         {
@@ -242,19 +245,9 @@ public class SampleInfo
         }
     }
 
-    public void updateSampleSets(GWTSampleSet[] sets)
+    public void updateSampleSets(List<GWTSampleSet> sets)
     {
         setSampleSets(sets, getSelectedSampleSet());
-    }
-
-    public static String getLsidFormElementID(int index)
-    {
-        return "__sample" + index + "LSID";
-    }
-
-    public static String getNameFormElementID(int index)
-    {
-        return "__sample" + index + "Name";
     }
 
     public void setVisible(boolean selected)

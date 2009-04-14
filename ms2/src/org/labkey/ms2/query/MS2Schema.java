@@ -31,6 +31,7 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.ProteinGroupProteins;
+import org.labkey.ms2.xarassay.XarAssayProvider;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.http.HttpServletRequest;
@@ -97,7 +98,8 @@ public class MS2Schema extends UserSchema
             {
                 ExpRunTable result = ExperimentService.get().createRunTable(SamplePrepRuns.toString(), ms2Schema);
                 result.populate();
-                result.setProtocolPatterns(PROTOCOL_PATTERN_PREFIX + SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX + "%");
+                // Include the old XAR-based and the new assay-based
+                result.setProtocolPatterns(PROTOCOL_PATTERN_PREFIX + SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX + "%", "urn:lsid:%:" + XarAssayProvider.PROTOCOL_LSID_NAMESPACE_PREFIX + ".Folder-%:%");
                 return result;
             }
         },

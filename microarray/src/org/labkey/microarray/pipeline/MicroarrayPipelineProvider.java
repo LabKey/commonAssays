@@ -22,15 +22,16 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.NavTree;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.MicroarrayController;
 
 import java.io.File;
 import java.util.List;
-import java.sql.SQLException;
 
 
 public class MicroarrayPipelineProvider extends PipelineProvider
@@ -56,17 +57,30 @@ public class MicroarrayPipelineProvider extends PipelineProvider
                         entry, files);
 
             files = entry.listFiles(ArrayPipelineManager.getMageFileFilter());
-            if (files != null)
+            if (files != null && files.length > 0)
             {
-                for (ExpProtocol protocol : AssayService.get().getAssayProtocols(context.getContainer()))
+                List<ExpProtocol> assays = AssayService.get().getAssayProtocols(context.getContainer());
+                NavTree navTree = new NavTree("Import MageML");
+                for (ExpProtocol protocol : assays)
                 {
                     if (AssayService.get().getProvider(protocol) instanceof MicroarrayAssayProvider)
                     {
                         ActionURL url = MicroarrayController.getUploadRedirectAction(context.getContainer(), protocol, root.relativePath(new File(entry.getURI())));
-                        addAction(url, "Import MAGEML using " + protocol.getName(),
-                                entry, files);
+                        NavTree child = new NavTree("Use " + protocol.getName(), url);
+                        child.setId("Import MageML:Use " + protocol.getName());
+                        navTree.addChild(child);
                     }
                 }
+
+                if (navTree.getChildCount() > 0)
+                {
+                    navTree.addSeparator();
+                }
+
+                ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(context.getContainer(), MicroarrayAssayProvider.NAME);
+                navTree.addChild("Create Assay Definition", url);
+
+                entry.addAction(new FileAction(navTree, files));
             }
         }
     }

@@ -21,7 +21,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.ACL;
 import org.labkey.microarray.sampleset.client.SampleSetService;
 import org.labkey.microarray.sampleset.client.model.GWTSampleSet;
@@ -41,27 +41,26 @@ public class SampleSetServiceImpl extends BaseRemoteService implements SampleSet
         super(context);
     }
 
-    public GWTSampleSet[] getSampleSets()
+    public List<GWTSampleSet> getSampleSets()
     {
         ExpSampleSet[] sets = ExperimentService.get().getSampleSets(getContainer(), _context.getUser(), true);
-        GWTSampleSet[] result = new GWTSampleSet[sets.length];
-        for (int i = 0; i < sets.length; i++)
+        List<GWTSampleSet> result = new ArrayList<GWTSampleSet>(sets.length);
+        for (ExpSampleSet set : sets)
         {
-            ExpSampleSet set = sets[i];
             GWTSampleSet gwtSet = new GWTSampleSet(set.getName(), set.getLSID());
             gwtSet.setRowId(set.getRowId());
             List<String> columnNames = new ArrayList<String>();
-            for (PropertyDescriptor propertyDescriptor : set.getPropertiesForType())
+            for (DomainProperty propertyDescriptor : set.getPropertiesForType())
             {
                 columnNames.add(propertyDescriptor.getName());
             }
             gwtSet.setColumnNames(columnNames);
-            result[i] = gwtSet;
+            result.add(gwtSet);
         }
         return result;
     }
 
-    public GWTMaterial[] getMaterials(GWTSampleSet gwtSet)
+    public List<GWTMaterial> getMaterials(GWTSampleSet gwtSet)
     {
         ExpSampleSet set = ExperimentService.get().getSampleSet(gwtSet.getRowId());
         if (set == null)
@@ -75,12 +74,11 @@ public class SampleSetServiceImpl extends BaseRemoteService implements SampleSet
         }
 
         ExpMaterial[] materials = set.getSamples();
-        GWTMaterial[] result = new GWTMaterial[materials.length];
-        for (int i = 0; i < materials.length; i++)
+        List<GWTMaterial> result = new ArrayList<GWTMaterial>(materials.length);
+        for (ExpMaterial material : materials)
         {
-            ExpMaterial material = materials[i];
             GWTMaterial gwtMaterial = new GWTMaterial();
-            result[i] = gwtMaterial;
+            result.add(gwtMaterial);
             gwtMaterial.setLsid(material.getLSID());
             gwtMaterial.setRowId(material.getRowId());
             gwtMaterial.setName(material.getName());

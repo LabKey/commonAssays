@@ -36,6 +36,7 @@ import org.labkey.api.reports.ReportService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
@@ -54,6 +55,7 @@ import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
+import org.labkey.ms2.xarassay.*;
 import org.labkey.common.tools.MS2Modification;
 
 import java.beans.PropertyChangeEvent;
@@ -176,6 +178,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     protected void init()
     {
+        addController("xarassay", XarAssayController.class);
         addController("ms2", MS2Controller.class);
         addController("protein", ProteinController.class);
         addController("ms2-pipeline", PipelineController.class);
@@ -235,6 +238,10 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         ReportService.get().registerReport(new SingleMS2RunRReport());
         ReportService.get().addUIProvider(new MS2ReportUIProvider());
         MS2Controller.registerAdminConsoleLinks();
+        
+        AssayService.get().registerAssayProvider(new XarAssayProvider());
+        AssayService.get().registerAssayProvider(new MsFractionAssayProvider());
+        PipelineService.get().registerPipelineProvider(new XarAssayPipelineProvider());
 
         initWebApplicationContext();
     }

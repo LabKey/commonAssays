@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.labkey.xarassay;
+package org.labkey.ms2.xarassay;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.security.User;
@@ -45,7 +46,6 @@ public class MsFractionDataHandler extends AbstractExperimentDataHandler
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
-        return;
     }
 
     public ActionURL getContentURL(Container container, ExpData data)
@@ -67,14 +67,15 @@ public class MsFractionDataHandler extends AbstractExperimentDataHandler
         return dataRowLsid;
     }
 
-     public void deleteData(ExpData data, Container container, User user) throws ExperimentException
+     public void deleteData(ExpData data, Container container, User user)
     {
-        try {
+        try
+        {
             OntologyManager.deleteOntologyObject(data.getLSID(), container, true);
         }
         catch (SQLException e)
         {
-            throw new ExperimentException(e);
+            throw new RuntimeSQLException(e);
         }
     }
 

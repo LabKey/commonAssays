@@ -18,11 +18,10 @@ package org.labkey.microarray;
 
 import org.labkey.api.action.*;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
@@ -31,9 +30,8 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.actions.ProtocolIdForm;
-import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.study.assay.AssayUrls;
-import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.study.assay.PipelineDataCollectorRedirectAction;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
@@ -44,8 +42,9 @@ import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileFilter;
+import java.io.File;
 import java.net.URI;
 import java.util.*;
 
@@ -108,117 +107,30 @@ public class MicroarrayController extends SpringActionController
         return getUploadRedirectAction(c, protocol).addParameter("path", pipelinePath);
     }
 
-    public static class UploadRedirectForm
-    {
-        private int _protocolId;
-        private String _path;
-
-        public int getProtocolId()
-        {
-            return _protocolId;
-        }
-
-        public ExpProtocol getProtocol()
-        {
-            ExpProtocol result = ExperimentService.get().getExpProtocol(_protocolId);
-            if (result == null)
-            {
-                HttpView.throwNotFound("Could not find protocol");
-            }
-            return result;
-        }
-
-        public void setProtocolId(int protocolId)
-        {
-            _protocolId = protocolId;
-        }
-
-        public String getPath()
-        {
-            return _path;
-        }
-
-        public void setPath(String path)
-        {
-            _path = path;
-        }
-    }
-
     @RequiresPermission(ACL.PERM_INSERT)
-    public class UploadRedirectAction extends SimpleViewAction<UploadRedirectForm>
+    public class UploadRedirectAction extends PipelineDataCollectorRedirectAction
     {
-        public ModelAndView getView(UploadRedirectForm form, BindException errors) throws Exception
+        protected FileFilter getFileFilter()
         {
-            // Can't trust the form's getPath() because it translates the empty string into null, and we
-            // need to know if the parameter was present
-            String path = getViewContext().getRequest().getParameter("path");
-            List<File> files = new ArrayList<File>();
-            if (path != null)
-            {
-                PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-                if (root == null)
-                {
-                    throw new NotFoundException("No pipeline root is available");
-                }
-                File f = root.resolvePath(path);
-                if (!NetworkDrive.exists(f))
-                {
-                    HttpView.throwNotFound("Unable to find file: " + path);
-                }
+            return ArrayPipelineManager.getMageFileFilter();
+        }
 
-                File[] selectedFiles = f.listFiles(ArrayPipelineManager.getMageFileFilter());
-                if (selectedFiles != null)
-                {
-                    files.addAll(Arrays.asList(selectedFiles));
-                }
-            }
-            else
-            {
-                int[] dataIds = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
+        protected ActionURL getUploadURL(ExpProtocol protocol)
+        {
+            return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), protocol, MicroarrayUploadWizardAction.class);
+        }
 
-                for (int dataId : dataIds)
-                {
-                    ExpData data = ExperimentService.get().getExpData(dataId);
-                    if (data == null || !data.getContainer().equals(getContainer()))
-                    {
-                        throw new NotFoundException("Could not find all selected datas");
-                    }
-
-                    File f = data.getFile();
-                    if (f != null && f.isFile())
-                    {
-                        files.add(f);
-                    }
-                }
-            }
-
-            if (files.isEmpty())
-            {
-                HttpView.throwNotFound("Could not find any matching files");
-            }
-            Collections.sort(files);
-            List<Map<String, File>> maps = new ArrayList<Map<String, File>>();
+        protected List<File> validateFiles(BindException errors, List<File> files)
+        {
             for (File file : files)
             {
-                ExpData data = ExperimentService.get().getExpDataByURL(file, getContainer());
+                ExpData data = ExperimentService.get().getExpDataByURL(file, getViewContext().getContainer());
                 if (data != null && data.getRun() != null)
                 {
                     errors.addError(new LabkeyError("The file " + file.getAbsolutePath() + " has already been uploaded"));
                 }
-                maps.add(Collections.singletonMap(file.getName(), file));
             }
-            if (errors.getErrorCount() > 0)
-            {
-                return new SimpleErrorView(errors);
-            }
-            PipelineDataCollector.setFileCollection(getViewContext().getRequest().getSession(true), getContainer(), form.getProtocol(), maps);
-            HttpView.throwRedirect(PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), form.getProtocol(), MicroarrayUploadWizardAction.class));
-            return null;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Microarray Upload Attempt");
+            return files;
         }
     }
 

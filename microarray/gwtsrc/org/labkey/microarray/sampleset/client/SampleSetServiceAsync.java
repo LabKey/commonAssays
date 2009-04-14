@@ -18,6 +18,9 @@ package org.labkey.microarray.sampleset.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.labkey.microarray.sampleset.client.model.GWTSampleSet;
+import org.labkey.microarray.sampleset.client.model.GWTMaterial;
+
+import java.util.List;
 
 /**
  * User: jeckels
@@ -25,7 +28,7 @@ import org.labkey.microarray.sampleset.client.model.GWTSampleSet;
  */
 public interface SampleSetServiceAsync
 {
-    void getSampleSets(AsyncCallback async);
+    void getSampleSets(AsyncCallback<List<GWTSampleSet>> async);
 
-    void getMaterials(GWTSampleSet sampleSet, AsyncCallback async);
+    void getMaterials(GWTSampleSet sampleSet, AsyncCallback<List<GWTMaterial>> async);
 }

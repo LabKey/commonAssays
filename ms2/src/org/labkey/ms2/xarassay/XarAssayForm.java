@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.labkey.xarassay ;
+package org.labkey.ms2.xarassay;
 
 import org.labkey.api.action.FormArrayList;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 
 import java.io.File;
@@ -31,7 +32,7 @@ import java.util.*;
  * Date: Sep 17, 2007
  * Time: 12:30:55 AM
  */
-public class XarAssayForm extends AssayRunUploadForm
+public class XarAssayForm extends AssayRunUploadForm<XarAssayProvider>
 {
     private URI _dataURI;
     private String _currentFileName;
@@ -96,11 +97,11 @@ public class XarAssayForm extends AssayRunUploadForm
         _dataURI = dataURI;
     }
 
-    public Integer getNumFilesRemaining()
+    public int getNumFilesRemaining() throws ExperimentException
     {
         if (null== _numFilesRemaining)
-            getUndescribedFiles();  
-        return _numFilesRemaining;
+            getUndescribedFiles();
+        return _numFilesRemaining.intValue();
     }
 
     public String getCurrentFileName()
@@ -108,38 +109,26 @@ public class XarAssayForm extends AssayRunUploadForm
         return _currentFileName;
     }
     
-    public ArrayList<String> getUndescribedFiles()
+    public ArrayList<String> getUndescribedFiles() throws ExperimentException
     {
-        if (null== _numFilesRemaining)
+        if (null == _numFilesRemaining)
         {
             ArrayList<String> udf = new ArrayList<String>();
-            ExpData d = null;
-            File f;
-            SortedMap<String, File> sm;
-
-            try
+            SortedMap<String, File> sm = new TreeMap<String, File>(getUploadedData());
+            for (Map.Entry<String, File> entry : sm.entrySet())
             {
-                sm = new TreeMap<String, File>(getUploadedData());
-                for (Map.Entry<String, File> entry : sm.entrySet())
-                {
-                    f = entry.getValue();
+                File f = entry.getValue();
 
-                    d = ExperimentService.get().getExpDataByURL(f, getContainer());
-                    if ((null == d) || (null== d.getRun()))
-                        udf.add(entry.getKey());
-                }
-                _undescribedFileNames = udf;
-                _numFilesRemaining = udf.size();
-                if (_numFilesRemaining > 0)
-                    _currentFileName = udf.get(0);
-                else
-                    _currentFileName = null;
-
+                ExpData d = ExperimentService.get().getExpDataByURL(f, getContainer());
+                if ((null == d) || (null== d.getRun()))
+                    udf.add(entry.getKey());
             }
-            catch (Exception e)
-            {
-                throw new RuntimeException((e));
-            }
+            _undescribedFileNames = udf;
+            _numFilesRemaining = udf.size();
+            if (!udf.isEmpty())
+                _currentFileName = udf.get(0);
+            else
+                _currentFileName = null;
         }
         return _undescribedFileNames;
 

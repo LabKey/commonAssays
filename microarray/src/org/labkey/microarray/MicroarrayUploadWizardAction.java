@@ -19,18 +19,19 @@ package org.labkey.microarray;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.PipelineDataCollector;
+import org.labkey.api.study.assay.SampleChooserDisplayColumn;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.query.ValidationException;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
+import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.w3c.dom.Document;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -56,7 +57,52 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayR
 
     protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
     {
-        insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(protocol, _channelCount, _barcode));
+        int maxCount = _channelCount == null ? MicroarrayAssayProvider.MAX_SAMPLE_COUNT : _channelCount.intValue();
+        int minCount = _channelCount == null ? MicroarrayAssayProvider.MIN_SAMPLE_COUNT : _channelCount.intValue();
+
+        String[] barcodeFieldNames = { "Barcode" };
+        ProtocolParameter barcodeFieldNamesParam = _protocol.getProtocolParameters().get(MicroarrayAssayDesigner.BARCODE_FIELD_NAMES_PARAMETER_URI);
+        if (barcodeFieldNamesParam != null && barcodeFieldNamesParam.getStringValue() != null)
+        {
+            barcodeFieldNames = barcodeFieldNamesParam.getStringValue().split(",");
+        }
+
+        List<ExpMaterial> matchingMaterials = new ArrayList<ExpMaterial>();
+        if (barcodeFieldNames != null && _barcode != null)
+        {
+            // Look through all the sample sets that are visible from this folder to check for samples where
+            // the barcode matches
+            for (ExpSampleSet sampleSet : ExperimentService.get().getSampleSets(getContainer(), getViewContext().getUser(), true))
+            {
+                ExpMaterial[] materials = sampleSet.getSamples();
+                Domain domain = sampleSet.getType();
+                DomainProperty[] properties = domain == null ? new DomainProperty[0] : domain.getProperties();
+                // Check all of the possible barcode field names
+                for (String barcodeFieldName : barcodeFieldNames)
+                {
+                    barcodeFieldName = barcodeFieldName.trim();
+                    for (DomainProperty prop : properties)
+                    {
+                        // Look for fields with matching names
+                        if (barcodeFieldName.equalsIgnoreCase(prop.getName()) || barcodeFieldName.equalsIgnoreCase(prop.getLabel()))
+                        {
+                            for (ExpMaterial material : materials)
+                            {
+                                // If the names match, check if the material has the desired barcode value
+                                Object propObj = material.getProperty(prop);
+                                if (propObj != null && _barcode.equals(propObj.toString()))
+                                {
+                                    // Add it to the list of matching materials
+                                    matchingMaterials.add(material);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(minCount, maxCount, matchingMaterials));
     }
 
     protected InsertView createBatchInsertView(MicroarrayRunUploadForm form, boolean reshow, BindException errors)

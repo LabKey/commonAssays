@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package org.labkey.xarassay;
+package org.labkey.ms2.xarassay;
 
 import org.labkey.api.data.*;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.query.ValidationException;
+import org.labkey.common.util.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,21 +76,13 @@ public class MsFractionAssayProvider extends XarAssayProvider
         return NAME;
     }
 
-
-    protected Domain createRunDomain(Container c, User user)
+    public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
     {
-        Domain runDomain = super.createRunDomain(c, user);
-        return runDomain;
-    }
-
-    public List<Domain> createDefaultDomains(Container c, User user)
-    {
-        List<Domain> result = super.createDefaultDomains(c, user);
+        List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
         result.add(createFractionDomain(c,user));
         return result;
     }
 
-    @Override
     public ExpRun saveExperimentRun(AssayRunUploadContext context) throws ExperimentException
     {
         // check first if there are any per-fraction properties.  if not treat as non-fraction case
@@ -95,9 +91,8 @@ public class MsFractionAssayProvider extends XarAssayProvider
         PropertyDescriptor[] fractionProps = OntologyManager.getPropertiesForType(domainURI, context.getContainer());
         if (fractionProps.length==0)
         {
-            return super.saveExperimentRun(context);
+            // No longer supported
         }
-        Container c = context.getContainer();
         ExpRun run = null;
         XarAssayForm form = (XarAssayForm) context;
 
@@ -110,10 +105,10 @@ public class MsFractionAssayProvider extends XarAssayProvider
         Map<ExpMaterial, String> outputMaterials = new HashMap<ExpMaterial, String>();
         Map<ExpData, String> outputDatas = new HashMap<ExpData, String>();
 
-        Map<PropertyDescriptor, String> runProperties = context.getRunProperties();
-        Map<PropertyDescriptor, String> uploadSetProperties = context.getUploadSetProperties();
+        Map<DomainProperty, String> runProperties = context.getRunProperties();
+        Map<DomainProperty, String> uploadSetProperties = context.getBatchProperties();
 
-        Map<PropertyDescriptor, String> allProperties = new HashMap<PropertyDescriptor, String>();
+        Map<DomainProperty, String> allProperties = new HashMap<DomainProperty, String>();
         allProperties.putAll(runProperties);
         allProperties.putAll(uploadSetProperties);
 
@@ -122,20 +117,21 @@ public class MsFractionAssayProvider extends XarAssayProvider
 
         DbScope scope = ExperimentService.get().getSchema().getScope();
         boolean transactionOwner = !scope.isTransactionActive();
-        try {
+        try
+        {
             ExpSampleSet fractionSet = getFractionSampleSet(context);
-            MsFractionPropertyHelper helper = new MsFractionPropertyHelper(fractionSet, files, context.getContainer(), context.getUser());
+            MsFractionPropertyHelper helper = new MsFractionPropertyHelper(fractionSet, files, context.getContainer());
 
-            Map<File, Map<PropertyDescriptor, String>> mapFilesToFractionProperties = helper.getSampleProperties(context.getRequest());
+            Map<File, Map<DomainProperty, String>> mapFilesToFractionProperties = helper.getSampleProperties(context.getRequest());
 
-            if (form.getNumFilesRemaining().intValue() != mapData.size())
-                throw new ExperimentException("Some data files in the directory are already described by AssayRuns.  You musst delete all existing AssayRuns in order to describe the runs as fractions of a single sample." );
+            if (form.getNumFilesRemaining() != mapData.size())
+                throw new ExperimentException("Some data files in the directory are already described by AssayRuns.  You must delete all existing AssayRuns in order to describe the runs as fractions of a single sample." );
 
             // create the fractionation run first, then tie each resulting sample to one of the mzxml files
             if (transactionOwner)
                 scope.beginTransaction();
 
-            addSampleInput(context, inputMaterials, allProperties);
+//            addSampleInput(context, inputMaterials, allProperties);
             Map<File,Map<ExpMaterial,String>> mapFilesToFractions = createFractions(form, inputMaterials, mapFilesToFractionProperties);
 
             for (Map.Entry<File, Map<ExpMaterial, String>> fractionEntry : mapFilesToFractions.entrySet())
@@ -150,7 +146,7 @@ public class MsFractionAssayProvider extends XarAssayProvider
                 String runName = form.getName() + " (" + fName.substring(0, fName.lastIndexOf('.')) + ") ";
 
                 // put the fraction properties on the run
-                Map<PropertyDescriptor, String> fractionProperties = mapFilesToFractionProperties.get(fractionEntry.getKey());
+                Map<DomainProperty, String> fractionProperties = mapFilesToFractionProperties.get(fractionEntry.getKey());
                 runProperties.putAll(fractionProperties);
 
                 ExpRun runFraction = createSingleExpRun(form, oneFraction, inputDatas, outputMaterials, outputDatas
@@ -166,10 +162,7 @@ public class MsFractionAssayProvider extends XarAssayProvider
         }
         catch (SQLException e)
         {
-            if (transactionOwner)
-                scope.rollbackTransaction();
-
-            throw new RuntimeException(e);
+            throw new RuntimeSQLException(e);
         }
         finally
         {
@@ -178,10 +171,8 @@ public class MsFractionAssayProvider extends XarAssayProvider
         }
     }
 
-    private Map<File,Map<ExpMaterial, String>> createFractions(XarAssayForm form
-            , Map<ExpMaterial, String> inputMaterials
-            , Map<File,Map<PropertyDescriptor, String>> mapFilesToFractionProperties
-    ) throws ExperimentException
+    private Map<File,Map<ExpMaterial, String>> createFractions(XarAssayForm form, Map<ExpMaterial, String> inputMaterials,
+            Map<File,Map<DomainProperty, String>> mapFilesToFractionProperties) throws ExperimentException
     {
         Map<File, Map<ExpMaterial, String>> outputFileToFractions = new HashMap<File, Map<ExpMaterial, String>>();
         Map<ExpMaterial, String> fractionMaterialSet = new HashMap<ExpMaterial, String>();
@@ -190,12 +181,12 @@ public class MsFractionAssayProvider extends XarAssayProvider
         ExpSampleSet fractionSet = getFractionSampleSet(form);
         try
         {
-            for (Map.Entry<File,Map<PropertyDescriptor, String>> entry : mapFilesToFractionProperties.entrySet())
+            for (Map.Entry<File,Map<DomainProperty, String>> entry : mapFilesToFractionProperties.entrySet())
             {
                 // generate unique lsids for the derived samples
                 File mzxmlFile = entry.getKey();
                 String fileNameBase = mzxmlFile.getName().substring(0, (mzxmlFile.getName().lastIndexOf('.')));
-                Map<PropertyDescriptor, String> properties = entry.getValue();
+                Map<DomainProperty, String> properties = entry.getValue();
                 Lsid derivedLsid = new Lsid(fractionSet.getMaterialLSIDPrefix() + "OBJECT");
                 derivedLsid.setObjectId(derivedLsid.getObjectId() + "-" + fileNameBase + "_" + ms);
                 int index = 0;
@@ -207,28 +198,28 @@ public class MsFractionAssayProvider extends XarAssayProvider
                 derivedMaterial.setCpasType(fractionSet.getLSID());
                 // could put the fraction properties on the fraction material object or on the run.  decided to do the run
 
-                for (Map.Entry<PropertyDescriptor,String> property : properties.entrySet())
+                for (Map.Entry<DomainProperty, String> property : properties.entrySet())
                 {
                     String value = property.getValue();
-                    derivedMaterial.setProperty(form.getUser(),property.getKey(), value);
+                    derivedMaterial.setProperty(form.getUser(), property.getKey().getPropertyDescriptor(), value);
                 }
 
                 fractionMaterialSet.put(derivedMaterial, "Fraction");
                 outputFileToFractions.put(mzxmlFile, Collections.singletonMap(derivedMaterial, "Fraction"));
             }
             ViewBackgroundInfo info = new ViewBackgroundInfo(form.getContainer(), form.getUser(), form.getActionURL());
-            ExpRun deriveFractionsRun = ExperimentService.get().deriveSamples(inputMaterials, fractionMaterialSet, info, null);
+            ExperimentService.get().deriveSamples(inputMaterials, fractionMaterialSet, info, null);
         }
-        catch (SQLException e)
+        catch (ValidationException e)
         {
             throw new ExperimentException(e);
         }
         return outputFileToFractions;
     }
 
+    @NotNull
     protected ExpSampleSet getFractionSampleSet(AssayRunUploadContext context) throws ExperimentException
     {
-        Domain domainFractionSet = null;
         String domainURI = getDomainURIForPrefix(context.getProtocol(), FRACTION_DOMAIN_PREFIX);
         ExpSampleSet sampleSet=null;
         if (null != domainURI)
@@ -236,7 +227,6 @@ public class MsFractionAssayProvider extends XarAssayProvider
 
         if (sampleSet == null)
         {
-            domainFractionSet = createFractionDomain(context.getContainer(), context.getUser());
             sampleSet = ExperimentService.get().createSampleSet();
             sampleSet.setContainer(context.getProtocol().getContainer());
             sampleSet.setName("Fractions: " + context.getProtocol().getName());
@@ -260,8 +250,7 @@ public class MsFractionAssayProvider extends XarAssayProvider
         {
             ExpSampleSet sampleSet = getFractionSampleSet(context);
             ArrayList<File> files = new ArrayList<File>(context.getUploadedData().values());
-            MsFractionPropertyHelper helper = new MsFractionPropertyHelper(sampleSet, files, context.getContainer(), context.getUser());
-            return helper;
+            return new MsFractionPropertyHelper(sampleSet, files, context.getContainer());
         }
         catch (IOException e)
         {
@@ -269,13 +258,11 @@ public class MsFractionAssayProvider extends XarAssayProvider
         }
     }
 
-    protected Domain createFractionDomain(Container c, User user)
+    protected Pair<Domain, Map<DomainProperty, Object>> createFractionDomain(Container c, User user)
     {
         String domainLsid = getPresubstitutionLsid(FRACTION_DOMAIN_PREFIX);
         Domain fractionDomain = PropertyService.get().createDomain(c, domainLsid, FRACTION_SET_NAME);
         fractionDomain.setDescription(FRACTION_SET_LABEL);
-        return fractionDomain;
+        return new Pair<Domain, Map<DomainProperty, Object>>(fractionDomain, Collections.<DomainProperty, Object>emptyMap());
     }
-
-
 }

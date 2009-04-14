@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.labkey.xarassay;
+package org.labkey.ms2.xarassay;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpSampleSet;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.security.User;
+import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.exp.property.Domain;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.io.File;
@@ -34,28 +35,22 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
 {
     private List<String> _names;
     private ArrayList<File>_files;
-    private final ExpSampleSet _sampleSet;
-    private final int _sampleCount;
-    private final Container _container;
-    private final User _user;
+    private final @NotNull ExpSampleSet _sampleSet;
 
-
-    public MsFractionPropertyHelper(ExpSampleSet sampleSet, ArrayList<File> files, Container c, User user)
+    public MsFractionPropertyHelper(@NotNull ExpSampleSet sampleSet, ArrayList<File> files, Container c)
     {
-        super(getPropertyDescriptors(sampleSet, c));
+        super(getProperties(sampleSet, c));
         _sampleSet = sampleSet;
         _files = files;
-        _sampleCount = files.size();
-        _container = c;
-        _user = user;
         _names = new ArrayList<String>();
-        for (int i = 0; i < _sampleCount; i++)
+        for (File file : files)
         {
-            String fName = files.get(i).getName();
+            String fName = file.getName();
             _names.add("Fraction - " + fName.substring(0, fName.lastIndexOf('.')));
         }
     }
 
+    @NotNull
     public ExpSampleSet getSampleSet()
     {
         return _sampleSet;
@@ -66,16 +61,16 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
         return _names;
     }
 
-    protected File getObject(int index, Map<PropertyDescriptor, String> sampleProperties) throws DuplicateMaterialException
+    protected File getObject(int index, Map<DomainProperty, String> sampleProperties) throws DuplicateMaterialException
     {
         return _files.get(index);
     }
 
-    public String determineMaterialName(Map<PropertyDescriptor, String> sampleProperties)
+    public String determineMaterialName(Map<DomainProperty, String> sampleProperties)
     {
         String separator = "";
         StringBuilder sb = new StringBuilder();
-        for (PropertyDescriptor pd : getNamePDs())
+        for (DomainProperty pd : getNamePDs())
         {
             sb.append(separator);
             separator = "-";
@@ -84,43 +79,32 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
         return sb.toString();
     }
 
-    protected boolean isCopyable(PropertyDescriptor pd)
+    protected boolean isCopyable(DomainProperty pd)
     {
         return !getNamePDs().contains(pd);
     }
 
-    public static PropertyDescriptor[] getPropertyDescriptors(ExpSampleSet sampleSet, Container c)
+    public static DomainProperty[] getProperties(@NotNull ExpSampleSet sampleSet, Container c)
     {
-        List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
-
-        if (sampleSet != null && sampleSet.getType() != null)
+        if (sampleSet.getType() != null)
         {
-            for (DomainProperty domainProp : sampleSet.getType().getProperties())
-            {
-                pds.add(domainProp.getPropertyDescriptor());
-            }
+            return sampleSet.getType().getProperties();
         }
         else
         {
-            PropertyDescriptor namePD = new PropertyDescriptor(ExperimentService.get().getTinfoMaterial().getColumn("Name"), c);
+            Domain d = PropertyService.get().createDomain(c, sampleSet.getLSID(), sampleSet.getName());
+            DomainProperty namePD = d.addProperty();
+            namePD.setName("Name");
+            namePD.setLabel("Name");
+            namePD.setType(PropertyService.get().getType(c, PropertyType.STRING.getXmlName()));
             namePD.setRequired(true);
-            pds.add(namePD);
+            return new DomainProperty[] { namePD };
         }
-
-        return pds.toArray(new PropertyDescriptor[pds.size()]);
     }
 
-    public List<PropertyDescriptor> getNamePDs()
+    public List<DomainProperty> getNamePDs()
     {
-        if (_sampleSet != null)
-        {
-            return _sampleSet.getIdCols();
-        }
-        else
-        {
-            assert _propertyDescriptors[0].getName().equals("Name");
-            return Collections.singletonList(_propertyDescriptors[0]);
-        }
+        return _sampleSet.getIdCols();
     }
 
 }

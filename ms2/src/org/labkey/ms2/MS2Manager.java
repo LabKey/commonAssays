@@ -57,7 +57,6 @@ import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
@@ -396,10 +395,6 @@ public class MS2Manager
             return expRun;
         }
         catch (SQLException e)
-        {
-            throw new ExperimentException(e);
-        }
-        catch (IOException e)
         {
             throw new ExperimentException(e);
         }
@@ -762,26 +757,15 @@ public class MS2Manager
             MS2Run run = getRun(runId.intValue());
             if (run != null)
             {
-                try
+                File file = new File(run.getPath(), run.getFileName());
+                ExpData data = ExperimentService.get().getExpDataByURL(file, c);
+                if (data != null)
                 {
-                    File file = new File(run.getPath(), run.getFileName());
-                    ExpData data = ExperimentService.get().getExpDataByURL(file, c);
-                    if (data != null)
+                    ExpRun expRun = data.getRun();
+                    if (expRun != null)
                     {
-                        ExpRun expRun = data.getRun();
-                        if (expRun != null)
-                        {
-                            experimentRunsToDelete.add(expRun.getRowId());
-                        }
+                        experimentRunsToDelete.add(expRun.getRowId());
                     }
-                }
-                catch (MalformedURLException e)
-                {
-                    _log.error("markAsDeleted", e);
-                }
-                catch (IOException e)
-                {
-                    _log.error("markAsDeleted", e);
                 }
             }
         }
