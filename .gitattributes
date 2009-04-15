@@ -1191,7 +1191,6 @@ ms2/src/org/labkey/ms2/xarassay/XarAssayPipelineProvider.java -text
 ms2/src/org/labkey/ms2/xarassay/XarAssayProvider.java -text
 ms2/src/org/labkey/ms2/xarassay/XarAssayUploadAction.java -text
 ms2/src/org/labkey/ms2/xarassay/XarChooseAssayForm.java -text
-ms2/src/org/labkey/ms2/xarassay/view/chooseAssay.jsp -text
 ms2/webapp/MS2/externalData/ProtSprotOrgMap.txt -text
 ms2/webapp/MS2/images/runIcon.gif -text
 ms2/webapp/WEB-INF/ms2/ms2Context.xml -text
