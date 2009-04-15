@@ -54,11 +54,6 @@ public class XarAssayPipelineProvider extends PipelineProvider
             {
                 continue;
             }
-            ActionURL actionUrl = entry.cloneHref();
-            actionUrl.setAction(XarAssayController.ChooseAssayAction.class);
-            String protId = context.getRequest().getParameter("rowId");
-            if (null != protId)
-                actionUrl.addParameter("rowId", protId);
 
             File[] files = entry.listFiles(getAnalyzeFilter());
             if (files != null && files.length > 0)
