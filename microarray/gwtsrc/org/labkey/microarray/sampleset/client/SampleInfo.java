@@ -197,6 +197,7 @@ public class SampleInfo
             DOM.setStyleAttribute(_label.getElement(), "visibility", "hidden");
             DOM.setStyleAttribute(_sampleSetListBox.getElement(), "visibility", "hidden");
             DOM.setStyleAttribute(_materialListBox.getElement(), "visibility", "hidden");
+            DOM.setStyleAttribute(_materialTextBox.getElement(), "visibility", "hidden");
         }
     }
 

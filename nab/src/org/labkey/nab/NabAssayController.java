@@ -36,21 +36,20 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.query.*;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.WellData;
-import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.*;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.common.util.Pair;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
@@ -354,10 +353,7 @@ public class NabAssayController extends SpringActionController
             super(protocol, provider, false, null);
             if (getViewContext().hasPermission(ACL.PERM_INSERT))
             {
-                for (Map.Entry<String, Class<? extends Controller>> entry : provider.getImportActions().entrySet())
-                {
-                    _links.put(entry.getKey().toLowerCase(), PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), protocol, entry.getValue()));
-                }
+                _links.put(AbstractAssayProvider.IMPORT_DATA_LINK_NAME, provider.getImportURL(getContainer(), protocol));
 
                 if (getViewContext().hasPermission(ACL.PERM_DELETE))
                 {

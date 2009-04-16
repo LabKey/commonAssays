@@ -58,7 +58,7 @@ public class XarAssayController extends SpringActionController
     {
         protected FileFilter getFileFilter()
         {
-            return new XarAssayProvider.AnalyzeFileFilter();
+            return XarAssayPipelineProvider.FILE_FILTER;
         }
 
         protected ActionURL getUploadURL(ExpProtocol protocol)

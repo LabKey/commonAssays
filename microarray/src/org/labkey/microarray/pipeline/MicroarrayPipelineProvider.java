@@ -60,14 +60,14 @@ public class MicroarrayPipelineProvider extends PipelineProvider
             if (files != null && files.length > 0)
             {
                 List<ExpProtocol> assays = AssayService.get().getAssayProtocols(context.getContainer());
-                NavTree navTree = new NavTree("Import MageML");
+                NavTree navTree = new NavTree("Import MAGE-ML");
                 for (ExpProtocol protocol : assays)
                 {
                     if (AssayService.get().getProvider(protocol) instanceof MicroarrayAssayProvider)
                     {
                         ActionURL url = MicroarrayController.getUploadRedirectAction(context.getContainer(), protocol, root.relativePath(new File(entry.getURI())));
                         NavTree child = new NavTree("Use " + protocol.getName(), url);
-                        child.setId("Import MageML:Use " + protocol.getName());
+                        child.setId("Import MAGE-ML:Use " + protocol.getName());
                         navTree.addChild(child);
                     }
                 }

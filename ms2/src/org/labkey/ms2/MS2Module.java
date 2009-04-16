@@ -76,7 +76,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         {
             Lsid lsid = new Lsid(protocol.getLSID());
             String objectId = lsid.getObjectId();
-            if (objectId.startsWith(MS2Schema.SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX))
+            if (objectId.startsWith(MS2Schema.SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX) || lsid.getNamespacePrefix().startsWith(XarAssayProvider.PROTOCOL_LSID_NAMESPACE_PREFIX))
             {
                 return Priority.HIGH;
             }
@@ -240,7 +240,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         MS2Controller.registerAdminConsoleLinks();
         
         AssayService.get().registerAssayProvider(new XarAssayProvider());
-        AssayService.get().registerAssayProvider(new MsFractionAssayProvider());
         PipelineService.get().registerPipelineProvider(new XarAssayPipelineProvider());
 
         initWebApplicationContext();

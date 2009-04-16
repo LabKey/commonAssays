@@ -360,9 +360,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         }
     }
 
-    public Map<String, Class<? extends Controller>> getImportActions()
+    public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
-        return Collections.<String, Class<? extends Controller>>singletonMap(IMPORT_DATA_LINK_NAME, NabUploadWizardAction.class);
+        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, NabUploadWizardAction.class);
     }
     
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()

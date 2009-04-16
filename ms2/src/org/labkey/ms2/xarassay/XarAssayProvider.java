@@ -16,35 +16,32 @@
 
 package org.labkey.ms2.xarassay;
 
-import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.security.User;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.GUID;
-import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.common.util.Pair;
-import org.springframework.web.servlet.mvc.Controller;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -56,17 +53,17 @@ import java.util.*;
 
 public class XarAssayProvider extends AbstractAssayProvider
 {
-    public static final String PROTOCOL_LSID_NAMESPACE_PREFIX = "MsBaseProtocol";
-    public static final String NAME = "MS Basic";
-    public static final String DATA_LSID_PREFIX = "MZXMLData";
-    public static final DataType MS_ASSAY_DATA_TYPE = new DataType(DATA_LSID_PREFIX);
-    private static final Logger LOG = Logger.getLogger(XarAssayProvider.class);
+    public static final String PROTOCOL_LSID_NAMESPACE_PREFIX = "MSSampleDescriptionProtocol";
+    public static final String NAME = "Mass Spec Sample Description";
+    public static final DataType MS_ASSAY_DATA_TYPE = new DataType("MZXMLData");
     public static final String PROTOCOL_LSID_OBJECTID_PREFIX = "FileType.mzXML";
     public static final String RUN_LSID_NAMESPACE_PREFIX = "ExperimentRun";
     public static final String RUN_LSID_OBJECT_ID_PREFIX = "MS2PreSearch";
-    public static final String SAMPLE_LIST_NAME = "Samples";
-    protected static String _pipelineMzXMLExt = ".mzXML";
 
+    public static final String FRACTION_DOMAIN_PREFIX = ExpProtocol.ASSAY_DOMAIN_PREFIX + "Fractions";
+    public static final String FRACTION_SET_NAME = "FractionProperties";
+    public static final String FRACTION_SET_LABEL = "If fraction properties are defined in this group, all mzXML files in the derctory will be described by fractions derived from the selected sample. ";
+    
     public XarAssayProvider(String protocolLSIDPrefix, String runLSIDPrefix, DataType dataType)
     {
         super(protocolLSIDPrefix, runLSIDPrefix, dataType);
@@ -107,40 +104,20 @@ public class XarAssayProvider extends AbstractAssayProvider
         }
     }
 
+    protected Pair<Domain, Map<DomainProperty, Object>> createFractionDomain(Container c)
+    {
+        String domainLsid = getPresubstitutionLsid(FRACTION_DOMAIN_PREFIX);
+        Domain fractionDomain = PropertyService.get().createDomain(c, domainLsid, FRACTION_SET_NAME);
+        fractionDomain.setDescription(FRACTION_SET_LABEL);
+        return new Pair<Domain, Map<DomainProperty, Object>>(fractionDomain, Collections.<DomainProperty, Object>emptyMap());
+    }
+    
     public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
     {
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
-
-        // remove data properties since we don't same them
-        String lsidName = "Data Properties";
-        for (Pair<Domain, Map<DomainProperty, Object>> pair : result)
-        {
-            Domain d = pair.getKey();
-            if (d.getName().equals(lsidName))
-            {
-                result.remove(pair);
-                break;
-            }
-        }
-
+        result.add(createFractionDomain(c));
         return result;
     }
-
-    public void validateUpload(XarAssayForm form) throws ExperimentException
-    {
-        if (form.getNumFilesRemaining() == 0)
-            throw new ExperimentException("No more files left to describe");
-    }
-
-    protected PipeRoot getPipelineRoot (AssayRunUploadContext context) throws ExperimentException
-    {
-        PipeRoot pipeRoot = PipelineService.get().findPipelineRoot(context.getContainer());
-        if (pipeRoot == null || !NetworkDrive.exists(pipeRoot.getRootPath()))
-            throw new ExperimentException("The target container must have a valid pipeline root");
-        return pipeRoot;
-    }
-
-
 
     public String getName()
     {
@@ -155,36 +132,11 @@ public class XarAssayProvider extends AbstractAssayProvider
     public ExpData getDataForDataRow(Object dataRowId)
     {
         throw new UnsupportedOperationException("Whoa how did i get here");
-
-    }
-
-    public ActionURL getUploadWizardURL(Container container, ExpProtocol protocol)
-    {
-        ActionURL url = new ActionURL(XarAssayUploadAction.class, container);
-        url.addParameter("rowId", protocol.getRowId());
-
-        return url;
     }
 
     public TableInfo createDataTable(UserSchema schema, ExpProtocol protocol)
     {
         return new ExpSchema(schema.getUser(), schema.getContainer()).createDatasTable();
-    }
-
-    public Set<FieldKey> getParticipantIDDataKeys()
-    {
-        return null;
-    }
-
-    public Set<FieldKey> getVisitIDDataKeys()
-    {
-        return null;
-    }
-
-    public String getRunDataTableName(ExpProtocol protocol)
-    {
-        // use the Runs list table here so that there is a way to order columns in a run upload form
-        return protocol.getName() + " Runs";
     }
 
     public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
@@ -194,7 +146,7 @@ public class XarAssayProvider extends AbstractAssayProvider
 
     public String getDescription()
     {
-        return "mzXML file describer";
+        return "Describes metadata for mass spec data files, including mzXML";
     }
 
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
@@ -207,89 +159,10 @@ public class XarAssayProvider extends AbstractAssayProvider
         return null;
     }
 
-    public boolean canPublish()
+    @Override
+    public boolean canCopyToStudy()
     {
         return false;
-    }
-
-    protected ExpRun createSingleExpRun(XarAssayForm form
-            , Map<ExpMaterial, String> inputMaterials
-            , Map<ExpData, String> inputDatas
-            , Map<ExpMaterial, String> outputMaterials
-            , Map<ExpData, String> outputDatas
-            , Map<DomainProperty, String> runProperties
-            , Map<DomainProperty,String> uploadSetProperties
-            , String runName, PipeRoot pipeRoot)  throws SQLException, ExperimentException
-    {
-
-        // user inputs from the form
-        ExpRun run = ExperimentService.get().createExperimentRun(form.getContainer(), runName);
-        run.setProtocol(form.getProtocol());
-        run.setFilePathRoot(pipeRoot.getRootPath());
-        String entityId = GUID.makeGUID();
-        Lsid lsid = new Lsid(getRunLsidNamespacePrefix(), "Folder-" + form.getContainer().getRowId(),
-                getRunLsidObjectIdPrefix() + "." + entityId);
-        run.setLSID(lsid.toString());
-        run.setComments(form.getComments());
-
-        savePropertyObject(run.getLSID(), runProperties, form.getContainer());
-        savePropertyObject(run.getLSID(), uploadSetProperties, form.getContainer());
-
-        run = ExperimentService.get().insertSimpleExperimentRun(run,
-                inputMaterials,
-                inputDatas,
-                outputMaterials,
-                outputDatas,
-                new ViewBackgroundInfo(form.getContainer(),
-                        form.getUser(), form.getActionURL()), LOG, true);
-        return run;
-
-    }
-
-    protected void addMzxmlOutputs(XarAssayForm form, Map<ExpData, String> outputDatas, List<File> files) throws ExperimentException
-    {
-        for (File f : files)
-        {
-            ExpData data = ExperimentService.get().getExpDataByURL(f, form.getContainer());
-            if (null == data)
-                data = createData(form.getContainer(), f, f.getName(), _dataType);
-
-            outputDatas.put(data, "mzXML");
-        }
-    }// todo:  should these all be static
-
-    public String getProtocolLsidNamespacePrefix()
-    {
-        return PROTOCOL_LSID_NAMESPACE_PREFIX;
-    }
-
-    public String getProtocolLsidObjectidPrefix()
-    {
-        return PROTOCOL_LSID_OBJECTID_PREFIX;
-    }
-
-    public String getRunLsidNamespacePrefix()
-    {
-        return RUN_LSID_NAMESPACE_PREFIX;
-    }
-
-    public String getRunLsidObjectIdPrefix()
-    {
-        return RUN_LSID_OBJECT_ID_PREFIX;
-    }
-
-    public static boolean isMzXMLFile(File file)
-    {
-        return file.getName().endsWith(_pipelineMzXMLExt);
-    }
-
-    public static class AnalyzeFileFilter extends PipelineProvider.FileEntryFilter
-    {
-        public boolean accept(File file)
-        {
-            // Show all mzXML files.
-            return isMzXMLFile(file);
-        }
     }
 
     public FieldKey getParticipantIDFieldKey()
@@ -317,23 +190,89 @@ public class XarAssayProvider extends AbstractAssayProvider
         return FieldKey.fromParts("RowId");
     }
 
-    protected static Map<String, XarAssayProvider> getMsBaseAssayProviders()
+    public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
-        List<AssayProvider> ap = AssayService.get().getAssayProviders();
-        Map<String, XarAssayProvider> map = new HashMap<String, XarAssayProvider>();
-        for (AssayProvider ax : ap)
-        {
-            if (ax instanceof XarAssayProvider)
-            {
-                XarAssayProvider xa = (XarAssayProvider) ax;
-                map.put(xa.getProtocolLsidNamespacePrefix(), xa);
-            }
-        }
-        return map;
+        return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(container, null);
     }
 
-    public Map<String, Class<? extends Controller>> getImportActions()
+    @NotNull
+    protected ExpSampleSet getFractionSampleSet(AssayRunUploadContext context) throws ExperimentException
     {
-        return Collections.<String, Class<? extends Controller>>singletonMap(IMPORT_DATA_LINK_NAME, XarAssayUploadAction.class);
+        String domainURI = getDomainURIForPrefix(context.getProtocol(), FRACTION_DOMAIN_PREFIX);
+        ExpSampleSet sampleSet=null;
+        if (null != domainURI)
+            sampleSet = ExperimentService.get().getSampleSet(domainURI);
+
+        if (sampleSet == null)
+        {
+            sampleSet = ExperimentService.get().createSampleSet();
+            sampleSet.setContainer(context.getProtocol().getContainer());
+            sampleSet.setName("Fractions: " + context.getProtocol().getName());
+            sampleSet.setLSID(domainURI);
+
+            Lsid sampleSetLSID = new Lsid(domainURI);
+            sampleSetLSID.setNamespacePrefix("Sample");
+            sampleSetLSID.setNamespaceSuffix(context.getProtocol().getContainer().getRowId() + "." + context.getProtocol().getName());
+            sampleSetLSID.setObjectId("");
+            String prefix = sampleSetLSID.toString();
+
+            sampleSet.setMaterialLSIDPrefix(prefix);
+            sampleSet.save(context.getUser());
+        }
+        return sampleSet;
+    }
+
+    @Override
+    protected void resolveExtraRunData(ParticipantVisitResolver resolver, AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, Map<ExpData, String> inputDatas, Map<ExpMaterial, String> outputMaterials, Map<ExpData, String> outputDatas) throws ExperimentException
+    {
+        XarAssayForm form = (XarAssayForm)context;
+        if (form.getSelectedDataCollector().getExistingAnnotationStatus(form).getValue().intValue() > 0)
+        {
+            throw new ExperimentException("You must delete any existing annotations before re-annotating.");
+        }
+        
+        ExpSampleSet fractionSet = getFractionSampleSet(context);
+        List<File> files = new ArrayList<File>(form.getUploadedData().values());
+        MsFractionPropertyHelper helper = new MsFractionPropertyHelper(fractionSet, files, context.getContainer());
+        Map<File, Map<DomainProperty, String>> mapFilesToFractionProperties = helper.getSampleProperties(context.getRequest());
+
+        Map<ExpMaterial, String> derivedSamples = new HashMap<ExpMaterial, String>();
+
+        try
+        {
+            for (Map.Entry<File,Map<DomainProperty, String>> entry : mapFilesToFractionProperties.entrySet())
+            {
+                // generate unique lsids for the derived samples
+                File mzxmlFile = entry.getKey();
+                String fileNameBase = mzxmlFile.getName().substring(0, (mzxmlFile.getName().lastIndexOf('.')));
+                Map<DomainProperty, String> properties = entry.getValue();
+                Lsid derivedLsid = new Lsid(fractionSet.getMaterialLSIDPrefix() + "OBJECT");
+                derivedLsid.setObjectId(GUID.makeGUID());
+                int index = 0;
+                while(ExperimentService.get().getExpMaterial(derivedLsid.toString()) != null)
+                    derivedLsid.setObjectId(derivedLsid.getObjectId() + "-" + ++index);
+
+                ExpMaterial derivedMaterial = ExperimentService.get().createExpMaterial(form.getContainer()
+                        , derivedLsid.toString(), "Fraction - " + fileNameBase);
+                derivedMaterial.setCpasType(fractionSet.getLSID());
+                // could put the fraction properties on the fraction material object or on the run.  decided to do the run
+
+                for (Map.Entry<DomainProperty, String> property : properties.entrySet())
+                {
+                    String value = property.getValue();
+                    derivedMaterial.setProperty(form.getUser(), property.getKey().getPropertyDescriptor(), value);
+                }
+
+                derivedSamples.put(derivedMaterial, "Fraction");
+            }
+            ViewBackgroundInfo info = new ViewBackgroundInfo(form.getContainer(), form.getUser(), form.getActionURL());
+            ExperimentService.get().deriveSamples(inputMaterials, derivedSamples, info, null);
+            inputMaterials.clear();
+            inputMaterials.putAll(derivedSamples);
+        }
+        catch (ValidationException e)
+        {
+            throw new ExperimentException(e);
+        }
     }
 }

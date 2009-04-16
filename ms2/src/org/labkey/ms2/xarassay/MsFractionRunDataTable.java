@@ -20,7 +20,6 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -31,7 +30,6 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
 
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -47,10 +45,6 @@ public class MsFractionRunDataTable extends FilteredTable
 {
     public static final String RUN_ID_COLUMN_NAME = "RunId";
 
-//    public abstract PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException;
-//    public abstract String getInputMaterialPropertyName();
-//    public abstract String getDataRowLsidPrefix();
-//
     public MsFractionRunDataTable(final QuerySchema schema, final ExpProtocol protocol)
     {
         super(OntologyManager.getTinfoObject(), schema.getContainer());
@@ -59,7 +53,7 @@ public class MsFractionRunDataTable extends FilteredTable
         List<FieldKey> visibleColumns = new ArrayList<FieldKey>();
 
         // add material lookup columns to the view first, so they appear at the left:
-        String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, MsFractionAssayProvider.FRACTION_DOMAIN_PREFIX);
+        String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, XarAssayProvider.FRACTION_DOMAIN_PREFIX);
         final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
         if (sampleSet != null)
         {

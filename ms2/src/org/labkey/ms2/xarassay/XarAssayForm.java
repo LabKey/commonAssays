@@ -16,16 +16,7 @@
 
 package org.labkey.ms2.xarassay;
 
-import org.labkey.api.action.FormArrayList;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.study.actions.AssayRunUploadForm;
-
-import java.io.File;
-import java.net.URI;
-import java.util.*;
 
 /**
  * User: phussey
@@ -34,113 +25,20 @@ import java.util.*;
  */
 public class XarAssayForm extends AssayRunUploadForm<XarAssayProvider>
 {
-    private URI _dataURI;
-    private String _currentFileName;
-    private ExpProtocol selectedProtocol;
-    private String _sampleSetUrl;
-    private String _path;
-    private Integer _numFilesRemaining;
-    private ArrayList<String> _undescribedFileNames = new FormArrayList<String>(String.class) ;
-    private Map<String, String> _links = new LinkedHashMap<String, String>();
-
     public XarAssayForm()
     {
         super();
         setDataCollectorName(XarAssayDataCollector.NAME);
     }
 
+    public boolean isFractions()
+    {
+        return Boolean.parseBoolean(getRequest().getParameter(FractionsDisplayColumn.FRACTIONS_FIELD_NAME));
+    }
+
     @Override
-    public void clearUploadedData()
+    public XarAssayDataCollector getSelectedDataCollector()
     {
-        // don't clear the data, but do reset the check for undescribed files
-        _numFilesRemaining=null;
-        _currentFileName=null;
-    }
-
-    public String getPath()
-    {
-        return _path;
-    }
-
-    public void setPath(String path)
-    {
-        _path = path;
-    }
-
-    public ExpProtocol getSelectedProtocol()
-    {
-        return selectedProtocol;
-    }
-
-    public void setSelectedProtocol(ExpProtocol selectedProtocol)
-    {
-        this.selectedProtocol = selectedProtocol;
-    }
-
-    public String getSampleSetUrl()
-    {
-        return _sampleSetUrl;
-    }
-
-    public void setSampleSetUrl(String sampleSetUrl)
-    {
-        _sampleSetUrl = sampleSetUrl;
-    }
-
-     public URI getDataURI()
-    {
-        return _dataURI;
-    }
-
-    public void setDataURI(URI dataURI)
-    {
-        _dataURI = dataURI;
-    }
-
-    public int getNumFilesRemaining() throws ExperimentException
-    {
-        if (null== _numFilesRemaining)
-            getUndescribedFiles();
-        return _numFilesRemaining.intValue();
-    }
-
-    public String getCurrentFileName()
-    {
-        return _currentFileName;
-    }
-    
-    public ArrayList<String> getUndescribedFiles() throws ExperimentException
-    {
-        if (null == _numFilesRemaining)
-        {
-            ArrayList<String> udf = new ArrayList<String>();
-            SortedMap<String, File> sm = new TreeMap<String, File>(getUploadedData());
-            for (Map.Entry<String, File> entry : sm.entrySet())
-            {
-                File f = entry.getValue();
-
-                ExpData d = ExperimentService.get().getExpDataByURL(f, getContainer());
-                if ((null == d) || (null== d.getRun()))
-                    udf.add(entry.getKey());
-            }
-            _undescribedFileNames = udf;
-            _numFilesRemaining = udf.size();
-            if (!udf.isEmpty())
-                _currentFileName = udf.get(0);
-            else
-                _currentFileName = null;
-        }
-        return _undescribedFileNames;
-
-    }
-
-    public Map<String, String> getLinks()
-    {
-        return _links;
-    }
-
-    public void setLinks(Map<String, String> links)
-    {
-        _links = links;
+        return (XarAssayDataCollector)super.getSelectedDataCollector();
     }
 }

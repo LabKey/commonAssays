@@ -33,18 +33,17 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.common.util.Pair;
-import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -221,9 +220,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return new HtmlView("Currently the only supported file type is the multi-sheet BioPlex Excel file format.");
     }
 
-    public Map<String, Class<? extends Controller>> getImportActions()
+    public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
-        return Collections.<String, Class<? extends Controller>>singletonMap(IMPORT_DATA_LINK_NAME, LuminexUploadWizardAction.class);
+        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexUploadWizardAction.class);
     }
     
     public ExpData getDataForDataRow(Object dataRowId)

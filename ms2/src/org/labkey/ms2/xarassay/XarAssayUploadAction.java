@@ -16,32 +16,24 @@
 
 package org.labkey.ms2.xarassay;
 
+import org.labkey.api.action.LabkeyError;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
-import org.labkey.api.util.URIUtil;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.view.InsertView;
-import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
 import java.io.File;
-import java.net.URI;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: phussey
@@ -55,15 +47,7 @@ public class XarAssayUploadAction extends UploadWizardAction<XarAssayForm, XarAs
     {
         super(XarAssayForm.class);
         addStepHandler(new DeleteAssaysStepHandler());
-
     }
-
-    @Override
-    public ModelAndView getView(XarAssayForm assayRunUploadForm, BindException errors) throws Exception
-    {
-        return super.getView(assayRunUploadForm, errors);
-    }
-
 
     @RequiresPermission(ACL.PERM_DELETE)
     public class DeleteAssaysStepHandler extends StepHandler<XarAssayForm>
@@ -71,40 +55,23 @@ public class XarAssayUploadAction extends UploadWizardAction<XarAssayForm, XarAs
         public static final String NAME = "DELETEASSAYS";
 
         @Override
-        public ModelAndView handleStep(XarAssayForm form, BindException errors) throws ServletException, SQLException
+        public ModelAndView handleStep(XarAssayForm form, BindException errors)
         {
-            try
+            Container c = form.getContainer();
+
+            List<Map<String,File>> allFiles = form.getSelectedDataCollector().getFileCollection(form);
+
+            for (Map<String, File> fileSet : allFiles)
             {
-                Container c = form.getContainer();
-
-                PipelineService service = PipelineService.get();
-                PipeRoot pr = service.findPipelineRoot(c);
-                if (pr == null || !URIUtil.exists(pr.getUri()))
-                    throw new NotFoundException("No pipeline root has been configured for this folder");
-
-                URI uriData = URIUtil.resolve(pr.getUri(c), form.getPath());
-                if (uriData == null)
-                    throw new NotFoundException("Could not find file " + form.getPath());
-
-                File[] mzXMLFiles = new File(uriData).listFiles(new XarAssayProvider.AnalyzeFileFilter());
-                for (File mzXMLFile : mzXMLFiles)
+                for (File file : fileSet.values())
                 {
-                    ExpRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
+                    ExpRun run = ExperimentService.get().getCreatingRun(file, c);
                     if (run != null)
                     {
                         ExperimentService.get().deleteExperimentRunsByRowIds(c, form.getUser(), run.getRowId());
                     }
                 }
             }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e);
-            }
-
-            ActionURL helper = form.getProvider().getUploadWizardURL(getContainer(), _protocol);
-            helper.replaceParameter("path", form.getPath());
-            helper.replaceParameter("providerName", form.getProviderName());
-            HttpView.redirect(helper);
 
             return null;
         }
@@ -112,7 +79,6 @@ public class XarAssayUploadAction extends UploadWizardAction<XarAssayForm, XarAs
         public String getName()
         {
             return NAME;
-
         }
     }
 
@@ -120,27 +86,45 @@ public class XarAssayUploadAction extends UploadWizardAction<XarAssayForm, XarAs
     protected InsertView createRunInsertView(XarAssayForm form, boolean reshow, BindException errors)
     {
         InsertView parent = super.createRunInsertView(form, reshow, errors);
+        parent.getDataRegion().addHiddenFormField(FractionsDisplayColumn.FRACTIONS_FIELD_NAME, Boolean.toString(form.isFractions()));
 
-        AssayProvider provider = getProvider(form);
-        try
+        if (form.isFractions())
         {
-            if (provider instanceof MsFractionAssayProvider)
+            try
             {
-                MsFractionPropertyHelper helper = ((MsFractionAssayProvider)getProvider(form)).createSamplePropertyHelper(form, form.getProtocol(),null);
+                ExpSampleSet sampleSet = form.getProvider().getFractionSampleSet(form);
+                ArrayList<File> files = new ArrayList<File>(form.getUploadedData().values());
+                MsFractionPropertyHelper helper = new MsFractionPropertyHelper(sampleSet, files, getContainer());
                 helper.addSampleColumns(parent, form.getUser());
             }
-            return parent;
+            catch (ExperimentException e)
+            {
+                errors.addError(new LabkeyError(e));
+            }
         }
-        catch (ExperimentException e)
-        {
-            throw new RuntimeException(e);
-        }
+        return parent;
+    }
+
+    @Override
+    protected boolean showBatchStep(XarAssayForm form, Domain batchDomain)
+    {
+        // Show the batch step if we have batch properties or might be a fractions search
+        return super.showBatchStep(form, batchDomain) ||
+            form.getSelectedDataCollector().getFileCollection(form).size() > 1;
+    }
+
+    @Override
+    protected InsertView createBatchInsertView(XarAssayForm form, boolean reshow, BindException errors)
+    {
+        InsertView result = super.createBatchInsertView(form, reshow, errors);
+        result.getDataRegion().addDisplayColumn(new FractionsDisplayColumn(form));
+        return result;
     }
 
     @Override
     protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
     {
         super.addSampleInputColumns(protocol, insertView);
-        insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(1, 2, Collections.<ExpMaterial>emptyList()));
+        insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(1, 2, Collections.<ExpMaterial>emptyList(), 1));
     }
 }

@@ -41,7 +41,7 @@ public class SampleChooser extends SampleChooserUtils implements EntryPoint
 
     private FlexTable _table = new FlexTable();
     private int _maxSampleCount;
-    private int _minSampleCount;
+    private ListBox _sampleCountListBox;
 
     public void onModuleLoad()
     {
@@ -49,24 +49,34 @@ public class SampleChooser extends SampleChooserUtils implements EntryPoint
         if (rootPanel != null)
         {
             _maxSampleCount = Integer.parseInt(PropertyUtil.getServerProperty(PROP_NAME_MAX_SAMPLE_COUNT));
-            _minSampleCount = Integer.parseInt(PropertyUtil.getServerProperty(PROP_NAME_MIN_SAMPLE_COUNT));
-
-            if (_minSampleCount < _maxSampleCount)
+            int minSampleCount = Integer.parseInt(PropertyUtil.getServerProperty(PROP_NAME_MIN_SAMPLE_COUNT));
+            String defaultCountString = PropertyUtil.getServerProperty(PROP_NAME_DEFAULT_SAMPLE_COUNT);
+            int defaultSampleCount;
+            if (defaultCountString != null)
             {
-                final ListBox sampleCountListBox = new ListBox();
-                for (int i = _minSampleCount; i <= _maxSampleCount; i++)
+                defaultSampleCount = Integer.parseInt(defaultCountString);
+            }
+            else
+            {
+                defaultSampleCount = _maxSampleCount;
+            }
+
+            if (minSampleCount < _maxSampleCount)
+            {
+                _sampleCountListBox = new ListBox();
+                for (int i = minSampleCount; i <= _maxSampleCount; i++)
                 {
-                    sampleCountListBox.addItem(i + " sample" + (i == 1 ? "" : "s"), Integer.toString(i));
+                    _sampleCountListBox.addItem(i + " sample" + (i == 1 ? "" : "s"), Integer.toString(i));
                 }
-                sampleCountListBox.setSelectedIndex(sampleCountListBox.getItemCount() - 1);
-                sampleCountListBox.addChangeListener(new ChangeListener()
+                _sampleCountListBox.setSelectedIndex(defaultSampleCount - minSampleCount);
+                _sampleCountListBox.addChangeListener(new ChangeListener()
                 {
                     public void onChange(Widget sender)
                     {
-                        updateSampleCount(sampleCountListBox);
+                        updateSampleCount();
                     }
                 });
-                _table.setWidget(0, 0, sampleCountListBox);
+                _table.setWidget(0, 0, _sampleCountListBox);
             }
 
             _table.setWidget(0, 1, new HTML("<b>Sample Set</b>"));
@@ -113,12 +123,13 @@ public class SampleChooser extends SampleChooserUtils implements EntryPoint
             setSampleCount(_maxSampleCount);
 
             rootPanel.add(_table);
+            updateSampleCount();
         }
     }
 
-    private void updateSampleCount(ListBox sampleCountListBox)
+    private void updateSampleCount()
     {
-        int count = Integer.parseInt(sampleCountListBox.getValue(sampleCountListBox.getSelectedIndex()));
+        int count = Integer.parseInt(_sampleCountListBox.getValue(_sampleCountListBox.getSelectedIndex()));
         setSampleCount(count);
     }
 

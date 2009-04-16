@@ -15,36 +15,37 @@
  */
 package org.labkey.microarray;
 
-import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.SampleChooserDisplayColumn;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ProtocolParameter;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.actions.UploadWizardAction;
+import org.labkey.api.study.assay.PipelineDataCollector;
+import org.labkey.api.study.assay.SampleChooserDisplayColumn;
 import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.common.tools.TabLoader;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
-import org.labkey.common.tools.TabLoader;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
-import java.util.*;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.File;/*
+import java.util.*;/*
  * User: brittp
  * Date: Jan 19, 2009
  * Time: 2:29:57 PM
@@ -404,5 +405,12 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
     {
         // getBulkProperties() handles all the checks that we do right now and throws exceptions directly
         getBulkProperties();
+    }
+
+    @Override
+    public PipelineDataCollector<MicroarrayRunUploadForm> getSelectedDataCollector()
+    {
+        // We support only the PipelineDataCollector
+        return (PipelineDataCollector<MicroarrayRunUploadForm>)super.getSelectedDataCollector();
     }
 }

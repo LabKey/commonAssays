@@ -17,33 +17,38 @@
 package org.labkey.elispot;
 
 import org.labkey.api.data.*;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.OntologyObject;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.list.ListDefinition;
+import org.labkey.api.exp.list.ListItem;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
-import org.labkey.api.exp.list.ListDefinition;
-import org.labkey.api.exp.list.ListItem;
-import org.labkey.api.exp.*;
 import org.labkey.api.exp.query.ExpRunTable;
-import org.labkey.api.query.*;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
+import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
-import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.query.ResultsQueryView;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.common.util.Pair;
+import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
-import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.labkey.elispot.query.ElispotRunDataTable;
-import org.labkey.common.util.Pair;
-import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
-import java.util.*;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -346,9 +351,9 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
     }
 
-    public Map<String, Class<? extends Controller>> getImportActions()
+    public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
-        return Collections.<String, Class<? extends Controller>>singletonMap(IMPORT_DATA_LINK_NAME, ElispotUploadWizardAction.class);
+        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, ElispotUploadWizardAction.class);
     }
 
     public Domain getAntigenWellGroupDomain(ExpProtocol protocol)

@@ -16,29 +16,28 @@
 
 package org.labkey.microarray;
 
-import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.AssayDataCollector;
-import org.labkey.api.study.assay.PipelineDataCollector;
-import org.labkey.api.study.assay.SampleChooserDisplayColumn;
+import org.labkey.api.action.LabkeyError;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ProtocolParameter;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.api.*;
-import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.ACL;
-import org.labkey.api.view.InsertView;
-import org.labkey.api.action.LabkeyError;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.study.actions.UploadWizardAction;
+import org.labkey.api.study.assay.PipelineDataCollector;
+import org.labkey.api.study.assay.SampleChooserDisplayColumn;
+import org.labkey.api.view.InsertView;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
-import org.w3c.dom.Document;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
+import org.w3c.dom.Document;
 
 import javax.servlet.ServletException;
-import java.util.*;
 import java.io.File;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -200,13 +199,13 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayR
         {
             try
             {
-                AssayDataCollector collector = form.getSelectedDataCollector();
+                PipelineDataCollector<MicroarrayRunUploadForm> collector = form.getSelectedDataCollector();
                 RunStepHandler handler = getRunStepHandler();
                 List<ExpRun> runs = new ArrayList<ExpRun>();
 
                 // Hold on to a copy of the original file list so that we can reset the selection state if one of them fails
                 List<Map<String, File>> allFiles =
-                        new ArrayList<Map<String, File>>(PipelineDataCollector.getFileCollection(getViewContext().getRequest().getSession(true), getContainer(), form.getProtocol()));
+                        new ArrayList<Map<String, File>>(collector.getFileCollection(form));
                 boolean success = false;
                 ExperimentService.get().beginTransaction();
                 try

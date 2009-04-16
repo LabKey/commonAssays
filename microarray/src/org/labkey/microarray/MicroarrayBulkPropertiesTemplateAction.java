@@ -15,28 +15,29 @@
  */
 package org.labkey.microarray;
 
-import org.labkey.api.study.actions.BaseAssayAction;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.PipelineDataCollector;
-import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.ACL;
+import jxl.Workbook;
+import jxl.write.*;
+import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.ProtocolParameter;
-import org.labkey.api.view.NotFoundException;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.study.actions.BaseAssayAction;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.Document;
 
-import java.util.*;
 import java.io.File;
-
-import jxl.Workbook;
-import jxl.write.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -112,7 +113,7 @@ public class MicroarrayBulkPropertiesTemplateAction extends BaseAssayAction<Micr
         }
 
         int row = 1;
-        List<Map<String, File>> allFiles = PipelineDataCollector.getFileCollection(getViewContext().getRequest().getSession(true), getContainer(), protocol);
+        List<Map<String, File>> allFiles = form.getSelectedDataCollector().getFileCollection(form);
         for (Map<String, File> files : allFiles)
         {
             for (File file : files.values())

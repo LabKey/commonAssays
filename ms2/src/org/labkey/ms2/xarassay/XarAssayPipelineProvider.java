@@ -55,7 +55,7 @@ public class XarAssayPipelineProvider extends PipelineProvider
                 continue;
             }
 
-            File[] files = entry.listFiles(getAnalyzeFilter());
+            File[] files = entry.listFiles(FILE_FILTER);
             if (files != null && files.length > 0)
             {
                 PipeRoot root = PipelineService.get().findPipelineRoot(context.getContainer());
@@ -88,17 +88,14 @@ public class XarAssayPipelineProvider extends PipelineProvider
         }
     }
 
-    public static PipelineProvider.FileEntryFilter getAnalyzeFilter()
+    public static final PipelineProvider.FileEntryFilter FILE_FILTER = new PipelineProvider.FileEntryFilter()
     {
-        return new PipelineProvider.FileEntryFilter()
-            {
-                public boolean accept(File f)
-                {
-                    // TODO:  If no corresponding mzXML file, show raw files.
-                    return isMzXMLFile(f);
-                }
-            };
-    }
+        public boolean accept(File f)
+        {
+            // TODO:  If no corresponding mzXML file, show raw files.
+            return isMzXMLFile(f);
+        }
+    };
 
     public static boolean isMzXMLFile(File file)
     {

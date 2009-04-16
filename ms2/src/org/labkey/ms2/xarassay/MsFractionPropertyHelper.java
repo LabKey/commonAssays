@@ -34,10 +34,10 @@ import java.io.File;
 public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
 {
     private List<String> _names;
-    private ArrayList<File>_files;
+    private List<File>_files;
     private final @NotNull ExpSampleSet _sampleSet;
 
-    public MsFractionPropertyHelper(@NotNull ExpSampleSet sampleSet, ArrayList<File> files, Container c)
+    public MsFractionPropertyHelper(@NotNull ExpSampleSet sampleSet, List<File> files, Container c)
     {
         super(getProperties(sampleSet, c));
         _sampleSet = sampleSet;
@@ -46,7 +46,7 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
         for (File file : files)
         {
             String fName = file.getName();
-            _names.add("Fraction - " + fName.substring(0, fName.lastIndexOf('.')));
+            _names.add(fName.substring(0, fName.lastIndexOf('.')));
         }
     }
 

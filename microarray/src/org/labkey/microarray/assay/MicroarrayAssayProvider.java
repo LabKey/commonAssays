@@ -16,43 +16,46 @@
 
 package org.labkey.microarray.assay;
 
-import org.labkey.api.study.assay.*;
-import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.query.RunListQueryView;
-import org.labkey.api.exp.api.*;
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.XarContext;
-import org.labkey.api.exp.ProtocolParameter;
-import org.labkey.api.exp.query.ExpRunTable;
-import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.property.PropertyService;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.HtmlView;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.data.TableInfo;
+import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.ProtocolParameter;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
+import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.assay.*;
+import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.pipeline.PipelineUrls;
-import org.labkey.microarray.pipeline.ArrayPipelineManager;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.common.util.Pair;
 import org.labkey.microarray.*;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
-import org.labkey.common.util.Pair;
-import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
+import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.springframework.web.servlet.mvc.Controller;
 
-import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import java.util.*;
+import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -89,7 +92,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("The MAGEML data file is an XML file that contains the results of the microarray run.");
+        return new HtmlView("The MAGE-ML data file is an XML file that contains the results of the microarray run.");
     }
 
     public TableInfo createDataTable(UserSchema schema, ExpProtocol protocol)
@@ -231,9 +234,9 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return result;
     }
 
-    public Map<String, Class<? extends Controller>> getImportActions()
+    public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
-        return Collections.<String, Class<? extends Controller>>singletonMap(IMPORT_DATA_LINK_NAME, MicroarrayUploadWizardAction.class);
+        return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(container, null);
     }
 
     protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
@@ -253,27 +256,6 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
             }
             inputMaterials.put(material, "Sample " + (i + 1));
         }
-    }
-
-    public boolean allowUpload(User user, Container container, ExpProtocol protocol)
-    {
-        // Microarray module expects MageML files to already be on the server's file system
-        return false;
-    }
-
-    public HttpView getDisallowedUploadMessageView(User user, Container container, ExpProtocol protocol)
-    {
-        HttpView result = super.getDisallowedUploadMessageView(user, container, protocol);
-        if (result == null)
-        {
-            String message = "To upload Microarray runs, browse to the MageML files using the <a href=\"" +
-                    PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(container, null) +
-                    "\">data pipeline</a> or use the <a href=\"" +
-                    MicroarrayController.getPendingMageMLFilesURL(container)
-                    + "\">pending MageML files list</a>.";
-            result = new HtmlView(message);
-        }
-        return result;
     }
 
     public Class<? extends Controller> getDesignerAction()
