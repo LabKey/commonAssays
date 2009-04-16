@@ -129,7 +129,7 @@ public class LogController extends SpringFlowController<LogController.Action>
 
                         if (dataObj != null)
                         {
-                            return textLink(dataObj.getName(), dataObj.urlShow().toString());
+                            return textLink(dataObj.getName(), dataObj.urlShow());
                         }
                         break;
                 }
