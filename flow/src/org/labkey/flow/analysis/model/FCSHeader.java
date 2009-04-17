@@ -138,7 +138,13 @@ public class FCSHeader
                 ichStart = ichEnd;
             }
         }
-        is.skip(dataOffset - cbRead);
+
+        if (dataOffset == 0)
+            try {dataOffset = Integer.parseInt(keywords.get("$BEGINDATA"));}catch(Exception x){}
+        if (dataLast == 0)
+            try {dataLast = Integer.parseInt(keywords.get("$ENDDATA"));}catch(Exception x){}
+        if (dataOffset != 0)
+            is.skip(dataOffset - cbRead);
         _parameterCount = Integer.parseInt(getKeyword("$PAR"));
     }
 
