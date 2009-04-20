@@ -433,7 +433,7 @@ public class ProteinManager
         missingCountSQL.append("(SELECT pgm.SeqId FROM " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm, " + MS2Manager.getTableInfoProteinGroups() + " pg, " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf, " + MS2Manager.getTableInfoRuns() + " r WHERE pgm.ProteinGroupId = pg.RowId AND pg.ProteinProphetFileId = ppf.RowId AND ppf.Run = r.Run AND r.FastaId = " + oldFastaId + "))\n");
         missingCountSQL.append("AND NewSeqId IS NULL");
 
-        int missingCount = Table.executeSingleton(getSchema(), missingCountSQL.getSQL(), missingCountSQL.getParamsArray(), Integer.class, true);
+        int missingCount = Table.executeSingleton(getSchema(), missingCountSQL.getSQL(), missingCountSQL.getParamsArray(), Integer.class);
         if (missingCount > 0)
         {
             throw new SQLException("There are " + missingCount + " protein sequences in the original FASTA file that are not in the new file");

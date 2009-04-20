@@ -85,7 +85,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
                 SQLFragment sql = new SQLFragment("SELECT ObjectURI FROM " + OntologyManager.getTinfoObject() + " WHERE Container = ? AND ObjectId = (SELECT MAX(ObjectId) FROM " + OntologyManager.getTinfoObject() + " o, " + LuminexSchema.getTableInfoAnalytes() + " a WHERE o.ObjectURI = a.LSID AND a.Name = ?)");
                 sql.add(getContainer().getId());
                 sql.add(disambiguationId);
-                String objectURI = Table.executeSingleton(LuminexSchema.getSchema(), sql.getSQL(), sql.getParamsArray(), String.class, true);
+                String objectURI = Table.executeSingleton(LuminexSchema.getSchema(), sql.getSQL(), sql.getParamsArray(), String.class);
                 if (objectURI != null)
                 {
                     Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer(), objectURI);

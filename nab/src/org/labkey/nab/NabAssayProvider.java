@@ -16,31 +16,31 @@
 
 package org.labkey.nab;
 
-import org.labkey.api.study.assay.*;
-import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.TimepointType;
-import org.labkey.api.study.query.ResultsQueryView;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.*;
-import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
-import org.labkey.api.data.*;
-import org.labkey.api.query.*;
-import org.labkey.api.view.*;
+import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
+import org.labkey.api.study.TimepointType;
+import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.assay.*;
+import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.nab.query.NabSchema;
-import org.labkey.nab.query.NabRunDataTable;
+import org.labkey.api.view.*;
 import org.labkey.common.util.Pair;
-import org.springframework.web.servlet.mvc.Controller;
+import org.labkey.nab.query.NabRunDataTable;
+import org.labkey.nab.query.NabSchema;
 
-import javax.servlet.ServletException;
-import java.util.*;
-import java.sql.SQLException;
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * User: brittp
@@ -258,13 +258,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     {
         try
         {
-            int rowIndex = 0;
-
             TimepointType studyType = AssayPublishService.get().getTimepointType(study);
 
             Set<PropertyDescriptor> typeSet = new LinkedHashSet<PropertyDescriptor>();
-
-            Map<Integer, ExpRun> runCache = new HashMap<Integer, ExpRun>();
 
             typeSet.add(createPublishPropertyDescriptor(study, getDataRowIdFieldKey().toString(), getDataRowIdType()));
             typeSet.add(createPublishPropertyDescriptor(study, "SourceLSID", getDataRowIdType()));
@@ -281,7 +277,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             OntologyObject[] dataRows = Table.select(OntologyManager.getTinfoObject(), Table.ALL_COLUMNS, filter,
                     new Sort(getDataRowIdFieldKey().toString()), OntologyObject.class);
 
-            Map<String, Object>[] dataMaps = new HashMap[dataRows.length];
+            List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>(dataRows.length);
             Container sourceContainer = null;
 
             // little hack here: since the property descriptors created by the 'addProperty' calls below are not in the database,
@@ -317,15 +313,8 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                     }
                 }
 
-                ExpRun run = runCache.get(row.getOwnerObjectId());
-                if (run == null)
-                {
-                    OntologyObject dataRowParent = OntologyManager.getOntologyObject(row.getOwnerObjectId());
-                    ExpData data = ExperimentService.get().getExpData(dataRowParent.getObjectURI());
-                    run = data.getRun();
-                    sourceContainer = run.getContainer();
-                    runCache.put(row.getOwnerObjectId(), run);
-                }
+                ExpRun run = context.getRun(row);
+                sourceContainer = run.getContainer();
 
                 AssayPublishKey publishKey = dataKeys.get(row.getObjectId());
                 dataMap.put("ParticipantID", publishKey.getParticipantId());
@@ -337,7 +326,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                 dataMap.put("SourceLSID", run.getLSID());
                 dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
                 addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
-                dataMaps[rowIndex++] = dataMap;
+                dataMaps.add(dataMap);
                 tempTypes = null;
             }
             return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,
@@ -345,18 +334,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         }
         catch (SQLException e)
         {
-            errors.add(e.getMessage());
-            return null;
-        }
-        catch (IOException e)
-        {
-            errors.add(e.getMessage());
-            return null;
-        }
-        catch (ServletException e)
-        {
-            errors.add(e.getMessage());
-            return null;
+            throw new RuntimeSQLException(e);
         }
     }
 

@@ -146,7 +146,6 @@ public class AnalysisHandler extends BaseHandler
                         dbtScript.setAbout(scriptLSID);
                         dbtScript.setDataFileUrl(file.toURI().toString());
                         dbtScript.setName(script.getName());
-                        dbtScript.setSourceProtocolLSID(_step.getLSID(getContainer()));
 
                         ScriptDef scriptDef = doc.getScript();
                         wellAnalysis = FlowAnalyzer.makeAnalysis(scriptDef.getSettings(), scriptDef.getAnalysis());

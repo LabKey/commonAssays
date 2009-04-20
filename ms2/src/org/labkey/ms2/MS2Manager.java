@@ -1640,7 +1640,7 @@ public class MS2Manager
             }
             catch (SQLException e)
             {
-                continue;
+                throw new RuntimeSQLException(e);
             }
 
             String key = run.getDescription();

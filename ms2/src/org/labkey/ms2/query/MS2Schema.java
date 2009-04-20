@@ -469,6 +469,14 @@ public class MS2Schema extends UserSchema
         fractionName.setWidth("200");
         result.addColumn(fractionName);
 
+        // Add a column that links directly to the data object
+        ExprColumn dataColumn = new ExprColumn(result, "Data",
+                new SQLFragment("(SELECT MIN(d.RowId) FROM " + ExperimentService.get().getTinfoData() + " d, " +
+                        MS2Manager.getTableInfoRuns() + " r WHERE d.Container = r.Container AND r.Run = " +
+                        ExprColumn.STR_TABLE_ALIAS + ".Run AND d.DataFileURL = " + ExprColumn.STR_TABLE_ALIAS + ".mzxmlURL)"), Types.INTEGER);
+        dataColumn.setFk(new ExpSchema(getUser(), getContainer()).getDataIdForeignKey());
+        result.addColumn(dataColumn);
+
         ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
         result.getColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {

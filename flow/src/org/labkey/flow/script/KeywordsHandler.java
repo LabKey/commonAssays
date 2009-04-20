@@ -16,23 +16,21 @@
 
 package org.labkey.flow.script;
 
-import org.labkey.flow.data.*;
-import org.labkey.flow.data.FlowDataType;
-import org.fhcrc.cpas.flow.script.xml.*;
-import org.labkey.flow.persist.FlowDataHandler;
-import org.labkey.flow.persist.AttributeSet;
-import org.labkey.api.util.URIUtil;
 import org.fhcrc.cpas.exp.xml.*;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
-
-import java.util.*;
-import java.util.regex.Pattern;
-import java.io.File;
-
-import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.util.URIUtil;
 import org.labkey.flow.analysis.model.FCSKeywordData;
+import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.flow.data.*;
+import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.FlowDataHandler;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class KeywordsHandler extends BaseHandler
 {
@@ -108,7 +106,6 @@ public class KeywordsHandler extends BaseHandler
             well.setName(filename);
             well.setAbout(FlowDataObject.generateDataLSID(_job.getContainer(), FlowDataType.FCSFile));
             well.setCpasType("Data");
-            well.setSourceProtocolLSID(_step.getLSID(getContainer()));
             AttributeSet attrSet = new AttributeSet(fileData);
             attrSet.save(_job.decideFileName(runDirectory, filename, FlowDataHandler.EXT_DATA), well);
             SampleKey sampleKey = _job.getProtocol().makeSampleKey(runName, well.getName(), attrSet);

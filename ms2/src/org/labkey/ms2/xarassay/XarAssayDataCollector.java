@@ -28,7 +28,9 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.common.util.Pair;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: phussey
@@ -37,8 +39,6 @@ import java.util.*;
  */
 public class XarAssayDataCollector extends PipelineDataCollector<XarAssayForm>
 {
-    public static String NAME = "mzXMLFiles";
-
     public String getHTML(XarAssayForm form) throws ExperimentException
     {
         StringBuilder sb = new StringBuilder(super.getHTML(form));
@@ -102,57 +102,30 @@ public class XarAssayDataCollector extends PipelineDataCollector<XarAssayForm>
     /** @return the total number of files for this set, and the number that have already been annotated */
     public Pair<Integer, Integer> getExistingAnnotationStatus(XarAssayForm form)
     {
-        int total = 0;
         int annotated = 0;
         // Look for files that have already been annotated
-        List<Map<String,File>> allFiles = getFileCollection(form);
-        for (Map<String, File> fileSet : allFiles)
+        Collection<File> files;
+        if (form.isFractions())
         {
-            for (File file : fileSet.values())
-            {
-                total++;
-                ExpRun run = ExperimentService.get().getCreatingRun(file, form.getContainer());
-                if (run != null)
-                {
-                    annotated++;
-                }
-            }
-        }
-        return new Pair<Integer, Integer>(total, annotated);
-    }
-
-    @Override
-    public void uploadComplete(XarAssayForm context)
-    {
-        if (context.isFractions())
-        {
-            super.getFileCollection(context).clear();
+            files = form.getAllFiles();
         }
         else
         {
-            super.uploadComplete(context);
+            files = getFileCollection(form).get(0).values();
         }
-    }
-
-    @Override
-    public List<Map<String, File>> getFileCollection(XarAssayForm context)
-    {
-        List<Map<String, File>> files = super.getFileCollection(context);
-        if (context.isFractions())
+        for (File file : files)
         {
-            Map<String, File> result = new LinkedHashMap<String, File>();
-            for (Map<String, File> batch : files)
+            ExpRun run = ExperimentService.get().getCreatingRun(file, form.getContainer());
+            if (run != null)
             {
-                result.putAll(batch);
+                annotated++;
             }
-            return Collections.singletonList(result);
         }
-
-        return files;
+        return new Pair<Integer, Integer>(files.size(), annotated);
     }
 
-    public String getShortName()
+    public boolean allowAdditionalUpload(XarAssayForm context)
     {
-        return NAME;
+        return !context.isFractions() && getFileCollection(context).size() > 1; 
     }
 }

@@ -69,7 +69,7 @@ import java.util.*;
  */
 public class MS2Module extends SpringModule implements ContainerManager.ContainerListener
 {
-    private static MS2SearchExperimentRunType _ms2SearchRunFilter = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX);
+    public static final MS2SearchExperimentRunType _ms2SearchRunFilter = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX);
     private static ExperimentRunType _samplePrepRunType = new ExperimentRunType("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.TableType.SamplePrepRuns.toString())
     {
         public Priority getPriority(ExpProtocol protocol)

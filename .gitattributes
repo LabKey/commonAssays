@@ -1180,7 +1180,6 @@ ms2/src/org/labkey/ms2/stats.jsp -text
 ms2/src/org/labkey/ms2/testMascot.jsp -text
 ms2/src/org/labkey/ms2/testSequest.jsp -text
 ms2/src/org/labkey/ms2/xarassay/FractionsDisplayColumn.java -text
-ms2/src/org/labkey/ms2/xarassay/MsAssaySchema.java -text
 ms2/src/org/labkey/ms2/xarassay/MsFractionDataHandler.java -text
 ms2/src/org/labkey/ms2/xarassay/MsFractionPropertyHelper.java -text
 ms2/src/org/labkey/ms2/xarassay/MsFractionRunDataTable.java -text
@@ -1247,8 +1246,3 @@ workbook/src/org/labkey/workbook/view/WorkbookList.java -text
 workbook/src/org/labkey/workbook/view/createWorkbook.jsp -text
 workbook/src/org/labkey/workbook/view/hello.jsp -text
 workbook/src/org/labkey/workbook/view/workbookList.jsp -text
-xarassay/ListTableData.xls -text
-xarassay/build.xml -text
-xarassay/module.properties -text
-xarassay/readme.htm -text
-xarassay/src/META-INF/xarassay.xml -text

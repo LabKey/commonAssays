@@ -19,16 +19,18 @@ package org.labkey.ms2.protein.query;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.query.*;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.query.*;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.SequencesTableInfo;
 
 import java.sql.Types;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -55,7 +57,8 @@ public class CustomAnnotationTable extends FilteredTable
         _annotationSet = annotationSet;
 
         ColumnInfo propertyCol = addColumn(createPropertyColumn("Property"));
-        propertyCol.setFk(new DomainForeignKey(_annotationSet.lookupContainer(), _annotationSet.getLsid(), schema));
+        Domain domain = PropertyService.get().getDomain(_annotationSet.lookupContainer(), _annotationSet.getLsid());
+        propertyCol.setFk(new DomainForeignKey(domain, schema));
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("LookupString"));

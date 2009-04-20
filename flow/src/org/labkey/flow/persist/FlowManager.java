@@ -195,8 +195,7 @@ public class FlowManager
                 }
                 catch (SQLException e)
                 {
-                    _log.error("Error retrieving attribute " + id, e);
-                    return null;
+                    throw new RuntimeSQLException(e);
                 }
             }
             return ret;
@@ -827,7 +826,7 @@ public class FlowManager
                 }
                 catch (SQLException x)
                 {
-                    _log.error("unexpected error", x);
+                    throw new RuntimeSQLException(x);
                 }
             }
         }

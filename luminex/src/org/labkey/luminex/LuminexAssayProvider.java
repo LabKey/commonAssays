@@ -289,19 +289,15 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             filter.addInClause("RowId", dataKeys.keySet());
             LuminexDataRow[] luminexDataRows = Table.select(LuminexSchema.getTableInfoDataRow(), Table.ALL_COLUMNS, filter, null, LuminexDataRow.class);
 
-            Map<String, Object>[] dataMaps = new Map[luminexDataRows.length];
+            List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>(luminexDataRows.length);
 
             Map<Integer, Pair<Analyte, Map<String, ObjectProperty>>> analytes = new HashMap<Integer, Pair<Analyte, Map<String, ObjectProperty>>>();
-
-            // Map from data id to experiment run source
-            Map<Integer, ExpRun> runs = new HashMap<Integer, ExpRun>();
 
             PropertyDescriptor[] excelRunPDs = getPropertyDescriptors(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN));
             CopyToStudyContext context = new CopyToStudyContext(protocol, excelRunPDs);
 
             TimepointType timepointType = AssayPublishService.get().getTimepointType(study);
 
-            int index = 0;
             Container sourceContainer = null;
 
             List<PropertyDescriptor> types = new ArrayList<PropertyDescriptor>();
@@ -342,7 +338,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 addProperty(study, "ExtraSpecimenInfo", luminexDataRow.getExtraSpecimenInfo(), dataMap, tempTypes);
                 addProperty(study, "SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, tempTypes);
 
-                ExpRun run = copyRunProperties(user, study, runs, tempTypes, luminexDataRow, dataMap, context);
+                ExpRun run = copyRunProperties(user, study, tempTypes, luminexDataRow, dataMap, context);
                 sourceContainer = run.getContainer();
                 copyAnalyteProperties(study, analytes, tempTypes, luminexDataRow, dataMap, sourceContainer, protocol);
 
@@ -359,7 +355,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                     addProperty(sourceContainer, AssayPublishService.DATE_PROPERTY_NAME, dataKey.getDate(), dataMap, tempTypes);
                 }
 
-                dataMaps[index++] = dataMap;
+                dataMaps.add(dataMap);
                 tempTypes = null;
             }
             return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol, dataMaps, types, getDataRowIdFieldKey().toString(), errors);
@@ -368,25 +364,12 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         {
             throw new RuntimeException(e);
         }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch (ServletException e)
-        {
-            throw new RuntimeException(e);
-        }
     }
 
-    private ExpRun copyRunProperties(User user, Container study, Map<Integer, ExpRun> runs, List<PropertyDescriptor> tempTypes, LuminexDataRow luminexDataRow, Map<String, Object> dataMap, CopyToStudyContext context) throws SQLException
+    private ExpRun copyRunProperties(User user, Container study, List<PropertyDescriptor> tempTypes, LuminexDataRow luminexDataRow, Map<String, Object> dataMap, CopyToStudyContext context) throws SQLException
     {
-        ExpRun run = runs.get(luminexDataRow.getDataId());
-        if (run == null)
-        {
-            ExpData data = ExperimentService.get().getExpData(luminexDataRow.getDataId());
-            run = data.getRun();
-            runs.put(luminexDataRow.getDataId(), run);
-        }
+        ExpData data = context.getData(luminexDataRow.getDataId());
+        ExpRun run = context.getRun(data);
         addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
         return run;
     }

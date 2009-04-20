@@ -45,8 +45,6 @@ import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
 import org.labkey.elispot.query.ElispotRunDataTable;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -241,12 +239,10 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
 
     public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
-        try {
-            int rowIndex = 0;
-
+        try
+        {
             TimepointType studyType = AssayPublishService.get().getTimepointType(study);
 
-            Map<Integer, ExpRun> runCache = new HashMap<Integer, ExpRun>();
             CopyToStudyContext context = new CopyToStudyContext(protocol);
 
             PropertyDescriptor[] samplePDs = getPropertyDescriptors(getSampleWellGroupDomain(protocol));
@@ -259,7 +255,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
             OntologyObject[] dataRows = Table.select(OntologyManager.getTinfoObject(), Table.ALL_COLUMNS, filter,
                     new Sort(getDataRowIdFieldKey().toString()), OntologyObject.class);
 
-            Map<String, Object>[] dataMaps = new HashMap[dataRows.length];
+            List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>(dataRows.length);
             Set<PropertyDescriptor> typeSet = new LinkedHashSet<PropertyDescriptor>();
             typeSet.add(createPublishPropertyDescriptor(study, getDataRowIdFieldKey().toString(), PropertyType.INTEGER));
             typeSet.add(createPublishPropertyDescriptor(study, "SourceLSID", PropertyType.INTEGER));
@@ -302,15 +298,8 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
                     }
                 }
 
-                ExpRun run = runCache.get(row.getOwnerObjectId());
-                if (run == null)
-                {
-                    OntologyObject dataRowParent = OntologyManager.getOntologyObject(row.getOwnerObjectId());
-                    ExpData data = ExperimentService.get().getExpData(dataRowParent.getObjectURI());
-                    run = data.getRun();
-                    sourceContainer = run.getContainer();
-                    runCache.put(row.getOwnerObjectId(), run);
-                }
+                ExpRun run = context.getRun(row);
+                sourceContainer = run.getContainer();
 
                 AssayPublishKey publishKey = dataKeys.get(row.getObjectId());
                 dataMap.put("ParticipantID", publishKey.getParticipantId());
@@ -324,7 +313,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
 
                 addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
 
-                dataMaps[rowIndex++] = dataMap;
+                dataMaps.add(dataMap);
                 tempTypes = null;
             }
             return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,
@@ -333,16 +322,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         catch (SQLException se)
         {
             throw new RuntimeSQLException(se);
-        }
-        catch (IOException e)
-        {
-            errors.add(e.getMessage());
-            return null;
-        }
-        catch (ServletException e)
-        {
-            errors.add(e.getMessage());
-            return null;
         }
     }
 

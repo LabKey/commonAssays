@@ -16,16 +16,17 @@
 
 package org.labkey.ms2.protein.organism;
 
+import org.apache.log4j.Logger;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.Table;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinPlus;
-import org.labkey.api.data.Table;
-import org.labkey.api.data.DbSchema;
-import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.HashMap;
 
 /**
  * User: brittp
@@ -58,7 +59,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
         }
         catch(SQLException e)
         {
-            _log.error("getNcbiId", e);
+            throw new RuntimeSQLException(e);
         }
 
         return _ncbiId;

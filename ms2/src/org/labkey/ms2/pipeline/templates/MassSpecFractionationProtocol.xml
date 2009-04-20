@@ -117,7 +117,6 @@
 	<exp:StartingInputDefinitions>
 		<exp:Material rdf:about="${Role:Material}">
 			<exp:Name/>
-			<exp:SourceProtocolLSID/>
 			<exp:Properties>
             </exp:Properties>
 		</exp:Material>

@@ -311,7 +311,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     {
         Map<DomainProperty, XPathExpression> result = new HashMap<DomainProperty, XPathExpression>();
 
-        Domain domain = getRunInputDomain(protocol);
+        Domain domain = getRunDomain(protocol);
         for (DomainProperty runPD : domain.getProperties())
         {
             String expression = runPD.getDescription();

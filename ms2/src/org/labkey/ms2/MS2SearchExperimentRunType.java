@@ -47,6 +47,11 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
         _protocolPrefixes = protocolPrefixes;
     }
 
+    public String[] getProtocolPrefixes()
+    {
+        return _protocolPrefixes;
+    }
+
     private ActionButton createButton(ViewContext context, Class<? extends Controller> action, String description, ActionButton.Action method)
     {
         ActionURL url = new ActionURL(action, context.getContainer());

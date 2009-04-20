@@ -16,22 +16,16 @@
 
 package org.labkey.flow.script;
 
-import org.labkey.flow.data.*;
-import org.labkey.flow.data.FlowDataType;
-import org.labkey.flow.persist.AttributeSet;
 import org.fhcrc.cpas.exp.xml.*;
-import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.data.Container;
-
-import java.util.*;
-import java.sql.SQLException;
-import java.io.File;
-import java.io.Serializable;
-
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
-import org.labkey.flow.analysis.web.GraphSpec;
-import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.data.*;
+import org.labkey.flow.persist.AttributeSet;
+
+import java.io.File;
+import java.sql.SQLException;
+import java.util.List;
 
 abstract public class BaseHandler
 {
@@ -77,7 +71,6 @@ abstract public class BaseHandler
         DataBaseType ret = app.getOutputDataObjects().addNewData();
         ret.setName(src.getName());
         ret.setAbout(FlowDataObject.generateDataLSID(getContainer(), type));
-        ret.setSourceProtocolLSID(_step.getLSID(_job.getContainer()));
         PropertyCollectionType pct = ret.addNewProperties();
         return ret;
     }

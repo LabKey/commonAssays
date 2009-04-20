@@ -93,7 +93,7 @@ public class XarAssayUploadAction extends UploadWizardAction<XarAssayForm, XarAs
             try
             {
                 ExpSampleSet sampleSet = form.getProvider().getFractionSampleSet(form);
-                ArrayList<File> files = new ArrayList<File>(form.getUploadedData().values());
+                ArrayList<File> files = new ArrayList<File>(form.getAllFiles());
                 MsFractionPropertyHelper helper = new MsFractionPropertyHelper(sampleSet, files, getContainer());
                 helper.addSampleColumns(parent, form.getUser());
             }

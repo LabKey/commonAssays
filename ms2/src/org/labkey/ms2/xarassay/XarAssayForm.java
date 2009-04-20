@@ -16,7 +16,17 @@
 
 package org.labkey.ms2.xarassay;
 
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.security.ACL;
 import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.assay.SampleChooserDisplayColumn;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: phussey
@@ -25,11 +35,7 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
  */
 public class XarAssayForm extends AssayRunUploadForm<XarAssayProvider>
 {
-    public XarAssayForm()
-    {
-        super();
-        setDataCollectorName(XarAssayDataCollector.NAME);
-    }
+    private Map<File, ExpMaterial> _fileFractionMap = new HashMap<File, ExpMaterial>();
 
     public boolean isFractions()
     {
@@ -40,5 +46,40 @@ public class XarAssayForm extends AssayRunUploadForm<XarAssayProvider>
     public XarAssayDataCollector getSelectedDataCollector()
     {
         return (XarAssayDataCollector)super.getSelectedDataCollector();
+    }
+
+    public Map<ExpMaterial, String> getInputMaterials() throws ExperimentException
+    {
+        Map<ExpMaterial, String> result = new HashMap<ExpMaterial, String>();
+        int count = SampleChooserDisplayColumn.getSampleCount(getRequest(), 1);
+        for (int i = 0; i < count; i++)
+        {
+            ExpMaterial material = SampleChooserDisplayColumn.getMaterial(i, getContainer(), getRequest());
+            if (!material.getContainer().hasPermission(getUser(), ACL.PERM_READ))
+            {
+                throw new ExperimentException("You do not have permission to reference the sample '" + material.getName() + ".");
+            }
+            if (result.containsKey(material))
+            {
+                throw new ExperimentException("The same material cannot be used multiple times");
+            }
+            result.put(material, "Sample " + (i + 1));
+        }
+        return result;
+    }
+
+    public List<File> getAllFiles()
+    {
+        List<File> result = new ArrayList<File>();
+        for (Map<String, File> fileSet : getSelectedDataCollector().getFileCollection(this))
+        {
+            result.addAll(fileSet.values());
+        }
+        return result;
+    }
+
+    public Map<File, ExpMaterial> getFileFractionMap()
+    {
+        return _fileFractionMap;
     }
 }

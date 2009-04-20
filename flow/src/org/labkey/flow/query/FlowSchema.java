@@ -1431,7 +1431,6 @@ public class FlowSchema extends UserSchema
                 "    exp.data.Name,\n" +
                 "    exp.data.CpasType,\n" +
                 "    exp.data.SourceApplicationId,\n" +
-                "    exp.data.SourceProtocolLSID,\n" +
                 "    exp.data.DataFileUrl,\n" +
                 "    exp.data.RunId,\n" +
                 "    exp.data.Created,\n" +
