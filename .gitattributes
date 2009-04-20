@@ -91,6 +91,7 @@ cabig/src/org/labkey/cabig/view/publish.jsp -text
 elispotassay/module.properties -text
 elispotassay/src/org/labkey/elispot/ElispotAssayProvider.java -text
 elispotassay/src/org/labkey/elispot/ElispotController.java -text
+elispotassay/src/org/labkey/elispot/ElispotDataExchangeHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotDataHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotManager.java -text
 elispotassay/src/org/labkey/elispot/ElispotModule.java -text
@@ -1204,6 +1205,7 @@ nab/src/org/labkey/nab/NabAssayProvider.java -text
 nab/src/org/labkey/nab/NabAssayRun.java -text
 nab/src/org/labkey/nab/NabContainerListener.java -text
 nab/src/org/labkey/nab/NabController.java -text
+nab/src/org/labkey/nab/NabDataExchangeHandler.java -text
 nab/src/org/labkey/nab/NabDataHandler.java -text
 nab/src/org/labkey/nab/NabManager.java -text
 nab/src/org/labkey/nab/NabModule.java -text

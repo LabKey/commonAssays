@@ -24,13 +24,13 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.list.ListDefinition;
 import org.labkey.api.exp.list.ListItem;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.query.ValidationException;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 
 import java.io.File;
@@ -69,7 +69,7 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
         {
             if (ElispotAssayProvider.READER_PROPERTY_NAME.equals(property.getName()))
             {
-                ElispotPlateReaderService.I reader = getPlateReaderFromName(property.getStringValue(), info.getContainer());
+                ElispotPlateReaderService.I reader = ElispotPlateReaderService.getPlateReaderFromName(property.getStringValue(), info.getContainer());
                 Plate plate = initializePlate(dataFile, template, reader);
 
                 insertPlateData(data, info, plate);
@@ -77,22 +77,6 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
             }
         }
         throw new ExperimentException("Unable to load data file: Plate reader type not found");
-    }
-
-    public static ElispotPlateReaderService.I getPlateReaderFromName(String readerName, Container c)
-    {
-        ListDefinition list = ElispotPlateReaderService.getPlateReaderList(c);
-        if (list != null)
-        {
-            DomainProperty prop = list.getDomain().getPropertyByName(ElispotPlateReaderService.READER_TYPE_PROPERTY);
-            ListItem item = list.getListItem(readerName);
-            if (item != null && prop != null)
-            {
-                Object value = item.getProperty(prop);
-                return ElispotPlateReaderService.getPlateReader(String.valueOf(value));
-            }
-        }
-        return null;
     }
 
     public static Plate initializePlate(File dataFile, PlateTemplate template, ElispotPlateReaderService.I reader) throws ExperimentException

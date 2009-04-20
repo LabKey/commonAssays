@@ -17,6 +17,9 @@
 package org.labkey.elispot;
 
 import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.exp.property.DomainProperty;
+
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -25,4 +28,26 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
  */
 public class ElispotRunUploadForm extends AssayRunUploadForm<ElispotAssayProvider>
 {
+    private Map<String, Map<DomainProperty, String>> _antigenProperties;
+    private Map<String, Map<DomainProperty, String>> _sampleProperties;
+
+    public Map<String, Map<DomainProperty, String>> getSampleProperties()
+    {
+        return _sampleProperties;
+    }
+
+    public void setSampleProperties(Map<String, Map<DomainProperty, String>> sampleProperties)
+    {
+        _sampleProperties = sampleProperties;
+    }
+
+    public Map<String, Map<DomainProperty, String>> getAntigenProperties()
+    {
+        return _antigenProperties;
+    }
+
+    public void setAntigenProperties(Map<String, Map<DomainProperty, String>> antigenProperties)
+    {
+        _antigenProperties = antigenProperties;
+    }
 }

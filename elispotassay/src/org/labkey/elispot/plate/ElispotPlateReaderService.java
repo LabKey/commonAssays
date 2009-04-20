@@ -18,11 +18,13 @@ package org.labkey.elispot.plate;
 
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.list.ListDefinition;
 import org.labkey.api.exp.list.ListService;
+import org.labkey.api.exp.list.ListItem;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
@@ -93,6 +95,25 @@ public class ElispotPlateReaderService
             }
         }
         return readerList;
+    }
+
+    public static ElispotPlateReaderService.I getPlateReaderFromName(String readerName, Container c)
+    {
+        ListDefinition list = ElispotPlateReaderService.getPlateReaderList(c);
+        if (list != null)
+        {
+            DomainProperty prop = list.getDomain().getPropertyByName(ElispotPlateReaderService.READER_TYPE_PROPERTY);
+            ListItem item = list.getListItem(readerName);
+            if (item != null && prop != null)
+            {
+                Object value = item.getProperty(prop);
+                if (value instanceof OntologyManager.PropertyRow)
+                    return ElispotPlateReaderService.getPlateReader(((OntologyManager.PropertyRow)value).getStringValue());
+                else
+                    return ElispotPlateReaderService.getPlateReader(String.valueOf(value));
+            }
+        }
+        return null;
     }
 
     protected static DomainProperty addProperty(Domain domain, String name, PropertyType type, String description)

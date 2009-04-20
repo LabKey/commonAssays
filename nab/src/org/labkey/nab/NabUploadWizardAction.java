@@ -86,7 +86,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
     {
         return new NabRunStepHandler();
     }
-    
+
     protected class NabRunStepHandler extends RunStepHandler
     {
         private Map<String, Map<DomainProperty, String>> _postedSampleProperties = null;
@@ -113,6 +113,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
 
         protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
+            form.setSampleProperties(_postedSampleProperties);
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
             {
                 try

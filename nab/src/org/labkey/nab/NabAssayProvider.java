@@ -33,6 +33,7 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.common.util.Pair;
 import org.labkey.nab.query.NabRunDataTable;
 import org.labkey.nab.query.NabSchema;
@@ -253,7 +254,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     {
         return PropertyType.INTEGER;
     }
-    
+
     public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
@@ -342,7 +343,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     {
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, NabUploadWizardAction.class);
     }
-    
+
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
         return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
@@ -363,7 +364,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             settings.setQueryName(name);
             return settings;
         }
-        
+
         public DataView createDataView()
         {
             DataView view = super.createDataView();
@@ -456,5 +457,11 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             throw new RuntimeSQLException(e);
         }
         return super.getAssayTemplate(user, targetContainer);
+    }
+
+    @Override
+    public DataExchangeHandler getDataExchangeHandler()
+    {
+        return new NabDataExchangeHandler();
     }
 }

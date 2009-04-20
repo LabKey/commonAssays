@@ -22,7 +22,6 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpData;
@@ -46,6 +45,7 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider>
 {
     private ExpRun _reRun;
     private Integer _reRunId;
+    private Map<String, Map<DomainProperty, String>> _sampleProperties;
 
     public Integer getReRunId()
     {
@@ -55,6 +55,16 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider>
     public void setReRunId(Integer reRunId)
     {
         _reRunId = reRunId;
+    }
+
+    public Map<String, Map<DomainProperty, String>> getSampleProperties()
+    {
+        return _sampleProperties;
+    }
+
+    public void setSampleProperties(Map<String, Map<DomainProperty, String>> sampleProperties)
+    {
+        _sampleProperties = sampleProperties;
     }
 
     private ExpRun getReRun()

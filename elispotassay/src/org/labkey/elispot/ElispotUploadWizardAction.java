@@ -21,13 +21,16 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.ACL;
@@ -37,7 +40,10 @@ import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.*;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.PlateSamplePropertyHelper;
+import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
@@ -48,7 +54,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -145,7 +154,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         {
             throw new ServletException(e);
         }
-        return view;        
+        return view;
     }
 
     private ModelAndView getPlateSummary(ElispotRunUploadForm form, ExpRun run)
@@ -229,6 +238,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         @Override
         protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
+            form.setSampleProperties(_postedSampleProperties);
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
             {
                 try
@@ -289,6 +299,11 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         {
             try
             {
+                PlateSamplePropertyHelper helper = form.getProvider().createSamplePropertyHelper(form, _protocol,
+                        getSelectedParticipantVisitResolverType(form.getProvider(), form));
+                form.setSampleProperties(helper.getPostedPropertyValues(form.getRequest()));
+
+                form.setAntigenProperties(_postedAntigenProperties);
                 ElispotAssayProvider provider = form.getProvider();
                 ExpRun run = saveExperimentRun(form);
 
@@ -307,7 +322,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 {
                     if (ElispotAssayProvider.READER_PROPERTY_NAME.equals(entry.getKey().getName()))
                     {
-                        ElispotPlateReaderService.I reader = ElispotDataHandler.getPlateReaderFromName(entry.getValue(), form.getContainer());
+                        ElispotPlateReaderService.I reader = ElispotPlateReaderService.getPlateReaderFromName(entry.getValue(), form.getContainer());
                         plate = ElispotDataHandler.initializePlate(data[0].getDataFile(), template, reader);
                         break;
                     }
