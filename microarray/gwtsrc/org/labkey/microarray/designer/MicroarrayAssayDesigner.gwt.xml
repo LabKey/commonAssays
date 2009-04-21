@@ -1,8 +1,5 @@
 <module>
-
     <inherits name='org.labkey.api.gwt.Internal'/>
-    <inherits name="org.labkey.microarray.sampleset.SampleChooser"/>
 
     <entry-point class="org.labkey.microarray.designer.client.MicroarrayAssayDesigner"/>
-
 </module>

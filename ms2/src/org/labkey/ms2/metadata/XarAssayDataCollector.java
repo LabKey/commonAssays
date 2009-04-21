@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.ms2.xarassay;
+package org.labkey.ms2.metadata;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
@@ -29,7 +29,7 @@ import org.labkey.common.util.Pair;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,6 +39,35 @@ import java.util.Map;
  */
 public class XarAssayDataCollector extends PipelineDataCollector<XarAssayForm>
 {
+
+    @Override
+    protected Map<String, File> getCurrentFilesForDisplay(XarAssayForm context)
+    {
+        if (!context.isFractions())
+        {
+            return super.getCurrentFilesForDisplay(context);
+        }
+        else
+        {
+            Map<String, File> result = new HashMap<String, File>();
+            for (Map<String, File> files : getFileCollection(context))
+            {
+                result.putAll(files);
+            }
+            return result;
+        }
+    }
+
+    @Override
+    protected int getAdditionalFileSetCount(XarAssayForm context)
+    {
+        if (context.isFractions())
+        {
+            return 0;
+        }
+        return super.getAdditionalFileSetCount(context);
+    }
+
     public String getHTML(XarAssayForm form) throws ExperimentException
     {
         StringBuilder sb = new StringBuilder(super.getHTML(form));
@@ -60,7 +89,7 @@ public class XarAssayDataCollector extends PipelineDataCollector<XarAssayForm>
                 deleteURL.addParameter("rowId", form.getProtocol().getRowId());
                 deleteURL.addParameter("uploadStep", XarAssayUploadAction.DeleteAssaysStepHandler.NAME);
 
-                sb.append("<div id=\"deleteRunsSpan\">");
+                sb.append("<div id=\"deleteRunsSpan\"><span class=\"labkey-error\">");
                 if (annotatedFiles == totalFiles)
                 {
                     if (totalFiles == 1)
@@ -76,7 +105,7 @@ public class XarAssayDataCollector extends PipelineDataCollector<XarAssayForm>
                 {
                     sb.append("Some of the selected files have already been annotated. You must delete the existing runs to re-annotate them.");
                 }
-                sb.append(" [<a onclick=\"");
+                sb.append("</span> [<a onclick=\"");
                 //noinspection StringConcatenationInsideStringBufferAppend
                 sb.append("if (window.confirm('Are you sure you want to delete the existing assay runs associated with these files?'))" +
                             "{" +

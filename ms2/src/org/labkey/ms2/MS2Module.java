@@ -55,7 +55,7 @@ import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
-import org.labkey.ms2.xarassay.*;
+import org.labkey.ms2.metadata.*;
 import org.labkey.common.tools.MS2Modification;
 
 import java.beans.PropertyChangeEvent;

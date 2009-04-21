@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.ms2.xarassay.FractionsDisplayColumn" %>
+<%@ page import="org.labkey.ms2.metadata.FractionsDisplayColumn" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.ms2.xarassay.XarAssayForm" %>
+<%@ page import="org.labkey.ms2.metadata.XarAssayForm" %>
 
 <%
     ViewContext context = HttpView.currentContext();

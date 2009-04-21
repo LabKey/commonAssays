@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.ms2.xarassay;
+package org.labkey.ms2.metadata;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
@@ -55,7 +55,7 @@ public class FractionsDisplayColumn extends SimpleDisplayColumn
 
     public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
     {
-        JspView<XarAssayForm> view = new JspView<XarAssayForm>("/org/labkey/ms2/xarassay/fractionsInput.jsp", _form);
+        JspView<XarAssayForm> view = new JspView<XarAssayForm>("/org/labkey/ms2/metadata/fractionsInput.jsp", _form);
         try
         {
             view.render(ctx.getRequest(), ctx.getViewContext().getResponse());

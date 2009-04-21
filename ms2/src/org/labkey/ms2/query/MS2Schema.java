@@ -31,7 +31,7 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.ProteinGroupProteins;
-import org.labkey.ms2.xarassay.XarAssayProvider;
+import org.labkey.ms2.metadata.XarAssayProvider;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.http.HttpServletRequest;

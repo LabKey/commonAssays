@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.ms2.xarassay;
+package org.labkey.ms2.metadata;
 
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;

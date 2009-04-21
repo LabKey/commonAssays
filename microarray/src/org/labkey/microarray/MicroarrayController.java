@@ -270,14 +270,4 @@ public class MicroarrayController extends SpringActionController
             return null;
         }
     }
-
-    @RequiresPermission(ACL.PERM_READ)
-    public class SampleSetServiceAction extends GWTServiceAction
-    {
-        protected BaseRemoteService createService()
-        {
-            return new SampleSetServiceImpl(getViewContext());
-        }
-    }
-
 }
