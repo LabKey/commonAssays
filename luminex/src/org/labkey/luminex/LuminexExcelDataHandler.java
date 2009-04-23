@@ -370,6 +370,33 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
     }
 
+    public static List<String> getAnalyteNames(File dataFile) throws ExperimentException
+    {
+        List<String> analytes = new ArrayList<String>();
+        try {
+            FileInputStream fIn = new FileInputStream(dataFile);
+            WorkbookSettings settings = new WorkbookSettings();
+            settings.setGCDisabled(true);
+            Workbook workbook = Workbook.getWorkbook(fIn, settings);
+
+            for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
+            {
+                Sheet sheet = workbook.getSheet(sheetIndex);
+
+                if (sheet.getRows() == 0 || sheet.getColumns() == 0 || "Row #".equals(sheet.getCell(0, 0).getContents()))
+                {
+                    continue;
+                }
+                analytes.add(sheet.getName());
+            }
+            return analytes;
+        }
+        catch (Exception e)
+        {
+            throw new ExperimentException(e);
+        }
+    }
+
     private void parseFile(PropertyDescriptor[] analyteColumns, PropertyDescriptor[] excelRunColumns, Workbook workbook, final ExpRun expRun, Container container, ExpData data, User user) throws SQLException, ExperimentException
     {
         boolean ownTransaction = !ExperimentService.get().isTransactionActive();

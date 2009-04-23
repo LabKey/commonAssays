@@ -28,6 +28,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.ColumnInfo;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -38,26 +39,25 @@ import java.sql.SQLException;
  */
 public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvider>
 {
-    private int _dataId;
+    private String[] _analyteNames;
 
-    public int getDataId()
+    public String[] getAnalyteNames()
     {
-        return _dataId;
+        return _analyteNames;
     }
 
-    public void setDataId(int dataId)
+    public void setAnalyteNames(String[] analyteNames)
     {
-        _dataId = dataId;
+        _analyteNames = analyteNames;
     }
 
-
-    protected Map<DomainProperty, String> getAnalytePropertyMapFromRequest(List<DomainProperty> columns, int analyteId)
+    protected Map<DomainProperty, String> getAnalytePropertyMapFromRequest(List<DomainProperty> columns, String analyteName)
     {
         Map<DomainProperty, String> properties = new LinkedHashMap<DomainProperty, String>();
         for (DomainProperty dp : columns)
         {
             String propName = UploadWizardAction.getInputName(dp);
-            String value = getRequest().getParameter("_analyte_" + analyteId + "_" + propName);
+            String value = getRequest().getParameter("_analyte_" + ColumnInfo.propNameFromName(analyteName) + "_" + propName);
             if (dp.isRequired() && dp.getPropertyDescriptor().getPropertyType() == PropertyType.BOOLEAN &&
                     (value == null || value.length() == 0))
                 value = Boolean.FALSE.toString();
@@ -66,11 +66,11 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         return properties;
     }
 
-    public Map<DomainProperty, String> getAnalyteProperties(int analyteId)
+    public Map<DomainProperty, String> getAnalyteProperties(String analyteName)
     {
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         List<DomainProperty> domainProperties = Arrays.asList(analyteDomain.getProperties());
-        return getAnalytePropertyMapFromRequest(domainProperties, analyteId);
+        return getAnalytePropertyMapFromRequest(domainProperties, analyteName);
     }
 
     @Override
