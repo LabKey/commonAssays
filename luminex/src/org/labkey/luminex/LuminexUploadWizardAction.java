@@ -265,23 +265,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                                     entry.getValue(), entry.getKey().getPropertyDescriptor().getPropertyType());
                             objProperties[i++] = property;
                         }
-                        try {
-                            OntologyManager.insertProperties(getContainer(), analyte.getLsid(), objProperties);
-                        }
-                        catch (ValidationException ve)
-                        {
-                            for (ValidationError error : ve.getErrors())
-                                errors.reject(SpringActionController.ERROR_MSG, PageFlowUtil.filter(error.getMessage()));
-                        }
-
-                        try
-                        {
-                            form.saveDefaultValues(properties, analyte.getName());
-                        }
-                        catch (ExperimentException e)
-                        {
-                            errors.addError(new ObjectError("main", null, null, e.toString()));
-                        }
+                        OntologyManager.insertProperties(getContainer(), analyte.getLsid(), objProperties);
+                        form.saveDefaultValues(properties, analyte.getName());
                     }
 
                     LuminexSchema.getSchema().getScope().commitTransaction();
@@ -302,12 +287,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             catch (ExperimentException e)
             {
                 errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
-                return getAnalytesView(form.getAnalyteNames(), form, true, errors);
             }
             finally
             {
                 LuminexSchema.getSchema().getScope().closeConnection();
             }
+
+            if (errors.hasErrors())
+                return getAnalytesView(form.getAnalyteNames(), form, true, errors);
             return runUploadComplete(form, errors);
         }
 

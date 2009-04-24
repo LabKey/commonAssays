@@ -43,6 +43,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
@@ -448,5 +449,10 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     public String getDescription()
     {
         return "Imports data in the multi-sheet BioPlex Excel file format.";
+    }
+
+    public DataExchangeHandler getDataExchangeHandler()
+    {
+        return new LuminexDataExchangeHandler();        
     }
 }

@@ -386,12 +386,14 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             catch (ExperimentException e)
             {
                 errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
-                return getAntigenView(form, true, errors);
             }
             finally
             {
                 ExperimentService.get().getSchema().getScope().closeConnection();
             }
+            
+            if (errors.hasErrors())
+                return getAntigenView(form, true, errors);
             return runUploadComplete(form, errors);
         }
 
