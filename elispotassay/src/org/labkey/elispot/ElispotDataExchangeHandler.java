@@ -16,13 +16,16 @@
 
 package org.labkey.elispot;
 
-import org.labkey.api.qc.TsvDataExchangeHandler;
-import org.labkey.api.qc.PlateBasedDataExchangeHandler;
-import org.labkey.api.study.assay.AssayRunUploadContext;
-import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.WellGroup;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.qc.PlateBasedDataExchangeHandler;
+import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.WellGroup;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayRunUploadContext;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.view.ViewContext;
 
 import java.io.File;
 import java.util.Map;
@@ -52,5 +55,25 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
         addSampleProperties(ANTIGEN_DATA_PROP_NAME, GROUP_COLUMN_NAME, form.getAntigenProperties(), template, WellGroup.Type.ANTIGEN);
 
         return super.createValidationRunInfo(context, run, scriptDir);
+    }
+
+    @Override
+    public void createSampleData(ExpProtocol protocol, ViewContext viewContext, File scriptDir) throws Exception
+    {
+        AssayProvider provider = AssayService.get().getProvider(protocol);
+        if (provider instanceof ElispotAssayProvider)
+        {
+            ElispotAssayProvider plateProvider = (ElispotAssayProvider)provider;
+            PlateTemplate template = plateProvider.getPlateTemplate(viewContext.getContainer(), protocol);
+            DomainProperty[] props = plateProvider.getSampleWellGroupDomain(protocol).getProperties();
+            DomainProperty[] antigenProps = plateProvider.getAntigenWellGroupDomain(protocol).getProperties();
+
+            Map<String, Map<DomainProperty, String>>specimens = createTestSampleProperties(props, template, WellGroup.Type.SPECIMEN);
+            Map<String, Map<DomainProperty, String>>antigens = createTestSampleProperties(antigenProps, template, WellGroup.Type.ANTIGEN);
+            
+            addSampleProperties(SAMPLE_DATA_PROP_NAME, GROUP_COLUMN_NAME, specimens, template, WellGroup.Type.SPECIMEN);
+            addSampleProperties(ANTIGEN_DATA_PROP_NAME, GROUP_COLUMN_NAME, antigens, template, WellGroup.Type.ANTIGEN);
+        }
+        super.createSampleData(protocol, viewContext, scriptDir);
     }
 }

@@ -105,6 +105,11 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return NAME;
     }
 
+    public Domain getRunDataDomain(ExpProtocol protocol)
+    {
+        return null;
+    }
+
     public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
     {
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
