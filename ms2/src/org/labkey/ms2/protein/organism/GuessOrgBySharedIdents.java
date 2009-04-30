@@ -18,8 +18,8 @@ package org.labkey.ms2.protein.organism;
 
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.Table;
-import org.labkey.api.util.LimitedCacheMap;
-import org.labkey.common.tools.Protein;
+import org.labkey.api.collections.LimitedCacheMap;
+import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.protein.IdentifierType;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinPlus;
@@ -29,7 +29,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.io.IOException;
 
 /**
  * User: brittp

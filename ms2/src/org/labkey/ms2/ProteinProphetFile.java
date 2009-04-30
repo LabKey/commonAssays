@@ -16,9 +16,9 @@
 
 package org.labkey.ms2;
 
-import org.labkey.common.tools.PeptideProphetSummary;
-import org.labkey.common.tools.SimpleXMLStreamReader;
-import org.labkey.common.tools.SensitivitySummary;
+import org.labkey.ms2.reader.PeptideProphetSummary;
+import org.labkey.api.reader.SimpleXMLStreamReader;
+import org.labkey.ms2.reader.SensitivitySummary;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.List;

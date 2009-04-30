@@ -23,7 +23,7 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.common.util.Pair" %>
+<%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.nab.DilutionSummary" %>
 <%@ page import="org.labkey.nab.Luc5Assay" %>
 <%@ page import="org.labkey.nab.NabAssayController" %>

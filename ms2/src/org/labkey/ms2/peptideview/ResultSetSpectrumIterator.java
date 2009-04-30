@@ -22,7 +22,7 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.Table;
 import org.labkey.ms2.*;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

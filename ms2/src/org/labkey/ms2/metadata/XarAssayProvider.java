@@ -39,10 +39,10 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.common.util.Pair;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Module;
 

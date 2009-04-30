@@ -22,7 +22,7 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.CaseInsensitiveHashMap;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.query.FieldKey;
 
 import java.io.Writer;

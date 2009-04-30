@@ -24,7 +24,7 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
-import org.labkey.api.util.CaseInsensitiveHashSet;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;

@@ -17,7 +17,7 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.BeanObjectFactory;
-import org.labkey.common.tools.SimpleXMLStreamReader;
+import org.labkey.api.reader.SimpleXMLStreamReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.InputStream;

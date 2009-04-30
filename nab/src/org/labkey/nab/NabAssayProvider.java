@@ -32,9 +32,9 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.*;
 import org.labkey.api.qc.DataExchangeHandler;
-import org.labkey.common.util.Pair;
 import org.labkey.nab.query.NabRunDataTable;
 import org.labkey.nab.query.NabSchema;
 

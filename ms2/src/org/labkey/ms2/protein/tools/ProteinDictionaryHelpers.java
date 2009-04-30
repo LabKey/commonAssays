@@ -24,7 +24,7 @@ import org.labkey.api.util.CloseableIterator;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.api.webdav.ModuleStaticResolverImpl;
 import org.labkey.api.webdav.WebdavResolver;
-import org.labkey.common.tools.TabLoader;
+import org.labkey.api.reader.TabLoader;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.ProteinManager;
 

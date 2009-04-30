@@ -23,8 +23,8 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
 import org.labkey.microarray.MicroarrayModule;
-import org.labkey.common.tools.SimpleXMLStreamReader;
-import org.labkey.common.tools.TabLoader;
+import org.labkey.api.reader.TabLoader;
+import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.common.tools.ColumnDescriptor;
 
 import javax.xml.stream.XMLStreamException;

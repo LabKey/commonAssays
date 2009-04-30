@@ -22,7 +22,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 
 import java.sql.SQLException;
 import java.util.Collection;

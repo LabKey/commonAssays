@@ -18,10 +18,10 @@ package org.labkey.ms2.compare;
 
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.*;
-import org.labkey.api.util.CaseInsensitiveHashSet;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.action.LabkeyError;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;

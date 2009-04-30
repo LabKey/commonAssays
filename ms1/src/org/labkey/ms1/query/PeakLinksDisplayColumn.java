@@ -19,7 +19,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.view.FeaturesView;
 

@@ -17,7 +17,7 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
-import org.labkey.common.tools.FastaValidator;
+import org.labkey.ms2.protein.fasta.FastaValidator;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.File;

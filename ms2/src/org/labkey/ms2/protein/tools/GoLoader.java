@@ -27,7 +27,7 @@ import org.labkey.api.util.JobRunner;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.WebPartView;
-import org.labkey.common.tools.TabLoader;
+import org.labkey.api.reader.TabLoader;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.ServletException;

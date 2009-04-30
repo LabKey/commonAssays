@@ -42,7 +42,7 @@ import org.labkey.ms1.model.*;
 import org.labkey.ms1.query.*;
 import org.labkey.ms1.view.*;
 import org.labkey.ms1.client.MS1VennDiagramView;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;

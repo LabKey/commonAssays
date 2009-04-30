@@ -21,7 +21,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.DomainNotFoundException;
-import org.labkey.api.util.CaseInsensitiveHashSet;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.ms2.*;
 
 import java.io.UnsupportedEncodingException;

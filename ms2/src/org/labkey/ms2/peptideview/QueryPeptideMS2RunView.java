@@ -21,7 +21,7 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.api.view.*;
 import org.labkey.api.query.*;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;

@@ -24,7 +24,7 @@ import org.labkey.api.view.GridView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;

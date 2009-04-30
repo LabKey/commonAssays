@@ -17,7 +17,7 @@
 package org.labkey.ms2;
 
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.common.tools.RelativeQuantAnalysisSummary;
+import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
 import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
 import org.labkey.ms2.reader.SimpleScan;
 

@@ -17,7 +17,7 @@
 package org.labkey.ms2.compare;
 
 import org.labkey.api.view.ActionURL;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.api.data.SimpleFilter;

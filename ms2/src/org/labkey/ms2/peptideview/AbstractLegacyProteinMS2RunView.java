@@ -20,7 +20,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.data.*;
-import org.labkey.api.util.CaseInsensitiveHashMap;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.ms2.*;
 import org.springframework.web.servlet.ModelAndView;
 

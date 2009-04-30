@@ -24,8 +24,8 @@ import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
-import org.labkey.common.util.Pair;
 
 import java.io.File;
 import java.util.Collection;

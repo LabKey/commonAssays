@@ -40,14 +40,12 @@ import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.qc.DataExchangeHandler;
-import org.labkey.common.util.Pair;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 

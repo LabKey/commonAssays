@@ -27,6 +27,7 @@ import org.labkey.api.util.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.collections.Cache;
 import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.StatisticSpec;

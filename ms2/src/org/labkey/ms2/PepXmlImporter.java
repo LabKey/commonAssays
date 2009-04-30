@@ -24,11 +24,11 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.ResultSetUtil;
-import org.labkey.common.tools.*;
-import org.labkey.common.tools.PepXmlLoader.FractionIterator;
-import org.labkey.common.tools.PepXmlLoader.PepXmlFraction;
-import org.labkey.common.tools.PepXmlLoader.PepXmlPeptide;
-import org.labkey.common.tools.PepXmlLoader.PeptideIterator;
+import org.labkey.ms2.reader.PepXmlLoader.FractionIterator;
+import org.labkey.ms2.reader.*;
+import org.labkey.ms2.reader.PepXmlLoader.PepXmlFraction;
+import org.labkey.ms2.reader.PepXmlLoader.PepXmlPeptide;
+import org.labkey.ms2.reader.PepXmlLoader.PeptideIterator;
 import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.ProteinManager;
 

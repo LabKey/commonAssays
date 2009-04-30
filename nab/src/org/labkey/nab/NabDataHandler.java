@@ -28,7 +28,7 @@ import org.labkey.api.study.*;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
 

@@ -22,10 +22,10 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.util.CaseInsensitiveHashSet;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.services.ServiceRegistry;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 import org.labkey.ms2.*;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
 

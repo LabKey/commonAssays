@@ -56,7 +56,7 @@ import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.labkey.ms2.metadata.*;
-import org.labkey.common.tools.MS2Modification;
+import org.labkey.ms2.MS2Modification;
 
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
@@ -317,6 +317,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             ListParamsValidator.TestCase.class,
             org.labkey.ms2.protein.FastaDbLoader.TestCase.class,                
             org.labkey.ms2.reader.RandomAccessMzxmlIterator.TestCase.class,
+            org.labkey.ms2.protein.fasta.PeptideTestCase.class,
             MS2Modification.MS2ModificationTest.class
         ));
     }

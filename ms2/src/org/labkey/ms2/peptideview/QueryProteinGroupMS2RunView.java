@@ -24,7 +24,7 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 
 import javax.servlet.ServletException;
 import java.util.List;

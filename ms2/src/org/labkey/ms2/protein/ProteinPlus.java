@@ -16,7 +16,7 @@
 
 package org.labkey.ms2.protein;
 
-import org.labkey.common.tools.Protein;
+import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.api.util.HashHelpers;
 
 /**

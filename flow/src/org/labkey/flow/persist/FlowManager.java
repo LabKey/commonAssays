@@ -31,6 +31,7 @@ import org.labkey.api.util.Search.SearchTermParser;
 import org.labkey.api.util.Search.Searchable;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.collections.CacheMap;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.query.AttributeCache;

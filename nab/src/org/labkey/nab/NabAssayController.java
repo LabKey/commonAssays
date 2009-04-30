@@ -46,8 +46,8 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.*;
-import org.labkey.common.util.Pair;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 

@@ -19,7 +19,7 @@ package org.labkey.ms2;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.common.util.Pair;
+import org.labkey.api.util.Pair;
 import org.labkey.ms2.reader.SequentialMzxmlIterator;
 import org.labkey.ms2.reader.SimpleScan;
 import org.labkey.ms2.reader.SimpleScanIterator;

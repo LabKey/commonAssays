@@ -22,11 +22,12 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.common.tools.ProtXmlReader;
-import org.labkey.common.tools.ProteinGroup;
-import org.labkey.common.tools.SimpleXMLStreamReader;
-import org.labkey.common.util.Pair;
+import org.labkey.ms2.protein.fasta.Protein;
+import org.labkey.ms2.reader.ProtXmlReader;
+import org.labkey.ms2.reader.ProteinGroup;
+import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.ExperimentException;
@@ -338,13 +339,13 @@ public class ProteinProphetImporter
         int proteinIndex = 1;
         proteinStmt.setInt(proteinIndex++, groupId);
         proteinStmt.setFloat(proteinIndex++, protein.getProbability());
-        org.labkey.common.tools.Protein p = new org.labkey.common.tools.Protein(protein.getProteinName(), new byte[0]);
+        Protein p = new org.labkey.ms2.protein.fasta.Protein(protein.getProteinName(), new byte[0]);
         proteinStmt.setString(proteinIndex, p.getLookup());
         proteinStmt.execute();
 
         for (String indistinguishableProteinName : protein.getIndistinguishableProteinNames())
         {
-            p = new org.labkey.common.tools.Protein(indistinguishableProteinName, new byte[0]);
+            p = new Protein(indistinguishableProteinName, new byte[0]);
             proteinStmt.setString(proteinIndex, p.getLookup());
             proteinStmt.execute();
         }
