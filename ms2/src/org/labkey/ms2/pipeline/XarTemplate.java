@@ -19,7 +19,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.SimpleInputColumn;
 import org.labkey.api.data.TextAreaInputColumn;
-import org.labkey.api.util.CsvSet;
+import org.labkey.api.collections.CsvSet;
 import org.labkey.api.util.PageFlowUtil;
 
 import java.io.File;
