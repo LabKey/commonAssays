@@ -29,7 +29,7 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.common.tools.ColumnDescriptor;
+import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.MS1Controller;
 

@@ -25,7 +25,7 @@ import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.reader.SimpleXMLStreamReader;
-import org.labkey.common.tools.ColumnDescriptor;
+import org.labkey.api.reader.ColumnDescriptor;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;

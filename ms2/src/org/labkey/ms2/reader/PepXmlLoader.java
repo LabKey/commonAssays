@@ -17,7 +17,6 @@
 package org.labkey.ms2.reader;
 
 import org.apache.log4j.Logger;
-import org.labkey.common.tools.*;
 import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.MS2Modification;
 import org.labkey.api.reader.SimpleXMLStreamReader;

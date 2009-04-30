@@ -16,27 +16,30 @@
 
 package org.labkey.ms2;
 
-import org.labkey.api.view.ViewBackgroundInfo;
+import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.SqlDialect;
 import org.labkey.api.data.Table;
-import org.labkey.api.data.Container;
-import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.reader.ProtXmlReader;
 import org.labkey.ms2.reader.ProteinGroup;
-import org.labkey.api.reader.SimpleXMLStreamReader;
-import org.labkey.ms2.pipeline.TPPTask;
-import org.labkey.api.exp.XarContext;
-import org.labkey.api.exp.ExperimentException;
-import org.apache.log4j.Logger;
 
 import javax.xml.stream.XMLStreamException;
-import java.sql.*;
 import java.io.*;
-import java.util.*;
+import java.sql.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * User: jeckels
@@ -461,12 +464,12 @@ public class ProteinProphetImporter
 
     private String getPepXMLFileName() throws FileNotFoundException, XMLStreamException
     {
-        BeanXMLStreamReader parser = null;
+        SimpleXMLStreamReader parser = null;
         InputStream fIn = null;
         try
         {
             fIn = new BufferedInputStream(new FileInputStream(_file), STREAM_BUFFER_SIZE);
-            parser = new BeanXMLStreamReader(fIn);
+            parser = new SimpleXMLStreamReader(fIn);
             if (parser.skipToStart("protein_summary_header"))
             {
                 for (int i = 0; i < parser.getAttributeCount(); i++)

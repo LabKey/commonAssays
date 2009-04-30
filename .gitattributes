@@ -832,7 +832,6 @@ ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-2.34-2.35.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-drop.sql -text
 ms2/src/META-INF/prot.xml -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
-ms2/src/org/labkey/ms2/BeanXMLStreamReader.java -text
 ms2/src/org/labkey/ms2/CompareServiceImpl.java -text
 ms2/src/org/labkey/ms2/CumulativeTimer.java -text
 ms2/src/org/labkey/ms2/DeltaScanColumn.java -text
@@ -1096,6 +1095,7 @@ ms2/src/org/labkey/ms2/protein/XMLProteinLoader.java -text
 ms2/src/org/labkey/ms2/protein/fasta/FastaDbHelper.java -text
 ms2/src/org/labkey/ms2/protein/fasta/FastaFile.java -text
 ms2/src/org/labkey/ms2/protein/fasta/FastaValidator.java -text
+ms2/src/org/labkey/ms2/protein/fasta/IdPattern.java -text
 ms2/src/org/labkey/ms2/protein/fasta/PeptideTestCase.java -text
 ms2/src/org/labkey/ms2/protein/organism/GuessOrgByParsing.java -text
 ms2/src/org/labkey/ms2/protein/organism/GuessOrgBySharedHash.java -text
@@ -1177,6 +1177,7 @@ ms2/src/org/labkey/ms2/reader/Q3Handler.java -text
 ms2/src/org/labkey/ms2/reader/RandomAccessMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/RelativeQuantAnalysisResult.java -text
 ms2/src/org/labkey/ms2/reader/RelativeQuantAnalysisSummary.java -text
+ms2/src/org/labkey/ms2/reader/Rounder.java -text
 ms2/src/org/labkey/ms2/reader/SensitivitySummary.java -text
 ms2/src/org/labkey/ms2/reader/SequentialMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/SimpleScan.java -text

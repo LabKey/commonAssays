@@ -30,7 +30,7 @@ import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.common.tools.ColumnDescriptor;
+import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.springframework.validation.BindException;

@@ -16,7 +16,7 @@
 
 package org.labkey.flow.analysis.model;
 
-import org.labkey.common.tools.DoubleArray;
+import org.labkey.api.arrays.DoubleArray;
 
 import java.util.List;
 import java.util.Arrays;

@@ -24,8 +24,8 @@ import org.labkey.api.data.Table;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.ResultSetUtil;
-import org.labkey.common.tools.DoubleArray;
-import org.labkey.common.tools.MatrixUtil;
+import org.labkey.api.util.MatrixUtil;
+import org.labkey.api.arrays.DoubleArray;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

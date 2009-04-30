@@ -55,7 +55,7 @@ abstract public class AbstractMS2SearchProtocolFactory extends AbstractFileAnaly
 
     public abstract String getDefaultParametersResource();
 
-    public String getDefaultParametersXML(File dirRoot) throws FileNotFoundException, IOException
+    public String getDefaultParametersXML(File dirRoot) throws IOException
     {
         String xml = super.getDefaultParametersXML(dirRoot);
         if (xml != null)

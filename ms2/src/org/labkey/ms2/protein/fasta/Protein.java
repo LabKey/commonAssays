@@ -16,7 +16,7 @@
 package org.labkey.ms2.protein.fasta;
 
 import org.labkey.ms2.protein.fasta.PeptideGenerator;
-import org.labkey.common.tools.IdPattern;
+import org.labkey.ms2.protein.fasta.IdPattern;
 
 import java.io.PrintWriter;
 import java.io.File;

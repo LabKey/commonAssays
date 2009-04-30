@@ -25,7 +25,7 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.ResultSetUtil;
-import org.labkey.common.tools.IdPattern;
+import org.labkey.ms2.protein.fasta.IdPattern;
 import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.fasta.*;

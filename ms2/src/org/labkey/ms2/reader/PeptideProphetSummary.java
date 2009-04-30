@@ -19,7 +19,7 @@ import net.systemsbiology.regisWeb.pepXML.PeptideprophetSummaryDocument;
 import org.apache.xmlbeans.XmlException;
 import org.labkey.ms2.reader.SensitivitySummary;
 import org.labkey.api.reader.SimpleXMLStreamReader;
-import org.labkey.common.tools.MatrixUtil;
+import org.labkey.api.util.MatrixUtil;
 
 import javax.xml.stream.XMLStreamException;
 import java.nio.ByteBuffer;

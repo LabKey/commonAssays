@@ -20,7 +20,7 @@ import com.ice.tar.TarInputStream;
 import org.apache.log4j.Logger;
 import org.labkey.ms2.MS2Importer;
 import org.labkey.ms2.FloatParser;
-import org.labkey.common.tools.FloatArray;
+import org.labkey.api.arrays.FloatArray;
 
 import java.io.*;
 import java.util.zip.GZIPInputStream;
