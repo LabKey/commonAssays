@@ -87,7 +87,7 @@ public class RunListCache
                         MS2Run ms2Run = MS2Manager.getRunByExperimentRunLSID(expRun.getLSID());
                         if (ms2Run == null)
                         {
-                            parseErrors.add("Could not find MS2 run for run LSID" + expRun.getLSID());
+                            parseErrors.add("Could not find MS2 run for run LSID: " + expRun.getLSID());
                         }
                     }
                     else

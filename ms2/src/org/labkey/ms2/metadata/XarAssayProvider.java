@@ -97,6 +97,7 @@ public class XarAssayProvider extends AbstractAssayProvider
     }
 
     public static final String SEARCH_COUNT_COLUMN = "MS2SearchCount";
+    public static final String SEARCHES_COLUMN = "MS2Searches";
 
     private class LinkDisplayColumn extends IconDisplayColumn
     {
@@ -141,10 +142,11 @@ public class XarAssayProvider extends AbstractAssayProvider
         searchCountSQL.append(getSearchRunSQL(schema.getContainer(), result.getContainerFilter(), ExprColumn.STR_TABLE_ALIAS + ".RowId"));
         searchCountSQL.append(" sub)");
         ExprColumn searchCountCol = new ExprColumn(result, SEARCH_COUNT_COLUMN, searchCountSQL, Types.INTEGER);
-        searchCountCol.setIsHidden(true);
+        searchCountCol.setCaption("MS2 Search Count");
         result.addColumn(searchCountCol);
 
-        ColumnInfo searchLinkCol = result.addColumn("MS2Searches", ExpRunTable.Column.RowId);
+        ColumnInfo searchLinkCol = result.addColumn(SEARCHES_COLUMN, ExpRunTable.Column.RowId);
+        searchLinkCol.setIsHidden(false);
         searchLinkCol.setCaption("MS2 Search Results");
         searchLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
@@ -368,8 +370,12 @@ public class XarAssayProvider extends AbstractAssayProvider
         for (DomainProperty fractionProperty : getFractionDomain(protocol).getProperties())
         {
             cols.add(getDataFractionPropertyFieldKey(fractionProperty));
-            cols.add(0, FieldKey.fromParts(ExpDataTable.Column.Run.toString(), "MS2Searches"));
         }
+        for (DomainProperty runProperty : getRunDomain(protocol).getProperties())
+        {
+            cols.add(FieldKey.fromParts(ExpDataTable.Column.Run.toString(), "Run Properties", runProperty.getName()));
+        }
+        cols.add(0, FieldKey.fromParts(ExpDataTable.Column.Run.toString(), SEARCHES_COLUMN));
         result.setDefaultVisibleColumns(cols);
 
         return result;
