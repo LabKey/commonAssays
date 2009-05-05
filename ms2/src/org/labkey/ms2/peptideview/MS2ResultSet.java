@@ -19,6 +19,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.data.ResultSetWrapper;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.ms2.MS2Run;
 
 import java.sql.SQLException;
@@ -48,6 +49,20 @@ public abstract class MS2ResultSet extends ResultSetWrapper
         _iter = runs.iterator();
         _filter = filter;
         _sort = sort;
+    }
+
+    // Subclasses should call at the end of their constructors -- this pre-fetches the first result set which ensures
+    // that calls to getMetaData(), etc. will work before next() is called.
+    protected void init()
+    {
+        try
+        {
+            prepareNextResultSet();
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
     }
 
     private boolean prepareNextResultSet() throws SQLException

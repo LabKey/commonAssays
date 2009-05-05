@@ -62,6 +62,8 @@ public class MultiRunRenderContext extends RenderContext
             _columns = columns;
             _maxRows = maxRows;
             _cache = cache;
+
+            init();
         }
 
 

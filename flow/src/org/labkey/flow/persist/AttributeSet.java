@@ -275,30 +275,30 @@ public class AttributeSet implements Serializable
             if (_keywords != null)
             {
                 String sql = "INSERT INTO " + mgr.getTinfoKeyword() + " (ObjectId, KeywordId, Value) VALUES (?,?,?)";
-                List<Object[]> paramsList = new ArrayList();
+                List<List<?>> paramsList = new ArrayList<List<?>>();
                 for (Map.Entry<String, String> entry : _keywords.entrySet())
                 {
-                    paramsList.add(new Object[] { obj.getRowId(), mgr.getAttributeId(entry.getKey()), entry.getValue()});
+                    paramsList.add(Arrays.asList(obj.getRowId(), mgr.getAttributeId(entry.getKey()), entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }
             if (_statistics != null)
             {
                 String sql = "INSERT INTO " + mgr.getTinfoStatistic() + " (ObjectId, StatisticId, Value) VALUES (?,?,?)";
-                List<Object[]> paramsList = new ArrayList();
+                List<List<?>> paramsList = new ArrayList<List<?>>();
                 for (Map.Entry<StatisticSpec, Double> entry : _statistics.entrySet())
                 {
-                    paramsList.add(new Object[] { obj.getRowId(), mgr.getAttributeId(entry.getKey().toString()), entry.getValue() });
+                    paramsList.add(Arrays.<Object>asList(obj.getRowId(), mgr.getAttributeId(entry.getKey().toString()), entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }
             if (_graphs != null)
             {
                 String sql = "INSERT INTO " + mgr.getTinfoGraph() + " (ObjectId, GraphId, Data) VALUES (?, ?, ?)";
-                List<Object[]> paramsList = new ArrayList();
+                List<List<?>> paramsList = new ArrayList<List<?>>();
                 for (Map.Entry<GraphSpec, byte[]> entry : _graphs.entrySet())
                 {
-                    paramsList.add(new Object[] { obj.getRowId(), mgr.getAttributeId(entry.getKey().toString()), entry.getValue()});
+                    paramsList.add(Arrays.asList(obj.getRowId(), mgr.getAttributeId(entry.getKey().toString()), entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }
