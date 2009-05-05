@@ -24,6 +24,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.GridView;
 import org.labkey.api.security.ACL;
+import org.labkey.api.collections.ResultSetRowMapFactory;
 import org.labkey.flow.controllers.well.WellController;
 
 import java.io.IOException;
@@ -99,7 +100,9 @@ public class GraphView extends GridView
             region.getButtonBar(DataRegion.MODE_GRID).render(ctx, out);
 
             out.write("<table class=\"labkey-data-region\">\n");
-            Map rowMap = null;
+
+            ResultSetRowMapFactory factory = new ResultSetRowMapFactory(rs);
+
             while (rs.next())
             {
                 out.write("<tr>");
@@ -109,8 +112,7 @@ public class GraphView extends GridView
                 }
                 out.write("<th width=\"100%\">&nbsp;</th>");
                 out.write("</tr>");
-                rowMap = ResultSetUtil.mapRow(rs, rowMap);
-                ctx.setRow(rowMap);
+                ctx.setRow(factory.getRowMap(rs));
                 out.write("<tr>");
                 for (DisplayColumn col : dataColumns)
                 {
