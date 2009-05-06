@@ -29,7 +29,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.reader.NewTabLoader;
+import org.labkey.api.reader.TabLoader;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
@@ -214,7 +214,7 @@ public class ProteinController extends SpringActionController
                 errors.addError(new ObjectError("main", null, null, "There is already an protein list with the name '" + form.getName() + "' loaded."));
             }
 
-            NewTabLoader tabLoader = new NewTabLoader(form.getAnnotationsText(), true);
+            TabLoader tabLoader = new TabLoader(form.getAnnotationsText(), true);
             tabLoader.setScanAheadLineCount(200);
 
             List<Map<String, Object>> rows = tabLoader.load();

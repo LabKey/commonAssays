@@ -27,7 +27,7 @@ import org.labkey.api.util.JobRunner;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.WebPartView;
-import org.labkey.api.reader.NewTabLoader;
+import org.labkey.api.reader.TabLoader;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.ServletException;
@@ -184,7 +184,7 @@ public abstract class GoLoader
 
             logStatus("Starting to load " + filename);
             InputStreamReader isr = new InputStreamReader(is);
-            NewTabLoader t = new NewTabLoader(isr, false);
+            TabLoader t = new TabLoader(isr, false);
             scope = ProteinManager.getSchema().getScope();
             conn = scope.getConnection();
             String SQLCommand = "INSERT INTO " + ti + "(";

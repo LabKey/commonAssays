@@ -24,7 +24,7 @@ import org.labkey.api.util.CloseableIterator;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.api.webdav.ModuleStaticResolverImpl;
 import org.labkey.api.webdav.WebdavResolver;
-import org.labkey.api.reader.NewTabLoader;
+import org.labkey.api.reader.TabLoader;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.ProteinManager;
 
@@ -58,7 +58,7 @@ public class ProteinDictionaryHelpers
         {
             Table.execute(ProteinManager.getSchema(), "DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap(), null);
 
-            NewTabLoader t = new NewTabLoader(new InputStreamReader(getSProtOrgMap()), false);
+            TabLoader t = new TabLoader(new InputStreamReader(getSProtOrgMap()), false);
             conn = scope.getConnection();
             ps = conn.prepareStatement(
                     "INSERT INTO " + ProteinManager.getTableInfoSprotOrgMap() +
