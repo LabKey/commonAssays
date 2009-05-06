@@ -28,7 +28,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.reader.TabLoader;
+import org.labkey.api.reader.NewTabLoader;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.MS1Controller;
@@ -232,8 +232,8 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             //insert the feature files row
             int idFile = insertFeaturesFile(info.getUser(), schema, data);
 
-            //open the tsv file using TabLoader for automatic parsing
-            TabLoader tsvloader = new TabLoader(dataFile);
+            //open the tsv file using NewTabLoader for automatic parsing
+            NewTabLoader tsvloader = new NewTabLoader(dataFile);
             Iterator<Map<String, Object>> iter = tsvloader.iterator();
             ColumnDescriptor[] coldescrs = tsvloader.getColumns();
 

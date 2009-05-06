@@ -28,7 +28,7 @@ import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.reader.TabLoader;
+import org.labkey.api.reader.NewTabLoader;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.w3c.dom.Document;
@@ -212,7 +212,7 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
             String tsv = getRawBulkProperties();
             try
             {
-                TabLoader loader = new TabLoader(tsv, true);
+                NewTabLoader loader = new NewTabLoader(tsv, true);
                 List<Map<String, Object>> maps = loader.load();
                 _bulkProperties = new ArrayList<Map<String, Object>>(maps.size());
                 for (Map<String, Object> map : maps)

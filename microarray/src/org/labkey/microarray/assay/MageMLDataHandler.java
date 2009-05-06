@@ -23,7 +23,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
 import org.labkey.microarray.MicroarrayModule;
-import org.labkey.api.reader.TabLoader;
+import org.labkey.api.reader.NewTabLoader;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.reader.ColumnDescriptor;
 
@@ -118,7 +118,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
                         }
                         Reader fileReader = new InputStreamReader(tsvIn);
 
-                        TabLoader loader = new TabLoader(fileReader, false);
+                        NewTabLoader loader = new NewTabLoader(fileReader, false);
                         ColumnDescriptor[] tabColumns = new ColumnDescriptor[columnNames.size()];
                         for (int i = 0; i < columnNames.size(); i++)
                         {

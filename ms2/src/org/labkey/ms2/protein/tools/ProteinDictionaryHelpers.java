@@ -24,7 +24,7 @@ import org.labkey.api.util.CloseableIterator;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.api.webdav.ModuleStaticResolverImpl;
 import org.labkey.api.webdav.WebdavResolver;
-import org.labkey.api.reader.TabLoader;
+import org.labkey.api.reader.NewTabLoader;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.ProteinManager;
 
@@ -58,7 +58,7 @@ public class ProteinDictionaryHelpers
         {
             Table.execute(ProteinManager.getSchema(), "DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap(), null);
 
-            TabLoader t = new TabLoader(new InputStreamReader(getFASTA()));
+            NewTabLoader t = new NewTabLoader(new InputStreamReader(getSProtOrgMap()), false);
             conn = scope.getConnection();
             ps = conn.prepareStatement(
                     "INSERT INTO " + ProteinManager.getTableInfoSprotOrgMap() +
@@ -67,10 +67,8 @@ public class ProteinDictionaryHelpers
 
             Set<String> sprotSuffixes = new HashSet<String>();
 
-            for (it = t.iterator(); it.hasNext();)
+            for (Map<String, Object> curRec : t)
             {
-                Map<String, Object> curRec = it.next();
-
                 // SprotSuffix
                 String sprotSuffix = (String) curRec.get("column0");
                 if (sprotSuffix == null)
@@ -147,7 +145,7 @@ public class ProteinDictionaryHelpers
     }
 
 
-    private static InputStream getFASTA() throws IOException
+    private static InputStream getSProtOrgMap() throws IOException
     {
         WebdavResolver.Resource r = ModuleStaticResolverImpl.get().lookup(FILE);
         if (null != r)
