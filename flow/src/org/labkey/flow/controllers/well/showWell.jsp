@@ -41,6 +41,8 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.webdav.WebdavService" %>
+<%@ page import="org.labkey.api.security.SecurityPolicy" %>
+<%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <style type="text/css">
     .right {text-align:right;}
@@ -387,8 +389,8 @@ else
     if (null != r)
     {
         // UNDONE: PipeRoot should have wrapper for this
-        ACL acl = org.labkey.api.security.SecurityManager.getACL(r.getContainer(), r.getEntityId());
-        if (null != acl && acl.hasPermission(context.getUser(), ACL.PERM_READ))
+        SecurityPolicy policy = org.labkey.api.security.SecurityManager.getPolicy(r);
+        if (policy.hasPermission(context.getUser(), ReadPermission.class))
         {
             URI rootURI = r.getUri();
             URI rel = URIUtil.relativize(r.getUri(), fileURI);
