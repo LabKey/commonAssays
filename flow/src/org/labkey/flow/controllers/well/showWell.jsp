@@ -389,7 +389,11 @@ else
     if (null != r)
     {
         // UNDONE: PipeRoot should have wrapper for this
-        SecurityPolicy policy = org.labkey.api.security.SecurityManager.getPolicy(r);
+        //NOTE: we are specifically not inheriting policies from the parent container
+        //as the old permissions-checking code did not do this. We need to consider
+        //whether the pipeline root's parent really is the container, or if we should
+        //be checking a different (more specific) permission.
+        SecurityPolicy policy = org.labkey.api.security.SecurityManager.getPolicy(r, false);
         if (policy.hasPermission(context.getUser(), ReadPermission.class))
         {
             URI rootURI = r.getUri();
