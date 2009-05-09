@@ -27,7 +27,6 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
 
 /**
- * Created by IntelliJ IDEA.
  * User: matthewb
  * Date: Sep 24, 2007
  * Time: 4:06:44 PM

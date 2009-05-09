@@ -32,7 +32,6 @@ import java.io.File;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: Apr 14, 2009
  * Time: 10:30:43 AM
