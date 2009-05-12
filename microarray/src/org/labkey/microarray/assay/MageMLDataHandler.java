@@ -16,16 +16,18 @@
 
 package org.labkey.microarray.assay;
 
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
-import org.labkey.microarray.MicroarrayModule;
-import org.labkey.api.reader.TabLoader;
-import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.reader.ColumnDescriptor;
+import org.labkey.api.reader.SimpleXMLStreamReader;
+import org.labkey.api.reader.TabLoader;
+import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
+import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.microarray.MicroarrayModule;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
@@ -35,7 +37,7 @@ import java.util.*;
  * User: jeckels
  * Date: Jan 3, 2008
  */
-public class MageMLDataHandler extends AbstractAssayTsvDataHandler
+public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements TransformDataHandler
 {
     public Priority getPriority(ExpData data)
     {
@@ -57,12 +59,12 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
         return false;
     }
 
-    public List<Map<String, Object>> loadFileData(Domain dataDomain, File dataFile) throws IOException, ExperimentException
+    public Map<DataType, List<Map<String, Object>>> loadFileData(Domain dataDomain, File dataFile) throws IOException, ExperimentException
     {
         DomainProperty[] columns = dataDomain.getProperties();
         if (columns.length == 0)
         {
-            return Collections.singletonList((Map<String, Object>)new HashMap<String, Object>());
+            return Collections.emptyMap();
         }
         FileInputStream fIn = null;
         try
@@ -132,7 +134,10 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
                             tabColumns[i].errorValues = ERROR_VALUE;
                         }
                         loader.setColumns(tabColumns);
-                        return loader.load();
+                        Map<org.labkey.api.exp.api.DataType, List<Map<String, Object>>> datas = new HashMap<org.labkey.api.exp.api.DataType, List<Map<String, Object>>>();
+
+                        datas.put(MicroarrayModule.MAGE_ML_DATA_TYPE, loader.load());
+                        return datas;
                     }
                     finally
                     {
