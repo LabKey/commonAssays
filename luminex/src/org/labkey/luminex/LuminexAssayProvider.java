@@ -60,7 +60,17 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public LuminexAssayProvider()
     {
-        super("LuminexAssayProtocol", "LuminexAssayRun", LuminexExcelDataHandler.LUMINEX_DATA_TYPE);
+        super("LuminexAssayProtocol", "LuminexAssayRun", LuminexExcelDataHandler.LUMINEX_DATA_TYPE, new AssayTableMetadata(
+            null,
+            FieldKey.fromParts("Data", "Run"),
+            FieldKey.fromParts("RowId"))
+            {
+            @Override
+            public FieldKey getSpecimenIDFieldKey()
+            {
+                return FieldKey.fromParts("Description");
+            }
+        });
     }
 
     public String getName()
@@ -116,7 +126,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return table;
     }
 
-    public Domain getRunDataDomain(ExpProtocol protocol)
+    public Domain getResultsDomain(ExpProtocol protocol)
     {
         return null;
     }
@@ -252,34 +262,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return ExperimentService.get().getExpData(dataRow.getDataId());
     }
 
-    public FieldKey getRunIdFieldKeyFromDataRow()
-    {
-        return FieldKey.fromParts("Data", "Run", "RowId");
-    }
-
-    public FieldKey getParticipantIDFieldKey()
-    {
-        return FieldKey.fromParts(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-    }
-
-    public FieldKey getVisitIDFieldKey(Container container)
-    {
-        if (AssayPublishService.get().getTimepointType(container) == TimepointType.VISIT)
-            return FieldKey.fromParts(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-        else
-            return FieldKey.fromParts(AbstractAssayProvider.DATE_PROPERTY_NAME);
-    }
-
-    public FieldKey getDataRowIdFieldKey()
-    {
-        return FieldKey.fromParts("RowId");
-    }
-
-    public FieldKey getSpecimenIDFieldKey()
-    {
-        return FieldKey.fromParts("Description");
-    }
-
     public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
@@ -357,7 +339,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 dataMaps.add(dataMap);
                 tempTypes = null;
             }
-            return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol, dataMaps, types, getDataRowIdFieldKey().toString(), errors);
+            return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol, dataMaps, types, getTableMetadata().getResultRowIdFieldKey().toString(), errors);
         }
         catch (SQLException e)
         {

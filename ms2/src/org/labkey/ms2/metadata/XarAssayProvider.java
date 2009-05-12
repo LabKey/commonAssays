@@ -74,14 +74,12 @@ public class XarAssayProvider extends AbstractAssayProvider
     public static final String FRACTION_SET_LABEL = "These fields are used to describe searches where one sample has been divided into multiple fractions. The fields should describe the properties that vary from fraction to fraction.";
     private static final String FRACTION_INPUT_ROLE = "Fraction";
 
-    public XarAssayProvider(String protocolLSIDPrefix, String runLSIDPrefix, DataType dataType)
-    {
-        super(protocolLSIDPrefix, runLSIDPrefix, dataType);
-    }
-
     public XarAssayProvider()
     {
-        super(PROTOCOL_LSID_NAMESPACE_PREFIX, RUN_LSID_NAMESPACE_PREFIX, MS_ASSAY_DATA_TYPE);
+        super(PROTOCOL_LSID_NAMESPACE_PREFIX, RUN_LSID_NAMESPACE_PREFIX, MS_ASSAY_DATA_TYPE, new AssayTableMetadata(
+                FieldKey.fromParts("Run"),
+                FieldKey.fromParts("Run"),
+                FieldKey.fromParts("RowId")));
     }
     
     @Override
@@ -398,7 +396,7 @@ public class XarAssayProvider extends AbstractAssayProvider
             TimepointType studyType = AssayPublishService.get().getTimepointType(study);
 
             SimpleFilter filter = new SimpleFilter();
-            filter.addInClause(getDataRowIdFieldKey().toString(), dataKeys.keySet());
+            filter.addInClause(getTableMetadata().getResultRowIdFieldKey().toString(), dataKeys.keySet());
 
             UserSchema schema = QueryService.get().getUserSchema(user, protocol.getContainer(), AssayService.ASSAY_SCHEMA_NAME);
             ExpDataTable tableInfo = createDataTable(schema, protocol);
@@ -410,14 +408,14 @@ public class XarAssayProvider extends AbstractAssayProvider
             {
                 fieldKeys.add(getDataFractionPropertyFieldKey(prop));
             }
-            fieldKeys.add(getRunIdFieldKeyFromDataRow());
+            fieldKeys.add(getTableMetadata().getRunRowIdFieldKeyFromResults());
             fieldKeys.add(FieldKey.fromParts("DataFileUrl"));
-            fieldKeys.add(getDataRowIdFieldKey());
+            fieldKeys.add(getTableMetadata().getResultRowIdFieldKey());
             Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(tableInfo, fieldKeys);
 
-            ColumnInfo dataRowIdCol = columns.get(getDataRowIdFieldKey());
+            ColumnInfo dataRowIdCol = columns.get(getTableMetadata().getResultRowIdFieldKey());
 
-            SQLFragment selectSQL = Table.getSelectSQL(tableInfo, columns.values(), filter, new Sort(getDataRowIdFieldKey().toString()));
+            SQLFragment selectSQL = Table.getSelectSQL(tableInfo, columns.values(), filter, new Sort(getTableMetadata().getResultRowIdFieldKey().toString()));
             Table.TableResultSet rs = Table.executeQuery(schema.getDbSchema(), selectSQL);
 
             List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>();
@@ -425,7 +423,7 @@ public class XarAssayProvider extends AbstractAssayProvider
             CopyToStudyContext context = new CopyToStudyContext(protocol);
 
             Set<PropertyDescriptor> typeList = new LinkedHashSet<PropertyDescriptor>();
-            typeList.add(createPublishPropertyDescriptor(study, getDataRowIdFieldKey().toString(), PropertyType.INTEGER));
+            typeList.add(createPublishPropertyDescriptor(study, getTableMetadata().getResultRowIdFieldKey().toString(), PropertyType.INTEGER));
             typeList.add(createPublishPropertyDescriptor(study, "SourceLSID", PropertyType.INTEGER));
 
             Container sourceContainer = null;
@@ -477,7 +475,7 @@ public class XarAssayProvider extends AbstractAssayProvider
                     dataMap.put("Date", publishKey.getDate());
                 }
                 dataMap.put("SourceLSID", run.getLSID());
-                dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
+                dataMap.put(getTableMetadata().getResultRowIdFieldKey().toString(), publishKey.getDataId());
 
                 addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
 
@@ -485,7 +483,7 @@ public class XarAssayProvider extends AbstractAssayProvider
                 tempTypes = null;
             }
             return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,
-                    dataMaps, new ArrayList<PropertyDescriptor>(typeList), getDataRowIdFieldKey().toString(), errors);
+                    dataMaps, new ArrayList<PropertyDescriptor>(typeList), getTableMetadata().getResultRowIdFieldKey().toString(), errors);
         }
         catch (SQLException e)
         {
@@ -513,32 +511,6 @@ public class XarAssayProvider extends AbstractAssayProvider
     {
         return true;
     }
-
-    public FieldKey getParticipantIDFieldKey()
-    {
-        return new FieldKey(getRunIdFieldKeyFromDataRow(), AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-    }
-
-    public FieldKey getVisitIDFieldKey(Container targetStudy)
-    {
-        return new FieldKey(getRunIdFieldKeyFromDataRow(), AbstractAssayProvider.VISITID_PROPERTY_NAME);
-    }
-
-    public FieldKey getSpecimenIDFieldKey()
-    {
-        return new FieldKey(getRunIdFieldKeyFromDataRow(), AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-    }
-
-    public FieldKey getRunIdFieldKeyFromDataRow()
-    {
-        return FieldKey.fromParts("Run");
-    }
-
-    public FieldKey getDataRowIdFieldKey()
-    {
-        return FieldKey.fromParts("RowId");
-    }
-
     public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
         return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(container, null);

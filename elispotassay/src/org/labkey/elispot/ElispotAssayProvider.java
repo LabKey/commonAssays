@@ -84,7 +84,10 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
 
     public ElispotAssayProvider()
     {
-        super("ElispotAssayProtocol", "ElispotAssayRun", ElispotDataHandler.ELISPOT_DATA_TYPE);
+        super("ElispotAssayProtocol", "ElispotAssayRun", ElispotDataHandler.ELISPOT_DATA_TYPE, new AssayTableMetadata(
+            FieldKey.fromParts("Properties", ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
+            FieldKey.fromParts("Run"),
+            FieldKey.fromParts("ObjectId")));
     }
 
     public ExpData getDataForDataRow(Object dataRowId)
@@ -105,7 +108,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return NAME;
     }
 
-    public Domain getRunDataDomain(ExpProtocol protocol)
+    public Domain getResultsDomain(ExpProtocol protocol)
     {
         return null;
     }
@@ -211,38 +214,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         reader.save(user);
     }
 
-    public FieldKey getParticipantIDFieldKey()
-    {
-        return FieldKey.fromParts("Properties",
-                ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property", PARTICIPANTID_PROPERTY_NAME);
-    }
-
-    public FieldKey getVisitIDFieldKey(Container targetStudy)
-    {
-        if (AssayPublishService.get().getTimepointType(targetStudy) == TimepointType.VISIT)
-            return FieldKey.fromParts("Properties",
-                    ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property", VISITID_PROPERTY_NAME);
-        else
-            return FieldKey.fromParts("Properties",
-                    ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property", DATE_PROPERTY_NAME);
-    }
-
-    public FieldKey getRunIdFieldKeyFromDataRow()
-    {
-        return FieldKey.fromParts("Run", "RowId");
-    }
-
-    public FieldKey getDataRowIdFieldKey()
-    {
-        return FieldKey.fromParts("ObjectId");
-    }
-
-    public FieldKey getSpecimenIDFieldKey()
-    {
-        return FieldKey.fromParts("Properties",
-                ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property", SPECIMENID_PROPERTY_NAME);
-    }
-
     public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
@@ -255,15 +226,15 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
             PropertyDescriptor[] dataPDs = ElispotSchema.getExistingDataProperties(protocol);
 
             SimpleFilter filter = new SimpleFilter();
-            filter.addInClause(getDataRowIdFieldKey().toString(), dataKeys.keySet());
+            filter.addInClause(getTableMetadata().getResultRowIdFieldKey().toString(), dataKeys.keySet());
 
             // get the selected rows from the copy to study wizard
             OntologyObject[] dataRows = Table.select(OntologyManager.getTinfoObject(), Table.ALL_COLUMNS, filter,
-                    new Sort(getDataRowIdFieldKey().toString()), OntologyObject.class);
+                    new Sort(getTableMetadata().getResultRowIdFieldKey().toString()), OntologyObject.class);
 
             List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>(dataRows.length);
             Set<PropertyDescriptor> typeSet = new LinkedHashSet<PropertyDescriptor>();
-            typeSet.add(createPublishPropertyDescriptor(study, getDataRowIdFieldKey().toString(), PropertyType.INTEGER));
+            typeSet.add(createPublishPropertyDescriptor(study, getTableMetadata().getResultRowIdFieldKey().toString(), PropertyType.INTEGER));
             typeSet.add(createPublishPropertyDescriptor(study, "SourceLSID", PropertyType.INTEGER));
 
             Container sourceContainer = null;
@@ -315,7 +286,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
                     dataMap.put("Date", publishKey.getDate());
                 }
                 dataMap.put("SourceLSID", run.getLSID());
-                dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
+                dataMap.put(getTableMetadata().getResultRowIdFieldKey().toString(), publishKey.getDataId());
 
                 addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
 
@@ -323,7 +294,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
                 tempTypes = null;
             }
             return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,
-                    dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getDataRowIdFieldKey().toString(), errors);
+                    dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getTableMetadata().getResultRowIdFieldKey().toString(), errors);
         }
         catch (SQLException se)
         {

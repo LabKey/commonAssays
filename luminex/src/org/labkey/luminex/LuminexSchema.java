@@ -29,6 +29,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.SpecimenForeignKey;
 
 import java.util.*;
 import java.sql.Types;
@@ -149,7 +150,9 @@ public class LuminexSchema extends UserSchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Type")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Well")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Outlier")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Description")));
+        ColumnInfo specimenColumn = result.wrapColumn(result.getRealTable().getColumn("Description"));
+        specimenColumn.setFk(new SpecimenForeignKey(this, AssayService.get().getProvider(_protocol), _protocol));
+        result.addColumn(specimenColumn);
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ExtraSpecimenInfo")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIString"))).setCaption("FI String");
         OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("FI"), result.getRealTable().getColumn("FIOORIndicator"));

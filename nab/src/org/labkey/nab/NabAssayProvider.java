@@ -67,7 +67,10 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
     public NabAssayProvider()
     {
-        super("NabAssayProtocol", "NabAssayRun", NabDataHandler.NAB_DATA_TYPE);
+        super("NabAssayProtocol", "NabAssayRun", NabDataHandler.NAB_DATA_TYPE, new AssayTableMetadata(
+            FieldKey.fromParts("Properties", NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
+            FieldKey.fromParts("Run"),
+            FieldKey.fromParts("ObjectId")));
     }
 
     protected void registerLsidHandler()
@@ -182,7 +185,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return domainMap;
     }
 
-    public Domain getRunDataDomain(ExpProtocol protocol)
+    public Domain getResultsDomain(ExpProtocol protocol)
     {
         return null;
     }
@@ -217,39 +220,6 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return table;
     }
 
-    public FieldKey getParticipantIDFieldKey()
-    {
-        return FieldKey.fromParts("Properties",
-                NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", PARTICIPANTID_PROPERTY_NAME);
-    }
-
-    public FieldKey getVisitIDFieldKey(Container container)
-    {
-        if (AssayPublishService.get().getTimepointType(container) == TimepointType.VISIT)
-            return FieldKey.fromParts("Properties",
-                    NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", VISITID_PROPERTY_NAME);
-        else
-            return FieldKey.fromParts("Properties",
-                    NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", DATE_PROPERTY_NAME);
-
-    }
-
-    public FieldKey getRunIdFieldKeyFromDataRow()
-    {
-        return FieldKey.fromParts("Run", "RowId");
-    }
-
-    public FieldKey getDataRowIdFieldKey()
-    {
-        return FieldKey.fromParts("ObjectId");
-    }
-
-    public FieldKey getSpecimenIDFieldKey()
-    {
-        return FieldKey.fromParts("Properties",
-                NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", SPECIMENID_PROPERTY_NAME);
-    }
-
     protected PropertyType getDataRowIdType()
     {
         return PropertyType.INTEGER;
@@ -263,7 +233,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
             Set<PropertyDescriptor> typeSet = new LinkedHashSet<PropertyDescriptor>();
 
-            typeSet.add(createPublishPropertyDescriptor(study, getDataRowIdFieldKey().toString(), getDataRowIdType()));
+            typeSet.add(createPublishPropertyDescriptor(study, getTableMetadata().getResultRowIdFieldKey().toString(), getDataRowIdType()));
             typeSet.add(createPublishPropertyDescriptor(study, "SourceLSID", getDataRowIdType()));
 
             Domain sampleDomain = getSampleWellGroupDomain(protocol);
@@ -273,10 +243,10 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             CopyToStudyContext context = new CopyToStudyContext(protocol);
 
             SimpleFilter filter = new SimpleFilter();
-            filter.addInClause(getDataRowIdFieldKey().toString(), dataKeys.keySet());
+            filter.addInClause(getTableMetadata().getResultRowIdFieldKey().toString(), dataKeys.keySet());
 
             OntologyObject[] dataRows = Table.select(OntologyManager.getTinfoObject(), Table.ALL_COLUMNS, filter,
-                    new Sort(getDataRowIdFieldKey().toString()), OntologyObject.class);
+                    new Sort(getTableMetadata().getResultRowIdFieldKey().toString()), OntologyObject.class);
 
             List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>(dataRows.length);
             Container sourceContainer = null;
@@ -325,13 +295,13 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                     dataMap.put("Date", publishKey.getDate());
                 }
                 dataMap.put("SourceLSID", run.getLSID());
-                dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
+                dataMap.put(getTableMetadata().getResultRowIdFieldKey().toString(), publishKey.getDataId());
                 addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
                 dataMaps.add(dataMap);
                 tempTypes = null;
             }
             return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,
-                    dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getDataRowIdFieldKey().toString(), errors);
+                    dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getTableMetadata().getResultRowIdFieldKey().toString(), errors);
         }
         catch (SQLException e)
         {

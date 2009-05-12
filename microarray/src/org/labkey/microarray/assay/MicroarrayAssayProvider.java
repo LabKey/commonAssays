@@ -37,6 +37,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
+import org.labkey.api.study.TimepointType;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
@@ -74,7 +75,11 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 
     public MicroarrayAssayProvider()
     {
-        super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_DATA_TYPE);
+        super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_DATA_TYPE, new AssayTableMetadata(
+            null,
+            FieldKey.fromParts("Run"),
+            FieldKey.fromParts("ObjectId")
+        ));
     }
 
     @Override
@@ -132,34 +137,9 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return result;
     }
 
-    public FieldKey getParticipantIDFieldKey()
-    {
-        return FieldKey.fromParts(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-    }
-
-    public FieldKey getVisitIDFieldKey(Container targetStudy)
-    {
-        return FieldKey.fromParts(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-    }
-
-    public FieldKey getSpecimenIDFieldKey()
-    {
-        return FieldKey.fromParts("SpecimenId");
-    }
-
     public boolean canCopyToStudy()
     {
         return true;
-    }
-
-    public FieldKey getRunIdFieldKeyFromDataRow()
-    {
-        return FieldKey.fromParts("Run", "RowId");
-    }
-
-    public FieldKey getDataRowIdFieldKey()
-    {
-        return FieldKey.fromParts("ObjectId");
     }
 
     protected void addOutputDatas(AssayRunUploadContext context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
