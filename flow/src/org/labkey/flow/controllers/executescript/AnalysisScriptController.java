@@ -776,7 +776,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             if (root == null)
             {
                 // root-less pipeline job for workapce uploaded via the browser
-                info.setUrlHelper(null);
+                info.setURL(null);
             }
 
             boolean createKeywordRun = keywordRun == null && runFilePathRoot != null;
