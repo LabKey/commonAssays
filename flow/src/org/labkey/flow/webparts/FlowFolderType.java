@@ -25,6 +25,7 @@ import org.labkey.api.view.Portal;
 import org.labkey.flow.FlowModule;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class FlowFolderType extends DefaultFolderType
 {
@@ -32,10 +33,13 @@ public class FlowFolderType extends DefaultFolderType
     {
         super("Flow", "Perform statistical analysis and create graphs for high-volume, highly standardized flow experiments. Organize, archive and track statistics and keywords for FlowJo experiments.");
         
-        requiredParts = Arrays.asList(OverviewWebPart.FACTORY.createWebPart());
-        preferredParts = Arrays.asList(AnalysesWebPart.FACTORY.createWebPart(),
-                        AnalysisScriptsWebPart.FACTORY.createWebPart(),
-                        Portal.getPortalPart("Messages").createWebPart());
+        requiredParts = Collections.emptyList();
+        preferredParts = Arrays.asList(
+                FlowSummaryWebPart.FACTORY.createWebPart(),
+                OverviewWebPart.FACTORY.createWebPart(),
+                AnalysesWebPart.FACTORY.createWebPart(),
+                AnalysisScriptsWebPart.FACTORY.createWebPart(),
+                Portal.getPortalPart("Messages").createWebPart());
         activeModules = getDefaultModuleSet(module, getModule("Pipeline"));
         defaultModule = module;
     }

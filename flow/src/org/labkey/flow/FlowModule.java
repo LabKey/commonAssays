@@ -107,8 +107,8 @@ public class FlowModule extends DefaultModule
     {
         return Arrays.asList(OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
-                AnalysisScriptsWebPart.FACTORY
-                ,FlowFrontPage.FACTORY,FlowFiles.FACTORY
+                AnalysisScriptsWebPart.FACTORY,
+                FlowSummaryWebPart.FACTORY
                 );
     }
 
