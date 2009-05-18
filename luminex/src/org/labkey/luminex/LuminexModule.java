@@ -68,6 +68,8 @@ public class LuminexModule extends DefaultModule
     {
         AssayService.get().registerAssayProvider(new LuminexAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new LuminexExcelDataHandler());
+        ExperimentService.get().registerExperimentDataHandler(new LuminexTsvDataHandler());
+        ExperimentService.get().registerExperimentDataHandler(new LuminexExcelRunPropsDataHandler());
     }
 
     public Set<String> getSchemaNames()

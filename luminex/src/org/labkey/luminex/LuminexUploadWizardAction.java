@@ -21,6 +21,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
@@ -168,10 +169,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     private String[] getAnalyteNames(LuminexRunUploadForm form) throws ExperimentException
     {
         List<String> names = new ArrayList<String>();
-        form.getUploadedData().values().toArray(new File[0]);
-        for (Map.Entry<String, File> entry : form.getUploadedData().entrySet())
-            names.addAll(LuminexExcelDataHandler.getAnalyteNames(entry.getValue()));
 
+        assert(form.getUploadedData().size() == 1);
+        File dataFile = form.getUploadedData().values().iterator().next();
+        LuminexExcelDataHandler.LuminexExcelParser parser = new LuminexExcelDataHandler.LuminexExcelParser(form.getProtocol(), dataFile);
+        for (Analyte analyte : parser.getSheets().keySet())
+        {
+            names.add(analyte.getName());
+        }
         return names.toArray(new String[names.size()]);
     }
 
@@ -249,8 +254,24 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     ExpRun run = saveExperimentRun(form);
 
                     List<ExpData> outputs = run.getDataOutputs();
-                    assert outputs.size() == 1;
-                    int dataId = outputs.get(0).getRowId();
+                    int dataId = 0;
+                    if (!form.getTransformResult().isEmpty())
+                    {
+                        // data transform occured, need to find the transformed output that was persisted
+                        for (ExpData data : outputs)
+                        {
+                            if (LuminexTsvDataHandler.LUMINEX_TSV_DATA_TYPE.matches(new Lsid(data.getLSID())))
+                            {
+                                dataId = data.getRowId();
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        assert outputs.size() == 1;
+                        dataId = outputs.get(0).getRowId();
+                    }
 
                     for (Analyte analyte : getAnalytes(dataId))
                     {

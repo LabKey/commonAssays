@@ -142,4 +142,24 @@ public class Analyte
     {
         _lsid = lsid;
     }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof Analyte)
+        {
+            if (_name != null)
+                return _name.equals(((Analyte)obj).getName());
+        }
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        if (_name != null)
+            return _name.hashCode();
+
+        return super.hashCode();
+    }
 }

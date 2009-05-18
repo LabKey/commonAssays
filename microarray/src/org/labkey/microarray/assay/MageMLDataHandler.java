@@ -18,16 +18,22 @@ package org.labkey.microarray.assay;
 
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.microarray.MicroarrayModule;
+import org.apache.log4j.Logger;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
@@ -59,8 +65,12 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
         return false;
     }
 
-    public Map<DataType, List<Map<String, Object>>> loadFileData(Domain dataDomain, File dataFile) throws IOException, ExperimentException
+    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
+        ExpProtocol protocol = data.getRun().getProtocol();
+        AssayProvider provider = AssayService.get().getProvider(protocol);
+
+        Domain dataDomain = provider.getResultsDomain(protocol);
         DomainProperty[] columns = dataDomain.getProperties();
         if (columns.length == 0)
         {
@@ -145,6 +155,10 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
                     }
                 }
             }
+        }
+        catch (IOException ioe)
+        {
+            throw new ExperimentException(ioe);
         }
         catch (XMLStreamException e)
         {

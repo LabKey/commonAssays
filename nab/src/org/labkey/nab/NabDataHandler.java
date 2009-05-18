@@ -16,98 +16,121 @@
 
 package org.labkey.nab;
 
-import org.labkey.api.exp.api.*;
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ActionURL;
+import jxl.Cell;
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.WorkbookSettings;
+import jxl.read.biff.BiffException;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
-import org.labkey.api.study.assay.*;
-import org.labkey.api.query.ValidationException;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.Pair;
-import org.apache.log4j.Logger;
-import org.apache.commons.lang.StringUtils;
+import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
 import java.sql.SQLException;
-
-import jxl.WorkbookSettings;
-import jxl.Workbook;
-import jxl.Sheet;
-import jxl.Cell;
-import jxl.read.biff.BiffException;
+import java.util.*;
 
 /**
  * User: brittp
  * Date: Sep 21, 2007
  * Time: 3:21:18 PM
  */
-public class NabDataHandler extends AbstractExperimentDataHandler
+public class NabDataHandler extends AbstractNabDataHandler implements TransformDataHandler
 {
     public static final DataType NAB_DATA_TYPE = new DataType("AssayRunNabData");
     public static final String NAB_DATA_ROW_LSID_PREFIX = "AssayRunNabDataRow";
-    public static final String NAB_PROPERTY_LSID_PREFIX = "NabProperty";
-    public static final String NAB_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
-    public static final String WELLGROUP_NAME_PROPERTY = "WellgroupName";
     private static final int START_ROW = 6; //0 based, row 7 inthe workshet
     private static final int START_COL = 0;
     private static final int PLATE_WIDTH = 12;
     private static final int PLATE_HEIGHT = 8;
 
-    public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    class NabExcelParser implements NabDataFileParser
     {
-        try
+        private ExpData _data;
+        private File _dataFile;
+        private ViewBackgroundInfo _info;
+        private Logger _log;
+        private XarContext _context;
+
+        public NabExcelParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context)
         {
-            ExpRun run = data.getRun();
-            ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
-            Container container = data.getContainer();
-            Luc5Assay assayResults = getAssayResults(run, info.getUser(), dataFile);
-            OntologyManager.ensureObject(container, data.getLSID());
-            for (int summaryIndex = 0; summaryIndex < assayResults.getSummaries().length; summaryIndex++)
-            {
-                DilutionSummary dilution = assayResults.getSummaries()[summaryIndex];
-                WellGroup group = dilution.getWellGroup();
-                ExpMaterial sampleInput = assayResults.getMaterial(group);
-                List<ObjectProperty> results = new ArrayList<ObjectProperty>();
-                Lsid dataRowLsid = new Lsid(data.getLSID());
-                dataRowLsid.setNamespacePrefix(NAB_DATA_ROW_LSID_PREFIX);
-                dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + group.getName());
-                for (Integer cutoff : assayResults.getCutoffs())
+            _data = data;
+            _dataFile = dataFile;
+            _info = info;
+            _log = log;
+            _context = context;
+        }
+
+        public List<Map<String, Object>> getResults() throws ExperimentException
+        {
+            try {
+                ExpRun run = _data.getRun();
+                ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
+                Container container = _data.getContainer();
+                Luc5Assay assayResults = getAssayResults(run, _info.getUser(), _dataFile);
+                List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
+                Map<Integer, String> cutoffFormats = assayResults.getCutoffFormats();
+
+                for (int summaryIndex = 0; summaryIndex < assayResults.getSummaries().length; summaryIndex++)
                 {
-                    String format = assayResults.getCutoffFormats().get(cutoff);
-                    saveICValue("Curve IC" + cutoff, dilution.getCutoffDilution(cutoff / 100.0),
-                            dilution, dataRowLsid, protocol, container, format, results);
+                    DilutionSummary dilution = assayResults.getSummaries()[summaryIndex];
+                    WellGroup group = dilution.getWellGroup();
+                    ExpMaterial sampleInput = assayResults.getMaterial(group);
 
-                    saveICValue("Point IC" + cutoff, dilution.getInterpolatedCutoffDilution(cutoff / 100.0),
-                            dilution, dataRowLsid, protocol, container, format, results);
+                    Lsid dataRowLsid = new Lsid(_data.getLSID());
+                    dataRowLsid.setNamespacePrefix(NAB_DATA_ROW_LSID_PREFIX);
+                    dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + group.getName());
+
+                    Map<String, Object> props = new HashMap<String, Object>();
+                    props.put(DATA_ROW_LSID_PROPERTY, dataRowLsid.toString());
+
+                    results.add(props);
+
+                    for (Integer cutoff : assayResults.getCutoffs())
+                    {
+                        saveICValue(CURVE_IC_PREFIX + cutoff, dilution.getCutoffDilution(cutoff / 100.0),
+                                dilution, dataRowLsid, protocol, container, cutoffFormats, props);
+
+                        saveICValue(POINT_IC_PREFIX + cutoff, dilution.getInterpolatedCutoffDilution(cutoff / 100.0),
+                                dilution, dataRowLsid, protocol, container, cutoffFormats, props);
+                    }
+
+                    props.put(FIT_ERROR_PROPERTY, dilution.getFitError());
+                    props.put(NAB_INPUT_MATERIAL_DATA_PROPERTY, sampleInput.getLSID());
+                    props.put(WELLGROUP_NAME_PROPERTY, group.getName());
                 }
-
-                results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "Fit Error", dilution.getFitError(), PropertyType.DOUBLE, "0.0"));
-                results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), NAB_INPUT_MATERIAL_DATA_PROPERTY, sampleInput.getLSID(), PropertyType.STRING));
-                results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), WELLGROUP_NAME_PROPERTY, group.getName(), PropertyType.STRING));
-
-                OntologyManager.ensureObject(container, dataRowLsid.toString(),  data.getLSID());
-                OntologyManager.insertProperties(container, dataRowLsid.toString(), results.toArray(new ObjectProperty[results.size()]));
+                return results;
+            }
+            catch (DilutionCurve.FitFailedException e)
+            {
+                throw new ExperimentException(e.getMessage(), e);
             }
         }
-        catch (ValidationException ve)
-        {
-            throw new ExperimentException(ve.getMessage(), ve);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch (DilutionCurve.FitFailedException e)
-        {
-            throw new ExperimentException(e.getMessage(), e);
-        }
+    }
+
+    public NabDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    {
+        return new NabExcelParser(data, dataFile, info, log, context);
+    }
+
+    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    {
+        NabDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
+
+        Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
+        datas.put(NabTsvDataHandler.NAB_TSV_DATA_TYPE, parser.getResults());
+
+        return datas;
     }
 
     public static List<DilutionSummary> getDilutionSummaries(User user, int... dataObjectIds) throws ExperimentException, SQLException
@@ -161,7 +184,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
     }
 
     private void saveICValue(String name, double icValue, DilutionSummary dilution, Lsid dataRowLsid,
-                             ExpProtocol protocol, Container container, String format, List<ObjectProperty> results) throws DilutionCurve.FitFailedException
+                             ExpProtocol protocol, Container container, Map<Integer, String> formats, Map<String, Object> results) throws DilutionCurve.FitFailedException
     {
         String outOfRange = null;
         if (Double.NEGATIVE_INFINITY == icValue)
@@ -174,11 +197,8 @@ public class NabDataHandler extends AbstractExperimentDataHandler
             outOfRange = ">";
             icValue = dilution.getMaxDilution();
         }
-        ObjectProperty curveIC = getResultObjectProperty(container, protocol, dataRowLsid.toString(), name,
-                icValue, PropertyType.DOUBLE, format);
-        results.add(curveIC);
-        results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), curveIC.getName() + "OORIndicator",
-                outOfRange, PropertyType.STRING, null));
+        results.put(name, icValue);
+        results.put(name + OORINDICATOR_SUFFIX, outOfRange);
     }
 
     public static File getDataFile(ExpRun run)
@@ -223,23 +243,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         for (DomainProperty column : provider.getBatchDomain(protocol).getProperties())
             runProperties.put(column.getName(), column);
 
-        Map<Integer, String> cutoffs = new HashMap<Integer, String>();
-        for (String cutoffPropName : NabAssayProvider.CUTOFF_PROPERTIES)
-        {
-            DomainProperty cutoffProp = runProperties.get(cutoffPropName);
-            if (cutoffProp != null)
-            {
-                Integer cutoff = (Integer) run.getProperty(cutoffProp);
-                if (cutoff != null)
-                    cutoffs.put(cutoff, cutoffProp.getPropertyDescriptor().getFormat());
-            }
-        }
-
-        if (cutoffs.isEmpty())
-        {
-            cutoffs.put(50, "0.000");
-            cutoffs.put(80, "0.000");
-        }
+        Map<Integer, String> cutoffs = getCutoffFormats(protocol, run);
 
         double[][] cellValues = getCellValues(dataFile, nabTemplate);
 
@@ -408,51 +412,6 @@ public class NabDataHandler extends AbstractExperimentDataHandler
                 well.setDilution(dilution);
             }
         }
-    }
-
-
-    private ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
-                                                   String propertyName, Object value, PropertyType type)
-    {
-        return getResultObjectProperty(container, protocol, objectURI, propertyName, value, type, null);
-    }
-
-    private ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
-                                                   String propertyName, Object value, PropertyType type, String format)
-    {
-        Lsid propertyURI = new Lsid(NAB_PROPERTY_LSID_PREFIX, protocol.getName(), propertyName);
-        ObjectProperty prop = new ObjectProperty(objectURI, container, propertyURI.toString(), value, type, propertyName);
-        prop.setFormat(format);
-        return prop;
-    }
-
-    public ActionURL getContentURL(Container container, ExpData data)
-    {
-        ExpRun run = data.getRun();
-        if (run != null)
-        {
-            ExpProtocol protocol = run.getProtocol();
-            ExpProtocol p = ExperimentService.get().getExpProtocol(protocol.getRowId());
-            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(container, p, run.getRowId());
-        }
-        return null;
-    }
-
-    public void deleteData(ExpData data, Container container, User user)
-    {
-        try
-        {
-            OntologyManager.deleteOntologyObject(data.getLSID(), container, true);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-    }
-
-    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
-    {
-        throw new UnsupportedOperationException("Not Yet Implemented");
     }
 
     public Priority getPriority(ExpData data)
