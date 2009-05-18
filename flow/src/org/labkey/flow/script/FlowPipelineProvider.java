@@ -171,7 +171,7 @@ public class FlowPipelineProvider extends PipelineProvider
         }
 
 
-        if (flowDirCount > 1)
+        if (flowDirCount > 0)
         {
             FileEntry entryRoot = entries.get(0);
             File file = new File(entryRoot.getURI());
