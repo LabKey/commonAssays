@@ -76,18 +76,15 @@
 
 %>
 <style type="text/css">
-    h2.summary-header {
+    .summary-header {
         margin-top:1em;
         margin-bottom:0.3em;
         border-bottom:1px solid lightgray
     }
 </style>
-<script type="text/javascript">
-    var getQueryURL = LABKEY.ActionURL.buildURL("query", "getQuery");
-</script>
 
 <% if (_fcsRunCount > 0 || _fcsAnalysisRunCount > 0 || _compensationMatrixCount > 0) { %>
-    <h2 class="summary-header">Summary</h2>
+    <h3 class="summary-header">Summary</h3>
 <% } %>
 
 <% if (_fcsRunCount > 0) { %>
@@ -309,7 +306,7 @@
 --%>
 
 <br/>
-<h2 class="summary-header">Actions</h2>
+<h3 class="summary-header">Actions</h3>
 <%
     if (_canSetPipelineRoot)
     {
@@ -345,7 +342,9 @@
 <%
     if (_protocol != null)
     {
-        %><br/><h2 class="summary-header">Settings</h2><%
+        %><br/><h3 class="summary-header">Configure</h3><%
+        %><div><%= PageFlowUtil.textLink("Settings", _protocol.urlShow())%></div><%
+
         if (_canUpdate)
         {
             %><div><%=PageFlowUtil.textLink("Upload Samples", _protocol.urlUploadSamples(_sampleSet != null))%></div><%
@@ -361,7 +360,6 @@
             int jobCount = PipelineService.get().getQueuedStatusFiles(c).length;
             %><div><%=PageFlowUtil.textLink("Show Jobs" + (jobCount > 0 ? " (" + jobCount + " running)" : ""), PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(c))%></div><%
         }
-        %><div><%= PageFlowUtil.textLink("Other Settings", _protocol.urlShow())%></div><%
 
         if (_canCreateFolder && _hasPipelineRoot)
         {
@@ -374,7 +372,7 @@
 <%--
 <br><hr><br>
 
-<h2 class="summary-header">Import Data</h2>
+<h3 class="summary-header">Import Data</h3>
 <div>Upload and import experimental data to LabKey server.</div>
 <div><%= PageFlowUtil.textLink("Upload and Import", PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(c, getViewContext().getActionURL().getLocalURIString()))%></div>
 <div class="labkey-indented">
@@ -392,7 +390,7 @@
     <a href="#">4 Workspaces</a>
 </div>
 
-<h2 class="summary-header">Analyze Data</h2>
+<h3 class="summary-header">Analyze Data</h3>
 <div>Create scripts and perform analysis on uploaded FCS Files.</div>
 <div><%= PageFlowUtil.textLink("Create Script", "#")%></div>
 <div class="labkey-indented">

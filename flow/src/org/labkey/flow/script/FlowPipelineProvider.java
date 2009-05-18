@@ -22,7 +22,6 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
@@ -41,9 +40,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class FlowPipelineProvider extends PipelineProvider
 {
@@ -86,11 +83,11 @@ public class FlowPipelineProvider extends PipelineProvider
     {
         public boolean accept(File pathname)
         {
+            if (pathname.isDirectory())
+                return false;
             if (pathname.getName().endsWith(".wsp"))
                 return true;
             if (!pathname.getName().endsWith(".xml"))
-                return false;
-            if (pathname.isDirectory())
                 return false;
             WorkspaceRecognizer recognizer = new WorkspaceRecognizer();
             try
@@ -110,11 +107,11 @@ public class FlowPipelineProvider extends PipelineProvider
 
     public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
     {
+        if (entries.size() == 0)
+            return;
         if (!context.hasPermission(ACL.PERM_INSERT))
             return;
         if (!hasFlowModule(context))
-            return;
-        if (entries.size() == 0)
             return;
 
         PipeRoot root;
@@ -132,12 +129,15 @@ public class FlowPipelineProvider extends PipelineProvider
             return;
         }
 
-        ActionURL url = PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
+        ActionURL importRunsURL = new ActionURL(AnalysisScriptController.ChooseRunsToUploadAction.class, context.getContainer());
         String srcURL = context.getActionURL().toString();
-        url.replaceParameter("srcURL", srcURL);
+        importRunsURL.replaceParameter("srcURL", srcURL);
         URI rootURI = root != null ? root.getUri() : pr.getUri();
 
-        boolean hasFlowDir = false;
+        ActionURL importWorkspaceURL = new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, context.getContainer());
+        importWorkspaceURL.addParameter("step", String.valueOf(AnalysisScriptController.ImportAnalysisStep.ASSOCIATE_FCSFILES.getNumber()));
+
+        int flowDirCount = 0;
         
         for (FileEntry entry : entries)
         {
@@ -149,26 +149,38 @@ public class FlowPipelineProvider extends PipelineProvider
                 File[] fcsFiles = dir.listFiles((FileFilter)FCS.FCSFILTER);
                 if (null == fcsFiles || 0 == fcsFiles.length)
                     continue;
-                url.replaceParameter("path", URIUtil.relativize(rootURI, dir.toURI()).toString());
-                FileAction action = new UploadRunAction("Import Flow Run", url, dir);
+                importRunsURL.replaceParameter("path", URIUtil.relativize(rootURI, dir.toURI()).toString());
+                FileAction action = new ImportFCSFilesAction("Import Flow Run", importRunsURL, dir);
                 action.setDescription("" + fcsFiles.length + "&nbsp;fcs&nbsp;file" + ((fcsFiles.length>1)?"s":""));
                 entry.addAction(action);
-                hasFlowDir = true;
+                flowDirCount++;
             }
+
+            File[] workspaces = entry.listFiles(new IsFlowJoWorkspaceFilter());
+            for (File workspace : workspaces)
+            {
+                importWorkspaceURL.replaceParameter("workspace.path", root.relativePath(workspace));
+                FileAction importWorkspaceAction = new FileAction("Import FlowJo Workspace", importWorkspaceURL, new File[] { workspace });
+                importWorkspaceAction.setDescription("Import analysis from a FlowJo workspace");
+                entry.addAction(importWorkspaceAction);
+
+                // UNDONE: create workspace from FlowJo workspace
+            }
+
+            // UNDONE: import FlowJo exported compensation matrix file: CompensationController.UploadAction
         }
 
-        if (hasFlowDir)
+
+        if (flowDirCount > 1)
         {
             FileEntry entryRoot = entries.get(0);
             File file = new File(entryRoot.getURI());
-
-            url.replaceParameter("path", URIUtil.relativize(rootURI, file.toURI()).toString());
-            FileAction action = new FileAction("Import Multiple Runs", url, null);
+            importRunsURL.replaceParameter("path", URIUtil.relativize(rootURI, file.toURI()).toString());
+            FileAction action = new FileAction("Import Multiple Runs", importRunsURL, null);
             action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
             entryRoot.addAction(action);
         }
     }
-
 
     public boolean suppressOverlappingRootsWarning(ViewContext context)
     {
@@ -178,9 +190,9 @@ public class FlowPipelineProvider extends PipelineProvider
     }
 
 
-    class UploadRunAction extends FileAction
+    class ImportFCSFilesAction extends FileAction
     {
-        UploadRunAction(String label, ActionURL url, File dir)
+        ImportFCSFilesAction(String label, ActionURL url, File dir)
         {
             super(label, url, new File[] {dir});
         }
