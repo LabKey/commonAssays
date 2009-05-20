@@ -34,8 +34,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.Document;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -56,9 +54,6 @@ public class MicroarrayBulkPropertiesTemplateAction extends BaseAssayAction<Micr
             throw new NotFoundException("Could not find microarray assay provider");
         }
         MicroarrayAssayProvider provider = (MicroarrayAssayProvider)p;
-
-        Domain runDomain = provider.getRunDomain(protocol);
-        List<DomainProperty> propertiesToCollect = new ArrayList<DomainProperty>(Arrays.asList(runDomain.getProperties()));
 
         getViewContext().getResponse().reset();
 
@@ -102,11 +97,16 @@ public class MicroarrayBulkPropertiesTemplateAction extends BaseAssayAction<Micr
         sheet.addCell(new Label(col++, 0, cy3Name, cellFormat));
         sheet.addCell(new Label(col++, 0, cy5Name, cellFormat));
 
-        for (DomainProperty domainProperty : propertiesToCollect)
+        Domain runDomain = provider.getRunDomain(protocol);
+        for (DomainProperty property : runDomain.getProperties())
         {
-            sheet.addCell(new Label(col++, 0, domainProperty.getName(), cellFormat));
+            if (MicroarrayAssayProvider.getXPath(property) == null)
+            {
+                // Only prompt user for non-XPath properties
+                sheet.addCell(new Label(col++, 0, property.getName(), cellFormat));
+            }
         }
-
+        
         for (int i = 0; i < col; i++)
         {
             sheet.setColumnView(i, 15);

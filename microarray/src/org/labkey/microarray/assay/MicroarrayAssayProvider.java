@@ -37,7 +37,6 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
-import org.labkey.api.study.TimepointType;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
@@ -45,7 +44,10 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.microarray.*;
+import org.labkey.microarray.MicroarrayController;
+import org.labkey.microarray.MicroarrayModule;
+import org.labkey.microarray.MicroarrayRunUploadForm;
+import org.labkey.microarray.MicroarraySchema;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.springframework.web.servlet.mvc.Controller;
@@ -294,25 +296,33 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         Domain domain = getRunDomain(protocol);
         for (DomainProperty runPD : domain.getProperties())
         {
-            String expression = runPD.getDescription();
-            if (expression != null)
+            XPathExpression xpath = getXPath(runPD);
+            if (xpath != null)
             {
-                // We use the description of the property descriptor as the XPath. Far from ideal.
-                try
-                {
-                    XPathFactory factory = XPathFactory.newInstance();
-                    XPath xPath = factory.newXPath();
-                    XPathExpression xPathExpression = xPath.compile(expression);
-
-                    result.put(runPD, xPathExpression);
-                }
-                catch (XPathExpressionException e)
-                {
-                    // User isn't required to use the description as an XPath
-                }
+                result.put(runPD, xpath);
             }
         }
         return result;
+    }
+
+    public static XPathExpression getXPath(DomainProperty runPD)
+    {
+        String expression = runPD.getDescription();
+        if (expression != null)
+        {
+            // We use the description of the property descriptor as the XPath. Far from ideal.
+            try
+            {
+                XPathFactory factory = XPathFactory.newInstance();
+                XPath xPath = factory.newXPath();
+                return xPath.compile(expression);
+            }
+            catch (XPathExpressionException e)
+            {
+                // User isn't required to use the description as an XPath
+            }
+        }
+        return null;
     }
 
     @Override
