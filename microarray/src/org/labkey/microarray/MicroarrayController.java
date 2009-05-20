@@ -29,9 +29,11 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.PipelineDataCollectorRedirectAction;
+import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
@@ -76,7 +78,7 @@ public class MicroarrayController extends SpringActionController
         private boolean _copy;
     }
     
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(DesignAssayPermission.class)
     public class DesignerAction extends org.labkey.api.study.actions.DesignerAction
     {
         protected ModelAndView createGWTView(Map<String, String> properties)
