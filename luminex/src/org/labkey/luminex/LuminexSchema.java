@@ -150,7 +150,8 @@ public class LuminexSchema extends UserSchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Type")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Well")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Outlier")));
-        ColumnInfo specimenColumn = result.wrapColumn(result.getRealTable().getColumn("Description"));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Description")));
+        ColumnInfo specimenColumn = result.wrapColumn(result.getRealTable().getColumn("SpecimenID"));
         specimenColumn.setFk(new SpecimenForeignKey(this, AssayService.get().getProvider(_protocol), _protocol));
         result.addColumn(specimenColumn);
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ExtraSpecimenInfo")));
@@ -180,6 +181,7 @@ public class LuminexSchema extends UserSchema
         defaultCols.add(FieldKey.fromParts("Type"));
         defaultCols.add(FieldKey.fromParts("Well"));
         defaultCols.add(FieldKey.fromParts("Description"));
+        defaultCols.add(FieldKey.fromParts("SpecimenID"));
         defaultCols.add(FieldKey.fromParts("ParticipantID"));
         defaultCols.add(FieldKey.fromParts("VisitID"));
         defaultCols.add(FieldKey.fromParts("FI"));

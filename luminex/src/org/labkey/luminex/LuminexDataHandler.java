@@ -86,9 +86,8 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 throw new ExperimentException("Could not find Excel run domain for protocol with LSID " + protocol.getLSID());
             }
 
-            PropertyDescriptor[] analyteColumns = OntologyManager.getPropertiesForType(analyteDomain.getTypeURI(), info.getContainer());
             PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), info.getContainer());
-            importData(analyteColumns, excelRunColumns, expRun, info.getContainer(), data, info.getUser(), dataFile);
+            importData(excelRunColumns, expRun, info.getContainer(), data, info.getUser(), dataFile);
         }
         catch (SQLException e)
         {
@@ -382,7 +381,6 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
 
     /**
      * Handles persisting of uploaded run data into the database
-     * @param analyteColumns
      * @param excelRunColumns
      * @param expRun
      * @param container
@@ -392,7 +390,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
      * @throws SQLException
      * @throws ExperimentException
      */
-    private void importData(PropertyDescriptor[] analyteColumns, PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, File dataFile) throws SQLException, ExperimentException
+    private void importData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, File dataFile) throws SQLException, ExperimentException
     {
         boolean ownTransaction = !ExperimentService.get().isTransactionActive();
         if (ownTransaction)
@@ -456,6 +454,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                     Table.insert(user, LuminexSchema.getTableInfoDataRow(), dataRow);
                 }
             }
+            
             if (inputMaterials.isEmpty())
             {
                 throw new ExperimentException("Could not find any input samples in the data");
@@ -652,297 +651,100 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         String value = dataRow.getDescription();
         if (resolver != null && value != null)
         {
+            // First try resolving the whole description column as a specimen id
             ParticipantVisit match = resolver.resolve(value, null, null, null);
-            String participantId;
-            Double visitId;
-            Date date;
             String extraSpecimenInfo = null;
-            String[] parts = value == null ? new String[0] : value.split(",");
-            if (match.getParticipantID() == null && match.getVisitID() == null && match.getDate() == null && parts.length >= 3)
+            if (!isResolved(match))
             {
-                // First part is participant id
-                participantId = parts[0].trim();
-                try
+                // If that doesn't work, check if we have a specimen ID followed by a : or ; and possibly other text
+                int index = value.indexOf(';');
+                if (index == -1)
                 {
-                    // Second part is visit id, possibly prefixed with "visit"
-                    String visitString = parts[1].trim();
-                    if (visitString.toLowerCase().startsWith("visit"))
+                    // No ';', might have a ':'
+                    index = value.indexOf(':');
+                }
+                else
+                {
+                    int index2 = value.indexOf(':');
+                    if (index2 != -1)
                     {
-                        visitString = visitString.substring("visit".length()).trim();
+                        // We have both, use the first one
+                        index = Math.min(index, index2);
                     }
-                    visitId = new Double(visitString);
                 }
-                catch (NumberFormatException e)
+                
+                if (index != -1)
                 {
-                    visitId = null;
+                    String specimenID = value.substring(0, index);
+                    match = resolver.resolve(specimenID, null, null, null);
                 }
-                try
+                // If that doesn't work either, try to parse as "<PTID>, Visit <VisitNumber>, <Date>, <ExtraInfo>"
+                if (!isResolved(match))
                 {
-                    date = (Date) ConvertUtils.convert(parts[2].trim(), Date.class);
-                }
-                catch (ConversionException e)
-                {
-                    date = null;
-                }
-                if (parts.length > 3)
-                {
-                    StringBuilder sb = new StringBuilder(parts[3]);
-                    for (int i = 4; i < parts.length; i++)
+                    String[] parts = value.split(",");
+                    if (parts.length >= 3)
                     {
-                        sb.append(", ");
-                        sb.append(parts[i].trim());
+                        match = resolveParticipantVisitInfo(resolver, parts);
+
+                        StringBuilder sb = new StringBuilder();
+                        String separator = "";
+                        for (int i = 3; i < parts.length; i++)
+                        {
+                            sb.append(separator);
+                            separator = ", ";
+                            sb.append(parts[i].trim());
+                        }
+                        if (sb.length() > 0)
+                        {
+                            extraSpecimenInfo = sb.toString();
+                        }
                     }
-                    extraSpecimenInfo = sb.toString();
                 }
-                match = resolver.resolve(null, participantId, visitId, date);
             }
-            else
-            {
-                participantId = match.getParticipantID();
-                visitId = match.getVisitID();
-                date = match.getDate();
-            }
-            dataRow.setPtid(participantId);
-            dataRow.setVisitID(visitId);
-            dataRow.setDate(date);
+
+            dataRow.setPtid(match.getParticipantID());
+            dataRow.setVisitID(match.getVisitID());
+            dataRow.setDate(match.getDate());
+            dataRow.setSpecimenID(match.getSpecimenID());
             dataRow.setExtraSpecimenInfo(extraSpecimenInfo);
             materialInputs.add(match.getMaterial());
         }
     }
 
-    private LuminexDataRow createDataRow(ExpData data, Sheet sheet, List<String> colNames, int row, ParticipantVisitResolver resolver, Set<ExpMaterial> materialInputs)
+    private boolean isResolved(ParticipantVisit match)
     {
-        LuminexDataRow dataRow = new LuminexDataRow();
-        dataRow.setDataId(data.getRowId());
-        for (int col = 0; col < sheet.getColumns(); col++)
-        {
-            String columnName = colNames.get(col);
-
-            String value = sheet.getCell(col, row).getContents().trim();
-            if ("FI".equalsIgnoreCase(columnName))
-            {
-                dataRow.setFiString(value);
-                dataRow.setFi(determineOutOfRange(value).getValue(value));
-            }
-            else if ("FI - Bkgd".equalsIgnoreCase(columnName))
-            {
-                dataRow.setFiBackgroundString(value);
-                dataRow.setFiBackground(determineOutOfRange(value).getValue(value));
-            }
-            else if ("Type".equalsIgnoreCase(columnName))
-            {
-                dataRow.setType(value);
-            }
-            else if ("Well".equalsIgnoreCase(columnName))
-            {
-                dataRow.setWell(value);
-            }
-            else if ("Outlier".equalsIgnoreCase(columnName))
-            {
-                dataRow.setOutlier(!"0".equals(value));
-            }
-            else if ("Description".equalsIgnoreCase(columnName))
-            {
-                dataRow.setDescription(value);
-                if (resolver != null)
-                {
-                    ParticipantVisit match = resolver.resolve(value, null, null, null);
-                    String participantId;
-                    Double visitId;
-                    Date date;
-                    String extraSpecimenInfo = null;
-                    String[] parts = value == null ? new String[0] : value.split(",");
-                    if (match.getParticipantID() == null && match.getVisitID() == null && match.getDate() == null && parts.length >= 3)
-                    {
-                        // First part is participant id
-                        participantId = parts[0].trim();
-                        try
-                        {
-                            // Second part is visit id, possibly prefixed with "visit"
-                            String visitString = parts[1].trim();
-                            if (visitString.toLowerCase().startsWith("visit"))
-                            {
-                                visitString = visitString.substring("visit".length()).trim();
-                            }
-                            visitId = new Double(visitString);
-                        }
-                        catch (NumberFormatException e)
-                        {
-                            visitId = null;
-                        }
-                        try
-                        {
-                            date = (Date)ConvertUtils.convert(parts[2].trim(), Date.class);
-                        }
-                        catch (ConversionException e)
-                        {
-                            date = null;
-                        }
-                        if (parts.length > 3)
-                        {
-                            StringBuilder sb = new StringBuilder(parts[3]);
-                            for (int i = 4; i < parts.length; i++)
-                            {
-                                sb.append(", ");
-                                sb.append(parts[i].trim());
-                            }
-                            extraSpecimenInfo = sb.toString();
-                        }
-                        match = resolver.resolve(null, participantId, visitId, date);
-                    }
-                    else
-                    {
-                        participantId = match.getParticipantID();
-                        visitId = match.getVisitID();
-                        date = match.getDate();
-                    }
-                    dataRow.setPtid(participantId);
-                    dataRow.setVisitID(visitId);
-                    dataRow.setDate(date);
-                    dataRow.setExtraSpecimenInfo(extraSpecimenInfo);
-                    materialInputs.add(match.getMaterial());
-                }
-            }
-            else if ("Std Dev".equalsIgnoreCase(columnName))
-            {
-                dataRow.setStdDevString(value);
-                dataRow.setStdDev(determineOutOfRange(value).getValue(value));
-            }
-            else if ("Exp Conc".equalsIgnoreCase(columnName))
-            {
-                dataRow.setExpConc(parseDouble(value));
-            }
-            else if ("Obs Conc".equalsIgnoreCase(columnName))
-            {
-                dataRow.setObsConcString(value);
-                dataRow.setObsConc(determineOutOfRange(value).getValue(value));
-            }
-            else if ("(Obs/Exp) * 100".equalsIgnoreCase(columnName))
-            {
-                if (!value.equals("***"))
-                {
-                    dataRow.setObsOverExp(parseDouble(value));
-                }
-            }
-            else if ("Conc in Range".equalsIgnoreCase(columnName))
-            {
-                dataRow.setConcInRangeString(value);
-                dataRow.setConcInRange(determineOutOfRange(value).getValue(value));
-            }
-            else if ("Ratio".equalsIgnoreCase(columnName))
-            {
-                dataRow.setRatio(value);
-            }
-            else if ("Dilution".equalsIgnoreCase(columnName))
-            {
-                String dilutionValue = value;
-                if (dilutionValue != null && dilutionValue.startsWith("1:"))
-                {
-                    dilutionValue = dilutionValue.substring("1:".length());
-                }
-                dataRow.setDilution(parseDouble(dilutionValue));
-            }
-            else if ("Group".equalsIgnoreCase(columnName))
-            {
-                dataRow.setDataRowGroup(value);
-            }
-            else if ("Sampling Errors".equalsIgnoreCase(columnName))
-            {
-                dataRow.setSamplingErrors(value);
-            }
-        }
-        return dataRow;
+        return match.getParticipantID() != null || match.getVisitID() != null || match.getDate() != null;
     }
 
-    private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, PropertyDescriptor[] analyteColumns, Map<String, Object> analyteProps, PropertyDescriptor[] excelRunColumns, Map<String, Object> excelRunProps)
+    private ParticipantVisit resolveParticipantVisitInfo(ParticipantVisitResolver resolver, String[] parts)
     {
-        if (row >= analyteSheet.getRows())
+        // First part is participant id
+        String participantId = parts[0].trim();
+        Double visitId;
+        Date date;
+        try
         {
-            return row;
+            // Second part is visit id, possibly prefixed with "visit"
+            String visitString = parts[1].trim();
+            if (visitString.toLowerCase().startsWith("visit"))
+            {
+                visitString = visitString.substring("visit".length()).trim();
+            }
+            visitId = new Double(visitString);
         }
-
-        Map<String,PropertyDescriptor> analyteMap = OntologyManager.createImportPropertyMap(analyteColumns);
-        Map<String,PropertyDescriptor> excelMap = OntologyManager.createImportPropertyMap(excelRunColumns);
-
-        do
+        catch (NumberFormatException e)
         {
-            String cellContents = analyteSheet.getCell(0, row).getContents();
-            int index = cellContents.indexOf(":");
-            if (index != -1)
-            {
-                String propName = cellContents.substring(0, index);
-                String value = cellContents.substring((propName + ":").length()).trim();
-
-                if ("Regression Type".equalsIgnoreCase(propName))
-                {
-                    analyte.setRegressionType(value);
-                }
-                else if ("Std. Curve".equalsIgnoreCase(propName))
-                {
-                    analyte.setStdCurve(value);
-                }
-
-                storePropertyValue(propName, value, analyteMap, analyteProps);
-                storePropertyValue(propName, value, excelMap, excelRunProps);
-            }
-
-            String recoveryPrefix = "conc in range = unknown sample concentrations within range where standards recovery is ";
-            if (cellContents.toLowerCase().startsWith(recoveryPrefix))
-            {
-                String recoveryString = cellContents.substring(recoveryPrefix.length()).trim();
-                int charIndex = 0;
-
-                StringBuilder minSB = new StringBuilder();
-                while (charIndex < recoveryString.length() && Character.isDigit(recoveryString.charAt(charIndex)))
-                {
-                    minSB.append(recoveryString.charAt(charIndex));
-                    charIndex++;
-                }
-
-                while (charIndex < recoveryString.length() && !Character.isDigit(recoveryString.charAt(charIndex)))
-                {
-                    charIndex++;
-                }
-
-                StringBuilder maxSB = new StringBuilder();
-                while (charIndex < recoveryString.length() && Character.isDigit(recoveryString.charAt(charIndex)))
-                {
-                    maxSB.append(recoveryString.charAt(charIndex));
-                    charIndex++;
-                }
-
-                analyte.setMinStandardRecovery(Integer.parseInt(minSB.toString()));
-                analyte.setMaxStandardRecovery(Integer.parseInt(maxSB.toString()));
-            }
-
-            if (cellContents.toLowerCase().startsWith("fitprob. "))
-            {
-                int startIndex = cellContents.indexOf("=");
-                int endIndex = cellContents.indexOf(",");
-                if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex)
-                {
-                    String fitProbValue = cellContents.substring(startIndex + 1, endIndex).trim();
-                    analyte.setFitProb(Double.parseDouble(fitProbValue));
-                }
-                startIndex = cellContents.lastIndexOf("=");
-                if (startIndex >= 0)
-                {
-                    String resVarValue = cellContents.substring(startIndex + 1).trim();
-                    analyte.setResVar(Double.parseDouble(resVarValue));
-                }
-            }
+            visitId = null;
         }
-        while (++row < analyteSheet.getRows() && !"".equals(analyteSheet.getCell(0, row).getContents()));
-        return row;
-    }
-
-    private void storePropertyValue(String propName, String value, Map<String,PropertyDescriptor> columns, Map<String, Object> props)
-    {
-        PropertyDescriptor pd = columns.get(propName);
-        if (pd != null)
+        try
         {
-            props.put(pd.getPropertyURI(), value);
+            date = (Date)ConvertUtils.convert(parts[2].trim(), Date.class);
         }
+        catch (ConversionException e)
+        {
+            date = null;
+        }
+        return resolver.resolve(null, participantId, visitId, date);
     }
 
     public ActionURL getContentURL(Container container, ExpData data)

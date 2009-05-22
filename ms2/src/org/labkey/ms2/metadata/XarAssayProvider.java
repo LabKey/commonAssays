@@ -70,7 +70,7 @@ public class XarAssayProvider extends AbstractAssayProvider
     public static final String RUN_LSID_OBJECT_ID_PREFIX = "MS2PreSearch";
 
     public static final String FRACTION_DOMAIN_PREFIX = ExpProtocol.ASSAY_DOMAIN_PREFIX + "Fractions";
-    public static final String FRACTION_SET_NAME = "FractionProperties";
+    public static final String FRACTION_SET_NAME = "Fraction Fields";
     public static final String FRACTION_SET_LABEL = "These fields are used to describe searches where one sample has been divided into multiple fractions. The fields should describe the properties that vary from fraction to fraction.";
     private static final String FRACTION_INPUT_ROLE = "Fraction";
 

@@ -31,6 +31,7 @@ public class LuminexDataRow
     private String _well;
     private boolean _outlier;
     private String _description;
+    private String _specimenID;
     private String _ptid;
     private Double _visitID;
     private Date _date;
@@ -380,5 +381,15 @@ public class LuminexDataRow
     public String getExtraSpecimenInfo()
     {
         return _extraSpecimenInfo;
+    }
+
+    public String getSpecimenID()
+    {
+        return _specimenID;
+    }
+
+    public void setSpecimenID(String specimenID)
+    {
+        _specimenID = specimenID;
     }
 }

@@ -63,14 +63,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         super("LuminexAssayProtocol", "LuminexAssayRun", LuminexExcelDataHandler.LUMINEX_DATA_TYPE, new AssayTableMetadata(
             null,
             FieldKey.fromParts("Data", "Run"),
-            FieldKey.fromParts("RowId"))
-            {
-            @Override
-            public FieldKey getSpecimenIDFieldKey()
-            {
-                return FieldKey.fromParts("Description");
-            }
-        });
+            FieldKey.fromParts("RowId")));
     }
 
     public String getName()

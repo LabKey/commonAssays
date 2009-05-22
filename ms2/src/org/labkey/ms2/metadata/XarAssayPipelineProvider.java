@@ -70,8 +70,9 @@ public class XarAssayPipelineProvider extends PipelineProvider
                         ActionURL url = new ActionURL(XarAssayController.UploadRedirectAction.class, context.getContainer());
                         url.addParameter("protocolId", protocol.getRowId());
                         url.addParameter("path", root.relativePath(new File(entry.getURI())));
-                        navTree.addChild("Use " + protocol.getName(), url);
-                        navTree.setId("Describe Samples:Use " + protocol.getName());
+                        NavTree child = new NavTree("Use " + protocol.getName(), url);
+                        child.setId("Describe Samples:Use " + protocol.getName());
+                        navTree.addChild(child);
                     }
                 }
 
@@ -81,7 +82,10 @@ public class XarAssayPipelineProvider extends PipelineProvider
                 }
 
                 ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(context.getContainer(), XarAssayProvider.NAME);
-                navTree.addChild("Create Assay Definition", url);
+
+                NavTree child = new NavTree("Create Assay Definition", url);
+                child.setId("Describe Samples:Create Assay Definition");
+                navTree.addChild(child);
 
                 entry.addAction(new FileAction(navTree, files));
             }
