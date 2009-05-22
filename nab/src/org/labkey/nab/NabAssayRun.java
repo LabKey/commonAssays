@@ -16,7 +16,6 @@
 package org.labkey.nab;
 
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -29,9 +28,13 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QueryView;
+import org.labkey.api.query.CustomView;
 import org.labkey.api.data.*;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.api.security.User;
+import org.labkey.nab.query.NabSchema;
 
 import java.util.*;
 import java.sql.ResultSet;
@@ -48,6 +51,7 @@ public class NabAssayRun extends Luc5Assay
     private ExpProtocol _protocol;
     private AbstractPlateBasedAssayProvider _provider;
     private Map<PropertyDescriptor, Object> _runProperties;
+    private Map<PropertyDescriptor, Object> _runDisplayProperties;
     List<SampleResult> _sampleResults;
     private ExpRun _run;
     private User _user;
@@ -61,48 +65,80 @@ public class NabAssayRun extends Luc5Assay
         _provider = provider;
     }
 
+    private Map<FieldKey, PropertyDescriptor> getFieldKeys()
+    {
+        Map<FieldKey, PropertyDescriptor> fieldKeys = new HashMap<FieldKey, PropertyDescriptor>();
+        for (DomainProperty property : _provider.getBatchDomain(_protocol).getProperties())
+            fieldKeys.put(FieldKey.fromParts(AssayService.RUN_PROPERTIES_COLUMN_NAME, property.getName()), property.getPropertyDescriptor());
+        for (DomainProperty property : _provider.getRunDomain(_protocol).getProperties())
+            fieldKeys.put(FieldKey.fromParts(AssayService.RUN_PROPERTIES_COLUMN_NAME, property.getName()), property.getPropertyDescriptor());
+        return fieldKeys;
+    }
+
+    private Map<PropertyDescriptor, Object> getRunProperties(TableInfo runTable, Map<FieldKey, PropertyDescriptor> fieldKeys, Map<FieldKey, ColumnInfo> selectCols)
+    {
+        SimpleFilter filter = new SimpleFilter("RowId", _run.getRowId());
+
+        Map<PropertyDescriptor, Object> properties = new LinkedHashMap<PropertyDescriptor, Object>();
+        ResultSet rs = null;
+        try
+        {
+            rs = Table.selectForDisplay(runTable, new ArrayList<ColumnInfo>(selectCols.values()), filter, null, 1, 0);
+            if (!rs.next())
+                HttpView.throwNotFound("Run " + _run.getRowId() + " was not found.");
+
+            for (Map.Entry<FieldKey, ColumnInfo> entry : selectCols.entrySet())
+            {
+                ColumnInfo column = entry.getValue();
+                ColumnInfo displayField = column.getDisplayField();
+                if (column.getDisplayField() != null)
+                    column = displayField;
+                if (fieldKeys.containsKey(entry.getKey()))
+                    properties.put(fieldKeys.get(entry.getKey()), column.getValue(rs));
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        finally
+        {
+            if (rs != null)
+                try { rs.close(); } catch (SQLException e) { /* do nothing */ }
+        }
+        return properties;
+    }
+
+    public Map<PropertyDescriptor, Object> getRunDisplayProperties(ViewContext context)
+    {
+        if (_runDisplayProperties == null)
+        {
+            Map<FieldKey, PropertyDescriptor> fieldKeys = getFieldKeys();
+            TableInfo runTable = AssayService.get().createRunTable(_protocol, _provider, _user, _run.getContainer());
+            
+            CustomView runView = QueryService.get().getCustomView(context.getUser(), context.getContainer(),
+                   AssayService.ASSAY_SCHEMA_NAME, AssayService.get().getRunsTableName(_protocol), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+
+            if (runView != null)
+            {
+                Map<FieldKey, ColumnInfo> selectCols = QueryService.get().getColumns(runTable, runView.getColumns());
+                _runDisplayProperties = getRunProperties(runTable, fieldKeys, selectCols);
+            }
+            else
+                _runDisplayProperties = getRunProperties();
+        }
+        return Collections.unmodifiableMap(_runDisplayProperties);
+    }
+
     public Map<PropertyDescriptor, Object> getRunProperties()
     {
         if (_runProperties == null)
         {
+            Map<FieldKey, PropertyDescriptor> fieldKeys = getFieldKeys();
+            TableInfo runTable = AssayService.get().createRunTable(_protocol, _provider, _user, _run.getContainer());
+            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(runTable, fieldKeys.keySet());
             _runProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
-            ResultSet rs = null;
-            try
-            {
-                Map<FieldKey, PropertyDescriptor> fieldKeys = new HashMap<FieldKey, PropertyDescriptor>();
-                for (DomainProperty property : _provider.getBatchDomain(_protocol).getProperties())
-                    fieldKeys.put(FieldKey.fromParts(AssayService.RUN_PROPERTIES_COLUMN_NAME, property.getName()), property.getPropertyDescriptor());
-                for (DomainProperty property : _provider.getRunDomain(_protocol).getProperties())
-                    fieldKeys.put(FieldKey.fromParts(AssayService.RUN_PROPERTIES_COLUMN_NAME, property.getName()), property.getPropertyDescriptor());
-
-                TableInfo runTable = AssayService.get().createRunTable(_protocol, _provider, _user, _run.getContainer());
-                SimpleFilter filter = new SimpleFilter("RowId", _run.getRowId());
-                Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(runTable, fieldKeys.keySet());
-                rs = Table.selectForDisplay(runTable, new ArrayList<ColumnInfo>(cols.values()), filter, null, 1, 0);
-                if (!rs.next())
-                    HttpView.throwNotFound("Run " + _run.getRowId() + " was not found.");
-
-                for (Map.Entry<FieldKey, ColumnInfo> entry : cols.entrySet())
-                {
-                    ColumnInfo column = entry.getValue();
-                    ColumnInfo displayField = column.getDisplayField();
-                    if (column.getDisplayField() != null)
-                        column = displayField;
-                    _runProperties.put(fieldKeys.get(entry.getKey()), column.getValue(rs));
-                }
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
-            finally
-            {
-                if (rs != null)
-                    try { rs.close(); } catch (SQLException e) { /* do nothing */ }
-            }
-            ColumnInfo runName = ExperimentService.get().getTinfoExperimentRun().getColumn("Name");
-            if (runName != null)
-                _runProperties.put(new PropertyDescriptor(runName, _run.getContainer()), _run.getName());
+            _runProperties.putAll(getRunProperties(runTable, fieldKeys, cols));
         }
         return Collections.unmodifiableMap(_runProperties);
     }

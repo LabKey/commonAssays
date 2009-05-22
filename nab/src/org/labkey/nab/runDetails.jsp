@@ -31,6 +31,7 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.*" %>
 <%@ page import="org.labkey.api.study.DilutionCurve" %>
+<%@ page import="org.labkey.api.util.Pair" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();
@@ -42,13 +43,7 @@
     Map<PropertyDescriptor, Object> firstSample = sampleInfos.get(0).getProperties();
     Set<PropertyDescriptor> samplePropertyDescriptors = firstSample.keySet();
 
-    Map<PropertyDescriptor, Object> runProperties = bean.getRunProperties();
-    Map<PropertyDescriptor, Object> nonNullRunProperties = new LinkedHashMap<PropertyDescriptor, Object>();
-    for (Map.Entry<PropertyDescriptor, Object> prop : runProperties.entrySet())
-    {
-        if (prop.getValue() != null)
-            nonNullRunProperties.put(prop.getKey(), prop.getValue());
-    }
+    Map<String, Object> runProperties = bean.getRunDisplayProperties();
 
     boolean writer = context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT);
 
@@ -61,6 +56,7 @@
     }
 
     QueryView duplicateDataFileView = bean.getDuplicateDataFileView(me.getViewContext());
+    int columnCount = 2;
 
     if (bean.isNewRun())
     {
@@ -104,22 +100,31 @@
         <td>
             <table width="100%">
                 <%
-                    Iterator<Map.Entry<PropertyDescriptor, Object>> propertyIt = nonNullRunProperties.entrySet().iterator();
-                    while (propertyIt.hasNext())
+                    Iterator<Map.Entry<String, Object>> propertyIt = runProperties.entrySet().iterator();
+                    Pair<String, Object>[] entries = new Pair[runProperties.size()];
+                    for (int i = 0; i < entries.length; i++)
+                    {
+                        Map.Entry<String, Object> entry = propertyIt.next();
+                        entries[i] = new Pair<String, Object>(entry.getKey(), entry.getValue());
+                    }
+
+                    int longestColumn = (int) Math.ceil(entries.length/2.0);
+                    for (int row = 0; row < longestColumn; row++)
                     {
                 %>
                     <tr>
                     <%
-                        for (int col = 0; col < 2; col++)
+                        for (int col = 0; col < columnCount; col++)
                         {
-                            Map.Entry<PropertyDescriptor, Object> property = propertyIt.hasNext() ? propertyIt.next() : null;
-                            Object value = null;
-                            if (property != null)
-                                value = formatValue(property.getKey(), property.getValue());
-                    %>
-                        <th class="labkey-header"><%= property != null ? h(property.getKey().getNonBlankLabel()) : "&nbsp;"  %></th>
-                        <td><%= property != null ? h(value) : "&nbsp;"  %></td>
-                    <%
+                            int index = col*longestColumn + row;
+                            if (index < entries.length)
+                            {
+                                Pair<String, Object> property = index < entries.length ? entries[index] : null;
+                        %>
+                            <th class="labkey-header"><%= property != null ? h(property.getKey()) : "&nbsp;"  %></th>
+                            <td><%= property != null ? h(property.getValue()) : "&nbsp;"  %></td>
+                        <%
+                            }
                         }
                     %>
                     </tr>
@@ -300,7 +305,7 @@
                             if (!pdsWithData.contains(pd.getName()))
                                 continue;
 
-                            Object value = formatValue(pd, entry.getValue());
+                            Object value = bean.formatValue(pd, entry.getValue());
                     %>
                             <td><%= h(value) %></td>
                     <%
@@ -428,36 +433,3 @@
     }
 %>
 </table>
-<%!
-    Object formatValue(PropertyDescriptor pd, Object value)
-    {
-        if (pd.getFormat() != null)
-        {
-            if (pd.getPropertyType() == PropertyType.DOUBLE)
-            {
-                DecimalFormat format = new DecimalFormat(pd.getFormat());
-                value = format.format(value);
-            }
-            if (pd.getPropertyType() == PropertyType.DATE_TIME)
-            {
-                DateFormat format = new SimpleDateFormat(pd.getFormat());
-                value = format.format((Date) value);
-            }
-        }
-        else if (pd.getPropertyType() == PropertyType.DATE_TIME && value instanceof Date)
-        {
-            Date date = (Date) value;
-            if (date.getHours() == 0 &&
-                    date.getMinutes() == 0 &&
-                    date.getSeconds() == 0)
-            {
-                value = formatDate(date);
-            }
-            else
-            {
-                value = formatDateTime(date);
-            }
-        }
-        return value;
-    }
-%>

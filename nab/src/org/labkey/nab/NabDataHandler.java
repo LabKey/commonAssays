@@ -133,10 +133,10 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
         return datas;
     }
 
-    public static List<DilutionSummary> getDilutionSummaries(User user, int... dataObjectIds) throws ExperimentException, SQLException
+    public static Map<DilutionSummary, NabAssayRun> getDilutionSummaries(User user, int... dataObjectIds) throws ExperimentException, SQLException
     {
-        Map<String, Luc5Assay> dataToAssay = new HashMap<String, Luc5Assay>();
-        List<DilutionSummary> summaries = new ArrayList<DilutionSummary>();
+        Map<String, NabAssayRun> dataToAssay = new HashMap<String, NabAssayRun>();
+        Map<DilutionSummary, NabAssayRun> summaries = new HashMap<DilutionSummary, NabAssayRun>();
         for (int dataObjectId : dataObjectIds)
         {
             OntologyObject dataRow = OntologyManager.getOntologyObject(dataObjectId);
@@ -159,7 +159,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
             if (dataParent == null)
                 continue;
             String dataLsid = dataParent.getObjectURI();
-            Luc5Assay assay = dataToAssay.get(dataLsid);
+            NabAssayRun assay = dataToAssay.get(dataLsid);
             if (assay == null)
             {
                 ExpData dataObject = ExperimentService.get().getExpData(dataLsid);
@@ -175,7 +175,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
             {
                 if (wellgroupName.equals(summary.getWellGroup().getName()))
                 {
-                    summaries.add(summary);
+                    summaries.put(summary, assay);
                     break;
                 }
             }

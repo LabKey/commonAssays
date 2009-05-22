@@ -33,6 +33,8 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -59,6 +61,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
+import java.text.DecimalFormat;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * User: jeckels
@@ -170,15 +175,17 @@ public class NabAssayController extends SpringActionController
 
     public static class RenderAssayBean
     {
+        private ViewContext _context;
         private NabAssayRun _assay;
         private boolean _newRun;
         private boolean _printView;
         private Set<String> _hiddenRunColumns;
-        private Map<PropertyDescriptor, Object> _displayProperties;
+        private Map<String, Object> _displayProperties;
 
 
-        public RenderAssayBean(NabAssayRun assay, boolean newRun, boolean printView)
+        public RenderAssayBean(ViewContext context, NabAssayRun assay, boolean newRun, boolean printView)
         {
+            _context = context;
             _assay = assay;
             _newRun = newRun;
             _printView = printView;
@@ -188,20 +195,60 @@ public class NabAssayController extends SpringActionController
             _hiddenRunColumns.addAll(Arrays.asList(NabAssayProvider.CUTOFF_PROPERTIES));
         }
 
-        public Map<PropertyDescriptor, Object> getRunProperties()
+        public Map<String, Object> getRunDisplayProperties()
         {
             if (_displayProperties == null)
             {
-                Map<PropertyDescriptor, Object> allProperties = _assay.getRunProperties();
-                _displayProperties = new LinkedHashMap<PropertyDescriptor, Object>();
+                Map<PropertyDescriptor, Object> allProperties = _assay.getRunDisplayProperties(_context);
+                _displayProperties = new LinkedHashMap<String, Object>();
                 for (Map.Entry<PropertyDescriptor, Object> entry : allProperties.entrySet())
                 {
-                    if (!_hiddenRunColumns.contains(entry.getKey().getName()))
-                        _displayProperties.put(entry.getKey(), entry.getValue());
+                    PropertyDescriptor property = entry.getKey();
+                    if (!_hiddenRunColumns.contains(property.getName()))
+                    {
+                        Object value = entry.getValue();
+                        if (value != null)
+                        {
+                            _displayProperties.put(property.getNonBlankLabel(), formatValue(property, value));
+                        }
+                    }
                 }
             }
             return _displayProperties;
         }
+
+        public Object formatValue(PropertyDescriptor pd, Object value)
+        {
+            if (pd.getFormat() != null)
+            {
+                if (pd.getPropertyType() == PropertyType.DOUBLE)
+                {
+                    DecimalFormat format = new DecimalFormat(pd.getFormat());
+                    value = format.format(value);
+                }
+                if (pd.getPropertyType() == PropertyType.DATE_TIME)
+                {
+                    DateFormat format = new SimpleDateFormat(pd.getFormat());
+                    value = format.format((Date) value);
+                }
+            }
+            else if (pd.getPropertyType() == PropertyType.DATE_TIME && value instanceof Date)
+            {
+                Date date = (Date) value;
+                if (date.getHours() == 0 &&
+                        date.getMinutes() == 0 &&
+                        date.getSeconds() == 0)
+                {
+                    value = DateUtil.formatDate(date);
+                }
+                else
+                {
+                    value = DateUtil.formatDateTime(date);
+                }
+            }
+            return value;
+        }
+
 
         public List<NabAssayRun.SampleResult> getSampleResults()
         {
@@ -369,15 +416,40 @@ public class NabAssayController extends SpringActionController
         }
     }
 
+    private NabAssayRun getNabAssayRun(ExpRun run) throws ExperimentException
+    {
+        // cache last NAb assay run in session.  This speeds up the case where users bring up details view and
+        // then immediately hit the 'print' button.
+        NabAssayRun assay = (NabAssayRun) getViewContext().getSession().getAttribute(LAST_NAB_RUN_KEY);
+        if (assay == null ||
+                (assay.getRunRowId() != null && run.getRowId() != assay.getRunRowId().intValue()) ||
+                (assay.getRun() != null && run.getRowId() != assay.getRun().getRowId()))
+        {
+            try
+            {
+                assay = NabDataHandler.getAssayResults(run, getUser());
+                if (assay != null)
+                    getViewContext().getSession().setAttribute(LAST_NAB_RUN_KEY, assay);
+            }
+            catch (NabDataHandler.MissingDataFileException e)
+            {
+                HttpView.throwNotFound(e.getMessage());
+            }
+        }
+        return assay;
+    }
+
+    private static final String LAST_NAB_RUN_KEY = NabAssayController.class.getName() + "/LastNAbRun";
 
     @RequiresPermission(ACL.PERM_READ)
     public class DetailsAction extends SimpleViewAction<RenderAssayForm>
     {
-        private ExpRun _run;
+        private int _runRowId;
         private ExpProtocol _protocol;
 
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
+            _runRowId = form.getRowId();
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             if (run == null)
             {
@@ -391,40 +463,33 @@ public class NabAssayController extends SpringActionController
                 newURL.setContainer(run.getContainer());
                 HttpView.throwRedirect(newURL);
             }
-            NabAssayRun assay = null;
-            try
-            {
-                assay = NabDataHandler.getAssayResults(run, getUser());
-            }
-            catch (NabDataHandler.MissingDataFileException e)
-            {
-                HttpView.throwNotFound(e.getMessage());
-            }
-            _run = ExperimentService.get().getExpRun(form.getRowId());
-            _protocol = _run.getProtocol();
+            NabAssayRun assay = getNabAssayRun(run);
+            _protocol = run.getProtocol();
             AbstractPlateBasedAssayProvider provider = (AbstractPlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
 
             HttpView view = new JspView<RenderAssayBean>("/org/labkey/nab/runDetails.jsp",
-                    new RenderAssayBean(assay, form.isNewRun(), isPrint()));
+                    new RenderAssayBean(getViewContext(), assay, form.isNewRun(), isPrint()));
             if (!isPrint())
-                view = new VBox(new NabDetailsHeaderView(_protocol, provider, _run.getRowId()), view);
+                view = new VBox(new NabDetailsHeaderView(_protocol, provider, _runRowId), view);
             return view;
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            ActionURL assayListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(_run.getContainer());
-            ActionURL runListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(_run.getContainer(), _protocol);
-            ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(_run.getContainer(), _protocol, _run.getRowId());
+            ActionURL assayListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer());
+            ActionURL runListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol);
+            ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(getContainer(), _protocol, _runRowId);
             return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
-                    " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _run.getRowId() + " Details");
+                    " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _runRowId + " Details");
         }
     }
 
     public static class GraphSelectedForm extends FormData
     {
+        public static final String DEFAULT_PTID_CAPTION = "DefaultPtidCaption";
         private int _protocolId;
         private int[] _id;
+        private String _captionColumn = DEFAULT_PTID_CAPTION;
 
         public int[] getId()
         {
@@ -445,30 +510,35 @@ public class NabAssayController extends SpringActionController
         {
             _protocolId = protocolId;
         }
+
+        public String getCaptionColumn()
+        {
+            return _captionColumn;
+        }
+
+        public void setCaptionColumn(String captionColumn)
+        {
+            _captionColumn = captionColumn;
+        }
     }
 
     public static class GraphSelectedBean
     {
         private ViewContext _context;
-        private DilutionSummary[] _dilutionSummaries;
         private int[] _cutoffs;
         private ExpProtocol _protocol;
         private int[] _dataObjectIds;
         private QueryView _queryView;
         private int[] _graphableIds;
+        private String _captionColumn;
 
-        public GraphSelectedBean(ViewContext context, ExpProtocol protocol, DilutionSummary[] dilutions, int[] cutoffs, int[] dataObjectIds)
+        public GraphSelectedBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, int[] dataObjectIds, String captionColumn)
         {
             _context = context;
-            _dilutionSummaries = dilutions;
             _cutoffs = cutoffs;
             _protocol = protocol;
             _dataObjectIds = dataObjectIds;
-        }
-
-        public DilutionSummary[] getDilutionSummaries()
-        {
-            return _dilutionSummaries;
+            _captionColumn = captionColumn;
         }
 
         public int[] getCutoffs()
@@ -479,6 +549,11 @@ public class NabAssayController extends SpringActionController
         public ExpProtocol getProtocol()
         {
             return _protocol;
+        }
+
+        public String getCaptionColumn()
+        {
+            return _captionColumn;
         }
 
         public int[] getGraphableObjectIds() throws IOException, SQLException
@@ -559,14 +634,16 @@ public class NabAssayController extends SpringActionController
             }
 
             Set<Integer> cutoffSet = new HashSet<Integer>();
-            List<DilutionSummary> summaries = NabDataHandler.getDilutionSummaries(getUser(), objectIds);
-            for (DilutionSummary summary :summaries)
+            Map<DilutionSummary, NabAssayRun> summaries = NabDataHandler.getDilutionSummaries(getUser(), objectIds);
+            for (DilutionSummary summary : summaries.keySet())
             {
                 for (int cutoff : summary.getAssay().getCutoffs())
                     cutoffSet.add(cutoff);
             }
-            JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/multiRunGraph.jsp",
-                    new GraphSelectedBean(getViewContext(), _protocol, summaries.toArray(new DilutionSummary[summaries.size()]), toArray(cutoffSet), objectIds));
+
+            GraphSelectedBean bean = new GraphSelectedBean(getViewContext(), _protocol, toArray(cutoffSet), objectIds, form.getCaptionColumn());
+
+            JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/multiRunGraph.jsp", bean);
 
             return new VBox(new AssayHeaderView(_protocol, AssayService.get().getProvider(_protocol), false, null), multiGraphView);
         }
@@ -658,14 +735,14 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(GraphSelectedForm form, BindException errors) throws Exception
         {
             int[] ids = form.getId();
-            List<DilutionSummary> summaries = NabDataHandler.getDilutionSummaries(getUser(), ids);
+            Map<DilutionSummary, NabAssayRun> summaries = NabDataHandler.getDilutionSummaries(getUser(), ids);
             Set<Integer> cutoffSet = new HashSet<Integer>();
-            for (DilutionSummary summary :summaries)
+            for (DilutionSummary summary : summaries.keySet())
             {
                 for (int cutoff : summary.getAssay().getCutoffs())
                     cutoffSet.add(cutoff);
             }
-            renderChartPNG(getViewContext().getResponse(), summaries.toArray(new DilutionSummary[summaries.size()]), toArray(cutoffSet), false);
+            renderChartPNG(getViewContext().getResponse(), summaries, toArray(cutoffSet), false, form.getCaptionColumn());
             return null;
         }
 
@@ -681,8 +758,8 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
-            Luc5Assay assay = NabDataHandler.getAssayResults(run, getUser());
-            renderChartPNG(getViewContext().getResponse(), assay, assay.isLockAxes());
+            NabAssayRun assay = getNabAssayRun(run);
+            renderChartPNG(getViewContext().getResponse(), assay, assay.isLockAxes(), null);
             return null;
         }
 
@@ -700,24 +777,47 @@ public class NabAssayController extends SpringActionController
             ChartColor.MAGENTA
     };
 
-    private void renderChartPNG(HttpServletResponse response, DilutionSummary[] summaries, int[] cutoffs, boolean lockAxes) throws IOException, DilutionCurve.FitFailedException
+    private void renderChartPNG(HttpServletResponse response, Map<DilutionSummary, NabAssayRun> summaries, int[] cutoffs, boolean lockAxes, String captionColumn) throws IOException, DilutionCurve.FitFailedException
     {
         List<Pair<String, DilutionSummary>> summaryMap = new ArrayList<Pair<String, DilutionSummary>>();
-        for (DilutionSummary summary : summaries)
+        for (Map.Entry<DilutionSummary, NabAssayRun> sampleEntry : summaries.entrySet())
         {
-            String sampleId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-            String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-            Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-            Date date = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
-            String key = getMaterialKey(sampleId, participantId, visitId, date);
+            String key = null;
+            DilutionSummary summary = sampleEntry.getKey();
+            if (captionColumn != null)
+            {
+                Object value = summary.getWellGroup().getProperty(captionColumn);
+                if (value != null)
+                    key = value.toString();
+                else
+                {
+                    Map<PropertyDescriptor, Object> runProperties = sampleEntry.getValue().getRunProperties();
+                    for (Map.Entry<PropertyDescriptor, Object> runProperty : runProperties.entrySet())
+                    {
+                        if (captionColumn.equals(runProperty.getKey().getName()) && runProperty.getValue() != null)
+                            key = runProperty.getValue().toString();
+                    }
+                }
+            }
+            if (key == null || key.length() == 0)
+            {
+                String sampleId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
+                String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
+                Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
+                Date date = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
+                key = getMaterialKey(sampleId, participantId, visitId, date);
+            }
             summaryMap.add(new Pair<String, DilutionSummary>(key, summary));
         }
         renderChartPNG(response, summaryMap, cutoffs, lockAxes);
     }
 
-    private void renderChartPNG(HttpServletResponse response, Luc5Assay assay, boolean lockAxes) throws IOException, DilutionCurve.FitFailedException
+    private void renderChartPNG(HttpServletResponse response, NabAssayRun assay, boolean lockAxes, String captionColumn) throws IOException, DilutionCurve.FitFailedException
     {
-        renderChartPNG(response, assay.getSummaries(), assay.getCutoffs(), lockAxes);
+        Map<DilutionSummary, NabAssayRun> samples = new HashMap<DilutionSummary, NabAssayRun>();
+        for (DilutionSummary summary : assay.getSummaries())
+            samples.put(summary, assay);
+        renderChartPNG(response, samples, assay.getCutoffs(), lockAxes, captionColumn);
     }
 
     private void renderChartPNG(HttpServletResponse response, List<Pair<String, DilutionSummary>> dilutionSummaries, int[] cutoffs, boolean lockAxes) throws IOException, DilutionCurve.FitFailedException

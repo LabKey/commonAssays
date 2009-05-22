@@ -50,6 +50,7 @@ import java.util.*;
  */
 public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 {
+    public static final String CUSTOM_DETAILS_VIEW_NAME = "CustomDetailsView";
     public static final String[] CUTOFF_PROPERTIES = { "Cutoff1", "Cutoff2", "Cutoff3" };
     public static final String SAMPLE_METHOD_PROPERTY_NAME = "Method";
     public static final String SAMPLE_METHOD_PROPERTY_CAPTION = "Method";
@@ -335,6 +336,19 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             return settings;
         }
 
+        private void addGraphSubItems(NavTree parent, Domain domain, String dataRegionName)
+        {
+            ActionURL graphSelectedURL = new ActionURL(NabAssayController.GraphSelectedAction.class, getContainer());
+            for (DomainProperty prop : domain.getProperties())
+            {
+                NavTree menuItem = new NavTree(prop.getLabel(), "#");
+                menuItem.setScript("document.forms['" + dataRegionName + "'].action = '" + graphSelectedURL.getLocalURIString() + "';\n" +
+                        "document.forms['" + dataRegionName + "'].captionColumn.value = '" + prop.getName() + "';\n" +
+                        "document.forms['" + dataRegionName + "'].submit(); return false;");
+                parent.addChild(menuItem);
+            }
+        }
+
         public DataView createDataView()
         {
             DataView view = super.createDataView();
@@ -342,11 +356,25 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             rgn.setRecordSelectorValueColumns("ObjectId");
             rgn.addHiddenFormField("protocolId", "" + _protocol.getRowId());
             ButtonBar bbar = view.getDataRegion().getButtonBar(DataRegion.MODE_GRID);
+
             ActionURL graphSelectedURL = new ActionURL(NabAssayController.GraphSelectedAction.class, getContainer());
-            ActionButton graphSelectedButton = new ActionButton("button", "Graph");
-            graphSelectedButton.setURL(graphSelectedURL);
+            MenuButton graphSelectedButton = new MenuButton("Graph");
+            rgn.addHiddenFormField("captionColumn", "");
+
+            graphSelectedButton.addMenuItem("Default Graph", "#",
+                    "document.forms['" + rgn.getName() + "'].action = '" + graphSelectedURL.getLocalURIString() + "';\n" +
+                    "document.forms['" + rgn.getName() + "'].submit(); return false;");
+
+            Domain sampleDomain = ((NabAssayProvider) _provider).getSampleWellGroupDomain(_protocol);
+            NavTree sampleSubMenu = new NavTree("Custom Caption (Sample)");
+            addGraphSubItems(sampleSubMenu, sampleDomain, rgn.getName());
+            graphSelectedButton.addMenuItem(sampleSubMenu);
+
+            Domain runDomain = _provider.getRunDomain(_protocol);
+            NavTree runSubMenu = new NavTree("Custom Caption (Run)");
+            addGraphSubItems(runSubMenu, runDomain, rgn.getName());
+            graphSelectedButton.addMenuItem(runSubMenu);
             graphSelectedButton.setRequiresSelection(true);
-            graphSelectedButton.setActionType(ActionButton.Action.GET);
             bbar.add(graphSelectedButton);
 
             rgn.addDisplayColumn(0, new SimpleDisplayColumn()
