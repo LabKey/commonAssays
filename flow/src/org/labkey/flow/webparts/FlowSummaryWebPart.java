@@ -26,7 +26,19 @@ import org.labkey.api.data.Container;
 public class FlowSummaryWebPart extends JspView<FlowSummaryWebPart>
 {
     public static WebPartFactory FACTORY =
-            new SimpleWebPartFactory("Flow Summary", BaseWebPartFactory.LOCATION_RIGHT, FlowSummaryWebPart.class, null);
+            new SimpleWebPartFactory("Flow Summary", WebPartFactory.LOCATION_RIGHT, FlowSummaryWebPart.class, null)
+            {
+                @Override
+                public boolean isAvailable(Container c, String location)
+                {
+                    if (location.equals(getDefaultLocation()) || location.equals(WebPartFactory.LOCATION_MENUBAR))
+                    {
+                        return c.getFolderType() instanceof FlowFolderType ||
+                               c.getActiveModules().contains(getModule());
+                    }
+                    return false;
+                }
+            };
 
     // web parts shouldn't assume the current container
     public Container c;
