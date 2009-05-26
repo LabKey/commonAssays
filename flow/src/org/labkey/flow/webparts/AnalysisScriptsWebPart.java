@@ -21,14 +21,20 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.controllers.editscript.ScriptController;
+import org.labkey.flow.controllers.executescript.AnalysisScriptController;
+import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
+import org.springframework.web.servlet.mvc.Controller;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.io.Writer;
+import java.io.IOException;
 
 
 public class AnalysisScriptsWebPart extends FlowQueryView
@@ -57,8 +63,12 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         List<DisplayColumn> ret = new ArrayList<DisplayColumn>();
         TableInfo table = getTable();
         ret.addAll(getQueryDef().getDisplayColumns(null, table));
-        ColumnInfo colScriptType = new AliasedColumn("Type", table.getColumn("RowId"));
-        ret.add(new AnalysisScriptTypeColumn(colScriptType));
+
+        ColumnInfo colRowId = new AliasedColumn("RowId", table.getColumn("RowId"));
+        ret.add(new PerformAnalysisColumn(colRowId));
+        ret.add(new ScriptActionColumn("Copy", ScriptController.CopyAction.class, colRowId));
+        ret.add(new ScriptActionColumn("Delete", ScriptController.DeleteAction.class, colRowId));
+
         return ret;
     }
 
@@ -76,4 +86,75 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         ret.setFixedWidthColumns(false);
         return ret;
     }
+
+    public class ScriptActionColumn extends DataColumn
+    {
+        String _actionName;
+
+        public ScriptActionColumn(String actionName, Class<? extends Controller> action, ColumnInfo col)
+        {
+            super(col);
+            _actionName = actionName;
+            ActionURL actionURL = new ActionURL(action, AnalysisScriptsWebPart.this.getContainer());
+            setURL(actionURL + "scriptId=${RowId}");
+            setCaption("");
+            setWidth("40");
+        }
+
+        @Override
+        public String getFormattedValue(RenderContext ctx)
+        {
+            return _actionName;
+        }
+    }
+
+    public class PerformAnalysisColumn extends DataColumn
+    {
+        public PerformAnalysisColumn(ColumnInfo col)
+        {
+            super(col);
+            setCaption("Execute Script");
+            setNoWrap(true);
+            setWidth("auto");
+        }
+
+        public FlowScript getScript(RenderContext ctx)
+        {
+            Object value = getBoundColumn().getValue(ctx);
+            if (!(value instanceof Number))
+                return null;
+            int id = ((Number) value).intValue();
+            return FlowScript.fromScriptId(id);
+        }
+
+        @Override
+        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        {
+            FlowScript script = getScript(ctx);
+            if (script != null)
+            {
+                String and = "";
+
+                if (script.hasStep(FlowProtocolStep.calculateCompensation))
+                {
+                    ActionURL url = script.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation);
+                    out.write("<a href='" + PageFlowUtil.filter(url) + "'>Compensation</a>");
+                    and = "<br>";
+                }
+
+                if (script.hasStep(FlowProtocolStep.analysis))
+                {
+                    ActionURL url = script.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.analysis);
+                    out.write(and);
+                    out.write("<a href='" + PageFlowUtil.filter(url) + "'>Statistics and Graphs</a>");
+                }
+
+            }
+            else
+            {
+                out.write("&nbsp;");
+            }
+        }
+    }
+
 }

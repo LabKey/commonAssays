@@ -432,6 +432,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
                     destProtocol.setFCSAnalysisNameExpr(getUser(), srcProtocol.getFCSAnalysisNameExpr());
                     destProtocol.setSampleSetJoinFields(getUser(), srcProtocol.getSampleSetJoinFields());
                     destProtocol.setFCSAnalysisFilter(getUser(), srcProtocol.getFCSAnalysisFilterString());
+                    destProtocol.setICSMetadata(getUser(), srcProtocol.getICSMetadataString());
                 }
                 for (String analysisScriptName : form.getCopyAnalysisScript())
                 {

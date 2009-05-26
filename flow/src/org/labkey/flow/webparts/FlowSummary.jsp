@@ -76,124 +76,124 @@
 
 %>
 <style type="text/css">
+    <%-- elements following a summary-div get extra padding --%>
+    * + .summary-div {
+        padding-top:1em;
+    }
     .summary-header {
-        margin-top:1em;
+        border-bottom:1px solid lightgray;
+        font-weight:bold;
+        padding-top:0.2em;
+        margin-top:0;
         margin-bottom:0.3em;
-        border-bottom:1px solid lightgray
     }
 </style>
 
-<% if (_fcsRunCount > 0 || _fcsAnalysisRunCount > 0 || _compensationMatrixCount > 0) { %>
-    <h3 class="summary-header">Summary</h3>
-<% } %>
+<% if (_fcsRunCount > 0 || _fcsAnalysisRunCount > 0 || _compensationMatrixCount > 0 || _sampleSet != null) { %>
+    <div class="summary-div">
+        <h3 class="summary-header">Summary</h3>
 
-<% if (_fcsRunCount > 0) { %>
-    <script type="text/javascript">
-    Ext.onReady(function () {
-        var tip = new LABKEY.ext.CalloutTip({
-            target: "fcsFileRuns-div",
-            autoLoad: {
-              url: LABKEY.ActionURL.buildURL("query", "getQuery", null, {
-                  schemaName: "flow",
-                  "query.queryName": "Runs",
-                  "query.FCSFileCount~neq": 0,
-                  "query.columns": encodeURI("Name,Flag/Comment,FCSFileCount"),
-                  "query.sort": "Name",
-                  apiVersion: 9.1
-              })
-            },
-            tpl: new Ext.XTemplate(
-              '<table boder=0>',
-              '<tpl for="rows">',
-              '  <tr>',
-              '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
-              '    <td align="right" nowrap>({[values.FCSFileCount.value]} files)',
-              '  </tr>',
-              '</tpl>',
-              '</table>')
+    <% if (_fcsRunCount > 0) { %>
+        <script type="text/javascript">
+        Ext.onReady(function () {
+            var tip = new LABKEY.ext.CalloutTip({
+                target: "fcsFileRuns-div",
+                autoLoad: {
+                  url: LABKEY.ActionURL.buildURL("query", "getQuery", null, {
+                      schemaName: "flow",
+                      "query.queryName": "Runs",
+                      "query.FCSFileCount~neq": 0,
+                      "query.columns": encodeURI("Name,Flag/Comment,FCSFileCount"),
+                      "query.sort": "Name",
+                      apiVersion: 9.1
+                  })
+                },
+                tpl: new Ext.XTemplate(
+                  '<table boder=0>',
+                  '<tpl for="rows">',
+                  '  <tr>',
+                  '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
+                  '    <td align="right" nowrap>({[values.FCSFileCount.value]} files)',
+                  '  </tr>',
+                  '</tpl>',
+                  '</table>')
+            });
         });
-    });
-    </script>
-    <div id="fcsFileRuns-div">
-        <a href="<%=fcsFileRunsURL%>">FCS Files (<%=_fcsRunCount%> <%=_fcsRunCount == 1 ? "run" : "runs"%>)</a>
-    </div>
-<% } %>
+        </script>
+        <div id="fcsFileRuns-div">
+            <a href="<%=fcsFileRunsURL%>">FCS Files (<%=_fcsRunCount%> <%=_fcsRunCount == 1 ? "run" : "runs"%>)</a>
+        </div>
+    <% } %><%-- end if (_fcsRunCount > 0) --%>
 
-<% if (_fcsAnalysisRunCount > 0) { %>
-    <script type="text/javascript">
-    Ext.onReady(function () {
-        var tip = new LABKEY.ext.CalloutTip({
-            target: "fcsAnalysisRuns-div",
-            autoLoad: {
-              url: LABKEY.ActionURL.buildURL("query", "getQuery", null, {
-                  schemaName: "flow",
-                  "query.queryName": "Runs",
-                  "query.FCSAnalysisCount~neq": 0,
-                  "query.columns": encodeURI("Name,Flag/Comment,FCSAnalysisCount"),
-                  "query.sort": "Name",
-                  apiVersion: 9.1
-              })
-            },
-            tpl: new Ext.XTemplate(
-              '<table boder=0>',
-              '<tpl for="rows">',
-              '  <tr>',
-              '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
-              '    <td align="right" nowrap>({[values.FCSAnalysisCount.value]} wells)',
-              '  </tr>',
-              '</tpl>',
-              '</table>')
+    <% if (_fcsAnalysisRunCount > 0) { %>
+        <script type="text/javascript">
+        Ext.onReady(function () {
+            var tip = new LABKEY.ext.CalloutTip({
+                target: "fcsAnalysisRuns-div",
+                autoLoad: {
+                  url: LABKEY.ActionURL.buildURL("query", "getQuery", null, {
+                      schemaName: "flow",
+                      "query.queryName": "Runs",
+                      "query.FCSAnalysisCount~neq": 0,
+                      "query.columns": encodeURI("Name,Flag/Comment,FCSAnalysisCount"),
+                      "query.sort": "Name",
+                      apiVersion: 9.1
+                  })
+                },
+                tpl: new Ext.XTemplate(
+                  '<table boder=0>',
+                  '<tpl for="rows">',
+                  '  <tr>',
+                  '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
+                  '    <td align="right" nowrap>({[values.FCSAnalysisCount.value]} wells)',
+                  '  </tr>',
+                  '</tpl>',
+                  '</table>')
+            });
         });
-    });
-    </script>
-    <div id="fcsAnalysisRuns-div">
-        <a href="<%=fcsAnalysisRunsURL%>">FCS Analyses (<%=_fcsAnalysisRunCount%> <%=_fcsAnalysisRunCount == 1 ? "run" : "runs"%>)</a>
-    </div>
-<% } %>
+        </script>
+        <div id="fcsAnalysisRuns-div">
+            <a href="<%=fcsAnalysisRunsURL%>">FCS Analyses (<%=_fcsAnalysisRunCount%> <%=_fcsAnalysisRunCount == 1 ? "run" : "runs"%>)</a>
+        </div>
+    <% } %><%-- end if (_fcsAnalysisRunCount > 0) --%>
 
-<% if (_compensationMatrixCount > 0) { %>
-    <script type="text/javascript">
-    Ext.onReady(function () {
-        var tip = new LABKEY.ext.CalloutTip({
-            target: "compensationMatrices-div",
-            autoLoad: {
-              url: LABKEY.ActionURL.buildURL("query", "getQuery", null, {
-                  schemaName: "flow",
-                  "query.queryName": "CompensationMatrices",
-                  "query.columns": encodeURI("Name,Flag/Comment"),
-                  "query.sort": "Name",
-                  apiVersion: 9.1
-              })
-            },
-            tpl: new Ext.XTemplate(
-              '<table boder=0>',
-              '<tpl for="rows">',
-              '  <tr>',
-              '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
-              '  </tr>',
-              '</tpl>',
-              '</table>')
+    <% if (_compensationMatrixCount > 0) { %>
+        <script type="text/javascript">
+        Ext.onReady(function () {
+            var tip = new LABKEY.ext.CalloutTip({
+                target: "compensationMatrices-div",
+                autoLoad: {
+                  url: LABKEY.ActionURL.buildURL("query", "getQuery", null, {
+                      schemaName: "flow",
+                      "query.queryName": "CompensationMatrices",
+                      "query.columns": encodeURI("Name,Flag/Comment"),
+                      "query.sort": "Name",
+                      apiVersion: 9.1
+                  })
+                },
+                tpl: new Ext.XTemplate(
+                  '<table boder=0>',
+                  '<tpl for="rows">',
+                  '  <tr>',
+                  '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
+                  '  </tr>',
+                  '</tpl>',
+                  '</table>')
+            });
         });
-    });
-    </script>
-    <div id="compensationMatrices-div">
-        <a href="<%=compMatricesURL%>">Compensation (<%=_compensationMatrixCount%> <%=_compensationMatrixCount == 1 ? "matrix" : "matrices"%>)</a>
-    </div>
-<% } %>
+        </script>
+        <div id="compensationMatrices-div">
+            <a href="<%=compMatricesURL%>">Compensation (<%=_compensationMatrixCount%> <%=_compensationMatrixCount == 1 ? "matrix" : "matrices"%>)</a>
+        </div>
+    <% } %><%-- end if (_compensationMatrixCount > 0) --%>
 
-<%
-    if (_sampleSet != null)
-    {
-        %>
-        <div id="samples-div"><a href="<%=_sampleSet.detailsURL()%>">Samples (<%=_sampleSet.getSamples().length%>)</a> </div>
-        <%
-    }
-%>
+    <% if (_sampleSet != null) { %>
+        <div id="samples-div">
+            <a href="<%=_sampleSet.detailsURL()%>">Samples (<%=_sampleSet.getSamples().length%>)</a>
+        </div>
+    <% } %>
 
-<%
-    if (_scripts.length > 0)
-    {
-        %>
+    <% if (_scripts.length > 0) { %>
         <br/>
         <div>Analysis Scripts</div>
         <div class="labkey-indented">
@@ -201,51 +201,90 @@
         for (FlowScript script : _scripts)
         {
             int runCount = script.getRunCount();
-            if (runCount > 0)
-            {
-                %>
-                <script type="text/javascript">
-                Ext.onReady(function () {
-                    var tip = new LABKEY.ext.CalloutTip({
-                        target: "script-<%=script.getScriptId()%>-div",
-                        autoLoad: {
-                          url: LABKEY.ActionURL.buildURL("query", "getQuery", null, {
-                              schemaName: "flow",
-                              "query.queryName": "Runs",
-                              "query.AnalysisScript/RowId~eq": <%=script.getScriptId()%>,
-                              "query.columns": encodeURI("Name,Flag/Comment,WellCount"),
-                              "query.sort": "Name",
-                              apiVersion: 9.1
-                          })
-                        },
-                        tpl: new Ext.XTemplate(
-                          '<table boder=0>',
-                          '<tpl for="rows">',
-                          '  <tr>',
-                          '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
-                          '    <td align="right" nowrap>({[values.WellCount.value]} wells)',
-                          '  </tr>',
-                          '</tpl>',
-                          '</table>')
-                    });
-                });
-                </script>
-                <%
-            }
+            boolean canEditScript = runCount == 0 && _canUpdate;
             %>
-            <div id="script-<%=script.getScriptId()%>-div">
+            <script type="text/javascript">
+            Ext.onReady(function () {
+                var tip = new LABKEY.ext.CalloutTip({
+                    target: "script-<%=script.getScriptId()%>-div",
+                    autoLoad: {
+                      url: LABKEY.ActionURL.buildURL("query", "getQuery", null, {
+                          schemaName: "flow",
+                          "query.queryName": "Runs",
+                          "query.AnalysisScript/RowId~eq": <%=script.getScriptId()%>,
+                          "query.columns": encodeURI("Name,Flag/Comment,WellCount"),
+                          "query.sort": "Name",
+                          apiVersion: 9.1
+                      })
+                    },
+                    tpl: new Ext.XTemplate(
+                        '<div style="white-space:nowrap">',
+                        '<div class="summary-div">',
+                            '<div class="summary-header">Execute Script</div>',
+                            <% if (!script.hasStep(FlowProtocolStep.calculateCompensation) && !script.hasStep(FlowProtocolStep.analysis)) { %>
+                                '<div>This blank script must be<br>',
+                                '<a href="<%=script.urlShow()%>">edited</a> before it can be used.</div>',
+                            <% } %>
+                            <% if (script.hasStep(FlowProtocolStep.calculateCompensation)) { %>
+                                '<div><a href="<%=script.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation)%>">Compensation</a></div>',
+                            <% } %>
+                            <% if (script.hasStep(FlowProtocolStep.analysis)) { %>
+                                '<div><a href="<%=script.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.analysis)%>">Statistics and Graphs</a></div>',
+                            <% } %>
+                        '</div>',
+                        <% if (canEditScript || script.hasStep(FlowProtocolStep.calculateCompensation) || script.hasStep(FlowProtocolStep.analysis)) { %>
+                            '<div class="summary-div">',
+                                '<div class="summary-header">Analysis Definition</div>',
+                                <% if (script.hasStep(FlowProtocolStep.calculateCompensation)) { %>
+                                    '<div><a href="<%=script.urlFor(ScriptController.Action.editCompensationCalculation)%>">Show Compensation</a></div>',
+                                <% } else if (canEditScript) { %>
+                                    '<div><a href="<%=script.urlFor(ScriptController.Action.uploadCompensationCalculation)%>">Upload FlowJo Compensation</a></div>',
+                                <% } %>
+                                <% if (script.hasStep(FlowProtocolStep.analysis)) { %>
+                                    '<div><a href="<%=script.urlFor(ScriptController.Action.gateEditor, FlowProtocolStep.analysis)%>"><%=canEditScript ? "Edit" : "View"%> Gate Definitions</a></div>',
+                                    '<div><a href="<%=script.urlFor(ScriptController.Action.editAnalysis)%>"><%=canEditScript ? "Edit" : "View"%> Statistics and Graphs</a></div>',
+                                    <% if (canEditScript) { %>
+                                        '<div><a href="<%=script.urlFor(ScriptController.Action.editGateTree, FlowProtocolStep.analysis)%>">Rename Populations</a></div>',
+                                    <% } %>
+                                <% } else if (canEditScript) { %>
+                                    '<div><a href="<%=script.urlFor(ScriptController.Action.uploadAnalysis)%>">Upload FlowJo Analysis</a></div>',
+                                <% } %>
+                            '</div>',
+                        <% } %>
+                        '<div class="summary-div">',
+                            '<div class="summary-header">Manage</div>',
+                            '<div><a href="<%=script.urlFor(ScriptController.Action.editSettings)%>">Edit Settings</a></div>',
+                            '<div><a href="<%=script.urlFor(ScriptController.Action.copy)%>">Copy Script</a></div>',
+                            <% if (runCount == 0) { %>
+                                '<div><a href="<%=script.urlFor(ScriptController.Action.delete)%>">Delete Script</a></div>',
+                            <% } %>
+                        '</div>',
+                        <% if (runCount > 0) { %>
+                            '<div class="summary-div">',
+                                '<div class="summary-header">Runs</div>',
+                                '<table boder=0>',
+                                '<tpl for="rows">',
+                                '  <tr>',
+                                '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
+                                '    <td align="right" nowrap>({[values.WellCount.value]} wells)',
+                                '  </tr>',
+                                '</tpl>',
+                                '</table>',
+                            '</div>',
+                        <% } %>
+                        '</div>')
+                });
+            });
+            </script>
+            <div id="script-<%=script.getScriptId()%>-div" style="white-space:nowrap;">
                 <a href="<%=script.urlShow()%>"><%=script.getName()%> (<%=runCount%> <%=runCount == 1 ? "run" : "runs"%>)</a>
             </div>
             <%
         }
-        %></div><%
-    }
-%>
+        %></div><%-- end labkey-indented --%>
+    <% } %><%-- end if (_scripts.length > 0) --%>
 
-<%
-    if (_fcsAnalysisRunCount > 0)
-    {
-        %>
+    <% if (_fcsAnalysisRunCount > 0) { %>
         <br/>
         <div>Analysis Folders</div>
         <div class="labkey-indented">
@@ -290,9 +329,10 @@
             </div>
             <%
         }
-        %></div><%
-    }
-%>
+        %></div><%-- end labkey-indented --%>
+    <% } %><%-- end if (_fcsAnalysisRunCount > 0) --%>
+</div><%-- end summary-div --%>
+<% } %>
 
 <%--
 <div>
@@ -305,46 +345,44 @@
 </div>
 --%>
 
-<br/>
-<h3 class="summary-header">Actions</h3>
-<%
-    if (_canSetPipelineRoot)
-    {
-        ActionURL urlPipelineRoot = PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(c);
+<div class="summary-div">
+    <h3 class="summary-header">Actions</h3>
+    <%
+        if (_canSetPipelineRoot)
+        {
+            ActionURL urlPipelineRoot = PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(c);
+            if (!_hasPipelineRoot)
+            {
+                %><div><%=PageFlowUtil.textLink("Setup Pipeline", urlPipelineRoot)%></div><%
+            }
+            else if (_fcsFileCount == 0)
+            {
+                %><div><%=PageFlowUtil.textLink("Change Pipeline", urlPipelineRoot)%></div><%
+            }
+        }
+
         if (!_hasPipelineRoot)
         {
-            %><div><%=PageFlowUtil.textLink("Setup Pipeline", urlPipelineRoot)%></div><%
+            %><div><%=PageFlowUtil.textLink("Import Workspace", new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, c))%></div><%
         }
-        else if (_fcsFileCount == 0)
+        else
         {
-            %><div><%=PageFlowUtil.textLink("Change Pipeline", urlPipelineRoot)%></div><%
+            %><div><%=PageFlowUtil.textLink("Upload and Import", PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(c, getViewContext().getActionURL().getLocalURIString()))%></div><%
         }
-    }
 
-    if (!_hasPipelineRoot)
-    {
-        %><div><%=PageFlowUtil.textLink("Import Workspace", new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, c))%></div><%
-    }
-    else
-    {
-        %><div><%=PageFlowUtil.textLink("Upload and Import", PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(c, getViewContext().getActionURL().getLocalURIString()))%></div><%
-    }
+        if (_fcsRealRunCount > 0)
+        {
+            %><div><%=PageFlowUtil.textLink("Create Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, c))%></div><%
+        }
+    %>
+</div>
 
-    if (_fcsRealRunCount > 0)
-    {
-        %><div><%=PageFlowUtil.textLink("Create Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, c))%></div><%
-    }
-%>
+<% if (_protocol != null) { %>
+    <div class="summary-div">
+        <h3 class="summary-header">Configure</h3>
+        <div><%= PageFlowUtil.textLink("Settings", _protocol.urlShow())%></div>
 
-<div>[Calculate compensation matrices]</div>
-<div>[Analyze FCS Files]</div>
-
-<%
-    if (_protocol != null)
-    {
-        %><br/><h3 class="summary-header">Configure</h3><%
-        %><div><%= PageFlowUtil.textLink("Settings", _protocol.urlShow())%></div><%
-
+        <%
         if (_canUpdate)
         {
             %><div><%=PageFlowUtil.textLink("Upload Samples", _protocol.urlUploadSamples(_sampleSet != null))%></div><%
@@ -365,8 +403,9 @@
         {
             %><div><%=PageFlowUtil.textLink("Copy Folder", new ActionURL(FlowController.NewFolderAction.class, c))%></div><%
         }
-    }
-%>
+        %>
+    </div>
+<% } %>
 
 
 <%--

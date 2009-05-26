@@ -149,9 +149,13 @@ public class FlowScript extends FlowDataObject
         return strScript;
     }
 
+    private ScriptDocument _document = null;
+
     public ScriptDocument getAnalysisScriptDocument() throws Exception
     {
-        return ScriptDocument.Factory.parse(getAnalysisScript());
+        if (_document == null)
+            _document = ScriptDocument.Factory.parse(getAnalysisScript());
+        return _document;
     }
 
     public void setAnalysisScript(User user, String script) throws SQLException
@@ -277,11 +281,11 @@ public class FlowScript extends FlowDataObject
             return false;
         if (step == FlowProtocolStep.calculateCompensation)
         {
-            return script.getCompensationCalculation() != null;
+            return script.isSetCompensationCalculation();
         }
         if (step == FlowProtocolStep.analysis)
         {
-            return script.getAnalysis() != null;
+            return script.isSetAnalysis();
         }
         return false;
     }
