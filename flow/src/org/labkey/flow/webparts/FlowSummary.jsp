@@ -76,9 +76,9 @@
 
 %>
 <style type="text/css">
-    <%-- elements following a summary-div get extra padding --%>
-    * + .summary-div {
-        padding-top:1em;
+    .summary-div {
+        padding-bottom:1.2em;
+        line-height:140%;
     }
     .summary-header {
         border-bottom:1px solid lightgray;
@@ -86,6 +86,10 @@
         padding-top:0.2em;
         margin-top:0;
         margin-bottom:0.3em;
+    }
+
+    h3.summary-header {
+        font-size: 1.15em;
     }
 </style>
 
@@ -379,7 +383,7 @@
 
 <% if (_protocol != null) { %>
     <div class="summary-div">
-        <h3 class="summary-header">Configure</h3>
+        <h3 class="summary-header">Manage</h3>
         <div><%= PageFlowUtil.textLink("Settings", _protocol.urlShow())%></div>
 
         <%
