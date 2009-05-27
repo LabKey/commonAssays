@@ -133,7 +133,7 @@ public class XarAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ExpRunTable createRunTable(final UserSchema schema, ExpProtocol protocol)
+    public ExpRunTable createRunTable(final AssaySchema schema, ExpProtocol protocol)
     {
         ExpRunTable result = super.createRunTable(schema, protocol);
         SQLFragment searchCountSQL = new SQLFragment("(SELECT COUNT(sub.RowId) FROM ");
@@ -346,7 +346,7 @@ public class XarAssayProvider extends AbstractAssayProvider
         return getDomainByPrefix(protocol, FRACTION_DOMAIN_PREFIX);
     }
 
-    public ExpDataTable createDataTable(final UserSchema schema, final ExpProtocol protocol)
+    public ExpDataTable createDataTable(final AssaySchema schema, final ExpProtocol protocol)
     {
         final ExpDataTable result = new ExpSchema(schema.getUser(), schema.getContainer()).createDatasTable();
         SQLFragment runConditionSQL = new SQLFragment("RunId IN (SELECT RowId FROM " +
@@ -398,7 +398,7 @@ public class XarAssayProvider extends AbstractAssayProvider
             SimpleFilter filter = new SimpleFilter();
             filter.addInClause(getTableMetadata().getResultRowIdFieldKey().toString(), dataKeys.keySet());
 
-            UserSchema schema = QueryService.get().getUserSchema(user, protocol.getContainer(), AssayService.ASSAY_SCHEMA_NAME);
+            AssaySchema schema = AssayService.get().createSchema(user, protocol.getContainer());
             ExpDataTable tableInfo = createDataTable(schema, protocol);
             tableInfo.setContainerFilter(new ContainerFilter.CurrentAndSubfolders(user));
 

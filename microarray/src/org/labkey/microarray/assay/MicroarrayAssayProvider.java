@@ -31,7 +31,6 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
@@ -102,7 +101,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return new HtmlView("The MAGE-ML data file is an XML file that contains the results of the microarray run.");
     }
 
-    public TableInfo createDataTable(UserSchema schema, ExpProtocol protocol)
+    public TableInfo createDataTable(AssaySchema schema, ExpProtocol protocol)
     {
         RunDataTable result = new RunDataTable(schema, protocol);
         if (getDomainByPrefix(protocol, ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().length > 0)
@@ -202,7 +201,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
     }
 
-    public ExpRunTable createRunTable(UserSchema schema, ExpProtocol protocol)
+    public ExpRunTable createRunTable(AssaySchema schema, ExpProtocol protocol)
     {
         ExpRunTable result = new MicroarraySchema(schema.getUser(), schema.getContainer()).createRunsTable();
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();

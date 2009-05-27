@@ -31,7 +31,6 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
@@ -125,7 +124,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return new HtmlView("The Elispot data file is the output file from the plate reader that has been selected.");
     }
 
-    public TableInfo createDataTable(UserSchema schema, ExpProtocol protocol)
+    public TableInfo createDataTable(AssaySchema schema, ExpProtocol protocol)
     {
         ElispotRunDataTable table = new ElispotRunDataTable(schema, protocol);
         addCopiedToStudyColumns(table, protocol, schema.getUser(), "objectId", true);
@@ -336,7 +335,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     {
         String name = AssayService.get().getResultsTableName(protocol);
         QuerySettings settings = new QuerySettings(context, name);
-        settings.setSchemaName(AssayService.ASSAY_SCHEMA_NAME);
+        settings.setSchemaName(AssaySchema.NAME);
         settings.setQueryName(name);
         return new ElispotResultsQueryView(protocol, context, settings);
     }

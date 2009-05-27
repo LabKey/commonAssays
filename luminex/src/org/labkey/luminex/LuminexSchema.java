@@ -17,24 +17,24 @@
 package org.labkey.luminex;
 
 import org.labkey.api.data.*;
-import org.labkey.api.query.*;
-import org.labkey.api.security.User;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.query.ExpDataTable;
-import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.exp.query.ExpDataTable;
+import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.query.*;
+import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.SpecimenForeignKey;
+import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayService;
 
-import java.util.*;
 import java.sql.Types;
+import java.util.*;
 
-public class LuminexSchema extends UserSchema
+public class LuminexSchema extends AssaySchema
 {
     private static final String ANALYTE_TABLE_NAME = "Analyte";
     private static final String DATA_ROW_TABLE_NAME = "DataRow";
@@ -69,7 +69,7 @@ public class LuminexSchema extends UserSchema
         return null;
     }
 
-    private TableInfo createAnalyteTable()
+    protected TableInfo createAnalyteTable()
     {
         FilteredTable result = new FilteredTable(getTableInfoAnalytes());
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Name")));
@@ -135,77 +135,10 @@ public class LuminexSchema extends UserSchema
 
     public FilteredTable createDataRowTable()
     {
-        final FilteredTable result = new FilteredTable(getTableInfoDataRow());
-        result.addColumn(result.wrapColumn("Analyte", result.getRealTable().getColumn("AnalyteId")));
-        ColumnInfo dataColumn = result.addColumn(result.wrapColumn("Data", result.getRealTable().getColumn("DataId")));
-        dataColumn.setFk(new LookupForeignKey("RowId")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                return createDataTable();
-            }
-        });
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RowId"))).setIsHidden(true);
-        result.getColumn("RowId").setKeyField(true);
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Type")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Well")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Outlier")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Description")));
-        ColumnInfo specimenColumn = result.wrapColumn(result.getRealTable().getColumn("SpecimenID"));
-        specimenColumn.setFk(new SpecimenForeignKey(this, AssayService.get().getProvider(_protocol), _protocol));
-        result.addColumn(specimenColumn);
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ExtraSpecimenInfo")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIString"))).setCaption("FI String");
-        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("FI"), result.getRealTable().getColumn("FIOORIndicator"));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIBackgroundString"))).setCaption("FI-Bkgd String");
-        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("FIBackground"), result.getRealTable().getColumn("FIBackgroundOORIndicator"), "FI-Bkgd");
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("StdDevString")));
-        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("StdDev"), result.getRealTable().getColumn("StdDevOORIndicator"));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ObsConcString")));
-        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("ObsConc"), result.getRealTable().getColumn("ObsConcOORIndicator"));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ExpConc")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ObsOverExp"))).setCaption("(Obs/Exp)*100");
-        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("ConcInRange"), result.getRealTable().getColumn("ConcInRangeOORIndicator"));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ConcInRangeString")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Dilution")));
-        result.addColumn(result.wrapColumn("Group", result.getRealTable().getColumn("DataRowGroup")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Ratio")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("SamplingErrors")));
-
-        result.addColumn(result.wrapColumn("ParticipantID", result.getRealTable().getColumn("PTID")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("VisitID")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Date")));
-
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
-        defaultCols.add(FieldKey.fromParts("Analyte"));
-        defaultCols.add(FieldKey.fromParts("Type"));
-        defaultCols.add(FieldKey.fromParts("Well"));
-        defaultCols.add(FieldKey.fromParts("Description"));
-        defaultCols.add(FieldKey.fromParts("SpecimenID"));
-        defaultCols.add(FieldKey.fromParts("ParticipantID"));
-        defaultCols.add(FieldKey.fromParts("VisitID"));
-        defaultCols.add(FieldKey.fromParts("FI"));
-        defaultCols.add(FieldKey.fromParts("FIBackground"));
-        defaultCols.add(FieldKey.fromParts("StdDev"));
-        defaultCols.add(FieldKey.fromParts("ObsConc"));
-        defaultCols.add(FieldKey.fromParts("ExpConc"));
-        defaultCols.add(FieldKey.fromParts("ObsOverExp"));
-        defaultCols.add(FieldKey.fromParts("ConcInRange"));
-        defaultCols.add(FieldKey.fromParts("Dilution"));
-        result.setDefaultVisibleColumns(defaultCols);
-
-        result.getColumn("Analyte").setFk(new LookupForeignKey("RowId")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                return createAnalyteTable();
-            }
-        });
-        addDataFilter(result);
-        return result;
+        return new LuminexDataTable(this);
     }
 
-    private void addDataFilter(FilteredTable result)
+    protected void addDataFilter(FilteredTable result)
     {
         SQLFragment filter = new SQLFragment("DataId IN (SELECT d.RowId FROM " + ExperimentService.get().getTinfoData() + " d, " + ExperimentService.get().getTinfoExperimentRun() + " r WHERE d.RunId = r.RowId AND d.Container = ?");
         filter.add(getContainer().getId());
@@ -236,5 +169,10 @@ public class LuminexSchema extends UserSchema
     public static TableInfo getTableInfoDataRow()
     {
         return getSchema().getTable(DATA_ROW_TABLE_NAME);
+    }
+
+    public ExpProtocol getProtocol()
+    {
+        return _protocol;
     }
 }

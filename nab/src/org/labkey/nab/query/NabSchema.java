@@ -16,30 +16,35 @@
 
 package org.labkey.nab.query;
 
-import org.labkey.api.query.*;
-import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
-import org.labkey.api.data.*;
-import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
 import org.labkey.nab.SampleInfo;
 
-import java.util.*;
 import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * User: brittp
  * Date: Oct 3, 2007
  * Time: 4:22:26 PM
  */
-public class NabSchema extends UserSchema
+public class NabSchema extends AssaySchema
 {
     public static final String SCHEMA_NAME = "Nab";
 

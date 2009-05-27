@@ -18,8 +18,7 @@ package org.labkey.nab.query;
 
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.query.QuerySchema;
-import org.labkey.api.query.UserSchema;
+import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.query.PlateBasedAssayRunDataTable;
 import org.labkey.nab.NabDataHandler;
 
@@ -32,7 +31,7 @@ import java.sql.SQLException;
  */
 public class NabRunDataTable extends PlateBasedAssayRunDataTable
 {
-    public NabRunDataTable(final UserSchema schema, final ExpProtocol protocol)
+    public NabRunDataTable(final AssaySchema schema, final ExpProtocol protocol)
     {
         super(schema, protocol);
     }

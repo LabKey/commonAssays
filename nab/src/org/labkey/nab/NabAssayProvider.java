@@ -25,7 +25,6 @@ import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
@@ -214,7 +213,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return new HtmlView("The NAb data file is a specially formatted Excel 1997-2003 file with a .xls extension.");
     }
 
-    public TableInfo createDataTable(UserSchema schema, ExpProtocol protocol)
+    public TableInfo createDataTable(AssaySchema schema, ExpProtocol protocol)
     {
         AbstractTableInfo table = (AbstractTableInfo)NabSchema.getDataRowTable(schema.getContainer(), schema.getUser(), protocol);
         addCopiedToStudyColumns(table, protocol, schema.getUser(), "objectId", true);
@@ -331,7 +330,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         {
             String name = AssayService.get().getResultsTableName(protocol);
             QuerySettings settings = new QuerySettings(context, name);
-            settings.setSchemaName(AssayService.ASSAY_SCHEMA_NAME);
+            settings.setSchemaName(AssaySchema.NAME);
             settings.setQueryName(name);
             return settings;
         }

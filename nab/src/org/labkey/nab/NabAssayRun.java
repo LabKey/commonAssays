@@ -15,30 +15,29 @@
  */
 package org.labkey.nab;
 
-import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.data.*;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
-import org.labkey.api.study.Plate;
-import org.labkey.api.study.DilutionCurve;
-import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.query.QueryView;
-import org.labkey.api.query.CustomView;
-import org.labkey.api.data.*;
+import org.labkey.api.security.User;
+import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.study.Plate;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.security.User;
-import org.labkey.nab.query.NabSchema;
 
-import java.util.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.*;
 
 /*
  * User: brittp
@@ -117,7 +116,7 @@ public class NabAssayRun extends Luc5Assay
             TableInfo runTable = AssayService.get().createRunTable(_protocol, _provider, _user, _run.getContainer());
             
             CustomView runView = QueryService.get().getCustomView(context.getUser(), context.getContainer(),
-                   AssayService.ASSAY_SCHEMA_NAME, AssayService.get().getRunsTableName(_protocol), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+                   AssaySchema.NAME, AssayService.get().getRunsTableName(_protocol), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
 
             if (runView != null)
             {

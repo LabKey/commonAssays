@@ -22,9 +22,9 @@ import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 
 import java.sql.SQLException;
@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ElispotSchema extends UserSchema
+public class ElispotSchema extends AssaySchema
 {
     private static final String DATA_ROW_TABLE_NAME = "DataRow";
     private final ExpProtocol _protocol;
@@ -62,7 +62,7 @@ public class ElispotSchema extends UserSchema
             {
                 if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
                 {
-                    return provider.createDataTable(this, protocol);
+                    return provider.createDataTable(AssayService.get().createSchema(getUser(), getContainer()), protocol);
                 }
             }
         }

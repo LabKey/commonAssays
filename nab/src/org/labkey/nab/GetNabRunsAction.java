@@ -31,6 +31,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.*;
 import org.labkey.api.data.*;
 import org.labkey.api.query.*;
@@ -308,7 +309,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         settings.setQueryName(tableName);
 
         UserSchema assaySchema = QueryService.get().getUserSchema(form.getViewContext().getUser(),
-                form.getViewContext().getContainer(), AssayService.ASSAY_SCHEMA_NAME);
+                form.getViewContext().getContainer(), AssaySchema.NAME);
 
         DataView dataView;
         try
