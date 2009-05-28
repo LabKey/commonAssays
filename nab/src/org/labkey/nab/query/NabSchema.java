@@ -118,7 +118,7 @@ public class NabSchema extends AssaySchema
             {
                 if (getTableName(protocol).equalsIgnoreCase(name))
                 {
-                    return new NabRunDataTable(this, protocol);
+                    return createDataRowTable(protocol);
                 }
             }
         }
@@ -134,9 +134,9 @@ public class NabSchema extends AssaySchema
         return _protocols;
     }
 
-    public static TableInfo getDataRowTable(Container container, User user, ExpProtocol protocol)
+    public NabRunDataTable createDataRowTable(ExpProtocol protocol)
     {
-        return new NabSchema(user, container).getTable(getTableName(protocol));        
+        return new NabRunDataTable(this, protocol);        
     }
 
     public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException

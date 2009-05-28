@@ -215,7 +215,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
     public TableInfo createDataTable(AssaySchema schema, ExpProtocol protocol)
     {
-        AbstractTableInfo table = (AbstractTableInfo)NabSchema.getDataRowTable(schema.getContainer(), schema.getUser(), protocol);
+        NabSchema nabSchema = new NabSchema(schema.getUser(), schema.getContainer());
+        nabSchema.setTargetStudy(schema.getTargetStudy());
+        NabRunDataTable table = nabSchema.createDataRowTable(protocol);
         addCopiedToStudyColumns(table, protocol, schema.getUser(), "objectId", true);
         return table;
     }
