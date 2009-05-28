@@ -19,6 +19,7 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="API" />
     <orderEntry type="module" module-name="Internal" />
   </component>
 </module>
