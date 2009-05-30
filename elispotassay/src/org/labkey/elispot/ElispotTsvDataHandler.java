@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 LabKey Corporation
+ * Copyright (c) 2006-2009 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,40 @@
  * limitations under the License.
  */
 
-package org.labkey.nab;
+package org.labkey.elispot;
 
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.DataType;
-import org.labkey.api.exp.XarContext;
+import org.apache.log4j.Logger;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.TabLoader;
-import org.apache.log4j.Logger;
+import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
  * User: klum
- * Date: May 18, 2009
+ * Date: May 29, 2009
  */
-public class NabTsvDataHandler extends AbstractNabDataHandler
+public class ElispotTsvDataHandler extends AbstractElispotDataHandler
 {
-    public static final DataType NAB_TSV_DATA_TYPE = new DataType("AssayRunNabTsvData");
+    public static final DataType ELISPOT_TSV_DATA_TYPE = new DataType("ElispotTsvAssayData");
 
-    static class NabTsvParser implements NabDataFileParser
+    static class ElispotTsvParser implements ElispotDataFileParser
     {
         private File _dataFile;
         private List<Map<String, Object>> _results = new ArrayList<Map<String, Object>>();
         private boolean _fileParsed;
 
-        public NabTsvParser(File dataFile)
+        public ElispotTsvParser(File dataFile)
         {
             _dataFile = dataFile;
         }
@@ -76,15 +78,15 @@ public class NabTsvDataHandler extends AbstractNabDataHandler
         }
     }
 
-    public NabDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    public ElispotDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
-        return new NabTsvParser(dataFile);
+        return new ElispotTsvParser(dataFile);
     }
 
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
-        if (NAB_TSV_DATA_TYPE.matches(lsid))
+        if (ELISPOT_TSV_DATA_TYPE.matches(lsid))
         {
             return Priority.HIGH;
         }
