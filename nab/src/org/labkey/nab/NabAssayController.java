@@ -42,13 +42,8 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.*;
-import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.security.roles.Role;
-import org.labkey.api.study.DilutionCurve;
-import org.labkey.api.study.WellData;
-import org.labkey.api.study.StudyService;
-import org.labkey.api.study.DataSet;
+import org.labkey.api.study.*;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
@@ -447,39 +442,11 @@ public class NabAssayController extends SpringActionController
 
     private static final String LAST_NAB_RUN_KEY = NabAssayController.class.getName() + "/LastNAbRun";
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(value=ReadPermission.class, contextual=RunDataSetContextualRoles.class)
     public class DetailsAction extends SimpleViewAction<RenderAssayForm>
     {
         private int _runRowId;
         private ExpProtocol _protocol;
-
-        @Override
-        protected Set<Role> getContextualRoles()
-        {
-            String studyContainerId = getViewContext().getRequest().getParameter("studyContainerId");
-            String datasetId = getViewContext().getRequest().getParameter("datasetId");
-            if (studyContainerId != null && datasetId != null)
-            {
-                Container studyContainer = ContainerManager.getForId(studyContainerId);
-                if (studyContainer != null)
-                {
-                    DataSet resource = StudyService.get().getDataSet(studyContainer, NumberUtils.toInt(datasetId));
-                    if (resource != null)
-//                    SecurableResource resource = studyContainer.findSecurableResource(datasetResourceId, getUser());
-//                    if (resource != null)
-                    {
-                        SecurityPolicy policy = SecurityManager.getPolicy(resource);
-                        if (policy.hasPermission(getViewContext().getUser(), ReadPermission.class))
-                        {
-                            // XXX: also check that the run rowId is the one copied to the dataset
-                            return Collections.<Role>singleton(new ReadPermission());
-                        }
-                    }
-                }
-            }
-
-            return super.getContextualRoles();
-        }
 
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
@@ -786,7 +753,7 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresOneOf(value=ReadPermission.class, contextual=RunDataSetContextualRoles.class)
     public class GraphAction extends SimpleViewAction<RenderAssayForm>
     {
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
