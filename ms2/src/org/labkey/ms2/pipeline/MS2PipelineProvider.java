@@ -52,9 +52,6 @@ public class MS2PipelineProvider extends PipelineProvider
 
             addFileActions(PipelineController.UploadAction.class, "Import Results",
                     entry, entry.listFiles(MS2PipelineManager.getUploadFilter()));
-
-            addAction(PipelineController.ShowDescribeMS2RunAction.class, "Describe Samples",
-                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter(pr.isPerlPipeline())));
         }
     }
 

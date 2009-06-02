@@ -37,11 +37,11 @@ import java.util.Map;
  * Date: Sep 23, 2007
  * Time: 1:09:11 PM
  */
-public class XarAssayDataCollector extends PipelineDataCollector<XarAssayForm>
+public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpecMetadataAssayForm>
 {
 
     @Override
-    protected Map<String, File> getCurrentFilesForDisplay(XarAssayForm context)
+    protected Map<String, File> getCurrentFilesForDisplay(MassSpecMetadataAssayForm context)
     {
         if (!context.isFractions())
         {
@@ -59,7 +59,7 @@ public class XarAssayDataCollector extends PipelineDataCollector<XarAssayForm>
     }
 
     @Override
-    protected int getAdditionalFileSetCount(XarAssayForm context)
+    protected int getAdditionalFileSetCount(MassSpecMetadataAssayForm context)
     {
         if (context.isFractions())
         {
@@ -68,7 +68,7 @@ public class XarAssayDataCollector extends PipelineDataCollector<XarAssayForm>
         return super.getAdditionalFileSetCount(context);
     }
 
-    public String getHTML(XarAssayForm form) throws ExperimentException
+    public String getHTML(MassSpecMetadataAssayForm form) throws ExperimentException
     {
         StringBuilder sb = new StringBuilder(super.getHTML(form));
 
@@ -85,9 +85,9 @@ public class XarAssayDataCollector extends PipelineDataCollector<XarAssayForm>
             // If we found some, prompt the user to delete them
             if (annotatedFiles > 0)
             {
-                ActionURL deleteURL = new ActionURL(XarAssayUploadAction.class, c);
+                ActionURL deleteURL = new ActionURL(MassSpecMetadataUploadAction.class, c);
                 deleteURL.addParameter("rowId", form.getProtocol().getRowId());
-                deleteURL.addParameter("uploadStep", XarAssayUploadAction.DeleteAssaysStepHandler.NAME);
+                deleteURL.addParameter("uploadStep", MassSpecMetadataUploadAction.DeleteAssaysStepHandler.NAME);
 
                 sb.append("<div id=\"deleteRunsSpan\"><span class=\"labkey-error\">");
                 if (annotatedFiles == totalFiles)
@@ -129,7 +129,7 @@ public class XarAssayDataCollector extends PipelineDataCollector<XarAssayForm>
     }
 
     /** @return the total number of files for this set, and the number that have already been annotated */
-    public Pair<Integer, Integer> getExistingAnnotationStatus(XarAssayForm form)
+    public Pair<Integer, Integer> getExistingAnnotationStatus(MassSpecMetadataAssayForm form)
     {
         int annotated = 0;
         // Look for files that have already been annotated
@@ -153,7 +153,7 @@ public class XarAssayDataCollector extends PipelineDataCollector<XarAssayForm>
         return new Pair<Integer, Integer>(files.size(), annotated);
     }
 
-    public boolean allowAdditionalUpload(XarAssayForm context)
+    public boolean allowAdditionalUpload(MassSpecMetadataAssayForm context)
     {
         return !context.isFractions() && getFileCollection(context).size() > 1; 
     }

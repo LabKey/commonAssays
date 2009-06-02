@@ -19,32 +19,35 @@ package org.labkey.microarray;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ProtocolParameter;
-import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.PipelineDataCollector;
+import org.labkey.api.study.actions.BulkPropertiesDisplayColumn;
+import org.labkey.api.study.assay.BulkPropertiesUploadWizardAction;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.InsertView;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.validation.BindException;
-import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.Document;
 
-import javax.servlet.ServletException;
-import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: jeckels
  * Date: Feb 6, 2008
  */
 @RequiresPermission(ACL.PERM_INSERT)
-public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayRunUploadForm, MicroarrayAssayProvider>
+public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardAction<MicroarrayRunUploadForm, MicroarrayAssayProvider>
 {
     private Integer _channelCount;
     private String _barcode;
@@ -107,7 +110,10 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayR
     protected InsertView createBatchInsertView(MicroarrayRunUploadForm form, boolean reshow, BindException errors)
     {
         InsertView result = super.createBatchInsertView(form, reshow, errors);
-        result.getDataRegion().addDisplayColumn(new MicroarrayBulkPropertiesDisplayColumn(form));
+        ActionURL templateURL = new ActionURL(MicroarrayBulkPropertiesTemplateAction.class, getContainer());
+        templateURL.addParameter("rowId", form.getProtocol().getRowId());
+        form.setTemplateURL(templateURL);
+        result.getDataRegion().addDisplayColumn(new BulkPropertiesDisplayColumn(form));
         return result;
     }
 
@@ -158,96 +164,5 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<MicroarrayR
             errors.addError(new LabkeyError("Unable to get barcode and channel count from MageML file:" + e.getMessage()));
         }
         return result;
-    }
-
-    @Override
-    protected boolean showBatchStep(MicroarrayRunUploadForm runForm, Domain uploadDomain)
-    {
-        return true;
-    }
-
-    @Override
-    protected StepHandler<MicroarrayRunUploadForm> getBatchStepHandler()
-    {
-        return new MicroarrayBatchStepHandler();
-    }
-
-    private class MicroarrayBatchStepHandler extends BatchStepHandler
-    {
-        @Override
-        public ModelAndView handleStep(MicroarrayRunUploadForm form, BindException errors) throws ServletException
-        {
-            if (form.isBulkUploadAttempted())
-            {
-                BindException batchErrors = new BindException(form, "form");
-                // Collect the errors in a separate list because if otherwise we fail, the superclass will add them a
-                // second time during its reshow logic
-                if (validatePostedProperties(form.getBatchProperties(), batchErrors))
-                {
-                    List<ExpRun> runs = insertRuns(form, errors);
-                    if (batchErrors.getErrorCount() == 0 && errors.getErrorCount() == 0 && !runs.isEmpty())
-                    {
-                        return afterRunCreation(form, runs.get(0), errors);
-                    }
-                }
-            }
-
-            return super.handleStep(form, errors);
-        }
-
-        private List<ExpRun> insertRuns(MicroarrayRunUploadForm form, BindException errors)
-        {
-            try
-            {
-                PipelineDataCollector<MicroarrayRunUploadForm> collector = form.getSelectedDataCollector();
-                RunStepHandler handler = getRunStepHandler();
-                List<ExpRun> runs = new ArrayList<ExpRun>();
-
-                // Hold on to a copy of the original file list so that we can reset the selection state if one of them fails
-                List<Map<String, File>> allFiles =
-                        new ArrayList<Map<String, File>>(collector.getFileCollection(form));
-                boolean success = false;
-                ExperimentService.get().beginTransaction();
-                try
-                {
-                    boolean hasMoreRuns;
-                    do
-                    {
-                        hasMoreRuns = collector.allowAdditionalUpload(form);
-                        form.getUploadedData();
-                        form.checkBulkProperties();
-                        validatePostedProperties(form.getRunProperties(), errors);
-                        if (errors.getErrorCount() > 0)
-                        {
-                            return Collections.emptyList();
-                        }
-                        runs.add(handler.saveExperimentRun(form));
-                        form.clearUploadedData();
-                    }
-                    while (hasMoreRuns);
-                    success = true;
-                    ExperimentService.get().commitTransaction();
-                    return runs;
-                }
-                finally
-                {
-                    if (!success)
-                    {
-                        // Something went wrong, restore the full list of files
-                        PipelineDataCollector.setFileCollection(getViewContext().getRequest().getSession(true), getContainer(), form.getProtocol(), allFiles);
-                    }
-                    ExperimentService.get().closeTransaction();
-                }
-            }
-            catch (ExperimentException e)
-            {
-                errors.addError(new LabkeyError(e));
-            }
-            catch (ValidationException e)
-            {
-                errors.addError(new LabkeyError(e));
-            }
-            return Collections.emptyList();
-        }
     }
 }

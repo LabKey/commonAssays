@@ -51,6 +51,36 @@ public class XarTemplate
         this.name = name;
     }
 
+    public static final Pattern upperCaseTokenPattern = Pattern.compile("[A-Z0-9_]+");
+    public static boolean isUpperCaseTokenName(String name)
+    {
+        return upperCaseTokenPattern.matcher(name).matches();
+    }
+
+    public static String upperCaseTokenNameToPropName(String token)
+    {
+        StringBuffer sb = new StringBuffer(token.length());
+        boolean capLetter = true;
+        for (char c : token.toCharArray())
+        {
+            if ('_' == c)
+            {
+                capLetter = true;
+                continue;
+            }
+
+            if (capLetter)
+                sb.append(c);
+            else
+                sb.append(Character.toLowerCase(c));
+
+            capLetter = !Character.isLetter(c);
+
+        }
+
+        return sb.toString();
+    }
+
     private static Set<String> defaultTokens = new CsvSet("RUN_NAME,RUN_FILENAME,PROTOCOL_NAME");
     public List<DisplayColumn> getSubstitutionFields()
     {
@@ -62,8 +92,8 @@ public class XarTemplate
             if (!defaultTokens.contains(s))
             {
                 String propName = s;
-                if (MassSpecProtocolFactory.isUpperCaseTokenName(s))
-                    propName = MassSpecProtocolFactory.upperCaseTokenNameToPropName(s);
+                if (isUpperCaseTokenName(s))
+                    propName = upperCaseTokenNameToPropName(s);
 
                 String title = ColumnInfo.captionFromName(propName);
                 DisplayColumn col;

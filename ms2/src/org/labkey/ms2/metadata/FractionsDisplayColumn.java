@@ -29,11 +29,11 @@ import java.io.Writer;
  */
 public class FractionsDisplayColumn extends SimpleDisplayColumn
 {
-    private XarAssayForm _form;
+    private MassSpecMetadataAssayForm _form;
     private ColumnInfo _col;
     public static final String FRACTIONS_FIELD_NAME = "__fractions";
 
-    public FractionsDisplayColumn(XarAssayForm form)
+    public FractionsDisplayColumn(MassSpecMetadataAssayForm form)
     {
         _form = form;
         setCaption("Fractions");
@@ -55,7 +55,7 @@ public class FractionsDisplayColumn extends SimpleDisplayColumn
 
     public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
     {
-        JspView<XarAssayForm> view = new JspView<XarAssayForm>("/org/labkey/ms2/metadata/fractionsInput.jsp", _form);
+        JspView<MassSpecMetadataAssayForm> view = new JspView<MassSpecMetadataAssayForm>("/org/labkey/ms2/metadata/fractionsInput.jsp", _form);
         try
         {
             view.render(ctx.getRequest(), ctx.getViewContext().getResponse());

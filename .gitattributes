@@ -524,7 +524,6 @@ microarray/src/META-INF/microarray/scripts/sql[!!-~]server/microarray-8.30-8.31.
 microarray/src/META-INF/microarray/scripts/sql[!!-~]server/microarray-8.30-9.10.sql -text
 microarray/src/META-INF/microarray/scripts/sql[!!-~]server/obsolete/microarray-0.00-0.01.sql -text
 microarray/src/org/labkey/microarray/FeatureExtractionRun.java -text
-microarray/src/org/labkey/microarray/MicroarrayBulkPropertiesDisplayColumn.java -text
 microarray/src/org/labkey/microarray/MicroarrayBulkPropertiesTemplateAction.java -text
 microarray/src/org/labkey/microarray/MicroarrayController.java -text
 microarray/src/org/labkey/microarray/MicroarrayFolderType.java -text
@@ -540,7 +539,6 @@ microarray/src/org/labkey/microarray/PendingMageMLFilesView.java -text
 microarray/src/org/labkey/microarray/assay/MageMLDataHandler.java -text
 microarray/src/org/labkey/microarray/assay/MicroarrayAssayProvider.java -text
 microarray/src/org/labkey/microarray/assay/TrimmedFileInputStream.java -text
-microarray/src/org/labkey/microarray/bulkPropertiesInput.jsp -text
 microarray/src/org/labkey/microarray/pipeline/AgilentFeatureExtractionClientImpl.java -text
 microarray/src/org/labkey/microarray/pipeline/ArrayPipelineManager.java -text
 microarray/src/org/labkey/microarray/pipeline/FeatureExtractionPipelineJob.java -text
@@ -917,13 +915,14 @@ ms2/src/org/labkey/ms2/loadGoAutomatic.jsp -text
 ms2/src/org/labkey/ms2/loadGoManual.jsp -text
 ms2/src/org/labkey/ms2/manageViews.jsp -text
 ms2/src/org/labkey/ms2/metadata/FractionsDisplayColumn.java -text
+ms2/src/org/labkey/ms2/metadata/MassSpecBulkPropertiesTemplateAction.java -text
+ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayForm.java -text
+ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayProvider.java -text
+ms2/src/org/labkey/ms2/metadata/MassSpecMetadataController.java -text
+ms2/src/org/labkey/ms2/metadata/MassSpecMetadataDataCollector.java -text
+ms2/src/org/labkey/ms2/metadata/MassSpecMetadataPipelineProvider.java -text
+ms2/src/org/labkey/ms2/metadata/MassSpecMetadataUploadAction.java -text
 ms2/src/org/labkey/ms2/metadata/MsFractionPropertyHelper.java -text
-ms2/src/org/labkey/ms2/metadata/XarAssayController.java -text
-ms2/src/org/labkey/ms2/metadata/XarAssayDataCollector.java -text
-ms2/src/org/labkey/ms2/metadata/XarAssayForm.java -text
-ms2/src/org/labkey/ms2/metadata/XarAssayPipelineProvider.java -text
-ms2/src/org/labkey/ms2/metadata/XarAssayProvider.java -text
-ms2/src/org/labkey/ms2/metadata/XarAssayUploadAction.java -text
 ms2/src/org/labkey/ms2/metadata/fractionsInput.jsp -text
 ms2/src/org/labkey/ms2/modifications.jsp -text
 ms2/src/org/labkey/ms2/ms2Admin.jsp -text
@@ -971,10 +970,8 @@ ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchTask.java -text
 ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchTaskFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.jsp -text
-ms2/src/org/labkey/ms2/pipeline/DescribeRunPage.java -text
 ms2/src/org/labkey/ms2/pipeline/FastaCheckTask.java -text
 ms2/src/org/labkey/ms2/pipeline/FileStatus.java -text
-ms2/src/org/labkey/ms2/pipeline/MS2ExperimentForm.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2ImportPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineForm.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineJobSupport.java -text
@@ -982,8 +979,6 @@ ms2/src/org/labkey/ms2/pipeline/MS2PipelineManager.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2SearchForm.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2SearchJobSupport.java -text
-ms2/src/org/labkey/ms2/pipeline/MassSpecProtocol.java -text
-ms2/src/org/labkey/ms2/pipeline/MassSpecProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/PipelineController.java -text
 ms2/src/org/labkey/ms2/pipeline/ProteinProphetPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/ProteinProphetPipelineProvider.java -text
@@ -994,7 +989,6 @@ ms2/src/org/labkey/ms2/pipeline/XarTemplate.java -text
 ms2/src/org/labkey/ms2/pipeline/addSequenceDB.jsp -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometRun.java -text
-ms2/src/org/labkey/ms2/pipeline/describe.jsp -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotClientImpl.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotDefaults.xml -text
@@ -1010,7 +1004,6 @@ ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotFractions.xml -t
 ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotFractionsXpress.xml -text
 ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotXpress.xml -text
 ms2/src/org/labkey/ms2/pipeline/phenyx/PhenyxRun.java -text
-ms2/src/org/labkey/ms2/pipeline/pickProtocol.jsp -text
 ms2/src/org/labkey/ms2/pipeline/sequest/BooleanParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/ConverterFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/IInputXMLConverter.java -text

@@ -77,7 +77,7 @@ public class MicroarrayPipelineProvider extends PipelineProvider
                     navTree.addSeparator();
                 }
 
-                ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(context.getContainer(), MicroarrayAssayProvider.NAME);
+                ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(context.getContainer(), MicroarrayAssayProvider.NAME, context.getActionURL());
                 navTree.addChild("Create Assay Definition", url);
 
                 entry.addAction(new FileAction(navTree, files));

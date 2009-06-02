@@ -35,9 +35,9 @@ public class MicroarrayDesignerMainPanel extends AssayDesignerMainPanel
     private BoundTextBox _cy3SampleFieldNameTextBox;
     private BoundTextBox _cy5SampleFieldNameTextBox;
 
-    public MicroarrayDesignerMainPanel(RootPanel panel, String providerName, Integer protocolId, boolean copyAssay)
+    public MicroarrayDesignerMainPanel(RootPanel panel)
     {
-        super(panel, providerName, protocolId, copyAssay);
+        super(panel);
     }
 
     protected FlexTable createAssayInfoTable(final GWTProtocol assay)

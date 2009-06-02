@@ -38,11 +38,7 @@ public class MicroarrayAssayDesigner implements EntryPoint
         RootPanel panel = RootPanel.get("org.labkey.microarray.designer.MicroarrayAssayDesigner-Root");
         if (panel != null)
         {
-            String protocolIdStr = PropertyUtil.getServerProperty("protocolId");
-            String providerName = PropertyUtil.getServerProperty("providerName");
-            String copyStr = PropertyUtil.getServerProperty("copy");
-            boolean copyAssay = copyStr != null && Boolean.TRUE.toString().equals(copyStr);
-            MicroarrayDesignerMainPanel view = new MicroarrayDesignerMainPanel(panel, providerName, protocolIdStr != null ? new Integer(Integer.parseInt(protocolIdStr)) : null, copyAssay);
+            MicroarrayDesignerMainPanel view = new MicroarrayDesignerMainPanel(panel);
             view.showAsync();
         }
     }

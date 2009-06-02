@@ -19,8 +19,9 @@ package org.labkey.ms2.metadata;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.security.ACL;
-import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.actions.BulkPropertiesUploadForm;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
+import org.labkey.api.util.FileUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -33,19 +34,13 @@ import java.util.Map;
  * Date: Sep 17, 2007
  * Time: 12:30:55 AM
  */
-public class XarAssayForm extends AssayRunUploadForm<XarAssayProvider>
+public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpecMetadataAssayProvider>
 {
     private Map<File, ExpMaterial> _fileFractionMap = new HashMap<File, ExpMaterial>();
 
     public boolean isFractions()
     {
         return Boolean.parseBoolean(getRequest().getParameter(FractionsDisplayColumn.FRACTIONS_FIELD_NAME));
-    }
-
-    @Override
-    public XarAssayDataCollector getSelectedDataCollector()
-    {
-        return (XarAssayDataCollector)super.getSelectedDataCollector();
     }
 
     public Map<ExpMaterial, String> getInputMaterials() throws ExperimentException
@@ -81,5 +76,18 @@ public class XarAssayForm extends AssayRunUploadForm<XarAssayProvider>
     public Map<File, ExpMaterial> getFileFractionMap()
     {
         return _fileFractionMap;
+    }
+
+    public Map<String, Object> getBulkProperties() throws ExperimentException
+    {
+        File file = getUploadedData().values().iterator().next();
+
+        // Try both the full file name and without the extension
+        return getProperties(file.getName(), FileUtil.getBaseName(file));
+    }
+
+    protected String getIdentifierColumnName()
+    {
+        return "filename";
     }
 }

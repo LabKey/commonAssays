@@ -36,14 +36,13 @@ import java.util.List;
  * Date: Aug 24, 2006
  * Time: 12:45:45 PM
  */
-public class XarAssayPipelineProvider extends PipelineProvider
+public class MassSpecMetadataPipelineProvider extends PipelineProvider
 {
-    public static String name = "XarAssay";
-    public static String PIPELINE_BUTTON_TEXT = "Create Assay Run";
+    public static String NAME = "XarAssay";
 
-    public XarAssayPipelineProvider()
+    public MassSpecMetadataPipelineProvider()
     {
-        super(name);
+        super(NAME);
     }
 
     public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
@@ -61,13 +60,13 @@ public class XarAssayPipelineProvider extends PipelineProvider
                 PipeRoot root = PipelineService.get().findPipelineRoot(context.getContainer());
                 List<ExpProtocol> assays = AssayService.get().getAssayProtocols(context.getContainer());
 
-                NavTree navTree = new NavTree("Describe Samples with Assay");
+                NavTree navTree = new NavTree("Describe Samples");
 
                 for (ExpProtocol protocol : assays)
                 {
-                    if (AssayService.get().getProvider(protocol) instanceof XarAssayProvider)
+                    if (AssayService.get().getProvider(protocol) instanceof MassSpecMetadataAssayProvider)
                     {
-                        ActionURL url = new ActionURL(XarAssayController.UploadRedirectAction.class, context.getContainer());
+                        ActionURL url = new ActionURL(MassSpecMetadataController.UploadRedirectAction.class, context.getContainer());
                         url.addParameter("protocolId", protocol.getRowId());
                         url.addParameter("path", root.relativePath(new File(entry.getURI())));
                         NavTree child = new NavTree("Use " + protocol.getName(), url);
@@ -81,7 +80,7 @@ public class XarAssayPipelineProvider extends PipelineProvider
                     navTree.addSeparator();
                 }
 
-                ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(context.getContainer(), XarAssayProvider.NAME);
+                ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(context.getContainer(), MassSpecMetadataAssayProvider.NAME, null);
 
                 NavTree child = new NavTree("Create Assay Definition", url);
                 child.setId("Describe Samples:Create Assay Definition");

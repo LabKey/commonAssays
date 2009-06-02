@@ -21,11 +21,11 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.ms2.metadata.XarAssayForm" %>
+<%@ page import="org.labkey.ms2.metadata.MassSpecMetadataAssayForm" %>
 
 <%
     ViewContext context = HttpView.currentContext();
-    XarAssayForm form = ((JspView<XarAssayForm>)HttpView.currentView()).getModelBean();
+    MassSpecMetadataAssayForm form = ((JspView<MassSpecMetadataAssayForm>)HttpView.currentView()).getModelBean();
     boolean fractions = form.isFractions();
 %>
 <input type="checkbox" id="<%= FractionsDisplayColumn.FRACTIONS_FIELD_NAME %>" value="true" <%= fractions ? "checked" : "" %>

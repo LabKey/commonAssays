@@ -97,7 +97,7 @@ public class PendingMageMLFilesView extends QueryView
             if (microarrayProtocols.size() == 0)
             {
                 StringBuilder message = new StringBuilder("To import MAGE-ML files, <a href=\"");
-                message.append(PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(getContainer(), MicroarrayAssayProvider.NAME));
+                message.append(PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(getContainer(), MicroarrayAssayProvider.NAME, getViewContext().getActionURL()));
                 message.append("\">create a microarray microarray assay definition</a>.");
                 SimpleTextDisplayElement element = new SimpleTextDisplayElement(message.toString(), true);
                 element.setDisplayPermission(ACL.PERM_INSERT);

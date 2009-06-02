@@ -23,9 +23,11 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.study.actions.UploadWizardAction;
+import org.labkey.api.study.actions.BulkPropertiesDisplayColumn;
+import org.labkey.api.study.assay.BulkPropertiesUploadWizardAction;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
 import org.labkey.api.view.InsertView;
+import org.labkey.api.view.ActionURL;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -41,21 +43,21 @@ import java.util.Map;
  * Time: 12:30:55 AM
  */
 @RequiresPermission(ACL.PERM_INSERT)
-public class XarAssayUploadAction extends UploadWizardAction<XarAssayForm, XarAssayProvider>
+public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardAction<MassSpecMetadataAssayForm, MassSpecMetadataAssayProvider>
 {
-    public XarAssayUploadAction()
+    public MassSpecMetadataUploadAction()
     {
-        super(XarAssayForm.class);
+        super(MassSpecMetadataAssayForm.class);
         addStepHandler(new DeleteAssaysStepHandler());
     }
 
     @RequiresPermission(ACL.PERM_DELETE)
-    public class DeleteAssaysStepHandler extends StepHandler<XarAssayForm>
+    public class DeleteAssaysStepHandler extends StepHandler<MassSpecMetadataAssayForm>
     {
         public static final String NAME = "DELETEASSAYS";
 
         @Override
-        public ModelAndView handleStep(XarAssayForm form, BindException errors)
+        public ModelAndView handleStep(MassSpecMetadataAssayForm form, BindException errors)
         {
             Container c = form.getContainer();
 
@@ -83,7 +85,7 @@ public class XarAssayUploadAction extends UploadWizardAction<XarAssayForm, XarAs
     }
 
     @Override
-    protected InsertView createRunInsertView(XarAssayForm form, boolean reshow, BindException errors)
+    protected InsertView createRunInsertView(MassSpecMetadataAssayForm form, boolean reshow, BindException errors)
     {
         InsertView parent = super.createRunInsertView(form, reshow, errors);
         parent.getDataRegion().addHiddenFormField(FractionsDisplayColumn.FRACTIONS_FIELD_NAME, Boolean.toString(form.isFractions()));
@@ -106,7 +108,7 @@ public class XarAssayUploadAction extends UploadWizardAction<XarAssayForm, XarAs
     }
 
     @Override
-    protected boolean showBatchStep(XarAssayForm form, Domain batchDomain)
+    protected boolean showBatchStep(MassSpecMetadataAssayForm form, Domain batchDomain)
     {
         // Show the batch step if we have batch properties or might be a fractions search
         return super.showBatchStep(form, batchDomain) ||
@@ -114,9 +116,13 @@ public class XarAssayUploadAction extends UploadWizardAction<XarAssayForm, XarAs
     }
 
     @Override
-    protected InsertView createBatchInsertView(XarAssayForm form, boolean reshow, BindException errors)
+    protected InsertView createBatchInsertView(MassSpecMetadataAssayForm form, boolean reshow, BindException errors)
     {
         InsertView result = super.createBatchInsertView(form, reshow, errors);
+        ActionURL templateURL = new ActionURL(MassSpecBulkPropertiesTemplateAction.class, getContainer());
+        templateURL.addParameter("rowId", form.getProtocol().getRowId());
+        form.setTemplateURL(templateURL);
+        result.getDataRegion().addDisplayColumn(new BulkPropertiesDisplayColumn(form));
         result.getDataRegion().addDisplayColumn(new FractionsDisplayColumn(form));
         return result;
     }

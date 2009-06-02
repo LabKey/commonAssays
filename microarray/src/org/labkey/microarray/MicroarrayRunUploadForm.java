@@ -22,13 +22,10 @@ import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.actions.BulkPropertiesUploadForm;
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
-import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.reader.TabLoader;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.w3c.dom.Document;
@@ -45,18 +42,21 @@ import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;/*
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+/*
  * User: brittp
  * Date: Jan 19, 2009
  * Time: 2:29:57 PM
  */
 
-public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayProvider>
+public class MicroarrayRunUploadForm extends BulkPropertiesUploadForm<MicroarrayAssayProvider>
 {
     private Map<DomainProperty, String> _mageMLProperties;
     private Document _mageML;
     private boolean _loadAttempted;
-    private List<Map<String, Object>> _bulkProperties;
 
     public Document getMageML(File f) throws ExperimentException
     {
@@ -144,37 +144,6 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
     }
 
     @Override
-    public Map<DomainProperty, String> getRunProperties()
-    {
-        if (_runProperties == null)
-        {
-            _runProperties = new HashMap<DomainProperty, String>(super.getRunProperties());
-            if (isBulkUploadAttempted())
-            {
-                try
-                {
-                    Map<String, Object> values = getBulkProperties();
-                    for (DomainProperty prop : _runProperties.keySet())
-                    {
-                        Object value = values.get(prop.getName());
-                        if (value == null)
-                        {
-                            value = values.get(prop.getLabel());
-                        }
-                        _runProperties.put(prop, value == null ? null : value.toString());
-                    }
-                    _runProperties.putAll(getMageMLProperties());
-                }
-                catch (ExperimentException e)
-                {
-                    throw new UnexpectedException(e);
-                }
-            }
-        }
-        return _runProperties;
-    }
-
-    @Override
     public void clearUploadedData()
     {
         super.clearUploadedData();
@@ -183,69 +152,32 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
         _loadAttempted = false;
     }
 
-    public boolean isBulkUploadAttempted()
+    @Override
+    public Map<DomainProperty, String> getRunProperties()
     {
-        return "on".equals(getRequest().getParameter(MicroarrayBulkPropertiesDisplayColumn.ENABLED_FIELD_NAME));
+        if (_runProperties == null)
+        {
+            try
+            {
+                super.getRunProperties();
+                _runProperties.putAll(getMageMLProperties());
+            }
+            catch (ExperimentException e)
+            {
+                throw new UnexpectedException(e);
+            }
+        }
+        return _runProperties;
     }
 
-    private Map<String, Object> getBulkProperties() throws ExperimentException
+    public Map<String, Object> getBulkProperties() throws ExperimentException
     {
         String barcode = getBarcode(getCurrentMageML());
         if (barcode == null || "".equals(barcode))
         {
             throw new ExperimentException("Could not find a barcode value in " + getUploadedData().values().iterator().next().getName());
         }
-        for (Map<String, Object> props : getParsedBulkProperties())
-        {
-            if (barcode.equals(props.get("barcode")))
-            {
-                return props;
-            }
-        }
-        throw new ExperimentException("Could not find a row for barcode '" + barcode + "' specified in " + getUploadedData().values().iterator().next().getName());
-    }
-
-    private List<Map<String, Object>> getParsedBulkProperties() throws ExperimentException
-    {
-        if (_bulkProperties == null)
-        {
-            String tsv = getRawBulkProperties();
-            try
-            {
-                TabLoader loader = new TabLoader(tsv, true);
-                List<Map<String, Object>> maps = loader.load();
-                _bulkProperties = new ArrayList<Map<String, Object>>(maps.size());
-                for (Map<String, Object> map : maps)
-                {
-                    _bulkProperties.add(new CaseInsensitiveHashMap<Object>(map));
-                }
-            }
-            catch (IOException e)
-            {
-                // Shouldn't get this from an in-memory TSV parse
-                throw new UnexpectedException(e);
-            }
-
-            Set<String> barcodes = new HashSet<String>();
-            for (Map<String, Object> row : _bulkProperties)
-            {
-                String barcode = row.get("barcode") == null ? null : row.get("barcode").toString();
-                if (barcode == null || barcode.equals(""))
-                {
-                    throw new ExperimentException("All entries must have a barcode value.");
-                }
-                if (!barcodes.add(barcode))
-                {
-                    throw new ExperimentException("Duplicate barcode value '" + barcode + "' was found. All barcode entries must be unique.");
-                }
-            }
-        }
-        return _bulkProperties;
-    }
-
-    public String getRawBulkProperties()
-    {
-        return getRequest().getParameter(MicroarrayBulkPropertiesDisplayColumn.PROPERTIES_FIELD_NAME);
+        return getProperties(barcode);
     }
 
     public int getSampleCount(Document mageML) throws ExperimentException
@@ -401,16 +333,9 @@ public class MicroarrayRunUploadForm extends AssayRunUploadForm<MicroarrayAssayP
         return null;
     }
 
-    public void checkBulkProperties() throws ExperimentException
-    {
-        // getBulkProperties() handles all the checks that we do right now and throws exceptions directly
-        getBulkProperties();
-    }
-
     @Override
-    public PipelineDataCollector<MicroarrayRunUploadForm> getSelectedDataCollector()
+    protected String getIdentifierColumnName()
     {
-        // We support only the PipelineDataCollector
-        return (PipelineDataCollector<MicroarrayRunUploadForm>)super.getSelectedDataCollector();
+        return "barcode";
     }
 }

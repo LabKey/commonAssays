@@ -60,35 +60,33 @@ import java.util.*;
  */
 
 
-public class XarAssayProvider extends AbstractAssayProvider
+public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
 {
-    public static final String PROTOCOL_LSID_NAMESPACE_PREFIX = "MSSampleDescriptionProtocol";
-    public static final String NAME = "Mass Spec Sample Description";
+    public static final String PROTOCOL_LSID_NAMESPACE_PREFIX = "MassSpecMetadataProtcool";
+    public static final String NAME = "Mass Spec Metadata";
     public static final DataType MS_ASSAY_DATA_TYPE = new DataType("MZXMLData");
-    public static final String PROTOCOL_LSID_OBJECTID_PREFIX = "FileType.mzXML";
-    public static final String RUN_LSID_NAMESPACE_PREFIX = "ExperimentRun";
-    public static final String RUN_LSID_OBJECT_ID_PREFIX = "MS2PreSearch";
+    public static final String RUN_LSID_NAMESPACE_PREFIX = "MassSpecMetadataRun";
 
     public static final String FRACTION_DOMAIN_PREFIX = ExpProtocol.ASSAY_DOMAIN_PREFIX + "Fractions";
     public static final String FRACTION_SET_NAME = "Fraction Fields";
     public static final String FRACTION_SET_LABEL = "These fields are used to describe searches where one sample has been divided into multiple fractions. The fields should describe the properties that vary from fraction to fraction.";
     private static final String FRACTION_INPUT_ROLE = "Fraction";
 
-    public XarAssayProvider()
+    public MassSpecMetadataAssayProvider()
     {
         super(PROTOCOL_LSID_NAMESPACE_PREFIX, RUN_LSID_NAMESPACE_PREFIX, MS_ASSAY_DATA_TYPE, new AssayTableMetadata(
                 FieldKey.fromParts("Run"),
                 FieldKey.fromParts("Run"),
                 FieldKey.fromParts("RowId")));
     }
-    
+
     @Override
     protected Pair<Domain, Map<DomainProperty, Object>> createBatchDomain(Container c, User user)
     {
-        // don't call the standard upload set create because we don't want the target study or participant data resolver
+        // don't call the standard createBatchDomain because we don't want the target study or participant data resolver
         Domain domain = PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_BATCH), "Batch Fields");
-        domain.setDescription("The user is prompted for batch properties once for each set of runs they import. The run " +
-                "set is a convenience to let users set properties that seldom change in one place and import many runs " +
+        domain.setDescription("The user is prompted for batch properties once for each set of runs they import. Batches " +
+                "are a convenience to let users set properties that seldom change in one place and import many runs " +
                 "using them. This is the first step of the import process.");
 
         return new Pair<Domain, Map<DomainProperty, Object>>(domain, Collections.<DomainProperty, Object>emptyMap());
@@ -103,7 +101,7 @@ public class XarAssayProvider extends AbstractAssayProvider
 
         public LinkDisplayColumn(ColumnInfo runIdColumn, Container container)
         {
-            super(runIdColumn, 18, 18, new ActionURL(XarAssayController.SearchLinkAction.class, container), "runId", AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif");
+            super(runIdColumn, 18, 18, new ActionURL(MassSpecMetadataController.SearchLinkAction.class, container), "runId", AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif");
         }
 
         @Override
@@ -207,7 +205,7 @@ public class XarAssayProvider extends AbstractAssayProvider
     @Override
     public Pair<ExpRun, ExpExperiment> saveExperimentRun(AssayRunUploadContext context, ExpExperiment batch) throws ExperimentException, ValidationException
     {
-        XarAssayForm form = (XarAssayForm)context;
+        MassSpecMetadataAssayForm form = (MassSpecMetadataAssayForm)context;
         if (form.isFractions())
         {
             // If this is a fractions search, first derive the fraction samples
@@ -229,7 +227,7 @@ public class XarAssayProvider extends AbstractAssayProvider
         }
     }
 
-    private ExpRun deriveFractions(XarAssayForm form) throws ExperimentException
+    private ExpRun deriveFractions(MassSpecMetadataAssayForm form) throws ExperimentException
     {
         ExpSampleSet fractionSet = getFractionSampleSet(form);
 
@@ -295,7 +293,7 @@ public class XarAssayProvider extends AbstractAssayProvider
 
     protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
-        XarAssayForm form = (XarAssayForm)context;
+        MassSpecMetadataAssayForm form = (MassSpecMetadataAssayForm)context;
         if (form.isFractions())
         {
             Map<String, File> files = form.getUploadedData();
@@ -333,7 +331,7 @@ public class XarAssayProvider extends AbstractAssayProvider
 
     public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles)
     {
-        return Collections.<AssayDataCollector>singletonList(new XarAssayDataCollector());
+        return Collections.<AssayDataCollector>singletonList(new MassSpecMetadataDataCollector());
     }
 
     public ExpData getDataForDataRow(Object dataRowId)
@@ -357,7 +355,7 @@ public class XarAssayProvider extends AbstractAssayProvider
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpRunTable expRunTable = AssayService.get().createRunTable(protocol, XarAssayProvider.this, schema.getUser(), schema.getContainer());
+                ExpRunTable expRunTable = AssayService.get().createRunTable(protocol, MassSpecMetadataAssayProvider.this, schema.getUser(), schema.getContainer());
                 expRunTable.setContainerFilter(result.getContainerFilter());
                 return expRunTable;
             }

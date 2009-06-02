@@ -76,7 +76,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         {
             Lsid lsid = new Lsid(protocol.getLSID());
             String objectId = lsid.getObjectId();
-            if (objectId.startsWith(MS2Schema.SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX) || lsid.getNamespacePrefix().startsWith(XarAssayProvider.PROTOCOL_LSID_NAMESPACE_PREFIX))
+            if (objectId.startsWith(MS2Schema.SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX) || lsid.getNamespacePrefix().startsWith(MassSpecMetadataAssayProvider.PROTOCOL_LSID_NAMESPACE_PREFIX))
             {
                 return Priority.HIGH;
             }
@@ -178,7 +178,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     protected void init()
     {
-        addController("xarassay", XarAssayController.class);
+        addController("xarassay", MassSpecMetadataController.class);
         addController("ms2", MS2Controller.class);
         addController("protein", ProteinController.class);
         addController("ms2-pipeline", PipelineController.class);
@@ -239,8 +239,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         ReportService.get().addUIProvider(new MS2ReportUIProvider());
         MS2Controller.registerAdminConsoleLinks();
         
-        AssayService.get().registerAssayProvider(new XarAssayProvider());
-        PipelineService.get().registerPipelineProvider(new XarAssayPipelineProvider());
+        AssayService.get().registerAssayProvider(new MassSpecMetadataAssayProvider());
+        PipelineService.get().registerPipelineProvider(new MassSpecMetadataPipelineProvider());
 
         initWebApplicationContext();
     }

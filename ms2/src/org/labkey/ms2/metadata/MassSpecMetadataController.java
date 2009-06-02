@@ -44,13 +44,15 @@ import java.io.FileFilter;
 import java.util.List;
 
 
-public class XarAssayController extends SpringActionController
+public class MassSpecMetadataController extends SpringActionController
 {
-    private static final DefaultActionResolver _resolver =
-            new DefaultActionResolver(XarAssayController.class, XarAssayUploadAction.class);
+    private static final DefaultActionResolver _resolver = new DefaultActionResolver(
+            MassSpecMetadataController.class,
+            MassSpecMetadataUploadAction.class,
+            MassSpecBulkPropertiesTemplateAction.class);
 
 
-    public XarAssayController()
+    public MassSpecMetadataController()
     {
         super();
         setActionResolver(_resolver);
@@ -70,12 +72,12 @@ public class XarAssayController extends SpringActionController
     {
         protected FileFilter getFileFilter()
         {
-            return XarAssayPipelineProvider.FILE_FILTER;
+            return MassSpecMetadataPipelineProvider.FILE_FILTER;
         }
 
         protected ActionURL getUploadURL(ExpProtocol protocol)
         {
-            return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), protocol, XarAssayUploadAction.class);
+            return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), protocol, MassSpecMetadataUploadAction.class);
         }
 
         protected List<File> validateFiles(BindException errors, List<File> files)
@@ -119,7 +121,7 @@ public class XarAssayController extends SpringActionController
             QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module._ms2SearchRunFilter, true, true);
             ExpRunTable table = (ExpRunTable) result.getTable();
 
-            SQLFragment searchSQL = XarAssayProvider.getSearchRunSQL(getContainer(), table.getContainerFilter(), Integer.toString(form.getRunId()));
+            SQLFragment searchSQL = MassSpecMetadataAssayProvider.getSearchRunSQL(getContainer(), table.getContainerFilter(), Integer.toString(form.getRunId()));
             // Figure out how many search matches there are
             Integer[] searchRunIds = Table.executeArray(ExperimentService.get().getSchema(), searchSQL, Integer.class);
             if (searchRunIds.length == 0)
