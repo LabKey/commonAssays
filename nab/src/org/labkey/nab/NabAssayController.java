@@ -442,7 +442,8 @@ public class NabAssayController extends SpringActionController
 
     private static final String LAST_NAB_RUN_KEY = NabAssayController.class.getName() + "/LastNAbRun";
 
-    @RequiresPermissionClass(value=ReadPermission.class, contextual=RunDataSetContextualRoles.class)
+    @RequiresPermissionClass(ReadPermission.class)
+    @ContextualRoles(RunDataSetContextualRoles.class)
     public class DetailsAction extends SimpleViewAction<RenderAssayForm>
     {
         private int _runRowId;
@@ -753,7 +754,8 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    @RequiresOneOf(value=ReadPermission.class, contextual=RunDataSetContextualRoles.class)
+    @RequiresPermissionClass(ReadPermission.class)
+    @ContextualRoles(RunDataSetContextualRoles.class)
     public class GraphAction extends SimpleViewAction<RenderAssayForm>
     {
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
