@@ -73,7 +73,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     protected void registerLsidHandler()
     {
         super.registerLsidHandler();
-        LsidManager.get().registerHandler("LuminexDataRow", new LsidManager.LsidHandler()
+        LsidManager.get().registerHandler("LuminexDataRow", new LsidManager.ExpObjectLsidHandler()
         {
             public ExpData getObject(Lsid lsid)
             {
@@ -93,12 +93,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                     return null;
                 ActionURL dataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(expRun.getContainer(), protocol, expRun.getRowId());
                 return dataURL.getLocalURIString();
-            }
-
-            public Container getContainer(Lsid lsid)
-            {
-                ExpData data = getObject(lsid);
-                return data == null ? null : data.getContainer();
             }
         });
     }

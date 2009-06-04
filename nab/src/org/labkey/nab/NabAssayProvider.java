@@ -26,6 +26,7 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
@@ -36,6 +37,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.nab.query.NabRunDataTable;
 import org.labkey.nab.query.NabSchema;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -75,29 +77,25 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
     protected void registerLsidHandler()
     {
-        LsidManager.get().registerHandler(_runLSIDPrefix, new LsidManager.LsidHandler()
+        LsidManager.get().registerHandler(_runLSIDPrefix, new LsidManager.ExpRunLsidHandler()
         {
-            public ExpRun getObject(Lsid lsid)
+            @Override
+            protected ActionURL getDisplayURL(Container c, ExpProtocol protocol, ExpRun run)
             {
-                return ExperimentService.get().getExpRun(lsid.toString());
+                return new ActionURL(NabAssayController.DetailsAction.class, run.getContainer()).addParameter("rowId", run.getRowId());
             }
 
-            public String getDisplayURL(Lsid lsid)
+            @Override
+            public boolean hasPermission(Lsid lsid, @NotNull User user, @NotNull Class<? extends Permission> perm)
             {
-                ExpRun run = ExperimentService.get().getExpRun(lsid.toString());
-                if (run == null)
-                    return null;
-                ExpProtocol protocol = run.getProtocol();
-                if (protocol == null)
-                    return null;
-                ActionURL dataURL = new ActionURL(NabAssayController.DetailsAction.class, run.getContainer()).addParameter("rowId", run.getRowId());
-                return dataURL.getLocalURIString();
-            }
+                // defer permission checking until user attempts to view the details page
+                return true;
 
-            public Container getContainer(Lsid lsid)
-            {
-                ExpRun run = getObject(lsid);
-                return run == null ? null : run.getContainer();
+//                ExpRun run = getObject(lsid);
+//                if (run == null)
+//                    return false;
+//                Container c = run.getContainer();
+//                return c.hasPermission(user, perm, RunDataSetContextualRoles.getContextualRolesForRun(c, user, run));
             }
         });
     }
@@ -419,6 +417,11 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     public NabRunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
     {
         return new NabRunListQueryView(protocol, context);
+    }
+
+    public boolean hasUsefulDetailsPage()
+    {
+        return true;
     }
 
     public String getDescription()
