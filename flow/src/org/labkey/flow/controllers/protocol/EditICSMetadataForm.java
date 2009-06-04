@@ -19,12 +19,12 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
+import org.labkey.api.data.FilterInfo;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.data.FlowProtocol;
-import org.labkey.flow.analysis.model.ScriptSettings;
 
 import javax.servlet.ServletException;
 import java.util.*;
@@ -47,12 +47,12 @@ public class EditICSMetadataForm extends ProtocolForm
 
     // from FlowProtocol's ICSMetadata
     public FieldKey[] matchColumn;
-    public ScriptSettings.FilterInfo[] backgroundFilter;
+    public FilterInfo[] backgroundFilter;
 
     public void init(FlowProtocol protocol)
     {
         matchColumn = new FieldKey[MATCH_COLUMNS_MAX];
-        backgroundFilter = new ScriptSettings.FilterInfo[BACKGROUND_COLUMNS_MAX];
+        backgroundFilter = new FilterInfo[BACKGROUND_COLUMNS_MAX];
 
         ICSMetadata icsmetadata = protocol.getICSMetadata();
         if (icsmetadata != null)
@@ -67,8 +67,8 @@ public class EditICSMetadataForm extends ProtocolForm
             {
                 for (int i = 0; i < icsmetadata.getBackgroundFilter().size(); i++)
                 {
-                    ScriptSettings.FilterInfo filter = icsmetadata.getBackgroundFilter().get(i);
-                    backgroundFilter[i] = new ScriptSettings.FilterInfo(filter.getField(), filter.getOp(), filter.getValue());
+                    FilterInfo filter = icsmetadata.getBackgroundFilter().get(i);
+                    backgroundFilter[i] = new FilterInfo(filter.getField(), filter.getOp(), filter.getValue());
                 }
             }
         }
@@ -113,9 +113,9 @@ public class EditICSMetadataForm extends ProtocolForm
     }
 
     /** Get background filters from form posted values. */
-    public List<ScriptSettings.FilterInfo> getBackgroundFilters()
+    public List<FilterInfo> getBackgroundFilters()
     {
-        List<ScriptSettings.FilterInfo> filters = new ArrayList<ScriptSettings.FilterInfo>(backgroundFilterFields.length);
+        List<FilterInfo> filters = new ArrayList<FilterInfo>(backgroundFilterFields.length);
         if (backgroundFilterFields != null && backgroundFilterOps != null)
         {
             for (int i = 0; i < backgroundFilterFields.length; i++)
@@ -136,7 +136,7 @@ public class EditICSMetadataForm extends ProtocolForm
                 else
                     value = backgroundFilterValues[i];
 
-                ScriptSettings.FilterInfo filter = new ScriptSettings.FilterInfo(field, op, value);
+                FilterInfo filter = new FilterInfo(field, op, value);
                 filters.add(filter);
             }
         }

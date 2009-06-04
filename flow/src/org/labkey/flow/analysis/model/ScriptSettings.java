@@ -19,7 +19,7 @@ package org.labkey.flow.analysis.model;
 import org.fhcrc.cpas.flow.script.xml.*;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.query.FieldKey;
+import org.labkey.api.data.FilterInfo;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -27,8 +27,16 @@ import java.util.Map;
 
 public class ScriptSettings implements Serializable
 {
-    Map<String, ParameterInfo> _parameters = new HashMap();
+    Map<String, ParameterInfo> _parameters = new HashMap<String, ParameterInfo>();
     Map<String, FilterInfo> _filters = new HashMap<String, FilterInfo>();
+
+    public static FilterInfo fromFilterDef(FilterDef filter)
+    {
+        return new FilterInfo(
+                filter.getField(),
+                filter.getOp() == null ? CompareType.NONBLANK.getUrlKey() : filter.getOp().toString(),
+                filter.getValue());
+    }
 
     static public class ParameterInfo implements Serializable
     {
@@ -74,71 +82,6 @@ public class ScriptSettings implements Serializable
             result = _name.hashCode();
             result = 31 * result + (_minValue != null ? _minValue.hashCode() : 0);
             return result;
-        }
-    }
-
-    public static class FilterInfo implements Serializable
-    {
-        FieldKey field;
-        CompareType op;
-        String value;
-
-        public FilterInfo(String field, String op, String value)
-        {
-            this(FieldKey.fromString(field), CompareType.getByURLKey(op), value);
-        }
-
-        public FilterInfo(FieldKey field, CompareType op, String value)
-        {
-            this.field = field;
-            this.op = op;
-            this.value = value;
-        }
-
-        public FieldKey getField()
-        {
-            return field;
-        }
-
-        public CompareType getOp()
-        {
-            return op;
-        }
-
-        public String getValue()
-        {
-            return value;
-        }
-
-        public boolean equals(Object o)
-        {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            FilterInfo that = (FilterInfo) o;
-
-            if (field != null ? !field.equals(that.field) : that.field != null) return false;
-            if (op != that.op) return false;
-            if (value != null ? !value.equals(that.value) : that.value != null) return false;
-
-            return true;
-        }
-
-        public int hashCode()
-        {
-            int result;
-            result = (field != null ? field.hashCode() : 0);
-            result = 31 * result + (op != null ? op.hashCode() : 0);
-            result = 31 * result + (value != null ? value.hashCode() : 0);
-            return result;
-        }
-
-        public static FilterInfo fromFilterDef(FilterDef filter)
-        {
-            return new FilterInfo(
-                    filter.getField(),
-                    filter.getOp() == null ? CompareType.NONBLANK.getUrlKey() : filter.getOp().toString(),
-                    filter.getValue());
         }
     }
 
@@ -210,7 +153,7 @@ public class ScriptSettings implements Serializable
                 FilterInfo mine = getFilter(filter.getField());
                 if (mine == null)
                 {
-                    mine = FilterInfo.fromFilterDef(filter);
+                    mine = fromFilterDef(filter);
                     _filters.put(filter.getField(), mine);
                 }
             }

@@ -20,6 +20,7 @@ import org.fhcrc.cpas.flow.script.xml.FilterDef;
 import org.fhcrc.cpas.flow.script.xml.OpDef;
 import org.fhcrc.cpas.flow.script.xml.FiltersDef;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.data.FilterInfo;
 import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.icsmetadata.xml.ICSMetadataDocument;
 import org.labkey.flow.icsmetadata.xml.ICSMetadataType;
@@ -33,7 +34,7 @@ import java.util.*;
 public class ICSMetadata
 {
     List<FieldKey> matchColumns; // columns shared between background and stimulated wells
-    List<ScriptSettings.FilterInfo> background;
+    List<FilterInfo> background;
 
     public ICSMetadata()
     {
@@ -59,19 +60,19 @@ public class ICSMetadata
         this.matchColumns = matchColumns;
     }
 
-    public List<ScriptSettings.FilterInfo> getBackgroundFilter()
+    public List<FilterInfo> getBackgroundFilter()
     {
         return background;
     }
 
-    public void setBackgroundFilter(List<ScriptSettings.FilterInfo> filters)
+    public void setBackgroundFilter(List<FilterInfo> filters)
     {
         background = filters;
     }
 
-    public ScriptSettings.FilterInfo getBackgroundFilter(FieldKey fieldKey)
+    public FilterInfo getBackgroundFilter(FieldKey fieldKey)
     {
-        for (ScriptSettings.FilterInfo filter : background)
+        for (FilterInfo filter : background)
         {
             if (filter.getField().equals(fieldKey))
                 return filter;
@@ -98,7 +99,7 @@ public class ICSMetadata
         if (getBackgroundFilter() != null && getBackgroundFilter().size() > 0)
         {
             FiltersDef xBackgroundFilter = null;
-            for (ScriptSettings.FilterInfo filterInfo : getBackgroundFilter())
+            for (FilterInfo filterInfo : getBackgroundFilter())
             {
                 if (filterInfo != null && filterInfo.getField() != null && filterInfo.getOp() != null)
                 {
@@ -144,13 +145,13 @@ public class ICSMetadata
             result.setMatchColumns(matchColumns);
         }
 
-        List<ScriptSettings.FilterInfo> backgroundFilters = new ArrayList<ScriptSettings.FilterInfo>();
+        List<FilterInfo> backgroundFilters = new ArrayList<FilterInfo>();
 
         // 'backgroundColumn' element is deprecated
         FilterDef xBackgroundColumn = xBackground.getBackgroundColumn();
         if (xBackgroundColumn != null)
         {
-            ScriptSettings.FilterInfo filter = ScriptSettings.FilterInfo.fromFilterDef(xBackgroundColumn);
+            FilterInfo filter = ScriptSettings.fromFilterDef(xBackgroundColumn);
             backgroundFilters.add(filter);
         }
 
@@ -164,7 +165,7 @@ public class ICSMetadata
                 {
                     if (xFilter == null)
                         continue;
-                    ScriptSettings.FilterInfo filter = ScriptSettings.FilterInfo.fromFilterDef(xFilter);
+                    FilterInfo filter = ScriptSettings.fromFilterDef(xFilter);
                     backgroundFilters.add(filter);
                 }
             }

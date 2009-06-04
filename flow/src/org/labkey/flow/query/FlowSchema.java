@@ -28,7 +28,6 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.collections.Cache;
-import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.controllers.FlowParam;
@@ -1515,7 +1514,7 @@ public class FlowSchema extends UserSchema
             FlowDataTable bg = (FlowDataTable)detach().getTable(FlowTableType.FCSAnalyses.toString());
             bg.addObjectIdColumn("objectid");
             Set<FieldKey> allColumns = new TreeSet<FieldKey>(ics.getMatchColumns());
-            for (ScriptSettings.FilterInfo f : ics.getBackgroundFilter())
+            for (FilterInfo f : ics.getBackgroundFilter())
                 allColumns.add(f.getField());
             Map<FieldKey,ColumnInfo> bgMap = QueryService.get().getColumns(bg, allColumns);
             if (bgMap.size() != allColumns.size())
@@ -1524,7 +1523,7 @@ public class FlowSchema extends UserSchema
             bgFields.add(bg.getColumn("objectid"));
             bgFields.addAll(bgMap.values());
             SimpleFilter filter = new SimpleFilter();
-            for (ScriptSettings.FilterInfo f : ics.getBackgroundFilter())
+            for (FilterInfo f : ics.getBackgroundFilter())
                 filter.addCondition(bgMap.get(f.getField()), f.getValue(), f.getOp());
             SQLFragment bgSQL = Table.getSelectSQL(bg, bgFields, null, null);
             if (filter.getClauses().size() > 0)

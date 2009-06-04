@@ -22,6 +22,7 @@
 <%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="org.labkey.flow.analysis.model.ScriptSettings" %>
+<%@ page import="org.labkey.api.data.FilterInfo" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%! void addCompare(Map<String, String> options, CompareType ct)
@@ -96,7 +97,7 @@
         </tr>
         <%
             for (int i = 0; i < EditICSMetadataForm.BACKGROUND_COLUMNS_MAX; i++) {
-                ScriptSettings.FilterInfo filter = form.backgroundFilter[i];
+                FilterInfo filter = form.backgroundFilter[i];
                 %>
                 <tr>
                     <td><%=i == 0 ? "&nbsp;" : "and"%></td>
