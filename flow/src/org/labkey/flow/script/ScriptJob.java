@@ -636,7 +636,7 @@ abstract public class ScriptJob extends FlowJob
         {
             try
             {
-                _sampleMap = _protocol.getSampleMap();
+                _sampleMap = _protocol.getSampleMap(getUser());
             }
             catch (SQLException e)
             {

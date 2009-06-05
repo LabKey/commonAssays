@@ -216,7 +216,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
-    public Map<SampleKey, ExpMaterial> getSampleMap() throws SQLException
+    public Map<SampleKey, ExpMaterial> getSampleMap(User user) throws SQLException
     {
         ExpSampleSet ss = getSampleSet();
         if (ss == null)
@@ -224,7 +224,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         Set<String> propertyNames = getSampleSetJoinFields().keySet();
         if (propertyNames.size() == 0)
             return Collections.emptyMap();
-        SamplesSchema schema = new SamplesSchema(null, getContainer());
+        SamplesSchema schema = new SamplesSchema(user, getContainer());
 
         ExpMaterialTable sampleTable = schema.getSampleTable(ss);
         List<ColumnInfo> selectedColumns = new ArrayList<ColumnInfo>();
@@ -267,7 +267,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     {
         ExperimentService.Interface svc = ExperimentService.get();
         Map<String, FieldKey> joinFields = getSampleSetJoinFields();
-        Map<SampleKey, ExpMaterial> sampleMap = getSampleMap();
+        Map<SampleKey, ExpMaterial> sampleMap = getSampleMap(user);
         ExpSampleSet ss = getSampleSet();
 
         FlowSchema schema = new FlowSchema(user, getContainer());
