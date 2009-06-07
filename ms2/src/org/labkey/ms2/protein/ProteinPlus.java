@@ -31,6 +31,7 @@ public class ProteinPlus
     protected String _species;
     protected String _genus;
     protected Protein _protein;
+    private String _description;
 
 
     public ProteinPlus(Protein p)
@@ -92,5 +93,28 @@ public class ProteinPlus
     public void genHash()
     {
         setHash(HashHelpers.hash(getProtein().getBytes()));
+    }
+
+    public String getDescription()
+    {
+        int firstBlankIndex = getProtein().getHeader().indexOf(" ");
+        if (firstBlankIndex != -1)
+        {
+            return getProtein().getHeader().substring(firstBlankIndex + 1).replaceAll("\\01", " ").trim();
+        }
+        return null;
+    }
+
+    public String getBestName()
+    {
+        int firstBlankIndex = getProtein().getHeader().indexOf(" ");
+
+        if (firstBlankIndex != -1)
+        {
+            String result = getProtein().getHeader().substring(0, firstBlankIndex).trim();
+            if (result.length() > 500) result = result.substring(0, 499);
+            return result;
+        }
+        return null;
     }
 }

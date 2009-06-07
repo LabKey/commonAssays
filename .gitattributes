@@ -1199,6 +1199,7 @@ ms2/src/org/labkey/ms2/showPeptideProphetDetails.jsp -text
 ms2/src/org/labkey/ms2/showProteinGroup.jsp -text
 ms2/src/org/labkey/ms2/showSensitivityDetails.jsp -text
 ms2/src/org/labkey/ms2/stats.jsp -text
+ms2/src/org/labkey/ms2/testFastaParsing.jsp -text
 ms2/src/org/labkey/ms2/testMascot.jsp -text
 ms2/src/org/labkey/ms2/testSequest.jsp -text
 ms2/src/org/labkey/ms2/writer/BasePepXmlWriter.java -text

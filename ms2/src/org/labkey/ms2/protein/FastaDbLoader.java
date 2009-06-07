@@ -242,12 +242,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
             fdbu._addSeqStmt.setString(1, curSeq.getProtein().getSequenceAsString());
             fdbu._addSeqStmt.setString(2, curSeq.getHash());
-            String desc = null;
-            int firstBlankIndex;
-            if ((firstBlankIndex = curSeq.getProtein().getHeader().indexOf(" ")) != -1)
-            {
-                desc = curSeq.getProtein().getHeader().substring(firstBlankIndex + 1).replaceAll("\\01", " ").trim();
-            }
+            String desc = curSeq.getDescription();
             if (desc == null)
             {
                 fdbu._addSeqStmt.setNull(3, Types.VARCHAR);
@@ -259,9 +254,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             }
             fdbu._addSeqStmt.setDouble(4, curSeq.getProtein().getMass());
             fdbu._addSeqStmt.setInt(5, curSeq.getProtein().getBytes().length);
-            String bestNameTmp = curSeq.getProtein().getHeader();
-            if (firstBlankIndex != -1) bestNameTmp = bestNameTmp.substring(0, firstBlankIndex).trim();
-            if (bestNameTmp.length() > 500) bestNameTmp = bestNameTmp.substring(0, 499);
+            String bestNameTmp = curSeq.getBestName();
             fdbu._addSeqStmt.setString(6, bestNameTmp);
             //todo: rethink best name
             fdbu._addSeqStmt.setString(7, baseFileName(getParseFName()));

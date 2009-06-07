@@ -46,8 +46,8 @@ public class ProteinProphetFile extends SensitivitySummary
         List<Float> minimumProbabilities = new ArrayList<Float>();
         List<Float> sensitivities = new ArrayList<Float>();
         List<Float> falsePositiveErrorRate = new ArrayList<Float>();
-        List<Integer> predictedNumberCorrect = new ArrayList<Integer>();
-        List<Integer> predictedNumberIncorrect = new ArrayList<Integer>();
+        List<Float> predictedNumberCorrect = new ArrayList<Float>();
+        List<Float> predictedNumberIncorrect = new ArrayList<Float>();
 
         while (parser.hasNext() && !(parser.isEndElement() && "proteinprophet_details".equals(parser.getLocalName())))
         {
@@ -58,8 +58,8 @@ public class ProteinProphetFile extends SensitivitySummary
                 minimumProbabilities.add(new Float(parser.getAttributeValue(null, "min_probability")));
                 sensitivities.add(new Float(parser.getAttributeValue(null, "sensitivity")));
                 falsePositiveErrorRate.add(new Float(parser.getAttributeValue(null, "false_positive_error_rate")));
-                predictedNumberCorrect.add(new Integer(parser.getAttributeValue(null, "predicted_num_correct")));
-                predictedNumberIncorrect.add(new Integer(parser.getAttributeValue(null, "predicted_num_incorrect")));
+                predictedNumberCorrect.add(new Float(parser.getAttributeValue(null, "predicted_num_correct")));
+                predictedNumberIncorrect.add(new Float(parser.getAttributeValue(null, "predicted_num_incorrect")));
             }
         }
         _minProb = toFloatArray(minimumProbabilities);
@@ -69,7 +69,7 @@ public class ProteinProphetFile extends SensitivitySummary
         _predictedNumberIncorrect = toIntArray(predictedNumberIncorrect);
     }
 
-    public float[] toFloatArray(List<Float> floats)
+    public float[] toFloatArray(List<? extends Number> floats)
     {
         float[] result = new float[floats.size()];
         for (int i = 0; i < floats.size(); i++)
@@ -79,7 +79,7 @@ public class ProteinProphetFile extends SensitivitySummary
         return result;
     }
 
-    public int[] toIntArray(List<Integer> ints)
+    public int[] toIntArray(List<? extends Number> ints)
     {
         int[] result = new int[ints.size()];
         for (int i = 0; i < ints.size(); i++)

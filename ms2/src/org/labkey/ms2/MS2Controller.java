@@ -2237,6 +2237,41 @@ public class MS2Controller extends SpringActionController
     }
 
 
+    public static class FastaParsingForm
+    {
+        private String _header;
+
+        public String getHeader()
+        {
+            if (_header != null && _header.length() > 0 && _header.startsWith(">"))
+            {
+                return _header.substring(1);
+            }
+            return _header;
+        }
+
+        public void setHeader(String headers)
+        {
+            _header = headers;
+        }
+    }
+
+    @RequiresSiteAdmin
+    public class TestFastaParsingAction extends SimpleViewAction<FastaParsingForm>
+    {
+        public ModelAndView getView(FastaParsingForm form, BindException errors) throws Exception
+        {
+            return new JspView<FastaParsingForm>("/org/labkey/ms2/testFastaParsing.jsp", form);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            appendProteinAdminNavTrail(root, "Test FASTA header parsing", getPageConfig(), null);
+            return root;
+        }
+    }
+
+
     @RequiresSiteAdmin
     public class ShowProteinAdminAction extends SimpleViewAction
     {
@@ -2285,6 +2320,10 @@ public class MS2Controller extends SpringActionController
             insertAnnots.setActionType(ActionButton.Action.LINK);
             bb.add(insertAnnots);
 
+            ActionButton testFastaHeader = new ActionButton(new ActionURL(TestFastaParsingAction.class, getContainer()), "Test FASTA Header Parsing");
+            testFastaHeader.setActionType(ActionButton.Action.LINK);
+            bb.add(testFastaHeader);
+
             bb.add(new ActionButton("reloadSPOM.post", "Reload SWP Org Map"));
 
             ActionButton reloadGO = new ActionButton("loadGo.view", (GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO");
@@ -2320,6 +2359,10 @@ public class MS2Controller extends SpringActionController
             reload.setActionType(ActionButton.Action.POST);
             reload.setRequiresSelection(true);
             bb.add(reload);
+
+            ActionButton testFastaHeader = new ActionButton(new ActionURL(TestFastaParsingAction.class, getContainer()), "Test FASTA Header Parsing");
+            testFastaHeader.setActionType(ActionButton.Action.LINK);
+            bb.add(testFastaHeader);
 
             MenuButton setBestNameMenu = new MenuButton("Set Protein Best Name...");
             ActionURL setBestNameURL = new ActionURL(SetBestNameAction.class, getContainer());
@@ -5207,6 +5250,11 @@ public class MS2Controller extends SpringActionController
         public boolean handlePost(LoadAnnotForm form, BindException errors) throws Exception
         {
             String fname = form.getFileName();
+            if (fname == null)
+            {
+                errors.addError(new LabkeyError("Please enter a file path."));
+                return false;
+            }
             try
             {
                 new File(fname).getCanonicalFile();

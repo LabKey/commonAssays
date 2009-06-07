@@ -402,6 +402,11 @@ public abstract class CompareQuery extends SQLFragment
 
     public void checkForErrors(BindException errors) throws SQLException
     {
+        if (_runs.isEmpty())
+        {
+            errors.addError(new LabkeyError("You must select at least one run."));
+            return;
+        }
         if (getGridColumns().size() == 0)
         {
             errors.addError(new LabkeyError("You must choose at least one comparison column to display in the grid."));

@@ -15,14 +15,14 @@
  */
 package org.labkey.ms2.protein.fasta;
 
-import org.labkey.ms2.protein.fasta.PeptideGenerator;
-import org.labkey.ms2.protein.fasta.IdPattern;
-
-import java.io.PrintWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.io.PrintWriter;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: migra
@@ -38,7 +38,7 @@ public class Protein
     private String _lookup;
 
     private String _origHeader;
-    private Map _identifierMap;
+    private Map<String, Set<String>> _identifierMap;
 
     //known identifier types.  Multiple identifiers found in fasta files can often
     //boil down to the same thing
@@ -210,7 +210,7 @@ public class Protein
         }
 
     //lazily parse the header for identifiers
-    public Map getIdentifierMap()
+    public Map<String, Set<String>> getIdentifierMap()
     {
         if (_identifierMap == null)
         {
