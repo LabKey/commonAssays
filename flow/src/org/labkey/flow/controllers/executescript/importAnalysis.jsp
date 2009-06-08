@@ -206,7 +206,7 @@
                     continue;
 
                 FlowExperiment experiment = keywordRun.getExperiment();
-                if (experiment.isWorkspace() || experiment.isAnalysis())
+                if (experiment != null && (experiment.isWorkspace() || experiment.isAnalysis()))
                     continue;
 
                 File keywordRunFile = new File(keywordRun.getPath());
