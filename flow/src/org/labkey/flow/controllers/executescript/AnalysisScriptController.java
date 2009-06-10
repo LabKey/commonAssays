@@ -591,7 +591,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             }
 
             // first, try to find an existing run in the same directory as the workspace
-            if (form.getExistingKeywordRunId() == 0)
+            if (workspaceFile != null && form.getExistingKeywordRunId() == 0)
             {
                 FlowRun[] keywordRuns = FlowRun.getRunsForPath(getContainer(), FlowProtocolStep.keywords, workspaceFile.getParentFile());
                 if (keywordRuns != null && keywordRuns.length > 0)
