@@ -38,6 +38,9 @@
 <%@ page import="org.labkey.flow.controllers.FlowController" %>
 <%@ page import="org.labkey.api.pipeline.PipelineStatusUrls" %>
 <%@ page import="org.labkey.flow.data.*" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@page extends="org.labkey.api.jsp.JspBase" %>
 <%
     FlowSummaryWebPart me = (FlowSummaryWebPart) HttpView.currentModel();
@@ -48,7 +51,7 @@
     PipeRoot pipeRoot = pipeService.findPipelineRoot(c);
     boolean _hasPipelineRoot = pipeRoot != null && pipeRoot.getUri(c) != null;
     boolean _canSetPipelineRoot = user.isAdministrator() && (pipeRoot == null || c.equals(pipeRoot.getContainer()));
-    boolean _canInsert = c.hasPermission(user, ACL.PERM_INSERT);
+//    boolean _canInsert = c.hasPermission(user, ACL.PERM_INSERT);
     boolean _canUpdate = c.hasPermission(user, ACL.PERM_UPDATE);
     boolean _canCreateFolder = c.getParent() != null && !c.getParent().isRoot() &&
             c.getParent().hasPermission(user, ACL.PERM_ADMIN);
@@ -59,7 +62,7 @@
     int _fcsAnalysisCount = FlowManager.get().getObjectCount(c, ObjectType.fcsAnalysis);
     int _fcsAnalysisRunCount = FlowManager.get().getRunCount(c, ObjectType.fcsAnalysis);
     int _compensationMatrixCount = FlowManager.get().getObjectCount(c, ObjectType.compensationMatrix);
-    int _compensationRunCount = FlowManager.get().getRunCount(c, ObjectType.compensationControl);
+//    int _compensationRunCount = FlowManager.get().getRunCount(c, ObjectType.compensationControl);
 
     FlowProtocol _protocol = FlowProtocol.getForContainer(c);
     ExpSampleSet _sampleSet = _protocol != null ? _protocol.getSampleSet() : null;
@@ -93,6 +96,32 @@
     }
 </style>
 
+<script type="text/javascript">
+    function createRenderer(urlFlagged, countProperty, countLabel)
+    {
+        return function (el, json) {
+            var html = "<table border='0'>";
+            for (var i = 0; i < json.rows.length; i++) {
+                var row = json.rows[i];
+                var name = row.Name.value;
+                var url = row.Name.url;
+                var comment = row["Flag/Comment"].value ? " title='" + row["Flag/Comment"].value + "'" : "";
+                var src = row["Flag/Comment"].value ? urlFlagged : "<%=h(AppProps.getInstance().getContextPath())%>/_.gif";
+
+                html += "<tr>" +
+                        "<td><a" + comment + " href='" + url + "'><img src='" + src + "'></a></td>" +
+                        "<td nowrap><a" + comment + " href='" + url + "'>" + name + "</a><td>";
+                if (countProperty) {
+                    html += "<td align='right' nowrap>(" + row[countProperty].value + " " + countLabel + ")</td>";
+                }
+                html += "</tr>";
+            }
+            html += "</table>";
+            el.update(html);
+        };
+    }
+</script>
+
 <% if (_fcsRunCount > 0 || _fcsAnalysisRunCount > 0 || _compensationMatrixCount > 0 || _sampleSet != null) { %>
     <div class="summary-div">
         <h3 class="summary-header">Summary</h3>
@@ -112,15 +141,7 @@
                       apiVersion: 9.1
                   })
                 },
-                tpl: new Ext.XTemplate(
-                  '<table boder=0>',
-                  '<tpl for="rows">',
-                  '  <tr>',
-                  '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
-                  '    <td align="right" nowrap>({[values.FCSFileCount.value]} files)',
-                  '  </tr>',
-                  '</tpl>',
-                  '</table>')
+                renderer: createRenderer("<%=h(FlowDataType.FCSFile.urlFlag(true))%>", "FCSFileCount", "files")
             });
         });
         </script>
@@ -144,15 +165,7 @@
                       apiVersion: 9.1
                   })
                 },
-                tpl: new Ext.XTemplate(
-                  '<table boder=0>',
-                  '<tpl for="rows">',
-                  '  <tr>',
-                  '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
-                  '    <td align="right" nowrap>({[values.FCSAnalysisCount.value]} wells)',
-                  '  </tr>',
-                  '</tpl>',
-                  '</table>')
+                renderer: createRenderer("<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "FCSAnalysisCount", "wells")
             });
         });
         </script>
@@ -175,14 +188,7 @@
                       apiVersion: 9.1
                   })
                 },
-                tpl: new Ext.XTemplate(
-                  '<table boder=0>',
-                  '<tpl for="rows">',
-                  '  <tr>',
-                  '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
-                  '  </tr>',
-                  '</tpl>',
-                  '</table>')
+                renderer: createRenderer("<%=h(FlowDataType.CompensationMatrix.urlFlag(true))%>")
             });
         });
         </script>
@@ -192,10 +198,38 @@
     <% } %><%-- end if (_compensationMatrixCount > 0) --%>
 
     <% if (_sampleSet != null) { %>
+        <script type="text/javascript">
+        Ext.onReady(function () {
+            var tip = new LABKEY.ext.CalloutTip({
+                target: "samples-div",
+                html: "<table border='0'>" +
+                      <%
+                        for (ExpMaterial sample : _sampleSet.getSamples())
+                        {
+                            String name = sample.getName();
+                            String url = sample.detailsURL().getLocalURIString();
+                            String comment = sample.getComment() != null ? " title='" + h(sample.getComment()) + "'" : "";
+                            String src = StringUtils.isNotEmpty(sample.getComment()) ? sample.urlFlag(true) : AppProps.getInstance().getContextPath() + "/_.gif";
+                      %>
+                          "<tr>" +
+                          "<td><a<%=comment%> href='<%=url%>'><img src='<%=src%>'></a>" +
+                          "<td nowrap><a<%=comment%> href='<%=url%>'><%=name%></a>" +
+                          "</tr>" +
+                      <%
+                         }
+                      %>
+                      "</table>"
+            });
+        });
+        </script>
         <div id="samples-div">
-            <a href="<%=_sampleSet.detailsURL()%>">Samples (<%=_sampleSet.getSamples().length%>)</a>
+            <a title="<%=_sampleSet.getDescription()%>" href="<%=_sampleSet.detailsURL()%>">Samples (<%=_sampleSet.getSamples().length%>)</a>
         </div>
     <% } %>
+
+        <div id="flagged-div">
+            Flagged
+        </div>
 
     <% if (_scripts.length > 0) { %>
         <br/>
@@ -257,10 +291,10 @@
                         <% } %>
                         '<div class="summary-div">',
                             '<div class="summary-header">Manage</div>',
-                            '<div><a href="<%=script.urlFor(ScriptController.Action.editSettings)%>">Edit Settings</a></div>',
-                            '<div><a href="<%=script.urlFor(ScriptController.Action.copy)%>">Copy Script</a></div>',
+                            '<div><a href="<%=script.urlFor(ScriptController.Action.editSettings)%>">Settings</a></div>',
+                            '<div><a href="<%=script.urlFor(ScriptController.Action.copy)%>">Copy</a></div>',
                             <% if (runCount == 0) { %>
-                                '<div><a href="<%=script.urlFor(ScriptController.Action.delete)%>">Delete Script</a></div>',
+                                '<div><a href="<%=script.urlFor(ScriptController.Action.delete)%>">Delete</a></div>',
                             <% } %>
                         '</div>',
                         <% if (runCount > 0) { %>
@@ -313,15 +347,7 @@
                               apiVersion: 9.1
                           })
                         },
-                        tpl: new Ext.XTemplate(
-                          '<table boder=0>',
-                          '<tpl for="rows">',
-                          '  <tr>',
-                          '    <td nowrap><a href="{[values.Name.url]}">{[values.Name.value]}</a>',
-                          '    <td align="right" nowrap>({[values.WellCount.value]} wells)',
-                          '  </tr>',
-                          '</tpl>',
-                          '</table>')
+                        renderer: createRenderer("<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "WellCount", "wells")
                     });
                 });
                 </script>
@@ -335,19 +361,10 @@
         }
         %></div><%-- end labkey-indented --%>
     <% } %><%-- end if (_fcsAnalysisRunCount > 0) --%>
+
 </div><%-- end summary-div --%>
 <% } %>
 
-<%--
-<div>
-    <br>
-    <img src="/labkey/_images/minus.gif"> Flagged
-    <div class="labkey-indented">
-        Runs: <a href="#">1 run</a><br>
-        Analysis: <a href="#">10 wells</a>
-    </div>
-</div>
---%>
 
 <div class="summary-div">
     <h3 class="summary-header">Actions</h3>
@@ -411,41 +428,4 @@
     </div>
 <% } %>
 
-
-<%--
-<br><hr><br>
-
-<h3 class="summary-header">Import Data</h3>
-<div>Upload and import experimental data to LabKey server.</div>
-<div><%= PageFlowUtil.textLink("Upload and Import", PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(c, getViewContext().getActionURL().getLocalURIString()))%></div>
-<div class="labkey-indented">
-<%
-    ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, c).addParameter("query.FCSFileCount~neq", 0);
-    if (_fcsRunCount > 0)
-    {
-%>
-        <a href="<%=urlShowRuns.getLocalURIString()%>">FCSFile Runs (<%=_fcsRunCount%>)</a>
-        |<img src="/labkey/ext-2.2/resources/images/default/grid/sort_desc.gif" xmlns:ext="http://www.extjs.com" ext:qtip="hello world">
-    <%
-    }
-%>
-    <br>
-    <a href="#">4 Workspaces</a>
-</div>
-
-<h3 class="summary-header">Analyze Data</h3>
-<div>Create scripts and perform analysis on uploaded FCS Files.</div>
-<div><%= PageFlowUtil.textLink("Create Script", "#")%></div>
-<div class="labkey-indented">
-    <a href="#">5 Scripts</a>|<img src="/labkey/ext-2.2/resources/images/default/grid/sort_desc.gif">
-</div>
-<div><%= PageFlowUtil.textLink("Analyze", "#")%></div>
-<div class="labkey-indented">
-    <a href="#">3 Compensation Matrices</a>|<img src="/labkey/ext-2.2/resources/images/default/grid/sort_desc.gif">
-    <br>
-    <a href="#">15 Analysis runs</a>|<img src="/labkey/ext-2.2/resources/images/default/grid/sort_desc.gif">
-</div>
-
-<hr>
---%>
 
