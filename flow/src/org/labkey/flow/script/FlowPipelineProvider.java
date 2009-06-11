@@ -151,7 +151,7 @@ public class FlowPipelineProvider extends PipelineProvider
                     continue;
                 importRunsURL.replaceParameter("path", URIUtil.relativize(rootURI, dir.toURI()).toString());
                 FileAction action = new ImportFCSFilesAction("Import Flow Run", importRunsURL, dir);
-                action.setDescription("" + fcsFiles.length + "&nbsp;fcs&nbsp;file" + ((fcsFiles.length>1)?"s":""));
+                action.setDescription("" + fcsFiles.length + "&nbsp;FCS&nbsp;file" + ((fcsFiles.length>1)?"s":""));
                 entry.addAction(action);
                 flowDirCount++;
             }
