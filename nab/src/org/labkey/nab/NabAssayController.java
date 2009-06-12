@@ -465,6 +465,14 @@ public class NabAssayController extends SpringActionController
                 newURL.setContainer(run.getContainer());
                 HttpView.throwRedirect(newURL);
             }
+
+            // 8128 : NAb should show only print details view if user doesn't have permission to container
+            // Using the permissions annotations, we've already checked that the user has permissions
+            // at this point.  However, if the user can view the dataset but not the container,
+            // lots of links will be broken. The workaround for now is to redirect to a print view.
+            if (!isPrint() && !getContainer().hasPermission(getUser(), ReadPermission.class))
+                HttpView.throwRedirect(getViewContext().getActionURL().clone().addParameter("_print", true));
+
             NabAssayRun assay = getNabAssayRun(run);
             _protocol = run.getProtocol();
             AbstractPlateBasedAssayProvider provider = (AbstractPlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
