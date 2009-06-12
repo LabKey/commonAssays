@@ -51,6 +51,7 @@ public class CompensationMatrixList extends GateComponent
         widget = new HorizontalPanel();
         widget.add(new Label("Compensation Matrix:"));
         listBox = new ListBox();
+        listBox.setEnabled(false);
         listBox.addChangeListener(changeListener);
         widget.add(listBox);
         editor.getService().getCompensationMatrices(new GateCallback<GWTCompensationMatrix[]>() {
@@ -58,6 +59,7 @@ public class CompensationMatrixList extends GateComponent
             public void onSuccess(GWTCompensationMatrix[] result)
             {
                 setCompensationMatrices(result);
+                listBox.setEnabled(true);
             }
         });
     }

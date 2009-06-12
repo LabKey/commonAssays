@@ -25,11 +25,15 @@ import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.SecurityPolicy;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.data.*;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.FCSViewer;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -49,12 +53,14 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.net.URI;
 
 public class WellController extends SpringFlowController<WellController.Action>
 {
@@ -216,7 +222,6 @@ public class WellController extends SpringFlowController<WellController.Action>
         }
     }
 
-
     @RequiresPermission(ACL.PERM_READ)
     public class ChooseGraphAction extends SimpleViewAction<ChooseGraphForm>
     {
@@ -225,6 +230,36 @@ public class WellController extends SpringFlowController<WellController.Action>
         public ModelAndView getView(ChooseGraphForm form, BindException errors) throws Exception
         {
             well = form.getWell();
+            if (null == well)
+                HttpView.throwNotFound();
+
+            URI fileURI = well.getFCSURI();
+            if (fileURI == null)
+                return new HtmlView("<span class='error'>There is no file on disk for this well.</span>");
+
+            PipeRoot r = PipelineService.get().findPipelineRoot(well.getContainer());
+            if (r == null)
+                return new HtmlView("<span class='error'>Pipeline not configured</span>");
+
+            // UNDONE: PipeRoot should have wrapper for this
+            //NOTE: we are specifically not inheriting policies from the parent container
+            //as the old permissions-checking code did not do this. We need to consider
+            //whether the pipeline root's parent really is the container, or if we should
+            //be checking a different (more specific) permission.
+            SecurityPolicy policy = org.labkey.api.security.SecurityManager.getPolicy(r, false);
+            if (!policy.hasPermission(getViewContext().getUser(), ReadPermission.class))
+                return new HtmlView("<span class='error'>You don't have permission to the FCS file.</span>");
+
+            boolean canRead = false;
+            URI rel = URIUtil.relativize(r.getUri(), fileURI);
+            if (rel != null)
+            {
+                File f = r.resolvePath(rel.getPath());
+                canRead = f != null && f.canRead();
+            }
+            if (!canRead)
+                return new HtmlView("<span class='error'>The original FCS file is no longer available or is not readable: " + PageFlowUtil.filter(rel.getPath()) + "</span>");
+
             FormPage page = FormPage.get(WellController.class, form, "chooseGraph.jsp");
             return new JspView(page);
         }

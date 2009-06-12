@@ -20,7 +20,6 @@
 <%@ page import="org.labkey.flow.persist.FlowManager" %>
 <%@ page import="org.labkey.flow.persist.ObjectType" %>
 <%@ page import="org.labkey.flow.webparts.FlowSummaryWebPart" %>
-<%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.security.User" %>
@@ -41,6 +40,7 @@
 <%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.labkey.api.data.*" %>
 <%@page extends="org.labkey.api.jsp.JspBase" %>
 <%
     FlowSummaryWebPart me = (FlowSummaryWebPart) HttpView.currentModel();
@@ -57,12 +57,13 @@
             c.getParent().hasPermission(user, ACL.PERM_ADMIN);
 
     int _fcsFileCount = FlowManager.get().getObjectCount(c, ObjectType.fcsKeywords);
-    int _fcsRunCount = FlowManager.get().getRunCount(c, ObjectType.fcsKeywords);
+    int _fcsRunCount = FlowManager.get().getFCSFileOnlyRunsCount(user, c);
     int _fcsRealRunCount = FlowManager.get().getFCSRunCount(c);
     int _fcsAnalysisCount = FlowManager.get().getObjectCount(c, ObjectType.fcsAnalysis);
     int _fcsAnalysisRunCount = FlowManager.get().getRunCount(c, ObjectType.fcsAnalysis);
     int _compensationMatrixCount = FlowManager.get().getObjectCount(c, ObjectType.compensationMatrix);
 //    int _compensationRunCount = FlowManager.get().getRunCount(c, ObjectType.compensationControl);
+    //int _flaggedCount = FlowManager.get().getFlaggedCount(c);
 
     FlowProtocol _protocol = FlowProtocol.getForContainer(c);
     ExpSampleSet _sampleSet = _protocol != null ? _protocol.getSampleSet() : null;
@@ -73,8 +74,11 @@
     FlowExperiment[] _experiments = FlowExperiment.getAnalysesAndWorkspace(c);
     Arrays.sort(_experiments);
 
-    ActionURL fcsFileRunsURL = new ActionURL(RunController.ShowRunsAction.class, c).addParameter("query.FCSFileCount~neq", 0);
-    ActionURL fcsAnalysisRunsURL = new ActionURL(RunController.ShowRunsAction.class, c).addParameter("query.FCSAnalysisCount~neq", 0);
+    ActionURL fcsFileRunsURL = new ActionURL(RunController.ShowRunsAction.class, c)
+            .addParameter("query.FCSFileCount~neq", 0)
+            .addParameter("query.FCSAnalysisCount~eq", 0);
+    ActionURL fcsAnalysisRunsURL = new ActionURL(RunController.ShowRunsAction.class, c)
+            .addParameter("query.FCSAnalysisCount~neq", 0);
     ActionURL compMatricesURL = FlowTableType.CompensationMatrices.urlFor(c, QueryAction.executeQuery);
 
 %>
@@ -136,6 +140,7 @@
                       schemaName: "flow",
                       "query.queryName": "Runs",
                       "query.FCSFileCount~neq": 0,
+                      "query.FCSAnalysisCount~eq": 0,
                       "query.columns": encodeURI("Name,Flag/Comment,FCSFileCount"),
                       "query.sort": "Name",
                       apiVersion: 9.1
@@ -227,9 +232,13 @@
         </div>
     <% } %>
 
+    <%--
+    <% if (_flaggedCount > 0) { %>
         <div id="flagged-div">
-            Flagged
+            <a href="#">Flagged (<%=_flaggedCount%>)</a>
         </div>
+    <% } %>
+    --%>
 
     <% if (_scripts.length > 0) { %>
         <br/>

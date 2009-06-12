@@ -437,7 +437,8 @@ public class FlowSchema extends UserSchema
                 sqlFlowData.append(",");
                 sqlFlowData.append("_flowObject").append("." + _flowObject.getColumn("compid").getName() + ",");
                 sqlFlowData.append("_flowObject").append("." + _flowObject.getColumn("fcsid").getName() + ",");
-                sqlFlowData.append("_flowObject").append("." + _flowObject.getColumn("scriptid").getName() + "");
+                sqlFlowData.append("_flowObject").append("." + _flowObject.getColumn("scriptid").getName() + ",");
+                sqlFlowData.append("_flowObject").append("." + _flowObject.getColumn("uri").getName() + "");
             }
             sqlFlowData.append("\nFROM ");
             sqlFlowData.append(_expData, _expDataAlias);
@@ -667,6 +668,15 @@ public class FlowSchema extends UserSchema
             ColumnInfo underlyingColumn = _flowObject.getColumn("rowid");
             ExprColumn ret = new ExprColumn(this, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".objectid"), underlyingColumn.getSqlTypeInt());
             ret.copyAttributesFrom(underlyingColumn);
+            addColumn(ret);
+            return ret;
+        }
+
+        ColumnInfo addHasURIColumn(String name)
+        {
+            ColumnInfo underlyingColumn = _flowObject.getColumn("uri");
+            ExprColumn ret = new ExprColumn(this, name, new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN true ELSE false END)"), java.sql.Types.BOOLEAN);
+//            ret.copyAttributesFrom(underlyingColumn);
             addColumn(ret);
             return ret;
         }
@@ -1106,6 +1116,10 @@ public class FlowSchema extends UserSchema
             colMaterialInput.setIsHidden(true);
         }
 
+        ExprColumn colHasFile = new ExprColumn(ret, "HasFile", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN true ELSE false END)"), java.sql.Types.BOOLEAN);
+        ret.addColumn(colHasFile);
+        colHasFile.setIsHidden(true);
+
         ret.setDefaultVisibleColumns(new DeferredFCSFileVisibleColumns(ret, colKeyword));
         return ret;
     }
@@ -1440,6 +1454,7 @@ public class FlowSchema extends UserSchema
                 "    flow.object.compid,\n" +
                 "    flow.object.fcsid,\n" +
                 "    flow.object.scriptid,\n" +
+                "    flow.object.uri,\n" +
                 "    exp.RunList.ExperimentId\n" +
                 "INTO " +  name + "\n" +
                 "FROM exp.data\n" +

@@ -111,8 +111,17 @@ public class FlowRun extends FlowObject<ExpRun>
             if (obj instanceof FlowWell)
             {
                 FlowWell well = (FlowWell)obj;
-                if (!realFiles || well.getFCSURI() != null)
+                if (realFiles)
+                {
+                    URI uri = well.getFCSURI();
+                    // XXX: hit the file system every time?
+                    if (uri != null && new File(uri.getPath()).canRead())
+                        wells.add((FlowWell) obj);
+                }
+                else
+                {
                     wells.add((FlowWell) obj);
+                }
             }
         }
         FlowWell[] ret = wells.toArray(new FlowWell[wells.size()]);

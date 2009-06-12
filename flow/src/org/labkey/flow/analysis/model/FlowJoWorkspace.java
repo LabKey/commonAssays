@@ -1152,7 +1152,10 @@ abstract public class FlowJoWorkspace implements Serializable
             {
                 file = new File(runFilePathRoot, sample.getLabel());
                 uri = file.toURI();
-                attrs.setURI(uri);
+                // Don't set FCSFile uri unless the file actually exists on disk.
+                // We assume the FCS file exists in graph editor if the URI is set.
+                if (file.exists())
+                    attrs.setURI(uri);
             }
             attrs.setKeywords(sample.getKeywords());
             attrs.prepareForSave();

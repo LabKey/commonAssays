@@ -103,6 +103,7 @@ public class RunList extends GateComponent
         widget = new HorizontalPanel();
         widget.add(new Label("Run"));
         listBox = new ListBox();
+        listBox.setEnabled(false);
         listBox.addChangeListener(changeListener);
         widget.add(listBox);
         editor.addListener(listener);
@@ -112,6 +113,7 @@ public class RunList extends GateComponent
             {
                 runs = result;
                 updateRuns();
+                listBox.setEnabled(true);
             }
         });
 

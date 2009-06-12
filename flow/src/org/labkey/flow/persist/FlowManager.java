@@ -23,8 +23,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Handler;
+import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.security.User;
 import org.labkey.api.util.*;
 import org.labkey.api.util.Search.SearchTermParser;
@@ -35,6 +37,8 @@ import org.labkey.api.collections.CacheMap;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.query.AttributeCache;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.controllers.well.WellController;
 
 import java.io.File;
@@ -539,16 +543,65 @@ public class FlowManager
 
     public int getObjectCount(Container container, ObjectType type)
     {
+        return getObjectCount(container, type, false);
+    }
+
+    public int getObjectCount(Container container, ObjectType type, boolean uriNotNull)
+    {
         try
         {
             String sqlFCSFileCount = "SELECT COUNT(flow.object.rowid) FROM flow.object\n" +
                     "WHERE flow.object.container = ? AND flow.object.typeid = ?";
+            if (uriNotNull)
+                sqlFCSFileCount += " AND flow.object.uri IS NOT NULL";
             return Table.executeSingleton(getSchema(), sqlFCSFileCount, new Object[] { container.getId(), type.getTypeId() }, Integer.class);
         }
         catch (SQLException x)
         {
             throw new RuntimeSQLException(x);
         }
+    }
+
+    // CONSIDER: move to experiment module
+    public int getFlaggedCount(Container container)
+    {
+        try
+        {
+            ExpObject o;
+            String sql = "SELECT COUNT(OP.objectid) FROM exp.object OB, exp.objectproperty OP, exp.propertydescriptor PD\n" +
+                    "WHERE OB.container = ? AND\n" +
+                    "OB.objectid = OP.objectid AND\n" +
+                    "OP.propertyid = PD.propertyid AND\n" +
+                    "PD.propertyuri = '" + ExperimentProperty.COMMENT.getPropertyDescriptor().getPropertyURI() + "'";
+            return Table.executeSingleton(getSchema(), sql, new Object[] { container.getId() }, Integer.class);
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
+    }
+
+    public int getFCSFileOnlyRunsCount(User user, Container container)
+    {
+        FlowSchema schema = new FlowSchema(user, container);
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition("FCSFileCount", 0, CompareType.NEQ);
+        filter.addCondition("FCSAnalysisCount", 0, CompareType.EQUAL);
+        TableInfo table = schema.getTable(FlowTableType.Runs);
+        try
+        {
+            List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
+            List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
+            Map<String, Aggregate.Result> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, filter, false);
+            Aggregate.Result result = agg.get("RowId");
+            if (result != null)
+                return ((Long)result.getValue()).intValue();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public int getRunCount(Container container, ObjectType type)

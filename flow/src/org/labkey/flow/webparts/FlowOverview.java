@@ -76,8 +76,8 @@ public class FlowOverview extends Overview
         _canCreateFolder = getContainer().getParent() != null && !getContainer().getParent().isRoot() &&
                 getContainer().getParent().hasPermission(getUser(), ACL.PERM_ADMIN);
 
-        _fcsFileCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsKeywords);
-        _fcsRunCount = FlowManager.get().getRunCount(getContainer(), ObjectType.fcsKeywords);
+        _fcsFileCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsKeywords, true);
+        _fcsRunCount = FlowManager.get().getFCSFileOnlyRunsCount(user, getContainer());
         _fcsRealRunCount = FlowManager.get().getFCSRunCount(getContainer());
         _fcsAnalysisCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsAnalysis);
         _fcsAnalysisRunCount = FlowManager.get().getRunCount(getContainer(), ObjectType.fcsAnalysis);
@@ -187,9 +187,12 @@ public class FlowOverview extends Overview
         if (_fcsFileCount != 0)
         {
             StringBuilder status = new StringBuilder();
-            ActionURL urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getContainer(), QueryAction.executeQuery);
+            ActionURL urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getContainer(), QueryAction.executeQuery)
+                    .addParameter("query.HasFile~eq", true);
             status.append("<a href=\"" + h(urlShowFCSFiles) + "\">" + _fcsFileCount + " FCS files</a> have been loaded.");
-            ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter("query.FCSFileCount~neq", 0);
+            ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer())
+                    .addParameter("query.FCSFileCount~neq", 0)
+                    .addParameter("query.FCSAnalysisCount~eq", 0);
             if (_fcsRunCount == 1)
             {
                 status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">1 run</a>");

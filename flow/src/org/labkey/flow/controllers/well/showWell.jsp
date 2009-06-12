@@ -43,6 +43,7 @@
 <%@ page import="org.labkey.api.webdav.WebdavService" %>
 <%@ page import="org.labkey.api.security.SecurityPolicy" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
+<%@ page import="java.io.File" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <style type="text/css">
     .right {text-align:right;}
@@ -382,9 +383,6 @@ if (null == fileURI)
 }
 else
 {
-    %><p><a href="<%=h(getWell().urlFor(WellController.Action.chooseGraph))%>">More Graphs</a><br>
-    <a href="<%=h(getWell().urlFor(WellController.Action.keywords))%>">Keywords from the FCS file</a><br><%
-
     PipeRoot r = PipelineService.get().findPipelineRoot(well.getContainer());
     if (null != r)
     {
@@ -396,12 +394,21 @@ else
         SecurityPolicy policy = org.labkey.api.security.SecurityManager.getPolicy(r, false);
         if (policy.hasPermission(context.getUser(), ReadPermission.class))
         {
-            URI rootURI = r.getUri();
             URI rel = URIUtil.relativize(r.getUri(), fileURI);
             if (null != rel)
             {
-                String url = context.getContextPath() + "/" + WebdavService.getServletPath() + r.getContainer().getPath() + "/@pipeline/" + rel.toString();
-                %><a href="<%=h(url)%>">Download FCS file</a><%
+                File f = r.resolvePath(rel.getPath());
+                if (f != null && f.canRead())
+                {
+                    %><p><a href="<%=h(getWell().urlFor(WellController.Action.chooseGraph))%>">More Graphs</a><br><%
+                    %><a href="<%=h(getWell().urlFor(WellController.Action.keywords))%>">Keywords from the FCS file</a><br><%
+                    String url = context.getContextPath() + "/" + WebdavService.getServletPath() + r.getContainer().getPath() + "/@pipeline/" + rel.toString();
+                    %><a href="<%=h(url)%>">Download FCS file</a><%
+                }
+                else
+                {
+                    %><span class="error">The original FCS file is no longer available or is not readable: <%=rel.getPath()%></span><%
+                }
             }
         }
     }

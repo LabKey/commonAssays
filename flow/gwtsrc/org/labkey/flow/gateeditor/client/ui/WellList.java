@@ -33,6 +33,7 @@ public class WellList extends GateComponent
     Map<Label,GWTWell> labelWellMap = new HashMap<Label,GWTWell>();
     Map<Integer,Label> wellLabelMap = new HashMap<Integer,Label>();
     Label currentLabel;
+    private boolean firstLoad = true;
 
     GateEditorListener listener = new GateEditorListener()
     {
@@ -67,6 +68,7 @@ public class WellList extends GateComponent
         scrollPanel.setWidth("150px");
         scrollPanel.setHeight("400px");
         list = new VerticalPanel();
+        list.add(new InlineHTML("<em>Loading...</em>"));
         scrollPanel.add(list);
         basePanel.add(scrollPanel);
         editor.addListener(listener);
@@ -79,6 +81,11 @@ public class WellList extends GateComponent
 
     public void setWells(GWTWell[] wells)
     {
+        if (firstLoad)
+        {
+            list.clear();
+            firstLoad = false;
+        }
         for (Label label : labelWellMap.keySet())
         {
             label.removeFromParent();
