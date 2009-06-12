@@ -559,8 +559,34 @@ public class NabController extends ViewController
         ChartUtilities.writeChartAsPNG(getResponse().getOutputStream(), chart, 425, 300);
     }
 
+    public static class NAbAttachmentForm extends ViewForm
+    {
+        private String _entityId = null;
+        private String _name = null;
+
+        public String getEntityId()
+        {
+            return _entityId;
+        }
+
+        public void setEntityId(String entityId)
+        {
+            _entityId = entityId;
+        }
+
+        public String getName()
+        {
+            return _name;
+        }
+
+        public void setName(String name)
+        {
+            _name = name;
+        }
+    }
+
     @Jpf.Action
-    protected Forward download(AttachmentForm form) throws IOException, ServletException, SQLException
+    protected Forward download(NAbAttachmentForm form) throws IOException, ServletException, SQLException
     {
         requiresPermission(ACL.PERM_READ);
 

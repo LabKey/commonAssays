@@ -52,8 +52,6 @@ import java.io.IOException;/*
 @ApiVersion(9.1)
 public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
 {
-
-
     public static class GetNabRunsForm implements HasViewContext
     {
         private ViewContext _viewContext;
@@ -66,6 +64,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         private Integer _limit;
         private String _sort;
         private String _dir;
+        private String _containerFilter;
 
         public ViewContext getViewContext()
         {
@@ -165,6 +164,16 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         public void setDir(String dir)
         {
             _dir = dir;
+        }
+
+        public String getContainerFilter()
+        {
+            return _containerFilter;
+        }
+
+        public void setContainerFilter(String containerFilter)
+        {
+            _containerFilter = containerFilter;
         }
     }
 
@@ -304,6 +313,14 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
             boolean desc = "DESC".equals(form.getDir());
             sortFilterURL.replaceParameter("query.sort", (desc ? "-" : "") + form.getSort());
             settings.setSortFilterURL(sortFilterURL); //this isn't working!
+        }
+
+        if (form.getContainerFilter() != null)
+        {
+            // If the user specified an incorrect filter, throw an IllegalArgumentException
+            ContainerFilter.Type containerFilterType =
+                ContainerFilter.Type.valueOf(form.getContainerFilter());
+            settings.setContainerFilterName(containerFilterType.name());
         }
 
         settings.setQueryName(tableName);
