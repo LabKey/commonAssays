@@ -195,7 +195,7 @@ public class FlowOverview extends Overview
                     .addParameter("query.FCSAnalysisCount~eq", 0);
             if (_fcsRunCount == 1)
             {
-                status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">1 run</a>");
+                status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">1 run</a>.");
             }
             else
             {
@@ -319,7 +319,10 @@ public class FlowOverview extends Overview
             if (_compensationRunCount != 0)
             {
                 ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter("query.CompensationControlCount~neq", 0);
-                statusHTML.append(" These have been calculated in <a href=\"" + h(urlShowRuns) + "\">" + _compensationRunCount + " runs</a>.");
+                if (_compensationRunCount == 1)
+                    statusHTML.append(" These have been calculated in <a href=\"" + h(urlShowRuns) + "\"> 1 run</a>.");
+                else
+                    statusHTML.append(" These have been calculated in <a href=\"" + h(urlShowRuns) + "\">" + _compensationRunCount + " runs</a>.");
             }
         }
         ret.setStatusHTML(statusHTML.toString());
@@ -372,7 +375,10 @@ public class FlowOverview extends Overview
             {
                 ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter("query.FCSAnalysisCount~neq", 0);
                 statusHTML.append("<a href=\"" + h(FlowTableType.FCSAnalyses.urlFor(getContainer(), QueryAction.executeQuery)) + "\">" + _fcsAnalysisCount + " FCS files</a>");
-                statusHTML.append(" have been analyzed in " + "<a href=\"" + h(urlShowRuns) + "\">" + _fcsAnalysisRunCount + " runs</a>.");
+                if (_fcsAnalysisRunCount == 1)
+                    statusHTML.append(" have been analyzed in " + "<a href=\"" + h(urlShowRuns) + "\"> 1 run</a>.");
+                else
+                    statusHTML.append(" have been analyzed in " + "<a href=\"" + h(urlShowRuns) + "\">" + _fcsAnalysisRunCount + " runs</a>.");
             }
         }
         ret.setStatusHTML(statusHTML.toString());
