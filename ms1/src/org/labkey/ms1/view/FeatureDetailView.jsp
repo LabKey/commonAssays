@@ -117,7 +117,7 @@
             _oldScanLow = <%=model.getScanWindowLow()%>;
             _oldScanHigh = <%=model.getScanWindowHigh()%>;
 
-            setElemDisplay("scanFilterUI", "")
+            setElemDisplay("scanFilterUI", "");
             setElemDisplay("scanFilterCol-1", "");
             setElemDisplay("scanFilterCol-2", "");
             setElemDisplay("scanFilterCol-3", "");
