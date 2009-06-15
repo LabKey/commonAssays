@@ -38,6 +38,7 @@ import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowTableType;
@@ -192,7 +193,7 @@ public class FlowOverview extends Overview
             status.append("<a href=\"" + h(urlShowFCSFiles) + "\">" + _fcsFileCount + " FCS files</a> have been loaded.");
             ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer())
                     .addParameter("query.FCSFileCount~neq", 0)
-                    .addParameter("query.FCSAnalysisCount~eq", 0);
+                    .addParameter("query.RunGroups/" + FlowExperiment.FlowExperimentRunExperimentName + "~eq", true);
             if (_fcsRunCount == 1)
             {
                 status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">1 run</a>.");

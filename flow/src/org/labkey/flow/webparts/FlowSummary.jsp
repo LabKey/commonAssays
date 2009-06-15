@@ -140,7 +140,7 @@
                       schemaName: "flow",
                       "query.queryName": "Runs",
                       "query.FCSFileCount~neq": 0,
-                      "query.FCSAnalysisCount~eq": 0,
+                      "query.RunGroups/<%=FlowExperiment.FlowExperimentRunExperimentName%>~eq": true,
                       "query.columns": encodeURI("Name,Flag/Comment,FCSFileCount"),
                       "query.sort": "Name",
                       apiVersion: 9.1

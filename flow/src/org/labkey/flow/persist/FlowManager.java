@@ -40,6 +40,7 @@ import org.labkey.flow.query.AttributeCache;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.controllers.well.WellController;
+import org.labkey.flow.data.FlowExperiment;
 
 import java.io.File;
 import java.net.URI;
@@ -586,7 +587,7 @@ public class FlowManager
         FlowSchema schema = new FlowSchema(user, container);
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition("FCSFileCount", 0, CompareType.NEQ);
-        filter.addCondition("FCSAnalysisCount", 0, CompareType.EQUAL);
+        filter.addCondition("RunGroups/" + FlowExperiment.FlowExperimentRunExperimentName, true, CompareType.EQUAL);
         TableInfo table = schema.getTable(FlowTableType.Runs);
         try
         {
