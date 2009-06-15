@@ -16,6 +16,7 @@
 package org.labkey.flow.controllers;
 
 import org.apache.log4j.Logger;
+import org.apache.xmlbeans.XmlObject;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.admin.AdminUrls;
@@ -36,6 +37,7 @@ import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.query.QueryDefinition;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.FlowModule;
@@ -127,9 +129,14 @@ public class FlowController extends SpringFlowController<FlowController.Action>
                 return null;
             }
             FlowSchema schema = new FlowSchema(getViewContext());
+            QueryDefinition queryDef = settings.getQueryDef(schema);
+            if (queryDef == null)
+            {
+                HttpView.throwNotFound("Query definition '" + settings.getQueryName() + "' in flow schema not found");
+            }
             if (schema.getTable(settings.getQueryName(), false) == null)
             {
-                HttpView.throwNotFound("Query '" + settings.getQueryName() + "' in flow schema not found");
+                HttpView.throwNotFound("Query name '" + settings.getQueryName() + "' in flow schema not found");
             }
 
             experiment = schema.getExperiment();
@@ -139,7 +146,11 @@ public class FlowController extends SpringFlowController<FlowController.Action>
             QueryView view = schema.createView(getViewContext(), settings);
             if (view.getQueryDef() == null)
             {
-                HttpView.throwNotFound("Query '" + settings.getQueryName() + "' in flow schema not found");
+                HttpView.throwNotFound("Query definition '" + settings.getQueryName() + "' in flow schema not found");
+            }
+            if (view.getTable() == null)
+            {
+                HttpView.throwNotFound("Query table '" + settings.getQueryName() + "' in flow schema not found");
             }
             return view;
         }
