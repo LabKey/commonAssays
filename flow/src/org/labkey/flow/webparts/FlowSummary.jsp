@@ -338,7 +338,7 @@
         <%
         for (FlowExperiment experiment : _experiments)
         {
-            int runCount = experiment.getRunCount(FlowProtocolStep.analysis);
+            int runCount = experiment.getRunCount(null);
             if (runCount > 0)
             {
                 %>
