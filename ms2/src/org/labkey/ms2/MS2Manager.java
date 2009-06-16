@@ -772,30 +772,13 @@ public class MS2Manager
             }
         }
 
-        SQLFragment markAsDeleted = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET Deleted=?, Modified=? ", Boolean.TRUE, new Date());
-        SimpleFilter where = new SimpleFilter();
-        where.addCondition("Container", c.getId());
-        where.addInClause("Run", runIds);
-        markAsDeleted.append(where.getSQLFragment(getSqlDialect()));
-
-        try
-        {
-            Table.execute(getSchema(), markAsDeleted);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-
-        _removeRunsFromCache(runIds);
-        recomputeBasicStats();  // Update runs/peptides statistics
+        markDeleted(runIds, c);
 
         for (Integer experimentRunId : experimentRunsToDelete)
         {
             ExperimentService.get().deleteExperimentRunsByRowIds(c, user, experimentRunId);
         }
     }
-
 
     public static void markAsDeleted(Container c, User user)
     {
@@ -810,6 +793,26 @@ public class MS2Manager
         }
     }
 
+    // pulled out into separate method so could be called by itself from data handlers
+    public static void markDeleted(List<Integer> runIds, Container c)
+    {
+        SQLFragment markDeleted = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET Deleted=?, Modified=? ", Boolean.TRUE, new Date());
+        SimpleFilter where = new SimpleFilter();
+        where.addCondition("Container", c.getId());
+        where.addInClause("Run", runIds);
+        markDeleted.append(where.getSQLFragment(getSqlDialect()));
+
+        try
+        {
+            Table.execute(getSchema(), markDeleted);
+            _removeRunsFromCache(runIds);
+            invalidateBasicStats();
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+    }
 
     public static List<Integer> parseIds(Collection<String> stringIds)
     {
@@ -1321,6 +1324,10 @@ public class MS2Manager
         return _basicStats;
     }
 
+    public static synchronized void invalidateBasicStats()
+    {
+        _basicStats = null;
+    }
 
     private static Map<String, String> computeBasicStats()
     {

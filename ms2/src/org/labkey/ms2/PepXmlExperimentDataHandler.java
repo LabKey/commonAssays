@@ -153,7 +153,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
             {
                 run.setExperimentRunLSID(null);
                 MS2Manager.updateRun(run, null);
-                MS2Manager.markAsDeleted(Arrays.asList(run.getRun()), container, user);
+                MS2Manager.markDeleted(Arrays.asList(run.getRun()), container);
             }
         }
         catch (URISyntaxException e)
