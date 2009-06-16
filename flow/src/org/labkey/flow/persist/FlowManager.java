@@ -587,7 +587,7 @@ public class FlowManager
         FlowSchema schema = new FlowSchema(user, container);
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition("FCSFileCount", 0, CompareType.NEQ);
-        filter.addCondition("RunGroups/" + FlowExperiment.FlowExperimentRunExperimentName, true, CompareType.EQUAL);
+        filter.addCondition("ProtocolStep", "Keywords", CompareType.EQUAL);
         TableInfo table = schema.getTable(FlowTableType.Runs);
         try
         {
@@ -600,7 +600,7 @@ public class FlowManager
         }
         catch (SQLException e)
         {
-            e.printStackTrace();
+            throw new RuntimeSQLException(e);
         }
         return 0;
     }

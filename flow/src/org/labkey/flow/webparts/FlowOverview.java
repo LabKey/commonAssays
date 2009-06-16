@@ -193,7 +193,7 @@ public class FlowOverview extends Overview
             status.append("<a href=\"" + h(urlShowFCSFiles) + "\">" + _fcsFileCount + " FCS files</a> have been loaded.");
             ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer())
                     .addParameter("query.FCSFileCount~neq", 0)
-                    .addParameter("query.RunGroups/" + FlowExperiment.FlowExperimentRunExperimentName + "~eq", true);
+                    .addParameter("query.ProtocolStep~eq", "Keywords");
             if (_fcsRunCount == 1)
             {
                 status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">1 run</a>.");

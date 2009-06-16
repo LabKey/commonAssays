@@ -458,7 +458,7 @@ public class FlowAnalyzer
         return well.getFCSURI();
     }
 
-    static public FCSRef getFCSRef(FlowWell well) throws Exception
+    static public FCSRef getFCSRef(FlowWell well)
     {
         Map<String, String> overrides = new HashMap();
         overrides.putAll(well.getKeywords());

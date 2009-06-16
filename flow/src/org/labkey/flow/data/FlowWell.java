@@ -99,7 +99,7 @@ public class FlowWell extends FlowDataObject
         FlowManager.get().setKeyword(user, getData(), keyword, value);
     }
 
-    public Map<String, String> getKeywords() throws SQLException
+    public Map<String, String> getKeywords()
     {
         return getAttributeSet().getKeywords();
     }

@@ -76,7 +76,7 @@
 
     ActionURL fcsFileRunsURL = new ActionURL(RunController.ShowRunsAction.class, c)
             .addParameter("query.FCSFileCount~neq", 0)
-            .addParameter("query.FCSAnalysisCount~eq", 0);
+            .addParameter("query.ProtocolStep~eq", "Keywords");
     ActionURL fcsAnalysisRunsURL = new ActionURL(RunController.ShowRunsAction.class, c)
             .addParameter("query.FCSAnalysisCount~neq", 0);
     ActionURL compMatricesURL = FlowTableType.CompensationMatrices.urlFor(c, QueryAction.executeQuery);
@@ -140,7 +140,7 @@
                       schemaName: "flow",
                       "query.queryName": "Runs",
                       "query.FCSFileCount~neq": 0,
-                      "query.RunGroups/<%=FlowExperiment.FlowExperimentRunExperimentName%>~eq": true,
+                      "query.ProtocolStep~eq": "Keywords",
                       "query.columns": encodeURI("Name,Flag/Comment,FCSFileCount"),
                       "query.sort": "Name",
                       apiVersion: 9.1
