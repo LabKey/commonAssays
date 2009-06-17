@@ -16,6 +16,8 @@
 
 package org.labkey.luminex;
 
+import org.labkey.api.data.Container;
+
 import java.util.Date;
 
 /**
@@ -58,6 +60,10 @@ public class LuminexDataRow
     private String _ratio;
     private String _samplingErrors;
     private String _extraSpecimenInfo;
+
+    /** Unfortunate to have these denormalized values here, but required for acceptable query performance */
+    private Container _container;
+    private int _protocolID;
 
     public LuminexDataRow()
     {
@@ -391,5 +397,25 @@ public class LuminexDataRow
     public void setSpecimenID(String specimenID)
     {
         _specimenID = specimenID;
+    }
+
+    public Container getContainer()
+    {
+        return _container;
+    }
+
+    public void setContainer(Container container)
+    {
+        _container = container;
+    }
+
+    public int getProtocolID()
+    {
+        return _protocolID;
+    }
+
+    public void setProtocolID(int protocolID)
+    {
+        _protocolID = protocolID;
     }
 }

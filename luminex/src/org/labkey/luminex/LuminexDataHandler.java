@@ -449,6 +449,8 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 for (LuminexDataRow dataRow : dataRows)
                 {
                     handleParticipantResolver(dataRow, resolver, inputMaterials);
+                    dataRow.setProtocolID(protocol.getRowId());
+                    dataRow.setContainer(container);
                     dataRow.setAnalyteId(analyte.getRowId());
                     dataRow.setDataId(data.getRowId());
                     Table.insert(user, LuminexSchema.getTableInfoDataRow(), dataRow);
@@ -651,8 +653,10 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         String value = dataRow.getDescription();
         if (resolver != null && value != null)
         {
+            value = value.trim();
+            String specimenID = value;
             // First try resolving the whole description column as a specimen id
-            ParticipantVisit match = resolver.resolve(value, null, null, null);
+            ParticipantVisit match = resolver.resolve(specimenID, null, null, null);
             String extraSpecimenInfo = null;
             if (!isResolved(match))
             {
@@ -672,19 +676,21 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                         index = Math.min(index, index2);
                     }
                 }
-                
+
                 if (index != -1)
                 {
-                    String specimenID = value.substring(0, index);
+                    specimenID = value.substring(0, index);
                     match = resolver.resolve(specimenID, null, null, null);
                 }
+
                 // If that doesn't work either, try to parse as "<PTID>, Visit <VisitNumber>, <Date>, <ExtraInfo>"
                 if (!isResolved(match))
                 {
-                    String[] parts = value.split(",");
+                    String valueToSplit = index == -1 ? value : value.substring(index + 1);
+                    String[] parts = valueToSplit.split(",");
                     if (parts.length >= 3)
                     {
-                        match = resolveParticipantVisitInfo(resolver, parts);
+                        match = resolveParticipantVisitInfo(resolver, specimenID, parts);
 
                         StringBuilder sb = new StringBuilder();
                         String separator = "";
@@ -705,7 +711,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
             dataRow.setPtid(match.getParticipantID());
             dataRow.setVisitID(match.getVisitID());
             dataRow.setDate(match.getDate());
-            dataRow.setSpecimenID(match.getSpecimenID());
+            dataRow.setSpecimenID(specimenID);
             dataRow.setExtraSpecimenInfo(extraSpecimenInfo);
             materialInputs.add(match.getMaterial());
         }
@@ -716,7 +722,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         return match.getParticipantID() != null || match.getVisitID() != null || match.getDate() != null;
     }
 
-    private ParticipantVisit resolveParticipantVisitInfo(ParticipantVisitResolver resolver, String[] parts)
+    private ParticipantVisit resolveParticipantVisitInfo(ParticipantVisitResolver resolver, String specimenID, String[] parts)
     {
         // First part is participant id
         String participantId = parts[0].trim();
@@ -744,7 +750,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         {
             date = null;
         }
-        return resolver.resolve(null, participantId, visitId, date);
+        return resolver.resolve(specimenID, participantId, visitId, date);
     }
 
     public ActionURL getContentURL(Container container, ExpData data)

@@ -60,7 +60,7 @@ public class LuminexSchema extends AssaySchema
     {
         if (ANALYTE_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createAnalyteTable();
+            return createAnalyteTable(true);
         }
         else if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -69,7 +69,7 @@ public class LuminexSchema extends AssaySchema
         return null;
     }
 
-    protected TableInfo createAnalyteTable()
+    protected TableInfo createAnalyteTable(boolean filterTable)
     {
         FilteredTable result = new FilteredTable(getTableInfoAnalytes());
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Name")));
@@ -102,7 +102,10 @@ public class LuminexSchema extends AssaySchema
         colProperty.setIsUnselectable(true);
         result.addColumn(colProperty);
 
-        addDataFilter(result);
+        if (filterTable)
+        {
+            addDataFilter(result);
+        }
         result.setTitleColumn("Name");
         return result;
     }
