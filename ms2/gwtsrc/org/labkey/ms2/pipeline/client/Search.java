@@ -296,9 +296,7 @@ public class Search implements EntryPoint
         {
             return;
         }
-        Label label = new Label("ERROR: " + error);
-        label.setStylePrimaryName("labkey-error");
-        messagesPanel.add(label);
+        new ErrorDialogBox(error);
     }
 
     private void appendMessage(String message)
@@ -551,7 +549,33 @@ public class Search implements EntryPoint
             cancelForm();
         }
     }
+    private class ErrorDialogBox
+    {
+        private DialogBox dialog = new DialogBox();
+        private final String error;
 
+        public ErrorDialogBox(String errorString)
+        {
+            error = errorString;
+            Label label = new Label(error);
+            label.setStylePrimaryName("labkey-error");
+            dialog.setText("Error");
+            VerticalPanel vPanel = new VerticalPanel();
+            vPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER );
+            vPanel.add(label);
+            ImageButton okButton = new ImageButton("OK") {
+                public void onClick(Widget sender)
+                {
+                    dialog.hide();
+                    dialog = null;
+                }
+            };
+            vPanel.add(okButton);
+            dialog.setWidget(vPanel);
+            dialog.center();
+            okButton.setFocus(true);
+        }
+    }    
     private class SearchFormHandler implements FormHandler
     {
         public void onSubmit(FormSubmitEvent event)
@@ -661,6 +685,7 @@ public class Search implements EntryPoint
         {
             appendError("The database entered for the input XML label \"pipeline, database\" cannot be found"
             + " at this fasta root.");
+            sequenceDbComposite.setEnabled(true, true);
             return;
         }
         appendError(syncForm2Xml());

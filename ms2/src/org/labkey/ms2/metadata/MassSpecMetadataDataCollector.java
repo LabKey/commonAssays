@@ -31,6 +31,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 /**
  * User: phussey
@@ -140,7 +141,12 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
         }
         else
         {
-            files = getFileCollection(form).get(0).values();
+            List<Map<String,File>> fileCollection = getFileCollection(form);
+            if (fileCollection.isEmpty())
+            {
+                return new Pair<Integer, Integer>(0, 0);
+            }
+            files = fileCollection.get(0).values();
         }
         for (File file : files)
         {

@@ -1189,7 +1189,7 @@ public class MascotClientImpl implements SearchClient
         }
         catch (FileNotFoundException err)
         {
-            getLogger().error("Failed to find Mascot query file '" + queryParamFile.getPath () + "'.\n");
+            getLogger().error("Failed to find Mascot query file '" + queryFile.getPath () + "'.\n");
             return false;
         }
 

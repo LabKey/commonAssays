@@ -469,18 +469,34 @@ public abstract class SequestParamsBuilder
             }
         }
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb1 = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
         Set<Character> modKeys = defaultMods.keySet();
         TreeSet<Character> sortedMods = new TreeSet<Character>(modKeys);
+        float weight = 0;
         for (Character aa :sortedMods)
         {
-            sb.append(defaultMods.get(aa));
-            sb.append(" ");
-            sb.append(aa);
-            sb.append(" ");
+
+            //parse mods function tested for NumberFormatxception
+            weight = Float.parseFloat(defaultMods.get(aa));
+            if(weight != 0)
+            {
+                sb1.append(defaultMods.get(aa));
+                sb1.append(" ");
+                sb1.append(aa);
+                sb1.append(" ");
+            }
+            else
+            {
+                sb2.append(defaultMods.get(aa));
+                sb2.append(" ");
+                sb2.append(aa);
+                sb2.append(" ");
+            }
         }
+        sb1.append(sb2);
         Param modProp = _params.getParam("diff_search_options");
-        modProp.setValue(sb.toString().trim());
+        modProp.setValue(sb1.toString().trim());
         return parserError;
     }
 
@@ -1712,7 +1728,7 @@ public abstract class SequestParamsBuilder
 
         public void testInitDynamicModsNormal()
         {
-            String expected1 = "0.000000 C 16.0 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
+            String expected1 = "16.0 M 0.000000 C 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">+16@M</note>" +
@@ -1725,7 +1741,7 @@ public abstract class SequestParamsBuilder
             assertEquals("diff_search_options", expected1, actual);
 
 
-            expected1 = "0.000000 C 16.0 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
+            expected1 = "16.0 M 0.000000 C 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">16@M</note>" +
@@ -1737,7 +1753,7 @@ public abstract class SequestParamsBuilder
             actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
 
-            expected1 = "0.000000 C -16.0 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
+            expected1 = "-16.0 M 0.000000 C 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">- 16.0000 @ M</note>" +

@@ -182,7 +182,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             File fileMGF = new File(_wd.getDir(), fileWorkMGF.getName());
 
             // 0. pre-Mascot search: c) translate the mzXML file to mgf for Mascot (msxml2other)
-            File fileWorkSpectra = _wd.inputFile(fileMzXML, false);
+            File fileWorkSpectra = _wd.inputFile(fileMzXML, true);
             ArrayList<String> argsM2S = new ArrayList<String>();
             String ver = TPPTask.getTPPVersion(getJob());
             argsM2S.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver));
@@ -339,7 +339,13 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             
             File fileOutputPepXML = _wd.newFile(new FileType(".xml"));
             if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
-                throw new IOException("Failed to rename " + fileOutputPepXML + " to " + fileWorkPepXMLRaw);
+            {
+                fileOutputPepXML = _wd.newFile(new FileType(".pep.xml"));
+                if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
+                {
+                    throw new IOException("Failed to rename " + fileOutputPepXML + " to " + fileWorkPepXMLRaw);
+                }
+            }
 
             WorkDirectory.CopyingResource lock = null;
             try
