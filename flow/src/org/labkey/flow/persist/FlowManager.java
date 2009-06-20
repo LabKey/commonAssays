@@ -40,7 +40,6 @@ import org.labkey.flow.query.AttributeCache;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.controllers.well.WellController;
-import org.labkey.flow.data.FlowExperiment;
 
 import java.io.File;
 import java.net.URI;
@@ -538,7 +537,7 @@ public class FlowManager
         else
         {
             script.setText(scriptText);
-            script = Table.update(user, getTinfoScript(), script, script.getRowId(), null);
+            script = Table.update(user, getTinfoScript(), script, script.getRowId());
         }
     }
 

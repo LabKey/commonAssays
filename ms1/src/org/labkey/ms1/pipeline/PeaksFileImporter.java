@@ -19,11 +19,9 @@ package org.labkey.ms1.pipeline;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
 import org.labkey.ms1.MS1Manager;
-import org.labkey.ms1.query.MS1Schema;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -104,7 +102,7 @@ public class PeaksFileImporter extends DefaultHandler
         {
             HashMap<String,Object> map = new HashMap<String,Object>();
             map.put("Imported", Boolean.TRUE);
-            Table.update(_user, MS1Manager.get().getTable(MS1Manager.TABLE_FILES), map, _idFile, null);
+            Table.update(_user, MS1Manager.get().getTable(MS1Manager.TABLE_FILES), map, _idFile);
 
             if(isTransactionActive())
                 commitTransaction();

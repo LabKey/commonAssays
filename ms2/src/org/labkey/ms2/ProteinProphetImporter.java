@@ -208,7 +208,7 @@ public class ProteinProphetImporter
             mergeProteinStmt.executeUpdate();
 
             file.setUploadCompleted(true);
-            Table.update(info.getUser(), MS2Manager.getTableInfoProteinProphetFiles(), file, file.getRowId(), null);
+            Table.update(info.getUser(), MS2Manager.getTableInfoProteinProphetFiles(), file, file.getRowId());
             success = true;
             connection.commit();
 

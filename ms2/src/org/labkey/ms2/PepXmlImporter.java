@@ -161,7 +161,7 @@ public class PepXmlImporter extends MS2Importer
         {
             summary.setRun(runId);
             Table.insert(_user, MS2Manager.getTableInfoPeptideProphetSummaries(), summary);
-            Table.update(_user, MS2Manager.getTableInfoRuns(), PageFlowUtil.map("HasPeptideProphet", true), _runId, null);
+            Table.update(_user, MS2Manager.getTableInfoRuns(), PageFlowUtil.map("HasPeptideProphet", true), _runId);
         }
     }
 
@@ -218,7 +218,7 @@ public class PepXmlImporter extends MS2Importer
         {
             // The FastaDbLoader may throw an exception, but we still want to update the run with its Type,
             // or we'll never be able to load it again.
-            Table.update(_user, MS2Manager.getTableInfoRuns(), m, _runId, null);
+            Table.update(_user, MS2Manager.getTableInfoRuns(), m, _runId);
         }
 
         for (MS2Modification mod : fraction.getModifications())

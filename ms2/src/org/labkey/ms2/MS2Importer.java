@@ -374,7 +374,7 @@ public abstract class MS2Importer
                 fractionMap.put("mzxmlurl", spectrumFile.toURI().toString());
             }
             fractionMap.put("FileName", spectrumFile.getName());
-            Table.update(_user, MS2Manager.getTableInfoFractions(), fractionMap, _fractionId, null);
+            Table.update(_user, MS2Manager.getTableInfoFractions(), fractionMap, _fractionId);
         }
     }
 

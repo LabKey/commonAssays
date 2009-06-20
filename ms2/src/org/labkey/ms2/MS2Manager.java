@@ -1390,7 +1390,7 @@ public class MS2Manager
     {
         try
         {
-            Table.update(null, MS2Manager.getTableInfoFractions(), updateMap, new Integer(fraction.getFraction()), null);
+            Table.update(null, MS2Manager.getTableInfoFractions(), updateMap, new Integer(fraction.getFraction()));
             _removeFractionFromCache(fraction.getFraction());
         }
         catch (SQLException e)
@@ -1404,7 +1404,7 @@ public class MS2Manager
 
     public static void updateRun(MS2Run run, User user) throws SQLException
     {
-        Table.update(user, getTableInfoRuns(), run, run.getRun(), null);
+        Table.update(user, getTableInfoRuns(), run, run.getRun());
     }
 
 

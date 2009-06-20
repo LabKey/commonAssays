@@ -360,7 +360,7 @@ public class ProteinManager
         {
             getSchema().getScope().beginTransaction();
             Table.execute(getSchema(), "DELETE FROM " + getTableInfoCustomAnnotation() + " WHERE CustomAnnotationSetId = ?", new Object[] {set.getCustomAnnotationSetId()});
-            Table.delete(getTableInfoCustomAnnotationSet(), set.getCustomAnnotationSetId(), null);
+            Table.delete(getTableInfoCustomAnnotationSet(), set.getCustomAnnotationSetId());
             getSchema().getScope().commitTransaction();
         }
         catch (SQLException e)

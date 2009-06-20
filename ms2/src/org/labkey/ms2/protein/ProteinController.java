@@ -296,7 +296,7 @@ public class ProteinController extends SpringActionController
 
                 annotationSet = Table.insert(getUser(), ProteinManager.getTableInfoCustomAnnotationSet(), annotationSet);
                 annotationSet.setLsid(new Lsid(CustomAnnotationSet.TYPE, Integer.toString(annotationSet.getCustomAnnotationSetId())).toString());
-                annotationSet = Table.update(getUser(), ProteinManager.getTableInfoCustomAnnotationSet(), annotationSet, annotationSet.getCustomAnnotationSetId(), null);
+                annotationSet = Table.update(getUser(), ProteinManager.getTableInfoCustomAnnotationSet(), annotationSet, annotationSet.getCustomAnnotationSetId());
 
                 StringBuilder sb = new StringBuilder();
                 sb.append("INSERT INTO ");

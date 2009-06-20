@@ -6076,7 +6076,7 @@ public class MS2Controller extends SpringActionController
             boolean validRanges = quant.resetRanges(form.getLightFirstScan(), form.getLightLastScan(), form.getHeavyFirstScan(), form.getHeavyLastScan(), peptide.getCharge());
             if (validRanges)
             {
-                Table.update(getUser(), MS2Manager.getTableInfoQuantitation(), quant, quant.getPeptideId(), null);
+                Table.update(getUser(), MS2Manager.getTableInfoQuantitation(), quant, quant.getPeptideId());
                 return true;
             }
             else

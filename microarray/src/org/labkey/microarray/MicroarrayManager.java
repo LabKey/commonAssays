@@ -85,7 +85,7 @@ public class MicroarrayManager
             }
             else
             {
-                Table.update(user, getTableInfoRun(), run, new Integer(run.getRowId()), null);
+                Table.update(user, getTableInfoRun(), run, new Integer(run.getRowId()));
             }
         }
         catch (SQLException e)
