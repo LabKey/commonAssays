@@ -55,9 +55,11 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     private static String DATATYPE_FRACTIONS = "Fractions";
     private static String DATATYPE_BOTH = "Both";
 
+    public static final String RAW_PEP_XML_SUFFIX = "_raw.pep.xml";
+
     public static File getPepXMLConvertFile(File dirAnalysis, String baseName)
     {
-        return new File(dirAnalysis, baseName + "_raw.pep.xml");
+        return new File(dirAnalysis, baseName + RAW_PEP_XML_SUFFIX);
     }
 
     protected File _dirSequenceRoot;

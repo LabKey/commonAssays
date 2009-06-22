@@ -16,15 +16,17 @@
 
 package org.labkey.ms2;
 
-import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlException;
+import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
+import org.labkey.api.collections.Cache;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Filter;
@@ -38,20 +40,17 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.collections.Cache;
-import org.labkey.ms2.MS2Modification;
-import org.labkey.ms2.reader.PeptideProphetSummary;
-import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
-import org.labkey.api.util.Pair;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
+import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
-import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
-import org.labkey.ms2.reader.SimpleScan;
 import org.labkey.ms2.query.MS2Schema;
-import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
+import org.labkey.ms2.reader.PeptideProphetSummary;
+import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
+import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
+import org.labkey.ms2.reader.SimpleScan;
 
 import javax.servlet.ServletException;
 import javax.xml.stream.XMLStreamException;
@@ -59,8 +58,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -873,6 +872,21 @@ public class MS2Manager
         if (runs != null && runs.length == 1)
         {
             return runs[0];
+        }
+        if (runs != null && runs.length == 2)
+        {
+            // Check if we have both an intermediate file and a result file
+            String name1 = runs[0].getFileName().toLowerCase();
+            String name2 = runs[1].getFileName().toLowerCase();
+            String rawSuffix = AbstractMS2SearchPipelineJob.RAW_PEP_XML_SUFFIX.toLowerCase();
+            if (name1.endsWith(rawSuffix) && !name2.endsWith(rawSuffix))
+            {
+                return runs[1];
+            }
+            if (name2.endsWith(rawSuffix) && !name1.endsWith(rawSuffix))
+            {
+                return runs[0];
+            }
         }
         return null;
     }
