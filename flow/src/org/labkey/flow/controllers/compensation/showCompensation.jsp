@@ -54,10 +54,16 @@
     final FlowCompensationMatrix flowComp = FlowCompensationMatrix.fromURL(getViewContext().getActionURL(), request);
     if (null == flowComp)
     {
-        %><font class="labkey-error">compensation matrix definition not found</font><%
+        %><span class="labkey-error">compensation matrix definition not found</span><%
         return;
     }
     final CompensationMatrix comp = flowComp.getCompensationMatrix();
+    if (null == comp)
+    {
+        %><span class="labkey-error">compensation matrix has no channels</span><%
+        return;
+    }
+
     final String[] channelNames = comp.getChannelNames();
     final int channelCount = channelNames.length;
     DecimalFormat format = new DecimalFormat();
@@ -68,7 +74,7 @@
 %>
 
 <table>
-    <tr><td>Compensation Matrix:</td><td><%=h(comp.getName())%></td></tr>
+    <tr><td>Compensation Matrix:</td><td><%=h(name)%></td></tr>
     <% if (canEdit || flowComp.getExpObject().getComment() != null) { %>
         <tr><td>Compensation Comment:</td>
             <td><%include(new SetCommentView(flowComp), out);%></td>
