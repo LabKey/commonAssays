@@ -31,7 +31,7 @@ public class LuminexDataRow
 
     private String _type;
     private String _well;
-    private boolean _outlier;
+    private int _outlier;
     private String _description;
     private String _specimenID;
     private String _ptid;
@@ -99,12 +99,12 @@ public class LuminexDataRow
         _well = well;
     }
 
-    public boolean isOutlier()
+    public int getOutlier()
     {
         return _outlier;
     }
 
-    public void setOutlier(boolean outlier)
+    public void setOutlier(int outlier)
     {
         _outlier = outlier;
     }

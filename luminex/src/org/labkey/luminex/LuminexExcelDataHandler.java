@@ -347,7 +347,12 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                 }
                 else if ("Outlier".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setOutlier(!"0".equals(value));
+                    int outlier = 0;
+                    if (value != null && !"".equals(value.trim()))
+                    {
+                        outlier = Integer.parseInt(value.trim());
+                    }
+                    dataRow.setOutlier(outlier);
                 }
                 else if ("Description".equalsIgnoreCase(columnName))
                 {

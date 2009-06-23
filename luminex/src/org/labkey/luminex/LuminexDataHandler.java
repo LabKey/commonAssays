@@ -712,7 +712,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
             dataRow.setVisitID(match.getVisitID());
             dataRow.setDate(match.getDate());
             dataRow.setSpecimenID(specimenID);
-            dataRow.setExtraSpecimenInfo(extraSpecimenInfo);
+            dataRow.setExtraSpecimenInfo(extraSpecimenInfo == null ? null : extraSpecimenInfo.trim());
             materialInputs.add(match.getMaterial());
         }
     }
