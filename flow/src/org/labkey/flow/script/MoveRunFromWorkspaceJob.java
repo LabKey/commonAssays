@@ -29,13 +29,13 @@ public class MoveRunFromWorkspaceJob extends ScriptJob
     public MoveRunFromWorkspaceJob(ViewBackgroundInfo info, FlowExperiment experiment, FlowRun run) throws Exception
     {
         super(info, experiment.getName(), experiment.getLSID(), new FlowProtocol(run.getExperimentRun().getProtocol()), run.getScript(), FlowProtocolStep.analysis);
-        getAnalysisHandler()._getScriptFromWells = true;
         _run = run;
     }
 
 
     protected void doRun() throws Throwable
     {
+        getAnalysisHandler()._getScriptFromWells = true;
         executeHandler(_run, getAnalysisHandler());
         if (!hasErrors())
         {
