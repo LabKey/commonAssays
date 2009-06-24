@@ -18,14 +18,13 @@ package org.labkey.nab;
 
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AssayFileWriter;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.data.RuntimeSQLException;
 
@@ -120,10 +119,29 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider>
         {
             try
             {
-                Map<String, Object> values = OntologyManager.getProperties(getContainer(), reRun.getLSID());
                 Map<DomainProperty, Object> ret = new HashMap<DomainProperty, Object>();
-                for (DomainProperty property : domain.getProperties())
-                    ret.put(property, values.get(property.getPropertyURI()));
+                String batchDomainURI = NabAssayProvider.getDomainURIForPrefix(getProtocol(), ExpProtocol.ASSAY_DOMAIN_BATCH);
+                if (batchDomainURI.equals(domain.getTypeURI()))
+                {
+                    // we're getting batch values
+                    ExpExperiment batch = AssayService.get().findBatch(reRun);
+                    if (batch != null)
+                    {
+                        Map<String, ObjectProperty> batchProperties = batch.getObjectProperties();
+                        for (DomainProperty property : domain.getProperties())
+                        {
+                            ObjectProperty value = batchProperties.get(property.getPropertyURI());
+                            ret.put(property, value != null ? value.value() : null);
+                        }
+                    }
+                }
+                else
+                {
+                    // we're getting run values
+                    Map<String, Object> values = OntologyManager.getProperties(getContainer(), reRun.getLSID());
+                    for (DomainProperty property : domain.getProperties())
+                        ret.put(property, values.get(property.getPropertyURI()));
+                }
                 return ret;
             }
             catch (SQLException e)

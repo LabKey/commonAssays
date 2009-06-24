@@ -135,8 +135,10 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
 
     public static Map<DilutionSummary, NabAssayRun> getDilutionSummaries(User user, int... dataObjectIds) throws ExperimentException, SQLException
     {
-        Map<String, NabAssayRun> dataToAssay = new HashMap<String, NabAssayRun>();
         Map<DilutionSummary, NabAssayRun> summaries = new HashMap<DilutionSummary, NabAssayRun>();
+        if (dataObjectIds == null || dataObjectIds.length == 0)
+            return summaries;
+        Map<String, NabAssayRun> dataToAssay = new HashMap<String, NabAssayRun>();
         for (int dataObjectId : dataObjectIds)
         {
             OntologyObject dataRow = OntologyManager.getOntologyObject(dataObjectId);

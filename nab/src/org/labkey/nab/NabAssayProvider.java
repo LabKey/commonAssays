@@ -362,6 +362,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
             graphSelectedButton.addMenuItem("Default Graph", "#",
                     "document.forms['" + rgn.getName() + "'].action = '" + graphSelectedURL.getLocalURIString() + "';\n" +
+                    "document.forms['" + rgn.getName() + "'].method = 'GET';\n" +
                     "document.forms['" + rgn.getName() + "'].submit(); return false;");
 
             Domain sampleDomain = ((NabAssayProvider) _provider).getSampleWellGroupDomain(_protocol);
