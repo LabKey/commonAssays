@@ -122,8 +122,8 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
         ActionURL templateURL = new ActionURL(MassSpecBulkPropertiesTemplateAction.class, getContainer());
         templateURL.addParameter("rowId", form.getProtocol().getRowId());
         form.setTemplateURL(templateURL);
-        result.getDataRegion().addDisplayColumn(new BulkPropertiesDisplayColumn(form));
         result.getDataRegion().addDisplayColumn(new FractionsDisplayColumn(form));
+        result.getDataRegion().addDisplayColumn(new BulkPropertiesDisplayColumn(form));
         return result;
     }
 

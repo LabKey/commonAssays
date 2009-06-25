@@ -34,11 +34,14 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.security.User;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
+import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
+import org.labkey.ms2.metadata.MassSpecMetadataController;
+import org.labkey.ms2.metadata.MassSpecMetadataPipelineProvider;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 import org.labkey.ms2.pipeline.MS2PipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
@@ -55,8 +58,6 @@ import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
-import org.labkey.ms2.metadata.*;
-import org.labkey.ms2.MS2Modification;
 
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
@@ -69,7 +70,7 @@ import java.util.*;
  */
 public class MS2Module extends SpringModule implements ContainerManager.ContainerListener
 {
-    public static final MS2SearchExperimentRunType _ms2SearchRunFilter = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX);
+    public static final MS2SearchExperimentRunType _ms2SearchRunFilter = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
     private static ExperimentRunType _samplePrepRunType = new ExperimentRunType("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.TableType.SamplePrepRuns.toString())
     {
         public Priority getPriority(ExpProtocol protocol)

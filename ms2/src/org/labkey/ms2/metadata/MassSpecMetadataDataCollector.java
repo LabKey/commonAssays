@@ -161,6 +161,6 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
 
     public boolean allowAdditionalUpload(MassSpecMetadataAssayForm context)
     {
-        return !context.isFractions() && getFileCollection(context).size() > 1; 
+        return !context.isFractions() && getFileCollection(context).size() > 1;
     }
 }

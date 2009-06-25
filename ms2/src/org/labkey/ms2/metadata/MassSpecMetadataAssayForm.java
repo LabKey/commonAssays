@@ -18,6 +18,8 @@ package org.labkey.ms2.metadata;
 
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.ACL;
 import org.labkey.api.study.actions.BulkPropertiesUploadForm;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
@@ -83,11 +85,43 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
         File file = getUploadedData().values().iterator().next();
 
         // Try both the full file name and without the extension
+        return getProperties(file);
+    }
+
+    private Map<String, Object> getProperties(File file)
+            throws ExperimentException
+    {
         return getProperties(file.getName(), FileUtil.getBaseName(file));
     }
 
     protected String getIdentifierColumnName()
     {
         return "filename";
+    }
+
+    public Map<File, Map<DomainProperty, String>> getFractionProperties(ExpSampleSet sampleSet) throws ExperimentException
+    {
+        List<File> files = getAllFiles();
+        if (!isBulkUploadAttempted())
+        {
+            MsFractionPropertyHelper helper = new MsFractionPropertyHelper(sampleSet, files, getContainer());
+            return helper.getSampleProperties(getRequest());
+        }
+        else
+        {
+            DomainProperty[] props = sampleSet.getPropertiesForType();
+            Map<File, Map<DomainProperty, String>> result = new HashMap<File, Map<DomainProperty, String>>();
+            for (File file : files)
+            {
+                Map<String, Object> fileRawValues = getProperties(file);
+                Map<DomainProperty, String> fileValues = new HashMap<DomainProperty, String>();
+                for (DomainProperty prop : props)
+                {
+                    fileValues.put(prop, getPropertyValue(fileRawValues, prop));
+                }
+                result.put(file, fileValues);
+            }
+            return result;
+        }
     }
 }

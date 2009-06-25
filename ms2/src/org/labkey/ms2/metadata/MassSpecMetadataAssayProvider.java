@@ -231,8 +231,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
     {
         ExpSampleSet fractionSet = getFractionSampleSet(form);
 
-        MsFractionPropertyHelper helper = new MsFractionPropertyHelper(fractionSet, form.getAllFiles(), form.getContainer());
-        Map<File, Map<DomainProperty, String>> mapFilesToFractionProperties = helper.getSampleProperties(form.getRequest());
+        Map<File, Map<DomainProperty, String>> mapFilesToFractionProperties = form.getFractionProperties(fractionSet);
 
         Map<ExpMaterial, String> derivedSamples = new HashMap<ExpMaterial, String>();
 

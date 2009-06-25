@@ -6,7 +6,9 @@
     <bean id="ms2PipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">
         <property name="factoryImpls">
             <list>
-                <bean class="org.labkey.ms2.pipeline.FastaCheckTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.FastaCheckTask$Factory">
+                    <property name="location" value="webserver-fasta-check" />
+                </bean>
                 <bean class="org.labkey.ms2.pipeline.tandem.XTandemSearchTask$Factory">
                     <property name="inputTypes">
                         <list>

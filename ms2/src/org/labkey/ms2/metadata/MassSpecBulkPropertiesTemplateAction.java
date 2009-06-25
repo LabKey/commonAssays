@@ -75,6 +75,12 @@ public class MassSpecBulkPropertiesTemplateAction extends BaseAssayAction<MassSp
             sheet.addCell(new Label(col++, 0, property.getName(), cellFormat));
         }
 
+        Domain fractionDomain = provider.getFractionDomain(protocol);
+        for (DomainProperty property : fractionDomain.getProperties())
+        {
+            sheet.addCell(new Label(col++, 0, property.getName(), cellFormat));
+        }
+
         for (int i = 0; i < col; i++)
         {
             sheet.setColumnView(i, 15);
