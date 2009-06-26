@@ -34,6 +34,7 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.util.Pair;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

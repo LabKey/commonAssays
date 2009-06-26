@@ -60,10 +60,9 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         private boolean _includeWells = true;
         private boolean _includeFitParameters = true;
         private boolean _calculateNeut = true;
-        private Integer _start;
-        private Integer _limit;
+        private Integer _offset;
+        private Integer _maxRows;
         private String _sort;
-        private String _dir;
         private String _containerFilter;
 
         public ViewContext getViewContext()
@@ -126,24 +125,24 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
             _includeFitParameters = includeFitParameters;
         }
 
-        public Integer getStart()
+        public Integer getOffset()
         {
-            return _start;
+            return _offset;
         }
 
-        public void setStart(Integer start)
+        public void setOffset(Integer offset)
         {
-            _start = start;
+            _offset = offset;
         }
 
-        public Integer getLimit()
+        public Integer getMaxRows()
         {
-            return _limit;
+            return _maxRows;
         }
 
-        public void setLimit(Integer limit)
+        public void setMaxRows(Integer maxRows)
         {
-            _limit = limit;
+            _maxRows = maxRows;
         }
 
         public String getSort()
@@ -154,16 +153,6 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         public void setSort(String sort)
         {
             _sort = sort;
-        }
-
-        public String getDir()
-        {
-            return _dir;
-        }
-
-        public void setDir(String dir)
-        {
-            _dir = dir;
         }
 
         public String getContainerFilter()
@@ -294,26 +283,21 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
     {
         QuerySettings settings = new QuerySettings(form.getViewContext(), QueryView.DATAREGIONNAME_DEFAULT);
         //show all rows by default
-       if(null == form.getLimit()
+       if(null == form.getMaxRows()
             && null == getViewContext().getRequest().getParameter(QueryView.DATAREGIONNAME_DEFAULT + "." + QueryParam.maxRows))
         {
             settings.setShowRows(ShowRows.ALL);
         }
-        else if (form.getLimit() != null)
+        else if (form.getMaxRows() != null)
         {
-            settings.setMaxRows(form.getLimit().intValue());
+            settings.setMaxRows(form.getMaxRows().intValue());
         }
 
-        if (form.getStart() != null)
-            settings.setOffset(form.getStart().intValue());
+        if (form.getOffset() != null)
+            settings.setOffset(form.getOffset().intValue());
 
-        if (form.getSort() != null)
-        {
-            ActionURL sortFilterURL = getViewContext().getActionURL().clone();
-            boolean desc = "DESC".equals(form.getDir());
-            sortFilterURL.replaceParameter("query.sort", (desc ? "-" : "") + form.getSort());
-            settings.setSortFilterURL(sortFilterURL); //this isn't working!
-        }
+        // handle both sorts and filters:
+        settings.setSortFilterURL(getViewContext().getActionURL());
 
         if (form.getContainerFilter() != null)
         {
