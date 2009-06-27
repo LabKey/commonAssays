@@ -1225,6 +1225,7 @@ nab/src/org/labkey/nab/NabController.java -text
 nab/src/org/labkey/nab/NabDataExchangeHandler.java -text
 nab/src/org/labkey/nab/NabDataHandler.java -text
 nab/src/org/labkey/nab/NabManager.java -text
+nab/src/org/labkey/nab/NabMaterialKey.java -text
 nab/src/org/labkey/nab/NabModule.java -text
 nab/src/org/labkey/nab/NabPlateTypeHandler.java -text
 nab/src/org/labkey/nab/NabRunUploadForm.java -text

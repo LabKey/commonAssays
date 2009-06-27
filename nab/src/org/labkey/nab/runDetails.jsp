@@ -184,7 +184,7 @@
                             %>
                             <tr>
                                 <td class="labkey-header">
-                                    <%=h(results.getKey())%>
+                                    <%=h(results.getCaption())%>
                                 </td>
                                 <%
                                     for (int set = 0; set < 2; set++)
@@ -333,7 +333,7 @@
                     <td>
                         <table>
                             <tr>
-                                <th colspan="4" class="labkey-header" style="text-align:center"><%= h(results.getKey()) %></th>
+                                <th colspan="4" class="labkey-header" style="text-align:center"><%= h(results.getCaption()) %></th>
                             </tr>
                             <tr>
                                 <th align="right"><%= summary.getMethod().getAbbreviation() %></th>

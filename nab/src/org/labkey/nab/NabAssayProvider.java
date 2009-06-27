@@ -335,16 +335,21 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             return settings;
         }
 
-        private void addGraphSubItems(NavTree parent, Domain domain, String dataRegionName)
+        private void addGraphSubItems(NavTree parent, Domain domain, String dataRegionName, Set<String> excluded)
         {
             ActionURL graphSelectedURL = new ActionURL(NabAssayController.GraphSelectedAction.class, getContainer());
             for (DomainProperty prop : domain.getProperties())
             {
-                NavTree menuItem = new NavTree(prop.getLabel(), "#");
-                menuItem.setScript("document.forms['" + dataRegionName + "'].action = '" + graphSelectedURL.getLocalURIString() + "';\n" +
-                        "document.forms['" + dataRegionName + "'].captionColumn.value = '" + prop.getName() + "';\n" +
-                        "document.forms['" + dataRegionName + "'].submit(); return false;");
-                parent.addChild(menuItem);
+                if (!excluded.contains(prop.getName()))
+                {
+                    NavTree menuItem = new NavTree(prop.getLabel(), "#");
+                    menuItem.setScript("document.forms['" + dataRegionName + "'].action = '" + graphSelectedURL.getLocalURIString() + "';\n" +
+                            "document.forms['" + dataRegionName + "'].captionColumn.value = '" + prop.getName() + "';\n" +
+                            "document.forms['" + dataRegionName + "'].chartTitle.value = 'Neutralization by " + prop.getLabel() + "';\n" +
+                            "document.forms['" + dataRegionName + "'].method = 'GET';\n" +
+                            "document.forms['" + dataRegionName + "'].submit(); return false;");
+                    parent.addChild(menuItem);
+                }
             }
         }
 
@@ -359,6 +364,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             ActionURL graphSelectedURL = new ActionURL(NabAssayController.GraphSelectedAction.class, getContainer());
             MenuButton graphSelectedButton = new MenuButton("Graph");
             rgn.addHiddenFormField("captionColumn", "");
+            rgn.addHiddenFormField("chartTitle", "");
 
             graphSelectedButton.addMenuItem("Default Graph", "#",
                     "document.forms['" + rgn.getName() + "'].action = '" + graphSelectedURL.getLocalURIString() + "';\n" +
@@ -367,12 +373,20 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
             Domain sampleDomain = ((NabAssayProvider) _provider).getSampleWellGroupDomain(_protocol);
             NavTree sampleSubMenu = new NavTree("Custom Caption (Sample)");
-            addGraphSubItems(sampleSubMenu, sampleDomain, rgn.getName());
+            Set<String> excluded = new HashSet<String>();
+            excluded.add(SAMPLE_METHOD_PROPERTY_NAME);
+            excluded.add(SAMPLE_INITIAL_DILUTION_PROPERTY_NAME);
+            excluded.add(SAMPLE_DILUTION_FACTOR_PROPERTY_NAME);
+            addGraphSubItems(sampleSubMenu, sampleDomain, rgn.getName(), excluded);
             graphSelectedButton.addMenuItem(sampleSubMenu);
 
             Domain runDomain = _provider.getRunDomain(_protocol);
             NavTree runSubMenu = new NavTree("Custom Caption (Run)");
-            addGraphSubItems(runSubMenu, runDomain, rgn.getName());
+            excluded.clear();
+            excluded.add(CURVE_FIT_METHOD_PROPERTY_NAME);
+            excluded.add(LOCK_AXES_PROPERTY_NAME);
+            excluded.addAll(Arrays.asList(CUTOFF_PROPERTIES));
+            addGraphSubItems(runSubMenu, runDomain, rgn.getName(), excluded);
             graphSelectedButton.addMenuItem(runSubMenu);
             graphSelectedButton.setRequiresSelection(true);
             bbar.add(graphSelectedButton);

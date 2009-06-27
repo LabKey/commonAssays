@@ -54,7 +54,10 @@
         chartURL.append("&");
     }
     chartURL.append("protocolId=").append(bean.getProtocol().getRowId());
-    chartURL.append("&captionColumn=").append(bean.getCaptionColumn());
+    if (bean.getCaptionColumn() != null)
+        chartURL.append("&captionColumn=").append(u(bean.getCaptionColumn()));
+    if (bean.getChartTitle() != null)
+        chartURL.append("&chartTitle=").append(u(bean.getChartTitle()));
 %>
 <img src="<%= chartURL %>">
 <br>

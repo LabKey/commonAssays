@@ -135,7 +135,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
 
     public static Map<DilutionSummary, NabAssayRun> getDilutionSummaries(User user, int... dataObjectIds) throws ExperimentException, SQLException
     {
-        Map<DilutionSummary, NabAssayRun> summaries = new HashMap<DilutionSummary, NabAssayRun>();
+        Map<DilutionSummary, NabAssayRun> summaries = new LinkedHashMap<DilutionSummary, NabAssayRun>();
         if (dataObjectIds == null || dataObjectIds.length == 0)
             return summaries;
         Map<String, NabAssayRun> dataToAssay = new HashMap<String, NabAssayRun>();

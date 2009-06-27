@@ -17,7 +17,6 @@
 package org.labkey.nab;
 
 import org.apache.beehive.netui.pageflow.FormData;
-import org.apache.commons.lang.math.NumberUtils;
 import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
@@ -33,7 +32,6 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.data.*;
-import org.labkey.api.data.Container;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyType;
@@ -322,21 +320,6 @@ public class NabAssayController extends SpringActionController
 
     }
 
-    public static String getMaterialKey(String specimenId, String participantId, Double visitId, Date date)
-    {
-        if (specimenId != null)
-            return specimenId;
-        else if (visitId == null && date != null)
-        {
-            if (date.getHours() == 0 && date.getMinutes() == 0 && date.getSeconds() == 0)
-                return participantId + ", " + DateUtil.formatDate(date);
-            else
-                return participantId + ", " + DateUtil.formatDateTime(date);
-        }
-        else
-            return participantId + ", Vst " + visitId;
-    }
-
     public static class HeaderBean
     {
         private ActionURL _printURL;
@@ -496,10 +479,10 @@ public class NabAssayController extends SpringActionController
 
     public static class GraphSelectedForm extends FormData
     {
-        public static final String DEFAULT_PTID_CAPTION = "DefaultPtidCaption";
         private int _protocolId;
         private int[] _id;
-        private String _captionColumn = DEFAULT_PTID_CAPTION;
+        private String _captionColumn;
+        private String _chartTitle;
 
         public int[] getId()
         {
@@ -530,6 +513,16 @@ public class NabAssayController extends SpringActionController
         {
             _captionColumn = captionColumn;
         }
+
+        public String getChartTitle()
+        {
+            return _chartTitle;
+        }
+
+        public void setChartTitle(String chartTitle)
+        {
+            _chartTitle = chartTitle;
+        }
     }
 
     public static class GraphSelectedBean
@@ -541,14 +534,16 @@ public class NabAssayController extends SpringActionController
         private QueryView _queryView;
         private int[] _graphableIds;
         private String _captionColumn;
+        private String _chartTitle;
 
-        public GraphSelectedBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, int[] dataObjectIds, String captionColumn)
+        public GraphSelectedBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, int[] dataObjectIds, String captionColumn, String chartTitle)
         {
             _context = context;
             _cutoffs = cutoffs;
             _protocol = protocol;
             _dataObjectIds = dataObjectIds;
             _captionColumn = captionColumn;
+            _chartTitle = chartTitle;
         }
 
         public int[] getCutoffs()
@@ -564,6 +559,11 @@ public class NabAssayController extends SpringActionController
         public String getCaptionColumn()
         {
             return _captionColumn;
+        }
+
+        public String getChartTitle()
+        {
+            return _chartTitle;
         }
 
         public int[] getGraphableObjectIds() throws IOException, SQLException
@@ -651,7 +651,7 @@ public class NabAssayController extends SpringActionController
                     cutoffSet.add(cutoff);
             }
 
-            GraphSelectedBean bean = new GraphSelectedBean(getViewContext(), _protocol, toArray(cutoffSet), objectIds, form.getCaptionColumn());
+            GraphSelectedBean bean = new GraphSelectedBean(getViewContext(), _protocol, toArray(cutoffSet), objectIds, form.getCaptionColumn(), form.getChartTitle());
 
             JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/multiRunGraph.jsp", bean);
 
@@ -752,7 +752,7 @@ public class NabAssayController extends SpringActionController
                 for (int cutoff : summary.getAssay().getCutoffs())
                     cutoffSet.add(cutoff);
             }
-            renderChartPNG(getViewContext().getResponse(), summaries, toArray(cutoffSet), false, form.getCaptionColumn());
+            renderChartPNG(getViewContext().getResponse(), summaries, toArray(cutoffSet), false, form.getCaptionColumn(), form.getChartTitle());
             return null;
         }
 
@@ -770,7 +770,7 @@ public class NabAssayController extends SpringActionController
         {
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             NabAssayRun assay = getNabAssayRun(run);
-            renderChartPNG(getViewContext().getResponse(), assay, assay.isLockAxes(), null);
+            renderChartPNG(getViewContext().getResponse(), assay, assay.isLockAxes(), null, null);
             return null;
         }
 
@@ -788,54 +788,81 @@ public class NabAssayController extends SpringActionController
             ChartColor.MAGENTA
     };
 
-    private void renderChartPNG(HttpServletResponse response, Map<DilutionSummary, NabAssayRun> summaries, int[] cutoffs, boolean lockAxes, String captionColumn) throws IOException, DilutionCurve.FitFailedException
+    private String getDefaultCaption(DilutionSummary summary, boolean longForm)
     {
+        String sampleId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
+        String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
+        Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
+        Date date = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
+        NabMaterialKey materialKey = new NabMaterialKey(sampleId, participantId, visitId, date);
+        return materialKey.getDisplayString(longForm);
+    }
+
+    private String formatCaption(Object captionValue)
+    {
+        if (captionValue instanceof Date)
+        {
+            Date date = (Date) captionValue;
+            if (date.getHours() == 0 && date.getMinutes() == 0 && date.getSeconds() == 0)
+                return DateUtil.formatDate(date);
+            else
+                return DateUtil.formatDateTime(date);
+        }
+        else
+            return captionValue.toString();
+    }
+
+    private void renderChartPNG(HttpServletResponse response, Map<DilutionSummary, NabAssayRun> summaries, int[] cutoffs, boolean lockAxes, String captionColumn, String chartTitle) throws IOException, DilutionCurve.FitFailedException
+    {
+        boolean longCaptions = false;
+        Set<String> shortCaptions = new HashSet<String>();
+        for (DilutionSummary summary : summaries.keySet())
+        {
+            String shortCaption = getDefaultCaption(summary, false);
+            if (shortCaptions.contains(shortCaption))
+                longCaptions = true;
+            shortCaptions.add(shortCaption);
+        }
         List<Pair<String, DilutionSummary>> summaryMap = new ArrayList<Pair<String, DilutionSummary>>();
         for (Map.Entry<DilutionSummary, NabAssayRun> sampleEntry : summaries.entrySet())
         {
-            String key = null;
+            String caption = null;
             DilutionSummary summary = sampleEntry.getKey();
             if (captionColumn != null)
             {
                 Object value = summary.getWellGroup().getProperty(captionColumn);
                 if (value != null)
-                    key = value.toString();
+                    caption = formatCaption(value);
                 else
                 {
                     Map<PropertyDescriptor, Object> runProperties = sampleEntry.getValue().getRunProperties();
                     for (Map.Entry<PropertyDescriptor, Object> runProperty : runProperties.entrySet())
                     {
                         if (captionColumn.equals(runProperty.getKey().getName()) && runProperty.getValue() != null)
-                            key = runProperty.getValue().toString();
+                            caption = formatCaption(runProperty.getValue());
                     }
                 }
             }
-            if (key == null || key.length() == 0)
-            {
-                String sampleId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-                String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-                Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-                Date date = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
-                key = getMaterialKey(sampleId, participantId, visitId, date);
-            }
-            summaryMap.add(new Pair<String, DilutionSummary>(key, summary));
+            if (caption == null || caption.length() == 0)
+                caption = getDefaultCaption(summary, longCaptions);
+            summaryMap.add(new Pair<String, DilutionSummary>(caption, summary));
         }
-        renderChartPNG(response, summaryMap, cutoffs, lockAxes);
+        renderChartPNG(response, summaryMap, cutoffs, lockAxes, chartTitle);
     }
 
-    private void renderChartPNG(HttpServletResponse response, NabAssayRun assay, boolean lockAxes, String captionColumn) throws IOException, DilutionCurve.FitFailedException
+    private void renderChartPNG(HttpServletResponse response, NabAssayRun assay, boolean lockAxes, String captionColumn, String chartTitle) throws IOException, DilutionCurve.FitFailedException
     {
-        Map<DilutionSummary, NabAssayRun> samples = new HashMap<DilutionSummary, NabAssayRun>();
+        Map<DilutionSummary, NabAssayRun> samples = new LinkedHashMap<DilutionSummary, NabAssayRun>();
         for (DilutionSummary summary : assay.getSummaries())
             samples.put(summary, assay);
-        renderChartPNG(response, samples, assay.getCutoffs(), lockAxes, captionColumn);
+        renderChartPNG(response, samples, assay.getCutoffs(), lockAxes, captionColumn, chartTitle);
     }
 
-    private void renderChartPNG(HttpServletResponse response, List<Pair<String, DilutionSummary>> dilutionSummaries, int[] cutoffs, boolean lockAxes) throws IOException, DilutionCurve.FitFailedException
+    private void renderChartPNG(HttpServletResponse response, List<Pair<String, DilutionSummary>> dilutionSummaries, int[] cutoffs, boolean lockAxes, String chartTitle) throws IOException, DilutionCurve.FitFailedException
     {
         XYSeriesCollection curvesDataset = new XYSeriesCollection();
         XYSeriesCollection pointDataset = new XYSeriesCollection();
-        JFreeChart chart = ChartFactory.createXYLineChart(null, null, "Percent Neutralization", curvesDataset, PlotOrientation.VERTICAL, true, true, false);
+        JFreeChart chart = ChartFactory.createXYLineChart(chartTitle, null, "Percent Neutralization", curvesDataset, PlotOrientation.VERTICAL, true, true, false);
         XYPlot plot = chart.getXYPlot();
         plot.setDataset(1, pointDataset);
         plot.getRenderer(0).setStroke(new BasicStroke(1.5f));

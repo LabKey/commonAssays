@@ -34,7 +34,6 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.util.Pair;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -148,24 +147,34 @@ public class NabAssayRun extends Luc5Assay
         if (_sampleResults == null)
         {
             _sampleResults = new ArrayList<SampleResult>();
-            Map<String, Map<PropertyDescriptor, Object>> sampleProperties = getSampleProperties();
+            Map<NabMaterialKey, Map<PropertyDescriptor, Object>> sampleProperties = getSampleProperties();
+            Set<String> captions = new HashSet<String>();
+            boolean longCaptions = false;
+            for (NabMaterialKey key : sampleProperties.keySet())
+            {
+                String shortCaption = key.getDisplayString(false);
+                if (captions.contains(shortCaption))
+                    longCaptions = true;
+                captions.add(shortCaption);
+            }
             for (DilutionSummary summary : getSummaries())
             {
                 String specimenId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
                 Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
                 String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
                 Date visitDate = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
-                String key = NabAssayController.getMaterialKey(specimenId, participantId, visitId, visitDate);
+                NabMaterialKey key = new NabMaterialKey(specimenId, participantId, visitId, visitDate);
                 Map<PropertyDescriptor, Object> properties = sampleProperties.get(key);
-                _sampleResults.add(new SampleResult(summary, key, properties));
+                _sampleResults.add(new SampleResult(summary, key, properties, longCaptions));
             }
         }
         return _sampleResults;
     }
 
-    private Map<String, Map<PropertyDescriptor, Object>> getSampleProperties()
+    private Map<NabMaterialKey, Map<PropertyDescriptor, Object>> getSampleProperties()
     {
-        Map<String, Map<PropertyDescriptor, Object>> samplePropertyMap = new HashMap<String, Map<PropertyDescriptor, Object>>();
+        Map<NabMaterialKey, Map<PropertyDescriptor, Object>> samplePropertyMap =
+                new HashMap<NabMaterialKey, Map<PropertyDescriptor, Object>>();
 
         Collection<ExpMaterial> inputs = _run.getMaterialInputs().keySet();
         Domain sampleDomain = _provider.getSampleWellGroupDomain(_protocol);
@@ -195,7 +204,7 @@ public class NabAssayRun extends Luc5Assay
                 PropertyDescriptor property = dp.getPropertyDescriptor();
                 sampleProperties.put(property, material.getProperty(property));
             }
-            String key = NabAssayController.getMaterialKey((String) material.getProperty(sampleIdPD),
+            NabMaterialKey key = new NabMaterialKey((String) material.getProperty(sampleIdPD),
                     (String) material.getProperty(participantIdPD), (Double) material.getProperty(visitIdPD), (Date) material.getProperty(datePD));
             samplePropertyMap.put(key, sampleProperties);
         }
@@ -205,14 +214,17 @@ public class NabAssayRun extends Luc5Assay
     public static class SampleResult
     {
         private DilutionSummary _dilutionSummary;
-        private String _materialKey;
+        private NabMaterialKey _materialKey;
         private Map<PropertyDescriptor, Object> _properties;
+        private boolean _longCaptions = false;
 
-        public SampleResult(DilutionSummary dilutionSummary, String materialKey, Map<PropertyDescriptor, Object> properties)
+        public SampleResult(DilutionSummary dilutionSummary, NabMaterialKey materialKey, Map<PropertyDescriptor, Object> properties, boolean longCaptions)
         {
             _dilutionSummary = dilutionSummary;
             _materialKey = materialKey;
+            _longCaptions = longCaptions;
             _properties = sortProperties(properties);
+
         }
         
         public DilutionSummary getDilutionSummary()
@@ -220,9 +232,9 @@ public class NabAssayRun extends Luc5Assay
             return _dilutionSummary;
         }
 
-        public String getKey()
+        public String getCaption()
         {
-            return _materialKey;
+            return _materialKey.getDisplayString(_longCaptions);
         }
 
         public Map<PropertyDescriptor, Object> getProperties()
