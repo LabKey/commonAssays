@@ -83,8 +83,8 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
 
     public Priority getPriority(ExpData data)
     {
-        File object = data.getFile();
-        if (object != null && (object.getName().endsWith("." + EXT_DATA)|| object.getName().endsWith("." + EXT_SCRIPT)))
+        String url = data.getDataFileUrl();
+        if (url != null && (url.endsWith("." + EXT_DATA) || url.endsWith("." + EXT_SCRIPT)))
             return Priority.HIGH;
         return null;
     }
