@@ -407,7 +407,7 @@ else
                 }
                 else
                 {
-                    %><span class="error">The original FCS file is no longer available or is not readable: <%=rel.getPath()%></span><%
+                    %><div class="error">The original FCS file is no longer available or is not readable: <%=rel.getPath()%></div><%
                 }
             }
         }
