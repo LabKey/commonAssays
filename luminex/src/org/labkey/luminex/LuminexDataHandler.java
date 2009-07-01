@@ -654,7 +654,11 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         if (resolver != null && value != null)
         {
             value = value.trim();
-            String specimenID = value;
+            String specimenID = null;
+            if (value.indexOf(",") == -1)
+            {
+                specimenID = value;
+            }
             // First try resolving the whole description column as a specimen id
             ParticipantVisit match = resolver.resolve(specimenID, null, null, null);
             String extraSpecimenInfo = null;
