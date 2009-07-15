@@ -50,7 +50,7 @@
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(c);
     boolean _hasPipelineRoot = pipeRoot != null && pipeRoot.getUri(c) != null;
-    boolean _canSetPipelineRoot = user.isAdministrator() && (pipeRoot == null || c.equals(pipeRoot.getContainer()));
+    boolean _canSetPipelineRoot = user.isAdministrator();
 //    boolean _canInsert = c.hasPermission(user, ACL.PERM_INSERT);
     boolean _canUpdate = c.hasPermission(user, ACL.PERM_UPDATE);
     boolean _canCreateFolder = c.getParent() != null && !c.getParent().isRoot() &&

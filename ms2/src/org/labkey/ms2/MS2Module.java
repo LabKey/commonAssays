@@ -179,8 +179,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     protected void init()
     {
-        addController("xarassay", MassSpecMetadataController.class);
         addController("ms2", MS2Controller.class);
+        addController("xarassay", MassSpecMetadataController.class);
         addController("protein", ProteinController.class);
         addController("ms2-pipeline", PipelineController.class);
         addController("ms2-scoring", ScoringController.class);

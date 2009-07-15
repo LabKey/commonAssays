@@ -71,13 +71,13 @@ public class FlowOverview extends Overview
         PipelineService pipeService = PipelineService.get();
         PipeRoot pipeRoot = pipeService.findPipelineRoot(getContainer());
         _hasPipelineRoot = pipeRoot != null && pipeRoot.getUri(container) != null;
-        _canSetPipelineRoot = isGlobalAdmin() && (pipeRoot == null || getContainer().equals(pipeRoot.getContainer()));
+        _canSetPipelineRoot = isGlobalAdmin();
         _canInsert = hasPermission(ACL.PERM_INSERT);
         _canUpdate = hasPermission(ACL.PERM_UPDATE);
         _canCreateFolder = getContainer().getParent() != null && !getContainer().getParent().isRoot() &&
                 getContainer().getParent().hasPermission(getUser(), ACL.PERM_ADMIN);
 
-        _fcsFileCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsKeywords, true);
+        _fcsFileCount = FlowManager.get().getFCSFileCount(user, getContainer());
         _fcsRunCount = FlowManager.get().getFCSFileOnlyRunsCount(user, getContainer());
         _fcsRealRunCount = FlowManager.get().getFCSRunCount(getContainer());
         _fcsAnalysisCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsAnalysis);
@@ -189,7 +189,7 @@ public class FlowOverview extends Overview
         {
             StringBuilder status = new StringBuilder();
             ActionURL urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getContainer(), QueryAction.executeQuery)
-                    .addParameter("query.HasFile~eq", true);
+                    .addParameter("query.Run/ProtocolStep~eq", "Keywords");
             status.append("<a href=\"" + h(urlShowFCSFiles) + "\">" + _fcsFileCount + " FCS files</a> have been loaded.");
             ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer())
                     .addParameter("query.FCSFileCount~neq", 0)

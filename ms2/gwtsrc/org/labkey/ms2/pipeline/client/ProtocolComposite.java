@@ -17,11 +17,11 @@
 package org.labkey.ms2.pipeline.client;
 
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.DOM;
-
-import java.util.*;
-
 import org.labkey.api.gwt.client.util.StringUtils;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * User: billnelson@uky.edu
@@ -29,13 +29,11 @@ import org.labkey.api.gwt.client.util.StringUtils;
  */
 public class ProtocolComposite extends SearchFormComposite implements SourcesChangeEvents
 {
-    private VerticalPanel instance = new VerticalPanel();
+    private FlexTable instance = new FlexTable();
     private ListBox protocolListBox = new ListBox();
     private TextBox protocolNameTextBox = new TextBox();
     private TextArea protocolDescTextArea = new TextArea();
-    private Hidden protocolNameHidden = new Hidden();
     private HTML protocolDescHtml = new HTML();
-    private Hidden protocolDescHidden = new Hidden();
     Label listBoxLabel;
     Label textBoxLabel;
     Label descriptionLabel;
@@ -53,24 +51,28 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
         protocolListBox.setVisibleItemCount(1);
         protocolDescHtml.setWordWrap(true);
         protocolDescHtml.setStylePrimaryName("labkey-read-only");
-        instance.add(protocolListBox);
-        instance.add(protocolNameTextBox);
-        instance.add(protocolDescTextArea);
-        initLabel();
+        textBoxLabel = new Label("Name:");
+        descriptionLabel = new Label("Description:");
+        
+        instance.setWidget(0,0,protocolListBox);
+        instance.getFlexCellFormatter().setColSpan(0,0,2);
+
+        instance.setWidget(1,0,textBoxLabel);
+        instance.getCellFormatter().setStylePrimaryName(1,0, "labkey-form-label-nowrap");
+        instance.setWidget(1,1,protocolNameTextBox);
+
+        instance.setWidget(2,0,descriptionLabel);
+        instance.getCellFormatter().setStylePrimaryName(2,0, "labkey-form-label-nowrap");
+        instance.getCellFormatter().setHorizontalAlignment(2,0,HasHorizontalAlignment.ALIGN_LEFT);
+        instance.setWidget(2,1,protocolDescTextArea);
+
+        listBoxLabel = new Label("Analysis protocols:");
+        listBoxLabel.addStyleName("labkey-strong");
+        labelWidget = new VerticalPanel();
+        ((VerticalPanel)labelWidget).add(listBoxLabel);
         initWidget(instance);
     }
 
-    private void initLabel()
-    {
-        listBoxLabel = new Label("Analysis protocols:");
-        listBoxLabel.addStyleName("labkey-strong");
-        textBoxLabel = new Label("Protocol name:");
-        descriptionLabel = new Label("Protocol description:");
-        labelWidget = new VerticalPanel();
-        ((VerticalPanel)labelWidget).add(listBoxLabel);
-        ((VerticalPanel)labelWidget).add(textBoxLabel);
-        ((VerticalPanel)labelWidget).add(descriptionLabel);
-    }
 
     public Widget getLabel(String style)
     {
@@ -80,6 +82,7 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
 
     private void setLabelStyle(String style)
     {
+        labelWidget.setStylePrimaryName(style);
         listBoxLabel.setStylePrimaryName(style);
         textBoxLabel.setStylePrimaryName(style);
         descriptionLabel.setStylePrimaryName(style);
@@ -110,10 +113,13 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
     public void setWidth(String width)
     {
         instance.setWidth(width);
-        protocolListBox.setWidth(width);
-        protocolNameTextBox.setWidth(width);
-        protocolDescTextArea.setWidth(width);
-        protocolDescHtml.setWidth(width);
+        
+        protocolListBox.setWidth("100%");
+        protocolNameTextBox.setWidth("100%");
+        protocolDescTextArea.setWidth("100%");
+        protocolDescHtml.setWidth("100%");
+        instance.getColumnFormatter().setWidth(0,"2%");
+        instance.getColumnFormatter().setWidth(1,"98%");
     }
 
     public void update(List protocolList, String defaultProtocol, String textArea)
@@ -173,6 +179,11 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
         {
             protocolNameTextBox.setText(defaultProtocol);
         }
+        else if(!found && !defaultProtocol.equals("new"))
+        {
+            protocolListBox.setSelectedIndex(0);
+            protocolNameTextBox.setText(defaultProtocol);
+        }
         else
         {
             protocolNameTextBox.setText("");   
@@ -186,42 +197,65 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
 
         if(readOnly)
         {
-            index = instance.getWidgetIndex(protocolNameTextBox);
-            protocolNameHidden.setValue(protocolNameTextBox.getText());
-            protocolNameHidden.setName(protocolNameTextBox.getName());
-            if(index != -1)
+            
+            protocolNameTextBox.setVisible(false);
+            textBoxLabel.setVisible(false);
+            instance.getCellFormatter().removeStyleName(1,0, "labkey-form-label-nowrap");
+            instance.remove(protocolDescTextArea);
+            instance.setWidget(2,1,protocolDescHtml);
+            if (protocolDescTextArea.getText() != null && !protocolDescTextArea.getText().trim().equals(""))
             {
-                instance.remove(protocolNameTextBox);
-                ((VerticalPanel)labelWidget).remove(textBoxLabel);
-                instance.insert(protocolNameHidden, index);
+                protocolDescHtml.setHTML(StringUtils.filter(protocolDescTextArea.getText(), true));
             }
-            index = instance.getWidgetIndex(protocolDescTextArea);
-            protocolDescHidden.setValue(protocolDescTextArea.getText());
-            protocolDescHtml.setHTML(StringUtils.filter(protocolDescTextArea.getText(), true));
-            protocolDescHidden.setName(protocolDescTextArea.getName());
-            if(index != -1)
+            else
             {
-                instance.remove(protocolDescTextArea);
-                instance.add(protocolDescHidden);
-                instance.insert(protocolDescHtml, index);
+                protocolDescHtml.setHTML("<em>" + StringUtils.filter("<none given>") + "</em>");
             }
+
+//            index = instance.getWidgetIndex(protocolNameTextBox);
+//            protocolNameHidden.setValue(protocolNameTextBox.getText());
+//            protocolNameHidden.setName(protocolNameTextBox.getName());
+//            if(index != -1)
+//            {
+//                instance.remove(protocolNameTextBox);
+//                ((VerticalPanel)labelWidget).remove(textBoxLabel);
+//                instance.insert(protocolNameHidden, index);
+//            }
+//            index = instance.getWidgetIndex(protocolDescTextArea);
+//            protocolDescHidden.setValue(protocolDescTextArea.getText());
+//            protocolDescHtml.setHTML(StringUtils.filter(protocolDescTextArea.getText(), true));
+//            protocolDescHidden.setName(protocolDescTextArea.getName());
+//            if(index != -1)
+//            {
+//                instance.remove(protocolDescTextArea);
+//                instance.add(protocolDescHidden);
+//                instance.insert(protocolDescHtml, index);
+//            }
         }
         else
         {
-            index = instance.getWidgetIndex(protocolNameHidden);
-            if(index != -1)
-            {
-                instance.remove(protocolNameHidden);
-                instance.insert(protocolNameTextBox, index);
-                ((VerticalPanel)labelWidget).insert(textBoxLabel,index);
-            }
-            index = instance.getWidgetIndex(protocolDescHtml);
-            if(index != -1)
-            {
-                instance.remove(protocolDescHidden);
-                instance.remove(protocolDescHtml);
-                instance.insert(protocolDescTextArea, index);
-            }
+            instance.getCellFormatter().setStylePrimaryName(1,0, "labkey-form-label-nowrap");
+            //instance.getCellFormatter().setStylePrimaryName(2,0, "labkey-form-label-nowrap");
+            protocolNameTextBox.setVisible(true);
+            instance.remove(protocolDescHtml);
+            instance.setWidget(2,1,protocolDescTextArea);
+            //protocolDescHtml.setHTML("");
+            textBoxLabel.setVisible(true);
+
+//            index = instance.getWidgetIndex(protocolNameHidden);
+//            if(index != -1)
+//            {
+//                instance.remove(protocolNameHidden);
+//                instance.insert(protocolNameTextBox, index);
+//                ((VerticalPanel)labelWidget).insert(textBoxLabel,index);
+//            }
+//            index = instance.getWidgetIndex(protocolDescHtml);
+//            if(index != -1)
+//            {
+//                instance.remove(protocolDescHidden);
+//                instance.remove(protocolDescHtml);
+//                instance.insert(protocolDescTextArea, index);
+//            }
         }
     }
 
@@ -293,11 +327,48 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
 
     public void copy()
     {
-        setDefault("");   
+        String suffix = "_Copy";
+        String pName = protocolNameTextBox.getText();
+
+        if(pName == null || pName.length() == 0 )
+        {
+            setDefault("");
+            return;
+        }
+
+        StringBuffer protocolName = new StringBuffer(pName);
+        int index = protocolName.lastIndexOf(suffix);
+
+        if( index > 0 && index != protocolName.length()-1)
+        {
+            String versionString = protocolName.substring(index + suffix.length());
+            int versionInt = 0;
+
+            try
+            {
+                versionInt = Integer.parseInt(versionString);
+            }
+            catch(NumberFormatException e)
+            {
+                protocolName.append(suffix + "1");
+                setDefault(protocolName.toString());
+                return;
+            }
+
+            versionInt++;
+            protocolName.replace(index + suffix.length(), protocolName.length(), Integer.toString(versionInt));
+
+        }
+        else
+        {
+            protocolName.append(suffix + "1");
+        }
+        setDefault(protocolName.toString());
     }
 
     public void setFocus(boolean hasFocus)
     {
         protocolNameTextBox.setFocus(hasFocus);
     }
+
 }

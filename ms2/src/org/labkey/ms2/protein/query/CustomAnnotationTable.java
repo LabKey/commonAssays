@@ -58,7 +58,10 @@ public class CustomAnnotationTable extends FilteredTable
 
         ColumnInfo propertyCol = addColumn(createPropertyColumn("Property"));
         Domain domain = PropertyService.get().getDomain(_annotationSet.lookupContainer(), _annotationSet.getLsid());
-        propertyCol.setFk(new DomainForeignKey(domain, schema));
+        if (domain != null)
+        {
+            propertyCol.setFk(new DomainForeignKey(domain, schema));
+        }
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("LookupString"));

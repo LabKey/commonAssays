@@ -64,7 +64,12 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
             {
                 return;
             }
+        }
 
+        if (expRun != null && !expRun.getDataOutputs().contains(data))
+        {
+            // If this is an intermediate file, don't bother loading it
+            return;
         }
 
         try

@@ -199,6 +199,7 @@ public class MS1Controller extends SpringActionController
 
         protected FeaturesView getFeaturesView(ShowFeaturesForm form, BindException bindErrors, boolean forExport) throws Exception
         {
+            _form = form;
             FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer()),
                                                         form.getRunId());
             if(null != form.getPepSeq() && form.getPepSeq().length() > 0)

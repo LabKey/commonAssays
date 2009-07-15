@@ -60,6 +60,9 @@ public class Search implements EntryPoint
     private                 SearchButton            searchButton = new SearchButton();
     private                 CopyButton              copyButton = new CopyButton();
     private                 String                  dirSequenceRoot;
+    private                 boolean                 errors = false;
+
+    private                 HTML                    spacer;
 
     /** Map from subdirectory path to FASTA files */
     private Map<String, GWTSearchServiceResult> databaseCache = new HashMap<String, GWTSearchServiceResult>();
@@ -79,6 +82,9 @@ public class Search implements EntryPoint
 
     public void onModuleLoad()
     {
+        spacer = new HTML("&nbsp;");
+        spacer.setStylePrimaryName("labkey-message-strong");
+
         returnURL = PropertyUtil.getServerProperty("returnURL");
         searchEngine = PropertyUtil.getServerProperty("searchEngine");
         SearchFormCompositeFactory compositeFactory = new SearchFormCompositeFactory(searchEngine);
@@ -281,10 +287,14 @@ public class Search implements EntryPoint
         formGrid.setWidget(7, 1, saveProtocolCheckBox);
         formGrid.getColumnFormatter().setWidth(1,"100%");
 
-        for(int i = 0; i < rows; i++)
+
+        for(int i = 0; i< rows; i++)
         {
             formGrid.getCellFormatter().setStylePrimaryName(i,0, "labkey-form-label-nowrap");
+            formGrid.getCellFormatter().setVerticalAlignment(i,0,HasVerticalAlignment.ALIGN_TOP);
+            formGrid.getCellFormatter().setVerticalAlignment(i,1,HasVerticalAlignment.ALIGN_TOP);
         }
+
         subPanel.add(formGrid);
         subPanel.add(buttonPanel);
         subPanel.add(helpHTML);
@@ -296,6 +306,7 @@ public class Search implements EntryPoint
         {
             return;
         }
+        setErrors(true);
         new ErrorDialogBox(error);
     }
 
@@ -307,12 +318,18 @@ public class Search implements EntryPoint
         }
         Label label = new Label(message);
         label.setStylePrimaryName("labkey-message-strong");
+        if (messagesPanel.getWidgetCount() == 1 && messagesPanel.getWidget(0) == spacer)
+        {
+            messagesPanel.remove(spacer);
+        }
         messagesPanel.add(label);
     }
 
     public void clearDisplay()
     {
+        setErrors(false);
         messagesPanel.clear();
+        messagesPanel.add(spacer);
     }
 
     private void setError(String error)
@@ -329,8 +346,14 @@ public class Search implements EntryPoint
 
     private boolean hasErrors()
     {
-        return(messagesPanel.getWidgetCount() > 0);
+        return errors;
     }
+
+    private void setErrors(boolean errors)
+    {
+        this.errors = errors;
+    }
+
 
     private void loading()
     {
@@ -651,7 +674,8 @@ public class Search implements EntryPoint
 
     private void updateDatabases(GWTSearchServiceResult gwtResult)
     {
-        if (sequencePathsLoaded && sequenceDbComposite.getSelectedDbPath() != null && !gwtResult.getCurrentPath().equals(sequenceDbComposite.getSelectedDbPath()))
+        String selectedDb = sequenceDbComposite.getSelectedDbPath();
+        if (sequencePathsLoaded && selectedDb != null && !gwtResult.getCurrentPath().equals(selectedDb))
         {
             // This is a listing for a directory that we're not trying to render anymore. The user has probably
             // changed the selected path again before the response from the first request finished. 
@@ -685,6 +709,10 @@ public class Search implements EntryPoint
         {
             appendError("The database entered for the input XML label \"pipeline, database\" cannot be found"
             + " at this fasta root.");
+            inputXmlComposite.removeSequenceDb();
+            try{
+                inputXmlComposite.writeXml();
+            }catch(SearchFormException e){}
             sequenceDbComposite.setEnabled(true, true);
             return;
         }

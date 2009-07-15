@@ -543,17 +543,10 @@ public class FlowManager
 
     public int getObjectCount(Container container, ObjectType type)
     {
-        return getObjectCount(container, type, false);
-    }
-
-    public int getObjectCount(Container container, ObjectType type, boolean uriNotNull)
-    {
         try
         {
             String sqlFCSFileCount = "SELECT COUNT(flow.object.rowid) FROM flow.object\n" +
                     "WHERE flow.object.container = ? AND flow.object.typeid = ?";
-            if (uriNotNull)
-                sqlFCSFileCount += " AND flow.object.uri IS NOT NULL";
             return Table.executeSingleton(getSchema(), sqlFCSFileCount, new Object[] { container.getId(), type.getTypeId() }, Integer.class);
         }
         catch (SQLException x)
@@ -581,6 +574,30 @@ public class FlowManager
         }
     }
 
+    // counts FCSFiles in Keyword runs
+    public int getFCSFileCount(User user, Container container)
+    {
+        FlowSchema schema = new FlowSchema(user, container);
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition("ProtocolStep", "Keywords", CompareType.EQUAL);
+        TableInfo table = schema.getTable(FlowTableType.Runs);
+        try
+        {
+            List<Aggregate> aggregates = Collections.singletonList(new Aggregate("FCSFileCount", Aggregate.Type.SUM));
+            List<ColumnInfo> columns = Collections.singletonList(table.getColumn("FCSFileCount"));
+            Map<String, Aggregate.Result> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, filter, false);
+            Aggregate.Result result = agg.get("FCSFileCount");
+            if (result != null)
+                return ((Long)result.getValue()).intValue();
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        return 0;
+    }
+
+    // counts Keyword runs
     public int getFCSFileOnlyRunsCount(User user, Container container)
     {
         FlowSchema schema = new FlowSchema(user, container);

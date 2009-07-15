@@ -74,7 +74,9 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
         DomainProperty[] columns = dataDomain.getProperties();
         if (columns.length == 0)
         {
-            return Collections.emptyMap();
+            // Return a single, empty row of results so that we get an entry in the results table and can copy it to
+            // a study, which is useful because it propagates the run and batch properties
+            return Collections.singletonMap(MicroarrayModule.MAGE_ML_DATA_TYPE, Collections.singletonList((Map<String, Object>)new HashMap<String, Object>()));
         }
         FileInputStream fIn = null;
         try

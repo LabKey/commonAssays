@@ -16,11 +16,10 @@
 
 package org.labkey.ms2.pipeline.client.mascot;
 
+import com.google.gwt.user.client.ui.*;
 import org.labkey.ms2.pipeline.client.SequenceDbComposite;
 
 import java.util.List;
-
-import com.google.gwt.user.client.ui.*;
 
 /**
  * User: billnelson@uky.edu
@@ -169,6 +168,11 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
             }
         }
         initLabel(readOnly);
+    }
+
+    public String getSelectedDbPath()
+    {
+        return "";
     }
 
     public String getSelectedTaxonomy()
