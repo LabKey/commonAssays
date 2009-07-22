@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.nab.NabController"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.nab.NabController" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<NabController.HeaderBean> me = (JspView<org.labkey.nab.NabController.HeaderBean>) HttpView.currentView();
+    JspView<NabController.HeaderBean> me = (JspView<NabController.HeaderBean>) HttpView.currentView();
     NabController.HeaderBean bean = me.getModelBean();
 %>
 <%
@@ -38,19 +38,19 @@
     if (bean.showPrintView())
     {
 %>
-[<a href="<%= bean.getPrintURL().getEncodedLocalURIString() %>" target="_blank">Print View</a>]
+[<a href="<%=h(bean.getPrintURL())%>" target="_blank">Print View</a>]
 <%
     }
     if (bean.getDatafileURL() != null)
     {
 %>
-[<a href="<%= bean.getDatafileURL().getEncodedLocalURIString() %>">Download Datafile</a>]
+[<a href="<%=h(bean.getDatafileURL())%>">Download Datafile</a>]
 <%
     }
     if (bean.getCustomizeURL() != null)
     {
 %>
-[<a href="<%= bean.getCustomizeURL().getEncodedLocalURIString() %>">Customize View</a>]
+[<a href="<%=h(bean.getCustomizeURL())%>">Customize View</a>]
 <%
     }
 %>

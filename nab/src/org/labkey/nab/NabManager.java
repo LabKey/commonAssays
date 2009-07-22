@@ -22,7 +22,8 @@ import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.read.biff.BiffException;
 import org.apache.log4j.Logger;
-import org.apache.struts.upload.FormFile;
+import org.labkey.api.attachments.AttachmentFile;
+import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.RuntimeSQLException;
@@ -30,9 +31,8 @@ import org.labkey.api.exp.PropertyType;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
 import org.labkey.api.util.ExceptionUtil;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.view.ViewContext;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -148,7 +148,7 @@ public class NabManager
         return null;
     }
 
-    public Luc5Assay saveResults(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, FormFile datafile) throws SQLException, IOException, BiffException, ServletException, AttachmentService.DuplicateFilenameException
+    public Luc5Assay saveResults(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, AttachmentFile datafile) throws SQLException, IOException, BiffException, ServletException, AttachmentService.DuplicateFilenameException
     {
         return createLuc5Assay(container, user, plateTemplate, metadata, sampleInfos, cutoffs, datafile);
     }
@@ -358,26 +358,20 @@ public class NabManager
         return new Luc5Assay(plate, cutoffs, DilutionCurve.FitType.FIVE_PARAMETER);
     }
 
-    protected Luc5Assay createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, FormFile datafile) throws SQLException, IOException, ServletException, BiffException, AttachmentService.DuplicateFilenameException
+    protected Luc5Assay createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, AttachmentFile datafile) throws SQLException, IOException, ServletException, BiffException, AttachmentService.DuplicateFilenameException
     {
         InputStream attachmentStream = null;
         try
         {
-            attachmentStream = datafile.getInputStream();
+            attachmentStream = datafile.openInputStream();
             Luc5Assay assay = createLuc5Assay(container, user, plateTemplate, metadata,
-                    sampleInfos, cutoffs, datafile.getFileName(), attachmentStream);
+                    sampleInfos, cutoffs, datafile.getFilename(), attachmentStream);
             PlateService.get().setDataFile(user, assay.getPlate(), datafile);
             return assay;
         }
         finally
         {
-            if (attachmentStream != null) try
-            {
-                attachmentStream.close();
-            }
-            catch (IOException e)
-            {
-            }
+            datafile.closeInputStream();
         }
     }
 
@@ -419,13 +413,16 @@ public class NabManager
 
     public NabController.UploadAssayForm getLastInputs(ViewContext context)
     {
-        Map<String, String> properties = PropertyManager.getProperties(context.getUser().getUserId(),
-                context.getContainer().getId(), Luc5Assay.class.getName(), false);
+        Container c = context.getContainer();
+        User user = context.getUser();
+
+        Map<String, String> properties = PropertyManager.getProperties(user.getUserId(), c.getId(), Luc5Assay.class.getName(), false);
+
         if (properties != null && !properties.isEmpty())
         {
             try
             {
-                return settingsFromMap(properties);
+                return settingsFromMap(properties, c, user);
             }
             catch (Exception e)
             {
@@ -433,6 +430,7 @@ public class NabManager
                 ExceptionUtil.logExceptionToMothership(context.getRequest(), e);
             }
         }
+
         return new NabController.UploadAssayForm(true);
     }
 
@@ -502,15 +500,16 @@ public class NabManager
         targetMap.put("sameMethod", String.valueOf(form.getRunSettings().isSameMethod()));
     }
 
-    private NabController.UploadAssayForm settingsFromMap(Map<String, String> properties)
+    private NabController.UploadAssayForm settingsFromMap(Map<String, String> properties, Container c, User user)
     {
         int sampleCount = 0;
         while (properties.get("sampleInfo" + sampleCount + ".sampleId") != null)
             sampleCount++;
         NabController.UploadAssayForm form = new NabController.UploadAssayForm(false);
 
-        form.setPlateTemplate((String) properties.get("plateTemplateName"));
+        form.setPlateTemplate(properties.get("plateTemplateName"), c, user);
         SampleInfo[] sampleInfos = new SampleInfo[sampleCount];
+
         for (int i = 0; i < sampleInfos.length; i++)
         {
             String prefix = "sampleInfo" + i + ".";
@@ -521,6 +520,7 @@ public class NabManager
             info.setSampleDescription(properties.get(prefix + "sampleDescription"));
             sampleInfos[i] = info;
         }
+
         form.setSampleInfos(sampleInfos);
         // file property:
         form.setFileName(properties.get("fileName"));
@@ -585,6 +585,7 @@ public class NabManager
         settings.setSameFactor(Boolean.valueOf(properties.get("sameFactor")));
         settings.setSameInitialValue(Boolean.valueOf(properties.get("sameInitialValue")));
         settings.setSameMethod(Boolean.valueOf(properties.get("sameMethod")));
+
         return form;
     }
 }

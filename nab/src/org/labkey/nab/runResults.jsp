@@ -16,25 +16,19 @@
  */
 %>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
+<%@ page import="org.labkey.api.security.ACL"%>
+<%@ page import="org.labkey.api.study.PlateQueryView"%>
 <%@ page import="org.labkey.api.study.WellData"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.api.data.SimpleFilter" %>
-<%@ page import="org.labkey.api.study.PlateQueryView" %>
-<%@ page import="org.labkey.api.study.PlateService" %>
 <%@ page import="org.labkey.nab.*" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.labkey.api.data.ActionButton" %>
-<%@ page import="org.labkey.api.security.ACL" %>
-<%@ page import="org.labkey.api.data.DataRegion" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<org.labkey.nab.NabController.RenderAssayBean> me = (JspView<NabController.RenderAssayBean>) HttpView.currentView();
+    JspView<NabController.RenderAssayBean> me = (JspView<NabController.RenderAssayBean>) HttpView.currentView();
     NabController.RenderAssayBean bean = me.getModelBean();
     Luc5Assay assay = bean.getAssay();
     ViewContext context = me.getViewContext();

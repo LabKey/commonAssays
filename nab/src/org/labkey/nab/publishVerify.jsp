@@ -18,19 +18,19 @@
 <%@ page import="org.labkey.api.study.ParticipantVisit"%>
 <%@ page import="org.labkey.api.study.TimepointType" %>
 <%@ page import="org.labkey.api.study.assay.AssayPublishService" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.nab.NabController" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <script type="text/javascript">LABKEY.requiresScript('completion.js');</script>
 <%
     JspView<NabController.PublishVerifyBean> me = (JspView<NabController.PublishVerifyBean>) HttpView.currentView();
     NabController.PublishVerifyBean bean = me.getModelBean();
-    String errors = PageFlowUtil.getStrutsError(request, "main");
 %>
+<labkey:errors />
 Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All data must be associated with a participant/visit within the target study.<br><br>
-<form action="handlePublish.post" method="POST">
+<form action="publish.post" method="POST">
     <input type="hidden" name="plateIds" value="false">
     <input type="hidden" name="targetContainerId" value="<%= bean.getTargetContainer().getId() %>">
     <table>

@@ -15,19 +15,18 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="java.text.DecimalFormat"%>
-<%@ page import="org.labkey.nab.DilutionSummary"%>
-<%@ page import="org.labkey.nab.NabController"%>
+<%@ page import="org.labkey.api.study.WellData"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.api.study.WellData" %>
+<%@ page import="org.labkey.nab.DilutionSummary"%>
+<%@ page import="org.labkey.nab.NabController"%>
+<%@ page import="java.text.DecimalFormat" %>
 <%@page extends="org.labkey.api.jsp.JspBase"%>
-
 <%
     JspView<NabController.GraphSelectedBean> me = (JspView<NabController.GraphSelectedBean>) HttpView.currentView();
-    org.labkey.nab.NabController.GraphSelectedBean bean = me.getModelBean();
+    NabController.GraphSelectedBean bean = me.getModelBean();
 
     String errs = PageFlowUtil.getStrutsError(request, "main");
     if (null != StringUtils.trimToNull(errs))
@@ -112,11 +111,11 @@
                         <%
                             double val = summary.getCutoffDilution(cutoff / 100.0);
                             if (val == Double.NEGATIVE_INFINITY)
-                                out.write("&lt; " + NabController.intString(summary.getMinDilution()));
+                                out.write("&lt; " + intString(summary.getMinDilution()));
                             else if (val == Double.POSITIVE_INFINITY)
-                                out.write("&gt; " + NabController.intString(summary.getMaxDilution()));
+                                out.write("&gt; " + intString(summary.getMaxDilution()));
                             else
-                                out.write(NabController.intString(val));
+                                out.write(intString(val));
 
                         %>
                     </td>
@@ -179,12 +178,12 @@
                     {
                 %>
                 <tr>
-                    <td align=right><%= NabController.intString(summary.getDilution(data)) %></td>
+                    <td align=right><%=intString(summary.getDilution(data)) %></td>
                     <td
-                        align=right><%= NabController.percentString(summary.getPercent(data)) %></td>
+                        align=right><%=percentString(summary.getPercent(data)) %></td>
                     <td>&plusmn;</td>
                     <td
-                        align=right><%= NabController.percentString(summary.getPlusMinus(data)) %></td>
+                        align=right><%=percentString(summary.getPlusMinus(data)) %></td>
                 </tr>
                 <%
                     }
@@ -196,3 +195,14 @@
         %>
     </tr>
 </table>
+<%!
+    public static String intString(double d)
+    {
+        return String.valueOf((int) Math.round(d));
+    }
+
+    public static String percentString(double d)
+    {
+        return intString(d * 100) + "%";
+    }
+%>
