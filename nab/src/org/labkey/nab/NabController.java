@@ -110,7 +110,7 @@ public class NabController extends SpringActionController
             url.addParameter("newRun", true);
 
         if (printView)
-            url.addParameter("printView", true);
+            url.addParameter("print", true);
 
         return url;
     }
