@@ -16,24 +16,20 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.labkey.flow.controllers.SpringFlowController;
-import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.data.FlowScript;
-import org.labkey.api.action.SpringActionController;
+import org.apache.log4j.Logger;
 import org.labkey.api.action.BeehivePortingActionResolver;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.action.RedirectAction;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.security.ACL;
-import org.labkey.api.view.NavTree;
-import org.labkey.api.view.ViewForward;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.util.PageFlowUtil;
-import org.apache.log4j.Logger;
-import org.springframework.web.servlet.ModelAndView;
+import org.labkey.api.view.NavTree;
+import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.controllers.SpringFlowController;
+import org.labkey.flow.data.FlowScript;
 import org.springframework.validation.BindException;
-import org.springframework.validation.Errors;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * User: kevink
