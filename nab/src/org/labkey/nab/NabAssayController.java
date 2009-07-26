@@ -16,7 +16,6 @@
 
 package org.labkey.nab;
 
-import org.apache.beehive.netui.pageflow.FormData;
 import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
@@ -32,16 +31,20 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.security.*;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.ContextualRoles;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.study.*;
+import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.study.WellData;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
@@ -58,11 +61,11 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
-import java.text.DecimalFormat;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 /**
  * User: jeckels
@@ -477,7 +480,7 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    public static class GraphSelectedForm extends FormData
+    public static class GraphSelectedForm
     {
         private int _protocolId;
         private int[] _id;

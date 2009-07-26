@@ -16,7 +16,6 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlCursor;
@@ -829,12 +828,11 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
             return null;
         }
 
-        protected Forward streamImage(BufferedImage image) throws Exception
+        protected void streamImage(BufferedImage image) throws Exception
         {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(image, "png", baos);
             PageFlowUtil.streamFileBytes(getViewContext().getResponse(), "graph.png", baos.toByteArray(), false);
-            return null;
         }
 
         protected Gate gateFromPoints(String xAxis, String yAxis, double[] arrX, double[] arrY, boolean unfinishedGate)
