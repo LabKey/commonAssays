@@ -467,6 +467,7 @@ luminex/src/META-INF/luminex/scripts/postgresql/luminex-2.30-8.10.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-8.10-8.11.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-8.10-8.20.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-9.10-9.11.sql -text
+luminex/src/META-INF/luminex/scripts/postgresql/luminex-9.10-9.20.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-9.11-9.12.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-9.12-9.13.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/obsolete/luminex-0.01-0.02.sql -text
