@@ -59,7 +59,7 @@ public class BackgroundMethod extends AbstractTableMethodInfo
                 "(SELECT AVG(flow.Statistic.Value) " +
                 "FROM flow.Statistic INNER JOIN " + junctionTable + " J ON flow.Statistic.ObjectId = J.bg " +
                 "INNER JOIN flow.attribute ON flow.statistic.statisticid = flow.attribute.rowid AND flow.attribute.name = " + arguments[0] + " " +
-                "WHERE J.fg = " + tableAlias + ".Background"); 
+                "WHERE J.fg = " + tableAlias + ".Background)"); 
                         // + _objectIdColumn.getValueSql(tableAlias) + ")");
         return ret;
     }

@@ -38,7 +38,7 @@ public class KeywordMethod extends AbstractTableMethodInfo
             throw new IllegalArgumentException("The keyword method requires 1 argument");
         }
         SQLFragment ret = new SQLFragment("(SELECT flow.keyword.value FROM flow.keyword" +
-                "\nINNER JOIN flow.attribute ON flow.statistic.keywordid = flow.attribute.rowid AND flow.attribute.name = ");
+                "\nINNER JOIN flow.attribute ON flow.keyword.keywordid = flow.attribute.rowid AND flow.attribute.name = ");
         ret.append(arguments[0]);
         ret.append("\nWHERE flow.keyword.objectId = " + tableAlias + ".Keyword");
 //        ret.append(_objectIdColumn.getValueSql(tableAlias));

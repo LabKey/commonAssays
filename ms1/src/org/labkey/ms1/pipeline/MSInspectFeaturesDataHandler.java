@@ -212,6 +212,18 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             throw new ExperimentException(MS1Manager.get().getAllErrors(e));
         }
 
+        //FIX: 8403
+        //When doing MSInspect + Pepmatch,
+        //the new pipeline is generating a XAR that loads both the .pepmatch.tsv and the .peptides.tsv files
+        //The former is simply the latter with a few extra columns added, so we should load only .pepmatch.tsv in this case.
+        //if file is .peptides.tsv, look to see if there is a corresponding .pepmatch.tsv, and if so, just return
+        if (FT_PEPTIDES.isType(dataFile))
+        {
+            File pepmatch = new File(dataFile.getParentFile(), FT_PEPMATCH.getName(FT_PEPTIDES.getBaseName(dataFile)));
+            if (pepmatch.exists())
+                return;
+        }
+
         //NOTE: I'm using the highly-efficient technique of prepared statements and batch execution here,
         //but that also means I'm not using the Table layer and benefiting from its functionality.
         // This may need to change in the future.

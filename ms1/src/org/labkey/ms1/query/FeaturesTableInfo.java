@@ -154,6 +154,8 @@ public class FeaturesTableInfo extends VirtualTable
         visibleColumns.remove(FieldKey.fromParts(COLUMN_FIND_SIMILAR_LINK));
         visibleColumns.add(1, FieldKey.fromParts(COLUMN_FIND_SIMILAR_LINK));
 
+        visibleColumns.add(FieldKey.fromParts("RelatedPeptide", "Fraction", "Run", "Description"));
+
         setDefaultVisibleColumns(visibleColumns);
     } //c-tor
 
