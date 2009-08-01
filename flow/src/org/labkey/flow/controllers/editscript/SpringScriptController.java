@@ -37,7 +37,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class SpringScriptController extends SpringFlowController<SpringScriptController.Action>
 {
-    static Logger _log = Logger.getLogger(SpringScriptController.class);
+    private static final Logger _log = Logger.getLogger(SpringScriptController.class);
 
     public enum Action
     {
