@@ -3088,12 +3088,6 @@ public class MS2Controller extends SpringActionController
         private int charge;
         private boolean cumulative = false;
 
-        public void reset(ActionMapping arg0, HttpServletRequest arg1)
-        {
-            super.reset(arg0, arg1);
-            cumulative = false;
-        }
-
         public int getCharge()
         {
             return charge;
@@ -4375,6 +4369,7 @@ public class MS2Controller extends SpringActionController
         private String parameters;
         private String message;
 
+        @Override
         public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
         {
             setMascotServer(trimSafe(httpServletRequest.getParameter("mascotServer")));
@@ -4501,6 +4496,7 @@ public class MS2Controller extends SpringActionController
         private String parameters;
         private String message;
 
+        @Override
         public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
         {
             setSequestServer(trimSafe(httpServletRequest.getParameter("sequestServer")));
@@ -4643,7 +4639,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class AddRunForm extends ViewFormData
+    public static class AddRunForm
     {
         private String fileName;
         private String protocol;
@@ -5074,33 +5070,23 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class RunForm extends FormData
+    public static class RunForm
     {
         public enum PARAMS
         {
             run, expanded, grouping
         }
 
-        int run;
+        int run = 0;
         int tryptic;
-        boolean expanded;
+        boolean expanded = false;
         boolean exportAsWebPage;
         String grouping;
         String columns;
         String proteinColumns;
         String proteinGroupingId;
         String returnUrl;
-
-        ArrayList<String> errors;
-
-        // Set form default values; will be overwritten by any params included on the url
-        public void reset(ActionMapping arg0, HttpServletRequest arg1)
-        {
-            super.reset(arg0, arg1);
-            run = 0;
-            expanded = false;
-            errors = new ArrayList<String>();
-        }
+        ArrayList<String> errors = new ArrayList<String>();
 
         private int toInt(String s, String field)
         {
@@ -5805,16 +5791,16 @@ public class MS2Controller extends SpringActionController
     public static class DetailsForm extends RunForm
     {
         private long peptideId;
-        private int rowIndex;
-        private int height;
-        private int width;
-        private double tolerance;
-        private double xEnd;
-        private double xStart;
+        private int rowIndex = -1;
+        private int height = 400;
+        private int width = 600;
+        private double tolerance = 1.0;
+        private double xStart = Double.MIN_VALUE;
+        private double xEnd = Double.MAX_VALUE;
         private int seqId;
         private String extension;
         private String protein;
-        private int quantitationCharge;
+        private int quantitationCharge = Integer.MIN_VALUE;
         private int groupNumber;
         private int indistinguishableCollectionId;
         private Integer proteinGroupId;
@@ -5935,20 +5921,6 @@ public class MS2Controller extends SpringActionController
         public int getHeight()
         {
             return this.height;
-        }
-
-        // Set form default values for graphs and peptides; these will be overwritten by
-        // any params included on the url
-        public void reset(ActionMapping arg0, HttpServletRequest arg1)
-        {
-            super.reset(arg0, arg1);
-            rowIndex = -1;
-            xStart = Double.MIN_VALUE;
-            xEnd = Double.MAX_VALUE;
-            tolerance = 1.0;
-            height = 400;
-            width = 600;
-            quantitationCharge = Integer.MIN_VALUE;
         }
 
         public void setRowIndex(int rowIndex)

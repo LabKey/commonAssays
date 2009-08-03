@@ -559,12 +559,12 @@ public class PipelineController extends SpringActionController
             props.put("errors", getErrors(errors));
             props.put("saveProtocol", Boolean.toString(form.isSaveProtocol()));
             props.put("returnURL", returnURL.getLocalURIString() );
-            props.put("helpTopic",helpTopic);
-            props.put("dirRoot",_dirRoot.toURI().getPath());
-            props.put("dirSequenceRoot",_dirSeqRoot.toURI().getPath());
+            props.put("helpTopic", helpTopic);
+            props.put("dirRoot", _dirRoot.toURI().getPath());
+            props.put("dirSequenceRoot", _dirSeqRoot.toURI().getPath());
             props.put("searchEngine", form.getSearchEngine());
             props.put("action", SpringActionController.getActionName(getAction()) + ".view");
-            props.put("path",form.getPath());
+            props.put("path", form.getPath());
             GWTView result = new GWTView(org.labkey.ms2.pipeline.client.Search.class, props);
             result.setImmediateLoad(true);
             return result;

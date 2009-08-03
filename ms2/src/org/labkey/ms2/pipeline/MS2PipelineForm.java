@@ -15,13 +15,12 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.view.ViewFormData;
 import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
 
 /**
  * <code>MS2PipelineForm</code> base class for MS2 pipeline forms.
  */
-public class MS2PipelineForm extends ViewFormData
+public class MS2PipelineForm
 {
     public enum PARAMS
     {
