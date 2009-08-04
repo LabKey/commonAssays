@@ -610,7 +610,7 @@ public class PipelineController extends SpringActionController
                 root = file.toURI();
             }
 
-            MS2PipelineManager.setSequenceDatabaseRoot(getUser(), form.getContainer(),
+            MS2PipelineManager.setSequenceDatabaseRoot(getUser(), getContainer(),
                     root, form.isAllowUpload());
 
             return ret;
