@@ -15,11 +15,9 @@
  */
 package org.labkey.ms2;
 
-import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
-import org.apache.struts.action.ActionMapping;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.action.*;
 import org.labkey.api.admin.AdminUrls;
@@ -97,7 +95,6 @@ public class MS2Controller extends SpringActionController
 
     public MS2Controller()
     {
-        super();
         setActionResolver(_actionResolver);
     }
 
@@ -4316,8 +4313,8 @@ public class MS2Controller extends SpringActionController
         {
             String originalMascotServer = form.getMascotServer();
             MascotClientImpl mascotClient = new MascotClientImpl(form.getMascotServer(), null,
-                form.getUserAccount(), form.getPassword());
-            mascotClient.setProxyURL(form.getHTTPProxyServer());
+                form.getMascotUserAccount(), form.getMascotUserPassword());
+            mascotClient.setProxyURL(form.getMascotHTTPProxy());
             mascotClient.findWorkableSettings(true);
             form.setStatus(mascotClient.getErrorCode());
 
@@ -4342,7 +4339,7 @@ public class MS2Controller extends SpringActionController
 
             form.setMessage(message);
             form.setMascotServer(originalMascotServer);
-            form.setPassword(("".equals(form.getPassword())) ? "" : "***");  // do not show password in clear
+            form.setMascotUserPassword(("".equals(form.getMascotUserPassword())) ? "" : "***");  // do not show password in clear
 
             getPageConfig().setTemplate(PageConfig.Template.Dialog);
             return new JspView<TestMascotForm>("/org/labkey/ms2/testMascot.jsp", form);
@@ -4359,94 +4356,84 @@ public class MS2Controller extends SpringActionController
         return (s == null ? "" : s.trim());
     }
 
-    public static class TestMascotForm extends FormData
+    public static class TestMascotForm
     {
-        private String mascotserver;
-        private String useraccount;
-        private String password;
-        private String httpproxyserver;
-        private int status;
-        private String parameters;
-        private String message;
+        private String _mascotServer = "";
+        private String _mascotUserAccount = "";
+        private String _mascotUserPassword = "";
+        private String _mascotHTTPProxy = "";
+        private int _status;
+        private String _parameters = "";
+        private String _message;
 
-        @Override
-        public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
+        public String getMascotUserAccount()
         {
-            setMascotServer(trimSafe(httpServletRequest.getParameter("mascotServer")));
-            setUserAccount(trimSafe(httpServletRequest.getParameter("mascotUserAccount")));
-            setPassword(trimSafe(httpServletRequest.getParameter("mascotUserPassword")));
-            setHTTPProxyServer(trimSafe(httpServletRequest.getParameter("mascotHTTPProxy")));
-            super.reset(actionMapping, httpServletRequest);
+            return _mascotUserAccount;
         }
 
-        public String getUserAccount()
+        public void setMascotUserAccount(String mascotUserAccount)
         {
-            return (null == useraccount ? "" : useraccount);
+            _mascotUserAccount = mascotUserAccount;
         }
 
-        public void setUserAccount(String useraccount)
+        public String getMascotUserPassword()
         {
-            this.useraccount = useraccount;
+            return _mascotUserPassword;
         }
 
-        public String getPassword()
+        public void setMascotUserPassword(String mascotUserPassword)
         {
-            return (null == password ? "" : password);
-        }
-
-        public void setPassword(String password)
-        {
-            this.password = password;
+            _mascotUserPassword = mascotUserPassword;
         }
 
         public String getMascotServer()
         {
-            return (null == mascotserver ? "" : mascotserver);
+            return _mascotServer;
         }
 
-        public void setMascotServer(String mascotserver)
+        public void setMascotServer(String mascotServer)
         {
-            this.mascotserver = mascotserver;
+            _mascotServer = mascotServer;
         }
 
-        public String getHTTPProxyServer()
+        public String getMascotHTTPProxy()
         {
-            return (null == httpproxyserver ? "" : httpproxyserver);
+            return _mascotHTTPProxy;
         }
 
-        public void setHTTPProxyServer(String httpproxyserver)
+        public void setMascotHTTPProxy(String mascotHTTPProxy)
         {
-            this.httpproxyserver = httpproxyserver;
+            _mascotHTTPProxy = mascotHTTPProxy;
         }
 
         public String getMessage()
         {
-            return message;
+            return _message;
         }
 
         public void setMessage(String message)
         {
-            this.message = message;
+            _message = message;
         }
 
         public int getStatus()
         {
-            return status;
+            return _status;
         }
 
         public void setStatus(int status)
         {
-            this.status = status;
+            _status = status;
         }
 
         public String getParameters()
         {
-            return (null == parameters ? "" : parameters);
+            return _parameters;
         }
 
         public void setParameters(String parameters)
         {
-            this.parameters = parameters;
+            _parameters = parameters;
         }
     }
 
@@ -4463,7 +4450,7 @@ public class MS2Controller extends SpringActionController
                 html = sequestClient.getEnvironmentConf();
 
             String message;
-            if(sequestClient.getErrorCode() != 0)
+            if (sequestClient.getErrorCode() != 0)
             {
                 form.setStatus(sequestClient.getErrorCode());
                 message = "Test failed.";
@@ -4489,19 +4476,12 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class TestSequestForm extends FormData
+    public static class TestSequestForm
     {
-        private String sequestserver;
+        private String sequestserver = "";
         private int status;
         private String parameters;
         private String message;
-
-        @Override
-        public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
-        {
-            setSequestServer(trimSafe(httpServletRequest.getParameter("sequestServer")));
-            super.reset(actionMapping, httpServletRequest);
-        }
 
         public String getSequestServer()
         {
@@ -4510,7 +4490,7 @@ public class MS2Controller extends SpringActionController
 
         public void setSequestServer(String sequestserver)
         {
-            this.sequestserver = sequestserver;
+            this.sequestserver = sequestserver.trim();
         }
 
         public String getMessage()

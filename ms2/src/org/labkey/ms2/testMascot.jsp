@@ -47,9 +47,9 @@ else
 <%}
 %></td></tr>
     <tr><td>User account:</td><td><%
-if ("".equals(form.getUserAccount()))
+if (!"".equals(form.getMascotUserAccount()))
 {
-    out.print(form.getUserAccount());
+    out.print(form.getMascotUserAccount());
 }
 else
 {
@@ -57,9 +57,9 @@ else
 <%}
 %></td></tr>
     <tr><td>Password:</td><td><%
-if (!"".equals(form.getPassword()))
+if (!"".equals(form.getMascotUserPassword()))
 {
-    out.print(form.getPassword());
+    out.print(form.getMascotUserPassword());
 }
 else
 {
@@ -67,9 +67,9 @@ else
 <%}
 %></td></tr>
     <tr><td>HTTP Proxy URL:</td><td><%
-if (!"".equals(form.getHTTPProxyServer()))
+if (!"".equals(form.getMascotHTTPProxy()))
 {
-    out.print(form.getHTTPProxyServer());
+    out.print(form.getMascotHTTPProxy());
 }
 else
 {
