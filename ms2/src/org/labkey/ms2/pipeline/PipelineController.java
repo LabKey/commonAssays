@@ -658,8 +658,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return FormPage.getView(XTandemCPipelineProvider.class, form, errors,
-                    "setTandemDefaults.jsp");
+            return new JspView<SetDefaultsForm>(XTandemCPipelineProvider.class, "setTandemDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()
@@ -683,8 +682,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return FormPage.getView(MascotCPipelineProvider.class, form, errors,
-                    "setMascotDefaults.jsp");
+            return new JspView<SetDefaultsForm>(MascotCPipelineProvider.class, "setMascotDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()
@@ -708,8 +706,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return FormPage.getView(SequestLocalPipelineProvider.class, form, errors,
-                    "setSequestDefaults.jsp");
+            return new JspView<SetDefaultsForm>(SequestLocalPipelineProvider.class, "setSequestDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()
@@ -723,7 +720,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static class SetDefaultsForm extends ViewFormData
+    public static class SetDefaultsForm
     {
         private String configureXml;
 
@@ -806,7 +803,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static class SequenceDBForm extends ViewFormData
+    public static class SequenceDBForm
     {
         private MultipartFile sequenceDBFile;
 
@@ -831,7 +828,7 @@ public class PipelineController extends SpringActionController
         public ModelAndView getView(SequenceDBForm form, boolean reshow, BindException errors) throws Exception
         {
             setHelpTopic(getHelpTopic("MS2-Pipeline/addSequenceDB"));
-            return FormPage.getView(PipelineController.class, form, errors, "addSequenceDB.jsp");
+            return new JspView<SequenceDBForm>(PipelineController.class, "addSequenceDB.jsp", form, errors);
         }
 
         public boolean handlePost(SequenceDBForm form, BindException errors) throws Exception
@@ -898,7 +895,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static class SequenceDBRootForm extends ViewFormData
+    public static class SequenceDBRootForm extends ViewForm
     {
         private String _localPathRoot;
         private boolean _allowUpload;
