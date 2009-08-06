@@ -289,7 +289,6 @@ flow/src/org/labkey/flow/controllers/editscript/GraphCache.java -text
 flow/src/org/labkey/flow/controllers/editscript/GraphForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/NewProtocolForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/ScriptController.java -text
-flow/src/org/labkey/flow/controllers/editscript/SpringScriptController.java -text
 flow/src/org/labkey/flow/controllers/editscript/TemplatePage.java -text
 flow/src/org/labkey/flow/controllers/editscript/UploadAnalysisForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/chooseCompensationRun.jsp -text
