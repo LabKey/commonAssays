@@ -17,9 +17,11 @@ package org.labkey.nab;
 
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.CustomView;
@@ -157,6 +159,12 @@ public class NabAssayRun extends Luc5Assay
                     longCaptions = true;
                 captions.add(shortCaption);
             }
+
+            List<ExpData> outputs = _run.getDataOutputs();
+            if (outputs.size() != 1)
+                throw new IllegalStateException("Expected a single data file output for this NAb run.  Found " + outputs.size());
+            ExpData outputObject = outputs.get(0);
+
             for (DilutionSummary summary : getSummaries())
             {
                 String specimenId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
@@ -165,7 +173,7 @@ public class NabAssayRun extends Luc5Assay
                 Date visitDate = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
                 NabMaterialKey key = new NabMaterialKey(specimenId, participantId, visitId, visitDate);
                 Map<PropertyDescriptor, Object> properties = sampleProperties.get(key);
-                _sampleResults.add(new SampleResult(summary, key, properties, longCaptions));
+                _sampleResults.add(new SampleResult(outputObject, summary, key, properties, longCaptions));
             }
         }
         return _sampleResults;
@@ -213,20 +221,42 @@ public class NabAssayRun extends Luc5Assay
 
     public static class SampleResult
     {
+        private String _dataRowLsid;
+        private Container _dataContainer;
+        private Integer _objectId;
         private DilutionSummary _dilutionSummary;
         private NabMaterialKey _materialKey;
         private Map<PropertyDescriptor, Object> _properties;
         private boolean _longCaptions = false;
 
-        public SampleResult(DilutionSummary dilutionSummary, NabMaterialKey materialKey, Map<PropertyDescriptor, Object> properties, boolean longCaptions)
+        public SampleResult(ExpData data, DilutionSummary dilutionSummary, NabMaterialKey materialKey, Map<PropertyDescriptor, Object> properties, boolean longCaptions)
         {
             _dilutionSummary = dilutionSummary;
             _materialKey = materialKey;
             _longCaptions = longCaptions;
             _properties = sortProperties(properties);
-
+            _dataRowLsid = NabDataHandler.getDataRowLSID(data, dilutionSummary.getWellGroup()).toString();
+            _dataContainer = data.getContainer();
         }
-        
+
+        public Integer getObjectId()
+        {
+            if (_objectId == null)
+            {
+                try
+                {
+                    _objectId = Table.executeSingleton(OntologyManager.getExpSchema(), "SELECT ObjectId FROM " +
+                            OntologyManager.getTinfoObject() + " WHERE ObjectURI = ? AND Container = ?",
+                            new Object[] {_dataRowLsid, _dataContainer.getId()}, Integer.class);
+                }
+                catch (SQLException e)
+                {
+                    throw new RuntimeSQLException(e);
+                }
+            }
+            return _objectId;
+        }
+
         public DilutionSummary getDilutionSummary()
         {
             return _dilutionSummary;

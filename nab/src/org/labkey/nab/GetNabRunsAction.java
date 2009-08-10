@@ -215,6 +215,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
                 Map<String, Object> sample = new HashMap<String, Object>();
                 sample.put("properties", new PropertyNameMap(result.getProperties()));
                 DilutionSummary dilutionSummary = result.getDilutionSummary();
+                sample.put("objectId", result.getObjectId());
                 sample.put("wellgroupName", dilutionSummary.getWellGroup().getName());
                 try
                 {

@@ -87,9 +87,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                     WellGroup group = dilution.getWellGroup();
                     ExpMaterial sampleInput = assayResults.getMaterial(group);
 
-                    Lsid dataRowLsid = new Lsid(_data.getLSID());
-                    dataRowLsid.setNamespacePrefix(NAB_DATA_ROW_LSID_PREFIX);
-                    dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + group.getName());
+                    Lsid dataRowLsid = getDataRowLSID(_data, group);
 
                     Map<String, Object> props = new HashMap<String, Object>();
                     props.put(DATA_ROW_LSID_PROPERTY, dataRowLsid.toString());
@@ -116,6 +114,14 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                 throw new ExperimentException(e.getMessage(), e);
             }
         }
+    }
+
+    public static Lsid getDataRowLSID(ExpData data, WellGroup group)
+    {
+        Lsid dataRowLsid = new Lsid(data.getLSID());
+        dataRowLsid.setNamespacePrefix(NAB_DATA_ROW_LSID_PREFIX);
+        dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + group.getName());
+        return dataRowLsid;
     }
 
     public NabDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
