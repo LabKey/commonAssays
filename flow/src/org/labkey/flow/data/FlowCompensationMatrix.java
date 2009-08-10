@@ -46,7 +46,10 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
 
     static public FlowCompensationMatrix fromCompId(int id)
     {
-        return (FlowCompensationMatrix) FlowDataObject.fromRowId(id);
+        FlowObject flowobj = fromRowId(id);
+        if (flowobj instanceof FlowCompensationMatrix)
+            return (FlowCompensationMatrix)flowobj;
+        return null;
     }
 
     static public FlowCompensationMatrix fromURL(ActionURL url, HttpServletRequest request) throws Exception

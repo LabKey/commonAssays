@@ -41,7 +41,10 @@ public class FlowWell extends FlowDataObject
 
     static public FlowWell fromWellId(int id)
     {
-        return (FlowWell) fromRowId(id);
+        FlowObject flowobj = fromRowId(id);
+        if (flowobj instanceof FlowWell)
+            return (FlowWell)flowobj;
+        return null;
     }
 
     public FlowLog getLog(LogType type) throws SQLException
