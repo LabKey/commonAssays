@@ -18,18 +18,15 @@ package org.labkey.flow.query;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.CompareType;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ExprColumn;
-import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
-import org.labkey.flow.analysis.model.ScriptSettings;
-import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.data.ICSMetadata;
+import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.data.FlowDataType;
+import org.labkey.flow.data.ICSMetadata;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
 {
@@ -95,8 +92,8 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
         
         SQLFragment ret = new SQLFragment(
                 "(SELECT AVG(flow.Statistic.Value)\n" +
-                "FROM flow.Statistic INNER JOIN " + junctionTable + " J ON flow.Statistic.ObjectId = J.bg\n" +
-                "WHERE J.fg = " + objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS) + " AND flow.Statistic.StatisticId = " + attrId + ")");
+                        "FROM flow.Statistic INNER JOIN " + junctionTable + " J ON flow.Statistic.ObjectId = J.bg\n" +
+                        "WHERE J.fg = " + objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS).getSQL() + " AND flow.Statistic.StatisticId = " + attrId + ")");
         return ret;
     }
 }

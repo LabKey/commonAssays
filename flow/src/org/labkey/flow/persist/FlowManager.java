@@ -351,10 +351,10 @@ public class FlowManager
                 scope.beginTransaction();
                 transaction = true;
             }
-            Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN " + sqlObjectIds, sqlObjectIds.getParamsArray());
-            Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN " + sqlObjectIds, sqlObjectIds.getParamsArray());
-            Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN " + sqlObjectIds, sqlObjectIds.getParamsArray());
-            Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN " + sqlObjectIds, sqlObjectIds.getParamsArray());
+            Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN " + sqlObjectIds.getSQL(), sqlObjectIds.getParamsArray());
+            Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN " + sqlObjectIds.getSQL(), sqlObjectIds.getParamsArray());
+            Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN " + sqlObjectIds.getSQL(), sqlObjectIds.getParamsArray());
+            Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN " + sqlObjectIds.getSQL(), sqlObjectIds.getParamsArray());
             if (transaction)
             {
                 scope.commitTransaction();
@@ -391,7 +391,7 @@ public class FlowManager
                 fTrans = true;
             }
             deleteAttributes(sqlOIDs);
-            Table.execute(getSchema(), "DELETE FROM flow.Object WHERE RowId IN " + sqlOIDs, sqlOIDs.getParamsArray());
+            Table.execute(getSchema(), "DELETE FROM flow.Object WHERE RowId IN " + sqlOIDs.getSQL(), sqlOIDs.getParamsArray());
             if (fTrans)
             {
                 scope.commitTransaction();

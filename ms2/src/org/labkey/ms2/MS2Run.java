@@ -17,13 +17,14 @@
 package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.*;
-import org.labkey.ms2.MS2Modification;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.util.MemTracker;
 
 import java.io.Serializable;
-import java.util.*;
 import java.sql.SQLException;
+import java.util.*;
 
 public abstract class MS2Run implements Serializable
 {
@@ -207,7 +208,7 @@ public abstract class MS2Run implements Serializable
             {
                 String columnName = column.getName();
                 if (columnNameList.contains(columnName) || pkList.contains(columnName) && !sqlColumns.contains(columnName))
-                    sqlColumns.add(column.getValueSql().toString());
+                    sqlColumns.add(column.getValueSql().getSQL());
             }
         }
 

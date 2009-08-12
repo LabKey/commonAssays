@@ -4199,6 +4199,11 @@ public class MS2Controller extends SpringActionController
         if (null != peptide)
         {
             Quantitation quantitation = peptide.getQuantitation();
+            if (quantitation == null)
+            {
+                renderErrorImage("No quantitation data for this peptide", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
+                return;
+            }
             response.setDateHeader("Expires", 0);
             response.setContentType("image/png");
 
@@ -4248,7 +4253,7 @@ public class MS2Controller extends SpringActionController
             protected void renderDataPoint(Graphics2D g, double x, double y) {}
         };
         g.setNoDataErrorMessage(errorMessage);
-        g.render(response.getOutputStream());
+        g.render(response);
     }
 
 

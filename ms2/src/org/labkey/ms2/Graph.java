@@ -19,6 +19,7 @@ package org.labkey.ms2;
 import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
@@ -183,7 +184,7 @@ public abstract class Graph
     }
 
 
-    public void render(OutputStream outputStream)
+    public void render(HttpServletResponse response)
             throws IOException
     {
         BufferedImage bi = new BufferedImage(_width, _height, BufferedImage.TYPE_INT_RGB);
@@ -191,6 +192,8 @@ public abstract class Graph
         g.setColor(Color.white);
         g.fillRect(0, 0, _width, _height);
         g.setColor(_foregroundColor);
+        OutputStream outputStream = response.getOutputStream();
+        response.setContentType("image/png");
 
         if (0 == _plotCount)
         {

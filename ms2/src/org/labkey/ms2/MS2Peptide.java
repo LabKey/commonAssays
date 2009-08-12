@@ -112,7 +112,7 @@ public class MS2Peptide
     {
         init(tolerance, xStart, xEnd);
         SpectrumGraph g = new SpectrumGraph(this, width, height, tolerance, xStart, xEnd);
-        g.render(response.getOutputStream());
+        g.render(response);
     }
 
 

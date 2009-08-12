@@ -291,7 +291,7 @@ public class ProteinManager
         sql.append(" ORDER BY Name");
         try
         {
-            CustomAnnotationSet[] allSets = Table.executeQuery(getSchema(), sql.toString(), sql.getParamsArray(), CustomAnnotationSet.class);
+            CustomAnnotationSet[] allSets = Table.executeQuery(getSchema(), sql, CustomAnnotationSet.class);
 
             Set<String> setNames = new CaseInsensitiveHashSet();
             List<CustomAnnotationSet> dedupedSets = new ArrayList<CustomAnnotationSet>(allSets.length);
@@ -389,7 +389,7 @@ public class ProteinManager
         sql.add(id);
         try
         {
-            CustomAnnotationSet[] matches = Table.executeQuery(getSchema(), sql.toString(), sql.getParamsArray(), CustomAnnotationSet.class);
+            CustomAnnotationSet[] matches = Table.executeQuery(getSchema(), sql, CustomAnnotationSet.class);
             if (matches.length > 1)
             {
                 for (CustomAnnotationSet set : matches)
@@ -817,7 +817,7 @@ public class ProteinManager
     {
         SQLFragment sql = getProteinSql(currentUrl, run, extraPeptideWhere, maxRows, offset);
 
-        return Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray(), maxRows);
+        return Table.executeQuery(getSchema(), sql, maxRows);
     }
 
     public static SQLFragment getProteinSql(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, long offset)
@@ -883,7 +883,7 @@ public class ProteinManager
     {
         SQLFragment sql = getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, offset, columnNames);
 
-        ResultSet rs = Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray());
+        ResultSet rs = Table.executeQuery(getSchema(), sql);
         return new GroupedResultSet(rs, "Protein");
     }
 
@@ -926,7 +926,7 @@ public class ProteinManager
     {
         SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, offset, columnNames);
 
-        return (Table.TableResultSet)Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray(), 0, maxProteinRows != 0, maxProteinRows == 0);
+        return (Table.TableResultSet)Table.executeQuery(getSchema(), sql, 0, maxProteinRows != 0, maxProteinRows == 0);
     }
 
     public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames)

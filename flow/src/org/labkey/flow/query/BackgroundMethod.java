@@ -16,8 +16,10 @@
 
 package org.labkey.flow.query;
 
-import org.labkey.api.data.*;
-import org.labkey.api.query.AbstractMethodInfo;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.snapshot.AbstractTableMethodInfo;
 import org.labkey.flow.data.ICSMetadata;
 
@@ -58,7 +60,7 @@ public class BackgroundMethod extends AbstractTableMethodInfo
         SQLFragment ret = new SQLFragment(
                 "(SELECT AVG(flow.Statistic.Value) " +
                 "FROM flow.Statistic INNER JOIN " + junctionTable + " J ON flow.Statistic.ObjectId = J.bg " +
-                "INNER JOIN flow.attribute ON flow.statistic.statisticid = flow.attribute.rowid AND flow.attribute.name = " + arguments[0] + " " +
+                "INNER JOIN flow.attribute ON flow.statistic.statisticid = flow.attribute.rowid AND flow.attribute.name = " + arguments[0].getSQL() + " " +
                 "WHERE J.fg = " + tableAlias + ".Background)"); 
                         // + _objectIdColumn.getValueSql(tableAlias) + ")");
         return ret;
