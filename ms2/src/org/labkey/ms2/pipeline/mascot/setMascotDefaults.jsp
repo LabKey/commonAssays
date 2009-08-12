@@ -15,12 +15,17 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.data.Container"%>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls"%>
-<%@ page import="org.labkey.ms2.pipeline.PipelineController"%>
-<%@ page extends="org.labkey.api.jsp.FormPage" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.ms2.pipeline.PipelineController" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-PipelineController.SetDefaultsForm form = (PipelineController.SetDefaultsForm) getForm();
+    JspView<PipelineController.SetDefaultsForm> view = (JspView<PipelineController.SetDefaultsForm>) HttpView.currentView();
+    PipelineController.SetDefaultsForm form = view.getModelBean();
+    Container c = view.getViewContext().getContainer();
 %>
 <form method="post" action="<%=urlFor(PipelineController.SetMascotDefaultsAction.class)%>">
 <labkey:errors />
@@ -33,7 +38,7 @@ it need not be a X! Tandem default
         <td><textarea name="configureXml" cols="90" rows="20"><%=form.getConfigureXml()%></textarea><br>
                     For detailed explanations of all available input parameters, see the
                     <a href="http://www.matrixscience.com/help_index.html" target="_api">Mascot API Documentation</a> on-line.</td></tr>
-    <tr><td colspan="2"><labkey:button text="Set Defaults"/>&nbsp;<labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(getContainer())%>"/></td></tr>
+    <tr><td colspan="2"><labkey:button text="Set Defaults"/>&nbsp;<labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(c)%>"/></td></tr>
 </table>
 </form>
 <script for=window event=onload>
