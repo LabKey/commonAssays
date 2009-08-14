@@ -22,6 +22,7 @@ import org.labkey.api.reports.report.view.ReportUtil;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
+import org.labkey.ms1.query.MS1Schema;
 
 import java.util.Map;
 import java.util.List;
@@ -34,13 +35,17 @@ import java.util.ArrayList;
 */
 public class MS1ReportUIProvider extends DefaultReportUIProvider
 {
-    public List<ReportService.DesignerInfo> getReportDesignURL(ViewContext context, QuerySettings settings)
+    public List<ReportService.DesignerInfo> getDesignerInfo(ViewContext context, QuerySettings settings)
     {
         List<ReportService.DesignerInfo> reportDesigners = new ArrayList<ReportService.DesignerInfo>();
 
-        addDesignerURL(context, settings, reportDesigners, FeaturesRReport.TYPE, FeaturesRReport.PARAMS);
-        addDesignerURL(context, settings, reportDesigners, PeaksRReport.TYPE, PeaksRReport.PARAMS);
-
+        if (MS1Schema.SCHEMA_NAME.equals(settings.getSchemaName()))
+        {
+            if (MS1Schema.TABLE_FEATURES.equals(settings.getQueryName()))
+                addDesignerURL(context, settings, reportDesigners, FeaturesRReport.TYPE, FeaturesRReport.PARAMS);
+            if (MS1Schema.TABLE_PEAKS.equals(settings.getQueryName()))
+                addDesignerURL(context, settings, reportDesigners, PeaksRReport.TYPE, PeaksRReport.PARAMS);
+        }
         return reportDesigners;
     }
 

@@ -23,6 +23,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
+import org.labkey.ms2.query.MS2Schema;
 
 import java.util.*;/*
  * User: Karl Lum
@@ -34,7 +35,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
 {
     private static final Set<String> R_REPORT_TYPES = new HashSet<String>(Arrays.asList(SpectraCountRReport.TYPE, SingleMS2RunRReport.TYPE));
 
-    public List<ReportService.DesignerInfo> getReportDesignURL(ViewContext context, QuerySettings settings)
+    public List<ReportService.DesignerInfo> getDesignerInfo(ViewContext context, QuerySettings settings)
     {
         List<ReportService.DesignerInfo> reportDesigners = new ArrayList<ReportService.DesignerInfo>();
 
@@ -44,7 +45,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
         bean.setReportType(SpectraCountRReport.TYPE);
         bean.setRedirectUrl(context.getActionURL().toString());
 
-        reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R View", ReportUtil.getRReportDesignerURL(context, bean)));
+        reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R View", "MS2 Spectra Count R Report", ReportUtil.getRReportDesignerURL(context, bean)));
 
         return reportDesigners;
     }
