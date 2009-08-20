@@ -157,7 +157,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
             ColumnInfo ci = new ColumnInfo(columnName);
             ci.setParentTable(ti);
             ci.setSqlTypeName(md.getColumnTypeName(rgn.getResultSet().findColumn(columnName)));
-            ci.setCaption(column.getLabel());
+            ci.setLabel(column.getLabel());
             return new GroupNumberDisplayColumn(ci, linkURL, runPrefix + "GroupNumber", runPrefix + "CollectionId");
         }
         else

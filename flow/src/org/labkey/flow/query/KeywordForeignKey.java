@@ -45,10 +45,10 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
     protected void initColumn(String attrName, ColumnInfo column)
     {
         column.setSqlTypeName("VARCHAR");
-        column.setCaption(attrName);
+        column.setLabel(attrName);
         if (isHidden(attrName))
         {
-            column.setIsHidden(true);
+            column.setHidden(true);
         }
     }
 

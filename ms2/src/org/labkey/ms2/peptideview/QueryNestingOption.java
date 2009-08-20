@@ -126,7 +126,7 @@ public abstract class QueryNestingOption
         dataRegion.setNestedRegion(nestedRgn);
         for (DisplayColumn column : outerColumns)
         {
-            column.setCaption(column.getColumnInfo().getCaption());
+            column.setCaption(column.getColumnInfo().getLabel());
         }
         dataRegion.setDisplayColumns(outerColumns);
 

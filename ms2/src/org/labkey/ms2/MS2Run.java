@@ -208,7 +208,7 @@ public abstract class MS2Run implements Serializable
             {
                 String columnName = column.getName();
                 if (columnNameList.contains(columnName) || pkList.contains(columnName) && !sqlColumns.contains(columnName))
-                    sqlColumns.add(column.getValueSql().getSQL());
+                    sqlColumns.add(column.getValueSql(tableInfo.toString()).getSQL());
             }
         }
 

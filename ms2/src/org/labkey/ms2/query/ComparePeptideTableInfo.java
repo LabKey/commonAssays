@@ -66,7 +66,7 @@ public class ComparePeptideTableInfo extends VirtualTable
                 sql.append(run.getRun());
                 sql.append("PeptideId");
                 ExprColumn peptideIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, Types.INTEGER);
-                peptideIdColumn.setCaption(run.getDescription());
+                peptideIdColumn.setLabel(run.getDescription());
                 peptideIdColumn.setIsUnselectable(true);
                 runColumns.add(peptideIdColumn);
                 LookupForeignKey fk = new LookupForeignKey("RowId")

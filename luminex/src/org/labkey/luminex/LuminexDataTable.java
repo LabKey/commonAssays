@@ -36,6 +36,7 @@ public class LuminexDataTable extends FilteredTable
     public LuminexDataTable(LuminexSchema schema)
     {
         super(LuminexSchema.getTableInfoDataRow(), schema.getContainer());
+        setDescription("Contains all the Luminex data rows for the " + schema.getProtocol().getName() + " assay definition");
         _schema = schema;
 
         addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
@@ -47,7 +48,7 @@ public class LuminexDataTable extends FilteredTable
                 return _schema.createDataTable();
             }
         });
-        addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setIsHidden(true);
+        addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
         getColumn("RowId").setKeyField(true);
         addColumn(wrapColumn(getRealTable().getColumn("Type")));
         addColumn(wrapColumn(getRealTable().getColumn("Well")));
@@ -57,16 +58,16 @@ public class LuminexDataTable extends FilteredTable
         specimenColumn.setFk(new SpecimenForeignKey(_schema, AssayService.get().getProvider(_schema.getProtocol()), _schema.getProtocol()));
         addColumn(specimenColumn);
         addColumn(wrapColumn(getRealTable().getColumn("ExtraSpecimenInfo")));
-        addColumn(wrapColumn(getRealTable().getColumn("FIString"))).setCaption("FI String");
+        addColumn(wrapColumn(getRealTable().getColumn("FIString"))).setLabel("FI String");
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("FI"), getRealTable().getColumn("FIOORIndicator"));
-        addColumn(wrapColumn(getRealTable().getColumn("FIBackgroundString"))).setCaption("FI-Bkgd String");
+        addColumn(wrapColumn(getRealTable().getColumn("FIBackgroundString"))).setLabel("FI-Bkgd String");
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("FIBackground"), getRealTable().getColumn("FIBackgroundOORIndicator"), "FI-Bkgd");
         addColumn(wrapColumn(getRealTable().getColumn("StdDevString")));
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("StdDev"), getRealTable().getColumn("StdDevOORIndicator"));
         addColumn(wrapColumn(getRealTable().getColumn("ObsConcString")));
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("ObsConc"), getRealTable().getColumn("ObsConcOORIndicator"));
         addColumn(wrapColumn(getRealTable().getColumn("ExpConc")));
-        addColumn(wrapColumn(getRealTable().getColumn("ObsOverExp"))).setCaption("(Obs/Exp)*100");
+        addColumn(wrapColumn(getRealTable().getColumn("ObsOverExp"))).setLabel("(Obs/Exp)*100");
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("ConcInRange"), getRealTable().getColumn("ConcInRangeOORIndicator"));
         addColumn(wrapColumn(getRealTable().getColumn("ConcInRangeString")));
         addColumn(wrapColumn(getRealTable().getColumn("Dilution")));
@@ -74,7 +75,7 @@ public class LuminexDataTable extends FilteredTable
         addColumn(wrapColumn(getRealTable().getColumn("Ratio")));
         addColumn(wrapColumn(getRealTable().getColumn("SamplingErrors")));
         ColumnInfo containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));
-        containerColumn.setIsHidden(true);
+        containerColumn.setHidden(true);
         containerColumn.setFk(new ContainerForeignKey());
 
         addColumn(wrapColumn("ParticipantID", getRealTable().getColumn("PTID")));

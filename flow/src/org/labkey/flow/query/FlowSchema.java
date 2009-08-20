@@ -287,12 +287,12 @@ public class FlowSchema extends UserSchema
                 flag.setDescription(type.getLabel() + " Flag");
         }
         ret.addColumn(ExpRunTable.Column.Name);
-        ret.addColumn(ExpRunTable.Column.FilePathRoot).setIsHidden(true);
-        ret.addColumn(ExpRunTable.Column.LSID).setIsHidden(true);
+        ret.addColumn(ExpRunTable.Column.FilePathRoot).setHidden(true);
+        ret.addColumn(ExpRunTable.Column.LSID).setHidden(true);
         ret.addColumn(ExpRunTable.Column.ProtocolStep);
 
         ColumnInfo analysisFolder = ret.addColumn(ExpRunTable.Column.RunGroups);
-        analysisFolder.setCaption("Analysis Folder");
+        analysisFolder.setLabel("Analysis Folder");
         ActionURL url = PageFlowUtil.urlFor(RunController.Action.showRuns, getContainer()).addParameter(FlowQueryView.DATAREGIONNAME_DEFAULT + ".sort", "ProtocolStep");
         analysisFolder.setURL(StringExpressionFactory.create(url.getLocalURIString() + "&experimentId=${experimentId}"));
 
@@ -418,7 +418,7 @@ public class FlowSchema extends UserSchema
         {
             ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
             ret.copyAttributesFrom(underlyingColumn);
-            ret.setIsHidden(underlyingColumn.isHidden());
+            ret.setHidden(underlyingColumn.isHidden());
             if (underlyingColumn.getFk() instanceof RowIdForeignKey)
                 ret.setFk(new RowIdForeignKey(ret));
             addColumn(ret);
@@ -685,7 +685,7 @@ public class FlowSchema extends UserSchema
         {
             ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
             ret.copyAttributesFrom(underlyingColumn);
-            ret.setIsHidden(underlyingColumn.isHidden());
+            ret.setHidden(underlyingColumn.isHidden());
             if (underlyingColumn.getFk() instanceof RowIdForeignKey)
                 ret.setFk(new RowIdForeignKey(ret));            
             addColumn(ret);
@@ -939,15 +939,15 @@ public class FlowSchema extends UserSchema
     {
         FlowDataTable ret = new FlowDataTable(name, type);
         ret.addColumn(ExpDataTable.Column.Name);
-        ret.addColumn(ExpDataTable.Column.RowId).setIsHidden(true);
-        ret.addColumn(ExpDataTable.Column.LSID).setIsHidden(true);
+        ret.addColumn(ExpDataTable.Column.RowId).setHidden(true);
+        ret.addColumn(ExpDataTable.Column.LSID).setHidden(true);
         ColumnInfo flag = ret.addColumn(ExpDataTable.Column.Flag);
         if (type != null)
             flag.setDescription(type.getLabel() + " Flag");
         ret.addColumn(ExpDataTable.Column.Created);
         ret.setTitleColumn("Name");
         ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
-        protocol.setIsHidden(true);
+        protocol.setHidden(true);
 
         ColumnInfo colRun = ret.addColumn(ExpDataTable.Column.Run);
         colRun.setFk(new LookupForeignKey(PageFlowUtil.urlFor(RunController.Action.showRun, getContainer()), FlowParam.runId, "RowId", "Name")
@@ -972,13 +972,13 @@ public class FlowSchema extends UserSchema
         ret.setDataType(type);
         ret.addCondition(dataIdCondition(ExpDataTable.COLUMN_ROWID, type.getObjectType()));
         ret.addColumn(ExpDataTable.Column.RowId);
-        ret.addColumn(ExpDataTable.Column.LSID).setIsHidden(true);
+        ret.addColumn(ExpDataTable.Column.LSID).setHidden(true);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
         ret.addColumn(ExpDataTable.Column.Created);
         ret.setTitleColumn("Name");
         ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
-        protocol.setIsHidden(true);
+        protocol.setHidden(true);
 
         ColumnInfo colRun = ret.addColumn(ExpDataTable.Column.Run);
         colRun.setFk(new LookupForeignKey(PageFlowUtil.urlFor(RunController.Action.showRun, getContainer()), FlowParam.runId,
@@ -1113,12 +1113,12 @@ public class FlowSchema extends UserSchema
         ColumnInfo colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), ExpMaterialRunInput.DEFAULT_ROLE, ss);
         if (ss == null)
         {
-            colMaterialInput.setIsHidden(true);
+            colMaterialInput.setHidden(true);
         }
 
         ExprColumn colHasFile = new ExprColumn(ret, "HasFile", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN true ELSE false END)"), java.sql.Types.BOOLEAN);
         ret.addColumn(colHasFile);
-        colHasFile.setIsHidden(true);
+        colHasFile.setHidden(true);
 
         ret.setDefaultVisibleColumns(new DeferredFCSFileVisibleColumns(ret, colKeyword));
         return ret;
@@ -1259,7 +1259,7 @@ public class FlowSchema extends UserSchema
             ret.addCondition(runIdCondition);
         }
         ret.addInputRunCountColumn("RunCount");
-        ret.getColumn(ExpDataTable.Column.Run.toString()).setIsHidden(true);
+        ret.getColumn(ExpDataTable.Column.Run.toString()).setHidden(true);
         ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()), Collections.singletonMap(FlowParam.scriptId.toString(), "RowId")));
         return ret;
     }
@@ -1320,7 +1320,7 @@ public class FlowSchema extends UserSchema
         SQLFragment sql = new SQLFragment("(SELECT COUNT(exp.data.rowid) FROM exp.data WHERE (SELECT flow.object.typeid FROM flow.object WHERE flow.object.dataid = exp.data.rowid) = "
                 + type.getTypeId() + " AND exp.data.runid = " + ExprColumn.STR_TABLE_ALIAS + ".RowId)");
         ExprColumn ret = new ExprColumn(runTable, name, sql, Types.INTEGER);
-        ret.setIsHidden(true);
+        ret.setHidden(true);
         runTable.addColumn(ret);
         return ret;
     }

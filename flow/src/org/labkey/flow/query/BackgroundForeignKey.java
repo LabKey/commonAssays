@@ -72,10 +72,10 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
         // Hide spill stats be default for all tables except CompensationMatrix.
         // Hide non-spill stats from the CompensationMatrix table.
         if (_type == FlowDataType.CompensationMatrix)
-            column.setIsHidden(stat.getStatistic() != StatisticSpec.STAT.Spill);
+            column.setHidden(stat.getStatistic() != StatisticSpec.STAT.Spill);
         else
-            column.setIsHidden(stat.getStatistic() == StatisticSpec.STAT.Spill);
-        column.setCaption("BG " + stat.toShortString());
+            column.setHidden(stat.getStatistic() == StatisticSpec.STAT.Spill);
+        column.setLabel("BG " + stat.toShortString());
         column.setSqlTypeName("DOUBLE");
         column.setFormatString("#,##0.###");
     }

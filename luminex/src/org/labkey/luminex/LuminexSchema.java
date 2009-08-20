@@ -80,13 +80,13 @@ public class LuminexSchema extends AssaySchema
                 return createDataTable();
             }
         });
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RowId"))).setIsHidden(true);
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RowId"))).setHidden(true);
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FitProb")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ResVar")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RegressionType")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("StdCurve")));
         ColumnInfo lsidColumn = result.addColumn(result.wrapColumn(result.getRealTable().getColumn("LSID")));
-        lsidColumn.setIsHidden(true);
+        lsidColumn.setHidden(true);
 
         String sqlObjectId = "(SELECT objectid FROM " + OntologyManager.getTinfoObject() + " o WHERE o.objecturi = " +
                 ExprColumn.STR_TABLE_ALIAS + ".lsid)";
@@ -119,7 +119,7 @@ public class LuminexSchema extends AssaySchema
         ret.addColumn(ExpDataTable.Column.Created);
         ret.setTitleColumn("Name");
         ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
-        protocol.setIsHidden(true);
+        protocol.setHidden(true);
 
         ColumnInfo runCol = ret.addColumn(ExpDataTable.Column.Run);
         if (_protocol != null)

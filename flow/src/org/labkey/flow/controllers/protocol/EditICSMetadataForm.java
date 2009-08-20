@@ -174,7 +174,7 @@ public class EditICSMetadataForm extends ProtocolForm
             String name = column.getName();
             if (skipKeyword.matcher(name).matches())
                 continue;
-            ret.put(new FieldKey(keyword, name), "Keyword " + column.getCaption());
+            ret.put(new FieldKey(keyword, name), "Keyword " + column.getLabel());
         }
 
         FieldKey sampleProperty = FieldKey.fromParts("FCSFile", "Sample", "Property");

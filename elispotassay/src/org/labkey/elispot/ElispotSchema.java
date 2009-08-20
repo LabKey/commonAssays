@@ -82,7 +82,7 @@ public class ElispotSchema extends AssaySchema
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
 
         ColumnInfo lsidColumn = result.addColumn(result.wrapColumn(result.getRealTable().getColumn("LSID")));
-        lsidColumn.setIsHidden(true);
+        lsidColumn.setHidden(true);
 
         String sqlObjectId = "(SELECT objectid FROM " + OntologyManager.getTinfoObject() + " o WHERE o.objecturi = " +
                 ExprColumn.STR_TABLE_ALIAS + ".lsid)";
@@ -120,7 +120,7 @@ public class ElispotSchema extends AssaySchema
         ret.addColumn(ExpDataTable.Column.Created);
         ret.setTitleColumn("Name");
         ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
-        protocol.setIsHidden(true);
+        protocol.setHidden(true);
 
         ColumnInfo runCol = ret.addColumn(ExpDataTable.Column.Run);
         if (_protocol != null)

@@ -211,7 +211,7 @@ public class NabAssayController extends SpringActionController
                         Object value = entry.getValue();
                         if (value != null)
                         {
-                            _displayProperties.put(property.getNonBlankLabel(), formatValue(property, value));
+                            _displayProperties.put(property.getNonBlankCaption(), formatValue(property, value));
                         }
                     }
                 }

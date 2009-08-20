@@ -138,12 +138,12 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         searchCountSQL.append(getSearchRunSQL(schema.getContainer(), result.getContainerFilter(), ExprColumn.STR_TABLE_ALIAS + ".RowId"));
         searchCountSQL.append(" sub)");
         ExprColumn searchCountCol = new ExprColumn(result, SEARCH_COUNT_COLUMN, searchCountSQL, Types.INTEGER);
-        searchCountCol.setCaption("MS2 Search Count");
+        searchCountCol.setLabel("MS2 Search Count");
         result.addColumn(searchCountCol);
 
         ColumnInfo searchLinkCol = result.addColumn(SEARCHES_COLUMN, ExpRunTable.Column.RowId);
-        searchLinkCol.setIsHidden(false);
-        searchLinkCol.setCaption("MS2 Search Results");
+        searchLinkCol.setHidden(false);
+        searchLinkCol.setLabel("MS2 Search Results");
         searchLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)

@@ -388,7 +388,7 @@ public abstract class CompareQuery extends SQLFragment
         ColumnInfo ci = new ColumnInfo(columnName);
         ci.setParentTable(ti);
         ci.setSqlTypeName(md.getColumnTypeName(rgn.getResultSet().findColumn(columnName)));
-        ci.setCaption(column.getLabel());
+        ci.setLabel(column.getLabel());
         DataColumn dc = new DataColumn(ci);
         dc.setURL(linkURL.getLocalURIString() + "&" + columnFilter);
         return dc;

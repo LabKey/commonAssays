@@ -59,7 +59,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         column.setSqlTypeName("INTEGER");
         SubsetSpec subset = _fps.simplifySubset(spec.getSubset());
         GraphSpec captionSpec = new GraphSpec(subset, spec.getParameters());
-        column.setCaption(captionSpec.toString());
+        column.setLabel(captionSpec.toString());
         column.setFk(new AbstractForeignKey() {
             public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
             {

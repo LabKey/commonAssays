@@ -95,7 +95,7 @@ public class XarTemplate
                 if (isUpperCaseTokenName(s))
                     propName = upperCaseTokenNameToPropName(s);
 
-                String title = ColumnInfo.captionFromName(propName);
+                String title = ColumnInfo.labelFromName(propName);
                 DisplayColumn col;
                 if (title.contains("Description"))
                     col = new TextAreaInputColumn(propName, null);

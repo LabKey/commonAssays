@@ -70,7 +70,7 @@ public class PeaksAvailableColumnInfo extends ExprColumn implements DisplayColum
 
     protected void commonInit()
     {
-        setCaption(COLUMN_CAPTION);
+        setLabel(COLUMN_CAPTION);
         setDisplayColumnFactory(this);
     }
 

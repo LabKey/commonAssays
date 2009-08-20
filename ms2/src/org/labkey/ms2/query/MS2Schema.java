@@ -354,7 +354,7 @@ public class MS2Schema extends UserSchema
             }
         });
 
-        result.getColumn("SeqId").setCaption("Protein");
+        result.getColumn("SeqId").setLabel("Protein");
         result.getColumn("SeqId").setFk(new LookupForeignKey("SeqId")
         {
             public TableInfo getLookupTableInfo()
@@ -437,7 +437,7 @@ public class MS2Schema extends UserSchema
             ColumnInfo newColumn = result.addWrapColumn(col);
             if (HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES.contains(newColumn.getName()))
             {
-                newColumn.setIsHidden(true);
+                newColumn.setHidden(true);
             }
         }
         LookupForeignKey fk = new LookupForeignKey("RowId")
@@ -445,7 +445,7 @@ public class MS2Schema extends UserSchema
             public TableInfo getLookupTableInfo()
             {
                 ProteinGroupTableInfo result = new ProteinGroupTableInfo(MS2Schema.this);
-                result.getColumn("ProteinProphet").setIsHidden(true);
+                result.getColumn("ProteinProphet").setHidden(true);
                 result.addProteinDetailColumns();
 
                 return result;
@@ -465,7 +465,7 @@ public class MS2Schema extends UserSchema
         SQLFragment fractionNameSQL = new SQLFragment(dialect.getSubstringFunction(ExprColumn.STR_TABLE_ALIAS + ".FileName", "1", dialect.getStringIndexOfFunction("'.'", ExprColumn.STR_TABLE_ALIAS + ".FileName") + "- 1"));
 
         ColumnInfo fractionName = new ExprColumn(result, "FractionName", fractionNameSQL, Types.VARCHAR);
-        fractionName.setCaption("Name");
+        fractionName.setLabel("Name");
         fractionName.setWidth("200");
         result.addColumn(fractionName);
 
@@ -591,7 +591,7 @@ public class MS2Schema extends UserSchema
             }
         });
 
-        ms2DetailsColumn.setIsHidden(false);
+        ms2DetailsColumn.setHidden(false);
 
         //adjust the default visible columns
         List<FieldKey> columns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());

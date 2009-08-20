@@ -99,7 +99,7 @@ public class PeptidesTableInfo extends FilteredTable
         ColumnInfo mz = new ExprColumn(this, "MZ", mzSQL, Types.REAL);
         mz.setFormatString("0.0000");
         mz.setWidth("55");
-        mz.setCaption("ObsMZ");
+        mz.setLabel("ObsMZ");
         addColumn(mz);
 
         SQLFragment strippedPeptideSQL = new SQLFragment("LTRIM(RTRIM(" + ExprColumn.STR_TABLE_ALIAS + ".PrevAA " + dialect.getConcatenationOperator() + " " + ExprColumn.STR_TABLE_ALIAS + ".TrimmedPeptide " + dialect.getConcatenationOperator() + " " + ExprColumn.STR_TABLE_ALIAS + ".NextAA))");
@@ -117,8 +117,8 @@ public class PeptidesTableInfo extends FilteredTable
             {
                 FilteredTable result = new FilteredTable(MS2Manager.getTableInfoQuantitation());
                 result.wrapAllColumns(true);
-                result.getColumn("PeptideId").setIsHidden(true);
-                result.getColumn("QuantId").setIsHidden(true);
+                result.getColumn("PeptideId").setHidden(true);
+                result.getColumn("QuantId").setHidden(true);
                 return result;
             }
         });
@@ -145,7 +145,7 @@ public class PeptidesTableInfo extends FilteredTable
             {
                 FilteredTable table = new FilteredTable(MS2Manager.getTableInfoPeptideProphetData());
                 table.wrapAllColumns(true);
-                table.getColumn("PeptideId").setIsHidden(true);
+                table.getColumn("PeptideId").setHidden(true);
                 return table;
             }
         });
@@ -211,7 +211,7 @@ public class PeptidesTableInfo extends FilteredTable
         spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
         spectrumSQL.append(".Scan)");
         ExprColumn spectrumColumn = new ExprColumn(this, "Spectrum", spectrumSQL, Types.BLOB);
-        spectrumColumn.setIsHidden(true);
+        spectrumColumn.setHidden(true);
         addColumn(spectrumColumn);
 
         SQLFragment sql = new SQLFragment();
@@ -290,7 +290,7 @@ public class PeptidesTableInfo extends FilteredTable
 
         getColumn("SeqId").setURL(showProteinURLString);
         getColumn("SeqId").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
-        getColumn("SeqId").setCaption("Search Engine Protein");
+        getColumn("SeqId").setLabel("Search Engine Protein");
         getColumn("Protein").setURL(showProteinURLString);
         getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
     }
@@ -362,14 +362,14 @@ public class PeptidesTableInfo extends FilteredTable
         ColumnInfo precursorMass = new ExprColumn(this, "PrecursorMass", precursorMassSQL, Types.REAL);
         precursorMass.setFormatString("0.0000");
         precursorMass.setWidth("65");
-        precursorMass.setCaption("ObsMH+");
+        precursorMass.setLabel("ObsMH+");
         addColumn(precursorMass);
 
         SQLFragment fractionalDeltaMassSQL = new SQLFragment("ABS(" + ExprColumn.STR_TABLE_ALIAS + ".deltamass - " + dialect.getRoundFunction(ExprColumn.STR_TABLE_ALIAS + ".deltamass") + ")");
         ColumnInfo fractionalDeltaMass = new ExprColumn(this, "FractionalDeltaMass", fractionalDeltaMassSQL, Types.REAL);
         fractionalDeltaMass.setFormatString("0.0000");
         fractionalDeltaMass.setWidth("55");
-        fractionalDeltaMass.setCaption("fdMass");
+        fractionalDeltaMass.setLabel("fdMass");
         addColumn(fractionalDeltaMass);
 
         SQLFragment fractionalSQL = new SQLFragment("CASE\n" +
@@ -379,7 +379,7 @@ public class PeptidesTableInfo extends FilteredTable
         ColumnInfo fractionalDeltaMassPPM = new ExprColumn(this, "FractionalDeltaMassPPM", fractionalSQL, Types.REAL);
         fractionalDeltaMassPPM.setFormatString("0.0");
         fractionalDeltaMassPPM.setWidth("80");
-        fractionalDeltaMassPPM.setCaption("fdMassPPM");
+        fractionalDeltaMassPPM.setLabel("fdMassPPM");
         addColumn(fractionalDeltaMassPPM);
 
         SQLFragment deltaSQL = new SQLFragment("CASE\n" +
@@ -389,7 +389,7 @@ public class PeptidesTableInfo extends FilteredTable
         ColumnInfo deltaMassPPM = new ExprColumn(this, "DeltaMassPPM", deltaSQL, Types.REAL);
         deltaMassPPM.setFormatString("0.0");
         deltaMassPPM.setWidth("75");
-        deltaMassPPM.setCaption("dMassPPM");
+        deltaMassPPM.setLabel("dMassPPM");
         addColumn(deltaMassPPM);
     }
 

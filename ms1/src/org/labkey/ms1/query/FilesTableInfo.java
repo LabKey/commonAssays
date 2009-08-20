@@ -43,7 +43,7 @@ public class FilesTableInfo extends FilteredTable
         _expSchema = expSchema;
         wrapAllColumns(true);
 
-        getColumn("FileId").setIsHidden(true);
+        getColumn("FileId").setHidden(true);
         ColumnInfo edfid = getColumn("ExpDataFileId");
         edfid.setFk(new LookupForeignKey("RowId")
         {

@@ -64,7 +64,7 @@ public class ProteinGroupTableInfo extends FilteredTable
 
         wrapAllColumns(true);
         addColumn(wrapColumn("ProteinProphet", getRealTable().getColumn("ProteinProphetFileId")));
-        getColumn("ProteinProphetFileId").setIsHidden(true);
+        getColumn("ProteinProphetFileId").setHidden(true);
 
         ColumnInfo quantitation = wrapColumn("Quantitation", getRealTable().getColumn("RowId"));
         quantitation.setIsUnselectable(true);
@@ -82,7 +82,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         {
             if (HIDDEN_PROTEIN_GROUP_COLUMN_NAMES.contains(col.getName()))
             {
-                col.setIsHidden(true);
+                col.setHidden(true);
             }
         }
 
@@ -185,7 +185,7 @@ public class ProteinGroupTableInfo extends FilteredTable
                     ColumnInfo newColumn = result.addWrapColumn(col);
                     if (HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES.contains(newColumn.getName()))
                     {
-                        newColumn.setIsHidden(true);
+                        newColumn.setHidden(true);
                     }
                 }
 

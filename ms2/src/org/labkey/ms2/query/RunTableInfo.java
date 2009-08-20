@@ -51,15 +51,15 @@ public class RunTableInfo extends FilteredTable
             }
         };
         getColumn("Container").setFk(containerFK);
-        getColumn("Container").setIsHidden(true);
+        getColumn("Container").setHidden(true);
 
         ColumnInfo folderColumn = wrapColumn("Folder", getRealTable().getColumn("Container"));
-        folderColumn.setIsHidden(false);
+        folderColumn.setHidden(false);
         folderColumn.setFk(containerFK);
         addColumn(folderColumn);
 
         ColumnInfo erLSIDColumn = getColumn("ExperimentRunLSID");
-        erLSIDColumn.setCaption("Experiment Run");
+        erLSIDColumn.setLabel("Experiment Run");
         erLSIDColumn.setFk(new LookupForeignKey("LSID")
         {
             public TableInfo getLookupTableInfo()

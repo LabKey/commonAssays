@@ -64,7 +64,7 @@ public class SequencesTableInfo extends FilteredTable
         });
 
         addColumn(wrapColumn("Source", getRealTable().getColumn("SourceId")));
-        getColumn("SourceId").setIsHidden(true);
+        getColumn("SourceId").setHidden(true);
 
         ActionURL url = new ActionURL("MS2", "showProtein.view", _container);
         ColumnInfo bnColumn = getColumn("BestName");
@@ -107,7 +107,7 @@ public class SequencesTableInfo extends FilteredTable
                         sql.add(annotationSet.getCustomAnnotationSetId());
                         ExprColumn ret = new ExprColumn(parent.getParentTable(), displayField,
                             sql, Types.INTEGER, parent);
-                        ret.setCaption(annotationSet.getName());
+                        ret.setLabel(annotationSet.getName());
                         ret.setFk(new LookupForeignKey("CustomAnnotationId")
                         {
                             public TableInfo getLookupTableInfo()
@@ -133,7 +133,7 @@ public class SequencesTableInfo extends FilteredTable
         {
             SQLFragment sql = new SQLFragment(type.getFirstSelectForSeqId());
             ExprColumn firstIdentColumn = new ExprColumn(this, "First" + type.toString(), sql, Types.VARCHAR);
-            firstIdentColumn.setCaption("First " + type.getDescription());
+            firstIdentColumn.setLabel("First " + type.getDescription());
             addColumn(firstIdentColumn);
         }
 

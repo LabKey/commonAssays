@@ -81,7 +81,7 @@ public class PeaksTableInfo extends FilteredTable
         setDefaultVisibleColumns(visibleColumns);
         
         //mark the PeakId column as hidden
-        getColumn("PeakId").setIsHidden(true);
+        getColumn("PeakId").setHidden(true);
 
         //add a condition that limits the features returned to just those existing in the
         //current container. The FilteredTable class supports this automatically only if

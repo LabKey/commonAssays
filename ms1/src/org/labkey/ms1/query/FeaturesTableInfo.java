@@ -288,7 +288,7 @@ public class FeaturesTableInfo extends VirtualTable
             ColumnInfo newCol = new AliasedColumn(this, col.getAlias(), col);
             addColumn(newCol);
             if (preserveHidden && col.isHidden())
-                newCol.setIsHidden(col.isHidden());
+                newCol.setHidden(col.isHidden());
         }
     }
 
@@ -297,7 +297,7 @@ public class FeaturesTableInfo extends VirtualTable
         assert underlyingColumn.getParentTable() == getSourceTable();
         ExprColumn ret = new ExprColumn(this, alias, underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
         ret.copyAttributesFrom(underlyingColumn);
-        ret.setCaption(ColumnInfo.captionFromName(alias));
+        ret.setLabel(ColumnInfo.labelFromName(alias));
         return ret;
     }
 

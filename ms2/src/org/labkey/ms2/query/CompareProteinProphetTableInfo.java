@@ -85,7 +85,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
                 sql.append(run.getRun());
                 sql.append("ProteinGroupId");
                 ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, Types.INTEGER);
-                proteinGroupIdColumn.setCaption(run.getDescription());
+                proteinGroupIdColumn.setLabel(run.getDescription());
                 proteinGroupIdColumn.setIsUnselectable(true);
                 runColumns.add(proteinGroupIdColumn);
                 LookupForeignKey fk = new LookupForeignKey("RowId")
