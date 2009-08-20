@@ -851,6 +851,7 @@ public class FlowSchema extends UserSchema
         public ColumnInfo addColumn(String alias, Column column)
         {
             ColumnInfo col =  createColumn(alias, column);
+            _expData.addColumn(col);
             addColumn(col);
             return col;
         }
@@ -946,6 +947,10 @@ public class FlowSchema extends UserSchema
             flag.setDescription(type.getLabel() + " Flag");
         ret.addColumn(ExpDataTable.Column.Created);
         ret.setTitleColumn("Name");
+
+        ColumnInfo sourceProtocolApplication = ret.addColumn(ExpDataTable.Column.SourceProtocolApplication);
+        sourceProtocolApplication.setHidden(true);
+
         ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
         protocol.setHidden(true);
 
