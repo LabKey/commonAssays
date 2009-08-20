@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.TemplatePage" %>
-<%=PageFlowUtil.getStrutsError(request, null)%>
+<labkey:errors/>
 <%renderBody(out);%>

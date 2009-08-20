@@ -239,7 +239,7 @@ public class MS2Controller extends SpringActionController
             rgn.setFixedWidthColumns(false);
             rgn.setShowRecordSelectors(true);
 
-            GridView gridView = new GridView(rgn);
+            GridView gridView = new GridView(rgn, errors);
             gridView.setTitle("MS2 Runs");
             gridView.setFilter(new SimpleFilter("Deleted", Boolean.FALSE));
             gridView.setSort(MS2Manager.getRunsBaseSort());
@@ -2126,7 +2126,7 @@ public class MS2Controller extends SpringActionController
 
             HttpView filterView = new CurrentFilterView(query);
 
-            GridView compareView = new GridView(rgn);
+            GridView compareView = new GridView(rgn, errors);
             rgn.setShowPagination(false);
             compareView.setResultSet(rgn.getResultSet());
             compareView.getDataRegion().setButtonBarPosition(DataRegion.ButtonBarPosition.BOTH);
@@ -2279,7 +2279,7 @@ public class MS2Controller extends SpringActionController
 
             grid.getViewContext().setPermissions(ACL.PERM_READ);
 
-            GridView annots = new GridView(getAnnotInsertsGrid());
+            GridView annots = new GridView(getAnnotInsertsGrid(), errors);
             annots.setTitle("Protein Annotations Loaded");
 
             annots.getViewContext().setPermissions(ACL.PERM_READ);
@@ -2340,7 +2340,7 @@ public class MS2Controller extends SpringActionController
             rgn.setFixedWidthColumns(false);
             rgn.setShowRecordSelectors(true);
 
-            GridView result = new GridView(rgn);
+            GridView result = new GridView(rgn, (BindException)null);
             result.getRenderContext().setBaseSort(new Sort("FastaId"));
 
             ButtonBar bb = new ButtonBar();
@@ -2630,7 +2630,7 @@ public class MS2Controller extends SpringActionController
             QuerySettings proteinsSettings = schema.getSettings(getViewContext(), POTENTIAL_PROTEIN_DATA_REGION);
             proteinsSettings.setQueryName(MS2Schema.TableType.Sequences.toString());
             proteinsSettings.setAllowChooseQuery(false);
-            QueryView proteinsView = new QueryView(schema, proteinsSettings);
+            QueryView proteinsView = new QueryView(schema, proteinsSettings, null);
             // Disable R and other reporting until there's an implementation that respects the search criteria
             proteinsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
@@ -3337,7 +3337,7 @@ public class MS2Controller extends SpringActionController
 
             rgn.addColumns(MS2Manager.getTableInfoRuns().getColumns("Path, Created, Deleted, StatusId, Status, PeptideCount, SpectrumCount, FastaId"));
 
-            GridView gridView = new GridView(rgn);
+            GridView gridView = new GridView(rgn, errors);
             gridView.getRenderContext().setUseContainerFilter(false);
             gridView.getViewContext().setPermissions(ACL.PERM_READ);
             SimpleFilter runFilter = new SimpleFilter();
@@ -4172,7 +4172,7 @@ public class MS2Controller extends SpringActionController
         DataRegion rgn = new DataRegion();
         rgn.setName(formName);
         rgn.setSelectionKey(selectionKey);
-        GridView view = new GridView(rgn);
+        GridView view = new GridView(rgn, (BindException)null);
 
         bb.add(createCompareMenu(getContainer(), view, false));
 

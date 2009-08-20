@@ -19,6 +19,7 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.nab.NabController" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.HeaderBean> me = (JspView<NabController.HeaderBean>) HttpView.currentView();
@@ -55,4 +56,4 @@
     }
 %>
 <br>
-<span class="labkey-error"><%=PageFlowUtil.getStrutsError(request, "main")%></span>
+<labkey:errors/>

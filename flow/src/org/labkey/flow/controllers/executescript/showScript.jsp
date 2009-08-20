@@ -67,7 +67,7 @@ The analysis section describes which gates in the analysis, as well as the stati
         form.setQueryName(FlowTableType.Runs.toString());
 
         // HACK: work around for bug 6520 : can't set filter/sort on QuerySettings progamatically
-        QueryView view = new QueryView(form) {
+        QueryView view = new QueryView(form, null) {
             protected void setupDataView(DataView ret)
             {
                 super.setupDataView(ret);

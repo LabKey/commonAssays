@@ -15,26 +15,18 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="org.labkey.api.study.WellData"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.nab.DilutionSummary"%>
 <%@ page import="org.labkey.nab.NabController"%>
-<%@ page import="java.text.DecimalFormat" %>
-<%@page extends="org.labkey.api.jsp.JspBase"%>
+<%@ page import="java.text.DecimalFormat"%>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<%@ page extends="org.labkey.api.jsp.JspBase"%>
+<labkey:errors/>
 <%
     JspView<NabController.GraphSelectedBean> me = (JspView<NabController.GraphSelectedBean>) HttpView.currentView();
     NabController.GraphSelectedBean bean = me.getModelBean();
-
-    String errs = PageFlowUtil.getStrutsError(request, "main");
-    if (null != StringUtils.trimToNull(errs))
-    {
-        out.write("<span class=\"labkey-error\">");
-        out.write(errs);
-        out.write("</span>");
-    }
 
     StringBuilder chartURL = new StringBuilder("renderMultiRunChart.view?");
     DilutionSummary[] summaries = bean.getDilutionSummaries();

@@ -35,6 +35,7 @@ import java.util.HashMap;
 
 import org.labkey.ms2.MS2Controller;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.validation.BindException;
 
 /**
  * User: jeckels
@@ -51,7 +52,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     {
         DataRegion proteinRgn = createProteinDataRegion(expanded, requestedPeptideColumnNames, requestedProteinColumnNames);
         proteinRgn.setTable(MS2Manager.getTableInfoProteins());
-        GridView proteinView = new GridView(proteinRgn);
+        GridView proteinView = new GridView(proteinRgn, (BindException)null);
         proteinRgn.setShowPagination(false);
         proteinView.setResultSet(ProteinManager.getProteinRS(_url, getSingleRun(), null, proteinRgn.getMaxRows(), proteinRgn.getOffset()));
         proteinView.setContainer(getContainer());
@@ -234,7 +235,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     {
         String peptideColumns = getPeptideColumnNames(columns);
         DataRegion peptideRegion = getNestedPeptideGrid(_runs[0], peptideColumns, true);
-        GridView view = new GridView(peptideRegion);
+        GridView view = new GridView(peptideRegion, (BindException)null);
         String extraWhere = MS2Manager.getTableInfoPeptides() + ".Protein= '" + proteinGroupingId + "'";
         GroupedResultSet groupedResultSet = createPeptideResultSet(peptideColumns, _runs[0], _maxGroupingRows, _offset, extraWhere);
         // Shouldn't really close it here, but this prevents us from getting errors logged about not closing the result set
@@ -249,7 +250,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form) throws SQLException
     {
         DataRegion rgn = getNestedPeptideGrid(getSingleRun(), form.getColumns(), true);
-        GridView gridView = new GridView(rgn);
+        GridView gridView = new GridView(rgn, (BindException)null);
         SimpleFilter gridFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.EXTRA_FILTER + ProteinManager.PROTEIN_FILTER, getSingleRun());
         gridView.setFilter(gridFilter);
         gridView.setSort(ProteinManager.getPeptideBaseSort());

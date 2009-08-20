@@ -19,6 +19,7 @@ package org.labkey.ms2;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.*;
+import org.springframework.validation.BindException;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class MS2WebPart extends GridView
 {
     public MS2WebPart(ViewContext viewContext)
     {
-        super(getGridRegionWebPart());
+        super(getGridRegionWebPart(), (BindException)null);
 
         DataRegion rgn = getDataRegion();
         rgn.getDisplayColumn(0).setURL(MS2Controller.getShowRunSubstitutionURL(viewContext.getContainer()));

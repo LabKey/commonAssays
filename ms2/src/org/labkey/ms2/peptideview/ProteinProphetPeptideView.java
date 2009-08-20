@@ -33,6 +33,7 @@ import java.util.*;
 
 import org.labkey.ms2.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.validation.BindException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -266,7 +267,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         GridView peptidesGridView;
         DataRegion rgn = getNestedPeptideGrid(getSingleRun(), form.getColumns(), false);
 
-        peptidesGridView = new GridView(rgn);
+        peptidesGridView = new GridView(rgn, (BindException)null);
 
         String columnNames = getPeptideColumnNames(form.getColumns());
         String sqlColumnNames = getPeptideSQLColumnNames(columnNames, getSingleRun());
@@ -317,7 +318,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport) throws ServletException, SQLException
     {
         DataRegion proteinRgn = createProteinDataRegion(expanded, requestedPeptideColumnNames, requestedProteinColumnNames);
-        GridView proteinView = new GridView(proteinRgn);
+        GridView proteinView = new GridView(proteinRgn, (BindException)null);
         ResultSet rs;
         if (expanded)
         {
@@ -447,7 +448,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     {
         String peptideColumns = getPeptideColumnNames(requestedPeptideColumns);
         DataRegion peptideRegion = createPeptideDataRegion(requestedPeptideColumns);
-        GridView view = new GridView(peptideRegion);
+        GridView view = new GridView(peptideRegion, (BindException)null);
         String extraWhere = MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId = " + proteinGroupingId;
         view.setResultSet(createPeptideResultSet(peptideColumns, _maxPeptideRows, _offset, extraWhere));
         return view;

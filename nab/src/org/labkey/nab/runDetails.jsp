@@ -15,24 +15,21 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="org.labkey.api.exp.PropertyDescriptor"%>
-<%@ page import="org.labkey.api.exp.PropertyType"%>
 <%@ page import="org.labkey.api.query.QueryView"%>
 <%@ page import="org.labkey.api.security.ACL" %>
 <%@ page import="org.labkey.api.study.WellData" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.nab.*" %>
-<%@ page import="java.text.DateFormat" %>
 <%@ page import="java.text.DecimalFormat" %>
-<%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.*" %>
 <%@ page import="org.labkey.api.study.DilutionCurve" %>
 <%@ page import="org.labkey.api.util.Pair" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<labkey:errors/>
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();
     NabAssayController.RenderAssayBean bean = me.getModelBean();
@@ -46,14 +43,6 @@
     Map<String, Object> runProperties = bean.getRunDisplayProperties();
 
     boolean writer = context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT);
-
-    String errs = PageFlowUtil.getStrutsError(request, "main");
-    if (null != StringUtils.trimToNull(errs))
-    {
-        out.write("<span class=\"labkey-error\">");
-        out.write(errs);
-        out.write("</span>");
-    }
 
     QueryView duplicateDataFileView = bean.getDuplicateDataFileView(me.getViewContext());
     int columnCount = 2;

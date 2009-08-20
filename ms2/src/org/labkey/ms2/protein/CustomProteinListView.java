@@ -21,6 +21,7 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.security.ACL;
+import org.springframework.validation.BindException;
 
 /**
  * User: jeckels
@@ -37,7 +38,7 @@ public class CustomProteinListView extends VBox
         rgn.setColumns(ProteinManager.getTableInfoCustomAnnotationSet().getColumns("Name, Created, CreatedBy, CustomAnnotationSetId"));
         rgn.getDisplayColumn("Name").setURL("showAnnotationSet.view?CustomAnnotation.queryName=${Name}");
         rgn.getDisplayColumn("CustomAnnotationSetId").setVisible(false);
-        GridView gridView = new GridView(rgn);
+        GridView gridView = new GridView(rgn, (BindException)null);
         rgn.setShowRecordSelectors(context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT) || context.getContainer().hasPermission(context.getUser(), ACL.PERM_DELETE));
         gridView.setSort(new Sort("Name"));
 

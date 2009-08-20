@@ -35,6 +35,7 @@ import java.io.IOException;
 
 import org.labkey.ms2.MS2Controller;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.validation.BindException;
 import jxl.write.WritableWorkbook;
 
 /**
@@ -51,7 +52,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
     public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport) throws ServletException, SQLException
     {
         DataRegion rgn = getPeptideGridForDisplay(requestedPeptideColumnNames);
-        GridView peptideView = new GridView(rgn);
+        GridView peptideView = new GridView(rgn, (BindException)null);
         peptideView.setFilter(ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.EXTRA_FILTER, getSingleRun()));
         peptideView.setSort(ProteinManager.getPeptideBaseSort());
         peptideView.setTitle("Peptides");

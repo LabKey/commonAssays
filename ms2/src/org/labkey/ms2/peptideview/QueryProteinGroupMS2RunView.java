@@ -25,6 +25,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.labkey.api.util.Pair;
+import org.springframework.validation.BindException;
 
 import javax.servlet.ServletException;
 import java.util.List;
@@ -180,7 +181,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         QueryPeptideDataRegion rgn = (QueryPeptideDataRegion)peptideView.createDataRegion();
 
         DataRegion nestedRegion = rgn.getNestedRegion();
-        GridView result = new GridView(nestedRegion);
+        GridView result = new GridView(nestedRegion, (BindException)null);
 
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);

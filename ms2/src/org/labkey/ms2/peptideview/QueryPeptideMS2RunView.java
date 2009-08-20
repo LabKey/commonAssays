@@ -31,6 +31,7 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.PeptidesTableInfo;
+import org.springframework.validation.BindException;
 
 /**
  * User: jeckels
@@ -232,7 +233,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         QueryPeptideDataRegion rgn = (QueryPeptideDataRegion)view.createDataRegion();
 
         DataRegion nestedRegion = rgn.getNestedRegion();
-        GridView result = new GridView(nestedRegion);
+        GridView result = new GridView(nestedRegion, (BindException)null);
 
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);

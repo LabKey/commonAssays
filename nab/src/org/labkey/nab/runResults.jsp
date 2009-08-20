@@ -15,17 +15,16 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="org.labkey.api.security.ACL"%>
 <%@ page import="org.labkey.api.study.PlateQueryView"%>
 <%@ page import="org.labkey.api.study.WellData"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.nab.*" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.RenderAssayBean> me = (JspView<NabController.RenderAssayBean>) HttpView.currentView();
@@ -33,14 +32,9 @@
     Luc5Assay assay = bean.getAssay();
     ViewContext context = me.getViewContext();
     boolean writer = context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT);
-
-    String errs = PageFlowUtil.getStrutsError(request, "main");
-    if (null != StringUtils.trimToNull(errs))
-    {
-        out.write("<span class=\"labkey-error\">");
-        out.write(errs);
-        out.write("</span>");
-    }
+    %>
+<labkey:errors/>
+<%
     String labelStyle = "text-align:left;vertical-align:middle;font-weight:bold";
 
     PlateQueryView duplicateDataFileView = bean.getDuplicateDataFileView(me.getViewContext(), assay);
