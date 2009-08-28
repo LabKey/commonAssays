@@ -323,7 +323,7 @@ public class ProteinController extends SpringActionController
                     pd.setRangeURI(PropertyType.getFromClass(cd.clazz).getTypeUri());
                     pd.setContainer(getContainer());
                     //Change name to be fully qualified string for property
-                    pd = OntologyManager.insertOrUpdatePropertyDescriptor(pd, dd);
+                    pd = OntologyManager.insertOrUpdatePropertyDescriptor(pd, dd, i - 1);
 
                     cd.name = pd.getPropertyURI();
                     descriptors.add(pd);

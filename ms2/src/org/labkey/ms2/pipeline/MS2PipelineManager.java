@@ -56,6 +56,8 @@ public class MS2PipelineManager
     private static final String ALLOW_SEQUENCE_DB_UPLOAD_KEY = "allowSequenceDbUpload";
     public static final String SEQUENCE_DB_ROOT_TYPE = "SEQUENCE_DATABASE";
 
+    public static final TaskId MZXML_CONVERTER_TASK_ID = new TaskId(ConvertTaskId.class, "mzxmlConverter");
+    
     //todo this the right way
     public static String _allFractionsMzXmlFileBase = "all";
 
@@ -156,8 +158,7 @@ public class MS2PipelineManager
         if (supportCluster && AppProps.getInstance().isPerlPipelineEnabled())
             return new AnalyzeFileFilter();
 
-        TaskId tidConvert = new TaskId(ConvertTaskId.class, "mzxmlConverter");
-        TaskFactory factory = PipelineJobService.get().getTaskFactory(tidConvert);
+        TaskFactory factory = PipelineJobService.get().getTaskFactory(MZXML_CONVERTER_TASK_ID);
         if (factory != null)
             return new PipelineProvider.FileTypesEntryFilter(factory.getInputTypes());
 

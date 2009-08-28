@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.FileType;
@@ -102,8 +104,12 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
 
     public FileType[] getInputTypes()
     {
-        // TODO: Make this based on installed converters.
-        return new FileType[] { FT_MZXML, FT_THERMO_RAW, FT_WATERS_RAW };
+        TaskFactory taskFactory = PipelineJobService.get().getTaskFactory(MS2PipelineManager.MZXML_CONVERTER_TASK_ID);
+        if (taskFactory != null)
+        {
+            return taskFactory.getInputTypes();
+        }
+        return new FileType[] { FT_MZXML };
     }
 
     public void validate(URI uriRoot) throws PipelineValidationException

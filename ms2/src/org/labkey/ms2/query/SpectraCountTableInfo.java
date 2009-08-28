@@ -115,6 +115,7 @@ public class SpectraCountTableInfo extends VirtualTable
         super(MS2Manager.getSchema());
         _ms2Schema = ms2Schema;
         _config = config;
+        setName(config.getTableName());
 
         _context = context;
         _form = form;
