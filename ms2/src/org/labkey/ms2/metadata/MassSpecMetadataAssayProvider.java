@@ -134,9 +134,8 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
     public ExpRunTable createRunTable(final AssaySchema schema, ExpProtocol protocol)
     {
         ExpRunTable result = super.createRunTable(schema, protocol);
-        SQLFragment searchCountSQL = new SQLFragment("(SELECT COUNT(sub.RowId) FROM ");
-        searchCountSQL.append(getSearchRunSQL(schema.getContainer(), result.getContainerFilter(), ExprColumn.STR_TABLE_ALIAS + ".RowId"));
-        searchCountSQL.append(" sub)");
+        SQLFragment searchCountSQL = new SQLFragment();
+        searchCountSQL.append(getSearchRunSQL(schema.getContainer(), result.getContainerFilter(), ExprColumn.STR_TABLE_ALIAS + ".RowId", "COUNT(DISTINCT(er.RowId))"));
         ExprColumn searchCountCol = new ExprColumn(result, SEARCH_COUNT_COLUMN, searchCountSQL, Types.INTEGER);
         searchCountCol.setLabel("MS2 Search Count");
         result.addColumn(searchCountCol);
@@ -159,9 +158,9 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         return result;
     }
 
-    public static SQLFragment getSearchRunSQL(Container container, ContainerFilter containerFilter, String runIdSQL)
+    public static SQLFragment getSearchRunSQL(Container container, ContainerFilter containerFilter, String runIdSQL, String selectSQL)
     {
-        SQLFragment searchCountSQL = new SQLFragment("(SELECT DISTINCT(er.RowId) FROM " +
+        SQLFragment searchCountSQL = new SQLFragment("(SELECT " + selectSQL + " FROM " +
                 MS2Manager.getTableInfoRuns() + " r, " +
                 ExperimentService.get().getTinfoExperimentRun() + " er, " +
                 ExperimentService.get().getTinfoData() + " d, " +

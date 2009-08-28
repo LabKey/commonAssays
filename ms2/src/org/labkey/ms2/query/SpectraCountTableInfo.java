@@ -176,7 +176,7 @@ public class SpectraCountTableInfo extends VirtualTable
             addColumn(new ExprColumn(this, "ChargeStatesObsv", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".ChargeStatesObsv"), Types.INTEGER));
             defaultCols.add(FieldKey.fromParts("ChargeStatesObsv"));
         }
-        
+
         addColumn(new ExprColumn(this, "TotalPeptideCount", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".TotalPeptideCount"), Types.INTEGER));
         defaultCols.add(FieldKey.fromParts("TotalPeptideCount"));
 
@@ -283,7 +283,7 @@ public class SpectraCountTableInfo extends VirtualTable
             }
             peptidesSQL = _ms2Schema.getPeptideSelectSQL(filter, peptideFieldKeys);
         }
-        
+
         sql.append(peptidesSQL);
         sql.append(") pd ON (f.fraction = pd.fraction)\n");
 

@@ -121,7 +121,7 @@ public class MassSpecMetadataController extends SpringActionController
             QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module._ms2SearchRunFilter, true, true);
             ExpRunTable table = (ExpRunTable) result.getTable();
 
-            SQLFragment searchSQL = MassSpecMetadataAssayProvider.getSearchRunSQL(getContainer(), table.getContainerFilter(), Integer.toString(form.getRunId()));
+            SQLFragment searchSQL = MassSpecMetadataAssayProvider.getSearchRunSQL(getContainer(), table.getContainerFilter(), Integer.toString(form.getRunId()), "DISTINCT(er.RowId)");
             // Figure out how many search matches there are
             Integer[] searchRunIds = Table.executeArray(ExperimentService.get().getSchema(), searchSQL, Integer.class);
             if (searchRunIds.length == 0)

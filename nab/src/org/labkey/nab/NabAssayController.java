@@ -34,6 +34,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -192,6 +193,9 @@ public class NabAssayController extends SpringActionController
             _newRun = newRun;
             _printView = printView;
             _hiddenRunColumns = new HashSet<String>();
+            _hiddenRunColumns.add(ExpRunTable.Column.RunGroups.name());
+            _hiddenRunColumns.add(ExpRunTable.Column.Links.name());
+            _hiddenRunColumns.add(ExpRunTable.Column.Flag.name());
             _hiddenRunColumns.add(AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME);
             _hiddenRunColumns.add(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME);
             _hiddenRunColumns.addAll(Arrays.asList(NabAssayProvider.CUTOFF_PROPERTIES));

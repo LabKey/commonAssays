@@ -70,9 +70,25 @@ public class NabAssayRun extends Luc5Assay
     {
         Map<FieldKey, PropertyDescriptor> fieldKeys = new HashMap<FieldKey, PropertyDescriptor>();
         for (DomainProperty property : _provider.getBatchDomain(_protocol).getProperties())
-            fieldKeys.put(FieldKey.fromParts(AssayService.RUN_PROPERTIES_COLUMN_NAME, property.getName()), property.getPropertyDescriptor());
+            fieldKeys.put(FieldKey.fromParts(AssayService.BATCH_COLUMN_NAME, AssayService.BATCH_PROPERTIES_COLUMN_NAME, property.getName()), property.getPropertyDescriptor());
         for (DomainProperty property : _provider.getRunDomain(_protocol).getProperties())
             fieldKeys.put(FieldKey.fromParts(AssayService.RUN_PROPERTIES_COLUMN_NAME, property.getName()), property.getPropertyDescriptor());
+
+        // Add all of the hard columns to the set of properties we can show
+        TableInfo runTableInfo = AssayService.get().createRunTable(_protocol, _provider, _user, _run.getContainer());
+        for (ColumnInfo runColumn : runTableInfo.getColumns())
+        {
+            // Fake up a property descriptor. Currently only name and label are actually used for rendering the page,
+            // but set a few more so that toString() works for debugging purposes
+            PropertyDescriptor pd = new PropertyDescriptor();
+            pd.setName(runColumn.getName());
+            pd.setLabel(runColumn.getLabel());
+            pd.setPropertyURI(runColumn.getPropertyURI());
+            pd.setContainer(_protocol.getContainer());
+            pd.setProject(_protocol.getContainer().getProject());
+            fieldKeys.put(FieldKey.fromParts(runColumn.getName()), pd);
+        }
+
         return fieldKeys;
     }
 
@@ -120,13 +136,19 @@ public class NabAssayRun extends Luc5Assay
             CustomView runView = QueryService.get().getCustomView(context.getUser(), context.getContainer(),
                    AssaySchema.NAME, AssayService.get().getRunsTableName(_protocol), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
 
+            Collection<FieldKey> fieldKeysToShow;
             if (runView != null)
             {
-                Map<FieldKey, ColumnInfo> selectCols = QueryService.get().getColumns(runTable, runView.getColumns());
-                _runDisplayProperties = getRunProperties(runTable, fieldKeys, selectCols);
+                // If we have a saved view to use for the column list, use it
+                fieldKeysToShow = runView.getColumns();
             }
             else
-                _runDisplayProperties = getRunProperties();
+            {
+                // Otherwise, use the default list of columns
+                fieldKeysToShow = new ArrayList<FieldKey>(runTable.getDefaultVisibleColumns());
+            }
+            Map<FieldKey, ColumnInfo> selectCols = QueryService.get().getColumns(runTable, fieldKeysToShow);
+            _runDisplayProperties = getRunProperties(runTable, fieldKeys, selectCols);
         }
         return Collections.unmodifiableMap(_runDisplayProperties);
     }
