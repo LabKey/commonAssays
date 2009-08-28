@@ -46,13 +46,13 @@ public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipe
     }
 
     public SequestPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                                          File[] filesInput,
-                                                          File fileParameters,
-                                                          boolean fromCluster)
+                                                File[] filesInput,
+                                                File fileParameters
+    )
             throws SQLException, IOException
     {
         return new SequestPipelineJob(this, info, getName(), getDirSeqRoot(),
-                filesInput, fileParameters, fromCluster);
+                filesInput, fileParameters);
     }
 
     public void validate(URI uriRoot) throws PipelineValidationException

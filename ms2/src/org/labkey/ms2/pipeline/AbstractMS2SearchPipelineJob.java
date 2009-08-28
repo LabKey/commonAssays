@@ -16,16 +16,15 @@
 
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.TaskId;
-import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.exp.pipeline.XarTemplateSubstitutionId;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.TaskFactory;
+import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
+import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.exp.pipeline.XarTemplateSubstitutionId;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -40,17 +39,6 @@ import java.util.*;
 public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJob
         implements MS2SearchJobSupport, TPPTask.JobSupport, XarTemplateSubstitutionId.JobSupport
 {
-    enum Pipelines
-    {
-        finishPerlCluster,
-        finishPerlClusterJoined;
-
-        public TaskId getTaskId()
-        {
-            return new TaskId(getClass().getEnclosingClass(), toString());
-        }
-    }
-
     private static String DATATYPE_SAMPLES = "Samples"; // Default
     private static String DATATYPE_FRACTIONS = "Fractions";
     private static String DATATYPE_BOTH = "Both";
@@ -64,7 +52,6 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 
     protected File _dirSequenceRoot;
     protected boolean _fractions;
-    protected boolean _fromCluster;
 
     public AbstractMS2SearchPipelineJob(AbstractMS2SearchProtocol protocol,
                                         String providerName,
@@ -72,13 +59,12 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                                         String protocolName,
                                         File dirSequenceRoot,
                                         File fileParameters,
-                                        File filesInput[],
-                                        boolean fromCluster) throws SQLException, IOException
+                                        File filesInput[]
+    ) throws SQLException, IOException
     {
-        super(protocol, providerName, info, protocolName, fileParameters, filesInput, fromCluster);
+        super(protocol, providerName, info, protocolName, fileParameters, filesInput);
 
         _dirSequenceRoot = dirSequenceRoot;
-        _fromCluster = fromCluster;
 
         // Make sure a sequence file is specified.
         String paramDatabase = getParameters().get("pipeline, database");
@@ -103,9 +89,6 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                 }
             }
         }
-
-        if (isPerlClusterAware() && PipelineService.get().usePerlPipeline(info.getContainer()))
-            setStatusFile(FT_PERL_STATUS.newFile(getAnalysisDirectory(), getBaseName()));
     }
 
     public AbstractMS2SearchPipelineJob(AbstractMS2SearchPipelineJob job, File fileFraction)
@@ -115,23 +98,6 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         // Copy some parameters from the parent job.
         _dirSequenceRoot = job._dirSequenceRoot;
         _fractions = job._fractions;
-
-        // Change parameters which are specific to the fraction job.
-        if (job.getStatusFile() != job.getLogFile())
-            setStatusFile(FT_PERL_STATUS.newFile(getAnalysisDirectory(), getBaseName()));
-    }
-
-    public TaskId getTaskPipelineId()
-    {
-        if (_fromCluster)
-        {
-            if (getInputFiles().length > 1)
-                return Pipelines.finishPerlClusterJoined.getTaskId();
-            else
-                return Pipelines.finishPerlCluster.getTaskId();
-        }
-
-        return null;
     }
 
     public File findInputFile(String name)
@@ -184,16 +150,6 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     }
 
     abstract public String getSearchEngine();
-
-    /**
-     * Returns true, if this job supports a Perl based pipeline driven by pipe.pl.
-     *
-     * @return true if Perl pipeline
-     */
-    public boolean isPerlClusterAware()
-    {
-        return false;
-    }
 
     /**
      * Override to turn off PeptideProphet and ProteinProphet analysis.

@@ -47,13 +47,13 @@ public class XTandemSearchProtocol extends AbstractMS2SearchProtocol<XTandemPipe
     }
 
     public XTandemPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                                          File[] filesInput,
-                                                          File fileParameters,
-                                                          boolean fromCluster)
+                                                File[] filesInput,
+                                                File fileParameters
+    )
             throws SQLException, IOException
     {
         return new XTandemPipelineJob(this, info, getName(), getDirSeqRoot(),
-                filesInput, fileParameters, fromCluster);
+                filesInput, fileParameters);
     }
 
     public void validate(URI uriRoot) throws PipelineValidationException

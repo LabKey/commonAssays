@@ -43,10 +43,10 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements 
                               String name,
                               File dirSequenceRoot,
                               File filesMzXML[],
-                              File fileInputXML,
-                              boolean fromCluster) throws SQLException, IOException
+                              File fileInputXML
+    ) throws SQLException, IOException
     {
-        super(protocol, SequestLocalPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML, fromCluster);
+        super(protocol, SequestLocalPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
         AppProps appProps = AppProps.getInstance();
         _sequestServer = appProps.getSequestServer();
@@ -78,10 +78,6 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements 
 
     public TaskId getTaskPipelineId()
     {
-        TaskId tid = super.getTaskPipelineId();
-        if (tid != null)
-            return tid;
-
         return _tid;
     }
 

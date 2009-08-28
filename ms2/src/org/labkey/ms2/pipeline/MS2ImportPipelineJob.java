@@ -21,9 +21,8 @@ import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.util.FileUtil;
-import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Importer;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
@@ -50,13 +49,7 @@ public class MS2ImportPipelineJob extends PipelineJob
         _runInfo = runInfo;
 
         String basename = FileUtil.getBaseName(_file, 2);
-        setLogFile(FT_LOG.newFile(_file.getParentFile(), basename), appendLog);
-
-        // If there is a .status file created by the Perl pipeline, then connect this job
-        // to it.
-        File fileStatus = FT_PERL_STATUS.newFile(_file.getParentFile(), basename);
-        if (NetworkDrive.exists(fileStatus))
-            setStatusFile(fileStatus);
+        setLogFile(FT_LOG.newFile(_file.getParentFile(), basename));
 
         // If there is an existing status file, make sure this job does not
         // overwrite the original provider.  Both Comet and X!Tandem legacy

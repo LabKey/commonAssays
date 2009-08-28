@@ -16,25 +16,27 @@
 
 package org.labkey.ms2.pipeline;
 
-import org.labkey.ms2.pipeline.client.SearchService;
-import org.labkey.ms2.pipeline.client.GWTSearchServiceResult;
+import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
 import org.labkey.api.gwt.server.BaseRemoteService;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
-import org.labkey.api.util.URIUtil;
-import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.FileType;
-import org.labkey.api.settings.AppProps;
-import org.labkey.api.data.Container;
-import org.apache.log4j.Logger;
-import java.util.*;
-import java.io.IOException;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.URIUtil;
+import org.labkey.api.view.ViewContext;
+import org.labkey.ms2.pipeline.client.GWTSearchServiceResult;
+import org.labkey.ms2.pipeline.client.SearchService;
+
 import java.io.File;
-import java.io.FileFilter;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 
 /**
@@ -458,48 +460,26 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.setActiveJobs(false);
             results.setFileInputNames(new ArrayList<String>());
             results.setFileInputStatus(new ArrayList<String>());
-            if (pr.isPerlPipeline() && AppProps.getInstance().isPerlPipelineEnabled())
-            {
-                // Do what the Perl Pipeline has always done.
-                Map<File, FileStatus> mapFileStatus =
-                    MS2PipelineManager.getAnalysisFileStatus(dirData, dirAnalysis, c);
-                for (Map.Entry<File, FileStatus> entry : mapFileStatus.entrySet())
-                {
-                    results.getFileInputNames().add(entry.getKey().getName());
-                    FileStatus status = entry.getValue();
-                    if (status == FileStatus.UNKNOWN || status == FileStatus.ANNOTATED)
-                        results.getFileInputStatus().add(null);
-                    else
-                    {
-                        // For Perl Pipeline anything that has status at all, means the
-                        // the job is active.
-                        results.getFileInputStatus().add(status.toString());
-                        results.setActiveJobs(true);
-                    }
-                }
-            }
-            else
-            {
-                // todo: use the file list passed to the form by initial post
-                File[] fileInputs = dirData.listFiles(MS2PipelineManager.getAnalyzeFilter(false));
-                Arrays.sort(fileInputs, new Comparator<File>()
-                {
-                    public int compare(File o1, File o2)
-                    {
-                        return o1.getName().compareToIgnoreCase(o2.getName());
-                    }
-                });
 
-                for (File file : fileInputs)
+            // todo: use the file list passed to the form by initial post
+            File[] fileInputs = dirData.listFiles(MS2PipelineManager.getAnalyzeFilter());
+            Arrays.sort(fileInputs, new Comparator<File>()
+            {
+                public int compare(File o1, File o2)
                 {
-                    String name = file.getName();
-                    results.getFileInputNames().add(name);
-                    if (protocolExists)
-                        results.getFileInputStatus().add(getInputStatus(protocol, dirData, dirAnalysis, name, true));
+                    return o1.getName().compareToIgnoreCase(o2.getName());
                 }
+            });
+
+            for (File file : fileInputs)
+            {
+                String name = file.getName();
+                results.getFileInputNames().add(name);
                 if (protocolExists)
-                    results.getFileInputStatus().add(getInputStatus(protocol, dirData, dirAnalysis, null, false));
+                    results.getFileInputStatus().add(getInputStatus(protocol, dirData, dirAnalysis, name, true));
             }
+            if (protocolExists)
+                results.getFileInputStatus().add(getInputStatus(protocol, dirData, dirAnalysis, null, false));
         }
         catch (IOException e)
         {

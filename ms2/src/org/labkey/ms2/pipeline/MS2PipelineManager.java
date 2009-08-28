@@ -27,7 +27,6 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.settings.AppProps;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
 
 import java.io.*;
@@ -69,16 +68,6 @@ public class MS2PipelineManager
     public static boolean isMzXMLFile(File file)
     {
         return AbstractMS2SearchProtocol.FT_MZXML.isType(file);
-    }
-
-    public static boolean isThermoRawFile(File file)
-    {
-        return AbstractMS2SearchProtocol.FT_THERMO_RAW.isType(file);
-    }
-
-    public static boolean isWatersRawDir(File file)
-    {
-        return AbstractMS2SearchProtocol.FT_WATERS_RAW.isType(file);
     }
 
     public static File getAnnotationFile(File dirData)
@@ -127,37 +116,8 @@ public class MS2PipelineManager
         return new UploadFileFilter();
     }
 
-    public static class AnalyzeFileFilter extends PipelineProvider.FileEntryFilter
-    {
-        public boolean accept(File file)
-        {
-            // Show all mzXML files.
-            if (isMzXMLFile(file))
-                return true;
-
-            // If no corresponding mzXML file, show raw files.
-            if (isThermoRawFile(file) || isWatersRawDir(file))
-            {
-                String basename = FileUtil.getBaseName(file);
-                File dirData = file.getParentFile();
-                if (!fileExists(getMzXMLFile(dirData, basename)))
-                    return true;
-            }
-
-            return false;
-        }
-    }
-
     public static PipelineProvider.FileEntryFilter getAnalyzeFilter()
     {
-        return getAnalyzeFilter(true);
-    }
-
-    public static PipelineProvider.FileEntryFilter getAnalyzeFilter(boolean supportCluster)
-    {
-        if (supportCluster && AppProps.getInstance().isPerlPipelineEnabled())
-            return new AnalyzeFileFilter();
-
         TaskFactory factory = PipelineJobService.get().getTaskFactory(MZXML_CONVERTER_TASK_ID);
         if (factory != null)
             return new PipelineProvider.FileTypesEntryFilter(factory.getInputTypes());
@@ -315,7 +275,7 @@ public class MS2PipelineManager
         if (rootSeq != null && root != null && rootSeq.equals(getSequenceDatabaseRoot(root)))
              rootSeq = null;
 
-        service.setPipelineRoot(user, container, rootSeq, SEQUENCE_DB_ROOT_TYPE, null, false);
+        service.setPipelineRoot(user, container, rootSeq, SEQUENCE_DB_ROOT_TYPE, null);
         if (root != null)
             service.setPipelineProperty(container, ALLOW_SEQUENCE_DB_UPLOAD_KEY, allowUpload ? "true" : "false");
         else
@@ -369,15 +329,7 @@ public class MS2PipelineManager
         
         String dirDataURL = dirData.toURI().toURL().toString();
 
-        File[] mzXMLFiles = null;
-        try
-        {
-            mzXMLFiles = dirData.listFiles(getAnalyzeFilter(PipelineService.get().usePerlPipeline(c)));
-        }
-        catch (SQLException e)
-        {
-            throw new IOException("Failed retrieving directory properties.");
-        }
+        File[] mzXMLFiles = dirData.listFiles(getAnalyzeFilter());
 
         Map<File, FileStatus> analysisMap = new LinkedHashMap<File, FileStatus>();
         if (mzXMLFiles != null && mzXMLFiles.length > 0)

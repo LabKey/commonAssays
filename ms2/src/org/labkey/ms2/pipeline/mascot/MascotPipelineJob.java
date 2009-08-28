@@ -49,10 +49,10 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
                              String name,
                              File dirSequenceRoot,
                              File filesMzXML[],
-                             File fileInputXML,
-                             boolean fromCluster) throws SQLException, IOException
+                             File fileInputXML
+    ) throws SQLException, IOException
     {
-        super(protocol, MascotCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML, fromCluster);
+        super(protocol, MascotCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
         AppProps appProps = AppProps.getInstance();
         _mascotServer = appProps.getMascotServer();
@@ -73,11 +73,6 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         _mascotUserPassword = job._mascotUserPassword;
         _mascotSequenceDB = job._mascotSequenceDB;
         _mascotSequenceRelease = job._mascotSequenceRelease;
-    }
-
-    public boolean isPerlClusterAware()
-    {
-        return true;
     }
 
     public String getMascotServer()
@@ -117,10 +112,6 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
 
     public TaskId getTaskPipelineId()
     {
-        TaskId tid = super.getTaskPipelineId();
-        if (tid != null)
-            return tid;
-
         return _tid;
     }
 

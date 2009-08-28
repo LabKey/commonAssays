@@ -18,7 +18,6 @@ package org.labkey.ms2.pipeline;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 
@@ -35,8 +34,6 @@ import java.util.Map;
 abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPipelineJob> extends AbstractFileAnalysisProtocol<JOB>
 {
     public static final FileType FT_MZXML = new FileType(".mzXML");
-    public static final FileType FT_THERMO_RAW = new FileType(".RAW", false);
-    public static final FileType FT_WATERS_RAW = new FileType(".raw", true);  // Directory
     public static final FileType FT_SEARCH_XAR = new FileType(".search.xar.xml");
 
     private File _dirSeqRoot;
@@ -79,9 +76,9 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     }
 
     public abstract JOB createPipelineJob(ViewBackgroundInfo info,
-                                           File[] filesInput,
-                                           File fileParameters,
-                                           boolean append)
+                                          File[] filesInput,
+                                          File fileParameters
+    )
             throws SQLException, IOException;
 
     @Override
@@ -115,17 +112,6 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     public void validate(URI uriRoot) throws PipelineValidationException
     {
         super.validate(uriRoot);
-
-        // todo: spaces are currently restricted any time the perl pipeline is enabled
-        //       would be better to only do this for containers running the perl pipeline
-        if (AppProps.getInstance().isPerlPipelineEnabled())
-        {
-            if (getName().indexOf(' ') != -1)
-            {
-                throw new PipelineValidationException("The cluster pipeline does not currently support spaces in"
-                        + " search protocol names.");
-            }
-        }
 
         if (_dbNames.length == 0 || _dbNames[0] == null || _dbNames[0].length() == 0)
             throw new PipelineValidationException("Select a sequence database.");

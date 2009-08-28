@@ -47,10 +47,10 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
                               String name,
                               File dirSequenceRoot,
                               File filesMzXML[],
-                              File fileInputXML,
-                              boolean fromCluster) throws SQLException, IOException
+                              File fileInputXML
+    ) throws SQLException, IOException
     {
-        super(protocol, XTandemCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML, fromCluster);
+        super(protocol, XTandemCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
         header("X! Tandem search for " + getBaseName());
     }
@@ -60,11 +60,6 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
         super(job, fileFraction);        
     }
 
-    public boolean isPerlClusterAware()
-    {
-        return true;
-    }
-
     public String getSearchEngine()
     {
         return "x!tandem";
@@ -72,10 +67,6 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
 
     public TaskId getTaskPipelineId()
     {
-        TaskId tid = super.getTaskPipelineId();
-        if (tid != null)
-            return tid;
-
         return _tid;
     }
 

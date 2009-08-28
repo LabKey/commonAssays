@@ -15,21 +15,26 @@
  */
 package org.labkey.ms2.pipeline.tandem;
 
-import org.labkey.api.pipeline.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineProtocol;
+import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
-import org.labkey.api.data.Container;
 import org.labkey.ms2.pipeline.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.util.*;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 /**
  * XTandemCPipelineProvider class
@@ -42,25 +47,9 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     public static String name = "X! Tandem";
 
-    public PipelinePerlClusterSupport _clusterSupport;
-
     public XTandemCPipelineProvider()
     {
         super(name);
-
-        _clusterSupport = new PipelinePerlClusterSupport();
-    }
-
-    public void preDeleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
-    {
-        super.preDeleteStatusFile(sf);
-        _clusterSupport.preDeleteStatusFile(sf);
-    }
-
-    public void preCompleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
-    {
-        super.preCompleteStatusFile(sf);
-        _clusterSupport.preCompleteStatusFile(sf);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)
@@ -69,16 +58,7 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
         if (nameParameters.equals(name) || (nameParameters + ".err").equals(name))
             return true;
 
-        if (_clusterSupport.isStatusViewableFile(null, name, basename))
-            return true;
-
         return super.isStatusViewableFile(container, name, basename);
-    }
-
-    public List<StatusAction> addStatusActions(Container container)
-    {
-        List<StatusAction> actions = super.addStatusActions(container);
-        return _clusterSupport.addStatusActions(container, actions);
     }
 
     public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf)
@@ -99,7 +79,7 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
             tandemErr.renameTo(tandemXml);
         }
 
-        return _clusterSupport.handleStatusAction(ctx, name, sf);
+        return null;
     }
 
     public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
@@ -113,22 +93,12 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
             }
 
             addAction(PipelineController.SearchXTandemAction.class, "X!Tandem Peptide Search",
-                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter(pr.isPerlPipeline())));
+                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
         }
     }
 
     public HttpView getSetupWebPart(Container container)
     {
-        // No extra setup for cluster.
-        try
-        {
-            if (PipelineService.get().usePerlPipeline(container))
-                return null;
-        }
-        catch (SQLException e)
-        {
-            return null;
-        }
         return new SetupWebPart();
     }
 

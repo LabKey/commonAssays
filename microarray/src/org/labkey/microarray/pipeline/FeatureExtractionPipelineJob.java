@@ -52,7 +52,7 @@ public class FeatureExtractionPipelineJob extends PipelineJob
         _protocol = protocol;
         _extractionEngine = extractionEngine;
         _dirImages = new File(uriData);
-        setLogFile(ArrayPipelineManager.getExtractionLog(_dirImages, null), false);
+        setLogFile(ArrayPipelineManager.getExtractionLog(_dirImages, null));
         header("Feature extraction for folder " + _dirImages.getAbsolutePath());
     }
 

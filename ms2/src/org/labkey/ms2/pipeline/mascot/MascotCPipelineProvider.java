@@ -15,23 +15,26 @@
  */
 package org.labkey.ms2.pipeline.mascot;
 
-import org.labkey.api.pipeline.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.security.ACL;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
-import org.labkey.api.data.Container;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.util.*;
-import java.sql.SQLException;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 /**
  * MascotCPipelineProvider class
@@ -44,33 +47,14 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     public static String name = "Mascot";
 
-    public PipelinePerlClusterSupport _clusterSupport;
-
     public MascotCPipelineProvider()
     {
         super(name);
-
-        _clusterSupport = new PipelinePerlClusterSupport();
-    }
-
-    public void preDeleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
-    {
-        super.preDeleteStatusFile(sf);
-        _clusterSupport.preDeleteStatusFile(sf);
-    }
-
-    public void preCompleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
-    {
-        super.preCompleteStatusFile(sf);
-        _clusterSupport.preCompleteStatusFile(sf);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)
     {
         if ("mascot.xml".equals(name))
-            return true;
-
-        if (_clusterSupport.isStatusViewableFile(null, name, basename))
             return true;
 
         return super.isStatusViewableFile(container, name, basename);
@@ -90,39 +74,15 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
             }
 
             addAction(PipelineController.SearchMascotAction.class, "Mascot Peptide Search",
-                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter(pr.isPerlPipeline())));
+                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
         }
-    }
-
-    public List<StatusAction> addStatusActions(Container container)
-    {
-        List<StatusAction> actions = super.addStatusActions(container);
-        _clusterSupport.addStatusActions(container, actions);
-        return actions;
-    }
-
-    public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf) throws HandlerException
-    {
-        ActionURL url = super.handleStatusAction(ctx, name, sf);
-        if (url != null)
-            return url;
-
-        return _clusterSupport.handleStatusAction(ctx, name, sf); 
     }
 
     public HttpView getSetupWebPart(Container container)
     {
         if (!AppProps.getInstance().hasMascotServer())
             return null;
-        try
-        {
-            if (PipelineService.get().usePerlPipeline(container))
-                return null;
-        }
-        catch (SQLException e)
-        {
-            return null;
-        }
+
         return new SetupWebPart();
     }
 

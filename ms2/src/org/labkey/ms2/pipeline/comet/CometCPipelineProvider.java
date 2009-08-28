@@ -15,19 +15,15 @@
  */
 package org.labkey.ms2.pipeline.comet;
 
-import org.labkey.api.pipeline.PipelinePerlClusterSupport;
-import org.labkey.api.pipeline.PipelineProtocol;
-import org.labkey.api.pipeline.PipelineStatusFile;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.Container;
+import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
-import java.util.Map;
-import java.util.List;
-import java.net.URI;
 import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 /**
  * CometCPipelineProvider class
@@ -40,25 +36,9 @@ public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     public static String name = "Comet";
 
-    public PipelinePerlClusterSupport _clusterSupport;
-
     public CometCPipelineProvider()
     {
         super(name);
-
-        _clusterSupport = new PipelinePerlClusterSupport();
-    }
-
-    public void preDeleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
-    {
-        super.preDeleteStatusFile(sf);
-        _clusterSupport.preDeleteStatusFile(sf);
-    }
-
-    public void preCompleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
-    {
-        super.preCompleteStatusFile(sf);
-        _clusterSupport.preCompleteStatusFile(sf);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)
@@ -66,26 +46,7 @@ public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
         if ("comet.def".equals(name))
             return true;
 
-        if (_clusterSupport.isStatusViewableFile(null, name, basename))
-            return true;
-
         return super.isStatusViewableFile(container, name, basename);
-    }
-
-    public List<StatusAction> addStatusActions(Container container)
-    {
-        List<StatusAction> actions = super.addStatusActions(container);
-        _clusterSupport.addStatusActions(container, actions);
-        return actions;
-    }
-
-    public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf) throws HandlerException
-    {
-        ActionURL url = super.handleStatusAction(ctx, name, sf);
-        if (url != null)
-            return url;
-
-        return _clusterSupport.handleStatusAction(ctx, name, sf); 
     }
 
     public boolean supportsDirectories()

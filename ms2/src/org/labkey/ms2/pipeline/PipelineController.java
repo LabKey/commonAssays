@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.action.*;
 import org.labkey.api.data.Container;
@@ -28,7 +27,6 @@ import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
@@ -49,7 +47,10 @@ import org.springframework.web.servlet.mvc.Controller;
 import java.io.*;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <code>PipelineController</code>
@@ -266,7 +267,6 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(ACL.PERM_INSERT)
     public class SearchAction extends FormViewAction<MS2SearchForm>
     {
-        private boolean _perlPipeline;
         private File _dirRoot;
         private File _dirSeqRoot;
         private File _dirData;
@@ -295,8 +295,6 @@ public class PipelineController extends SpringActionController
             PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
             if (pr == null || !URIUtil.exists(pr.getUri()))
                 return HttpView.throwNotFound();
-
-            _perlPipeline = pr.isPerlPipeline();
 
             URI uriRoot = pr.getUri();
             _dirRoot = new File(uriRoot);
@@ -456,30 +454,7 @@ public class PipelineController extends SpringActionController
                 }
 
                 Container c = getContainer();
-                File[] mzXMLFiles;
-
-                if (_perlPipeline && AppProps.getInstance().isPerlPipelineEnabled())
-                {
-                    List<File> mzXMLFileList = new ArrayList<File>();
-
-                    File[] annotatedFiles = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.ANNOTATED, c);
-                    mzXMLFileList.addAll(Arrays.asList(annotatedFiles));
-                    File[] unprocessedFile = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.UNKNOWN, c);
-                    mzXMLFileList.addAll(Arrays.asList(unprocessedFile));
-                    
-                    mzXMLFiles = mzXMLFileList.toArray(new File[mzXMLFileList.size()]);
-
-                    if (mzXMLFiles.length == 0)
-                    {
-                        errors.reject(ERROR_MSG, "Analysis for this protocol is already complete.");
-                        return false;
-                    }
-                }
-                else
-                {
-                    mzXMLFiles = _dirData.listFiles(MS2PipelineManager.getAnalyzeFilter(false));
-                }
-                    
+                File[] mzXMLFiles = _dirData.listFiles(MS2PipelineManager.getAnalyzeFilter());
 
                 _protocol.getFactory().ensureDefaultParameters(_dirRoot);
 
@@ -492,39 +467,9 @@ public class PipelineController extends SpringActionController
                 }
 
                 AbstractMS2SearchPipelineJob job =
-                        _protocol.createPipelineJob(getViewBackgroundInfo(), mzXMLFiles, fileParameters, false);
+                        _protocol.createPipelineJob(getViewBackgroundInfo(), mzXMLFiles, fileParameters);
 
-                // This boolean tells us whether the job is going to be processed by a
-                // Perl-driven cluster.
-                boolean hasStatusFile = (job.getStatusFile() != job.getLogFile());
-
-                // If not a Perl-driven cluster, just let the PipelineJobQueue deal with it.
-                if (!hasStatusFile)
-                {
-                    // If the Perl pipeline is enabled, but is not to be run on this job,
-                    // write a blank 'pipe.log' file to keep the Perl pipeline from ever
-                    // processing this directory.
-                    if (AppProps.getInstance().isPerlPipelineEnabled())
-                    {
-                        FileUtils.writeLines(new File(job.getAnalysisDirectory(), "pipe.log"),
-                                Arrays.asList("Prevent Perl pipeline processing."));
-                    }
-                    PipelineService.get().queueJob(job);
-                }
-                else
-                {
-                    // For backward compatibility, we need to create placeholder jobs for
-                    // a Perl-driven cluster.  These are not queued, but simply set
-                    // status to show to the user.
-                    
-                    job.setStatus(PipelineJob.WAITING_STATUS);
-
-                    if (mzXMLFiles.length > 1)
-                    {
-                        for (PipelineJob jobSingle : job.createSplitJobs())
-                            jobSingle.setStatus(PipelineJob.WAITING_STATUS);
-                    }
-                }
+                PipelineService.get().queueJob(job);
             }
             catch (IllegalArgumentException e)
             {

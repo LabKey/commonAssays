@@ -82,12 +82,12 @@ public class MascotSearchProtocol extends AbstractMS2SearchProtocol<MascotPipeli
     }
 
     public MascotPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                                          File[] filesInput,
-                                                          File fileParameters,
-                                                          boolean fromCluster)
+                                               File[] filesInput,
+                                               File fileParameters
+    )
             throws SQLException, IOException
     {
         return new MascotPipelineJob(this, info, getName(), getDirSeqRoot(),
-                filesInput, fileParameters, fromCluster);
+                filesInput, fileParameters);
     }
 }

@@ -41,8 +41,6 @@
                 <ref bean="readwMzxmlConverter"/>
                 <ref bean="expGeneratorSearch"/>
                 <ref bean="expGeneratorSearchJoin"/>
-                <ref bean="expTemplateSearch"/>
-                <ref bean="expTemplateSearchJoin"/>
                 <ref bean="expImportSearch"/>
                 <ref bean="expImportSearchJoin"/>
                 <ref bean="msPrefixCommand"/>
@@ -106,30 +104,6 @@
                         </list>
                     </property>
                 </bean>
-
-                <!-- MS2 pipeline for finishing a search on the Perl Cluster Pipeline -->
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob"/>
-                    <constructor-arg value="finishPerlCluster"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <ref bean="expTemplateSearch"/>
-                            <ref bean="expImportSearch"/>
-                        </list>
-                    </property>
-                </bean>
-
-                <!-- MS2 pipeline for finishing a fractions search on the Perl Cluster Pipeline -->
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob"/>
-                    <constructor-arg value="finishPerlClusterJoined"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <ref bean="expTemplateSearchJoin"/>
-                            <ref bean="expImportSearchJoin"/>
-                        </list>
-                    </property>
-                </bean>
             </list>
         </property>
     </bean>
@@ -155,19 +129,6 @@
         <constructor-arg value="expGeneratorSearchJoin"/>
         <property name="outputExt" value=".search.xar.xml"/>
         <property name="join" value="true" />
-        <property name="dependencyId" ref="tppTaskJoin"/>
-    </bean>
-
-    <bean id="expTemplateSearch" class="org.labkey.api.exp.pipeline.XarTemplateSubstitutionFactorySettings">
-        <constructor-arg value="expTemplateSearch"/>
-        <property name="outputExt" value=".search.xar.xml"/>
-        <property name="dependencyId" ref="tppTask"/>
-    </bean>
-
-    <bean id="expTemplateSearchJoin" class="org.labkey.api.exp.pipeline.XarTemplateSubstitutionFactorySettings">
-        <constructor-arg value="expTemplateSearchJoin"/>
-        <property name="outputExt" value=".search.xar.xml"/>
-        <property name="join" value="true"/>
         <property name="dependencyId" ref="tppTaskJoin"/>
     </bean>
 
