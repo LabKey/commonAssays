@@ -75,7 +75,7 @@ public class NabModule extends DefaultModule
             public ActionURL getDetailsURL(Plate plate)
             {
                 // for 2.0, we'll accept all plate types: only NAB uses the plate service.
-                ActionURL url = new ActionURL("Nab", "display", plate.getContainer());
+                ActionURL url = new ActionURL(NabController.DisplayAction.class, plate.getContainer());
                 url.addParameter("rowId", "" + plate.getRowId());
                 return url;
             }
