@@ -36,6 +36,7 @@ import java.util.Set;
 public class MicroarraySchema extends UserSchema
 {
     public static final String SCHEMA_NAME = "Microarray";
+    public static final String SCHMEA_DESCR = "Contains data about Microarray assay runs";
     public static final String TABLE_RUNS = "MicroarrayRuns";
 
     private ExpSchema _expSchema;
@@ -44,7 +45,7 @@ public class MicroarraySchema extends UserSchema
 
     public MicroarraySchema(User user, Container container)
     {
-        super(SCHEMA_NAME, user, container, getSchema());
+        super(SCHEMA_NAME, SCHMEA_DESCR, user, container, getSchema());
         _expSchema = new ExpSchema(user, container);
     }
 

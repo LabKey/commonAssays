@@ -45,6 +45,7 @@ import java.util.*;
 public class MS2Schema extends UserSchema
 {
     public static final String SCHEMA_NAME = "ms2";
+    public static final String SCHEMA_DESCR = "Contains data about MS2 runs, including detected peptides and proteins";
 
     private static final String PROTOCOL_PATTERN_PREFIX = "urn:lsid:%:Protocol.%:";
 
@@ -86,7 +87,7 @@ public class MS2Schema extends UserSchema
 
     public MS2Schema(User user, Container container)
     {
-        super(SCHEMA_NAME, user, container, ExperimentService.get().getSchema());
+        super(SCHEMA_NAME, SCHEMA_DESCR, user, container, ExperimentService.get().getSchema());
         _expSchema = new ExpSchema(user, container);
     }
 

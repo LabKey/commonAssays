@@ -35,6 +35,7 @@ import java.util.*;
 public class MS1Schema extends UserSchema
 {
     public static final String SCHEMA_NAME = "ms1";
+    public static final String SCHEMA_DESCR = "Contains data about MS1 runs, including detected features, scans, and peaks";
     public static final String TABLE_FEATURE_RUNS = "MSInspectFeatureRuns";
     public static final String TABLE_FEATURES = "Features";
     public static final String TABLE_FEATURES_SEARCH = "FeaturesSearch";
@@ -64,7 +65,7 @@ public class MS1Schema extends UserSchema
 
     public MS1Schema(User user, Container container, boolean restrictContainer)
     {
-        super(SCHEMA_NAME, user, container, MS1Manager.get().getSchema());
+        super(SCHEMA_NAME, SCHEMA_DESCR, user, container, MS1Manager.get().getSchema());
         _restrictContainer = restrictContainer;
 
         if (_restrictContainer)

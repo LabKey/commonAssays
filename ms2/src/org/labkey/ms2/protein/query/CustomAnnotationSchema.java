@@ -36,6 +36,7 @@ public class CustomAnnotationSchema extends UserSchema
 {
     public static final String SCHEMA_WITHOUT_SEQUENCES_NAME = "CustomProteinAnnotations";
     public static final String SCHEMA_WITH_SEQUENCES_NAME = "CustomProteinAnnotationsWithSequences";
+    public static final String SCHEMA_DESCR = "Contains data about custom protein annotations.";
     private final boolean _includeSequences;
 
     public static void register()
@@ -59,7 +60,7 @@ public class CustomAnnotationSchema extends UserSchema
 
     public CustomAnnotationSchema(User user, Container container, boolean includeSequences)
     {
-        super(includeSequences ? SCHEMA_WITH_SEQUENCES_NAME : SCHEMA_WITHOUT_SEQUENCES_NAME, user, container, ProteinManager.getSchema());
+        super(includeSequences ? SCHEMA_WITH_SEQUENCES_NAME : SCHEMA_WITHOUT_SEQUENCES_NAME, SCHEMA_DESCR, user, container, ProteinManager.getSchema());
         _includeSequences = includeSequences;
         _annotationSets = ProteinManager.getCustomAnnotationSets(container, true);
     }
