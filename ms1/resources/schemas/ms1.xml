@@ -27,6 +27,7 @@
       </ns:columns>
     </ns:table>
     <ns:table tableName="Features" tableDbType="TABLE">
+      <ns:description>Contains all features found in all MS1 experiment runs loaded into this folder.</ns:description>
       <ns:columns>
         <ns:column columnName="FeatureId">
             <ns:isHidden>true</ns:isHidden>
@@ -87,6 +88,7 @@
       </ns:columns>
     </ns:table>
     <ns:table tableName="Files" tableDbType="TABLE">
+      <ns:description>Contains a list of MS1 data files that have been imported into this folder.</ns:description>
       <ns:columns>
         <ns:column columnName="FileId">
             <ns:isHidden>true</ns:isHidden>
@@ -106,6 +108,7 @@
       </ns:columns>
     </ns:table>
     <ns:table tableName="PeakFamilies" tableDbType="TABLE">
+      <ns:description>Contains one row per peak family identified in each peaks xml file imported into this folder.</ns:description>
       <ns:columns>
         <ns:column columnName="PeakFamilyId">
             <ns:isHidden>true</ns:isHidden>
@@ -124,6 +127,7 @@
       </ns:columns>
     </ns:table>
     <ns:table tableName="Peaks" tableDbType="TABLE">
+      <ns:description>Contains a row for each peak listed in every peaks xml file imported into this folder.</ns:description>
       <ns:columns>
         <ns:column columnName="PeakId">
             <ns:isHidden>true</ns:isHidden>
@@ -156,6 +160,7 @@
       </ns:columns>
     </ns:table>
     <ns:table tableName="PeaksToFamilies" tableDbType="TABLE">
+      <ns:description>A many-to-many relation table between peaks and peak families.</ns:description>
       <ns:columns>
         <ns:column columnName="PeakFamilyId">
             <ns:columnTitle>Peak Family</ns:columnTitle>
@@ -168,6 +173,7 @@
       </ns:columns>
     </ns:table>
     <ns:table tableName="Scans" tableDbType="TABLE">
+      <ns:description>Contains all scans found in all peaks xml files imported into this folder.</ns:description>
       <ns:columns>
         <ns:column columnName="ScanId">
             <ns:isHidden>true</ns:isHidden>
@@ -186,6 +192,8 @@
       </ns:columns>
     </ns:table>
     <ns:table tableName="Software" tableDbType="TABLE">
+      <ns:description>Contains information about the software used to produce a given file.
+          There will be one row in this table for each software package used to produce the file identified by the FileId column.</ns:description>
       <ns:columns>
         <ns:column columnName="SoftwareId"/>
         <ns:column columnName="FileId"/>
@@ -195,6 +203,8 @@
       </ns:columns>
     </ns:table>
     <ns:table tableName="SoftwareParams" tableDbType="TABLE">
+      <ns:description>Contain information about the parameters passed to a particular software package used to create a particular file.
+      The SoftwareId column identifies the software package used to produce the file.</ns:description>
       <ns:columns>
         <ns:column columnName="SoftwareId"/>
         <ns:column columnName="Name"/>

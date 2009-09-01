@@ -64,6 +64,7 @@ public class FeaturesTableInfo extends VirtualTable
     {
         super(schema.getDbSchema());
         setName("Features");
+        setDescription("Contains all features from all MS1 experiment runs loaded into this folder.");
 
         _schema = schema;
         _sourceTable = MS1Manager.get().getTable(MS1Service.Tables.Features.name());
