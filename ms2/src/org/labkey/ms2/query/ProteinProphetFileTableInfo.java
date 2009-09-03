@@ -21,6 +21,7 @@ import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Controller;
 
 /**
  * User: jeckels
@@ -36,7 +37,7 @@ public class ProteinProphetFileTableInfo extends FilteredTable
         _schema = schema;
         wrapAllColumns(true);
 
-        ActionURL url = new ActionURL("MS2", "showRun.view", schema.getContainer());
+        ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, schema.getContainer());
         getColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
             public TableInfo getLookupTableInfo()

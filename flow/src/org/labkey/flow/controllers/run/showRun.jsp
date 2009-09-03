@@ -31,6 +31,7 @@
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.view.FlowQueryView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
+<%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -83,7 +84,7 @@
     { %>
     <labkey:link text="Show Compensation" href="<%=comp.urlFor(CompensationController.Action.showCompensation)%>"/><br>
     <% } %>
-    <%  ActionURL urlShowRunGraph = new ActionURL("Experiment", "showRunGraph", context.getContainer());
+    <%  ActionURL urlShowRunGraph = urlProvider(ExperimentUrls.class).getShowRunGraph(context.getContainer());
         urlShowRunGraph.addParameter("rowId", Integer.toString(run.getRunId()));
     %>
     <labkey:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br>

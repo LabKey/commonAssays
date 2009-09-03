@@ -23,6 +23,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomAnnotationType;
 import org.labkey.ms2.protein.ProteinManager;
@@ -66,7 +67,7 @@ public class SequencesTableInfo extends FilteredTable
         addColumn(wrapColumn("Source", getRealTable().getColumn("SourceId")));
         getColumn("SourceId").setHidden(true);
 
-        ActionURL url = new ActionURL("MS2", "showProtein.view", _container);
+        ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, _container);
         ColumnInfo bnColumn = getColumn("BestName");
         bnColumn.setURL(url + "seqId=${SeqId}");
         bnColumn.setDisplayColumnFactory(new DisplayColumnFactory() {

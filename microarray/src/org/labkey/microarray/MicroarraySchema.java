@@ -90,7 +90,7 @@ public class MicroarraySchema extends UserSchema
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                ActionURL url = new ActionURL("experiment", "showFile.view", getContainer());
+                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
                 return new IconDisplayColumn(colInfo, 18, 18, url, "rowId", AppProps.getInstance().getContextPath() + "/microarray/images/microarrayThumbnailIcon.png");
             }
         });
@@ -104,7 +104,7 @@ public class MicroarraySchema extends UserSchema
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                ActionURL url = new ActionURL("experiment", "showFile.view", getContainer());
+                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
                 url.addParameter("inline", "true");
                 return new IconDisplayColumn(colInfo, 18, 18, url, "rowId", AppProps.getInstance().getContextPath() + "/microarray/images/qcReportIcon.png");
             }

@@ -26,6 +26,7 @@
 <%@ page import="org.labkey.nab.SampleInfo" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.study.assay.PlateUrls" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.UploadAssayForm> me = (JspView<NabController.UploadAssayForm>) HttpView.currentView();
@@ -42,7 +43,7 @@
             specimenWellGroups.add(groupTemplate);
     }
 
-    ActionURL choosePlateURL = new ActionURL("Plate", "plateTemplateList", me.getViewContext().getContainer());
+    ActionURL choosePlateURL = urlProvider(PlateUrls.class).getPlateTemplateListURL(me.getViewContext().getContainer());
 
     String errorParameter = request.getParameter("error");
     if (errorParameter != null)
@@ -87,7 +88,7 @@
         document.getElementById("fileId").disabled = disabled;
     }
 </script>
-<form method="post" onSubmit="return copyImpliedValues()" action="upload.view" enctype="multipart/form-data">
+<form method="post" onSubmit="return copyImpliedValues();" action="upload.view" enctype="multipart/form-data">
 
 <table>
     <tr class="labkey-wp-header">
@@ -98,7 +99,7 @@
             <table style="<%= dataTDStyle %>">
                 <tr>
                     <td align=top>
-                        Plate template:<br><select name="plateTemplate" onChange="document.location='begin.view?plateTemplate=' + escape(this.options[this.selectedIndex].value)">
+                        Plate template:<br><select name="plateTemplate" onChange="document.location='begin.view?plateTemplate=' + escape(this.options[this.selectedIndex].value);">
                         <%
                             for (PlateTemplate current : templates)
                             {
