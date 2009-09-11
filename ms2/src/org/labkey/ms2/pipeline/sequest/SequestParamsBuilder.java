@@ -248,7 +248,6 @@ public abstract class SequestParamsBuilder
 
     protected String initEnzymeInfo()
     {
-        String supportedEnzyme = "";
         String parserError = "";
         String inputXmlEnzyme = sequestInputParams.get("protein, cleavage site");
         if (inputXmlEnzyme == null) return parserError;
@@ -272,13 +271,13 @@ public abstract class SequestParamsBuilder
         }
         try
         {
-            supportedEnzyme =  getSupportedEnzyme(enzyme);
+            String supportedEnzyme =  getSupportedEnzyme(enzyme);
+            if(supportedEnzyme.equals("")) return inputXmlEnzyme + " is not a pipeline supported enzyme.";
         }
         catch(SequestParamsException e)
         {
             return e.getMessage();
         }
-        if(supportedEnzyme.equals("")) return inputXmlEnzyme + " is not a pipeline supported enzyme.";
         return "";
     }
 
@@ -286,19 +285,17 @@ public abstract class SequestParamsBuilder
 
     protected boolean sameEnzyme(String enzyme1, String enzyme2) throws SequestParamsException
     {
-        Set<Character> e1Block = new TreeSet();
-        String[] e1Blocks = new String[2];
+        Set<Character> e1Block = new TreeSet<Character>();
 
-        Set<Character> e2Block = new TreeSet();
-        String[] e2Blocks = new String[2];
+        Set<Character> e2Block = new TreeSet<Character>();
 
-        char bracket = 0;
         try
         {
-            e1Blocks = enzyme1.split("\\|");
-            e2Blocks = enzyme2.split("\\|");
+            String[] e1Blocks = enzyme1.split("\\|");
+            String[] e2Blocks = enzyme2.split("\\|");
 
 
+            char bracket;
             for(int i = 0; i < 2; i++ )
             {
                 if(e1Blocks[i].charAt(0) == '[') bracket = ']';
@@ -327,17 +324,15 @@ public abstract class SequestParamsBuilder
 
     protected String combineEnzymes(String[] enzymes) throws SequestParamsException
     {
-        CharSequence block = "";
         Set<Character> block1 = new TreeSet<Character>();
         Set<Character> block2 = new TreeSet<Character>();
-        String[] blocks = new String[2];
         char bracketOpen1 = 0;
         char bracketClose1 = 0;
         char bracketOpen2 = 0;
         char bracketClose2 = 0;
         for(String enzyme:enzymes)
         {
-            blocks = enzyme.split("\\|");
+            String[] blocks = enzyme.split("\\|");
             if(blocks.length != 2) throw new SequestParamsException("Invalid enzyme definition:" + enzyme);
             if(bracketOpen1 == 0)
             {
@@ -437,13 +432,15 @@ public abstract class SequestParamsBuilder
 
     String initDynamicMods()
     {
-        HashMap<Character,String> defaultMods = new HashMap<Character, String>();
-        defaultMods.put('S', "0.000000");
-        defaultMods.put('C', "0.000000");
-        defaultMods.put('M', "0.000000");
-        defaultMods.put('X', "0.000000");
-        defaultMods.put('T', "0.000000");
-        defaultMods.put('Y', "0.000000");
+        ArrayList<Character> defaultMods = new ArrayList<Character>();
+        ArrayList<ResidueMod> workList = new ArrayList<ResidueMod>();
+        // default weight "0.000000"
+        defaultMods.add('S');
+        defaultMods.add('C');
+        defaultMods.add('M');
+        defaultMods.add('X');
+        defaultMods.add('T');
+        defaultMods.add('Y');
 
         String parserError = "";
         String mods = sequestInputParams.get("residue, potential modification mass");
@@ -465,38 +462,31 @@ public abstract class SequestParamsBuilder
             }
             else
             {
-                defaultMods.put(res, masses.get(i));
+                defaultMods.remove(new Character(res));
+                workList.add(new ResidueMod(res, masses.get(i)));
+
             }
         }
-
-        StringBuilder sb1 = new StringBuilder();
-        StringBuilder sb2 = new StringBuilder();
-        Set<Character> modKeys = defaultMods.keySet();
-        TreeSet<Character> sortedMods = new TreeSet<Character>(modKeys);
-        float weight = 0;
-        for (Character aa :sortedMods)
+        if(workList.size() > 6) return "Sequest will only accept a max of 6 variable modifications.";
+        StringBuilder sb = new StringBuilder();
+        for (ResidueMod mod :workList)
         {
-
             //parse mods function tested for NumberFormatxception
-            weight = Float.parseFloat(defaultMods.get(aa));
-            if(weight != 0)
-            {
-                sb1.append(defaultMods.get(aa));
-                sb1.append(" ");
-                sb1.append(aa);
-                sb1.append(" ");
-            }
-            else
-            {
-                sb2.append(defaultMods.get(aa));
-                sb2.append(" ");
-                sb2.append(aa);
-                sb2.append(" ");
-            }
+            float weight = Float.parseFloat(mod.getWeight());
+            sb.append(weight);
+            sb.append(" ");
+            sb.append(mod.getRes());
+            sb.append(" ");
         }
-        sb1.append(sb2);
+        int leftover = 6 -  workList.size();
+        for(int i = 0; i < leftover; i++)
+        {
+            sb.append("0.000000 ");
+            sb.append(defaultMods.get(i));
+            sb.append(" ");
+        }
         Param modProp = _params.getParam("diff_search_options");
-        modProp.setValue(sb1.toString().trim());
+        modProp.setValue(sb.toString().trim());
         return parserError;
     }
 
@@ -909,6 +899,45 @@ public abstract class SequestParamsBuilder
             clean.append(c);
         }
         return clean.toString();
+    }
+
+    private class ResidueMod
+    {
+
+        private Character res;
+        private String weight;
+
+        private ResidueMod(Character res, String weight)
+        {
+            this.res = res;
+            this.weight = weight;
+        }
+
+        public Character getRes()
+        {
+            return res;
+        }
+
+        public void setRes(Character res)
+        {
+            this.res = res;
+        }
+
+        public String getWeight()
+        {
+            return weight;
+        }
+
+        public void setWeight(String weight)
+        {
+            this.weight = weight;
+        }
+
+        public boolean equals(ResidueMod o)
+        {
+            if(this.res.equals(o)) return this.weight.equals(o);
+            return false;
+        }
     }
     //JUnit TestCase
     public static class TestCase extends junit.framework.TestCase
@@ -1505,7 +1534,6 @@ public abstract class SequestParamsBuilder
         public void testInitEnzymeInfoNormal()
         {
             //Testing no enzyme
-            String expected1 = "0";
             String expected2 = "nonspecific 0 0 - -";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1519,7 +1547,6 @@ public abstract class SequestParamsBuilder
             String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
 
-            expected1 = "1";
             expected2 = "trypsin_k 1 1 K P";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1533,7 +1560,6 @@ public abstract class SequestParamsBuilder
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
 
-            expected1 = "1";
             expected2 = "pepsina 1 1 FL -";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1603,7 +1629,6 @@ public abstract class SequestParamsBuilder
 
         public void testInitEnzymeInfoDefault()
         {
-            String expected1 = "1";
 //            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
             String expected2 = "trypsin 1 1 KR P";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1645,7 +1670,6 @@ public abstract class SequestParamsBuilder
 
         public void testInitEnzymeInfoGarbage()
         {
-            String expected1 = "1";
             String expected2 = "trypsin 1 1 KR P";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1728,7 +1752,7 @@ public abstract class SequestParamsBuilder
 
         public void testInitDynamicModsNormal()
         {
-            String expected1 = "16.0 M 0.000000 C 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
+            String expected1 = "16.0 M 0.000000 S 0.000000 C 0.000000 X 0.000000 T 0.000000 Y";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">+16@M</note>" +
@@ -1740,8 +1764,7 @@ public abstract class SequestParamsBuilder
             String actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
 
-
-            expected1 = "16.0 M 0.000000 C 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
+            expected1 = "16.0 M 0.000000 S 0.000000 C 0.000000 X 0.000000 T 0.000000 Y";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">16@M</note>" +
@@ -1753,7 +1776,7 @@ public abstract class SequestParamsBuilder
             actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
 
-            expected1 = "-16.0 M 0.000000 C 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
+            expected1 = "-16.0 M 0.000000 S 0.000000 C 0.000000 X 0.000000 T 0.000000 Y";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">- 16.0000 @ M</note>" +
@@ -1766,7 +1789,7 @@ public abstract class SequestParamsBuilder
             assertEquals("diff_search_options", expected1, actual);
 
 
-            expected1 = "9.0 C 16.0 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
+            expected1 = "16.0 M 9.0 C 0.000000 S 0.000000 X 0.000000 T 0.000000 Y";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\"> 16@M,9@C </note>" +

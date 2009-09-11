@@ -265,7 +265,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             }
             else
             {
-                fdbu._addSeqStmt.setString(9, curSeq.getGenus());
+                fdbu._addSeqStmt.setString(9, StringUtils.abbreviate(curSeq.getGenus(), 100));
             }
             if (curSeq.getSpecies() == null)
             {
@@ -273,7 +273,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             }
             else
             {
-                fdbu._addSeqStmt.setString(10, curSeq.getSpecies());
+                fdbu._addSeqStmt.setString(10, StringUtils.abbreviate(curSeq.getSpecies(), 100));
             }
             if (curSeq.getFullOrg() == null)
             {
@@ -281,7 +281,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             }
             else
             {
-                fdbu._addSeqStmt.setString(11, curSeq.getFullOrg());
+                fdbu._addSeqStmt.setString(11, StringUtils.abbreviate(curSeq.getFullOrg(), 200));
             }
             // The timestamp, at index 12, is set once for the whole batch
             fdbu._addSeqStmt.addBatch();
@@ -396,7 +396,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             // not their name field.
             // todo:  this is almost the same code as in Protein.getIdentifier map and should be consolidated
             // note that newer IPI files don't have this issue
-            if (rawIdentString.startsWith("IPI") && rawIdentString.indexOf("|") == -1 && (desc.indexOf("|") != -1))
+            if (rawIdentString != null && rawIdentString.startsWith("IPI") && rawIdentString.indexOf("|") == -1 && desc != null && (desc.indexOf("|") != -1))
                  rawIdentString = desc;
 
             Map<String, Set<String>> identifiers = Protein.identParse(rawIdentString, wholeHeader);

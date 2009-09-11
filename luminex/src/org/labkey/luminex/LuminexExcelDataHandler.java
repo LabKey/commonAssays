@@ -29,6 +29,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -147,8 +148,6 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                 String excelRunDomainURI = AbstractAssayProvider.getDomainURIForPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
                 Domain analyteDomain = PropertyService.get().getDomain(container, analyteDomainURI);
                 Domain excelRunDomain = PropertyService.get().getDomain(container, excelRunDomainURI);
-                PropertyDescriptor[] analyteColumns = OntologyManager.getPropertiesForType(analyteDomain.getTypeURI(), container);
-                PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), container);
 
                 for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
                 {
@@ -163,7 +162,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
 
                     Map<String, Object> analyteProps = new HashMap<String, Object>();
 
-                    int row = handleHeaderOrFooterRow(sheet, 0, analyte, analyteColumns, analyteProps, excelRunColumns, _excelRunProps);
+                    int row = handleHeaderOrFooterRow(sheet, 0, analyte, analyteDomain, analyteProps, excelRunDomain, _excelRunProps);
 
                     // Skip over the blank line
                     row++;
@@ -193,7 +192,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                         // Skip over the blank line
                         row++;
                     }
-                    row = handleHeaderOrFooterRow(sheet, row, analyte, analyteColumns, analyteProps, excelRunColumns, _excelRunProps);
+                    row = handleHeaderOrFooterRow(sheet, row, analyte, analyteDomain, analyteProps, excelRunDomain, _excelRunProps);
                     //analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + rowId + "." + analyte.getName()).toString());
                 }
                 _fileParsed = true;
@@ -227,15 +226,15 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
             return _excelRunProps;
         }
 
-        private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, PropertyDescriptor[] analyteColumns, Map<String, Object> analyteProps, PropertyDescriptor[] excelRunColumns, Map<String, Object> excelRunProps)
+        private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, Domain analyteDomain, Map<String, Object> analyteProps, Domain excelRunDomain, Map<String, Object> excelRunProps)
         {
             if (row >= analyteSheet.getRows())
             {
                 return row;
             }
 
-            Map<String, PropertyDescriptor> analyteMap = OntologyManager.createImportPropertyMap(analyteColumns);
-            Map<String, PropertyDescriptor> excelMap = OntologyManager.createImportPropertyMap(excelRunColumns);
+            Map<String, DomainProperty> analyteMap = analyteDomain.createImportMap(true);
+            Map<String, DomainProperty> excelMap = excelRunDomain.createImportMap(true);
 
             do
             {
@@ -309,9 +308,9 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
             return row;
         }
 
-        private void storePropertyValue(String propName, String value, Map<String,PropertyDescriptor> columns, Map<String, Object> props)
+        private void storePropertyValue(String propName, String value, Map<String, DomainProperty> columns, Map<String, Object> props)
         {
-            PropertyDescriptor pd = columns.get(propName);
+            DomainProperty pd = columns.get(propName);
             if (pd != null)
             {
                 props.put(pd.getPropertyURI(), value);

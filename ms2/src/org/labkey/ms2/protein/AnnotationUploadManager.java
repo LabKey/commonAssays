@@ -18,14 +18,14 @@ package org.labkey.ms2.protein;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Table;
-import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.Job;
+import org.labkey.api.util.JobRunner;
 import org.xml.sax.SAXException;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.sql.SQLException;
 
 public class AnnotationUploadManager
 {
@@ -143,6 +143,15 @@ public class AnnotationUploadManager
                 if (e.getException() != null)
                 {
                     _log.error("Failed to parse, root cause" + _loader.getParseFName(), e.getException());
+                }
+            }
+            catch (SQLException e)
+            {
+                _log.error("Failed to parse file " + _loader.getParseFName(), e);
+                while (e.getNextException() != null)
+                {
+                    e = e.getNextException();
+                    _log.error("Nested SQLException", e);
                 }
             }
             catch (Exception e)
