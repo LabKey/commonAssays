@@ -255,7 +255,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
                     List<ExpData> outputs = run.getDataOutputs();
                     int dataId = 0;
-                    if (!form.getTransformResult().isEmpty())
+                    if (!form.getTransformResult().getTransformedData().isEmpty())
                     {
                         // data transform occured, need to find the transformed output that was persisted
                         for (ExpData data : outputs)
