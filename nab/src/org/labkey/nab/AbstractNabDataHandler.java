@@ -23,12 +23,12 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -51,8 +51,10 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
     public static final String FIT_ERROR_PROPERTY = "Fit Error";
     public static final String CURVE_IC_PREFIX = "Curve IC";
     public static final String POINT_IC_PREFIX = "Point IC";
+    public static final String AUC_PREFIX = "AUC";
     public static final String OORINDICATOR_SUFFIX = "OORIndicator";
     public static final String DATA_ROW_LSID_PROPERTY = "Data Row LSID";
+    public static final String AUC_PROPERTY_FORMAT = "0.000";
 
     public interface NabDataFileParser
     {
@@ -100,7 +102,7 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
         }
     }
 
-    protected ObjectProperty getObjectProperty(Container container, ExpProtocol protocol, String objectURI, String propertyName, Object value, Map<Integer, String> cutoffFormats)
+    protected static ObjectProperty getObjectProperty(Container container, ExpProtocol protocol, String objectURI, String propertyName, Object value, Map<Integer, String> cutoffFormats)
     {
         PropertyType type = PropertyType.STRING;
         String format = null;
@@ -110,12 +112,17 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
             type = PropertyType.DOUBLE;
             format = "0.0";
         }
+        else if (propertyName.startsWith(AUC_PREFIX))
+        {
+            type = PropertyType.DOUBLE;
+            format = AUC_PROPERTY_FORMAT;
+        }
         else if (propertyName.startsWith(CURVE_IC_PREFIX))
         {
             // parse out the cutoff number
             if (!propertyName.endsWith(OORINDICATOR_SUFFIX))
             {
-                String num = propertyName.substring(CURVE_IC_PREFIX.length());
+                String num = propertyName.substring(CURVE_IC_PREFIX.length(), propertyName.indexOf('_'));
                 format = cutoffFormats.get(Integer.valueOf(num));
                 type = PropertyType.DOUBLE;
             }
@@ -133,13 +140,13 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
         return getResultObjectProperty(container, protocol, objectURI, propertyName, value, type, format);
     }
 
-    protected ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
+    protected static ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
                                                    String propertyName, Object value, PropertyType type)
     {
         return getResultObjectProperty(container, protocol, objectURI, propertyName, value, type, null);
     }
 
-    protected ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
+    protected static ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
                                                    String propertyName, Object value, PropertyType type, String format)
     {
         Lsid propertyURI = new Lsid(NAB_PROPERTY_LSID_PREFIX, protocol.getName(), propertyName);

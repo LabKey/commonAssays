@@ -21,6 +21,8 @@ import org.labkey.api.study.WellData;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.labkey.api.study.DilutionCurve;
 
@@ -32,7 +34,7 @@ import org.labkey.api.study.DilutionCurve;
 public class DilutionSummary implements Serializable
 {
     private WellGroup _sampleGroup;
-    private DilutionCurve _dilutionCurve;
+    private Map<DilutionCurve.FitType, DilutionCurve> _dilutionCurve = new HashMap<DilutionCurve.FitType, DilutionCurve>() ;
     private Luc5Assay _assay;
     private String _lsid;
     private DilutionCurve.FitType _curveFitType;
@@ -78,13 +80,13 @@ public class DilutionSummary implements Serializable
         return _assay.getPercent(_sampleGroup, data);
     }
 
-    private DilutionCurve getDilutionCurve() throws DilutionCurve.FitFailedException
+    private DilutionCurve getDilutionCurve(DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
     {
-        if (_dilutionCurve == null)
+        if (!_dilutionCurve.containsKey(type))
         {
-            _dilutionCurve = _sampleGroup.getDilutionCurve(_assay, getMethod() == SampleInfo.Method.Dilution, _curveFitType);
+            _dilutionCurve.put(type, _sampleGroup.getDilutionCurve(_assay, getMethod() == SampleInfo.Method.Dilution, type));
         }
-        return _dilutionCurve;
+        return _dilutionCurve.get(type);
     }
 
     public double getPlusMinus(WellData data) throws DilutionCurve.FitFailedException
@@ -116,34 +118,34 @@ public class DilutionSummary implements Serializable
         return SampleInfo.Method.valueOf(name);
     }
 
-    public double getCutoffDilution(double cutoff) throws DilutionCurve.FitFailedException
+    public double getCutoffDilution(double cutoff, DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
     {
-        return getDilutionCurve().getCutoffDilution(cutoff);
+        return getDilutionCurve(type).getCutoffDilution(cutoff);
     }
 
-    public double getInterpolatedCutoffDilution(double cutoff) throws DilutionCurve.FitFailedException
+    public double getInterpolatedCutoffDilution(double cutoff, DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
     {
-        return getDilutionCurve().getInterpolatedCutoffDilution(cutoff);
+        return getDilutionCurve(type).getInterpolatedCutoffDilution(cutoff);
     }
 
     public DilutionCurve.DoublePoint[] getCurve() throws DilutionCurve.FitFailedException
     {
-        return getDilutionCurve().getCurve();
+        return getDilutionCurve(_curveFitType).getCurve();
     }
 
     public double getFitError() throws DilutionCurve.FitFailedException
     {
-        return getDilutionCurve().getFitError();
+        return getDilutionCurve(_curveFitType).getFitError();
     }
 
-    public double getMinDilution() throws DilutionCurve.FitFailedException
+    public double getMinDilution(DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
     {
-        return getDilutionCurve().getMinDilution();
+        return getDilutionCurve(type).getMinDilution();
     }
 
-    public double getMaxDilution() throws DilutionCurve.FitFailedException
+    public double getMaxDilution(DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
     {
-        return getDilutionCurve().getMaxDilution();
+        return getDilutionCurve(type).getMaxDilution();
     }
 
     public String getLSID()
@@ -161,8 +163,13 @@ public class DilutionSummary implements Serializable
         return _sampleGroup;
     }
 
-    public DilutionCurve.Parameters getCurveParameters() throws DilutionCurve.FitFailedException
+    public DilutionCurve.Parameters getCurveParameters(DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
     {
-        return getDilutionCurve().getParameters();
+        return getDilutionCurve(type).getParameters();
+    }
+
+    public double getAUC(DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
+    {
+        return getDilutionCurve(type).calculateAUC();
     }
 }

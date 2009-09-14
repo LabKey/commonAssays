@@ -16,14 +16,17 @@
 package org.labkey.nab;
 
 import org.labkey.api.data.*;
-import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
@@ -294,6 +297,11 @@ public class NabAssayRun extends Luc5Assay
             return _properties;
         }
 
+        public String getDataRowLsid()
+        {
+            return _dataRowLsid;
+        }
+
         private Map<PropertyDescriptor, Object> sortProperties(Map<PropertyDescriptor, Object> properties)
         {
             Map<PropertyDescriptor, Object> sortedProperties = new LinkedHashMap<PropertyDescriptor, Object>();
@@ -355,5 +363,71 @@ public class NabAssayRun extends Luc5Assay
     public ExpRun getRun()
     {
         return _run;
+    }
+
+    private static final String INSERT_AUC_COLUMNS = "Inserting new AUC and IC values for curve fit type: %s";
+    private static final String DELETE_PREV_COLUMN = "Deleting previous IC column : %s";
+
+    public void upgradeAUCValues(PipelineJob job) throws Exception
+    {
+        Container container = getRun().getContainer();
+
+        for (SampleResult result : getSampleResults())
+        {
+            Map<String, ObjectProperty> rowMap = OntologyManager.getPropertyObjects(container, result.getDataRowLsid());
+
+            for (DilutionCurve.FitType type : DilutionCurve.FitType.values())
+            {
+                // if we don't find an AUC colunmn for that fit type, lets go ahead and recalculate AUC and IC values and remove the old columns
+                Lsid propertyURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getProtocol().getName(), NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, type));
+
+                if (!rowMap.containsKey(propertyURI.toString()))
+                {
+                    job.info(String.format(INSERT_AUC_COLUMNS, type.getLabel()));
+                    List<ObjectProperty> results = new ArrayList<ObjectProperty>();
+                    DilutionSummary dilution = result.getDilutionSummary();
+                    Map<Integer, String> cutoffFormats = NabDataHandler.getCutoffFormats(getProtocol(), getRun());
+                    Map<String, Object> props = new HashMap<String, Object>();
+                    Lsid dataRowLsid = new Lsid(result.getDataRowLsid());
+
+                    double auc = dilution.getAUC(type);
+                    if (!Double.isNaN(auc))
+                        props.put(NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, type), auc);
+                    
+                    for (Integer cutoff : getCutoffs())
+                    {
+                        NabDataHandler.saveICValue(NabDataHandler.getPropertyName(NabDataHandler.CURVE_IC_PREFIX, cutoff, type),
+                                dilution.getCutoffDilution(cutoff / 100.0, type),
+                                dilution, dataRowLsid, getProtocol(), container, cutoffFormats, props, type);
+                    }
+
+                    // convert to object properties
+                    for (Map.Entry<String, Object> entry : props.entrySet())
+                    {
+                        results.add(NabDataHandler.getObjectProperty(container, getProtocol(), result.getDataRowLsid(),
+                                entry.getKey(), entry.getValue(), cutoffFormats));
+                    }
+                    OntologyManager.insertProperties(container, result.getDataRowLsid(), results.toArray(new ObjectProperty[results.size()]));
+                }
+            }
+        }
+        // delete old IC columns (point and curve plus OOR indicators)
+        for (Integer cutoff : getCutoffs())
+        {
+            List<String> prevColumns = new ArrayList<String>();
+
+            prevColumns.add(new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getProtocol().getName(), NabDataHandler.CURVE_IC_PREFIX + cutoff).toString());
+            prevColumns.add(new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getProtocol().getName(), NabDataHandler.CURVE_IC_PREFIX + cutoff + NabDataHandler.OORINDICATOR_SUFFIX).toString());
+
+            for (String uri : prevColumns)
+            {
+                PropertyDescriptor pd = OntologyManager.getPropertyDescriptor(uri, container);
+                if (pd != null)
+                {
+                    job.info(String.format(DELETE_PREV_COLUMN, pd.getName()));
+                    OntologyManager.deletePropertyDescriptor(pd);
+                }
+            }
+        }
     }
 }

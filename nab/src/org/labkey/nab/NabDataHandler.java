@@ -28,7 +28,6 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
-import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayService;
@@ -94,15 +93,27 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
 
                     results.add(props);
 
-                    for (Integer cutoff : assayResults.getCutoffs())
+                    // generate curve ICs and AUCs for each curve fit type
+                    for (DilutionCurve.FitType type : DilutionCurve.FitType.values())
                     {
-                        saveICValue(CURVE_IC_PREFIX + cutoff, dilution.getCutoffDilution(cutoff / 100.0),
-                                dilution, dataRowLsid, protocol, container, cutoffFormats, props);
-
-                        saveICValue(POINT_IC_PREFIX + cutoff, dilution.getInterpolatedCutoffDilution(cutoff / 100.0),
-                                dilution, dataRowLsid, protocol, container, cutoffFormats, props);
+                        for (Integer cutoff : assayResults.getCutoffs())
+                        {
+                            saveICValue(getPropertyName(CURVE_IC_PREFIX, cutoff, type),
+                                    dilution.getCutoffDilution(cutoff / 100.0, type),
+                                    dilution, dataRowLsid, protocol, container, cutoffFormats, props, type);
+                        }
+                        double auc = dilution.getAUC(type);
+                        if (!Double.isNaN(auc))
+                            props.put(getPropertyName(AUC_PREFIX, type), auc);
                     }
 
+                    // only need one set of interpolated ICs as they would be identical for all fit types
+                    for (Integer cutoff : assayResults.getCutoffs())
+                    {
+                        saveICValue(POINT_IC_PREFIX + cutoff,
+                                dilution.getInterpolatedCutoffDilution(cutoff / 100.0, assayResults.getCurveFitType()),
+                                dilution, dataRowLsid, protocol, container, cutoffFormats, props, assayResults.getCurveFitType());
+                    }
                     props.put(FIT_ERROR_PROPERTY, dilution.getFitError());
                     props.put(NAB_INPUT_MATERIAL_DATA_PROPERTY, sampleInput.getLSID());
                     props.put(WELLGROUP_NAME_PROPERTY, group.getName());
@@ -114,6 +125,16 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                 throw new ExperimentException(e.getMessage(), e);
             }
         }
+    }
+
+    static public String getPropertyName(String prefix, int cutoff, DilutionCurve.FitType type)
+    {
+        return getPropertyName(prefix + cutoff, type);
+    }
+
+    static public String getPropertyName(String prefix, DilutionCurve.FitType type)
+    {
+        return prefix + "_" + type.getColSuffix();
     }
 
     public static Lsid getDataRowLSID(ExpData data, WellGroup group)
@@ -191,19 +212,19 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
         return summaries;
     }
 
-    private void saveICValue(String name, double icValue, DilutionSummary dilution, Lsid dataRowLsid,
-                             ExpProtocol protocol, Container container, Map<Integer, String> formats, Map<String, Object> results) throws DilutionCurve.FitFailedException
+    protected static void saveICValue(String name, double icValue, DilutionSummary dilution, Lsid dataRowLsid,
+                             ExpProtocol protocol, Container container, Map<Integer, String> formats, Map<String, Object> results, DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
     {
         String outOfRange = null;
         if (Double.NEGATIVE_INFINITY == icValue)
         {
             outOfRange = "<";
-            icValue = dilution.getMinDilution();
+            icValue = dilution.getMinDilution(type);
         }
         else if (Double.POSITIVE_INFINITY == icValue)
         {
             outOfRange = ">";
-            icValue = dilution.getMaxDilution();
+            icValue = dilution.getMaxDilution(type);
         }
         results.put(name, icValue);
         results.put(name + OORINDICATOR_SUFFIX, outOfRange);

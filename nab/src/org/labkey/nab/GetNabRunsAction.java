@@ -221,28 +221,21 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
                 {
                     if (includeStats)
                     {
-                        sample.put("minDilution", dilutionSummary.getMinDilution());
-                        sample.put("maxDilution", dilutionSummary.getMaxDilution());
+                        sample.put("minDilution", dilutionSummary.getMinDilution(assay.getCurveFitType()));
+                        sample.put("maxDilution", dilutionSummary.getMaxDilution(assay.getCurveFitType()));
                     }
                     if (calculateNeut)
                     {
                         sample.put("fitError", dilutionSummary.getFitError());
                         for (int cutoff : assay.getCutoffs())
                         {
-                            sample.put("curveIC" + cutoff, dilutionSummary.getCutoffDilution(cutoff/100.0));
-                            sample.put("pointIC" + cutoff, dilutionSummary.getInterpolatedCutoffDilution(cutoff/100.0));
+                            sample.put("curveIC" + cutoff, dilutionSummary.getCutoffDilution(cutoff/100.0, assay.getCurveFitType()));
+                            sample.put("pointIC" + cutoff, dilutionSummary.getInterpolatedCutoffDilution(cutoff/100.0, assay.getCurveFitType()));
                         }
                     }
                     if (includeFitParameters)
                     {
-                        Map<String, Object> curveProperties = new HashMap<String, Object>();
-                        DilutionCurve.Parameters parameters = dilutionSummary.getCurveParameters();
-                        curveProperties.put("asymmetry", parameters.getAsymmetry());
-                        curveProperties.put("inflection", parameters.getInflection());
-                        curveProperties.put("slope", parameters.getSlope());
-                        curveProperties.put("max", parameters.getMax());
-                        curveProperties.put("min", parameters.getMin());
-                        sample.put("fitParameters", curveProperties);
+                        sample.put("fitParameters", dilutionSummary.getCurveParameters(assay.getCurveFitType()).toMap());
                     }
                     List<Map<String, Object>> replicates = new ArrayList<Map<String, Object>>();
                     for (WellGroup replicate : dilutionSummary.getWellGroup().getOverlappingGroups(WellGroup.Type.REPLICATE))

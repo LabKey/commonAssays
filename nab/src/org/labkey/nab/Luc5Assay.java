@@ -251,4 +251,8 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
         _lockAxes = lockAxes;
     }
 
+    public DilutionCurve.FitType getCurveFitType()
+    {
+        return _curveFitType;
+    }
 }

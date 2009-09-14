@@ -101,11 +101,11 @@
                     %>
                     <td>
                         <%
-                            double val = summary.getCutoffDilution(cutoff / 100.0);
+                            double val = summary.getCutoffDilution(cutoff / 100.0, summary.getAssay().getCurveFitType());
                             if (val == Double.NEGATIVE_INFINITY)
-                                out.write("&lt; " + intString(summary.getMinDilution()));
+                                out.write("&lt; " + intString(summary.getMinDilution(summary.getAssay().getCurveFitType())));
                             else if (val == Double.POSITIVE_INFINITY)
-                                out.write("&gt; " + intString(summary.getMaxDilution()));
+                                out.write("&gt; " + intString(summary.getMaxDilution(summary.getAssay().getCurveFitType())));
                             else
                                 out.write(intString(val));
 

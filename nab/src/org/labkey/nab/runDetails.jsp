@@ -27,18 +27,18 @@
 <%@ page import="java.util.*" %>
 <%@ page import="org.labkey.api.study.DilutionCurve" %>
 <%@ page import="org.labkey.api.util.Pair" %>
+<%@ page import="org.labkey.api.exp.Lsid" %>
+<%@ page import="org.labkey.api.exp.OntologyManager" %>
+<%@ page import="org.labkey.api.exp.ObjectProperty" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <labkey:errors/>
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();
     NabAssayController.RenderAssayBean bean = me.getModelBean();
-    Luc5Assay assay = bean.getAssay();
+    NabAssayRun assay = bean.getAssay();
     ViewContext context = me.getViewContext();
-
-    List<NabAssayRun.SampleResult> sampleInfos = bean.getSampleResults();
-    Map<PropertyDescriptor, Object> firstSample = sampleInfos.get(0).getProperties();
-    Set<PropertyDescriptor> samplePropertyDescriptors = firstSample.keySet();
 
     Map<String, Object> runProperties = bean.getRunDisplayProperties();
 
@@ -46,6 +46,34 @@
 
     QueryView duplicateDataFileView = bean.getDuplicateDataFileView(me.getViewContext());
     int columnCount = 2;
+
+    // the data for the sample properties table
+    List<Map<PropertyDescriptor, Object>> sampleData = new ArrayList<Map<PropertyDescriptor, Object>>();
+    Set<String> pdsWithData = new HashSet<String>();
+
+    Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, assay.getCurveFitType()));
+    PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), context.getContainer());
+
+    for (NabAssayRun.SampleResult result : bean.getSampleResults())
+    {
+        Map<PropertyDescriptor, Object> sampleProps = new LinkedHashMap<PropertyDescriptor, Object>(result.getProperties());
+
+        // add the AUC value for the selected curve fit method to the sample data map 
+        if (aucPD != null)
+        {
+            Map<String, ObjectProperty> rowMap = OntologyManager.getPropertyObjects(context.getContainer(), result.getDataRowLsid());
+            if (rowMap.containsKey(aucURI.toString()))
+                sampleProps.put(aucPD, rowMap.get(aucURI.toString()).value());
+        }
+        sampleData.add(sampleProps);
+
+        // calculate which columns have data
+        for (Map.Entry<PropertyDescriptor, Object> entry : sampleProps.entrySet())
+        {
+            if (entry.getValue() != null && !pdsWithData.contains(entry.getKey().getName()))
+                pdsWithData.add(entry.getKey().getName());
+        }
+    }
 
     if (bean.isNewRun())
     {
@@ -193,12 +221,12 @@
                                             }
                                             else
                                             {
-                                                double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0) :
-                                                        summary.getInterpolatedCutoffDilution(cutoff / 100.0);
+                                                double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0, assay.getCurveFitType()) :
+                                                        summary.getInterpolatedCutoffDilution(cutoff / 100.0, assay.getCurveFitType());
                                                 if (val == Double.NEGATIVE_INFINITY)
-                                                    out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution()));
+                                                    out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution(assay.getCurveFitType())));
                                                 else if (val == Double.POSITIVE_INFINITY)
-                                                    out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution()));
+                                                    out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution(assay.getCurveFitType())));
                                                 else
                                                 {
                                                     DecimalFormat shortDecFormat;
@@ -245,17 +273,8 @@
                 </table>
                 <table class="labkey-data-region labkey-show-borders">
                     <colgroup><%
-                        Set<String> pdsWithData = new HashSet<String>();
-                        for (NabAssayRun.SampleResult results : bean.getSampleResults())
-                        {
-                            for (Map.Entry<PropertyDescriptor, Object> entry : results.getProperties().entrySet())
-                            {
-                                if (entry.getValue() != null)
-                                    pdsWithData.add(entry.getKey().getName());
-                            }
-                        }
 
-                        for (PropertyDescriptor pd : samplePropertyDescriptors)
+                        for (PropertyDescriptor pd : sampleData.get(0).keySet())
                         {
                             if (!pdsWithData.contains(pd.getName()))
                                 continue;
@@ -269,26 +288,26 @@
                     <%
 
 
-                        for (PropertyDescriptor pd : samplePropertyDescriptors)
+                        for (PropertyDescriptor pd : sampleData.get(0).keySet())
                         {
                             if (!pdsWithData.contains(pd.getName()))
                                 continue;
 
                     %>
-                        <th><%= h(pd.getLabel()) %></th>
+                        <th><%= h(StringUtils.isBlank(pd.getLabel()) ? pd.getName() : pd.getLabel()) %></th>
                     <%
                         }
                     %>
                     </tr>
                     <%
                         int rowNumber = 0;
-                        for (NabAssayRun.SampleResult results : bean.getSampleResults())
+                        for (Map<PropertyDescriptor, Object> row : sampleData)
                         {
                             rowNumber++;
                     %>
                         <tr <%= rowNumber % 2 == 0 ? "class=\"labkey-alternate-row\"" : ""%>>
                     <%
-                        for (Map.Entry<PropertyDescriptor, Object> entry : results.getProperties().entrySet())
+                        for (Map.Entry<PropertyDescriptor, Object> entry : row.entrySet())
                         {
                             PropertyDescriptor pd = entry.getKey();
                             if (!pdsWithData.contains(pd.getName()))

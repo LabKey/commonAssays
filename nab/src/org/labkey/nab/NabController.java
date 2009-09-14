@@ -40,12 +40,18 @@ import org.labkey.api.attachments.SpringAttachmentFile;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayPublishService;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig.Template;
 import org.springframework.validation.BindException;
@@ -1662,6 +1668,36 @@ public class NabController extends SpringActionController
         }
     }
 
+    @RequiresPermissionClass(AdminPermission.class)
+    public class UpgradeNabAUCAction extends FormViewAction
+    {
+        public void validateCommand(Object target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
+        {
+            return new HtmlView("<form action=\"upgradeNabAUC.view\" method=\"post\"><input type=\"submit\" value=\"Begin NAb AUC Conversion\"></form>");
+        }
+
+        public boolean handlePost(Object o, BindException errors) throws Exception
+        {
+            PipelineJob job = new NabUpgradeCode.NabAUCUpgradeJob(null, getViewBackgroundInfo());
+            PipelineService.get().getPipelineQueue().addJob(job);
+
+            return true;
+        }
+
+        public ActionURL getSuccessURL(Object o)
+        {
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Convert NAb AUC Values");
+        }
+    }
 
     public static class PublishSampleInfo implements ParticipantVisit
     {

@@ -261,7 +261,7 @@ public class NabAssayController extends SpringActionController
             return _assay.getSampleResults();
         }
 
-        public Luc5Assay getAssay()
+        public NabAssayRun getAssay()
         {
             return _assay;
         }

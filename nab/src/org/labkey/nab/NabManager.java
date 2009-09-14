@@ -342,8 +342,8 @@ public class NabManager
                 assert groupInPlate(plate, group) : "Group not found in plate";
                 for (int cutoff : cutoffs)
                 {
-                    group.setProperty("Curve IC" + cutoff, dilution.getCutoffDilution((double) cutoff / 100.0));
-                    group.setProperty("Point IC" + cutoff, dilution.getInterpolatedCutoffDilution((double) cutoff / 100.0));
+                    group.setProperty("Curve IC" + cutoff, dilution.getCutoffDilution((double) cutoff / 100.0, temp.getCurveFitType()));
+                    group.setProperty("Point IC" + cutoff, dilution.getInterpolatedCutoffDilution((double) cutoff / 100.0, temp.getCurveFitType()));
                 }
                 group.setProperty(SampleProperty.FitError.name(), dilution.getFitError());
             }

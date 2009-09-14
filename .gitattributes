@@ -1215,6 +1215,7 @@ nab/src/org/labkey/nab/NabModule.java -text
 nab/src/org/labkey/nab/NabPlateTypeHandler.java -text
 nab/src/org/labkey/nab/NabRunUploadForm.java -text
 nab/src/org/labkey/nab/NabTsvDataHandler.java -text
+nab/src/org/labkey/nab/NabUpgradeCode.java -text
 nab/src/org/labkey/nab/NabUploadWizardAction.java -text
 nab/src/org/labkey/nab/RunMetadata.java -text
 nab/src/org/labkey/nab/RunSettings.java -text
