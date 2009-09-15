@@ -25,6 +25,7 @@ import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 
@@ -196,9 +197,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 
     public ActionURL urlShow()
     {
-        ActionURL ret = getFlowSchema(null).urlFor(QueryAction.executeQuery, FlowTableType.Runs);
-        addParams(ret);
-        return ret;
+        return addParams(urlFor(RunController.Action.showRuns));
     }
 
     public String[] getAnalyzedRunPaths(User user, FlowProtocolStep step) throws Exception
