@@ -79,7 +79,7 @@
             .addParameter("query.ProtocolStep~eq", "Keywords");
     ActionURL fcsAnalysisRunsURL = new ActionURL(RunController.ShowRunsAction.class, c)
             .addParameter("query.FCSAnalysisCount~neq", 0);
-    ActionURL compMatricesURL = FlowTableType.CompensationMatrices.urlFor(c, QueryAction.executeQuery);
+    ActionURL compMatricesURL = FlowTableType.CompensationMatrices.urlFor(user, c, QueryAction.executeQuery);
 
 %>
 <style type="text/css">

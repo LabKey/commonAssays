@@ -16,7 +16,6 @@
 
 package org.labkey.flow.webparts;
 
-import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.pipeline.PipeRoot;
@@ -38,7 +37,6 @@ import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowTableType;
@@ -188,7 +186,7 @@ public class FlowOverview extends Overview
         if (_fcsFileCount != 0)
         {
             StringBuilder status = new StringBuilder();
-            ActionURL urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getContainer(), QueryAction.executeQuery)
+            ActionURL urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
                     .addParameter("query.Run/ProtocolStep~eq", "Keywords");
             status.append("<a href=\"" + h(urlShowFCSFiles) + "\">" + _fcsFileCount + " FCS files</a> have been loaded.");
             ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer())
@@ -260,7 +258,7 @@ public class FlowOverview extends Overview
             }
             else
             {
-                String statusHTML = "This folder contains <a href=\"" + h(FlowTableType.AnalysisScripts.urlFor(getContainer(), QueryAction.executeQuery)) + "\">" + _scripts.length + " analysis scripts</a>.";
+                String statusHTML = "This folder contains <a href=\"" + h(FlowTableType.AnalysisScripts.urlFor(getUser(), getContainer(), QueryAction.executeQuery)) + "\">" + _scripts.length + " analysis scripts</a>.";
                 ret.setStatusHTML(statusHTML);
             }
         }
@@ -315,7 +313,7 @@ public class FlowOverview extends Overview
             {
                 statusHTML.append("<br>");
             }
-            ActionURL urlFlowComp = FlowTableType.CompensationMatrices.urlFor(getContainer(), QueryAction.executeQuery);
+            ActionURL urlFlowComp = FlowTableType.CompensationMatrices.urlFor(getUser(), getContainer(), QueryAction.executeQuery);
             statusHTML.append("There are <a href=\"" + h(urlFlowComp.getLocalURIString()) + "\">" + _compensationMatrixCount + " compensation matrices</a>.");
             if (_compensationRunCount != 0)
             {
@@ -375,7 +373,7 @@ public class FlowOverview extends Overview
             else
             {
                 ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter("query.FCSAnalysisCount~neq", 0);
-                statusHTML.append("<a href=\"" + h(FlowTableType.FCSAnalyses.urlFor(getContainer(), QueryAction.executeQuery)) + "\">" + _fcsAnalysisCount + " FCS files</a>");
+                statusHTML.append("<a href=\"" + h(FlowTableType.FCSAnalyses.urlFor(getUser(), getContainer(), QueryAction.executeQuery)) + "\">" + _fcsAnalysisCount + " FCS files</a>");
                 if (_fcsAnalysisRunCount == 1)
                     statusHTML.append(" have been analyzed in " + "<a href=\"" + h(urlShowRuns) + "\"> 1 run</a>.");
                 else

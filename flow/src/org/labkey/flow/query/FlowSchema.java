@@ -1279,14 +1279,14 @@ public class FlowSchema extends UserSchema
         if (compensationProtocol != null)
         {
             ColumnInfo colCompensationCount = ret.createRunCountColumn("CompensationRunCount", null, compensationProtocol.getProtocol());
-            ActionURL detailsURL = FlowTableType.Runs.urlFor(getContainer(), "ProtocolStep", FlowProtocolStep.calculateCompensation.getName());
+            ActionURL detailsURL = FlowTableType.Runs.urlFor(getUser(), getContainer(), "ProtocolStep", FlowProtocolStep.calculateCompensation.getName());
             colCompensationCount.setURL(detailsURL + "&" + FlowParam.experimentId.toString() + "=${RowId}");
             ret.addColumn(colCompensationCount);
         }
         if (analysisProtocol != null)
         {
             ColumnInfo colAnalysisRunCount = ret.createRunCountColumn("AnalysisRunCount", null, analysisProtocol.getProtocol());
-            ActionURL detailsURL = FlowTableType.Runs.urlFor(getContainer(), "ProtocolStep", FlowProtocolStep.analysis.getName());
+            ActionURL detailsURL = FlowTableType.Runs.urlFor(getUser(), getContainer(), "ProtocolStep", FlowProtocolStep.analysis.getName());
             colAnalysisRunCount.setURL(detailsURL + "&" + FlowParam.experimentId.toString() + "=${RowId}");
             ret.addColumn(colAnalysisRunCount);
         }
