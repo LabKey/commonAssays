@@ -101,7 +101,7 @@ public class GraphView extends GridView
 
             out.write("<table class=\"labkey-data-region\">\n");
 
-            ResultSetRowMapFactory factory = new ResultSetRowMapFactory(rs);
+            ResultSetRowMapFactory factory = ResultSetRowMapFactory.create(rs);
 
             while (rs.next())
             {
