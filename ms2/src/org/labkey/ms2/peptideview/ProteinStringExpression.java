@@ -16,7 +16,7 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.util.StringExpression;
 
 import java.util.Map;
 import java.io.Writer;
@@ -27,7 +27,7 @@ import java.io.IOException;
  * Date: Apr 4, 2006
  * Time: 4:15:26 PM
  */
-public class ProteinStringExpression implements StringExpressionFactory.StringExpression
+public class ProteinStringExpression implements StringExpression
 {
     private String _localURI;
 

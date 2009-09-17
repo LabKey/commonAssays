@@ -17,8 +17,9 @@
 package org.labkey.flow.query;
 
 import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.*;
-import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.util.StringExpression;
 import org.labkey.flow.view.GraphColumn;
 
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -67,7 +68,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
                     return null;
                 SQLFragment sqlExpr = new SQLFragment();
                 sqlExpr.appendStringLiteral(spec.toString());
-                ColumnInfo ret = new ExprColumn(parent.getParentTable(), parent.getName() + "$", sqlExpr, Types.VARCHAR);
+                ColumnInfo ret = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(),"$"), sqlExpr, Types.VARCHAR);
                 return ret;
             }
 
@@ -76,7 +77,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
                 return null;
             }
 
-            public StringExpressionFactory.StringExpression getURL(ColumnInfo parent)
+            public StringExpression getURL(ColumnInfo parent)
             {
                 return null;
             }

@@ -18,7 +18,7 @@ package org.labkey.flow.query;
 
 import org.labkey.api.data.*;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.util.StringExpression;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 
@@ -26,7 +26,7 @@ import java.util.Collection;
 
 abstract public class AttributeForeignKey<T> extends AbstractForeignKey
 {
-    public StringExpressionFactory.StringExpression getURL(ColumnInfo parent)
+    public StringExpression getURL(ColumnInfo parent)
     {
         return null;
     }
@@ -47,7 +47,7 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
 
         for (T attrName : getAttributes())
         {
-            ColumnInfo column = new ColumnInfo(attrName.toString(), ret);
+            ColumnInfo column = new ColumnInfo(new FieldKey(null,attrName.toString()), ret);
             initColumn(attrName, column);
             ret.addColumn(column);
         }
@@ -64,7 +64,7 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
             return null;
         int attrId = FlowManager.get().getAttributeId(attrName.toString());
         SQLFragment sql = sqlValue(parent, attrName, attrId);
-        ExprColumn ret = new ExprColumn(parent.getParentTable(), new FieldKey(FieldKey.fromString(parent.getName()), displayField).toString(), sql, 0, parent);
+        ExprColumn ret = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(), displayField), sql, 0, parent);
         initColumn(attrName, ret);
         return ret;
     }
