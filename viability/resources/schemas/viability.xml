@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ * Copyright (c) 2007-2009 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+
+ -->
+<ns:tables xmlns:ns="http://labkey.org/data/xml">
+
+    <ns:table tableName="ResultSpecimens" tableDbType="TABLE">
+        <ns:columns>
+            <ns:column columnName="ResultID">
+                <ns:isKeyField>true</ns:isKeyField>
+                <ns:isReadOnly>true</ns:isReadOnly>
+                <ns:isHidden>true</ns:isHidden>
+                <ns:fk>
+                    <ns:fkDbSchema>viability</ns:fkDbSchema>
+                    <ns:fkTable>Results</ns:fkTable>
+                    <ns:fkColumnName>RowId</ns:fkColumnName>
+                </ns:fk>
+            </ns:column>
+            <ns:column columnName="SpecimenID">
+                <ns:isKeyField>true</ns:isKeyField>
+                <ns:isReadOnly>true</ns:isReadOnly>
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+            <ns:column columnName="Index">
+                <ns:isKeyField>true</ns:isKeyField>
+                <ns:isReadOnly>true</ns:isReadOnly>
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+        </ns:columns>
+    </ns:table>
+
+    <ns:table tableName="Results" tableDbType="TABLE">
+        <ns:pkColumnName>RowID</ns:pkColumnName>
+        <ns:titleColumn>PoolID</ns:titleColumn>
+        <ns:columns>
+            <ns:column columnName="RowID">
+                <ns:isKeyField>true</ns:isKeyField>
+                <ns:isAutoInc>true</ns:isAutoInc>
+                <ns:isReadOnly>true</ns:isReadOnly>
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+            <ns:column columnName="DataID">
+                <ns:fk>
+                    <ns:fkDbSchema>exp</ns:fkDbSchema>
+                    <ns:fkTable>Data</ns:fkTable>
+                    <ns:fkColumnName>RowID</ns:fkColumnName>
+                </ns:fk>
+            </ns:column>
+            <ns:column columnName="ObjectID">
+                <ns:fk>
+                    <ns:fkDbSchema>exp</ns:fkDbSchema>
+                    <ns:fkTable>Object</ns:fkTable>
+                    <ns:fkColumnName>ObjectID</ns:fkColumnName>
+                </ns:fk>
+            </ns:column>
+
+            <ns:column columnName="ParticipantID"/>
+            <ns:column columnName="VisitID"/>
+            <ns:column columnName="Date"/>
+
+            <ns:column columnName="PoolID"/>
+            <ns:column columnName="TotalCells"/>
+            <ns:column columnName="ViableCells"/>
+        </ns:columns>
+    </ns:table>
+
+</ns:tables>
