@@ -46,6 +46,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     public static final String SAMPLE_ID_CAPTION = "Sample Id";
 
     private static final String RESULT_DOMAIN_NAME = "Result Fields";
+    public static final String RESULT_LSID_PREFIX = "ViabilityResult";
 
     public ViabilityAssayProvider()
     {

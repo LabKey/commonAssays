@@ -40,7 +40,7 @@ public class ViabilityResult
     private int viableCells;
 
     private List<String> specimenID;
-    private Map<PropertyDescriptor, Object> properties;
+    private Map<String, Object> properties;
 
     public ViabilityResult() { }
 
@@ -157,12 +157,12 @@ public class ViabilityResult
         this.specimenID = specimenID;
     }
 
-    public Map<PropertyDescriptor, Object> getProperties()
+    public Map<String, Object> getProperties()
     {
         return properties;
     }
 
-    public void setProperties(Map<PropertyDescriptor, Object> properties)
+    public void setProperties(Map<String, Object> properties)
     {
         this.properties = properties;
     }

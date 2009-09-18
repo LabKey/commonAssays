@@ -206,10 +206,8 @@ public class ViabilityAssaySchema extends AssaySchema
 
         private void addResultDomainPropertiesColumn()
         {
-            String sqlObjectId = "(SELECT objectid FROM " + OntologyManager.getTinfoObject() +
-                    " o WHERE o.objectid = " + ExprColumn.STR_TABLE_ALIAS + ".objectid)";
-
-            ColumnInfo colProperty = new ExprColumn(this, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
+            ColumnInfo colProperty = wrapColumn("Properties", _rootTable.getColumn("ObjectId"));
+            colProperty.setIsUnselectable(true);
 
             DomainProperty[] userResultDPs = _provider.getResultDomainUserProperties(_protocol);
             QcAwarePropertyForeignKey fk = new QcAwarePropertyForeignKey(userResultDPs, this, ViabilityAssaySchema.this);

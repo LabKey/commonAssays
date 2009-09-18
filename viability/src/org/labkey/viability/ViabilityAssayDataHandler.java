@@ -103,9 +103,10 @@ public class ViabilityAssayDataHandler extends AbstractAssayTsvDataHandler
         {
             ViabilityResult result = ViabilityResult.fromMap(row);
             assert result.getDataID() == 0;
+            assert result.getObjectID() == 0;
             result.setDataID(data.getRowId());
 
-            ViabilityManager.saveResult(user, result);
+            ViabilityManager.saveResult(user, container, result);
         }
     }
 
