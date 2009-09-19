@@ -128,7 +128,7 @@ public class NabRunDataTable extends PlateBasedAssayRunDataTable
 
                     columns.add(col);
 
-                    ExprColumn colOOR = new ExprColumn(this, NabDataHandler.CURVE_IC_PREFIX + entry.getKey() + NabDataHandler.OORINDICATOR_SUFFIX, sqlOOR, Types.NVARCHAR);
+                    ExprColumn colOOR = new ExprColumn(this, NabDataHandler.CURVE_IC_PREFIX + entry.getKey() + NabDataHandler.OORINDICATOR_SUFFIX, sqlOOR, Types.VARCHAR);
                     columns.add(colOOR);
                 }
             }
