@@ -98,13 +98,23 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                     {
                         for (Integer cutoff : assayResults.getCutoffs())
                         {
-                            saveICValue(getPropertyName(CURVE_IC_PREFIX, cutoff, type),
-                                    dilution.getCutoffDilution(cutoff / 100.0, type),
+                            double value = dilution.getCutoffDilution(cutoff / 100.0, type);
+                            saveICValue(getPropertyName(CURVE_IC_PREFIX, cutoff, type), value,
                                     dilution, dataRowLsid, protocol, container, cutoffFormats, props, type);
+
+                            if (type == assayResults.getCurveFitType())
+                            {
+                                saveICValue(CURVE_IC_PREFIX + cutoff, value,
+                                        dilution, dataRowLsid, protocol, container, cutoffFormats, props, type);
+                            }
                         }
                         double auc = dilution.getAUC(type);
                         if (!Double.isNaN(auc))
+                        {
                             props.put(getPropertyName(AUC_PREFIX, type), auc);
+                            if (type == assayResults.getCurveFitType())
+                                props.put(AUC_PREFIX, auc);
+                        }
                     }
 
                     // only need one set of interpolated ICs as they would be identical for all fit types
@@ -125,16 +135,6 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                 throw new ExperimentException(e.getMessage(), e);
             }
         }
-    }
-
-    static public String getPropertyName(String prefix, int cutoff, DilutionCurve.FitType type)
-    {
-        return getPropertyName(prefix + cutoff, type);
-    }
-
-    static public String getPropertyName(String prefix, DilutionCurve.FitType type)
-    {
-        return prefix + "_" + type.getColSuffix();
     }
 
     public static Lsid getDataRowLSID(ExpData data, WellGroup group)

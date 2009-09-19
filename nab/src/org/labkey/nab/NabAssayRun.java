@@ -392,7 +392,11 @@ public class NabAssayRun extends Luc5Assay
 
                     double auc = dilution.getAUC(type);
                     if (!Double.isNaN(auc))
+                    {
                         props.put(NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, type), auc);
+                        if (getCurveFitType() == type)
+                            props.put(NabDataHandler.AUC_PREFIX, auc);
+                    }
                     
                     for (Integer cutoff : getCutoffs())
                     {
@@ -412,6 +416,7 @@ public class NabAssayRun extends Luc5Assay
             }
         }
         // delete old IC columns (point and curve plus OOR indicators)
+/*
         for (Integer cutoff : getCutoffs())
         {
             List<String> prevColumns = new ArrayList<String>();
@@ -429,5 +434,6 @@ public class NabAssayRun extends Luc5Assay
                 }
             }
         }
+*/
     }
 }

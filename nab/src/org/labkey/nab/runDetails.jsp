@@ -51,7 +51,7 @@
     List<Map<PropertyDescriptor, Object>> sampleData = new ArrayList<Map<PropertyDescriptor, Object>>();
     Set<String> pdsWithData = new HashSet<String>();
 
-    Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, assay.getCurveFitType()));
+    Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), NabDataHandler.AUC_PREFIX);
     PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), context.getContainer());
 
     for (NabAssayRun.SampleResult result : bean.getSampleResults())

@@ -26,6 +26,7 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -119,21 +120,19 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
         }
         else if (propertyName.startsWith(CURVE_IC_PREFIX))
         {
-            // parse out the cutoff number
-            if (!propertyName.endsWith(OORINDICATOR_SUFFIX))
+            Integer cutoff = getCutoffFromPropertyName(propertyName);
+            if (cutoff != null)
             {
-                String num = propertyName.substring(CURVE_IC_PREFIX.length(), propertyName.indexOf('_'));
-                format = cutoffFormats.get(Integer.valueOf(num));
+                format = cutoffFormats.get(cutoff);
                 type = PropertyType.DOUBLE;
             }
         }
         else if (propertyName.startsWith(POINT_IC_PREFIX))
         {
-            // parse out the cutoff number
-            if (!propertyName.endsWith(OORINDICATOR_SUFFIX))
+            Integer cutoff = getCutoffFromPropertyName(propertyName);
+            if (cutoff != null)
             {
-                String num = propertyName.substring(CURVE_IC_PREFIX.length());
-                format = cutoffFormats.get(Integer.valueOf(num));
+                format = cutoffFormats.get(cutoff);
                 type = PropertyType.DOUBLE;
             }
         }
@@ -214,5 +213,36 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
         {
             throw new RuntimeSQLException(e);
         }
+    }
+
+    static public String getPropertyName(String prefix, int cutoff, DilutionCurve.FitType type)
+    {
+        return getPropertyName(prefix + cutoff, type);
+    }
+
+    static public String getPropertyName(String prefix, DilutionCurve.FitType type)
+    {
+        return prefix + "_" + type.getColSuffix();
+    }
+
+    static public Integer getCutoffFromPropertyName(String propertyName)
+    {
+        if (propertyName.startsWith(CURVE_IC_PREFIX) && !propertyName.endsWith(OORINDICATOR_SUFFIX))
+        {
+            // parse out the cutoff number
+            int idx = propertyName.indexOf('_');
+            String num;
+            if (idx != -1)
+                num = propertyName.substring(CURVE_IC_PREFIX.length(), propertyName.indexOf('_'));
+            else
+                num = propertyName.substring(CURVE_IC_PREFIX.length());
+
+            return Integer.valueOf(num);
+        }
+        else if (propertyName.startsWith(POINT_IC_PREFIX) && !propertyName.endsWith(OORINDICATOR_SUFFIX))
+        {
+            return Integer.valueOf(propertyName.substring(POINT_IC_PREFIX.length()));
+        }
+        return null;
     }
 }

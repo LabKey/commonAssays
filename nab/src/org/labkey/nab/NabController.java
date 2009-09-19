@@ -43,6 +43,7 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresPermissionClass;
@@ -1671,31 +1672,41 @@ public class NabController extends SpringActionController
     @RequiresPermissionClass(AdminPermission.class)
     public class UpgradeNabAUCAction extends FormViewAction
     {
+        private Container _container;
+
         public void validateCommand(Object target, Errors errors)
         {
         }
 
         public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
         {
-            return new HtmlView("<form action=\"upgradeNabAUC.view\" method=\"post\"><input type=\"submit\" value=\"Begin NAb AUC Conversion\"></form>");
+            return new JspView("/org/labkey/nab/upgradeAUC.jsp");
         }
 
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
-            PipelineJob job = new NabUpgradeCode.NabAUCUpgradeJob(null, getViewBackgroundInfo());
-            PipelineService.get().getPipelineQueue().addJob(job);
+            // just grab any root, it doesn't matter
+            for (PipeRoot root : PipelineService.get().getAllPipelineRoots())
+            {
+                ViewBackgroundInfo info = getViewBackgroundInfo();
+                _container = root.getContainer();
+                info.setContainer(_container);
+                PipelineJob job = new NabUpgradeCode.NabAUCUpgradeJob(null, info);
+                PipelineService.get().getPipelineQueue().addJob(job);
 
-            return true;
+                return true;
+            }
+            return false;
         }
 
         public ActionURL getSuccessURL(Object o)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(_container);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Convert NAb AUC Values");
+            return root.addChild("Calculate NAb AUC Values");
         }
     }
 

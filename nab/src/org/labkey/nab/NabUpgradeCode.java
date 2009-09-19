@@ -49,6 +49,7 @@ public class NabUpgradeCode implements UpgradeCode
 
         private static final String UPGRADE_NAB_RUN = "Checking NAb run: %s/%s for AUC columns to be inserted";
         private static final String UPGRADE_NAB_EXCEPTION = "An unexpected error occurred attempting to upgrade the NAb run: %s, skipping.";
+        private static final String UPGRADE_NAB_STATS = "Upgrade job complete. Number of assay instances checked: %s. Number of assay runs checked: %s.";
 
         public NabAUCUpgradeJob(String provider, ViewBackgroundInfo info) throws IOException
         {
@@ -81,6 +82,9 @@ public class NabUpgradeCode implements UpgradeCode
         public void run()
         {
             setStatus(PROCESSING_STATUS, "Job started at: " + DateUtil.nowISO());
+            int assayInstances = 0;
+            int runsProcessed = 0;
+
             try {
                 ViewContext context = new ViewContext(getInfo());
 
@@ -90,9 +94,11 @@ public class NabUpgradeCode implements UpgradeCode
                     AssayProvider provider = AssayService.get().getProvider(protocol);
                     if (provider instanceof NabAssayProvider)
                     {
+                        assayInstances++;
                         for (ExpRun run : protocol.getExpRuns())
                         {
                             try {
+                                runsProcessed++;
                                 info(String.format(UPGRADE_NAB_RUN, run.getContainer().getPath(), run.getName()));
                                 NabAssayRun nab = NabDataHandler.getAssayResults(run, context.getUser());
                                 nab.upgradeAUCValues(this);
@@ -112,6 +118,7 @@ public class NabUpgradeCode implements UpgradeCode
             }
             finally
             {
+                info(String.format(UPGRADE_NAB_STATS, assayInstances, runsProcessed));
                 setStatus(PipelineJob.COMPLETE_STATUS, "Job finished at: " + DateUtil.nowISO());
             }
         }
