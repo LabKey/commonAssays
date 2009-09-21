@@ -83,8 +83,9 @@ public class ViabilityModule extends DefaultModule
     @Override
     public Set<Class<? extends TestCase>> getJUnitTests()
     {
-        return new HashSet<Class<? extends TestCase>>(Arrays.asList(
-                ViabilityManager.TestCase.class
-        ));
+        return Collections.emptySet();
+//        return new HashSet<Class<? extends TestCase>>(Arrays.asList(
+//                ViabilityManager.TestCase.class
+//        ));
     }
 }
