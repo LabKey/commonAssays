@@ -39,8 +39,27 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
     public static final FileType FT_PEP_XML = new FileType(".pep.xml");
     public static final FileType FT_PROT_XML = new FileType(".prot.xml");
     public static final FileType FT_INTERMEDIATE_PROT_XML = new FileType(".pep-prot.xml");
-    public static final FileType FT_TPP_PROT_SENSERR_XML = new FileType(".pep-prot.xml_senserr.txt");
     public static final FileType FT_TPP_PROT_XML = new FileType("-prot.xml");
+
+    /** Map of optional file outputs from the TPP to their input role names */
+    public static final Map<FileType, String> FT_OPTIONAL_AND_IGNORABLES = new HashMap<FileType, String>();
+
+    static
+    {
+        // Outputs from ProphetModels.pl, added as part of TPP 4.2 or so
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep_FVAL_1.png"), "PepPropModel1");
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep_FVAL_2.png"), "PepPropModel2");
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep_FVAL_3.png"), "PepPropModel3");
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep_FVAL_4.png"), "PepPropModel4");
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep_FVAL_5.png"), "PepPropModel5");
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep_IPPROB.png"), "iPropPepProb");
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep_PPPROB.png"), "PepPropProb");
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".prot_IPPROB.png"), "iPropProtProb");
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".prot_PPPROB.png"), "ProtPropProb");
+
+        // Additonal output from ProteinProphet, added as part of TPP 4.0 or so
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep-prot.xml_senserr.txt"), "ProtSensErr");
+    }
 
     private static final FileType FT_PEP_XSL = new FileType(".pep.xsl");
     private static final FileType FT_PEP_SHTML = new FileType(".pep.shtml");
@@ -54,7 +73,6 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
     public static final String PEP_XML_INPUT_ROLE = "PepXML";
     public static final String PROT_XML_INPUT_ROLE = "ProtXML";
-    public static final String PROT_SENS_ERR_INPUT_ROLE = "ProtSensErr";
 
     public static String getTPPVersion(PipelineJob job)
     {
@@ -346,6 +364,8 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 paramMinProb = params.get("pipeline prophet, min protein probability");
                 if (paramMinProb != null && paramMinProb.length() > 0)
                     interactCmd.add("-pr" + paramMinProb);
+
+                interactCmd.add("-nIP");
             }
 
             RecordedAction proteinQuantAction = null;
@@ -401,20 +421,24 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                     protXMLAction.addOutput(fileProtXML, PROT_XML_INPUT_ROLE, false);
                     actions.add(protXMLAction);
 
-                    // As of version 4 of the TPP has started writing out a .pep-prot.xml_senserr.txt file
-                    File fileSensErrorWork = _wd.newFile(FT_TPP_PROT_SENSERR_XML);
+                    // Newer releases of the TPP write out some additional file types that don't really use, but
+                    // we need to deal with them so that we don't complain about unexpected files
+                    for (Map.Entry<FileType, String> entry : FT_OPTIONAL_AND_IGNORABLES.entrySet())
                     {
-                        // Check if it exists
-                        if (!NetworkDrive.exists(fileSensErrorWork))
+                        File workFile = _wd.newFile(entry.getKey());
                         {
-                            // If not, that's OK
-                            _wd.discardFile(fileSensErrorWork);
-                        }
-                        else
-                        {
-                            // If so, then grab it and mark as an output
-                            File fileSensError = _wd.outputFile(fileSensErrorWork);
-                            protXMLAction.addOutput(fileSensError, PROT_SENS_ERR_INPUT_ROLE, false);
+                            // Check if it exists
+                            if (!NetworkDrive.exists(workFile))
+                            {
+                                // If not, that's OK
+                                _wd.discardFile(workFile);
+                            }
+                            else
+                            {
+                                // If so, then grab it and mark as an output
+                                File outputFile = _wd.outputFile(workFile);
+                                protXMLAction.addOutput(outputFile, entry.getValue(), false);
+                            }
                         }
                     }
                 }
