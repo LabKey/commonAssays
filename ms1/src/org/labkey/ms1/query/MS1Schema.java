@@ -24,6 +24,7 @@ import org.labkey.api.query.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
 
@@ -271,7 +272,8 @@ public class MS1Schema extends UserSchema
         if(null != nameCol)
         {
             ActionURL featuresUrl = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer());
-            nameCol.setURL(featuresUrl.getLocalURIString() + "runId=${rowId}");
+            featuresUrl.addParameter("runId", "${rowId}");
+            nameCol.setURL(StringExpressionFactory.createURL(featuresUrl));
         }
 
         //set the default visible columns list

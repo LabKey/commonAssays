@@ -26,6 +26,7 @@ import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.ms2.*;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
 
@@ -173,9 +174,9 @@ public class PeptidesTableInfo extends FilteredTable
                 return dataColumn;
             }
         };
-        getColumn("Scan").setURL(showPeptideURLString);
+        getColumn("Scan").setURL(StringExpressionFactory.createURL(showPeptideURLString));
         getColumn("Scan").setDisplayColumnFactory(factory);
-        getColumn("Peptide").setURL(showPeptideURLString);
+        getColumn("Peptide").setURL(StringExpressionFactory.createURL(showPeptideURLString));
         getColumn("Peptide").setDisplayColumnFactory(factory);
 
         addScoreColumns(info);
@@ -278,7 +279,7 @@ public class PeptidesTableInfo extends FilteredTable
                 sequenceTable.addColumn(fastaNameColumn);
 
                 fastaNameColumn.setDisplayColumnFactory(new ProteinDisplayColumnFactory(showProteinURLString));
-                fastaNameColumn.setURL(showProteinURLString);
+                fastaNameColumn.setURL(StringExpressionFactory.createURL(showProteinURLString));
 
                 sequenceTable.addPeptideAggregationColumns();
 
@@ -288,10 +289,10 @@ public class PeptidesTableInfo extends FilteredTable
         fk.setPrefixColumnCaption(false);
         getColumn("SeqId").setFk(fk);
 
-        getColumn("SeqId").setURL(showProteinURLString);
+        getColumn("SeqId").setURL(StringExpressionFactory.createURL(showProteinURLString));
         getColumn("SeqId").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
         getColumn("SeqId").setLabel("Search Engine Protein");
-        getColumn("Protein").setURL(showProteinURLString);
+        getColumn("Protein").setURL(StringExpressionFactory.createURL(showProteinURLString));
         getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
     }
 

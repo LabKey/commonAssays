@@ -560,7 +560,8 @@ public class MS2Schema extends UserSchema
                 {
                     private ColumnInfo _runCol;
 
-                    public String getURL(RenderContext ctx)
+                    @Override
+                    public String renderURL(RenderContext ctx)
                     {
                         if (_runCol != null && _runCol.getValue(ctx) != null)
                         {
@@ -569,7 +570,7 @@ public class MS2Schema extends UserSchema
                             // attached to it in the database, so don't show links to it
                             ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
                             setURL(url.toString() + "&run=${" + _runCol.getAlias() + "}");
-                            return super.getURL(ctx);
+                            return super.renderURL(ctx);
                         }
                         else
                         {
@@ -673,9 +674,9 @@ public class MS2Schema extends UserSchema
 
         Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(peptidesTable, fieldKeys);
 
-        List<ColumnInfo> reqCols = new ArrayList<ColumnInfo>(columnMap.values());
+        Collection<ColumnInfo> reqCols = new ArrayList<ColumnInfo>(columnMap.values());
         Set<String> unresolvedColumns = new HashSet<String>();
-        QueryService.get().ensureRequiredColumns(peptidesTable, reqCols, filter, null, unresolvedColumns);
+        reqCols = QueryService.get().ensureRequiredColumns(peptidesTable, reqCols, filter, null, unresolvedColumns);
 
         SQLFragment innerSelect = Table.getSelectSQL(peptidesTable, reqCols, null, null);
 

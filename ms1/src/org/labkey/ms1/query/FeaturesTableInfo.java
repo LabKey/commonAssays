@@ -21,6 +21,7 @@ import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.query.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.ms1.MS1Service;
+import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
 
@@ -111,13 +112,13 @@ public class FeaturesTableInfo extends VirtualTable
                 }
             });
 
-            ciPepId.setURL(urlPep);
+            ciPepId.setURL(StringExpressionFactory.createURL(urlPep));
             ciPepId.setDisplayColumnFactory(dcfPep);
         } //if(includePepFk)
 
         //make the ms2 scan a hyperlink to showPeptide view
         ColumnInfo ciMS2Scan = getColumn("MS2Scan");
-        ciMS2Scan.setURL(urlPep);
+        ciMS2Scan.setURL(StringExpressionFactory.createURL(urlPep));
         ciMS2Scan.setDisplayColumnFactory(dcfPep);
 
         //add new columns for the peaks and details links

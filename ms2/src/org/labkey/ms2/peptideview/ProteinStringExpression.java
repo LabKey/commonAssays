@@ -17,8 +17,10 @@
 package org.labkey.ms2.peptideview;
 
 import org.labkey.api.util.StringExpression;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.util.Map;
+import java.util.Set;
 import java.io.Writer;
 import java.io.IOException;
 
@@ -27,7 +29,7 @@ import java.io.IOException;
  * Date: Apr 4, 2006
  * Time: 4:15:26 PM
  */
-public class ProteinStringExpression implements StringExpression
+public class ProteinStringExpression implements StringExpression, Cloneable
 {
     private String _localURI;
 
@@ -57,5 +59,23 @@ public class ProteinStringExpression implements StringExpression
     public void render(Writer out, Map ctx) throws IOException
     {
         out.write(eval(ctx));
+    }
+
+    public ProteinStringExpression copy()
+    {
+        return clone();
+    }
+
+    @Override
+    protected ProteinStringExpression clone()
+    {
+        try
+        {
+            return (ProteinStringExpression)super.clone();
+        }
+        catch (CloneNotSupportedException x)
+        {
+            throw new RuntimeException(x);
+        }
     }
 }

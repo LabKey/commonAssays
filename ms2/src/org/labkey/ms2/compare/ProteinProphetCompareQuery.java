@@ -22,6 +22,7 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.action.LabkeyError;
 import org.springframework.validation.BindException;
@@ -180,8 +181,8 @@ public class ProteinProphetCompareQuery extends CompareQuery
         ColumnInfo result = ti.getColumn("Protein");
         ActionURL linkURL = _currentUrl.clone();
         linkURL.setAction("showProtein");
-        linkURL.deleteParameter("seqId");
-        result.setURL(linkURL.getLocalURIString() + "&seqId=${SeqId}");
+        linkURL.replaceParameter("seqId", "${SeqId}");
+        result.setURL(StringExpressionFactory.createURL(linkURL));
         return result;
     }
 

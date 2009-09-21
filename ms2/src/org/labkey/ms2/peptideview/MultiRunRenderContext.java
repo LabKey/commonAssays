@@ -24,6 +24,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Collection;
 
 /**
  * User: adam
@@ -41,7 +42,7 @@ public class MultiRunRenderContext extends RenderContext
     }
 
     @Override
-    protected ResultSet selectForDisplay(TableInfo table, List<ColumnInfo> columns, SimpleFilter filter, Sort sort, int maxRows, long offset, boolean async) throws SQLException
+    protected ResultSet selectForDisplay(TableInfo table, Collection<ColumnInfo> columns, SimpleFilter filter, Sort sort, int maxRows, long offset, boolean async) throws SQLException
     {
         // XXX: we're ignoring offset for now
         return new MultiRunResultSet(_runs, table, columns, filter, sort, maxRows, getCache());
@@ -51,11 +52,11 @@ public class MultiRunRenderContext extends RenderContext
     public static class MultiRunResultSet extends MS2ResultSet
     {
         private TableInfo _table;
-        private List<ColumnInfo> _columns;
+        private Collection<ColumnInfo> _columns;
         private int _maxRows;
         private boolean _cache;
 
-        MultiRunResultSet(List<MS2Run> runs, TableInfo table, List<ColumnInfo> columns, SimpleFilter filter, Sort sort, int maxRows, boolean cache)
+        MultiRunResultSet(List<MS2Run> runs, TableInfo table, Collection<ColumnInfo> columns, SimpleFilter filter, Sort sort, int maxRows, boolean cache)
         {
             super(runs, filter, sort);
             _table = table;

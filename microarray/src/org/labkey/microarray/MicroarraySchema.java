@@ -25,6 +25,7 @@ import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
@@ -78,7 +79,8 @@ public class MicroarraySchema extends UserSchema
     {
         ExpRunTable result = _expSchema.createRunsTable();
         ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getRunTextURL(getContainer(), -1);
-        result.getColumn(ExpRunTable.Column.Name).setURL(url.toString().replace("-1", "${RowId}"));
+        url.replaceParameter("rowId", "${RowId}");
+        result.getColumn(ExpRunTable.Column.Name).setURL(StringExpressionFactory.createURL(url));
 
         result.setProtocolPatterns("urn:lsid:%:" + MicroarrayAssayProvider.PROTOCOL_PREFIX + ".%");
 
