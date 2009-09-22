@@ -182,9 +182,35 @@
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
                     <property name="parameter" value="pipeline, readw version"/>
-                    <property name="default" value="3.5.1"/>
+                    <property name="default" value="4.3.1"/>
                     <property name="converters">
                         <map>
+                            <entry key="4.3.1">
+                                <bean class="org.labkey.api.pipeline.cmd.ListToCommandArgs">
+                                    <property name="switchFormat" ref="unixNewSwitch"/>
+                                    <property name="converters">
+                                        <list>
+                                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                                <property name="switchName" value="mzXML"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
+                                                <property name="parameter" value="readw, peaklist compression"/>
+                                                <property name="switchName" value="compress"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
+                                                <property name="parameter" value="readw, verbose"/>
+                                                <property name="switchName" value="verbose"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                                                <property name="key" value="Spectra" />
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                                                <property name="function" value="output"/>
+                                            </bean>
+                                        </list>
+                                    </property>
+                                </bean>
+                            </entry>
                             <entry key="3.5.1">
                                 <bean class="org.labkey.api.pipeline.cmd.ListToCommandArgs">
                                     <property name="switchFormat" ref="unixNewSwitch"/>
