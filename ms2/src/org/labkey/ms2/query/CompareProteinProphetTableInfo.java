@@ -24,6 +24,7 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.FieldKey;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -159,6 +160,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
     }
 
 
+    @Override @NotNull
     public SQLFragment getFromSQL()
     {
         String innerAlias = "_innerCPP";

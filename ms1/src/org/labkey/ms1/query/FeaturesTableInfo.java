@@ -24,6 +24,7 @@ import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -192,6 +193,7 @@ public class FeaturesTableInfo extends VirtualTable
     }
 
 
+    @Override @NotNull
     public SQLFragment getFromSQL()
     {
         assert null != getSourceTable();

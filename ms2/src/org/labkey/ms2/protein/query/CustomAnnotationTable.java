@@ -27,6 +27,7 @@ import org.labkey.api.query.*;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.SequencesTableInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Types;
 import java.util.ArrayList;
@@ -108,6 +109,7 @@ public class CustomAnnotationTable extends FilteredTable
     }
 
 
+    @Override @NotNull
     public SQLFragment getFromSQL()
     {
         SQLFragment sql = super.getFromSQL();

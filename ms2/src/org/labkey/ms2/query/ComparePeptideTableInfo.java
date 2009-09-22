@@ -25,6 +25,7 @@ import org.labkey.api.data.VirtualTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -137,6 +138,7 @@ public class ComparePeptideTableInfo extends VirtualTable
     }
 
 
+    @Override @NotNull
     public SQLFragment getFromSQL()
     {
         SQLFragment result = new SQLFragment();

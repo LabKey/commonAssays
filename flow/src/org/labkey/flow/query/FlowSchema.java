@@ -39,6 +39,7 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.view.FlowQueryView;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -427,6 +428,7 @@ public class FlowSchema extends UserSchema
         }
 
         /* TableInfo */
+        @NotNull
         public SQLFragment getFromSQL()
         {
             SQLFragment sqlFlowData = new SQLFragment();
@@ -710,6 +712,7 @@ public class FlowSchema extends UserSchema
         }
 
         /* TableInfo */
+        @NotNull
         public SQLFragment getFromSQL()
         {
             assert _container != null;

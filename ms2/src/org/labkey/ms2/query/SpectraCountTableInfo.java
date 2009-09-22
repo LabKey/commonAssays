@@ -26,6 +26,7 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Types;
 import java.util.List;
@@ -200,7 +201,7 @@ public class SpectraCountTableInfo extends VirtualTable
         setDefaultVisibleColumns(defaultCols);
     }
 
-    @Override
+    @Override @NotNull
     public SQLFragment getFromSQL()
     {
         SQLFragment sql = new SQLFragment();
