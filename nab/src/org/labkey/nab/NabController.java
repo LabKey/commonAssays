@@ -1760,6 +1760,11 @@ public class NabController extends SpringActionController
             throw new UnsupportedOperationException("Not Implemented for PublishSampleInfo");
         }
 
+        public Integer getCohortID()
+        {
+            throw new UnsupportedOperationException("Not Implemented for PublishSampleInfo");
+        }
+
         public Date getDate()
         {
             try
