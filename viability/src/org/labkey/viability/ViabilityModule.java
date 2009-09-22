@@ -64,7 +64,8 @@ public class ViabilityModule extends DefaultModule
     {
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new ViabilityContainerListener());
-        ExperimentService.get().registerExperimentDataHandler(new ViabilityAssayDataHandler());
+        ExperimentService.get().registerExperimentDataHandler(new ViabilityTsvDataHandler());
+//        ExperimentService.get().registerExperimentDataHandler(new GuavaDataHandler());
         AssayService.get().registerAssayProvider(new ViabilityAssayProvider());
     }
 
@@ -83,9 +84,8 @@ public class ViabilityModule extends DefaultModule
     @Override
     public Set<Class<? extends TestCase>> getJUnitTests()
     {
-        return Collections.emptySet();
-//        return new HashSet<Class<? extends TestCase>>(Arrays.asList(
-//                ViabilityManager.TestCase.class
-//        ));
+        return new HashSet<Class<? extends TestCase>>(Arrays.asList(
+                ViabilityManager.TestCase.class
+        ));
     }
 }

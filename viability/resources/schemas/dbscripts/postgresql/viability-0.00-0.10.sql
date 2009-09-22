@@ -15,10 +15,17 @@
  */
 CREATE SCHEMA viability;
 
+CREATE AGGREGATE viability.array_accum (anyelement)
+(
+    sfunc = array_append,
+    stype = anyarray,
+    initcond = '{}'
+);
+
 CREATE TABLE viability.ResultSpecimens
 (
   ResultID INT NOT NULL,
-  SpecimenID TEXT NOT NULL,
+  SpecimenID VARCHAR(32) NOT NULL,
   Index INT NOT NULL,
 
   CONSTRAINT PK_Viability_ResultSpecimens PRIMARY KEY (ResultID, SpecimenID, Index)
@@ -30,7 +37,7 @@ CREATE TABLE viability.Results
   DataID INT NOT NULL,
   ObjectID INT NOT NULL,
 
-  Date TIMESTAMP,
+  Date TIMESTAMP NULL,
   VisitID FLOAT,
   ParticipantID VARCHAR(32),
 

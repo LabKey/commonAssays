@@ -18,7 +18,7 @@ GO
 
 CREATE TABLE viability.ResultSpecimens
 (
-  ResultID INT IDENTITY(1,1) NOT NULL,
+  ResultID INT NOT NULL,
   SpecimenID VARCHAR(32) NOT NULL,
   [Index] INT NOT NULL,
 
@@ -32,7 +32,7 @@ CREATE TABLE viability.Results
   DataID INT NOT NULL,
   ObjectID INT NOT NULL,
 
-  Date TIMESTAMP,
+  Date DATETIME NULL,
   VisitID FLOAT,
   ParticipantID VARCHAR(32),
 

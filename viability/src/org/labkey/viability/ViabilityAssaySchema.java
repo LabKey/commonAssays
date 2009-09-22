@@ -93,19 +93,6 @@ public class ViabilityAssaySchema extends AssaySchema
         ret.setTitleColumn("Name");
         ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
         protocol.setHidden(true);
-
-//        ColumnInfo runCol = ret.addColumn(ExpDataTable.Column.Run);
-//        if (_protocol != null)
-//        {
-//            runCol.setFk(new LookupForeignKey("RowId")
-//            {
-//                public TableInfo getLookupTableInfo()
-//                {
-//                    return AssayService.get().createRunTable(_protocol, AssayService.get().getProvider(_protocol), _user, _container);
-//                }
-//            });
-//        }
-
         return ret;
     }
 
@@ -180,28 +167,59 @@ public class ViabilityAssaySchema extends AssaySchema
             addVisible(wrapColumn(getRealTable().getColumn("TotalCells")));
             addVisible(wrapColumn(getRealTable().getColumn("ViableCells")));
 
-            ExprColumn viabilityCol = new ExprColumn(this, "Viability", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".TotalCells > 0 THEN SELECT " + ExprColumn.STR_TABLE_ALIAS + ".ViableCells / " + ExprColumn.STR_TABLE_ALIAS + ".TotalCells ELSE 0 END)"), Types.DOUBLE);
+            ExprColumn viabilityCol = new ExprColumn(this, "Viability", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".TotalCells > 0 THEN CAST(" + ExprColumn.STR_TABLE_ALIAS + ".ViableCells AS FLOAT) / " + ExprColumn.STR_TABLE_ALIAS + ".TotalCells ELSE 0.0 END)"), Types.DOUBLE);
             addVisible(viabilityCol);
 
             ExprColumn recoveryCol = new ExprColumn(this, "Recovery", new SQLFragment("3.0"), Types.DOUBLE);
             addVisible(recoveryCol);
 
-            // XXX: SpecimenIDs
-            // XXX: SpecimenCount
+            SQLFragment specimenIDs = new SQLFragment();
+            if (getDbSchema().getSqlDialect().isSqlServer())
+            {
+                specimenIDs.append("(REPLACE(");
+                specimenIDs.append("(SELECT rs.SpecimenID AS [data()]");
+                specimenIDs.append(" FROM viability.ResultSpecimens rs");
+                specimenIDs.append(" WHERE rs.ResultID = " + ExprColumn.STR_TABLE_ALIAS + ".RowID");
+                specimenIDs.append(" ORDER BY rs.[Index]");
+                specimenIDs.append(" FOR XML PATH ('')),' ', ','))");
+
+//                specimenIDs.append("(REPLACE(");
+//                specimenIDs.append("(SELECT rs1.SpecimenID AS [data()]");
+//                specimenIDs.append("  FROM (SELECT rs2.SpecimenID, rs2.ResultID FROM viability.ResultSpecimens rs2");
+//                specimenIDs.append("    WHERE rs2.ResultID = " + ExprColumn.STR_TABLE_ALIAS + ".RowID");
+//                specimenIDs.append("    ORDER BY rs2.[Index]) AS rs1");
+//                specimenIDs.append("  GROUP BY rs1.ResultID");
+//                specimenIDs.append(" FOR XML PATH ('')),' ', ','))");
+            }
+            else if (getDbSchema().getSqlDialect().isPostgreSQL())
+            {
+//                specimenIDs.append("(SELECT array_to_string(viability.array_accum(rs.SpecimenID), ',')");
+//                specimenIDs.append(" FROM viability.ResultSpecimens rs");
+//                specimenIDs.append(" WHERE rs.ResultID = " + ExprColumn.STR_TABLE_ALIAS + ".RowID");
+//                specimenIDs.append(" ORDER BY rs.Index");
+//                specimenIDs.append(")");
+
+                specimenIDs.append("(SELECT array_to_string(viability.array_accum(rs1.SpecimenID), ',')");
+                specimenIDs.append("  FROM (SELECT rs2.SpecimenID, rs2.ResultID FROM viability.ResultSpecimens rs2");
+                specimenIDs.append("    WHERE rs2.ResultID = " + ExprColumn.STR_TABLE_ALIAS + ".RowID");
+                specimenIDs.append("    ORDER BY rs2.Index) AS rs1");
+                specimenIDs.append("  GROUP BY rs1.ResultID");
+                specimenIDs.append(")");
+            }
+            else
+            {
+                throw new UnsupportedOperationException("SqlDialect not supported: " + getDbSchema().getSqlDialect().getClass().getSimpleName());
+            }
+            ExprColumn specimenIDsCol = new ExprColumn(this, "SpecimenIDs", specimenIDs, java.sql.Types.VARCHAR);
+            addVisible(specimenIDsCol);
+
+            ExprColumn specimenIDCount = new ExprColumn(this, "SpecimenIDCount",
+                    new SQLFragment("(SELECT COUNT(RS.specimenid) FROM viability.resultspecimens RS WHERE " + ExprColumn.STR_TABLE_ALIAS + ".RowID = RS.ResultID)"), Types.INTEGER);
+            addVisible(specimenIDCount);
+
             // XXX: SpecimenID1 .. N
 
             addResultDomainPropertiesColumn();
-            //addRunDomainProperties();
-            //addBatchDomainProperties();
-
-            // XXX: LuminexDatTable adds non-normalized columns ProtocolID and Container
-//            SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
-//            protocolIDFilter.add(_protocol.getRowId());
-//            addCondition(protocolIDFilter,"ProtocolID");
-//
-//            SQLFragment containerFilter = new SQLFragment("Container = ?");
-//            containerFilter.add(ViabilityAssaySchema.this.getContainer().getId());
-//            addCondition(containerFilter, "Container");
         }
 
         private void addResultDomainPropertiesColumn()

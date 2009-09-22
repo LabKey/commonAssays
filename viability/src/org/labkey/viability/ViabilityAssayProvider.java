@@ -24,14 +24,17 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.security.User;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.qc.DataExchangeHandler;
+import org.labkey.api.qc.TsvDataExchangeHandler;
 
 import java.util.*;
 
@@ -42,15 +45,18 @@ import java.util.*;
 public class ViabilityAssayProvider extends AbstractAssayProvider
 {
     public static final String NAME = "Viability";
-    public static final String SAMPLE_ID_NAME = "SampleId";
-    public static final String SAMPLE_ID_CAPTION = "Sample Id";
+    public static final String SPECIMENIDS_PROPERTY_NAME = "SpecimenIDs";
+    public static final String SPECIMENIDS_PROPERTY_CAPTION = "Specimen IDs";
+
+    public static final String POOL_ID_PROPERTY_NAME = "PoolID";
+    public static final String POOL_ID_PROPERTY_CAPTION = "Pool ID";
 
     private static final String RESULT_DOMAIN_NAME = "Result Fields";
     public static final String RESULT_LSID_PREFIX = "ViabilityResult";
 
     public ViabilityAssayProvider()
     {
-        super("ViabilityAssayProtocol", "ViabilityAssayRun", ViabilityAssayDataHandler.DATA_TYPE, new ViabilityAssayTableMetadata());
+        super("ViabilityAssayProtocol", "ViabilityAssayRun", ViabilityTsvDataHandler.DATA_TYPE, new ViabilityAssayTableMetadata());
     }
 
     private static class ViabilityAssayTableMetadata extends AssayTableMetadata
@@ -61,10 +67,14 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         }
     }
 
-    private static class ResultDomainProperty
+    /*package*/ static class ResultDomainProperty
     {
         public String name, label, description;
         public PropertyType type;
+
+        public boolean hideInUploadWizard = false;
+        public boolean editableInUploadWizard = false;
+        public int inputLength = 9;
 
         public ResultDomainProperty(String name, String label, PropertyType type, String description)
         {
@@ -75,23 +85,21 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         }
     }
 
-    private static Map<String, ResultDomainProperty> RESULT_DOMAIN_PROPERTIES;
+    /*package*/ static Map<String, ResultDomainProperty> RESULT_DOMAIN_PROPERTIES;
+
     static {
         ResultDomainProperty[] props = new ResultDomainProperty[] {
-            //new ResultDomainProperty(SPECIMENID_PROPERTY_NAME,  SPECIMENID_PROPERTY_CAPTION, PropertyType.STRING, "When a matching specimen exists in a study, can be used to identify subject and timepoint for assay. Alternately, supply " + PARTICIPANTID_PROPERTY_NAME + " and either " + VISITID_PROPERTY_NAME + " or " + DATE_PROPERTY_NAME + "."),
             new ResultDomainProperty(PARTICIPANTID_PROPERTY_NAME, PARTICIPANTID_PROPERTY_CAPTION, PropertyType.STRING, "Used with either " + VISITID_PROPERTY_NAME + " or " + DATE_PROPERTY_NAME + " to identify subject and timepoint for assay."),
             new ResultDomainProperty(VISITID_PROPERTY_NAME,  VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE, "Used with " + PARTICIPANTID_PROPERTY_NAME + " to identify subject and timepoint for assay."),
             new ResultDomainProperty(DATE_PROPERTY_NAME,  DATE_PROPERTY_CAPTION, PropertyType.DATE_TIME, "Used with " + PARTICIPANTID_PROPERTY_NAME + " to identify subject and timepoint for assay."),
+            new ResultDomainProperty(SPECIMENIDS_PROPERTY_NAME,  SPECIMENIDS_PROPERTY_CAPTION, PropertyType.STRING, "When a matching specimen exists in a study, can be used to identify subject and timepoint for assay."),
 
-            new ResultDomainProperty("PoolID", "Pool ID", PropertyType.STRING, "Unique identifier for each pool of specimens"),
+            new ResultDomainProperty(POOL_ID_PROPERTY_NAME, POOL_ID_PROPERTY_CAPTION, PropertyType.STRING, "Unique identifier for each pool of specimens"),
             new ResultDomainProperty("TotalCells", "Total Cells", PropertyType.INTEGER, "Total cell count"),
             new ResultDomainProperty("ViableCells", "Viable Cells", PropertyType.INTEGER, "Total viable cell count"),
-            new ResultDomainProperty("Viability", "Viability", PropertyType.DOUBLE, "Percent viable cell count"),
             // XXX: not in db, should be in domain?
+            new ResultDomainProperty("Viability", "Viability", PropertyType.DOUBLE, "Percent viable cell count"),
             new ResultDomainProperty("Recovery", "Recovery", PropertyType.DOUBLE, "Percent recovered cell count (viable cells / (sum of specimen vials original cell count)"),
-            new ResultDomainProperty("SpecimenIDs", "SpecimenIDs", PropertyType.STRING, "Comma-separated list of specimen IDs"),
-
-            // XXX: SpecimenIDCount
         };
 
         LinkedHashMap<String, ResultDomainProperty> map = new LinkedHashMap<String, ResultDomainProperty>();
@@ -99,6 +107,16 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         {
             map.put(prop.name, prop);
         }
+
+        map.get(POOL_ID_PROPERTY_NAME).hideInUploadWizard = true;
+        map.get("Viability").hideInUploadWizard = true;
+        map.get("Recovery").hideInUploadWizard = true;
+
+        map.get(PARTICIPANTID_PROPERTY_NAME).editableInUploadWizard = true;
+        map.get(VISITID_PROPERTY_NAME).editableInUploadWizard = true;
+        map.get(DATE_PROPERTY_NAME).editableInUploadWizard = true;
+        map.get(SPECIMENIDS_PROPERTY_NAME).editableInUploadWizard = true;
+
         RESULT_DOMAIN_PROPERTIES = Collections.unmodifiableMap(map);
     }
 
@@ -177,9 +195,11 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         Domain resultDomain = PropertyService.get().createDomain(c, lsid, RESULT_DOMAIN_NAME);
         resultDomain.setDescription("The user is prompted to enter data values for row of data associated with a run, typically done as uploading a file.  This is part of the second step of the upload process.");
 
-        for (ResultDomainProperty ddp : RESULT_DOMAIN_PROPERTIES.values())
+        for (ResultDomainProperty rdp : RESULT_DOMAIN_PROPERTIES.values())
         {
-            addProperty(resultDomain, ddp.name, ddp.label, ddp.type, ddp.description);
+            DomainProperty dp = addProperty(resultDomain, rdp.name, rdp.label, rdp.type, rdp.description);
+            PropertyDescriptor pd = dp.getPropertyDescriptor();
+            pd.setInputLength(rdp.inputLength);
         }
 
         return new Pair<Domain, Map<DomainProperty, Object>>(resultDomain, Collections.<DomainProperty, Object>emptyMap());
@@ -209,4 +229,43 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         throw new UnsupportedOperationException("NYI");
     }
 
+    @Override
+    public DataExchangeHandler getDataExchangeHandler()
+    {
+        return new TsvDataExchangeHandler();
+    }
+
+    @Override
+    public ActionURL getImportURL(Container container, ExpProtocol protocol)
+    {
+        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, ViabilityAssayUploadWizardAction.class);
+    }
+
+    /*
+    @Override
+    protected void addOutputDatas(AssayRunUploadContext context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
+    {
+        ViabilityAssayRunUploadForm form = (ViabilityAssayRunUploadForm)context;
+
+        Map<String, File> files;
+        try
+        {
+            files = context.getUploadedData();
+        }
+        catch (IOException e)
+        {
+            throw new ExperimentException(e);
+        }
+        if (files.size() == 0)
+        {
+            throw new IllegalStateException("AssayRunUploadContext " + context + " provided no upload data");
+        }
+
+        for (Map.Entry<String, File> entry : files.entrySet())
+        {
+            ExpData data = createData(context.getContainer(), entry.getValue(), entry.getKey(), _dataType);
+            outputDatas.put(data, "Data");
+        }
+    }
+    */
 }

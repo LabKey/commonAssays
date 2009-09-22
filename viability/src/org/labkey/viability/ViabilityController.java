@@ -19,18 +19,16 @@ package org.labkey.viability;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.view.*;
-import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.portal.ProjectUrls;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.validation.BindException;
+import org.labkey.api.study.assay.AssayUrls;
 
 public class ViabilityController extends SpringActionController
 {
     public static final String NAME = "viability";
 
-    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ViabilityController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ViabilityController.class, ViabilityAssayUploadWizardAction.class);
 
     public ViabilityController() throws Exception
     {
@@ -38,18 +36,11 @@ public class ViabilityController extends SpringActionController
     }
 
     @RequiresPermission(ACL.PERM_READ)
-    public class BeginAction extends SimpleViewAction
+    public class BeginAction extends SimpleRedirectAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ActionURL getRedirectURL(Object o) throws Exception
         {
-            ActionURL url = PageFlowUtil.urlProvider(ProjectUrls.class).getBeginURL(getContainer());
-            HttpView.throwRedirect(url);
-            return null;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root;
+            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getViewContext().getContainer());
         }
     }
 }

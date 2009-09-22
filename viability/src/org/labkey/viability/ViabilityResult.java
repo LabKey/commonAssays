@@ -17,9 +17,10 @@
 package org.labkey.viability;
 
 import org.labkey.api.data.ObjectFactory;
-import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.data.RuntimeSQLException;
 
 import java.util.*;
+import java.sql.SQLException;
 
 /**
  * User: kevink
@@ -44,10 +45,24 @@ public class ViabilityResult
 
     public ViabilityResult() { }
 
-    public static ViabilityResult fromMap(Map<String, Object> map)
+    public static ViabilityResult fromMap(Map<String, Object> base, Map<String, Object> extra)
     {
         ObjectFactory<ViabilityResult> factory = ObjectFactory.Registry.getFactory(ViabilityResult.class);
-        return factory.fromMap(map);
+        ViabilityResult result = factory.fromMap(base);
+
+        Object o = base.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME);
+        if (o instanceof String[])
+            result.setSpecimenIDs(Arrays.asList((String[])o));
+        else if (o instanceof List)
+            result.setSpecimenIDs((List)o);
+        else
+            result.setSpecimenIDs(Collections.<String>emptyList());
+
+        if (extra != null)
+            result.setProperties(extra);
+        else
+            result.setProperties(Collections.<String, Object>emptyMap());
+        return result;
     }
 
     public int getRowID()
@@ -149,6 +164,17 @@ public class ViabilityResult
 
     public List<String> getSpecimenIDs()
     {
+        if (specimenID == null)
+        {
+            try
+            {
+                specimenID = Arrays.asList(ViabilityManager.getSpecimens(getRowID()));
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
         return specimenID;
     }
 
@@ -159,6 +185,17 @@ public class ViabilityResult
 
     public Map<String, Object> getProperties()
     {
+        if (properties == null)
+        {
+            try
+            {
+                properties = ViabilityManager.getProperties(null, this.getObjectID());
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
         return properties;
     }
 

@@ -52,6 +52,16 @@ public class ViabilityManager
         return (ViabilityAssayProvider) AssayService.get().getProvider(ViabilityAssayProvider.NAME);
     }
 
+    public static ViabilityResult[] getResults(ExpData data, Container container) throws SQLException
+    {
+        ViabilityResult[] result = Table.select(ViabilitySchema.getTableInfoResults(),
+                Table.ALL_COLUMNS,
+                new SimpleFilter(),
+                null,
+                ViabilityResult.class);
+        return result;
+    }
+
     /**
      * Get a viability result row.
      * @param resultRowId The row id of the result to get.
@@ -62,13 +72,14 @@ public class ViabilityManager
         ViabilityResult result = Table.selectObject(ViabilitySchema.getTableInfoResults(), resultRowId, ViabilityResult.class);
         if (result == null)
             return null;
-        String[] specimens = getSpecimens(resultRowId);
-        result.setSpecimenIDs(Arrays.asList(specimens));
-        result.setProperties(getProperties(c, result.getObjectID()));
+        // lazily fetch specimens and properties
+//        String[] specimens = getSpecimens(resultRowId);
+//        result.setSpecimenIDs(Arrays.asList(specimens));
+//        result.setProperties(getProperties(c, result.getObjectID()));
         return result;
     }
 
-    private static String[] getSpecimens(int resultRowId) throws SQLException
+    static String[] getSpecimens(int resultRowId) throws SQLException
     {
         String[] specimens = Table.executeArray(
                 ViabilitySchema.getTableInfoResultSpecimens(),
@@ -79,7 +90,7 @@ public class ViabilityManager
         return specimens;
     }
 
-    private static Map<String, Object> getProperties(Container c, int objectID) throws SQLException
+    static Map<String, Object> getProperties(Container c, int objectID) throws SQLException
     {
         assert objectID > 0;
         OntologyObject obj = OntologyManager.getOntologyObject(objectID);
@@ -100,7 +111,7 @@ public class ViabilityManager
         assert result.getPoolID() != null;
         assert result.getTotalCells() > 0;
         assert result.getViableCells() > 0;
-        assert result.getSpecimenIDs() != null && result.getSpecimenIDs().size() > 0;
+//        assert result.getSpecimenIDs() != null && result.getSpecimenIDs().size() > 0;
 
         if (result.getRowID() == 0)
         {
@@ -108,7 +119,8 @@ public class ViabilityManager
             Integer id = OntologyManager.ensureObject(c, lsid);
 
             result.setObjectID(id.intValue());
-            Table.insert(user, ViabilitySchema.getTableInfoResults(), result);
+            ViabilityResult inserted = Table.insert(user, ViabilitySchema.getTableInfoResults(), result);
+            result.setRowID(inserted.getRowID());
         }
         else
         {
@@ -124,6 +136,7 @@ public class ViabilityManager
 
     private static void insertSpecimens(User user, ViabilityResult result) throws SQLException
     {
+//        assert result.getSpecimenIDs() != null && result.getSpecimenIDs().size() > 0;
         List<String> specimens = result.getSpecimenIDs();
         for (int index = 0; index < specimens.size(); index++)
         {
@@ -195,11 +208,51 @@ public class ViabilityManager
      */
     /*package*/ static ExpData getResultExpData(int resultRowId)
     {
-        // executeSingleton
         Integer dataId = Table.executeSingleton(ViabilitySchema.getTableInfoResults(), "DataID", new SimpleFilter("RowID", resultRowId), null, Integer.class);
         if (dataId != null)
             return ExperimentService.get().getExpData(dataId.intValue());
         return null;
+    }
+
+    /** Delete all viability results that reference the ExpData. */
+    public static void deleteAll(ExpData data, Container c)
+    {
+        deleteAll(Arrays.asList(data), c);
+    }
+
+    /** Delete all viability results that reference the ExpData. */
+    // XXX: optimize
+    public static void deleteAll(List<ExpData> datas, Container c)
+    {
+        try
+        {
+            List<Integer> dataIDs = new ArrayList<Integer>(datas.size());
+            for (ExpData data : datas)
+                dataIDs.add(data.getRowId());
+
+            Map<String, Object>[] rows =
+                    Table.selectMaps(ViabilitySchema.getTableInfoResults(),
+                    new HashSet<String>(Arrays.asList("RowID", "ObjectID")),
+                    new SimpleFilter("DataID", dataIDs, CompareType.IN), null);
+
+            Integer[] objectIDs = new Integer[rows.length];
+
+            for (int i = 0; i < rows.length; i++)
+            {
+                Map<String, Object> row = rows[i];
+                Integer resultID = (Integer)row.get("RowID");
+                objectIDs[i] = (Integer)row.get("ObjectID");
+
+                deleteSpecimens(resultID.intValue());
+                Table.delete(ViabilitySchema.getTableInfoResults(), resultID);
+            }
+
+            OntologyManager.deleteOntologyObjects(objectIDs, c, true);
+        }
+        catch (SQLException ex)
+        {
+            throw new RuntimeSQLException(ex);
+        }
     }
 
     public static class TestCase extends junit.framework.TestCase
@@ -221,7 +274,7 @@ public class ViabilityManager
             TestContext context = TestContext.get();
             User user = context.getUser();
 
-            _data = ExperimentService.get().createData(c, ViabilityAssayDataHandler.DATA_TYPE, "viability-exp-data");
+            _data = ExperimentService.get().createData(c, ViabilityTsvDataHandler.DATA_TYPE, "viability-exp-data");
             _data.save(user);
 
             _propertyA = new PropertyDescriptor("viability-juni-propertyA", PropertyType.STRING.getTypeUri(), "propertyA", c);
@@ -242,18 +295,18 @@ public class ViabilityManager
             Container c = JunitUtil.getTestContainer();
             TestContext context = TestContext.get();
 
-            //noinspection unchecked
-            Integer[] resultIDs = Table.executeArray(
-                    ViabilitySchema.getTableInfoResults(),
-                    ViabilitySchema.getTableInfoResults().getColumn("RowID"),
-                    new SimpleFilter("PoolID", "xxx-", CompareType.STARTS_WITH), null,
-                    Integer.class);
-            for (int resultID : resultIDs)
-            {
-                // XXX: UNDONE ViabilityManager.deleteAll(c);
-                ViabilityResult result = ViabilityManager.getResult(c, resultID);
-                ViabilityManager.deleteResult(c, result);
-            }
+//            deleteAll(_data, c);
+//            Integer[] resultIDs = Table.executeArray(
+//                    ViabilitySchema.getTableInfoResults(),
+//                    ViabilitySchema.getTableInfoResults().getColumn("RowID"),
+//                    new SimpleFilter("PoolID", "xxx-", CompareType.STARTS_WITH), null,
+//                    Integer.class);
+//            for (int resultID : resultIDs)
+//            {
+//                // XXX: UNDONE ViabilityManager.deleteAll(c);
+//                ViabilityResult result = ViabilityManager.getResult(c, resultID);
+//                ViabilityManager.deleteResult(c, result);
+//            }
 
             ExperimentService.get().deleteAllExpObjInContainer(c, context.getUser());
             OntologyManager.deleteAllObjects(c);
