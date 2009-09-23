@@ -1125,7 +1125,10 @@ public class FlowSchema extends UserSchema
             colMaterialInput.setHidden(true);
         }
 
-        ExprColumn colHasFile = new ExprColumn(ret, "HasFile", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN true ELSE false END)"), java.sql.Types.BOOLEAN);
+        String bTRUE = _dbSchema.getSqlDialect().getBooleanTRUE();
+        String bFALSE = _dbSchema.getSqlDialect().getBooleanFALSE();
+
+        ExprColumn colHasFile = new ExprColumn(ret, "HasFile", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN " + bTRUE +" ELSE " + bFALSE + " END)"), java.sql.Types.BOOLEAN);
         ret.addColumn(colHasFile);
         colHasFile.setHidden(true);
 
