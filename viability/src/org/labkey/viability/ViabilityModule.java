@@ -85,7 +85,8 @@ public class ViabilityModule extends DefaultModule
     public Set<Class<? extends TestCase>> getJUnitTests()
     {
         return new HashSet<Class<? extends TestCase>>(Arrays.asList(
-                ViabilityManager.TestCase.class
+                ViabilityManager.TestCase.class,
+                GuavaDataHandler.TestCase.class
         ));
     }
 }

@@ -50,6 +50,10 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     public static final String POOL_ID_PROPERTY_NAME = "PoolID";
     public static final String POOL_ID_PROPERTY_CAPTION = "Pool ID";
+    public static final String TOTAL_CELLS_PROPERTY_NAME = "TotalCells";
+    public static final String TOTAL_CELLS_PROPERTY_CAPTION = "Total Cells";
+    public static final String VIABLE_CELLS_PROPERTY_NAME = "ViableCells";
+    public static final String VIABLE_CELLS_PROPERTY_CAPTION = "Viable Cells";
 
     private static final String RESULT_DOMAIN_NAME = "Result Fields";
     public static final String RESULT_LSID_PREFIX = "ViabilityResult";
@@ -95,8 +99,8 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             new ResultDomainProperty(SPECIMENIDS_PROPERTY_NAME,  SPECIMENIDS_PROPERTY_CAPTION, PropertyType.STRING, "When a matching specimen exists in a study, can be used to identify subject and timepoint for assay."),
 
             new ResultDomainProperty(POOL_ID_PROPERTY_NAME, POOL_ID_PROPERTY_CAPTION, PropertyType.STRING, "Unique identifier for each pool of specimens"),
-            new ResultDomainProperty("TotalCells", "Total Cells", PropertyType.INTEGER, "Total cell count"),
-            new ResultDomainProperty("ViableCells", "Viable Cells", PropertyType.INTEGER, "Total viable cell count"),
+            new ResultDomainProperty(TOTAL_CELLS_PROPERTY_NAME, TOTAL_CELLS_PROPERTY_CAPTION, PropertyType.INTEGER, "Total cell count"),
+            new ResultDomainProperty(VIABLE_CELLS_PROPERTY_NAME, VIABLE_CELLS_PROPERTY_CAPTION, PropertyType.INTEGER, "Total viable cell count"),
             // XXX: not in db, should be in domain?
             new ResultDomainProperty("Viability", "Viability", PropertyType.DOUBLE, "Percent viable cell count"),
             new ResultDomainProperty("Recovery", "Recovery", PropertyType.DOUBLE, "Percent recovered cell count (viable cells / (sum of specimen vials original cell count)"),
@@ -243,29 +247,56 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     /*
     @Override
-    protected void addOutputDatas(AssayRunUploadContext context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
+    public DataTransformer getDataTransformer()
     {
-        ViabilityAssayRunUploadForm form = (ViabilityAssayRunUploadForm)context;
+        return new DataTransformer() {
+            public TransformResult transform(AssayRunUploadContext context, ExpRun run) throws ValidationException
+            {
+                ViabilityAssayRunUploadForm form = (ViabilityAssayRunUploadForm)context;
 
-        Map<String, File> files;
-        try
-        {
-            files = context.getUploadedData();
-        }
-        catch (IOException e)
-        {
-            throw new ExperimentException(e);
-        }
-        if (files.size() == 0)
-        {
-            throw new IllegalStateException("AssayRunUploadContext " + context + " provided no upload data");
-        }
+                // Find the ExpData that was just inserted as a run output,
+                // then update the results with the form posted data.
+                List<ExpData> datas = run.getDataOutputs();
+                assert datas.size() == 1;
+                ExpData data = datas.get(0);
+                File uploadedFile = data.getFile();
+                try
+                {
+                    List<Map<String, Object>> posted = form.getResultProperties();
+                    final File transformedFile = AssayFileWriter.safeDuplicate(context.getContainer(),
+                            new File(uploadedFile.getParentFile(), uploadedFile.getName() + ".tsv"));
+                    TSVWriter tsvWriter = new TSVWriter(transformedFile.getAbsolutePath());
+                    return new TransformResult() {
 
-        for (Map.Entry<String, File> entry : files.entrySet())
-        {
-            ExpData data = createData(context.getContainer(), entry.getValue(), entry.getKey(), _dataType);
-            outputDatas.put(data, "Data");
-        }
+                        public Map<DataType, File> getTransformedData()
+                        {
+                            return Collections.singletonMap(ViabilityTsvDataHandler.DATA_TYPE, transformedFile);
+                        }
+
+                        public Map<DomainProperty, String> getRunProperties()
+                        {
+                            return Collection;
+                        }
+
+                        public Map<DomainProperty, String> getBatchProperties()
+                        {
+                            return null;
+                        }
+                    };
+
+//                    ViabilityManager.deleteAll(data, form.getContainer());
+//                    ViabilityAssayDataHandler._insertRowData(data, form.getUser(), form.getContainer(), null, posted);
+                }
+                catch (ExperimentException e)
+                {
+                    throw new ValidationException(e.getMessage());
+                }
+//                catch (SQLException e)
+//                {
+//                    throw new RuntimeSQLException(e);
+//                }
+            }
+        };
     }
     */
 }

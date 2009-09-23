@@ -58,7 +58,15 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
             Domain runDomain = provider.getRunDomain(getProtocol());
             Domain resultDomain = provider.getResultsDomain(getProtocol());
 
-            ViabilityAssayDataHandler.Parser parser = new ViabilityTsvDataHandler.Parser(runDomain, resultDomain, file);
+            ViabilityAssayDataHandler.Parser parser;
+            String fileName = file.getName().toLowerCase();
+            if (fileName.endsWith(".tsv") || fileName.endsWith(".txt"))
+                parser = new ViabilityTsvDataHandler.Parser(runDomain, resultDomain, file);
+            else if (fileName.endsWith(".csv"))
+                parser = new GuavaDataHandler.Parser(runDomain, resultDomain, file);
+            else
+                throw new ExperimentException("Don't know how to parse uploaded file: " + fileName);
+            
             List<Map<String, Object>> rows = parser.getResultData();
             ViabilityAssayDataHandler.validateData(rows, false);
 

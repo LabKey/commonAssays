@@ -81,7 +81,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             }
         }
 
-        protected abstract void _parse() throws IOException;
+        protected abstract void _parse() throws IOException, ExperimentException;
 
         public Map<String, Object> getRunData() throws ExperimentException
         {
@@ -205,7 +205,8 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     @Override
     protected void insertRowData(ExpData data, User user, Container container, PropertyDescriptor[] dataProperties, List<Map<String, Object>> fileData) throws SQLException, ValidationException
     {
-        _insertRowData(data, user, container, dataProperties, fileData);
+        // Insert is a no-op.  We insert later during the upload wizard SpecimensStepHandler.handleSuccessfulPost()
+        //_insertRowData(data, user, container, dataProperties, fileData);
     }
 
     /*package*/ static void _insertRowData(ExpData data, User user, Container container, PropertyDescriptor[] dataProperties, List<Map<String, Object>> fileData) throws SQLException, ValidationException

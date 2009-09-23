@@ -1246,6 +1246,7 @@ viability/resources/schemas/dbscripts/postgresql/viability-0.10-0.20.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.00-0.10.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.10-0.20.sql -text
 viability/resources/schemas/viability.xml -text
+viability/src/org/labkey/viability/GuavaDataHandler.java -text
 viability/src/org/labkey/viability/ViabilityAssayDataHandler.java -text
 viability/src/org/labkey/viability/ViabilityAssayProvider.java -text
 viability/src/org/labkey/viability/ViabilityAssayRunUploadForm.java -text
