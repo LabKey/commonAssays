@@ -51,11 +51,6 @@ public class ProteinStringExpression implements StringExpression, Cloneable
         return _localURI + "&seqId={$SeqId}";
     }
 
-    public void addParameter(String key, String value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
     public void render(Writer out, Map ctx) throws IOException
     {
         out.write(eval(ctx));

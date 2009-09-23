@@ -26,10 +26,7 @@ import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Provides a filtered table implementation for the Features table, allowing clients
@@ -301,6 +298,7 @@ public class FeaturesTableInfo extends VirtualTable
         assert underlyingColumn.getParentTable() == getSourceTable();
         ExprColumn ret = new ExprColumn(this, alias, underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
         ret.copyAttributesFrom(underlyingColumn);
+        ret.copyURLFrom(underlyingColumn, null, Collections.singletonMap(underlyingColumn.getFieldKey(), ret.getFieldKey()));
         ret.setLabel(ColumnInfo.labelFromName(alias));
         return ret;
     }
