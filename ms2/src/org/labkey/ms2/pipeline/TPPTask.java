@@ -315,7 +315,8 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
             String ver = getTPPVersion(getJob());
             List<String> interactCmd = new ArrayList<String>();
-            interactCmd.add(PipelineJobService.get().getExecutablePath("xinteract", "tpp", ver));
+            String xinteractPath = PipelineJobService.get().getExecutablePath("xinteract", "tpp", ver);
+            interactCmd.add(xinteractPath);
 
             if (!getJobSupport().isProphetEnabled())
             {
@@ -364,8 +365,6 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 paramMinProb = params.get("pipeline prophet, min protein probability");
                 if (paramMinProb != null && paramMinProb.length() > 0)
                     interactCmd.add("-pr" + paramMinProb);
-
-                interactCmd.add("-nIP");
             }
 
             RecordedAction proteinQuantAction = null;
@@ -388,7 +387,9 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             for (File fileInput : inputWorkFiles)
                 interactCmd.add(_wd.getRelativePath(fileInput));
 
-            getJob().runSubProcess(new ProcessBuilder(interactCmd), _wd.getDir());
+            ProcessBuilder builder = new ProcessBuilder(interactCmd);
+            builder.environment().put("WEBSERVER_ROOT", new File(xinteractPath).getParent());
+            getJob().runSubProcess(builder, _wd.getDir());
 
             WorkDirectory.CopyingResource lock = null;
             try
