@@ -388,7 +388,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 interactCmd.add(_wd.getRelativePath(fileInput));
 
             ProcessBuilder builder = new ProcessBuilder(interactCmd);
-            builder.environment().put("WEBSERVER_ROOT", new File(xinteractPath).getParent());
+            builder.environment().put("WEBSERVER_ROOT", StringUtils.trimToEmpty(new File(xinteractPath).getParent()));
             getJob().runSubProcess(builder, _wd.getDir());
 
             WorkDirectory.CopyingResource lock = null;
