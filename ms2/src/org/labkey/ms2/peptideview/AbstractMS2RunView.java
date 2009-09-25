@@ -241,7 +241,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         setColumnURL(rgn, "scan", peptideDetailsURL, "pep");
         setColumnURL(rgn, "peptide", peptideDetailsURL, "pep");
 
-        baseURL.setFragment("#quantitation");
+        baseURL.setFragment("quantitation");
         DetailsURL quantitationDetailsURL = new DetailsURL(baseURL, peptideParams);
 
         setColumnURL(rgn, "lightfirstscan", quantitationDetailsURL, "pep");
@@ -260,6 +260,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         DetailsURL proteinHitsDetailsURL = new DetailsURL(baseURL, Collections.singletonMap("peptideId", "RowId"));
         setColumnURL(rgn, "proteinHits", proteinHitsDetailsURL, "prot");
 
+        baseURL.setFragment(null);
         DisplayColumn dc = rgn.getDisplayColumn("protein");
         if (null != dc)
         {
