@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
--- DROP obsolete views.  Do not remove; these are needed when upgrading from older versions.
+-- DROP all views (current and obsolete).
+-- NOTE: Never remove any of these drop statements, even if we stop using the view.  These drop statements must remain
+--   in place so we can correctly upgrade from older versions.  If you're not convinced, talk to adam.
+
+-- DROP obsolete views -- do not remove any of these statements
 EXEC core.fn_dropifexists 'ProteinDBs', 'prot', 'VIEW', NULL
 EXEC core.fn_dropifexists 'MS2Spectra', 'ms2', 'VIEW', NULL
 EXEC core.fn_dropifexists 'MS2ExperimentRuns', 'ms2', 'VIEW', NULL
@@ -22,7 +26,7 @@ EXEC core.fn_dropifexists 'MS2Peptides', 'ms2', 'VIEW', NULL
 EXEC core.fn_dropifexists 'MS2SimplePeptides', 'ms2', 'VIEW', NULL
 GO
 
--- DROP current views.
+-- DROP current views -- do not remove any of these statements 
 EXEC core.fn_dropifexists 'Peptides', 'ms2', 'VIEW', NULL
 EXEC core.fn_dropifexists 'SimplePeptides', 'ms2', 'VIEW', NULL
 EXEC core.fn_dropifexists 'ProteinGroupsWithQuantitation', 'ms2', 'VIEW', NULL
