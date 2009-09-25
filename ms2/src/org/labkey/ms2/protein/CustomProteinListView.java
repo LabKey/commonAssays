@@ -21,7 +21,10 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.security.ACL;
+import org.labkey.api.query.DetailsURL;
 import org.springframework.validation.BindException;
+
+import java.util.Collections;
 
 /**
  * User: jeckels
@@ -36,10 +39,10 @@ public class CustomProteinListView extends VBox
         DataRegion rgn = new DataRegion();
         rgn.setName(NAME);
         rgn.setColumns(ProteinManager.getTableInfoCustomAnnotationSet().getColumns("Name, Created, CreatedBy, CustomAnnotationSetId"));
-        rgn.getDisplayColumn("Name").setURL("showAnnotationSet.view?CustomAnnotation.queryName=${Name}");
+        rgn.getDisplayColumn("Name").setURLExpression(new DetailsURL(new ActionURL(ProteinController.ShowAnnotationSetAction.class, context.getContainer()), Collections.singletonMap("CustomAnnotation.queryName", "Name")));
         rgn.getDisplayColumn("CustomAnnotationSetId").setVisible(false);
         GridView gridView = new GridView(rgn, (BindException)null);
-        rgn.setShowRecordSelectors(context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT) || context.getContainer().hasPermission(context.getUser(), ACL.PERM_DELETE));
+        rgn.setShowRecordSelectors((context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT) || context.getContainer().hasPermission(context.getUser(), ACL.PERM_DELETE)) && includeButtons);
         gridView.setSort(new Sort("Name"));
 
         ButtonBar buttonBar = new ButtonBar();

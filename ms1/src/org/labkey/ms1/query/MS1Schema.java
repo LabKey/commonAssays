@@ -161,11 +161,11 @@ public class MS1Schema extends UserSchema
         settings.addMeasure(FieldKey.fromParts("Intensity"), CrosstabMeasure.AggregateFunction.AVG);
         CrosstabMeasure firstFeature = settings.addMeasure(FieldKey.fromParts("FeatureId"), CrosstabMeasure.AggregateFunction.MIN, "First Feature");
 
-        String measureUrl = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString()
-                + MS1Controller.ShowFeaturesForm.ParamNames.runId.name() + "=" + CrosstabMember.VALUE_TOKEN
-                + "&" + MS1Controller.ShowFeaturesForm.ParamNames.pepSeq.name() + "=${RelatedPeptide_Peptide}";
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put(MS1Controller.ShowFeaturesForm.ParamNames.runId.name(), CrosstabMember.VALUE_NAME);
+        parameters.put(MS1Controller.ShowFeaturesForm.ParamNames.pepSeq.name(), "RelatedPeptide_Peptide");
         for(CrosstabMeasure measure : settings.getMeasures())
-            measure.setUrl(measureUrl);
+            measure.setUrl(new DetailsURL(new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()), parameters));
 
         settings.setInstanceCountCaption("Num Runs");
         settings.getRowAxis().setCaption("Peptide Information");

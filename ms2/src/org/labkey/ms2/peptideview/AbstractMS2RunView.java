@@ -26,6 +26,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.MS2Modification;
 import org.labkey.api.util.Pair;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.ms2.*;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.GoLoader;
@@ -230,39 +231,40 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     public void setPeptideUrls(DataRegion rgn, String extraPeptideUrlParams)
     {
-        ActionURL showUrl = _url.clone();
-        showUrl.setAction("showPeptide");
-        String peptideUrlString = showUrl.getLocalURIString() + "&peptideId=${RowId}";
+        ActionURL baseURL = null != extraPeptideUrlParams ? new ActionURL(_url.toString() + "&" + extraPeptideUrlParams) : _url.clone();
+        baseURL.setAction(MS2Controller.ShowPeptideAction.class);
+        Map<String, Object> peptideParams = new HashMap<String, Object>();
+        peptideParams.put("peptideId", "RowId");
+        peptideParams.put("rowIndex", "_row");
+        DetailsURL peptideDetailsURL = new DetailsURL(baseURL, peptideParams);
 
-        if (null != extraPeptideUrlParams)
-            peptideUrlString += "&" + extraPeptideUrlParams;
+        setColumnURL(rgn, "scan", peptideDetailsURL, "pep");
+        setColumnURL(rgn, "peptide", peptideDetailsURL, "pep");
 
-        peptideUrlString += "&rowIndex=${_row}";
+        baseURL.setFragment("#quantitation");
+        DetailsURL quantitationDetailsURL = new DetailsURL(baseURL, peptideParams);
 
-        setColumnURL(rgn, "scan", peptideUrlString, "pep");
-        setColumnURL(rgn, "peptide", peptideUrlString, "pep");
-        String quantURLString = peptideUrlString + "#quantitation";
+        setColumnURL(rgn, "lightfirstscan", quantitationDetailsURL, "pep");
+        setColumnURL(rgn, "lightlastscan", quantitationDetailsURL, "pep");
+        setColumnURL(rgn, "heavyfirstscan", quantitationDetailsURL, "pep");
+        setColumnURL(rgn, "heavylastscan", quantitationDetailsURL, "pep");
+        setColumnURL(rgn, "lightmass", quantitationDetailsURL, "pep");
+        setColumnURL(rgn, "heavymass", quantitationDetailsURL, "pep");
+        setColumnURL(rgn, "ratio", quantitationDetailsURL, "pep");
+        setColumnURL(rgn, "heavy2lightratio", quantitationDetailsURL, "pep");
+        setColumnURL(rgn, "lightarea", quantitationDetailsURL, "pep");
+        setColumnURL(rgn, "heavyarea", quantitationDetailsURL, "pep");
+        setColumnURL(rgn, "decimalratio", quantitationDetailsURL, "pep");
 
-        setColumnURL(rgn, "lightfirstscan", quantURLString, "pep");
-        setColumnURL(rgn, "lightlastscan", quantURLString, "pep");
-        setColumnURL(rgn, "heavyfirstscan", quantURLString, "pep");
-        setColumnURL(rgn, "heavylastscan", quantURLString, "pep");
-        setColumnURL(rgn, "lightmass", quantURLString, "pep");
-        setColumnURL(rgn, "heavymass", quantURLString, "pep");
-        setColumnURL(rgn, "ratio", quantURLString, "pep");
-        setColumnURL(rgn, "heavy2lightratio", quantURLString, "pep");
-        setColumnURL(rgn, "lightarea", quantURLString, "pep");
-        setColumnURL(rgn, "heavyarea", quantURLString, "pep");
-        setColumnURL(rgn, "decimalratio", quantURLString, "pep");
-
-        showUrl.setAction("showAllProteins");
-        setColumnURL(rgn, "proteinHits", showUrl.getLocalURIString() + "&peptideId=${RowId}", "prot");
+        baseURL.setAction(MS2Controller.ShowAllProteinsAction.class);
+        DetailsURL proteinHitsDetailsURL = new DetailsURL(baseURL, Collections.singletonMap("peptideId", "RowId"));
+        setColumnURL(rgn, "proteinHits", proteinHitsDetailsURL, "prot");
 
         DisplayColumn dc = rgn.getDisplayColumn("protein");
         if (null != dc)
         {
-            showUrl.setAction("showProtein");
-            ((DataColumn)dc).setURLExpression(new ProteinStringExpression(showUrl.getLocalURIString()));
+            baseURL.setAction(MS2Controller.ShowProteinAction.class);
+            dc.setURLExpression(new ProteinStringExpression(baseURL.getLocalURIString()));
             dc.setLinkTarget("prot");
         }
 
@@ -271,12 +273,12 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
             dc.setURL(_geneNameUrl);
     }
 
-    private void setColumnURL(DataRegion rgn, String columnName, String peptideUrlString, String linkTarget)
+    private void setColumnURL(DataRegion rgn, String columnName, DetailsURL url, String linkTarget)
     {
         DisplayColumn dc = rgn.getDisplayColumn(columnName);
         if (null != dc)
         {
-            dc.setURL(peptideUrlString);
+            dc.setURLExpression(url);
             dc.setLinkTarget(linkTarget);
         }
     }

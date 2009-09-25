@@ -23,6 +23,7 @@ import org.labkey.api.view.GridView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.*;
 import org.labkey.api.util.Pair;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.ServletException;
@@ -32,6 +33,7 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Collections;
 
 import org.labkey.ms2.MS2Controller;
 import org.springframework.web.servlet.ModelAndView;
@@ -93,11 +95,11 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         proteinRgn.setGroupedResultSet(peptideResultSet);
 
         ActionURL proteinUrl = _url.clone();
-        proteinUrl.setAction("showProtein");
+        proteinUrl.setAction(MS2Controller.ShowProteinAction.class);
         DisplayColumn proteinColumn = proteinRgn.getDisplayColumn("Protein");
         if (proteinColumn != null)
         {
-            proteinColumn.setURL(proteinUrl.getLocalURIString() + "&seqId=${SeqId}");
+            proteinColumn.setURLExpression(new DetailsURL(proteinUrl, Collections.singletonMap("seqId", "SeqId")));
             proteinColumn.setLinkTarget("prot");
         }
 

@@ -568,8 +568,6 @@ public class MS2Schema extends UserSchema
                             // In rare cases we'll have something that qualifies as an MS2 run
                             // based on its protocol LSID but that doesn't actually have a MS2 run
                             // attached to it in the database, so don't show links to it
-                            ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
-                            setURL(url.toString() + "&run=${" + _runCol.getAlias() + "}");
                             return super.renderURL(ctx);
                         }
                         else
@@ -587,6 +585,8 @@ public class MS2Schema extends UserSchema
                         if (_runCol != null)
                         {
                             columns.add(_runCol);
+                            ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
+                            setURLExpression(new DetailsURL(url, Collections.singletonMap("run", _runCol.getFieldKey())));
                         }
                     }
                 };
