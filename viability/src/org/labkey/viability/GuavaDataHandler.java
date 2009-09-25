@@ -43,13 +43,15 @@ import junit.framework.TestSuite;
  */
 public class GuavaDataHandler extends ViabilityAssayDataHandler
 {
-    public static final DataType DATA_TYPE = new DataType("ViabilityAssay-GuavaData");
-    
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
         if (DATA_TYPE.matches(lsid))
-            return Priority.HIGH;
+        {
+            File f = data.getFile();
+            if (f.getName().toLowerCase().endsWith(".csv"))
+                return Priority.HIGH;
+        }
         return null;
     }
 
@@ -64,8 +66,6 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
         {
             super(runDomain, resultsDomain, dataFile);
         }
-
-        public DataType getDataType() { return DATA_TYPE; }
 
         protected void _parse() throws IOException, ExperimentException
         {

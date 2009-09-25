@@ -70,6 +70,12 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return "Luminex";
     }
 
+    @Override
+    public AssaySchema getProviderSchema(User user, Container container, ExpProtocol protocol)
+    {
+        return new LuminexSchema(user, container, protocol);
+    }
+
     protected void registerLsidHandler()
     {
         super.registerLsidHandler();

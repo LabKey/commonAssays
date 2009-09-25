@@ -26,6 +26,7 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.beanutils.ConversionException;
 
 import java.util.*;
 import java.io.File;
@@ -125,12 +126,20 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 PropertyDescriptor pd = dp.getPropertyDescriptor();
                 if (dp.getName().equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
                 {
+                    // get SpecimenIDs from request as a String array
                     value = getRequest().getParameterValues(paramName);
                 }
                 else
                 {
                     Class type = pd.getPropertyType().getJavaType();
-                    value = ConvertUtils.convert(parameter, type);
+                    try
+                    {
+                        value = ConvertUtils.convert(parameter, type);
+                    }
+                    catch (ConversionException ex)
+                    {
+                        throw new ExperimentException("Failed to convert property '" + dp.getName() + "' from '" + parameter + "' to a " + type.getSimpleName());
+                    }
                 }
             }
             properties.put(dp.getName(), value);

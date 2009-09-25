@@ -40,32 +40,39 @@ public class LuminexSchema extends AssaySchema
     private static final String DATA_ROW_TABLE_NAME = "DataRow";
     private final ExpProtocol _protocol;
 
-    public LuminexSchema(User user, Container container)
-    {
-        this(user, container, null);
-    }
-
     public LuminexSchema(User user, Container container, ExpProtocol protocol)
     {
         super("Luminex", user, container, getSchema());
+        assert protocol != null;
         _protocol = protocol;
     }
-    
+
     public Set<String> getTableNames()
     {
-        return new HashSet<String>(Arrays.asList(ANALYTE_TABLE_NAME, DATA_ROW_TABLE_NAME));
+        // return only additional tables not exposed in the assay schema.
+        return Collections.singleton(prefixTableName(ANALYTE_TABLE_NAME));
     }
+
+    private String prefixTableName(String table)
+    {
+        return _protocol.getName() + " " + table;
+    }
+
 
     public TableInfo createTable(String name)
     {
+        assert name.startsWith(_protocol.getName() + " ");
+        name = name.substring((_protocol.getName() + " ").length());
         if (ANALYTE_TABLE_NAME.equalsIgnoreCase(name))
         {
             return createAnalyteTable(true);
         }
+        /*
         else if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
         {
             return createDataRowTable();
         }
+        */
         return null;
     }
 

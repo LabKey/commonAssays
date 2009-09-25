@@ -24,7 +24,7 @@ var MultiValueInput = function (fieldId, initialValues)
                         {
                             if (f.getValue()) {
                                 self.addInput('', true);
-                            } else {
+                            } else if (fields.length > 1) {
                                 // defer destroy so focus is moved to next element
                                 f.destroy.defer(10, f);
                             }
@@ -41,9 +41,16 @@ var MultiValueInput = function (fieldId, initialValues)
 
     };
 
-    for (var i=0; i < initialValues.length; i++)
+    if (initialValues === undefined || initialValues.length == 0)
     {
-        this.addInput(initialValues[i]);
+        this.addInput('');
+    }
+    else
+    {
+        for (var i=0; i < initialValues.length; i++)
+        {
+            this.addInput(initialValues[i]);
+        }
     }
 };
 

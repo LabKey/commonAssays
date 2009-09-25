@@ -90,13 +90,22 @@ public class ViabilityManager
         return specimens;
     }
 
-    static Map<String, Object> getProperties(Container c, int objectID) throws SQLException
+    static Map<PropertyDescriptor, Object> getProperties(int objectID) throws SQLException
     {
         assert objectID > 0;
         OntologyObject obj = OntologyManager.getOntologyObject(objectID);
         assert obj != null;
 
-        return OntologyManager.getProperties(c, obj.getObjectURI());
+        Map<String, Object> oprops = OntologyManager.getProperties(obj.getContainer(), obj.getObjectURI());
+        Map<PropertyDescriptor, Object> properties = new HashMap<PropertyDescriptor, Object>();
+        for (Map.Entry<String, Object> entry : oprops.entrySet())
+        {
+            String propertyURI = entry.getKey();
+            PropertyDescriptor pd = OntologyManager.getPropertyDescriptor(propertyURI, obj.getContainer());
+            assert pd != null;
+            properties.put(pd, entry.getValue());
+        }
+        return properties;
     }
 
     /**
@@ -107,10 +116,11 @@ public class ViabilityManager
      */
     public static void saveResult(User user, Container c, ViabilityResult result) throws SQLException, ValidationException
     {
-        assert result.getDataID() > 0;
-        assert result.getPoolID() != null;
-        assert result.getTotalCells() > 0;
-        assert result.getViableCells() > 0;
+        assert user != null && c != null : "user or container is null";
+        assert result.getDataID() > 0 : "DataID is not set";
+        assert result.getPoolID() != null : "PoolID is not set";
+        assert result.getTotalCells() > 0 : "TotalCells is not set";
+        assert result.getViableCells() > 0 : "ViableCells is not set";
 //        assert result.getSpecimenIDs() != null && result.getSpecimenIDs().size() > 0;
 
         if (result.getRowID() == 0)
@@ -140,6 +150,10 @@ public class ViabilityManager
         List<String> specimens = result.getSpecimenIDs();
         for (int index = 0; index < specimens.size(); index++)
         {
+            String specimenID = specimens.get(index);
+            if (specimenID == null || specimenID.length() == 0)
+                continue;
+            
             Map<String, Object> resultSpecimen = new HashMap<String, Object>();
             resultSpecimen.put("ResultID", result.getRowID());
             resultSpecimen.put("SpecimenID", specimens.get(index));
@@ -151,7 +165,7 @@ public class ViabilityManager
 
     private static void insertProperties(Container c, ViabilityResult result) throws SQLException, ValidationException
     {
-        Map<String, Object> properties = result.getProperties();
+        Map<PropertyDescriptor, Object> properties = result.getProperties();
         if (properties == null || properties.size() == 0)
             return;
 
@@ -159,10 +173,15 @@ public class ViabilityManager
         assert obj != null;
 
         List<ObjectProperty> oprops = new ArrayList<ObjectProperty>(properties.size());
-        for (Map.Entry<String, Object> prop : properties.entrySet())
+        for (Map.Entry<PropertyDescriptor, Object> prop : properties.entrySet())
         {
-            String propertyURI = prop.getKey();
             Object value = prop.getValue();
+            if (value == null)
+                continue;
+
+            PropertyDescriptor pd = prop.getKey();
+            assert pd != null && pd.getPropertyURI() != null;
+            String propertyURI = pd.getPropertyURI();
             oprops.add(new ObjectProperty(obj.getObjectURI(), c, propertyURI, value));
         }
 
@@ -196,6 +215,7 @@ public class ViabilityManager
         Table.delete(ViabilitySchema.getTableInfoResultSpecimens(), new SimpleFilter("ResultID", resultRowId));
     }
 
+    /** Delete the properties for objectID, but not the object itself. */
     private static void deleteProperties(Container c, int objectID) throws SQLException
     {
         OntologyManager.deleteProperties(objectID, c);
@@ -295,18 +315,16 @@ public class ViabilityManager
             Container c = JunitUtil.getTestContainer();
             TestContext context = TestContext.get();
 
-//            deleteAll(_data, c);
-//            Integer[] resultIDs = Table.executeArray(
-//                    ViabilitySchema.getTableInfoResults(),
-//                    ViabilitySchema.getTableInfoResults().getColumn("RowID"),
-//                    new SimpleFilter("PoolID", "xxx-", CompareType.STARTS_WITH), null,
-//                    Integer.class);
-//            for (int resultID : resultIDs)
-//            {
-//                // XXX: UNDONE ViabilityManager.deleteAll(c);
-//                ViabilityResult result = ViabilityManager.getResult(c, resultID);
-//                ViabilityManager.deleteResult(c, result);
-//            }
+            Map<String, Object>[] rows = Table.selectMaps(
+                    ViabilitySchema.getTableInfoResults(),
+                    new HashSet<String>(Arrays.asList("RowID", "ObjectID")),
+                    new SimpleFilter("PoolID", "xxx-", CompareType.STARTS_WITH), null);
+            for (Map<String, Object> row : rows)
+            {
+                int resultId = (Integer)row.get("RowID");
+                int objectId = (Integer)row.get("ObjectID");
+                ViabilityManager.deleteResult(c, resultId, objectId);
+            }
 
             ExperimentService.get().deleteAllExpObjInContainer(c, context.getUser());
             OntologyManager.deleteAllObjects(c);
@@ -335,9 +353,9 @@ public class ViabilityManager
                 assertEquals(0.9, result.getViability());
                 result.setSpecimenIDs(Arrays.asList("111", "222", "333"));
 
-                Map<String, Object> properties = new HashMap<String, Object>();
-                properties.put(_propertyA.getPropertyURI(), "hello property");
-                properties.put(_propertyB.getPropertyURI(), true);
+                Map<PropertyDescriptor, Object> properties = new HashMap<PropertyDescriptor, Object>();
+                properties.put(_propertyA, "hello property");
+                properties.put(_propertyB, true);
                 result.setProperties(properties);
 
                 ViabilityManager.saveResult(user, c, result);
@@ -368,10 +386,10 @@ public class ViabilityManager
                 assertEquals("222", specimenIDs.get(1));
                 assertEquals("333", specimenIDs.get(2));
 
-                Map<String, Object> properties = result.getProperties();
+                Map<PropertyDescriptor, Object> properties = result.getProperties();
                 assertEquals(2, properties.size());
-                assertEquals("hello property", properties.get(_propertyA.getPropertyURI()));
-                assertEquals(Boolean.TRUE, properties.get(_propertyB.getPropertyURI()));
+                assertEquals("hello property", properties.get(_propertyA));
+                assertEquals(Boolean.TRUE, properties.get(_propertyB));
             }
 
             // UPDATE
@@ -383,8 +401,8 @@ public class ViabilityManager
                 specimens.add("444");
                 specimens.add("555");
                 result.setSpecimenIDs(specimens);
-                result.getProperties().put(_propertyA.getPropertyURI(), "goodbye property");
-                result.getProperties().remove(_propertyB.getPropertyURI());
+                result.getProperties().put(_propertyA, "goodbye property");
+                result.getProperties().remove(_propertyB);
                 ViabilityManager.saveResult(user, c, result);
             }
 
@@ -397,9 +415,9 @@ public class ViabilityManager
                 assertEquals("444", specimenIDs.get(2));
                 assertEquals("555", specimenIDs.get(3));
 
-                Map<String, Object> properties = result.getProperties();
+                Map<PropertyDescriptor, Object> properties = result.getProperties();
                 assertEquals(1, properties.size());
-                assertEquals("goodbye property", properties.get(_propertyA.getPropertyURI()));
+                assertEquals("goodbye property", properties.get(_propertyA));
             }
 
             // DELETE

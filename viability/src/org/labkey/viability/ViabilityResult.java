@@ -18,6 +18,7 @@ package org.labkey.viability;
 
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.exp.PropertyDescriptor;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -41,11 +42,11 @@ public class ViabilityResult
     private int viableCells;
 
     private List<String> specimenID;
-    private Map<String, Object> properties;
+    private Map<PropertyDescriptor, Object> properties;
 
     public ViabilityResult() { }
 
-    public static ViabilityResult fromMap(Map<String, Object> base, Map<String, Object> extra)
+    public static ViabilityResult fromMap(Map<String, Object> base, Map<PropertyDescriptor, Object> extra)
     {
         ObjectFactory<ViabilityResult> factory = ObjectFactory.Registry.getFactory(ViabilityResult.class);
         ViabilityResult result = factory.fromMap(base);
@@ -61,7 +62,7 @@ public class ViabilityResult
         if (extra != null)
             result.setProperties(extra);
         else
-            result.setProperties(Collections.<String, Object>emptyMap());
+            result.setProperties(Collections.<PropertyDescriptor, Object>emptyMap());
         return result;
     }
 
@@ -183,13 +184,13 @@ public class ViabilityResult
         this.specimenID = specimenID;
     }
 
-    public Map<String, Object> getProperties()
+    public Map<PropertyDescriptor, Object> getProperties()
     {
         if (properties == null)
         {
             try
             {
-                properties = ViabilityManager.getProperties(null, this.getObjectID());
+                properties = ViabilityManager.getProperties(getObjectID());
             }
             catch (SQLException e)
             {
@@ -199,7 +200,7 @@ public class ViabilityResult
         return properties;
     }
 
-    public void setProperties(Map<String, Object> properties)
+    public void setProperties(Map<PropertyDescriptor, Object> properties)
     {
         this.properties = properties;
     }

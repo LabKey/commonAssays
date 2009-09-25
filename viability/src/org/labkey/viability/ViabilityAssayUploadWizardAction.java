@@ -181,8 +181,8 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             boolean valid = super.validatePost(form, errors);
             try
             {
-                if (valid)
-                    form.getResultProperties();
+                List<Map<String, Object>> rows = form.getResultProperties();
+                ViabilityAssayDataHandler.validateData(rows, true);
             }
             catch (ExperimentException e)
             {
@@ -213,7 +213,11 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 // XXX: hack hack. It would be nice to insert the form posted values the first time rather than deleting and re-inserting.
                 List<Map<String, Object>> posted = form.getResultProperties();
                 ViabilityManager.deleteAll(data, form.getContainer());
-                ViabilityAssayDataHandler._insertRowData(data, form.getUser(), form.getContainer(), null, posted);
+
+                AssayProvider provider = AssayService.get().getProvider(form.getProtocol());
+                Domain resultDomain = provider.getResultsDomain(form.getProtocol());
+
+                ViabilityAssayDataHandler._insertRowData(data, form.getUser(), form.getContainer(), resultDomain, posted);
             }
             catch (SQLException e)
             {

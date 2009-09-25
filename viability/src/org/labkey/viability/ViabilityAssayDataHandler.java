@@ -44,6 +44,8 @@ import java.sql.SQLException;
  */
 public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHandler
 {
+    public static final DataType DATA_TYPE = new DataType("ViabilityAssayData");
+
     public static abstract class Parser
     {
         protected Domain _runDomain;
@@ -60,13 +62,12 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             _dataFile = dataFile;
         }
 
-        public abstract DataType getDataType();
-        
         protected void parse() throws ExperimentException
         {
             try
             {
                 _parse();
+                splitPoolID();
             }
             catch (IOException e)
             {
@@ -82,6 +83,48 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         }
 
         protected abstract void _parse() throws IOException, ExperimentException;
+
+        protected void splitPoolID() throws ExperimentException
+        {
+            if (_resultData == null)
+                return;
+
+            for (ListIterator<Map<String, Object>> it = _resultData.listIterator(); it.hasNext();)
+            {
+                Map<String, Object> row = it.next();
+
+                String poolID = (String) row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME);
+                if (poolID == null || poolID.length() == 0)
+                    throw new ExperimentException(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME + " required");
+
+                String participantID = (String) row.get(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
+                String visitID = (String) row.get(AbstractAssayProvider.VISITID_PROPERTY_NAME);
+                if (participantID == null && visitID == null)
+                {
+                    String[] parts = poolID.split("-|_", 2);
+                    if (parts.length == 2)
+                    {
+                        row = new HashMap<String, Object>(row);
+                        row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, parts[0]);
+
+                        try
+                        {
+                            Double visit = Double.parseDouble(parts[1]);
+                            row.put(AbstractAssayProvider.VISITID_PROPERTY_NAME, visit);
+                        }
+                        catch (NumberFormatException nfe)
+                        {
+                            throw new ExperimentException(
+                                    "PoolID should be in the format 'ParticipantID-VisitID' where 'VisitID' is a double number.\n" +
+                                    "Failed to parse VisitID of pool '" + poolID + "': " + nfe.getMessage(), nfe);
+                        }
+
+                        it.set(row);
+                    }
+                }
+            }
+
+        }
 
         public Map<String, Object> getRunData() throws ExperimentException
         {
@@ -136,17 +179,9 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
-        ExpProtocol protocol = data.getRun().getProtocol();
-        AssayProvider provider = AssayService.get().getProvider(protocol);
-
-        Domain runDomain = provider.getRunDomain(protocol);
-        Domain resultsDomain = provider.getResultsDomain(protocol);
-        Parser parser = getParser(runDomain, resultsDomain, dataFile);
-        List<Map<String, Object>> rows = parser.getResultData();
-        validateData(rows, false);
-
+        // Insert is a no-op.  We insert later during the upload wizard SpecimensStepHandler.handleSuccessfulPost()
         Map<DataType, List<Map<String, Object>>> result = new HashMap<DataType, List<Map<String, Object>>>();
-        result.put(parser.getDataType(), rows);
+        result.put(DATA_TYPE, Collections.<Map<String, Object>>emptyList());
         return result;
     }
 
@@ -163,20 +198,6 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             if (poolID == null || poolID.length() == 0)
                 throw new ExperimentException(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME + " required");
 
-            String participantID = (String) row.get(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-            String visitID = (String) row.get(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-            if (participantID == null && visitID == null)
-            {
-                String[] parts = poolID.split("-|_", 2);
-                if (parts.length == 2)
-                {
-                    row = new HashMap<String, Object>(row);
-                    row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, parts[0]);
-                    row.put(AbstractAssayProvider.VISITID_PROPERTY_NAME, parts[1]);
-                    it.set(row);
-                }
-            }
-
             if (requireSpecimens)
             {
                 Object obj = row.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME);
@@ -190,6 +211,9 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
                     String specimenID = specimenIDs[i];
                     if (specimenID == null || specimenID.length() == 0)
                         throw new ExperimentException(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME + "[" + i + "] is empty or null.");
+
+                    // XXX: check all specimens come from the same study.
+                    // XXX: check all specimens match the given Participant
                 }
             }
         }
@@ -209,11 +233,13 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         //_insertRowData(data, user, container, dataProperties, fileData);
     }
 
-    /*package*/ static void _insertRowData(ExpData data, User user, Container container, PropertyDescriptor[] dataProperties, List<Map<String, Object>> fileData) throws SQLException, ValidationException
+    /*package*/ static void _insertRowData(ExpData data, User user, Container container, Domain resultDomain, List<Map<String, Object>> fileData) throws SQLException, ValidationException
     {
+        Map<String, DomainProperty> importMap = resultDomain.createImportMap(true);
+
         for (Map<String, Object> row : fileData)
         {
-            Pair<Map<String, Object>, Map<String, Object>> pair = splitBaseFromExtra(row);
+            Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> pair = splitBaseFromExtra(row, importMap);
 
             ViabilityResult result = ViabilityResult.fromMap(pair.first, pair.second);
             assert result.getDataID() == 0;
@@ -224,18 +250,27 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         }
     }
 
-    /*package*/ static Pair<Map<String, Object>, Map<String, Object>> splitBaseFromExtra(Map<String, Object> row)
+    /*package*/ static Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, DomainProperty> importMap)
     {
         Map<String, Object> base = new CaseInsensitiveHashMap<Object>();
-        Map<String, Object> extra = new CaseInsensitiveHashMap<Object>();
+        Map<PropertyDescriptor, Object> extra = new HashMap<PropertyDescriptor, Object>();
         for (Map.Entry<String, Object> entry : row.entrySet())
         {
             if (ViabilityAssayProvider.RESULT_DOMAIN_PROPERTIES.containsKey(entry.getKey()))
+            {
                 base.put(entry.getKey(), entry.getValue());
+            }
             else
-                extra.put(entry.getKey(), entry.getValue());
+            {
+                DomainProperty dp = importMap.get(entry.getKey());
+                if (dp == null)
+                    continue;
+                PropertyDescriptor pd = dp.getPropertyDescriptor();
+                if (pd != null)
+                    extra.put(pd, entry.getValue());
+            }
         }
 
-        return new Pair<Map<String, Object>, Map<String, Object>>(base, extra);
+        return new Pair<Map<String, Object>, Map<PropertyDescriptor, Object>>(base, extra);
     }
 }

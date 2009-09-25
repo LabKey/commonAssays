@@ -38,13 +38,20 @@ import java.util.*;
  */
 public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
 {
-    public static final DataType DATA_TYPE = new DataType("ViabilityAssay-TsvData");
-
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
         if (DATA_TYPE.matches(lsid))
-            return Priority.HIGH;
+        {
+            File f = data.getFile();
+            if (f != null && f.getName() != null)
+            {
+                String lowerName = f.getName().toLowerCase();
+                if (lowerName.endsWith(".tsv") || lowerName.endsWith(".txt"))
+                    return Priority.HIGH;
+            }
+            return Priority.MEDIUM;
+        }
         return null;
     }
 
@@ -59,8 +66,6 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
         {
             super(runDomain, resultsDomain, dataFile);
         }
-
-        public DataType getDataType() { return DATA_TYPE; }
 
         protected void _parse() throws IOException
         {

@@ -60,14 +60,37 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     public ViabilityAssayProvider()
     {
-        super("ViabilityAssayProtocol", "ViabilityAssayRun", ViabilityTsvDataHandler.DATA_TYPE, new ViabilityAssayTableMetadata());
+        super("ViabilityAssayProtocol", "ViabilityAssayRun", ViabilityTsvDataHandler.DATA_TYPE, new ResultsAssayTableMetadata());
     }
 
-    private static class ViabilityAssayTableMetadata extends AssayTableMetadata
+    /** Relative from Results table. */
+    static class ResultsAssayTableMetadata extends AssayTableMetadata
     {
-        public ViabilityAssayTableMetadata()
+        public ResultsAssayTableMetadata()
         {
             super(null, FieldKey.fromParts("Run"), FieldKey.fromParts("RowId"));
+        }
+
+        @Override
+        public FieldKey getSpecimenIDFieldKey()
+        {
+            // Can't lookup to Specimen ID from Results table
+            return null;
+        }
+    }
+
+    /** Relative from ResultSpecimens table. */
+    static class ResultsSpecimensAssayTableMetadata extends AssayTableMetadata
+    {
+        public ResultsSpecimensAssayTableMetadata()
+        {
+            super(FieldKey.fromParts("ResultID"), FieldKey.fromParts("ResultID", "Run"), FieldKey.fromParts("ResultID"));
+        }
+
+        @Override
+        public FieldKey getSpecimenIDFieldKey()
+        {
+            return FieldKey.fromParts(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
         }
     }
 
@@ -132,6 +155,12 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     public String getDescription()
     {
         return "Imports Guava cell count and viability data.";
+    }
+
+    @Override
+    public AssaySchema getProviderSchema(User user, Container container, ExpProtocol protocol)
+    {
+        return new ViabilityAssaySchema(user, container, protocol);
     }
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
@@ -226,6 +255,12 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
         return Collections.emptyList();
+    }
+
+    @Override
+    public boolean canCopyToStudy()
+    {
+        return false;
     }
 
     public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
