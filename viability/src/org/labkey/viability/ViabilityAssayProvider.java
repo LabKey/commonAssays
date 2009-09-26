@@ -173,7 +173,8 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         ViabilityAssaySchema viabilitySchema = new ViabilityAssaySchema(schema.getUser(), schema.getContainer(), protocol);
         viabilitySchema.setTargetStudy(schema.getTargetStudy());
         AbstractTableInfo table = viabilitySchema.createResultsTable();
-        addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
+        // UNDONE: add copy to study columns when copy to study is implemented
+        //addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
         return table;
     }
 
