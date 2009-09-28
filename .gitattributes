@@ -190,6 +190,7 @@ flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-2.30-2.32.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-2.31-2.32.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-8.30-8.31.sql -text
 flow/resources/schemas/flow.xml -text
+flow/src/META-INF/qc.R -text
 flow/src/org/labkey/flow/FlowModule.java -text
 flow/src/org/labkey/flow/FlowPreference.java -text
 flow/src/org/labkey/flow/FlowSettings.java -text
@@ -264,9 +265,11 @@ flow/src/org/labkey/flow/analysis/web/SubsetExpressionParser.java -text
 flow/src/org/labkey/flow/analysis/web/SubsetSpec.java -text
 flow/src/org/labkey/flow/controllers/FlowAdminForm.java -text
 flow/src/org/labkey/flow/controllers/FlowController.java -text
+flow/src/org/labkey/flow/controllers/FlowExtAction.java -text
 flow/src/org/labkey/flow/controllers/FlowParam.java -text
 flow/src/org/labkey/flow/controllers/IWorkspaceForm.java -text
 flow/src/org/labkey/flow/controllers/NewFolderForm.java -text
+flow/src/org/labkey/flow/controllers/ReportsController.java -text
 flow/src/org/labkey/flow/controllers/SpringFlowController.java -text
 flow/src/org/labkey/flow/controllers/WorkspaceData.java -text
 flow/src/org/labkey/flow/controllers/compensation/CompensationController.java -text
@@ -337,6 +340,7 @@ flow/src/org/labkey/flow/controllers/protocol/joinSampleSet.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/showProtocol.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/updateSamples.jsp -text
 flow/src/org/labkey/flow/controllers/remote/FlowRemoteController.java -text
+flow/src/org/labkey/flow/controllers/reports.jsp -text
 flow/src/org/labkey/flow/controllers/run/DownloadRunBean.java -text
 flow/src/org/labkey/flow/controllers/run/DownloadRunForm.java -text
 flow/src/org/labkey/flow/controllers/run/MoveToAnalysisForm.java -text
@@ -350,6 +354,7 @@ flow/src/org/labkey/flow/controllers/run/plate.jsp -text
 flow/src/org/labkey/flow/controllers/run/showRun.jsp -text
 flow/src/org/labkey/flow/controllers/run/showRuns.jsp -text
 flow/src/org/labkey/flow/controllers/runningJobs.jsp -text
+flow/src/org/labkey/flow/controllers/selectReport.jsp -text
 flow/src/org/labkey/flow/controllers/well/ChooseGraphForm.java -text
 flow/src/org/labkey/flow/controllers/well/EditWellForm.java -text
 flow/src/org/labkey/flow/controllers/well/WellController.java -text
@@ -403,6 +408,9 @@ flow/src/org/labkey/flow/query/KeywordMethod.java -text
 flow/src/org/labkey/flow/query/RunEditHelper.java -text
 flow/src/org/labkey/flow/query/StatisticForeignKey.java -text
 flow/src/org/labkey/flow/query/StatisticMethod.java -text
+flow/src/org/labkey/flow/reports/ControlsQCReport.java -text
+flow/src/org/labkey/flow/reports/FlowReport.java -text
+flow/src/org/labkey/flow/reports/editQCReport.jsp -text
 flow/src/org/labkey/flow/script/AddRunsJob.java -text
 flow/src/org/labkey/flow/script/AnalysisHandler.java -text
 flow/src/org/labkey/flow/script/AnalyzeJob.java -text

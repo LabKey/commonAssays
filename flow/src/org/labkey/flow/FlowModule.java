@@ -31,6 +31,8 @@ import org.labkey.api.util.Search;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.DefaultWebPartFactory;
+import org.labkey.api.reports.ReportService;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -40,6 +42,7 @@ import org.labkey.flow.controllers.remote.FlowRemoteController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.controllers.ReportsController;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocolImplementation;
@@ -49,6 +52,7 @@ import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.webparts.*;
+import org.labkey.flow.reports.ControlsQCReport;
 
 import java.util.Set;
 import java.util.Collection;
@@ -99,8 +103,11 @@ public class FlowModule extends DefaultModule
         addController("flow-compensation", CompensationController.class);
         addController("flow-protocol", ProtocolController.class);
         addController("flow-remote", FlowRemoteController.class);
+        addController("flow-reports", ReportsController.class);
         FlowProperty.register();
         ContainerManager.addContainerListener(new FlowContainerListener());
+
+        ReportService.get().registerReport(new ControlsQCReport());
     }
 
     protected Collection<? extends WebPartFactory> createWebPartFactories()
@@ -108,7 +115,8 @@ public class FlowModule extends DefaultModule
         return Arrays.asList(OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
                 AnalysisScriptsWebPart.FACTORY,
-                FlowSummaryWebPart.FACTORY
+                FlowSummaryWebPart.FACTORY,
+                new DefaultWebPartFactory("Flow Reports", ReportsController.BeginView.class)
                 );
     }
 
