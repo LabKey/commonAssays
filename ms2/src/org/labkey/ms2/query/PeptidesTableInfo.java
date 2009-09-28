@@ -229,7 +229,6 @@ public class PeptidesTableInfo extends FilteredTable
         }
         if (_schema.getRuns() != null)
         {
-            assert _schema.getRuns().size()> 0 : "Doesn't make sense to filter to no runs";
             sql.append(" AND Run IN ");
             _schema.appendRunInClause(sql);
         }

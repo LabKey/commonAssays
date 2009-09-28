@@ -100,6 +100,7 @@ public class MS2Schema extends UserSchema
                 ExpRunTable result = ExperimentService.get().createRunTable(SamplePrepRuns.toString(), ms2Schema);
                 result.populate();
                 // Include the old XAR-based and the new assay-based
+                result.setDescription("Contains one row per experimental metadata attached to source spectra files.");
                 result.setProtocolPatterns(PROTOCOL_PATTERN_PREFIX + SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX + "%", "urn:lsid:%:" + MassSpecMetadataAssayProvider.PROTOCOL_LSID_NAMESPACE_PREFIX + ".Folder-%:%");
                 return result;
             }
@@ -108,35 +109,45 @@ public class MS2Schema extends UserSchema
         {
             public ExpRunTable createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createSearchTable(ImportedSearchRuns.toString(), ContainerFilter.CURRENT, IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
+                ExpRunTable searchTable = ms2Schema.createSearchTable(ImportedSearchRuns.toString(), ContainerFilter.CURRENT, IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
+                searchTable.setDescription("Contains one row per externally-generated MS2 search result imported in this folder.");
+                return searchTable;
             }
         },
         XTandemSearchRuns
         {
             public ExpRunTable createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createSearchTable(XTandemSearchRuns.toString(), ContainerFilter.CURRENT, XTANDEM_PROTOCOL_OBJECT_PREFIX);
+                ExpRunTable searchTable = ms2Schema.createSearchTable(XTandemSearchRuns.toString(), ContainerFilter.CURRENT, XTANDEM_PROTOCOL_OBJECT_PREFIX);
+                searchTable.setDescription("Contains one row per X!Tandem search result loaded in this folder.");
+                return searchTable;
             }
         },
         MascotSearchRuns
         {
             public ExpRunTable createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createSearchTable(MascotSearchRuns.toString(), ContainerFilter.CURRENT, MASCOT_PROTOCOL_OBJECT_PREFIX);
+                ExpRunTable searchTable = ms2Schema.createSearchTable(MascotSearchRuns.toString(), ContainerFilter.CURRENT, MASCOT_PROTOCOL_OBJECT_PREFIX);
+                searchTable.setDescription("Contains one row per Mascot search results loaded in this folder.");
+                return searchTable;
             }
         },
         SequestSearchRuns
         {
             public ExpRunTable createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createSearchTable(SequestSearchRuns.toString(), ContainerFilter.CURRENT, SEQUEST_PROTOCOL_OBJECT_PREFIX);
+                ExpRunTable searchTable = ms2Schema.createSearchTable(SequestSearchRuns.toString(), ContainerFilter.CURRENT, SEQUEST_PROTOCOL_OBJECT_PREFIX);
+                searchTable.setDescription("Contains one row per Sequest search result loaded in this folder.");
+                return searchTable;
             }
         },
         MS2SearchRuns
         {
             public ExpRunTable createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createRunsTable(MS2SearchRuns.toString(), ContainerFilter.CURRENT);
+                ExpRunTable runsTable = ms2Schema.createRunsTable(MS2SearchRuns.toString(), ContainerFilter.CURRENT);
+                runsTable.setDescription("Contains one row per MS2 search result, regardless of source, loaded in this folder.");
+                return runsTable;
             }
         },
         Peptides
@@ -419,12 +430,19 @@ public class MS2Schema extends UserSchema
     public void appendRunInClause(SQLFragment sql)
     {
         sql.append("(");
-        String separator = "";
-        for (MS2Run run : _runs)
+        if (_runs.isEmpty())
         {
-            sql.append(separator);
-            separator = ", ";
-            sql.append(run.getRun());
+            sql.append("-1");
+        }
+        else
+        {
+            String separator = "";
+            for (MS2Run run : _runs)
+            {
+                sql.append(separator);
+                separator = ", ";
+                sql.append(run.getRun());
+            }
         }
         sql.append(")");
     }

@@ -120,6 +120,8 @@ public class MicroarraySchema extends UserSchema
         defaultCols.add(2, FieldKey.fromParts(thumbnailColumn.getName()));
         result.setDefaultVisibleColumns(defaultCols);
 
+        result.setDescription("Contains a row per microarray analysis result loaded in this folder.");
+
         return result;
     }
 

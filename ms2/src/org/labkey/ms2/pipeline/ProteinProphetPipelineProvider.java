@@ -20,6 +20,7 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.util.FileType;
+import org.labkey.api.module.Module;
 import org.labkey.ms2.MS2Controller;
 
 import java.io.File;
@@ -33,9 +34,9 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
 {
     static final String NAME = "ProteinProphet";
 
-    public ProteinProphetPipelineProvider()
+    public ProteinProphetPipelineProvider(Module owningModule)
     {
-        super(NAME);
+        super(NAME, owningModule);
     }
 
     public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)

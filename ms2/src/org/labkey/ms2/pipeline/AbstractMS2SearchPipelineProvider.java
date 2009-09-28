@@ -19,6 +19,7 @@ import org.labkey.api.pipeline.file.AbstractFileAnalysisProvider;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.TaskPipeline;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.module.Module;
 
 import java.io.IOException;
 import java.io.File;
@@ -32,9 +33,9 @@ import java.util.Map;
 abstract public class AbstractMS2SearchPipelineProvider
         extends AbstractFileAnalysisProvider<AbstractMS2SearchProtocolFactory, TaskPipeline>
 {
-    public AbstractMS2SearchPipelineProvider(String name)
+    public AbstractMS2SearchPipelineProvider(String name, Module owningModule)
     {
-        super(name);
+        super(name, owningModule);
     }
 
     public void initSystemDirectory(File rootDir, File systemDir)

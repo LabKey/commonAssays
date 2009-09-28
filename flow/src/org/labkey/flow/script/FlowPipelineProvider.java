@@ -25,6 +25,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.module.Module;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -47,9 +48,9 @@ public class FlowPipelineProvider extends PipelineProvider
     private static final Logger _log = Logger.getLogger(FlowPipelineProvider.class);
     public static final String NAME = "flow";
 
-    public FlowPipelineProvider()
+    public FlowPipelineProvider(Module owningModule)
     {
-        super(NAME);
+        super(NAME, owningModule);
     }
 
     private boolean hasFlowModule(ViewContext context)

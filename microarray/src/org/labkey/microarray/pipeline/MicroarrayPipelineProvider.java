@@ -27,6 +27,7 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.module.Module;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.MicroarrayController;
 
@@ -38,9 +39,9 @@ public class MicroarrayPipelineProvider extends PipelineProvider
 {
     public static final String NAME = "Array";
 
-    public MicroarrayPipelineProvider()
+    public MicroarrayPipelineProvider(Module owningModule)
     {
-        super(NAME);
+        super(NAME, owningModule);
     }
 
     public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)

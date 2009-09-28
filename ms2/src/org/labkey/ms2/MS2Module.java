@@ -97,7 +97,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public double getVersion()
     {
-        return 9.20;
+        return 9.21;
     }
 
     protected Collection<? extends WebPartFactory> createWebPartFactories()
@@ -200,13 +200,13 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     public void startup(ModuleContext context)
     {
         PipelineService service = PipelineService.get();
-        service.registerPipelineProvider(new MS2PipelineProvider());
-        service.registerPipelineProvider(new XTandemCPipelineProvider(), "X!Tandem (Cluster)");
-        service.registerPipelineProvider(new MascotCPipelineProvider(), "Mascot (Cluster)");
-        service.registerPipelineProvider(new SequestLocalPipelineProvider());
-        service.registerPipelineProvider(new CometCPipelineProvider(), "Comet (Cluster)");
+        service.registerPipelineProvider(new MS2PipelineProvider(this));
+        service.registerPipelineProvider(new XTandemCPipelineProvider(this), "X!Tandem (Cluster)");
+        service.registerPipelineProvider(new MascotCPipelineProvider(this), "Mascot (Cluster)");
+        service.registerPipelineProvider(new SequestLocalPipelineProvider(this));
+        service.registerPipelineProvider(new CometCPipelineProvider(this), "Comet (Cluster)");
 
-        service.registerPipelineProvider(new ProteinProphetPipelineProvider());
+        service.registerPipelineProvider(new ProteinProphetPipelineProvider(this));
 
         final Set<ExperimentRunType> runTypes = new HashSet<ExperimentRunType>();
         runTypes.add(_samplePrepRunType);
@@ -241,7 +241,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         MS2Controller.registerAdminConsoleLinks();
         
         AssayService.get().registerAssayProvider(new MassSpecMetadataAssayProvider());
-        PipelineService.get().registerPipelineProvider(new MassSpecMetadataPipelineProvider());
+        PipelineService.get().registerPipelineProvider(new MassSpecMetadataPipelineProvider(this));
 
         initWebApplicationContext();
     }

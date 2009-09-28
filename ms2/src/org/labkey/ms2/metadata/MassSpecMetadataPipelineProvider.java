@@ -26,6 +26,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.module.Module;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import java.io.File;
@@ -40,9 +41,9 @@ public class MassSpecMetadataPipelineProvider extends PipelineProvider
 {
     public static String NAME = "XarAssay";
 
-    public MassSpecMetadataPipelineProvider()
+    public MassSpecMetadataPipelineProvider(Module owningModule)
     {
-        super(NAME);
+        super(NAME, owningModule);
     }
 
     public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)

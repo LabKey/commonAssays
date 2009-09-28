@@ -24,6 +24,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
+import org.labkey.api.module.Module;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
@@ -47,9 +48,9 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     public static String name = "Mascot";
 
-    public MascotCPipelineProvider()
+    public MascotCPipelineProvider(Module owningModule)
     {
-        super(name);
+        super(name, owningModule);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)

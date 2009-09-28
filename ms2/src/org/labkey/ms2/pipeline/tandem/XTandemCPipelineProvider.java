@@ -25,6 +25,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
+import org.labkey.api.module.Module;
 import org.labkey.ms2.pipeline.*;
 
 import java.io.File;
@@ -47,9 +48,9 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     public static String name = "X! Tandem";
 
-    public XTandemCPipelineProvider()
+    public XTandemCPipelineProvider(Module owningModule)
     {
-        super(name);
+        super(name, owningModule);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)

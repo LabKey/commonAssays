@@ -23,6 +23,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.data.Container;
+import org.labkey.api.module.Module;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -33,9 +34,9 @@ public class MS2PipelineProvider extends PipelineProvider
 {
     static String name = "MS2";
 
-    public MS2PipelineProvider()
+    public MS2PipelineProvider(Module owningModule)
     {
-        super(name);
+        super(name, owningModule);
     }
 
     public HttpView getSetupWebPart(Container container)

@@ -23,6 +23,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.data.Container;
+import org.labkey.api.module.Module;
 import org.labkey.ms2.pipeline.*;
 
 import java.io.IOException;
@@ -41,9 +42,9 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
 
     public static String name = "Sequest";
 
-    public SequestLocalPipelineProvider()
+    public SequestLocalPipelineProvider(Module owningModule)
     {
-        super(name);
+        super(name, owningModule);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)

@@ -305,15 +305,9 @@ public class SpectraCountTableInfo extends VirtualTable
 
         if (_ms2Schema.getRuns() != null)
         {
-            sql.append("AND r.Run IN (");
-            String separator = "";
-            for (MS2Run ms2Run : _ms2Schema.getRuns())
-            {
-                sql.append(separator);
-                separator = ", ";
-                sql.append(ms2Run.getRun());
-            }
-            sql.append(")\n");
+            sql.append("AND r.Run IN ");
+            _ms2Schema.appendRunInClause(sql);
+            sql.append("\n");
         }
         sql.append("GROUP BY f.Run");
         if (_config.isGroupedByPeptide())

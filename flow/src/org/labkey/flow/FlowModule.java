@@ -129,7 +129,7 @@ public class FlowModule extends DefaultModule
 
     public void startup(ModuleContext moduleContext)
     {
-        PipelineService.get().registerPipelineProvider(new FlowPipelineProvider());
+        PipelineService.get().registerPipelineProvider(new FlowPipelineProvider(this));
         FlowDataType.register();
         ExperimentService.get().registerExperimentDataHandler(FlowDataHandler.instance);
         FlowProtocolImplementation.register();

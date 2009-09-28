@@ -190,6 +190,7 @@
                 <ns:isHidden>true</ns:isHidden>
             </ns:column>
         </ns:columns>
+        <ns:description>Contains a row per protein known to this server installation.</ns:description>
 	</ns:table>
 	<ns:table tableName="SprotOrgMap" tableDbType="TABLE">
 		<ns:columns>

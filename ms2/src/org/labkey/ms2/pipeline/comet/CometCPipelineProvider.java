@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline.comet;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipelineProtocol;
+import org.labkey.api.module.Module;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
@@ -36,9 +37,9 @@ public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     public static String name = "Comet";
 
-    public CometCPipelineProvider()
+    public CometCPipelineProvider(Module owningModule)
     {
-        super(name);
+        super(name, owningModule);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)

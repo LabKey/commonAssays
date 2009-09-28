@@ -36,6 +36,7 @@
       <ns:column columnName="PepXMLDataLSID"/>
       <ns:column columnName="MzXMLURL"/>
     </ns:columns>
+    <ns:description>Contains a row for every fraction in a loaded MS2 search result.</ns:description>
     <ns:titleColumn>Fraction</ns:titleColumn>
   </ns:table>
   <ns:table tableName="History" tableDbType="TABLE">
@@ -77,6 +78,7 @@
     </ns:columns>
     <ns:tableTitle>MS2History</ns:tableTitle>
     <ns:pkColumnName>Date</ns:pkColumnName>
+    <ns:description>Contains a history of statistics for all MS2 runs loaded into the server.</ns:description>
   </ns:table>
   <ns:table tableName="Modifications" tableDbType="TABLE">
     <ns:columns>
@@ -86,6 +88,7 @@
       <ns:column columnName="Variable"/>
       <ns:column columnName="Symbol"/>
     </ns:columns>
+    <ns:description>Contains a row for every type of amino acid modification loaded in an MS2 run.</ns:description>
   </ns:table>
   <ns:table tableName="PeptidesData" tableDbType="TABLE">
     <ns:columns>
@@ -324,6 +327,7 @@
           <ns:isUserEditable>true</ns:isUserEditable>
         </ns:column>
     </ns:columns>
+    <ns:description>Contains a row for every peptide loaded in an MS2 run.</ns:description>
   </ns:table>
   <ns:table tableName="Runs" tableDbType="TABLE">
     <ns:titleColumn>Name</ns:titleColumn>
@@ -468,6 +472,7 @@
     </ns:columns>
     <ns:tableTitle>MS2Runs</ns:tableTitle>
     <ns:versionColumnName>_ts</ns:versionColumnName>
+    <ns:description>Contains a row for every MS2 run loaded in this folder.</ns:description>
   </ns:table>
   <ns:table tableName="ExperimentRuns" tableDbType="VIEW">
     <ns:columns>
@@ -584,6 +589,7 @@
     <ns:pkColumnName>Run</ns:pkColumnName>
     <ns:versionColumnName>_ts</ns:versionColumnName>
     <ns:titleColumn>Description</ns:titleColumn>
+    <ns:description>Contains a row for every MS2 run in this folder, including links to experimental metadata.</ns:description>
   </ns:table>
   <ns:table tableName="SpectraData" tableDbType="TABLE">
     <ns:columns>
@@ -591,6 +597,7 @@
       <ns:column columnName="Scan"/>
       <ns:column columnName="Spectrum"/>
     </ns:columns>
+    <ns:description>Contains a row for every spectra loaded in this folder.</ns:description>
   </ns:table>
   <ns:table tableName="Peptides" tableDbType="VIEW">
     <ns:columns>
@@ -1070,6 +1077,7 @@
     <ns:tableTitle>MS2Peptides</ns:tableTitle>
     <ns:pkColumnName>Run,RowId</ns:pkColumnName>
     <ns:titleColumn>Peptide</ns:titleColumn>
+    <ns:description>Contains a row for every peptide loaded in this folder, including additional data about the run and protein.</ns:description>
   </ns:table>
   <ns:table tableName="SimplePeptides" tableDbType="VIEW">
     <ns:columns>
@@ -1522,6 +1530,7 @@
     <ns:tableTitle>MS2Peptides</ns:tableTitle>
     <ns:pkColumnName>Run,RowId</ns:pkColumnName>
     <ns:titleColumn>Peptide</ns:titleColumn>
+    <ns:description>Contains a row for every peptide loaded in this folder, including a smaller amount of related data.</ns:description>
   </ns:table>
   <ns:table tableName="Spectra" tableDbType="VIEW">
     <ns:columns>
@@ -1561,6 +1570,7 @@
     <ns:tableTitle>MS2Spectra</ns:tableTitle>
     <ns:pkColumnName>Fraction,Scan,Charge</ns:pkColumnName>
     <ns:titleColumn>Run</ns:titleColumn>
+    <ns:description>Contains a row for every spectra loaded from this folder, including some run and fraction data.</ns:description>
   </ns:table>
   <ns:table tableName="Compare" tableDbType="NOT_IN_DB">
     <ns:tableTitle>MS2Compare</ns:tableTitle>
@@ -1614,6 +1624,7 @@
         <ns:scale>10</ns:scale>
       </ns:column>
     </ns:columns>
+    <ns:description>Contains a row for every </ns:description>
   </ns:table>
   <ns:table tableName="Proteins" tableDbType="NOT_IN_DB">
     <ns:tableTitle>MS2Proteins</ns:tableTitle>
@@ -1722,6 +1733,7 @@
         <ns:datatype>varchar</ns:datatype>
       </ns:column>
     </ns:columns>
+    <ns:description>Contains a row for every protein known by the entire system.</ns:description>
   </ns:table>
   <ns:table tableName="ProteinProphetFiles" tableDbType="TABLE">
     <ns:columns>
@@ -1747,6 +1759,7 @@
     </ns:columns>
     <ns:tableTitle>ProteinProphetFiles</ns:tableTitle>
     <ns:pkColumnName>RowId</ns:pkColumnName>
+    <ns:description>Contains a row for every ProteinProphet result loaded in this folder.</ns:description>
   </ns:table>
   <ns:table tableName="ProteinGroups" tableDbType="TABLE">
     <ns:columns>
@@ -1791,6 +1804,7 @@
     </ns:columns>
     <ns:tableTitle>MS2ProteinGroups</ns:tableTitle>
     <ns:pkColumnName>RowId</ns:pkColumnName>
+    <ns:description>Contains a row for every ProteinProphet protein group loaded in this folder.</ns:description>
   </ns:table>
   <ns:table tableName="ProteinGroupMemberships" tableDbType="TABLE">
     <ns:columns>
@@ -1800,6 +1814,7 @@
     </ns:columns>
     <ns:tableTitle>ProteinGroupMembership</ns:tableTitle>
     <ns:pkColumnName>RowId, SeqId</ns:pkColumnName>
+    <ns:description>Contains a row for every protein membership in every protein group in this folder, as assigned by ProteinProphet.</ns:description>
   </ns:table>
   <ns:table tableName="PeptideMemberships" tableDbType="TABLE">
     <ns:columns>
@@ -1839,6 +1854,7 @@
     </ns:columns>
     <ns:tableTitle>PeptideMembership</ns:tableTitle>
     <ns:pkColumnName>PeptideId, ProteinGroupId</ns:pkColumnName>
+    <ns:description>Contains a row for every peptide membership in a protein group in this folder, as assigned by ProteinProphet.</ns:description>
   </ns:table>
   <ns:table tableName="ProteinGroupsWithQuantitation" tableDbType="VIEW">
     <ns:columns>
@@ -1899,6 +1915,7 @@
     </ns:columns>
     <ns:tableTitle>MS2ProteinGroups</ns:tableTitle>
     <ns:pkColumnName>RowId</ns:pkColumnName>
+    <ns:description>Contains a row for every ProteinProphet protein group in this folder, and includes quantitation data, if available.</ns:description>
   </ns:table>
   <ns:table tableName="PeptideProphetData" tableDbType="TABLE">
     <ns:columns>
@@ -1907,8 +1924,9 @@
       <ns:column columnName="ProphetDeltaMass"/>
       <ns:column columnName="ProphetNumTrypticTerm"/>
       <ns:column columnName="ProphetNumMissedCleav"/>
-      </ns:columns>
-    </ns:table>
+    </ns:columns>
+    <ns:description>Contains a row for every peptide with ProteinProphet data in this folder.</ns:description>
+  </ns:table>
   <ns:table tableName="PeptideProphetSummaries" tableDbType="TABLE">
     <ns:columns>
       <ns:column columnName="ErrorSeries"/>
@@ -1926,6 +1944,7 @@
       <ns:column columnName="Run"/>
       <ns:column columnName="SensitivitySeries"/>
     </ns:columns>
+    <ns:description>Contains a row for every </ns:description>
   </ns:table>
   <ns:table tableName="ProteinQuantitation" tableDbType="TABLE">
     <ns:columns>
@@ -1938,6 +1957,7 @@
       <ns:column columnName="Heavy2LightRatioMean"/>
       <ns:column columnName="Heavy2LightRatioStandardDev"/>
     </ns:columns>
+    <ns:description>Contains a row for every protein with quantitation data in this folder.</ns:description>
   </ns:table>
   <ns:table tableName="Quantitation" tableDbType="TABLE">
     <ns:columns>
@@ -1965,6 +1985,7 @@
           <ns:formatString>0.##</ns:formatString>
       </ns:column>
     </ns:columns>
+    <ns:description>Contains a row for every peptide with quantitation data in this folder.</ns:description>
   </ns:table>
   <ns:table tableName="QuantSummaries" tableDbType="TABLE">
     <ns:columns>
@@ -1979,5 +2000,6 @@
       <ns:column columnName="SameScanRange"/>
       <ns:column columnName="XpressLight"/>
     </ns:columns>
+    <ns:description>Contains a row for every MS2 run with quantitation data in this folder.</ns:description>
   </ns:table>
 </ns:tables>
