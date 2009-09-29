@@ -157,7 +157,7 @@ public class ReportsController extends SpringFlowController<ReportsController.Ac
 */
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public static class UpdateAction extends FlowExtAction<IdForm>
+    public static class UpdateAction extends FormApiAction<IdForm>
     {
         FlowReport r;
         
