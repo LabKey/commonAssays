@@ -124,8 +124,15 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 PropertyDescriptor pd = dp.getPropertyDescriptor();
                 if (dp.getName().equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
                 {
-                    // get SpecimenIDs from request as a String array
-                    value = getRequest().getParameterValues(paramName);
+                    // get SpecimenIDs from request as a List<String>
+                    String[] values = getRequest().getParameterValues(paramName);
+                    List<String> specimenIDs = new ArrayList<String>(values.length);
+                    for (String specimenID : values)
+                    {
+                        if (specimenID != null && specimenID.trim().length() > 0)
+                            specimenIDs.add(specimenID.trim());
+                    }
+                    value = specimenIDs;
                 }
                 else
                 {

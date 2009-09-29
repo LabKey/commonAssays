@@ -51,12 +51,7 @@ public class ViabilityResult
         ObjectFactory<ViabilityResult> factory = ObjectFactory.Registry.getFactory(ViabilityResult.class);
         ViabilityResult result = factory.fromMap(base);
 
-        Object o = base.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME);
-        if (o instanceof String[])
-            result.setSpecimenIDs(Arrays.asList((String[])o));
-        else if (o instanceof List)
-            result.setSpecimenIDs((List)o);
-        else
+        if (result.getSpecimenIDs() == null)
             result.setSpecimenIDs(Collections.<String>emptyList());
 
         if (extra != null)
