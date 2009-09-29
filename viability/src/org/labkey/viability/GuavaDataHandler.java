@@ -71,115 +71,123 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
         {
             _runData = new HashMap<String, Object>();
 
-            BufferedReader reader = new BufferedReader(new FileReader(_dataFile));
-            boolean foundBlankLine = false;
-            String[] groupHeaders = null;
-            String[] headers = null;
-            int count = 0;
-            String line;
-            while (null != (line = reader.readLine()))
+            BufferedReader reader = null;
+            try
             {
-                if (line.length() == 0)
-                    throw new ExperimentException("Expected non-empty line in guava file (line " + count + ")");
-
-                String[] parts = line.split(",", -1); // include empty cells
-                if (parts.length < 2)
-                    throw new ExperimentException("Expected comma separated values in guava file (line " + count + ")");
-
-                if (!foundBlankLine)
+                reader = new BufferedReader(new FileReader(_dataFile));
+                boolean foundBlankLine = false;
+                String[] groupHeaders = null;
+                String[] headers = null;
+                int count = 0;
+                String line;
+                while (null != (line = reader.readLine()))
                 {
-                    String firstCell = parts[0];
-                    if (firstCell.length() == 0)
+                    String[] parts = line.split(",", -1); // include empty cells
+
+                    if (!foundBlankLine)
                     {
-                        foundBlankLine = true;
+                        if (line.length() == 0 || parts.length == 0 || parts[0].length() == 0)
+                        {
+                            foundBlankLine = true;
+                        }
+                        else
+                        {
+                            String firstCell = parts.length > 0 ? parts[0] : line;
+                            String[] runMeta = firstCell.split(" - ", 2);
+                            // XXX: convert types
+                            if (runMeta.length == 2 && runMeta[0].length() > 0 && runMeta[1].length() > 0)
+                                _runData.put(runMeta[0].trim(), runMeta[1].trim());
+                        }
                     }
                     else
                     {
-                        String[] meta = firstCell.split(" - ", 2);
-                        // XXX: convert types
-                        _runData.put(meta[0].trim(), meta[1].trim());
+                        // skip blank lines after the first
+                        if (line.length() == 0 || parts.length == 0)
+                            continue;
+
+                        if (groupHeaders == null)
+                        {
+                            groupHeaders = parts;
+                        }
+                        else if (headers == null)
+                        {
+                            headers = parts;
+                            // found both header lines.
+                            break;
+                        }
+                        else
+                        {
+                            assert false : "should have stopped parsing";
+                        }
                     }
+
+                    count++;
                 }
-                else
+
+                if (groupHeaders == null || headers == null)
+                    throw new ExperimentException("Failed to find header rows in guava file");
+
+                final int COL_SAMPLE_ID = 1;
+                final int COL_VIABLE = 11;
+                final int COL_TOTAL_VIABLE = 42;
+                final int COL_TOTAL_CELLS = 45;
+
+                // XXX: hard coded the columns we are interested in.
+                ColumnDescriptor[] columns = new ColumnDescriptor[headers.length];
+                for (int i = 0; i < headers.length; i++)
                 {
-                    if (groupHeaders == null)
+                    ColumnDescriptor cd = new ColumnDescriptor();
+                    String expectHeader = null;
+                    switch (i)
                     {
-                        groupHeaders = parts;
+                        case COL_SAMPLE_ID:
+                            cd.name = ViabilityAssayProvider.POOL_ID_PROPERTY_NAME;
+                            expectHeader = "Sample ID";
+                            cd.clazz = String.class;
+                            break;
+                        case COL_VIABLE:
+                            cd.name = "Viability"; // XXX: add constant to ViabilityAssayProvider?
+                            expectHeader = "Viable";
+                            cd.clazz = Double.class;
+                            break;
+                        case COL_TOTAL_VIABLE:
+                            cd.name = ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME;
+                            expectHeader = "Total Viable Cells in Original Sample";
+                            cd.clazz = Integer.class;
+                            break;
+                        case COL_TOTAL_CELLS:
+                            cd.name = ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME;
+                            expectHeader = "Total Cells in Original Sample";
+                            cd.clazz = Integer.class;
+                            break;
+                        default:
+                            cd.load = false;
                     }
-                    else if (headers == null)
+
+                    if (expectHeader != null)
                     {
-                        headers = parts;
-                        // found both header lines.
-                        break;
+                        assert cd.load;
+                        if (headers[i] == null || !expectHeader.equals(headers[i].trim()))
+                            throw new ExperimentException("Expected '" + expectHeader + "' in column " + i + " of header line; found '" + headers[i].trim() + "' instead.");
                     }
-                    else
-                    {
-                        assert false : "should have stopped parsing";
-                    }
+
+                    columns[i] = cd;
                 }
 
-                count++;
+                String expectHeader = "% of Total Information";
+                if (groupHeaders[COL_VIABLE] == null || !expectHeader.equals(groupHeaders[COL_VIABLE].trim()))
+                    throw new ExperimentException("Expected '" + expectHeader + "' in column " + COL_VIABLE + " of group headers line");
+
+                TabLoader tl = new TabLoader(reader, false);
+                tl.setColumns(columns);
+                tl.setScanAheadLineCount(count);
+                tl.parseAsCSV();
+                _resultData = tl.load();
             }
-
-            if (groupHeaders == null || headers == null)
-                throw new ExperimentException("Failed to find header rows in guava file");
-
-            final int COL_SAMPLE_ID = 1;
-            final int COL_VIABLE = 11;
-            final int COL_TOTAL_VIABLE = 42;
-            final int COL_TOTAL_CELLS = 45;
-
-            // XXX: hard coded the columns we are interested in.
-            ColumnDescriptor[] columns = new ColumnDescriptor[headers.length];
-            for (int i = 0; i < headers.length; i++)
+            finally
             {
-                ColumnDescriptor cd = new ColumnDescriptor();
-                String expectHeader = null;
-                switch (i)
-                {
-                    case COL_SAMPLE_ID:
-                        cd.name = ViabilityAssayProvider.POOL_ID_PROPERTY_NAME;
-                        expectHeader = "Sample ID";
-                        cd.clazz = String.class;
-                        break;
-                    case COL_VIABLE:
-                        cd.name = "Viability"; // XXX: add constant to ViabilityAssayProvider?
-                        expectHeader = "Viable";
-                        cd.clazz = Double.class;
-                        break;
-                    case COL_TOTAL_VIABLE:
-                        cd.name = ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME;
-                        expectHeader = "Total Viable Cells in Original Sample";
-                        cd.clazz = Integer.class;
-                        break;
-                    case COL_TOTAL_CELLS:
-                        cd.name = ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME;
-                        expectHeader = "Total Cells in Original Sample";
-                        cd.clazz = Integer.class;
-                        break;
-                    default:
-                        cd.load = false;
-                }
-
-                if (expectHeader != null)
-                {
-                    assert cd.load;
-                    if (headers[i] == null || !expectHeader.equals(headers[i].trim()))
-                        throw new ExperimentException("Expected '" + expectHeader + "' in column " + i + " of header line; found '" + headers[i].trim() + "' instead.");
-                }
-
-                columns[i] = cd;
+                if (reader != null) { try { reader.close(); } catch (IOException ioe) { } }
             }
-
-            String expectHeader = "% of Total Information";
-            if (groupHeaders[COL_VIABLE] == null || !expectHeader.equals(groupHeaders[COL_VIABLE].trim()))
-                throw new ExperimentException("Expected '" + expectHeader + "' in column " + COL_VIABLE + " of group headers line");
-
-            TabLoader tl = new TabLoader(reader, false);
-            tl.setColumns(columns);
-            tl.setScanAheadLineCount(count);
-            tl.parseAsCSV();
-            _resultData = tl.load();
         }
     }
 

@@ -84,10 +84,15 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
         {
             if (_poolIDs == null || _poolIDs.length == 0)
                 throw new ExperimentException("No rows!");
+
+            Domain resultsDomain = getProvider().getResultsDomain(getProtocol());
+            List<DomainProperty> domainProperties = Arrays.asList(resultsDomain.getProperties());
+
             List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>(_poolIDs.length);
-            for (String poolID : _poolIDs)
+            for (int rowIndex = 0; rowIndex < _poolIDs.length; rowIndex++)
             {
-                Map<String, Object> row = getResultProperties(poolID);
+                String poolID = _poolIDs[rowIndex];
+                Map<String, Object> row = getPropertyMapFromRequest(domainProperties, rowIndex, poolID);
                 rows.add(row);
             }
 
@@ -97,16 +102,9 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
         return _resultProperties;
     }
 
-    private Map<String, Object> getResultProperties(String poolID) throws ExperimentException
+    private Map<String, Object> getPropertyMapFromRequest(List<DomainProperty> columns, int rowIndex, String poolID) throws ExperimentException
     {
-        Domain resultsDomain = getProvider().getResultsDomain(getProtocol());
-        List<DomainProperty> domainProperties = Arrays.asList(resultsDomain.getProperties());
-        return getPropertyMapFromRequest(domainProperties, poolID);
-    }
-
-    private Map<String, Object> getPropertyMapFromRequest(List<DomainProperty> columns, String poolID) throws ExperimentException
-    {
-        String inputPrefix = INPUT_PREFIX + poolID;
+        String inputPrefix = INPUT_PREFIX + poolID + "_" + rowIndex;
         Map<String, Object> properties = new LinkedHashMap<String, Object>();
         for (DomainProperty dp : columns)
         {

@@ -207,7 +207,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     protected Map<String, Set<String>> getRequiredDomainProperties()
     {
         Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
-        domainMap.put(RESULT_DOMAIN_NAME, RESULT_DOMAIN_PROPERTIES.keySet());
+        domainMap.put(ExpProtocol.ASSAY_DOMAIN_DATA, RESULT_DOMAIN_PROPERTIES.keySet());
         return domainMap;
     }
 

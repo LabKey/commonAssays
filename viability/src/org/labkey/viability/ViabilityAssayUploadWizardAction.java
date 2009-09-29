@@ -100,11 +100,12 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             boolean copyable = editable;
 
             List<DisplayColumn> columns = new ArrayList<DisplayColumn>(rows.size());
-            for (Map<String, Object> row : rows)
+            for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++)
             {
-                String poolID = (String)row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME);
+                Map<String, Object> row = rows.get(rowIndex);
+                String poolID = (String) row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME);
                 assert poolID != null;
-                String inputName = getInputName(resultDomainProperty, ViabilityAssayRunUploadForm.INPUT_PREFIX + poolID);
+                String inputName = getInputName(resultDomainProperty, ViabilityAssayRunUploadForm.INPUT_PREFIX + poolID + "_" + rowIndex);
                 if (firstPass)
                 {
                     poolIDs.add(poolID);
@@ -121,7 +122,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 DisplayColumn displayCol;
                 if (resultDomainProperty.getName().equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
                 {
-                    String[] values = (String[])initialValue;
+                    String[] values = (String[]) initialValue;
                     displayCol = new MultiValueInputColumn(col, values);
                     copyable = false;
                 }
@@ -182,7 +183,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             try
             {
                 List<Map<String, Object>> rows = form.getResultProperties();
-                ViabilityAssayDataHandler.validateData(rows, true);
+                ViabilityAssayDataHandler.validateData(rows, false);
             }
             catch (ExperimentException e)
             {
