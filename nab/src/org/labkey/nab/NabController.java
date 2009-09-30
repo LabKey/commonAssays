@@ -64,6 +64,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.*;
 import java.io.IOException;
+import java.io.File;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -1688,13 +1689,17 @@ public class NabController extends SpringActionController
             // just grab any root, it doesn't matter
             for (PipeRoot root : PipelineService.get().getAllPipelineRoots())
             {
-                ViewBackgroundInfo info = getViewBackgroundInfo();
-                _container = root.getContainer();
-                info.setContainer(_container);
-                PipelineJob job = new NabUpgradeCode.NabAUCUpgradeJob(null, info);
-                PipelineService.get().getPipelineQueue().addJob(job);
+                File rootPath = root.getRootPath();
+                if (rootPath.exists())
+                {
+                    ViewBackgroundInfo info = getViewBackgroundInfo();
+                    _container = root.getContainer();
+                    info.setContainer(_container);
+                    PipelineJob job = new NabUpgradeCode.NabAUCUpgradeJob(null, info);
+                    PipelineService.get().getPipelineQueue().addJob(job);
 
-                return true;
+                    return true;
+                }
             }
             return false;
         }
