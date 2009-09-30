@@ -84,7 +84,7 @@
     { %>
     <labkey:link text="Show Compensation" href="<%=comp.urlFor(CompensationController.Action.showCompensation)%>"/><br>
     <% } %>
-    <%  ActionURL urlShowRunGraph = urlProvider(ExperimentUrls.class).getShowRunGraph(context.getContainer());
+    <%  ActionURL urlShowRunGraph = urlProvider(ExperimentUrls.class).getShowRunGraphURL(context.getContainer());
         urlShowRunGraph.addParameter("rowId", Integer.toString(run.getRunId()));
     %>
     <labkey:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br>

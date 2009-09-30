@@ -150,6 +150,12 @@ public class SequencesTableInfo extends FilteredTable
         setDefaultVisibleColumns(cols);
     }
 
+    @Override
+    public String getPublicSchemaName()
+    {
+        return MS2Schema.SCHEMA_NAME;
+    }
+
     public void addPeptideAggregationColumns()
     {
         ColumnInfo aaColumn = wrapColumn("AACoverage", getRealTable().getColumn("ProtSequence"));

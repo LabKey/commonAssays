@@ -28,6 +28,7 @@ import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.ms2.*;
+import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
 
 import java.sql.Types;
@@ -43,12 +44,12 @@ public class PeptidesTableInfo extends FilteredTable
 
     public PeptidesTableInfo(MS2Schema schema)
     {
-        this(schema, new ActionURL("MS2", "someAction.view", schema.getContainer()), true, true);
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), true, true);
     }
 
     public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk, boolean restrictContainer)
     {
-        this(schema, new ActionURL("MS2", "someAction.view", schema.getContainer()), includeFeatureFk, restrictContainer);
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), includeFeatureFk, restrictContainer);
     }
 
     public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, boolean restrictContainer)
@@ -154,7 +155,7 @@ public class PeptidesTableInfo extends FilteredTable
         addColumn(peptideProphetData);
 
         ActionURL showProteinURL = url.clone();
-        showProteinURL.setAction("showProtein.view");
+        showProteinURL.setAction(MS2Controller.ShowProteinAction.class);
         showProteinURL.deleteParameter("seqId");
         showProteinURL.deleteParameter("protein");
         final String showProteinURLString = showProteinURL.getLocalURIString() + "&seqId=${SeqId}&protein=${Protein}";
@@ -162,7 +163,7 @@ public class PeptidesTableInfo extends FilteredTable
         setupProteinColumns(showProteinURLString);
 
         ActionURL showPeptideURL = url.clone();
-        showPeptideURL.setAction("showPeptide.view");
+        showPeptideURL.setAction(MS2Controller.ShowPeptideAction.class);
         showPeptideURL.deleteParameter("peptideId");
         String showPeptideURLString = showPeptideURL.getLocalURIString() + "&peptideId=${RowId}";
         DisplayColumnFactory factory = new DisplayColumnFactory()
@@ -272,7 +273,7 @@ public class PeptidesTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                SequencesTableInfo sequenceTable = new SequencesTableInfo(null, _schema);
+                SequencesTableInfo sequenceTable = new SequencesTableInfo(ProteinManager.getTableInfoSequences().getName(), _schema);
                 SQLFragment fastaNameSQL = new SQLFragment(getName() + ".Protein");
                 ExprColumn fastaNameColumn = new ExprColumn(PeptidesTableInfo.this, "Database Sequence Name", fastaNameSQL, Types.VARCHAR);
                 sequenceTable.addColumn(fastaNameColumn);
