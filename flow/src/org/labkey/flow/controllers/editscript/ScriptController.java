@@ -68,7 +68,7 @@ import java.util.List;
  */
 public class ScriptController extends SpringFlowController<ScriptController.Action>
 {
-    static Logger _log = Logger.getLogger(ScriptController.class);
+    private static Logger _log = Logger.getLogger(ScriptController.class);
 
     public enum Action
     {
