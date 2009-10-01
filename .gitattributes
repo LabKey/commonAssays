@@ -410,6 +410,7 @@ flow/src/org/labkey/flow/query/StatisticMethod.java -text
 flow/src/org/labkey/flow/reports/ControlsQCReport.java -text
 flow/src/org/labkey/flow/reports/FlowReport.java -text
 flow/src/org/labkey/flow/reports/editQCReport.jsp -text
+flow/src/org/labkey/flow/reports/statPicker.jsp -text
 flow/src/org/labkey/flow/script/AddRunsJob.java -text
 flow/src/org/labkey/flow/script/AnalysisHandler.java -text
 flow/src/org/labkey/flow/script/AnalyzeJob.java -text
