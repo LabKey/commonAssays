@@ -4,6 +4,8 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.reports.report.ReportDescriptor" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ControlsQCReport report = (ControlsQCReport) HttpView.currentModel();
@@ -79,18 +81,18 @@ Ext.onReady(function() {
 
     form = new Ext.form.FormPanel({
         url:window.location,
-        defaults:{msgTarget:'side'},
+        defaults:{msgTarget:'side', width:300},
         border:false,
         defaultType: 'textfield',
         items:[
             {fieldLabel:'Name', name:'reportName', value:report.name, allowBlank:false},
-            {fieldLabel:'Statistic', name:'statistic', value:report.statistic, allowBlank:false},
+            {fieldLabel:'Statistic', name:'statistic', xtype:'statisticField', value:report.statistic, allowBlank:false},
 
-            {fieldLabel:'Keyword', name:'filter[0].property', value:keyword[0].property},
+            {fieldLabel:'Keyword', name:'filter[0].property', xtype:'combo', store:FlowPropertySet.keywords, value:keyword[0].property},
             {xtype:'hidden', name:'filter[0].type', value:'keyword'},
             {fieldLabel:'Value', name:'filter[0].value', value:keyword[0].value},
 
-            {fieldLabel:'Keyword', name:'filter[1].property', value:keyword[1].property},
+            {fieldLabel:'Keyword', name:'filter[1].property', xtype:'combo', store:FlowPropertySet.keywords, value:keyword[1].property},
             {xtype:'hidden', name:'filter[1].type', value:'keyword'},
             {fieldLabel:'Value', name:'filter[1].value', value:keyword[1].value},
 
@@ -100,14 +102,20 @@ Ext.onReady(function() {
 
             {fieldLabel:'Sample Property', name:'filter[3].property', value:sample[1].property},
             {xtype:'hidden', name:'filter[3].type', value:'sample'},
-            {fieldLabel:'Value', name:'filter[3].value', value:sample[1].value},
+            {fieldLabel:'Value', name:'filter[3].value', value:sample[1].value}
         ],
         buttons:[
             {text:'Save', handler:Form_onSave},
             {text:'Cancel', handler:Form_onCancel},
             {text:'Delete', handler:Form_onDelete}
-        ]
+        ],
+        buttonAlign:'left'
     });
     form.render('form');
 });
 </script>
+
+<%
+    JspView statPicker = new JspView(FlowReport.class, "statPicker.jsp", null, null);
+    statPicker.include(statPicker, out);
+%>

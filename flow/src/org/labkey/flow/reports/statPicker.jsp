@@ -104,8 +104,8 @@ var StatisticField = Ext.extend(Ext.form.TriggerField,
                 enableDD:false
             });
             var root = new Ext.tree.TreeNode({text:'-', expanded:true});
-            for (var i=0 ; i<_statsTreeData.length ; i++)
-                root.appendChild(_statsTreeData[i]);
+            for (var i=0 ; i<FlowPropertySet.statsTreeData.length ; i++)
+                root.appendChild(FlowPropertySet.statsTreeData[i]);
             tree.setRootNode(root);
             var sm = tree.getSelectionModel();
             sm.on("selectionchange", function(sm,curr,prev){
@@ -152,8 +152,19 @@ var StatisticField = Ext.extend(Ext.form.TriggerField,
 });
 
 
-var _statistics = <%=jsonStats%>;
-var _statsTreeData = statisticsTree(_statistics);
+
+var FlowPropertySet = {};
+FlowPropertySet.keywords = [<%
+    comma = "";
+    for (String s : fps.getKeywordProperties().keySet())
+    {
+        %><%=comma%><%=PageFlowUtil.jsString(s)%><%
+        comma=",";
+    }
+%>];
+FlowPropertySet.statistics = <%=jsonStats%>;
+FlowPropertySet.statsTreeData = statisticsTree(FlowPropertySet.statistics);
+
 Ext.reg('statisticField', StatisticField);
 
 </script>
