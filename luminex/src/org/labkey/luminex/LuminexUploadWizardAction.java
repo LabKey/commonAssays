@@ -257,7 +257,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     int dataId = 0;
                     if (!form.getTransformResult().getTransformedData().isEmpty())
                     {
-                        // data transform occured, need to find the transformed output that was persisted
+                        // data transform occurred, need to find the transformed output that was persisted
                         for (ExpData data : outputs)
                         {
                             if (LuminexTsvDataHandler.LUMINEX_TSV_DATA_TYPE.matches(new Lsid(data.getLSID())))
