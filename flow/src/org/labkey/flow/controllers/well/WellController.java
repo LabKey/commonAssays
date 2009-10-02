@@ -531,7 +531,7 @@ public class WellController extends SpringFlowController<WellController.Action>
             sb.append("<span style='color:green;'>");
             sb.append(PageFlowUtil.filter(message));
             sb.append("</span><br>");
-            sb.append(PageFlowUtil.generateButton("OK",href));
+            sb.append(PageFlowUtil.generateButton("OK", href));
             setHtml(sb.toString());
         }
     }

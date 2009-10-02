@@ -52,13 +52,13 @@
         if (null == ctx.previousUrl)
             out.print(PageFlowUtil.generateDisabledButton("<< Prev"));
         else
-            out.print("    " + PageFlowUtil.generateButton("<< Prev", ctx.previousUrl.getLocalURIString()));
+            out.print("    " + PageFlowUtil.generateButton("<< Prev", ctx.previousUrl));
 %>&nbsp;
 <%
     if (null == ctx.nextUrl)
         out.print(PageFlowUtil.generateDisabledButton("Next >>"));
     else
-        out.print("    " + PageFlowUtil.generateButton("Next >>", ctx.nextUrl.getLocalURIString()));
+        out.print("    " + PageFlowUtil.generateButton("Next >>", ctx.nextUrl));
 %>&nbsp;
 <%
     if (fraction.wasloadedFromGzFile() && null != ctx.showGzUrl)
@@ -68,7 +68,7 @@
         for (String gzFileExtension : gzFileExtensions)
         {
             ctx.showGzUrl.replaceParameter("extension", gzFileExtension);
-            out.println("    " + PageFlowUtil.generateButton("Show " + gzFileExtension.toUpperCase(), ctx.showGzUrl.getLocalURIString()) + "&nbsp;");
+            out.println("    " + PageFlowUtil.generateButton("Show " + gzFileExtension.toUpperCase(), ctx.showGzUrl) + "&nbsp;");
         }
     }
     out.print(ctx.modificationHref);
