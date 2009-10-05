@@ -244,7 +244,7 @@ public class MS1Schema extends UserSchema
     public ExpRunTable getMS1ExpRunsTableInfo()
     {
         // Start with a standard experiment run table
-        ExpRunTable result = _expSchema.createRunsTable();
+        ExpRunTable result = _expSchema.getRunsTable();
         result.setDescription("Contains a row per MS1 experiment run imported into this folder.");
 
         // Filter to just the runs with the MS1 protocol

@@ -270,7 +270,6 @@ public class PipelineController extends SpringActionController
         private File _dirRoot;
         private File _dirSeqRoot;
         private File _dirData;
-        private File _dirAnalysis;
         private AbstractMS2SearchPipelineProvider _provider;
         private AbstractMS2SearchProtocol _protocol;
 
@@ -336,7 +335,6 @@ public class PipelineController extends SpringActionController
             }
 
             String protocolName = form.getProtocol();
-            _dirAnalysis = protocolFactory.getAnalysisDir(_dirData,protocolName);
             if ( !protocolName.equals("new") && !protocolName.equals("") )
             {
                 try
@@ -508,7 +506,7 @@ public class PipelineController extends SpringActionController
             props.put("dirRoot", _dirRoot.toURI().getPath());
             props.put("dirSequenceRoot", _dirSeqRoot.toURI().getPath());
             props.put("searchEngine", form.getSearchEngine());
-            props.put("action", SpringActionController.getActionName(getAction()) + ".view");
+            props.put("targetAction", SpringActionController.getActionName(getAction()) + ".view");
             props.put("path", form.getPath());
             GWTView result = new GWTView(org.labkey.ms2.pipeline.client.Search.class, props);
             result.setImmediateLoad(true);

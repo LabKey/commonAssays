@@ -204,17 +204,22 @@ public class PeptidesTableInfo extends FilteredTable
         ExprColumn trypricEndsColumn = new ExprColumn(this, "TrypticEnds", trypticSQL, Types.INTEGER);
         addColumn(trypricEndsColumn);
 
-        SQLFragment spectrumSQL = new SQLFragment();
-        spectrumSQL.append("(SELECT Spectrum FROM ");
-        spectrumSQL.append(MS2Manager.getTableInfoSpectraData(), "sd");
-        spectrumSQL.append(" WHERE sd.Fraction = ");
-        spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
-        spectrumSQL.append(".fraction AND sd.Scan = ");
-        spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
-        spectrumSQL.append(".Scan)");
-        ExprColumn spectrumColumn = new ExprColumn(this, "Spectrum", spectrumSQL, Types.BLOB);
-        spectrumColumn.setHidden(true);
-        addColumn(spectrumColumn);
+        if (!MS2Manager.getSqlDialect().isSqlServer() || !DbScope.getLabkeyScope().getDatabaseProductVersion().startsWith("08."))
+        {
+            // Add this column if we're not on SQLServer 2000, which doesn't support BLOBs in a subselect like this
+            // This is an ugly way to conditionalize the column - remove the check as soon as we drop support for SQL Server 2000
+            SQLFragment spectrumSQL = new SQLFragment();
+            spectrumSQL.append("(SELECT Spectrum FROM ");
+            spectrumSQL.append(MS2Manager.getTableInfoSpectraData(), "sd");
+            spectrumSQL.append(" WHERE sd.Fraction = ");
+            spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
+            spectrumSQL.append(".fraction AND sd.Scan = ");
+            spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
+            spectrumSQL.append(".Scan)");
+            ExprColumn spectrumColumn = new ExprColumn(this, "Spectrum", spectrumSQL, Types.BLOB);
+            spectrumColumn.setHidden(true);
+            addColumn(spectrumColumn);
+        }
 
         SQLFragment sql = new SQLFragment();
         sql.append("Fraction IN (SELECT Fraction FROM ");

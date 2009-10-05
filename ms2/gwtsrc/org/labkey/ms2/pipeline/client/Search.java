@@ -99,7 +99,7 @@ public class Search implements EntryPoint
         getSearchService().getSearchServiceResult(searchEngine, dirSequenceRoot,dirRoot,
                 PropertyUtil.getServerProperty("path"), new SearchServiceAsyncCallback());
         //form
-        searchFormPanel.setAction(PropertyUtil.getServerProperty("action"));
+        searchFormPanel.setAction(PropertyUtil.getServerProperty("targetAction"));
         searchFormPanel.setMethod(FormPanel.METHOD_POST);
         searchFormPanel.addFormHandler(new SearchFormHandler());
         searchFormPanel.setWidth("100%");

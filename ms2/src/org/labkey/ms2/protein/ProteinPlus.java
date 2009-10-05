@@ -109,12 +109,16 @@ public class ProteinPlus
     {
         int firstBlankIndex = getProtein().getHeader().indexOf(" ");
 
+        String result;
         if (firstBlankIndex != -1)
         {
-            String result = getProtein().getHeader().substring(0, firstBlankIndex).trim();
-            if (result.length() > 500) result = result.substring(0, 499);
-            return result;
+            result = getProtein().getHeader().substring(0, firstBlankIndex).trim();
         }
-        return null;
+        else
+        {
+            result = getProtein().getHeader();
+        }
+        if (result.length() > 500) result = result.substring(0, 499);
+        return result;
     }
 }

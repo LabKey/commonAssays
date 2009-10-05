@@ -77,7 +77,7 @@ public class MicroarraySchema extends UserSchema
 
     public ExpRunTable createRunsTable()
     {
-        ExpRunTable result = _expSchema.createRunsTable();
+        ExpRunTable result = _expSchema.getRunsTable();
         ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getRunTextURL(getContainer(), -1);
         url.replaceParameter("rowId", "${RowId}");
         result.getColumn(ExpRunTable.Column.Name).setURL(StringExpressionFactory.createURL(url));

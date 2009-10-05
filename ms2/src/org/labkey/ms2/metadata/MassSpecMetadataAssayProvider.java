@@ -344,7 +344,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
 
     public ExpDataTable createDataTable(final AssaySchema schema, final ExpProtocol protocol)
     {
-        final ExpDataTable result = new ExpSchema(schema.getUser(), schema.getContainer()).createDatasTable();
+        final ExpDataTable result = new ExpSchema(schema.getUser(), schema.getContainer()).getDatasTable();
         SQLFragment runConditionSQL = new SQLFragment("RunId IN (SELECT RowId FROM " +
                 ExperimentService.get().getTinfoExperimentRun() + " WHERE ProtocolLSID = ?)");
         runConditionSQL.add(protocol.getLSID());
