@@ -123,7 +123,9 @@ public class FlowSchema extends UserSchema
         try
         {
             FlowTableType type = FlowTableType.valueOf(name);
-            return getTable(type);
+            AbstractTableInfo table = (AbstractTableInfo)getTable(type);
+            table.setDescription(type.getDescription());
+            return table;
         }
         catch (IllegalArgumentException iae)
         {
