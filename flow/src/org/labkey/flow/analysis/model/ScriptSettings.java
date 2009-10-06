@@ -107,7 +107,8 @@ public class ScriptSettings implements Serializable
         SimpleFilter ret = new SimpleFilter();
         for (FilterInfo filter : _filters.values())
         {
-            ret.addCondition(filter.getField().toString(), filter.getValue(), filter.getOp());
+            if (filter.getField() != null && filter.getValue() != null)
+                ret.addCondition(filter.getField().toString(), filter.getValue(), filter.getOp());
         }
         return ret;
     }
