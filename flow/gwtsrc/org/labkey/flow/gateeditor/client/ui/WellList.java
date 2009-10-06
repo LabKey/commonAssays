@@ -19,6 +19,7 @@ package org.labkey.flow.gateeditor.client.ui;
 import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.FlowUtil;
 import org.labkey.flow.gateeditor.client.model.GWTWell;
+import org.labkey.api.gwt.client.ui.WebPartPanel;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.DOM;
 
@@ -27,19 +28,24 @@ import java.util.HashMap;
 
 public class WellList extends GateComponent
 {
-    VerticalPanel basePanel;
+    WebPartPanel panel;
+    VerticalPanel widget;
     ScrollPanel scrollPanel;
     VerticalPanel list;
     Map<Label,GWTWell> labelWellMap = new HashMap<Label,GWTWell>();
     Map<Integer,Label> wellLabelMap = new HashMap<Integer,Label>();
     Label currentLabel;
-    private boolean firstLoad = true;
 
     GateEditorListener listener = new GateEditorListener()
     {
         public void onWellChanged()
         {
             selectWell(getWell());
+        }
+
+        public void onBeforeWorkspaceChanged()
+        {
+            setLoadingMessage();
         }
 
         public void onWorkspaceChanged()
@@ -59,33 +65,37 @@ public class WellList extends GateComponent
     public WellList(GateEditor editor)
     {
         super(editor);
-        basePanel = new VerticalPanel();
+        widget = new VerticalPanel();
+        this.panel = new WebPartPanel("Well List", widget);
         Image spacer = new Image();
         spacer.setUrl(FlowUtil._gif());
-        spacer.setHeight("1px");
-        spacer.setWidth("150px");
+        spacer.setHeight("4px");
+        spacer.setWidth("160px");
+        widget.add(spacer);
         scrollPanel = new ScrollPanel();
         scrollPanel.setWidth("150px");
         scrollPanel.setHeight("400px");
         list = new VerticalPanel();
-        list.add(new InlineHTML("<em>Loading...</em>"));
+        setLoadingMessage();
         scrollPanel.add(list);
-        basePanel.add(scrollPanel);
+        widget.add(scrollPanel);
         editor.addListener(listener);
     }
 
     public Widget getWidget()
     {
-        return basePanel;
+        return panel;
+    }
+
+    public void setLoadingMessage()
+    {
+        list.clear();
+        list.add(new InlineHTML("<em>Loading wells...</em>"));
     }
 
     public void setWells(GWTWell[] wells)
     {
-        if (firstLoad)
-        {
-            list.clear();
-            firstLoad = false;
-        }
+        list.clear();
         for (Label label : labelWellMap.keySet())
         {
             label.removeFromParent();

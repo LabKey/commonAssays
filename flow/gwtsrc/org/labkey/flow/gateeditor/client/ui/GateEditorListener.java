@@ -50,6 +50,11 @@ public class GateEditorListener
 
     }
 
+    public void onBeforeWorkspaceChanged()
+    {
+
+    }
+
     public void onWorkspaceChanged()
     {
 

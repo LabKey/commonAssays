@@ -21,6 +21,7 @@ import com.google.gwt.user.client.Timer;
 import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.FlowUtil;
+import org.labkey.flow.gateeditor.client.GWTGraphException;
 import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
 import org.labkey.flow.gateeditor.client.model.GWTGraphInfo;
 import org.labkey.flow.gateeditor.client.ui.*;
@@ -65,6 +66,20 @@ public class GraphWindow extends GateComponent
         }
         status.setText(loadingText);
         gateWidget.updateDisplay();
+    }
+
+    public void setGraphError(GWTGraphException e)
+    {
+        this.image.setVisible(false);
+        GWTGraphOptions options = e.getGraphOptions();
+        String msg = e.getMessage() + "\n";
+        if (options.well != null && options.well.getName() != null)
+            msg += "\n  FCS file: " + options.well.getName();
+        if (options.compensationMatrix != null && options.compensationMatrix.getName() != null)
+            msg += "\n  Comp Matrix: " + options.compensationMatrix.getName();
+        if (options.subset != null)
+            msg += "\n  Subset: " + options.subset;
+        status.setText(msg);
     }
 
     GateEditorListener listener = new GateEditorListener()
@@ -199,7 +214,16 @@ public class GraphWindow extends GateComponent
             }
         }
         status.setText(loadingText);
-        editor.getService().getGraphInfo(options, new GateCallback<GWTGraphInfo>() {
+        editor.getService().getGraphInfo(options, new GateCallback<GWTGraphInfo>()
+        {
+            @Override
+            public void onFailure(Throwable caught)
+            {
+                if (caught instanceof GWTGraphException)
+                    setGraphError((GWTGraphException)caught);
+                else
+                    super.onFailure(caught);
+            }
 
             public void onSuccess(GWTGraphInfo graphInfo)
             {

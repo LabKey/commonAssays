@@ -23,8 +23,9 @@ public interface GateEditorService extends RemoteService
 {
     GWTRun[] getRuns();
     GWTCompensationMatrix[] getCompensationMatrices();
+    int getRunCompensationMatrix(int runId);
     GWTWorkspace getWorkspace(GWTWorkspaceOptions workspaceOptions);
-    GWTGraphInfo getGraphInfo(GWTGraphOptions graphOptions);
+    GWTGraphInfo getGraphInfo(GWTGraphOptions graphOptions) throws GWTGraphException;
     GWTScript save(GWTScript script);
     GWTWell save(GWTWell well, GWTScript script);
 }

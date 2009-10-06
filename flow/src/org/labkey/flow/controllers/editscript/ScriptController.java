@@ -1224,6 +1224,12 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
                 props.put("scriptId", Integer.toString(scriptId));
             }
             int runId = form.getRunId();
+            if (runId == 0)
+            {
+                FlowRun run = FlowRun.findMostRecent(getContainer(), FlowProtocolStep.keywords);
+                if (run != null)
+                    runId = run.getRunId();
+            }
             if (runId != 0)
             {
                 props.put("runId", Integer.toString(runId));

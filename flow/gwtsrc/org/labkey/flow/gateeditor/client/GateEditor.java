@@ -37,6 +37,18 @@ public class GateEditor implements EntryPoint
 
     public void onModuleLoad()
     {
+        final GWT.UncaughtExceptionHandler ueh = GWT.getUncaughtExceptionHandler();
+        GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler()
+        {
+            public void onUncaughtException(Throwable e)
+            {
+                GWT.log("AppController: Uncaught exception handled: " + e.getMessage(), e);
+                if (ueh != null) {
+                  ueh.onUncaughtException(e);
+                }
+            }
+        });
+
         editorState = new EditorState();
         GWTEditingMode editingMode = GWTEditingMode.valueOf(PropertyUtil.getServerProperty("editingMode"));
         getState().setEditingMode(editingMode);
@@ -53,6 +65,7 @@ public class GateEditor implements EntryPoint
         {
             workspaceOptions.runId = Integer.parseInt(strRunId);
         }
+
         getState().setSubsetName(PropertyUtil.getServerProperty("subset"));
         init(workspaceOptions);
 
@@ -73,8 +86,8 @@ public class GateEditor implements EntryPoint
 
     void init(GWTWorkspaceOptions workspaceOptions)
     {
-        getService().getWorkspace(workspaceOptions, new GateCallback<GWTWorkspace>() {
-
+        getService().getWorkspace(workspaceOptions, new GateCallback<GWTWorkspace>()
+        {
             public void onSuccess(GWTWorkspace result)
             {
                 getState().setWorkspace(result);

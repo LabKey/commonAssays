@@ -261,6 +261,14 @@ public class FlowRun extends FlowObject<ExpRun>
         return getScript().getAnalysisScript();
     }
 
+    private int getScriptId()
+    {
+        ExpData[] datas = getExperimentRun().getInputDatas(InputRole.AnalysisScript.toString(), ExpProtocol.ApplicationType.ExperimentRun);
+        if (datas.length == 0)
+            return 0;
+        return datas[0].getRowId();
+    }
+
     public FlowScript getScript()
     {
         ExpData[] datas = getExperimentRun().getInputDatas(InputRole.AnalysisScript.toString(), ExpProtocol.ApplicationType.ExperimentRun);
@@ -327,9 +335,49 @@ public class FlowRun extends FlowObject<ExpRun>
         return getRunsForPath(container, step, null);
     }
 
+    static public FlowRun[] getRunsWithRealFCSFiles(Container container, FlowProtocolStep step) throws SQLException
+    {
+        FlowRun[] runs = FlowRun.getRunsForContainer(container, step);
+        List<FlowRun> ret = new ArrayList<FlowRun>();
+        for (FlowRun run : runs)
+        {
+            if (run.hasRealWells())
+                ret.add(run);
+        }
+        return ret.toArray(new FlowRun[ret.size()]);
+    }
+
+    static public FlowRun[] getRunsForScript(Container container, FlowProtocolStep step, int scriptId) throws SQLException
+    {
+        if (scriptId == 0)
+            return new FlowRun[0];
+
+        List<FlowRun> ret = new ArrayList<FlowRun>();
+        for (FlowRun run : getRunsForContainer(container, step))
+        {
+            if (scriptId == run.getScriptId())
+                ret.add(run);
+        }
+        return ret.toArray(new FlowRun[ret.size()]);
+    }
+
+    static public FlowRun findMostRecent(Container container, FlowProtocolStep step) throws SQLException
+    {
+        FlowRun[] runs = getRunsForContainer(container, step);
+        FlowRun max = null;
+        for (FlowRun run : runs)
+        {
+            if (max == null)
+                max = run;
+            else
+                max = max.getExperimentRun().getModified().before(run.getExperimentRun().getModified()) ? run : max;
+        }
+        return max;
+    }
+
     static public FlowRun[] getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot) throws SQLException
     {
-        List<FlowRun> ret = new ArrayList();
+        List<FlowRun> ret = new ArrayList<FlowRun>();
         ExpProtocol childProtocol = null;
         if (step != null)
         {

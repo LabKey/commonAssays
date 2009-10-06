@@ -44,7 +44,7 @@ public class SubsetSpec implements Serializable
         }
     }
 
-    static public SubsetSpec fromString(String strSubset)
+    static public SubsetSpec fromString(String strSubset) throws SubsetFormatException
     {
         if (strSubset == null || strSubset.length() == 0)
         {

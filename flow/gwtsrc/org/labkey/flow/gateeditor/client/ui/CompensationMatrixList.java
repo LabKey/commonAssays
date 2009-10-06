@@ -17,9 +17,12 @@
 package org.labkey.flow.gateeditor.client.ui;
 
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.model.GWTCompensationMatrix;
+import org.labkey.flow.gateeditor.client.model.GWTRun;
 
 import java.util.Arrays;
 
@@ -35,11 +38,17 @@ public class CompensationMatrixList extends GateComponent
         {
             updateCompensationMatrix();
         }
+
+        public void onRunChanged()
+        {
+            GWTRun run = getRun();
+            setCompMatrixForRun(run);
+        }
     };
 
-    ChangeListener changeListener = new ChangeListener() {
-
-        public void onChange(Widget sender)
+    ChangeHandler changeHandler = new ChangeHandler()
+    {
+        public void onChange(ChangeEvent event)
         {
             getEditor().getState().setCompensationMatrix(matrices[listBox.getSelectedIndex()]);
         }
@@ -52,10 +61,11 @@ public class CompensationMatrixList extends GateComponent
         widget.add(new Label("Compensation Matrix:"));
         listBox = new ListBox();
         listBox.setEnabled(false);
-        listBox.addChangeListener(changeListener);
+        listBox.addChangeHandler(changeHandler);
         widget.add(listBox);
-        editor.getService().getCompensationMatrices(new GateCallback<GWTCompensationMatrix[]>() {
-
+        editor.addListener(listener);
+        editor.getService().getCompensationMatrices(new GateCallback<GWTCompensationMatrix[]>()
+        {
             public void onSuccess(GWTCompensationMatrix[] result)
             {
                 setCompensationMatrices(result);
@@ -72,24 +82,54 @@ public class CompensationMatrixList extends GateComponent
 
     public void updateCompensationMatrix()
     {
-        int index = Arrays.asList(matrices).indexOf(getCompensationMatrix());
-        if (index >= 0)
+        GWTCompensationMatrix matrix = getCompensationMatrix();
+        int index = matrix == null ? -1 : Arrays.asList(matrices).indexOf(matrix);
+        index++; // 0th index is "<No compensation>"
+        if (index >= 0 && listBox.getSelectedIndex() != index)
         {
-            listBox.setSelectedIndex(1);
+            listBox.setSelectedIndex(index);
         }
     }
 
-    public void setCompensationMatrices(GWTCompensationMatrix[] comps)
+    public void setCompensationMatrices(final GWTCompensationMatrix[] comps)
     {
         matrices = comps;
         listBox.clear();
+        listBox.addItem("<No Compensation>", "0");
         for (GWTCompensationMatrix comp : comps)
         {
             listBox.addItem(comp.getLabel(), Integer.toString(comp.getCompId()));
         }
         if (comps.length > 0)
         {
-            editor.getState().setCompensationMatrix(comps[0]);
+            setCompMatrixForRun(getRun());
         }
+    }
+
+    public void setCompMatrixForRun(GWTRun run)
+    {
+        if (matrices == null)
+            return;
+        if (run != null)
+        {
+            editor.getService().getRunCompensationMatrix(run.getRunId(), new GateCallback<Integer>()
+            {
+                public void onSuccess(Integer compId)
+                {
+                    if (compId != null)
+                    {
+                        for (GWTCompensationMatrix comp : matrices)
+                        {
+                            if (comp.getCompId() == compId.intValue())
+                            {
+                                editor.getState().setCompensationMatrix(comp);
+                                break;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        editor.getState().setCompensationMatrix(null);
     }
 }

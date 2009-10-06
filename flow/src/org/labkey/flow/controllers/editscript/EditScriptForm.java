@@ -305,10 +305,12 @@ public class EditScriptForm extends ViewForm
     public Map<Integer, String> getExperimentRuns(boolean realFiles) throws Exception
     {
         LinkedHashMap<Integer, String> ret = new LinkedHashMap<Integer, String>();
-        for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
+        FlowRun[] runs = realFiles ?
+                FlowRun.getRunsWithRealFCSFiles(getContainer(), FlowProtocolStep.keywords) :
+                FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+        for (FlowRun run : runs)
         {
-            if (!realFiles || run.hasRealWells())
-                ret.put(run.getRunId(), run.getName());
+            ret.put(run.getRunId(), run.getName());
         }
         return ret;
     }

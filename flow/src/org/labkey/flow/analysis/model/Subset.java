@@ -40,7 +40,7 @@ public class Subset
         this(null, null, fcs, fcs.getScaledData(settings));
     }
 
-    public Subset apply(CompensationMatrix matrix)
+    public Subset apply(CompensationMatrix matrix) throws FlowException
     {
         DataFrame data = matrix.getCompensatedData(_data);
         return new Subset(_parent, _name, _fcs, data);

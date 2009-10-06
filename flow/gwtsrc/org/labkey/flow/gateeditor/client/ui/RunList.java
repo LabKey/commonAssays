@@ -17,6 +17,8 @@
 package org.labkey.flow.gateeditor.client.ui;
 
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.model.*;
@@ -57,6 +59,7 @@ public class RunList extends GateComponent
                     return;
                 }
             }
+            editor.getState().fireBeforeWorkspaceChanged();
             currentRequest = new GateCallback<GWTWorkspace>()
             {
                 public void onSuccess(GWTWorkspace result)
@@ -83,10 +86,11 @@ public class RunList extends GateComponent
             }
             updateWorkspace();
         }
+
     };
-    ChangeListener changeListener = new ChangeListener()
+    ChangeHandler changeHandler = new ChangeHandler()
     {
-        public void onChange(Widget sender)
+        public void onChange(ChangeEvent event)
         {
             editor.getState().setRun(getRuns()[listBox.getSelectedIndex()]);
         }
@@ -104,11 +108,11 @@ public class RunList extends GateComponent
         widget.add(new Label("Run"));
         listBox = new ListBox();
         listBox.setEnabled(false);
-        listBox.addChangeListener(changeListener);
+        listBox.addChangeHandler(changeHandler);
         widget.add(listBox);
         editor.addListener(listener);
-        editor.getService().getRuns(new GateCallback<GWTRun[]>() {
-
+        editor.getService().getRuns(new GateCallback<GWTRun[]>()
+        {
             public void onSuccess(GWTRun[] result)
             {
                 runs = result;
@@ -133,7 +137,7 @@ public class RunList extends GateComponent
             listBox.addItem(run1.getName(), Integer.toString(run1.getRunId()));
         }
 
-        if (runs.length > 0)
+        if (runs.length > 0 && run != null)
         {
             int index = Arrays.asList(runs).indexOf(run);
             if (index >= 0)
@@ -141,7 +145,6 @@ public class RunList extends GateComponent
                 listBox.setSelectedIndex(index);
                 return;
             }
-            getEditor().getState().setRun(runs[0]);
         }
     }
 }

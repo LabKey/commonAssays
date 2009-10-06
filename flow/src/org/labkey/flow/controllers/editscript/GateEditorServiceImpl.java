@@ -26,6 +26,7 @@ import org.labkey.flow.gateeditor.client.model.*;
 import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
 import org.labkey.flow.gateeditor.client.model.GWTGraphInfo;
 import org.labkey.flow.gateeditor.client.GateEditorService;
+import org.labkey.flow.gateeditor.client.GWTGraphException;
 import org.labkey.flow.data.*;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -378,7 +379,19 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         return ret;
     }
 
-    public GWTGraphInfo getGraphInfo(GWTGraphOptions graphOptions)
+    public int getRunCompensationMatrix(int runId)
+    {
+        FlowRun run = FlowRun.fromRunId(runId);
+        if (run != null)
+        {
+            FlowCompensationMatrix comp = run.getCompensationMatrix();
+            if (comp != null)
+                return comp.getRowId();
+        }
+        return 0;
+    }
+
+    public GWTGraphInfo getGraphInfo(GWTGraphOptions graphOptions) throws GWTGraphException
     {
         try
         {
@@ -390,14 +403,16 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             GWTGraphInfo ret = cache.getGraphInfo(graphOptions);
             if (ret != null)
                 return ret;
+            SubsetSpec subsetSpec = SubsetSpec.fromString(graphOptions.subset);
+            SubsetSpec parentSubsetSpec = subsetSpec == null ? null : subsetSpec.getParent();
             GraphSpec graphSpec;
             if (StringUtils.isEmpty(graphOptions.yAxis))
             {
-                graphSpec = new GraphSpec(SubsetSpec.fromString(graphOptions.subset).getParent(), graphOptions.xAxis);
+                graphSpec = new GraphSpec(parentSubsetSpec, graphOptions.xAxis);
             }
             else
             {
-                graphSpec = new GraphSpec(SubsetSpec.fromString(graphOptions.subset).getParent(), graphOptions.xAxis, graphOptions.yAxis);
+                graphSpec = new GraphSpec(parentSubsetSpec, graphOptions.xAxis, graphOptions.yAxis);
             }
             FlowScript script = FlowScript.fromScriptId(graphOptions.script.getScriptId());
             ScriptDef scriptDef = script.getAnalysisScriptDocument().getScript();
@@ -437,11 +452,13 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             graphInfo.graphOptions = graphOptions;
             return graphInfo;
         }
+        catch (FlowException e)
+        {
+            throw new GWTGraphException(e.getMessage(), graphOptions, e);
+        }
         catch (Exception e)
         {
-            // rethrow with more information for mothership
-            // CONSIDER: instead just add error details in GateCallback.onFailure()
-            String msg = "Failed to get graph info: " + e.getMessage();
+            String msg = "Internal Error getting graph info: " + e.getMessage();
             if (graphOptions.well != null && graphOptions.well.getName() != null)
                 msg += "\n  FCS file: " + graphOptions.well.getName();
             if (graphOptions.compensationMatrix != null && graphOptions.compensationMatrix.getName() != null)
@@ -449,7 +466,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             if (graphOptions.subset != null)
                 msg += "\n  Subset: " + graphOptions.subset;
             _log.error(msg, e);
-            throw new UnexpectedException(e, msg);
+            throw new GWTGraphException(e.getMessage(), graphOptions, e);
         }
     }
 

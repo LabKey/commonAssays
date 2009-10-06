@@ -242,17 +242,17 @@ public class DataFrame
     }
 
 
-    public NumberArray getColumn(String s)
+    public NumberArray getColumn(String s) throws FlowException
     {
         Field field = getField(s);
         if (field == null)
         {
-            throw new IllegalArgumentException("No such field '" + s + "'");
+            throw new FlowException("No such channel '" + s + "' in FCS file");
         }
         return data[field.getIndex()];
     }
 
-    public double[] getDoubleArray(String s)
+    public double[] getDoubleArray(String s) throws FlowException
     {
         NumberArray narray = getColumn(s);
         double[] ret = new double[narray.size()];

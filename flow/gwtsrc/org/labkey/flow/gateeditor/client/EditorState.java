@@ -63,16 +63,27 @@ public class EditorState
 
     public void setWorkspace(GWTWorkspace workspace)
     {
+        if (this.workspace == workspace)
+            return;
         this.workspace = workspace;
-        for (int i = 0; i < listeners.size(); i ++)
+        for (GateEditorListener listener : listeners)
         {
-            ((GateEditorListener) listeners.get(i)).onWorkspaceChanged();
+            listener.onWorkspaceChanged();
         }
         setScript(workspace.getScript());
+        setRun(workspace.getRun());
+    }
+
+    public void fireBeforeWorkspaceChanged()
+    {
+        for (GateEditorListener listener : listeners)
+        {
+            listener.onBeforeWorkspaceChanged();
+        }
     }
 
     private GWTWorkspace workspace;
-    private List listeners = new ArrayList();
+    private List<GateEditorListener> listeners = new ArrayList<GateEditorListener>();
 
     public GWTScript getScript()
     {
@@ -86,10 +97,12 @@ public class EditorState
 
     public void setScript(GWTScript script)
     {
+        if (this.script == script)
+            return;
         this.script = script;
-        for (int i = 0; i < listeners.size(); i ++)
+        for (GateEditorListener listener : listeners)
         {
-            ((GateEditorListener) listeners.get(i)).onScriptChanged();
+            listener.onScriptChanged();
         }
         if (subsetName != null)
         {
@@ -104,15 +117,18 @@ public class EditorState
 
     public void setPopulation(GWTPopulation population)
     {
+        if (this.population == population)
+            return;
+
         GWTPopulation populationDelete = null;
         if (this.population != null && this.population.isIncomplete())
         {
             populationDelete = this.population;
         }
         this.population = population;
-        for (int i = 0; i < listeners.size(); i ++)
+        for (GateEditorListener listener : listeners)
         {
-            ((GateEditorListener) listeners.get(i)).onPopulationChanged();
+            listener.onPopulationChanged();
         }
         setGate(population.getGate());
         if (populationDelete != null)
@@ -122,7 +138,7 @@ public class EditorState
         if (population != null)
         {
             subsetName = population.getFullName();
-            GWTWell well = (GWTWell) getWorkspace().getSubsetReleventWellMap().get(population.getFullName());
+            GWTWell well = getWorkspace().getSubsetReleventWellMap().get(population.getFullName());
             if (well != null)
             {
                 setWell(well);
@@ -155,7 +171,7 @@ public class EditorState
         {
             parent = scriptComponent.findPopulation(parentName);
         }
-        List lstPopulations = new ArrayList();
+        List<GWTPopulation> lstPopulations = new ArrayList<GWTPopulation>();
         for (int i = 0; i < parent.getPopulations().length; i ++)
         {
             GWTPopulation child = parent.getPopulations()[i];
@@ -167,7 +183,7 @@ public class EditorState
         GWTPopulation[] arrPopulation = new GWTPopulation[lstPopulations.size()];
         for (int i = 0; i < arrPopulation.length; i ++)
         {
-            arrPopulation[i] = (GWTPopulation) lstPopulations.get(i);
+            arrPopulation[i] = lstPopulations.get(i);
         }
         parent.setPopulations(arrPopulation);
         setScript(newScript);
@@ -180,10 +196,12 @@ public class EditorState
 
     public void setRun(GWTRun run)
     {
+        if (this.run == run)
+            return;
         this.run = run;
-        for (int i = 0; i < listeners.size(); i ++)
+        for (GateEditorListener listener : listeners)
         {
-            ((GateEditorListener) listeners.get(i)).onRunChanged();
+            listener.onRunChanged();
         }
     }
 
@@ -194,6 +212,9 @@ public class EditorState
 
     public void setWell(GWTWell well)
     {
+        if (this.well == well)
+            return;
+        
         this.well = well;
         if (isRunMode())
         {
@@ -205,9 +226,9 @@ public class EditorState
             setScript(script);
             setCompensationMatrix(well.getCompensationMatrix());
         }
-        for (int i = 0; i < listeners.size(); i ++)
+        for (GateEditorListener listener : listeners)
         {
-            ((GateEditorListener) listeners.get(i)).onWellChanged();
+            listener.onWellChanged();
         }
     }
 
@@ -218,10 +239,12 @@ public class EditorState
 
     public void setGate(GWTGate gate)
     {
+        if (this.gate == gate)
+            return;
         this.gate = gate;
-        for (int i = 0; i < listeners.size(); i ++)
+        for (GateEditorListener listener : listeners)
         {
-            ((GateEditorListener) listeners.get(i)).onGateChanged();
+            listener.onGateChanged();
         }
     }
 
@@ -232,10 +255,12 @@ public class EditorState
 
     public void setYAxis(String yAxis)
     {
+        if (this.yAxis != null && this.yAxis.equals(yAxis))
+            return;
         this.yAxis = yAxis;
-        for (int i = 0; i < listeners.size(); i ++)
+        for (GateEditorListener listener : listeners)
         {
-            ((GateEditorListener) listeners.get(i)).onYAxisChanged();
+            listener.onYAxisChanged();
         }
     }
 
@@ -256,10 +281,12 @@ public class EditorState
 
     public void setCompensationMatrix(GWTCompensationMatrix comp)
     {
+        if (this.comp == comp)
+            return;
         this.comp = comp;
-        for (int i = 0; i < listeners.size(); i ++)
+        for (GateEditorListener listener : listeners)
         {
-            ((GateEditorListener) listeners.get(i)).onCompMatrixChanged();
+            listener.onCompMatrixChanged();
         }
 
     }

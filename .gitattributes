@@ -111,6 +111,7 @@ flow/gwtsrc/org/labkey/flow/gateeditor/GateEditor.gwt.xml -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/EditorState.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/FlowStyle.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/FlowUtil.java -text
+flow/gwtsrc/org/labkey/flow/gateeditor/client/GWTGraphException.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/GateCallback.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/GateEditor.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/GateEditorService.java -text

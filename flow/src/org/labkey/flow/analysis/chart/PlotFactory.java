@@ -105,21 +105,21 @@ public class PlotFactory
         return true;
     }
 
-    static protected ValueAxis getValueAxis(Subset subset, String name, DataFrame.Field field)
+    static private ValueAxis getValueAxis(Subset subset, String name, DataFrame.Field field)
     {
         if (!displayLogarithmic(subset, field))
             return new NumberAxis(name);
         return new FlowLogarithmicAxis(name);
     }
 
-    static public DataFrame.Field getField(DataFrame data, String name)
+    static private DataFrame.Field getField(DataFrame data, String name) throws FlowException
     {
         DataFrame.Field ret = data.getField(CompensationMatrix.DITHERED_PREFIX + name);
         if (ret != null)
             return ret;
         ret = data.getField(name);
         if (ret == null)
-            throw new IllegalArgumentException("No such field '" + name + "'");
+            throw new FlowException("Channel '" + name + "' required for graph");
         return ret;
     }
 
@@ -152,11 +152,11 @@ public class PlotFactory
         return label;
     }
 
-    static public String getLabel(Subset subset, String fieldName)
+    static private String getLabel(Subset subset, String fieldName) throws FlowException
     {
         DataFrame.Field field = subset.getDataFrame().getField(fieldName);
         if (field == null)
-            throw new IllegalArgumentException("No such field '" + fieldName + "'");
+            throw new FlowException("Channel '" + fieldName + "' required for graph");
         boolean compensated = field.getOrigIndex() != field.getIndex();
         return getLabel(subset.getFCSHeader(), field.getOrigIndex(), compensated);
     }

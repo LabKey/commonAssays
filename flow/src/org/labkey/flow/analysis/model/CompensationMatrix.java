@@ -219,14 +219,14 @@ public class CompensationMatrix implements Serializable
         {
             DataFrame.Field ifield = data.getField(_channelNames[i]);
             if (ifield == null)
-                throw new FlowException("Channel '" + _channelNames[i] + "' not found");
+                throw new FlowException("Channel '" + _channelNames[i] + "' required for compensation matrix.");
             int irow = ifield.getIndex();
             double[] row = _rows[i];
             for (int j = 0; j < _channelNames.length; j ++)
             {
                 DataFrame.Field jfield = data.getField(_channelNames[j]);
                 if (jfield == null)
-                    throw new FlowException("Channel '" + _channelNames[j] + "' not found");
+                    throw new FlowException("Channel '" + _channelNames[j] + "' required for compensation matrix.");
                 int icol = jfield.getIndex();
                 ret.set(icol, irow, row[j]);
             }
@@ -270,7 +270,7 @@ public class CompensationMatrix implements Serializable
         {
             DataFrame.Field origField = data.getField(_channelNames[i]);
             if (origField == null)
-                throw new FlowException("Channel '" + _channelNames[i] + "' not found");
+                throw new FlowException("Channel '" + _channelNames[i] + "' required for compensation matrix.");
             DataFrame.Field compField = new DataFrame.Field(data.getColCount() + i, origField, _prefix + _channelNames[i] + _suffix);
             DataFrame.Field ditheredField = new DataFrame.Field(data.getColCount() + _channelNames.length + i, origField, DITHERED_PREFIX + _prefix + _channelNames[i] + _suffix);
             fields[compField.getIndex()] = compField;

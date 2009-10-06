@@ -18,17 +18,21 @@ package org.labkey.flow.gateeditor.client.ui;
 
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 import org.labkey.flow.gateeditor.client.model.*;
 import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.FlowUtil;
 import org.labkey.api.gwt.client.ui.WindowUtil;
 import org.labkey.api.gwt.client.ui.ImageButton;
+import org.labkey.api.gwt.client.ui.WebPartPanel;
 
 import java.util.Map;
 import java.util.HashMap;
 
 public class PopulationTree extends GateComponent
 {
+    WebPartPanel panel;
     VerticalPanel widget;
     ScrollPanel scrollPanel;
     VerticalPanel tree;
@@ -50,11 +54,12 @@ public class PopulationTree extends GateComponent
         }
     };
 
-    ClickListener clickListener = new ClickListener()
+    ClickHandler clickHandler = new ClickHandler()
     {
-        public void onClick(Widget sender)
+        public void onClick(ClickEvent event)
         {
-            GWTPopulation population = labelPopulationMap.get(sender);
+            Widget widget = (Widget)event.getSource();
+            GWTPopulation population = labelPopulationMap.get(widget);
             if (population != null)
             {
                 editor.getState().setPopulation(population);
@@ -64,17 +69,18 @@ public class PopulationTree extends GateComponent
 
     public Widget getWidget()
     {
-        return widget;
+        return panel;
     }
 
     public PopulationTree(GateEditor editor)
     {
         super(editor);
         this.widget = new VerticalPanel();
+        this.panel = new WebPartPanel("Population Tree", widget);
         Image spacer = new Image();
         spacer.setUrl(FlowUtil._gif());
-        spacer.setHeight("1px");
-        spacer.setWidth("150px");
+        spacer.setHeight("4px");
+        spacer.setWidth("160px");
         widget.add(spacer);
         scrollPanel = new ScrollPanel();
         scrollPanel.setWidth("150px");
@@ -138,7 +144,7 @@ public class PopulationTree extends GateComponent
         DOM.setStyleAttribute(label.getElement(), "paddingLeft", (depth * 10) + "px");
         DOM.setStyleAttribute(label.getElement(), "cursor", "default");
         tree.add(label);
-        label.addClickListener(clickListener);
+        label.addClickHandler(clickHandler);
         makeBold(population, label);
         populationNameLabelMap.put(population.getFullName(), label);
         labelPopulationMap.put(label, population);
