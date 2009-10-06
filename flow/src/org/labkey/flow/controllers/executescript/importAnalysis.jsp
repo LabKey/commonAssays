@@ -225,7 +225,7 @@
                     Choose a previously imported directory of FCS files
                     <br/><br/>
                     <select name="existingKeywordRunId">
-                        <option value="0" disabled="disabled" selected="selected">&lt;Select FCS File run&gt;</option>
+                        <option value="0" selected="selected">&lt;Select FCS File run&gt;</option>
                         <% for (Map.Entry<FlowRun, String> entry : keywordRuns.entrySet()) { %>
                             <option value="<%=entry.getKey().getRunId()%>" title="<%=entry.getValue()%>"><%=entry.getKey().getName()%></option>
                         <% } %>
