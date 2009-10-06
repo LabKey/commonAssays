@@ -52,7 +52,7 @@
 
         for (Map.Entry<String, String> entry : paths.entrySet())
         {
-            %><tr><td><input type="checkbox" name="ff_path" value="<%=h(entry.getKey())%>"></td>
+            %><tr><td><input type="checkbox" name="ff_path" value="<%=h(entry.getKey())%>" checked></td>
             <td><%=h(entry.getValue())%></td></tr><%
         }
         %></table>
