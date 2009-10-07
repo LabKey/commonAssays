@@ -124,7 +124,7 @@ public class NabRunDataTable extends PlateBasedAssayRunDataTable
                     SQLFragment sqlOOR = getCurveICSql(sqlFitMethod, entry.getValue(), OOR_INDEX);
 
                     ExprColumn col = new ExprColumn(this, NabDataHandler.CURVE_IC_PREFIX + entry.getKey(), sql, Types.DOUBLE);
-                    col.setFormatString("0.000");
+                    col.setFormat("0.000");
 
                     columns.add(col);
 

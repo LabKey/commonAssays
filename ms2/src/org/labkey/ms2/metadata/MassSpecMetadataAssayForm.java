@@ -40,6 +40,8 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
 {
     private Map<File, ExpMaterial> _fileFractionMap = new HashMap<File, ExpMaterial>();
 
+    private static final String SAMPLE_COLUMN_PREFIX = "Sample";
+
     public boolean isFractions()
     {
         return Boolean.parseBoolean(getRequest().getParameter(FractionsDisplayColumn.FRACTIONS_FIELD_NAME));
@@ -48,19 +50,52 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
     public Map<ExpMaterial, String> getInputMaterials() throws ExperimentException
     {
         Map<ExpMaterial, String> result = new HashMap<ExpMaterial, String>();
-        int count = SampleChooserDisplayColumn.getSampleCount(getRequest(), 1);
-        for (int i = 0; i < count; i++)
+        if (isBulkUploadAttempted())
         {
-            ExpMaterial material = SampleChooserDisplayColumn.getMaterial(i, getContainer(), getRequest());
-            if (!material.getContainer().hasPermission(getUser(), ACL.PERM_READ))
+            Map<String, Object> values = getBulkProperties();
+
+            int suffix = 1;
+            Object o = values.get(SAMPLE_COLUMN_PREFIX + suffix);
+            if (o == null)
             {
-                throw new ExperimentException("You do not have permission to reference the sample '" + material.getName() + ".");
+                // Allow either "Sample" or "Sample1" for the first sample
+                o = values.get(SAMPLE_COLUMN_PREFIX);
             }
-            if (result.containsKey(material))
+            if (o == null)
             {
-                throw new ExperimentException("The same material cannot be used multiple times");
+                throw new ExperimentException("At least one sample is required.");
             }
-            result.put(material, "Sample " + (i + 1));
+
+            do
+            {
+                ExpMaterial material = resolveSample(o.toString());
+                if (result.containsKey(material))
+                {
+                    throw new ExperimentException("The same material, " + material.getName() + ", cannot be used multiple times for the same mzXML file.");
+                }
+                result.put(material, "Sample " + suffix);
+
+                suffix++;
+                o = values.get(SAMPLE_COLUMN_PREFIX + suffix);
+            }
+            while (o != null);
+        }
+        else
+        {
+            int count = SampleChooserDisplayColumn.getSampleCount(getRequest(), 1);
+            for (int i = 0; i < count; i++)
+            {
+                ExpMaterial material = SampleChooserDisplayColumn.getMaterial(i, getContainer(), getRequest());
+                if (!material.getContainer().hasPermission(getUser(), ACL.PERM_READ))
+                {
+                    throw new ExperimentException("You do not have permission to reference the sample '" + material.getName() + ".");
+                }
+                if (result.containsKey(material))
+                {
+                    throw new ExperimentException("The same material, " + material.getName() + ", cannot be used multiple times for the same mzXML file.");
+                }
+                result.put(material, "Sample " + (i + 1));
+            }
         }
         return result;
     }
@@ -86,6 +121,16 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
 
         // Try both the full file name and without the extension
         return getProperties(file);
+    }
+
+    @Override
+    public String getHelpPopupHTML()
+    {
+        return "<p>You may use a set of TSV (tab-separated values) to specify run metadata.</p>" +
+                "<p>The Filename column in the TSV is matched with the mzXML file's name. " +
+                "The sample name columns (Sample, Sample2, Sample3, etc), " +
+                "will be used to look up matching samples by name in all visible sample sets.</p>" +
+                "<p>Any additional run level properties may be specified as separate columns.</p>";
     }
 
     private Map<String, Object> getProperties(File file)

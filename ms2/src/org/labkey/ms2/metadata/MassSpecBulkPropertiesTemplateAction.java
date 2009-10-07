@@ -68,6 +68,8 @@ public class MassSpecBulkPropertiesTemplateAction extends BaseAssayAction<MassSp
         cellFormat.setVerticalAlignment(jxl.format.VerticalAlignment.TOP);
 
         sheet.addCell(new Label(col++, 0, "Filename", cellFormat));
+        sheet.addCell(new Label(col++, 0, "Sample", cellFormat));
+        sheet.addCell(new Label(col++, 0, "Sample2", cellFormat));
 
         Domain runDomain = provider.getRunDomain(protocol);
         for (DomainProperty property : runDomain.getProperties())

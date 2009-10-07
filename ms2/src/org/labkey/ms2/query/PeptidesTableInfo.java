@@ -99,7 +99,7 @@ public class PeptidesTableInfo extends FilteredTable
 
         SQLFragment mzSQL = new SQLFragment("CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".Charge = 0.0 THEN 0.0 ELSE (" + ExprColumn.STR_TABLE_ALIAS + ".Mass + " + ExprColumn.STR_TABLE_ALIAS + ".DeltaMass + (" + ExprColumn.STR_TABLE_ALIAS + ".Charge - 1.0) * 1.007276) / " + ExprColumn.STR_TABLE_ALIAS + ".Charge END");
         ColumnInfo mz = new ExprColumn(this, "MZ", mzSQL, Types.REAL);
-        mz.setFormatString("0.0000");
+        mz.setFormat("0.0000");
         mz.setWidth("55");
         mz.setLabel("ObsMZ");
         addColumn(mz);
@@ -357,7 +357,7 @@ public class PeptidesTableInfo extends FilteredTable
             sql.append(" ELSE NULL END");
 
             ColumnInfo newCol = addColumn(new ExprColumn(this, entry.getKey(), sql, Types.DOUBLE));
-            newCol.setFormatString(realScoreCol.getFormatString());
+            newCol.setFormat(realScoreCol.getFormat());
             newCol.setWidth(realScoreCol.getWidth());
         }
     }
@@ -366,14 +366,14 @@ public class PeptidesTableInfo extends FilteredTable
     {
         SQLFragment precursorMassSQL = new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".mass + " + ExprColumn.STR_TABLE_ALIAS + ".deltamass");
         ColumnInfo precursorMass = new ExprColumn(this, "PrecursorMass", precursorMassSQL, Types.REAL);
-        precursorMass.setFormatString("0.0000");
+        precursorMass.setFormat("0.0000");
         precursorMass.setWidth("65");
         precursorMass.setLabel("ObsMH+");
         addColumn(precursorMass);
 
         SQLFragment fractionalDeltaMassSQL = new SQLFragment("ABS(" + ExprColumn.STR_TABLE_ALIAS + ".deltamass - " + dialect.getRoundFunction(ExprColumn.STR_TABLE_ALIAS + ".deltamass") + ")");
         ColumnInfo fractionalDeltaMass = new ExprColumn(this, "FractionalDeltaMass", fractionalDeltaMassSQL, Types.REAL);
-        fractionalDeltaMass.setFormatString("0.0000");
+        fractionalDeltaMass.setFormat("0.0000");
         fractionalDeltaMass.setWidth("55");
         fractionalDeltaMass.setLabel("fdMass");
         addColumn(fractionalDeltaMass);
@@ -383,7 +383,7 @@ public class PeptidesTableInfo extends FilteredTable
             "            ELSE abs(1000000.0 * abs(" + ExprColumn.STR_TABLE_ALIAS + ".deltamass - " + dialect.getRoundFunction(ExprColumn.STR_TABLE_ALIAS + ".deltamass") + ") / (" + ExprColumn.STR_TABLE_ALIAS + ".mass + ((" + ExprColumn.STR_TABLE_ALIAS + ".charge - 1.0) * 1.007276)))\n" +
             "        END");
         ColumnInfo fractionalDeltaMassPPM = new ExprColumn(this, "FractionalDeltaMassPPM", fractionalSQL, Types.REAL);
-        fractionalDeltaMassPPM.setFormatString("0.0");
+        fractionalDeltaMassPPM.setFormat("0.0");
         fractionalDeltaMassPPM.setWidth("80");
         fractionalDeltaMassPPM.setLabel("fdMassPPM");
         addColumn(fractionalDeltaMassPPM);
@@ -393,7 +393,7 @@ public class PeptidesTableInfo extends FilteredTable
             "            ELSE abs(1000000.0 * " + ExprColumn.STR_TABLE_ALIAS + ".deltamass / (" + ExprColumn.STR_TABLE_ALIAS + ".mass + ((" + ExprColumn.STR_TABLE_ALIAS + ".charge - 1.0) * 1.007276)))\n" +
             "        END");
         ColumnInfo deltaMassPPM = new ExprColumn(this, "DeltaMassPPM", deltaSQL, Types.REAL);
-        deltaMassPPM.setFormatString("0.0");
+        deltaMassPPM.setFormat("0.0");
         deltaMassPPM.setWidth("75");
         deltaMassPPM.setLabel("dMassPPM");
         addColumn(deltaMassPPM);

@@ -40,7 +40,7 @@ public class BackgroundMethod extends AbstractTableMethodInfo
     public ColumnInfo createColumnInfo(TableInfo parentTable, ColumnInfo[] arguments, String alias)
     {
         ColumnInfo ret = super.createColumnInfo(parentTable, arguments, alias);
-        ret.setFormatString("#,##0.###");
+        ret.setFormat("#,##0.###");
         return ret;
     }
 

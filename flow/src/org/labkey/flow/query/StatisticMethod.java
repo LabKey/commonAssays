@@ -17,8 +17,6 @@
 package org.labkey.flow.query;
 
 import org.labkey.api.data.*;
-import org.labkey.api.query.AbstractMethodInfo;
-import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.snapshot.AbstractTableMethodInfo;
 
 import java.sql.Types;
@@ -35,7 +33,7 @@ public class StatisticMethod extends AbstractTableMethodInfo
     public ColumnInfo createColumnInfo(TableInfo parentTable, ColumnInfo[] arguments, String alias)
     {
         ColumnInfo ret = super.createColumnInfo(parentTable, arguments, alias);
-        ret.setFormatString("#,##0.###");
+        ret.setFormat("#,##0.###");
         return ret;
     }
 

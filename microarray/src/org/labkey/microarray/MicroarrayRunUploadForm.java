@@ -170,6 +170,16 @@ public class MicroarrayRunUploadForm extends BulkPropertiesUploadForm<Microarray
         return _runProperties;
     }
 
+    @Override
+    public String getHelpPopupHTML()
+    {
+        return "<p>You may use a set of TSV (tab-separated values) to specify run metadata.</p>" +
+                "<p>The barcode column in the TSV is matched with the barcode value in the MageML file. " +
+                "The sample name columns, configured in the assay design, will be used to look for matching samples by " +
+                "name in all visible sample sets.</p>" +
+                "<p>Any additional run level properties may be specified as separate columns.</p>";
+    }
+
     public Map<String, Object> getBulkProperties() throws ExperimentException
     {
         String barcode = getBarcode(getCurrentMageML());
@@ -204,43 +214,7 @@ public class MicroarrayRunUploadForm extends BulkPropertiesUploadForm<Microarray
             String name = getSampleName(index);
             if (name != null)
             {
-                List<? extends ExpMaterial> materials = ExperimentService.get().getExpMaterialsByName(name, getContainer(), getUser());
-                if (materials.size() == 1)
-                {
-                    return materials.get(0);
-                }
-                // Couldn't find exactly one match, check if it might be of the form <SAMPLE_SET_NAME>.<SAMPLE_NAME>
-                int dotIndex = name.indexOf(".");
-                if (dotIndex != -1)
-                {
-                    String sampleSetName = name.substring(0, dotIndex);
-                    String sampleName = name.substring(dotIndex + 1);
-                    // Could easily do some caching here, but probably not a significant perf issue
-                    ExpSampleSet[] sampleSets = ExperimentService.get().getSampleSets(getContainer(), getUser(), true);
-                    for (ExpSampleSet sampleSet : sampleSets)
-                    {
-                        // Look for a sample set with the right name
-                        if (sampleSetName.equals(sampleSet.getName()))
-                        {
-                            for (ExpMaterial sample : sampleSet.getSamples())
-                            {
-                                // Look for a sample with the right name
-                                if (sample.getName().equals(sampleName))
-                                {
-                                    return sample;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // If we can't find a <SAMPLE_SET_NAME>.<SAMPLE_NAME> match, then fall back on the original results
-                if (materials.isEmpty())
-                {
-                    throw new ExperimentException("No sample with name '" + name + "' was found.");
-                }
-                // Must be more than one match
-                throw new ExperimentException("Found samples with name '" + name + "' in multiple sample sets. Please prefix the name with the desired sample set, in the format 'SAMPLE_SET.SAMPLE'.");
+                return resolveSample(name);
             }
             throw new ExperimentException("No sample name was specified for sample " + (index + 1));
         }

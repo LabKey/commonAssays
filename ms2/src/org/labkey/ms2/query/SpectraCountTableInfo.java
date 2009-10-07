@@ -23,7 +23,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
 import org.jetbrains.annotations.NotNull;
@@ -93,13 +92,13 @@ public class SpectraCountTableInfo extends VirtualTable
             if (_avg)
             {
                 ExprColumn col = new ExprColumn(table, "Avg" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Avg" + _key.getName()), Types.FLOAT);
-                col.setFormatString("#.#####");
+                col.setFormat("#.#####");
                 table.addColumn(col);
             }
             if (_stdDev)
             {
                 ExprColumn col = new ExprColumn(table, "StdDev" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".StdDev" + _key.getName()), Types.FLOAT);
-                col.setFormatString("#.#####");
+                col.setFormat("#.#####");
                 table.addColumn(col);
             }
             if (_sum) { table.addColumn(new ExprColumn(table, "Sum" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Sum" + _key.getName()), Types.FLOAT)); }
