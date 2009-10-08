@@ -32,6 +32,8 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.util.Pair;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.apache.log4j.Logger;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.beanutils.ConversionException;
 
 import java.util.*;
 import java.io.File;
@@ -52,7 +54,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         protected Domain _resultsDomain;
         protected File _dataFile;
 
-        protected Map<String, Object> _runData;
+        protected Map<DomainProperty, Object> _runData;
         protected List<Map<String, Object>> _resultData;
 
         public Parser(Domain runDomain, Domain resultsDomain, File dataFile)
@@ -105,11 +107,11 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
                     if (parts.length == 2)
                     {
                         row = new HashMap<String, Object>(row);
-                        row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, parts[0]);
+                        row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, parts[0].trim());
 
                         try
                         {
-                            Double visit = Double.parseDouble(parts[1]);
+                            Double visit = Double.parseDouble(parts[1].trim());
                             row.put(AbstractAssayProvider.VISITID_PROPERTY_NAME, visit);
                         }
                         catch (NumberFormatException nfe)
@@ -126,7 +128,21 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
 
         }
 
-        public Map<String, Object> getRunData() throws ExperimentException
+        protected Object convert(DomainProperty dp, String value) throws ExperimentException
+        {
+            PropertyDescriptor pd = dp.getPropertyDescriptor();
+            Class type = pd.getPropertyType().getJavaType();
+            try
+            {
+                return ConvertUtils.convert(value, type);
+            }
+            catch (ConversionException ex)
+            {
+                throw new ExperimentException("Failed to convert property '" + dp.getName() + "' from '" + value + "' to a " + type.getSimpleName());
+            }
+        }
+
+        public Map<DomainProperty, Object> getRunData() throws ExperimentException
         {
             if (_runData == null)
                 parse();

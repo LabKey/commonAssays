@@ -22,14 +22,12 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.security.User;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.OntologyManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -82,7 +80,7 @@ public class ViabilityAssaySchema extends AssaySchema
         return null;
     }
 
-    public RecoveryResultsTable createResultsTable()
+    public AbstractTableInfo createResultsTable()
     {
         return new RecoveryResultsTable();
     }
@@ -135,18 +133,35 @@ public class ViabilityAssaySchema extends AssaySchema
 
     }
 
+    protected static ColumnInfo copyProperties(ColumnInfo column, DomainProperty dp)
+    {
+        if (dp != null)
+        {
+            PropertyDescriptor pd = dp.getPropertyDescriptor();
+            column.setLabel(pd.getLabel() == null ? column.getName() : pd.getLabel());
+            column.setDescription(pd.getDescription());
+            column.setFormat(pd.getFormat());
+            column.setDisplayWidth(pd.getDisplayWidth());
+            column.setHidden(pd.isHidden());
+            column.setNullable(!pd.isRequired());
+        }
+        return column;
+    }
+
     public class RecoveryResultsTable extends FilteredTable
     {
 
         public RecoveryResultsTable()
         {
             super(new ResultsTable());
+            ResultsTable resultsTable = (ResultsTable)getRealTable();
             wrapAllColumns(true);
 
             ExprColumn recoveryCol = new ExprColumn(this, "Recovery",
                     new SQLFragment(
                             "(CASE WHEN OriginalCells IS NULL OR OriginalCells = 0 THEN NULL " +
                             "ELSE ViableCells / OriginalCells END)"), Types.DOUBLE);
+            copyProperties(recoveryCol, resultsTable._resultsDomain.getPropertyByName(ViabilityAssayProvider.RECOVERY_PROPERTY_NAME));
             addColumn(recoveryCol);
         }
 
@@ -156,14 +171,23 @@ public class ViabilityAssaySchema extends AssaySchema
             // XXX: shouldn't have to call getSelectSQL() myself here
             SQLFragment fromSQL = QueryService.get().getSelectSQL(getFromTable(), getFromTable().getColumns(), getFilter(), null, 0, 0);
             return fromSQL;
+//            return super.getFromSQL();
         }
     }
 
     public class ResultsTable extends ViabilityAssayTable
     {
+        protected Domain _resultsDomain;
+
         public ResultsTable()
         {
             super(ViabilitySchema.getTableInfoResults());
+
+            _resultsDomain = _provider.getResultsDomain(_protocol);
+            DomainProperty[] resultDomainProperties = _resultsDomain.getProperties();
+            Map<String, DomainProperty> propertyMap = new LinkedHashMap<String, DomainProperty>(resultDomainProperties.length);
+            for (DomainProperty property : resultDomainProperties)
+                propertyMap.put(property.getName(), property);
 
             ColumnInfo rowId = addColumn(wrapColumn(getRealTable().getColumn("RowId")));
             rowId.setHidden(true);
@@ -192,25 +216,32 @@ public class ViabilityAssaySchema extends AssaySchema
             });
             addColumn(runColumn);
 
-            addVisible(wrapColumn(getRealTable().getColumn("ParticipantID")));
-            addVisible(wrapColumn(getRealTable().getColumn("VisitID")));
-            addVisible(wrapColumn(getRealTable().getColumn("Date")));
+            addVisible(copyProperties(wrapColumn(getRealTable().getColumn("ParticipantID")), propertyMap.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME)));
+            addVisible(copyProperties(wrapColumn(getRealTable().getColumn("VisitID")), propertyMap.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME)));
+            addVisible(copyProperties(wrapColumn(getRealTable().getColumn("Date")), propertyMap.get(ViabilityAssayProvider.DATE_PROPERTY_NAME)));
 
-            addVisible(wrapColumn(getRealTable().getColumn("PoolID")));
-            addVisible(wrapColumn(getRealTable().getColumn("TotalCells")));
-            addVisible(wrapColumn(getRealTable().getColumn("ViableCells")));
+            addColumn(copyProperties(wrapColumn(getRealTable().getColumn("SampleNum")), propertyMap.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME)));
+            addVisible(copyProperties(wrapColumn(getRealTable().getColumn("PoolID")), propertyMap.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME)));
+            addVisible(copyProperties(wrapColumn(getRealTable().getColumn("TotalCells")), propertyMap.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME)));
+            addVisible(copyProperties(wrapColumn(getRealTable().getColumn("ViableCells")), propertyMap.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME)));
 
             ExprColumn viabilityCol = new ExprColumn(this, "Viability", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".TotalCells > 0 THEN CAST(" + ExprColumn.STR_TABLE_ALIAS + ".ViableCells AS FLOAT) / " + ExprColumn.STR_TABLE_ALIAS + ".TotalCells ELSE 0.0 END)"), Types.DOUBLE);
+            copyProperties(viabilityCol, propertyMap.get(ViabilityAssayProvider.VIABILITY_PROPERTY_NAME));
             addVisible(viabilityCol);
 
+            // BUGBUG: selects too many samples if the vial id matches from more than one study
+            /*
             SQLFragment originalCellsSql = new SQLFragment();
             originalCellsSql.append(
                     "(SELECT SUM(s.TotalVolume) FROM study.specimen s, study.vial v\n" +
                     "\tWHERE s.VolumeUnits = 'CEL' AND s.RowID = v.SpecimenID\n" +
                     "\tAND v.GlobalUniqueId IN\n" +
                     "\t\t(SELECT rs.SpecimenID FROM viability.resultspecimens rs\n" +
-                    "\t\tWHERE rs.ResultID = Results.RowID))");
+                    "\t\tWHERE rs.ResultID = " + ExprColumn.STR_TABLE_ALIAS + ".RowID))");
             ExprColumn originalCells = new ExprColumn(this, "OriginalCells", originalCellsSql, Types.DOUBLE);
+            */
+            ExprColumn originalCells = new ExprColumn(this, "OriginalCells", new SQLFragment("3000000.0"), Types.DOUBLE);
+            copyProperties(viabilityCol, propertyMap.get(ViabilityAssayProvider.ORIGINAL_CELLS_PROPERTY_NAME));
             addVisible(originalCells);
 
             SQLFragment specimenIDs = new SQLFragment();
@@ -220,7 +251,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 specimenIDs.append("(SELECT rs.SpecimenID AS [data()]");
                 specimenIDs.append(" FROM " + ViabilitySchema.getTableInfoResultSpecimens() + " rs");
                 specimenIDs.append(" WHERE rs.ResultID = " + ExprColumn.STR_TABLE_ALIAS + ".RowID");
-                specimenIDs.append(" ORDER BY rs.[Index]");
+                specimenIDs.append(" ORDER BY rs.SpecimenIndex");
                 specimenIDs.append(" FOR XML PATH ('')),' ', ','))");
             }
             else if (getDbSchema().getSqlDialect().isPostgreSQL())
@@ -228,7 +259,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 specimenIDs.append("(SELECT array_to_string(viability.array_accum(rs1.SpecimenID), ',')");
                 specimenIDs.append("  FROM (SELECT rs2.SpecimenID, rs2.ResultID FROM viability.ResultSpecimens rs2");
                 specimenIDs.append("    WHERE rs2.ResultID = " + ExprColumn.STR_TABLE_ALIAS + ".RowID");
-                specimenIDs.append("    ORDER BY rs2.Index) AS rs1");
+                specimenIDs.append("    ORDER BY rs2.SpecimenIndex) AS rs1");
                 specimenIDs.append("  GROUP BY rs1.ResultID");
                 specimenIDs.append(")");
             }
@@ -237,6 +268,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 throw new UnsupportedOperationException("SqlDialect not supported: " + getDbSchema().getSqlDialect().getClass().getSimpleName());
             }
             ExprColumn specimenIDsCol = new ExprColumn(this, "SpecimenIDs", specimenIDs, java.sql.Types.VARCHAR);
+            copyProperties(specimenIDsCol, propertyMap.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME));
             addVisible(specimenIDsCol);
 
             ExprColumn specimenIDCount = new ExprColumn(this, "SpecimenIDCount",
@@ -253,7 +285,7 @@ public class ViabilityAssaySchema extends AssaySchema
             ColumnInfo colProperty = wrapColumn("Properties", _rootTable.getColumn("ObjectId"));
             colProperty.setIsUnselectable(true);
 
-            DomainProperty[] userResultDPs = _provider.getResultDomainUserProperties(_protocol);
+            DomainProperty[] userResultDPs = ViabilityAssayProvider.getResultDomainUserProperties(_resultsDomain);
             QcAwarePropertyForeignKey fk = new QcAwarePropertyForeignKey(userResultDPs, this, ViabilityAssaySchema.this);
 
             Set<String> hiddenCols = new HashSet<String>();
@@ -274,7 +306,7 @@ public class ViabilityAssaySchema extends AssaySchema
         protected void addProtocolContainerFilter()
         {
             SQLFragment filter = new SQLFragment(
-                    "DataID = (" +
+                    "DataID IN (" +
                             "SELECT d.RowId FROM " + ExperimentService.get().getTinfoData() + " d, " + ExperimentService.get().getTinfoExperimentRun() + " r " +
                             "WHERE r.RowID = d.RunID " +
                             "AND d.Container = ? " + // XXX: or is r.Container better?
@@ -310,7 +342,7 @@ public class ViabilityAssaySchema extends AssaySchema
             SpecimenForeignKey fk = new SpecimenForeignKey(ViabilityAssaySchema.this, _provider, _protocol, new ViabilityAssayProvider.ResultsSpecimensAssayTableMetadata());
             specimenID.setFk(fk);
 
-            ColumnInfo indexCol = addVisible(wrapColumn(getRealTable().getColumn("Index")));
+            ColumnInfo indexCol = addVisible(wrapColumn(getRealTable().getColumn("SpecimenIndex")));
             indexCol.setKeyField(true);
         }
     }

@@ -48,12 +48,18 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     public static final String SPECIMENIDS_PROPERTY_NAME = "SpecimenIDs";
     public static final String SPECIMENIDS_PROPERTY_CAPTION = "Specimen IDs";
 
+    public static final String SAMPLE_NUM_PROPERTY_NAME = "SampleNum";
+    public static final String SAMPLE_NUM_PROPERTY_CAPTION = "Sample Number";
     public static final String POOL_ID_PROPERTY_NAME = "PoolID";
     public static final String POOL_ID_PROPERTY_CAPTION = "Pool ID";
     public static final String TOTAL_CELLS_PROPERTY_NAME = "TotalCells";
     public static final String TOTAL_CELLS_PROPERTY_CAPTION = "Total Cells";
     public static final String VIABLE_CELLS_PROPERTY_NAME = "ViableCells";
     public static final String VIABLE_CELLS_PROPERTY_CAPTION = "Viable Cells";
+    public static final String ORIGINAL_CELLS_PROPERTY_NAME = "Original";
+    public static final String ORIGINAL_CELLS_PROPERTY_CAPTION = "Original Cells";
+    public static final String VIABILITY_PROPERTY_NAME = "Viability";
+    public static final String RECOVERY_PROPERTY_NAME = "Recovery";
 
     private static final String RESULT_DOMAIN_NAME = "Result Fields";
     public static final String RESULT_LSID_PREFIX = "ViabilityResult";
@@ -102,6 +108,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         public boolean hideInUploadWizard = false;
         public boolean editableInUploadWizard = false;
         public int inputLength = 9;
+        public String format;
 
         public ResultDomainProperty(String name, String label, PropertyType type, String description)
         {
@@ -116,17 +123,20 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     static {
         ResultDomainProperty[] props = new ResultDomainProperty[] {
+            new ResultDomainProperty(SAMPLE_NUM_PROPERTY_NAME, SAMPLE_NUM_PROPERTY_CAPTION, PropertyType.STRING, "Sample number"),
+
             new ResultDomainProperty(PARTICIPANTID_PROPERTY_NAME, PARTICIPANTID_PROPERTY_CAPTION, PropertyType.STRING, "Used with either " + VISITID_PROPERTY_NAME + " or " + DATE_PROPERTY_NAME + " to identify subject and timepoint for assay."),
             new ResultDomainProperty(VISITID_PROPERTY_NAME,  VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE, "Used with " + PARTICIPANTID_PROPERTY_NAME + " to identify subject and timepoint for assay."),
             new ResultDomainProperty(DATE_PROPERTY_NAME,  DATE_PROPERTY_CAPTION, PropertyType.DATE_TIME, "Used with " + PARTICIPANTID_PROPERTY_NAME + " to identify subject and timepoint for assay."),
             new ResultDomainProperty(SPECIMENIDS_PROPERTY_NAME,  SPECIMENIDS_PROPERTY_CAPTION, PropertyType.STRING, "When a matching specimen exists in a study, can be used to identify subject and timepoint for assay."),
 
             new ResultDomainProperty(POOL_ID_PROPERTY_NAME, POOL_ID_PROPERTY_CAPTION, PropertyType.STRING, "Unique identifier for each pool of specimens"),
-            new ResultDomainProperty(TOTAL_CELLS_PROPERTY_NAME, TOTAL_CELLS_PROPERTY_CAPTION, PropertyType.INTEGER, "Total cell count"),
-            new ResultDomainProperty(VIABLE_CELLS_PROPERTY_NAME, VIABLE_CELLS_PROPERTY_CAPTION, PropertyType.INTEGER, "Total viable cell count"),
+            new ResultDomainProperty(TOTAL_CELLS_PROPERTY_NAME, TOTAL_CELLS_PROPERTY_CAPTION, PropertyType.DOUBLE, "Total cell count"),
+            new ResultDomainProperty(VIABLE_CELLS_PROPERTY_NAME, VIABLE_CELLS_PROPERTY_CAPTION, PropertyType.DOUBLE, "Total viable cell count"),
+            new ResultDomainProperty(ORIGINAL_CELLS_PROPERTY_NAME, ORIGINAL_CELLS_PROPERTY_CAPTION, PropertyType.DOUBLE, "Original cell count (sum of specimen vials original cell count)"),
             // XXX: not in db, should be in domain?
-            new ResultDomainProperty("Viability", "Viability", PropertyType.DOUBLE, "Percent viable cell count"),
-            new ResultDomainProperty("Recovery", "Recovery", PropertyType.DOUBLE, "Percent recovered cell count (viable cells / (sum of specimen vials original cell count)"),
+            new ResultDomainProperty(VIABILITY_PROPERTY_NAME, VIABILITY_PROPERTY_NAME, PropertyType.DOUBLE, "Percent viable cell count"),
+            new ResultDomainProperty(RECOVERY_PROPERTY_NAME, RECOVERY_PROPERTY_NAME, PropertyType.DOUBLE, "Percent recovered cell count (viable cells / (sum of specimen vials original cell count)"),
         };
 
         LinkedHashMap<String, ResultDomainProperty> map = new LinkedHashMap<String, ResultDomainProperty>();
@@ -136,13 +146,19 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         }
 
         map.get(POOL_ID_PROPERTY_NAME).hideInUploadWizard = true;
-        map.get("Viability").hideInUploadWizard = true;
-        map.get("Recovery").hideInUploadWizard = true;
+        map.get(RECOVERY_PROPERTY_NAME).hideInUploadWizard = true;
 
         map.get(PARTICIPANTID_PROPERTY_NAME).editableInUploadWizard = true;
         map.get(VISITID_PROPERTY_NAME).editableInUploadWizard = true;
         map.get(DATE_PROPERTY_NAME).editableInUploadWizard = true;
         map.get(SPECIMENIDS_PROPERTY_NAME).editableInUploadWizard = true;
+
+        map.get(SAMPLE_NUM_PROPERTY_NAME).inputLength = 3;
+        map.get(VIABILITY_PROPERTY_NAME).format = "##.##%";
+        map.get(RECOVERY_PROPERTY_NAME).format = "##.##%";
+        map.get(TOTAL_CELLS_PROPERTY_NAME).format = "0.###E0";
+        map.get(VIABLE_CELLS_PROPERTY_NAME).format = "0.###E0";
+        map.get(ORIGINAL_CELLS_PROPERTY_NAME).format = "0.###E0";
 
         RESULT_DOMAIN_PROPERTIES = Collections.unmodifiableMap(map);
     }
@@ -232,6 +248,8 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         for (ResultDomainProperty rdp : RESULT_DOMAIN_PROPERTIES.values())
         {
             DomainProperty dp = addProperty(resultDomain, rdp.name, rdp.label, rdp.type, rdp.description);
+            if (rdp.format != null)
+                dp.setFormat(rdp.format);
             PropertyDescriptor pd = dp.getPropertyDescriptor();
             pd.setInputLength(rdp.inputLength);
         }
@@ -239,9 +257,25 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return new Pair<Domain, Map<DomainProperty, Object>>(resultDomain, Collections.<DomainProperty, Object>emptyMap());
     }
 
+    @Override
+    protected Pair<Domain, Map<DomainProperty, Object>> createRunDomain(Container c, User user)
+    {
+        Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
+        Domain domain = result.first;
+        if (domain.getPropertyByName(AbstractAssayProvider.DATE_PROPERTY_NAME) == null)
+        {
+            addProperty(domain, AbstractAssayProvider.DATE_PROPERTY_NAME, AbstractAssayProvider.DATE_PROPERTY_CAPTION, PropertyType.DATE_TIME, "Date the assay was run.  If not manually entered, the date will be read from the guava assay file.");
+        }
+        return result;
+    }
+
     public DomainProperty[] getResultDomainUserProperties(ExpProtocol protocol)
     {
-        Domain resultsDomain = getResultsDomain(protocol);
+        return getResultDomainUserProperties(getResultsDomain(protocol));
+    }
+
+    public static DomainProperty[] getResultDomainUserProperties(Domain resultsDomain)
+    {
         DomainProperty[] allProperties = resultsDomain.getProperties();
         List<DomainProperty> filtered = new ArrayList<DomainProperty>(allProperties.length);
         for (DomainProperty property : allProperties)

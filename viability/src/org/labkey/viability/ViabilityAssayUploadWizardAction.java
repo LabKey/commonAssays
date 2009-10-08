@@ -33,6 +33,7 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.viability.data.MultiValueInputColumn;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
+import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
@@ -80,7 +81,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
 
     protected ModelAndView getSpecimensView(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
     {
-        List<Map<String, Object>> rows = form.getParsedData();
+        List<Map<String, Object>> rows = form.getParsedResultData();
 
         String lsidCol = "RowID";
         InsertView view = createInsertView(ViabilitySchema.getTableInfoResults(), lsidCol, new DomainProperty[0], form.isResetDefaultValues(), SpecimensStepHandler.NAME, form, errors);
@@ -117,7 +118,9 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 ColumnInfo col = resultDomainProperty.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidCol, form.getUser());
                 col.setUserEditable(editable);
                 col.setName(inputName);
-                col.setInputLength(9); // XXX: inputLength on PropertyDescriptor isn't saved
+
+                 // XXX: inputLength on PropertyDescriptor isn't saved
+                col.setInputLength(rdp != null ? rdp.inputLength : 9);
 
                 DisplayColumn displayCol;
                 if (resultDomainProperty.getName().equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
@@ -164,6 +167,27 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         view.getDataRegion().setButtonBar(bbar, DataRegion.MODE_INSERT);
         
         return view;
+    }
+
+    protected void addHiddenRunProperties(ViabilityAssayRunUploadForm form, InsertView insertView) throws ExperimentException
+    {
+        Map<DomainProperty, String> runProperties = new HashMap<DomainProperty, String>();
+        Map<DomainProperty, Object> runData = form.getParsedRunData();
+        for (Map.Entry<DomainProperty, Object> entry : runData.entrySet())
+        {
+            String value = String.valueOf(entry.getValue());
+            runProperties.put(entry.getKey(), value);
+        }
+
+        // Any manually entered values on first step of upload wizard
+        // takes precedence over run property values in the file.
+        for (Map.Entry<DomainProperty, String> entry : form.getRunProperties().entrySet())
+        {
+            if (!StringUtils.isEmpty(entry.getValue()))
+                runProperties.put(entry.getKey(), entry.getValue());
+        }
+
+        addHiddenProperties(runProperties, insertView);
     }
 
     public class SpecimensStepHandler extends RunStepHandler

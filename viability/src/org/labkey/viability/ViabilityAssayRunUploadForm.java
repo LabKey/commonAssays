@@ -40,16 +40,28 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
     public static String INPUT_PREFIX = "_pool_";
 
     private String[] _poolIDs;
-    private List<Map<String, Object>> _parsedData;
+    private ViabilityAssayDataHandler.Parser _parser;
     private List<Map<String, Object>> _resultProperties;
 
     public String[] getPoolIds() { return _poolIDs; }
     public void setPoolIds(String[] poolIDs) { _poolIDs = poolIDs; }
 
     /** Read rows from a posted file. */
-    public List<Map<String, Object>> getParsedData() throws ExperimentException
+    public List<Map<String, Object>> getParsedResultData() throws ExperimentException
     {
-        if (_parsedData == null)
+        parseUploadedFile();
+        return _parser.getResultData();
+    }
+
+    public Map<DomainProperty, Object> getParsedRunData() throws ExperimentException
+    {
+        parseUploadedFile();
+        return _parser.getRunData();
+    }
+
+    private void parseUploadedFile() throws ExperimentException
+    {
+        if (_parser == null)
         {
             Map<String, File> uploaded = getUploadedData();
             assert uploaded.size() == 1;
@@ -67,14 +79,11 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 parser = new GuavaDataHandler.Parser(runDomain, resultDomain, file);
             else
                 throw new ExperimentException("Don't know how to parse uploaded file: " + fileName);
-            
+
             List<Map<String, Object>> rows = parser.getResultData();
             ViabilityAssayDataHandler.validateData(rows, false);
-
-            _parsedData = rows;
+            _parser = parser;
         }
-
-        return _parsedData;
     }
 
     /** Get the form posted values and attempt to convert them. */

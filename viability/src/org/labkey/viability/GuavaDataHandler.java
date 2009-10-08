@@ -21,6 +21,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.settings.AppProps;
@@ -69,7 +70,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
 
         protected void _parse() throws IOException, ExperimentException
         {
-            _runData = new HashMap<String, Object>();
+            _runData = new HashMap<DomainProperty, Object>();
 
             BufferedReader reader = null;
             try
@@ -90,13 +91,20 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
                         {
                             foundBlankLine = true;
                         }
-                        else
+                        else if (_runDomain != null)
                         {
                             String firstCell = parts.length > 0 ? parts[0] : line;
                             String[] runMeta = firstCell.split(" - ", 2);
-                            // XXX: convert types
                             if (runMeta.length == 2 && runMeta[0].length() > 0 && runMeta[1].length() > 0)
-                                _runData.put(runMeta[0].trim(), runMeta[1].trim());
+                            {
+                                DomainProperty property = _runDomain.getPropertyByName(runMeta[0].trim());
+                                if (property != null)
+                                {
+                                    Object value = convert(property, runMeta[1].trim());
+                                    if (value != null)
+                                        _runData.put(property, value);
+                                }
+                            }
                         }
                     }
                     else
@@ -127,12 +135,12 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
                 if (groupHeaders == null || headers == null)
                     throw new ExperimentException("Failed to find header rows in guava file");
 
+                final int COL_SAMPLE_NUM = 0;
                 final int COL_SAMPLE_ID = 1;
                 final int COL_VIABLE = 11;
                 final int COL_TOTAL_VIABLE = 42;
                 final int COL_TOTAL_CELLS = 45;
 
-                // XXX: hard coded the columns we are interested in.
                 ColumnDescriptor[] columns = new ColumnDescriptor[headers.length];
                 for (int i = 0; i < headers.length; i++)
                 {
@@ -140,6 +148,11 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
                     String expectHeader = null;
                     switch (i)
                     {
+                        case COL_SAMPLE_NUM:
+                            cd.name = ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME;
+                            expectHeader = "Sample No.";
+                            cd.clazz = Integer.class;
+                            break;
                         case COL_SAMPLE_ID:
                             cd.name = ViabilityAssayProvider.POOL_ID_PROPERTY_NAME;
                             expectHeader = "Sample ID";
@@ -153,12 +166,12 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
                         case COL_TOTAL_VIABLE:
                             cd.name = ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME;
                             expectHeader = "Total Viable Cells in Original Sample";
-                            cd.clazz = Integer.class;
+                            cd.clazz = Double.class;
                             break;
                         case COL_TOTAL_CELLS:
                             cd.name = ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME;
                             expectHeader = "Total Cells in Original Sample";
-                            cd.clazz = Integer.class;
+                            cd.clazz = Double.class;
                             break;
                         default:
                             cd.load = false;
@@ -206,27 +219,30 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
             File viabilityFiles = new File(projectRoot, "sampledata/viability");
             assertTrue("Expected to find viability test files: " + viabilityFiles.getAbsolutePath(), viabilityFiles.exists());
 
-            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(viabilityFiles, "040609thaw.VIA.CSV"));
-
-            Map<String, Object> run = parser.getRunData();
-            assertEquals("Expected 4 rows", 4, run.size());
+            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(viabilityFiles, /*"040609thaw.VIA.CSV"*/ "small.VIA.CSV"));
 
             List<Map<String, Object>> rows = parser.getResultData();
-            assertEquals("Expected 34 rows", 34, rows.size());
+            assertEquals("Expected 6 rows", 6, rows.size());
 
             Map<String, Object> row = rows.get(0);
-            assertEquals(4, row.size());
-            assertEquals("160450533v5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals(7, row.size());
+            assertEquals(1, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
+            assertEquals("160450533-5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals("160450533", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
+            assertEquals(5.0, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
             assertEquals(84.5, row.get("Viability"));
-            assertEquals(31268270, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
-            assertEquals(37003872, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
+            assertEquals(31268270.5, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
+            assertEquals(37003872.5, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
 
             row = rows.get(rows.size()-1);
-            assertEquals(4, row.size());
+            assertEquals(5, row.size()); // can't extract participant and visit from pool
+            assertEquals(34, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
             assertEquals("159401872v5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals(null, row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
+            assertEquals(null, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
             assertEquals(95.4, row.get("Viability"));
-            assertEquals(25878380, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
-            assertEquals(27126184, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
+            assertEquals(25878380.0, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
+            assertEquals(27126184.0, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
         }
     }
 }

@@ -82,7 +82,20 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
                 }
             }
 
-            _runData = (Map<String, Object>)tl.getComments();
+            if (_runDomain != null)
+            {
+                Map<String, Object> comments = (Map<String, Object>)tl.getComments();
+                Map<DomainProperty, Object> runData = new HashMap<DomainProperty, Object>(comments.size());
+                for (Map.Entry<String, Object> comment : comments.entrySet())
+                {
+                    DomainProperty property = _runDomain.getPropertyByName(comment.getKey());
+                    if (property != null)
+                    {
+                        runData.put(property, comment.getValue());
+                    }
+                }
+                _runData = runData;
+            }
             _resultData = tl.load();
         }
 

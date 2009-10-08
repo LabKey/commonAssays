@@ -21,21 +21,12 @@
     <ns:table tableName="ResultSpecimens" tableDbType="TABLE">
         <ns:columns>
             <ns:column columnName="ResultID">
-                <ns:isKeyField>true</ns:isKeyField>
-                <ns:isReadOnly>true</ns:isReadOnly>
-                <ns:isHidden>true</ns:isHidden>
-                <ns:fk>
-                    <ns:fkDbSchema>viability</ns:fkDbSchema>
-                    <ns:fkTable>Results</ns:fkTable>
-                    <ns:fkColumnName>RowId</ns:fkColumnName>
-                </ns:fk>
             </ns:column>
             <ns:column columnName="SpecimenID">
-                <ns:isKeyField>true</ns:isKeyField>
                 <ns:isReadOnly>true</ns:isReadOnly>
                 <ns:isHidden>true</ns:isHidden>
             </ns:column>
-            <ns:column columnName="Index">
+            <ns:column columnName="SpecimenIndex">
                 <ns:isKeyField>true</ns:isKeyField>
                 <ns:isReadOnly>true</ns:isReadOnly>
                 <ns:isHidden>true</ns:isHidden>
@@ -68,6 +59,7 @@
                 </ns:fk>
             </ns:column>
 
+            <ns:column columnName="SampleNum"/>
             <ns:column columnName="ParticipantID"/>
             <ns:column columnName="VisitID"/>
             <ns:column columnName="Date"/>

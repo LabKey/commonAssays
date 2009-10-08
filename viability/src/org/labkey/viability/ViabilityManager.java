@@ -85,7 +85,7 @@ public class ViabilityManager
                 ViabilitySchema.getTableInfoResultSpecimens(),
                 "SpecimenID",
                 new SimpleFilter("ResultID", resultRowId),
-                new Sort("Index"),
+                new Sort("SpecimenIndex"),
                 String.class);
         return specimens;
     }
@@ -119,8 +119,8 @@ public class ViabilityManager
         assert user != null && c != null : "user or container is null";
         assert result.getDataID() > 0 : "DataID is not set";
         assert result.getPoolID() != null : "PoolID is not set";
-        assert result.getTotalCells() > 0 : "TotalCells is not set";
-        assert result.getViableCells() > 0 : "ViableCells is not set";
+//        assert result.getTotalCells() > 0 : "TotalCells is not set";
+//        assert result.getViableCells() > 0 : "ViableCells is not set";
 //        assert result.getSpecimenIDs() != null && result.getSpecimenIDs().size() > 0;
 
         if (result.getRowID() == 0)
@@ -157,7 +157,7 @@ public class ViabilityManager
             Map<String, Object> resultSpecimen = new HashMap<String, Object>();
             resultSpecimen.put("ResultID", result.getRowID());
             resultSpecimen.put("SpecimenID", specimens.get(index));
-            resultSpecimen.put("Index", index);
+            resultSpecimen.put("SpecimenIndex", index);
 
             Table.insert(user, ViabilitySchema.getTableInfoResultSpecimens(), resultSpecimen);
         }

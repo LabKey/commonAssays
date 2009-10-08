@@ -37,6 +37,7 @@ public class ViabilityResult
     private Double visitID;
     private Date date;
 
+    private int sampleNum;
     private String poolID;
     private int totalCells;
     private int viableCells;
@@ -119,6 +120,16 @@ public class ViabilityResult
     public void setDate(Date date)
     {
         this.date = date;
+    }
+
+    public int getSampleNum()
+    {
+        return sampleNum;
+    }
+
+    public void setSampleNum(int sampleNum)
+    {
+        this.sampleNum = sampleNum;
     }
 
     public String getPoolID()
