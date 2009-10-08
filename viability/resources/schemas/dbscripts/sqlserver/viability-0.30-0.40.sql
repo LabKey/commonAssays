@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-ALTER TABLE viability.results ADD COLUMN SampleNum INT NOT NULL DEFAULT 0
+ALTER TABLE viability.results ADD SampleNum INT NOT NULL DEFAULT 0
 GO
 EXEC sp_rename 'viability.ResultSpecimens.[Index]', 'SpecimenIndex', 'COLUMN'
 GO
