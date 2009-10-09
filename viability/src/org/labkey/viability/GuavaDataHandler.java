@@ -219,7 +219,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
             File viabilityFiles = new File(projectRoot, "sampledata/viability");
             assertTrue("Expected to find viability test files: " + viabilityFiles.getAbsolutePath(), viabilityFiles.exists());
 
-            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(viabilityFiles, /*"040609thaw.VIA.CSV"*/ "small.VIA.CSV"));
+            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(viabilityFiles, "small.VIA.csv"));
 
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 6 rows", 6, rows.size());
