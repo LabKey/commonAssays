@@ -21,6 +21,8 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.view.InsertView;
+import org.labkey.api.view.VBox;
+import org.labkey.api.view.HtmlView;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
@@ -68,7 +70,22 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             {
                 try
                 {
-                    return getSpecimensView(form, errors);
+                    InsertView view = getSpecimensView(form, errors);
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("\n");
+                    sb.append("<script type='text/javascript'>\n");
+                    sb.append("LABKEY.requiresScript('viability/CheckRunUploadForm.js');\n");
+                    sb.append("</script>\n");
+                    sb.append("<script type='text/javascript'>\n");
+                    String formRef = view.getDataRegion().getJavascriptFormReference(false);
+                    sb.append(formRef).append(".onsubmit = function () { return checkRunUploadForm(").append(formRef).append("); }\n");
+                    sb.append("</script>\n");
+
+                    VBox vbox = new VBox();
+                    vbox.addView(view);
+                    vbox.addView(new HtmlView(sb.toString()));
+                    return vbox;
                 }
                 catch (ExperimentException e)
                 {
@@ -79,7 +96,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
     }
 
 
-    protected ModelAndView getSpecimensView(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
+    protected InsertView getSpecimensView(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
     {
         List<Map<String, Object>> rows = form.getParsedResultData();
 
@@ -165,7 +182,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         bbar.add(cancelButton);
 
         view.getDataRegion().setButtonBar(bbar, DataRegion.MODE_INSERT);
-        
+
         return view;
     }
 
