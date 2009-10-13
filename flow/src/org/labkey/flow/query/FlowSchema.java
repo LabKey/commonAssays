@@ -642,6 +642,13 @@ public class FlowSchema extends UserSchema
             _fps = new FlowPropertySet(FlowSchema.this.getContainer());
         }
 
+        @Override
+        public String getPublicName()
+        {
+            // 7471 Let schema explorer resolve lookup table names to "exp.Datas" table.
+            return ExpSchema.TableType.Datas.toString();
+        }
+
         ColumnInfo addStatisticColumn(String columnAlias)
         {
             ColumnInfo colStatistic = addObjectIdColumn(columnAlias);

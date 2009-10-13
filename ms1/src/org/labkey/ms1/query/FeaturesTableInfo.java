@@ -308,5 +308,10 @@ public class FeaturesTableInfo extends VirtualTable
         return _sourceTable;
     }
 
-
+    @Override
+    public boolean isPublic()
+    {
+        return true;
+    }
+    
 } //class FeaturesTableInfo
