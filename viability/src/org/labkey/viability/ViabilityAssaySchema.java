@@ -87,7 +87,7 @@ public class ViabilityAssaySchema extends AssaySchema
 
     public ResultSpecimensTable createResultSpecimensTable()
     {
-        return new ResultSpecimensTable();
+        return new ResultSpecimensTable(null);
     }
 
     public ExpDataTable createDataTable()
@@ -171,7 +171,6 @@ public class ViabilityAssaySchema extends AssaySchema
             // XXX: shouldn't have to call getSelectSQL() myself here
             SQLFragment fromSQL = QueryService.get().getSelectSQL(getFromTable(), getFromTable().getColumns(), getFilter(), null, 0, 0);
             return fromSQL;
-//            return super.getFromSQL();
         }
     }
 
@@ -229,18 +228,7 @@ public class ViabilityAssaySchema extends AssaySchema
             copyProperties(viabilityCol, propertyMap.get(ViabilityAssayProvider.VIABILITY_PROPERTY_NAME));
             addVisible(viabilityCol);
 
-            // BUGBUG: selects too many samples if the vial id matches from more than one study
-            /*
-            SQLFragment originalCellsSql = new SQLFragment();
-            originalCellsSql.append(
-                    "(SELECT SUM(s.TotalVolume) FROM study.specimen s, study.vial v\n" +
-                    "\tWHERE s.VolumeUnits = 'CEL' AND s.RowID = v.SpecimenID\n" +
-                    "\tAND v.GlobalUniqueId IN\n" +
-                    "\t\t(SELECT rs.SpecimenID FROM viability.resultspecimens rs\n" +
-                    "\t\tWHERE rs.ResultID = " + ExprColumn.STR_TABLE_ALIAS + ".RowID))");
-            ExprColumn originalCells = new ExprColumn(this, "OriginalCells", originalCellsSql, Types.DOUBLE);
-            */
-            ExprColumn originalCells = new ExprColumn(this, "OriginalCells", new SQLFragment("3000000.0"), Types.DOUBLE);
+            ExprColumn originalCells = new ExprColumn(this, "OriginalCells", new SQLFragment("VolumeSum"), Types.DOUBLE);
             copyProperties(viabilityCol, propertyMap.get(ViabilityAssayProvider.ORIGINAL_CELLS_PROPERTY_NAME));
             addVisible(originalCells);
 
@@ -317,11 +305,53 @@ public class ViabilityAssaySchema extends AssaySchema
             addCondition(filter);
         }
 
+        private boolean _addedResultSpecimens = false;
+
+        @NotNull
+        @Override
+        public SQLFragment getFromSQL()
+        {
+            if (!_addedResultSpecimens)
+            {
+                _addedResultSpecimens = true;
+                
+                ResultSpecimensTable rs = new ResultSpecimensTable(this);
+                SimpleFilter filter = new SimpleFilter();
+                filter.addCondition("SpecimenID/Specimen/VolumeUnits", "CEL");
+                List<FieldKey> fields = new ArrayList<FieldKey>();
+                FieldKey resultId, volume;
+                fields.add(resultId = FieldKey.fromParts("ResultID"));
+                fields.add(FieldKey.fromParts("SpecimenID"));
+                fields.add(volume = FieldKey.fromParts("SpecimenID", "Volume"));
+                fields.add(FieldKey.fromParts("SpecimenID", "Specimen", "VolumeUnits"));
+                fields.add(FieldKey.fromParts("ResultID", "Run", "Batch", "BatchProperties", "TargetStudy"));
+                Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(rs, fields);
+
+                SQLFragment sub = QueryService.get().getSelectSQL(rs, columnMap.values(), filter, null, 0, 0);
+
+                SQLFragment fromSQL = new SQLFragment("SELECT * FROM (\n");
+                fromSQL.append(super.getFromSQL());
+                fromSQL.append("\n) AS x");
+                fromSQL.append("\nLEFT OUTER JOIN (\n");
+
+                fromSQL.append("SELECT " + columnMap.get(resultId).getAlias() + " as VolumeResultID, SUM(" + columnMap.get(volume).getAlias() + ") as VolumeSum FROM (\n");
+                fromSQL.append(sub);
+                fromSQL.append(") y \nGROUP BY " + columnMap.get(resultId).getAlias());
+                fromSQL.append("\n) AS z");
+                fromSQL.append(" ON x.RowId = z.VolumeResultId");
+
+                return fromSQL;
+            }
+            else
+            {
+                return super.getFromSQL();
+            }
+        }
     }
 
     public class ResultSpecimensTable extends ViabilityAssayTable
     {
-        public ResultSpecimensTable()
+        public ResultSpecimensTable(final ResultsTable results)
         {
             super(ViabilitySchema.getTableInfoResultSpecimens());
 
@@ -332,6 +362,8 @@ public class ViabilityAssaySchema extends AssaySchema
             {
                 public TableInfo getLookupTableInfo()
                 {
+                    if (results != null)
+                        return results;
                     return new RecoveryResultsTable();
                 }
             });
