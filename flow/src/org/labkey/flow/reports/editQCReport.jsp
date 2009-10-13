@@ -20,7 +20,6 @@
 <%@ page import="org.labkey.flow.reports.ControlsQCReport" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.reports.report.ReportDescriptor" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -133,6 +132,6 @@ Ext.onReady(function() {
 </script>
 
 <%
-    JspView statPicker = new JspView(FlowReport.class, "statPicker.jsp", null, null);
+    JspView<Object> statPicker = new JspView<Object>(FlowReport.class, "statPicker.jsp", null, null);
     statPicker.include(statPicker, out);
 %>
