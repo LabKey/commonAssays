@@ -34,13 +34,13 @@ public enum FlowTableType
 {
     Runs("The flow 'Runs' table shows experiment runs in the three steps of analysis: read Keywords, calculate Compensation, and perform Analysis.", false),
     CompensationMatrices("The 'CompensationMatrices' table shows compensation matrices and their spill values.", false),
-    FCSFiles("The 'FCSFiles' table shows FCS files and their keywords", false),
-    FCSAnalyses("The 'FCSAnalyses' table shows statistics and graphs of FCS files", false),
+    FCSFiles("The 'FCSFiles' table shows FCS files and their keywords.", false),
+    FCSAnalyses("The 'FCSAnalyses' table shows statistics and graphs of FCS files.", false),
     CompensationControls("The 'CompensationControls' table shows statistics and graphs of FCS files that were used to calculate a compensaton matrix.", false),
     AnalysisScripts("An analysis script contains the rules for calculating the compensation matrix for a run, as well as gates to apply, statistics to calculate, and graphs to draw.", true),
     Analyses("When a flow runs are analyzed, the results are grouped in an analysis.", true),
-    Statistics("The 'Statistics' table shows the names of all statistics", true),
-    Keywords("The 'Keywords' table show the names of all keywords", true),
+    Statistics("The 'Statistics' table shows the names of all statistics.", true),
+    Keywords("The 'Keywords' table show the names of all keywords.", true),
     ;
     final String _description;
     final boolean _hidden;
