@@ -242,7 +242,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
             assertEquals("160450533-5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
             assertEquals("160450533", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
             assertEquals(5.0, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
-            assertEquals(84.5, row.get("Viability"));
+            assertEquals(0.845, row.get("Viability"));
             assertEquals(31268270.5, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
             assertEquals(37003872.5, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
 
@@ -252,7 +252,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
             assertEquals("159401872v5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
             assertEquals(null, row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
             assertEquals(null, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
-            assertEquals(95.4, row.get("Viability"));
+            assertEquals(0.954, row.get("Viability"));
             assertEquals(25878380.0, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
             assertEquals(27126184.0, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
         }
