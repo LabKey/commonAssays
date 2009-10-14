@@ -229,7 +229,7 @@ public class ViabilityAssaySchema extends AssaySchema
             addVisible(viabilityCol);
 
             ExprColumn originalCells = new ExprColumn(this, "OriginalCells", new SQLFragment("VolumeSum"), Types.DOUBLE);
-            copyProperties(viabilityCol, propertyMap.get(ViabilityAssayProvider.ORIGINAL_CELLS_PROPERTY_NAME));
+            copyProperties(originalCells, propertyMap.get(ViabilityAssayProvider.ORIGINAL_CELLS_PROPERTY_NAME));
             addVisible(originalCells);
 
             SQLFragment specimenIDs = new SQLFragment();

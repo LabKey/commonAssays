@@ -147,6 +147,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
         map.get(POOL_ID_PROPERTY_NAME).hideInUploadWizard = true;
         map.get(RECOVERY_PROPERTY_NAME).hideInUploadWizard = true;
+        map.get(ORIGINAL_CELLS_PROPERTY_NAME).hideInUploadWizard = true;
 
         map.get(PARTICIPANTID_PROPERTY_NAME).editableInUploadWizard = true;
         map.get(VISITID_PROPERTY_NAME).editableInUploadWizard = true;
@@ -154,11 +155,11 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         map.get(SPECIMENIDS_PROPERTY_NAME).editableInUploadWizard = true;
 
         map.get(SAMPLE_NUM_PROPERTY_NAME).inputLength = 3;
-        map.get(VIABILITY_PROPERTY_NAME).format = "##.##%";
-        map.get(RECOVERY_PROPERTY_NAME).format = "##.##%";
-        map.get(TOTAL_CELLS_PROPERTY_NAME).format = "0.###E0";
-        map.get(VIABLE_CELLS_PROPERTY_NAME).format = "0.###E0";
-        map.get(ORIGINAL_CELLS_PROPERTY_NAME).format = "0.###E0";
+        map.get(VIABILITY_PROPERTY_NAME).format = "#0.0#%";
+        map.get(RECOVERY_PROPERTY_NAME).format = "#0.0#%";
+        map.get(TOTAL_CELLS_PROPERTY_NAME).format = "0.000E0";
+        map.get(VIABLE_CELLS_PROPERTY_NAME).format = "0.000E0";
+        map.get(ORIGINAL_CELLS_PROPERTY_NAME).format = "0.000E0";
 
         RESULT_DOMAIN_PROPERTIES = Collections.unmodifiableMap(map);
     }

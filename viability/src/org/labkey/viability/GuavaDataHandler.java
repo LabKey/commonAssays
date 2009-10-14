@@ -25,6 +25,8 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.settings.AppProps;
+import org.apache.commons.beanutils.Converter;
+import org.apache.commons.beanutils.ConvertUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -159,9 +161,19 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
                             cd.clazz = String.class;
                             break;
                         case COL_VIABLE:
-                            cd.name = "Viability"; // XXX: add constant to ViabilityAssayProvider?
+                            cd.name = ViabilityAssayProvider.VIABILITY_PROPERTY_NAME;
                             expectHeader = "Viable";
                             cd.clazz = Double.class;
+                            cd.converter = new Converter ()
+                            {
+                                public Object convert(Class type, Object value)
+                                {
+                                    Double d = (Double)ConvertUtils.convert((String)value, Double.class);
+                                    if (d != null)
+                                        return d.doubleValue() / 100;
+                                    return null;
+                                }
+                            };
                             break;
                         case COL_TOTAL_VIABLE:
                             cd.name = ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME;
