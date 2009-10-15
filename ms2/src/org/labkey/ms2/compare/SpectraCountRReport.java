@@ -23,6 +23,7 @@ import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.RunListCache;
@@ -72,7 +73,7 @@ public class SpectraCountRReport extends RReport
         final SpectraCountConfiguration config = SpectraCountConfiguration.findByTableName(spectraConfig);
         if (config == null)
         {
-            throw new IllegalArgumentException("Could not find spectra count config: " + spectraConfig);
+            throw new NotFoundException("Could not find spectra count config: " + spectraConfig);
         }
 
         MS2Schema schema = new MS2Schema(context.getUser(), context.getContainer());
