@@ -16,15 +16,18 @@
 
 package org.labkey.ms1.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
-import org.labkey.api.ms2.MS2Service;
-import org.labkey.api.query.*;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.ms1.MS1Service;
+import org.labkey.api.ms2.MS2Service;
+import org.labkey.api.query.AliasedColumn;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -286,7 +289,7 @@ public class FeaturesTableInfo extends VirtualTable
     {
         for (ColumnInfo col : getSourceTable().getColumns())
         {
-            ColumnInfo newCol = new AliasedColumn(this, col.getAlias(), col);
+            ColumnInfo newCol = new AliasedColumn(this, col.getName(), col);
             addColumn(newCol);
             if (preserveHidden && col.isHidden())
                 newCol.setHidden(col.isHidden());
