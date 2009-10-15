@@ -224,7 +224,6 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
 
         public void testGuava() throws Exception
         {
-            fail("expected failure: testing remote junit runner");
             AppProps props = AppProps.getInstance();
             String projectRootPath =  props.getProjectRoot();
             File projectRoot = new File(projectRootPath);
