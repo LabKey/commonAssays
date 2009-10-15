@@ -271,6 +271,10 @@
                     </td>
                 </tr>
                 </table>
+            <%
+                if (sampleData.size() > 0)
+                {
+            %>
                 <table class="labkey-data-region labkey-show-borders">
                     <colgroup><%
 
@@ -324,6 +328,15 @@
                         }
                     %>
                 </table>
+            <%
+                }
+                else
+                {
+            %>
+            <span class="labkey-error">No samples well groups were specified in the selected plate template.</span>
+            <%
+                }
+            %>
         </td>
     </tr>
     <tr class="labkey-wp-header">
