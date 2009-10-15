@@ -35,6 +35,7 @@ import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.JobRunner;
 import org.labkey.api.view.*;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.QueryDefinition;
@@ -43,6 +44,8 @@ import org.labkey.flow.FlowSettings;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowQuerySettings;
+import org.labkey.flow.query.FlowPropertySet;
+import org.labkey.flow.query.AttributeCache;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowExperiment;
@@ -102,7 +105,8 @@ public class FlowController extends SpringFlowController<FlowController.Action>
                 startUrl.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
                 HttpView.throwRedirect(startUrl);
             }
-            return new OverviewWebPart(getViewContext());
+            HttpView v = new OverviewWebPart(getViewContext());
+            return v;
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -110,6 +114,23 @@ public class FlowController extends SpringFlowController<FlowController.Action>
             return getFlowNavStart(getViewContext());
         }
     }
+
+
+    // HACK: FlowPropertySet can be very slow the first time, let's attempt to precache
+    public static void initFlow(final Container c)
+    {
+        Runnable r = new Runnable()
+        {
+            public void run()
+            {
+                AttributeCache.STATS.getAttrValues(c, null);
+                AttributeCache.GRAPHS.getAttrValues(c, null);
+                AttributeCache.KEYWORDS.getAttrValues(c, null);
+            }
+        };
+        JobRunner.getDefault().execute(r);
+    }
+
 
     @RequiresPermission(ACL.PERM_READ)
     public class QueryAction extends SimpleViewAction

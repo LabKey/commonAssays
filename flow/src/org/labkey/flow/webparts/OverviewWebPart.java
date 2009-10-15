@@ -17,6 +17,7 @@
 package org.labkey.flow.webparts;
 
 import org.labkey.api.view.*;
+import org.labkey.flow.controllers.FlowController;
 
 public class OverviewWebPart extends HtmlView
 {
@@ -30,5 +31,8 @@ public class OverviewWebPart extends HtmlView
     {
         super(new FlowOverview(portalCtx.getUser(), portalCtx.getContainer()).toString());
         setTitle("Flow Experiment Management");
+
+        // slight hackery see initFlow()
+        FlowController.initFlow(portalCtx.getContainer());
     }
 }
