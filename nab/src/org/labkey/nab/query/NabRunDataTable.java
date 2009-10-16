@@ -36,6 +36,7 @@ public class NabRunDataTable extends PlateBasedAssayRunDataTable
     public NabRunDataTable(final AssaySchema schema, final ExpProtocol protocol)
     {
         super(schema, protocol);
+        setDescription("Contains one row per data for the \"" + protocol.getName() + "\" Neutralizing Antibodies assay design.");
     }
 
     public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException

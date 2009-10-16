@@ -24,6 +24,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.data.RuntimeSQLException;
@@ -141,6 +142,20 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider>
                     Map<String, Object> values = OntologyManager.getProperties(getContainer(), reRun.getLSID());
                     for (DomainProperty property : domain.getProperties())
                         ret.put(property, values.get(property.getPropertyURI()));
+
+                    // bad hack here to temporarily create domain properties for name and comments.  These need to be
+                    // repopulated just like the rest of the domain properties, but they aren't actually part of the
+                    // domain- they're hard columns on the ExperimentRun table.  Since the DomainProperty objects are
+                    // just used to calculate the input form element names, this hack works to pre-populate the values.
+                    DomainProperty nameProperty = domain.addProperty();
+                    nameProperty.setName("Name");
+                    ret.put(nameProperty, reRun.getName());
+                    nameProperty.delete();
+
+                    DomainProperty commentsProperty = domain.addProperty();
+                    commentsProperty.setName("Comments");
+                    ret.put(commentsProperty, reRun.getComments());
+                    commentsProperty.delete();
                 }
                 return ret;
             }
