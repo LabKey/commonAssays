@@ -58,6 +58,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
@@ -666,14 +667,27 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         {
             if (form.selectedRunId != 0)
             {
+                FlowRun run = FlowRun.fromRunId(form.selectedRunId);
+                if (run == null)
+                {
+                    errors.reject(ERROR_MSG, "Run '" + form.selectedRunId + "' does not exist");
+                    return null;
+                }
+
                 try
                 {
-                    return new FlowRunWorkspace(form.analysisScript, form.step, FlowRun.fromRunId(form.selectedRunId));
+                    return new FlowRunWorkspace(form.analysisScript, form.step, run);
+                }
+                catch (IOException e)
+                {
+                    errors.reject(ERROR_MSG, "Error reading FCS files in run (" + run.getName() + "):\n" + e.getMessage());
+                    return null;
                 }
                 catch (Exception e)
                 {
-                    errors.reject(ERROR_MSG, "Exception reading run:" + e);
+                    errors.reject(ERROR_MSG, "Exception reading run:\n" + e);
                     ExceptionUtil.logExceptionToMothership(form.getRequest(), e);
+                    return null;
                 }
             }
             MultipartFile file = getFileMap().get("workspaceFile");
