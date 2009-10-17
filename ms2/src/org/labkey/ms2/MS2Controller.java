@@ -1733,7 +1733,18 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), true, getViewContext());
+            List<MS2Run> runs;
+            try
+            {
+                runs = RunListCache.getCachedRuns(form.getRunList(), true, getViewContext());
+            }
+            catch (RunListException e)
+            {
+                errors.addError(new LabkeyError(e));
+                SimpleErrorView view = new SimpleErrorView(errors);
+                view.render(getViewContext().getRequest(), response);
+                return;
+            }
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), runs.toArray(new MS2Run[runs.size()]));
             ActionURL currentURL = getViewContext().cloneActionURL();
@@ -2372,6 +2383,8 @@ public class MS2Controller extends SpringActionController
             setBestNameMenu.addMenuItem("to Swiss-Prot Name (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files", false));
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.SWISS_PROT_ACCN.toString());
             setBestNameMenu.addMenuItem("to Swiss-Prot Accession (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files", false));
+            setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.GEN_INFO.toString());
+            setBestNameMenu.addMenuItem("to GI number (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files", false));
 
             bb.add(setBestNameMenu);
 
@@ -2389,7 +2402,7 @@ public class MS2Controller extends SpringActionController
     public static class SetBestNameForm
     {
         public enum NameType
-        { LOOKUP_STRING, IPI, SWISS_PROT, SWISS_PROT_ACCN }
+        { LOOKUP_STRING, IPI, SWISS_PROT, SWISS_PROT_ACCN, GEN_INFO }
 
         private String _nameType;
 

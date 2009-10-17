@@ -65,6 +65,12 @@ public class SetBestNameRunnable implements Runnable
                         identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
                         identifierSQL.append(IdentifierType.SwissProtAccn + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
                         break;
+                    case GEN_INFO:
+                        identifierSQL = new SQLFragment();
+                        identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, ");
+                        identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
+                        identifierSQL.append(IdentifierType.GI + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
+                        break;
                     case LOOKUP_STRING:
                         identifierSQL = new SQLFragment();
                         String nameSubstring = ProteinManager.getSqlDialect().getSubstringFunction("MAX(fs.LookupString)", "0", "50");

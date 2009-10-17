@@ -22,6 +22,6 @@ package org.labkey.ms2.protein;
  */
 public enum IdentifierType
 {
-    SwissProtAccn, SwissProt, GeneName, IPI;
+    SwissProtAccn, SwissProt, GeneName, IPI, GI
 
 }
