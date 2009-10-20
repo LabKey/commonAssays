@@ -14,7 +14,7 @@ var MultiValueInput = function (fieldId, initialValues)
             name: fieldId,
             editable: true,
             value: value,
-            style: "display:block;",
+            style: "display:block;font-family:monospace",
             listeners: {
                 'specialkey': function (f, e) {
                     if (e.getKey() == e.TAB && !e.shiftKey)
