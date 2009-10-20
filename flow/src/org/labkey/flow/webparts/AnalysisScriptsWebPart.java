@@ -28,6 +28,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -65,9 +66,12 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         ret.addAll(getQueryDef().getDisplayColumns(null, table));
 
         ColumnInfo colRowId = new AliasedColumn("RowId", table.getColumn("RowId"));
-        ret.add(new PerformAnalysisColumn(colRowId));
-        ret.add(new ScriptActionColumn("Copy", ScriptController.CopyAction.class, colRowId));
-        ret.add(new ScriptActionColumn("Delete", ScriptController.DeleteAction.class, colRowId));
+        if (getContainer().hasPermission(getUser(), UpdatePermission.class))
+        {
+            ret.add(new PerformAnalysisColumn(colRowId));
+            ret.add(new ScriptActionColumn("Copy", ScriptController.CopyAction.class, colRowId));
+            ret.add(new ScriptActionColumn("Delete", ScriptController.DeleteAction.class, colRowId));
+        }
 
         return ret;
     }

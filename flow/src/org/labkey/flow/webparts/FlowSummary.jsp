@@ -51,7 +51,7 @@
     PipeRoot pipeRoot = pipeService.findPipelineRoot(c);
     boolean _hasPipelineRoot = pipeRoot != null && pipeRoot.getUri(c) != null;
     boolean _canSetPipelineRoot = user.isAdministrator();
-//    boolean _canInsert = c.hasPermission(user, ACL.PERM_INSERT);
+    boolean _canInsert = c.hasPermission(user, ACL.PERM_INSERT);
     boolean _canUpdate = c.hasPermission(user, ACL.PERM_UPDATE);
     boolean _canCreateFolder = c.getParent() != null && !c.getParent().isRoot() &&
             c.getParent().hasPermission(user, ACL.PERM_ADMIN);
@@ -375,6 +375,7 @@
 <% } %>
 
 
+<% if (_canUpdate || _canSetPipelineRoot) { %>
 <div class="summary-div">
     <h3 class="summary-header">Actions</h3>
     <%
@@ -391,43 +392,43 @@
             }
         }
 
-        if (!_hasPipelineRoot)
+        if (_canUpdate)
         {
-            %><div><%=PageFlowUtil.textLink("Import Workspace", new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, c))%></div><%
-        }
-        else
-        {
-            %><div><%=PageFlowUtil.textLink("Upload and Import", PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(c, getViewContext().getActionURL().getLocalURIString()))%></div><%
-        }
+            if (!_hasPipelineRoot)
+            {
+                %><div><%=PageFlowUtil.textLink("Import Workspace", new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, c))%></div><%
+            }
+            else
+            {
+                %><div><%=PageFlowUtil.textLink("Upload and Import", PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(c, getViewContext().getActionURL().getLocalURIString()))%></div><%
+            }
 
-        if (_fcsRealRunCount > 0)
-        {
-            %><div><%=PageFlowUtil.textLink("Create Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, c))%></div><%
+            if (_fcsRealRunCount > 0)
+            {
+                %><div><%=PageFlowUtil.textLink("Create Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, c))%></div><%
+            }
         }
     %>
 </div>
+<% } %>
 
-<% if (_protocol != null) { %>
+<% if (_protocol != null && _canUpdate) { %>
     <div class="summary-div">
         <h3 class="summary-header">Manage</h3>
         <div><%= PageFlowUtil.textLink("Settings", _protocol.urlShow())%></div>
 
-        <%
-        if (_canUpdate)
+        <div><%=PageFlowUtil.textLink("Upload Samples", _protocol.urlUploadSamples(_sampleSet != null))%></div><%
+        if (_sampleSet != null)
         {
-            %><div><%=PageFlowUtil.textLink("Upload Samples", _protocol.urlUploadSamples(_sampleSet != null))%></div><%
-            if (_sampleSet != null)
-            {
-                %><div><%=PageFlowUtil.textLink("Sample Join Fields", _protocol.urlFor(ProtocolController.Action.joinSampleSet))%></div><%
-            }
-            if (_fcsAnalysisCount > 0)
-            {
-                %><div><%=PageFlowUtil.textLink("Identify Background", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div><%
-            }
-
-            int jobCount = PipelineService.get().getQueuedStatusFiles(c).length;
-            %><div><%=PageFlowUtil.textLink("Show Jobs" + (jobCount > 0 ? " (" + jobCount + " running)" : ""), PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(c))%></div><%
+            %><div><%=PageFlowUtil.textLink("Sample Join Fields", _protocol.urlFor(ProtocolController.Action.joinSampleSet))%></div><%
         }
+        if (_fcsAnalysisCount > 0)
+        {
+            %><div><%=PageFlowUtil.textLink("Identify Background", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div><%
+        }
+
+        int jobCount = PipelineService.get().getQueuedStatusFiles(c).length;
+        %><div><%=PageFlowUtil.textLink("Show Jobs" + (jobCount > 0 ? " (" + jobCount + " running)" : ""), PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(c))%></div><%
 
         if (_canCreateFolder && _hasPipelineRoot)
         {

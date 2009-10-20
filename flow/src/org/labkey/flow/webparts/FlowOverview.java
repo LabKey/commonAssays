@@ -118,9 +118,10 @@ public class FlowOverview extends Overview
         addStep(getAnalysisScriptStep());
         addStep(getCompensationMatrixStep());
         addStep(getAnalyzeStep());
-        addStep(getSamplesStep());
         if (_canUpdate)
         {
+            addStep(getSamplesStep());
+
             int jobCount = PipelineService.get().getQueuedStatusFiles(getContainer()).length;
             if (jobCount != 0)
             {
@@ -174,6 +175,7 @@ public class FlowOverview extends Overview
 
     private Action getUploadFlowJoAnalysisAction()
     {
+        if (!_canInsert) return null;
         ActionURL urlUploadFlowJoAnalysis = new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, getContainer());
         Action ret = new Action("Import FlowJo Workspace Analysis", urlUploadFlowJoAnalysis);
         ret.setExplanatoryHTML("You can also import statistics that have been calculated by FlowJo");
@@ -201,6 +203,10 @@ public class FlowOverview extends Overview
                 status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">" + _fcsRunCount + " runs</a>.");
             }
             ret.setStatusHTML(status.toString());
+        }
+        else
+        {
+            ret.setStatusHTML(" No FCS files have been loaded yet.");
         }
         ret.addAction(getBrowseForFCSFilesAction());
         ret.addAction(getUploadFlowJoAnalysisAction());
@@ -262,7 +268,8 @@ public class FlowOverview extends Overview
                 ret.setStatusHTML(statusHTML);
             }
         }
-        ret.addAction(new Action("Create a new Analysis script", PageFlowUtil.urlFor(ScriptController.Action.newProtocol, getContainer())));
+        if (_canInsert)
+            ret.addAction(new Action("Create a new Analysis script", PageFlowUtil.urlFor(ScriptController.Action.newProtocol, getContainer())));
         return ret;
     }
 
@@ -325,11 +332,14 @@ public class FlowOverview extends Overview
             }
         }
         ret.setStatusHTML(statusHTML.toString());
-        if (_scriptCompensation != null)
+        if (_canInsert)
         {
-            ret.addAction(new Action("Calculate compensation matrices", _scriptCompensation.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation)));
+            if (_scriptCompensation != null)
+            {
+                ret.addAction(new Action("Calculate compensation matrices", _scriptCompensation.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation)));
+            }
+            ret.addAction(new Action("Upload a compensation matrix", PageFlowUtil.urlFor(CompensationController.Action.upload, getContainer())));
         }
-        ret.addAction(new Action("Upload a compensation matrix", PageFlowUtil.urlFor(CompensationController.Action.upload, getContainer())));
         return ret;
     }
 
@@ -381,7 +391,7 @@ public class FlowOverview extends Overview
             }
         }
         ret.setStatusHTML(statusHTML.toString());
-        if (_scriptAnalysis != null)
+        if (_canUpdate && _scriptAnalysis != null)
         {
             ret.addAction(new Action("Choose runs to analyze", _scriptAnalysis.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze)));
         }
@@ -425,6 +435,7 @@ public class FlowOverview extends Overview
                 action.setDescriptionHTML("<i>Additional information about groups of FCS files can be uploaded in spreadsheet, and associated with the FCS files using keywords.</i>");
                 ret.addAction(action);
             }
+
             ret.addAction(new Action("Other settings", protocol.urlShow()));
         }
         return ret;
