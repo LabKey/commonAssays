@@ -247,11 +247,11 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
             assertEquals(37003872.5, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
 
             row = rows.get(rows.size()-1);
-            assertEquals(5, row.size()); // can't extract participant and visit from pool
+            assertEquals(7, row.size());
             assertEquals(34, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
             assertEquals("159401872v5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
-            assertEquals(null, row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
-            assertEquals(null, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
+            assertEquals("159401872", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
+            assertEquals(5.0, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
             assertTrue(Math.abs(0.954 - (Double)row.get("Viability")) < 0.0001);
             assertEquals(25878380.0, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
             assertEquals(27126184.0, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
