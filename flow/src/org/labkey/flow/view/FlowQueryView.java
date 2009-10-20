@@ -29,6 +29,7 @@ import org.labkey.api.reports.report.RReport;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.*;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.FlowModule;
@@ -152,9 +153,9 @@ public class FlowQueryView extends QueryView
         return getSettings().getSubtractBackground();
     }
 
-    protected ActionURL urlChangeView()
+    protected URLHelper urlChangeView()
     {
-        ActionURL ret = super.urlChangeView();
+        URLHelper ret = super.urlChangeView();
         ret.deleteParameter(FlowParam.experimentId.toString());
         return ret;
     }
@@ -169,7 +170,7 @@ public class FlowQueryView extends QueryView
         if (getSchema().getRun() == null /*&& getSchema().getScript() == null*/)
         {
             FlowExperiment[] experiments = FlowExperiment.getAnalysesAndWorkspace(getContainer());
-            ActionURL target = urlChangeView();
+            URLHelper target = urlChangeView();
 //            if (getSchema().getScript() != null)
 //                getSchema().getScript().addParams(target);
             MenuButton button = new MenuButton("Analysis Folder");
@@ -188,9 +189,9 @@ public class FlowQueryView extends QueryView
 
             for (Map.Entry<Integer, String> entry : availableExperiments.entrySet())
             {
-                ActionURL url = target.clone();
+                URLHelper url = target.clone();
                 if (entry.getKey().intValue() != 0)
-                    url.replaceParameter(FlowParam.experimentId, String.valueOf(entry.getKey()));
+                    url.replaceParameter(FlowParam.experimentId.name(), String.valueOf(entry.getKey()));
                 button.addMenuItem(entry.getValue(),
                         url.toString(),
                         null,
