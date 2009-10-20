@@ -642,11 +642,14 @@ public class ProteinManager
                     {
                         try
                         {
-                            for (Object o : clause.getParamVals())
+                            if (clause.getParamVals() != null)
                             {
-                                if (o != null)
+                                for (Object o : clause.getParamVals())
                                 {
-                                    ConvertUtils.convert(o.toString(), column.getJavaClass());
+                                    if (o != null)
+                                    {
+                                        ConvertUtils.convert(o.toString(), column.getJavaClass());
+                                    }
                                 }
                             }
                             validClause = true;
