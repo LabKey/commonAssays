@@ -185,10 +185,12 @@ public class NabAssayRun extends Luc5Assay
                 captions.add(shortCaption);
             }
 
-            List<ExpData> outputs = _run.getDataOutputs();
-            if (outputs.size() != 1)
-                throw new IllegalStateException("Expected a single data file output for this NAb run.  Found " + outputs.size());
-            ExpData outputObject = outputs.get(0);
+            ExpData[] outputDatas = _run.getOutputDatas(NabTsvDataHandler.NAB_TSV_DATA_TYPE);
+            if (outputDatas == null || outputDatas.length == 0)
+                outputDatas = _run.getOutputDatas(NabDataHandler.NAB_DATA_TYPE);
+            if (outputDatas.length != 1)
+                throw new IllegalStateException("Expected a single data file output for this NAb run.  Found " + outputDatas.length);
+            ExpData outputObject = outputDatas[0];
 
             for (DilutionSummary summary : getSummaries())
             {
@@ -260,7 +262,7 @@ public class NabAssayRun extends Luc5Assay
             _materialKey = materialKey;
             _longCaptions = longCaptions;
             _properties = sortProperties(properties);
-            _dataRowLsid = NabDataHandler.getDataRowLSID(data, dilutionSummary.getWellGroup()).toString();
+            _dataRowLsid = NabDataHandler.getDataRowLSID(data, dilutionSummary.getWellGroup().getName()).toString();
             _dataContainer = data.getContainer();
         }
 
@@ -402,14 +404,15 @@ public class NabAssayRun extends Luc5Assay
                     {
                         NabDataHandler.saveICValue(NabDataHandler.getPropertyName(NabDataHandler.CURVE_IC_PREFIX, cutoff, type),
                                 dilution.getCutoffDilution(cutoff / 100.0, type),
-                                dilution, dataRowLsid, getProtocol(), container, cutoffFormats, props, type);
+                                dilution, getProtocol(), container, cutoffFormats, props, type);
                     }
 
                     // convert to object properties
                     for (Map.Entry<String, Object> entry : props.entrySet())
                     {
-                        results.add(NabDataHandler.getObjectProperty(container, getProtocol(), result.getDataRowLsid(),
-                                entry.getKey(), entry.getValue(), cutoffFormats));
+                        ObjectProperty objProp = NabDataHandler.getObjectProperty(container, getProtocol(), result.getDataRowLsid(), entry.getKey(), entry.getValue(), cutoffFormats);
+                        if (objProp != null)
+                            results.add(objProp);
                     }
                     OntologyManager.insertProperties(container, result.getDataRowLsid(), results.toArray(new ObjectProperty[results.size()]));
                 }

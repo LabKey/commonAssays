@@ -47,7 +47,6 @@ import java.util.*;
 public class NabDataHandler extends AbstractNabDataHandler implements TransformDataHandler
 {
     public static final DataType NAB_DATA_TYPE = new DataType("AssayRunNabData");
-    public static final String NAB_DATA_ROW_LSID_PREFIX = "AssayRunNabDataRow";
     private static final int START_ROW = 6; //0 based, row 7 inthe workshet
     private static final int START_COL = 0;
     private static final int PLATE_WIDTH = 12;
@@ -86,11 +85,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                     WellGroup group = dilution.getWellGroup();
                     ExpMaterial sampleInput = assayResults.getMaterial(group);
 
-                    Lsid dataRowLsid = getDataRowLSID(_data, group);
-
                     Map<String, Object> props = new HashMap<String, Object>();
-                    props.put(DATA_ROW_LSID_PROPERTY, dataRowLsid.toString());
-
                     results.add(props);
 
                     // generate curve ICs and AUCs for each curve fit type
@@ -100,12 +95,12 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                         {
                             double value = dilution.getCutoffDilution(cutoff / 100.0, type);
                             saveICValue(getPropertyName(CURVE_IC_PREFIX, cutoff, type), value,
-                                    dilution, dataRowLsid, protocol, container, cutoffFormats, props, type);
+                                    dilution, protocol, container, cutoffFormats, props, type);
 
                             if (type == assayResults.getCurveFitType())
                             {
                                 saveICValue(CURVE_IC_PREFIX + cutoff, value,
-                                        dilution, dataRowLsid, protocol, container, cutoffFormats, props, type);
+                                        dilution, protocol, container, cutoffFormats, props, type);
                             }
                         }
                         double auc = dilution.getAUC(type);
@@ -122,7 +117,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                     {
                         saveICValue(POINT_IC_PREFIX + cutoff,
                                 dilution.getInterpolatedCutoffDilution(cutoff / 100.0, assayResults.getCurveFitType()),
-                                dilution, dataRowLsid, protocol, container, cutoffFormats, props, assayResults.getCurveFitType());
+                                dilution, protocol, container, cutoffFormats, props, assayResults.getCurveFitType());
                     }
                     props.put(FIT_ERROR_PROPERTY, dilution.getFitError());
                     props.put(NAB_INPUT_MATERIAL_DATA_PROPERTY, sampleInput.getLSID());
@@ -135,14 +130,6 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                 throw new ExperimentException(e.getMessage(), e);
             }
         }
-    }
-
-    public static Lsid getDataRowLSID(ExpData data, WellGroup group)
-    {
-        Lsid dataRowLsid = new Lsid(data.getLSID());
-        dataRowLsid.setNamespacePrefix(NAB_DATA_ROW_LSID_PREFIX);
-        dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + group.getName());
-        return dataRowLsid;
     }
 
     public NabDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
@@ -212,8 +199,8 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
         return summaries;
     }
 
-    protected static void saveICValue(String name, double icValue, DilutionSummary dilution, Lsid dataRowLsid,
-                             ExpProtocol protocol, Container container, Map<Integer, String> formats, Map<String, Object> results, DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
+    protected static void saveICValue(String name, double icValue, DilutionSummary dilution, ExpProtocol protocol,
+                                      Container container, Map<Integer, String> formats, Map<String, Object> results, DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
     {
         String outOfRange = null;
         if (Double.NEGATIVE_INFINITY == icValue)

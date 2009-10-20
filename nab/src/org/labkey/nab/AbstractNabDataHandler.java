@@ -24,9 +24,9 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
-import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -46,6 +46,7 @@ import java.util.Map;
 public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandler
 {
     public static final String NAB_PROPERTY_LSID_PREFIX = "NabProperty";
+    public static final String NAB_DATA_ROW_LSID_PREFIX = "AssayRunNabDataRow";
 
     public static final String NAB_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
     public static final String WELLGROUP_NAME_PROPERTY = "WellgroupName";
@@ -76,10 +77,11 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
 
             for (Map<String, Object> group : parser.getResults())
             {
-                if (!group.containsKey(DATA_ROW_LSID_PROPERTY))
-                    throw new ExperimentException("The row must contain a value for the data row LSID : " + DATA_ROW_LSID_PROPERTY);
+                if (!group.containsKey(WELLGROUP_NAME_PROPERTY))
+                    throw new ExperimentException("The row must contain a value for the well group name : " + WELLGROUP_NAME_PROPERTY);
 
-                String dataRowLsid = group.get(DATA_ROW_LSID_PROPERTY).toString();
+                String groupName = group.get(WELLGROUP_NAME_PROPERTY).toString();
+                String dataRowLsid = getDataRowLSID(data, groupName).toString();
 
                 OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
                 List<ObjectProperty> results = new ArrayList<ObjectProperty>();
@@ -88,7 +90,10 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
                 {
                     if (prop.getKey().equals(DATA_ROW_LSID_PROPERTY))
                         continue;
-                    results.add(getObjectProperty(container, protocol, dataRowLsid, prop.getKey(), prop.getValue(), cutoffFormats));
+
+                    ObjectProperty objProp = getObjectProperty(container, protocol, dataRowLsid, prop.getKey(), prop.getValue(), cutoffFormats);
+                    if (objProp != null)
+                        results.add(objProp);
                 }
                 OntologyManager.insertProperties(container, dataRowLsid, results.toArray(new ObjectProperty[results.size()]));
             }
@@ -105,38 +110,64 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
 
     protected static ObjectProperty getObjectProperty(Container container, ExpProtocol protocol, String objectURI, String propertyName, Object value, Map<Integer, String> cutoffFormats)
     {
-        PropertyType type = PropertyType.STRING;
-        String format = null;
+        if (isValidDataProperty(propertyName))
+        {
+            PropertyType type = PropertyType.STRING;
+            String format = null;
 
-        if (propertyName.equals(FIT_ERROR_PROPERTY))
-        {
-            type = PropertyType.DOUBLE;
-            format = "0.0";
-        }
-        else if (propertyName.startsWith(AUC_PREFIX))
-        {
-            type = PropertyType.DOUBLE;
-            format = AUC_PROPERTY_FORMAT;
-        }
-        else if (propertyName.startsWith(CURVE_IC_PREFIX))
-        {
-            Integer cutoff = getCutoffFromPropertyName(propertyName);
-            if (cutoff != null)
+            if (propertyName.equals(FIT_ERROR_PROPERTY))
             {
-                format = cutoffFormats.get(cutoff);
                 type = PropertyType.DOUBLE;
+                format = "0.0";
             }
-        }
-        else if (propertyName.startsWith(POINT_IC_PREFIX))
-        {
-            Integer cutoff = getCutoffFromPropertyName(propertyName);
-            if (cutoff != null)
+            else if (propertyName.startsWith(AUC_PREFIX))
             {
-                format = cutoffFormats.get(cutoff);
                 type = PropertyType.DOUBLE;
+                format = AUC_PROPERTY_FORMAT;
             }
+            else if (propertyName.startsWith(CURVE_IC_PREFIX))
+            {
+                Integer cutoff = getCutoffFromPropertyName(propertyName);
+                if (cutoff != null)
+                {
+                    format = cutoffFormats.get(cutoff);
+                    type = PropertyType.DOUBLE;
+                }
+            }
+            else if (propertyName.startsWith(POINT_IC_PREFIX))
+            {
+                Integer cutoff = getCutoffFromPropertyName(propertyName);
+                if (cutoff != null)
+                {
+                    format = cutoffFormats.get(cutoff);
+                    type = PropertyType.DOUBLE;
+                }
+            }
+            return getResultObjectProperty(container, protocol, objectURI, propertyName, value, type, format);
         }
-        return getResultObjectProperty(container, protocol, objectURI, propertyName, value, type, format);
+        return null;
+    }
+
+    protected static boolean isValidDataProperty(String propertyName)
+    {
+        if (DATA_ROW_LSID_PROPERTY.equals(propertyName)) return true;
+        if (NAB_INPUT_MATERIAL_DATA_PROPERTY.equals(propertyName)) return true;
+        if (WELLGROUP_NAME_PROPERTY.equals(propertyName)) return true;
+        if (FIT_ERROR_PROPERTY.equals(propertyName)) return true;
+
+        if (propertyName.startsWith(AUC_PREFIX)) return true;
+        if (propertyName.startsWith(CURVE_IC_PREFIX)) return true;
+        if (propertyName.startsWith(POINT_IC_PREFIX)) return true;
+
+        return false;
+    }
+
+    public static Lsid getDataRowLSID(ExpData data, String wellGroupName)
+    {
+        Lsid dataRowLsid = new Lsid(data.getLSID());
+        dataRowLsid.setNamespacePrefix(NAB_DATA_ROW_LSID_PREFIX);
+        dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + wellGroupName);
+        return dataRowLsid;
     }
 
     protected static ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
