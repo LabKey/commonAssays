@@ -79,7 +79,7 @@ public class FlowQueryView extends QueryView
 //        return button;
 //    }
 
-    protected boolean showRecordSelectors()
+    public boolean showRecordSelectors()
     {
         if (!getViewContext().hasPermission(ACL.PERM_DELETE))
             return false;
