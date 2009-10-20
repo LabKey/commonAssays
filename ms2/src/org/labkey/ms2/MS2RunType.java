@@ -23,6 +23,7 @@ import org.labkey.ms2.pipeline.phenyx.PhenyxRun;
 import org.labkey.ms2.pipeline.mascot.MascotRun;
 import org.labkey.ms2.pipeline.comet.CometRun;
 import org.labkey.ms2.pipeline.sequest.SequestRun;
+import org.labkey.ms2.pipeline.UnknownMS2Run;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +40,8 @@ public enum MS2RunType
     Sequest(SequestRun.class, "SpRank", "SpScore", "DeltaCn", "XCorr"),
     XComet(XCometRun.class, "RawScore", "DiffScore", "Expect"),
     XTandem(XTandemRun.class, "Hyper", "Next", "B", "Y", "Expect"),
-    XTandemcomet(XTandemcometRun.class, "RawScore", "DiffScore", "Expect");
+    XTandemcomet(XTandemcometRun.class, "RawScore", "DiffScore", "Expect"),
+    Unknown(UnknownMS2Run.class);
 
     private final Class<? extends MS2Run> _runClass;
     private final String _scoreColumnNames;
@@ -104,10 +106,11 @@ public enum MS2RunType
         }
 
         // If it was created by X!Tandem, then use the X!Tandem default class.
-        if (type != null && type.startsWith("x!"))
+        if (type.startsWith("x!"))
         {
             return XTandem;
         }
-        return null;
+        
+        return Unknown;
     }
 }

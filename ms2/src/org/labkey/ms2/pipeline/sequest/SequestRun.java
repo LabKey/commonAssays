@@ -54,9 +54,9 @@ public class SequestRun extends MS2Run
     }
 
 
-    protected String getPepXmlScoreNames()
+    protected String[] getPepXmlScoreNames()
     {
-        return "spscore, deltacn, xcorr, sprank";
+        return new String[] { "spscore", "deltacn", "xcorr", "sprank" };
     }
 
 

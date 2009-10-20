@@ -63,9 +63,9 @@ public class MascotRun extends MS2Run
         return "-Identity";
     }
 
-    protected String getPepXmlScoreNames()
+    protected String[] getPepXmlScoreNames()
     {
-        return "ionscore, identityscore, homologyscore, null, expect";  // TODO: star score?  qmatch?
+        return new String[] { "ionscore", "identityscore", "homologyscore", "null", "expect" };  // TODO: star score?  qmatch?
     }
 
 

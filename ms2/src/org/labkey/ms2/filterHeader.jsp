@@ -78,17 +78,19 @@
             if (bean.currentViewType.supportsExtraFilters())
             { %>
                 <td style="height: 100%; padding-right: 1em">
-                    <fieldset>
-                        <legend><%=h(bean.run.getChargeFilterColumnName())%> charge filter</legend>
-                        <table class="labkey-data-region">
-                            <tr>
-                                <td nowrap style="vertical-align: middle;">1+&nbsp;<input id="Charge1" type="text" name=charge1 value="<%=bean.charge1%>" size="2"><%=PageFlowUtil.helpPopup("1+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 1+ charge state.")%></td>
-                                <td nowrap style="vertical-align: middle;">2+&nbsp;<input id="Charge2" type="text" name=charge2 value="<%=bean.charge2%>" size="2"><%=PageFlowUtil.helpPopup("2+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 2+ charge state.")%></td>
-                                <td nowrap style="vertical-align: middle;">3+&nbsp;<input id="Charge3" type="text" name=charge3 value="<%=bean.charge3%>" size="2"><%=PageFlowUtil.helpPopup("3+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 3+ charge state.")%></td>
-                                <td nowrap style="vertical-align: middle;"><%=PageFlowUtil.generateSubmitButton("Go", "", "id=\"AddChargeScoreFilterButton\"")%></td>
-                            </tr>
-                        </table>
-                    </fieldset>
+                    <% if (bean.run.getChargeFilterColumnName() != null) { %>
+                        <fieldset>
+                            <legend><%=h(bean.run.getChargeFilterColumnName())%> charge filter</legend>
+                            <table class="labkey-data-region">
+                                <tr>
+                                    <td nowrap style="vertical-align: middle;">1+&nbsp;<input id="Charge1" type="text" name=charge1 value="<%=bean.charge1%>" size="2"><%=PageFlowUtil.helpPopup("1+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 1+ charge state.")%></td>
+                                    <td nowrap style="vertical-align: middle;">2+&nbsp;<input id="Charge2" type="text" name=charge2 value="<%=bean.charge2%>" size="2"><%=PageFlowUtil.helpPopup("2+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 2+ charge state.")%></td>
+                                    <td nowrap style="vertical-align: middle;">3+&nbsp;<input id="Charge3" type="text" name=charge3 value="<%=bean.charge3%>" size="2"><%=PageFlowUtil.helpPopup("3+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 3+ charge state.")%></td>
+                                    <td nowrap style="vertical-align: middle;"><%=PageFlowUtil.generateSubmitButton("Go", "", "id=\"AddChargeScoreFilterButton\"")%></td>
+                                </tr>
+                            </table>
+                        </fieldset>
+                    <% } %>
                 </td>
                 <td style="height: 100%">
                     <fieldset>

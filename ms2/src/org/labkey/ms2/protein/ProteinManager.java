@@ -17,6 +17,8 @@
 package org.labkey.ms2.protein;
 
 import org.apache.log4j.Logger;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.beanutils.ConversionException;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.exp.OntologyManager;
@@ -235,7 +237,6 @@ public class ProteinManager
 
     public static void addExtraFilter(SimpleFilter filter, MS2Run run, ActionURL currentUrl)
     {
-        String columnName = run.getChargeFilterColumnName();
         String paramName = run.getChargeFilterParamName();
 
         boolean includeChargeFilter = false;
@@ -260,8 +261,8 @@ public class ProteinManager
         }
 
         // Add charge filter only if there's one or more valid values
-        if (includeChargeFilter)
-            filter.addClause(new ChargeFilter(columnName, values));
+        if (includeChargeFilter && run.getChargeFilterColumnName() != null)
+            filter.addClause(new ChargeFilter(run.getChargeFilterColumnName(), values));
 
         String tryptic = currentUrl.getParameter("tryptic");
 
@@ -627,17 +628,30 @@ public class ProteinManager
             {
                 for (TableInfo table : tables)
                 {
-                    if (table.getColumn(columnName) == null)
+                    ColumnInfo column = table.getColumn(columnName);
+                    if (column == null)
                     {
                         int index = columnName.lastIndexOf('.');
-                        if (index != -1 && table.getColumn(columnName.substring(index + 1)) != null)
+                        if (index != -1)
                         {
-                            validClause = true;
+                            column = table.getColumn(columnName.substring(index + 1));
                         }
                     }
-                    else
+
+                    if (column != null)
                     {
-                        validClause = true;
+                        try
+                        {
+                            for (Object o : clause.getParamVals())
+                            {
+                                if (o != null)
+                                {
+                                    ConvertUtils.convert(o.toString(), column.getJavaClass());
+                                }
+                            }
+                            validClause = true;
+                        }
+                        catch (ConversionException e) {}
                     }
                 }
             }

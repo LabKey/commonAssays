@@ -49,9 +49,9 @@ public class CometRun extends MS2Run
     }
 
 
-    protected String getPepXmlScoreNames()
+    protected String[] getPepXmlScoreNames()
     {
-        return "dotproduct, delta, zscore";
+        return new String[] { "dotproduct", "delta", "zscore" };
     }
 
     public String getDiscriminateExpressions()
