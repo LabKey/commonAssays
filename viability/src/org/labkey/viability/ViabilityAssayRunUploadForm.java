@@ -25,8 +25,11 @@ import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.data.ColumnInfo;
+import static org.labkey.api.action.SpringActionController.ERROR_MSG;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConversionException;
+import org.springframework.validation.BindException;
 
 import java.util.*;
 import java.io.File;
@@ -87,7 +90,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
     }
 
     /** Get the form posted values and attempt to convert them. */
-    public List<Map<String, Object>> getResultProperties() throws ExperimentException
+    public List<Map<String, Object>> getResultProperties(BindException errors) throws ExperimentException
     {
         if (_resultProperties == null)
         {
@@ -101,7 +104,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
             for (int rowIndex = 0; rowIndex < _poolIDs.length; rowIndex++)
             {
                 String poolID = _poolIDs[rowIndex];
-                Map<String, Object> row = getPropertyMapFromRequest(domainProperties, rowIndex, poolID);
+                Map<String, Object> row = getPropertyMapFromRequest(domainProperties, rowIndex, poolID, errors);
                 rows.add(row);
             }
 
@@ -111,26 +114,32 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
         return _resultProperties;
     }
 
-    private Map<String, Object> getPropertyMapFromRequest(List<DomainProperty> columns, int rowIndex, String poolID) throws ExperimentException
+    private Map<String, Object> getPropertyMapFromRequest(List<DomainProperty> columns, int rowIndex, String poolID, BindException errors) throws ExperimentException
     {
         String inputPrefix = INPUT_PREFIX + poolID + "_" + rowIndex;
         Map<String, Object> properties = new LinkedHashMap<String, Object>();
         for (DomainProperty dp : columns)
         {
-            Object value;
+            Object value = null;
             if (dp.getName().equals(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME))
             {
                 value = poolID;
             }
             else
             {
+                String label = dp.getPropertyDescriptor().getNonBlankCaption();
                 String paramName = UploadWizardAction.getInputName(dp, inputPrefix);
                 String parameter = getRequest().getParameter(paramName);
+                PropertyDescriptor pd = dp.getPropertyDescriptor();
+                Class type = pd.getPropertyType().getJavaType();
+
                 if (dp.isRequired() && dp.getPropertyDescriptor().getPropertyType() == PropertyType.BOOLEAN &&
                         (parameter == null || parameter.length() == 0))
                     parameter = Boolean.FALSE.toString();
 
-                PropertyDescriptor pd = dp.getPropertyDescriptor();
+                if (dp.isRequired() && (parameter == null || parameter.length() == 0))
+                    errors.reject(ERROR_MSG, label + " is required and must be of type " + ColumnInfo.getFriendlyTypeName(type) + ".");
+
                 if (dp.getName().equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
                 {
                     // get SpecimenIDs from request as a List<String>
@@ -145,14 +154,20 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 }
                 else
                 {
-                    Class type = pd.getPropertyType().getJavaType();
                     try
                     {
                         value = ConvertUtils.convert(parameter, type);
                     }
-                    catch (ConversionException ex)
+                    catch (ConversionException e)
                     {
-                        throw new ExperimentException("Failed to convert property '" + dp.getName() + "' from '" + parameter + "' to a " + type.getSimpleName());
+                        String message = label + " must be of type " + ColumnInfo.getFriendlyTypeName(type) + ".";
+                        message +=  "  Value \"" + parameter + "\" could not be converted";
+                        if (e.getCause() instanceof ArithmeticException)
+                            message +=  ": " + e.getCause().getLocalizedMessage();
+                        else
+                            message += ".";
+
+                        errors.reject(ERROR_MSG, message);
                     }
                 }
             }

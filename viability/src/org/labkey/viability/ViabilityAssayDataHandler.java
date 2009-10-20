@@ -103,16 +103,28 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
                 String visitID = (String) row.get(AbstractAssayProvider.VISITID_PROPERTY_NAME);
                 if (participantID == null && visitID == null)
                 {
-                    String[] parts = poolID.split("-|_", 2);
-                    if (parts.length == 2)
+                    int sep = poolID.lastIndexOf('-');
+                    if (sep == -1)
+                        sep = poolID.lastIndexOf('_');
+                    if (sep == -1)
+                        sep = poolID.lastIndexOf('v');
+                    if (sep > 0)
                     {
+                        String ptid = poolID.substring(0, sep).trim();
+                        String visit = poolID.substring(sep+1).trim();
+                        if (ptid.length() == 0 || visit.length() == 0)
+                        {
+                            throw new ExperimentException(
+                                    "PoolID should be in the format 'ParticipantID-VisitID' where 'VisitID' is a double number.");
+                        }
+
                         row = new HashMap<String, Object>(row);
-                        row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, parts[0].trim());
+                        row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, ptid);
 
                         try
                         {
-                            Double visit = Double.parseDouble(parts[1].trim());
-                            row.put(AbstractAssayProvider.VISITID_PROPERTY_NAME, visit);
+                            Double visitNum = Double.parseDouble(visit);
+                            row.put(AbstractAssayProvider.VISITID_PROPERTY_NAME, visitNum);
                         }
                         catch (NumberFormatException nfe)
                         {

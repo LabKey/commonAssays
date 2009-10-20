@@ -23,23 +23,28 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.query.ValidationError;
+import org.labkey.api.query.PropertyValidationError;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.qc.TransformResult;
+import org.labkey.api.qc.DefaultTransformResult;
 import org.labkey.viability.data.MultiValueInputColumn;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
 import java.util.*;
+import java.io.File;
 
 /**
  * User: kevink
@@ -51,7 +56,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
     public ViabilityAssayUploadWizardAction()
     {
         super(ViabilityAssayRunUploadForm.class);
-        addStepHandler(new SpecimensStepHandler());
+        addStepHandler(new ResultsStepHandler());
     }
 
     @Override
@@ -64,44 +69,69 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
     @Override
     protected RunStepHandler getRunStepHandler()
     {
-        return new RunStepHandler() {
+        return new RunStepHandler()
+        {
             @Override
-            protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws SQLException, ServletException
+            protected boolean validatePost(ViabilityAssayRunUploadForm form, BindException errors)
             {
+                if (!super.validatePost(form, errors))
+                    return false;
+
                 try
                 {
-                    InsertView view = getSpecimensView(form, errors);
-
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("\n");
-                    sb.append("<script type='text/javascript'>\n");
-                    sb.append("LABKEY.requiresScript('viability/CheckRunUploadForm.js');\n");
-                    sb.append("</script>\n");
-                    sb.append("<script type='text/javascript'>\n");
-                    String formRef = view.getDataRegion().getJavascriptFormReference(false);
-                    sb.append(formRef).append(".onsubmit = function () { return checkRunUploadForm(").append(formRef).append("); }\n");
-                    sb.append("</script>\n");
-
-                    VBox vbox = new VBox();
-                    vbox.addView(view);
-                    vbox.addView(new HtmlView(sb.toString()));
-                    return vbox;
+                    form.getParsedResultData();
                 }
                 catch (ExperimentException e)
                 {
-                    throw new ServletException(e);
+                    errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+                    return false;
                 }
+
+                return true;
+            }
+
+            @Override
+            protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws SQLException, ServletException
+            {
+                InsertView view = getResultsView(form, false, errors);
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("\n");
+                sb.append("<script type='text/javascript'>\n");
+                sb.append("LABKEY.requiresScript('viability/CheckRunUploadForm.js');\n");
+                sb.append("</script>\n");
+                sb.append("<script type='text/javascript'>\n");
+                String formRef = view.getDataRegion().getJavascriptFormReference(false);
+                sb.append(formRef).append(".onsubmit = function () { return checkRunUploadForm(").append(formRef).append("); }\n");
+                sb.append("</script>\n");
+
+                VBox vbox = new VBox();
+                vbox.addView(view);
+                vbox.addView(new HtmlView(sb.toString()));
+                return vbox;
             }
         };
     }
 
 
-    protected InsertView getSpecimensView(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
+    protected InsertView getResultsView(ViabilityAssayRunUploadForm form, boolean errorReshow, BindException errors) throws ServletException
+    {
+        try
+        {
+            return _getResultsView(form, errorReshow, errors);
+        }
+        catch (ExperimentException e)
+        {
+            throw new ServletException(e);
+        }
+    }
+
+    protected InsertView _getResultsView(ViabilityAssayRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
     {
         List<Map<String, Object>> rows = form.getParsedResultData();
 
         String lsidCol = "RowID";
-        InsertView view = createInsertView(ViabilitySchema.getTableInfoResults(), lsidCol, new DomainProperty[0], form.isResetDefaultValues(), SpecimensStepHandler.NAME, form, errors);
+        InsertView view = createInsertView(ViabilitySchema.getTableInfoResults(), lsidCol, new DomainProperty[0], errorReshow, ResultsStepHandler.NAME, form, errors);
 
         Domain resultDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ExpProtocol.ASSAY_DOMAIN_DATA);
         DomainProperty[] resultDomainProperties = resultDomain.getProperties();
@@ -207,9 +237,10 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         addHiddenProperties(runProperties, insertView);
     }
 
-    public class SpecimensStepHandler extends RunStepHandler
+    public class ResultsStepHandler extends RunStepHandler
     {
-        public static final String NAME = "Specimens";
+        public static final String NAME = "Results";
+        private List<Map<String, Object>> validatedRows = null;
 
         @Override
         public String getName()
@@ -218,13 +249,30 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         }
 
         @Override
+        public ModelAndView handleStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException
+        {
+            if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
+            {
+                HttpView.throwRedirect(getViewContext().getActionURL());
+            }
+
+            if (!form.isResetDefaultValues() && validatePost(form, errors))
+                return handleSuccessfulPost(form, errors);
+            else
+                return getResultsView(form, !form.isResetDefaultValues(), errors);
+        }
+
+        @Override
         protected boolean validatePost(ViabilityAssayRunUploadForm form, BindException errors)
         {
             boolean valid = super.validatePost(form, errors);
             try
             {
-                List<Map<String, Object>> rows = form.getResultProperties();
+                List<Map<String, Object>> rows = form.getResultProperties(errors);
+                if (errors.hasErrors())
+                    return false;
                 ViabilityAssayDataHandler.validateData(rows, false);
+                validatedRows = rows;
             }
             catch (ExperimentException e)
             {
@@ -237,12 +285,34 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         @Override
         protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
-            return super.handleSuccessfulPost(form, errors);
+            try
+            {
+                ExpRun run = saveExperimentRun(form);
+                return afterRunCreation(form, run, errors);
+            }
+            catch (ValidationException e)
+            {
+                for (ValidationError error : e.getErrors())
+                {
+                    if (error instanceof PropertyValidationError)
+                        errors.addError(new FieldError("AssayUploadForm", ((PropertyValidationError)error).getPropety(), null, false,
+                                new String[]{SpringActionController.ERROR_MSG}, new Object[0], error.getMessage()));
+                    else
+                        errors.reject(SpringActionController.ERROR_MSG, error.getMessage());
+                }
+                return getResultsView(form, true, errors);
+            }
+            catch (ExperimentException e)
+            {
+                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+                return getResultsView(form, true, errors);
+            }
         }
 
         @Override
-        public ExpRun saveExperimentRun(ViabilityAssayRunUploadForm form) throws ExperimentException, ValidationException
+        public ExpRun saveExperimentRun(final ViabilityAssayRunUploadForm form) throws ExperimentException, ValidationException
         {
+            assert validatedRows != null;
             ExpRun run = super.saveExperimentRun(form);
 
             // Find the ExpData that was just inserted as a run output,
@@ -250,16 +320,16 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             List<ExpData> datas = run.getDataOutputs();
             assert datas.size() == 1;
             ExpData data = datas.get(0);
+
             try
             {
                 // XXX: hack hack. It would be nice to insert the form posted values the first time rather than deleting and re-inserting.
-                List<Map<String, Object>> posted = form.getResultProperties();
                 ViabilityManager.deleteAll(data, form.getContainer());
 
                 AssayProvider provider = AssayService.get().getProvider(form.getProtocol());
                 Domain resultDomain = provider.getResultsDomain(form.getProtocol());
 
-                ViabilityAssayDataHandler._insertRowData(data, form.getUser(), form.getContainer(), resultDomain, posted);
+                ViabilityAssayDataHandler._insertRowData(data, form.getUser(), form.getContainer(), resultDomain, validatedRows);
             }
             catch (SQLException e)
             {
