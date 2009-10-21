@@ -316,6 +316,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             String ver = getTPPVersion(getJob());
             List<String> interactCmd = new ArrayList<String>();
             String xinteractPath = PipelineJobService.get().getExecutablePath("xinteract", "tpp", ver);
+            File xinteractFile = new File(xinteractPath);
             interactCmd.add(xinteractPath);
 
             if (!getJobSupport().isProphetEnabled())
@@ -388,6 +389,25 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 interactCmd.add(_wd.getRelativePath(fileInput));
 
             ProcessBuilder builder = new ProcessBuilder(interactCmd);
+            // Add the TPP directory to the PATH so that xinteract can find it
+            if (xinteractFile.getParentFile().exists())
+            {
+                String pathEnvName = "PATH";
+                String path = "";
+                for (String envName : builder.environment().keySet())
+                {
+                    // Not sure what the casing for that PATH environment variable is going to be, so check in
+                    // case insensitive way
+                    if ("PATH".equalsIgnoreCase(envName))
+                    {
+                        pathEnvName = envName;
+                        path = builder.environment().get(pathEnvName);
+                        break;
+                    }
+                }
+                path = xinteractFile.getParentFile().getAbsolutePath() + File.pathSeparatorChar + path;
+                builder.environment().put(pathEnvName, path);
+            }
             builder.environment().put("WEBSERVER_ROOT", StringUtils.trimToEmpty(new File(xinteractPath).getParent()));
             getJob().runSubProcess(builder, _wd.getDir());
 
