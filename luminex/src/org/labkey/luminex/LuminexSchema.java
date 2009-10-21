@@ -99,7 +99,7 @@ public class LuminexSchema extends AssaySchema
         //        ExprColumn.STR_TABLE_ALIAS + ".lsid)";
 
         //ColumnInfo colProperty = new ExprColumn(result, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
-        ColumnInfo colProperty = new AliasedColumn("Properties", result.getColumn("lsid"));
+        ColumnInfo colProperty = result.wrapColumn("Properties", result.getRealTable().getColumn("LSID"));
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
         for(DomainProperty pd : analyteDomain.getProperties())
