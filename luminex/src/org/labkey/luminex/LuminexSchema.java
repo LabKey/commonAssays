@@ -95,10 +95,11 @@ public class LuminexSchema extends AssaySchema
         ColumnInfo lsidColumn = result.addColumn(result.wrapColumn(result.getRealTable().getColumn("LSID")));
         lsidColumn.setHidden(true);
 
-        String sqlObjectId = "(SELECT objectid FROM " + OntologyManager.getTinfoObject() + " o WHERE o.objecturi = " +
-                ExprColumn.STR_TABLE_ALIAS + ".lsid)";
+        //String sqlObjectId = "(SELECT objectid FROM " + OntologyManager.getTinfoObject() + " o WHERE o.objecturi = " +
+        //        ExprColumn.STR_TABLE_ALIAS + ".lsid)";
 
-        ColumnInfo colProperty = new ExprColumn(result, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
+        //ColumnInfo colProperty = new ExprColumn(result, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
+        ColumnInfo colProperty = new AliasedColumn("Properties", result.getColumn("lsid"));
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
         for(DomainProperty pd : analyteDomain.getProperties())
