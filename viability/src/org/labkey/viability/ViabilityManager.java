@@ -148,6 +148,7 @@ public class ViabilityManager
     {
 //        assert result.getSpecimenIDs() != null && result.getSpecimenIDs().size() > 0;
         List<String> specimens = result.getSpecimenIDs();
+        Collections.sort(specimens);
         for (int index = 0; index < specimens.size(); index++)
         {
             String specimenID = specimens.get(index);
@@ -351,7 +352,7 @@ public class ViabilityManager
                 result.setTotalCells(10000);
                 result.setViableCells(9000);
                 assertEquals(0.9, result.getViability());
-                result.setSpecimenIDs(Arrays.asList("111", "222", "333"));
+                result.setSpecimenIDs(Arrays.asList("222", "111", "333"));
 
                 Map<PropertyDescriptor, Object> properties = new HashMap<PropertyDescriptor, Object>();
                 properties.put(_propertyA, "hello property");
@@ -399,7 +400,7 @@ public class ViabilityManager
                 specimens = new ArrayList<String>(specimens);
                 specimens.remove("222");
                 specimens.add("444");
-                specimens.add("555");
+                specimens.add("000");
                 result.setSpecimenIDs(specimens);
                 result.getProperties().put(_propertyA, "goodbye property");
                 result.getProperties().remove(_propertyB);
@@ -410,10 +411,10 @@ public class ViabilityManager
             {
                 ViabilityResult result = ViabilityManager.getResult(c, resultId);
                 List<String> specimenIDs = result.getSpecimenIDs();
-                assertEquals("111", specimenIDs.get(0));
-                assertEquals("333", specimenIDs.get(1));
-                assertEquals("444", specimenIDs.get(2));
-                assertEquals("555", specimenIDs.get(3));
+                assertEquals("000", specimenIDs.get(0));
+                assertEquals("111", specimenIDs.get(1));
+                assertEquals("333", specimenIDs.get(2));
+                assertEquals("444", specimenIDs.get(3));
 
                 Map<PropertyDescriptor, Object> properties = result.getProperties();
                 assertEquals(1, properties.size());
