@@ -25,6 +25,7 @@ var MultiValueInput = function (fieldId, initialValues)
                             if (f.getValue()) {
                                 self.addInput('', true);
                             } else if (fields.length > 1) {
+                                fields.pop();
                                 // defer destroy so focus is moved to next element
                                 f.destroy.defer(10, f);
                             }
