@@ -28,10 +28,15 @@ import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.util.PageFlowUtil;
 import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
 import java.sql.Types;
+import java.io.Writer;
+import java.io.IOException;
 
 public class ViabilityAssaySchema extends AssaySchema
 {
@@ -163,6 +168,7 @@ public class ViabilityAssaySchema extends AssaySchema
                             "ELSE ViableCells / OriginalCells END)"), Types.DOUBLE);
             copyProperties(recoveryCol, resultsTable._resultsDomain.getPropertyByName(ViabilityAssayProvider.RECOVERY_PROPERTY_NAME));
             addColumn(recoveryCol);
+            recoveryCol.setDisplayColumnFactory(new MissingSpecimenPopupFactory());
         }
 
         @NotNull
@@ -255,13 +261,22 @@ public class ViabilityAssaySchema extends AssaySchema
             {
                 throw new UnsupportedOperationException("SqlDialect not supported: " + getDbSchema().getSqlDialect().getClass().getSimpleName());
             }
-            ExprColumn specimenIDsCol = new ExprColumn(this, "SpecimenIDs", specimenIDs, java.sql.Types.VARCHAR);
+            ExprColumn specimenIDsCol = new ExprColumn(this, "SpecimenIDs", specimenIDs, Types.VARCHAR);
             copyProperties(specimenIDsCol, propertyMap.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME));
+            specimenIDsCol.setDisplayColumnFactory(new MissingSpecimenPopupFactory());
             addVisible(specimenIDsCol);
 
-            ExprColumn specimenIDCount = new ExprColumn(this, "SpecimenIDCount",
+            ExprColumn specimenCount = new ExprColumn(this, "SpecimenCount",
                     new SQLFragment("(SELECT COUNT(RS.specimenid) FROM viability.resultspecimens RS WHERE " + ExprColumn.STR_TABLE_ALIAS + ".RowID = RS.ResultID)"), Types.INTEGER);
-            addVisible(specimenIDCount);
+            addVisible(specimenCount);
+
+            ExprColumn specimenMatchCount = new ExprColumn(this, "SpecimenMatchCount", new SQLFragment("SpecimenMatchCount"), Types.INTEGER);
+            specimenMatchCount.setHidden(true);
+            addColumn(specimenMatchCount);
+
+            ExprColumn specimenMatches = new ExprColumn(this, "SpecimenMatches", new SQLFragment("SpecimenMatches"), Types.VARCHAR);
+            specimenMatches.setHidden(true);
+            addColumn(specimenMatches);
 
             addResultDomainPropertiesColumn();
 
@@ -319,10 +334,13 @@ public class ViabilityAssaySchema extends AssaySchema
                 SimpleFilter filter = new SimpleFilter();
                 filter.addCondition("SpecimenID/Specimen/VolumeUnits", "CEL");
                 List<FieldKey> fields = new ArrayList<FieldKey>();
-                FieldKey resultId, volume;
-                fields.add(resultId = FieldKey.fromParts("ResultID"));
+                FieldKey resultId = FieldKey.fromParts("ResultID");
+                FieldKey volume = FieldKey.fromParts("SpecimenID", "Volume");
+                FieldKey globalUniqueId = FieldKey.fromParts("SpecimenID", "GlobalUniqueId");
+                fields.add(resultId);
                 fields.add(FieldKey.fromParts("SpecimenID"));
-                fields.add(volume = FieldKey.fromParts("SpecimenID", "Volume"));
+                fields.add(volume);
+                fields.add(globalUniqueId);
                 fields.add(FieldKey.fromParts("SpecimenID", "Specimen", "VolumeUnits"));
                 fields.add(FieldKey.fromParts("ResultID", "Run", "Batch", "BatchProperties", "TargetStudy"));
                 Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(rs, fields);
@@ -334,7 +352,29 @@ public class ViabilityAssaySchema extends AssaySchema
                 fromSQL.append("\n) AS x");
                 fromSQL.append("\nLEFT OUTER JOIN (\n");
 
-                fromSQL.append("SELECT " + columnMap.get(resultId).getAlias() + " as VolumeResultID, SUM(" + columnMap.get(volume).getAlias() + ") as VolumeSum FROM (\n");
+                fromSQL.append("SELECT\n");
+                fromSQL.append("  " + columnMap.get(resultId).getAlias() + " as VolumeResultID,\n");
+                fromSQL.append("  SUM(" + columnMap.get(volume).getAlias() + ") as VolumeSum,\n");
+                fromSQL.append("  COUNT(" + columnMap.get(globalUniqueId).getAlias() + ") as SpecimenMatchCount,\n");
+
+                if (getDbSchema().getSqlDialect().isSqlServer())
+                {
+                    // XXX: SpecimenMatches column isn't supported on SQLServer yet
+//                    fromSQL.append("  (REPLACE(");
+//                    fromSQL.append("(SELECT ").append(columnMap.get(globalUniqueId).getAlias()).append(" as [data()]");
+//                    fromSQL.append(" FOR XML PATH ('')), ' ', ',')) as SpecimenMatches\n");
+                    fromSQL.append(" NULL as SpecimenMatches\n");
+                }
+                else if (getDbSchema().getSqlDialect().isPostgreSQL())
+                {
+                    fromSQL.append("  array_to_string(viability.array_accum(").append(columnMap.get(globalUniqueId).getAlias()).append("), ',') as SpecimenMatches\n");
+                }
+                else
+                {
+                    throw new UnsupportedOperationException("SqlDialect not supported: " + getDbSchema().getSqlDialect().getClass().getSimpleName());
+                }
+
+                fromSQL.append("FROM (\n");
                 fromSQL.append(sub);
                 fromSQL.append(") y \nGROUP BY " + columnMap.get(resultId).getAlias());
                 fromSQL.append("\n) AS z");
@@ -346,6 +386,65 @@ public class ViabilityAssaySchema extends AssaySchema
             {
                 return super.getFromSQL();
             }
+        }
+    }
+
+    public class MissingSpecimenPopupFactory implements DisplayColumnFactory
+    {
+        public DisplayColumn createRenderer(ColumnInfo colInfo)
+        {
+            final FieldKey specimenIDs = FieldKey.fromParts("SpecimenIDs");
+            final FieldKey specimenMatches = FieldKey.fromParts("SpecimenMatches");
+            final FieldKey specimenCount = FieldKey.fromParts("SpecimenCount");
+            final FieldKey specimenMatchCount = FieldKey.fromParts("SpecimenMatchCount");
+
+            return new DataColumn(colInfo)
+            {
+                @Override
+                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                {
+                    super.renderGridCellContents(ctx, out);
+
+                    String popupText = "Some specimen IDs were not found in the target study.";
+
+                    Number count = (Number)ctx.get(specimenCount);
+                    Number matchCount = (Number)ctx.get(specimenMatchCount);
+
+                    if (count != null && count.intValue() > 0 && !count.equals(matchCount))
+                    {
+                        String id = (String)ctx.get(specimenIDs);
+                        String match = (String)ctx.get(specimenMatches);
+
+                        // XXX: SpecimenMatches column isn't supported on SQLServer yet
+                        if (ViabilityAssaySchema.this.getSqlDialect().isPostgreSQL())
+                        {
+                            String[] ids = id != null ? id.split(",") : new String[0];
+                            String[] matches = match != null ? match.split(",") : new String[0];
+
+                            HashSet s = new LinkedHashSet(Arrays.asList(ids));
+                            s.removeAll(Arrays.asList(matches));
+
+                            popupText += "<p>" + PageFlowUtil.filter(StringUtils.join(s, ", ")) + "</p>";
+                        }
+
+                        String imgHtml = "<img align=\"top\" src=\"" +
+                                HttpView.currentContext().getContextPath() +
+                                "/_images/mv_indicator.gif\" class=\"labkey-mv-indicator\">";
+
+                        out.write(PageFlowUtil.helpPopup("Matched Specimen IDs", popupText, true, imgHtml, 0));
+                    }
+                }
+
+                @Override
+                public void addQueryFieldKeys(Set<FieldKey> keys)
+                {
+                    super.addQueryFieldKeys(keys);
+                    keys.add(specimenIDs);
+                    keys.add(specimenMatches);
+                    keys.add(specimenCount);
+                    keys.add(specimenMatchCount);
+                }
+            };
         }
     }
 
