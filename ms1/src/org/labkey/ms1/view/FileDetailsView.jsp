@@ -46,7 +46,7 @@
 
             for (ExpData input : inputs)
             {
-                if (input.getDataFileUrl().equalsIgnoreCase(dataFile.getMzXmlUrl()))
+                if (input.getDataFileUrl() != null && input.getDataFileUrl().equalsIgnoreCase(dataFile.getMzXmlUrl()))
                     urlDownload.addParameter("rowId", input.getRowId());
             }
         %>
