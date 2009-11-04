@@ -416,7 +416,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
 
             List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>();
 
-            CopyToStudyContext context = new CopyToStudyContext(protocol);
+            CopyToStudyContext context = new CopyToStudyContext(protocol, user);
 
             Set<PropertyDescriptor> typeList = new LinkedHashSet<PropertyDescriptor>();
             typeList.add(createPublishPropertyDescriptor(study, getTableMetadata().getResultRowIdFieldKey().toString(), PropertyType.INTEGER));
@@ -473,7 +473,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
                 dataMap.put("SourceLSID", run.getLSID());
                 dataMap.put(getTableMetadata().getResultRowIdFieldKey().toString(), publishKey.getDataId());
 
-                addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
+                addStandardRunPublishProperties(study, tempTypes, dataMap, run, context);
 
                 dataMaps.add(dataMap);
                 tempTypes = null;

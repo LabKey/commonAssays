@@ -269,7 +269,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             Map<Integer, Pair<Analyte, Map<String, ObjectProperty>>> analytes = new HashMap<Integer, Pair<Analyte, Map<String, ObjectProperty>>>();
 
             PropertyDescriptor[] excelRunPDs = getPropertyDescriptors(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN));
-            CopyToStudyContext context = new CopyToStudyContext(protocol, excelRunPDs);
+            CopyToStudyContext context = new CopyToStudyContext(protocol, user, excelRunPDs);
 
             TimepointType timepointType = AssayPublishService.get().getTimepointType(study);
 
@@ -345,7 +345,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         ExpData data = context.getData(luminexDataRow.getDataId());
         ExpRun run = context.getRun(data);
-        addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
+        addStandardRunPublishProperties(study, tempTypes, dataMap, run, context);
         return run;
     }
 

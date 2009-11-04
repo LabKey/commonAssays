@@ -1687,7 +1687,7 @@ public class NabController extends SpringActionController
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
             // just grab any root, it doesn't matter
-            for (PipeRoot root : PipelineService.get().getAllPipelineRoots())
+            for (PipeRoot root : PipelineService.get().getAllPipelineRoots().values())
             {
                 File rootPath = root.getRootPath();
                 if (rootPath.exists())

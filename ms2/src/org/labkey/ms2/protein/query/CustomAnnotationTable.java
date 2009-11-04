@@ -102,8 +102,8 @@ public class CustomAnnotationTable extends FilteredTable
 
     public ColumnInfo createPropertyColumn(String name)
     {
-        String sql = "( SELECT objectid FROM exp.object WHERE exp.object.objecturi = " + ExprColumn.STR_TABLE_ALIAS + ".objecturi)";
-        ColumnInfo ret = new ExprColumn(this, name, new SQLFragment(sql), Types.INTEGER);
+        String sql = ExprColumn.STR_TABLE_ALIAS + ".objecturi";
+        ColumnInfo ret = new ExprColumn(this, name, new SQLFragment(sql), Types.VARCHAR);
         ret.setIsUnselectable(true);
         return ret;
     }

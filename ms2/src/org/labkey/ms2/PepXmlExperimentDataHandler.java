@@ -16,7 +16,6 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
@@ -26,15 +25,12 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
-import org.labkey.api.util.UnexpectedException;
 import org.apache.log4j.Logger;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URI;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Arrays;
@@ -151,23 +147,14 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
 
     public void deleteData(ExpData data, Container container, User user)
     {
-        try
+        File file = data.getFile();
+        if (file != null)
         {
-            MS2Run run = getMS2Run(new File(new URI(data.getDataFileUrl())), container);
+            MS2Run run = getMS2Run(file, container);
             if (run != null)
             {
-                run.setExperimentRunLSID(null);
-                MS2Manager.updateRun(run, null);
                 MS2Manager.markDeleted(Arrays.asList(run.getRun()), container);
             }
-        }
-        catch (URISyntaxException e)
-        {
-            throw new UnexpectedException(e);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
         }
     }
 

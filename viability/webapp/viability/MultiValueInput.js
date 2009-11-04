@@ -17,8 +17,11 @@ var MultiValueInput = function (fieldId, initialValues)
             style: "display:block;font-family:monospace",
             listeners: {
                 'specialkey': function (f, e) {
-                    if (e.getKey() == e.TAB && !e.shiftKey)
+                    var key = e.getKey();
+                    if ((key == e.TAB || key == e.ENTER) && !e.shiftKey)
                     {
+                        if (key == e.ENTER)
+                            e.stopEvent();
                         var index = fields.indexOf(f);
                         if (index == fields.length - 1)
                         {

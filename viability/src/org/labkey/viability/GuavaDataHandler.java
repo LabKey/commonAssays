@@ -20,22 +20,24 @@ import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.study.assay.AssayUploadXarContext;
+import org.labkey.api.qc.TransformDataHandler;
 import org.apache.commons.beanutils.Converter;
 import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.FileReader;
 import java.io.BufferedReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -44,16 +46,23 @@ import junit.framework.TestSuite;
  * User: kevink
  * Date: Sep 22, 2009
  */
-public class GuavaDataHandler extends ViabilityAssayDataHandler
+public class GuavaDataHandler extends ViabilityAssayDataHandler implements TransformDataHandler
 {
+    public static final DataType DATA_TYPE = new DataType("ViabilityAssay-GuavaData");
+
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
-        if (DATA_TYPE.matches(lsid))
+        if (DATA_TYPE.matches(lsid) || OLD_DATA_TYPE.matches(lsid))
         {
             File f = data.getFile();
-            if (f.getName().toLowerCase().endsWith(".csv"))
-                return Priority.HIGH;
+            if (f != null && f.getName() != null)
+            {
+                String lowerName = f.getName().toLowerCase();
+                if (lowerName.endsWith(".csv"))
+                    return Priority.HIGH;
+            }
+            return Priority.MEDIUM;
         }
         return null;
     }
@@ -215,6 +224,22 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler
             }
         }
     }
+
+    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    {
+        assert dataFile.getName().endsWith(".csv") || dataFile.getName().endsWith(".CSV");
+
+        Map<DataType, List<Map<String, Object>>> result = new HashMap<DataType, List<Map<String, Object>>>();
+        if (context instanceof AssayUploadXarContext)
+        {
+            ViabilityAssayRunUploadForm form = (ViabilityAssayRunUploadForm)((AssayUploadXarContext)context).getContext();
+            List<Map<String, Object>> rows = form.getResultProperties(null);
+            // Use the .tsv DATA_TYPE so the results will be read back in by the ViabilityTsvDataHandler after transormation
+            result.put(ViabilityTsvDataHandler.DATA_TYPE, rows);
+        }
+        return result;
+    }
+
 
     public static class TestCase extends junit.framework.TestCase
     {

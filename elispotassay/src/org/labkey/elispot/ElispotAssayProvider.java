@@ -219,7 +219,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         {
             TimepointType studyType = AssayPublishService.get().getTimepointType(study);
 
-            CopyToStudyContext context = new CopyToStudyContext(protocol);
+            CopyToStudyContext context = new CopyToStudyContext(protocol, user);
 
             PropertyDescriptor[] samplePDs = getPropertyDescriptors(getSampleWellGroupDomain(protocol));
             PropertyDescriptor[] dataPDs = ElispotSchema.getExistingDataProperties(protocol);
@@ -287,7 +287,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
                 dataMap.put("SourceLSID", run.getLSID());
                 dataMap.put(getTableMetadata().getResultRowIdFieldKey().toString(), publishKey.getDataId());
 
-                addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
+                addStandardRunPublishProperties(study, tempTypes, dataMap, run, context);
 
                 dataMaps.add(dataMap);
                 tempTypes = null;

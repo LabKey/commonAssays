@@ -22,6 +22,7 @@ import org.labkey.api.data.RenderContext;
 
 import java.io.Writer;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * User: kevink
@@ -29,9 +30,9 @@ import java.io.IOException;
  */
 public class MultiValueInputColumn extends DataColumn
 {
-    private String[] _values;
+    private List<String> _values;
 
-    public MultiValueInputColumn(ColumnInfo col, String[] values)
+    public MultiValueInputColumn(ColumnInfo col, List<String> values)
     {
         super(col);
         _values = values;
@@ -65,13 +66,13 @@ public class MultiValueInputColumn extends DataColumn
         out.write("'");
 
         // XXX: hack. ignore the value in the render context. take the value as pased in during view creation.
-        if (_values != null && _values.length > 0)
+        if (_values != null && _values.size() > 0)
         {
             out.write(", [");
-            for (int i = 0; i < _values.length; i++)
+            for (String s : _values)
             {
                 out.write("'");
-                out.write(_values[i]);
+                out.write(s);
                 out.write("', ");
             }
             out.write("]");

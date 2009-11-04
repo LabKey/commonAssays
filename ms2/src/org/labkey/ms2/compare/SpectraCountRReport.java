@@ -18,6 +18,7 @@ package org.labkey.ms2.compare;
 
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.report.RReport;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.view.ActionURL;
@@ -47,9 +48,9 @@ public class SpectraCountRReport extends RReport
     }
 
 
-    public ResultSet generateResultSet(ViewContext context) throws Exception
+    public Results generateResults(ViewContext context) throws Exception
     {
-        return getQueryView(context).getResultset();
+        return getQueryView(context).getResults();
     }
 
     public HttpView renderDataView(ViewContext context) throws Exception

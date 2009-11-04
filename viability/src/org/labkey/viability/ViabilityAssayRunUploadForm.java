@@ -62,13 +62,19 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
         return _parser.getRunData();
     }
 
+    public File getUploadedFile() throws ExperimentException
+    {
+        Map<String, File> uploaded = getUploadedData();
+        assert uploaded.size() == 1;
+        File file = uploaded.values().iterator().next();
+        return file;
+    }
+
     private void parseUploadedFile() throws ExperimentException
     {
         if (_parser == null)
         {
-            Map<String, File> uploaded = getUploadedData();
-            assert uploaded.size() == 1;
-            File file = uploaded.values().iterator().next();
+            File file = getUploadedFile();
 
             AssayProvider provider = AssayService.get().getProvider(getProtocol());
             Domain runDomain = provider.getRunDomain(getProtocol());
@@ -138,7 +144,12 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                     parameter = Boolean.FALSE.toString();
 
                 if (dp.isRequired() && (parameter == null || parameter.length() == 0))
-                    errors.reject(ERROR_MSG, label + " is required and must be of type " + ColumnInfo.getFriendlyTypeName(type) + ".");
+                {
+                    String msg = label + " is required and must be of type " + ColumnInfo.getFriendlyTypeName(type) + ".";
+                    if (errors == null)
+                        throw new ExperimentException(msg);
+                    errors.reject(ERROR_MSG, msg);
+                }
 
                 if (dp.getName().equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
                 {
@@ -167,6 +178,8 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                         else
                             message += ".";
 
+                        if (errors == null)
+                            throw new ExperimentException(message);
                         errors.reject(ERROR_MSG, message);
                     }
                 }

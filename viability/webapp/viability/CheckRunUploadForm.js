@@ -39,6 +39,7 @@ function checkRunUploadForm(form)
         }
     }
 
+    var submit = true;
     if (haserrors)
     {
         var msg = "Some values are missing for the following pools:\n\n";
@@ -48,8 +49,13 @@ function checkRunUploadForm(form)
             msg += "  Sample number " + sampleNum + ": " + (list.join(", ")) + "\n";
         }
         msg += "\nSave anyway?";
-        return confirm(msg);
+        submit = confirm(msg);
     }
 
-    return true;
+    if (submit)
+        LABKEY.setDirty(false);
+    return submit;
 }
+
+LABKEY.setDirty(true);
+window.onbeforeunload = LABKEY.beforeunload();

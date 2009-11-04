@@ -46,7 +46,8 @@ import java.sql.SQLException;
  */
 public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHandler
 {
-    public static final DataType DATA_TYPE = new DataType("ViabilityAssayData");
+    // Used during 9.3 development, but deprecated for the more specific static DATA_TYPE in derived classes.
+    public static final DataType OLD_DATA_TYPE = new DataType("ViabilityAssayData");
 
     public static abstract class Parser
     {
@@ -99,41 +100,43 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
                 if (poolID == null || poolID.length() == 0)
                     throw new ExperimentException(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME + " required");
 
-                String participantID = (String) row.get(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-                String visitID = (String) row.get(AbstractAssayProvider.VISITID_PROPERTY_NAME);
+                Object participantID = row.get(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
+                Object visitID = row.get(AbstractAssayProvider.VISITID_PROPERTY_NAME);
                 if (participantID == null && visitID == null)
                 {
                     int sep = poolID.lastIndexOf('-');
                     if (sep == -1)
-                        sep = poolID.lastIndexOf('_');
+                        sep = poolID.lastIndexOf('V');
                     if (sep == -1)
                         sep = poolID.lastIndexOf('v');
                     if (sep > 0)
                     {
+                        boolean modified = false;
                         String ptid = poolID.substring(0, sep).trim();
                         String visit = poolID.substring(sep+1).trim();
-                        if (ptid.length() == 0 || visit.length() == 0)
+                        if (ptid.length() > 0)
                         {
-                            throw new ExperimentException(
-                                    "PoolID should be in the format 'ParticipantID-VisitID' where 'VisitID' is a double number.");
+                            row = new HashMap<String, Object>(row);
+                            row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, ptid);
+                            modified = true;
                         }
 
-                        row = new HashMap<String, Object>(row);
-                        row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, ptid);
-
-                        try
+                        if (visit.length() > 0)
                         {
-                            Double visitNum = Double.parseDouble(visit);
-                            row.put(AbstractAssayProvider.VISITID_PROPERTY_NAME, visitNum);
-                        }
-                        catch (NumberFormatException nfe)
-                        {
-                            throw new ExperimentException(
-                                    "PoolID should be in the format 'ParticipantID-VisitID' where 'VisitID' is a double number.\n" +
-                                    "Failed to parse VisitID of pool '" + poolID + "': " + nfe.getMessage(), nfe);
+                            try
+                            {
+                                Double visitNum = Double.parseDouble(visit);
+                                row.put(AbstractAssayProvider.VISITID_PROPERTY_NAME, visitNum);
+                                modified = true;
+                            }
+                            catch (NumberFormatException nfe)
+                            {
+                                // ignore
+                            }
                         }
 
-                        it.set(row);
+                        if (modified)
+                            it.set(row);
                     }
                 }
             }
@@ -205,14 +208,6 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
-    {
-        // Insert is a no-op.  We insert later during the upload wizard SpecimensStepHandler.handleSuccessfulPost()
-        Map<DataType, List<Map<String, Object>>> result = new HashMap<DataType, List<Map<String, Object>>>();
-        result.put(DATA_TYPE, Collections.<Map<String, Object>>emptyList());
-        return result;
-    }
-
     // check file data: all rows must have PoolID
     public static void validateData(List<Map<String, Object>> rows, boolean requireSpecimens) throws ExperimentException
     {
@@ -257,13 +252,18 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     @Override
     protected void insertRowData(ExpData data, User user, Container container, PropertyDescriptor[] dataProperties, List<Map<String, Object>> fileData) throws SQLException, ValidationException
     {
-        // Insert is a no-op.  We insert later during the upload wizard SpecimensStepHandler.handleSuccessfulPost()
-        //_insertRowData(data, user, container, dataProperties, fileData);
+        Map<String, PropertyDescriptor> importMap = new HashMap();
+        for (PropertyDescriptor pd : dataProperties)
+        {
+            importMap.put(pd.getName(), pd);
+        }
+        _insertRowData(data, user, container, importMap, fileData);
     }
 
-    /*package*/ static void _insertRowData(ExpData data, User user, Container container, Domain resultDomain, List<Map<String, Object>> fileData) throws SQLException, ValidationException
+    /*package*/ static void _insertRowData(ExpData data, User user, Container container, Map<String, PropertyDescriptor> importMap, List<Map<String, Object>> fileData) throws SQLException, ValidationException
     {
-        Map<String, DomainProperty> importMap = resultDomain.createImportMap(true);
+        ExpRun run = data.getRun();
+        ExpProtocol protocol = run.getProtocol();
 
         for (Map<String, Object> row : fileData)
         {
@@ -273,12 +273,14 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             assert result.getDataID() == 0;
             assert result.getObjectID() == 0;
             result.setDataID(data.getRowId());
+            result.setContainer(container.getId());
+            result.setProtocolID(protocol.getRowId());
 
             ViabilityManager.saveResult(user, container, result);
         }
     }
 
-    /*package*/ static Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, DomainProperty> importMap)
+    /*package*/ static Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, PropertyDescriptor> importMap)
     {
         Map<String, Object> base = new CaseInsensitiveHashMap<Object>();
         Map<PropertyDescriptor, Object> extra = new HashMap<PropertyDescriptor, Object>();
@@ -290,10 +292,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             }
             else
             {
-                DomainProperty dp = importMap.get(entry.getKey());
-                if (dp == null)
-                    continue;
-                PropertyDescriptor pd = dp.getPropertyDescriptor();
+                PropertyDescriptor pd = importMap.get(entry.getKey());
                 if (pd != null)
                     extra.put(pd, entry.getValue());
             }

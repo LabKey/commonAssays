@@ -18,6 +18,7 @@ package org.labkey.viability;
 
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.Container;
 import org.labkey.api.exp.PropertyDescriptor;
 
 import java.util.*;
@@ -31,6 +32,8 @@ public class ViabilityResult
 {
     private int rowID;
 
+    private String containerID;
+    private int protocolID;
     private int dataID;
     private int objectID;
     private String participantID;
@@ -70,6 +73,26 @@ public class ViabilityResult
     public void setRowID(int rowID)
     {
         this.rowID = rowID;
+    }
+
+    public String getContainer()
+    {
+        return containerID;
+    }
+
+    public void setContainer(String containerID)
+    {
+        this.containerID = containerID;
+    }
+
+    public int getProtocolID()
+    {
+        return protocolID;
+    }
+
+    public void setProtocolID(int protocolID)
+    {
+        this.protocolID = protocolID;
     }
 
     public int getDataID()

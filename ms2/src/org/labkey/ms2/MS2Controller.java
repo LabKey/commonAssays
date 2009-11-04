@@ -5520,14 +5520,13 @@ public class MS2Controller extends SpringActionController
             ActionURL moveURL = new ActionURL(MoveRunsAction.class, ContainerManager.getRoot());
             moveURL.addParameters(getViewContext().getActionURL().getParameters());
             final Container originalContainer = getContainer();
-            ContainerTree ct = new ContainerTree("/", getUser(), ACL.PERM_INSERT, moveURL)
+            PipelineRootContainerTree ct = new PipelineRootContainerTree(getUser(), moveURL)
             {
-                protected void renderCellContents(StringBuilder html, Container c, ActionURL url)
+                protected void renderCellContents(StringBuilder html, Container c, ActionURL url, boolean hasRoot)
                 {
-                    boolean hasRoot = PipelineService.get().findPipelineRoot(c) != null;
                     if (hasRoot && !c.equals(originalContainer))
                     {
-                        super.renderCellContents(html, c, url);
+                        super.defaultRenderCellContents(html, c, url);
                     }
                     else
                     {

@@ -20,8 +20,8 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.*;
-import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.util.JunitUtil;
@@ -278,6 +278,7 @@ public class ViabilityManager
 
     public static class TestCase extends junit.framework.TestCase
     {
+        private ExpProtocol _protocol;
         private ExpData _data;
         private PropertyDescriptor _propertyA;
         private PropertyDescriptor _propertyB;
@@ -294,6 +295,9 @@ public class ViabilityManager
             Container c = JunitUtil.getTestContainer();
             TestContext context = TestContext.get();
             User user = context.getUser();
+
+            _protocol = ExperimentService.get().createExpProtocol(c, ExpProtocol.ApplicationType.ExperimentRun, "viability-exp-protocol");
+            _protocol.save(user);
 
             _data = ExperimentService.get().createData(c, ViabilityTsvDataHandler.DATA_TYPE, "viability-exp-data");
             _data.save(user);
@@ -348,6 +352,8 @@ public class ViabilityManager
             {
                 ViabilityResult result = new ViabilityResult();
                 result.setDataID(_data.getRowId());
+                result.setContainer(c.getId());
+                result.setProtocolID(_protocol.getRowId());
                 result.setPoolID("xxx-12345-67890");
                 result.setTotalCells(10000);
                 result.setViableCells(9000);

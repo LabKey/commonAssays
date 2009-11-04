@@ -106,9 +106,10 @@ public class ControlsQCReport extends FlowReport
             _inner = new RReport()
             {
                 @Override
-                public ResultSet generateResultSet(ViewContext context) throws Exception
+                public Results generateResults(ViewContext context) throws Exception
                 {
-                    return ControlsQCReport.this.generateResultSet(context);
+                    ResultSet rs = ControlsQCReport.this.generateResultSet(context);
+                    return rs == null ? null : new Results(rs,null);
                 }
 
                 @Override

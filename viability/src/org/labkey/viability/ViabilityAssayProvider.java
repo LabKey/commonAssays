@@ -21,6 +21,7 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpData;
@@ -66,7 +67,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     public ViabilityAssayProvider()
     {
-        super("ViabilityAssayProtocol", "ViabilityAssayRun", ViabilityTsvDataHandler.DATA_TYPE, new ResultsAssayTableMetadata());
+        super("ViabilityAssayProtocol", "ViabilityAssayRun", GuavaDataHandler.DATA_TYPE, new ResultsAssayTableMetadata());
     }
 
     /** Relative from Results table. */
@@ -182,7 +183,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new JspView<AssayRunUploadForm>("/org/labkey/study/assay/view/tsvDataDescription.jsp", form);
+        return new HtmlView("Currently the only supported file type is the Guava comma separated values (.csv) file format.");
     }
 
     public TableInfo createDataTable(AssaySchema schema, ExpProtocol protocol)
@@ -316,58 +317,4 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, ViabilityAssayUploadWizardAction.class);
     }
 
-    /*
-    @Override
-    public DataTransformer getDataTransformer()
-    {
-        return new DataTransformer() {
-            public TransformResult transform(AssayRunUploadContext context, ExpRun run) throws ValidationException
-            {
-                ViabilityAssayRunUploadForm form = (ViabilityAssayRunUploadForm)context;
-
-                // Find the ExpData that was just inserted as a run output,
-                // then update the results with the form posted data.
-                List<ExpData> datas = run.getDataOutputs();
-                assert datas.size() == 1;
-                ExpData data = datas.get(0);
-                File uploadedFile = data.getFile();
-                try
-                {
-                    List<Map<String, Object>> posted = form.getResultProperties();
-                    final File transformedFile = AssayFileWriter.safeDuplicate(context.getContainer(),
-                            new File(uploadedFile.getParentFile(), uploadedFile.getName() + ".tsv"));
-                    TSVWriter tsvWriter = new TSVWriter(transformedFile.getAbsolutePath());
-                    return new TransformResult() {
-
-                        public Map<DataType, File> getTransformedData()
-                        {
-                            return Collections.singletonMap(ViabilityTsvDataHandler.DATA_TYPE, transformedFile);
-                        }
-
-                        public Map<DomainProperty, String> getRunProperties()
-                        {
-                            return Collection;
-                        }
-
-                        public Map<DomainProperty, String> getBatchProperties()
-                        {
-                            return null;
-                        }
-                    };
-
-//                    ViabilityManager.deleteAll(data, form.getContainer());
-//                    ViabilityAssayDataHandler._insertRowData(data, form.getUser(), form.getContainer(), null, posted);
-                }
-                catch (ExperimentException e)
-                {
-                    throw new ValidationException(e.getMessage());
-                }
-//                catch (SQLException e)
-//                {
-//                    throw new RuntimeSQLException(e);
-//                }
-            }
-        };
-    }
-    */
 }

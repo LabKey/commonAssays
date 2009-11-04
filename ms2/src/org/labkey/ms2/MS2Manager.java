@@ -795,7 +795,7 @@ public class MS2Manager
     // pulled out into separate method so could be called by itself from data handlers
     public static void markDeleted(List<Integer> runIds, Container c)
     {
-        SQLFragment markDeleted = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET Deleted=?, Modified=? ", Boolean.TRUE, new Date());
+        SQLFragment markDeleted = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET ExperimentRunLSID = NULL, Deleted=?, Modified=? ", Boolean.TRUE, new Date());
         SimpleFilter where = new SimpleFilter();
         where.addCondition("Container", c.getId());
         where.addInClause("Run", runIds);

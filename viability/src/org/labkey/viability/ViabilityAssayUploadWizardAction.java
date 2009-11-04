@@ -129,7 +129,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
 
     protected InsertView _getResultsView(ViabilityAssayRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
     {
-        List<Map<String, Object>> rows = form.getParsedResultData();
+        List<Map<String, Object>> rows = errorReshow ? form.getResultProperties(errors) : form.getParsedResultData();
 
         String lsidCol = "RowID";
         InsertView view = createInsertView(ViabilitySchema.getTableInfoResults(), lsidCol, new DomainProperty[0], errorReshow, ResultsStepHandler.NAME, form, errors);
@@ -173,7 +173,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 DisplayColumn displayCol;
                 if (resultDomainProperty.getName().equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
                 {
-                    String[] values = (String[]) initialValue;
+                    List<String> values = (List<String>) initialValue;
                     displayCol = new MultiValueInputColumn(col, values);
                     copyable = false;
                 }
@@ -189,6 +189,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
 
         view.getDataRegion().setHorizontalGroups(false);
         view.getDataRegion().setGroupHeadings(poolIDs);
+        view.getDataRegion().setShadeAlternatingRows(true);
 
         addHiddenBatchProperties(form, view);
         addHiddenRunProperties(form, view);
@@ -241,7 +242,6 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
     public class ResultsStepHandler extends RunStepHandler
     {
         public static final String NAME = "Results";
-        private List<Map<String, Object>> validatedRows = null;
 
         @Override
         public String getName()
@@ -273,7 +273,6 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 if (errors.hasErrors())
                     return false;
                 ViabilityAssayDataHandler.validateData(rows, false);
-                validatedRows = rows;
             }
             catch (ExperimentException e)
             {
@@ -310,34 +309,5 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             }
         }
 
-        @Override
-        public ExpRun saveExperimentRun(final ViabilityAssayRunUploadForm form) throws ExperimentException, ValidationException
-        {
-            assert validatedRows != null;
-            ExpRun run = super.saveExperimentRun(form);
-
-            // Find the ExpData that was just inserted as a run output,
-            // then update the results with the form posted data.
-            List<ExpData> datas = run.getDataOutputs();
-            assert datas.size() == 1;
-            ExpData data = datas.get(0);
-
-            try
-            {
-                // XXX: hack hack. It would be nice to insert the form posted values the first time rather than deleting and re-inserting.
-                ViabilityManager.deleteAll(data, form.getContainer());
-
-                AssayProvider provider = AssayService.get().getProvider(form.getProtocol());
-                Domain resultDomain = provider.getResultsDomain(form.getProtocol());
-
-                ViabilityAssayDataHandler._insertRowData(data, form.getUser(), form.getContainer(), resultDomain, validatedRows);
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
-
-            return run;
-        }
     }
 }

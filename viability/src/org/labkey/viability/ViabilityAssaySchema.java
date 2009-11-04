@@ -30,7 +30,6 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.util.PageFlowUtil;
-import org.jetbrains.annotations.NotNull;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
@@ -87,12 +86,12 @@ public class ViabilityAssaySchema extends AssaySchema
 
     public AbstractTableInfo createResultsTable()
     {
-        return new RecoveryResultsTable();
+        return new ResultsTable();
     }
 
     public ResultSpecimensTable createResultSpecimensTable()
     {
-        return new ResultSpecimensTable(null);
+        return new ResultSpecimensTable();
     }
 
     public ExpDataTable createDataTable()
@@ -153,33 +152,6 @@ public class ViabilityAssaySchema extends AssaySchema
         return column;
     }
 
-    public class RecoveryResultsTable extends FilteredTable
-    {
-
-        public RecoveryResultsTable()
-        {
-            super(new ResultsTable());
-            ResultsTable resultsTable = (ResultsTable)getRealTable();
-            wrapAllColumns(true);
-
-            ExprColumn recoveryCol = new ExprColumn(this, "Recovery",
-                    new SQLFragment(
-                            "(CASE WHEN OriginalCells IS NULL OR OriginalCells = 0 THEN NULL " +
-                            "ELSE ViableCells / OriginalCells END)"), Types.DOUBLE);
-            copyProperties(recoveryCol, resultsTable._resultsDomain.getPropertyByName(ViabilityAssayProvider.RECOVERY_PROPERTY_NAME));
-            addColumn(recoveryCol);
-            recoveryCol.setDisplayColumnFactory(new MissingSpecimenPopupFactory());
-        }
-
-        @NotNull
-        public SQLFragment getFromSQL()
-        {
-            // XXX: shouldn't have to call getSelectSQL() myself here
-            SQLFragment fromSQL = QueryService.get().getSelectSQL(getFromTable(), getFromTable().getColumns(), getFilter(), null, 0, 0);
-            return fromSQL;
-        }
-    }
-
     public class ResultsTable extends ViabilityAssayTable
     {
         protected Domain _resultsDomain;
@@ -204,7 +176,9 @@ public class ViabilityAssaySchema extends AssaySchema
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return ViabilityAssaySchema.this.createDataTable();
+                    ExpDataTable dataTable = ViabilityAssaySchema.this.createDataTable();
+                    dataTable.setContainerFilter(ContainerFilter.EVERYTHING);
+                    return dataTable;
                 }
             });
 
@@ -215,7 +189,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 public TableInfo getLookupTableInfo()
                 {
                     ExpRunTable expRunTable = AssayService.get().createRunTable(_protocol, _provider, ViabilityAssaySchema.this.getUser(), ViabilityAssaySchema.this.getContainer());
-                    expRunTable.setContainerFilter(getContainerFilter());
+                    expRunTable.setContainerFilter(ContainerFilter.EVERYTHING);
                     return expRunTable;
                 }
             });
@@ -234,7 +208,15 @@ public class ViabilityAssaySchema extends AssaySchema
             copyProperties(viabilityCol, propertyMap.get(ViabilityAssayProvider.VIABILITY_PROPERTY_NAME));
             addVisible(viabilityCol);
 
-            ExprColumn originalCells = new ExprColumn(this, "OriginalCells", new SQLFragment("VolumeSum"), Types.DOUBLE);
+            ExprColumn recoveryCol = new SpecimenAggregateColumn(this, "Recovery",
+                    new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + "$z.OriginalCells IS NULL OR " +
+                                    ExprColumn.STR_TABLE_ALIAS + "$z.OriginalCells = 0 THEN NULL " +
+                                    "ELSE " + ExprColumn.STR_TABLE_ALIAS + ".ViableCells / " + ExprColumn.STR_TABLE_ALIAS + "$z.OriginalCells END)"),
+                    Types.DOUBLE);
+            copyProperties(recoveryCol, _resultsDomain.getPropertyByName(ViabilityAssayProvider.RECOVERY_PROPERTY_NAME));
+            addColumn(recoveryCol);
+
+            ExprColumn originalCells = new SpecimenAggregateColumn(this, "OriginalCells", Types.DOUBLE);
             copyProperties(originalCells, propertyMap.get(ViabilityAssayProvider.ORIGINAL_CELLS_PROPERTY_NAME));
             addVisible(originalCells);
 
@@ -270,17 +252,19 @@ public class ViabilityAssaySchema extends AssaySchema
                     new SQLFragment("(SELECT COUNT(RS.specimenid) FROM viability.resultspecimens RS WHERE " + ExprColumn.STR_TABLE_ALIAS + ".RowID = RS.ResultID)"), Types.INTEGER);
             addVisible(specimenCount);
 
-            ExprColumn specimenMatchCount = new ExprColumn(this, "SpecimenMatchCount", new SQLFragment("SpecimenMatchCount"), Types.INTEGER);
+            ExprColumn specimenMatchCount = new SpecimenAggregateColumn(this, "SpecimenMatchCount", Types.INTEGER);
             specimenMatchCount.setHidden(true);
             addColumn(specimenMatchCount);
 
-            ExprColumn specimenMatches = new ExprColumn(this, "SpecimenMatches", new SQLFragment("SpecimenMatches"), Types.VARCHAR);
+            ExprColumn specimenMatches = new SpecimenAggregateColumn(this, "SpecimenMatches", Types.VARCHAR);
             specimenMatches.setHidden(true);
             addColumn(specimenMatches);
 
             addResultDomainPropertiesColumn();
 
-            addProtocolContainerFilter();
+            SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
+            protocolIDFilter.add(_protocol.getRowId());
+            addCondition(protocolIDFilter,"ProtocolID");
         }
 
         private void addResultDomainPropertiesColumn()
@@ -290,6 +274,7 @@ public class ViabilityAssaySchema extends AssaySchema
 
             DomainProperty[] userResultDPs = ViabilityAssayProvider.getResultDomainUserProperties(_resultsDomain);
             QcAwarePropertyForeignKey fk = new QcAwarePropertyForeignKey(userResultDPs, this, ViabilityAssaySchema.this);
+            fk.setParentIsObjectId(true);
 
             Set<String> hiddenCols = new HashSet<String>();
             for (PropertyDescriptor pd : fk.getDefaultHiddenProperties())
@@ -306,31 +291,24 @@ public class ViabilityAssaySchema extends AssaySchema
             addColumn(colProperty);
         }
 
-        protected void addProtocolContainerFilter()
+        public class SpecimenAggregateColumn extends ExprColumn
         {
-            SQLFragment filter = new SQLFragment(
-                    "DataID IN (" +
-                            "SELECT d.RowId FROM " + ExperimentService.get().getTinfoData() + " d, " + ExperimentService.get().getTinfoExperimentRun() + " r " +
-                            "WHERE r.RowID = d.RunID " +
-                            "AND d.Container = ? " + // XXX: or is r.Container better?
-                            "AND r.ProtocolLSID = ? " +
-                            ")");
-            filter.add(ViabilityAssaySchema.this.getContainer().getId());
-            filter.add(_protocol.getLSID());
-            addCondition(filter);
-        }
-
-        private boolean _addedResultSpecimens = false;
-
-        @NotNull
-        @Override
-        public SQLFragment getFromSQL()
-        {
-            if (!_addedResultSpecimens)
+            public SpecimenAggregateColumn(TableInfo parent, String name, SQLFragment frag, int type, ColumnInfo... dependentColumns)
             {
-                _addedResultSpecimens = true;
-                
-                ResultSpecimensTable rs = new ResultSpecimensTable(this);
+                super(parent, name, frag, type, dependentColumns);
+            }
+
+            public SpecimenAggregateColumn(TableInfo parent, String name, int type, ColumnInfo... dependentColumns)
+            {
+                super(parent, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + "$z." + name), type, dependentColumns);
+            }
+
+            @Override
+            public void declareJoins(String parentAlias, Map<String, SQLFragment> map)
+            {
+                ResultSpecimensTable rs = new ResultSpecimensTable();
+                // 9024: propogate container filter
+                rs.setContainerFilter(getContainerFilter());
                 SimpleFilter filter = new SimpleFilter();
                 filter.addCondition("SpecimenID/Specimen/VolumeUnits", "CEL");
                 List<FieldKey> fields = new ArrayList<FieldKey>();
@@ -346,16 +324,11 @@ public class ViabilityAssaySchema extends AssaySchema
                 Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(rs, fields);
 
                 SQLFragment sub = QueryService.get().getSelectSQL(rs, columnMap.values(), filter, null, 0, 0);
-
-                SQLFragment fromSQL = new SQLFragment("SELECT * FROM (\n");
-                fromSQL.append(super.getFromSQL());
-                fromSQL.append("\n) AS x");
-                fromSQL.append("\nLEFT OUTER JOIN (\n");
-
-                fromSQL.append("SELECT\n");
-                fromSQL.append("  " + columnMap.get(resultId).getAlias() + " as VolumeResultID,\n");
-                fromSQL.append("  SUM(" + columnMap.get(volume).getAlias() + ") as VolumeSum,\n");
-                fromSQL.append("  COUNT(" + columnMap.get(globalUniqueId).getAlias() + ") as SpecimenMatchCount,\n");
+                SQLFragment groupFrag = new SQLFragment();
+                groupFrag.append("SELECT\n");
+                groupFrag.append("  " + columnMap.get(resultId).getAlias() + " as VolumeResultID,\n");
+                groupFrag.append("  SUM(" + columnMap.get(volume).getAlias() + ") as OriginalCells,\n");
+                groupFrag.append("  COUNT(" + columnMap.get(globalUniqueId).getAlias() + ") as SpecimenMatchCount,\n");
 
                 if (getDbSchema().getSqlDialect().isSqlServer())
                 {
@@ -363,28 +336,28 @@ public class ViabilityAssaySchema extends AssaySchema
 //                    fromSQL.append("  (REPLACE(");
 //                    fromSQL.append("(SELECT ").append(columnMap.get(globalUniqueId).getAlias()).append(" as [data()]");
 //                    fromSQL.append(" FOR XML PATH ('')), ' ', ',')) as SpecimenMatches\n");
-                    fromSQL.append(" NULL as SpecimenMatches\n");
+                    groupFrag.append(" NULL as SpecimenMatches\n");
                 }
                 else if (getDbSchema().getSqlDialect().isPostgreSQL())
                 {
-                    fromSQL.append("  array_to_string(viability.array_accum(").append(columnMap.get(globalUniqueId).getAlias()).append("), ',') as SpecimenMatches\n");
+                    groupFrag.append("  array_to_string(viability.array_accum(").append(columnMap.get(globalUniqueId).getAlias()).append("), ',') as SpecimenMatches\n");
                 }
                 else
                 {
                     throw new UnsupportedOperationException("SqlDialect not supported: " + getDbSchema().getSqlDialect().getClass().getSimpleName());
                 }
 
-                fromSQL.append("FROM (\n");
-                fromSQL.append(sub);
-                fromSQL.append(") y \nGROUP BY " + columnMap.get(resultId).getAlias());
-                fromSQL.append("\n) AS z");
-                fromSQL.append(" ON x.RowId = z.VolumeResultId");
+                groupFrag.append("FROM (\n");
+                groupFrag.append(sub);
+                groupFrag.append(") y \nGROUP BY " + columnMap.get(resultId).getAlias());
 
-                return fromSQL;
-            }
-            else
-            {
-                return super.getFromSQL();
+                SQLFragment frag = new SQLFragment();
+                frag.append("LEFT OUTER JOIN (\n");
+                frag.append(groupFrag);
+                String name = parentAlias + "$z";
+                frag.append(") AS ").append(name).append(" ON ").append(parentAlias).append(".RowId = ").append(name).append(".VolumeResultID");
+
+                map.put(name, frag);
             }
         }
     }
@@ -450,7 +423,7 @@ public class ViabilityAssaySchema extends AssaySchema
 
     public class ResultSpecimensTable extends ViabilityAssayTable
     {
-        public ResultSpecimensTable(final ResultsTable results)
+        public ResultSpecimensTable()
         {
             super(ViabilitySchema.getTableInfoResultSpecimens());
 
@@ -461,9 +434,9 @@ public class ViabilityAssaySchema extends AssaySchema
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    if (results != null)
-                        return results;
-                    return new RecoveryResultsTable();
+                    ResultsTable results = new ResultsTable();
+                    results.setContainerFilter(getContainerFilter());
+                    return results;
                 }
             });
 
@@ -475,6 +448,30 @@ public class ViabilityAssaySchema extends AssaySchema
 
             ColumnInfo indexCol = addVisible(wrapColumn(getRealTable().getColumn("SpecimenIndex")));
             indexCol.setKeyField(true);
+        }
+
+        @Override
+        protected void applyContainerFilter(ContainerFilter containerFilter)
+        {
+            getFilter().deleteConditions("ResultID");
+
+            SQLFragment filter = new SQLFragment(
+                    "ResultID IN (" +
+                        "SELECT result.RowId FROM " +
+                            ViabilitySchema.getTableInfoResults() + " result " +
+                        "WHERE result.ProtocolID = ? ");
+            filter.add(_protocol.getRowId());
+
+            Collection<String> ids = containerFilter.getIds(getContainer());
+            if (ids != null)
+            {
+                String questionMarks = StringUtils.repeat("?, ", ids.size());
+                filter.append("AND result.Container IN (" + questionMarks.substring(0, questionMarks.length() - 2) + ")");
+                filter.addAll(ids);
+            }
+
+            filter.append(")");
+            addCondition(filter, "ResultID");
         }
     }
 }

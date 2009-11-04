@@ -240,7 +240,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             DomainProperty[] samplePDs = sampleDomain.getProperties();
 
             PropertyDescriptor[] dataPDs = NabSchema.getExistingDataProperties(protocol);
-            CopyToStudyContext context = new CopyToStudyContext(protocol);
+            CopyToStudyContext context = new CopyToStudyContext(protocol, user);
 
             SimpleFilter filter = new SimpleFilter();
             filter.addInClause(getTableMetadata().getResultRowIdFieldKey().toString(), dataKeys.keySet());
@@ -296,7 +296,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                 }
                 dataMap.put("SourceLSID", run.getLSID());
                 dataMap.put(getTableMetadata().getResultRowIdFieldKey().toString(), publishKey.getDataId());
-                addStandardRunPublishProperties(user, study, tempTypes, dataMap, run, context);
+                addStandardRunPublishProperties(study, tempTypes, dataMap, run, context);
                 dataMaps.add(dataMap);
                 tempTypes = null;
             }

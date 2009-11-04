@@ -59,14 +59,6 @@ public class FlowQueryView extends QueryView
         super(schema, settings);
         setShadeAlternatingRows(true);
         setShowBorders(true);
-        setViewItemFilter(new ReportService.ItemFilter() {
-            public boolean accept(String type, String label)
-            {
-                if (RReport.TYPE.equals(type)) return true;
-                if (ChartQueryReport.TYPE.equals(type)) return true;
-                return false;
-            }
-        });
     }
 
 //    protected MenuButton createExportMenuButton(boolean exportAsWebPage)
