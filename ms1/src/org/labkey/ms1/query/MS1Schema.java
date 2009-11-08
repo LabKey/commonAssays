@@ -304,7 +304,7 @@ public class MS1Schema extends UserSchema
     public String getContainerInList()
     {
         Set<Container> containers = isRestrictContainer() ? new HashSet<Container>()
-                : ContainerManager.getAllChildren(getContainer(), getUser(), ACL.PERM_READ);
+                : ContainerManager.getAllChildren(getContainer(), getUser());
         containers.add(getContainer());
 
         StringBuilder filterList = new StringBuilder();

@@ -37,6 +37,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.*;
@@ -44,7 +45,9 @@ import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
-import org.labkey.ms2.pipeline.*;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
 import org.labkey.ms2.pipeline.sequest.SequestClientImpl;
@@ -3357,7 +3360,7 @@ public class MS2Controller extends SpringActionController
 
             if (!getUser().isAdministrator())
             {
-                runFilter.addInClause("Container", ContainerManager.getIds(getUser(), ACL.PERM_READ));
+                runFilter.addInClause("Container", ContainerManager.getIds(getUser(), ReadPermission.class));
             }
 
             gridView.setFilter(runFilter);

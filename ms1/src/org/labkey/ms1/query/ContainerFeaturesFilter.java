@@ -51,7 +51,7 @@ public class ContainerFeaturesFilter implements FeaturesFilter
     {
         if(includeDescendants)
         {
-            Set<Container> containers = ContainerManager.getAllChildren(container, user, ACL.PERM_READ);
+            Set<Container> containers = ContainerManager.getAllChildren(container, user);
             containers.add(container);
             _containers = new Container[containers.size()];
             containers.toArray(_containers);

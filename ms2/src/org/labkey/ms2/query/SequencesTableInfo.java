@@ -242,7 +242,7 @@ public class SequencesTableInfo extends FilteredTable
 
     public void addContainerCondition(Container c, User u, boolean includeSubfolders)
     {
-        Set<Container> containers = ContainerManager.getAllChildren(c, u, ACL.PERM_READ);
+        Set<Container> containers = ContainerManager.getAllChildren(c, u);
         SQLFragment sql = new SQLFragment();
         sql.append("SeqId IN (SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");

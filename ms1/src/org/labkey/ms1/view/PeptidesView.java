@@ -82,7 +82,7 @@ public class PeptidesView extends QueryView
 
         //add a clause to filter on container(s)
         Set<Container> containers = _searchSubfolders ?
-                ContainerManager.getAllChildren(getViewContext().getContainer(), getViewContext().getUser(), ACL.PERM_READ)
+                ContainerManager.getAllChildren(getViewContext().getContainer(), getViewContext().getUser())
                 : Collections.singleton(getViewContext().getContainer());
 
         StringBuilder sql = new StringBuilder("Fraction IN (SELECT Fraction FROM ms2.Fractions WHERE Run IN (SELECT Run FROM ms2.Runs WHERE Container IN (");

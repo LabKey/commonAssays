@@ -310,7 +310,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         sql.add(Boolean.FALSE);
         if (includeSubfolders)
         {
-            Set<Container> containers = ContainerManager.getAllChildren(c, u, ACL.PERM_READ);
+            Set<Container> containers = ContainerManager.getAllChildren(c, u);
             sql.append(ContainerManager.getIdsAsCsvList(new HashSet<Container>(containers)));
         }
         else
