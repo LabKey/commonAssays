@@ -1452,7 +1452,7 @@ public class MS2Manager
 
         public PeptideIndexCache()
         {
-            super(getSchema().getScope(), CACHE_SIZE, TIME_OUT);
+            super(getSchema().getScope(), CACHE_SIZE, TIME_OUT, "Peptide Index");
         }
     }
 

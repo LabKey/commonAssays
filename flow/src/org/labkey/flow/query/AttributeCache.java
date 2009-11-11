@@ -33,7 +33,7 @@ import org.labkey.flow.analysis.web.GraphSpec;
 abstract public class AttributeCache<T>
 {
     static final private Logger _log = Logger.getLogger(AttributeCache.class);
-    static final private LimitedCacheMap<CacheKey, Map.Entry<Integer, String>[]> _cache = new LimitedCacheMap(200, 200);
+    static final private LimitedCacheMap<CacheKey, Map.Entry<Integer, String>[]> _cache = new LimitedCacheMap<CacheKey, Map.Entry<Integer, String>[]>(200, 200, "Flow AttributeCache");
     static long _transactionCount;
     static private Container _lastContainerInvalidated;
     static private class CacheKey

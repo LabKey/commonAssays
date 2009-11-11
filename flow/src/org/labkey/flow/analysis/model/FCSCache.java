@@ -33,7 +33,7 @@ public class FCSCache
         TTLCacheMap _map;
         public AbstractCacheMap(int size)
             {
-            _map = new TTLCacheMap(size);
+            _map = new TTLCacheMap(size, "FCS cache");
             }
         abstract protected V loadObject(K key) throws IOException;
 
