@@ -76,7 +76,15 @@ public class FlowQueryView extends QueryView
     {
         if (!getViewContext().hasPermission(ACL.PERM_DELETE))
             return false;
-        TableInfo mainTable = getQueryDef().getMainTable();
+        TableInfo mainTable = null;
+        try
+        {
+            mainTable = getQueryDef().getMainTable();
+        }
+        catch (java.lang.IllegalArgumentException x)
+        {
+             // see bug 9119
+        }
         if (mainTable instanceof ExpRunTable)
         {
             return true;

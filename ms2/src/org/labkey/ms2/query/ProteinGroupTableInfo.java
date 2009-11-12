@@ -214,7 +214,7 @@ public class ProteinGroupTableInfo extends FilteredTable
                     {
                         SequencesTableInfo result = new SequencesTableInfo(null, _schema);
                         SQLFragment sql = new SQLFragment();
-                        sql.append("(SELECT Min(LookupString) FROM ");
+                        sql.append("SELECT LookupString FROM ");
                         sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
                         sql.append(", ");
                         sql.append(MS2Manager.getTableInfoRuns(), "r");
@@ -224,6 +224,10 @@ public class ProteinGroupTableInfo extends FilteredTable
                         sql.append(ExprColumn.STR_TABLE_ALIAS);
                         sql.append(".SeqId AND fs.FastaId = r.FastaId AND r.Run = ppf.Run AND ppf.RowId = ");
                         sql.append(ProteinGroupTableInfo.this.getColumn("ProteinProphetFileId").getValueSql());
+                        sql.append(" ORDER BY LookupString");
+                        getSchema().getSqlDialect().limitRows(sql, 1);
+                        // Wrap the whole thing in parenthesis after the LIMIT/TOP has been applied
+                        sql.insert(0, "(");
                         sql.append(")");
                         ExprColumn col = new ExprColumn(result, "DatabaseSequenceName", sql, Types.VARCHAR);
 

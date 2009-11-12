@@ -75,12 +75,16 @@ public class ViabilityAssaySchema extends AssaySchema
 
     public TableInfo createTable(String name)
     {
-        assert name.startsWith(_protocol.getName() + " ");
-        name = name.substring((_protocol.getName() + " ").length());
-//        if (name.equals(UserTables.Results.name()))
-//            return createResultsTable();
-        if (name.equals(UserTables.ResultSpecimens.name()))
-            return createResultSpecimensTable();
+        String lname = name.toLowerCase();
+        String protocolPrefix = _protocol.getName().toLowerCase() + " ";
+        if (lname.startsWith(protocolPrefix))
+        {
+            name = name.substring(protocolPrefix.length());
+    //        if (name.equalsIgnoreCase(UserTables.Results.name()))
+    //            return createResultsTable();
+            if (name.equalsIgnoreCase(UserTables.ResultSpecimens.name()))
+                return createResultSpecimensTable();
+        }
         return null;
     }
 
@@ -435,7 +439,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 public TableInfo getLookupTableInfo()
                 {
                     ResultsTable results = new ResultsTable();
-                    results.setContainerFilter(getContainerFilter());
+                    results.setContainerFilter(ContainerFilter.EVERYTHING);
                     return results;
                 }
             });

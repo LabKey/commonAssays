@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 public class ViabilityModule extends DefaultModule
 {
     public static final String NAME = "Viability";
-    private static final double VERSION = 0.5;
+    private static final double VERSION = 9.29;
 
     public String getName()
     {

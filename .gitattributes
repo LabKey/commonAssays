@@ -1275,11 +1275,13 @@ viability/Viability.iml -text
 viability/build.xml -text
 viability/module.properties -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.00-0.10.sql -text
+viability/resources/schemas/dbscripts/postgresql/viability-0.00-9.29.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.10-0.20.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.20-0.30.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.30-0.40.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.40-0.50.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.00-0.10.sql -text
+viability/resources/schemas/dbscripts/sqlserver/viability-0.00-9.29.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.10-0.20.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.20-0.30.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.30-0.40.sql -text

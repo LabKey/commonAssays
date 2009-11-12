@@ -61,18 +61,22 @@ public class LuminexSchema extends AssaySchema
 
     public TableInfo createTable(String name)
     {
-        assert name.startsWith(_protocol.getName() + " ");
-        name = name.substring((_protocol.getName() + " ").length());
-        if (ANALYTE_TABLE_NAME.equalsIgnoreCase(name))
+        String lname = name.toLowerCase();
+        String protocolPrefix = _protocol.getName().toLowerCase() + " ";
+        if (lname.startsWith(protocolPrefix))
         {
-            return createAnalyteTable(true);
+            name = name.substring(protocolPrefix.length());
+            if (ANALYTE_TABLE_NAME.equalsIgnoreCase(name))
+            {
+                return createAnalyteTable(true);
+            }
+            /*
+            else if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
+            {
+                return createDataRowTable();
+            }
+            */
         }
-        /*
-        else if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
-        {
-            return createDataRowTable();
-        }
-        */
         return null;
     }
 
