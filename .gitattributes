@@ -184,6 +184,7 @@ flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/graph/Handle.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/graph/TransparentEventImage.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/util/LogAxisFunction.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/util/RangeFunction.java -text
+flow/gwtsrc/org/labkey/flow/gateeditor/client/util/SimpleLogAxisFunction.java -text
 flow/module.properties -text
 flow/resources/schemas/dbscripts/postgresql/flow-0.00-8.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-2.10-2.20.sql -text

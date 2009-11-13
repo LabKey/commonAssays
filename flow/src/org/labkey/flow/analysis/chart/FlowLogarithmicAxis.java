@@ -20,6 +20,8 @@ import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.data.Range;
 import org.labkey.flow.gateeditor.client.util.LogAxisFunction;
+import org.labkey.flow.gateeditor.client.util.SimpleLogAxisFunction;
+import org.labkey.flow.gateeditor.client.util.RangeFunction;
 
 import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;
@@ -30,7 +32,9 @@ import java.text.ParsePosition;
 public class FlowLogarithmicAxis extends LogarithmicAxis
 {
     static public final int LOG_LIN_SWITCH = 50;
-    static LogAxisFunction fn = new LogAxisFunction(LOG_LIN_SWITCH);
+    static LogAxisFunction loglinFN = new LogAxisFunction(LOG_LIN_SWITCH);
+    static SimpleLogAxisFunction simpleFN = new SimpleLogAxisFunction();
+    final RangeFunction fn;
 
     private class TickFormat extends NumberFormat
     {
@@ -51,12 +55,15 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
 
     }
 
-    public FlowLogarithmicAxis(String label)
+
+    public FlowLogarithmicAxis(String label, boolean simpleLog)
     {
         super(label);
         setAllowNegativesFlag(true);
         setNumberFormatOverride(new TickFormat());
+        fn = simpleLog ? simpleFN : loglinFN;
     }
+    
 
     protected String makeTickLabel(double val)
     {
@@ -75,7 +82,7 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
             tester = tester / 10;
             power++;
         }
-        if (power < 2)
+        if (power < 1 || fn == loglinFN && power < 2)
             return "";
         if (tester == 1)
             return (neg ? "-" : "") + "10^" + power;
@@ -84,13 +91,13 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
     }
 
 
-    static public double s_adjustedLog10(double val)
+    public double s_adjustedLog10(double val)
     {
         return fn.compute(val);
     }
 
 
-    static public double s_adjustedPow10(double val)
+    public double s_adjustedPow10(double val)
     {
         return fn.invert(val);
     }

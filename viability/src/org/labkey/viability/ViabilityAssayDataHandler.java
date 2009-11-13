@@ -109,35 +109,42 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
                         sep = poolID.lastIndexOf('V');
                     if (sep == -1)
                         sep = poolID.lastIndexOf('v');
+
+                    boolean modified = false;
+                    String ptid = poolID;
+                    String visit = null;
                     if (sep > 0)
                     {
-                        boolean modified = false;
-                        String ptid = poolID.substring(0, sep).trim();
-                        String visit = poolID.substring(sep+1).trim();
-                        if (ptid.length() > 0)
+                        ptid = poolID.substring(0, sep).trim();
+                        int dot = ptid.lastIndexOf('.');
+                        if (dot > 0)
+                            ptid = ptid.substring(0, dot).trim();
+                        visit = poolID.substring(sep+1).trim();
+                    }
+
+                    if (ptid != null && ptid.length() > 0)
+                    {
+                        row = new HashMap<String, Object>(row);
+                        row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, ptid);
+                        modified = true;
+                    }
+
+                    if (visit != null && visit.length() > 0)
+                    {
+                        try
                         {
-                            row = new HashMap<String, Object>(row);
-                            row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, ptid);
+                            Double visitNum = Double.parseDouble(visit);
+                            row.put(AbstractAssayProvider.VISITID_PROPERTY_NAME, visitNum);
                             modified = true;
                         }
-
-                        if (visit.length() > 0)
+                        catch (NumberFormatException nfe)
                         {
-                            try
-                            {
-                                Double visitNum = Double.parseDouble(visit);
-                                row.put(AbstractAssayProvider.VISITID_PROPERTY_NAME, visitNum);
-                                modified = true;
-                            }
-                            catch (NumberFormatException nfe)
-                            {
-                                // ignore
-                            }
+                            // ignore
                         }
-
-                        if (modified)
-                            it.set(row);
                     }
+
+                    if (modified)
+                        it.set(row);
                 }
             }
 

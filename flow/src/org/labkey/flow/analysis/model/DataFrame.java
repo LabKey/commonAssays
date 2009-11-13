@@ -85,6 +85,7 @@ public class DataFrame
         {
             String name = field.getName();
             fieldsMap.put(name, field);
+            fieldsMap.put(name, field);
             name = canonicalFieldName(name);
             if (!fieldsMap.containsKey(name))
                 fieldsMap.put(name, field);
@@ -324,6 +325,9 @@ public class DataFrame
         private int _range;
         private ScalingFunction _scalingFunction;
 
+        // for FlowJo compatibility use simple log axis (for uncompensated integer mode data)
+        private boolean _simpleLogAxis = false;
+
         public Field(int index, String name, int range)
         {
             _index = index;
@@ -332,16 +336,19 @@ public class DataFrame
             _range = range;
         }
 
+        // propagates _simpleLogAxis, used by subsetting code
         public Field(int index, Field other, ScalingFunction scalingFunction)
         {
             _index = index;
             _origIndex = other._origIndex;
             _name = other.getName();
             _range = other._range;
+            _simpleLogAxis = other._simpleLogAxis;
             _scalingFunction = scalingFunction;
             _description = other.getDescription();
         }
 
+        // does not propagate _simpleLogAxis, used by compensation code
         public Field(int index, Field other, String newName)
         {
             _index = index;
@@ -402,7 +409,17 @@ public class DataFrame
 		{
 			return _name + "[" + _index + "]";
 		}
-	}
+
+        public boolean isSimpleLogAxis()
+        {
+            return _simpleLogAxis;
+        }
+
+        public void setSimpleLogAxis(boolean simpleLogAxis)
+        {
+            _simpleLogAxis = simpleLogAxis;
+        }
+    }
 
 
 }

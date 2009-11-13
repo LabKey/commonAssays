@@ -25,6 +25,7 @@ import org.jfree.data.Range;
 import org.jfree.data.xy.XYDataset;
 import org.labkey.api.view.Stats;
 import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.gateeditor.client.util.RangeFunction;
 
 import java.awt.*;
 
@@ -36,15 +37,6 @@ public class PlotFactory
     public static int MAX_HISTOGRAM_BUCKETS = Integer.getInteger("flow.maxchannels", 512).intValue();
     public static final Color COLOR_GATE = Color.RED;
 
-    static public double adjustedLog10(double value)
-    {
-        return FlowLogarithmicAxis.s_adjustedLog10(value);
-    }
-
-    static public double adjustedPow10(double value)
-    {
-        return FlowLogarithmicAxis.s_adjustedPow10(value);
-    }
 
     /**
      * Return a set of buckets usable for binning a dataset.
@@ -54,19 +46,21 @@ public class PlotFactory
      * @param bucketCount The maximum number of buckets
      * @return
      */
-    static public double[] getPossibleValues(double minValue, double maxValue, boolean fLogarithmic, int bucketCount)
+    static public double[] getPossibleValues(double minValue, double maxValue, boolean fLogarithmic, boolean simpleLog, int bucketCount)
     {
         int cBuckets = (int) Math.min(maxValue - minValue, bucketCount);
         double[] ret = new double[cBuckets];
 
         int i = 0;
 
+        RangeFunction fn = !fLogarithmic ? null : simpleLog ? FlowLogarithmicAxis.simpleFN : FlowLogarithmicAxis.loglinFN;
+        
         for (; i < cBuckets; i ++)
         {
             if (fLogarithmic)
             {
-                double x = (adjustedLog10(maxValue) - adjustedLog10(minValue)) * i / cBuckets + adjustedLog10(minValue);
-                ret[i] = adjustedPow10(x);
+                double x = (fn.compute(maxValue) - fn.compute(minValue)) * i / cBuckets + fn.compute(minValue);
+                ret[i] = fn.invert(x);
             }
             else
             {
@@ -75,6 +69,7 @@ public class PlotFactory
         }
         return ret;
     }
+
 
     static double[] getPossibleValues(Subset subset, DataFrame.Field field, int maxCount)
     {
@@ -86,8 +81,11 @@ public class PlotFactory
             max = stats.getMax();
             min = stats.getMin();
         }
-        return getPossibleValues(min, max, displayLogarithmic(subset, field), maxCount);
+        boolean logarithmic = displayLogarithmic(subset, field);
+        boolean simpleLog = logarithmic && field.isSimpleLogAxis();
+        return getPossibleValues(min, max, logarithmic, simpleLog, maxCount);
     }
+
 
     static protected boolean displayLogarithmic(Subset subset, DataFrame.Field field)
     {
@@ -105,12 +103,14 @@ public class PlotFactory
         return true;
     }
 
+
     static private ValueAxis getValueAxis(Subset subset, String name, DataFrame.Field field)
     {
         if (!displayLogarithmic(subset, field))
             return new NumberAxis(name);
-        return new FlowLogarithmicAxis(name);
+        return new FlowLogarithmicAxis(name, field.isSimpleLogAxis());
     }
+
 
     static private DataFrame.Field getField(DataFrame data, String name) throws FlowException
     {
@@ -208,7 +208,7 @@ public class PlotFactory
 
         if (displayLogarithmic(subset, field))
         {
-            xAxis = new FlowLogarithmicAxis(getLabel(subset, axis));
+            xAxis = new FlowLogarithmicAxis(getLabel(subset, axis), field.isSimpleLogAxis());
         }
         else
         {

@@ -157,6 +157,12 @@ public class FCSHeader
 
     protected DataFrame createDataFrame(float[][] data)
     {
+        // by default we use either linear, or a modified log
+        // to be compatible with flowjo we use simple log for non-compensated integer data
+        // we're just going to assume the fcs data is non-compensated
+        boolean datatypeI = "I".equals(getKeyword("$DATATYPE"));
+        boolean facsCalibur = "FACSCalibur".equals(getKeyword("$CYT"));
+
         int count = getParameterCount();
         DataFrame.Field[] fields = new DataFrame.Field[count];
         for (int i = 0; i < count; i++)
@@ -170,10 +176,13 @@ public class FCSHeader
             DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
             f.setDescription(getKeyword(key + "S"));
             f.setScalingFunction(ScalingFunction.makeFunction(decade, scale, range));
+            if (datatypeI && facsCalibur && 0 != decade)
+                f.setSimpleLogAxis(true);
             fields[i] = f;
         }
         return new DataFrame(fields, data);
     }
+
 
     public DataFrame createEmptyDataFrame()
     {
