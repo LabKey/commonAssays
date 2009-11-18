@@ -30,6 +30,7 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.util.ReturnURLString;
 import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.pipeline.PipelineService;
@@ -538,7 +539,7 @@ public class WellController extends SpringFlowController<WellController.Action>
 
     public static class UpdateKeywordsForm
     {
-        String returnURL = "begin.view";
+        ReturnURLString returnURL = new ReturnURLString("begin.view");
         public String keyword = null;
         public String[] from = new String[0];
         public String[] to = new String[0];
@@ -564,7 +565,7 @@ public class WellController extends SpringFlowController<WellController.Action>
             this.to = to;
         }
 
-        public void setReturnURL(String url)
+        public void setReturnURL(ReturnURLString url)
         {
             this.returnURL = url;
         }

@@ -4985,7 +4985,7 @@ public class MS2Controller extends SpringActionController
         String columns;
         String proteinColumns;
         String proteinGroupingId;
-        String returnUrl;
+        ReturnURLString returnUrl;
         ArrayList<String> errors = new ArrayList<String>();
 
         private int toInt(String s, String field)
@@ -5109,12 +5109,12 @@ public class MS2Controller extends SpringActionController
                 return getShowListURL(c);
         }
 
-        public String getReturnUrl()
+        public ReturnURLString getReturnUrl()
         {
             return returnUrl;
         }
 
-        public void setReturnUrl(String returnUrl)
+        public void setReturnUrl(ReturnURLString returnUrl)
         {
             this.returnUrl = returnUrl;
         }
