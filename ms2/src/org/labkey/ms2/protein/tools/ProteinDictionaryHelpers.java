@@ -23,7 +23,7 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.CloseableIterator;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.api.webdav.ModuleStaticResolverImpl;
-import org.labkey.api.webdav.WebdavResolver;
+import org.labkey.api.webdav.Resource;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.ProteinManager;
@@ -147,7 +147,7 @@ public class ProteinDictionaryHelpers
 
     private static InputStream getSProtOrgMap() throws IOException
     {
-        WebdavResolver.Resource r = ModuleStaticResolverImpl.get().lookup(FILE);
+        Resource r = ModuleStaticResolverImpl.get().lookup(FILE);
         if (null != r)
         {
             InputStream is = r.getInputStream(null);
