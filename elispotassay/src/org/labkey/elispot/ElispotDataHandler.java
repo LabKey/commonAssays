@@ -18,15 +18,14 @@ package org.labkey.elispot;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.security.User;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 
 import java.io.File;
@@ -120,12 +119,17 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         return new ElispotFileParser(data, dataFile, info, log, context);
     }
 
+    public void importTransformDataMap(ExpData data, User user, ExpRun run, ExpProtocol protocol, AssayProvider provider, List<Map<String, Object>> dataMap) throws ExperimentException
+    {
+        importData(data, run, protocol, dataMap);
+    }
+
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
 
         Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
-        datas.put(ElispotTsvDataHandler.ELISPOT_TSV_DATA_TYPE, parser.getResults());
+        datas.put(ELISPOT_DATA_TYPE, parser.getResults());
 
         return datas;
     }

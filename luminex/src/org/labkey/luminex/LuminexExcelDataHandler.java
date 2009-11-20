@@ -23,16 +23,15 @@ import jxl.read.biff.BiffException;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.exp.*;
-import org.labkey.api.exp.api.DataType;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.security.User;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -46,6 +45,7 @@ import java.util.*;
  */
 public class LuminexExcelDataHandler extends LuminexDataHandler implements TransformDataHandler
 {
+    public static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
     public static final DataType LUMINEX_DATA_TYPE = new DataType("LuminexDataFile");
 
     public Map<DataType, List<Map<String, Object>>> loadFileData(ExpProtocol expProtocol, Domain dataDomain, File dataFile) throws IOException, ExperimentException
@@ -63,7 +63,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                 dataRows.add(serializeDataRow(entry.getKey(), dataRow));
             }
         }
-        datas.put(LuminexTsvDataHandler.LUMINEX_TSV_DATA_TYPE, dataRows);
+        datas.put(LUMINEX_DATA_TYPE, dataRows);
         return datas;
     }
 
@@ -82,8 +82,35 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                 dataRows.add(serializeDataRow(entry.getKey(), dataRow));
             }
         }
-        datas.put(LuminexTsvDataHandler.LUMINEX_TSV_DATA_TYPE, dataRows);
+        datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, dataRows);
         return datas;
+    }
+
+    public void importTransformDataMap(ExpData data, User user, ExpRun run, ExpProtocol protocol, AssayProvider provider, List<Map<String, Object>> dataMap) throws ExperimentException
+    {
+        ObjectFactory<Analyte> analyteFactory = ObjectFactory.Registry.getFactory(Analyte.class);
+        if (null == analyteFactory)
+            throw new ExperimentException("Cound not find a matching object factory.");
+
+        ObjectFactory<LuminexDataRow> rowFactory = ObjectFactory.Registry.getFactory(LuminexDataRow.class);
+        if (null == rowFactory)
+            throw new ExperimentException("Cound not find a matching object factory.");
+
+        Map<Analyte, List<LuminexDataRow>> sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
+        for (Map<String, Object> row : dataMap)
+        {
+            Analyte analyte = analyteFactory.fromMap(row);
+            LuminexDataRow dataRow = rowFactory.fromMap(row);
+
+            if (!sheets.containsKey(analyte))
+            {
+                sheets.put(analyte, new ArrayList<LuminexDataRow>());
+            }
+            sheets.get(analyte).add(dataRow);
+        }
+
+        Map<String, Object> excelProps = Collections.emptyMap();
+        importData(data, run, user, null, sheets, excelProps);
     }
 
     protected Map<String, Object> serializeDataRow(Analyte analyte, LuminexDataRow dataRow)
@@ -112,6 +139,10 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
     {
         Lsid lsid = new Lsid(data.getLSID());
         if (LUMINEX_DATA_TYPE.matches(lsid))
+        {
+            return Priority.HIGH;
+        }
+        if (LUMINEX_TRANSFORMED_DATA_TYPE.matches(lsid))
         {
             return Priority.HIGH;
         }

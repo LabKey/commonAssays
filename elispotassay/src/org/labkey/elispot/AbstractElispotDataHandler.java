@@ -60,14 +60,19 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
+        ExpRun run = data.getRun();
+        ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
+
+        ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
+        importData(data, run, protocol, parser.getResults());
+    }
+
+    protected void importData(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> inputData) throws ExperimentException
+    {
         try {
-            ExpRun run = data.getRun();
-            ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
             Container container = data.getContainer();
 
-            ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
-
-            for (Map<String, Object> row : parser.getResults())
+            for (Map<String, Object> row : inputData)
             {
                 if (!row.containsKey(DATA_ROW_LSID_PROPERTY))
                     throw new ExperimentException("The row must contain a value for the data row LSID : " + DATA_ROW_LSID_PROPERTY);

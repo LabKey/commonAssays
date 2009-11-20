@@ -16,26 +16,26 @@
 
 package org.labkey.viability;
 
-import org.labkey.api.study.assay.*;
-import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.JspView;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HtmlView;
-import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.data.AbstractTableInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
-import org.labkey.api.exp.PropertyType;
-import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.util.Pair;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.security.User;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.qc.DataExchangeHandler;
-import org.labkey.api.qc.TsvDataExchangeHandler;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.security.User;
+import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.assay.*;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
 
 import java.util.*;
 
@@ -308,7 +308,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     @Override
     public DataExchangeHandler getDataExchangeHandler()
     {
-        return new TsvDataExchangeHandler();
+        return new ViabilityDataExchangeHandler();
     }
 
     @Override
@@ -316,5 +316,4 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     {
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, ViabilityAssayUploadWizardAction.class);
     }
-
 }

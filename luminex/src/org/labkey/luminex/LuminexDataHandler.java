@@ -68,14 +68,21 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         {
             throw new ExperimentException("Could not load Luminex file " + dataFile.getAbsolutePath() + " because it is not owned by an experiment run");
         }
+
+        LuminexDataFileParser parser = getDataFileParser(expRun.getProtocol(), dataFile);
+        importData(data, expRun, info.getUser(), log, parser.getSheets(), parser.getExcelRunProps());
+    }
+
+    public void importData(ExpData data, ExpRun run, User user, Logger log, Map<Analyte, List<LuminexDataRow>> inputData, Map<String, Object> excelRunProps) throws ExperimentException
+    {
         try
         {
-            ExpProtocol expProtocol = expRun.getProtocol();
+            ExpProtocol expProtocol = run.getProtocol();
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(expProtocol.getRowId());
             String analyteDomainURI = AbstractAssayProvider.getDomainURIForPrefix(expProtocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
             String excelRunDomainURI = AbstractAssayProvider.getDomainURIForPrefix(expProtocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
-            Domain analyteDomain = PropertyService.get().getDomain(info.getContainer(), analyteDomainURI);
-            Domain excelRunDomain = PropertyService.get().getDomain(info.getContainer(), excelRunDomainURI);
+            Domain analyteDomain = PropertyService.get().getDomain(run.getContainer(), analyteDomainURI);
+            Domain excelRunDomain = PropertyService.get().getDomain(run.getContainer(), excelRunDomainURI);
 
             if (analyteDomain == null)
             {
@@ -86,13 +93,13 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 throw new ExperimentException("Could not find Excel run domain for protocol with LSID " + protocol.getLSID());
             }
 
-            PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), info.getContainer());
-            importData(excelRunColumns, expRun, info.getContainer(), data, info.getUser(), dataFile);
+            PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), run.getContainer());
+            _importData(excelRunColumns, run, run.getContainer(), data, user, inputData, excelRunProps);
         }
         catch (SQLException e)
         {
-            log.error("Failed to load from data file " + dataFile.getAbsolutePath(), e);
-            throw new ExperimentException("Failed to load from data file " + dataFile.getAbsolutePath() + "(" + e.toString() + ")", e);
+            log.error("Failed to load from data file " + data.getFile().getAbsolutePath(), e);
+            throw new ExperimentException("Failed to load from data file " + data.getFile().getAbsolutePath() + "(" + e.toString() + ")", e);
         }
     }
 
@@ -386,11 +393,10 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
      * @param container
      * @param data
      * @param user
-     * @param dataFile
      * @throws SQLException
      * @throws ExperimentException
      */
-    private void importData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, File dataFile) throws SQLException, ExperimentException
+    private void _importData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, Map<Analyte, List<LuminexDataRow>> inputData, Map<String, Object> excelRunProps) throws SQLException, ExperimentException
     {
         boolean ownTransaction = !ExperimentService.get().isTransactionActive();
         if (ownTransaction)
@@ -432,9 +438,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 }
             }
 
-            LuminexDataFileParser parser = getDataFileParser(protocol, dataFile);
-
-            for (Map.Entry<Analyte, List<LuminexDataRow>> sheet : parser.getSheets().entrySet())
+            for (Map.Entry<Analyte, List<LuminexDataRow>> sheet : inputData.entrySet())
             {
                 Analyte analyte = sheet.getKey();
 
@@ -472,7 +476,6 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 OntologyManager.deleteProperty(expRun.getLSID(), excelRunColumn.getPropertyURI(), container, protocol.getContainer());
             }
 
-            Map<String, Object> excelRunProps = parser.getExcelRunProps();
             List<Map<String, Object>> excelRunPropsList = new ArrayList<Map<String, Object>>();
             excelRunPropsList.add(excelRunProps);
             OntologyManager.insertTabDelimited(container, objectId, new OntologyManager.ImportHelper()
@@ -774,13 +777,13 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
     {
         try
         {
-            Object[] ids = new Object[data.size()];
-            for (int i = 0; i < data.size(); i++)
+            for (ExpData expData : data)
             {
-                ids[i] = data.get(0).getRowId();
+                Object[] ids = new Object[]{expData.getRowId()};
+
+                Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoDataRow() + " WHERE DataId = ?", ids);
+                Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoAnalytes() + " WHERE DataId = ?", ids);
             }
-            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoDataRow() + " WHERE DataId = ?", ids);
-            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoAnalytes() + " WHERE DataId = ?", ids);
         }
         catch (SQLException e)
         {

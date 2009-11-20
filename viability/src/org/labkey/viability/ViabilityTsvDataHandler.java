@@ -63,7 +63,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
         return null;
     }
 
-    protected Parser getParser(Domain runDomain, Domain resultsDomain, File dataFile)
+    public Parser getParser(Domain runDomain, Domain resultsDomain, File dataFile)
     {
         return new Parser(runDomain, resultsDomain, dataFile);
     }

@@ -22,6 +22,7 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.reader.ColumnDescriptor;
@@ -32,6 +33,7 @@ import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.security.User;
 import org.labkey.microarray.MicroarrayModule;
 import org.apache.log4j.Logger;
 
@@ -63,6 +65,11 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
     protected boolean shouldAddInputMaterials()
     {
         return false;
+    }
+
+    public void importTransformDataMap(ExpData data, User user, ExpRun run, ExpProtocol protocol, AssayProvider provider, List<Map<String, Object>> dataMap) throws ExperimentException
+    {
+        importRows(data, user, run, protocol, provider, dataMap);
     }
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException

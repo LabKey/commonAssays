@@ -118,7 +118,6 @@ elispotassay/src/org/labkey/elispot/ElispotModule.java -text
 elispotassay/src/org/labkey/elispot/ElispotPlateTypeHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotRunUploadForm.java -text
 elispotassay/src/org/labkey/elispot/ElispotSchema.java -text
-elispotassay/src/org/labkey/elispot/ElispotTsvDataHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotUploadWizardAction.java -text
 elispotassay/src/org/labkey/elispot/PlateAntigenPropertyHelper.java -text
 elispotassay/src/org/labkey/elispot/plate/ElispotPlateReaderService.java -text
@@ -536,12 +535,10 @@ luminex/src/org/labkey/luminex/LuminexDataHandler.java -text
 luminex/src/org/labkey/luminex/LuminexDataRow.java -text
 luminex/src/org/labkey/luminex/LuminexDataTable.java -text
 luminex/src/org/labkey/luminex/LuminexExcelDataHandler.java -text
-luminex/src/org/labkey/luminex/LuminexExcelRunPropsDataHandler.java -text
 luminex/src/org/labkey/luminex/LuminexModule.java -text
 luminex/src/org/labkey/luminex/LuminexProtocolUpgrader.java -text
 luminex/src/org/labkey/luminex/LuminexRunUploadForm.java -text
 luminex/src/org/labkey/luminex/LuminexSchema.java -text
-luminex/src/org/labkey/luminex/LuminexTsvDataHandler.java -text
 luminex/src/org/labkey/luminex/LuminexUploadWizardAction.java -text
 luminex/src/org/labkey/luminex/LuminexWell.java -text
 microarray/gwtsrc/org/labkey/microarray/designer/MicroarrayAssayDesigner.gwt.xml -text
@@ -1248,7 +1245,6 @@ nab/src/org/labkey/nab/NabMaterialKey.java -text
 nab/src/org/labkey/nab/NabModule.java -text
 nab/src/org/labkey/nab/NabPlateTypeHandler.java -text
 nab/src/org/labkey/nab/NabRunUploadForm.java -text
-nab/src/org/labkey/nab/NabTsvDataHandler.java -text
 nab/src/org/labkey/nab/NabUpgradeCode.java -text
 nab/src/org/labkey/nab/NabUploadWizardAction.java -text
 nab/src/org/labkey/nab/RunMetadata.java -text
@@ -1296,6 +1292,7 @@ viability/src/org/labkey/viability/ViabilityAssaySchema.java -text
 viability/src/org/labkey/viability/ViabilityAssayUploadWizardAction.java -text
 viability/src/org/labkey/viability/ViabilityContainerListener.java -text
 viability/src/org/labkey/viability/ViabilityController.java -text
+viability/src/org/labkey/viability/ViabilityDataExchangeHandler.java -text
 viability/src/org/labkey/viability/ViabilityManager.java -text
 viability/src/org/labkey/viability/ViabilityModule.java -text
 viability/src/org/labkey/viability/ViabilityResult.java -text

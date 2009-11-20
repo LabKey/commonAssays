@@ -18,6 +18,8 @@ package org.labkey.viability;
 
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
@@ -28,7 +30,9 @@ import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.study.assay.AssayUploadXarContext;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.api.security.User;
 import org.apache.commons.beanutils.Converter;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.log4j.Logger;
@@ -67,7 +71,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
         return null;
     }
 
-    protected Parser getParser(Domain runDomain, Domain resultsDomain, File dataFile)
+    public Parser getParser(Domain runDomain, Domain resultsDomain, File dataFile)
     {
         return new Parser(runDomain, resultsDomain, dataFile);
     }
@@ -223,6 +227,11 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
                 if (reader != null) { try { reader.close(); } catch (IOException ioe) { } }
             }
         }
+    }
+
+    public void importTransformDataMap(ExpData data, User user, ExpRun run, ExpProtocol protocol, AssayProvider provider, List<Map<String, Object>> dataMap) throws ExperimentException
+    {
+        importRows(data, user, run, protocol, provider, dataMap);
     }
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException

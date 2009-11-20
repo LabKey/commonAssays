@@ -180,7 +180,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
 
     }
 
-    protected abstract Parser getParser(Domain runDomain, Domain resultsDomain, File dataFile);
+    public abstract Parser getParser(Domain runDomain, Domain resultsDomain, File dataFile);
 
     protected boolean allowEmptyData()
     {

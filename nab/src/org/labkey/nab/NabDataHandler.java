@@ -31,6 +31,7 @@ import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ViewBackgroundInfo;
 
@@ -47,6 +48,7 @@ import java.util.*;
 public class NabDataHandler extends AbstractNabDataHandler implements TransformDataHandler
 {
     public static final DataType NAB_DATA_TYPE = new DataType("AssayRunNabData");
+    public static final DataType NAB_TRANSFORMED_DATA_TYPE = new DataType("AssayRunNabTransformedData"); // a marker data type
     private static final int START_ROW = 6; //0 based, row 7 inthe workshet
     private static final int START_COL = 0;
     private static final int PLATE_WIDTH = 12;
@@ -137,12 +139,17 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
         return new NabExcelParser(data, dataFile, info, log, context);
     }
 
+    public void importTransformDataMap(ExpData data, User user, ExpRun run, ExpProtocol protocol, AssayProvider provider, List<Map<String, Object>> dataMap) throws ExperimentException
+    {
+        importRows(data, run, protocol, dataMap);
+    }
+
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         NabDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
 
         Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
-        datas.put(NabTsvDataHandler.NAB_TSV_DATA_TYPE, parser.getResults());
+        datas.put(NAB_TRANSFORMED_DATA_TYPE, parser.getResults());
 
         return datas;
     }

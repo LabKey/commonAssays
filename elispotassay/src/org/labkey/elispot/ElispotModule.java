@@ -70,7 +70,6 @@ public class ElispotModule extends DefaultModule
     {
         PlateService.get().registerPlateTypeHandler(new ElispotPlateTypeHandler());
         ExperimentService.get().registerExperimentDataHandler(new ElispotDataHandler());
-        ExperimentService.get().registerExperimentDataHandler(new ElispotTsvDataHandler());
         AssayService.get().registerAssayProvider(new ElispotAssayProvider());
 
         ElispotPlateReaderService.registerProvider(new ExcelPlateReader());

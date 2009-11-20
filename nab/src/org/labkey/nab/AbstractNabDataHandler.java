@@ -27,6 +27,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -65,17 +66,22 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
+        ExpRun run = data.getRun();
+        ExpProtocol protocol = run.getProtocol();
+        NabDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
+
+        importRows(data, run, protocol, parser.getResults());
+    }
+
+    protected void importRows(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData) throws ExperimentException
+    {
         try
         {
-            ExpRun run = data.getRun();
-            ExpProtocol protocol = run.getProtocol();
-
-            Container container = info.getContainer();
+            Container container = run.getContainer();
             OntologyManager.ensureObject(container, data.getLSID());
-            NabDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
             Map<Integer, String> cutoffFormats = getCutoffFormats(protocol, run);
 
-            for (Map<String, Object> group : parser.getResults())
+            for (Map<String, Object> group : rawData)
             {
                 if (!group.containsKey(WELLGROUP_NAME_PROPERTY))
                     throw new ExperimentException("The row must contain a value for the well group name : " + WELLGROUP_NAME_PROPERTY);

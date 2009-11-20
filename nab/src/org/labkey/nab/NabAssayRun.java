@@ -185,9 +185,7 @@ public class NabAssayRun extends Luc5Assay
                 captions.add(shortCaption);
             }
 
-            ExpData[] outputDatas = _run.getOutputDatas(NabTsvDataHandler.NAB_TSV_DATA_TYPE);
-            if (outputDatas == null || outputDatas.length == 0)
-                outputDatas = _run.getOutputDatas(NabDataHandler.NAB_DATA_TYPE);
+            ExpData[] outputDatas = _run.getOutputDatas(NabDataHandler.NAB_DATA_TYPE);
             if (outputDatas.length != 1)
                 throw new IllegalStateException("Expected a single data file output for this NAb run.  Found " + outputDatas.length);
             ExpData outputObject = outputDatas[0];
