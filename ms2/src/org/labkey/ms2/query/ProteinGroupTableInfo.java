@@ -202,7 +202,7 @@ public class ProteinGroupTableInfo extends FilteredTable
                         {
                             url.addParameter("run", Integer.toString(_runs.get(0).getRun()));
                         }
-                        result.setURL(url.getLocalURIString() + "&proteinGroupId=${RowId}&seqId=${" + colInfo.getAlias() + "}");
+                        result.setURL(url.getLocalURIString() + "&proteinGroupId=${RowId}&seqId=${" + colInfo.getName() + "}");
                         return result;
                     }
                 });

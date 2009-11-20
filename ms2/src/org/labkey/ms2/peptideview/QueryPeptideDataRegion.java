@@ -51,6 +51,7 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
     {
         List<DisplayColumn> realColumns = getDisplayColumns();
         setDisplayColumns(_allColumns);
+        ctx.setCache(false);
         ResultSet rs = super.getResultSet(ctx, async);
         setDisplayColumns(realColumns);
 

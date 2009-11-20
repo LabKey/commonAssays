@@ -900,7 +900,7 @@ public class ProteinManager
     {
         SQLFragment sql = getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, offset, columnNames);
 
-        ResultSet rs = Table.executeQuery(getSchema(), sql);
+        ResultSet rs = Table.executeQuery(getSchema(), sql, Table.ALL_ROWS, false, true);
         return new GroupedResultSet(rs, "Protein");
     }
 

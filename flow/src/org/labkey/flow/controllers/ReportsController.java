@@ -21,6 +21,7 @@ import org.labkey.api.reports.Report;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.reports.report.DbReportIdentifier;
 import org.labkey.api.reports.report.ReportDescriptor;
+import org.labkey.api.reports.report.ReportIdentifier;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.UpdatePermission;
@@ -175,7 +176,7 @@ public class ReportsController extends SpringFlowController<ReportsController.Ac
     public static class UpdateAction extends FormApiAction<IdForm>
     {
         FlowReport r;
-        
+
         public ModelAndView getView(IdForm form, BindException errors) throws Exception
         {
             if (null == form.getReportId())
@@ -197,11 +198,18 @@ public class ReportsController extends SpringFlowController<ReportsController.Ac
 
         public ApiResponse execute(IdForm form, BindException errors) throws Exception
         {
-            r = getReport(getViewContext(), form);
+            if (null == form.getReportId())
+                r = new ControlsQCReport();
+            else
+                r = getReport(getViewContext(), form);
             r.updateProperties(getPropertyValues(), errors, false);
+
             int id = ReportService.get().saveReport(getViewContext(), null, r);
+            ReportIdentifier dbid = r.getReportId();
+            if (null == dbid)
+                dbid = new DbReportIdentifier(id);
             ApiSimpleResponse ret = new ApiSimpleResponse(r.getDescriptor().getProperties());
-            ret.put("reportId", r.getReportId().toString());
+            ret.put("reportId", dbid.toString());
             ret.put("success",Boolean.TRUE);
             return ret;
         }
@@ -222,7 +230,7 @@ public class ReportsController extends SpringFlowController<ReportsController.Ac
     public static class CopyAction extends FormHandlerAction<IdForm>
     {
         FlowReport r;
-        
+
         public void validateCommand(IdForm target, Errors errors)
         {
 

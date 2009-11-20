@@ -126,7 +126,7 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         renderRowStart(rowIndex, out, ctx);
 
         RenderContext nestedCtx = new RenderContext(ctx.getViewContext());
-        nestedCtx.setResultSet(nestedRS);
+        nestedCtx.setResultSet(nestedRS, ctx.getFieldMap());
         nestedCtx.setMode(DataRegion.MODE_GRID);
 
         // We need to make sure that we've rendered at least one nested grid because it contains JavaScript that needs

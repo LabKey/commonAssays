@@ -106,6 +106,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         public String name, label, description;
         public PropertyType type;
 
+        public boolean required = true;
         public boolean hideInUploadWizard = false;
         public boolean editableInUploadWizard = false;
         public int inputLength = 9;
@@ -154,6 +155,9 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         map.get(VISITID_PROPERTY_NAME).editableInUploadWizard = true;
         map.get(DATE_PROPERTY_NAME).editableInUploadWizard = true;
         map.get(SPECIMENIDS_PROPERTY_NAME).editableInUploadWizard = true;
+
+        map.get(VISITID_PROPERTY_NAME).required = false;
+        map.get(DATE_PROPERTY_NAME).required = false;
 
         map.get(SAMPLE_NUM_PROPERTY_NAME).inputLength = 3;
         map.get(VIABILITY_PROPERTY_NAME).format = "#0.0#%";
@@ -225,7 +229,14 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     protected Map<String, Set<String>> getRequiredDomainProperties()
     {
         Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
-        domainMap.put(ExpProtocol.ASSAY_DOMAIN_DATA, RESULT_DOMAIN_PROPERTIES.keySet());
+        Set<String> propertyNames = new HashSet<String>();
+        for (Map.Entry<String, ResultDomainProperty> entry : RESULT_DOMAIN_PROPERTIES.entrySet())
+        {
+            ResultDomainProperty prop = entry.getValue();
+            if (prop.required)
+                propertyNames.add(entry.getKey());
+        }
+        domainMap.put(ExpProtocol.ASSAY_DOMAIN_DATA, propertyNames);
         return domainMap;
     }
 
