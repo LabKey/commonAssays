@@ -16,7 +16,6 @@
 package org.labkey.flow.controllers;
 
 import org.apache.log4j.Logger;
-import org.apache.xmlbeans.XmlObject;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.admin.AdminUrls;
@@ -29,30 +28,28 @@ import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.query.QueryDefinition;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.JobRunner;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.query.QueryView;
-import org.labkey.api.query.QueryDefinition;
+import org.labkey.flow.FlowModule;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
-import org.labkey.flow.FlowModule;
-import org.labkey.flow.query.FlowSchema;
-import org.labkey.flow.query.FlowQuerySettings;
-import org.labkey.flow.query.FlowPropertySet;
-import org.labkey.flow.query.AttributeCache;
-import org.labkey.flow.data.FlowProtocol;
-import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.query.AttributeCache;
+import org.labkey.flow.query.FlowQuerySettings;
+import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowJob;
 import org.labkey.flow.view.JobStatusView;
-import org.labkey.flow.view.FlowQueryView;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
 import org.springframework.validation.BindException;
@@ -64,7 +61,7 @@ import java.net.URI;
 
 public class FlowController extends SpringFlowController<FlowController.Action>
 {
-    private static Logger _log = Logger.getLogger(FlowController.class);
+    private static final Logger _log = Logger.getLogger(FlowController.class);
 
     public enum Action
     {
@@ -197,8 +194,6 @@ public class FlowController extends SpringFlowController<FlowController.Action>
     @RequiresPermission(ACL.PERM_READ)
     public class ShowStatusJobAction extends SimpleViewAction<StatusJobForm>
     {
-        private PipelineStatusFile _psf;
-
         public void validate(StatusJobForm form, BindException errors)
         {
             String statusFile = form.getStatusFile();
@@ -361,7 +356,6 @@ public class FlowController extends SpringFlowController<FlowController.Action>
                     // from the job store, and go to its status href.  This URL is not set in the
                     // PipelineStatusFile until the job completes.  Apparently FlowJobs have useful
                     // information to show at this URL, even when the job has not completed.
-                    ActionURL redirect = null;
                     FlowJob job = (FlowJob) PipelineJobService.get().getJobStore().getJob(sf.getJobId());
                     if (job != null)
                         return HttpView.redirect(job.getStatusHref());

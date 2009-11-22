@@ -90,7 +90,7 @@ public class SpringFlowController<A extends Enum> extends SpringActionController
     }
     
 
-    public NavTree appendFlowNavTrail(NavTree root, ViewContext context, FlowObject object, String title, Enum action)
+    public NavTree appendFlowNavTrail(NavTree root, FlowObject object, String title, A action)
     {
         ArrayList<NavTree> children = new ArrayList<NavTree>();
         while (object != null)
@@ -106,12 +106,6 @@ public class SpringFlowController<A extends Enum> extends SpringActionController
 // UNDONE
 //        ntc.setHelpTopic(new HelpTopic(PFUtil.helpTopic(action), HelpTopic.Area.FLOW));
         return root;
-    }
-
-
-    public NavTree appendFlowNavTrail(NavTree root, FlowObject object, String title, A action)
-    {
-        return appendFlowNavTrail(root, getViewContext(), object, title, action);
     }
 
 
