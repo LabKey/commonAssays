@@ -18,6 +18,7 @@ package org.labkey.ms2.protein.tools;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Table;
+import org.labkey.api.util.Path;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.CloseableIterator;
@@ -147,7 +148,7 @@ public class ProteinDictionaryHelpers
 
     private static InputStream getSProtOrgMap() throws IOException
     {
-        Resource r = ModuleStaticResolverImpl.get().lookup(FILE);
+        Resource r = ModuleStaticResolverImpl.get().lookup(Path.parse(FILE));
         if (null != r)
         {
             InputStream is = r.getInputStream(null);

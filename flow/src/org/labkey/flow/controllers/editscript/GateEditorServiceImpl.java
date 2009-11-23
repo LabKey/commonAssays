@@ -19,6 +19,7 @@ package org.labkey.flow.controllers.editscript;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.ACL;
@@ -325,6 +326,8 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
                 if (workspaceOptions.editingMode.isRunMode())
                 {
                     script = run.getScript();
+                    if (null == script)
+                        HttpView.throwNotFound();
                     if (!canUpdate(run))
                     {
                         ret.setReadOnly(true);
@@ -333,6 +336,8 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
                 else
                 {
                     script = FlowScript.fromScriptId(workspaceOptions.scriptId);
+                    if (null == script)
+                        HttpView.throwNotFound();
                     if (!canUpdate(script))
                     {
                         ret.setReadOnly(true);
