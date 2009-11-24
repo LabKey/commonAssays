@@ -97,6 +97,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         return url;
     }
 
+
     final public Map<FlowParam,Object> getParams()
     {
         Map<FlowParam,Object> ret = new EnumMap(FlowParam.class);
@@ -104,10 +105,13 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         return ret;
     }
 
+
     public String getLabel()
     {
         return getName();
     }
+
+
     public Object getId()
     {
         Map<FlowParam, Object> params = getParams();
@@ -116,11 +120,13 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         return params.values().iterator().next();
     }
 
+
     public void checkContainer(ActionURL url) throws ServletException
     {
-        if (!getContainerPath().equals(url.getExtraPath()))
+        if (!getContainer().getParsedPath().equals(url.getParsedPath()))
             HttpView.throwNotFound("Wrong container");
     }
+
 
     static public String getParam(ActionURL url, HttpServletRequest request, FlowParam param)
     {
@@ -135,6 +141,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         }
         return null;
     }
+
 
     static public int getIntParam(ActionURL url, HttpServletRequest request, FlowParam param)
     {

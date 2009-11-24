@@ -390,7 +390,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
             ProcessBuilder builder = new ProcessBuilder(interactCmd);
             // Add the TPP directory to the PATH so that xinteract can find it
-            if (xinteractFile.getParentFile().exists())
+            if (null != xinteractFile.getParentFile() && xinteractFile.getParentFile().exists())
             {
                 String pathEnvName = "PATH";
                 String path = "";
