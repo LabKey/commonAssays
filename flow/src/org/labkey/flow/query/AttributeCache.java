@@ -32,11 +32,11 @@ import org.labkey.flow.analysis.web.GraphSpec;
 
 abstract public class AttributeCache<T>
 {
-    static final private Logger _log = Logger.getLogger(AttributeCache.class);
-    static final private LimitedCacheMap<CacheKey, Map.Entry<Integer, String>[]> _cache = new LimitedCacheMap<CacheKey, Map.Entry<Integer, String>[]>(200, 200, "Flow AttributeCache");
-    static long _transactionCount;
-    static private Container _lastContainerInvalidated;
-    static private class CacheKey
+    private static final Logger _log = Logger.getLogger(AttributeCache.class);
+    private static final LimitedCacheMap<CacheKey, Map.Entry<Integer, String>[]> _cache = new LimitedCacheMap<CacheKey, Map.Entry<Integer, String>[]>(200, 200, "Flow AttributeCache");
+    private static long _transactionCount;
+    private static Container _lastContainerInvalidated;
+    private static class CacheKey
     {
         final public Container _container;
         final public String _sql;
@@ -108,7 +108,7 @@ abstract public class AttributeCache<T>
             }
             else
             {
-                for (CacheKey key : _cache.keySet().toArray(new CacheKey[0]))
+                for (CacheKey key : _cache.keySet().toArray(new CacheKey[_cache.keySet().size()]))
                 {
                     if (key._container == null || key._container.equals(container))
                     {
@@ -201,13 +201,13 @@ abstract public class AttributeCache<T>
         catch (SQLException e)
         {
             _log.error("exception", e);
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
     }
 
     private Map<T, Integer> mapFromEntries(Map.Entry<Integer, String>[] entries)
     {
-        TreeMap<T, Integer> ret = new TreeMap();
+        TreeMap<T, Integer> ret = new TreeMap<T, Integer>();
         for (Map.Entry<Integer, String> entry : entries)
         {
             ret.put(keyFromString(entry.getValue()), entry.getKey());

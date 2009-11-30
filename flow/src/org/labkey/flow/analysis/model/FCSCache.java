@@ -23,71 +23,79 @@ import java.io.File;
 import java.io.IOException;
 
 public class FCSCache
-    {
+{
     FCSHeaderCacheMap _fcsHeaderCache = new FCSHeaderCacheMap();
     FCSCacheMap _fcsCache = new FCSCacheMap();
 
-    abstract static class AbstractCacheMap<K,V>
-        {
+    abstract static class AbstractCacheMap<K, V>
+    {
         private Object READING_LOCK = new Object();
-        TTLCacheMap _map;
-        public AbstractCacheMap(int size)
-            {
-            _map = new TTLCacheMap(size, "FCS cache");
-            }
+        TTLCacheMap<K, V> _map;
+
+        public AbstractCacheMap(int size, String debugName)
+        {
+            _map = new TTLCacheMap<K, V>(size, debugName);
+        }
+
         abstract protected V loadObject(K key) throws IOException;
 
         public V get(K key) throws IOException
-            {
-            V ret = (V) _map.get(key);
+        {
+            V ret = _map.get(key);
             if (ret != null)
                 return ret;
+
             synchronized(READING_LOCK)
-                {
-                ret = (V) _map.get(key);
+            {
+                ret = _map.get(key);
                 if (ret != null)
                     return ret;
                 ret = loadObject(key);
                 if (ret != null)
                     _map.put(key, ret);
-                }
+            }
+
             return ret;
-            }
-        }
-
-    static class FCSHeaderCacheMap extends AbstractCacheMap<URI, FCSHeader>
-        {
-        static final int CACHE_SIZE = 100;
-        public FCSHeaderCacheMap()
-            {
-            super(CACHE_SIZE);
-            }
-
-        public FCSHeader loadObject(URI uri) throws IOException
-            {
-            return new FCSHeader(new File(uri));
-            }
-        }
-
-    static class FCSCacheMap extends AbstractCacheMap<URI, FCS>
-        {
-        static final int CACHE_SIZE = 20;
-        public FCSCacheMap()
-            {
-            super(CACHE_SIZE);
-            }
-
-        public FCS loadObject(URI uri) throws IOException
-            {
-            return new FCS(new File(uri));
-            }
-        }        
-    public FCS readFCS(URI uri) throws IOException
-        {
-        return _fcsCache.get(uri);
-        }
-    public FCSHeader readFCSHeader(URI uri) throws IOException
-        {
-        return _fcsHeaderCache.get(uri);
         }
     }
+
+    private static class FCSHeaderCacheMap extends AbstractCacheMap<URI, FCSHeader>
+    {
+        private static final int CACHE_SIZE = 100;
+
+        private FCSHeaderCacheMap()
+        {
+            super(CACHE_SIZE,  "FCS header cache");
+        }
+
+        protected FCSHeader loadObject(URI uri) throws IOException
+        {
+            return new FCSHeader(new File(uri));
+        }
+    }
+
+    private static class FCSCacheMap extends AbstractCacheMap<URI, FCS>
+    {
+        private static final int CACHE_SIZE = 20;
+
+        private FCSCacheMap()
+        {
+            super(CACHE_SIZE,  "FCS cache");
+        }
+
+        protected FCS loadObject(URI uri) throws IOException
+        {
+            return new FCS(new File(uri));
+        }
+    }
+
+    public FCS readFCS(URI uri) throws IOException
+    {
+        return _fcsCache.get(uri);
+    }
+
+    public FCSHeader readFCSHeader(URI uri) throws IOException
+    {
+        return _fcsHeaderCache.get(uri);
+    }
+}
