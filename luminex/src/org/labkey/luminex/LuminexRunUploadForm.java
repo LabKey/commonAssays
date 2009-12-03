@@ -93,7 +93,10 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
                     for (DomainProperty analyteDP : analyteColumns)
                     {
                         ObjectProperty objectProp = values.get(analyteDP.getPropertyURI());
-                        ret.put(analyteDP,  objectProp.value());
+                        if (objectProp != null)
+                        {
+                            ret.put(analyteDP, objectProp.value());
+                        }
                     }
                     return ret;
                 }

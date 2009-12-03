@@ -1,5 +1,3 @@
-# load the graphing library
-library("GDD")
 
 #
 # D(date,value)
@@ -56,6 +54,9 @@ QC_levey_jennings_by_date <- function(D, image, type="jpeg", width=700, height=7
   # get the mean and standard deviation for all of the data
   m = mean(D$value)
   s = sd(D$value)
+
+  if (!is.finite(s) || !is.finite(m) || m < 0.01)
+    return;
 
   # calculate the 1CV, 2CV, 3CV values for the plot
   s1 = s / m * 100
@@ -161,7 +162,7 @@ if (length < 2)
 }
 if (length >= 2)
 {
-    GDD("${imgout:labkey_jpg}", type="jpeg", width=800, height=600)
+    png(filename="${imgout:labkey_png}", width=800, height=600)
 #   layout(matrix(c(1,2,3), 3, 1, byrow = TRUE))
     layout(matrix(c(1,2), 2, 1, byrow = TRUE))
 

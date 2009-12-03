@@ -272,6 +272,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
 
+        int rowIndex = 0;
         for (Map<String, Object> row : fileData)
         {
             Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> pair = splitBaseFromExtra(row, importMap);
@@ -283,7 +284,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             result.setContainer(container.getId());
             result.setProtocolID(protocol.getRowId());
 
-            ViabilityManager.saveResult(user, container, result);
+            ViabilityManager.saveResult(user, container, result, rowIndex++);
         }
     }
 

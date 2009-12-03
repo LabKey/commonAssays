@@ -114,7 +114,7 @@ public class ViabilityManager
      * @param result
      * @throws SQLException
      */
-    public static void saveResult(User user, Container c, ViabilityResult result) throws SQLException, ValidationException
+    public static void saveResult(User user, Container c, ViabilityResult result, int rowIndex) throws SQLException, ValidationException
     {
         assert user != null && c != null : "user or container is null";
         assert result.getDataID() > 0 : "DataID is not set";
@@ -125,7 +125,7 @@ public class ViabilityManager
 
         if (result.getRowID() == 0)
         {
-            String lsid = new Lsid(ViabilityAssayProvider.RESULT_LSID_PREFIX, result.getDataID() + "-" + result.getPoolID()).toString();
+            String lsid = new Lsid(ViabilityAssayProvider.RESULT_LSID_PREFIX, result.getDataID() + "-" + result.getPoolID() + "-" + rowIndex).toString();
             Integer id = OntologyManager.ensureObject(c, lsid);
 
             result.setObjectID(id.intValue());
@@ -365,7 +365,7 @@ public class ViabilityManager
                 properties.put(_propertyB, true);
                 result.setProperties(properties);
 
-                ViabilityManager.saveResult(user, c, result);
+                ViabilityManager.saveResult(user, c, result, 0);
                 resultId = result.getRowID();
             }
 
@@ -410,7 +410,7 @@ public class ViabilityManager
                 result.setSpecimenIDs(specimens);
                 result.getProperties().put(_propertyA, "goodbye property");
                 result.getProperties().remove(_propertyB);
-                ViabilityManager.saveResult(user, c, result);
+                ViabilityManager.saveResult(user, c, result, 0);
             }
 
             // verify

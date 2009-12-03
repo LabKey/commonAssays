@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Collections;
+import java.io.PrintWriter;
+import java.io.IOException;
 
 import org.labkey.ms2.MS2Controller;
 import org.springframework.web.servlet.ModelAndView;
@@ -237,14 +239,22 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     {
         String peptideColumns = getPeptideColumnNames(columns);
         DataRegion peptideRegion = getNestedPeptideGrid(_runs[0], peptideColumns, true);
-        GridView view = new GridView(peptideRegion, (BindException)null);
         String extraWhere = MS2Manager.getTableInfoPeptides() + ".Protein= '" + proteinGroupingId + "'";
-        GroupedResultSet groupedResultSet = createPeptideResultSet(peptideColumns, _runs[0], _maxGroupingRows, _offset, extraWhere);
-        // Shouldn't really close it here, but this prevents us from getting errors logged about not closing the result set
-        // The problem is that nobody cares about the outer GroupedResultSet - we only care about the inner ResultSet,
-        // and there's nobody to close the outer when we're done. Since the ResultSet continues to work after it's closed,
-        // this is good enough for now.
-        groupedResultSet.close();
+        final GroupedResultSet groupedResultSet = createPeptideResultSet(peptideColumns, _runs[0], _maxGroupingRows, _offset, extraWhere);
+        GridView view = new GridView(peptideRegion, (BindException)null)
+        {
+            @Override
+            public void renderView(RenderContext model, PrintWriter out) throws IOException, ServletException
+            {
+                super.renderView(model, out);
+                try
+                {
+                    // Close the outer result set after we're done with it
+                    groupedResultSet.close();
+                }
+                catch (SQLException e) {}
+            }
+        };
         view.setResultSet(groupedResultSet.getNextResultSet());
         return view;
     }

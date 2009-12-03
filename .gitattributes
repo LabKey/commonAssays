@@ -713,6 +713,7 @@ ms2/resources/schemas/dbscripts/postgresql/ms2-2.30-8.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-8.10-8.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-8.30-9.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-9.20-9.21.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-9.21-9.22.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-drop.sql -text
@@ -789,6 +790,7 @@ ms2/resources/schemas/dbscripts/sqlserver/ms2-2.30-8.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-8.10-8.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-8.30-9.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-9.20-9.21.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-9.21-9.22.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-drop.sql -text
@@ -1272,13 +1274,13 @@ viability/Viability.iml -text
 viability/build.xml -text
 viability/module.properties -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.00-0.10.sql -text
-viability/resources/schemas/dbscripts/postgresql/viability-0.00-9.29.sql -text
+viability/resources/schemas/dbscripts/postgresql/viability-0.00-9.30.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.10-0.20.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.20-0.30.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.30-0.40.sql -text
 viability/resources/schemas/dbscripts/postgresql/viability-0.40-0.50.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.00-0.10.sql -text
-viability/resources/schemas/dbscripts/sqlserver/viability-0.00-9.29.sql -text
+viability/resources/schemas/dbscripts/sqlserver/viability-0.00-9.30.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.10-0.20.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.20-0.30.sql -text
 viability/resources/schemas/dbscripts/sqlserver/viability-0.30-0.40.sql -text
