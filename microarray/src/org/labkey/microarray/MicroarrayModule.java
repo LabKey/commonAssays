@@ -77,6 +77,7 @@ public class MicroarrayModule extends DefaultModule
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
                     QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayRunType.INSTANCE, true, false);
+                    view.setShowExportButtons(true);
                     view.setTitle(WEBPART_MICROARRAY_RUNS);
                     view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
                     return view;

@@ -48,25 +48,34 @@ public class ProteinProphetDataRegion extends AbstractProteinDataRegion
         _groupedRS.previous();
         ResultSet nestedRS = _groupedRS.getNextResultSet();
 
-        int totalFilteredPeptides = 0;
-        Set<String> uniqueFilteredPeptides = new HashSet<String>();
-        // Validate that the inner and outer result sets are sorted the same
-        while (nestedRS.next())
+        try
         {
-            if (!ctx.getRow().get("ProteinGroupId").equals(nestedRS.getInt("ProteinGroupId")))
+            int totalFilteredPeptides = 0;
+            Set<String> uniqueFilteredPeptides = new HashSet<String>();
+            // Validate that the inner and outer result sets are sorted the same
+            while (nestedRS.next())
             {
-                throw new IllegalArgumentException("ProteinGroup ids do not match for the outer and inner queries");
+                if (!ctx.getRow().get("ProteinGroupId").equals(nestedRS.getInt("ProteinGroupId")))
+                {
+                    throw new IllegalArgumentException("ProteinGroup ids do not match for the outer and inner queries");
+                }
+                uniqueFilteredPeptides.add(nestedRS.getString("Peptide"));
+                totalFilteredPeptides++;
             }
-            uniqueFilteredPeptides.add(nestedRS.getString("Peptide"));
-            totalFilteredPeptides++;
+            nestedRS.beforeFirst();
+            ctx.put(TotalFilteredPeptidesColumn.NAME, totalFilteredPeptides);
+            ctx.put(UniqueFilteredPeptidesColumn.NAME, uniqueFilteredPeptides.size());
+
+            super.renderTableRow(ctx, out, renderers, rowIndex);
+
+            renderNestedGrid(out, ctx, nestedRS, rowIndex);
         }
-        nestedRS.beforeFirst();
-        ctx.put(TotalFilteredPeptidesColumn.NAME, totalFilteredPeptides);
-        ctx.put(UniqueFilteredPeptidesColumn.NAME, uniqueFilteredPeptides.size());
-
-        super.renderTableRow(ctx, out, renderers, rowIndex);
-
-        renderNestedGrid(out, ctx, nestedRS, rowIndex);
-        nestedRS.close();
+        finally
+        {
+            if (nestedRS != null)
+            {
+                try { nestedRS.close(); } catch (SQLException e) {}
+            }
+        }
     }
 }
