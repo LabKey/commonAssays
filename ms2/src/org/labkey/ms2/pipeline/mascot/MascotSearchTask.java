@@ -193,6 +193,12 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             String paramMaxParent = params.get("spectrum, maximum parent m+h");
             if (paramMaxParent != null)
                 argsM2S.add("-T" + paramMaxParent);
+            String paramMinPeakIntensity = params.get("spectrum, minimum peak intensity");
+            if (paramMinPeakIntensity != null)
+                argsM2S.add("-I" + paramMinPeakIntensity);
+            String paramMinPeakCount = params.get("spectrum, minimum peak count");
+            if (paramMinPeakCount != null)
+                argsM2S.add("-P" + paramMinPeakCount);
             argsM2S.add(fileWorkSpectra.getAbsolutePath());
 
             getJob().runSubProcess(new ProcessBuilder(argsM2S), _wd.getDir());
