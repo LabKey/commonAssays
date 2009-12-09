@@ -32,6 +32,7 @@
 <%@ page import="org.labkey.flow.view.FlowQueryView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -61,8 +62,8 @@
     <%} %>
 </p>
 <% } %>
-<% if (context.getContainer().hasPermission(context.getUser(), ACL.PERM_UPDATE) &&
-    (run.getStep() == FlowProtocolStep.analysis || run.isInWorkspace()))
+<% if (context.getContainer().hasPermission(context.getUser(), UpdatePermission.class) &&
+        (run.getStep() == FlowProtocolStep.analysis || run.isInWorkspace()))
     {
         if (run.isInWorkspace()) { %>
             <p>

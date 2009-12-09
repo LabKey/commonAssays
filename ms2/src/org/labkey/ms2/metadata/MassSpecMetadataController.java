@@ -26,8 +26,8 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.PipelineDataCollectorRedirectAction;
 import org.labkey.api.util.PageFlowUtil;
@@ -58,7 +58,7 @@ public class MassSpecMetadataController extends SpringActionController
         setActionResolver(_resolver);
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleRedirectAction
     {
         public ActionURL getRedirectURL(Object o) throws Exception
@@ -67,7 +67,7 @@ public class MassSpecMetadataController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class UploadRedirectAction extends PipelineDataCollectorRedirectAction
     {
         protected FileFilter getFileFilter()
@@ -101,7 +101,7 @@ public class MassSpecMetadataController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class SearchLinkAction extends SimpleViewAction<SearchLinkForm>
     {
         private ExpRun _run;
@@ -113,7 +113,7 @@ public class MassSpecMetadataController extends SpringActionController
             {
                 throw new NotFoundException("Could not find run " + form.getRunId());
             }
-            if (!_run.getContainer().hasPermission(getUser(), ACL.PERM_READ))
+            if (!_run.getContainer().hasPermission(getUser(), ReadPermission.class))
             {
                 throw new UnauthorizedException();
             }

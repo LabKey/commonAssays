@@ -30,8 +30,8 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.JspView;
@@ -65,7 +65,7 @@ public class ScoringController extends SpringActionController
         setActionResolver(_resolver);
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class CompareAction extends SimpleViewAction<ChartForm>
     {
         public ModelAndView getView(ChartForm form, BindException errors) throws Exception
@@ -86,7 +86,7 @@ public class ScoringController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     abstract public class ChartCompareBaseAction extends ExportAction<ChartForm>
     {
         abstract public XYSeriesCollection getSeriesCollection(ChartForm form);
@@ -125,7 +125,7 @@ public class ScoringController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ChartCompareAction extends ChartCompareBaseAction
     {
         public XYSeriesCollection getSeriesCollection(ChartForm form)
@@ -180,7 +180,7 @@ public class ScoringController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ChartCompareProtAction extends ChartCompareBaseAction
     {
         public XYSeriesCollection getSeriesCollection(ChartForm form)
@@ -400,7 +400,7 @@ public class ScoringController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class DiscriminateAction extends SimpleViewAction<ChartDiscForm>
     {
         public ModelAndView getView(ChartDiscForm form, BindException errors) throws Exception
@@ -441,7 +441,7 @@ public class ScoringController extends SpringActionController
                 .addParameter(ChartDiscForm.PARAMS.title, form.getTitle() + " (charge " + charge + ")");
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ChartDiscriminateAction extends ExportAction<ChartDiscForm>
     {
         public void export(ChartDiscForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -491,7 +491,7 @@ public class ScoringController extends SpringActionController
                 .addParameter(ChartDiscForm.PARAMS.expressions + "_" + 2, form.getExpressions()[2]);
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ChartDiscriminateROCAction extends ExportAction<ChartDiscForm>
     {
         public void export(ChartDiscForm form, HttpServletResponse response, BindException errors) throws Exception

@@ -25,6 +25,7 @@
 <%@ page import="java.text.DecimalFormat"%>
 <%@ page import="org.labkey.api.security.ACL"%>
 <%@ page import="org.labkey.api.util.Formats"%>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
@@ -238,7 +239,7 @@ if (p.getQuantitation() != null)
                     <a href="<%= chargeUrl %>#quantitation"><%= i %>+</a><%
                 }
             } %>
-            <% if (quant.findScanFile() != null && ctx.container.hasPermission(ctx.user, ACL.PERM_UPDATE) && ! "q3".equals(ctx.run.getQuantAnalysisType())) { %><a href="<%= editUrl %>">Edit elution profile selection</a><% } %>
+            <% if (quant.findScanFile() != null && ctx.container.hasPermission(ctx.user, UpdatePermission.class) && ! "q3".equals(ctx.run.getQuantAnalysisType())) { %><a href="<%= editUrl %>">Edit elution profile selection</a><% } %>
         </td>
     </tr>
     <tr>

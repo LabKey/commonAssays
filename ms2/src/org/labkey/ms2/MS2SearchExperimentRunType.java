@@ -25,6 +25,7 @@ import org.labkey.api.exp.Lsid;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
@@ -72,7 +73,7 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
         exportRuns.setURL(url);
         exportRuns.setActionType(ActionButton.Action.POST);
         exportRuns.setRequiresSelection(true);
-        exportRuns.setDisplayPermission(ACL.PERM_READ);
+        exportRuns.setDisplayPermission(ReadPermission.class);
         bar.add(exportRuns);
 
         bar.add(createButton(context, MS2Controller.ShowHierarchyAction.class, "Show Hierarchy", ActionButton.Action.LINK));

@@ -25,8 +25,8 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.portal.ProjectUrls;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
@@ -98,7 +98,7 @@ public class PipelineController extends SpringActionController
         return StringUtils.trimToNull(s.toString());
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleRedirectAction
     {
         public ActionURL getRedirectURL(Object o)
@@ -107,7 +107,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class UploadAction extends RedirectAction<PipelinePathForm>
     {
         public ActionURL getSuccessURL(PipelinePathForm form)
@@ -216,7 +216,7 @@ public class PipelineController extends SpringActionController
         return new ActionURL(SearchXTandemAction.class, container);
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class SearchXTandemAction extends SearchAction
     {
         public String getProviderName()
@@ -230,7 +230,7 @@ public class PipelineController extends SpringActionController
         return new ActionURL(SearchMascotAction.class, container);
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class SearchMascotAction extends SearchAction
     {
         public String getProviderName()
@@ -244,7 +244,7 @@ public class PipelineController extends SpringActionController
         return new ActionURL(SearchSequestAction.class, container);
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class SearchSequestAction extends SearchAction
     {
         public String getProviderName()
@@ -253,7 +253,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class SearchServiceAction extends GWTServiceAction
     {
         protected BaseRemoteService createService()
@@ -264,7 +264,7 @@ public class PipelineController extends SpringActionController
 
 
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class SearchAction extends FormViewAction<MS2SearchForm>
     {
         private File _dirRoot;
@@ -532,7 +532,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_ADMIN)
+    @RequiresPermissionClass(AdminPermission.class)
     public class SetupClusterSequenceDBAction extends FormViewAction<SequenceDBRootForm>
     {
         public void validateCommand(SequenceDBRootForm form, Errors errors)
@@ -591,7 +591,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_ADMIN)
+    @RequiresPermissionClass(AdminPermission.class)
     public class SetTandemDefaultsAction extends SetDefaultsActionBase
     {
         public String getProviderName()
@@ -615,7 +615,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_ADMIN)
+    @RequiresPermissionClass(AdminPermission.class)
     public class SetMascotDefaultsAction extends SetDefaultsActionBase
     {
         public String getProviderName()
@@ -639,7 +639,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_ADMIN)
+    @RequiresPermissionClass(AdminPermission.class)
     public class SetSequestDefaultsAction extends SetDefaultsActionBase
     {
         public String getProviderName()
@@ -761,7 +761,7 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_ADMIN)
+    @RequiresPermissionClass(AdminPermission.class)
     public class AddSequenceDBAction extends FormViewAction<SequenceDBForm>
     {
         public void validateCommand(SequenceDBForm form, Errors errors)

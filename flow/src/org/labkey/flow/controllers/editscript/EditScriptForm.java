@@ -19,6 +19,7 @@ package org.labkey.flow.controllers.editscript;
 import org.apache.log4j.Logger;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.HString;
 import org.labkey.api.view.ActionURL;
@@ -294,7 +295,7 @@ public class EditScriptForm extends ViewForm
 
     public boolean canEdit()
     {
-        return getContainer().hasPermission(getUser(), ACL.PERM_UPDATE) && _runCount == 0;
+        return getContainer().hasPermission(getUser(), UpdatePermission.class) && _runCount == 0;
     }
 
     public Map<Integer, String> getExperimentRuns() throws Exception

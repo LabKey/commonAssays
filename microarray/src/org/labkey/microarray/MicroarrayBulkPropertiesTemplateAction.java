@@ -21,8 +21,8 @@ import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.util.DateUtil;
@@ -41,7 +41,7 @@ import java.util.Map;
  * User: jeckels
  * Date: Feb 2, 2009
  */
-@RequiresPermission(ACL.PERM_READ)
+@RequiresPermissionClass(ReadPermission.class)
 public class MicroarrayBulkPropertiesTemplateAction extends BaseAssayAction<MicroarrayRunUploadForm>
 {
     public ModelAndView getView(MicroarrayRunUploadForm form, BindException errors) throws Exception

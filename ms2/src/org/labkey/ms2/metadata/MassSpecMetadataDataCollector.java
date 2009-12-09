@@ -22,6 +22,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
@@ -77,7 +78,7 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
 
         Container c = form.getContainer();
 
-        if (c.hasPermission(form.getUser(), ACL.PERM_DELETE))
+        if (c.hasPermission(form.getUser(), DeletePermission.class))
         {
             Pair<Integer, Integer> status = getExistingAnnotationStatus(form);
             int totalFiles = status.getKey().intValue();
@@ -109,15 +110,15 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
                 sb.append("</span> [<a onclick=\"");
                 //noinspection StringConcatenationInsideStringBufferAppend
                 sb.append("if (window.confirm('Are you sure you want to delete the existing assay runs associated with these files?'))" +
-                            "{" +
-                                "Ext.Ajax.request(" +
-                                "{" +
-                                    "url: '" + PageFlowUtil.filter(deleteURL )+ "', " +
-                                    "success: function() { document.getElementById('deleteRunsSpan').innerHTML = 'Runs deleted successfully.' }," +
-                                    "failure: function() { alert('failure'); }" +
-                                "});" +
-                            "}" +
-                            "return false;");
+                        "{" +
+                        "Ext.Ajax.request(" +
+                        "{" +
+                        "url: '" + PageFlowUtil.filter(deleteURL) + "', " +
+                        "success: function() { document.getElementById('deleteRunsSpan').innerHTML = 'Runs deleted successfully.' }," +
+                        "failure: function() { alert('failure'); }" +
+                        "});" +
+                        "}" +
+                        "return false;");
                 sb.append("\">");
                 sb.append("delete assay runs</a>]</div>");
             }

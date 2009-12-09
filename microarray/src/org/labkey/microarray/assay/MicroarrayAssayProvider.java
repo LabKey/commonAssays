@@ -33,6 +33,7 @@ import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
@@ -227,7 +228,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         for (int i = 0; i < count; i++)
         {
             ExpMaterial material = form.getSample(i);
-            if (!material.getContainer().hasPermission(context.getUser(), ACL.PERM_READ))
+            if (!material.getContainer().hasPermission(context.getUser(), ReadPermission.class))
             {
                 throw new ExperimentException("You do not have permission to reference the sample '" + material.getName() + ".");
             }

@@ -23,6 +23,8 @@ import org.labkey.api.jsp.FormPage;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NavTree;
@@ -30,7 +32,6 @@ import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.ICSMetadata;
-import org.labkey.flow.analysis.model.ScriptSettings;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -95,7 +96,7 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ShowProtocolAction extends SimpleViewAction<ProtocolForm>
     {
         FlowProtocol protocol = null;
@@ -112,7 +113,7 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class JoinSampleSetAction extends ProtocolViewAction<JoinSampleSetForm>
     {
         public void validateCommand(JoinSampleSetForm form, Errors errors)
@@ -151,7 +152,7 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class UpdateSamplesAction extends SimpleViewAction<UpdateSamplesForm>
     {
         FlowProtocol protocol;
@@ -169,7 +170,7 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class EditFCSAnalysisNameAction extends ProtocolViewAction<EditFCSAnalysisNameForm>
     {
         public void validateCommand(EditFCSAnalysisNameForm form, Errors errors)
@@ -200,7 +201,7 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class EditFCSAnalysisFilterAction extends ProtocolViewAction<EditFCSAnalysisFilterForm>
     {
         public void validateCommand(EditFCSAnalysisFilterForm target, Errors errors)
@@ -230,7 +231,7 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class EditICSMetadataAction extends ProtocolViewAction<EditICSMetadataForm>
     {
         public void validateCommand(EditICSMetadataForm target, Errors errors)

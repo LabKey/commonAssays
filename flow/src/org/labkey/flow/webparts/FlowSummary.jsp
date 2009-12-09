@@ -41,6 +41,9 @@
 <%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.labkey.api.data.*" %>
+<%@ page import="org.labkey.api.security.permissions.InsertPermission" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
+<%@ page import="org.labkey.api.security.permissions.AdminPermission" %>
 <%@page extends="org.labkey.api.jsp.JspBase" %>
 <%
     FlowSummaryWebPart me = (FlowSummaryWebPart) HttpView.currentModel();
@@ -51,10 +54,10 @@
     PipeRoot pipeRoot = pipeService.findPipelineRoot(c);
     boolean _hasPipelineRoot = pipeRoot != null && pipeRoot.getUri(c) != null;
     boolean _canSetPipelineRoot = user.isAdministrator();
-    boolean _canInsert = c.hasPermission(user, ACL.PERM_INSERT);
-    boolean _canUpdate = c.hasPermission(user, ACL.PERM_UPDATE);
+    boolean _canInsert = c.hasPermission(user, InsertPermission.class);
+    boolean _canUpdate = c.hasPermission(user, UpdatePermission.class);
     boolean _canCreateFolder = c.getParent() != null && !c.getParent().isRoot() &&
-            c.getParent().hasPermission(user, ACL.PERM_ADMIN);
+            c.getParent().hasPermission(user, AdminPermission.class);
 
     int _fcsFileCount = FlowManager.get().getObjectCount(c, ObjectType.fcsKeywords);
     int _fcsRunCount = FlowManager.get().getFCSFileOnlyRunsCount(user, c);

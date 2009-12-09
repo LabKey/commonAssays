@@ -31,6 +31,8 @@
 <%@ page import="org.labkey.api.exp.OntologyManager" %>
 <%@ page import="org.labkey.api.exp.ObjectProperty" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.labkey.api.security.permissions.DeletePermission" %>
+<%@ page import="org.labkey.api.security.permissions.InsertPermission" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <labkey:errors/>
@@ -42,7 +44,7 @@
 
     Map<String, Object> runProperties = bean.getRunDisplayProperties();
 
-    boolean writer = context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT);
+    boolean writer = context.getContainer().hasPermission(context.getUser(), InsertPermission.class);
 
     QueryView duplicateDataFileView = bean.getDuplicateDataFileView(me.getViewContext());
     int columnCount = 2;
@@ -80,10 +82,10 @@
 %>
     This run has been automatically saved.
 <%
-        if (getViewContext().getContainer().hasPermission(getViewContext().getUser(), ACL.PERM_DELETE))
+        if (getViewContext().getContainer().hasPermission(getViewContext().getUser(), DeletePermission.class))
         {
 %>
-<%= generateButton("Delete Run", "deleteRun.view?rowId=" + bean.getRunId(), "return confirm('Permanently delete this run?')")%>
+<%=generateButton("Delete Run", "deleteRun.view?rowId=" + bean.getRunId(), "return confirm('Permanently delete this run?')")%>
 <%
         }
 %>

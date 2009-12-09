@@ -47,8 +47,10 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayPublishService;
 import org.labkey.api.util.DateUtil;
@@ -135,10 +137,10 @@ public class NabController extends SpringActionController
     {
         public ModelAndView getView(BeginForm form, BindException errors) throws Exception
         {
-            if (!getUser().isGuest() && !getContainer().hasPermission(getUser(), ACL.PERM_INSERT))
+            if (!getUser().isGuest() && !getContainer().hasPermission(getUser(), InsertPermission.class))
                 HttpView.throwRedirect(getRunsURL());
 
-            if (!getContainer().hasPermission(getUser(), ACL.PERM_INSERT))
+            if (!getContainer().hasPermission(getUser(), InsertPermission.class))
                 HttpView.throwUnauthorized();
 
             UploadAssayForm assayForm;
@@ -192,7 +194,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class EditRunParametersAction extends SimpleViewAction<UploadAssayForm>
     {
         public ModelAndView getView(UploadAssayForm form, BindException errors) throws Exception
@@ -216,7 +218,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class UploadAction extends SimpleRedirectAction<UploadAssayForm>
     {
         @Override
@@ -587,7 +589,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class DisplayAction extends SimpleViewAction<RenderAssayForm>
     {
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
@@ -651,17 +653,17 @@ public class NabController extends SpringActionController
             PlateQueryView duplicateDataFileView = PlateService.get().getPlateGridView(context, filter);
             duplicateDataFileView.setShowExportButtons(false);
             ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
-            selectButton.setDisplayPermission(ACL.PERM_INSERT);
+            selectButton.setDisplayPermission(InsertPermission.class);
             List<ActionButton> buttons = new ArrayList<ActionButton>();
             buttons.add(selectButton);
 
             ActionButton clearButton = ActionButton.BUTTON_CLEAR_ALL.clone();
-            clearButton.setDisplayPermission(ACL.PERM_INSERT);
+            clearButton.setDisplayPermission(InsertPermission.class);
             buttons.add(clearButton);
 
             ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
             deleteButton.setRequiresSelection(true);
-            deleteButton.setDisplayPermission(ACL.PERM_DELETE);
+            deleteButton.setDisplayPermission(DeletePermission.class);
             buttons.add(deleteButton);
             duplicateDataFileView.setButtons(buttons);
             duplicateDataFileView.addHiddenFormField("runId", "" + assay.getRunRowId());
@@ -716,7 +718,7 @@ public class NabController extends SpringActionController
             _printURL = printLink;
             _datafileURL = dataFileLink;
             _customizeURL = customizeLink;
-            _writer = context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT);
+            _writer = context.getContainer().hasPermission(context.getUser(), InsertPermission.class);
         }
 
         public boolean showPrintView()
@@ -768,7 +770,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class RenderChartAction extends ExportAction<RowIdForm>
     {
         public void export(RowIdForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -842,7 +844,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_DELETE)
+    @RequiresPermissionClass(DeletePermission.class)
     public class DeleteRunAction extends SimpleRedirectAction<RowIdForm>
     {
         public ActionURL getRedirectURL(RowIdForm form) throws Exception
@@ -868,7 +870,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class RunsAction extends SimpleViewAction<RowIdForm>
     {
         public ModelAndView getView(RowIdForm rowIdForm, BindException errors) throws Exception
@@ -878,22 +880,22 @@ public class NabController extends SpringActionController
             List<ActionButton> buttons = new ArrayList<ActionButton>();
 
             ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
-            selectButton.setDisplayPermission(ACL.PERM_INSERT);
+            selectButton.setDisplayPermission(InsertPermission.class);
             buttons.add(selectButton);
 
             ActionButton clearButton = ActionButton.BUTTON_CLEAR_ALL.clone();
-            clearButton.setDisplayPermission(ACL.PERM_INSERT);
+            clearButton.setDisplayPermission(InsertPermission.class);
             buttons.add(clearButton);
 
             ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
-            deleteButton.setDisplayPermission(ACL.PERM_DELETE);
+            deleteButton.setDisplayPermission(DeletePermission.class);
             deleteButton.setRequiresSelection(true);
             buttons.add(deleteButton);
 
             if (!AssayPublishService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
             {
                 ActionButton publishButton = new ActionButton("publishPlatesChooseStudy.view", "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
-                publishButton.setDisplayPermission(ACL.PERM_INSERT);
+                publishButton.setDisplayPermission(InsertPermission.class);
                 publishButton.setRequiresSelection(true);
                 buttons.add(publishButton);
             }
@@ -910,7 +912,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class DownloadAction extends ExportAction<AttachmentForm>
     {
         public void export(AttachmentForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -955,7 +957,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class GraphSelectedAction extends SimpleViewAction<GraphSelectedForm>
     {
         public ModelAndView getView(GraphSelectedForm form, BindException errors) throws Exception
@@ -1045,7 +1047,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class RenderMultiRunChart extends ExportAction<RenderMultiChartForm>
     {
         public void export(RenderMultiChartForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -1149,7 +1151,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_DELETE)
+    @RequiresPermissionClass(DeletePermission.class)
     public class DeleteRunsAction extends SimpleRedirectAction<RunIdForm>
     {
         public ActionURL getRedirectURL(RunIdForm form) throws Exception
@@ -1210,7 +1212,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class PublishPlatesChooseStudy extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -1237,7 +1239,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class PublishWellGroupsChooseStudy extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -1288,7 +1290,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class SampleListAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -1297,11 +1299,11 @@ public class NabController extends SpringActionController
 
             List<ActionButton> buttons = new ArrayList<ActionButton>();
             ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
-            selectButton.setDisplayPermission(ACL.PERM_INSERT);
+            selectButton.setDisplayPermission(InsertPermission.class);
             buttons.add(selectButton);
 
             ActionButton clearButton = ActionButton.BUTTON_CLEAR_ALL.clone();
-            clearButton.setDisplayPermission(ACL.PERM_INSERT);
+            clearButton.setDisplayPermission(InsertPermission.class);
             buttons.add(clearButton);
 
             ActionButton graphSelectedButton = new ActionButton("graphSelected.view", "Graph Selected");
@@ -1312,7 +1314,7 @@ public class NabController extends SpringActionController
             if (!AssayPublishService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
             {
                 ActionButton publishButton = new ActionButton("publishWellGroupsChooseStudy.view", "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
-                publishButton.setDisplayPermission(ACL.PERM_INSERT);
+                publishButton.setDisplayPermission(InsertPermission.class);
                 publishButton.setRequiresSelection(true);
                 buttons.add(publishButton);
             }
@@ -1493,7 +1495,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class PublishAction extends FormViewAction<PublishForm>
     {
         private ActionURL _returnURL = null;
@@ -1506,7 +1508,7 @@ public class NabController extends SpringActionController
         public ModelAndView getView(PublishForm form, boolean reshow, BindException errors) throws Exception
         {
             Container targetContainer = ContainerManager.getForId(form.getTargetContainerId());
-            if (!targetContainer.hasPermission(getUser(), ACL.PERM_INSERT))
+            if (!targetContainer.hasPermission(getUser(), InsertPermission.class))
                 HttpView.throwUnauthorized();
 
             List<WellGroup> sampleList = new ArrayList<WellGroup>();
@@ -1572,7 +1574,7 @@ public class NabController extends SpringActionController
         public boolean handlePost(PublishForm form, BindException errors) throws Exception
         {
             Container targetContainer = ContainerManager.getForId(form.getTargetContainerId());
-            if (!targetContainer.hasPermission(getUser(), ACL.PERM_INSERT))
+            if (!targetContainer.hasPermission(getUser(), InsertPermission.class))
                 HttpView.throwUnauthorized();
 
             boolean dateBased = AssayPublishService.get().getTimepointType(targetContainer) == TimepointType.DATE;

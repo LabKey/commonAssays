@@ -44,6 +44,7 @@
 <%@ page import="org.labkey.api.security.SecurityPolicy" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
 <%@ page import="java.io.File" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <style type="text/css">
     .right {text-align:right;}
@@ -341,10 +342,11 @@ for (ExpMaterial sample : well.getSamples())
 %></table>
 <div id="keywordsGrid" class="extContainer"></div>
 <%
-if (getContainer().hasPermission(getUser(), ACL.PERM_UPDATE))
-{
-    %><%=generateButton("edit", well.urlFor(WellController.Action.editWell))%><br><%
-}
+    if (getContainer().hasPermission(getUser(), UpdatePermission.class))
+    {
+%><%=generateButton("edit", well.urlFor(WellController.Action.editWell))%><br>
+<%
+    }
 
 %><div id="statsTree" class="extContainer"></div><%
 

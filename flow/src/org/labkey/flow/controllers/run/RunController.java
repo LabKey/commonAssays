@@ -21,6 +21,8 @@ import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.view.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.analysis.model.FCS;
@@ -85,7 +87,7 @@ public class RunController extends SpringFlowController<RunController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ShowRunAction extends SimpleViewAction<RunForm>
     {
         FlowRun run;
@@ -105,7 +107,7 @@ public class RunController extends SpringFlowController<RunController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ShowRunsAction extends SimpleViewAction<RunsForm>
     {
         FlowExperiment experiment;
@@ -134,7 +136,7 @@ public class RunController extends SpringFlowController<RunController.Action>
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class DownloadAction extends SimpleViewAction<DownloadRunForm>
     {
         private FlowRun _run;
@@ -224,7 +226,7 @@ public class RunController extends SpringFlowController<RunController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class MoveToWorkspaceAction extends FormViewAction<RunForm>
     {
         FlowRun run;
@@ -270,7 +272,7 @@ public class RunController extends SpringFlowController<RunController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class MoveToAnalysisAction extends FormViewAction<MoveToAnalysisForm>
     {
         FlowRun run;

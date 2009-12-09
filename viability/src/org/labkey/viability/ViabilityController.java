@@ -16,8 +16,8 @@
 
 package org.labkey.viability;
 
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.*;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleRedirectAction;
@@ -35,7 +35,7 @@ public class ViabilityController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleRedirectAction
     {
         public ActionURL getRedirectURL(Object o) throws Exception

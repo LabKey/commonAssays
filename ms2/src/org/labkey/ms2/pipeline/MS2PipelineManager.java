@@ -25,6 +25,7 @@ import org.labkey.api.pipeline.cmd.ConvertTaskId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
@@ -289,7 +290,7 @@ public class MS2PipelineManager
 
     public static boolean allowSequenceDatabaseUploads(User user, Container container) throws SQLException
     {
-        if (!container.hasPermission(user, ACL.PERM_INSERT))
+        if (!container.hasPermission(user, InsertPermission.class))
             return false;
         Object obj = PipelineService.get().getPipelineProperty(container, ALLOW_SEQUENCE_DB_UPLOAD_KEY);
         return Boolean.parseBoolean((String) obj);

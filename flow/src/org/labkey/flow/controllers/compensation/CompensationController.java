@@ -24,8 +24,8 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.query.*;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.view.*;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.controllers.SpringFlowController;
@@ -65,7 +65,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleViewAction<QueryForm>
     {
         public ModelAndView getView(QueryForm form, BindException errors) throws Exception
@@ -82,7 +82,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
     }
 
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class UploadAction extends FormViewAction<UploadCompensationForm>
     {
         FlowCompensationMatrix _flowComp = null;
@@ -165,7 +165,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ShowCompensationAction extends SimpleViewAction<ViewForm>
     {
         FlowCompensationMatrix _comp;
@@ -191,7 +191,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
 
 
 
-    @RequiresPermission(ACL.PERM_DELETE)
+    @RequiresPermissionClass(DeletePermission.class)
     public class DeleteAction extends ConfirmAction<ViewForm>
     {
         public void validateCommand(ViewForm target, Errors errors)

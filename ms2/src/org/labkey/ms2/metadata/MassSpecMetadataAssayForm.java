@@ -21,6 +21,7 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.BulkPropertiesUploadForm;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
 import org.labkey.api.util.FileUtil;
@@ -86,7 +87,7 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
             for (int i = 0; i < count; i++)
             {
                 ExpMaterial material = SampleChooserDisplayColumn.getMaterial(i, getContainer(), getRequest());
-                if (!material.getContainer().hasPermission(getUser(), ACL.PERM_READ))
+                if (!material.getContainer().hasPermission(getUser(), ReadPermission.class))
                 {
                     throw new ExperimentException("You do not have permission to reference the sample '" + material.getName() + ".");
                 }

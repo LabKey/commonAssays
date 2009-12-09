@@ -23,8 +23,8 @@ import org.labkey.flow.gateeditor.client.GateEditorService;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 
 /**
  * User: matthewb
@@ -43,7 +43,7 @@ public class FlowRemoteController extends SpringActionController
 
     // UNDONE: InfoAction { version number, login status, etc }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class GateEditorServiceAction extends InterfaceAction<GateEditorService>
     {
         public GateEditorServiceAction()

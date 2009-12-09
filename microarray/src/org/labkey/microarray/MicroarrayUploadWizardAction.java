@@ -25,8 +25,8 @@ import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.BulkPropertiesDisplayColumn;
 import org.labkey.api.study.assay.BulkPropertiesUploadWizardAction;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
@@ -46,7 +46,7 @@ import java.util.Map;
  * User: jeckels
  * Date: Feb 6, 2008
  */
-@RequiresPermission(ACL.PERM_INSERT)
+@RequiresPermissionClass(InsertPermission.class)
 public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardAction<MicroarrayRunUploadForm, MicroarrayAssayProvider>
 {
     private Integer _channelCount;

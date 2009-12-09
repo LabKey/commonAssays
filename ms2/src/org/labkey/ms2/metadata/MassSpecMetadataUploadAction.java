@@ -21,13 +21,13 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.actions.BulkPropertiesDisplayColumn;
 import org.labkey.api.study.assay.BulkPropertiesUploadWizardAction;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -42,7 +42,7 @@ import java.util.Map;
  * Date: Sep 17, 2007
  * Time: 12:30:55 AM
  */
-@RequiresPermission(ACL.PERM_INSERT)
+@RequiresPermissionClass(InsertPermission.class)
 public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardAction<MassSpecMetadataAssayForm, MassSpecMetadataAssayProvider>
 {
     public MassSpecMetadataUploadAction()
@@ -51,7 +51,7 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
         addStepHandler(new DeleteAssaysStepHandler());
     }
 
-    @RequiresPermission(ACL.PERM_DELETE)
+    @RequiresPermissionClass(DeletePermission.class)
     public class DeleteAssaysStepHandler extends StepHandler<MassSpecMetadataAssayForm>
     {
         public static final String NAME = "DELETEASSAYS";

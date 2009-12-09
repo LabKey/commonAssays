@@ -21,8 +21,8 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
@@ -42,7 +42,7 @@ import java.util.Map;
  * Date: Sep 27, 2007
  * Time: 3:48:53 PM
  */
-@RequiresPermission(ACL.PERM_INSERT)
+@RequiresPermissionClass(InsertPermission.class)
 public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, NabAssayProvider>
 {
     public NabUploadWizardAction()

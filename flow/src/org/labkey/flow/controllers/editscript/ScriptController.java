@@ -28,8 +28,8 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
@@ -100,7 +100,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleViewAction<EditScriptForm>
     {
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
@@ -119,7 +119,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class EditScriptAction extends SimpleViewAction<EditScriptForm>
     {
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
@@ -164,7 +164,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class NewProtocolAction extends SimpleViewAction<NewProtocolForm>
     {
         public ModelAndView getView(NewProtocolForm form, BindException errors) throws Exception
@@ -256,7 +256,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class EditAnalysisAction extends SimpleViewAction<AnalysisForm>
     {
         public ModelAndView getView(AnalysisForm form, BindException errors) throws Exception
@@ -453,7 +453,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class UploadAnalysisAction extends SimpleViewAction<UploadAnalysisForm>
     {
         public ModelAndView getView(UploadAnalysisForm form, BindException errors) throws Exception
@@ -588,7 +588,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         return null;
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class UploadCompensationCalculationAction extends SimpleViewAction<EditCompensationCalculationForm>
     {
         public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
@@ -608,7 +608,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
 
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class ChooseCompensationRunAction extends SimpleViewAction<EditCompensationCalculationForm>
     {
         public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
@@ -640,7 +640,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         return graphDef;
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class EditCompensationCalculationAction extends SimpleViewAction<EditCompensationCalculationForm>
     {
         public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
@@ -766,7 +766,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         return true;
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class GraphImageAction extends SimpleViewAction<GraphForm>
     {
         public ModelAndView getView(GraphForm form, BindException errors) throws Exception
@@ -917,7 +917,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class EditGateTreeAction extends SimpleViewAction<EditGateTreeForm>
     {
         public ModelAndView getView(EditGateTreeForm form, BindException errors) throws Exception
@@ -1016,7 +1016,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class CopyAction extends SimpleViewAction<CopyProtocolForm>
     {
         String scriptName;
@@ -1076,7 +1076,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class EditPropertiesAction extends SimpleViewAction<EditPropertiesForm>
     {
         public ModelAndView getView(EditPropertiesForm form, BindException errors) throws Exception
@@ -1097,7 +1097,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class EditSettingsAction extends SimpleViewAction<EditSettingsForm>
     {
         public ModelAndView getView(EditSettingsForm form, BindException errors) throws Exception
@@ -1202,7 +1202,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         return success;
     }
 
-    @RequiresPermission(ACL.PERM_DELETE)
+    @RequiresPermissionClass(DeletePermission.class)
     public class DeleteAction extends SimpleViewAction<EditScriptForm>
     {
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
@@ -1223,7 +1223,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class GateEditorAction extends SimpleViewAction<GateEditorForm>
     {
         FlowObject object;
@@ -1262,7 +1262,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class GateEditorService extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception

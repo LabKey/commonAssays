@@ -28,7 +28,8 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.Pair;
@@ -78,7 +79,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
         FlowScript script;
@@ -154,7 +155,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
         }
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class ChooseRunsToAnalyzeAction extends BaseAnalyzeRunsAction
     {
         FlowScript script;
@@ -166,7 +167,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
         }
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class AnalyzeSelectedRunsAction extends BaseAnalyzeRunsAction
     {
         public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors) throws Exception
@@ -337,7 +338,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
         }
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class ChooseRunsToUploadAction extends BaseUploadRunsAction
     {
         public ModelAndView getView(ChooseRunsToUploadForm form, BindException errors) throws Exception
@@ -347,7 +348,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
     }
 
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class UploadRunsAction extends BaseUploadRunsAction
     {
         public ModelAndView getView(ChooseRunsToUploadForm form, BindException errors) throws Exception
@@ -356,7 +357,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
         }
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class ShowUploadRunsAction extends RedirectAction
     {
         public ActionURL getSuccessURL(Object o)
@@ -422,7 +423,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class ImportAnalysisAction extends FormViewAction<ImportAnalysisForm>
     {
         String title;

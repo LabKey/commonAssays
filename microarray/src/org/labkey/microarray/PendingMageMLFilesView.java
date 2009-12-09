@@ -28,7 +28,7 @@ import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
-import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.reports.ReportService;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
@@ -83,13 +83,13 @@ public class PendingMageMLFilesView extends QueryView
         deleteButton.setURL(deleteURL);
         deleteButton.setRequiresSelection(true, null, view.getDataRegion().getJavascriptFormReference(true));
         deleteButton.setActionType(ActionButton.Action.POST);
-        deleteButton.setDisplayPermission(ACL.PERM_DELETE);
+        deleteButton.setDisplayPermission(DeletePermission.class);
         bar.add(deleteButton);
 
         if (root == null)
         {
             SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to import because pipeline has not been configured. [<a href=\"" + PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer()) + "\">setup pipeline</a>]", true);
-            element.setDisplayPermission(ACL.PERM_INSERT);
+            element.setDisplayPermission(InsertPermission.class);
             bar.add(element);
         }
         else
@@ -100,7 +100,7 @@ public class PendingMageMLFilesView extends QueryView
                 message.append(PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(getContainer(), MicroarrayAssayProvider.NAME, getViewContext().getActionURL()));
                 message.append("\">create a microarray microarray assay definition</a>.");
                 SimpleTextDisplayElement element = new SimpleTextDisplayElement(message.toString(), true);
-                element.setDisplayPermission(ACL.PERM_INSERT);
+                element.setDisplayPermission(InsertPermission.class);
                 bar.add(element);
             }
             else
@@ -112,13 +112,13 @@ public class PendingMageMLFilesView extends QueryView
                     ActionButton button = new ActionButton(url, "Import using " + protocol.getName());
                     button.setRequiresSelection(true, null, view.getDataRegion().getJavascriptFormReference(true));
                     button.setActionType(ActionButton.Action.POST);
-                    button.setDisplayPermission(ACL.PERM_INSERT);
+                    button.setDisplayPermission(InsertPermission.class);
                     bar.add(button);
                 }
                 else
                 {
                     MenuButton menu = new MenuButton("Import selected using...");
-                    menu.setDisplayPermission(ACL.PERM_INSERT);
+                    menu.setDisplayPermission(InsertPermission.class);
                     bar.add(menu);
                     for (ExpProtocol protocol : microarrayProtocols)
                     {
@@ -128,7 +128,7 @@ public class PendingMageMLFilesView extends QueryView
                 }
                 ActionURL browseURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), getReturnURL().toString());
                 ActionButton browseButton = new ActionButton(browseURL, "Browse for MageML Files");
-                browseButton.setDisplayPermission(ACL.PERM_INSERT);
+                browseButton.setDisplayPermission(InsertPermission.class);
                 bar.add(browseButton);
             }
         }

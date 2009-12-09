@@ -29,6 +29,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -82,7 +83,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
         if (ret == null)
             return null;
-        if (!ret.getContainer().hasPermission(user, ACL.PERM_READ))
+        if (!ret.getContainer().hasPermission(user, ReadPermission.class))
         {
             HttpView.throwUnauthorized();
         }

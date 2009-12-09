@@ -20,10 +20,9 @@ import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiVersion;
 import org.labkey.api.action.HasViewContext;
 import org.labkey.api.security.ActionNames;
-import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -41,14 +40,16 @@ import javax.servlet.ServletException;
 import java.util.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.io.IOException;/*
+import java.io.IOException;
+
+/*
  * User: brittp
  * Date: Dec 9, 2008
  * Time: 5:13:30 PM
  */
 
 @ActionNames("getNabRuns, getNAbRuns")
-@RequiresPermission(ACL.PERM_READ)
+@RequiresPermissionClass(ReadPermission.class)
 @ApiVersion(9.1)
 public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
 {

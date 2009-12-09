@@ -24,6 +24,7 @@
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.nab.*" %>
+<%@ page import="org.labkey.api.security.permissions.InsertPermission" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -31,7 +32,7 @@
     NabController.RenderAssayBean bean = me.getModelBean();
     Luc5Assay assay = bean.getAssay();
     ViewContext context = me.getViewContext();
-    boolean writer = context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT);
+    boolean writer = context.getContainer().hasPermission(context.getUser(), InsertPermission.class);
     %>
 <labkey:errors/>
 <%

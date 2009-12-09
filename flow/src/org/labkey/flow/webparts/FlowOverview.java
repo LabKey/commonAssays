@@ -24,6 +24,7 @@ import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Overview;
@@ -73,7 +74,7 @@ public class FlowOverview extends Overview
         _canInsert = hasPermission(ACL.PERM_INSERT);
         _canUpdate = hasPermission(ACL.PERM_UPDATE);
         _canCreateFolder = getContainer().getParent() != null && !getContainer().getParent().isRoot() &&
-                getContainer().getParent().hasPermission(getUser(), ACL.PERM_ADMIN);
+                getContainer().getParent().hasPermission(getUser(), AdminPermission.class);
 
         _fcsFileCount = FlowManager.get().getFCSFileCount(user, getContainer());
         _fcsRunCount = FlowManager.get().getFCSFileOnlyRunsCount(user, getContainer());

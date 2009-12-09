@@ -25,6 +25,8 @@ import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.security.SecurityPolicy;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
@@ -119,7 +121,7 @@ public class WellController extends SpringFlowController<WellController.Action>
         return new ActionURL(ShowWellAction.class, ContainerManager.getRoot());
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ShowWellAction extends SimpleViewAction
     {
         FlowWell well;
@@ -138,7 +140,7 @@ public class WellController extends SpringFlowController<WellController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class EditWellAction extends FormViewAction<EditWellForm>
     {
         FlowWell well;
@@ -223,7 +225,7 @@ public class WellController extends SpringFlowController<WellController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ChooseGraphAction extends SimpleViewAction<ChooseGraphForm>
     {
         FlowWell well;
@@ -271,7 +273,7 @@ public class WellController extends SpringFlowController<WellController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ShowGraphAction extends SimpleViewAction
     {
         FlowWell well;
@@ -313,7 +315,7 @@ public class WellController extends SpringFlowController<WellController.Action>
         response.getOutputStream().write(bytes);
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class GenerateGraphAction extends SimpleViewAction<ChooseGraphForm>
     {
         public ModelAndView getView(ChooseGraphForm form, BindException errors) throws Exception
@@ -357,7 +359,7 @@ public class WellController extends SpringFlowController<WellController.Action>
     }
     
     
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class KeywordsAction extends FCSAction
     {
         protected ModelAndView internalGetView(FlowWell well) throws Exception
@@ -377,7 +379,7 @@ public class WellController extends SpringFlowController<WellController.Action>
 
 
     // this is really for dev use as far as I can tell
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ShowFCSAction extends FCSAction
     {
         public ModelAndView internalGetView(FlowWell well) throws Exception
@@ -422,7 +424,7 @@ public class WellController extends SpringFlowController<WellController.Action>
     }
 
 
-    @RequiresPermission(ACL.PERM_ADMIN)
+    @RequiresPermissionClass(AdminPermission.class)
     public class BulkUpdateKeywordsAction extends FormViewAction<UpdateKeywordsForm>
     {
         Integer keywordid = null;

@@ -35,6 +35,8 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.DeletePermission;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.*;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.UnauthorizedException;
@@ -710,7 +712,7 @@ public class MS2Manager
             while (rs.next())
             {
                 Container c = ContainerManager.getForId(rs.getString(1));
-                if (!c.hasPermission(user, ACL.PERM_DELETE))
+                if (!c.hasPermission(user, DeletePermission.class))
                     throw new UnauthorizedException();
             }
 
@@ -1970,7 +1972,7 @@ public class MS2Manager
             // Authorize this run
             Container c = run.getContainer();
 
-            if (!c.hasPermission(user, ACL.PERM_READ))
+            if (!c.hasPermission(user, ReadPermission.class))
             {
                 if (user.isGuest())
                     HttpView.throwUnauthorized();

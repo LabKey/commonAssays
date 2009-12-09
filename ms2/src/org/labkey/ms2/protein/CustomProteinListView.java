@@ -21,6 +21,8 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.DeletePermission;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.query.DetailsURL;
 import org.springframework.validation.BindException;
 
@@ -42,7 +44,7 @@ public class CustomProteinListView extends VBox
         rgn.getDisplayColumn("Name").setURLExpression(new DetailsURL(new ActionURL(ProteinController.ShowAnnotationSetAction.class, context.getContainer()), Collections.singletonMap("CustomAnnotation.queryName", "Name")));
         rgn.getDisplayColumn("CustomAnnotationSetId").setVisible(false);
         GridView gridView = new GridView(rgn, (BindException)null);
-        rgn.setShowRecordSelectors((context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT) || context.getContainer().hasPermission(context.getUser(), ACL.PERM_DELETE)) && includeButtons);
+        rgn.setShowRecordSelectors((context.getContainer().hasPermission(context.getUser(), InsertPermission.class) || context.getContainer().hasPermission(context.getUser(), DeletePermission.class)) && includeButtons);
         gridView.setSort(new Sort("Name"));
 
         ButtonBar buttonBar = new ButtonBar();
@@ -54,11 +56,11 @@ public class CustomProteinListView extends VBox
             deleteButton.setURL(deleteURL);
             deleteButton.setRequiresSelection(true);
             deleteButton.setActionType(ActionButton.Action.POST);
-            deleteButton.setDisplayPermission(ACL.PERM_DELETE);
+            deleteButton.setDisplayPermission(DeletePermission.class);
             buttonBar.add(deleteButton);
 
             ActionButton addButton = new ActionButton(new ActionURL(ProteinController.UploadCustomProteinAnnotations.class, context.getContainer()), "Import Custom Protein List");
-            addButton.setDisplayPermission(ACL.PERM_INSERT);
+            addButton.setDisplayPermission(InsertPermission.class);
             addButton.setActionType(ActionButton.Action.LINK);
             buttonBar.add(addButton);
         }

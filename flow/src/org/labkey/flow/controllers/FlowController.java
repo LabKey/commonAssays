@@ -33,6 +33,8 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
+import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.JobRunner;
@@ -91,7 +93,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
         AdminConsole.addLink(SettingsLinkType.Configuration, "flow cytometry", new ActionURL(FlowAdminAction.class, ContainerManager.getRoot()));
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -129,7 +131,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class QueryAction extends SimpleViewAction
     {
         String query;
@@ -191,7 +193,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ShowStatusJobAction extends SimpleViewAction<StatusJobForm>
     {
         public void validate(StatusJobForm form, BindException errors)
@@ -299,7 +301,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class ShowJobsAction extends SimpleViewAction<Object>
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -331,7 +333,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
         return null;
     }
 
-    @RequiresPermission(ACL.PERM_UPDATE)
+    @RequiresPermissionClass(UpdatePermission.class)
     public class CancelJobAction extends SimpleViewAction<CancelJobForm>
     {
         public ModelAndView getView(CancelJobForm form, BindException errors) throws Exception
@@ -389,7 +391,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_ADMIN)
+    @RequiresPermissionClass(AdminPermission.class)
     public class NewFolderAction extends FormViewAction<NewFolderForm>
     {
         Container destContainer;
@@ -402,7 +404,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
         {
             if (getContainer().getParent() == null || getContainer().getParent().isRoot())
                 HttpView.throwUnauthorized();
-            if (!getContainer().getParent().hasPermission(getUser(), ACL.PERM_ADMIN))
+            if (!getContainer().getParent().hasPermission(getUser(), AdminPermission.class))
             {
                 HttpView.throwUnauthorized();
             }
@@ -538,7 +540,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class SavePerferencesAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception

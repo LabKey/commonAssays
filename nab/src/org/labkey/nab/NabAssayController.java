@@ -43,7 +43,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.WellData;
 import org.labkey.api.study.actions.AssayHeaderView;
@@ -85,7 +85,7 @@ public class NabAssayController extends SpringActionController
         setActionResolver(_resolver);
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -144,16 +144,16 @@ public class NabAssayController extends SpringActionController
             DataRegion rgn = view.getDataRegion();
             ButtonBar bar = rgn.getButtonBar(DataRegion.MODE_GRID);
             ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
-            selectButton.setDisplayPermission(ACL.PERM_INSERT);
+            selectButton.setDisplayPermission(InsertPermission.class);
             bar.add(selectButton);
 
             ActionButton clearButton = ActionButton.BUTTON_CLEAR_ALL.clone();
-            clearButton.setDisplayPermission(ACL.PERM_INSERT);
+            clearButton.setDisplayPermission(InsertPermission.class);
             bar.add(clearButton);
 
             ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
             deleteButton.setRequiresSelection(true);
-            deleteButton.setDisplayPermission(ACL.PERM_DELETE);
+            deleteButton.setDisplayPermission(DeletePermission.class);
             bar.add(deleteButton);
 
             SimpleFilter filter;
@@ -337,7 +337,7 @@ public class NabAssayController extends SpringActionController
         {
             _printURL = printLink;
             _datafileURL = dataFileLink;
-            _writer = context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT);
+            _writer = context.getContainer().hasPermission(context.getUser(), InsertPermission.class);
         }
 
         public boolean showPrintView()
@@ -361,7 +361,7 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class DownloadDatafileAction extends SimpleViewAction<RenderAssayForm>
     {
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
@@ -627,7 +627,7 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class GraphSelectedAction extends SimpleViewAction<GraphSelectedForm>
     {
         private ExpProtocol _protocol;
@@ -700,7 +700,7 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_DELETE)
+    @RequiresPermissionClass(DeletePermission.class)
     public class DeleteRunAction extends SimpleViewAction<DeleteRunForm>
     {
         public ModelAndView getView(DeleteRunForm deleteRunForm, BindException errors) throws Exception
@@ -746,7 +746,7 @@ public class NabAssayController extends SpringActionController
         return arr;
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class MultiGraphAction extends SimpleViewAction<GraphSelectedForm>
     {
         public ModelAndView getView(GraphSelectedForm form, BindException errors) throws Exception

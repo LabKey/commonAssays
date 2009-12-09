@@ -22,14 +22,12 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.permissions.*;
 import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.PipelineDataCollectorRedirectAction;
@@ -109,7 +107,7 @@ public class MicroarrayController extends SpringActionController
         return getUploadRedirectAction(c, protocol).addParameter("path", pipelinePath);
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class UploadRedirectAction extends PipelineDataCollectorRedirectAction
     {
         protected FileFilter getFileFilter()
@@ -137,7 +135,7 @@ public class MicroarrayController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ShowRunsAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -154,7 +152,7 @@ public class MicroarrayController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class ShowPendingMageMLFilesAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -168,7 +166,7 @@ public class MicroarrayController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
+    @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -235,7 +233,7 @@ public class MicroarrayController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_INSERT)
+    @RequiresPermissionClass(InsertPermission.class)
     public class ImportImageFilesAction extends SimpleViewAction<ExtractionForm>
     {
         public NavTree appendNavTrail(NavTree root)

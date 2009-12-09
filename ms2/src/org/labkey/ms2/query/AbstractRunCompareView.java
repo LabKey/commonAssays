@@ -19,6 +19,7 @@ package org.labkey.ms2.query;
 import org.labkey.api.data.*;
 import org.labkey.api.query.*;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.HttpView;
@@ -75,7 +76,7 @@ public abstract class AbstractRunCompareView extends QueryView
             for (MS2Run run : _runs)
             {
                 Container c = run.getContainer();
-                if (c == null || !c.hasPermission(getUser(), ACL.PERM_READ))
+                if (c == null || !c.hasPermission(getUser(), ReadPermission.class))
                 {
                     HttpView.throwUnauthorized();
                 }

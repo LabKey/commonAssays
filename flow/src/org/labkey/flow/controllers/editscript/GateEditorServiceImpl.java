@@ -23,6 +23,7 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.flow.gateeditor.client.model.*;
 import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
 import org.labkey.flow.gateeditor.client.model.GWTGraphInfo;
@@ -621,7 +622,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
 
     private boolean canUpdate(FlowRun run)
     {
-        if (!run.getContainer().hasPermission(getUser(), ACL.PERM_UPDATE))
+        if (!run.getContainer().hasPermission(getUser(), UpdatePermission.class))
             return false;
         if (!run.isInWorkspace())
             return false;
