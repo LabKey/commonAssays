@@ -168,7 +168,7 @@ public class FlowManager
         }
         if (!hasNulls)
             return ret;
-        ArrayList<Map.Entry<Integer, String>> lstRet = new ArrayList();
+        ArrayList<Map.Entry<Integer, String>> lstRet = new ArrayList<Map.Entry<Integer, String>>();
         for (Map.Entry<Integer, String> entry : ret)
         {
             if (entry != null)
@@ -176,7 +176,7 @@ public class FlowManager
                 lstRet.add(entry);
             }
         }
-        return lstRet.toArray(new Map.Entry[0]);
+        return lstRet.toArray(new Map.Entry[lstRet.size()]);
     }
 
 
