@@ -16,10 +16,7 @@
 
 package org.labkey.viability;
 
-import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.Lsid;
@@ -30,15 +27,19 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.*;
+import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
@@ -47,6 +48,8 @@ import org.labkey.api.gwt.client.DefaultValueType;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.beans.PropertyValue;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 /**
@@ -363,6 +366,43 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     }
 
     @Override
+    public RunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
+    {
+        return new ViabilityRunListQueryView(protocol, context);
+    }
+
+    private class ViabilityRunListQueryView extends RunListQueryView
+    {
+        ExpProtocol _protocol;
+
+        public ViabilityRunListQueryView(ExpProtocol protocol, UserSchema schema, QuerySettings settings, AssayRunType assayRunFilter)
+        {
+            super(protocol, schema, settings, assayRunFilter);
+            _protocol = protocol;
+        }
+
+        public ViabilityRunListQueryView(ExpProtocol protocol, ViewContext context)
+        {
+            super(protocol, context);
+            _protocol = protocol;
+        }
+
+        @Override
+        public List<DisplayColumn> getDisplayColumns()
+        {
+            ActionURL reRunURL = getImportURL(getContainer(), _protocol);
+            reRunURL.addParameter("reRunId", "${RowId}");
+
+            DisplayColumn reRunDisplayCol = new UrlColumn(StringExpressionFactory.createURL(reRunURL), "re-import");
+            reRunDisplayCol.setNoWrap(true);
+
+            List<DisplayColumn> cols = super.getDisplayColumns();
+            cols.add(0, reRunDisplayCol);
+            return cols;
+        }
+    }
+
+    @Override
     public ModelAndView createResultsView(ViewContext context, ExpProtocol protocol)
     {
         return new AssayResultsView(protocol, false)
@@ -411,7 +451,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
                         ActionURL reRunURL = getImportURL(c, protocol);
                         reRunURL.addParameter("reRunId", runId);
 
-                        _links.put("too long: use values from this run and import a new one", reRunURL);
+                        _links.put("re-import", reRunURL);
 
                         if (canDelete)
                         {

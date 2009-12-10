@@ -16,8 +16,10 @@
 
 package org.labkey.viability;
 
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.UploadWizardAction;
+import org.labkey.api.study.assay.AssayFileWriter;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.ExperimentException;
@@ -246,4 +248,29 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
         return ret;
     }
 
+    @Override
+    public Map<String, File> getUploadedData() throws ExperimentException
+    {
+        // We don't want to re-populate the upload form with the re-run file if this is a reshow due to error during
+        // a re-upload process:
+        Map<String, File> currentUpload = super.getUploadedData();
+        if (currentUpload == null || currentUpload.isEmpty())
+        {
+            ExpRun reRun = getReRun();
+            if (reRun != null)
+            {
+                List<ExpData> inputs = reRun.getDataOutputs();
+                if (inputs.size() > 1)
+                    throw new IllegalStateException("Viability runs are expected to produce one output.");
+                File dataFile = inputs.get(0).getDataFile();
+                if (dataFile.exists())
+                {
+                    AssayFileWriter writer = new AssayFileWriter();
+                    File dup = writer.safeDuplicate(getViewContext(), dataFile);
+                    return Collections.singletonMap(inputs.get(0).getName(), dup);
+                }
+            }
+        }
+        return currentUpload;
+    }
 }
