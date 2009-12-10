@@ -23,16 +23,21 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.RuntimeSQLException;
 import static org.labkey.api.action.SpringActionController.ERROR_MSG;
+import org.labkey.api.view.HttpView;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.springframework.validation.BindException;
 
 import java.util.*;
 import java.io.File;
+import java.sql.SQLException;
 
 /**
  * User: kevink
@@ -42,12 +47,22 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
 {
     public static String INPUT_PREFIX = "_pool_";
 
+    private ExpRun _reRun;
+    private Integer _reRunId;
+    private boolean _delete;
+    
     private String[] _poolIDs;
     private ViabilityAssayDataHandler.Parser _parser;
     private List<Map<String, Object>> _resultProperties;
 
     public String[] getPoolIds() { return _poolIDs; }
     public void setPoolIds(String[] poolIDs) { _poolIDs = poolIDs; }
+
+    public Integer getReRunId() { return _reRunId; }
+    public void setReRunId(Integer reRunId) { _reRunId = reRunId; }
+
+    public boolean isDelete() { return _delete; }
+    public void setDelete(boolean delete) { _delete = delete; }
 
     /** Read rows from a posted file. */
     public List<Map<String, Object>> getParsedResultData() throws ExperimentException
@@ -187,6 +202,48 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
             properties.put(dp.getName(), value);
         }
         return properties;
+    }
+
+    private ExpRun getReRun()
+    {
+        if (_reRunId != null)
+        {
+            _reRun = ExperimentService.get().getExpRun(_reRunId);
+            if (_reRun == null)
+                HttpView.throwNotFound("Viability run " + _reRunId + " could not be found");
+        }
+        return _reRun;
+    }
+
+    /**
+     * Returns a Map of PoolId to a Map of property names and values.
+     */
+    public Map<String, Map<String, Object>> getReRunResults() throws ExperimentException
+    {
+        Map<String, Map<String, Object>> ret = Collections.emptyMap();
+
+        ExpRun reRun = getReRun();
+        if (reRun != null)
+        {
+            ret = new HashMap<String, Map<String, Object>>();
+            try
+            {
+                ViabilityResult[] results = ViabilityManager.getResults(reRun, reRun.getContainer());
+                for (ViabilityResult result : results)
+                {
+                    String poolID = result.getPoolID();
+                    // XXX: there can be more than one pool id in a run
+                    if (!ret.containsKey(poolID))
+                        ret.put(poolID, result.toMap());
+                }
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
+        return ret;
     }
 
 }

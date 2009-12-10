@@ -21,6 +21,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.*;
 import org.labkey.api.security.User;
 import org.labkey.api.util.TestContext;
@@ -56,7 +57,17 @@ public class ViabilityManager
     {
         ViabilityResult[] result = Table.select(ViabilitySchema.getTableInfoResults(),
                 Table.ALL_COLUMNS,
-                new SimpleFilter(),
+                new SimpleFilter("DataID", data.getRowId()).addCondition("Container", container.getId()),
+                null,
+                ViabilityResult.class);
+        return result;
+    }
+
+    public static ViabilityResult[] getResults(ExpRun run, Container container) throws SQLException
+    {
+        ViabilityResult[] result = Table.select(ViabilitySchema.getTableInfoResults(),
+                Table.ALL_COLUMNS,
+                new SimpleFilter("DataID/RunID", run.getRowId()).addCondition("Container", container.getId()),
                 null,
                 ViabilityResult.class);
         return result;
@@ -367,6 +378,10 @@ public class ViabilityManager
 
                 ViabilityManager.saveResult(user, c, result, 0);
                 resultId = result.getRowID();
+
+                ViabilityResult[] results = ViabilityManager.getResults(_data, c);
+                assertEquals(1, results.length);
+                assertEquals(resultId, results[0].getRowID());
             }
 
             // verify

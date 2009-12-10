@@ -33,8 +33,6 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.PropertyValidationError;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.qc.TransformResult;
-import org.labkey.api.qc.DefaultTransformResult;
 import org.labkey.viability.data.MultiValueInputColumn;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
@@ -127,21 +125,48 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         }
     }
 
+    @Override
+    protected DataRegion createDataRegionForInsert(TableInfo baseTable, String lsidCol, DomainProperty[] domainProperties, Map<String, String> columnNameToPropertyName)
+    {
+        // The base implementation adds ColumnInfos to the DataRegion, but we
+        // do this manually in _getResultsView() for the Results table.
+        if (baseTable.getName().equals(ViabilitySchema.Tables.Results.name()))
+        {
+            DataRegion rgn = new DataRegion();
+            rgn.setTable(baseTable);
+            return rgn;
+        }
+
+        return super.createDataRegionForInsert(baseTable, lsidCol, domainProperties, columnNameToPropertyName);
+    }
+
+    @Override
+    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, DomainProperty[] properties, boolean errorReshow, String uploadStepName, ViabilityAssayRunUploadForm form, BindException errors)
+    {
+        InsertView view = super.createInsertView(baseTable, lsidCol, properties, errorReshow, uploadStepName, form, errors);
+        if (form.getReRunId() != null)
+            view.getDataRegion().addHiddenFormField("reRunId", "" + form.getReRunId());
+        if (form.isDelete())
+            view.getDataRegion().addHiddenFormField("delete", "" + form.isDelete());
+        return view;
+    }
+
     protected InsertView _getResultsView(ViabilityAssayRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
     {
         List<Map<String, Object>> rows = errorReshow ? form.getResultProperties(errors) : form.getParsedResultData();
-
-        String lsidCol = "RowID";
-        InsertView view = createInsertView(ViabilitySchema.getTableInfoResults(), lsidCol, new DomainProperty[0], errorReshow, ResultsStepHandler.NAME, form, errors);
+        Map<String, Map<String, Object>> reRunResults = form.getReRunResults();
 
         Domain resultDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ExpProtocol.ASSAY_DOMAIN_DATA);
         DomainProperty[] resultDomainProperties = resultDomain.getProperties();
+        String lsidCol = "RowID";
+        InsertView view = createInsertView(ViabilitySchema.getTableInfoResults(), lsidCol, resultDomainProperties, errorReshow, ResultsStepHandler.NAME, form, errors);
 
         boolean firstPass = true;
         List<String> poolIDs = new ArrayList<String>(rows.size());
         for (DomainProperty resultDomainProperty : resultDomainProperties)
         {
-            ViabilityAssayProvider.ResultDomainProperty rdp = ViabilityAssayProvider.RESULT_DOMAIN_PROPERTIES.get(resultDomainProperty.getName());
+            String propertyName = resultDomainProperty.getName();
+            ViabilityAssayProvider.ResultDomainProperty rdp = ViabilityAssayProvider.RESULT_DOMAIN_PROPERTIES.get(propertyName);
             if (rdp != null && rdp.hideInUploadWizard)
                 continue;
 
@@ -154,12 +179,30 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 Map<String, Object> row = rows.get(rowIndex);
                 String poolID = (String) row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME);
                 assert poolID != null;
-                String inputName = getInputName(resultDomainProperty, ViabilityAssayRunUploadForm.INPUT_PREFIX + poolID + "_" + rowIndex);
                 if (firstPass)
                 {
                     poolIDs.add(poolID);
                 }
-                Object initialValue = row.get(resultDomainProperty.getName());
+
+                String inputName = getInputName(resultDomainProperty, ViabilityAssayRunUploadForm.INPUT_PREFIX + poolID + "_" + rowIndex);
+                Object initialValue = null;
+
+                // first, get the property's default value set in the assay design
+                initialValue = view.getInitialValues().get(propertyName);
+
+                // second, get the value from the parsed file
+                if (!errorReshow && row.containsKey(propertyName))
+                    initialValue = row.get(propertyName);
+
+                // third, if the field is editable get the property's default value from a previous run
+                Map<String, Object> reRun = reRunResults.get(poolID);
+                if (editable && reRun != null && reRun.containsKey(propertyName))
+                    initialValue = reRun.get(propertyName);
+
+                // finally, get the value as entered by the user in the case of errorReshow
+                if (errorReshow && row.containsKey(propertyName))
+                    initialValue = row.get(propertyName);
+
                 if (initialValue != null)
                     view.setInitialValue(inputName, initialValue);
 
@@ -171,7 +214,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 col.setInputLength(rdp != null ? rdp.inputLength : 9);
 
                 DisplayColumn displayCol;
-                if (resultDomainProperty.getName().equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
+                if (propertyName.equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
                 {
                     List<String> values = (List<String>) initialValue;
                     displayCol = new MultiValueInputColumn(col, values);
@@ -183,7 +226,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 }
                 columns.add(displayCol);
             }
-            view.getDataRegion().addGroup(new DisplayColumnGroup(columns, resultDomainProperty.getName(), copyable));
+            view.getDataRegion().addGroup(new DisplayColumnGroup(columns, propertyName, copyable));
             firstPass = false;
         }
 
@@ -288,6 +331,12 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             try
             {
                 ExpRun run = saveExperimentRun(form);
+
+                if (form.isDelete() && form.getReRunId() != null)
+                {
+                    ExperimentService.get().deleteExperimentRunsByRowIds(getContainer(), getViewContext().getUser(), form.getReRunId().intValue());
+                }
+
                 return afterRunCreation(form, run, errors);
             }
             catch (ValidationException e)

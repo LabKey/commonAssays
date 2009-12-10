@@ -18,8 +18,8 @@ package org.labkey.viability;
 
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.data.Container;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -63,6 +63,14 @@ public class ViabilityResult
         else
             result.setProperties(Collections.<PropertyDescriptor, Object>emptyMap());
         return result;
+    }
+
+    public Map<String, Object> toMap()
+    {
+        ObjectFactory<ViabilityResult> factory = ObjectFactory.Registry.getFactory(ViabilityResult.class);
+        Map<String, Object> ret = factory.toMap(this, null);
+        ret.putAll(getStringProperties());
+        return ret;
     }
 
     public int getRowID()
@@ -227,6 +235,15 @@ public class ViabilityResult
             }
         }
         return properties;
+    }
+
+    private Map<String, Object> getStringProperties()
+    {
+        Map<String, Object> ret = new CaseInsensitiveHashMap<Object>();
+        Map<PropertyDescriptor, Object> properties = getProperties();
+        for (Map.Entry<PropertyDescriptor, Object> entry : properties.entrySet())
+            ret.put(entry.getKey().getName(), entry.getValue());
+        return ret;
     }
 
     public void setProperties(Map<PropertyDescriptor, Object> properties)
