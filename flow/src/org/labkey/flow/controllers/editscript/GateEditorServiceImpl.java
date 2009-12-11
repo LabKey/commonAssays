@@ -16,39 +16,36 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.labkey.api.gwt.server.BaseRemoteService;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.flow.gateeditor.client.model.*;
-import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
-import org.labkey.flow.gateeditor.client.model.GWTGraphInfo;
-import org.labkey.flow.gateeditor.client.GateEditorService;
-import org.labkey.flow.gateeditor.client.GWTGraphException;
-import org.labkey.flow.data.*;
-import org.labkey.flow.analysis.web.SubsetSpec;
-import org.labkey.flow.analysis.web.GraphSpec;
-import org.labkey.flow.analysis.web.PlotInfo;
-import org.labkey.flow.analysis.web.FCSAnalyzer;
-import org.labkey.flow.analysis.model.*;
-import org.labkey.flow.analysis.chart.FlowLogarithmicAxis;
-import org.labkey.flow.script.FlowAnalyzer;
-import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.FlowPreference;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.fhcrc.cpas.flow.script.xml.*;
 import org.jfree.chart.axis.ValueAxis;
-import org.apache.log4j.Logger;
-import org.apache.commons.lang.StringUtils;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.gwt.server.BaseRemoteService;
+import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.flow.FlowPreference;
+import org.labkey.flow.analysis.chart.FlowLogarithmicAxis;
+import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.PlotInfo;
+import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.data.*;
+import org.labkey.flow.gateeditor.client.GWTGraphException;
+import org.labkey.flow.gateeditor.client.GateEditorService;
+import org.labkey.flow.gateeditor.client.model.*;
+import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.script.FlowAnalyzer;
 
 import javax.servlet.http.HttpServletRequest;
+import java.awt.*;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
-import java.sql.SQLException;
-import java.awt.*;
 
 
 public class GateEditorServiceImpl extends BaseRemoteService implements GateEditorService

@@ -18,13 +18,12 @@ package org.labkey.ms2.query;
 
 import org.labkey.api.data.*;
 import org.labkey.api.query.*;
-import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
-import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomAnnotationType;
 import org.labkey.ms2.protein.ProteinManager;

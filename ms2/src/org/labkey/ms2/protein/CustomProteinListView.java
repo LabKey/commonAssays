@@ -15,15 +15,14 @@
  */
 package org.labkey.ms2.protein;
 
-import org.labkey.api.view.*;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.Sort;
-import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.ActionButton;
-import org.labkey.api.security.ACL;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.query.DetailsURL;
+import org.labkey.api.view.*;
 import org.springframework.validation.BindException;
 
 import java.util.Collections;

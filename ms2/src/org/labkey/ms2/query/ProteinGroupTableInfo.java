@@ -16,18 +16,20 @@
 
 package org.labkey.ms2.query;
 
-import org.labkey.api.query.*;
-import org.labkey.api.data.*;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
-import org.labkey.api.security.ACL;
+import org.labkey.api.data.*;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.*;
 import org.labkey.ms2.protein.ProteinManager;
 
-import java.util.*;
 import java.sql.Types;
+import java.util.*;
 
 /**
  * User: jeckels

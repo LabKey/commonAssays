@@ -15,16 +15,15 @@
  */
 package org.labkey.flow.view;
 
+import org.labkey.api.collections.ResultSetRowMapFactory;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.GridView;
-import org.labkey.api.security.ACL;
-import org.labkey.api.collections.ResultSetRowMapFactory;
 import org.labkey.flow.controllers.well.WellController;
 
 import java.io.IOException;
@@ -33,7 +32,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  */

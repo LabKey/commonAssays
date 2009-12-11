@@ -19,11 +19,10 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlDialect;
-import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Use with FeaturesView and TableInfo to filter on a given set of containers

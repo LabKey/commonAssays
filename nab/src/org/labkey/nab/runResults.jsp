@@ -15,16 +15,18 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.security.ACL"%>
+<%@ page import="org.labkey.api.security.permissions.InsertPermission"%>
 <%@ page import="org.labkey.api.study.PlateQueryView"%>
 <%@ page import="org.labkey.api.study.WellData"%>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.nab.DilutionSummary" %>
+<%@ page import="org.labkey.nab.Luc5Assay" %>
+<%@ page import="org.labkey.nab.NabController" %>
+<%@ page import="org.labkey.nab.SampleInfo" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.nab.*" %>
-<%@ page import="org.labkey.api.security.permissions.InsertPermission" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%

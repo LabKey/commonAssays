@@ -17,20 +17,19 @@ package org.labkey.ms1.view;
 
 import org.labkey.api.data.*;
 import org.labkey.api.ms2.MS2Service;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.security.ACL;
+import org.labkey.api.reports.ReportService;
 import org.labkey.api.security.User;
 import org.labkey.api.view.DataView;
-import org.labkey.api.reports.ReportService;
 import org.labkey.ms1.query.PeptideFilter;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
