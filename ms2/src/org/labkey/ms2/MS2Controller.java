@@ -4152,7 +4152,7 @@ public class MS2Controller extends SpringActionController
 
             StringBuilder html = new StringBuilder();
             html.append("<script type=\"text/javascript\">\n");
-            html.append("LABKEY.requiresScript('filter.js');\n");
+            html.append("LABKEY.requiresScript('DataRegion.js');\n");
             html.append("</script>");
             html.append("<form method=post name=\"").append(formName).append("\" action=''>");
 
