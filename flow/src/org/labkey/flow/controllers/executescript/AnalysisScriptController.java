@@ -29,16 +29,18 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.permissions.*;
+import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
-import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.BaseFlowController;
+import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.AddRunsJob;
@@ -56,7 +58,7 @@ import java.util.*;
 
 public class AnalysisScriptController extends BaseFlowController<AnalysisScriptController.Action>
 {
-    static Logger _log = Logger.getLogger(SpringActionController.class);
+    private static final Logger _log = Logger.getLogger(SpringActionController.class);
 
     public enum Action
     {
