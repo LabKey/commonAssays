@@ -43,7 +43,7 @@ import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.SpringFlowController;
+import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
@@ -65,7 +65,7 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.net.URI;
 
-public class WellController extends SpringFlowController<WellController.Action>
+public class WellController extends BaseFlowController<WellController.Action>
 {
     static private final Logger _log = Logger.getLogger(WellController.class);
     public enum Action

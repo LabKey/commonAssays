@@ -61,7 +61,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.File;
 import java.net.URI;
 
-public class FlowController extends SpringFlowController<FlowController.Action>
+public class FlowController extends BaseFlowController<FlowController.Action>
 {
     private static final Logger _log = Logger.getLogger(FlowController.class);
 

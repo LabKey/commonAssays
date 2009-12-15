@@ -28,7 +28,7 @@ import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.SpringFlowController;
+import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowLog;
 import org.labkey.flow.data.FlowObject;
@@ -38,7 +38,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
 
-public class LogController extends SpringFlowController<LogController.Action>
+public class LogController extends BaseFlowController<LogController.Action>
 {
     public enum Action
     {

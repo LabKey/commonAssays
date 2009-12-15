@@ -44,7 +44,7 @@ import java.sql.SQLException;
  * Date: Sep 1, 2009
  * Time: 5:15:39 PM
  */
-public class ReportsController extends SpringFlowController<ReportsController.Action>
+public class ReportsController extends BaseFlowController<ReportsController.Action>
 {
     private static Logger _log = Logger.getLogger(ReportsController.class);
 

@@ -26,7 +26,7 @@ import org.labkey.api.security.permissions.*;
 import org.labkey.api.view.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.analysis.model.FCS;
-import org.labkey.flow.controllers.SpringFlowController;
+import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.FlowAnalyzer;
@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class RunController extends SpringFlowController<RunController.Action>
+public class RunController extends BaseFlowController<RunController.Action>
 {
     static private final Logger _log = Logger.getLogger(RunController.class);
     public enum Action

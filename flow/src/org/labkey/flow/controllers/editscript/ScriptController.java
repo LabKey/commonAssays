@@ -43,7 +43,7 @@ import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.SpringFlowController;
+import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.data.*;
 import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
 import org.labkey.flow.script.FlowAnalyzer;
@@ -67,7 +67,7 @@ import java.util.List;
  * User: kevink
  * Date: Nov 25, 2008 5:27:35 PM
  */
-public class ScriptController extends SpringFlowController<ScriptController.Action>
+public class ScriptController extends BaseFlowController<ScriptController.Action>
 {
     private static Logger _log = Logger.getLogger(ScriptController.class);
 
@@ -374,7 +374,7 @@ public class ScriptController extends SpringFlowController<ScriptController.Acti
         public ScriptParser.Error scriptParseError;
     }
 
-    abstract static public class Page<F extends EditScriptForm> extends SpringFlowController.FlowPage<ScriptController>
+    abstract static public class Page<F extends EditScriptForm> extends BaseFlowController.FlowPage<ScriptController>
     {
         public F form;
 

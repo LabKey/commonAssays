@@ -283,13 +283,13 @@ flow/src/org/labkey/flow/analysis/web/StatisticSpec.java -text
 flow/src/org/labkey/flow/analysis/web/SubsetExpression.java -text
 flow/src/org/labkey/flow/analysis/web/SubsetExpressionParser.java -text
 flow/src/org/labkey/flow/analysis/web/SubsetSpec.java -text
+flow/src/org/labkey/flow/controllers/BaseFlowController.java -text
 flow/src/org/labkey/flow/controllers/FlowAdminForm.java -text
 flow/src/org/labkey/flow/controllers/FlowController.java -text
 flow/src/org/labkey/flow/controllers/FlowParam.java -text
 flow/src/org/labkey/flow/controllers/IWorkspaceForm.java -text
 flow/src/org/labkey/flow/controllers/NewFolderForm.java -text
 flow/src/org/labkey/flow/controllers/ReportsController.java -text
-flow/src/org/labkey/flow/controllers/SpringFlowController.java -text
 flow/src/org/labkey/flow/controllers/WorkspaceData.java -text
 flow/src/org/labkey/flow/controllers/compensation/CompensationController.java -text
 flow/src/org/labkey/flow/controllers/compensation/UploadCompensationForm.java -text

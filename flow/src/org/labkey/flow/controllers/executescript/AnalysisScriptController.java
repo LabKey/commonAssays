@@ -38,7 +38,7 @@ import org.labkey.flow.FlowPreference;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.controllers.SpringFlowController;
+import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.AddRunsJob;
@@ -54,7 +54,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.*;
 
-public class AnalysisScriptController extends SpringFlowController<AnalysisScriptController.Action>
+public class AnalysisScriptController extends BaseFlowController<AnalysisScriptController.Action>
 {
     static Logger _log = Logger.getLogger(SpringActionController.class);
 

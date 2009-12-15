@@ -41,16 +41,16 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
 
-public class SpringFlowController<A extends Enum> extends SpringActionController
+public abstract class BaseFlowController<A extends Enum> extends SpringActionController
 {
-    protected SpringFlowController.FlowPage getFlowPage(String name) throws Exception
+    protected BaseFlowController.FlowPage getFlowPage(String name) throws Exception
     {
         return getFlowPage(name, getClass().getPackage());
     }
 
-    protected SpringFlowController.FlowPage getFlowPage(String name, Package thePackage) throws Exception
+    protected BaseFlowController.FlowPage getFlowPage(String name, Package thePackage) throws Exception
     {
-        SpringFlowController.FlowPage ret = (SpringFlowController.FlowPage) JspLoader.createPage(getRequest(), thePackage.getName(), name);
+        BaseFlowController.FlowPage ret = (BaseFlowController.FlowPage) JspLoader.createPage(getRequest(), thePackage.getName(), name);
         ret._controller = this;
         return ret;
     }
@@ -125,7 +125,7 @@ public class SpringFlowController<A extends Enum> extends SpringActionController
     }
 
 
-    abstract static public class FlowPage<C extends SpringFlowController> extends JspBase
+    abstract static public class FlowPage<C extends BaseFlowController> extends JspBase
     {
         C _controller;
 

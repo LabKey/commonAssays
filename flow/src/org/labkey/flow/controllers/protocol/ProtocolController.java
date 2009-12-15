@@ -29,7 +29,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.UnauthorizedException;
-import org.labkey.flow.controllers.SpringFlowController;
+import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.ICSMetadata;
 import org.springframework.validation.BindException;
@@ -38,7 +38,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.*;
 
-public class ProtocolController extends SpringFlowController<ProtocolController.Action>
+public class ProtocolController extends BaseFlowController<ProtocolController.Action>
 {
     public enum Action
     {

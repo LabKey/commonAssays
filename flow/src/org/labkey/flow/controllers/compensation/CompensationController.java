@@ -28,7 +28,7 @@ import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.view.*;
 import org.labkey.flow.analysis.model.CompensationMatrix;
-import org.labkey.flow.controllers.SpringFlowController;
+import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.persist.AttributeSet;
@@ -40,7 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 
-public class CompensationController extends SpringFlowController<CompensationController.Action>
+public class CompensationController extends BaseFlowController<CompensationController.Action>
 {
     public enum Action
     {
