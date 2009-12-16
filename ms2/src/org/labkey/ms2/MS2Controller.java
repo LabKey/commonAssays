@@ -751,7 +751,7 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
-        public ActionURL getSuccessURL(RenameForm form)
+        public URLHelper getSuccessURL(RenameForm form)
         {
             return form.getReturnActionURL();
         }
@@ -3696,7 +3696,7 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
-        public ActionURL getSuccessURL(MS2ViewForm form)
+        public URLHelper getSuccessURL(MS2ViewForm form)
         {
             return form.getReturnActionURL();
         }
