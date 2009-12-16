@@ -58,9 +58,9 @@ public class FlowQueryView extends QueryView
         setShowBorders(true);
     }
 
-//    protected MenuButton createExportMenuButton(boolean exportAsWebPage)
+//    protected MenuButton createExportButton(boolean exportAsWebPage)
 //    {
-//        MenuButton button = super.createExportMenuButton(exportAsWebPage);
+//        MenuButton button = super.createExportButton(exportAsWebPage);
 //
 //        // XXX: only add menu item for queries based on FCSAnalyses
 //        ActionURL url = getViewContext().cloneActionURL();

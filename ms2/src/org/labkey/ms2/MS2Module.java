@@ -118,7 +118,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         {
             public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
             {
-                QueryView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _ms2SearchRunFilter, true, true);
+                QueryView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _ms2SearchRunFilter, true);
                 result.setTitle("MS2 Experiment Runs");
                 return result;
             }
@@ -132,7 +132,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _samplePrepRunType, true, true);
+                    WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _samplePrepRunType, true);
                     result.setTitle(MS2_SAMPLE_PREPARATION_RUNS_NAME);
                     return result;
                 }

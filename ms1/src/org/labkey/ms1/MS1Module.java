@@ -93,7 +93,7 @@ public class MS1Module extends SpringModule
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MS1Module.EXP_RUN_TYPE, true, true);
+                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MS1Module.EXP_RUN_TYPE, true);
                     view.setTitle("MS1 Runs");
                     ActionURL url = portalCtx.getActionURL().clone();
                     url.setPageFlow(CONTROLLER_NAME);
