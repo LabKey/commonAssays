@@ -753,7 +753,7 @@ public class MS2Controller extends SpringActionController
 
         public URLHelper getSuccessURL(RenameForm form)
         {
-            return form.getReturnActionURL();
+            return form.getReturnURLHelper();
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -3698,7 +3698,7 @@ public class MS2Controller extends SpringActionController
 
         public URLHelper getSuccessURL(MS2ViewForm form)
         {
-            return form.getReturnActionURL();
+            return form.getReturnURLHelper();
         }
 
         public NavTree appendNavTrail(NavTree root)
