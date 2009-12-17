@@ -959,7 +959,6 @@ ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayForm.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayProvider.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataController.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataDataCollector.java -text
-ms2/src/org/labkey/ms2/metadata/MassSpecMetadataPipelineProvider.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataUploadAction.java -text
 ms2/src/org/labkey/ms2/metadata/MsFractionPropertyHelper.java -text
 ms2/src/org/labkey/ms2/metadata/fractionsInput.jsp -text

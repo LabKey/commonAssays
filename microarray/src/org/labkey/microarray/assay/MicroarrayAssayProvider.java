@@ -30,6 +30,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.pipeline.PipelineUrls;
+import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -49,6 +50,7 @@ import org.labkey.microarray.MicroarrayRunUploadForm;
 import org.labkey.microarray.MicroarraySchema;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
+import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
 import org.springframework.web.servlet.mvc.Controller;
 
 import javax.xml.xpath.XPath;
@@ -220,6 +222,11 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(container, null);
     }
 
+    public ActionURL getImportURL(Container container, ExpProtocol protocol, String path, String[] fileNames)
+    {
+        return MicroarrayController.getUploadRedirectAction(container, protocol, path);
+    }
+
     protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
         MicroarrayRunUploadForm form = (MicroarrayRunUploadForm)context;
@@ -330,5 +337,10 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         RunListQueryView result = super.createRunQueryView(context, protocol);
         result.setShowAddToRunGroupButton(true);
         return result;
+    }
+
+    public PipelineProvider getPipelineProvider()
+    {
+        return new MicroarrayPipelineProvider(this);
     }
 }

@@ -72,7 +72,7 @@ public class MassSpecMetadataController extends SpringActionController
     {
         protected FileFilter getFileFilter()
         {
-            return MassSpecMetadataPipelineProvider.FILE_FILTER;
+            return MassSpecMetadataAssayProvider.FILE_FILTER;
         }
 
         protected ActionURL getUploadURL(ExpProtocol protocol)

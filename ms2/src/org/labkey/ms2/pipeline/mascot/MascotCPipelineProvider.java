@@ -18,7 +18,7 @@ package org.labkey.ms2.pipeline.mascot;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineProtocol;
-import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 /**
@@ -61,22 +60,17 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return super.isStatusViewableFile(container, name, basename);
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
     {
         if (!AppProps.getInstance().hasMascotServer())
             return;
-
-        for (ListIterator<FileEntry> it = entries.listIterator(); it.hasNext();)
+        if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
         {
-            FileEntry entry = it.next();
-            if (!entry.isDirectory())
-            {
-                continue;
-            }
-
-            addAction(PipelineController.SearchMascotAction.class, "Mascot Peptide Search",
-                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
+            return;
         }
+
+        addAction(PipelineController.SearchMascotAction.class, "Mascot Peptide Search",
+                directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()));
     }
 
     public HttpView getSetupWebPart(Container container)
@@ -93,7 +87,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         protected void renderView(Object model, PrintWriter out) throws Exception
         {
             ViewContext context = getViewContext();
-            if (!context.hasPermission(ACL.PERM_INSERT))
+            if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
                 return;
             StringBuilder html = new StringBuilder();
             html.append("<table><tr><td style=\"font-weight:bold;\">Mascot specific settings:</td></tr>");

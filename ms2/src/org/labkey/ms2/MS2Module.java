@@ -41,7 +41,6 @@ import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
 import org.labkey.ms2.metadata.MassSpecMetadataController;
-import org.labkey.ms2.metadata.MassSpecMetadataPipelineProvider;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 import org.labkey.ms2.pipeline.MS2PipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
@@ -241,7 +240,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         MS2Controller.registerAdminConsoleLinks();
         
         AssayService.get().registerAssayProvider(new MassSpecMetadataAssayProvider());
-        PipelineService.get().registerPipelineProvider(new MassSpecMetadataPipelineProvider(this));
 
         initWebApplicationContext();
     }

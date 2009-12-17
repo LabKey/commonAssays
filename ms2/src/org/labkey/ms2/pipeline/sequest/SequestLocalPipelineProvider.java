@@ -17,7 +17,7 @@
 package org.labkey.ms2.pipeline.sequest;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.*;
 import org.labkey.api.pipeline.PipelineProtocol;
@@ -52,22 +52,18 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
         return "sequest.xml".equals(name) || super.isStatusViewableFile(container, name, basename);
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
     {
         if (!AppProps.getInstance().hasSequest())
             return;
-
-        for (ListIterator<FileEntry> it = entries.listIterator(); it.hasNext();)
+        if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
         {
-            FileEntry entry = it.next();
-            if (!entry.isDirectory())
-            {
-                continue;
-            }
-
-            addAction(PipelineController.SearchSequestAction.class, "Sequest Peptide Search",
-                entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
+            return;
         }
+
+
+        addAction(PipelineController.SearchSequestAction.class, "Sequest Peptide Search",
+            directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()));
     }
 
     public HttpView getSetupWebPart(Container container)
@@ -83,7 +79,7 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
         protected void renderView(Object model, PrintWriter out) throws Exception
         {
             ViewContext context = getViewContext();
-            if (!context.hasPermission(ACL.PERM_INSERT))
+            if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
                 return;
             StringBuilder html = new StringBuilder();
             html.append("<table><tr><td style=\"font-weight:bold;\">Sequest specific settings:</td></tr>");
@@ -104,7 +100,7 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
     {
         AppProps appProps = AppProps.getInstance();
         SequestClientImpl sequestClient = new SequestClientImpl(appProps.getSequestServer(), _log);
-        List dbList = sequestClient.addSequenceDbPaths("", new ArrayList<String>());
+        List<String> dbList = sequestClient.addSequenceDbPaths("", new ArrayList<String>());
         if(dbList == null) throw new IOException("Trouble connecting to the Sequest server.");
         return dbList;
     }
@@ -113,7 +109,7 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
     {
         AppProps appProps = AppProps.getInstance();
         SequestClientImpl sequestClient = new SequestClientImpl(appProps.getSequestServer(), _log);
-        List dbList = sequestClient.getSequenceDbDirList(sequenceRoot.getPath());
+        List<String> dbList = sequestClient.getSequenceDbDirList(sequenceRoot.getPath());
         if(dbList == null) throw new IOException("Trouble connecting to the Sequest server.");
         return dbList;
     }

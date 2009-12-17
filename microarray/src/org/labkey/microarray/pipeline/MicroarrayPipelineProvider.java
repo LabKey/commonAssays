@@ -16,75 +16,39 @@
 
 package org.labkey.microarray.pipeline;
 
-import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.security.ACL;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.NavTree;
-import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.AssayUrls;
-import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.module.Module;
+import org.labkey.api.study.assay.AssayPipelineProvider;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.MicroarrayController;
+import org.labkey.microarray.MicroarrayModule;
 
 import java.io.File;
-import java.util.List;
 
-
-public class MicroarrayPipelineProvider extends PipelineProvider
+public class MicroarrayPipelineProvider extends AssayPipelineProvider
 {
     public static final String NAME = "Array";
 
-    public MicroarrayPipelineProvider(Module owningModule)
+    public MicroarrayPipelineProvider(MicroarrayAssayProvider assayProvider)
     {
-        super(NAME, owningModule);
+        super(NAME, MicroarrayModule.class, ArrayPipelineManager.getMageFileFilter(), assayProvider, "Import MAGE-ML");
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
     {
-        if (!context.hasPermission(ACL.PERM_INSERT))
-            return;
+        super.updateFileProperties(context, pr, directory);
 
-        PipeRoot root = PipelineService.get().findPipelineRoot(context.getContainer());
-        for (FileEntry entry : entries)
+        if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
         {
-            File[] files = entry.listFiles(ArrayPipelineManager.getImageFileFilter());
-            if (files != null)
-                addAction(MicroarrayController.ImportImageFilesAction.class, "Import Images",
-                        entry, files);
-
-            files = entry.listFiles(ArrayPipelineManager.getMageFileFilter());
-            if (files != null && files.length > 0)
-            {
-                List<ExpProtocol> assays = AssayService.get().getAssayProtocols(context.getContainer());
-                NavTree navTree = new NavTree("Import MAGE-ML");
-                for (ExpProtocol protocol : assays)
-                {
-                    if (AssayService.get().getProvider(protocol) instanceof MicroarrayAssayProvider)
-                    {
-                        ActionURL url = MicroarrayController.getUploadRedirectAction(context.getContainer(), protocol, root.relativePath(new File(entry.getURI())));
-                        NavTree child = new NavTree("Use " + protocol.getName(), url);
-                        child.setId("Import MAGE-ML:Use " + protocol.getName());
-                        navTree.addChild(child);
-                    }
-                }
-
-                if (navTree.getChildCount() > 0)
-                {
-                    navTree.addSeparator();
-                }
-
-                ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getDesignerURL(context.getContainer(), MicroarrayAssayProvider.NAME, context.getActionURL());
-                navTree.addChild("Create Assay Definition", url);
-
-                entry.addAction(new FileAction(navTree, files));
-            }
+            return;
         }
-    }
+        
+        File[] files = directory.listFiles(ArrayPipelineManager.getImageFileFilter());
+        if (files != null)
+            addAction(MicroarrayController.ImportImageFilesAction.class, "Import Images",
+                    directory, files);
 
+    }
 }
 

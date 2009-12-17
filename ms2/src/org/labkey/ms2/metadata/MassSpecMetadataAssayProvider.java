@@ -31,6 +31,7 @@ import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.pipeline.PipelineUrls;
+import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
@@ -45,6 +46,7 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Module;
+import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -507,9 +509,18 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
     {
         return true;
     }
+    
     public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
         return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(container, null);
+    }
+
+    public ActionURL getImportURL(Container container, ExpProtocol protocol, String path, String[] fileNames)
+    {
+        ActionURL url = new ActionURL(MassSpecMetadataController.UploadRedirectAction.class, container);
+        url.addParameter("protocolId", protocol.getRowId());
+        url.addParameter("path", path);
+        return url;
     }
 
     @NotNull
@@ -538,4 +549,19 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         }
         return sampleSet;
     }
+
+    public static final PipelineProvider.FileEntryFilter FILE_FILTER = new PipelineProvider.FileEntryFilter()
+    {
+        public boolean accept(File f)
+        {
+            // TODO:  If no corresponding mzXML file, show raw files.
+            return MS2PipelineManager.isMzXMLFile(f);
+        }
+    };
+
+    public PipelineProvider getPipelineProvider()
+    {
+        return new AssayPipelineProvider(MS2Module.class, FILE_FILTER, this, "Describe Samples");
+    }
+
 }

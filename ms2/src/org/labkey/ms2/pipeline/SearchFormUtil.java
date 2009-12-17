@@ -32,14 +32,14 @@ import java.util.*;
 public class SearchFormUtil
 {
     private static List<Enzyme> tppEnzymeList;
-    private static Map mod0Map;
-    private static Map mod1Map;
+    private static Map<String, String> mod0Map;
+    private static Map<String, String> mod1Map;
     private static Set<String> residues;
 
     public static List<Enzyme> getDefaultEnzymeList()
     {
         if(tppEnzymeList != null) return tppEnzymeList;
-        tppEnzymeList = new ArrayList();
+        tppEnzymeList = new ArrayList<Enzyme>();
         tppEnzymeList.add(new Enzyme("Trypsin",new String[]{"trypsin"},
                 new CutSite[]{new CutSite( new char[]{'K','R'}, new char[]{'P'},"[KR]|{P}", false)}));
         tppEnzymeList.add(new Enzyme("Strict Trypsin",new String[]{"stricttrypsin"},
@@ -100,9 +100,9 @@ public class SearchFormUtil
         return tppEnzymeList;
     }
 
-    public static Map getDefaultEnzymeMap()
+    public static Map<String, String> getDefaultEnzymeMap()
     {
-        HashMap enzymeMap = new HashMap();
+        Map<String, String> enzymeMap = new HashMap<String, String>();
         getDefaultEnzymeList();
         for(Enzyme enz: tppEnzymeList)
         {
@@ -121,7 +121,7 @@ public class SearchFormUtil
 
     public static Map<String, String> mascot2Tpp(List<Enzyme> mascotEnzymeList)
     {
-        Map<String, String> enzymeMap = new HashMap();
+        Map<String, String> enzymeMap = new HashMap<String, String>();
         getDefaultEnzymeList();
         for(Enzyme mascotEnz: mascotEnzymeList)
         {
@@ -143,11 +143,11 @@ public class SearchFormUtil
         return enzymeMap;
     }
 
-    public static Map getDefaultDynamicMods()
+    public static Map<String, String> getDefaultDynamicMods()
     {
         if( mod1Map == null)
         {
-            mod1Map = new HashMap();
+            mod1Map = new HashMap<String, String>();
             mod1Map.put("Oxidation (M)", "15.994915@M");
             mod1Map.put("Oxidation (W)", "15.994915@W");
             mod1Map.put("Deamidation (N)", "0.984016@N");
@@ -174,11 +174,11 @@ public class SearchFormUtil
         return mod1Map;
     }
 
-        public static Map getDefaultStaticMods()
+        public static Map<String, String> getDefaultStaticMods()
     {
         if( mod0Map == null)
         {
-            mod0Map = new HashMap();
+            mod0Map = new HashMap<String, String>();
             mod0Map.put("Carbamidomethyl (C)", "57.021464@C");
             mod0Map.put("Carboxymethyl (C)", "58.005479@C");
             mod0Map.put("ICAT-D (C)","442.224991@C");
@@ -196,7 +196,7 @@ public class SearchFormUtil
     {
         if(residues == null)
         {
-            residues = new TreeSet();
+            residues = new TreeSet<String>();
             residues.add("A");
             residues.add("B");
             residues.add("C");

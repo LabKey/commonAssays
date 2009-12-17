@@ -33,8 +33,10 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.FileType;
 import org.labkey.api.view.*;
 import org.labkey.api.qc.DataExchangeHandler;
+import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.nab.query.NabRunDataTable;
 import org.labkey.nab.query.NabSchema;
 import org.jetbrains.annotations.NotNull;
@@ -314,6 +316,12 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, NabUploadWizardAction.class);
     }
 
+    @Override
+    public ActionURL getImportURL(Container container, ExpProtocol protocol, String path, String[] fileNames)
+    {
+        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, NabUploadWizardAction.class);
+    }
+
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
         return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
@@ -480,5 +488,11 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     public DataExchangeHandler getDataExchangeHandler()
     {
         return new NabDataExchangeHandler();
+    }
+
+    public PipelineProvider getPipelineProvider()
+    {
+        return new AssayPipelineProvider(NabModule.class,
+                new PipelineProvider.FileTypesEntryFilter(new FileType(".xls")), this, "Import NAb");
     }
 }

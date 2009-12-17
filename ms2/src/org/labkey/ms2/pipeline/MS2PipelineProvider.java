@@ -17,7 +17,7 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
@@ -26,7 +26,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 
 import java.io.PrintWriter;
-import java.util.List;
 
 /**
  */
@@ -44,16 +43,15 @@ public class MS2PipelineProvider extends PipelineProvider
         return new SetupWebPart();
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
     {
-        for (FileEntry entry : entries)
+        if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
         {
-            if (!entry.isDirectory())
-                continue;
-
-            addFileActions(PipelineController.UploadAction.class, "Import Results",
-                    entry, entry.listFiles(MS2PipelineManager.getUploadFilter()));
+            return;
         }
+
+        addFileActions(PipelineController.UploadAction.class, "Import Results",
+                directory, directory.listFiles(MS2PipelineManager.getUploadFilter()));
     }
 
     class SetupWebPart extends WebPartView
@@ -62,7 +60,7 @@ public class MS2PipelineProvider extends PipelineProvider
         protected void renderView(Object model, PrintWriter out) throws Exception
         {
             ViewContext context = getViewContext();
-            if (!context.hasPermission(ACL.PERM_INSERT))
+            if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
                 return;
             StringBuilder html = new StringBuilder();
             html.append("<table><tr><td style=\"font-weight:bold;\">MS2 specific settings:</td></tr>");

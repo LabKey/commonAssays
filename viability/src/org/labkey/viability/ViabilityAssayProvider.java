@@ -40,16 +40,16 @@ import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.util.FileType;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.gwt.client.DefaultValueType;
+import org.labkey.api.pipeline.PipelineProvider;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.beans.PropertyValue;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.*;
 
 /**
@@ -366,6 +366,12 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     }
 
     @Override
+    public ActionURL getImportURL(Container container, ExpProtocol protocol, String path, String[] fileNames)
+    {
+        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, ViabilityAssayUploadWizardAction.class);
+    }
+
+    @Override
     public RunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
     {
         return new ViabilityRunListQueryView(protocol, context);
@@ -465,4 +471,9 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         }
     }
 
+    public PipelineProvider getPipelineProvider()
+    {
+        return new AssayPipelineProvider(ViabilityModule.class,
+                new PipelineProvider.FileTypesEntryFilter(new FileType(".csv")), this, "Import Viability");
+    }
 }

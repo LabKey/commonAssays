@@ -40,6 +40,8 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.FileType;
+import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
@@ -311,6 +313,11 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, ElispotUploadWizardAction.class);
     }
 
+    public ActionURL getImportURL(Container container, ExpProtocol protocol, String path, String[] fileNames)
+    {
+        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, ElispotUploadWizardAction.class);
+    }
+
     public Domain getAntigenWellGroupDomain(ExpProtocol protocol)
     {
         return getDomainByPrefix(protocol, ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
@@ -355,5 +362,12 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     public DataExchangeHandler getDataExchangeHandler()
     {
         return new ElispotDataExchangeHandler();
+    }
+
+    public PipelineProvider getPipelineProvider()
+    {
+        return new AssayPipelineProvider(ElispotModule.class,
+                new PipelineProvider.FileTypesEntryFilter(new FileType(".txt"), new FileType(".xls")),
+                this, "Import Elispot");
     }
 }

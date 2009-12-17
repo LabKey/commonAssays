@@ -17,11 +17,11 @@
 package org.labkey.flow.script;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.log4j.Logger;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.security.ACL;
+import org.labkey.api.pipeline.PipelineAction;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
@@ -45,7 +45,6 @@ import java.util.*;
 
 public class FlowPipelineProvider extends PipelineProvider
 {
-    private static final Logger _log = Logger.getLogger(FlowPipelineProvider.class);
     public static final String NAME = "flow";
 
     public FlowPipelineProvider(Module owningModule)
@@ -64,14 +63,7 @@ public class FlowPipelineProvider extends PipelineProvider
 
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
         {
-            if ("Workspace".equals(qName))
-            {
-                _isWorkspace = true;
-            }
-            else
-            {
-                _isWorkspace = false;
-            }
+            _isWorkspace = "Workspace".equals(qName);
             throw new SAXException("Stop parsing");
         }
         boolean isWorkspace()
@@ -106,11 +98,9 @@ public class FlowPipelineProvider extends PipelineProvider
     }
 
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
     {
-        if (entries.size() == 0)
-            return;
-        if (!context.hasPermission(ACL.PERM_INSERT))
+        if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
             return;
         if (!hasFlowModule(context))
             return;
@@ -140,46 +130,42 @@ public class FlowPipelineProvider extends PipelineProvider
 
         int flowDirCount = 0;
         
-        for (FileEntry entry : entries)
+        File[] dirs = directory.listFiles(DirectoryFileFilter.INSTANCE);
+        for (File dir : dirs)
         {
-            File[] dirs = entry.listFiles(DirectoryFileFilter.INSTANCE);
-            for (File dir : dirs)
-            {
-                if (usedPaths.contains(dir.getPath()))
-                    continue;
-                File[] fcsFiles = dir.listFiles((FileFilter)FCS.FCSFILTER);
-                if (null == fcsFiles || 0 == fcsFiles.length)
-                    continue;
-                importRunsURL.replaceParameter("path", URIUtil.relativize(rootURI, dir.toURI()).toString());
-                FileAction action = new ImportFCSFilesAction("Import Flow Run", importRunsURL, dir);
-                action.setDescription("" + fcsFiles.length + "&nbsp;FCS&nbsp;file" + ((fcsFiles.length>1)?"s":""));
-                entry.addAction(action);
-                flowDirCount++;
-            }
-
-            File[] workspaces = entry.listFiles(new IsFlowJoWorkspaceFilter());
-            for (File workspace : workspaces)
-            {
-                importWorkspaceURL.replaceParameter("workspace.path", root.relativePath(workspace));
-                FileAction importWorkspaceAction = new FileAction("Import FlowJo Workspace", importWorkspaceURL, new File[] { workspace });
-                importWorkspaceAction.setDescription("Import analysis from a FlowJo workspace");
-                entry.addAction(importWorkspaceAction);
-
-                // UNDONE: create workspace from FlowJo workspace
-            }
-
-            // UNDONE: import FlowJo exported compensation matrix file: CompensationController.UploadAction
+            if (usedPaths.contains(dir.getPath()))
+                continue;
+            File[] fcsFiles = dir.listFiles((FileFilter)FCS.FCSFILTER);
+            if (null == fcsFiles || 0 == fcsFiles.length)
+                continue;
+            importRunsURL.replaceParameter("path", URIUtil.relativize(rootURI, dir.toURI()).toString());
+            PipelineAction action = new PipelineAction("Import Flow Run", importRunsURL, new File[] {dir});
+            action.setDescription("" + fcsFiles.length + "&nbsp;FCS&nbsp;file" + ((fcsFiles.length>1)?"s":""));
+            directory.addAction(action);
+            flowDirCount++;
         }
+
+        File[] workspaces = directory.listFiles(new IsFlowJoWorkspaceFilter());
+        for (File workspace : workspaces)
+        {
+            importWorkspaceURL.replaceParameter("workspace.path", root.relativePath(workspace));
+            PipelineAction importWorkspaceAction = new PipelineAction("Import FlowJo Workspace", importWorkspaceURL, new File[] { workspace });
+            importWorkspaceAction.setDescription("Import analysis from a FlowJo workspace");
+            directory.addAction(importWorkspaceAction);
+
+            // UNDONE: create workspace from FlowJo workspace
+        }
+
+        // UNDONE: import FlowJo exported compensation matrix file: CompensationController.UploadAction
 
 
         if (flowDirCount > 0)
         {
-            FileEntry entryRoot = entries.get(0);
-            File file = new File(entryRoot.getURI());
+            File file = new File(directory.getURI());
             importRunsURL.replaceParameter("path", URIUtil.relativize(rootURI, file.toURI()).toString());
-            FileAction action = new FileAction("Import Multiple Runs", importRunsURL, null);
+            PipelineAction action = new PipelineAction("Import Multiple Runs", importRunsURL, null);
             action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
-            entryRoot.addAction(action);
+            directory.addAction(action);
         }
     }
 
@@ -188,21 +174,5 @@ public class FlowPipelineProvider extends PipelineProvider
         if (!hasFlowModule(context))
             return super.suppressOverlappingRootsWarning(context);
         return true;
-    }
-
-
-    class ImportFCSFilesAction extends FileAction
-    {
-        ImportFCSFilesAction(String label, ActionURL url, File dir)
-        {
-            super(label, url, new File[] {dir});
-        }
-
-        @Override
-        public String getDisplay()
-        {
-            String img = super.getDisplay();
-            return img + "&nbsp;(" + getDescription() + ")";
-        }
     }
 }

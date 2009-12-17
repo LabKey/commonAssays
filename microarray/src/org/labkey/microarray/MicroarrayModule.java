@@ -132,7 +132,6 @@ public class MicroarrayModule extends DefaultModule
                 return Collections.emptySet();
             }
         });
-        PipelineService.get().registerPipelineProvider(new MicroarrayPipelineProvider(this));
     }
 
     public Set<String> getSchemaNames()

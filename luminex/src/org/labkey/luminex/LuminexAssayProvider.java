@@ -40,10 +40,12 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.FileType;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.qc.DataExchangeHandler;
+import org.labkey.api.pipeline.PipelineProvider;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -228,6 +230,11 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexUploadWizardAction.class);
     }
     
+    public ActionURL getImportURL(Container container, ExpProtocol protocol, String path, String[] fileNames)
+    {
+        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexUploadWizardAction.class);
+    }
+
     public ExpData getDataForDataRow(Object dataRowId)
     {
         // on Postgres 8.3, we must pass in an integer row ID; passing a string that happens to be all digits isn't
@@ -429,4 +436,12 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         return new LuminexDataExchangeHandler();        
     }
+
+    public PipelineProvider getPipelineProvider()
+    {
+        return new AssayPipelineProvider(LuminexModule.class,
+                new PipelineProvider.FileTypesEntryFilter(new FileType(".xls")), 
+                this, "Import Luminex");
+    }
+
 }

@@ -21,10 +21,10 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.util.FileType;
 import org.labkey.api.module.Module;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.ms2.MS2Controller;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * User: jeckels
@@ -39,16 +39,15 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
         super(NAME, owningModule);
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
     {
-        for (FileEntry entry : entries)
+        if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
         {
-            if (!entry.isDirectory())
-                continue;
-
-            addFileActions(MS2Controller.ImportProteinProphetAction.class, "Import Results",
-                    entry, entry.listFiles(new ProteinProphetFilenameFilter()));
+            return;
         }
+        
+        addFileActions(MS2Controller.ImportProteinProphetAction.class, "Import Results",
+                directory, directory.listFiles(new ProteinProphetFilenameFilter()));
     }
 
 
