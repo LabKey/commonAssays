@@ -21,7 +21,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
@@ -29,22 +28,17 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.study.actions.ProtocolIdForm;
-import org.labkey.api.study.assay.AssayUrls;
-import org.labkey.api.study.assay.PipelineDataCollectorRedirectAction;
 import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
-import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.FileNotFoundException;
-import java.io.FileFilter;
-import java.io.File;
 import java.net.URI;
 import java.util.*;
 
@@ -94,46 +88,6 @@ public class MicroarrayController extends SpringActionController
     {
         return new ActionURL(ShowPendingMageMLFilesAction.class, c);
     }
-
-    public static ActionURL getUploadRedirectAction(Container c, ExpProtocol protocol)
-    {
-        ActionURL url = new ActionURL(UploadRedirectAction.class, c);
-        url.addParameter("protocolId", protocol.getRowId());
-        return url;
-    }
-
-    public static ActionURL getUploadRedirectAction(Container c, ExpProtocol protocol, String pipelinePath)
-    {
-        return getUploadRedirectAction(c, protocol).addParameter("path", pipelinePath);
-    }
-
-    @RequiresPermissionClass(InsertPermission.class)
-    public class UploadRedirectAction extends PipelineDataCollectorRedirectAction
-    {
-        protected FileFilter getFileFilter()
-        {
-            return ArrayPipelineManager.getMageFileFilter();
-        }
-
-        protected ActionURL getUploadURL(ExpProtocol protocol)
-        {
-            return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), protocol, MicroarrayUploadWizardAction.class);
-        }
-
-        protected List<File> validateFiles(BindException errors, List<File> files)
-        {
-            for (File file : files)
-            {
-                ExpData data = ExperimentService.get().getExpDataByURL(file, getViewContext().getContainer());
-                if (data != null && data.getRun() != null)
-                {
-                    errors.addError(new LabkeyError("The file " + file.getAbsolutePath() + " has already been uploaded"));
-                }
-            }
-            return files;
-        }
-    }
-
 
     @RequiresPermissionClass(ReadPermission.class)
     public class ShowRunsAction extends SimpleViewAction

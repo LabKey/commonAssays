@@ -316,12 +316,6 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, NabUploadWizardAction.class);
     }
 
-    @Override
-    public ActionURL getImportURL(Container container, ExpProtocol protocol, String path, String[] fileNames)
-    {
-        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, NabUploadWizardAction.class);
-    }
-
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
         return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());

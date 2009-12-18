@@ -22,6 +22,7 @@ import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AssayFileWriter;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -82,9 +83,8 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
     public File getUploadedFile() throws ExperimentException
     {
         Map<String, File> uploaded = getUploadedData();
-        assert uploaded.size() == 1;
-        File file = uploaded.values().iterator().next();
-        return file;
+        assert uploaded.containsKey(AssayDataCollector.PRIMARY_FILE);
+        return uploaded.get(AssayDataCollector.PRIMARY_FILE);
     }
 
     private void parseUploadedFile() throws ExperimentException

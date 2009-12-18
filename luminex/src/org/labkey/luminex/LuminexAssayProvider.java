@@ -230,11 +230,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexUploadWizardAction.class);
     }
     
-    public ActionURL getImportURL(Container container, ExpProtocol protocol, String path, String[] fileNames)
-    {
-        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexUploadWizardAction.class);
-    }
-
     public ExpData getDataForDataRow(Object dataRowId)
     {
         // on Postgres 8.3, we must pass in an integer row ID; passing a string that happens to be all digits isn't

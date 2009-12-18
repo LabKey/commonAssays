@@ -32,10 +32,7 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AssayUrls;
-import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
-import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.InsertView;
@@ -170,8 +167,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     {
         List<String> names = new ArrayList<String>();
 
-        assert(form.getUploadedData().size() == 1);
-        File dataFile = form.getUploadedData().values().iterator().next();
+        assert form.getUploadedData().containsKey(AssayDataCollector.PRIMARY_FILE);
+        File dataFile = form.getUploadedData().get(AssayDataCollector.PRIMARY_FILE);
         LuminexExcelDataHandler.LuminexExcelParser parser = new LuminexExcelDataHandler.LuminexExcelParser(form.getProtocol(), dataFile);
         for (Analyte analyte : parser.getSheets().keySet())
         {

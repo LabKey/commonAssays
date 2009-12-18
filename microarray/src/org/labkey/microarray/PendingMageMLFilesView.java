@@ -108,7 +108,7 @@ public class PendingMageMLFilesView extends QueryView
                 if (microarrayProtocols.size() == 1)
                 {
                     ExpProtocol protocol = protocols.get(0);
-                    ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
+                    ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getImportURL(getContainer(), protocol, null, null);
                     ActionButton button = new ActionButton(url, "Import using " + protocol.getName());
                     button.setRequiresSelection(true, null, view.getDataRegion().getJavascriptFormReference(true));
                     button.setActionType(ActionButton.Action.POST);
@@ -122,7 +122,7 @@ public class PendingMageMLFilesView extends QueryView
                     bar.add(menu);
                     for (ExpProtocol protocol : microarrayProtocols)
                     {
-                        ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
+                        ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getImportURL(getContainer(), protocol, null, null);
                         menu.addMenuItem("Import using " + protocol.getName(), "javascript: if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(false) + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference(false) + ".submit(); }");
                     }
                 }

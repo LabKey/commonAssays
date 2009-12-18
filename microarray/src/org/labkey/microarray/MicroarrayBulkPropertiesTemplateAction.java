@@ -113,7 +113,7 @@ public class MicroarrayBulkPropertiesTemplateAction extends BaseAssayAction<Micr
         }
 
         int row = 1;
-        List<Map<String, File>> allFiles = form.getSelectedDataCollector().getFileCollection(form);
+        List<Map<String, File>> allFiles = form.getSelectedDataCollector().getFileQueue(form);
         for (Map<String, File> files : allFiles)
         {
             for (File file : files.values())

@@ -893,7 +893,7 @@ public class NabController extends SpringActionController
             deleteButton.setRequiresSelection(true);
             buttons.add(deleteButton);
 
-            if (!AssayPublishService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
+            if (!AssayPublishService.get().getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
             {
                 ActionButton publishButton = new ActionButton("publishPlatesChooseStudy.view", "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
                 publishButton.setDisplayPermission(InsertPermission.class);
@@ -1198,7 +1198,7 @@ public class NabController extends SpringActionController
 
         public Map<Container, String> getValidTargets()
         {
-            return AssayPublishService.get().getValidPublishTargets(_user, ACL.PERM_INSERT);
+            return AssayPublishService.get().getValidPublishTargets(_user, InsertPermission.class);
         }
 
         public List<Integer> getIds()
@@ -1312,7 +1312,7 @@ public class NabController extends SpringActionController
             graphSelectedButton.setRequiresSelection(true);
             buttons.add(graphSelectedButton);
 
-            if (!AssayPublishService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
+            if (!AssayPublishService.get().getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
             {
                 ActionButton publishButton = new ActionButton("publishWellGroupsChooseStudy.view", "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
                 publishButton.setDisplayPermission(InsertPermission.class);

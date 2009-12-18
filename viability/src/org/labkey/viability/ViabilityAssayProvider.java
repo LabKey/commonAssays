@@ -366,12 +366,6 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ActionURL getImportURL(Container container, ExpProtocol protocol, String path, String[] fileNames)
-    {
-        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, ViabilityAssayUploadWizardAction.class);
-    }
-
-    @Override
     public RunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
     {
         return new ViabilityRunListQueryView(protocol, context);

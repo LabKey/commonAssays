@@ -30,7 +30,6 @@ import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
-import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
@@ -213,7 +212,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
             deriveFractions(form);
             Pair<ExpRun, ExpExperiment> result = null;
             // Then upload a bunch of runs
-            while (!form.getSelectedDataCollector().getFileCollection(form).isEmpty())
+            while (!form.getSelectedDataCollector().getFileQueue(form).isEmpty())
             {
                 result = super.saveExperimentRun(context, batch);
                 batch = result.getValue();
@@ -297,8 +296,8 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         if (form.isFractions())
         {
             Map<String, File> files = form.getUploadedData();
-            assert files.size() == 1;
-            File mzXMLFile = files.values().iterator().next();
+            assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
+            File mzXMLFile = files.get(AssayDataCollector.PRIMARY_FILE);
             ExpMaterial sample = form.getFileFractionMap().get(mzXMLFile);
             assert sample != null;
             inputMaterials.put(sample, FRACTION_INPUT_ROLE);
@@ -329,7 +328,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         return NAME;
     }
 
-    public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles)
+    public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles, AssayRunUploadForm context)
     {
         return Collections.<AssayDataCollector>singletonList(new MassSpecMetadataDataCollector());
     }
@@ -512,15 +511,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
     
     public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
-        return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(container, null);
-    }
-
-    public ActionURL getImportURL(Container container, ExpProtocol protocol, String path, String[] fileNames)
-    {
-        ActionURL url = new ActionURL(MassSpecMetadataController.UploadRedirectAction.class, container);
-        url.addParameter("protocolId", protocol.getRowId());
-        url.addParameter("path", path);
-        return url;
+        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, MassSpecMetadataUploadAction.class);
     }
 
     @NotNull

@@ -29,7 +29,6 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpRunTable;
-import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
@@ -44,10 +43,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.microarray.MicroarrayController;
-import org.labkey.microarray.MicroarrayModule;
-import org.labkey.microarray.MicroarrayRunUploadForm;
-import org.labkey.microarray.MicroarraySchema;
+import org.labkey.microarray.*;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
@@ -150,8 +146,8 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         try
         {
             Map<String, File> files = context.getUploadedData();
-            assert files.size() == 1;
-            File mageMLFile = files.values().iterator().next();
+            assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
+            File mageMLFile = files.get(AssayDataCollector.PRIMARY_FILE);
             ExpData mageData = createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_DATA_TYPE);
 
             outputDatas.put(mageData, "MageML");
@@ -193,7 +189,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         }
     }
 
-    public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles)
+    public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles, AssayRunUploadForm context)
     {
         return Collections.<AssayDataCollector>singletonList(new PipelineDataCollector());
     }
@@ -219,12 +215,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 
     public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
-        return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(container, null);
-    }
-
-    public ActionURL getImportURL(Container container, ExpProtocol protocol, String path, String[] fileNames)
-    {
-        return MicroarrayController.getUploadRedirectAction(container, protocol, path);
+        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, MicroarrayUploadWizardAction.class);
     }
 
     protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException

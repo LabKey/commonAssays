@@ -30,13 +30,18 @@ import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.BulkPropertiesDisplayColumn;
 import org.labkey.api.study.assay.BulkPropertiesUploadWizardAction;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
+import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.InsertView;
+import org.labkey.api.view.RedirectException;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.validation.BindException;
 import org.w3c.dom.Document;
 
+import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -105,6 +110,17 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
         }
 
         insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(minCount, maxCount, matchingMaterials));
+    }
+
+    @Override
+    protected boolean showBatchStep(MicroarrayRunUploadForm form, Domain uploadDomain) throws ServletException
+    {
+        if (form.getSelectedDataCollector().getAdditionalUploadType(form) == AssayDataCollector.AdditionalUploadType.Disallowed)
+        {
+            throw new RedirectException(PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(form.getContainer(), null));
+        }
+
+        return super.showBatchStep(form, uploadDomain);
     }
 
     protected InsertView createBatchInsertView(MicroarrayRunUploadForm form, boolean reshow, BindException errors)

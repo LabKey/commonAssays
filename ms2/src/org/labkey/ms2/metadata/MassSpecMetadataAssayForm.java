@@ -23,6 +23,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.BulkPropertiesUploadForm;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
+import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.util.FileUtil;
 
 import java.io.File;
@@ -103,7 +104,7 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
     public List<File> getAllFiles()
     {
         List<File> result = new ArrayList<File>();
-        for (Map<String, File> fileSet : getSelectedDataCollector().getFileCollection(this))
+        for (Map<String, File> fileSet : getSelectedDataCollector().getFileQueue(this))
         {
             result.addAll(fileSet.values());
         }
@@ -117,7 +118,7 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
 
     public Map<String, Object> getBulkProperties() throws ExperimentException
     {
-        File file = getUploadedData().values().iterator().next();
+        File file = getUploadedData().get(AssayDataCollector.PRIMARY_FILE);
 
         // Try both the full file name and without the extension
         return getProperties(file);

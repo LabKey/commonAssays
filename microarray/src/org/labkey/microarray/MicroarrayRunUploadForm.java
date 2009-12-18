@@ -18,13 +18,12 @@ package org.labkey.microarray;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.exp.api.ExpSampleSet;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.actions.BulkPropertiesUploadForm;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
+import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
@@ -44,7 +43,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 /*
  * User: brittp
@@ -86,7 +84,7 @@ public class MicroarrayRunUploadForm extends BulkPropertiesUploadForm<Microarray
         if (!_loadAttempted)
         {
             _loadAttempted = true;
-            _mageML = getMageML(getUploadedData().values().iterator().next());
+            _mageML = getMageML(getUploadedData().get(AssayDataCollector.PRIMARY_FILE));
         }
         return _mageML;
     }
@@ -185,7 +183,7 @@ public class MicroarrayRunUploadForm extends BulkPropertiesUploadForm<Microarray
         String barcode = getBarcode(getCurrentMageML());
         if (barcode == null || "".equals(barcode))
         {
-            throw new ExperimentException("Could not find a barcode value in " + getUploadedData().values().iterator().next().getName());
+            throw new ExperimentException("Could not find a barcode value in " + getUploadedData().get(AssayDataCollector.PRIMARY_FILE));
         }
         return getProperties(barcode);
     }

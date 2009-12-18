@@ -24,13 +24,18 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.study.actions.BulkPropertiesDisplayColumn;
 import org.labkey.api.study.assay.BulkPropertiesUploadWizardAction;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
+import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.RedirectException;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.*;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,7 +66,7 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
         {
             Container c = form.getContainer();
 
-            List<Map<String,File>> allFiles = form.getSelectedDataCollector().getFileCollection(form);
+            List<Map<String,File>> allFiles = form.getSelectedDataCollector().getFileQueue(form);
 
             for (Map<String, File> fileSet : allFiles)
             {
@@ -108,11 +113,16 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
     }
 
     @Override
-    protected boolean showBatchStep(MassSpecMetadataAssayForm form, Domain batchDomain)
+    protected boolean showBatchStep(MassSpecMetadataAssayForm form, Domain batchDomain) throws ServletException
     {
+        if (PipelineDataCollector.getFileQueue(form).size() == 0)
+        {
+            throw new RedirectException(PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(form.getContainer(), null));
+        }
+
         // Show the batch step if we have batch properties or might be a fractions search
         return super.showBatchStep(form, batchDomain) ||
-            form.getSelectedDataCollector().getFileCollection(form).size() > 1;
+            form.getSelectedDataCollector().getFileQueue(form).size() > 1;
     }
 
     @Override

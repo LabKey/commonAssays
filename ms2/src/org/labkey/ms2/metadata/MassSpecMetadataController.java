@@ -40,7 +40,6 @@ import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.List;
 
 
@@ -64,25 +63,6 @@ public class MassSpecMetadataController extends SpringActionController
         public ActionURL getRedirectURL(Object o) throws Exception
         {
             return getContainer().getStartURL(getViewContext());
-        }
-    }
-
-    @RequiresPermissionClass(InsertPermission.class)
-    public class UploadRedirectAction extends PipelineDataCollectorRedirectAction
-    {
-        protected FileFilter getFileFilter()
-        {
-            return MassSpecMetadataAssayProvider.FILE_FILTER;
-        }
-
-        protected ActionURL getUploadURL(ExpProtocol protocol)
-        {
-            return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), protocol, MassSpecMetadataUploadAction.class);
-        }
-
-        protected List<File> validateFiles(BindException errors, List<File> files)
-        {
-            return files;
         }
     }
 
