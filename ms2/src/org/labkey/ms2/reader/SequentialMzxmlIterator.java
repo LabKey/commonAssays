@@ -52,7 +52,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
         {
             throw new FileNotFoundException(fileName);
         }
-        _in = new BufferedInputStream(new FileInputStream(f), STREAM_BUFFER_SIZE);
+        _in = new BufferedInputStream(PossiblyGZIPpedFileInputStreamFactory.getStream(f), STREAM_BUFFER_SIZE);
         _parser = new SimpleXMLStreamReader(_in);
         if (!_parser.skipToStart("msRun"))
         {

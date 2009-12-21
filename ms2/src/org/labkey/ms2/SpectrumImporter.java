@@ -20,10 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
-import org.labkey.ms2.reader.SequentialMzxmlIterator;
-import org.labkey.ms2.reader.SimpleScan;
-import org.labkey.ms2.reader.SimpleScanIterator;
-import org.labkey.ms2.reader.TarIterator;
+import org.labkey.ms2.reader.*;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -84,7 +81,21 @@ public class SpectrumImporter
                 else
                 {
                     _fileName = mzXmlFileName;
-                    _scanIterator = new SequentialMzxmlIterator(mzXmlFileName, 2);
+                    // prefer ProteoWizard's RAMPAdapter interface
+                    // (with JNI bindings via SWIG) as it's actively 
+                    // maintained, handles mzML and mzXML, and gzipped
+                    // files natively
+                    boolean has_mzML = false;
+                    try {
+                        has_mzML = RandomAccessPwizMSDataIterator.isAvailable();
+                    } catch (IOException x) {
+                        _log.info(x);
+                    }
+                    if (has_mzML) {
+                        _scanIterator = new RandomAccessPwizMSDataIterator(mzXmlFileName, 2);
+                    } else {
+                        _scanIterator = new SequentialMzxmlIterator(mzXmlFileName, 2);
+                    }
                 }
             }
         }
@@ -95,7 +106,7 @@ public class SpectrumImporter
         catch (XMLStreamException x)
         {
             throw new RuntimeException(x);
-        }
+        }        
     }
 
 

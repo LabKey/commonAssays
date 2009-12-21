@@ -32,6 +32,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.reader.ProtXmlReader;
 import org.labkey.ms2.reader.ProteinGroup;
+import org.labkey.ms2.reader.PossiblyGZIPpedFileInputStreamFactory;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
@@ -468,7 +469,7 @@ public class ProteinProphetImporter
         InputStream fIn = null;
         try
         {
-            fIn = new BufferedInputStream(new FileInputStream(_file), STREAM_BUFFER_SIZE);
+            fIn = new BufferedInputStream(PossiblyGZIPpedFileInputStreamFactory.getStream(_file), STREAM_BUFFER_SIZE);
             parser = new SimpleXMLStreamReader(fIn);
             if (parser.skipToStart("protein_summary_header"))
             {

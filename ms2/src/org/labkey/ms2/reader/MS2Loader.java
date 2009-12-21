@@ -35,7 +35,7 @@ public abstract class MS2Loader
         if (f.exists())
         {
             _fileLength = f.length();
-            _fIn = new BufferedInputStream(new FileInputStream(f), STREAM_BUFFER_SIZE);
+            _fIn = new BufferedInputStream(PossiblyGZIPpedFileInputStreamFactory.getStream(f), STREAM_BUFFER_SIZE);
             _parser = new SimpleXMLStreamReader(_fIn);
         }
         else
