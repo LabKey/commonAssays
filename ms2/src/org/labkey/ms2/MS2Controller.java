@@ -4147,7 +4147,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             ActionURL currentURL = getViewContext().cloneActionURL();
-            MS2RunHierarchyTree ht = new MS2RunHierarchyTree(currentURL.getExtraPath(), getUser(), ACL.PERM_READ, currentURL);
+            MS2RunHierarchyTree ht = new MS2RunHierarchyTree(currentURL.getExtraPath(), getUser(), currentURL);
             String formName = "hierarchy";
 
             StringBuilder html = new StringBuilder();

@@ -21,6 +21,7 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ContainerTree;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
@@ -39,9 +40,9 @@ public class MS2RunHierarchyTree extends ContainerTree
         return "hierarchyRuns";
     }
 
-    public MS2RunHierarchyTree(String rootPath, User user, int perm, ActionURL url)
+    public MS2RunHierarchyTree(String rootPath, User user, ActionURL url)
     {
-        super(rootPath, user, perm, url);
+        super(rootPath, user, ReadPermission.class, url);
     }
 
     @Override
