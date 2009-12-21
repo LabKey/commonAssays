@@ -409,6 +409,12 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 builder.environment().put(pathEnvName, path);
             }
             builder.environment().put("WEBSERVER_ROOT", StringUtils.trimToEmpty(new File(xinteractPath).getParent()));
+            // tell more modern TPP tools to run headless (so no perl calls etc) bpratt 4-14-09
+            builder.environment().put("XML_ONLY", "1");
+            // tell TPP tools not to mess with tmpdirs, we handle this at higher level
+            builder.environment().put("WEBSERVER_TMP","");
+
+           
             getJob().runSubProcess(builder, _wd.getDir());
 
             WorkDirectory.CopyingResource lock = null;
