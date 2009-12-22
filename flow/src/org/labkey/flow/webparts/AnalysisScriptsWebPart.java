@@ -84,11 +84,11 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         bar.add(btnNewScript);
     }
 
-    protected DataRegion createDataRegion()
+    @Override
+    protected void configureDataRegion(DataRegion rgn)
     {
-        DataRegion ret = super.createDataRegion();
-        ret.setFixedWidthColumns(false);
-        return ret;
+        super.configureDataRegion(rgn);
+        rgn.setFixedWidthColumns(false);
     }
 
     public class ScriptActionColumn extends DataColumn

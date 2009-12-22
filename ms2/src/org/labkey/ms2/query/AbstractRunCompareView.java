@@ -256,10 +256,13 @@ public abstract class AbstractRunCompareView extends QueryView
         _columns = columns;
     }
 
+    @Override
     protected DataRegion createDataRegion()
     {
-        List<DisplayColumn> displayColumns = getDisplayColumns();
         CompareDataRegion rgn = new CompareDataRegion(null, getGroupHeader());
+        configureDataRegion(rgn);
+        configureDataRegion(rgn);
+        List<DisplayColumn> displayColumns = getDisplayColumns();
         int offset = 0;
         for (DisplayColumn col : displayColumns)
         {
@@ -277,12 +280,6 @@ public abstract class AbstractRunCompareView extends QueryView
         }
         rgn.setMultiColumnCaptions(headings);
         rgn.setColSpan((displayColumns.size() - offset) / _runs.size());
-        rgn.setMaxRows(getMaxRows());
-        rgn.setOffset(getOffset());
-        rgn.setSelectionKey(getSelectionKey());
-        rgn.setShowRecordSelectors(showRecordSelectors());
-        rgn.setName(getDataRegionName());
-        rgn.setDisplayColumns(displayColumns);
         return rgn;
     }
 

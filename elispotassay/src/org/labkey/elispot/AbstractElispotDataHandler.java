@@ -24,8 +24,10 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Position;
+import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -145,6 +147,13 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
 
     public ActionURL getContentURL(Container container, ExpData data)
     {
+        ExpRun run = data.getRun();
+        if (run != null)
+        {
+            ExpProtocol protocol = run.getProtocol();
+            ExpProtocol p = ExperimentService.get().getExpProtocol(protocol.getRowId());
+            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(container, p, run.getRowId());
+        }
         return null;
     }
 
