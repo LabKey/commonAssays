@@ -19,16 +19,22 @@ package org.labkey.flow.controllers.run;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.permissions.*;
-import org.labkey.api.view.*;
+import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
-import org.labkey.flow.data.*;
+import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.MoveRunFromWorkspaceJob;
 import org.springframework.validation.BindException;
@@ -41,10 +47,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -73,7 +79,7 @@ public class RunController extends BaseFlowController<RunController.Action>
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresNoPermission
     public class BeginAction extends SimpleViewAction<RunForm>
     {
         public ModelAndView getView(RunForm runForm, BindException errors) throws Exception

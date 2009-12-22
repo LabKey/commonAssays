@@ -44,8 +44,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
@@ -133,7 +132,7 @@ public class NabController extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresNoPermission
     public class BeginAction extends SimpleViewAction<BeginForm>
     {
         public ModelAndView getView(BeginForm form, BindException errors) throws Exception

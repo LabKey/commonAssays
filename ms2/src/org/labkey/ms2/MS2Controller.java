@@ -4719,7 +4719,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresNoPermission
     public class AddRunAction extends SimpleRedirectAction<AddRunForm>
     {
         public ActionURL getRedirectURL(AddRunForm form) throws Exception
@@ -5360,7 +5360,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresNoPermission
     public class AddFileRunStatusAction extends ExportAction
     {
         public void export(Object o, HttpServletResponse response, BindException errors) throws Exception
@@ -5625,7 +5625,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresNoPermission
     public class UpdateShowPeptideAction extends SimpleRedirectAction
     {
         public ActionURL getRedirectURL(Object o) throws Exception

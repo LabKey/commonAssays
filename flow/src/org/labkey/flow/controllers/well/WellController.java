@@ -20,50 +20,50 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SimpleErrorView;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.data.*;
 import org.labkey.api.jsp.FormPage;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.permissions.*;
 import org.labkey.api.security.SecurityPolicy;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.ReturnURLString;
+import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.data.*;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.FCSViewer;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.query.AttributeCache;
+import org.labkey.flow.script.FlowAnalyzer;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.File;
+import java.net.URI;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.net.URI;
 
 public class WellController extends BaseFlowController<WellController.Action>
 {
@@ -87,7 +87,7 @@ public class WellController extends BaseFlowController<WellController.Action>
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresNoPermission
     public class BeginAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception

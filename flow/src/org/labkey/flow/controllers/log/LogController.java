@@ -19,16 +19,15 @@ package org.labkey.flow.controllers.log;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowLog;
 import org.labkey.flow.data.FlowObject;
@@ -56,7 +55,7 @@ public class LogController extends BaseFlowController<LogController.Action>
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresNoPermission
     public class BeginAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception

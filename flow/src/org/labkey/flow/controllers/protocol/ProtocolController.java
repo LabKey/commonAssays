@@ -21,10 +21,10 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.permissions.*;
+import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NavTree;
@@ -36,7 +36,8 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ProtocolController extends BaseFlowController<ProtocolController.Action>
 {
@@ -82,7 +83,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
         }
     }
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresNoPermission
     public class BeginAction extends SimpleViewAction<ProtocolForm>
     {
         public ModelAndView getView(ProtocolForm form, BindException errors) throws Exception
