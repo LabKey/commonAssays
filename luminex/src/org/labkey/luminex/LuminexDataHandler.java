@@ -485,7 +485,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                     return expRun.getLSID();
                 }
 
-                public void afterImportObject(String lsid, ObjectProperty[] props) throws SQLException
+                public void afterBatchInsert(int currentRow) throws SQLException
                 {
                 }
             }, excelRunColumns, excelRunPropsList, true);

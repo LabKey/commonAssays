@@ -18,13 +18,10 @@ package org.labkey.ms2.protein;
 
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.ObjectProperty;
 
 import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -75,7 +72,7 @@ public class CustomAnnotationImportHelper implements OntologyManager.ImportHelpe
         return lsid;
     }
 
-    public void afterImportObject(String lsid, ObjectProperty[] props) throws SQLException
+    public void afterBatchInsert(int currentRow) throws SQLException
     {
     }
 }

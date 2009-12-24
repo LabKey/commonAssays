@@ -17,7 +17,6 @@
 package org.labkey.luminex;
 
 import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.ObjectProperty;
 
 import java.util.Map;
 import java.util.Collection;
@@ -51,7 +50,7 @@ public class AnalyteImportHelper implements OntologyManager.ImportHelper
         throw new IllegalStateException("Could not find LSID for Analyte with name " + name);
     }
 
-    public void afterImportObject(String lsid, ObjectProperty[] props) throws SQLException
+    public void afterBatchInsert(int currentRow) throws SQLException
     {
 
     }
