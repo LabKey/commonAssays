@@ -30,8 +30,10 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileType;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -46,7 +48,7 @@ import java.util.*;
 public class LuminexExcelDataHandler extends LuminexDataHandler implements TransformDataHandler
 {
     public static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
-    public static final DataType LUMINEX_DATA_TYPE = new DataType("LuminexDataFile");
+    public static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType("LuminexDataFile", new FileType(".xls"));
 
     public Map<DataType, List<Map<String, Object>>> loadFileData(ExpProtocol expProtocol, Domain dataDomain, File dataFile) throws IOException, ExperimentException
     {

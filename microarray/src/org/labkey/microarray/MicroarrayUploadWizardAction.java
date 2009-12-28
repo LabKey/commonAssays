@@ -115,8 +115,16 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
     @Override
     protected boolean showBatchStep(MicroarrayRunUploadForm form, Domain uploadDomain) throws ServletException
     {
-        if (form.getSelectedDataCollector().getAdditionalUploadType(form) == AssayDataCollector.AdditionalUploadType.Disallowed)
+        try
         {
+            if (form.getUploadedData().isEmpty())
+            {
+                throw new RedirectException(PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(form.getContainer(), null));
+            }
+        }
+        catch (ExperimentException e)
+        {
+            // No data was present
             throw new RedirectException(PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(form.getContainer(), null));
         }
 

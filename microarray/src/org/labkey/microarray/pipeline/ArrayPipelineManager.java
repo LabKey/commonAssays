@@ -19,14 +19,13 @@ package org.labkey.microarray.pipeline;
 import java.io.*;
 import java.net.URI;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileUtil;
+import org.labkey.microarray.MicroarrayModule;
 
 
 public class ArrayPipelineManager {
@@ -88,26 +87,8 @@ public class ArrayPipelineManager {
     {
         public boolean accept(File f)
         {
-            return isMageFile(f);
+            return MicroarrayModule.MAGE_ML_INPUT_TYPE.getFileType().isType(f);
         }
-
-    }
-
-    private static final Pattern MAGE_REGEX = Pattern.compile("(.*)(\\Q.mage\\E|\\QMAGE-ML.xml\\E|\\Q_MAGEML.xml\\E)", Pattern.CASE_INSENSITIVE);
-
-    public static boolean isMageFile(File f)
-    {
-        return MAGE_REGEX.matcher(f.getName()).matches() && f.isFile();
-    }
-
-    public static String getBaseMageName(String filename)
-    {
-        Matcher matcher = MAGE_REGEX.matcher(filename);
-        if (matcher.matches() && matcher.groupCount() > 0)
-        {
-            return matcher.group(1);
-        }
-        return null;
     }
 
     public static PipelineProvider.FileEntryFilter getMageFileFilter()

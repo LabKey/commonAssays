@@ -266,8 +266,17 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     }
                     else
                     {
-                        assert outputs.size() == 1;
-                        dataId = outputs.get(0).getRowId();
+                        for (ExpData output : outputs)
+                        {
+                            if (form.getProvider().getDataType().matches(new Lsid(output.getLSID())))
+                            {
+                                dataId = output.getRowId();
+                            }
+                        }
+                        if (dataId == 0)
+                        {
+                            throw new IllegalStateException("Could not find primary file in run outputs");
+                        }
                     }
 
                     for (Analyte analyte : getAnalytes(dataId))

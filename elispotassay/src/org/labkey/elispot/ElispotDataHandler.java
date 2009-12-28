@@ -24,9 +24,10 @@ import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileType;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 
 import java.io.File;
@@ -39,7 +40,7 @@ import java.util.*;
  */
 public class ElispotDataHandler extends AbstractElispotDataHandler implements TransformDataHandler
 {
-    public static final DataType ELISPOT_DATA_TYPE = new DataType("ElispotAssayData");
+    public static final AssayDataType ELISPOT_DATA_TYPE = new AssayDataType("ElispotAssayData", new FileType(Arrays.asList(".txt", ".xls"), ".txt"));
 
     public static final String ELISPOT_DATA_LSID_PREFIX = "ElispotAssayData";
     public static final String ELISPOT_DATA_ROW_LSID_PREFIX = "ElispotAssayDataRow";

@@ -49,7 +49,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
 {
     public Priority getPriority(ExpData data)
     {
-        if (MicroarrayModule.MAGE_ML_DATA_TYPE.matches(new Lsid(data.getLSID())))
+        if (MicroarrayModule.MAGE_ML_INPUT_TYPE.matches(new Lsid(data.getLSID())))
         {
             return Priority.HIGH;
         }
@@ -83,7 +83,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
         {
             // Return a single, empty row of results so that we get an entry in the results table and can copy it to
             // a study, which is useful because it propagates the run and batch properties
-            return Collections.singletonMap(MicroarrayModule.MAGE_ML_DATA_TYPE, Collections.singletonList((Map<String, Object>)new HashMap<String, Object>()));
+            return Collections.<DataType, List<Map<String, Object>>>singletonMap(MicroarrayModule.MAGE_ML_INPUT_TYPE, Collections.singletonList((Map<String, Object>)new HashMap<String, Object>()));
         }
         FileInputStream fIn = null;
         try
@@ -155,7 +155,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
                         loader.setColumns(tabColumns);
                         Map<org.labkey.api.exp.api.DataType, List<Map<String, Object>>> datas = new HashMap<org.labkey.api.exp.api.DataType, List<Map<String, Object>>>();
 
-                        datas.put(MicroarrayModule.MAGE_ML_DATA_TYPE, loader.load());
+                        datas.put(MicroarrayModule.MAGE_ML_INPUT_TYPE, loader.load());
                         return datas;
                     }
                     finally

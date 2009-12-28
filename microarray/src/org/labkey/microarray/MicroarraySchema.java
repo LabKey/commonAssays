@@ -86,7 +86,7 @@ public class MicroarraySchema extends UserSchema
 
         SQLFragment thumbnailSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
                 "\nFROM " + ExperimentService.get().getTinfoData() + " d " +
-                "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.IMAGE_DATA_TYPE.getNamespacePrefix() + "%')");
+                "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.THUMBNAIL_INPUT_TYPE.getNamespacePrefix() + "%')");
         ColumnInfo thumbnailColumn = new ExprColumn(result, THUMBNAIL_IMAGE_COLUMN_NAME, thumbnailSQL, Types.INTEGER);
         thumbnailColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
@@ -100,7 +100,7 @@ public class MicroarraySchema extends UserSchema
 
         SQLFragment qcReportSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
                 "\nFROM " + ExperimentService.get().getTinfoData() + " d " +
-                "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.QC_REPORT_DATA_TYPE.getNamespacePrefix() + "%')");
+                "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.QC_REPORT_INPUT_TYPE.getNamespacePrefix() + "%')");
         ColumnInfo qcReportColumn = new ExprColumn(result, QC_REPORT_COLUMN_NAME, qcReportSQL, Types.INTEGER);
         qcReportColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {

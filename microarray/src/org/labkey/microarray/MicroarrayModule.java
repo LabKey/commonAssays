@@ -18,26 +18,22 @@ package org.labkey.microarray;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.FileType;
 import org.labkey.api.view.*;
 import org.labkey.microarray.assay.MageMLDataHandler;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
-import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 public class MicroarrayModule extends DefaultModule
 {
@@ -47,11 +43,20 @@ public class MicroarrayModule extends DefaultModule
     public static final String WEBPART_PENDING_FILES = "Pending MAGE-ML Files";
     private static final String CONTROLLER_NAME = "microarray";
 
-    public static final DataType MAGE_ML_DATA_TYPE = new DataType("MicroarrayAssayData");
-    public static final DataType QC_REPORT_DATA_TYPE = new DataType("MicroarrayQCData");
-    public static final DataType IMAGE_DATA_TYPE = new DataType("MicroarrayImageData");
-    public static final DataType FEATURES_DATA_TYPE = new DataType("MicroarrayFeaturesData");
-    public static final DataType GRID_DATA_TYPE = new DataType("MicroarrayGridData");
+    public static final AssayDataType MAGE_ML_INPUT_TYPE =
+            new AssayDataType("MicroarrayAssayData", new FileType(Arrays.asList("_MAGEML.xml", "MAGE-ML.xml", ".mage"), "_MAGEML.xml"), "MageML");
+    public static final AssayDataType QC_REPORT_INPUT_TYPE =
+            new AssayDataType("MicroarrayQCData", new FileType(".pdf"), "QCReport");
+    public static final AssayDataType THUMBNAIL_INPUT_TYPE =
+            new AssayDataType("MicroarrayImageData", new FileType(".jpg"), "ThumbnailImage");
+    public static final AssayDataType FEATURES_INPUT_TYPE =
+            new AssayDataType("MicroarrayFeaturesData", new FileType("_feat.csv"), "Features");
+    public static final AssayDataType GRID_INPUT_TYPE =
+            new AssayDataType("MicroarrayGridData", new FileType("_grid.csv"), "Grid");
+
+    /** Collection of all of the non-MageML input types that are handled specially in the code */
+    public static final List<AssayDataType> RELATED_INPUT_TYPES =
+            Arrays.asList(QC_REPORT_INPUT_TYPE, THUMBNAIL_INPUT_TYPE, FEATURES_INPUT_TYPE, GRID_INPUT_TYPE); 
 
     public String getName()
     {

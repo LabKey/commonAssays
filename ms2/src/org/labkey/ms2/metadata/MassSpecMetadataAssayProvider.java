@@ -46,6 +46,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +66,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
 {
     public static final String PROTOCOL_LSID_NAMESPACE_PREFIX = "MassSpecMetadataProtcool";
     public static final String NAME = "Mass Spec Metadata";
-    public static final DataType MS_ASSAY_DATA_TYPE = new DataType("MZXMLData");
+    public static final AssayDataType MS_ASSAY_DATA_TYPE = new AssayDataType("MZXMLData", AbstractMS2SearchProtocol.FT_MZXML);
     public static final String RUN_LSID_NAMESPACE_PREFIX = "MassSpecMetadataRun";
 
     public static final String FRACTION_DOMAIN_PREFIX = ExpProtocol.ASSAY_DOMAIN_PREFIX + "Fractions";

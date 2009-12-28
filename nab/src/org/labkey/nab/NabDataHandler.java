@@ -32,7 +32,9 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
@@ -47,7 +49,7 @@ import java.util.*;
  */
 public class NabDataHandler extends AbstractNabDataHandler implements TransformDataHandler
 {
-    public static final DataType NAB_DATA_TYPE = new DataType("AssayRunNabData");
+    public static final AssayDataType NAB_DATA_TYPE = new AssayDataType("AssayRunNabData", new FileType(".xls"));
     public static final DataType NAB_TRANSFORMED_DATA_TYPE = new DataType("AssayRunNabTransformedData"); // a marker data type
     private static final int START_ROW = 6; //0 based, row 7 inthe workshet
     private static final int START_COL = 0;

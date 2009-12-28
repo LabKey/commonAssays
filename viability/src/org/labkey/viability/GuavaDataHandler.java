@@ -31,8 +31,10 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.study.assay.AssayUploadXarContext;
 import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileType;
 import org.apache.commons.beanutils.Converter;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.log4j.Logger;
@@ -52,7 +54,7 @@ import junit.framework.TestSuite;
  */
 public class GuavaDataHandler extends ViabilityAssayDataHandler implements TransformDataHandler
 {
-    public static final DataType DATA_TYPE = new DataType("ViabilityAssay-GuavaData");
+    public static final AssayDataType DATA_TYPE = new AssayDataType("ViabilityAssay-GuavaData", new FileType(".csv"));
 
     public Priority getPriority(ExpData data)
     {

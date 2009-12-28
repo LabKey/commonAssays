@@ -36,7 +36,6 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
-import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
@@ -45,7 +44,6 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.*;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
-import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -74,7 +72,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 
     public MicroarrayAssayProvider()
     {
-        super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_DATA_TYPE, new AssayTableMetadata(
+        super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_INPUT_TYPE, new AssayTableMetadata(
             null,
             FieldKey.fromParts("Run"),
             FieldKey.fromParts("ObjectId")
@@ -147,41 +145,11 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         {
             Map<String, File> files = context.getUploadedData();
             assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
-            File mageMLFile = files.get(AssayDataCollector.PRIMARY_FILE);
-            ExpData mageData = createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_DATA_TYPE);
+            final File mageMLFile = files.get(AssayDataCollector.PRIMARY_FILE);
+            ExpData mageData = createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE);
 
-            outputDatas.put(mageData, "MageML");
-            String baseName = ArrayPipelineManager.getBaseMageName(mageMLFile.getName());
-            if (baseName != null)
-            {
-                File imageFile = new File(mageMLFile.getParentFile(), baseName + ".jpg");
-                if (NetworkDrive.exists(imageFile))
-                {
-                    ExpData imageData = createData(context.getContainer(), imageFile, imageFile.getName(), MicroarrayModule.IMAGE_DATA_TYPE);
-                    outputDatas.put(imageData, "ThumbnailImage");
-                }
-
-                File qcFile = new File(mageMLFile.getParentFile(), baseName + ".pdf");
-                if (NetworkDrive.exists(qcFile))
-                {
-                    ExpData qcData = createData(context.getContainer(), qcFile, qcFile.getName(), MicroarrayModule.QC_REPORT_DATA_TYPE);
-                    outputDatas.put(qcData, "QCReport");
-                }
-
-                File featuresFile = new File(mageMLFile.getParentFile(), baseName + "_feat.csv");
-                if (NetworkDrive.exists(featuresFile))
-                {
-                    ExpData featuresData = createData(context.getContainer(), featuresFile, featuresFile.getName(), MicroarrayModule.FEATURES_DATA_TYPE);
-                    outputDatas.put(featuresData, "Features");
-                }
-
-                File gridFile = new File(mageMLFile.getParentFile(), baseName + "_grid.csv");
-                if (NetworkDrive.exists(gridFile))
-                {
-                    ExpData gridData = createData(context.getContainer(), gridFile, gridFile.getName(), MicroarrayModule.GRID_DATA_TYPE);
-                    outputDatas.put(gridData, "Grid");
-                }
-            }
+            outputDatas.put(mageData, MicroarrayModule.MAGE_ML_INPUT_TYPE.getRole());
+            addRelatedOutputDatas(context, outputDatas, mageMLFile, Arrays.asList(MicroarrayModule.THUMBNAIL_INPUT_TYPE, MicroarrayModule.QC_REPORT_INPUT_TYPE, MicroarrayModule.GRID_INPUT_TYPE, MicroarrayModule.FEATURES_INPUT_TYPE));
         }
         catch (IOException e)
         {

@@ -40,7 +40,6 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.FileType;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
@@ -435,7 +434,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     public PipelineProvider getPipelineProvider()
     {
         return new AssayPipelineProvider(LuminexModule.class,
-                new PipelineProvider.FileTypesEntryFilter(new FileType(".xls")), 
+                new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()), 
                 this, "Import Luminex");
     }
 
