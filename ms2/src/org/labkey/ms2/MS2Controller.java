@@ -155,7 +155,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private NavTree appendRunNavTrail(NavTree root, MS2Run run, ActionURL runURL, String title, PageConfig page, String helpTopic)
+    private NavTree appendRunNavTrail(NavTree root, MS2Run run, URLHelper runURL, String title, PageConfig page, String helpTopic)
     {
         appendRootNavTrail(root, null, page, helpTopic);
 
@@ -720,7 +720,7 @@ public class MS2Controller extends SpringActionController
     public class RenameRunAction extends FormViewAction<RenameForm>
     {
         private MS2Run _run;
-        private ActionURL _returnURL;
+        private URLHelper _returnURL;
 
         public void validateCommand(RenameForm target, Errors errors)
         {
@@ -729,7 +729,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(RenameForm form, boolean reshow, BindException errors) throws Exception
         {
             _run = MS2Manager.getRun(form.getRun());
-            _returnURL = form.getReturnActionURL(getShowRunURL(getContainer(), form.getRun()));
+            _returnURL = form.getReturnURLHelper(getShowRunURL(getContainer(), form.getRun()));
 
             String description = form.getDescription();
             if (description == null || description.length() == 0)
@@ -767,7 +767,7 @@ public class MS2Controller extends SpringActionController
     {
         public MS2Run run;
         public String description;
-        public ActionURL returnURL;
+        public URLHelper returnURL;
     }
 
 
