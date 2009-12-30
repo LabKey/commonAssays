@@ -31,7 +31,7 @@
             <td>
                 <input name="name" id="name" style="width:200px;">
                 <input type=hidden value="<%=h(bean.viewParams)%>" name="viewParams">
-                <input type=hidden value="<%=h(bean.returnURL)%>" name="<%=ReturnUrlForm.Params.returnUrl%>">
+                <%=generateReturnUrlFormField(bean.returnURL)%>
             </td>
         </tr><%
 if (bean.canShare)
