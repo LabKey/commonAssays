@@ -90,6 +90,7 @@ public class SpectrumImporter
                         has_mzML = RandomAccessPwizMSDataIterator.isAvailable();
                     } catch (IOException x) {
                         _log.info(x);
+                        _systemLog.info(x);
                     }
                     if (has_mzML) {
                         _scanIterator = new RandomAccessPwizMSDataIterator(mzXmlFileName, 2);

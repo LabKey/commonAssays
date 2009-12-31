@@ -23,7 +23,6 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 
 /**
  * XTandemPipelineJob class
@@ -48,7 +47,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
                               File dirSequenceRoot,
                               File filesMzXML[],
                               File fileInputXML
-    ) throws SQLException, IOException
+    ) throws IOException
     {
         super(protocol, XTandemCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML);
 

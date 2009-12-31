@@ -85,7 +85,7 @@ public class MascotSearchProtocol extends AbstractMS2SearchProtocol<MascotPipeli
                                                File[] filesInput,
                                                File fileParameters
     )
-            throws SQLException, IOException
+            throws IOException
     {
         return new MascotPipelineJob(this, info, getName(), getDirSeqRoot(),
                 filesInput, fileParameters);

@@ -23,7 +23,6 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.net.URI;
 
 /**
@@ -33,8 +32,6 @@ import java.net.URI;
  */
 public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipelineJob>
 {
-    private static Logger _log = Logger.getLogger(SequestSearchProtocol.class);
-
     public SequestSearchProtocol(String name, String description, String xml)
     {
         super(name, description, xml);
@@ -49,7 +46,7 @@ public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipe
                                                 File[] filesInput,
                                                 File fileParameters
     )
-            throws SQLException, IOException
+            throws IOException
     {
         return new SequestPipelineJob(this, info, getName(), getDirSeqRoot(),
                 filesInput, fileParameters);

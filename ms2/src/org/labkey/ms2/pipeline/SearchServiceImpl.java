@@ -25,6 +25,7 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.pipeline.client.GWTSearchServiceResult;
 import org.labkey.ms2.pipeline.client.SearchService;
 
@@ -35,7 +36,6 @@ import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 
@@ -58,21 +58,39 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         super(context);
     }
 
-    public GWTSearchServiceResult getSearchServiceResult(String searchEngine, String dirSequenceRoot,
-                                                         String dirRoot,String path)
+    public GWTSearchServiceResult getSearchServiceResult(String searchEngine, String path, String[] fileNames)
     {
         provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
-        getProtocols(dirRoot, "",dirSequenceRoot, searchEngine, path);
+        getProtocols("", searchEngine, path, fileNames);
         if(results.getSelectedProtocol() == null || results.getSelectedProtocol().equals("") )
-            getSequenceDbs(results.getDefaultSequenceDb(), dirSequenceRoot, searchEngine, false);
+            getSequenceDbs(results.getDefaultSequenceDb(), searchEngine, false);
         getMascotTaxonomy(searchEngine);
         getEnzymes(searchEngine);
         getResidueMods(searchEngine);
         return results;
     }
 
-    public GWTSearchServiceResult getProtocol(String searchEngine, String protocolName, String dirRoot,
-                                              String dirSequenceRoot, String path)
+    private URI getPipelineRootURI()
+    {
+        PipeRoot pipeRoot = PipelineService.get().findPipelineRoot(getContainer());
+        if (pipeRoot == null)
+        {
+            throw new NotFoundException("No pipeline root configurd for " + getContainer().getPath());
+        }
+        return pipeRoot.getRootPath().toURI();
+    }
+
+    private URI getSequenceRootURI()
+    {
+        PipeRoot pipeRoot = PipelineService.get().findPipelineRoot(getContainer());
+        if (pipeRoot == null)
+        {
+            throw new NotFoundException("No pipeline root configurd for " + getContainer().getPath());
+        }
+        return MS2PipelineManager.getSequenceDatabaseRoot(pipeRoot.getContainer());
+    }
+
+    public GWTSearchServiceResult getProtocol(String searchEngine, String protocolName, String path, String[] fileNames)
     {
         if(provider == null)
         {
@@ -94,10 +112,10 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         if(protocolName.equals("new"))
         {
             results.setSelectedProtocol("");
-            getMzXml(path, searchEngine, false);
+            getMzXml(path, fileNames, searchEngine, false);
             return results;
         }
-        URI  uriRoot = new File(dirRoot).toURI();
+        URI uriRoot = getPipelineRootURI();
 
         boolean protocolExists = false;
         AbstractMS2SearchProtocolFactory protocolFactory = provider.getProtocolFactory();
@@ -127,7 +145,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.setProtocolXml("");
             PipelineService.get().rememberLastProtocolSetting(provider.getProtocolFactory(), getContainer(),
                 getUser(),"");
-            getMzXml(path, searchEngine, false);
+            getMzXml(path, fileNames, searchEngine, false);
             _log.error("Could not find " + protocolName + ".");
         }
         if (protocol != null)
@@ -136,7 +154,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             if (protocol.getDbNames().length > 0)
             {
                 results.setDefaultSequenceDb(protocol.getDbNames()[0]);
-                if(!provider.dbExists(dirSequenceRoot,protocol.getDbNames()[0]))
+                if(!provider.dbExists(getSequenceRootURI(), protocol.getDbNames()[0]))
                     results.appendError("The database " + protocol.getDbNames()[0] + " cannot be found.");
             }
             else
@@ -150,7 +168,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.setProtocolDescription(protocol.getDescription());
             results.setProtocolXml(protocol.getXml());
         }
-        getMzXml(path, searchEngine, protocolExists);
+        getMzXml(path, fileNames, searchEngine, protocolExists);
         return results;
     }
 
@@ -219,8 +237,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
     }
 
-    private void getProtocols(String dirRoot, String defaultProtocol, String dirSequenceRoot, String searchEngine,
-                              String path)
+    private void getProtocols(String defaultProtocol, String searchEngine, String path, String[] fileNames)
     {
         ArrayList<String> protocolList = new ArrayList<String>();
         if(defaultProtocol == null || defaultProtocol.length() == 0 )
@@ -233,12 +250,11 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                     getUser());
             if(defaultProtocol == null) defaultProtocol = "";
         }
-        getProtocol(searchEngine,defaultProtocol,dirRoot, dirSequenceRoot, path);
+        getProtocol(searchEngine, defaultProtocol, path, fileNames);
 
-        String[] protocols;
-        URI  dirRootURI = new File(dirRoot).toURI();
+        URI dirRootURI = getPipelineRootURI();
 
-        protocols = provider.getProtocolFactory().getProtocolNames(dirRootURI, new File(URIUtil.resolve(dirRootURI, path)));
+        String[] protocols = provider.getProtocolFactory().getProtocolNames(dirRootURI, new File(URIUtil.resolve(dirRootURI, path)));
         for(String protName:protocols)
         {
             if(!protName.equals("default"))
@@ -247,12 +263,12 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         results.setProtocols(protocolList);
     }
 
-    public void getSequenceDbPaths(String dirSequenceRoot, String searchEngine)
+    public void getSequenceDbPaths(String searchEngine)
     {
-        getSequenceDbPaths(dirSequenceRoot, searchEngine, false);
+        getSequenceDbPaths(searchEngine, false);
     }
 
-    private void getSequenceDbPaths(String dirSequenceRoot, String searchEngine, boolean refresh)
+    private void getSequenceDbPaths(String searchEngine, boolean refresh)
     {
         if(provider == null)
         {
@@ -260,15 +276,13 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         }
         if(!provider.supportsDirectories()) return;
 
-        List<String> sequenceDbPaths;
-        sequenceDbPaths = PipelineService.get().getLastSequenceDbPathsSetting(provider.getProtocolFactory(),
+        List<String> sequenceDbPaths = PipelineService.get().getLastSequenceDbPathsSetting(provider.getProtocolFactory(),
                 getContainer(),getUser());
         if(sequenceDbPaths == null || sequenceDbPaths.size() == 0 || refresh)
         {
-            URI dirSequenceRootURI;
             try
             {
-                dirSequenceRootURI = new File(dirSequenceRoot).toURI();
+                URI dirSequenceRootURI = getSequenceRootURI();
                 sequenceDbPaths =  provider.getSequenceDbPaths(dirSequenceRootURI);
                 if(sequenceDbPaths == null) throw new IOException("Fasta directory not found.");
                 if(provider.remembersDirectories())
@@ -286,7 +300,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         results.setSequenceDbPaths(sequenceDbPaths);
     }
 
-    public GWTSearchServiceResult getSequenceDbs(String defaultDb, String dirSequenceRoot, String searchEngine, boolean refresh)
+    public GWTSearchServiceResult getSequenceDbs(String defaultDb, String searchEngine, boolean refresh)
     {
         if(defaultDb == null) defaultDb = "";
         String relativePath;
@@ -329,13 +343,11 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         {
             relativePath = defaultDb.substring(0, defaultDb.lastIndexOf('/') + 1);
         }
-        return getSequenceDbs(relativePath,defaultDb, dirSequenceRoot, searchEngine, refresh);
+        return getSequenceDbs(relativePath, defaultDb, searchEngine, refresh);
     }
 
-    private GWTSearchServiceResult getSequenceDbs(String relativePath, String defaultDb, String dirSequenceRoot,
-                                                  String searchEngine, boolean refresh)
+    private GWTSearchServiceResult getSequenceDbs(String relativePath, String defaultDb, String searchEngine, boolean refresh)
     {
-
         List<String> sequenceDbs = null;
         String defaultDbPath;
         ArrayList<String> returnList = new ArrayList<String>();
@@ -356,15 +368,15 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                 }
             }
         }
-        getSequenceDbPaths(dirSequenceRoot, searchEngine,refresh);
+        getSequenceDbPaths(searchEngine,refresh);
 
         if(relativePath.equals("/"))
         {
-            defaultDbPath = dirSequenceRoot;
+            defaultDbPath = getSequenceRootURI().getPath();
         }
         else
         {
-            defaultDbPath = dirSequenceRoot + relativePath;
+            defaultDbPath = getSequenceRootURI().getPath() + relativePath;
         }
         URI defaultDbPathURI;
         try
@@ -383,7 +395,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             if(sequenceDbs == null)
             {
                 results.appendError("Could not find the default sequence database path : " + defaultDbPath);
-                defaultDbPathURI = new File(dirSequenceRoot).toURI();
+                defaultDbPathURI = getSequenceRootURI();
                 sequenceDbs = provider.getSequenceDbDirList(defaultDbPathURI);
             }
             else
@@ -431,7 +443,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         return results;
     }
 
-    private void getMzXml(String path, String searchEngine, boolean protocolExists)
+    private void getMzXml(String path, String[] fileNames, String searchEngine, boolean protocolExists)
     {
         if (provider == null)
             provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
@@ -461,22 +473,19 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.setFileInputNames(new ArrayList<String>());
             results.setFileInputStatus(new ArrayList<String>());
 
-            // todo: use the file list passed to the form by initial post
-            File[] fileInputs = dirData.listFiles(MS2PipelineManager.getAnalyzeFilter());
-            Arrays.sort(fileInputs, new Comparator<File>()
+            Arrays.sort(fileNames, String.CASE_INSENSITIVE_ORDER);
+            for (String name : fileNames)
             {
-                public int compare(File o1, File o2)
+                if (name.indexOf("..") != -1 || name.indexOf("/") != -1 || name.indexOf("\\") != -1)
                 {
-                    return o1.getName().compareToIgnoreCase(o2.getName());
+                    results.appendError("Invalid file name " + name);
                 }
-            });
-
-            for (File file : fileInputs)
-            {
-                String name = file.getName();
-                results.getFileInputNames().add(name);
-                if (protocolExists)
-                    results.getFileInputStatus().add(getInputStatus(protocol, dirData, dirAnalysis, name, true));
+                else
+                {
+                    results.getFileInputNames().add(name);
+                    if (protocolExists)
+                        results.getFileInputStatus().add(getInputStatus(protocol, dirData, dirAnalysis, name, true));
+                }
             }
             if (protocolExists)
                 results.getFileInputStatus().add(getInputStatus(protocol, dirData, dirAnalysis, null, false));

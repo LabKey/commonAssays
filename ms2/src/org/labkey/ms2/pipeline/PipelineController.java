@@ -47,10 +47,7 @@ import org.springframework.web.servlet.mvc.Controller;
 import java.io.*;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <code>PipelineController</code>
@@ -125,29 +122,27 @@ public class PipelineController extends SpringActionController
             PipeRoot pr = PipelineService.get().findPipelineRoot(c);
             if (pr == null || !URIUtil.exists(pr.getUri()))
             {
-                HttpView.throwNotFound();
-                return false;
+                throw new NotFoundException(form.getPath());
             }
 
-            URI uriUpload = URIUtil.resolve(pr.getUri(c), form.getPath());
-            if (uriUpload == null)
+            URI dirURI = URIUtil.resolve(pr.getUri(c), form.getPath());
+            if (dirURI == null)
             {
-                HttpView.throwNotFound();
-                return false;
+                throw new NotFoundException(form.getPath());
             }
+            File dir = new File(dirURI);
 
-            File fileUpload = new File(uriUpload);
-            File[] files = new File[] { fileUpload };
-            if (fileUpload.isDirectory())
-                files = fileUpload.listFiles(MS2PipelineManager.getUploadFilter());
-
-            for (File file : files)
+            for (String fileName : form.getFile())
             {
+                File file = new File(dir, fileName);
+                if (!NetworkDrive.exists(file) && file.isFile())
+                {
+                    throw new NotFoundException("Could not find file " + file.getName());
+                }
                 int extParts = 1;
                 if (file.getName().endsWith(".xml"))
                     extParts = 2;
                 String baseName = FileUtil.getBaseName(file, extParts);
-                File dir = file.getParentFile();
                 // If the data was created by our pipeline, try to get the name
                 // to look like the normal generated name.
 
@@ -278,7 +273,7 @@ public class PipelineController extends SpringActionController
             return null;
         }
 
-        public Class<? extends Controller>  getAction()
+        public Class<? extends Controller> getAction()
         {
             return this.getClass();
         }
@@ -297,14 +292,14 @@ public class PipelineController extends SpringActionController
 
             URI uriRoot = pr.getUri();
             _dirRoot = new File(uriRoot);
-            _dirSeqRoot= new File(MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()));
+            _dirSeqRoot = new File(MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()));
 
             URI uriData = URIUtil.resolve(uriRoot, form.getPath());
             if (uriData == null)
-                return HttpView.throwNotFound();
+                throw new NotFoundException("Invalid path " + form.getPath());
             _dirData = new File(uriData);
             if (!NetworkDrive.exists(_dirData))
-                return HttpView.throwNotFound();
+                throw new NotFoundException("Path does not exist " + form.getPath());
 
             if (getProviderName() != null)
                 form.setSearchEngine(getProviderName());
@@ -312,7 +307,7 @@ public class PipelineController extends SpringActionController
             _provider =
                 (AbstractMS2SearchPipelineProvider)PipelineService.get().getPipelineProvider(form.getSearchEngine());
             if (_provider == null)
-                return HttpView.throwNotFound();
+                throw new NotFoundException("No such provider: " + form.getSearchEngine());
             AbstractMS2SearchProtocolFactory protocolFactory = _provider.getProtocolFactory();
 
             if ("".equals(form.getProtocol()))
@@ -369,35 +364,27 @@ public class PipelineController extends SpringActionController
                 }
             }
             boolean success = errors == null || !errors.hasErrors();
-            try
+            if ("POST".equals(getViewContext().getRequest().getMethod()) && form.isRunSearch())
             {
-                if ("POST".equals(getViewContext().getRequest().getMethod()) && form.isRunSearch())
+                getPageConfig().setTemplate(PageConfig.Template.None);
+
+                if (success && null != form)
+                    validate(form, errors);
+                success = errors == null || !errors.hasErrors();
+
+                if (success)
+                    success = handlePost(form, errors);
+
+                if (success)
                 {
-                    getPageConfig().setTemplate(PageConfig.Template.None);
-
-                    if (success && null != form)
-                        validate(form, errors);
-                    success = errors == null || !errors.hasErrors();
-
-                    if (success)
-                        success = handlePost(form, errors);
-
-                    if (success)
+                    ActionURL url = getSuccessURL(form);
+                    if (null != url)
                     {
-                        ActionURL url = getSuccessURL(form);
-                        if (null != url)
-                        {
-                            getViewContext().getResponse().getOutputStream().print("SUCCESS=" + url.getLocalURIString());
-                            return null;
-                        }
+                        getViewContext().getResponse().getOutputStream().print("SUCCESS=" + url.getLocalURIString());
+                        return null;
                     }
-                    getViewContext().getResponse().getOutputStream().print("ERROR=" + getErrors(errors));
-                    return null;
                 }
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace(new PrintStream(getViewContext().getResponse().getOutputStream()));
+                getViewContext().getResponse().getOutputStream().print("ERROR=" + getErrors(errors));
                 return null;
             }
 
@@ -451,8 +438,19 @@ public class PipelineController extends SpringActionController
                                 getUser(),form.getSequenceDBPath(), form.getSequenceDB());
                 }
 
-                Container c = getContainer();
-                File[] mzXMLFiles = _dirData.listFiles(MS2PipelineManager.getAnalyzeFilter());
+                if (form.getFile().length == 0)
+                {
+                    throw new NotFoundException("No files specified");
+                }
+                File[] mzXMLFiles = new File[form.getFile().length];
+                for (int i = 0; i < form.getFile().length; i++)
+                {
+                    mzXMLFiles[i] = new File(_dirData, form.getFile()[i]);
+                    if (!NetworkDrive.exists(mzXMLFiles[i]))
+                    {
+                        throw new NotFoundException("Could not find file " + form.getFile()[i]);
+                    }
+                }
 
                 _protocol.getFactory().ensureDefaultParameters(_dirRoot);
 
@@ -503,8 +501,7 @@ public class PipelineController extends SpringActionController
             props.put("saveProtocol", Boolean.toString(form.isSaveProtocol()));
             props.put("returnURL", returnURL.getLocalURIString() );
             props.put("helpTopic", helpTopic);
-            props.put("dirRoot", _dirRoot.toURI().getPath());
-            props.put("dirSequenceRoot", _dirSeqRoot.toURI().getPath());
+            props.put("file", StringUtils.join(form.getFile(), "/"));
             props.put("searchEngine", form.getSearchEngine());
             props.put("targetAction", SpringActionController.getActionName(getAction()) + ".view");
             props.put("path", form.getPath());

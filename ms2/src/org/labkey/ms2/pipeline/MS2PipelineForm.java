@@ -16,30 +16,14 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
+import org.labkey.api.pipeline.browse.PipelinePathForm;
 
 /**
  * <code>MS2PipelineForm</code> base class for MS2 pipeline forms.
  */
-public class MS2PipelineForm
+public class MS2PipelineForm extends PipelinePathForm
 {
-    public enum PARAMS
-    {
-        path,
-        searchEngine
-    }
-    
-    private String path = "";
     private String searchEngine = XTandemCPipelineProvider.name;
-
-    public String getPath()
-    {
-        return path;
-    }
-
-    public void setPath(String path)
-    {
-        this.path = (path == null ? "" : path);
-    }
 
     public String getSearchEngine()
     {

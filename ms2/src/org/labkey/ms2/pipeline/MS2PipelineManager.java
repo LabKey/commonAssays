@@ -253,7 +253,7 @@ public class MS2PipelineManager
     }
 
 
-    public static URI getSequenceDatabaseRoot(Container container) throws SQLException
+    public static URI getSequenceDatabaseRoot(Container container)
     {
         URI dbRoot = PipelineService.get().getPipelineRootSetting(container, SEQUENCE_DB_ROOT_TYPE);
         if (dbRoot == null)

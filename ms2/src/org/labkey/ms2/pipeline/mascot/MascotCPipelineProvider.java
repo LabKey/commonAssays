@@ -260,7 +260,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return "pipelineMascot";
     }
 
-    public boolean dbExists(String dirSequenceRoot, String db)
+    public boolean dbExists(URI dirSequenceRoot, String db)
     {
         return true;
     }

@@ -23,7 +23,6 @@ public class MS2SearchForm extends MS2PipelineForm
     private String protocol = "";
     private String protocolName = "";
     private String protocolDescription = "";
-    private String[] fileInputNames = new String[0];
     private String sequenceDBPath = "";
     private String sequenceDB = "";
     private String configureXml = "";
@@ -79,16 +78,6 @@ public class MS2SearchForm extends MS2PipelineForm
     public void setProtocolDescription(String protocolDescription)
     {
         this.protocolDescription = (protocolDescription == null ? "" : protocolDescription);
-    }
-
-    public String[] getFileInputNames()
-    {
-        return fileInputNames;
-    }
-
-    public void setFileInputNames(String[] fileInputNames)
-    {
-        this.fileInputNames = fileInputNames;
     }
 
     public String getSequenceDBPath()

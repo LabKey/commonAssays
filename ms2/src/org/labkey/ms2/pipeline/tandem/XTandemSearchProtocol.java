@@ -50,7 +50,7 @@ public class XTandemSearchProtocol extends AbstractMS2SearchProtocol<XTandemPipe
                                                 File[] filesInput,
                                                 File fileParameters
     )
-            throws SQLException, IOException
+            throws IOException
     {
         return new XTandemPipelineJob(this, info, getName(), getDirSeqRoot(),
                 filesInput, fileParameters);

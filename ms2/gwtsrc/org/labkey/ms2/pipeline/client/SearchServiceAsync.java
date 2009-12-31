@@ -25,14 +25,13 @@ import com.google.gwt.user.client.rpc.SerializableException;
  */
 public interface SearchServiceAsync
 {
-    void getSearchServiceResult(String searchEngine,String dirSequenceRoot, String dirRoot, String path,
-                                AsyncCallback async);
-    void getSequenceDbs(String defaultDb, String dirSequenceRoot, String searchEngine, boolean refresh, AsyncCallback async);
+    void getSearchServiceResult(String searchEngine, String path, String[] fileNames,
+                                AsyncCallback<GWTSearchServiceResult> async);
+    void getSequenceDbs(String defaultDb, String searchEngine, boolean refresh, AsyncCallback<GWTSearchServiceResult> async);
 
-    void getProtocol(String searchEngine, String protocolName, String dirRoot,String dirSequenceRoot,
-                     String path, AsyncCallback async);
+    void getProtocol(String searchEngine, String protocolName, String path, String[] fileNames, AsyncCallback<GWTSearchServiceResult> async);
 
-    void getMascotTaxonomy(String searchEngine, AsyncCallback async);
+    void getMascotTaxonomy(String searchEngine, AsyncCallback<GWTSearchServiceResult> async);
 
-    void getEnzymes(String searchEngine, AsyncCallback async);
+    void getEnzymes(String searchEngine, AsyncCallback<GWTSearchServiceResult> async);
 }

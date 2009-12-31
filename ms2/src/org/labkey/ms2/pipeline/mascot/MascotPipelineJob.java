@@ -50,7 +50,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
                              File dirSequenceRoot,
                              File filesMzXML[],
                              File fileInputXML
-    ) throws SQLException, IOException
+    ) throws IOException
     {
         super(protocol, MascotCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML);
 

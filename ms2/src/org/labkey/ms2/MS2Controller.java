@@ -30,6 +30,7 @@ import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.*;
 import org.labkey.api.reports.ReportService;
@@ -4901,56 +4902,45 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermissionClass(InsertPermission.class)
-    public class ImportProteinProphetAction extends SimpleRedirectAction<ImportProteinProphetForm>
+    public class ImportProteinProphetAction extends SimpleRedirectAction<PipelinePathForm>
     {
-        public ActionURL getRedirectURL(ImportProteinProphetForm form) throws Exception
+        public ActionURL getRedirectURL(PipelinePathForm form) throws Exception
         {
-            PipelineService service = PipelineService.get();
-            Container c = getContainer();
-
-            File f = null;
+            boolean jobStarted = false;
             String path = form.getPath();
             if (path != null)
             {
-                PipeRoot pr = service.findPipelineRoot(c);
+                PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
                 if (pr != null)
                 {
-                    URI uriData = URIUtil.resolve(pr.getUri(c), path);
+                    URI uriData = URIUtil.resolve(pr.getUri(getContainer()), path);
                     if (uriData != null)
                     {
-                        f = new File(uriData);
+                        File dir = new File(uriData);
+
+                        for (String fileName : form.getFile())
+                        {
+                            File f = new File(dir, fileName);
+                            if (NetworkDrive.exists(f) && f.isFile())
+                            {
+                                ProteinProphetPipelineJob job = new ProteinProphetPipelineJob(getViewBackgroundInfo(), f);
+                                PipelineService.get().queueJob(job);
+                                jobStarted = true;
+                            }
+                            else
+                            {
+                                throw new NotFoundException("Could not find file " + fileName);
+                            }
+                        }
                     }
                 }
             }
-
-
-            if (null != f && f.exists() && f.isFile())
+            if (!jobStarted)
             {
-                ProteinProphetPipelineJob job = new ProteinProphetPipelineJob(getViewBackgroundInfo(), f);
-                service.queueJob(job);
-            }
-            else
-            {
-                HttpView.throwNotFound("Unable to open the file '" + form.getPath() + "' to load as a ProteinProphet file");
+                throw new NotFoundException("No ProteinProphet files to load");
             }
 
-            return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(c);
-        }
-    }
-
-
-    public static class ImportProteinProphetForm
-    {
-        protected String _path;
-
-        public String getPath()
-        {
-            return _path;
-        }
-
-        public void setPath(String path)
-        {
-            _path = path;
+            return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());
         }
     }
 

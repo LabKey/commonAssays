@@ -60,7 +60,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                                         File dirSequenceRoot,
                                         File fileParameters,
                                         File filesInput[]
-    ) throws SQLException, IOException
+    ) throws IOException
     {
         super(protocol, providerName, info, protocolName, fileParameters, filesInput);
 

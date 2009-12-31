@@ -38,7 +38,7 @@ public class Search implements EntryPoint
     private                 VerticalPanel           subPanel = new VerticalPanel();
     private                 FormPanel               searchFormPanel = new FormPanel();
     private                 Grid                    formGrid = new Grid();
-    private                 Hidden                  pathHidden = new Hidden();
+    private                 Hidden                  pathHidden = new Hidden("path");
     private                 Hidden                  searchEngineHidden = new Hidden();
     private                 Hidden                  runSearch = new Hidden();
     private                 VerticalPanel           messagesPanel = new VerticalPanel();
@@ -59,8 +59,9 @@ public class Search implements EntryPoint
     private                 String                  searchEngine;
     private                 SearchButton            searchButton = new SearchButton();
     private                 CopyButton              copyButton = new CopyButton();
-    private                 String                  dirSequenceRoot;
     private                 boolean                 errors = false;
+    private                 String                  path;  // Relative path of directory containing the files
+    private                 String[]                fileNames;  // Names of files to be searched
 
     private                 HTML                    spacer;
 
@@ -93,22 +94,13 @@ public class Search implements EntryPoint
         enzymeComposite = compositeFactory.getEnzymeComposite();
         residueModComposite = compositeFactory.getResidueModComposite(this);
         protocolComposite = new ProtocolComposite();
-        dirSequenceRoot = PropertyUtil.getServerProperty("dirSequenceRoot");
-        String dirRoot = PropertyUtil.getServerProperty("dirRoot");
-        loading();
-        getSearchService().getSearchServiceResult(searchEngine, dirSequenceRoot,dirRoot,
-                PropertyUtil.getServerProperty("path"), new SearchServiceAsyncCallback());
+
         //form
         searchFormPanel.setAction(PropertyUtil.getServerProperty("targetAction"));
         searchFormPanel.setMethod(FormPanel.METHOD_POST);
         searchFormPanel.addFormHandler(new SearchFormHandler());
         searchFormPanel.setWidth("100%");
 
-        //hidden fields
-        pathHidden.setName("path");
-        pathHidden.setValue(PropertyUtil.getServerProperty("path"));
-        searchEngineHidden.setName("searchEngine");
-        searchEngineHidden.setValue(searchEngine);
         runSearch.setName("runSearch");
         runSearch.setValue("true");
 
@@ -146,7 +138,22 @@ public class Search implements EntryPoint
         loadSubPanel();
         searchFormPanel.add(subPanel);
 
-        protocolComposite.addChangeListener(new ProtocolChangeListener(dirRoot));
+        //hidden fields
+        path = PropertyUtil.getServerProperty("path");
+        pathHidden.setValue(path);
+        searchEngineHidden.setName("searchEngine");
+        searchEngineHidden.setValue(searchEngine);
+
+        fileNames = PropertyUtil.getServerProperty("file").split("/");
+        for (String fileName : fileNames)
+        {
+            subPanel.add(new Hidden("file", fileName));
+        }
+
+        loading();
+        getSearchService().getSearchServiceResult(searchEngine, path, fileNames, new SearchServiceAsyncCallback());
+
+        protocolComposite.addChangeListener(new ProtocolChangeListener());
 
         sequenceDbComposite.addChangeListener(new SequenceDbChangeListener());
         sequenceDbComposite.addRefreshClickListener(new RefreshSequenceDbPathsClickListener());
@@ -215,7 +222,7 @@ public class Search implements EntryPoint
         mzXmlComposite.clearStatus();
         sequenceDbComposite.setLoading(true);
         sequenceDbComposite.setEnabled(false, false);
-        getSearchService().getSequenceDbs(sequenceDbComposite.getSelectedDb(), dirSequenceRoot, searchEngine, false,
+        getSearchService().getSequenceDbs(sequenceDbComposite.getSelectedDb(), searchEngine, false,
                 new SequenceDbServiceCallback());
         buttonPanel.remove(copyButton);
         protocolComposite.setFocus(true);
@@ -286,7 +293,6 @@ public class Search implements EntryPoint
         formGrid.setWidget(7, 0, saveProtocolCheckBoxLabel);
         formGrid.setWidget(7, 1, saveProtocolCheckBox);
         formGrid.getColumnFormatter().setWidth(1,"100%");
-
 
         for(int i = 0; i< rows; i++)
         {
@@ -482,7 +488,7 @@ public class Search implements EntryPoint
         }
         else
         {
-            getSearchService().getSequenceDbs(sequenceDb, dirSequenceRoot, searchEngine, false, new SequenceDbServiceCallback());
+            getSearchService().getSequenceDbs(sequenceDb, searchEngine, false, new SequenceDbServiceCallback());
         }
         return "";
     }
@@ -649,7 +655,7 @@ public class Search implements EntryPoint
         }
     }
 
-    private class SequenceDbServiceCallback implements AsyncCallback
+    private class SequenceDbServiceCallback implements AsyncCallback<GWTSearchServiceResult>
     {
         public void onFailure(Throwable caught)
         {
@@ -664,9 +670,8 @@ public class Search implements EntryPoint
             }
         }
 
-        public void onSuccess(Object result)
+        public void onSuccess(GWTSearchServiceResult gwtResult)
         {
-            GWTSearchServiceResult gwtResult = (GWTSearchServiceResult)result;
             databaseCache.put(gwtResult.getCurrentPath(), gwtResult);
             updateDatabases(gwtResult);
         }
@@ -720,17 +725,16 @@ public class Search implements EntryPoint
         sequenceDbComposite.setEnabled(true, true);
     }
 
-    private class ProtocolServiceAsyncCallback implements AsyncCallback
+    private class ProtocolServiceAsyncCallback implements AsyncCallback<GWTSearchServiceResult>
     {
         public void onFailure(Throwable caught)
         {
             Window.alert(caught.getMessage());
         }
 
-         public void onSuccess(Object result)
+        public void onSuccess(GWTSearchServiceResult gwtResult)
         {
             clearDisplay();
-            GWTSearchServiceResult gwtResult = (GWTSearchServiceResult)result;
             appendError(gwtResult.getErrors());
             List<String> protocols = gwtResult.getProtocols();
             String defaultProtocol = gwtResult.getSelectedProtocol();
@@ -749,17 +753,16 @@ public class Search implements EntryPoint
         }
     }
 
-    private class SearchServiceAsyncCallback implements AsyncCallback
+    private class SearchServiceAsyncCallback implements AsyncCallback<GWTSearchServiceResult>
     {
         public void onFailure(Throwable caught)
         {
             Window.alert(caught.getMessage());
         }
 
-        public void onSuccess(Object result)
+        public void onSuccess(GWTSearchServiceResult gwtResult)
         {
             setError(PropertyUtil.getServerProperty("errors"));
-            GWTSearchServiceResult gwtResult = (GWTSearchServiceResult)result;
             List<String> sequenceDbs = gwtResult.getSequenceDBs();
             List<String> sequenceDbPaths = gwtResult.getSequenceDbPaths();
             String defaultDb = gwtResult.getDefaultSequenceDb();
@@ -803,7 +806,7 @@ public class Search implements EntryPoint
             }
             else
             {
-                service.getSequenceDbs(dbDirectory, dirSequenceRoot, searchEngine, false, new SequenceDbServiceCallback());
+                service.getSequenceDbs(dbDirectory, searchEngine, false, new SequenceDbServiceCallback());
 
                 // Stick in a null so that we don't request it again
                 databaseCache.put(dbDirectory, null);
@@ -813,13 +816,6 @@ public class Search implements EntryPoint
 
     private class ProtocolChangeListener implements ChangeListener
     {
-        private String  dirRoot;
-
-        public ProtocolChangeListener(String dirRoot)
-        {
-            this.dirRoot = dirRoot;
-        }
-
         public void onChange(Widget widget)
         {
             clearDisplay();
@@ -831,8 +827,7 @@ public class Search implements EntryPoint
                 return;
             }
             loading();
-            service.getProtocol(searchEngine, protocolName, dirRoot, dirSequenceRoot,
-                    PropertyUtil.getServerProperty("path"),new ProtocolServiceAsyncCallback());
+            service.getProtocol(searchEngine, protocolName, path, fileNames, new ProtocolServiceAsyncCallback());
         }
     }
 
@@ -913,7 +908,7 @@ public class Search implements EntryPoint
             databaseCache.clear();
             sequencePathsLoaded = false;
             String defaultSequenceDb = inputXmlComposite.getSequenceDb();
-            service.getSequenceDbs(defaultSequenceDb, dirSequenceRoot, searchEngine, true, new SequenceDbServiceCallback());
+            service.getSequenceDbs(defaultSequenceDb, searchEngine, true, new SequenceDbServiceCallback());
             sequenceDbComposite.setLoading(true);
             sequenceDbComposite.setEnabled(false, false);
         }

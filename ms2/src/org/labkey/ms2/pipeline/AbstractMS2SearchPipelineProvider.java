@@ -59,9 +59,9 @@ abstract public class AbstractMS2SearchPipelineProvider
         return null; 
     }
 
-    public boolean dbExists(String dirSequenceRoot, String db)
+    public boolean dbExists(URI dirSequenceRoot, String db)
     {
-        File dbFile = new File(dirSequenceRoot, db);
+        File dbFile = new File(new File(dirSequenceRoot), db);
         return NetworkDrive.exists(dbFile);
     }
 
