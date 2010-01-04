@@ -24,7 +24,6 @@ import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.security.ACL;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -56,7 +55,8 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
     private ActionButton createButton(ViewContext context, Class<? extends Controller> action, String description, ActionButton.Action method)
     {
         ActionURL url = new ActionURL(action, context.getContainer());
-        ActionButton button = new ActionButton(url.getLocalURIString() + "ExperimentRunIds=true", description, ACL.PERM_READ, method);
+        ActionButton button = new ActionButton(url.getLocalURIString() + "ExperimentRunIds=true", description);
+        button.setActionType(method);
         button.setDisplayModes(DataRegion.MODE_GRID);
         return button;
     }

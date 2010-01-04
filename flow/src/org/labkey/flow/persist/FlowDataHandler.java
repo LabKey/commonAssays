@@ -103,7 +103,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
                     uriFile = new URI(flowdata.getUri());
                     if (!uriFile.isAbsolute())
                     {
-                        URI uriPipelineRoot = PipelineService.get().findPipelineRoot(info.getContainer()).getUri(info.getContainer());
+                        URI uriPipelineRoot = PipelineService.get().findPipelineRoot(info.getContainer()).getUri();
                         uriFile = URIUtil.resolve(uriPipelineRoot, uriPipelineRoot, flowdata.getUri());
                     }
                 }

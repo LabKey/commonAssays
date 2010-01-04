@@ -90,24 +90,4 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
     {
         return XTandemSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName());
     }
-
-    public String getXarTemplateResource()
-    {
-        StringBuilder templateResource = new StringBuilder("org/labkey/ms2/pipeline/tandem/templates/MS2Search");
-        if (getInputFiles().length > 1)
-        {
-            templateResource.append("Fractions");
-        }
-        if ("comet".equals(getParameters().get("scoring, algorithm")))
-        {
-            templateResource.append("XComet");
-        }
-        if (isXPressQuantitation())
-        {
-            templateResource.append("Xpress");
-        }
-        templateResource.append(".xml");
-
-        return templateResource.toString();
-    }
 }

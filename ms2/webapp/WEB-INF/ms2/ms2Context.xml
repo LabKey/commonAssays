@@ -41,8 +41,6 @@
                 <ref bean="readwMzxmlConverter"/>
                 <ref bean="expGeneratorSearch"/>
                 <ref bean="expGeneratorSearchJoin"/>
-                <ref bean="expImportSearch"/>
-                <ref bean="expImportSearchJoin"/>
                 <ref bean="msPrefixCommand"/>
             </list>
         </property>
@@ -115,7 +113,7 @@
 
     <bean id="tppTaskJoin" class="org.labkey.api.pipeline.TaskId">
         <constructor-arg><value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value></constructor-arg>
-        <constructor-arg value="join"/>
+        <constructor-arg type="java.lang.String" value="join"/>
     </bean>
 
     <!-- Experiment derived tasks -->
@@ -129,19 +127,6 @@
         <constructor-arg value="expGeneratorSearchJoin"/>
         <property name="outputExt" value=".search.xar.xml"/>
         <property name="join" value="true" />
-        <property name="dependencyId" ref="tppTaskJoin"/>
-    </bean>
-
-    <bean id="expImportSearch" class="org.labkey.api.exp.pipeline.XarImportFactorySettings">
-        <constructor-arg value="expImportSearch"/>
-        <property name="inputExt" value=".search.xar.xml"/>
-        <property name="dependencyId" ref="tppTask"/>
-    </bean>
-
-    <bean id="expImportSearchJoin" class="org.labkey.api.exp.pipeline.XarImportFactorySettings">
-        <constructor-arg value="expImportSearchJoin"/>
-        <property name="inputExt" value=".search.xar.xml"/>
-        <property name="join" value="true"/>
         <property name="dependencyId" ref="tppTaskJoin"/>
     </bean>
 

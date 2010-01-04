@@ -118,26 +118,11 @@ public class PipelineController extends SpringActionController
 
         public boolean doAction(PipelinePathForm form, BindException errors) throws Exception
         {
-            Container c = getContainer();
-            PipeRoot pr = PipelineService.get().findPipelineRoot(c);
-            if (pr == null || !URIUtil.exists(pr.getUri()))
+            for (File file : form.getValidatedFiles(getContainer()))
             {
-                throw new NotFoundException(form.getPath());
-            }
-
-            URI dirURI = URIUtil.resolve(pr.getUri(c), form.getPath());
-            if (dirURI == null)
-            {
-                throw new NotFoundException(form.getPath());
-            }
-            File dir = new File(dirURI);
-
-            for (String fileName : form.getFile())
-            {
-                File file = new File(dir, fileName);
-                if (!NetworkDrive.exists(file) && file.isFile())
+                if (!file.isFile())
                 {
-                    throw new NotFoundException("Could not find file " + file.getName());
+                    throw new NotFoundException("Expected a file but found a directory: " + file.getName());
                 }
                 int extParts = 1;
                 if (file.getName().endsWith(".xml"))
@@ -163,8 +148,8 @@ public class PipelineController extends SpringActionController
                 {
                     // If the data was created by our pipeline, try to get the name
                     // to look like the normal generated name.
-                    protocolName = dir.getName();
-                    dirDataOriginal = dir.getParentFile();
+                    protocolName = file.getParentFile().getName();
+                    dirDataOriginal = file.getParentFile().getParentFile();
                     if (dirDataOriginal != null &&
                             dirDataOriginal.getName().equals(XTandemSearchProtocolFactory.get().getName()))
                     {

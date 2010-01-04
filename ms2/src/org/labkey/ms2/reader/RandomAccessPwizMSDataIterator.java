@@ -37,6 +37,8 @@ import java.io.FileNotFoundException;
  */
 public class RandomAccessPwizMSDataIterator extends AbstractMzxmlIterator
 {
+    private static Logger _log = Logger.getLogger(RandomAccessPwizMSDataIterator.class);
+
     pwiz_RAMPAdapter _parser = null;
     long _maxScan = 0;
     int _currScan = 0;
@@ -55,7 +57,8 @@ public class RandomAccessPwizMSDataIterator extends AbstractMzxmlIterator
             _triedLoadLib = true;
             try {
                 System.loadLibrary("pwiz_swigbindings");
-                _isAvailable = true;               
+                _isAvailable = true;
+                _log.info("Successfully loaded pwiz_swigbindings lib");
             } catch (UnsatisfiedLinkError e) {
                 throw new IOException ("pwiz_swigbindings lib not found, falling back to older mzXML reader code (no mzML support)" + e);
             } catch (Exception e) {

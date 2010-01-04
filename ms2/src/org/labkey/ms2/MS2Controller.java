@@ -71,7 +71,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.*;
-import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -497,7 +496,7 @@ public class MS2Controller extends SpringActionController
 
             bean.run = run;
             bean.applyViewURL = clearFilter(currentURL).setAction(ApplyRunViewAction.class);
-            bean.applyView = renderViewSelect(ACL.PERM_READ, true);
+            bean.applyView = renderViewSelect(true);
             bean.saveViewURL = currentURL.clone().setAction(SaveViewAction.class);
             bean.manageViewsURL = getManageViewsURL(run, currentURL);
             bean.pickPeptideColumnsURL = getPickPeptideColumnsURL(run, form.getColumns(), currentURL);
@@ -627,9 +626,9 @@ public class MS2Controller extends SpringActionController
      * Render current user's MS2Views in a drop down box with a submit button beside.
      * Caller is responsible for wrapping this in a <form> and (if desired) a <table>
      */
-    private StringBuilder renderViewSelect(int sharedPerm, boolean selectCurrent)
+    private StringBuilder renderViewSelect(boolean selectCurrent)
     {
-        Map<String, String> m = getViewMap(true, getContainer().hasPermission(getUser(), sharedPerm));
+        Map<String, String> m = getViewMap(true, getContainer().hasPermission(getUser(), ReadPermission.class));
 
         StringBuilder viewSelect = new StringBuilder("<select id=\"views\" name=\"viewParams\" style=\"width:200\">");
         // The defaultView parameter isn't used directly - it's just something on the URL so that it's clear
@@ -1634,7 +1633,7 @@ public class MS2Controller extends SpringActionController
         nextURL.deleteFilterParameters("button.y");
 
         bean.nextURL = nextURL;
-        bean.select = renderViewSelect(ACL.PERM_READ, false);
+        bean.select = renderViewSelect(false);
         bean.extraOptionsView = embeddedView;
         bean.viewInstructions = viewInstructions;
         bean.runList = runListId;
@@ -4906,38 +4905,17 @@ public class MS2Controller extends SpringActionController
     {
         public ActionURL getRedirectURL(PipelinePathForm form) throws Exception
         {
-            boolean jobStarted = false;
-            String path = form.getPath();
-            if (path != null)
+            for (File f : form.getValidatedFiles(getContainer()))
             {
-                PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
-                if (pr != null)
+                if (f.isFile())
                 {
-                    URI uriData = URIUtil.resolve(pr.getUri(getContainer()), path);
-                    if (uriData != null)
-                    {
-                        File dir = new File(uriData);
-
-                        for (String fileName : form.getFile())
-                        {
-                            File f = new File(dir, fileName);
-                            if (NetworkDrive.exists(f) && f.isFile())
-                            {
-                                ProteinProphetPipelineJob job = new ProteinProphetPipelineJob(getViewBackgroundInfo(), f);
-                                PipelineService.get().queueJob(job);
-                                jobStarted = true;
-                            }
-                            else
-                            {
-                                throw new NotFoundException("Could not find file " + fileName);
-                            }
-                        }
-                    }
+                    ProteinProphetPipelineJob job = new ProteinProphetPipelineJob(getViewBackgroundInfo(), f);
+                    PipelineService.get().queueJob(job);
                 }
-            }
-            if (!jobStarted)
-            {
-                throw new NotFoundException("No ProteinProphet files to load");
+                else
+                {
+                    throw new NotFoundException("Expected a file but found a directory: " + f.getName());
+                }
             }
 
             return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());

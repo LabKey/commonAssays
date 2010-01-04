@@ -51,7 +51,7 @@
 
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(c);
-    boolean _hasPipelineRoot = pipeRoot != null && pipeRoot.getUri(c) != null;
+    boolean _hasPipelineRoot = pipeRoot != null && pipeRoot.getUri() != null;
     boolean _canSetPipelineRoot = user.isAdministrator();
     boolean _canInsert = c.hasPermission(user, InsertPermission.class);
     boolean _canUpdate = c.hasPermission(user, UpdatePermission.class);

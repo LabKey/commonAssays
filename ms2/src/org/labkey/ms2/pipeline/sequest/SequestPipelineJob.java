@@ -90,20 +90,4 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements 
     {
         return SequestSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName());
     }
-
-    public String getXarTemplateResource()
-    {
-        StringBuilder templateResource = new StringBuilder("org/labkey/ms2/pipeline/sequest/templates/MS2SearchSequest");
-         if (getInputFiles().length > 1)
-         {
-             templateResource.append("Fractions");
-         }
-         if (isXPressQuantitation())
-         {
-             templateResource.append("Xpress");
-         }
-         templateResource.append(".xml");
-
-         return templateResource.toString();
-    }
 }

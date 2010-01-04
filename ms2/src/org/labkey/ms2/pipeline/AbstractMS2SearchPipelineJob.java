@@ -16,7 +16,6 @@
 
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.exp.pipeline.XarTemplateSubstitutionId;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.TaskId;
@@ -27,9 +26,7 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -37,7 +34,7 @@ import java.util.*;
  * Date: Nov 11, 2007
  */
 public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJob
-        implements MS2SearchJobSupport, TPPTask.JobSupport, XarTemplateSubstitutionId.JobSupport
+        implements MS2SearchJobSupport, TPPTask.JobSupport
 {
     private static String DATATYPE_SAMPLES = "Samples"; // Default
     private static String DATATYPE_FRACTIONS = "Fractions";
@@ -253,125 +250,5 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     public boolean isSamples()
     {
         return !_fractions || DATATYPE_BOTH.equalsIgnoreCase(getParameters().get("pipeline, data type"));
-    }
-
-/////////////////////////////////////////////////////////////////////////////
-//  Experiment writing
-    
-    public Map<String, String> getXarTemplateReplacements() throws IOException
-    {
-        Map<String, String> replaceMap = new HashMap<String, String>();
-
-        File dirRoot = getRootDir();
-        File dirAnalysis = getAnalysisDirectory();
-        File fileParameters = getParametersFile();
-        String baseName = getBaseName();
-
-        replaceMap.put("SEARCH_NAME", getDescription());
-
-        File[] databaseFiles = getSequenceFiles();
-        StringBuilder databaseSB = new StringBuilder();
-        for (File fileDatabase : databaseFiles)
-            databaseSB.append(getStartingInputDataSnippet(fileDatabase));
-
-        replaceMap.put("PROTEIN_DATABASES", databaseSB.toString());
-        replaceMap.put("PROTEIN_DATABASE_DATALSIDS", getDataLSIDSnippet(databaseFiles, dirAnalysis, "FASTA"));
-
-        StringBuilder mzxmlStartingInputsSB = new StringBuilder();
-        StringBuilder instanceDetailsSB = new StringBuilder();
-
-        File[] spectraFiles = getInputFiles();
-        for (File fileSpectra : spectraFiles)
-        {
-            mzxmlStartingInputsSB.append(getStartingInputDataSnippet(fileSpectra));
-            instanceDetailsSB.append(getInstanceDetailsSnippet(fileSpectra));
-        }
-
-        replaceMap.put("INSTANCE_DETAILS", instanceDetailsSB.toString());
-        replaceMap.put("MZXML_DATALSIDS", getDataLSIDSnippet(spectraFiles, dirAnalysis, "mzXML"));
-        replaceMap.put("MZXML_STARTING_INPUTS", mzxmlStartingInputsSB.toString());
-        replaceMap.put("MZXML_PATHS", getSpectraFilePaths(dirAnalysis, spectraFiles));
-        replaceMap.put("INPUT_XML_FILE_PATH", getXarPath(fileParameters));
-        if (spectraFiles.length == 1)
-        {
-            File f = getSearchNativeSpectraFile();
-            if (f != null)
-                replaceMap.put("SPECTRA_CONVERT_FILE_PATH",  getXarPath(f));
-
-            f = getSearchNativeOutputFile();
-            if (f != null)
-                replaceMap.put("SEARCH_OUTPUT_FILE_PATH", getXarPath(f));
-        }
-
-        replaceMap.put("PEP_XML_FILE_PATH",
-                TPPTask.getPepXMLFile(getAnalysisDirectory(), getBaseName()).getName());
-
-        File fileProtXml = TPPTask.getProtXMLFile(dirAnalysis, baseName);
-        if (!NetworkDrive.exists(fileProtXml))
-        {
-            File fileProtXMLInt = TPPTask.getProtXMLIntermediateFile(dirAnalysis, baseName);
-            if (NetworkDrive.exists(fileProtXMLInt))
-                fileProtXml = fileProtXMLInt;
-        }
-        replaceMap.put("PEP_PROT_XML_FILE_PATH", fileProtXml.getName());
-        replaceMap.put("RUN-UNIQUIFIER", getExperimentRunUniquifier());
-        return replaceMap;
-    }
-
-    protected String getExtraDataSnippets() throws IOException
-    {
-        StringBuilder sb = new StringBuilder();
-        for (File seqFile : getSequenceFiles())
-            sb.append(getAutoFileLSID(seqFile));
-        return sb.toString();
-    }
-
-    protected String getDataLSIDSnippet(File[] files, File analysisDir, String baseRoleName) throws IOException
-    {
-        StringBuilder sb = new StringBuilder();
-        for (File file : files)
-        {
-            sb.append("                                <exp:DataLSID DataFileUrl=\"");
-            sb.append(FileUtil.relativizeUnix(analysisDir, file, true));
-            sb.append("\" RoleName=\"");
-            sb.append(baseRoleName);
-            sb.append("\">${AutoFileLSID}</exp:DataLSID>\n");
-        }
-        return sb.toString();
-    }
-
-    protected String getSpectraFilePaths(File analysisDir, File[] jobSpectraFiles)
-            throws IOException
-    {
-        // CONSIDER(brendanx): look at extension of passed in spectra files to one day support mzData.
-        StringBuilder result = new StringBuilder();
-        File dirData = getDataDirectory();
-        File[] allSpectraFiles = dirData.listFiles(new FileFilter()
-        {
-            public boolean accept(File f)
-            {
-                return AbstractMS2SearchProtocol.FT_MZXML.isType(f);
-            }
-        });
-        Set<File> fileSet1 = new HashSet<File>(Arrays.asList(allSpectraFiles));
-        Set<File> fileSet2 = new HashSet<File>(Arrays.asList(jobSpectraFiles));
-        if (fileSet1.equals(fileSet2))
-        {
-            result.append(FileUtil.relativizeUnix(analysisDir, dirData, true));
-            result.append("/*.mzxml");
-        }
-        else
-        {
-            for (File f : jobSpectraFiles)
-            {
-                if (result.length() > 0)
-                {
-                    result.append(";");
-                }
-                result.append(FileUtil.relativizeUnix(analysisDir, f, true));
-            }
-        }
-
-        return result.toString();
     }
 }

@@ -24,7 +24,6 @@ import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 
 /**
  * MascotPipelineJob class
@@ -138,20 +137,4 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
     {
         return MascotSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName());
     }
-
-    public String getXarTemplateResource()
-     {
-         StringBuilder templateResource = new StringBuilder("org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascot");
-         if (getInputFiles().length > 1)
-         {
-             templateResource.append("Fractions");
-         }
-         if (isXPressQuantitation())
-         {
-             templateResource.append("Xpress");
-         }
-         templateResource.append(".xml");
-
-         return templateResource.toString();
-     }
 }

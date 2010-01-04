@@ -204,7 +204,7 @@ public class MicroarrayController extends SpringActionController
             if (pr == null || !URIUtil.exists(pr.getUri()))
                 throw new NotFoundException("No pipeline root configured for this folder");
 
-            URI uriData = URIUtil.resolve(pr.getUri(c), form.getPath());
+            URI uriData = URIUtil.resolve(pr.getUri(), form.getPath());
             if (uriData == null)
             {
                 HttpView.throwNotFound();

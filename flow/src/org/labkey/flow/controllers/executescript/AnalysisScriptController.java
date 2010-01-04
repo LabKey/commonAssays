@@ -27,7 +27,6 @@ import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
-import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -197,7 +196,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         if (root == null)
         {
             errors.reject(ERROR_MSG, "The pipeline root is not set.");
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
 
         String displayPath;
@@ -214,19 +213,19 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         if (null == uri)
         {
             errors.reject(ERROR_MSG, "The path " + displayPath + " is invalid.");
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
         File directory = new File(uri);
         if (!root.isUnderRoot(directory))
         {
             errors.reject(ERROR_MSG, "The path " + displayPath + " is invalid.");
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
 
         if (!directory.isDirectory())
         {
             errors.reject(ERROR_MSG, displayPath + " is not a directory.");
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
         List<File> files = new ArrayList<File>();
         files.add(directory);
@@ -285,7 +284,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         {
             nav = new Pair<String, Action>("Choose Runs to Upload", Action.chooseRunsToUpload);
             PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-            root.requiresPermission(getContainer(), getUser(), ACL.PERM_INSERT);
+            root.requiresPermission(getContainer(), getUser(), InsertPermission.class);
 
             JspView<ChooseRunsToUploadForm> view = new JspView<ChooseRunsToUploadForm>(AnalysisScriptController.class, "chooseRunsToUpload.jsp", form, errors);
             form.setNewPaths(getNewPaths(form, errors));
@@ -297,7 +296,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         {
             nav = new Pair<String, Action>(null, Action.uploadRuns);
             PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-            root.requiresPermission(getContainer(), getUser(), ACL.PERM_INSERT);
+            root.requiresPermission(getContainer(), getUser(), InsertPermission.class);
             if (form.ff_path == null || form.ff_path.length == 0)
             {
                 errors.reject(ERROR_MSG, "You did not select any runs.");
