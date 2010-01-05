@@ -16,6 +16,7 @@
 package org.labkey.ms2;
 
 import junit.framework.TestCase;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
@@ -33,7 +34,9 @@ import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
+import org.labkey.api.search.SearchService;
 import org.labkey.api.security.User;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
@@ -198,6 +201,12 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public void startup(ModuleContext context)
     {
+        SearchService ss = ServiceRegistry.get().getService(SearchService.class);
+        if (null != ss)
+        {
+            ss.addSearchCategory(ProteinManager.proteinCategory);
+        }
+
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new MS2PipelineProvider(this));
         service.registerPipelineProvider(new XTandemCPipelineProvider(this), "X!Tandem (Cluster)");
@@ -325,5 +334,15 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     public UpgradeCode getUpgradeCode()
     {
         return new MS2UpgradeCode();
+    }
+
+
+    @Override
+    public void enumerateDocuments(@NotNull SearchService.IndexTask task, Container c, Date modifiedSince)
+    {
+        if (null == c)
+        {
+            ProteinManager.indexSequences(task);
+        }
     }
 }

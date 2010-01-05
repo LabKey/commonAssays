@@ -20,14 +20,15 @@ import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.log4j.Logger;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConversionException;
-import org.labkey.api.collections.Cache;
-import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.*;
+import org.labkey.api.search.SearchService;
+import org.labkey.api.util.Path;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.DomainNotFoundException;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.webdav.SimpleDocumentResource;
 import org.labkey.ms2.*;
 
 import java.io.UnsupportedEncodingException;
@@ -44,6 +45,8 @@ import java.util.*;
  */
 public class ProteinManager
 {
+    public static final SearchService.SearchCategory proteinCategory = new SearchService.SearchCategory("protein", "Protein");
+    
     private static Logger _log = Logger.getLogger(ProteinManager.class);
     private static final String SCHEMA_NAME = "prot";
 
@@ -1248,5 +1251,95 @@ public class ProteinManager
         sql.add(id);
 
         Table.execute(ProteinManager.getSchema(), sql);
+    }
+
+
+    public static void indexSequences(final SearchService.IndexTask task)
+    {
+        task.addRunnable(new Runnable(){
+            public void run()
+            {
+                try
+                {
+                    Integer[] arr = Table.executeArray(getSchema(), "SELECT seqId FROM prot.sequences", null, Integer.class);
+                    indexSequences(task, Arrays.asList(arr));
+                }
+                catch (SQLException x)
+                {
+                    throw new RuntimeSQLException(x);
+                }
+            }
+        }, SearchService.PRIORITY.bulk);
+    }
+    
+
+    public static void indexSequences(final SearchService.IndexTask task, List<Integer> list)
+    {
+        int from = 0;
+        while (from < list.size())
+        {
+            final int[] ids = new int[1000];
+            int to=0;
+            while (to < ids.length && from < list.size())
+                ids[to++] = list.get(from++).intValue();
+            task.addRunnable(new Runnable(){
+                public void run()
+                {
+                    indexSequences(task,ids);
+                }
+            }, SearchService.PRIORITY.bulk);
+        }
+    }
+
+
+    public static void indexSequences(SearchService.IndexTask task, int[] ids)
+    {
+        Container c = ContainerManager.getHomeContainer();
+        ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, root);
+
+        for (int id : ids)
+        {
+            if (0==id)
+                continue;
+            try
+            {
+                Protein p = getProtein(id);
+                MultiValueMap map = getIdentifiersFromId(id);
+                StringBuilder sb = new StringBuilder();
+                sb.append(p.getBestName()).append("\n");
+                sb.append(p.getDescription()).append("\n");
+                for (Object v : map.values())
+                {
+                    if (v instanceof String)
+                    {
+                        sb.append((String)v).append(" ");
+                    }
+                    else
+                    {
+                        for (String ident : (Collection<String>)v)
+                        {
+                            sb.append(ident).append(" ");
+                        }
+                    }
+                }
+
+                String docid = "protein:" + id;
+                Map<String,Object> m = new HashMap<String,Object>();
+                m.put(SearchService.PROPERTY.category.name(), proteinCategory);
+                m.put(SearchService.PROPERTY.title.name(), "Protein " + p.getBestName());
+                SimpleDocumentResource r = new SimpleDocumentResource(
+                        new Path(docid),
+                        docid,
+                        c.getId(), "text/plain",
+                        sb.toString().getBytes(),
+                        url.clone().addParameter("seqId",id),
+                        m);
+                task.addResource(r, SearchService.PRIORITY.item);
+            }
+            catch (SQLException x)
+            {
+                throw new RuntimeSQLException(x);
+            }
+        }
     }
 }
