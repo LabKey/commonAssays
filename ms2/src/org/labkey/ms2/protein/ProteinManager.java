@@ -1295,7 +1295,7 @@ public class ProteinManager
     public static void indexSequences(SearchService.IndexTask task, int[] ids)
     {
         Container c = ContainerManager.getHomeContainer();
-        ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, root);
+        ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, c);
 
         for (int id : ids)
         {
