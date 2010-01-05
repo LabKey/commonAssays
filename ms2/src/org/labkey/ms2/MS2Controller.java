@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2;
 
+import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
@@ -3978,7 +3979,7 @@ public class MS2Controller extends SpringActionController
                 addView(proteinSummary);
 
                 // Add annotations
-                addView(new AnnotView(null, proteins[i].getSeqId()));
+                addView(new AnnotView(proteins[i]));
             }
 
             if (showPeptides)
@@ -4020,8 +4021,8 @@ public class MS2Controller extends SpringActionController
             for (String curSqid : sqidArr)
             {
                 int curSeqId = Integer.parseInt(curSqid);
-                String curTitle = ProteinManager.getSeqParamFromId("BestName", curSeqId);
-                vbox.addView(new AnnotView(curTitle, curSeqId));
+                Protein protein = ProteinManager.getProtein(curSeqId);
+                vbox.addView(new AnnotView(protein));
             }
 
             getPageConfig().setTitle("Pieslice Details for: " + req.getParameter("sliceTitle"));
@@ -4039,40 +4040,45 @@ public class MS2Controller extends SpringActionController
     private static class AnnotView extends JspView<AnnotViewBean>
     {
         // TODO: Pass in Protein object
-        private AnnotView(String title, int seqId) throws Exception
+        private AnnotView(Protein protein) throws Exception
         {
-            super("/org/labkey/ms2/protAnnots.jsp", getBean(seqId));
-
-            if (title != null)
-                setTitle("Annotations for " + title);
+            super("/org/labkey/ms2/protAnnots.jsp", getBean(protein));
+            setTitle("Annotations for " + protein.getBestName());
         }
 
-        private static AnnotViewBean getBean(int seqId) throws Exception
+        private static AnnotViewBean getBean(Protein protein) throws Exception
         {
+            int seqId = protein.getSeqId();
+            String[] empty = new String[0];
+
+            MultiValueMap identifiers = ProteinManager.getIdentifiersFromId(seqId);
+
             /* collect header info */
-            String SeqName = ProteinManager.getSeqParamFromId("BestName", seqId);
-            String SeqDesc = ProteinManager.getSeqParamFromId("Description", seqId);
-            String GeneNames[] = ProteinManager.getIdentifiersFromId("GeneName", seqId);
+            String SeqName = protein.getBestName(); // ProteinManager.getSeqParamFromId("BestName", seqId);
+            String SeqDesc = protein.getDescription(); // ProteinManager.getSeqParamFromId("Description", seqId);
+            Collection<String> GeneNames = identifiers.getCollection("genename");
             /* collect first table info */
-            String GenBankIds[] = ProteinManager.getIdentifiersFromId("GenBank", seqId);
-            String SwissProtNames[] = ProteinManager.getIdentifiersFromId("SwissProt", seqId);
-            String EnsemblIDs[] = ProteinManager.getIdentifiersFromId("Ensembl", seqId);
-            String GIs[] = ProteinManager.getIdentifiersFromId("GI", seqId);
-            String SwissProtAccns[] = ProteinManager.getIdentifiersFromId(IdentifierType.SwissProtAccn, seqId);
-            String GOCategories[] = ProteinManager.getGOCategoriesFromId(seqId);
-            String IPIds[] = ProteinManager.getIdentifiersFromId("IPI", seqId);
-            String RefSeqIds[] = ProteinManager.getIdentifiersFromId("REFSEQ", seqId);
+            Collection<String> GenBankIds = identifiers.getCollection("genbank");
+            Collection<String> SwissProtNames = identifiers.getCollection("swissprot");
+            Collection<String> EnsemblIDs = identifiers.getCollection("ensembl");
+            Collection<String> GIs = identifiers.getCollection("gi");
+            Collection<String> SwissProtAccns = identifiers.getCollection(IdentifierType.SwissProtAccn.name().toLowerCase());
+            Collection<String> IPIds = identifiers.getCollection("ipi");
+            Collection<String> RefSeqIds = identifiers.getCollection("refseq");
+            Collection<String> GOCategories = identifiers.getCollection("go");
 
             HashSet<String> allGbIds = new HashSet<String>();
-            allGbIds.addAll(Arrays.asList(GenBankIds));
-            allGbIds.addAll(Arrays.asList(RefSeqIds));
+            if (null != GenBankIds)
+                allGbIds.addAll(GenBankIds);
+            if (null != RefSeqIds)
+                allGbIds.addAll(RefSeqIds);
 
             Set<String> allGbURLs = new HashSet<String>();
 
             for (String ident : allGbIds)
             {
                 String url = ProteinManager.makeFullAnchorString(
-                        ProteinManager.makeAnyKnownIdentURLString(ident, 1),
+                        ProteinManager.makeIdentURLStringWithType(ident, "Genbank"),
                         "protWindow",
                         ident);
                 allGbURLs.add(url);
@@ -4081,17 +4087,18 @@ public class MS2Controller extends SpringActionController
             // It is convenient to strip the version numbers from the IPI identifiers
             // and this may cause some duplications.  Use a hash-set to compress
             // duplicates
-            Set<String> IPIset = new HashSet<String>();
-
-            for (String idWithoutVersion : IPIds)
+            if (null != IPIds && !IPIds.isEmpty())
             {
-                int dotIndex = idWithoutVersion.indexOf(".");
-                if (dotIndex != -1) idWithoutVersion = idWithoutVersion.substring(0, dotIndex);
-                IPIset.add(idWithoutVersion);
+                Set<String> IPIset = new HashSet<String>();
+    
+                for (String idWithoutVersion : IPIds)
+                {
+                    int dotIndex = idWithoutVersion.indexOf(".");
+                    if (dotIndex != -1) idWithoutVersion = idWithoutVersion.substring(0, dotIndex);
+                    IPIset.add(idWithoutVersion);
+                }
+                IPIds = IPIset;
             }
-
-            IPIds = new String[IPIset.size()];
-            IPIset.toArray(IPIds);
 
             AnnotViewBean bean = new AnnotViewBean();
 

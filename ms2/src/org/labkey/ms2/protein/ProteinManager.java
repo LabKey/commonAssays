@@ -16,10 +16,14 @@
 
 package org.labkey.ms2.protein;
 
+import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.log4j.Logger;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConversionException;
+import org.labkey.api.collections.Cache;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.*;
+import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.DomainNotFoundException;
@@ -1056,6 +1060,35 @@ public class ProteinManager
         return getIdentifiersFromId(identType.toString(), id);
     }
 
+
+    public static MultiValueMap getIdentifiersFromId(int seqid) throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            MultiValueMap map = new MultiValueMap();
+            rs = Table.executeQuery(getSchema(),
+                    "SELECT T.name AS name, I.identifier\n" +
+                    "FROM " + getTableInfoIdentifiers() + " I INNER JOIN " + getTableInfoIdentTypes() + " T ON I.identtypeid = T.identtypeid\n" +
+                    "WHERE seqId = ?",
+                    new Object[]{seqid});
+            while (rs.next())
+            {
+                String name = rs.getString(1).toLowerCase();
+                String id = rs.getString(2);
+                if (name.startsWith("go_"))
+                    name = "go";
+                map.put(name,id);
+            }
+            return map;
+        }
+        finally
+        {
+            ResultSetUtil.close(rs);
+        }
+    }
+
+
     public static String[] getIdentifiersFromId(String identType, int id) throws SQLException
     {
         return Table.executeArray(getSchema(),
@@ -1113,32 +1146,51 @@ public class ProteinManager
     }
 
 
-    public static String makeAnyKnownIdentURLString(String identifier, int sourceId) throws Exception
+//    public static String makeAnyKnownIdentURLString(String identifier, int sourceId) throws Exception
+//    {
+//        if (identifier == null)
+//            return null;
+//
+//        String url = Table.executeSingleton(
+//                ProteinManager.getSchema(),
+//                "SELECT Url FROM " + ProteinManager.getTableInfoInfoSources() + " WHERE sourceId=?",
+//                new Integer[]{sourceId}, String.class);
+//        if (url == null) return null;
+//        return makeIdentURLString(identifier, url);
+//    }
+
+
+    static final String NOTFOUND = "NOTFOUND";
+    static Map cacheURLs = Collections.synchronizedMap(new HashMap(200));
+
+    public static void clearURLCache()
     {
-        if (identifier == null)
-            return null;
-
-        String url = Table.executeSingleton(
-                ProteinManager.getSchema(),
-                "SELECT Url FROM " + ProteinManager.getTableInfoInfoSources() + " WHERE sourceId=?",
-                new Integer[]{sourceId}, String.class);
-        if (url == null) return null;
-        return makeIdentURLString(identifier, url);
+        cacheURLs.clear();
     }
-
 
     public static String makeIdentURLStringWithType(String identifier, String identType) throws Exception
     {
-        if (identifier == null || identType == null) return null;
-        Integer sourceId = Table.executeSingleton(
-                        ProteinManager.getSchema(),
-                        "SELECT cannonicalSourceId FROM " + ProteinManager.getTableInfoIdentTypes() + " WHERE name=?",
-                        new Object[]{identType},
-                        Integer.class
-                );
-        if (sourceId == null) return null;
-        return makeAnyKnownIdentURLString(identifier, sourceId);
+        if (identifier == null || identType == null)
+            return null;
+
+        String url = (String)cacheURLs.get(identType);
+        if (url == null)
+        {
+            url = Table.executeSingleton(getSchema(), 
+                    "SELECT S.url\n" +
+                    "FROM " + ProteinManager.getTableInfoInfoSources() + " S INNER JOIN " + ProteinManager.getTableInfoIdentTypes() +" T " +
+                        "ON S.sourceId = T.cannonicalSourceId\n" +
+                    "WHERE T.name=?",
+                    new Object[]{identType},
+                    String.class);
+            cacheURLs.put(identType, null==url ? NOTFOUND : url);
+        }
+        if (null == url || NOTFOUND == url)
+            return null;
+
+        return makeIdentURLString(identifier, url);
     }
+
 
     public static String makeFullAnchorString(String url, String target, String txt)
     {
@@ -1152,31 +1204,29 @@ public class ProteinManager
         return retVal;
     }
 
-    public static String[] makeFullAnchorStringArray(String[] idents, String target, String identType) throws Exception
+    public static String[] makeFullAnchorStringArray(Collection<String> idents, String target, String identType) throws Exception
     {
-        if (idents == null || identType == null) return new String[0];
-        String[] retVal = new String[idents.length];
-        for (int i = 0; i < idents.length; i++)
-        {
-            retVal[i] = makeFullAnchorString(makeIdentURLStringWithType(idents[i], identType), target, idents[i]);
-        }
+        if (idents == null || idents.isEmpty() || identType == null)
+            return new String[0];
+        String[] retVal = new String[idents.size()];
+        int i = 0;
+        for (String ident : idents)
+            retVal[i++] = makeFullAnchorString(makeIdentURLStringWithType(ident, identType), target, ident);
         return retVal;
     }
 
-    public static String[] makeFullGOAnchorStringArray(String[] goStrings, String target) throws Exception
+    public static String[] makeFullGOAnchorStringArray(Collection<String> goStrings, String target) throws Exception
     {
         if (goStrings == null) return new String[0];
-        String[] retVal = new String[goStrings.length];
-        for (int i = 0; i < goStrings.length; i++)
+        String[] retVal = new String[goStrings.size()];
+        int i=0;
+        for (String go : goStrings)
         {
-            retVal[i] =
-                    makeFullAnchorString(
-                            makeIdentURLStringWithType(
-                                    goStrings[i].substring(0, goStrings[i].indexOf(" ")), "GO"
-                            ),
-                            target,
-                            goStrings[i]
-                    );
+            retVal[i++] = makeFullAnchorString(
+                    makeIdentURLStringWithType(go.substring(0, go.indexOf(" ")), "GO"),
+                    target,
+                    go
+            );
         }
         return retVal;
     }
