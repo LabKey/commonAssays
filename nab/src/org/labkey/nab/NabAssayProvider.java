@@ -33,7 +33,6 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.FileType;
 import org.labkey.api.view.*;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.pipeline.PipelineProvider;
@@ -293,7 +292,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                 AssayPublishKey publishKey = dataKeys.get(row.getObjectId());
                 dataMap.put("ParticipantID", publishKey.getParticipantId());
                 dataMap.put("SequenceNum", publishKey.getVisitId());
-                if (TimepointType.DATE == studyType)
+                if (TimepointType.RELATIVE_DATE == studyType)
                 {
                     dataMap.put("Date", publishKey.getDate());
                 }

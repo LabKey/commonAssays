@@ -281,7 +281,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
                 AssayPublishKey publishKey = dataKeys.get(row.getObjectId());
                 dataMap.put("ParticipantID", publishKey.getParticipantId());
                 dataMap.put("SequenceNum", publishKey.getVisitId());
-                if (TimepointType.DATE == studyType)
+                if (TimepointType.RELATIVE_DATE == studyType)
                 {
                     dataMap.put("Date", publishKey.getDate());
                 }

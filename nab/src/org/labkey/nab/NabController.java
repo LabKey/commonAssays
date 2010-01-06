@@ -1577,7 +1577,7 @@ public class NabController extends SpringActionController
             if (!targetContainer.hasPermission(getUser(), InsertPermission.class))
                 HttpView.throwUnauthorized();
 
-            boolean dateBased = AssayPublishService.get().getTimepointType(targetContainer) == TimepointType.DATE;
+            boolean dateBased = AssayPublishService.get().getTimepointType(targetContainer) != TimepointType.VISIT;
             Set<String> includedSamples = new HashSet<String>();
             includedSamples.addAll(Arrays.asList(form.getIncludedSampleIds()));
 
