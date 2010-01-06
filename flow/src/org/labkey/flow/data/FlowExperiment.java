@@ -200,25 +200,12 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return addParams(urlFor(RunController.Action.showRuns));
     }
 
-    public String[] getAnalyzedRunPaths(User user, FlowProtocolStep step) throws Exception
-    {
-        FlowRun[] runs = getRuns(step);
-        List<String> ret = new ArrayList();
-        for (int i = 0; i < runs.length; i ++)
-        {
-            String str = runs[i].getExpObject().getFilePathRoot();
-            if (str != null)
-                ret.add(str);
-        }
-        return ret.toArray(new String[0]);
-    }
-
     public boolean hasRun(File filePath, FlowProtocolStep step) throws SQLException
     {
         FlowRun[] runs = getRuns(step);
         for (FlowRun run : runs)
         {
-            if (filePath.toString().equals(run.getExperimentRun().getFilePathRoot()))
+            if (filePath.equals(run.getExperimentRun().getFilePathRoot()))
                 return true;
         }
         return false;
@@ -230,7 +217,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         FlowRun[] runs = getRuns(step);
         for (FlowRun run : runs)
         {
-            if (filePath.toString().equals(run.getExperimentRun().getFilePathRoot()))
+            if (filePath.equals(run.getExperimentRun().getFilePathRoot()))
             {
                 ret.add(run);
             }

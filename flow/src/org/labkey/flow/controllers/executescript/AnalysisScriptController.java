@@ -233,7 +233,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         if (dirFiles != null)
             files.addAll(Arrays.asList(dirFiles));
 
-        Set<String> usedPaths = new HashSet<String>();
+        Set<File> usedPaths = new HashSet<File>();
         for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
         {
             usedPaths.add(run.getExperimentRun().getFilePathRoot());
@@ -247,7 +247,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             if (fcsFiles.length > 0)
             {
                 anyFCSDirectories = true;
-                if (!usedPaths.contains(file.toString()))
+                if (!usedPaths.contains(file))
                 {
                     String displayName;
                     if (file.equals(directory))

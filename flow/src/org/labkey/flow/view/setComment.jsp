@@ -30,9 +30,6 @@
     String contextPath = getViewContext().getContextPath();
 %>
 <% if (canEdit) { %>
-<script type="text/javascript">
-    LABKEY.requiresExtJs(false);
-</script>
 <span class="extContainer x-form-field-wrap">
     <input class="extContainer" type="text"
            id="comment" name="comment" size="65"

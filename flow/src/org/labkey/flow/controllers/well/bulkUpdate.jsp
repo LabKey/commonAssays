@@ -27,9 +27,6 @@ WellController.UpdateKeywordsForm form = (WellController.UpdateKeywordsForm)Http
 ViewContext context = HttpView.currentContext();
 
 %>
-<script type="text/javascript">
-    LABKEY.requiresExtJs();
-</script>
 <span style="color:green;"><%=PageFlowUtil.filter(form.message)%></span><br>
 <labkey:errors />
 <div id="updateForm" />

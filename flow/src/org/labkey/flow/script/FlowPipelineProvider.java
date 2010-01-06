@@ -106,7 +106,7 @@ public class FlowPipelineProvider extends PipelineProvider
             return;
 
         PipeRoot root;
-        Set<String> usedPaths = new HashSet<String>();
+        Set<File> usedPaths = new HashSet<File>();
 
         try
         {
@@ -133,7 +133,7 @@ public class FlowPipelineProvider extends PipelineProvider
         File[] dirs = directory.listFiles(DirectoryFileFilter.INSTANCE);
         for (File dir : dirs)
         {
-            if (usedPaths.contains(dir.getPath()))
+            if (usedPaths.contains(dir))
                 continue;
             File[] fcsFiles = dir.listFiles((FileFilter)FCS.FCSFILTER);
             if (null == fcsFiles || 0 == fcsFiles.length)

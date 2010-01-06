@@ -48,7 +48,6 @@
     .right {text-align:right;}
 </style>
 <script type="text/javascript">
-LABKEY.requiresExtJs(true);
 LABKEY.requiresClientAPI(true);
 LABKEY.requiresScript("ColumnTree.js");
 </script>

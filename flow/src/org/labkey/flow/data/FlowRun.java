@@ -279,7 +279,8 @@ public class FlowRun extends FlowObject<ExpRun>
 
     public String getPath()
     {
-        return getExperimentRun().getFilePathRoot();
+        File file = getExperimentRun().getFilePathRoot();
+        return file == null ? null : file.getPath();
     }
 
     public ActionURL getDownloadWorkspaceURL()
@@ -390,7 +391,7 @@ public class FlowRun extends FlowObject<ExpRun>
         }
         for (ExpRun run : ExperimentService.get().getExpRuns(container, null, childProtocol))
         {
-            if (runFilePathRoot == null || (run.getFilePathRoot() != null && runFilePathRoot.equals(new File(run.getFilePathRoot()))))
+            if (runFilePathRoot == null || (run.getFilePathRoot() != null && runFilePathRoot.equals(run.getFilePathRoot())))
                 ret.add(new FlowRun(run));
         }
         sortRuns(ret);
