@@ -492,7 +492,7 @@ public class NabController extends SpringActionController
         }
 
         private void resetDefaultProperties(Container c, User user)
-        {
+        {   
             PlateTemplate template = getActivePlateTemplate(c, user);
             Object experimentDate = template.getProperty("ExperimentDate");
             if (experimentDate instanceof Date)

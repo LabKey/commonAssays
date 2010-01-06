@@ -41,10 +41,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.util.FileType;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HtmlView;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.*;
 import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.springframework.web.servlet.ModelAndView;
@@ -420,6 +417,14 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         public ViabilityDetailsHeaderView(ExpProtocol protocol, AssayProvider provider, boolean minimizeLinks, ContainerFilter containerFilter)
         {
             super(protocol, provider, minimizeLinks, containerFilter);
+        }
+
+        @Override
+        public List<NavTree> getLinks()
+        {
+            List<NavTree> links = super.getLinks();
+            AssayProvider provider = getProvider();
+            ExpProtocol protocol = getProtocol();
 
             // UCK. Getting query filter parameter from url.
             PropertyValue pv = getViewContext().getBindPropertyValues().getPropertyValue(protocol.getName() + " Data.Run/RowId~eq");
@@ -444,24 +449,25 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
                 boolean canDelete = c.hasPermission(user, DeletePermission.class);
                 if (canInsert)
                 {
-                    _links.put(AbstractAssayProvider.IMPORT_DATA_LINK_NAME, provider.getImportURL(c, protocol));
+                    links.add(new NavTree(AbstractAssayProvider.IMPORT_DATA_LINK_NAME, provider.getImportURL(c, protocol)));
 
                     if (runId > 0)
                     {
                         ActionURL reRunURL = getImportURL(c, protocol);
                         reRunURL.addParameter("reRunId", runId);
 
-                        _links.put("re-import", reRunURL);
+                        links.add(new NavTree("re-import", reRunURL));
 
                         if (canDelete)
                         {
                             ActionURL deleteReRunURL = reRunURL.clone();
                             deleteReRunURL.addParameter("delete", "true");
-                            _links.put("delete and re-import", deleteReRunURL);
+                            links.add(new NavTree("delete and re-import", deleteReRunURL));
                         }
                     }
                 }
             }
+            return links;
         }
     }
 

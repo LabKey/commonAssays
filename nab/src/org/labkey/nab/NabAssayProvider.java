@@ -68,10 +68,11 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String CURVE_FIT_METHOD_PROPERTY_CAPTION = "Curve Fit Method";
     public static final String LOCK_AXES_PROPERTY_NAME = "LockYAxis";
     public static final String LOCK_AXES_PROPERTY_CAPTION = "Lock Graph Y-Axis";
+    public static final String NAB_RUN_LSID_PREFIX = "NabAssayRun";
 
     public NabAssayProvider()
     {
-        super("NabAssayProtocol", "NabAssayRun", NabDataHandler.NAB_DATA_TYPE, new AssayTableMetadata(
+        super("NabAssayProtocol", NAB_RUN_LSID_PREFIX, NabDataHandler.NAB_DATA_TYPE, new AssayTableMetadata(
             FieldKey.fromParts("Properties", NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
             FieldKey.fromParts("Run"),
             FieldKey.fromParts("ObjectId")));

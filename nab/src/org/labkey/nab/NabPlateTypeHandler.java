@@ -17,12 +17,10 @@
 package org.labkey.nab;
 
 import org.labkey.api.study.*;
-import org.labkey.api.security.User;
 import org.labkey.api.data.Container;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Arrays;
 import java.sql.SQLException;
 
 
@@ -66,10 +64,15 @@ public class NabPlateTypeHandler implements PlateTypeHandler
                 WellGroupTemplate sampleGroup = template.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
                         PlateService.get().createPosition(container, 0, firstCol),
                         PlateService.get().createPosition(container, 7, firstCol + 1));
+//                sampleGroup.setProperty(prop.name(), "");
                 for (NabManager.SampleProperty prop : NabManager.SampleProperty.values())
-                    sampleGroup.setProperty(prop.name(), "");
-                for (int replicate = 0; replicate < template.getRows(); replicate++)
                 {
+                    if (prop.isTemplateProperty())
+                        sampleGroup.setProperty(prop.name(), "");
+                }
+
+                for (int replicate = 0; replicate < template.getRows(); replicate++)
+                {   
                     template.addWellGroup("Specimen " + (sample + 1) + ", Replicate " + (replicate + 1), WellGroup.Type.REPLICATE,
                             PlateService.get().createPosition(container, replicate, firstCol),
                             PlateService.get().createPosition(container, replicate, firstCol + 1));

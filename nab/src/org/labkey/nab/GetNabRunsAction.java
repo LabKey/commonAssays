@@ -214,7 +214,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
             for (NabAssayRun.SampleResult result : assay.getSampleResults())
             {
                 Map<String, Object> sample = new HashMap<String, Object>();
-                sample.put("properties", new PropertyNameMap(result.getProperties()));
+                sample.put("properties", new PropertyNameMap(result.getSampleProperties()));
                 DilutionSummary dilutionSummary = result.getDilutionSummary();
                 sample.put("objectId", result.getObjectId());
                 sample.put("wellgroupName", dilutionSummary.getWellGroup().getName());
@@ -222,21 +222,21 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
                 {
                     if (includeStats)
                     {
-                        sample.put("minDilution", dilutionSummary.getMinDilution(assay.getCurveFitType()));
-                        sample.put("maxDilution", dilutionSummary.getMaxDilution(assay.getCurveFitType()));
+                        sample.put("minDilution", dilutionSummary.getMinDilution(assay.getRenderedCurveFitType()));
+                        sample.put("maxDilution", dilutionSummary.getMaxDilution(assay.getRenderedCurveFitType()));
                     }
                     if (calculateNeut)
                     {
                         sample.put("fitError", dilutionSummary.getFitError());
                         for (int cutoff : assay.getCutoffs())
                         {
-                            sample.put("curveIC" + cutoff, dilutionSummary.getCutoffDilution(cutoff/100.0, assay.getCurveFitType()));
-                            sample.put("pointIC" + cutoff, dilutionSummary.getInterpolatedCutoffDilution(cutoff/100.0, assay.getCurveFitType()));
+                            sample.put("curveIC" + cutoff, dilutionSummary.getCutoffDilution(cutoff/100.0, assay.getRenderedCurveFitType()));
+                            sample.put("pointIC" + cutoff, dilutionSummary.getInterpolatedCutoffDilution(cutoff/100.0, assay.getRenderedCurveFitType()));
                         }
                     }
                     if (includeFitParameters)
                     {
-                        sample.put("fitParameters", dilutionSummary.getCurveParameters(assay.getCurveFitType()).toMap());
+                        sample.put("fitParameters", dilutionSummary.getCurveParameters(assay.getRenderedCurveFitType()).toMap());
                     }
                     List<Map<String, Object>> replicates = new ArrayList<Map<String, Object>>();
                     for (WellGroup replicate : dilutionSummary.getWellGroup().getOverlappingGroups(WellGroup.Type.REPLICATE))

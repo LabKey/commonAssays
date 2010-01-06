@@ -79,7 +79,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                 ExpRun run = _data.getRun();
                 ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
                 Container container = _data.getContainer();
-                Luc5Assay assayResults = getAssayResults(run, _info.getUser(), _dataFile);
+                Luc5Assay assayResults = getAssayResults(run, _info.getUser(), _dataFile, null);
                 List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
                 Map<Integer, String> cutoffFormats = assayResults.getCutoffFormats();
 
@@ -101,7 +101,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                             saveICValue(getPropertyName(CURVE_IC_PREFIX, cutoff, type), value,
                                     dilution, protocol, container, cutoffFormats, props, type);
 
-                            if (type == assayResults.getCurveFitType())
+                            if (type == assayResults.getRenderedCurveFitType())
                             {
                                 saveICValue(CURVE_IC_PREFIX + cutoff, value,
                                         dilution, protocol, container, cutoffFormats, props, type);
@@ -111,7 +111,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                         if (!Double.isNaN(auc))
                         {
                             props.put(getPropertyName(AUC_PREFIX, type), auc);
-                            if (type == assayResults.getCurveFitType())
+                            if (type == assayResults.getRenderedCurveFitType())
                                 props.put(AUC_PREFIX, auc);
                         }
                     }
@@ -120,8 +120,8 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                     for (Integer cutoff : assayResults.getCutoffs())
                     {
                         saveICValue(POINT_IC_PREFIX + cutoff,
-                                dilution.getInterpolatedCutoffDilution(cutoff / 100.0, assayResults.getCurveFitType()),
-                                dilution, protocol, container, cutoffFormats, props, assayResults.getCurveFitType());
+                                dilution.getInterpolatedCutoffDilution(cutoff / 100.0, assayResults.getRenderedCurveFitType()),
+                                dilution, protocol, container, cutoffFormats, props, assayResults.getRenderedCurveFitType());
                     }
                     props.put(FIT_ERROR_PROPERTY, dilution.getFitError());
                     props.put(NAB_INPUT_MATERIAL_DATA_PROPERTY, sampleInput.getLSID());
@@ -156,7 +156,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
         return datas;
     }
 
-    public static Map<DilutionSummary, NabAssayRun> getDilutionSummaries(User user, int... dataObjectIds) throws ExperimentException, SQLException
+    public static Map<DilutionSummary, NabAssayRun> getDilutionSummaries(User user, DilutionCurve.FitType fit, int... dataObjectIds) throws ExperimentException, SQLException
     {
         Map<DilutionSummary, NabAssayRun> summaries = new LinkedHashMap<DilutionSummary, NabAssayRun>();
         if (dataObjectIds == null || dataObjectIds.length == 0)
@@ -190,7 +190,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                 ExpData dataObject = ExperimentService.get().getExpData(dataLsid);
                 if (dataObject == null)
                     continue;
-                assay = getAssayResults(dataObject.getRun(), user);
+                assay = getAssayResults(dataObject.getRun(), user, fit);
                 if (assay == null)
                     continue;
                 dataToAssay.put(dataLsid, assay);
@@ -249,13 +249,18 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
 
     public static NabAssayRun getAssayResults(ExpRun run, User user) throws ExperimentException
     {
+        return getAssayResults(run, user, null);
+    }
+
+    public static NabAssayRun getAssayResults(ExpRun run, User user, DilutionCurve.FitType fit) throws ExperimentException
+    {
         File dataFile = getDataFile(run);
         if (dataFile == null)
             throw new MissingDataFileException("Nab data file could not be found for run " + run.getName() + ".  Deleted from file system?");
-        return getAssayResults(run, user, dataFile);
+        return getAssayResults(run, user, dataFile, fit);
     }
 
-    private static NabAssayRun getAssayResults(ExpRun run, User user, File dataFile) throws ExperimentException
+    private static NabAssayRun getAssayResults(ExpRun run, User user, File dataFile, DilutionCurve.FitType fit) throws ExperimentException
     {
         ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
         Container container = run.getContainer();
@@ -291,14 +296,16 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
         Collections.sort(sortedCutoffs);
 
         DomainProperty curveFitPd = runProperties.get(NabAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME);
-        DilutionCurve.FitType fit = DilutionCurve.FitType.FIVE_PARAMETER;
-        if (curveFitPd != null)
+        if (fit == null)
         {
-            Object value = run.getProperty(curveFitPd);
-            if (value != null)
-                fit = DilutionCurve.FitType.fromLabel((String) value);
+            fit = DilutionCurve.FitType.FIVE_PARAMETER;
+            if (curveFitPd != null)
+            {
+                Object value = run.getProperty(curveFitPd);
+                if (value != null)
+                    fit = DilutionCurve.FitType.fromLabel((String) value);
+            }
         }
-
         boolean lockAxes = false;
         DomainProperty lockAxesProperty = runProperties.get(NabAssayProvider.LOCK_AXES_PROPERTY_NAME);
         if (lockAxesProperty != null)
@@ -418,11 +425,14 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
 
             List<WellData> wells = group.getWellData(true);
             boolean first = true;
+            boolean reverseDirection = Boolean.parseBoolean((String) group.getProperty(NabManager.SampleProperty.ReverseDilutionDirection.name()));
             Double dilution = (Double) sampleInput.getProperty(properties.get(NabAssayProvider.SAMPLE_INITIAL_DILUTION_PROPERTY_NAME));
             Double factor = (Double) sampleInput.getProperty(properties.get(NabAssayProvider.SAMPLE_DILUTION_FACTOR_PROPERTY_NAME));
             String methodString = (String) sampleInput.getProperty(properties.get(NabAssayProvider.SAMPLE_METHOD_PROPERTY_NAME));
             SampleInfo.Method method = SampleInfo.Method.valueOf(methodString);
-            for (int groupIndex = wells.size() - 1; groupIndex >= 0; groupIndex--)
+            int firstGroup = reverseDirection ? 0 : wells.size() - 1;
+            int incrementor = reverseDirection ? 1 : -1;
+            for (int groupIndex = firstGroup; groupIndex >= 0 && groupIndex < wells.size(); groupIndex = groupIndex + incrementor)
             {
                 WellData well = wells.get(groupIndex);
                 if (!first)

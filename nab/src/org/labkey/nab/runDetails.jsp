@@ -17,7 +17,6 @@
 %>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="org.labkey.api.exp.Lsid"%>
-<%@ page import="org.labkey.api.exp.ObjectProperty" %>
 <%@ page import="org.labkey.api.exp.OntologyManager" %>
 <%@ page import="org.labkey.api.exp.PropertyDescriptor" %>
 <%@ page import="org.labkey.api.query.QueryView" %>
@@ -26,12 +25,12 @@
 <%@ page import="org.labkey.api.study.DilutionCurve" %>
 <%@ page import="org.labkey.api.study.WellData" %>
 <%@ page import="org.labkey.api.util.Pair" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.nab.*" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.*" %>
+<%@ page import="org.labkey.api.view.*" %>
+<%@ page import="org.labkey.api.security.ACL" %>
+<%@ page import="org.labkey.api.study.assay.AbstractAssayProvider" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <labkey:errors/>
@@ -52,20 +51,21 @@
     List<Map<PropertyDescriptor, Object>> sampleData = new ArrayList<Map<PropertyDescriptor, Object>>();
     Set<String> pdsWithData = new HashSet<String>();
 
-    Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), NabDataHandler.AUC_PREFIX);
+    String aucPropertyName = bean.getFitType() == null ? NabDataHandler.AUC_PREFIX : NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, bean.getFitType());
+    Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), aucPropertyName);
     PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), context.getContainer());
 
     for (NabAssayRun.SampleResult result : bean.getSampleResults())
     {
-        Map<PropertyDescriptor, Object> sampleProps = new LinkedHashMap<PropertyDescriptor, Object>(result.getProperties());
+        Map<PropertyDescriptor, Object> sampleProps = new LinkedHashMap<PropertyDescriptor, Object>(result.getSampleProperties());
 
-        // add the AUC value for the selected curve fit method to the sample data map 
         if (aucPD != null)
         {
-            Map<String, ObjectProperty> rowMap = OntologyManager.getPropertyObjects(context.getContainer(), result.getDataRowLsid());
-            if (rowMap.containsKey(aucURI.toString()))
-                sampleProps.put(aucPD, rowMap.get(aucURI.toString()).value());
+            Object aucValue = result.getDataProperties().get(aucPD);
+            if (aucValue != null)
+                sampleProps.put(aucPD, aucValue);
         }
+
         sampleData.add(sampleProps);
 
         // calculate which columns have data
@@ -75,44 +75,88 @@
                 pdsWithData.add(entry.getKey().getName());
         }
     }
+    ActionURL reRunURL = new ActionURL(NabUploadWizardAction.class, context.getContainer());
+    reRunURL.addParameter("rowId", assay.getProtocol().getRowId());
+    reRunURL.addParameter("reRunId", bean.getRunId());
 
-    if (bean.isNewRun())
-    {
+    boolean needCurveNote = assay.getRenderedCurveFitType() != assay.getSavedCurveFitType();
+    boolean needNewRunNote = !bean.isPrintView() && bean.isNewRun();
+    boolean needDupFileNote = !bean.isPrintView() &&  duplicateDataFileView != null;
 %>
-    This run has been automatically saved.
-<%
-        if (getViewContext().getContainer().hasPermission(getViewContext().getUser(), DeletePermission.class))
-        {
-%>
-<%=generateButton("Delete Run", "deleteRun.view?rowId=" + bean.getRunId(), "return confirm('Permanently delete this run?')")%>
-<%
-        }
-%>
-<br>
-<%
-    }
-    if (!bean.isPrintView() &&  duplicateDataFileView != null)
-    {
-%>
+<input type="hidden" name="rowId" value="<%= assay.getRunRowId() %>">
 <table>
+<%
+    if (needCurveNote || needNewRunNote || needDupFileNote)
+    {
+%>
     <tr class="labkey-wp-header">
-        <th>Warnings</th>
+        <th align="left">Notes</th>
     </tr>
+    <%
+        if (needCurveNote)
+        {
+            boolean deleteAndInsertPerms = getViewContext().getContainer().hasPermission(getViewContext().getUser(), DeletePermission.class) &&
+            getViewContext().getContainer().hasPermission(getViewContext().getUser(), InsertPermission.class);
+    %>
+    <tr>
+        <td class="labkey-form-label">
+            This run is shown with a <strong><%= assay.getRenderedCurveFitType().getLabel() %></strong> curve fit,
+           but is saved with a <strong><%= assay.getSavedCurveFitType().getLabel() %></strong> curve fit.
+            To replace<br>the saved data with the displayed data,
+            <%
+            if (deleteAndInsertPerms)
+            {
+            %>
+                you must <a href="<%= reRunURL.getLocalURIString() %>">delete and re-import</a> the run.
+            <%
+            }
+            else
+            {
+            %>
+                a user with appropriate permissions must delete and re-import the run.
+            <%
+            }
+            %>
+        </td>
+    </tr>
+    <%
+        }
+        if (needNewRunNote)
+        {
+    %>
+    <tr>
+        <td class="labkey-form-label">
+            This run has been automatically saved.
+        <%
+                if (getViewContext().getContainer().hasPermission(getViewContext().getUser(), DeletePermission.class))
+                {
+                    ActionURL deleteUrl = new ActionURL(NabAssayController.DeleteRunAction.class, context.getContainer());
+                    deleteUrl.addParameter("rowId", bean.getRunId());
+        %>
+        <%=generateButton("Delete Run", deleteUrl, "return confirm('Permanently delete this run?')")%>
+        <%=generateButton("Delete and Re-Import", reRunURL)%>
+        <%
+                }
+        %>
+        </td>
+    </tr>
+    <%
+        }
+        if (needDupFileNote)
+        {
+    %>
     <tr>
         <td class="labkey-form-label">
             <span class="labkey-error"><b>WARNING</b>: The following runs use a data file by the same name.</span><br><br>
             <% include(duplicateDataFileView, out); %>
         </td>
     </tr>
-</table>
     <%
         }
-    %>
-
-<input type="hidden" name="rowId" value="<%= assay.getRunRowId() %>">
-<table>
+    }
+%>
 <tr class="labkey-wp-header">
-    <th>Run Summary: <%= h(assay.getName()) %></th>
+    <th>Run Summary<%= assay.getName() != null ? ": " + h(assay.getName()) : "" %></th>
 </tr>
     <tr>
         <td>
@@ -158,7 +202,13 @@
             <table>
                     <tr>
                         <td valign="top" rowspan="2">
-                            <img src="graph.view?rowId=<%= bean.getRunId() %>">
+                            <%
+                                ActionURL graphAction = new ActionURL(NabAssayController.GraphAction.class, context.getContainer());
+                                graphAction.addParameter("rowId", bean.getRunId());
+                                if (bean.getFitType() != null)
+                                    graphAction.addParameter("fitType", bean.getFitType().name());
+                            %>
+                            <img src="<%= graphAction.getLocalURIString() %>">
                         </td>
                         <td valign="top">
                         <table class="labkey-data-region labkey-show-borders" style="background-color:#FFFFA0;border:0">
@@ -222,12 +272,12 @@
                                             }
                                             else
                                             {
-                                                double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0, assay.getCurveFitType()) :
-                                                        summary.getInterpolatedCutoffDilution(cutoff / 100.0, assay.getCurveFitType());
+                                                double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0, assay.getRenderedCurveFitType()) :
+                                                        summary.getInterpolatedCutoffDilution(cutoff / 100.0, assay.getRenderedCurveFitType());
                                                 if (val == Double.NEGATIVE_INFINITY)
-                                                    out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution(assay.getCurveFitType())));
+                                                    out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution(assay.getRenderedCurveFitType())));
                                                 else if (val == Double.POSITIVE_INFINITY)
-                                                    out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution(assay.getCurveFitType())));
+                                                    out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution(assay.getRenderedCurveFitType())));
                                                 else
                                                 {
                                                     DecimalFormat shortDecFormat;

@@ -147,12 +147,12 @@
                                         %>
                                         <td align="right">
                                             <%
-                                                double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0, assay.getCurveFitType()) :
-                                                        summary.getInterpolatedCutoffDilution(cutoff / 100.0, assay.getCurveFitType());
+                                                double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0, assay.getRenderedCurveFitType()) :
+                                                        summary.getInterpolatedCutoffDilution(cutoff / 100.0, assay.getRenderedCurveFitType());
                                                 if (val == Double.NEGATIVE_INFINITY)
-                                                    out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution(assay.getCurveFitType())));
+                                                    out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution(assay.getRenderedCurveFitType())));
                                                 else if (val == Double.POSITIVE_INFINITY)
-                                                    out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution(assay.getCurveFitType())));
+                                                    out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution(assay.getRenderedCurveFitType())));
                                                 else
                                                 {
                                                     DecimalFormat shortDecFormat;

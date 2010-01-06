@@ -87,23 +87,31 @@ public class NabManager
 
     public enum SampleProperty
     {
-        InitialDilution(PropertyType.DOUBLE),
-        SampleId(PropertyType.STRING),
-        SampleDescription(PropertyType.STRING),
-        Factor(PropertyType.DOUBLE),
-        Method(PropertyType.STRING),
-        FitError(PropertyType.DOUBLE);
+        InitialDilution(PropertyType.DOUBLE, false),
+        SampleId(PropertyType.STRING, false),
+        SampleDescription(PropertyType.STRING, false),
+        Factor(PropertyType.DOUBLE, false),
+        Method(PropertyType.STRING, false),
+        ReverseDilutionDirection(PropertyType.BOOLEAN, true),
+        FitError(PropertyType.DOUBLE, false);
 
         private PropertyType _type;
+        private boolean _isTemplateProperty;
 
-        private SampleProperty(PropertyType type)
+        private SampleProperty(PropertyType type, boolean setInTemplateEditor)
         {
             _type = type;
+            _isTemplateProperty = setInTemplateEditor;
         }
 
         public PropertyType getType()
         {
             return _type;
+        }
+
+        public boolean isTemplateProperty()
+        {
+            return _isTemplateProperty;
         }
     }
 
@@ -342,8 +350,8 @@ public class NabManager
                 assert groupInPlate(plate, group) : "Group not found in plate";
                 for (int cutoff : cutoffs)
                 {
-                    group.setProperty("Curve IC" + cutoff, dilution.getCutoffDilution((double) cutoff / 100.0, temp.getCurveFitType()));
-                    group.setProperty("Point IC" + cutoff, dilution.getInterpolatedCutoffDilution((double) cutoff / 100.0, temp.getCurveFitType()));
+                    group.setProperty("Curve IC" + cutoff, dilution.getCutoffDilution((double) cutoff / 100.0, temp.getRenderedCurveFitType()));
+                    group.setProperty("Point IC" + cutoff, dilution.getInterpolatedCutoffDilution((double) cutoff / 100.0, temp.getRenderedCurveFitType()));
                 }
                 group.setProperty(SampleProperty.FitError.name(), dilution.getFitError());
             }

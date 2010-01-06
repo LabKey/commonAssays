@@ -33,6 +33,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.Plate;
+import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
@@ -59,14 +60,25 @@ public class NabAssayRun extends Luc5Assay
     List<SampleResult> _sampleResults;
     private ExpRun _run;
     private User _user;
+    private DilutionCurve.FitType _savedCurveFitType = null;
 
-    public NabAssayRun(AbstractPlateBasedAssayProvider provider, ExpRun run, Plate plate, User user, List<Integer> cutoffs, DilutionCurve.FitType fitType)
+    public NabAssayRun(AbstractPlateBasedAssayProvider provider, ExpRun run, Plate plate,
+                       User user, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
     {
-        super(plate, cutoffs, fitType);
+        super(plate, cutoffs, renderCurveFitType);
         _run = run;
         _user = user;
         _protocol = run.getProtocol();
         _provider = provider;
+
+        for (Map.Entry<PropertyDescriptor, Object> property : getRunProperties().entrySet())
+        {
+            if (NabAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME.equals(property.getKey().getName()))
+            {
+                String fitTypeLabel = (String) property.getValue();
+                _savedCurveFitType = DilutionCurve.FitType.fromLabel(fitTypeLabel);
+            }
+        }
     }
 
     private Map<FieldKey, PropertyDescriptor> getFieldKeys()
@@ -93,6 +105,11 @@ public class NabAssayRun extends Luc5Assay
         }
 
         return fieldKeys;
+    }
+
+    public DilutionCurve.FitType getSavedCurveFitType()
+    {
+        return _savedCurveFitType;
     }
 
     private Map<PropertyDescriptor, Object> getRunProperties(TableInfo runTable, Map<FieldKey, PropertyDescriptor> fieldKeys, Map<FieldKey, ColumnInfo> selectCols)
@@ -174,21 +191,15 @@ public class NabAssayRun extends Luc5Assay
         if (_sampleResults == null)
         {
             _sampleResults = new ArrayList<SampleResult>();
-            Map<NabMaterialKey, Map<PropertyDescriptor, Object>> sampleProperties = getSampleProperties();
-            Set<String> captions = new HashSet<String>();
-            boolean longCaptions = false;
-            for (NabMaterialKey key : sampleProperties.keySet())
-            {
-                String shortCaption = key.getDisplayString(false);
-                if (captions.contains(shortCaption))
-                    longCaptions = true;
-                captions.add(shortCaption);
-            }
 
             ExpData[] outputDatas = _run.getOutputDatas(NabDataHandler.NAB_DATA_TYPE);
             if (outputDatas.length != 1)
                 throw new IllegalStateException("Expected a single data file output for this NAb run.  Found " + outputDatas.length);
             ExpData outputObject = outputDatas[0];
+
+            Map<String, NabResultProperties> allProperties = getSampleProperties(outputObject);
+            Set<String> captions = new HashSet<String>();
+            boolean longCaptions = false;
 
             for (DilutionSummary summary : getSummaries())
             {
@@ -197,37 +208,54 @@ public class NabAssayRun extends Luc5Assay
                 String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
                 Date visitDate = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
                 NabMaterialKey key = new NabMaterialKey(specimenId, participantId, visitId, visitDate);
-                Map<PropertyDescriptor, Object> properties = sampleProperties.get(key);
-                _sampleResults.add(new SampleResult(outputObject, summary, key, properties, longCaptions));
+
+                String shortCaption = key.getDisplayString(false);
+                if (captions.contains(shortCaption))
+                    longCaptions = true;
+                captions.add(shortCaption);
+
+                NabResultProperties props = allProperties.get(summary.getWellGroup().getName());
+                _sampleResults.add(new SampleResult(outputObject, summary, key, props.getSampleProperties(), props.getDataProperties()));
+            }
+
+            if (longCaptions)
+            {
+                for (SampleResult result : _sampleResults)
+                    result.setLongCaptions(true);
             }
         }
         return _sampleResults;
     }
 
-    private Map<NabMaterialKey, Map<PropertyDescriptor, Object>> getSampleProperties()
+    private static class NabResultProperties
     {
-        Map<NabMaterialKey, Map<PropertyDescriptor, Object>> samplePropertyMap =
-                new HashMap<NabMaterialKey, Map<PropertyDescriptor, Object>>();
+        private Map<PropertyDescriptor, Object> _sampleProperties;
+        private Map<PropertyDescriptor, Object> _dataProperties;
+
+        public NabResultProperties(Map<PropertyDescriptor, Object> sampleProperties, Map<PropertyDescriptor, Object> dataProperties)
+        {
+            _sampleProperties = sampleProperties;
+            _dataProperties = dataProperties;
+        }
+
+        public Map<PropertyDescriptor, Object> getSampleProperties()
+        {
+            return _sampleProperties;
+        }
+
+        public Map<PropertyDescriptor, Object> getDataProperties()
+        {
+            return _dataProperties;
+        }
+    }
+
+    private Map<String, NabResultProperties> getSampleProperties(ExpData outputData)
+    {
+        Map<String, NabResultProperties> samplePropertyMap = new HashMap<String, NabResultProperties>();
 
         Collection<ExpMaterial> inputs = _run.getMaterialInputs().keySet();
         Domain sampleDomain = _provider.getSampleWellGroupDomain(_protocol);
         DomainProperty[] sampleDomainProperties = sampleDomain.getProperties();
-
-        PropertyDescriptor sampleIdPD = null;
-        PropertyDescriptor visitIdPD = null;
-        PropertyDescriptor participantIdPD = null;
-        PropertyDescriptor datePD = null;
-        for (DomainProperty property : sampleDomainProperties)
-        {
-            if (property.getName().equals(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME))
-                sampleIdPD = property.getPropertyDescriptor();
-            else if (property.getName().equals(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME))
-                participantIdPD = property.getPropertyDescriptor();
-            else if (property.getName().equals(AbstractAssayProvider.VISITID_PROPERTY_NAME))
-                visitIdPD = property.getPropertyDescriptor();
-            else if (property.getName().equals(AbstractAssayProvider.DATE_PROPERTY_NAME))
-                datePD = property.getPropertyDescriptor();
-        }
 
         for (ExpMaterial material : inputs)
         {
@@ -237,9 +265,28 @@ public class NabAssayRun extends Luc5Assay
                 PropertyDescriptor property = dp.getPropertyDescriptor();
                 sampleProperties.put(property, material.getProperty(property));
             }
-            NabMaterialKey key = new NabMaterialKey((String) material.getProperty(sampleIdPD),
-                    (String) material.getProperty(participantIdPD), (Double) material.getProperty(visitIdPD), (Date) material.getProperty(datePD));
-            samplePropertyMap.put(key, sampleProperties);
+
+            // in addition to the properties saved on the sample object, we'll add the properties associated with each sample's
+            // "output" data object.
+            Map<PropertyDescriptor, Object> dataProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
+            WellGroup wellGroup = getWellGroup(material);
+            String dataRowLsid = NabDataHandler.getDataRowLSID(outputData, wellGroup.getName()).toString();
+            Map<String, ObjectProperty> outputProperties;
+            try
+            {
+                outputProperties = OntologyManager.getPropertyObjects(_run.getContainer(), dataRowLsid);
+                for (ObjectProperty prop : outputProperties.values())
+                {
+                    PropertyDescriptor pd = OntologyManager.getPropertyDescriptor(prop.getPropertyURI(), prop.getContainer());
+                    dataProperties.put(pd, prop.value());
+                }
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+            
+            samplePropertyMap.put(wellGroup.getName(), new NabResultProperties(sampleProperties,  dataProperties));
         }
         return samplePropertyMap;
     }
@@ -251,15 +298,17 @@ public class NabAssayRun extends Luc5Assay
         private Integer _objectId;
         private DilutionSummary _dilutionSummary;
         private NabMaterialKey _materialKey;
-        private Map<PropertyDescriptor, Object> _properties;
+        private Map<PropertyDescriptor, Object> _sampleProperties;
+        private Map<PropertyDescriptor, Object> _dataProperties;
         private boolean _longCaptions = false;
 
-        public SampleResult(ExpData data, DilutionSummary dilutionSummary, NabMaterialKey materialKey, Map<PropertyDescriptor, Object> properties, boolean longCaptions)
+        public SampleResult(ExpData data, DilutionSummary dilutionSummary, NabMaterialKey materialKey,
+                            Map<PropertyDescriptor, Object> sampleProperties, Map<PropertyDescriptor, Object> dataProperties)
         {
             _dilutionSummary = dilutionSummary;
             _materialKey = materialKey;
-            _longCaptions = longCaptions;
-            _properties = sortProperties(properties);
+            _sampleProperties = sortProperties(sampleProperties);
+            _dataProperties = sortProperties(dataProperties);
             _dataRowLsid = NabDataHandler.getDataRowLSID(data, dilutionSummary.getWellGroup().getName()).toString();
             _dataContainer = data.getContainer();
         }
@@ -292,14 +341,24 @@ public class NabAssayRun extends Luc5Assay
             return _materialKey.getDisplayString(_longCaptions);
         }
 
-        public Map<PropertyDescriptor, Object> getProperties()
+        public Map<PropertyDescriptor, Object> getSampleProperties()
         {
-            return _properties;
+            return _sampleProperties;
+        }
+
+        public Map<PropertyDescriptor, Object> getDataProperties()
+        {
+            return _dataProperties;
         }
 
         public String getDataRowLsid()
         {
             return _dataRowLsid;
+        }
+
+        public void setLongCaptions(boolean longCaptions)
+        {
+            _longCaptions = longCaptions;
         }
 
         private Map<PropertyDescriptor, Object> sortProperties(Map<PropertyDescriptor, Object> properties)
@@ -394,7 +453,7 @@ public class NabAssayRun extends Luc5Assay
                     if (!Double.isNaN(auc))
                     {
                         props.put(NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, type), auc);
-                        if (getCurveFitType() == type)
+                        if (getRenderedCurveFitType() == type)
                             props.put(NabDataHandler.AUC_PREFIX, auc);
                     }
                     

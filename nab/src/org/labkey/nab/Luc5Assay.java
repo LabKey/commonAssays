@@ -24,7 +24,6 @@ import java.util.Map;
 import org.labkey.api.study.*;
 import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.exp.api.ExpRun;
 
 /**
  * User: migra
@@ -40,12 +39,12 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
     private Map<Integer, String> _cutoffFormats;
     private Map<WellGroup, ExpMaterial> _wellGroupMaterialMapping;
     private File _dataFile;
-    private DilutionCurve.FitType _curveFitType;
+    private DilutionCurve.FitType _renderedCurveFitType;
     private boolean _lockAxes;
 
-    public Luc5Assay(Plate plate, int[] cutoffs, DilutionCurve.FitType curveFitType)
+    public Luc5Assay(Plate plate, int[] cutoffs, DilutionCurve.FitType renderCurveFitType)
     {
-        _curveFitType = curveFitType;
+        _renderedCurveFitType = renderCurveFitType;
         assert plate != null : "plate cannot be null";
         _runRowId = plate.getRowId();
         _cutoffs = cutoffs;
@@ -53,9 +52,9 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
         init();
     }
 
-    public Luc5Assay(Plate plate, List<Integer> cutoffs, DilutionCurve.FitType fitType)
+    public Luc5Assay(Plate plate, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
     {
-        this(plate, toIntArray(cutoffs), fitType);
+        this(plate, toIntArray(cutoffs), renderCurveFitType);
     }
 
     private static int[] toIntArray(List<Integer> cutoffs)
@@ -72,7 +71,7 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
         int sampleIndex = 0;
         _dilutionSummaries = new DilutionSummary[specimenGroups.size()];
         for (WellGroup specimenGroup : specimenGroups)
-            _dilutionSummaries[sampleIndex++] = new DilutionSummary(this, specimenGroup, null, _curveFitType);
+            _dilutionSummaries[sampleIndex++] = new DilutionSummary(this, specimenGroup, null, _renderedCurveFitType);
     }
 
     public DilutionSummary[] getSummaries()
@@ -231,6 +230,16 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
         return _wellGroupMaterialMapping.get(wellgroup);
     }
 
+    public WellGroup getWellGroup(ExpMaterial material)
+    {
+        for (Map.Entry<WellGroup, ExpMaterial> entry : _wellGroupMaterialMapping.entrySet())
+        {
+            if (entry.getValue().equals(material))
+                return entry.getKey();
+        }
+        return null;
+    }
+
     public File getDataFile()
     {
         return _dataFile;
@@ -251,8 +260,8 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
         _lockAxes = lockAxes;
     }
 
-    public DilutionCurve.FitType getCurveFitType()
+    public DilutionCurve.FitType getRenderedCurveFitType()
     {
-        return _curveFitType;
+        return _renderedCurveFitType;
     }
 }

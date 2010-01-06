@@ -104,6 +104,7 @@ public class NabAssayController extends SpringActionController
     {
         private boolean _newRun;
         private int _rowId = -1;
+        private DilutionCurve.FitType _fitType;
 
         public boolean isNewRun()
         {
@@ -123,6 +124,21 @@ public class NabAssayController extends SpringActionController
         public void setRowId(int rowId)
         {
             _rowId = rowId;
+        }
+
+        public String getFitType()
+        {
+            return _fitType != null ? _fitType.name() : null;
+        }
+
+        public void setFitType(String fitType)
+        {
+            _fitType = fitType != null ? DilutionCurve.FitType.valueOf(fitType) : null;
+        }
+
+        public DilutionCurve.FitType getFitTypeEnum()
+        {
+            return _fitType;
         }
     }
 
@@ -185,13 +201,15 @@ public class NabAssayController extends SpringActionController
         private boolean _printView;
         private Set<String> _hiddenRunColumns;
         private Map<String, Object> _displayProperties;
+        private DilutionCurve.FitType _fitType;
 
 
-        public RenderAssayBean(ViewContext context, NabAssayRun assay, boolean newRun, boolean printView)
+        public RenderAssayBean(ViewContext context, NabAssayRun assay, DilutionCurve.FitType fitType, boolean newRun, boolean printView)
         {
             _context = context;
             _assay = assay;
             _newRun = newRun;
+            _fitType = fitType;
             _printView = printView;
             _hiddenRunColumns = new HashSet<String>();
             _hiddenRunColumns.add(ExpRunTable.Column.RunGroups.name());
@@ -213,10 +231,17 @@ public class NabAssayController extends SpringActionController
                     PropertyDescriptor property = entry.getKey();
                     if (!_hiddenRunColumns.contains(property.getName()))
                     {
-                        Object value = entry.getValue();
-                        if (value != null)
+                        if (NabAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME.equals(property.getName()) && _fitType != null)
                         {
-                            _displayProperties.put(property.getNonBlankCaption(), formatValue(property, value));
+                            _displayProperties.put(property.getNonBlankCaption(), _fitType.getLabel());
+                        }
+                        else
+                        {
+                            Object value = entry.getValue();
+                            if (value != null)
+                            {
+                                _displayProperties.put(property.getNonBlankCaption(), formatValue(property, value));
+                            }
                         }
                     }
                 }
@@ -260,6 +285,11 @@ public class NabAssayController extends SpringActionController
         public List<NabAssayRun.SampleResult> getSampleResults()
         {
             return _assay.getSampleResults();
+        }
+
+        public DilutionCurve.FitType getFitType()
+        {
+            return _fitType;
         }
 
         public NabAssayRun getAssay()
@@ -387,40 +417,63 @@ public class NabAssayController extends SpringActionController
 
     private class NabDetailsHeaderView extends AssayHeaderView
     {
+        private int _runId;
         public NabDetailsHeaderView(ExpProtocol protocol, AssayProvider provider, int runId)
         {
-            super(protocol, provider, false, null);
+            super(protocol, provider, true, null);
+            _runId = runId;
+        }
+
+        @Override
+        public List<NavTree> getLinks()
+        {
+            List<NavTree> links = new ArrayList<NavTree>();
+
+            links.add(new NavTree("View Runs", PageFlowUtil.addLastFilterParameter(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getViewContext().getContainer(), _protocol, _containerFilter))));
+            links.add(new NavTree("View Results", PageFlowUtil.addLastFilterParameter(PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(getViewContext().getContainer(), _protocol, _containerFilter))));
+
             if (getViewContext().hasPermission(ACL.PERM_INSERT))
             {
-                _links.put(AbstractAssayProvider.IMPORT_DATA_LINK_NAME, provider.getImportURL(getContainer(), protocol));
+                links.add(new NavTree(AbstractAssayProvider.IMPORT_DATA_LINK_NAME, _provider.getImportURL(getContainer(), _protocol)));
 
                 if (getViewContext().hasPermission(ACL.PERM_DELETE))
                 {
                     ActionURL reRunURL = new ActionURL(NabUploadWizardAction.class, getContainer());
-                    reRunURL.addParameter("rowId", protocol.getRowId());
-                    reRunURL.addParameter("reRunId", runId);
-                    _links.put("delete and re-import", reRunURL);
+                    reRunURL.addParameter("rowId", _protocol.getRowId());
+                    reRunURL.addParameter("reRunId", _runId);
+                    links.add(new NavTree("Delete and Re-import", reRunURL));
                 }
             }
-            ActionURL downloadURL = new ActionURL(DownloadDatafileAction.class, getContainer()).addParameter("rowId", runId);
-            _links.put("download datafile", downloadURL);
-            _links.put("print", getViewContext().cloneActionURL().addParameter("_print", "true"));
+
+            NavTree changeCurveMenu = new NavTree("Change Curve Type");
+            for (DilutionCurve.FitType type : DilutionCurve.FitType.values())
+            {
+                ActionURL changeCurveURL = getViewContext().cloneActionURL();
+                changeCurveURL.replaceParameter("fitType", type.name());
+                changeCurveMenu.addChild(type.getLabel(), changeCurveURL);
+            }
+            links.add(changeCurveMenu);
+
+            ActionURL downloadURL = new ActionURL(DownloadDatafileAction.class, getContainer()).addParameter("rowId", _runId);
+            links.add(new NavTree("Download Datafile", downloadURL));
+            links.add(new NavTree("Print", getViewContext().cloneActionURL().addParameter("_print", "true")));
+            return links;
         }
     }
 
-    private NabAssayRun getNabAssayRun(ExpRun run) throws ExperimentException
+    private NabAssayRun getNabAssayRun(ExpRun run, DilutionCurve.FitType fit) throws ExperimentException
     {
         // cache last NAb assay run in session.  This speeds up the case where users bring up details view and
         // then immediately hit the 'print' button.
         NabAssayRun assay = (NabAssayRun) getViewContext().getSession().getAttribute(LAST_NAB_RUN_KEY);
-        if (assay == null ||
+        if (fit != null || assay == null ||
                 (assay.getRunRowId() != null && run.getRowId() != assay.getRunRowId().intValue()) ||
                 (assay.getRun() != null && run.getRowId() != assay.getRun().getRowId()))
         {
             try
             {
-                assay = NabDataHandler.getAssayResults(run, getUser());
-                if (assay != null)
+                assay = NabDataHandler.getAssayResults(run, getUser(), fit);
+                if (assay != null && fit == null)
                     getViewContext().getSession().setAttribute(LAST_NAB_RUN_KEY, assay);
             }
             catch (NabDataHandler.MissingDataFileException e)
@@ -464,12 +517,12 @@ public class NabAssayController extends SpringActionController
             if (!isPrint() && !getContainer().hasPermission(getUser(), ReadPermission.class))
                 HttpView.throwRedirect(getViewContext().getActionURL().clone().addParameter("_print", true));
 
-            NabAssayRun assay = getNabAssayRun(run);
+            NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum());
             _protocol = run.getProtocol();
             AbstractPlateBasedAssayProvider provider = (AbstractPlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
 
             HttpView view = new JspView<RenderAssayBean>("/org/labkey/nab/runDetails.jsp",
-                    new RenderAssayBean(getViewContext(), assay, form.isNewRun(), isPrint()));
+                    new RenderAssayBean(getViewContext(), assay, form.getFitTypeEnum(), form.isNewRun(), isPrint()));
             if (!isPrint())
                 view = new VBox(new NabDetailsHeaderView(_protocol, provider, _runRowId), view);
             return view;
@@ -491,6 +544,7 @@ public class NabAssayController extends SpringActionController
         private int[] _id;
         private String _captionColumn;
         private String _chartTitle;
+        private DilutionCurve.FitType _fitType;
 
         public int[] getId()
         {
@@ -530,6 +584,21 @@ public class NabAssayController extends SpringActionController
         public void setChartTitle(String chartTitle)
         {
             _chartTitle = chartTitle;
+        }
+
+        public String getFitType()
+        {
+            return _fitType != null ? _fitType.name() : null;
+        }
+
+        public void setFitType(String fitType)
+        {
+            _fitType = fitType != null ? DilutionCurve.FitType.valueOf(fitType) : null;
+        }
+
+        public DilutionCurve.FitType getFitTypeEnum()
+        {
+            return _fitType;
         }
     }
 
@@ -652,7 +721,7 @@ public class NabAssayController extends SpringActionController
             }
 
             Set<Integer> cutoffSet = new HashSet<Integer>();
-            Map<DilutionSummary, NabAssayRun> summaries = NabDataHandler.getDilutionSummaries(getUser(), objectIds);
+            Map<DilutionSummary, NabAssayRun> summaries = NabDataHandler.getDilutionSummaries(getUser(), form.getFitTypeEnum(), objectIds);
             for (DilutionSummary summary : summaries.keySet())
             {
                 for (int cutoff : summary.getAssay().getCutoffs())
@@ -753,7 +822,7 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(GraphSelectedForm form, BindException errors) throws Exception
         {
             int[] ids = form.getId();
-            Map<DilutionSummary, NabAssayRun> summaries = NabDataHandler.getDilutionSummaries(getUser(), ids);
+            Map<DilutionSummary, NabAssayRun> summaries = NabDataHandler.getDilutionSummaries(getUser(), form.getFitTypeEnum(), ids);
             Set<Integer> cutoffSet = new HashSet<Integer>();
             for (DilutionSummary summary : summaries.keySet())
             {
@@ -777,7 +846,7 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
-            NabAssayRun assay = getNabAssayRun(run);
+            NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum());
             renderChartPNG(getViewContext().getResponse(), assay, assay.isLockAxes(), null, null);
             return null;
         }

@@ -172,4 +172,10 @@ public class DilutionSummary implements Serializable
     {
         return getDilutionCurve(type).calculateAUC();
     }
+
+    public double getAUC() throws DilutionCurve.FitFailedException
+    {
+        return getDilutionCurve(_assay.getRenderedCurveFitType()).calculateAUC();
+    }
+
 }
