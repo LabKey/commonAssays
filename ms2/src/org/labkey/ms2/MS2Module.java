@@ -342,7 +342,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     {
         if (null == c)
         {
-            ProteinManager.indexSequences(task);
+            ProteinManager.indexProteins(task);
         }
     }
 }

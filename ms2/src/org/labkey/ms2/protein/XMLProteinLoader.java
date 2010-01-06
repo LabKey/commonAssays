@@ -74,6 +74,7 @@ public class XMLProteinLoader extends DefaultAnnotationLoader implements Annotat
             handler.parse(fName);
             conn.setAutoCommit(false);
             ProteinManager.getSchema().getScope().commitTransaction();
+            ProteinManager.indexProteins(null);
         }
         finally
         {

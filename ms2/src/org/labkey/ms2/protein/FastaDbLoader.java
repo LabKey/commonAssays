@@ -157,6 +157,8 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                         try { ProteinManager.getSchema().getScope().releaseConnection(conn); } catch (SQLException e) {}
                 }
             }
+
+            ProteinManager.indexProteins(null);
         }
         else
         {

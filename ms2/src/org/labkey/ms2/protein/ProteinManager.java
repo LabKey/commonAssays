@@ -22,6 +22,7 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.labkey.api.data.*;
 import org.labkey.api.search.SearchService;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Path;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.ActionURL;
@@ -1254,15 +1255,24 @@ public class ProteinManager
     }
 
 
-    public static void indexSequences(final SearchService.IndexTask task)
+    public static void indexProteins(SearchService.IndexTask task)
     {
+        if (null == task)
+        {
+            SearchService ss = ServiceRegistry.get().getService(SearchService.class);
+            task = null == ss ? null : ss.createTask("Index Proteins");
+            if (null == task)
+                return;
+        }
+
+        final SearchService.IndexTask t = task;
         task.addRunnable(new Runnable(){
             public void run()
             {
                 try
                 {
                     Integer[] arr = Table.executeArray(getSchema(), "SELECT seqId FROM prot.sequences", null, Integer.class);
-                    indexSequences(task, Arrays.asList(arr));
+                    indexProteins(t, Arrays.asList(arr));
                 }
                 catch (SQLException x)
                 {
@@ -1273,7 +1283,7 @@ public class ProteinManager
     }
     
 
-    public static void indexSequences(final SearchService.IndexTask task, List<Integer> list)
+    public static void indexProteins(final SearchService.IndexTask task, List<Integer> list)
     {
         int from = 0;
         while (from < list.size())
@@ -1285,60 +1295,136 @@ public class ProteinManager
             task.addRunnable(new Runnable(){
                 public void run()
                 {
-                    indexSequences(task,ids);
+                    indexProteins(task,ids);
                 }
             }, SearchService.PRIORITY.bulk);
         }
     }
 
 
-    public static void indexSequences(SearchService.IndexTask task, int[] ids)
+    public static void indexProteins(SearchService.IndexTask task, int[] ids)
     {
         Container c = ContainerManager.getHomeContainer();
         ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, c);
 
-        for (int id : ids)
+        if (0==1) // one at at time
         {
-            if (0==id)
-                continue;
-            try
+            for (int id : ids)
             {
-                Protein p = getProtein(id);
-                MultiValueMap map = getIdentifiersFromId(id);
-                StringBuilder sb = new StringBuilder();
-                sb.append(p.getBestName()).append("\n");
-                sb.append(p.getDescription()).append("\n");
-                for (Object v : map.values())
+                if (0==id)
+                    continue;
+                try
                 {
-                    if (v instanceof String)
+                    Protein p = getProtein(id);
+                    MultiValueMap map = getIdentifiersFromId(id);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(p.getBestName()).append("\n");
+                    sb.append(p.getDescription()).append("\n");
+                    for (Object v : map.values())
                     {
-                        sb.append((String)v).append(" ");
-                    }
-                    else
-                    {
-                        for (String ident : (Collection<String>)v)
+                        if (v instanceof String)
                         {
-                            sb.append(ident).append(" ");
+                            sb.append((String)v).append(" ");
+                        }
+                        else
+                        {
+                            for (String ident : (Collection<String>)v)
+                            {
+                                sb.append(ident).append(" ");
+                            }
                         }
                     }
-                }
 
-                String docid = "protein:" + id;
-                Map<String,Object> m = new HashMap<String,Object>();
-                m.put(SearchService.PROPERTY.category.name(), proteinCategory);
-                m.put(SearchService.PROPERTY.title.name(), "Protein " + p.getBestName());
-                SimpleDocumentResource r = new SimpleDocumentResource(
-                        new Path(docid),
-                        docid,
-                        c.getId(), "text/plain",
-                        sb.toString().getBytes(),
-                        url.clone().addParameter("seqId",id),
-                        m);
-                task.addResource(r, SearchService.PRIORITY.item);
+                    String docid = "protein:" + id;
+                    Map<String,Object> m = new HashMap<String,Object>();
+                    m.put(SearchService.PROPERTY.category.toString(), proteinCategory);
+                    m.put(SearchService.PROPERTY.title.toString(), "Protein " + p.getBestName());
+                    SimpleDocumentResource r = new SimpleDocumentResource(
+                            new Path(docid),
+                            docid,
+                            c.getId(), "text/plain",
+                            sb.toString().getBytes(),
+                            url.clone().addParameter("seqId",id),
+                            m);
+                    task.addResource(r, SearchService.PRIORITY.item);
+                }
+                catch (SQLException x)
+                {
+                    throw new RuntimeSQLException(x);
+                }
+            }
+        }
+        else // fast query
+        {
+            SQLFragment sql = new SQLFragment();
+            sql.append("SELECT I.seqid, S.BestName, S.Description, I.identifier\n");
+            sql.append("FROM " + getTableInfoSequences() + " S INNER JOIN " + getTableInfoIdentifiers() + " I ON S.seqid = I.seqid\n");
+            sql.append("WHERE I.seqid IN (");
+            String comma = "";
+            int count = 0;
+            for (int id : ids)
+            {
+                if (id == 0) continue;
+                count++;
+                sql.append(comma);
+                sql.append(id);
+                comma = ",";
+            }
+            if (count == 0)
+                return;
+            sql.append(")\nORDER BY I.seqid");
+            ResultSet rs = null;
+            try
+            {
+                rs = Table.executeQuery(getSchema(), sql, 0, false, false);
+                int curSeqId = 0;
+                StringBuilder sb = null;
+
+                int seqid;
+                String bestName = "";
+                String description = "";
+                String ident = "";
+
+                do {
+                    seqid = 0;
+                    if (rs.next())
+                    {
+                        seqid = rs.getInt(1);
+                        bestName = rs.getString(2);
+                        description = rs.getString(3);
+                        ident = rs.getString(4);
+                    }
+                    if (seqid != curSeqId)
+                    {
+                        if (curSeqId > 0)
+                        {
+                            String docid = "protein:" + curSeqId;
+                            Map<String,Object> m = new HashMap<String,Object>();
+                            m.put(SearchService.PROPERTY.category.toString(), proteinCategory);
+                            m.put(SearchService.PROPERTY.title.toString(), "Protein " + bestName);
+                            SimpleDocumentResource r = new SimpleDocumentResource(
+                                    new Path(docid),
+                                    docid,
+                                    c.getId(), "text/plain",
+                                    sb.toString().getBytes(),
+                                    url.clone().addParameter("seqId",curSeqId),
+                                    m);
+                            task.addResource(r, SearchService.PRIORITY.item);
+                        }
+
+                        sb = new StringBuilder(bestName + "\n" + description + "\n");
+                        curSeqId = seqid;
+                    }
+                    sb.append(ident + " ");
+                } while (seqid > 0);
             }
             catch (SQLException x)
             {
                 throw new RuntimeSQLException(x);
+            }
+            finally
+            {
+                ResultSetUtil.close(rs);
             }
         }
     }
