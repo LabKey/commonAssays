@@ -1226,8 +1226,9 @@ public class ProteinManager
         int i=0;
         for (String go : goStrings)
         {
+            String sub = go.indexOf(" ") == -1 ? go : go.substring(0, go.indexOf(" "));
             retVal[i++] = makeFullAnchorString(
-                    makeIdentURLStringWithType(go.substring(0, go.indexOf(" ")), "GO"),
+                    makeIdentURLStringWithType(sub, "GO"),
                     target,
                     go
             );
