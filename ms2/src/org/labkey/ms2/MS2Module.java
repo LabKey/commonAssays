@@ -338,7 +338,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     }
 
 
-    @Override
     public void enumerateDocuments(@NotNull SearchService.IndexTask task, Container c, Date modifiedSince)
     {
         if (null == c)
