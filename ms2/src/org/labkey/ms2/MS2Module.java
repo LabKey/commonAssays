@@ -70,7 +70,7 @@ import java.util.*;
  * Date: Jul 18, 2005
  * Time: 3:25:52 PM
  */
-public class MS2Module extends SpringModule implements ContainerManager.ContainerListener
+public class MS2Module extends SpringModule implements ContainerManager.ContainerListener, SearchService.DocumentProvider
 {
     public static final MS2SearchExperimentRunType _ms2SearchRunFilter = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
     private static ExperimentRunType _samplePrepRunType = new ExperimentRunType("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.TableType.SamplePrepRuns.toString())
@@ -205,6 +205,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         if (null != ss)
         {
             ss.addSearchCategory(ProteinManager.proteinCategory);
+            ss.addDocumentProvider(this);
         }
 
         PipelineService service = PipelineService.get();
