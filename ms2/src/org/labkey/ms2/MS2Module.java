@@ -340,7 +340,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public void enumerateDocuments(@NotNull SearchService.IndexTask task, Container c, Date modifiedSince)
     {
-        if (null == c)
+        if (c == ContainerManager.getSharedContainer())
         {
             ProteinManager.indexProteins(task);
         }
