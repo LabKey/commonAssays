@@ -188,10 +188,10 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         return results.getProperty("HTTPContent", "");
     }
 
-    public File run(File[] imageFiles) throws ExtractionException
+    public File run(List<File> imageFiles) throws ExtractionException
     {
 //        _taskId = "1199843396163";
-        File resultsFile = ArrayPipelineManager.getResultsFile(imageFiles[0].getParentFile(), _taskId);
+        File resultsFile = ArrayPipelineManager.getResultsFile(imageFiles.get(0).getParentFile(), _taskId);
 //        if (1 == 1)
 //        {
 //            return resultsFile;
@@ -296,12 +296,12 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         }
     }
 
-    protected boolean submitFiles(String taskId, File[] imageFiles)
+    protected boolean submitFiles(String taskId, List<File> imageFiles)
     {
-        if ("".equals(taskId) || null == imageFiles || imageFiles.length == 0)
+        if ("".equals(taskId) || null == imageFiles || imageFiles.isEmpty())
             return false;
 
-        int partCount = 1 + imageFiles.length;
+        int partCount = 1 + imageFiles.size();
         int count = 0;
         Part[] parts = new Part[partCount];
 

@@ -21,16 +21,15 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
@@ -39,7 +38,6 @@ import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.FileNotFoundException;
-import java.net.URI;
 import java.util.*;
 
 public class MicroarrayController extends SpringActionController
@@ -134,22 +132,11 @@ public class MicroarrayController extends SpringActionController
         }
     }
 
-    public static class ExtractionForm
+    public static class ExtractionForm extends PipelinePathForm
     {
-        private String _path;
         private int _protocolId;
         private String _protocolName;
         private String _extractionEngine = "Agilent";
-
-        public String getPath()
-        {
-            return _path;
-        }
-
-        public void setPath(String path)
-        {
-            _path = path;
-        }
 
         public int getProtocol()
         {
@@ -198,21 +185,10 @@ public class MicroarrayController extends SpringActionController
         public ModelAndView getView(ExtractionForm form, BindException errors) throws Exception
         {
             Container c = getContainer();
-            PipelineService service = PipelineService.get();
-
-            PipeRoot pr = service.findPipelineRoot(c);
-            if (pr == null || !URIUtil.exists(pr.getUri()))
-                throw new NotFoundException("No pipeline root configured for this folder");
-
-            URI uriData = URIUtil.resolve(pr.getUri(), form.getPath());
-            if (uriData == null)
-            {
-                HttpView.throwNotFound();
-            }
 
             try
             {
-                PipelineJob job = new FeatureExtractionPipelineJob(getViewBackgroundInfo(), form.getProtocolName(), uriData, form.getExtractionEngine());
+                PipelineJob job = new FeatureExtractionPipelineJob(getViewBackgroundInfo(), form.getProtocolName(), form.getValidatedFiles(c), form.getExtractionEngine());
                 PipelineService.get().queueJob(job);
 
                 HttpView.throwRedirect(PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(c));

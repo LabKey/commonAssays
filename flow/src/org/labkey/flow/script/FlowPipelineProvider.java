@@ -139,7 +139,7 @@ public class FlowPipelineProvider extends PipelineProvider
             if (null == fcsFiles || 0 == fcsFiles.length)
                 continue;
             importRunsURL.replaceParameter("path", URIUtil.relativize(rootURI, dir.toURI()).toString());
-            PipelineAction action = new PipelineAction("Import Flow Run", importRunsURL, new File[] {dir});
+            PipelineAction action = new PipelineAction("Import Flow Run", importRunsURL, new File[] {dir}, false);
             action.setDescription("" + fcsFiles.length + "&nbsp;FCS&nbsp;file" + ((fcsFiles.length>1)?"s":""));
             directory.addAction(action);
             flowDirCount++;
@@ -149,7 +149,7 @@ public class FlowPipelineProvider extends PipelineProvider
         for (File workspace : workspaces)
         {
             importWorkspaceURL.replaceParameter("workspace.path", root.relativePath(workspace));
-            PipelineAction importWorkspaceAction = new PipelineAction("Import FlowJo Workspace", importWorkspaceURL, new File[] { workspace });
+            PipelineAction importWorkspaceAction = new PipelineAction("Import FlowJo Workspace", importWorkspaceURL, new File[] { workspace }, false);
             importWorkspaceAction.setDescription("Import analysis from a FlowJo workspace");
             directory.addAction(importWorkspaceAction);
 
@@ -163,7 +163,7 @@ public class FlowPipelineProvider extends PipelineProvider
         {
             File file = new File(directory.getURI());
             importRunsURL.replaceParameter("path", URIUtil.relativize(rootURI, file.toURI()).toString());
-            PipelineAction action = new PipelineAction("Import Multiple Runs", importRunsURL, null);
+            PipelineAction action = new PipelineAction("Import Multiple Runs", importRunsURL, null, false);
             action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
             directory.addAction(action);
         }

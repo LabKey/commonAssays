@@ -51,7 +51,7 @@ public class MS2PipelineProvider extends PipelineProvider
         }
 
         addAction(PipelineController.UploadAction.class, "Import Search Results",
-                directory, directory.listFiles(MS2PipelineManager.getUploadFilter()));
+                directory, directory.listFiles(MS2PipelineManager.getUploadFilter()), true);
     }
 
     class SetupWebPart extends WebPartView

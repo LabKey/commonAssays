@@ -47,7 +47,7 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
         }
         
         addAction(MS2Controller.ImportProteinProphetAction.class, "Import ProteinProphet Results",
-                directory, directory.listFiles(new ProteinProphetFilenameFilter()));
+                directory, directory.listFiles(new ProteinProphetFilenameFilter()), true);
     }
 
 

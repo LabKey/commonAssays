@@ -70,7 +70,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         }
 
         addAction(PipelineController.SearchMascotAction.class, "Mascot Peptide Search",
-                directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()));
+                directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true);
     }
 
     public HttpView getSetupWebPart(Container container)

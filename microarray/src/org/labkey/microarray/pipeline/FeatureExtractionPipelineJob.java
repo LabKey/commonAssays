@@ -17,7 +17,6 @@
 package org.labkey.microarray.pipeline;
 
 import java.io.*;
-import java.net.URI;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
@@ -39,21 +38,31 @@ import com.ice.tar.TarEntry;
 public class FeatureExtractionPipelineJob extends PipelineJob
 {
     protected Integer _extractionRowId;
-    protected File _dirImages;
+    protected List<File> _imageFiles;
     protected String _protocol;
     private String _extractionEngine;
 
     public FeatureExtractionPipelineJob(ViewBackgroundInfo info,
                                         String protocol,
-                                        URI uriData, String extractionEngine) throws SQLException
+                                        List<File> imageFiles, String extractionEngine) throws SQLException
     {
         super(MicroarrayPipelineProvider.NAME, info);
 
         _protocol = protocol;
         _extractionEngine = extractionEngine;
-        _dirImages = new File(uriData);
-        setLogFile(ArrayPipelineManager.getExtractionLog(_dirImages, null));
-        header("Feature extraction for folder " + _dirImages.getAbsolutePath());
+        _imageFiles = imageFiles;
+        if (_imageFiles.isEmpty())
+        {
+            throw new IllegalArgumentException("No image files to be processed");
+        }
+        File dirImages = getImagesDir();
+        setLogFile(ArrayPipelineManager.getExtractionLog(dirImages, null));
+        header("Feature extraction for folder " + dirImages.getAbsolutePath());
+    }
+
+    private File getImagesDir()
+    {
+        return _imageFiles.get(0).getParentFile();
     }
 
     public ActionURL getStatusHref()
@@ -68,12 +77,13 @@ public class FeatureExtractionPipelineJob extends PipelineJob
     public String getDescription()
     {
         String dataName = "";
-        if (_dirImages != null)
+        File dirImages = getImagesDir();
+        if (dirImages != null)
         {
-            dataName = _dirImages.getName();
+            dataName = dirImages.getName();
             if ("xml".equals(dataName))
             {
-                File dirData = _dirImages.getParentFile();
+                File dirData = dirImages.getParentFile();
                 if (dirData != null)
                     dataName = dirData.getName();
             }
@@ -95,24 +105,19 @@ public class FeatureExtractionPipelineJob extends PipelineJob
         boolean completeStatus = false;
         try
         {
-            if (!_dirImages.exists() || !_dirImages.isDirectory())
-            {
-                throw new FileNotFoundException("The specified data directory, " + _dirImages + ", does not exist.");
-            }
-
             AppProps appProps = AppProps.getInstance();
             if ("agilent".equalsIgnoreCase(_extractionEngine) && appProps.getMicroarrayFeatureExtractionServer() == null)
                 throw new IllegalArgumentException("Feature extraction server has not been specified in site customization.");
 
-            File[] unprocessedFile = ArrayPipelineManager.getImageFiles(_dirImages, FileStatus.UNKNOWN, getContainer());
+            File[] unprocessedFile = ArrayPipelineManager.getImageFiles(getImagesDir(), FileStatus.UNKNOWN, getContainer());
             List<File> imageFileList = new ArrayList<File>();
             imageFileList.addAll(Arrays.asList(unprocessedFile));
-            File[] imageFiles = imageFileList.toArray(new File[imageFileList.size()]);
-            if (imageFiles.length == 0)
+            imageFileList.retainAll(_imageFiles);
+            if (imageFileList.isEmpty())
                 throw new IllegalArgumentException("Feature extraction for this protocol is already complete.");
 
             info("Image files included in this extraction job:");
-            for (File image : imageFiles)
+            for (File image : imageFileList)
             {
                 info(image.getName());
             }
@@ -131,7 +136,7 @@ public class FeatureExtractionPipelineJob extends PipelineJob
             }
 
             info("Initiating feature extraction process...");
-            File resultsFile = extractionClient.run(imageFiles);
+            File resultsFile = extractionClient.run(imageFileList);
 
             if (!resultsFile.exists())
             {
@@ -149,7 +154,7 @@ public class FeatureExtractionPipelineJob extends PipelineJob
                 TarEntry entry;
                 while((entry = tIn.getNextEntry()) != null)
                 {
-                    File extractedFile = new File(_dirImages, entry.getName());
+                    File extractedFile = new File(getImagesDir(), entry.getName());
                     if (entry.isDirectory())
                     {
                         extractedFile.mkdirs();
@@ -198,7 +203,7 @@ public class FeatureExtractionPipelineJob extends PipelineJob
 //                }
 //            }
 
-            iReturn = extractionClient.saveProcessedRuns(getUser(), getContainer(), new File(_dirImages, extractionClient.getTaskId()));
+            iReturn = extractionClient.saveProcessedRuns(getUser(), getContainer(), new File(getImagesDir(), extractionClient.getTaskId()));
 
             if (iReturn != 0)
             {

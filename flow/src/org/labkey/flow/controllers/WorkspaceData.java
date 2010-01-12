@@ -200,7 +200,7 @@ public class WorkspaceData implements Serializable
         }
         else
         {
-            Map<String, String> ret = new HashMap();
+            Map<String, String> ret = new HashMap<String, String>();
             if (object != null)
             {
                 try

@@ -47,7 +47,7 @@ public class MicroarrayPipelineProvider extends AssayPipelineProvider
         File[] files = directory.listFiles(ArrayPipelineManager.getImageFileFilter());
         if (files != null)
             addAction(MicroarrayController.ImportImageFilesAction.class, "Import Images",
-                    directory, files);
+                    directory, files, true);
 
     }
 }

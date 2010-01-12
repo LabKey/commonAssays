@@ -112,36 +112,61 @@
         </property>
         <property name="converters">
             <list>
-                <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
-                    <property name="softwarePackage" value="pwiz"/>
-                    <property name="exePath" value="peakaboo"/>
-                </bean>
-                <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="peakaboo, start scan"/>
-                    <property name="switchName" value="scanBegin"/>
-                    <property name="help" value="Minimum scan number (default 1)"/>
-                </bean>
-                <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="peakaboo, end scan"/>
-                    <property name="switchName" value="scanEnd"/>
-                    <property name="help" value="Maximum scan number (default last)"/>
-                </bean>
-                <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="peakaboo, minimum m/z"/>
-                    <property name="switchName" value="mzLow"/>
-                    <property name="help" value="Minimum M/Z Value (default: the minimum m/z value in the file)"/>
-                </bean>
-                <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="peakaboo, maximum m/z"/>
-                    <property name="switchName" value="mzHigh"/>
-                    <property name="help" value="Maximum M/Z Value (default: the maximum m/z value in the file)"/>
-                </bean>
-                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
-                    <property name="switchName" value="e"/>
-                    <property name="value" value=".peaks.xml" />
-                </bean>
-                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                    <property name="key" value="spectra" />
+                <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
+                    <property name="parameter" value="pipeline, peakaboo enabled"/>
+                    <property name="default" value="false"/>
+                    <property name="converters">
+                        <map>
+                            <entry key="false">
+                                <!-- If peakaboo is disabled, then don't emit any args which will prevent it from running -->
+                                <bean class="org.labkey.api.pipeline.cmd.ListToCommandArgs">
+                                    <property name="converters">
+                                        <list />
+                                    </property>
+                                </bean>
+                            </entry>
+                            <entry key="true">
+                                <bean class="org.labkey.api.pipeline.cmd.ListToCommandArgs">
+                                    <property name="converters">
+                                        <list>
+                                            <!-- If peakaboo is enabled, then build up the standard arguments -->
+                                            <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                                                <property name="softwarePackage" value="pwiz"/>
+                                                <property name="exePath" value="peakaboo"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="peakaboo, start scan"/>
+                                                <property name="switchName" value="scanBegin"/>
+                                                <property name="help" value="Minimum scan number (default 1)"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="peakaboo, end scan"/>
+                                                <property name="switchName" value="scanEnd"/>
+                                                <property name="help" value="Maximum scan number (default last)"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="peakaboo, minimum m/z"/>
+                                                <property name="switchName" value="mzLow"/>
+                                                <property name="help" value="Minimum M/Z Value (default: the minimum m/z value in the file)"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="peakaboo, maximum m/z"/>
+                                                <property name="switchName" value="mzHigh"/>
+                                                <property name="help" value="Maximum M/Z Value (default: the maximum m/z value in the file)"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                                <property name="switchName" value="e"/>
+                                                <property name="value" value=".peaks.xml" />
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                                                <property name="key" value="spectra" />
+                                            </bean>
+                                        </list>
+                                    </property>
+                                </bean>
+                            </entry>
+                        </map>
+                    </property>
                 </bean>
             </list>
         </property>
