@@ -55,6 +55,9 @@ public class RandomAccessPwizMSDataIterator extends AbstractMzxmlIterator
         if (!_triedLoadLib)
         {
             _triedLoadLib = true;
+            /*
+            a more thorough implementation of mzML and mzXML.gz handling is forthcoming
+            just back this out for now - bpratt
             try {
                 System.loadLibrary("pwiz_swigbindings");
                 _isAvailable = true;
@@ -64,6 +67,7 @@ public class RandomAccessPwizMSDataIterator extends AbstractMzxmlIterator
             } catch (Exception e) {
                 throw new IOException ("pwiz_swigbindings lib not loaded, falling back to older mzXML reader code (no mzML support)" + e);
             }
+            */
         }
         return _isAvailable;
     }
