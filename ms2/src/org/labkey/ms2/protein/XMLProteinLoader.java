@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 
 /**
  * Based loosely on XERCES'
@@ -74,7 +75,7 @@ public class XMLProteinLoader extends DefaultAnnotationLoader implements Annotat
             handler.parse(fName);
             conn.setAutoCommit(false);
             ProteinManager.getSchema().getScope().commitTransaction();
-            ProteinManager.indexProteins(null);
+            ProteinManager.indexProteins(null, (Date)null);
         }
         finally
         {

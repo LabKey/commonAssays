@@ -204,8 +204,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         SearchService ss = ServiceRegistry.get().getService(SearchService.class);
         if (null != ss)
         {
-            ss.addSearchCategory(ProteinManager.proteinCategory);
-            ss.addDocumentProvider(this);
+//            ss.addSearchCategory(ProteinManager.proteinCategory);
+//            ss.addDocumentProvider(this);
         }
 
         PipelineService service = PipelineService.get();
@@ -342,7 +342,11 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     {
         if (c == ContainerManager.getSharedContainer())
         {
-            ProteinManager.indexProteins(task);
+            ProteinManager.indexProteins(task, modifiedSince);
         }
+    }
+
+    public void indexDeleted() throws SQLException
+    {
     }
 }

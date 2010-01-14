@@ -35,6 +35,7 @@ import org.labkey.ms2.*;
 import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
@@ -1256,8 +1257,24 @@ public class ProteinManager
     }
 
 
-    public static void indexProteins(SearchService.IndexTask task)
+    public static void indexProteins(SearchService.IndexTask task, Date modifiedSince)
     {
+        if (1==1)
+            return;
+        if (null != modifiedSince)
+        {
+            try
+            {
+                Date d = Table.executeSingleton(getSchema(),"SELECT max(insertdate) from prot.annotinsertions",null, Timestamp.class);
+                if (null != d && d.compareTo(modifiedSince) <= 0)
+                    return;
+            }
+            catch (SQLException x)
+            {
+                _log.error("Unexpected sql exception", x);
+            }
+        }
+
         if (null == task)
         {
             SearchService ss = ServiceRegistry.get().getService(SearchService.class);
@@ -1280,7 +1297,7 @@ public class ProteinManager
                     throw new RuntimeSQLException(x);
                 }
             }
-        }, SearchService.PRIORITY.bulk);
+        }, SearchService.PRIORITY.background);
     }
     
 

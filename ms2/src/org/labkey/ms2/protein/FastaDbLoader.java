@@ -158,7 +158,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                 }
             }
 
-            ProteinManager.indexProteins(null);
+            ProteinManager.indexProteins(null, (Date)null);
         }
         else
         {
