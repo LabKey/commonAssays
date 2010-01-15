@@ -16,11 +16,10 @@
  */
 %>
 <%@ page import="org.labkey.api.security.LoginUrls" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.authentication.ldap.LdapController" %>
-<%@ page import="org.labkey.authentication.ldap.LdapController.*" %>
+<%@ page import="org.labkey.authentication.ldap.LdapController.Config" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<Config> me = (JspView<Config>)HttpView.currentView();
@@ -48,7 +47,7 @@
     <tr>
         <td colspan=2>
             <%=generateSubmitButton("Save")%>
-            <%=generateButton(bean.reshow ? "Done" : "Cancel", PageFlowUtil.urlProvider(LoginUrls.class).getConfigureURL())%>
+            <%=generateButton(bean.reshow ? "Done" : "Cancel", urlProvider(LoginUrls.class).getConfigureURL())%>
         </td>
     </tr>
     <tr><td colspan="2">&nbsp;</td></tr>
