@@ -35,19 +35,17 @@ public class MicroarrayPipelineProvider extends AssayPipelineProvider
         super(NAME, MicroarrayModule.class, ArrayPipelineManager.getMageFileFilter(), assayProvider, "Import MAGE-ML");
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
-        super.updateFileProperties(context, pr, directory);
+        super.updateFileProperties(context, pr, directory, includeAll);
 
         if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
         {
             return;
         }
         
-        File[] files = directory.listFiles(ArrayPipelineManager.getImageFileFilter());
-        if (files != null)
-            addAction(MicroarrayController.ImportImageFilesAction.class, "Import Images",
-                    directory, files, true);
+        addAction(MicroarrayController.ImportImageFilesAction.class, "Import Images",
+                directory, directory.listFiles(ArrayPipelineManager.getImageFileFilter()), true, includeAll);
 
     }
 }

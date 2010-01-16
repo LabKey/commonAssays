@@ -82,7 +82,7 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return null;
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
         {
@@ -90,7 +90,7 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
         }
         
         addAction(PipelineController.SearchXTandemAction.class, "X!Tandem Peptide Search",
-                directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true);
+                directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, includeAll);
     }
 
     public HttpView getSetupWebPart(Container container)

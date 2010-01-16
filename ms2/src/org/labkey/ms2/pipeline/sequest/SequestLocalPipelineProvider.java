@@ -52,7 +52,7 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
         return "sequest.xml".equals(name) || super.isStatusViewableFile(container, name, basename);
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!AppProps.getInstance().hasSequest())
             return;
@@ -63,7 +63,7 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
 
 
         addAction(PipelineController.SearchSequestAction.class, "Sequest Peptide Search",
-            directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true);
+            directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, includeAll);
     }
 
     public HttpView getSetupWebPart(Container container)

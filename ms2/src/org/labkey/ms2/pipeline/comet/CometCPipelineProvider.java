@@ -116,7 +116,7 @@ public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         // Don't hook up any actions through the UI
     }

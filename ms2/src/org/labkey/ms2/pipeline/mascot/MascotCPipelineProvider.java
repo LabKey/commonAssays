@@ -60,7 +60,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return super.isStatusViewableFile(container, name, basename);
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!AppProps.getInstance().hasMascotServer())
             return;
@@ -70,7 +70,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         }
 
         addAction(PipelineController.SearchMascotAction.class, "Mascot Peptide Search",
-                directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true);
+                directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, includeAll);
     }
 
     public HttpView getSetupWebPart(Container container)

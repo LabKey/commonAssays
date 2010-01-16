@@ -39,7 +39,7 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
         super(NAME, owningModule);
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
         {
@@ -47,7 +47,7 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
         }
         
         addAction(MS2Controller.ImportProteinProphetAction.class, "Import ProteinProphet Results",
-                directory, directory.listFiles(new ProteinProphetFilenameFilter()), true);
+                directory, directory.listFiles(new ProteinProphetFilenameFilter()), true, includeAll);
     }
 
 

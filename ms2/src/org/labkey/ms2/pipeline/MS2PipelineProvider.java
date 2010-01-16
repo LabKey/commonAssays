@@ -43,7 +43,7 @@ public class MS2PipelineProvider extends PipelineProvider
         return new SetupWebPart();
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
         {
@@ -51,7 +51,7 @@ public class MS2PipelineProvider extends PipelineProvider
         }
 
         addAction(PipelineController.UploadAction.class, "Import Search Results",
-                directory, directory.listFiles(MS2PipelineManager.getUploadFilter()), true);
+                directory, directory.listFiles(MS2PipelineManager.getUploadFilter()), true, includeAll);
     }
 
     class SetupWebPart extends WebPartView
