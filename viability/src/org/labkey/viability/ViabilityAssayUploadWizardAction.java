@@ -195,7 +195,8 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                     initialValue = row.get(propertyName);
 
                 // third, if the field is editable get the property's default value from a previous run
-                Map<String, Object> reRun = reRunResults.get(poolID);
+                String lowerPoolID = poolID.replaceAll(" ", "").toLowerCase();
+                Map<String, Object> reRun = reRunResults.get(lowerPoolID);
                 if (editable && reRun != null && reRun.containsKey(propertyName))
                     initialValue = reRun.get(propertyName);
 

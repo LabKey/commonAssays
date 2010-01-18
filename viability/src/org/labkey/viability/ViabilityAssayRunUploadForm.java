@@ -234,9 +234,10 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 for (ViabilityResult result : results)
                 {
                     String poolID = result.getPoolID();
+                    String lowerPoolID = poolID.replaceAll(" ", "").toLowerCase();
                     // XXX: there can be more than one pool id in a run
-                    if (!ret.containsKey(poolID))
-                        ret.put(poolID, result.toMap());
+                    if (!ret.containsKey(lowerPoolID))
+                        ret.put(lowerPoolID, result.toMap());
                 }
             }
             catch (SQLException e)
