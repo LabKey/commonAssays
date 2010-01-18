@@ -477,7 +477,7 @@ public abstract class MS2Importer
     {
         progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateCounts);
 
-        String negativeHitLike = MS2Manager.getNegativeHitPrefix(_container) + "%";
+        String negativeHitLike = MS2Manager.NEGATIVE_HIT_PREFIX + "%";
 
         Table.execute(MS2Manager.getSchema(), _updateCountsSql, new Object[]{negativeHitLike, _runId});
     }

@@ -142,7 +142,7 @@ public class PeptideProphetGraphs
         String chargeSQL = "SELECT count(*) " +
                         "FROM " + MS2Manager.getTableInfoPeptides().getSelectName() + " " +
                         "WHERE Run = ? AND Charge = ?";
-        String negHitPrefix = MS2Manager.getNegativeHitPrefix(c);
+        String negHitPrefix = MS2Manager.NEGATIVE_HIT_PREFIX;
 
         int total = Table.executeSingleton(MS2Manager.getSchema(),
                         chargeSQL,

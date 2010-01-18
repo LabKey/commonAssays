@@ -171,7 +171,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         return associatedFastaId;
     }
 
-    protected int initAnnotLoad(Connection c, String fileName, String comment) throws SQLException
+    protected int initAnnotLoad(String comment) throws SQLException
     {
         if (currentInsertId == 0)
         {
@@ -304,10 +304,10 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         c.setAutoCommit(true);
         _log.debug("Sequences = " + transactionCount + ".  preProcessSequences() total elapsed time was " + (System.currentTimeMillis() - startTime)/1000 + " seconds for this mouthful.");
 
-       guessBySharedHash(c);
+       guessBySharedHash();
     }
 
-    protected void guessBySharedHash(Connection c) throws SQLException
+    protected void guessBySharedHash() throws SQLException
     {
         // only guessing for those records that are still 'Unknown unknown'
         // could be changed to
@@ -365,7 +365,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         return separateParts[1];
     }
 
-    protected int insertSequences(Connection c) throws SQLException
+    protected int insertSequences() throws SQLException
     {
         handleThreadStateChangeRequests("In insertSequences, before inserting org ids into temp table");
         fdbu._updateSTempWithOrgIDsStmt.executeUpdate();
@@ -375,11 +375,10 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         handleThreadStateChangeRequests("insertion took " + ((System.currentTimeMillis() - currentTime) / 1000) + " seconds");
         handleThreadStateChangeRequests("In insertSequences, before getting seqids from real table into temp table");
         fdbu._updateSTempWithSeqIDsStmt.executeUpdate();
-//       c.commit();
         return iInserted;
     }
 
-    protected int insertIdentifiers(Connection c, List<Integer> ids) throws SQLException
+    protected int insertIdentifiers(Connection c) throws SQLException
     {
         handleThreadStateChangeRequests("Entering insertIdentifiers, before collecting unparsed identifiers from temp table");
         ResultSet rs = fdbu._getIdentsStmt.executeQuery();
@@ -398,7 +397,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             // not their name field.
             // todo:  this is almost the same code as in Protein.getIdentifier map and should be consolidated
             // note that newer IPI files don't have this issue
-            if (rawIdentString != null && rawIdentString.startsWith("IPI") && rawIdentString.indexOf("|") == -1 && desc != null && (desc.indexOf("|") != -1))
+            if (rawIdentString != null && rawIdentString.startsWith("IPI") && !rawIdentString.contains("|") && desc != null && (desc.contains("|")))
                  rawIdentString = desc;
 
             Map<String, Set<String>> identifiers = Protein.identParse(rawIdentString, wholeHeader);
@@ -445,13 +444,12 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         handleThreadStateChangeRequests("In insertIdentifiers, before appending temp table into real table");
         int iInserted = fdbu._insertIntoIdentsStmt.executeUpdate();
 
-//       c.commit();
         handleThreadStateChangeRequests("Exiting insertIdentifiers");
         c.setAutoCommit(true);
         return iInserted;
     }
 
-    protected int insertAnnotations(Connection c) throws SQLException
+    protected int insertAnnotations() throws SQLException
     {
         // The only annotations we take from FASTA files  (currently) is the full organism name
         // (if there is one)
@@ -467,7 +465,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
 
     //TODO:  this code is temporary, while moving from Adam's system to Ted's
-    protected int insertLookups(Connection c, int fastaID) throws SQLException
+    protected int insertLookups(int fastaID) throws SQLException
     {
         if (fastaID <= 0)
         {
@@ -475,9 +473,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         }
         handleThreadStateChangeRequests("Before inserting into FastaSeqences");
         fdbu._insertFastaSequencesStmt.setInt(1, fastaID);
-        int n_lookups_updated =
-                fdbu._insertFastaSequencesStmt.executeUpdate();
-        return n_lookups_updated;
+        return fdbu._insertFastaSequencesStmt.executeUpdate();
     }
 
     protected int guessAssociatedFastaId() throws SQLException
@@ -504,19 +500,19 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         return 0;
     }
 
-    protected void processMouthful(Connection c, List<ProteinPlus> mouthful, List<Integer> seqIDs) throws SQLException
+    protected void processMouthful(Connection c, List<ProteinPlus> mouthful) throws SQLException
     {
         handleThreadStateChangeRequests("Entering Process Mouthful");
         preProcessSequences(mouthful, c);
         int orgsAdded = insertOrganisms(c);
         handleThreadStateChangeRequests();
-        int seqsAdded = insertSequences(c);
+        int seqsAdded = insertSequences();
         handleThreadStateChangeRequests();
-        int identsAdded = insertIdentifiers(c, seqIDs);
+        int identsAdded = insertIdentifiers(c);
         handleThreadStateChangeRequests();
-        int annotsAdded = insertAnnotations(c);
+        int annotsAdded = insertAnnotations();
         if (associatedFastaId <= 0) setAssociatedFastaId(guessAssociatedFastaId());
-        int lookupsUpdated = insertLookups(c, associatedFastaId);
+        int lookupsUpdated = insertLookups(associatedFastaId);
 
         _log.debug("Updated " + lookupsUpdated + " lookups");
         handleThreadStateChangeRequests("In Process mouthful - finished mouthful");
@@ -578,11 +574,9 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         fdbu._updateInsertionStmt.setInt(13, currentInsertId);
         fdbu._updateInsertionStmt.executeUpdate();
         handleThreadStateChangeRequests("Exiting Process Mouthful");
-
-//       c.commit();
     }
 
-    protected void finalizeAnnotLoad(Connection c, int insertId) throws SQLException
+    protected void finalizeAnnotLoad() throws SQLException
     {
         handleThreadStateChangeRequests("Setting BestGeneName");
         fdbu._updateBestGeneNameStmt.setInt(1, associatedFastaId);
@@ -592,17 +586,12 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         fdbu._finalizeInsertionStmt.setTimestamp(1, new java.sql.Timestamp(new java.util.Date().getTime()));
         fdbu._finalizeInsertionStmt.setInt(2, currentInsertId);
         fdbu._finalizeInsertionStmt.executeUpdate();
-//       c.commit();
     }
 
-    protected void genProtFastaRecord(Connection c, List<Integer> seqIds, String hash) throws SQLException
+    protected void genProtFastaRecord(List<Integer> seqIds, String hash) throws SQLException
     {
         handleThreadStateChangeRequests("Creating FASTA record");
-        int idArr[] = new int[seqIds.size()];
-        for (int i = 0; i < seqIds.size(); i++)
-        {
-            idArr[i] = seqIds.get(i).intValue();
-        }
+
         fdbu._insertIntoFastasStmt.setString(1, getParseFName());
         fdbu._insertIntoFastasStmt.setInt(2, seqIds.size());
         fdbu._insertIntoFastasStmt.setString(3, _comment);
@@ -610,8 +599,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         fdbu._insertIntoFastasStmt.setTimestamp(5, new java.sql.Timestamp(new java.util.Date().getTime()));
         fdbu._insertIntoFastasStmt.executeUpdate();
         handleThreadStateChangeRequests("Done creating FASTA record");
-
-        //c.commit();
     }
 
     public void parse() throws IOException, SQLException
@@ -643,16 +630,14 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         int loadCounter = 0;
         List<ProteinPlus> mouth = new ArrayList<ProteinPlus>();
         List<Integer> seqIds = new ArrayList<Integer>();
-        int insertId;
 
         if (_recoveryId == 0)
         {
-            insertId = initAnnotLoad(conn, getParseFName(), _comment);
+            currentInsertId = initAnnotLoad(_comment);
         }
         else
         {
-            insertId = _recoveryId;
-            currentInsertId = insertId;
+            currentInsertId = _recoveryId;
             ResultSet rs = null;
             try
             {
@@ -681,7 +666,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         int protCount = 0;
         int negCount = 0;
         // TODO: Need a container to make this configurable.
-        String negPrefix = MS2Manager.getNegativeHitPrefix(null);
+        String negPrefix = MS2Manager.NEGATIVE_HIT_PREFIX;
 
         //Main loop
         for (FastaLoader.ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
@@ -703,7 +688,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
             if (!proteinIterator.hasNext() || (loadCounter % mouthfulSize) == 0)
             {
-                processMouthful(conn, mouth, seqIds);
+                processMouthful(conn, mouth);
                 mouth.clear();
             }
 
@@ -720,28 +705,15 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                     " WHERE FastaId = ?", new Object[] { true, associatedFastaId });
         }
 
-        finalizeAnnotLoad(conn, insertId);
+        finalizeAnnotLoad();
         if (_fileHash == null)
         {
             _fileHash = HashHelpers.hashFileContents(getParseFName());
         }
-        genProtFastaRecord(conn, seqIds, _fileHash);
+        genProtFastaRecord(seqIds, _fileHash);
         fdbu._dropIdentTempStmt.executeUpdate();
         fdbu._dropSeqTempStmt.executeUpdate();
         cleanUp();
-    }
-
-    //
-    // Error handlers.
-    //
-    public static void parseWarning(String s)
-    {
-        _log.warn(s);
-    }
-
-    public static void parseError(String s)
-    {
-        _log.error(s);
     }
 
     public void cleanUp()

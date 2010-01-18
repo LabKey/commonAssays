@@ -564,7 +564,7 @@ public class MS2Manager
                              File file,
                              boolean restart, XarContext context) throws SQLException, IOException, XMLStreamException
     {
-        MS2Importer importer = createImporter(file, info, file.getName() + context.getJobDescription() != null ? file.getName() + " (" + context.getJobDescription() + ")" : "", log, context);
+        MS2Importer importer = createImporter(file, info, file.getName() + (context.getJobDescription() != null ? file.getName() + " (" + context.getJobDescription() + ")" : ""), log, context);
         MS2Importer.RunInfo runInfo = importer.prepareRun(restart);
 
         return importRun(info, log, file, runInfo, context);
@@ -575,7 +575,7 @@ public class MS2Manager
                              MS2Importer.RunInfo runInfo,
                              XarContext context) throws SQLException, IOException, XMLStreamException
     {
-        MS2Importer importer = createImporter(file, info, file.getName() + context.getJobDescription() != null ? file.getName() + " (" + context.getJobDescription() + ")" : "", log, context);
+        MS2Importer importer = createImporter(file, info, file.getName() + (context.getJobDescription() != null ? file.getName() + " (" + context.getJobDescription() + ")" : ""), log, context);
         return importer.upload(runInfo);
     }
 
@@ -590,11 +590,6 @@ public class MS2Manager
             return new MascotDatImporter(info.getUser(), c, description, fileName, log, context);
         else
             throw new IOException("Unable to import file type '" + file + "'.");
-    }
-
-    public static MS2Run[] getRunsForFastaId(int fastaId)
-    {
-        return getRuns("runs.FastaId = ?", fastaId);
     }
 
     public static MS2Run getRun(String runId)
@@ -627,11 +622,6 @@ public class MS2Manager
         return run;
     }
 
-    public static RelativeQuantAnalysisSummary getQuantSummary(int quantId)
-    {
-        return Table.selectObject(getTableInfoQuantSummaries(), quantId, RelativeQuantAnalysisSummary.class);
-    }
-
     public static RelativeQuantAnalysisSummary getQuantSummaryForRun(int runId)
     {
         SimpleFilter filter = new SimpleFilter("run", new Integer(runId));
@@ -642,11 +632,10 @@ public class MS2Manager
         }
         catch (SQLException e)
         {
-            _log.error("Error in getQuantSummaryForRun(" + runId + ")", e);
-            return null;
+            throw new RuntimeSQLException(e);
         }
             
-        if (null == summaries || summaries.length <= 0)
+        if (summaries.length <= 0)
             return null;
         if (summaries.length > 1)
             _log.warn("Found more than one quantitation summary for run " + runId + "; using first");
@@ -789,7 +778,7 @@ public class MS2Manager
         }
         catch (SQLException e)
         {
-            _log.error("markAsDeleted", e);
+            throw new RuntimeSQLException(e);
         }
     }
 
@@ -1044,25 +1033,6 @@ public class MS2Manager
         }
     }
 
-//    private static String[] suffixes = new String[] {".pep.tgz", ".cmt.tar.gz", ".gz"};
-
-    public static String getMzXMLPath(MS2Fraction fraction)
-    {
-        String baseName = fraction.getFileName();
-        //TODO: Assume we have base path for this document to include all analyses
-        baseName = baseName.substring(0, baseName.indexOf('.'));
-        return "xml/" + baseName + ".mzXML";
-    }
-
-    public static String getRawPath(MS2Fraction fraction)
-    {
-        String baseName = fraction.getFileName();
-        //TODO: Assume we have base path for this document to include all analyses
-        baseName = baseName.substring(0, baseName.indexOf('.'));
-        //TODO: Not always .RAW extension. Check where file really is
-        return "raw/" + baseName + ".RAW";
-    }
-
     public static MS2Modification[] getModifications(int run)
     {
         SimpleFilter filter = new SimpleFilter("run", new Integer(run));
@@ -1261,13 +1231,6 @@ public class MS2Manager
         return stats;
     }
 
-    public static void updateMS2Application(int ms2RunId, String LSID) throws SQLException
-    {
-        String sql = " UPDATE " + getTableInfoRuns() + " SET ExperimentRunLSID = ? WHERE Run = ? ;";
-
-        Table.execute(getSchema(), sql, new Object[]{LSID, ms2RunId});
-    }
-
     private static void addStats(Map<String, String> stats, String prefix, String whereSql, Object[] params)
     {
         ResultSet rs = null;
@@ -1435,17 +1398,6 @@ public class MS2Manager
     }
 
 
-    public static int getQuantitationCount(int run) throws SQLException
-    {
-        return Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoQuantitation() + " WHERE PeptideId IN (SELECT RowId FROM " + getTableInfoPeptides() + " WHERE Run = ?)", new Object[] { run }, Integer.class ).intValue();
-    }
-
-    public static int getProteinQuantitationCount(int run) throws SQLException
-    {
-        return Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoProteinQuantitation() + " WHERE ProteinGroupId IN (SELECT RowId FROM " + getTableInfoProteinGroups() + " WHERE ProteinProphetFileId IN (SELECT RowId FROM " + getTableInfoProteinProphetFiles() + " WHERE Run = ?))", new Object[] { run }, Integer.class ).intValue();
-    }
-
-
     private static class PeptideIndexCache extends DatabaseCache<long[]>
     {
         private static int CACHE_SIZE = 10;
@@ -1464,13 +1416,7 @@ public class MS2Manager
         return Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoRuns() + " WHERE Deleted= ? AND Container = ?", new Object[]{Boolean.FALSE, c.getId()}, Long.class);
     }
 
-    // TODO: Make this a property stored with the pipeline root.
-    private static final String negativeHitPrefix = "rev_";
-
-    public static String getNegativeHitPrefix(Container c)
-    {
-        return negativeHitPrefix;
-    }
+    public static final String NEGATIVE_HIT_PREFIX = "rev_";
 
     public static class XYSeriesROC extends XYSeries
     {
@@ -1528,7 +1474,7 @@ public class MS2Manager
                                                 double increment, double percentAACorrect, int limitFalsePs,
                                                 double[] marks, boolean markFdr, Container c)
     {
-        String negHitPrefix = getNegativeHitPrefix(c);
+        String negHitPrefix = NEGATIVE_HIT_PREFIX;
 
         XYSeriesCollection collection = new XYSeriesCollection();
         for (int i = 0; i < runIds.length; i++)
@@ -1634,7 +1580,7 @@ public class MS2Manager
                                                     double percentAACorrect, int limitFalsePs,
                                                     double[] marks, boolean markFdr, Container c)
     {
-        String negHitPrefix = getNegativeHitPrefix(c);
+        String negHitPrefix = NEGATIVE_HIT_PREFIX;
 
         XYSeriesCollection collection = new XYSeriesCollection();
         for (int i = 0; i < runIds.length; i++)
@@ -1650,7 +1596,7 @@ public class MS2Manager
             if (!showRun)
                 continue;
 
-            long runRows = 0;
+            long runRows;
             try
             {
                 runRows = Table.executeSingleton(getSchema(),
@@ -1753,7 +1699,7 @@ public class MS2Manager
                                                          int[] marks,
                                                          Container c)
     {
-        String negHitPrefix = getNegativeHitPrefix(c);
+        String negHitPrefix = NEGATIVE_HIT_PREFIX;
 
         XYSeriesCollection collection = new XYSeriesCollection();
         MS2Run run = getRun(runId);
@@ -1840,7 +1786,7 @@ public class MS2Manager
                                                          int scaleFactor,
                                                          Container c)
     {
-        String negHitPrefix = getNegativeHitPrefix(c);
+        String negHitPrefix = NEGATIVE_HIT_PREFIX;
 
         XYSeriesCollection collection = new XYSeriesCollection();
         MS2Run run = getRun(runId);
@@ -1865,7 +1811,6 @@ public class MS2Manager
                 if (!rs.next())
                     return collection;
 
-                int rows = 0;
                 double startChart = rs.getDouble(5);
 
                 double cutoffLast = startChart;
@@ -1892,7 +1837,6 @@ public class MS2Manager
                             falsePositives++;
                         else
                             correctIds++;
-                        rows++;
                     }
                     if (falsePositives > 0 || falsePositivesLast > 0)
                     {

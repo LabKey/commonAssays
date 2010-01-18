@@ -50,25 +50,6 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
     public static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
     public static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType("LuminexDataFile", new FileType(".xls"));
 
-    public Map<DataType, List<Map<String, Object>>> loadFileData(ExpProtocol expProtocol, Domain dataDomain, File dataFile) throws IOException, ExperimentException
-    {
-        ExpProtocol protocol = ExperimentService.get().getExpProtocol(expProtocol.getRowId());
-        LuminexDataFileParser parser = getDataFileParser(protocol, dataFile);
-
-        Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
-        List<Map<String, Object>> dataRows = new ArrayList<Map<String, Object>>();
-
-        for (Map.Entry<Analyte, List<LuminexDataRow>> entry : parser.getSheets().entrySet())
-        {
-            for (LuminexDataRow dataRow : entry.getValue())
-            {
-                dataRows.add(serializeDataRow(entry.getKey(), dataRow));
-            }
-        }
-        datas.put(LUMINEX_DATA_TYPE, dataRows);
-        return datas;
-    }
-
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         ExpProtocol protocol = data.getRun().getProtocol();
@@ -121,12 +102,12 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
 
         ObjectFactory<Analyte> af = ObjectFactory.Registry.getFactory(Analyte.class);
         if (null == af)
-            throw new IllegalArgumentException("Cound not find a matching object factory.");
+            throw new IllegalArgumentException("Could not find a matching object factory.");
         row.putAll(af.toMap(analyte, null));
 
         ObjectFactory<LuminexDataRow> f = ObjectFactory.Registry.getFactory(LuminexDataRow.class);
         if (null == f)
-            throw new IllegalArgumentException("Cound not find a matching object factory.");
+            throw new IllegalArgumentException("Could not find a matching object factory.");
         row.putAll(f.toMap(dataRow, null));
 
         return row;
