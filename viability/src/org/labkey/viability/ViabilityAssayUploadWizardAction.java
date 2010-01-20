@@ -174,9 +174,10 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             boolean copyable = editable;
 
             List<DisplayColumn> columns = new ArrayList<DisplayColumn>(rows.size());
-            for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++)
+            int rowIndex = 0;
+            for (ListIterator<Map<String, Object>> iter = rows.listIterator(); iter.hasNext(); rowIndex++)
             {
-                Map<String, Object> row = rows.get(rowIndex);
+                Map<String, Object> row = iter.next();
                 String poolID = (String) row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME);
                 assert poolID != null;
                 if (firstPass)
