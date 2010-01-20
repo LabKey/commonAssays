@@ -165,8 +165,9 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
     //JUnit TestCase
     public static class TestCase extends junit.framework.TestCase
     {
+        public TestCase() { }
 
-        TestCase(String name)
+        public TestCase(String name)
         {
             super(name);
         }

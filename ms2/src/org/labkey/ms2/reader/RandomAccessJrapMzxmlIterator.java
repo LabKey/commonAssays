@@ -164,8 +164,9 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
     //JUnit TestCase
     public static class TestCase extends junit.framework.TestCase
     {
+        public TestCase() { super(); }
 
-        TestCase(String name)
+        public TestCase(String name)
         {
             super(name);
         }
