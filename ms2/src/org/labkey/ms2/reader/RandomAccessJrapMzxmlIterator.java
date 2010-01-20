@@ -172,9 +172,7 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
 
         public static Test suite()
         {
-            TestSuite suite = new TestSuite();
-            suite.addTest(new TestCase("testMzxml"));
-            return suite;
+            return new TestSuite(TestCase.class);
         }
 
         public void testMzxml()

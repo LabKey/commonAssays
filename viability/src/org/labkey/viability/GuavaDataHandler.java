@@ -270,7 +270,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
             GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(viabilityFiles, "small.VIA.csv"));
 
             List<Map<String, Object>> rows = parser.getResultData();
-            assertEquals("Expected 6 rows", 6, rows.size());
+            assertEquals("Expected 7 rows", 7, rows.size());
 
             Map<String, Object> row = rows.get(0);
             assertEquals(7, row.size());

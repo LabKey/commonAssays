@@ -173,9 +173,7 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
 
         public static Test suite()
         {
-            TestSuite suite = new TestSuite();
-            suite.addTest(new TestCase("testPwizMSData"));
-            return suite;
+            return new TestSuite(TestCase.class);
         }
 
         public void testPwizMSData()
