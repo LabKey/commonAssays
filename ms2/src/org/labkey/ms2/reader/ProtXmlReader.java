@@ -17,10 +17,10 @@
 package org.labkey.ms2.reader;
 
 import org.labkey.api.reader.SimpleXMLStreamReader;
+import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
@@ -43,11 +43,12 @@ public class ProtXmlReader
     {
         private SimpleXMLStreamReader _parser;
         private ProteinGroup _nextProteinGroup = null;
-        private FileInputStream _fIn;
+        private java.io.InputStream _fIn;
 
         public ProteinGroupIterator() throws FileNotFoundException, XMLStreamException
         {
-            _fIn = new FileInputStream(_file);
+            // TPP treats .xml.gz as a native format
+            _fIn = PossiblyGZIPpedFileInputStreamFactory.getStream(_file);
             _parser = new SimpleXMLStreamReader(_fIn);
         }
 

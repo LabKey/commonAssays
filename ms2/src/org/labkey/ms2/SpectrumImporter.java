@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.ms2.reader.*;
 
 import javax.xml.stream.XMLStreamException;
@@ -87,10 +88,9 @@ public class SpectrumImporter
                     // files natively
                     boolean has_mzML = false;
                     try {
-                        has_mzML = RandomAccessPwizMSDataIterator.isAvailable();
+                        has_mzML = massSpecDataFileType.isMZmlAvailable();
                     } catch (IOException x) {
                         _log.info(x);
-                        _systemLog.info(x);
                     }
                     if (has_mzML) {
                         _scanIterator = new RandomAccessPwizMSDataIterator(mzXmlFileName, 2);

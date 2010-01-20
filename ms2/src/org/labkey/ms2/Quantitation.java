@@ -18,6 +18,7 @@ package org.labkey.ms2;
 
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
+import org.labkey.ms2.reader.RandomAccessMzxmlIteratorFactory;
 import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
 import org.labkey.ms2.reader.SimpleScan;
 
@@ -318,7 +319,7 @@ public class Quantitation
         RandomAccessMzxmlIterator iterator = null;
         try
         {
-            iterator = new RandomAccessMzxmlIterator(mzXmlFile.getPath(), 1, minScan);
+            iterator = RandomAccessMzxmlIteratorFactory.newIterator(mzXmlFile.getPath(), 1, minScan);
 
             while (iterator.hasNext())
             {

@@ -24,6 +24,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.ms2.reader.PepXmlLoader.FractionIterator;
 import org.labkey.ms2.reader.*;
 import org.labkey.ms2.reader.PepXmlLoader.PepXmlFraction;
@@ -252,15 +253,16 @@ public class PepXmlImporter extends MS2Importer
             // pipeline will be
             File pepXmlDir = new File(_path);
             File mzXMLFile = null;
+            massSpecDataFileType FT_MZXML = new  massSpecDataFileType();
             if (pepXmlDir.getParentFile() != null && pepXmlDir.getParentFile().getParentFile() != null)
             {
-                mzXMLFile = new File(pepXmlDir.getParentFile().getParentFile(), newFilename + ".mzXML");
+                mzXMLFile = FT_MZXML.getFile(pepXmlDir.getParentFile().getParentFile(), newFilename);
             }
 
             if (mzXMLFile == null || !NetworkDrive.exists(mzXMLFile))
             {
                 // If not there, look in the same directory as the MS2 results
-                mzXMLFile = new File(pepXmlDir, newFilename + ".mzXML");
+                mzXMLFile = FT_MZXML.getFile(pepXmlDir, newFilename);
             }
             fraction.setSpectrumPath(mzXMLFile.getAbsolutePath());
         }
@@ -316,10 +318,14 @@ public class PepXmlImporter extends MS2Importer
                 && null == mzXmlFileName)
         {
             // we attempt to load spectra from .mzXML rather than .pep.tgz
+            // (that is, the faked-up .out and .dta files from Mascot2XML)
             // generation of .pep.tgz can be turned off via (Mascot2XML -notgz)
-            mzXmlFileName = _gzFileName;
-            mzXmlFileName = mzXmlFileName.replaceAll("\\.pep\\.tgz$", ".mzXML");
-            File engineProtocolMzXMLFile = new File(_path, mzXmlFileName);
+            String baseName = _gzFileName;
+            baseName = baseName.replaceAll("\\.pep\\.tgz$", "");
+            massSpecDataFileType FT_MZXML = new massSpecDataFileType();
+            File path = new File(_path,"");
+            File engineProtocolMzXMLFile = FT_MZXML.getFile(path, baseName);
+            mzXmlFileName = engineProtocolMzXMLFile.getName();
             File engineProtocolDir = engineProtocolMzXMLFile.getParentFile();
             File engineDir = engineProtocolDir.getParentFile();
             File mzXMLFile = new File(engineDir.getParent(), mzXmlFileName);
@@ -594,6 +600,8 @@ public class PepXmlImporter extends MS2Importer
 
     public static boolean isFractionsFile(File pepXmlFile)
     {
-        return pepXmlFile.getName().toLowerCase().equals("all.pep.xml");
+        // TPP treats .xml.gz as a native format
+        return pepXmlFile.getName().toLowerCase().equals("all.pep.xml") ||
+               pepXmlFile.getName().toLowerCase().equals("all.pep.xml.gz");
     }
 }

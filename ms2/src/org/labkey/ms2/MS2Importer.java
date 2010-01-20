@@ -89,7 +89,11 @@ public abstract class MS2Importer
         else
         {
             int extension = _fileName.lastIndexOf(".");
-
+            if (_fileName.endsWith(".gz"))
+            {
+                // watch for .xml.gz
+                extension = _fileName.lastIndexOf(".",extension-1);
+            }
             if (-1 != extension)
                 _description = _fileName.substring(0, extension);
         }
@@ -336,7 +340,10 @@ public abstract class MS2Importer
             fractionMap.put("MzXMLURL", FileUtil.getAbsoluteCaseSensitiveFile(mzXmlFile).toURI().toString());
             String mzXmlFileName  = mzXmlFile.getName();
             int extensionIndex = mzXmlFileName.lastIndexOf('.');
-
+            if (mzXmlFileName.endsWith(".gz")) // TPP treats .xml.gz as a native format
+            {
+                extensionIndex = mzXmlFileName.lastIndexOf('.',extensionIndex-1);
+            }
             String pepXMLFileName;
             if (extensionIndex != -1)
             {
@@ -347,6 +354,17 @@ public abstract class MS2Importer
                 pepXMLFileName = mzXmlFileName + ".pep.xml";
             }
             File pepXMLFile = new File(path, pepXMLFileName);
+            if (!pepXMLFile.exists())
+            {
+                // TPP treats .xml.gz as a native format, try that
+                String pepXMLFileNameGZ = pepXMLFileName + ".gz";
+                File pepXMLFileGZ = new File(path, pepXMLFileName);
+                if (pepXMLFileGZ.exists())
+                {
+                    pepXMLFile = pepXMLFileGZ;
+                    pepXMLFileName = pepXMLFileNameGZ;
+                }
+            }
 
             ExpData pepXMLData = ExperimentService.get().getExpDataByURL(pepXMLFile, c);
             if (pepXMLData != null)

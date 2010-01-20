@@ -32,7 +32,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.reader.ProtXmlReader;
 import org.labkey.ms2.reader.ProteinGroup;
-import org.labkey.ms2.reader.PossiblyGZIPpedFileInputStreamFactory;
+import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;

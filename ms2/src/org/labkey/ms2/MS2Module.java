@@ -325,7 +325,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             PositiveIntegerParamsValidator.TestCase.class,
             ListParamsValidator.TestCase.class,
             org.labkey.ms2.protein.FastaDbLoader.TestCase.class,                
-            org.labkey.ms2.reader.RandomAccessMzxmlIterator.TestCase.class,
+            org.labkey.ms2.reader.RandomAccessPwizMSDataIterator.TestCase.class,
+            org.labkey.ms2.reader.RandomAccessJrapMzxmlIterator.TestCase.class,
             org.labkey.ms2.protein.fasta.PeptideTestCase.class,
             MS2Modification.MS2ModificationTest.class
         ));

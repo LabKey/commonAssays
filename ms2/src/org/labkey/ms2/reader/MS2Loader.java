@@ -18,6 +18,7 @@ package org.labkey.ms2.reader;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.reader.SimpleXMLStreamReader;
+import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;

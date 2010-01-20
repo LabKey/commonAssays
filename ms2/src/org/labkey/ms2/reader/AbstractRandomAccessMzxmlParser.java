@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2008 LabKey Corporation
+ * Copyright (c) 2009 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,28 @@
 
 package org.labkey.ms2.reader;
 
+import org.systemsbiology.jrap.ScanHeader;
+import org.systemsbiology.jrap.Scan;
+
 /**
- * User: jeckels
- * Date: May 8, 2006
+ * implemented either with jrap or pwiz swigbindings
+ * Author bpratt
  */
-public abstract class AbstractMzxmlIterator implements SimpleScanIterator
+public abstract class AbstractRandomAccessMzxmlParser
 {
-    final int _msLevelFilter;            // 0==none
-
-    AbstractMzxmlIterator(int msLevelFilter)
+    public AbstractRandomAccessMzxmlParser()
     {
-        _msLevelFilter = msLevelFilter;
-    }
+    };
 
-    public void remove()
+    public long getMaxScanNumber()
+    {
+        throw new UnsupportedOperationException();
+    }
+    public ScanHeader rapHeader(int currScan)
+    {
+        throw new UnsupportedOperationException();
+    }
+    public Scan rap(int scanIndex)
     {
         throw new UnsupportedOperationException();
     }

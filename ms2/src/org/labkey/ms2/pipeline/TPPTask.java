@@ -36,8 +36,9 @@ import java.util.Arrays;
  */
 public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 {
-    public static final FileType FT_PEP_XML = new FileType(".pep.xml");
-    public static final FileType FT_PROT_XML = new FileType(".prot.xml");
+    // note that TPP also handles these formats as .gz files (ex. .pep.xml.gz)
+    public static final FileType FT_PEP_XML = new FileType(".pep.xml",FileType.systemPreferenceGZ());
+    public static final FileType FT_PROT_XML = new FileType(".prot.xml",FileType.systemPreferenceGZ());
     public static final FileType FT_INTERMEDIATE_PROT_XML = new FileType(".pep-prot.xml");
     public static final FileType FT_TPP_PROT_XML = new FileType("-prot.xml");
 

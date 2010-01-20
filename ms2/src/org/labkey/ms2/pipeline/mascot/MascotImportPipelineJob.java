@@ -94,6 +94,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 
         File fileOutputTGZ = new File(dirWork.getAbsolutePath(), _baseName + ".tgz");
         File fileOutputXML = new File(dirWork.getAbsolutePath(), _baseName + ".xml");
+        // .pep.tgz is the faked-up .out and .dta files from Mascot2XML
         File filePepXMLTGZ = new File(_dirAnalysis, _baseName + ".pep.tgz");
         File filePepXML = new File(_dirAnalysis, _baseName + ".pep.xml");
 
@@ -133,6 +134,12 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
                     ),
                     workFile.getParentFile());
 
+            // is TPP running with .gz files? (TPP's env(PEPXML_EXT)==pep.xml.gz )
+            if (!fileOutputXML.exists())
+            {
+                fileOutputXML = new File(dirWork.getAbsolutePath(), _baseName + ".xml.gz");
+                filePepXML = new File(_dirAnalysis, _baseName + "pep.xml.gz");
+            }
             // we let any error fall thru' to super.run() so that
             // MS2Run's status get updated correctly
             if (!fileOutputTGZ.exists() || !fileOutputXML.exists())

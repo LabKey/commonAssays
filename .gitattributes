@@ -1183,6 +1183,7 @@ ms2/src/org/labkey/ms2/query/SpectraCountConfiguration.java -text
 ms2/src/org/labkey/ms2/query/SpectraCountTableInfo.java -text
 ms2/src/org/labkey/ms2/query/UniquePeptideCountCoverageColumn.java -text
 ms2/src/org/labkey/ms2/reader/AbstractMzxmlIterator.java -text
+ms2/src/org/labkey/ms2/reader/AbstractRandomAccessMzxmlParser.java -text
 ms2/src/org/labkey/ms2/reader/MS2Loader.java -text
 ms2/src/org/labkey/ms2/reader/MS2ModificationList.java -text
 ms2/src/org/labkey/ms2/reader/ModifiedAminoAcid.java -text
@@ -1190,12 +1191,13 @@ ms2/src/org/labkey/ms2/reader/PepXmlAnalysisResultHandler.java -text
 ms2/src/org/labkey/ms2/reader/PepXmlLoader.java -text
 ms2/src/org/labkey/ms2/reader/PeptideProphetHandler.java -text
 ms2/src/org/labkey/ms2/reader/PeptideProphetSummary.java -text
-ms2/src/org/labkey/ms2/reader/PossiblyGZIPpedFileInputStreamFactory.java -text
 ms2/src/org/labkey/ms2/reader/ProtXmlReader.java -text
 ms2/src/org/labkey/ms2/reader/ProteinGroup.java -text
 ms2/src/org/labkey/ms2/reader/Q3AnalysisSummary.java -text
 ms2/src/org/labkey/ms2/reader/Q3Handler.java -text
+ms2/src/org/labkey/ms2/reader/RandomAccessJrapMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/RandomAccessMzxmlIterator.java -text
+ms2/src/org/labkey/ms2/reader/RandomAccessMzxmlIteratorFactory.java -text
 ms2/src/org/labkey/ms2/reader/RandomAccessPwizMSDataIterator.java -text
 ms2/src/org/labkey/ms2/reader/RelativeQuantAnalysisResult.java -text
 ms2/src/org/labkey/ms2/reader/RelativeQuantAnalysisSummary.java -text

@@ -253,7 +253,7 @@
             <map>
                 <entry key="Spectra">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg value=".mzXML"/>
+                        <constructor-arg ref="massSpecDataFileType"/>
                     </bean>
                 </entry>
             </map>
@@ -309,7 +309,7 @@
     <bean id="unixCompactSwitch" class="org.labkey.api.pipeline.cmd.UnixCompactSwitchFormat"/>
     <bean id="unixDefaultSwitch" class="org.labkey.api.pipeline.cmd.UnixSwitchFormat"/>
 
-    <bean id="mzXMLFileType" class="org.labkey.api.util.FileType">
+    <bean id="mzXMLFileType" class="org.labkey.api.util.massSpecDataFileType">
         <constructor-arg>
             <list>
                 <value>.msprefix.mzXML</value>
@@ -318,4 +318,5 @@
         </constructor-arg>
         <constructor-arg value=".mzXML"/>
     </bean>
+    <bean id="massSpecDataFileType" class="org.labkey.api.util.massSpecDataFileType" />
 </beans>

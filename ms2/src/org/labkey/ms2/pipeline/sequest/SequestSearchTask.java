@@ -34,7 +34,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     private static final String SEQUEST_PARAMS = "sequest.params";
     private static final String REMOTE_PARAMS = "remote.params";
 
-    private static final FileType FT_RAW_XML = new FileType("_raw.pep.xml");
+    private static final FileType FT_RAW_XML = new FileType("_raw.pep.xml",FileType.systemPreferenceGZ());
     private static final FileType FT_SPECTRA_ARCHIVE = new FileType(".pep.tgz");
 
     private static final String ACTION_NAME = "Sequest Search";
@@ -137,7 +137,6 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             */
             if (!dirOutputDta.mkdir())
                 throw new IOException("Failed to create output directory for DTA files '" + dirOutputDta + "'.");
-
             ArrayList<String> command = new ArrayList<String>();
             String ver = TPPTask.getTPPVersion(getJob());
             command.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver));

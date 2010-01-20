@@ -196,7 +196,10 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
     public Priority getPriority(ExpData data)
     {
         File f = data.getFile();
-        if (f != null && f.getName().toLowerCase().endsWith(".pep.xml"))
+        // TPP treats xml.gz as a native format
+        if (f != null &&
+                (f.getName().toLowerCase().endsWith(".pep.xml")
+               ||f.getName().toLowerCase().endsWith(".pep.xml.gz")))
         {
             return Priority.HIGH;
         }

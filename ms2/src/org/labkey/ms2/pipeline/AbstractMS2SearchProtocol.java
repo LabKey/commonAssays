@@ -19,6 +19,7 @@ import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
@@ -33,7 +34,7 @@ import java.util.Map;
  */
 abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPipelineJob> extends AbstractFileAnalysisProtocol<JOB>
 {
-    public static final FileType FT_MZXML = new FileType(".mzXML");
+    public static final FileType FT_MZXML = new massSpecDataFileType();   
     public static final FileType FT_SEARCH_XAR = new FileType(".search.xar.xml");
 
     private File _dirSeqRoot;

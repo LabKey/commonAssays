@@ -42,12 +42,15 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
     private static final String X_TANDEM_ACTION_NAME = "X!Tandem";
     private static final String TANDEM2_XML_ACTION_NAME = "Tandem2XML";
     
-    private static final FileType FT_XTAN_XML = new FileType(".xtan.xml");
+    // TPP treats xml.gz as a native format
+    private static final FileType FT_XTAN_XML = new FileType(".xtan.xml",FileType.systemPreferenceGZ());
 
     public static File getNativeOutputFile(File dirAnalysis, String baseName)
     {
         return FT_XTAN_XML.newFile(dirAnalysis, baseName);
     }
+
+
 
     /**
      * Interface for support required from the PipelineJob to run this task,
@@ -140,7 +143,6 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             if (!searchComplete)
             {
                 fileWorkOutputXML = _wd.newFile(FT_XTAN_XML);
-
                 File fileWorkParameters = _wd.newFile(INPUT_XML);
                 File fileWorkTaxonomy = _wd.newFile(TAXONOMY_XML);
 

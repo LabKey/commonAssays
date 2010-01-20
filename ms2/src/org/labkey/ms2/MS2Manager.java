@@ -49,6 +49,7 @@ import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.PeptideProphetSummary;
+import org.labkey.ms2.reader.RandomAccessMzxmlIteratorFactory;
 import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
 import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
 import org.labkey.ms2.reader.SimpleScan;
@@ -570,6 +571,12 @@ public class MS2Manager
         return importRun(info, log, file, runInfo, context);
     }
 
+    // help deal with fact that TPP treats xml.gz as a native format
+    public static boolean endsWithExtOrExtDotGZ(String name,String ext)
+    {  
+        return name.endsWith(ext) || name.endsWith(ext+".gz");
+    }
+    
     public static MS2Run importRun(ViewBackgroundInfo info, Logger log,
                              File file,
                              MS2Importer.RunInfo runInfo,
@@ -584,7 +591,7 @@ public class MS2Manager
         Container c = info.getContainer();
 
         String fileName = file.getPath();
-        if (fileName.endsWith(".xml") || fileName.endsWith(".pepXML"))
+        if (endsWithExtOrExtDotGZ(fileName,".xml") || fileName.endsWith(".pepXML"))
             return new PepXmlImporter(info.getUser(), c, description, fileName, log, context);
         else if (fileName.toLowerCase().endsWith(".dat"))
             return new MascotDatImporter(info.getUser(), c, description, fileName, log, context);
@@ -869,11 +876,11 @@ public class MS2Manager
             String name1 = runs[0].getFileName().toLowerCase();
             String name2 = runs[1].getFileName().toLowerCase();
             String rawSuffix = AbstractMS2SearchPipelineJob.RAW_PEP_XML_SUFFIX.toLowerCase();
-            if (name1.endsWith(rawSuffix) && !name2.endsWith(rawSuffix))
+            if (endsWithExtOrExtDotGZ(name1,rawSuffix) && !endsWithExtOrExtDotGZ(name2,rawSuffix))
             {
                 return runs[1];
             }
-            if (name2.endsWith(rawSuffix) && !name1.endsWith(rawSuffix))
+            if (endsWithExtOrExtDotGZ(name2,rawSuffix) && !endsWithExtOrExtDotGZ(name1,rawSuffix))
             {
                 return runs[0];
             }
@@ -1139,7 +1146,7 @@ public class MS2Manager
 
         try
         {
-            iter = new RandomAccessMzxmlIterator(f.getAbsolutePath(), 2, scan);
+            iter = RandomAccessMzxmlIteratorFactory.newIterator(f.getAbsolutePath(), 2, scan);
             if (iter.hasNext())
             {
                 SimpleScan sscan = iter.next();

@@ -18,11 +18,11 @@ package org.labkey.ms2.reader;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.api.settings.AppProps;
 import proteowizard.pwiz.RAMPAdapter.Scan;
 import proteowizard.pwiz.RAMPAdapter.pwiz_RAMPAdapter;
 import proteowizard.pwiz.RAMPAdapter.vectord;
-import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.File;
@@ -35,50 +35,20 @@ import java.io.FileNotFoundException;
  * Date: March 5, 2009
  * Time: 9:03:43 AM
  */
-public class RandomAccessPwizMSDataIterator extends AbstractMzxmlIterator
+public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
 {
-    private static Logger _log = Logger.getLogger(RandomAccessPwizMSDataIterator.class);
-
     pwiz_RAMPAdapter _parser = null;
     long _maxScan = 0;
     int _currScan = 0;
     MzxmlSimpleScan _nextSimpleScan = null;
 
-    static boolean _isAvailable;
-    static boolean _triedLoadLib;
-
-    // use this to investigate availability of DLL that
-    // implements the pwiz interface
-    public static boolean isAvailable()
-             throws IOException
-    {
-        if (!_triedLoadLib)
-        {
-            _triedLoadLib = true;
-            /*
-            a more thorough implementation of mzML and mzXML.gz handling is forthcoming
-            just back this out for now - bpratt
-            try {
-                System.loadLibrary("pwiz_swigbindings");
-                _isAvailable = true;
-                _log.info("Successfully loaded pwiz_swigbindings lib");
-            } catch (UnsatisfiedLinkError e) {
-                throw new IOException ("pwiz_swigbindings lib not found, falling back to older mzXML reader code (no mzML support)" + e);
-            } catch (Exception e) {
-                throw new IOException ("pwiz_swigbindings lib not loaded, falling back to older mzXML reader code (no mzML support)" + e);
-            }
-            */
-        }
-        return _isAvailable;
-    }
-
-    public RandomAccessPwizMSDataIterator(String fileName, int msLevel)
+    public RandomAccessPwizMSDataIterator(String fileName, int msLevelFilter)
             throws IOException
     {
-        super(msLevel);
+        super(msLevelFilter);
         if (!NetworkDrive.exists(new File(fileName)))
             throw new FileNotFoundException(fileName);
-        if (isAvailable())
+        if (massSpecDataFileType.isMZmlAvailable())  // try loadlib
         {
             _parser = new pwiz_RAMPAdapter(fileName);
             _maxScan = _parser.scanCount();
@@ -108,7 +78,7 @@ public class RandomAccessPwizMSDataIterator extends AbstractMzxmlIterator
                 if (ind0 != _maxScan)
                 {
                     _nextSimpleScan = new MzxmlSimpleScan(ind0);
-                    if ((_msLevel == 0 || _nextSimpleScan._scan.getMsLevel() == _msLevel))
+                    if ((_msLevelFilter == 0 || _nextSimpleScan._scan.hdr.getMsLevel() == _msLevelFilter))
                     {
                         break;
                     }
@@ -157,17 +127,17 @@ public class RandomAccessPwizMSDataIterator extends AbstractMzxmlIterator
         MzxmlSimpleScan(long scanIndex)
         {
             _scanIndex = scanIndex;
-            _parser.getScanHeader(scanIndex, _scan);
+            _scan = new Scan(_parser, scanIndex);
         }
 
         public int getScan()
         {
-            return _scan.getSeqNum();
+            return _scan.hdr.getSeqNum();
         }
 
         public Double getRetentionTime()
         {
-            return _scan.getRetentionTime();
+            return _scan.hdr.getRetentionTime();
         }
 
         public float[][] getData() throws IOException
@@ -176,11 +146,11 @@ public class RandomAccessPwizMSDataIterator extends AbstractMzxmlIterator
             if (result == null)
             {
                 vectord peaks = new vectord();
-                peaks.reserve(2*(1+_scan.getPeaksCount()));
+                peaks.reserve(2*(1+_scan.hdr.getPeaksCount()));
                 _parser.getScanPeaks(_scanIndex, peaks);
-                if (peaks.isEmpty())
+                if (_scan.hdr.getPeaksCount()>0 && peaks.isEmpty())
                 {
-                    throw new IOException("No spectra available for scan " + _scan.getAcquisitionNum() + ", most likely there was an exception parsing. Check the server logs");
+                    throw new IOException("No spectra available for scan " + _scan.hdr.getAcquisitionNum() + ", most likely there was an exception parsing. Check the server logs");
                 }
                 else
                 {
@@ -204,36 +174,50 @@ public class RandomAccessPwizMSDataIterator extends AbstractMzxmlIterator
         public static Test suite()
         {
             TestSuite suite = new TestSuite();
-            suite.addTest(new TestCase("testMzxml"));
+            suite.addTest(new TestCase("testPwizMSData"));
             return suite;
         }
 
-        public void testMzxml()
+        public void testPwizMSData()
+                throws java.io.IOException
         {
+            massSpecDataFileType FT_MZXML = new massSpecDataFileType();
             String projectRoot = AppProps.getInstance().getProjectRoot();
             if (projectRoot == null || projectRoot.equals("")) projectRoot = "C:/Labkey";
             String mzxml2Fname = projectRoot + "/sampledata/mzxml/test_nocompression.mzXML";
             String mzxml3Fname = projectRoot + "/sampledata/mzxml/test_zlibcompression.mzXML";
+            String mzxml4Fname = projectRoot + "/sampledata/mzxml/test_gzipcompression.mzXML.gz";
+            if (massSpecDataFileType.isMZmlAvailable())
+            {
+                assertTrue(FT_MZXML.isType(mzxml2Fname));
+                assertTrue(FT_MZXML.isType(mzxml3Fname));
+                assertTrue(FT_MZXML.isType(mzxml4Fname));
+                compare_pwiz(mzxml2Fname,mzxml3Fname);
+                compare_pwiz(mzxml2Fname,mzxml4Fname);
+                // and verify that JRAP matches for simple mzXML
+                try
+                {
+                    // test mslevel filtering while we're at it
+                    RandomAccessMzxmlIterator mzxml2 = new RandomAccessPwizMSDataIterator(mzxml2Fname, 1);
+                    RandomAccessMzxmlIterator mzxml3 = new RandomAccessJrapMzxmlIterator(mzxml2Fname, 1);
+                    RandomAccessMzxmlIterator.compare_mzxml(this,mzxml2, mzxml3);
+                }
+                catch (IOException e)
+                {
+                    fail(e.toString());
+                }
+                finally {
+                }
+            }
+        }
+
+        private void compare_pwiz(String mzxml2Fname,String mzxml3Fname)
+        {
             try
             {
-                RandomAccessPwizMSDataIterator mzxml2 = new RandomAccessPwizMSDataIterator(mzxml2Fname, 1);
-                RandomAccessPwizMSDataIterator mzxml3 = new RandomAccessPwizMSDataIterator(mzxml3Fname, 1);
-                while (mzxml2.hasNext() && mzxml3.hasNext())
-                {
-                    SimpleScan scan2 = mzxml2.next();
-                    SimpleScan scan3 = mzxml3.next();
-                    assertEquals(scan2.getScan(),scan3.getScan());
-                    float [][]data2 = scan2.getData();
-                    float [][]data3 = scan3.getData();
-                    assertEquals(data2[0].length,data3[1].length);
-                    assertEquals(data2[1].length,data3[0].length);
-                    for (int i=0;i < data2[0].length; i++)
-                    {
-                        assertEquals(data2[0][i],data3[0][i]);
-                        assertEquals(data2[1][i],data3[1][i]);
-                    }
-                }
-                assertEquals("files should have same scan counts",mzxml2.hasNext(), mzxml3.hasNext());
+                RandomAccessMzxmlIterator mzxml2 = new RandomAccessPwizMSDataIterator(mzxml2Fname, 0);
+                RandomAccessMzxmlIterator mzxml3 = new RandomAccessPwizMSDataIterator(mzxml3Fname, 0);
+                RandomAccessMzxmlIterator.compare_mzxml(this,mzxml2, mzxml3);
             }
             catch (IOException e)
             {

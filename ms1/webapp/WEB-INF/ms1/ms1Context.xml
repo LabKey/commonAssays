@@ -337,7 +337,7 @@
         <property name="separator" value=" "/>
     </bean>
 
-    <bean id="mzXMLFileType" class="org.labkey.api.util.FileType">
+    <bean id="mzXMLFileType" class="org.labkey.api.util.massSpecDataFileType">
         <constructor-arg>
             <list>
                 <value>.msprefix.mzXML</value>

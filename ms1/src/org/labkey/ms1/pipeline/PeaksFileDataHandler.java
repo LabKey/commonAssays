@@ -26,12 +26,12 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.MS1Controller;
 import org.xml.sax.SAXException;
-
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -49,6 +49,7 @@ import java.sql.SQLException;
  */
 public class PeaksFileDataHandler extends AbstractExperimentDataHandler
 {
+    public static final massSpecDataFileType FT_MZXML = new massSpecDataFileType();
     public static final FileType FT_PEAKS = new FileType(".peaks.xml");
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
@@ -115,7 +116,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         
         for(ExpData input : inputs)
         {
-            if(input.getDataFileUrl().toLowerCase().endsWith(".mzxml"))
+            if(FT_MZXML.isType(input.getDataFileUrl()))
                 return input.getDataFileUrl();
         }
         return null;

@@ -155,8 +155,6 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
 
             File fileWorkMGF = _wd.newFile(FT_MASCOT_MGF);
             File fileWorkDAT = _wd.newFile(FT_MASCOT_DAT);
-            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
-                    getJobSupport().getBaseName());
 
             // Mascot starts with remote sequence file names, so it has to look at the
             // raw parameter, rather than using getJobSupport().getSequenceFiles().
@@ -326,7 +324,6 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
 
             // 2. translate Mascot result file to pep.xml format
             File fileSequenceDatabase = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
-
             String exePath = PipelineJobService.get().getExecutablePath("Mascot2XML", "tpp", ver);
             String[] args =
             {
@@ -334,7 +331,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                 fileWorkDAT.getName(),
                 "-D" + fileSequenceDatabase.getAbsolutePath(),
                 "-xml",
-                "-notgz",
+                "-notgz",     // don't create the tarball of fake .out and .dta
                 "-desc"
                 //wch: 2007-05-11
                 //     expand the protein id to match X!Tandem output or user who run X! Tandem first
@@ -342,11 +339,17 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                 //,"-shortid"
             };
             getJob().runSubProcess(new ProcessBuilder(args), _wd.getDir());
-            
-            File fileOutputPepXML = _wd.newFile(new FileType(".xml"));
+
+            // will autmagically pick up .xml.gz if that's what Mascot2XML wrote
+            File fileOutputPepXML = _wd.newFile(new FileType(".xml",FileType.systemPreferenceGZ()));
+            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
+                    getJobSupport().getBaseName());
             if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
             {
-                fileOutputPepXML = _wd.newFile(new FileType(".pep.xml"));
+                // will autmagically pick up .pep.xml.gz if that's what Mascot2XML wrote
+                fileOutputPepXML = _wd.newFile(new FileType(".pep.xml",FileType.systemPreferenceGZ()));
+                fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
+                    getJobSupport().getBaseName());
                 if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
                 {
                     throw new IOException("Failed to rename " + fileOutputPepXML + " to " + fileWorkPepXMLRaw);

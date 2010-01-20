@@ -43,8 +43,12 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     public static final String RAW_PEP_XML_SUFFIX = "_raw.pep.xml";
 
     public static File getPepXMLConvertFile(File dirAnalysis, String baseName)
-    {
-        return new File(dirAnalysis, baseName + RAW_PEP_XML_SUFFIX);
+        {
+        // possibly TPP's env(PEPXML_EXT)==pep.xml.gz
+        FileType ft = new FileType(RAW_PEP_XML_SUFFIX,FileType.systemPreferenceGZ());
+        String name = ft.getName(dirAnalysis,baseName);
+        File f = new File(dirAnalysis, name);
+        return f;
     }
 
     protected File _dirSequenceRoot;

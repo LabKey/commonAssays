@@ -17,6 +17,7 @@
 package org.labkey.ms2.reader;
 
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.GDuration;
@@ -110,7 +111,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
         int num = -1;
         String retentionTime = null;
         float[][] data = null;
-        while (msLevel != _msLevel)
+        while (msLevel != _msLevelFilter)
         {
             try
             {
@@ -118,7 +119,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
                     return false;
 
                 msLevel = Integer.parseInt(getAttributeValue("msLevel"));
-                if (msLevel != _msLevel)
+                if (msLevel != _msLevelFilter)
                 {
                     continue;
                 }
