@@ -730,6 +730,10 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(RenameForm form, boolean reshow, BindException errors) throws Exception
         {
             _run = MS2Manager.getRun(form.getRun());
+            if (_run == null || !_run.getContainer().equals(getContainer()))
+            {
+                throw new NotFoundException();
+            }
             _returnURL = form.getReturnURLHelper(getShowRunURL(getContainer(), form.getRun()));
 
             String description = form.getDescription();
@@ -748,6 +752,11 @@ public class MS2Controller extends SpringActionController
 
         public boolean handlePost(RenameForm form, BindException errors) throws Exception
         {
+            _run = MS2Manager.getRun(form.getRun());
+            if (_run == null || !_run.getContainer().equals(getContainer()))
+            {
+                throw new NotFoundException();
+            }
             MS2Manager.renameRun(form.getRun(), form.getDescription());
             return true;
         }

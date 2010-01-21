@@ -29,7 +29,6 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.study.assay.AssayUrls;
-import org.labkey.api.study.assay.PipelineDataCollectorRedirectAction;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.ms2.MS2Controller;
@@ -38,9 +37,6 @@ import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.MS2Run;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.io.File;
-import java.util.List;
 
 
 public class MassSpecMetadataController extends SpringActionController
@@ -98,7 +94,7 @@ public class MassSpecMetadataController extends SpringActionController
                 throw new UnauthorizedException();
             }
 
-            QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module._ms2SearchRunFilter, true);
+            QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module._ms2SearchRunFilter);
             ExpRunTable table = (ExpRunTable) result.getTable();
 
             SQLFragment searchSQL = MassSpecMetadataAssayProvider.getSearchRunSQL(getContainer(), table.getContainerFilter(), Integer.toString(form.getRunId()), "DISTINCT(er.RowId)");

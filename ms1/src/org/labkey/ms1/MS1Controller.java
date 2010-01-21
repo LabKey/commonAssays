@@ -84,7 +84,7 @@ public class MS1Controller extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return ExperimentService.get().createExperimentRunWebPart(getViewContext(),MS1Module.EXP_RUN_TYPE, true);
+            return ExperimentService.get().createExperimentRunWebPart(getViewContext(),MS1Module.EXP_RUN_TYPE);
         }
 
         public NavTree appendNavTrail(NavTree root)

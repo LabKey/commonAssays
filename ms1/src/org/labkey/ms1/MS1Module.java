@@ -16,7 +16,6 @@
 
 package org.labkey.ms1;
 
-import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.ExperimentRunType;
@@ -54,7 +53,6 @@ import java.util.*;
 
 public class MS1Module extends SpringModule
 {
-    private static final Logger _log = Logger.getLogger(MS1Module.class);
     public static final String NAME = "MS1";
     public static final String CONTROLLER_NAME = "ms1";
     public static final String WEBPART_MS1_RUNS = "MS1 Runs";
@@ -65,7 +63,7 @@ public class MS1Module extends SpringModule
 
     public String getName()
     {
-        return "MS1";
+        return NAME;
     }
 
     public double getVersion()
@@ -93,11 +91,10 @@ public class MS1Module extends SpringModule
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MS1Module.EXP_RUN_TYPE, true);
+                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MS1Module.EXP_RUN_TYPE);
                     view.setTitle("MS1 Runs");
                     ActionURL url = portalCtx.getActionURL().clone();
-                    url.setPageFlow(CONTROLLER_NAME);
-                    url.setAction("begin");
+                    url.setAction(MS1Controller.BeginAction.class);
                     view.setTitleHref(url);
                     return view;
                 }
