@@ -1355,7 +1355,7 @@ public class ProteinManager
 
                     String docid = "protein:" + id;
                     Map<String,Object> m = new HashMap<String,Object>();
-                    m.put(SearchService.PROPERTY.category.toString(), proteinCategory);
+                    m.put(SearchService.PROPERTY.categories.toString(), proteinCategory);
                     m.put(SearchService.PROPERTY.title.toString(), "Protein " + p.getBestName());
                     SimpleDocumentResource r = new SimpleDocumentResource(
                             new Path(docid),
@@ -1418,7 +1418,7 @@ public class ProteinManager
                         {
                             String docid = "protein:" + curSeqId;
                             Map<String,Object> m = new HashMap<String,Object>();
-                            m.put(SearchService.PROPERTY.category.toString(), proteinCategory);
+                            m.put(SearchService.PROPERTY.categories.toString(), proteinCategory);
                             m.put(SearchService.PROPERTY.title.toString(), "Protein " + bestName);
                             SimpleDocumentResource r = new SimpleDocumentResource(
                                     new Path(docid),
