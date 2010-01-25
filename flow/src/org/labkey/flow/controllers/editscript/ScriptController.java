@@ -178,7 +178,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
 
             JspView<NewProtocolForm> page = FormPage.getView(ScriptController.class, form, errors, "newProtocol.jsp");
             HomeTemplate template = new HomeTemplate(getViewContext(), getContainer(), page);
-            template.getModelBean().setFocus("forms[0].ff_name");
+            template.getModelBean().setFocusId("ff_name");
             return page;
         }
 
