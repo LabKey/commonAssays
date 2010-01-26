@@ -86,13 +86,7 @@ public class SpectrumImporter
                     // (with JNI bindings via SWIG) as it's actively 
                     // maintained, handles mzML and mzXML, and gzipped
                     // files natively
-                    boolean has_mzML = false;
-                    try {
-                        has_mzML = massSpecDataFileType.isMZmlAvailable();
-                    } catch (IOException x) {
-                        _log.info(x);
-                    }
-                    if (has_mzML) {
+                    if (massSpecDataFileType.isMZmlAvailable()) {
                         _scanIterator = new RandomAccessPwizMSDataIterator(mzXmlFileName, 2);
                     } else {
                         _scanIterator = new SequentialMzxmlIterator(mzXmlFileName, 2);
