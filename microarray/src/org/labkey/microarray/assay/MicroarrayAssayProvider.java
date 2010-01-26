@@ -199,7 +199,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
             }
             if (inputMaterials.containsKey(material))
             {
-                throw new ExperimentException("The same material cannot be used multiple times");
+                throw new ExperimentException("The same material, '" + material.getName() + "', cannot be used multiple times for a single run");
             }
             inputMaterials.put(material, "Sample " + (i + 1));
         }
