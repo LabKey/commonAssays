@@ -53,6 +53,10 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
             _parser = new pwiz_RAMPAdapter(fileName);
             _maxScan = _parser.scanCount();
         }
+        else
+        {
+            throw new IOException("no mzML support");
+        }
     }
 
     public RandomAccessPwizMSDataIterator(String fileName, int msLevel, int startingScan)
