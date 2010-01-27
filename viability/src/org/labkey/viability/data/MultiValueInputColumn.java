@@ -19,6 +19,7 @@ package org.labkey.viability.data;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -43,6 +44,7 @@ public class MultiValueInputColumn extends DataColumn
         if (ctx.get("renderedRequiresMultiValueInputScript") == null)
         {
             out.write("<script type='text/javascript'>LABKEY.requiresScript('viability/MultiValueInput.js');</script>\n");
+            out.write("<style>.labkey-multi-value-input { margin-top: 4px; margin-bottom: 4px; }</style>\n");
             ctx.put("renderedRequiresMultiValueInputScript", true);
         }
     }
@@ -58,11 +60,11 @@ public class MultiValueInputColumn extends DataColumn
 
         out.write("<div id='");
         out.write(id);
-        out.write("' class='extContainer'></div>");
+        out.write("' class='extContainer labkey-multi-value-input'></div>");
 
         out.write("<script text='text/javascript'>\n");
         out.write("new MultiValueInput('");
-        out.write(id);
+        out.write(PageFlowUtil.filter(id));
         out.write("'");
 
         // XXX: hack. ignore the value in the render context. take the value as pased in during view creation.
@@ -72,7 +74,7 @@ public class MultiValueInputColumn extends DataColumn
             for (String s : _values)
             {
                 out.write("'");
-                out.write(s);
+                out.write(PageFlowUtil.filter(s));
                 out.write("', ");
             }
             out.write("]");
