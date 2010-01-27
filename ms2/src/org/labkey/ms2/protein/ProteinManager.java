@@ -806,7 +806,7 @@ public class ProteinManager
         proteinSql.append(") pep LEFT OUTER JOIN ");
         proteinSql.append(getTableInfoSequences());
         proteinSql.append(" prot ON prot.SeqId = pep.SeqId\n");
-        proteinSql.append("GROUP BY Protein, prot.Mass, pep.SeqId, prot.BestGeneName, prot.BestName, prot.Description\n");
+        proteinSql.append("GROUP BY Protein, prot.Mass, pep.SeqId, prot.BestGeneName, prot.BestName, prot.Description, prot.SeqId\n");
 
         // Construct Protein HAVING clause
         SimpleFilter proteinFilter = new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteins());
@@ -816,6 +816,7 @@ public class ProteinManager
         // Can't use SELECT aliases in HAVING clause, so replace names with aggregate functions & disambiguate Mass
         proteinHaving = proteinHaving.replaceAll("UniquePeptides", "COUNT(DISTINCT Peptide)");
         proteinHaving = proteinHaving.replaceAll("Peptides", "COUNT(Peptide)");
+        proteinHaving = proteinHaving.replaceAll("SeqId", "prot.SeqId");
         proteinHaving = proteinHaving.replaceAll("SequenceMass", "prot.Mass");
         proteinHaving = proteinHaving.replaceAll("Description", "prot.Description");
         sql.addAll(proteinFilter.getWhereParams(MS2Manager.getTableInfoProteins()));

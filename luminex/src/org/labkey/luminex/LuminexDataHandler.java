@@ -478,7 +478,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
 
             List<Map<String, Object>> excelRunPropsList = new ArrayList<Map<String, Object>>();
             excelRunPropsList.add(excelRunProps);
-            OntologyManager.insertTabDelimited(container, objectId, new OntologyManager.ImportHelper()
+            OntologyManager.insertTabDelimited(container, user, objectId, new OntologyManager.ImportHelper()
             {
                 public String beforeImportObject(Map<String, Object> map) throws SQLException
                 {

@@ -42,7 +42,6 @@ import org.apache.commons.lang.StringUtils;
 import javax.servlet.ServletException;
 import java.sql.SQLException;
 import java.util.*;
-import java.io.File;
 
 /**
  * User: kevink
@@ -346,7 +345,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 for (ValidationError error : e.getErrors())
                 {
                     if (error instanceof PropertyValidationError)
-                        errors.addError(new FieldError("AssayUploadForm", ((PropertyValidationError)error).getPropety(), null, false,
+                        errors.addError(new FieldError("AssayUploadForm", ((PropertyValidationError)error).getProperty(), null, false,
                                 new String[]{SpringActionController.ERROR_MSG}, new Object[0], error.getMessage()));
                     else
                         errors.reject(SpringActionController.ERROR_MSG, error.getMessage());

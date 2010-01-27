@@ -334,7 +334,7 @@ public class ProteinController extends SpringActionController
                 int ownerObjectId = OntologyManager.ensureObject(getContainer(), annotationSet.getLsid());
                 OntologyManager.ImportHelper helper = new CustomAnnotationImportHelper(stmt, connection, annotationSet.getLsid(), lookupStringColumnName);
 
-                OntologyManager.insertTabDelimited(getContainer(), ownerObjectId, helper, descriptors.toArray(new PropertyDescriptor[descriptors.size()]), rows, false);
+                OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerObjectId, helper, descriptors.toArray(new PropertyDescriptor[descriptors.size()]), rows, false);
 
                 stmt.executeBatch();
                 connection.commit();

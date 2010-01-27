@@ -224,7 +224,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             String sequenceDB = getSequenceDatabase(fileWorkDAT);
             String sequenceRelease = getDatabaseRelease(fileWorkDAT);
             //b. get release information at Mascot server
-            getJob().info("Retreiving database information ("+sequenceRelease+")...");
+            getJob().info("Retrieving database information ("+sequenceRelease+")...");
             Map<String,String> returns = mascotClient.getDBInfo(sequenceDB, sequenceRelease);
             String status = returns.get("STATUS");
             if (null == status || !"OK".equals(status))
@@ -254,8 +254,8 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
 
             getJob().info("Database "+sequenceRelease+", hash="+smascotFileHash+", size="+smascotFileSize+", timestamp="+smascotFileTimestamp);
 
-            long nmascotFileSize=Long.parseLong(smascotFileSize);
-            long nmascotFileTimestamp=Long.parseLong(smascotFileTimestamp);
+            long nmascotFileSize = smascotFileSize == null ? -1 : Long.parseLong(smascotFileSize);
+            long nmascotFileTimestamp= smascotFileTimestamp == null ? -1 : Long.parseLong(smascotFileTimestamp);
 
             File dirSequenceRoot = getJobSupport().getSequenceRootDirectory();
             File localDB = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);

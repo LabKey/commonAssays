@@ -121,10 +121,10 @@ public class PeptideProphetHandler extends PepXmlAnalysisResultHandler
             return _fval;
         }
 
-        public void setProphetFval(float _fval)
+        public void setProphetFval(float fval)
         {
-            this._summaryLoaded = true;
-            this._fval = _fval;
+            _summaryLoaded = true;
+            _fval = fval;
         }
 
         public float getProphetDeltaMass()
@@ -132,9 +132,9 @@ public class PeptideProphetHandler extends PepXmlAnalysisResultHandler
             return _massd;
         }
 
-        public void setProphetDeltaMass(float _massd)
+        public void setProphetDeltaMass(float massd)
         {
-            this._massd = _massd;
+            _massd = massd;
         }
 
         public int getProphetNumTrypticTerm()
