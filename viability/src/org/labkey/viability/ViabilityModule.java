@@ -82,6 +82,12 @@ public class ViabilityModule extends DefaultModule
     }
 
     @Override
+    public Set<DbSchema> getSchemasToTest()
+    {
+        return Collections.singleton(ViabilitySchema.getSchema());
+    }
+
+    @Override
     public Set<Class<? extends TestCase>> getJUnitTests()
     {
         return new HashSet<Class<? extends TestCase>>(Arrays.asList(

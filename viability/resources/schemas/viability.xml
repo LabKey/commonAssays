@@ -44,6 +44,20 @@
                 <ns:isReadOnly>true</ns:isReadOnly>
                 <ns:isHidden>true</ns:isHidden>
             </ns:column>
+            <ns:column columnName="Container">
+                <ns:fk>
+                    <ns:fkDbSchema>core</ns:fkDbSchema>
+                    <ns:fkTable>Containers</ns:fkTable>
+                    <ns:fkColumnName>entityid</ns:fkColumnName>
+                </ns:fk>
+            </ns:column>
+            <ns:column columnName="ProtocolID">
+                <ns:fk>
+                    <ns:fkDbSchema>exp</ns:fkDbSchema>
+                    <ns:fkTable>Protocol</ns:fkTable>
+                    <ns:fkColumnName>RowID</ns:fkColumnName>
+                </ns:fk>
+            </ns:column>
             <ns:column columnName="DataID">
                 <ns:fk>
                     <ns:fkDbSchema>exp</ns:fkDbSchema>
