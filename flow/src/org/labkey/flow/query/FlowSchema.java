@@ -23,6 +23,7 @@ import org.labkey.api.exp.query.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.util.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -463,7 +464,7 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public boolean hasPermission(User user, int perm)
+        public boolean hasPermission(User user, Class<? extends Permission> perm)
         {
             return _expData.hasPermission(user, perm);
         }
@@ -916,7 +917,7 @@ public class FlowSchema extends UserSchema
             _editHelper = helper;
         }
 
-        public boolean hasPermission(User user, int perm)
+        public boolean hasPermission(User user, Class<? extends Permission> perm)
         {
             if (_editHelper != null)
                 return _editHelper.hasPermission(user, perm);
