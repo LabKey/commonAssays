@@ -95,20 +95,23 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         {
             if (dataFile.getName().endsWith("." + EXT_DATA))
             {
-                FlowdataDocument doc = FlowdataDocument.Factory.parse(dataFile);
-                FlowData flowdata = doc.getFlowdata();
-                URI uriFile = null;
-                if (flowdata.getUri() != null)
+                if (AttributeSet.fromData(data) == null)
                 {
-                    uriFile = new URI(flowdata.getUri());
-                    if (!uriFile.isAbsolute())
+                    FlowdataDocument doc = FlowdataDocument.Factory.parse(dataFile);
+                    FlowData flowdata = doc.getFlowdata();
+                    URI uriFile = null;
+                    if (flowdata.getUri() != null)
                     {
-                        URI uriPipelineRoot = PipelineService.get().findPipelineRoot(info.getContainer()).getUri();
-                        uriFile = URIUtil.resolve(uriPipelineRoot, uriPipelineRoot, flowdata.getUri());
+                        uriFile = new URI(flowdata.getUri());
+                        if (!uriFile.isAbsolute())
+                        {
+                            URI uriPipelineRoot = PipelineService.get().findPipelineRoot(info.getContainer()).getUri();
+                            uriFile = URIUtil.resolve(uriPipelineRoot, uriPipelineRoot, flowdata.getUri());
+                        }
                     }
+                    AttributeSet attrSet = new AttributeSet(doc.getFlowdata(), uriFile);
+                    attrSet.save(info.getUser(), data);
                 }
-                AttributeSet attrSet = new AttributeSet(doc.getFlowdata(), uriFile);
-                attrSet.save(info.getUser(), data);
             }
             else if (dataFile.getName().endsWith("." + EXT_SCRIPT))
             {

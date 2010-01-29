@@ -65,6 +65,7 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
     public void populateButtonBar(ViewContext context, ButtonBar bar, DataView view, ContainerFilter containerFilter)
     {
         MenuButton compareMenu = MS2Controller.createCompareMenu(context.getContainer(), view, true);
+        compareMenu.setRequiresSelection(true);
         bar.add(compareMenu);
 
         ActionButton exportRuns = new ActionButton("button", "MS2 Export");

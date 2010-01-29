@@ -104,6 +104,8 @@ public class ProteinProphetImporter
         PreparedStatement peptideStmt = null;
         PreparedStatement groupStmt = null;
         PreparedStatement proteinStmt = null;
+        PreparedStatement peptideIndexStmt = null;
+        PreparedStatement proteinIndexStmt = null;
 
         ProtXmlReader.ProteinGroupIterator iterator = null;
         boolean success = false;
@@ -189,6 +191,12 @@ public class ProteinProphetImporter
 
             peptideStmt.executeBatch();
 
+            long insertStartTime = System.currentTimeMillis();
+            log.info("Starting to move data into ms2.PeptidesMemberships");
+
+            peptideIndexStmt = connection.prepareStatement("CREATE INDEX idx_" + peptidesTempTableName + " ON " + peptidesTempTableName + "(TrimmedPeptide, Charge)");
+            peptideIndexStmt.execute();
+
             // Move the peptide information of the temp table into the real table
             String mergePeptideSQL = "INSERT INTO " + MS2Manager.getTableInfoPeptideMemberships() + " (" +
                     "\tPeptideId, ProteinGroupId, NSPAdjustedProbability, Weight, NondegenerateEvidence,\n" +
@@ -201,15 +209,28 @@ public class ProteinProphetImporter
             mergePeptideStmt = connection.prepareStatement(mergePeptideSQL);
             mergePeptideStmt.setInt(1, run.getRun());
             mergePeptideStmt.executeUpdate();
+            log.info("Finished with moving data into ms2.PeptidesMemberships after " + (System.currentTimeMillis() - insertStartTime) + " ms");
 
-            String mergeProteinSQL = "INSERT INTO " + MS2Manager.getTableInfoProteinGroupMemberships() + " (ProteinGroupId, Probability, SeqId) SELECT p.ProteinGroupId, p.Probability, s.SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " s, " + proteinsTempTableName + " p WHERE s.FastaId = ? AND s.LookupString = p.LookupString GROUP BY p.ProteinGroupId, p.Probability, s.SeqId";
+            insertStartTime = System.currentTimeMillis();
+            log.info("Starting to move data into ms2.ProteinGroupMemberships");
+
+            proteinIndexStmt = connection.prepareStatement("CREATE INDEX idx_" + proteinsTempTableName + " ON " + proteinsTempTableName + "(LookupString)");
+            proteinIndexStmt.execute();
+
+            String mergeProteinSQL = "INSERT INTO " + MS2Manager.getTableInfoProteinGroupMemberships() + " " +
+                    "(ProteinGroupId, Probability, SeqId) " +
+                    "SELECT p.ProteinGroupId, p.Probability, s.SeqId " +
+                    "   FROM " + ProteinManager.getTableInfoFastaSequences() + " s, " + proteinsTempTableName + " p" +
+                    "   WHERE s.FastaId = ? AND s.LookupString = p.LookupString GROUP BY p.ProteinGroupId, p.Probability, s.SeqId";
 
             mergeProteinStmt = connection.prepareStatement(mergeProteinSQL);
             mergeProteinStmt.setInt(1, fastaId);
             mergeProteinStmt.executeUpdate();
+            log.info("Finished with moving data into ms2.ProteinGroupMemberships after " + (System.currentTimeMillis() - insertStartTime) + " ms");
 
             file.setUploadCompleted(true);
             Table.update(info.getUser(), MS2Manager.getTableInfoProteinProphetFiles(), file, file.getRowId());
+
             success = true;
             connection.commit();
 
@@ -248,6 +269,8 @@ public class ProteinProphetImporter
             if (peptideStmt != null) { try { peptideStmt.close(); } catch (SQLException e) {} }
             if (groupStmt != null) { try { groupStmt.close(); } catch (SQLException e) {} }
             if (proteinStmt != null) { try { proteinStmt.close(); } catch (SQLException e) {} }
+            if (proteinIndexStmt != null) { try { proteinIndexStmt.close(); } catch (SQLException e) {} }
+            if (peptideIndexStmt != null) { try { peptideIndexStmt.close(); } catch (SQLException e) {} }
             MS2Manager.getSchema().getScope().closeConnection();
 
             if (!success)
