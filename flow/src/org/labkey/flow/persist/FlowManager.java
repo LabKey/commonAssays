@@ -136,9 +136,10 @@ public class FlowManager
             try
             {
                 Integer i = Table.executeSingleton(getSchema(), "SELECT RowId FROM flow.Attribute WHERE Name = ?", new Object[] {attr }, Integer.class);
-                _attridCacheMap.put(attr, i);
-                if (i == null)
+                // we're not caching misses because this is an unlimited cachemap
+                if (i==null)
                     return 0;
+                _attridCacheMap.put(attr, i);
                 _attrNameCacheMap.put(i, attr);
                 return i.intValue();
             }
