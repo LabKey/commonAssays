@@ -238,8 +238,6 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
-        assert dataFile.getName().endsWith(".csv") || dataFile.getName().endsWith(".CSV");
-
         Map<DataType, List<Map<String, Object>>> result = new HashMap<DataType, List<Map<String, Object>>>();
         if (context instanceof AssayUploadXarContext)
         {
