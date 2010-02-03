@@ -362,6 +362,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     {
         return new AssayPipelineProvider(ElispotModule.class,
                 new PipelineProvider.FileTypesEntryFilter(ElispotDataHandler.ELISPOT_DATA_TYPE.getFileType()),
-                this, "Import Elispot");
+                this, "Import ELISpot");
     }
 }
