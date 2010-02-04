@@ -449,7 +449,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         {
             File f = form.getValidatedSingleFile(getContainer());
             PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-            String workspacePath = "/" + root.relativePath(f);
+            String workspacePath = "/" + root.relativePath(f).replace('\\', '/');
 
             ActionURL url = new ActionURL(ImportAnalysisAction.class, getContainer());
             url.addParameter("workspace.path", workspacePath);
