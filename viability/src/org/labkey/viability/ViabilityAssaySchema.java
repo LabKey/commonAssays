@@ -356,7 +356,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 groupFrag.append(") y \nGROUP BY " + columnMap.get(resultId).getAlias());
 
                 SQLFragment frag = new SQLFragment();
-                frag.append("LEFT OUTER JOIN (\n");
+                frag.append("\nLEFT OUTER JOIN (\n");
                 frag.append(groupFrag);
                 String name = parentAlias + "$z";
                 frag.append(") AS ").append(name).append(" ON ").append(parentAlias).append(".RowId = ").append(name).append(".VolumeResultID");
