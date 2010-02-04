@@ -19,21 +19,17 @@ package org.labkey.flow.controllers.executescript;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.RedirectAction;
-import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.*;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
+import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.Pair;
-import org.labkey.api.util.URIUtil;
+import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.analysis.model.FCS;
@@ -51,6 +47,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletException;
 import java.io.File;
 import java.net.URI;
 import java.util.*;
@@ -63,9 +60,8 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
     {
         begin,
 
-        showUploadRuns,
-        chooseRunsToUpload,
-        uploadRuns,
+        confirmRunsToImport,
+        importRuns,
 
         chooseRunsToAnalyze,
         chooseAnalysisName,
@@ -189,49 +185,61 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         }
     }
 
-    protected Map<String, String> getNewPaths(ChooseRunsToUploadForm form, Errors errors) throws Exception
+    protected void collectNewPaths(ImportRunsForm form, Errors errors) throws Exception
     {
         PipelineService service = PipelineService.get();
         PipeRoot root = service.findPipelineRoot(getContainer());
         if (root == null)
         {
             errors.reject(ERROR_MSG, "The pipeline root is not set.");
-            return Collections.emptyMap();
+            return;
         }
 
         String displayPath;
-        if (StringUtils.isEmpty(form.path))
+        if (StringUtils.isEmpty(form.getPath()))
         {
             displayPath = "this directory";
         }
         else
         {
-            displayPath = "'" + PageFlowUtil.decode(form.path) + "'";
+            displayPath = "'" + PageFlowUtil.decode(form.getPath()) + "'";
         }
+        form.setDisplayPath(displayPath);
 
-        URI uri = URIUtil.resolve(root.getUri(), form.path);
+        URI uri = URIUtil.resolve(root.getUri(), form.getPath());
         if (null == uri)
         {
             errors.reject(ERROR_MSG, "The path " + displayPath + " is invalid.");
-            return Collections.emptyMap();
+            return;
         }
         File directory = new File(uri);
         if (!root.isUnderRoot(directory))
         {
             errors.reject(ERROR_MSG, "The path " + displayPath + " is invalid.");
-            return Collections.emptyMap();
+            return;
         }
 
         if (!directory.isDirectory())
         {
             errors.reject(ERROR_MSG, displayPath + " is not a directory.");
-            return Collections.emptyMap();
+            return;
         }
+
         List<File> files = new ArrayList<File>();
-        files.add(directory);
-        File[] dirFiles = directory.listFiles((java.io.FileFilter)DirectoryFileFilter.INSTANCE);
-        if (dirFiles != null)
-            files.addAll(Arrays.asList(dirFiles));
+        if (form.isCurrent())
+        {
+            files.add(directory);
+        }
+        else if (form.getFile() == null || form.getFile().length == 0)
+        {
+            File[] dirFiles = directory.listFiles((java.io.FileFilter)DirectoryFileFilter.INSTANCE);
+            if (dirFiles != null)
+                files.addAll(Arrays.asList(dirFiles));
+        }
+        else
+        {
+            files.addAll(form.getValidatedFiles(getContainer()));
+        }
 
         Set<File> usedPaths = new HashSet<File>();
         for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
@@ -250,109 +258,114 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                 if (!usedPaths.contains(file))
                 {
                     String displayName;
+                    String relativeFile;
                     if (file.equals(directory))
                     {
-                        displayName = "This Directory (" + fcsFiles.length + " fcs files)";
+                        displayName = "Current Directory (" + fcsFiles.length + " fcs files)";
+                        relativeFile = "";
                     }
                     else
                     {
                         displayName = file.getName() + " (" + fcsFiles.length + " fcs files)";
+
+                        // make relative to the path parameter
+                        URI relativeURI = URIUtil.relativize(uri, file.toURI());
+                        if (relativeURI == null)
+                        {
+                            errors.reject(ERROR_MSG, file.getName() + " is not under '" + displayPath + "'");
+                            continue;
+                        }
+
+                        relativeFile = relativeURI.getPath();
+                        if (relativeFile.endsWith("/"))
+                            relativeFile = relativeFile.substring(0, relativeFile.length()-1);
+                        if (relativeFile.length() == 0 || relativeFile.contains("..") || relativeFile.contains("/") || relativeFile.contains("\\"))
+                        {
+                            errors.reject(ERROR_MSG, relativeFile + " is not under '" + displayPath + "'");
+                            continue;
+                        }
                     }
-                    ret.put(URIUtil.relativize(root.getUri(), file.toURI()).toString(), displayName);
+
+                    ret.put(relativeFile, displayName);
                 }
             }
         }
+
         if (ret.isEmpty())
         {
             if (anyFCSDirectories)
-            {
                 errors.reject(ERROR_MSG, "All of the directories in " + displayPath + " have already been uploaded.");
-            }
             else
-            {
                 errors.reject(ERROR_MSG, "No FCS files were found in " + displayPath + " or its children.");
-            }
+            return;
         }
-        return ret;
+
+        form.setNewPaths(ret);
     }
 
-    public abstract class BaseUploadRunsAction extends SimpleViewAction<ChooseRunsToUploadForm>
+    public abstract class ImportRunsBaseAction extends SimpleViewAction<ImportRunsForm>
     {
-        Pair<String, Action> nav;
-
-        protected ModelAndView chooseRunsToUpload(ChooseRunsToUploadForm form, BindException errors) throws Exception
+        protected void validatePipeline() throws ServletException
         {
-            nav = new Pair<String, Action>("Choose Runs to Upload", Action.chooseRunsToUpload);
             PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
             root.requiresPermission(getContainer(), getUser(), InsertPermission.class);
+        }
 
-            JspView<ChooseRunsToUploadForm> view = new JspView<ChooseRunsToUploadForm>(AnalysisScriptController.class, "chooseRunsToUpload.jsp", form, errors);
-            form.setNewPaths(getNewPaths(form, errors));
-            form.setPipeRoot(root);
+        protected ModelAndView confirmRuns(ImportRunsForm form, BindException errors) throws Exception
+        {
+            validatePipeline();
+
+            collectNewPaths(form, errors);
+            JspView<PipelinePathForm> view = new JspView<PipelinePathForm>(AnalysisScriptController.class, "confirmRunsToImport.jsp", form, errors);
             return view;
         }
 
-        protected ModelAndView uploadRuns(ChooseRunsToUploadForm form, BindException errors) throws Exception
+        protected ModelAndView uploadRuns(ImportRunsForm form, BindException errors) throws Exception
         {
-            nav = new Pair<String, Action>(null, Action.uploadRuns);
-            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-            root.requiresPermission(getContainer(), getUser(), InsertPermission.class);
-            if (form.ff_path == null || form.ff_path.length == 0)
+            if (!form.isConfirm())
             {
-                errors.reject(ERROR_MSG, "You did not select any runs.");
-                return chooseRunsToUpload(form, errors);
+                URLHelper url = form.getReturnURLHelper();
+                if (url == null)
+                    url = new ActionURL(BeginAction.class, getContainer());
+                return HttpView.redirect(url);
             }
-            List<File> paths = new ArrayList<File>();
-            List<String> skippedPaths = new ArrayList<String>();
-            for (String path : form.ff_path)
-            {
-                File file;
-                if (path == null)
-                {
-                    file = root.getRootPath();
-                }
-                else
-                {
-                    file = new File(URIUtil.resolve(root.getUri(), path));
-                }
-                if (file == null)
-                {
-                    skippedPaths.add(path);
-                    continue;
-                }
 
-                paths.add(file);
+            validatePipeline();
+            List<File> files;
+            if (form.isCurrent())
+            {
+                PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
+                URI rootURI = pr.getUri();
+                URI dirURI = URIUtil.resolve(rootURI, form.getPath());
+                files = Collections.singletonList(new File(dirURI));
             }
+            else
+                files = form.getValidatedFiles(form.getContainer());
 
             ViewBackgroundInfo vbi = getViewBackgroundInfo();
-            AddRunsJob job = new AddRunsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), paths);
-            for (String path : skippedPaths)
-            {
-                job.addStatus("Skipping path '" + path + "' because it is invalid.");
-            }
+            AddRunsJob job = new AddRunsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), files);
             return HttpView.redirect(executeScript(job));
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, null, nav.first, nav.second);
+            return appendFlowNavTrail(root, null, "Import Flow FCS Files", Action.confirmRunsToImport);
         }
     }
 
     @RequiresPermissionClass(InsertPermission.class)
-    public class ChooseRunsToUploadAction extends BaseUploadRunsAction
+    public class ConfirmImportRunsAction extends ImportRunsBaseAction
     {
-        public ModelAndView getView(ChooseRunsToUploadForm form, BindException errors) throws Exception
+        public ModelAndView getView(ImportRunsForm form, BindException errors) throws Exception
         {
-            return chooseRunsToUpload(form, errors);
+            return confirmRuns(form, errors);
         }
     }
 
-
     @RequiresPermissionClass(InsertPermission.class)
-    public class UploadRunsAction extends BaseUploadRunsAction
+    public class ImportRunsAction extends ImportRunsBaseAction
     {
-        public ModelAndView getView(ChooseRunsToUploadForm form, BindException errors) throws Exception
+        public ModelAndView getView(ImportRunsForm form, BindException errors) throws Exception
         {
             return uploadRuns(form, errors);
         }
@@ -424,6 +437,33 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         }
     }
 
+    /**
+     * This action acts as a bridge between FlowPipelineProvider and ImportAnalysisAction
+     * by setting the 'workspace.path' parameter and skipping the first wizard step.
+     */
+    @RequiresPermissionClass(UpdatePermission.class)
+    public class ImportAnalysisFromPipelineAction extends SimpleViewAction<PipelinePathForm>
+    {
+        @Override
+        public ModelAndView getView(PipelinePathForm form, BindException errors) throws Exception
+        {
+            File f = form.getValidatedSingleFile(getContainer());
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            String workspacePath = "/" + root.relativePath(f);
+
+            ActionURL url = new ActionURL(ImportAnalysisAction.class, getContainer());
+            url.addParameter("workspace.path", workspacePath);
+            url.addParameter("step", String.valueOf(AnalysisScriptController.ImportAnalysisStep.ASSOCIATE_FCSFILES.getNumber()));
+
+            return HttpView.redirect(url);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
     @RequiresPermissionClass(UpdatePermission.class)
     public class ImportAnalysisAction extends FormViewAction<ImportAnalysisForm>
     {
@@ -443,6 +483,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
         public ModelAndView getView(ImportAnalysisForm form, boolean reshow, BindException errors) throws Exception
         {
+            title = form.getWizardStep().getTitle();
             return new JspView<ImportAnalysisForm>(AnalysisScriptController.class, "importAnalysis.jsp", form, errors);
         }
 

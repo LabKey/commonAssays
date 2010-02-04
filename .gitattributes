@@ -331,13 +331,13 @@ flow/src/org/labkey/flow/controllers/editscript/uploadCompensationCalculation.js
 flow/src/org/labkey/flow/controllers/executescript/AnalysisScriptController.java -text
 flow/src/org/labkey/flow/controllers/executescript/ChooseRunsRegion.java -text
 flow/src/org/labkey/flow/controllers/executescript/ChooseRunsToAnalyzeForm.java -text
-flow/src/org/labkey/flow/controllers/executescript/ChooseRunsToUploadForm.java -text
 flow/src/org/labkey/flow/controllers/executescript/ChooseRunsView.java -text
 flow/src/org/labkey/flow/controllers/executescript/ImportAnalysisForm.java -text
+flow/src/org/labkey/flow/controllers/executescript/ImportRunsForm.java -text
 flow/src/org/labkey/flow/controllers/executescript/ScriptOverview.java -text
 flow/src/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/chooseRunsToAnalyze.jsp -text
-flow/src/org/labkey/flow/controllers/executescript/chooseRunsToUpload.jsp -text
+flow/src/org/labkey/flow/controllers/executescript/confirmRunsToImport.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysis.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/main.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/showScript.jsp -text

@@ -17,13 +17,13 @@
 package org.labkey.flow.script;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineAction;
+import org.labkey.api.action.ReturnUrlForm;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.module.Module;
 import org.labkey.flow.analysis.model.FCS;
@@ -106,7 +106,7 @@ public class FlowPipelineProvider extends PipelineProvider
             return;
 
         PipeRoot root;
-        Set<File> usedPaths = new HashSet<File>();
+        final Set<File> usedPaths = new HashSet<File>();
 
         try
         {
@@ -120,53 +120,64 @@ public class FlowPipelineProvider extends PipelineProvider
             return;
         }
 
-        ActionURL importRunsURL = new ActionURL(AnalysisScriptController.ChooseRunsToUploadAction.class, context.getContainer());
-        String srcURL = context.getActionURL().toString();
-        importRunsURL.replaceParameter("srcURL", srcURL);
         URI rootURI = root != null ? root.getUri() : pr.getUri();
 
-        ActionURL importWorkspaceURL = new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, context.getContainer());
-        importWorkspaceURL.addParameter("step", String.valueOf(AnalysisScriptController.ImportAnalysisStep.ASSOCIATE_FCSFILES.getNumber()));
-
-        int flowDirCount = 0;
-        
-        File[] dirs = directory.listFiles(DirectoryFileFilter.INSTANCE);
-        for (File dir : dirs)
+        File[] dirs = directory.listFiles(new FileFilter()
         {
-            if (usedPaths.contains(dir))
-                continue;
-            File[] fcsFiles = dir.listFiles((FileFilter)FCS.FCSFILTER);
-            if (null == fcsFiles || 0 == fcsFiles.length)
-                continue;
-            importRunsURL.replaceParameter("path", URIUtil.relativize(rootURI, dir.toURI()).toString());
-            PipelineAction action = new PipelineAction("Import Flow Run", importRunsURL, new File[] {dir}, false);
-            action.setDescription("" + fcsFiles.length + "&nbsp;FCS&nbsp;file" + ((fcsFiles.length>1)?"s":""));
-            directory.addAction(action);
-            flowDirCount++;
+            public boolean accept(File dir)
+            {
+                if (!dir.isDirectory())
+                    return false;
+
+                if (usedPaths.contains(dir))
+                    return false;
+
+                File[] fcsFiles = dir.listFiles((FileFilter)FCS.FCSFILTER);
+                if (null == fcsFiles || 0 == fcsFiles.length)
+                    return false;
+
+                return true;
+            }
+        });
+
+        ActionURL importRunsURL = new ActionURL(AnalysisScriptController.ConfirmImportRunsAction.class, context.getContainer());
+
+        String path = directory.getPathParameter();
+        ActionURL returnUrl = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(context.getContainer(), null, path.toString());
+        importRunsURL.addReturnURL(returnUrl);
+        importRunsURL.replaceParameter("path", path);
+
+        if (includeAll || (dirs != null && dirs.length > 0))
+        {
+            NavTree selectedDirsNavTree = new NavTree("FCS Files");
+            selectedDirsNavTree.addChild("Directory of FCS Files", importRunsURL);
+            directory.addAction(new PipelineAction(selectedDirsNavTree, dirs, true));
+        }
+
+        File currentDir = new File(directory.getURI().getPath());
+        if (includeAll || !usedPaths.contains(currentDir))
+        {
+            File[] fcsFiles = directory.listFiles((FileFilter)FCS.FCSFILTER);
+            if (includeAll || (fcsFiles != null && fcsFiles.length > 0))
+            {
+                ActionURL url = importRunsURL.clone().addParameter("current", true);
+                NavTree tree = new NavTree("FCS Files");
+                tree.addChild("Current directory of " + fcsFiles.length + " FCS Files", url);
+                directory.addAction(new PipelineAction(tree, new File[] { currentDir }, false));
+            }
         }
 
         File[] workspaces = directory.listFiles(new IsFlowJoWorkspaceFilter());
-        for (File workspace : workspaces)
+        if (includeAll || (workspaces != null && workspaces.length > 0))
         {
-            importWorkspaceURL.replaceParameter("workspace.path", root.relativePath(workspace));
-            PipelineAction importWorkspaceAction = new PipelineAction("Import FlowJo Workspace", importWorkspaceURL, new File[] { workspace }, false);
-            importWorkspaceAction.setDescription("Import analysis from a FlowJo workspace");
-            directory.addAction(importWorkspaceAction);
+            ActionURL importWorkspaceURL = new ActionURL(AnalysisScriptController.ImportAnalysisFromPipelineAction.class, context.getContainer());
+            importWorkspaceURL.replaceParameter("path", path);
+            addAction(importWorkspaceURL, "FlowJo Workspace", directory, workspaces, false, includeAll);
 
             // UNDONE: create workspace from FlowJo workspace
         }
 
         // UNDONE: import FlowJo exported compensation matrix file: CompensationController.UploadAction
-
-
-        if (flowDirCount > 0)
-        {
-            File file = new File(directory.getURI());
-            importRunsURL.replaceParameter("path", URIUtil.relativize(rootURI, file.toURI()).toString());
-            PipelineAction action = new PipelineAction("Import Multiple Runs", importRunsURL, null, false);
-            action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
-            directory.addAction(action);
-        }
     }
 
     public boolean suppressOverlappingRootsWarning(ViewContext context)

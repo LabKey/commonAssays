@@ -170,28 +170,28 @@ public class FlowOverview extends Overview
     private Action getBrowseForFCSFilesAction()
     {
         if (!_hasPipelineRoot || !_canInsert) return null;
-        ActionURL urlUploadFCSFiles = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), FlowPipelineProvider.NAME);
-        return new Action(_fcsFileCount == 0 ? "Browse for FCS files to be loaded" : "Browse for more FCS files to be loaded", urlUploadFCSFiles);
+        ActionURL urlImportFCSFiles = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), FlowPipelineProvider.NAME);
+        return new Action(_fcsFileCount == 0 ? "Browse for FCS files to be imported" : "Browse for more FCS files to be imported", urlImportFCSFiles);
     }
 
-    private Action getUploadFlowJoAnalysisAction()
+    private Action getImportFlowJoAnalysisAction()
     {
         if (!_canInsert) return null;
-        ActionURL urlUploadFlowJoAnalysis = new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, getContainer());
-        Action ret = new Action("Import FlowJo Workspace Analysis", urlUploadFlowJoAnalysis);
+        ActionURL urlImportAnalysis = new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, getContainer());
+        Action ret = new Action("Import FlowJo Workspace Analysis", urlImportAnalysis);
         ret.setExplanatoryHTML("You can also import statistics that have been calculated by FlowJo");
         return ret;
     }
 
     private Step getFCSFileStep()
     {
-        Step ret = new Step("Load FCS Files", _fcsFileCount == 0 ? Step.Status.required : Step.Status.normal);
+        Step ret = new Step("Import FCS Files", _fcsFileCount == 0 ? Step.Status.required : Step.Status.normal);
         if (_fcsFileCount != 0)
         {
             StringBuilder status = new StringBuilder();
             ActionURL urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
                     .addParameter("query.Run/ProtocolStep~eq", "Keywords");
-            status.append("<a href=\"" + h(urlShowFCSFiles) + "\">" + _fcsFileCount + " FCS files</a> have been loaded.");
+            status.append("<a href=\"" + h(urlShowFCSFiles) + "\">" + _fcsFileCount + " FCS files</a> have been imported.");
             ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer())
                     .addParameter("query.FCSFileCount~neq", 0)
                     .addParameter("query.ProtocolStep~eq", "Keywords");
@@ -207,10 +207,10 @@ public class FlowOverview extends Overview
         }
         else
         {
-            ret.setStatusHTML(" No FCS files have been loaded yet.");
+            ret.setStatusHTML(" No FCS files have been imported yet.");
         }
         ret.addAction(getBrowseForFCSFilesAction());
-        ret.addAction(getUploadFlowJoAnalysisAction());
+        ret.addAction(getImportFlowJoAnalysisAction());
         ret.addAction(getPipelineRootAction());
         return ret;
     }
