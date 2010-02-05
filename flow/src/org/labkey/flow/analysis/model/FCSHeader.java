@@ -16,19 +16,20 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.labkey.api.search.SearchService;
 import org.labkey.api.util.NetworkDrive;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  */
-public class FCSHeader
+public class FCSHeader // implements SearchService.DocumentParser
 {
     private Map<String, String> keywords = new TreeMap<String,  String>();
     int dataLast;
@@ -46,7 +47,7 @@ public class FCSHeader
         load(file);
     }
 
-    protected FCSHeader()
+    public FCSHeader()
     {
     }
 
@@ -187,5 +188,62 @@ public class FCSHeader
     public DataFrame createEmptyDataFrame()
     {
         return createDataFrame(new float[getParameterCount()][0]);
+    }
+
+
+    //
+    // DocumentParser , tika like methods (w/o the imports)
+    //
+
+    public String getMediaType()
+    {
+        return "application/fcs";
+    }
+
+    public boolean detect(byte[] buf) throws IOException
+    {
+        if (buf.length < 58)
+            return false;
+        String header = new String(buf, 0, 58);
+
+        if (!header.startsWith("FCS2.0") && !header.startsWith("FCS3.0"))
+            return false;
+
+        try
+        {
+            version = header.substring(0, 6).trim();
+            textOffset = Integer.parseInt(header.substring(10, 18).trim());
+            textLast = Integer.parseInt(header.substring(18, 26).trim());
+            dataOffset = Integer.parseInt(header.substring(26, 34).trim());
+            dataLast = Integer.parseInt(header.substring(34, 42).trim());
+            return true;
+        }
+        catch (NumberFormatException x)
+        {
+            return false;
+        }
+    }
+ 
+    public void parse(InputStream stream, ContentHandler handler) throws IOException, SAXException
+    {
+        // load is not reentrant, create a new instance
+        FCSHeader loader = new FCSHeader();
+        loader.load(stream);
+
+        Map<String,String> keywords = loader.keywords;
+        StringBuilder sb = new StringBuilder(1000);
+        char[] buf = new char[1000];
+        for (Map.Entry<String,String> e : keywords.entrySet())
+        {
+            String k = e.getKey();
+            String v = e.getValue();
+            if (k.startsWith("$"))
+                continue;
+            sb.setLength(0);
+            sb.append(k).append(" ").append(v).append(" ");
+            int len = Math.min(sb.length(),buf.length);
+            sb.getChars(0, len, buf, 0);
+            handler.characters(buf,0,len);
+        }
     }
 }
