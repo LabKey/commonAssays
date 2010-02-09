@@ -146,12 +146,18 @@ public class FlowPipelineProvider extends PipelineProvider
         ActionURL returnUrl = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(context.getContainer(), null, path.toString());
         importRunsURL.addReturnURL(returnUrl);
         importRunsURL.replaceParameter("path", path);
+        String baseId = this.getClass().getName();
 
         if (includeAll || (dirs != null && dirs.length > 0))
         {
             NavTree selectedDirsNavTree = new NavTree("FCS Files");
-            selectedDirsNavTree.addChild("Directory of FCS Files", importRunsURL);
-            directory.addAction(new PipelineAction(selectedDirsNavTree, dirs, true));
+            selectedDirsNavTree.setId(baseId);
+
+            NavTree child = new NavTree("Directory of FCS Files", importRunsURL);
+            child.setId(baseId + ":Directory of FCS Files");
+
+            selectedDirsNavTree.addChild(child);
+            directory.addAction(new PipelineAction(selectedDirsNavTree, dirs, true, true));
         }
 
         File currentDir = new File(directory.getURI().getPath());
@@ -162,8 +168,13 @@ public class FlowPipelineProvider extends PipelineProvider
             {
                 ActionURL url = importRunsURL.clone().addParameter("current", true);
                 NavTree tree = new NavTree("FCS Files");
-                tree.addChild("Current directory of " + fcsFiles.length + " FCS Files", url);
-                directory.addAction(new PipelineAction(tree, new File[] { currentDir }, false));
+                tree.setId(baseId);
+
+                NavTree child = new NavTree("Current directory of " + fcsFiles.length + " FCS Files", url);
+                child.setId(baseId + ":FCS Files");
+                tree.addChild(child);
+
+                directory.addAction(new PipelineAction(tree, new File[] { currentDir }, false, true));
             }
         }
 
@@ -172,7 +183,8 @@ public class FlowPipelineProvider extends PipelineProvider
         {
             ActionURL importWorkspaceURL = new ActionURL(AnalysisScriptController.ImportAnalysisFromPipelineAction.class, context.getContainer());
             importWorkspaceURL.replaceParameter("path", path);
-            addAction(importWorkspaceURL, "FlowJo Workspace", directory, workspaces, false, includeAll);
+            String actionId = createActionId(AnalysisScriptController.ImportAnalysisFromPipelineAction.class, "FlowJo Workspace");
+            addAction(actionId, importWorkspaceURL, "FlowJo Workspace", directory, workspaces, false, true, includeAll);
 
             // UNDONE: create workspace from FlowJo workspace
         }

@@ -88,9 +88,10 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
         {
             return;
         }
-        
-        addAction(PipelineController.SearchXTandemAction.class, "X!Tandem Peptide Search",
-                directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, includeAll);
+
+        String actionId = createActionId(PipelineController.SearchXTandemAction.class, "X!Tandem Peptide Search");
+        addAction(actionId, PipelineController.SearchXTandemAction.class, "X!Tandem Peptide Search",
+                directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
     }
 
     public HttpView getSetupWebPart(Container container)

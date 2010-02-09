@@ -50,8 +50,9 @@ public class MS2PipelineProvider extends PipelineProvider
             return;
         }
 
-        addAction(PipelineController.UploadAction.class, "Import Search Results",
-                directory, directory.listFiles(MS2PipelineManager.getUploadFilter()), true, includeAll);
+        String actionId = createActionId(PipelineController.UploadAction.class, "Import Search Results");
+        addAction(actionId, PipelineController.UploadAction.class, "Import Search Results",
+                directory, directory.listFiles(MS2PipelineManager.getUploadFilter()), true, true, includeAll);
     }
 
     class SetupWebPart extends WebPartView
