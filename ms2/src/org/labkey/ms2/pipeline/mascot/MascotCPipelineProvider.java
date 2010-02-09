@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline.mascot;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.settings.AppProps;
@@ -33,6 +34,7 @@ import org.labkey.ms2.pipeline.PipelineController;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +48,7 @@ import java.util.Map;
 public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     public static String name = "Mascot";
+    private static final String ACTION_LABEL = "Mascot Peptide Search";
 
     public MascotCPipelineProvider(Module owningModule)
     {
@@ -69,9 +72,20 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
             return;
         }
 
-        String actionId = createActionId(PipelineController.SearchMascotAction.class, "Mascot Peptide Search");
-        addAction(actionId, PipelineController.SearchMascotAction.class, "Mascot Peptide Search",
+        String actionId = createActionId(PipelineController.SearchMascotAction.class, ACTION_LABEL);
+        addAction(actionId, PipelineController.SearchMascotAction.class, ACTION_LABEL,
                 directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+    }
+
+    @Override
+    public List<PipelineActionConfig> getDefaultActionConfig()
+    {
+        if (AppProps.getInstance().hasMascotServer())
+        {
+            String actionId = createActionId(PipelineController.SearchMascotAction.class, ACTION_LABEL);
+            return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
+        }
+        return super.getDefaultActionConfig();        
     }
 
     public HttpView getSetupWebPart(Container container)

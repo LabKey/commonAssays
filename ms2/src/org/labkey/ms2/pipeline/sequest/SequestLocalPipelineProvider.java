@@ -17,6 +17,7 @@
 package org.labkey.ms2.pipeline.sequest;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.*;
@@ -39,6 +40,7 @@ import java.util.*;
 public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     private static Logger _log = Logger.getLogger(SequestLocalPipelineProvider.class);
+    private static final String ACTION_LABEL = "Sequest Peptide Search";
 
     public static String name = "Sequest";
 
@@ -61,9 +63,20 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
             return;
         }
 
-        String actionId = createActionId(PipelineController.SearchSequestAction.class, "Sequest Peptide Search");
-        addAction(actionId, PipelineController.SearchSequestAction.class, "Sequest Peptide Search",
+        String actionId = createActionId(PipelineController.SearchSequestAction.class, ACTION_LABEL);
+        addAction(actionId, PipelineController.SearchSequestAction.class, ACTION_LABEL,
             directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+    }
+
+    @Override
+    public List<PipelineActionConfig> getDefaultActionConfig()
+    {
+        if (AppProps.getInstance().hasSequest())
+        {
+            String actionId = createActionId(PipelineController.SearchSequestAction.class, ACTION_LABEL);
+            return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
+        }
+        return super.getDefaultActionConfig();
     }
 
     public HttpView getSetupWebPart(Container container)

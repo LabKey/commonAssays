@@ -16,10 +16,7 @@
 package org.labkey.ms2.pipeline.tandem;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineProtocol;
-import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -33,6 +30,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +44,7 @@ import java.util.Map;
 public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     public static String name = "X! Tandem";
+    private static final String ACTION_LABEL = "X!Tandem Peptide Search";
 
     public XTandemCPipelineProvider(Module owningModule)
     {
@@ -89,9 +88,16 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
             return;
         }
 
-        String actionId = createActionId(PipelineController.SearchXTandemAction.class, "X!Tandem Peptide Search");
-        addAction(actionId, PipelineController.SearchXTandemAction.class, "X!Tandem Peptide Search",
+        String actionId = createActionId(PipelineController.SearchXTandemAction.class, ACTION_LABEL);
+        addAction(actionId, PipelineController.SearchXTandemAction.class, ACTION_LABEL,
                 directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+    }
+
+    @Override
+    public List<PipelineActionConfig> getDefaultActionConfig()
+    {
+        String actionId = createActionId(PipelineController.SearchXTandemAction.class, ACTION_LABEL);
+        return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
     }
 
     public HttpView getSetupWebPart(Container container)

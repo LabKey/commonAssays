@@ -46,6 +46,8 @@ import java.util.*;
 public class FlowPipelineProvider extends PipelineProvider
 {
     public static final String NAME = "flow";
+    private static final String IMPORT_WORKSPACE_LABEL = "FlowJo Workspace";
+    private static final String IMPORT_DIRECTORY_LABEL = "Directory of FCS Files";
 
     public FlowPipelineProvider(Module owningModule)
     {
@@ -153,8 +155,9 @@ public class FlowPipelineProvider extends PipelineProvider
             NavTree selectedDirsNavTree = new NavTree("FCS Files");
             selectedDirsNavTree.setId(baseId);
 
-            NavTree child = new NavTree("Directory of FCS Files", importRunsURL);
-            child.setId(baseId + ":Directory of FCS Files");
+            NavTree child = new NavTree(IMPORT_DIRECTORY_LABEL, importRunsURL);
+            String actionId = createActionId(this.getClass(), IMPORT_DIRECTORY_LABEL);
+            child.setId(actionId);
 
             selectedDirsNavTree.addChild(child);
             directory.addAction(new PipelineAction(selectedDirsNavTree, dirs, true, true));
@@ -183,14 +186,35 @@ public class FlowPipelineProvider extends PipelineProvider
         {
             ActionURL importWorkspaceURL = new ActionURL(AnalysisScriptController.ImportAnalysisFromPipelineAction.class, context.getContainer());
             importWorkspaceURL.replaceParameter("path", path);
-            String actionId = createActionId(AnalysisScriptController.ImportAnalysisFromPipelineAction.class, "FlowJo Workspace");
-            addAction(actionId, importWorkspaceURL, "FlowJo Workspace", directory, workspaces, false, true, includeAll);
+            String actionId = createActionId(AnalysisScriptController.ImportAnalysisFromPipelineAction.class, IMPORT_WORKSPACE_LABEL);
+            addAction(actionId, importWorkspaceURL, IMPORT_WORKSPACE_LABEL, directory, workspaces, false, true, includeAll);
 
             // UNDONE: create workspace from FlowJo workspace
         }
 
         // UNDONE: import FlowJo exported compensation matrix file: CompensationController.UploadAction
     }
+
+    @Override
+    public List<PipelineActionConfig> getDefaultActionConfig()
+    {
+        List<PipelineActionConfig> configs = new ArrayList<PipelineActionConfig>();
+
+        // import directory of fcs files
+        String actionId = createActionId(this.getClass(), null);
+        PipelineActionConfig importConfig = new PipelineActionConfig(actionId, PipelineActionConfig.displayState.enabled, "FCS Files");
+
+        actionId = createActionId(this.getClass(), IMPORT_DIRECTORY_LABEL);
+        importConfig.setLinks(Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, IMPORT_DIRECTORY_LABEL)));
+        configs.add(importConfig);
+
+        // import flow workspace
+        actionId = createActionId(AnalysisScriptController.ImportAnalysisFromPipelineAction.class, IMPORT_WORKSPACE_LABEL);
+        configs.add(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, IMPORT_WORKSPACE_LABEL, true));
+
+        return configs;
+    }
+
 
     public boolean suppressOverlappingRootsWarning(ViewContext context)
     {
