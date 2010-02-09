@@ -268,7 +268,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 {
                     AssayFileWriter writer = new AssayFileWriter();
                     File dup = writer.safeDuplicate(getViewContext(), dataFile);
-                    return Collections.singletonMap(inputs.get(0).getName(), dup);
+                    return Collections.singletonMap(AssayDataCollector.PRIMARY_FILE, dup);
                 }
             }
         }
