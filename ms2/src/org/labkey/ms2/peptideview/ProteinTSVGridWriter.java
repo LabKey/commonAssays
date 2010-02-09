@@ -73,7 +73,7 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
         if (null != _peptideDisplayColumns && !_peptideDisplayColumns.isEmpty())
         {
             if (header.length() > 0)
-                header.append('\t');
+                header.append(_chDelimiter);
 
             header.append(super.getHeader(ctx, _peptideDisplayColumns));
         }
@@ -119,7 +119,7 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
 
         // Append a tab if there's data in the protein columns (there won't be in the case of AMT)
         if (proteinRow.length() > 0)
-            proteinRow.append('\t');
+            proteinRow.append(_chDelimiter);
 
         RenderContext peptideCtx = new RenderContext(ctx.getViewContext());
         peptideCtx.put("ProteinRow", proteinRow);
