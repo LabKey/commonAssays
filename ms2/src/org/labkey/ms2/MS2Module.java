@@ -99,7 +99,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public double getVersion()
     {
-        return 9.30;
+        return 9.31;
     }
 
     protected Collection<? extends WebPartFactory> createWebPartFactories()

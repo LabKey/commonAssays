@@ -39,7 +39,7 @@ CREATE VIEW ms2.ProteinGroupsWithQuantitation AS
 GO
 
 CREATE VIEW ms2.SimplePeptides AS SELECT
-    frac.Run, run.Description AS RunDescription, pep.Fraction, LEFT(frac.FileName, CHARINDEX('.', frac.FileName) - 1) AS FractionName, Scan, EndScan,
+    frac.Run, run.Description AS RunDescription, pep.Fraction, CASE WHEN CHARINDEX('.', frac.FileName) >= 1 THEN LEFT(frac.FileName, CHARINDEX('.', frac.FileName) - 1) ELSE frac.FileName END AS FractionName, Scan, EndScan,
     RetentionTime, Charge, Score1 AS RawScore, Score2 AS DiffScore, Score3 AS ZScore, Score1 AS SpScore, Score2 AS DeltaCn, Score3 AS XCorr, Score4 AS SpRank, Score1 AS OrigScore,
     Score1 AS Hyper, Score2 AS Next, Score3 AS B, Score4 AS Y, Score5 AS Expect, Score1 AS Ion, Score2 AS "Identity", Score3 AS Homology,
     IonPercent, pep.Mass, DeltaMass, (pep.Mass + DeltaMass) AS PrecursorMass, ABS(DeltaMass - ROUND(DeltaMass, 0)) AS FractionalDeltaMass,

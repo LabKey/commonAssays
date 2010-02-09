@@ -88,7 +88,7 @@ public class PepXmlImporter extends MS2Importer
 
             while (fi.hasNext())
             {
-                PepXmlFraction fraction = (PepXmlFraction) fi.next();
+                PepXmlFraction fraction = fi.next();
 
                 if (!runUpdated)  // do this for the first fraction only
                 {
