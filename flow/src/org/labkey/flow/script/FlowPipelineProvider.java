@@ -173,7 +173,7 @@ public class FlowPipelineProvider extends PipelineProvider
                 NavTree tree = new NavTree("FCS Files");
                 tree.setId(baseId);
 
-                NavTree child = new NavTree("Current directory of " + fcsFiles.length + " FCS Files", url);
+                NavTree child = new NavTree("Current directory of " + (fcsFiles.length > 0 ? fcsFiles.length : "") + " FCS Files", url);
                 child.setId(baseId + ":FCS Files");
                 tree.addChild(child);
 
