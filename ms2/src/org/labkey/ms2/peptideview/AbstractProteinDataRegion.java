@@ -18,6 +18,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.*;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.query.FieldKey;
 import org.labkey.ms2.MS2Controller;
 
 import java.io.Writer;
@@ -26,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -39,7 +41,7 @@ public abstract class AbstractProteinDataRegion extends DataRegion
     protected final String _uniqueColumnName;
     private final String _groupURL;
     protected GroupedResultSet _groupedRS = null;
-
+    protected Map<FieldKey, ColumnInfo> _nestedFieldMap;
     protected AbstractProteinDataRegion(String uniqueColumnName, ActionURL url)
     {
         _uniqueColumnName = uniqueColumnName;
@@ -126,7 +128,12 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         renderRowStart(rowIndex, out, ctx);
 
         RenderContext nestedCtx = new RenderContext(ctx.getViewContext());
-        nestedCtx.setResultSet(nestedRS, ctx.getFieldMap());
+        nestedCtx.setResultSet(nestedRS, _nestedFieldMap);
+        if (_nestedFieldMap == null)
+        {
+            // Stash this so we don't have to calculate it for every group
+            _nestedFieldMap = nestedCtx.getFieldMap();
+        }
         nestedCtx.setMode(DataRegion.MODE_GRID);
 
         // We need to make sure that we've rendered at least one nested grid because it contains JavaScript that needs

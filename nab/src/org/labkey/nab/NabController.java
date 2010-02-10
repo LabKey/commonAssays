@@ -1688,19 +1688,29 @@ public class NabController extends SpringActionController
 
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
-            // just grab any root, it doesn't matter
-            for (PipeRoot root : PipelineService.get().getAllPipelineRoots().values())
-            {
-                File rootPath = root.getRootPath();
-                if (rootPath.exists())
-                {
-                    ViewBackgroundInfo info = getViewBackgroundInfo();
-                    _container = root.getContainer();
-                    info.setContainer(_container);
-                    PipelineJob job = new NabUpgradeCode.NabAUCUpgradeJob(null, info);
-                    PipelineService.get().getPipelineQueue().addJob(job);
+            String type = (String)getViewContext().get("upgradeType");
 
-                    return true;
+            if (type != null)
+            {
+                NabUpgradeCode.NabAUCUpgradeJob.UpgradeType upgradeType = NabUpgradeCode.NabAUCUpgradeJob.UpgradeType.AUC;
+
+                if ("pauc".equals(type))
+                    upgradeType = NabUpgradeCode.NabAUCUpgradeJob.UpgradeType.pAUC;
+
+                // just grab any root, it doesn't matter
+                for (PipeRoot root : PipelineService.get().getAllPipelineRoots().values())
+                {
+                    File rootPath = root.getRootPath();
+                    if (rootPath.exists())
+                    {
+                        ViewBackgroundInfo info = getViewBackgroundInfo();
+                        _container = root.getContainer();
+                        info.setContainer(_container);
+                        PipelineJob job = new NabUpgradeCode.NabAUCUpgradeJob(null, info, upgradeType);
+                        PipelineService.get().getPipelineQueue().addJob(job);
+
+                        return true;
+                    }
                 }
             }
             return false;

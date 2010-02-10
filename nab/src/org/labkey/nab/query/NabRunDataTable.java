@@ -73,7 +73,9 @@ public class NabRunDataTable extends PlateBasedAssayRunDataTable
             for (PropertyDescriptor prop : getExistingDataProperties(protocol))
             {
                 String propName = prop.getName();
-                if (propName.startsWith(NabDataHandler.CURVE_IC_PREFIX) || propName.startsWith(NabDataHandler.AUC_PREFIX))
+                if (propName.startsWith(NabDataHandler.CURVE_IC_PREFIX) ||
+                        propName.startsWith(NabDataHandler.AUC_PREFIX) ||
+                        propName.startsWith(NabDataHandler.pAUC_PREFIX))
                 {
                     if (propName.indexOf('_') != -1)
                         hiddenCols.add(propName);

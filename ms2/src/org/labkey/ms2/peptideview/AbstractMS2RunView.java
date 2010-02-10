@@ -265,6 +265,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         if (null != dc)
         {
             baseURL.setAction(MS2Controller.ShowProteinAction.class);
+            baseURL.deleteParameter("seqId");
             dc.setURLExpression(new ProteinStringExpression(baseURL.getLocalURIString()));
             dc.setLinkTarget("prot");
         }

@@ -18,6 +18,25 @@
 <%@ page import="org.labkey.api.data.ContainerManager" %>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+
+<form action="upgradeNabAUC.view" method="post">
+    <table width="75%">
+        <tr class="labkey-wp-header">
+            <th colspan=2>NAb Positive AUC Conversion</th>
+        </tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr>
+            <td><i>Calculation of Positive NAb area under the curve (AUC) values for all curve fit methods will be performed for
+                all existing NAb runs. The upgrade task may be long running but will be
+                invoked as a pipeline job, you will be able to monitor progress and view log information from
+                the <a href="<%=PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(ContainerManager.getRoot())%>">pipeline status </a>page.</i></td>
+    </tr>
+    <tr><td>&nbsp;</td></tr>
+    <tr><td><input type="submit" value="Upgrade"> </td></tr>
+</table>
+<input type="hidden" name="upgradeType" value="pauc">
+</form>
+
 <form action="upgradeNabAUC.view" method="post">
     <table width="75%">
         <tr class="labkey-wp-header">
@@ -35,4 +54,6 @@
     <tr><td>&nbsp;</td></tr>
     <tr><td><input type="submit" value="Upgrade"> </td></tr>
 </table>
+<input type="hidden" name="upgradeType" value="auc">
 </form>
+

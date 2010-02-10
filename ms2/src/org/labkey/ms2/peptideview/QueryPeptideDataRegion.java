@@ -56,6 +56,7 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
         setDisplayColumns(realColumns);
 
         _groupedRS = new GroupedResultSet(rs, _uniqueColumnName, _resultSetRowLimit, _outerGroupLimit);
+        _nestedFieldMap = ctx.getFieldMap();
         return _groupedRS;
     }
 

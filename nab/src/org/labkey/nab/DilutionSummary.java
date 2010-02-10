@@ -168,14 +168,14 @@ public class DilutionSummary implements Serializable
         return getDilutionCurve(type).getParameters();
     }
 
-    public double getAUC(DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
+    public double getAUC(DilutionCurve.FitType type, DilutionCurve.AUCType calc) throws DilutionCurve.FitFailedException
     {
-        return getDilutionCurve(type).calculateAUC();
+        return getDilutionCurve(type).calculateAUC(calc);
     }
 
     public double getAUC() throws DilutionCurve.FitFailedException
     {
-        return getDilutionCurve(_assay.getRenderedCurveFitType()).calculateAUC();
+        return getDilutionCurve(_assay.getRenderedCurveFitType()).calculateAUC(DilutionCurve.AUCType.NORMAL);
     }
 
 }

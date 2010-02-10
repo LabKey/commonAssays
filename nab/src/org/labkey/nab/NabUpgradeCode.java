@@ -51,9 +51,17 @@ public class NabUpgradeCode implements UpgradeCode
         private static final String UPGRADE_NAB_EXCEPTION = "An unexpected error occurred attempting to upgrade the NAb run: %s, skipping.";
         private static final String UPGRADE_NAB_STATS = "Upgrade job complete. Number of assay instances checked: %s. Number of assay runs checked: %s.";
 
-        public NabAUCUpgradeJob(String provider, ViewBackgroundInfo info) throws IOException
+        private UpgradeType _type;
+
+        public enum UpgradeType {
+            AUC,
+            pAUC,
+        }
+
+        public NabAUCUpgradeJob(String provider, ViewBackgroundInfo info, UpgradeType type) throws IOException
         {
             super(provider, info);
+            _type = type;
             init();
         }
 
@@ -101,7 +109,16 @@ public class NabUpgradeCode implements UpgradeCode
                                 runsProcessed++;
                                 info(String.format(UPGRADE_NAB_RUN, run.getContainer().getPath(), run.getName()));
                                 NabAssayRun nab = NabDataHandler.getAssayResults(run, context.getUser());
-                                nab.upgradeAUCValues(this);
+
+                                switch (_type)
+                                {
+                                    case AUC:
+                                        nab.upgradeAUCValues(this);
+                                        break;
+                                    case pAUC:
+                                        nab.upgradePositiveAUCValues(this);
+                                        break;
+                                }
                             }
                             catch (Exception e)
                             {

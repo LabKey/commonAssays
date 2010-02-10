@@ -84,6 +84,7 @@
             <ns:column columnName="SamplingErrors"/>
             <ns:column columnName="ExtraSpecimenInfo"/>
             <ns:column columnName="SpecimenID"/>
+            <ns:column columnName="BeadCount"/>
             <ns:column columnName="Container"/>
             <ns:column columnName="ProtocolID"/>
         </ns:columns>

@@ -401,6 +401,10 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                 {
                     dataRow.setRatio(value);
                 }
+                else if ("Bead Count".equalsIgnoreCase(columnName) || "BeadCount".equalsIgnoreCase(columnName))
+                {
+                    dataRow.setBeadCount(parseInteger(value));
+                }
                 else if ("Dilution".equalsIgnoreCase(columnName))
                 {
                     String dilutionValue = value;
@@ -429,6 +433,15 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                 return null;
             }
             else return Double.parseDouble(value);
+        }
+
+        private Integer parseInteger(String value)
+        {
+            if (value == null || "".equals(value))
+            {
+                return null;
+            }
+            else return Integer.parseInt(value);
         }
     }
 }

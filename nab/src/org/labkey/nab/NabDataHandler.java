@@ -107,12 +107,21 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
                                         dilution, protocol, container, cutoffFormats, props, type);
                             }
                         }
-                        double auc = dilution.getAUC(type);
+                        // compute both normal and positive AUC values
+                        double auc = dilution.getAUC(type, DilutionCurve.AUCType.NORMAL);
                         if (!Double.isNaN(auc))
                         {
                             props.put(getPropertyName(AUC_PREFIX, type), auc);
                             if (type == assayResults.getRenderedCurveFitType())
                                 props.put(AUC_PREFIX, auc);
+                        }
+
+                        double pAuc = dilution.getAUC(type, DilutionCurve.AUCType.POSITIVE);
+                        if (!Double.isNaN(pAuc))
+                        {
+                            props.put(getPropertyName(pAUC_PREFIX, type), pAuc);
+                            if (type == assayResults.getRenderedCurveFitType())
+                                props.put(pAUC_PREFIX, pAuc);
                         }
                     }
 

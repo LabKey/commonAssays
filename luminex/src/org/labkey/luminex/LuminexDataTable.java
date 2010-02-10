@@ -74,6 +74,7 @@ public class LuminexDataTable extends FilteredTable
         addColumn(wrapColumn("Group", getRealTable().getColumn("DataRowGroup")));
         addColumn(wrapColumn(getRealTable().getColumn("Ratio")));
         addColumn(wrapColumn(getRealTable().getColumn("SamplingErrors")));
+        addColumn(wrapColumn(getRealTable().getColumn("BeadCount")));
         ColumnInfo containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));
         containerColumn.setHidden(true);
         containerColumn.setFk(new ContainerForeignKey());
@@ -98,6 +99,7 @@ public class LuminexDataTable extends FilteredTable
         defaultCols.add(FieldKey.fromParts("ObsOverExp"));
         defaultCols.add(FieldKey.fromParts("ConcInRange"));
         defaultCols.add(FieldKey.fromParts("Dilution"));
+        defaultCols.add(FieldKey.fromParts("BeadCount"));
         setDefaultVisibleColumns(defaultCols);
 
         getColumn("Analyte").setFk(new LookupForeignKey("RowId")

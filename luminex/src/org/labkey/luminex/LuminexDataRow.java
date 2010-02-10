@@ -60,6 +60,7 @@ public class LuminexDataRow
     private String _ratio;
     private String _samplingErrors;
     private String _extraSpecimenInfo;
+    private Integer _beadCount;
 
     /** Unfortunate to have these denormalized values here, but required for acceptable query performance */
     private Container _container;
@@ -417,5 +418,15 @@ public class LuminexDataRow
     public void setProtocolID(int protocolID)
     {
         _protocolID = protocolID;
+    }
+
+    public Integer getBeadCount()
+    {
+        return _beadCount;
+    }
+
+    public void setBeadCount(Integer beadCount)
+    {
+        _beadCount = beadCount;
     }
 }

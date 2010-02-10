@@ -55,6 +55,7 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
     public static final String CURVE_IC_PREFIX = "Curve IC";
     public static final String POINT_IC_PREFIX = "Point IC";
     public static final String AUC_PREFIX = "AUC";
+    public static final String pAUC_PREFIX = "PositiveAUC";
     public static final String OORINDICATOR_SUFFIX = "OORIndicator";
     public static final String DATA_ROW_LSID_PROPERTY = "Data Row LSID";
     public static final String AUC_PROPERTY_FORMAT = "0.000";
@@ -126,7 +127,7 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
                 type = PropertyType.DOUBLE;
                 format = "0.0";
             }
-            else if (propertyName.startsWith(AUC_PREFIX))
+            else if (propertyName.startsWith(AUC_PREFIX) || propertyName.startsWith(pAUC_PREFIX))
             {
                 type = PropertyType.DOUBLE;
                 format = AUC_PROPERTY_FORMAT;
@@ -162,6 +163,7 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
         if (FIT_ERROR_PROPERTY.equals(propertyName)) return true;
 
         if (propertyName.startsWith(AUC_PREFIX)) return true;
+        if (propertyName.startsWith(pAUC_PREFIX)) return true;
         if (propertyName.startsWith(CURVE_IC_PREFIX)) return true;
         if (propertyName.startsWith(POINT_IC_PREFIX)) return true;
 

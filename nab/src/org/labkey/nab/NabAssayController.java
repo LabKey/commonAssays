@@ -445,7 +445,7 @@ public class NabAssayController extends SpringActionController
                 }
             }
 
-            NavTree changeCurveMenu = new NavTree("Change Curve Type");
+            NavTree changeCurveMenu = new NavTree("View With Curve Type");
             for (DilutionCurve.FitType type : DilutionCurve.FitType.values())
             {
                 ActionURL changeCurveURL = getViewContext().cloneActionURL();
@@ -845,8 +845,14 @@ public class NabAssayController extends SpringActionController
     {
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
+            if (form.getRowId() == -1)
+                return HttpView.throwNotFound("Run ID not specified.");
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            if (run == null)
+                return HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
             NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum());
+            if (assay == null)
+                return HttpView.throwNotFound("Could not load NAb results for run " + form.getRowId() + ".");
             renderChartPNG(getViewContext().getResponse(), assay, assay.isLockAxes(), null, null);
             return null;
         }

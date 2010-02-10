@@ -53,7 +53,10 @@
 
     String aucPropertyName = bean.getFitType() == null ? NabDataHandler.AUC_PREFIX : NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, bean.getFitType());
     Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), aucPropertyName);
+    String paucPropertyName = bean.getFitType() == null ? NabDataHandler.pAUC_PREFIX : NabDataHandler.getPropertyName(NabDataHandler.pAUC_PREFIX, bean.getFitType());
+    Lsid pAucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), paucPropertyName);
     PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), context.getContainer());
+    PropertyDescriptor pAucPD = OntologyManager.getPropertyDescriptor(pAucURI.toString(), context.getContainer());
 
     for (NabAssayRun.SampleResult result : bean.getSampleResults())
     {
@@ -64,6 +67,13 @@
             Object aucValue = result.getDataProperties().get(aucPD);
             if (aucValue != null)
                 sampleProps.put(aucPD, aucValue);
+        }
+
+        if (pAucPD != null)
+        {
+            Object paucValue = result.getDataProperties().get(pAucPD);
+            if (paucValue != null)
+                sampleProps.put(pAucPD, paucValue);
         }
 
         sampleData.add(sampleProps);
