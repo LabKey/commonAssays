@@ -57,16 +57,14 @@ public class FlowSettings
     static public String getWorkingDirectoryPath()
     {
         Container container = ContainerManager.getRoot();
-        Map<String, String> map = PropertyManager.getProperties(container.getId(), PROPCAT_FLOW, false);
-        if (map != null)
-            return map.get(PROPNAME_WORKINGDIRECTORY);
-        return null;
+        Map<String, String> map = PropertyManager.getProperties(container.getId(), PROPCAT_FLOW);
+        return map.get(PROPNAME_WORKINGDIRECTORY);
     }
 
     static public void setWorkingDirectoryPath(String path) throws Exception
     {
         Container container = ContainerManager.getRoot();
-        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(0, container.getId(), PROPCAT_FLOW, path != null);
+        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(container.getId(), PROPCAT_FLOW, path != null);
         if (map == null)
         {
             assert path == null;

@@ -424,9 +424,9 @@ public class NabManager
         Container c = context.getContainer();
         User user = context.getUser();
 
-        Map<String, String> properties = PropertyManager.getProperties(user.getUserId(), c.getId(), Luc5Assay.class.getName(), false);
+        Map<String, String> properties = PropertyManager.getProperties(user.getUserId(), c.getId(), Luc5Assay.class.getName());
 
-        if (properties != null && !properties.isEmpty())
+        if (!properties.isEmpty())
         {
             try
             {

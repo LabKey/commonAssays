@@ -17,6 +17,7 @@
 package org.labkey.ms2.peptideview;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.*;
 import org.labkey.api.security.User;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -185,14 +186,10 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         PropertyManager.saveProperties(defaultColumnLists);
     }
 
-    private String getSavedPeptideColumnNames() throws SQLException
+    private @Nullable String getSavedPeptideColumnNames() throws SQLException
     {
-        Map defaultColumnLists = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), "ColumnNames", false);
-
-        if (null != defaultColumnLists)
-            return (String) defaultColumnLists.get(_runs[0].getType() + "Peptides");
-
-        return null;
+        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), "ColumnNames");
+        return defaultColumnLists.get(_runs[0].getType() + "Peptides");
     }
 
     public String getStandardPeptideColumnNames()
@@ -483,14 +480,10 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         return proteinColumnNames;
     }
 
-    private String getSavedProteinColumnNames() throws SQLException
+    private @Nullable String getSavedProteinColumnNames() throws SQLException
     {
-        Map defaultColumnLists = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), "ProteinColumnNames", false);
-
-        if (null != defaultColumnLists)
-            return (String) defaultColumnLists.get(_runs[0].getType() + "Protein");
-
-        return null;
+        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), "ProteinColumnNames");
+        return defaultColumnLists.get(_runs[0].getType() + "Protein");
     }
 
     protected void addPeptideFilterText(List<String> headers, MS2Run run, ActionURL currentUrl)

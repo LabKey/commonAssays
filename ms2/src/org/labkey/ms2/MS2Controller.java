@@ -385,12 +385,12 @@ public class MS2Controller extends SpringActionController
             // If the user hasn't customized the view at all, show them their default view
             if (currentURL.getParameters().length == 1)
             {
-                Map<String, String> props = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY, true);
+                Map<String, String> props = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY);
                 String params;
                 // Check if they've explicitly requested a view by name as their default
                 if (props.get(MS2Controller.DEFAULT_VIEW_NAME) != null)
                 {
-                    Map<String, String> savedViews = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY, true);
+                    Map<String, String> savedViews = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY);
                     params = savedViews.get(props.get(MS2Controller.DEFAULT_VIEW_NAME));
                 }
                 else
@@ -573,7 +573,7 @@ public class MS2Controller extends SpringActionController
 
         if (includeUser)
         {
-            Map<String, String> properties = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY, true);
+            Map<String, String> properties = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY);
 
             for (Map.Entry<String, String> entry : properties.entrySet())
             {
@@ -584,7 +584,7 @@ public class MS2Controller extends SpringActionController
         //In addition to the user views, get shared views attached to this folder
         if (includeShared)
         {
-            Map<String, String> mShared = PropertyManager.getProperties(0, getContainer().getId(), MS2_VIEWS_CATEGORY, true);
+            Map<String, String> mShared = PropertyManager.getProperties(0, getContainer().getId(), MS2_VIEWS_CATEGORY);
             for (Map.Entry<String, String> entry : mShared.entrySet())
             {
                 String name = entry.getKey();
@@ -1222,7 +1222,7 @@ public class MS2Controller extends SpringActionController
 
             DefaultViewType defaultViewType;
             String viewName;
-            Map<String, String> props = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY, true);
+            Map<String, String> props = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY);
             if (props.get(MS2Controller.DEFAULT_VIEW_NAME) == null)
             {
                 defaultViewType = DefaultViewType.LastViewed;
@@ -1260,7 +1260,7 @@ public class MS2Controller extends SpringActionController
                 // project views) only the shared names will be seen and deleted. Local names ending in "(Shared)" are shadowed
                 if (getContainer().hasPermission(getUser(), DeletePermission.class))
                 {
-                    m = PropertyManager.getWritableProperties(0, getContainer().getId(), MS2_VIEWS_CATEGORY, true);
+                    m = PropertyManager.getWritableProperties(getContainer().getId(), MS2_VIEWS_CATEGORY, true);
 
                     for (String name : viewNames)
                     {
@@ -1930,7 +1930,7 @@ public class MS2Controller extends SpringActionController
 
     private Map<String, String> getPreferences(Class<? extends AbstractRunListCreationAction> setupActionClass)
     {
-        return PropertyManager.getProperties(getUser().getUserId(), getContainer().getId(), setupActionClass.getName(), true);
+        return PropertyManager.getProperties(getUser().getUserId(), getContainer().getId(), setupActionClass.getName());
     }
 
     @RequiresPermissionClass(ReadPermission.class)
@@ -3698,7 +3698,7 @@ public class MS2Controller extends SpringActionController
             String name = form.name;
             PropertyManager.PropertyMap m;
             if (form.isShared() && getContainer().hasPermission(getUser(), InsertPermission.class))
-                m = PropertyManager.getWritableProperties(0, getContainer().getId(), MS2_VIEWS_CATEGORY, true);
+                m = PropertyManager.getWritableProperties(getContainer().getId(), MS2_VIEWS_CATEGORY, true);
             else
                 m = PropertyManager.getWritableProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY, true);
 
