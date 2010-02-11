@@ -292,7 +292,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                 AssayPublishKey publishKey = dataKeys.get(row.getObjectId());
                 dataMap.put("ParticipantID", publishKey.getParticipantId());
                 dataMap.put("SequenceNum", publishKey.getVisitId());
-                if (TimepointType.RELATIVE_DATE == studyType)
+                if (TimepointType.DATE == studyType)
                 {
                     dataMap.put("Date", publishKey.getDate());
                 }
