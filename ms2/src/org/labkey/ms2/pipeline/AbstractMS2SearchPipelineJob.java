@@ -23,6 +23,7 @@ import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
@@ -40,15 +41,26 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     private static String DATATYPE_FRACTIONS = "Fractions";
     private static String DATATYPE_BOTH = "Both";
 
-    public static final String RAW_PEP_XML_SUFFIX = "_raw.pep.xml";
+    public static String getRawPepXMLSuffix()
+    {
+        PepXMLFileType pepxft = new PepXMLFileType();
+        return "_raw."+pepxft.getDefaultRole();
+    }
 
-    public static File getPepXMLConvertFile(File dirAnalysis, String baseName)
-        {
-        // possibly TPP's env(PEPXML_EXT)==pep.xml.gz
-        FileType ft = new FileType(RAW_PEP_XML_SUFFIX,FileType.systemPreferenceGZ());
+    // useful for constructing a filename for creation, will append .gz if indicated
+    public static File getPepXMLConvertFile(File dirAnalysis, String baseName, FileType.gzSupportLevel gzSupport)
+    {
+        FileType ft = new FileType(getRawPepXMLSuffix(),
+                gzSupport);
         String name = ft.getName(dirAnalysis,baseName);
         File f = new File(dirAnalysis, name);
         return f;
+    }
+
+    // useful for locating an existing file that may or may not be .gz
+    public static File getPepXMLConvertFile(File dirAnalysis, String baseName)
+    {
+        return getPepXMLConvertFile(dirAnalysis,baseName, FileType.gzSupportLevel.SUPPORT_GZ);
     }
 
     protected File _dirSequenceRoot;
@@ -152,6 +164,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 
     abstract public String getSearchEngine();
 
+
     /**
      * Override to turn off PeptideProphet and ProteinProphet analysis.
      * @return true if Prophets should run.
@@ -176,7 +189,8 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         for (File fileSpectra : getInputFiles())
         {
             files.add(getPepXMLConvertFile(getAnalysisDirectory(),
-                    FileUtil.getBaseName(fileSpectra)));
+                    FileUtil.getBaseName(fileSpectra),
+                    getGZPreference()));
         }
         return files.toArray(new File[files.size()]);
     }

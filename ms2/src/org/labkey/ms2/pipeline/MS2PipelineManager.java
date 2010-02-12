@@ -101,9 +101,8 @@ public class MS2PipelineManager
             if (TPPTask.isPepXMLFile(file))
             {
                 File parent = file.getParentFile();
-                String basename = FileUtil.getBaseName(file, 2);
+                String basename = TPPTask.FT_PEP_XML.getBaseName(file);
                 return !fileExists(TPPTask.getProtXMLFile(parent, basename)) &&
-                        !fileExists(TPPTask.getProtXMLIntermediateFile(parent, basename)) &&
                         !fileExists(AbstractMS2SearchProtocol.FT_SEARCH_XAR.newFile(parent, basename));
             }
 

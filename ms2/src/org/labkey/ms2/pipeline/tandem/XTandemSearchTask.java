@@ -42,15 +42,19 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
     private static final String X_TANDEM_ACTION_NAME = "X!Tandem";
     private static final String TANDEM2_XML_ACTION_NAME = "Tandem2XML";
     
-    // TPP treats xml.gz as a native format
-    private static final FileType FT_XTAN_XML = new FileType(".xtan.xml",FileType.systemPreferenceGZ());
-
-    public static File getNativeOutputFile(File dirAnalysis, String baseName)
+    // TPP's xtandem build treats xml.gz as a native format
+    public static FileType getNativeFileType(FileType.gzSupportLevel gzSupport)
     {
+        FileType FT_XTAN_XML = new FileType(".xtan.xml",gzSupport);
+        return FT_XTAN_XML;
+    }
+    // useful for naming an output file while honoring config preference for gzip output
+    public static File getNativeOutputFile(File dirAnalysis, String baseName,
+                                           FileType.gzSupportLevel gzSupport)
+    {
+        FileType FT_XTAN_XML = getNativeFileType(gzSupport);
         return FT_XTAN_XML.newFile(dirAnalysis, baseName);
     }
-
-
 
     /**
      * Interface for support required from the PipelineJob to run this task,
@@ -79,7 +83,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             File dirAnalysis = support.getAnalysisDirectory();
 
             // X! Tandem native output
-            if (!NetworkDrive.exists(getNativeOutputFile(dirAnalysis, baseName)))
+            if (!NetworkDrive.exists(getNativeOutputFile(dirAnalysis, baseName, FileType.gzSupportLevel.SUPPORT_GZ)))
                 return false;
 
             String baseNameJoined = support.getJoinedBaseName();
@@ -121,7 +125,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             // Avoid re-running an X! Tandem search, if the .xtan.xml alreayd exists.
             // Several labs soft-link or copy .xtan.xml files to reduce processing time.
             ProcessBuilder xTandemPB = null;
-            File fileOutputXML = FT_XTAN_XML.newFile(support.getAnalysisDirectory(), baseName);
+            File fileOutputXML = getNativeFileType(support.getGZPreference()).newFile(support.getAnalysisDirectory(), baseName);
             File fileWorkOutputXML = null;
             boolean searchComplete = NetworkDrive.exists(fileOutputXML);
 
@@ -142,6 +146,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
 
             if (!searchComplete)
             {
+                FileType FT_XTAN_XML = getNativeFileType(support.getGZPreference());
                 fileWorkOutputXML = _wd.newFile(FT_XTAN_XML);
                 File fileWorkParameters = _wd.newFile(INPUT_XML);
                 File fileWorkTaxonomy = _wd.newFile(TAXONOMY_XML);
@@ -167,7 +172,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                 _wd.discardFile(fileWorkTaxonomy);
             }
 
-            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(), baseName);
+            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(), baseName, support.getGZPreference());
 
             String ver = TPPTask.getTPPVersion(getJob());
             String exePath = PipelineJobService.get().getExecutablePath("Tandem2XML", "tpp", ver);

@@ -44,17 +44,17 @@
                     <property name="protocolObjectId" value="MS1.msInspectFeaturePeptideMatchingAnalysis" />
                     <property name="protocolName" value="msInspect Feature Peptide Matching Analysis" />
                     <property name="protocolFactoryName" value="pepmatch"/>
-                    <property name="initialInputExt"><bean class="org.labkey.api.util.FileType"><constructor-arg value=".pep.xml"/></bean></property>
+                    <property name="initialInputExt"><bean class="org.labkey.api.util.PepXMLFileType"/></property>
                     <property name="fileExtHierarchy">
                         <map>
                             <entry key-ref="mzXMLFileType">
-                                <list><bean class="org.labkey.api.util.FileType"><constructor-arg value=".pep.xml" /></bean></list>
+                                <list><bean class="org.labkey.api.util.PepXMLFileType"/></list>
                             </entry>
                             <entry key-ref="mzXML_InspectFileType">
-                                <list><bean class="org.labkey.api.util.FileType"><constructor-arg value=".pep.xml" /></bean></list>
+                                <list><bean class="org.labkey.api.util.PepXMLFileType"/></list>
                             </entry>
                             <entry key-ref="mzXML_MS2_TSVFileType">
-                                <list><bean class="org.labkey.api.util.FileType"><constructor-arg value=".pep.xml" /></bean></list>
+                                <list><bean class="org.labkey.api.util.PepXMLFileType"/></list>
                             </entry>
                         </map>
                     </property>
@@ -289,7 +289,7 @@
                 </entry>
                 <entry key="pepXML">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg value=".pep.xml"/>
+                        <constructor-arg><bean class="org.labkey.api.util.PepXMLFileType"/></constructor-arg>
                     </bean>
                 </entry>
             </map>

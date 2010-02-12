@@ -23,16 +23,13 @@ import org.labkey.api.data.Table;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.reader.SimpleXMLStreamReader;
-import org.labkey.api.util.FileUtil;
-import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.Pair;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.reader.ProtXmlReader;
 import org.labkey.ms2.reader.ProteinGroup;
-import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
+import org.labkey.api.util.*;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
@@ -316,24 +313,33 @@ public class ProteinProphetImporter
     private MS2Run importRun(ViewBackgroundInfo info, Logger log)
         throws IOException, XMLStreamException, SQLException, ExperimentException
     {
-        String pepXMLFileName = getPepXMLFileName();
-        // First, see if our usual XAR lookups can find it
-        File pepXMLFile = _context.findFile(pepXMLFileName, _file.getParentFile());
-        if (pepXMLFile == null)
+        String pepXMLFileNameOriginal = getPepXMLFileName();
+        File pepXMLFile=null;
+
+        for (int attempts=0;attempts++<2;) // try it straight up, then try finding .gz version
         {
-            // Second, try the file name in the XML in the current directory
-            pepXMLFile = new File(_file.getParentFile(), new File(pepXMLFileName).getName());
-            if (!NetworkDrive.exists(pepXMLFile))
+            // First, see if our usual XAR lookups can find it
+            String pepXMLFileName = pepXMLFileNameOriginal + ((attempts>1)?".gz":"");
+            pepXMLFile = _context.findFile(pepXMLFileName, _file.getParentFile());
+            if (pepXMLFile == null)
             {
-                // Third, try replacing the .pep-prot.xml on the file name with .pep.xml
-                // and looking in the same directory
-                if (TPPTask.isProtXMLFile(_file))
+                // Second, try the file name in the XML in the current directory
+                pepXMLFile = new File(_file.getParentFile(), new File(pepXMLFileName).getName());
+                if (!NetworkDrive.exists(pepXMLFile))
                 {
-                    String baseName = FileUtil.getBaseName(_file, 2);
-                    pepXMLFile = TPPTask.getPepXMLFile(_file.getParentFile(), baseName);
-                    if (!NetworkDrive.exists(pepXMLFile))
+                    // Third, try replacing the .pep-prot.xml on the file name with .pep.xml
+                    // and looking in the same directory
+                    if (TPPTask.isProtXMLFile(_file))
                     {
-                        throw new FileNotFoundException(pepXMLFileName + " could not be found on disk.");
+                        String baseName = TPPTask.FT_PROT_XML.getBaseName(_file);
+                        pepXMLFile = TPPTask.getPepXMLFile(_file.getParentFile(), baseName);
+                        if (!NetworkDrive.exists(pepXMLFile))
+                        {
+                            if (attempts>1)
+                            {
+                                throw new FileNotFoundException(pepXMLFileNameOriginal + " could not be found on disk.");
+                            }
+                        }
                     }
                 }
             }

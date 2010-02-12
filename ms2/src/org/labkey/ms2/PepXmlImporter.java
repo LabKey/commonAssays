@@ -21,10 +21,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.security.User;
-import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.ResultSetUtil;
-import org.labkey.api.util.massSpecDataFileType;
+import org.labkey.api.util.*;
 import org.labkey.ms2.reader.PepXmlLoader.FractionIterator;
 import org.labkey.ms2.reader.*;
 import org.labkey.ms2.reader.PepXmlLoader.PepXmlFraction;
@@ -600,8 +597,7 @@ public class PepXmlImporter extends MS2Importer
 
     public static boolean isFractionsFile(File pepXmlFile)
     {
-        // TPP treats .xml.gz as a native format
-        return pepXmlFile.getName().toLowerCase().equals("all.pep.xml") ||
-               pepXmlFile.getName().toLowerCase().equals("all.pep.xml.gz");
+        PepXMLFileType ft = new PepXMLFileType();
+        return ft.isType(pepXmlFile) && ft.getBaseName(pepXmlFile)=="all";
     }
 }

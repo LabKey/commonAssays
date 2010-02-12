@@ -34,15 +34,17 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     private static final String SEQUEST_PARAMS = "sequest.params";
     private static final String REMOTE_PARAMS = "remote.params";
 
-    private static final FileType FT_RAW_XML = new FileType("_raw.pep.xml",FileType.systemPreferenceGZ());
     private static final FileType FT_SPECTRA_ARCHIVE = new FileType(".pep.tgz");
 
     private static final String ACTION_NAME = "Sequest Search";
 
-    public static File getNativeOutputFile(File dirAnalysis, String baseName)
+    // useful for creating an output filename that honors config preference for gzipped output
+    public static File getNativeOutputFile(File dirAnalysis, String baseName,
+                                           FileType.gzSupportLevel gzSupport)
     {
-        return FT_RAW_XML.newFile(dirAnalysis, baseName);
+        return AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis,baseName,gzSupport);
     }
+
     /**
      * Interface for support required from the PipelineJob to run this task,
      * beyond the base PipelineJob methods.
@@ -130,7 +132,8 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             File dirOutputDta = new File(_wd.getDir(), getJobSupport().getBaseName());
             File fileWorkTgz = _wd.newFile(FT_SPECTRA_ARCHIVE);
             File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
-                    getJobSupport().getBaseName());
+                    getJobSupport().getBaseName(),
+                    getJobSupport().getGZPreference());
 
             /*
             0. pre-Sequest search: c) translate the mzXML file to dta for Sequest (MzXML2Search)

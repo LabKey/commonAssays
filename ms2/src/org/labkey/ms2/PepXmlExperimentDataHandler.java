@@ -25,6 +25,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
+import org.labkey.api.util.PepXMLFileType;
 import org.apache.log4j.Logger;
 
 import javax.xml.stream.XMLStreamException;
@@ -195,11 +196,8 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
 
     public Priority getPriority(ExpData data)
     {
-        File f = data.getFile();
-        // TPP treats xml.gz as a native format
-        if (f != null &&
-                (f.getName().toLowerCase().endsWith(".pep.xml")
-               ||f.getName().toLowerCase().endsWith(".pep.xml.gz")))
+        PepXMLFileType ft = new PepXMLFileType();
+        if (ft.isType(data.getFile()))
         {
             return Priority.HIGH;
         }

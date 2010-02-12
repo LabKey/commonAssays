@@ -875,7 +875,7 @@ public class MS2Manager
             // Check if we have both an intermediate file and a result file
             String name1 = runs[0].getFileName().toLowerCase();
             String name2 = runs[1].getFileName().toLowerCase();
-            String rawSuffix = AbstractMS2SearchPipelineJob.RAW_PEP_XML_SUFFIX.toLowerCase();
+            String rawSuffix = AbstractMS2SearchPipelineJob.getRawPepXMLSuffix().toLowerCase();
             if (endsWithExtOrExtDotGZ(name1,rawSuffix) && !endsWithExtOrExtDotGZ(name2,rawSuffix))
             {
                 return runs[1];

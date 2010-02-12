@@ -22,6 +22,7 @@ import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Importer;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
@@ -93,10 +94,11 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         File workFile = new File(dirWork.getAbsolutePath(), _file.getName());
 
         File fileOutputTGZ = new File(dirWork.getAbsolutePath(), _baseName + ".tgz");
-        File fileOutputXML = new File(dirWork.getAbsolutePath(), _baseName + ".xml");
         // .pep.tgz is the faked-up .out and .dta files from Mascot2XML
         File filePepXMLTGZ = new File(_dirAnalysis, _baseName + ".pep.tgz");
-        File filePepXML = new File(_dirAnalysis, _baseName + ".pep.xml");
+        // output filename depends on Mascot2XML version, figure that out post-execution
+        File fileOutputXML = null;
+        File filePepXML = null;
 
         boolean completeStatus = false;
         try
@@ -134,12 +136,12 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
                     ),
                     workFile.getParentFile());
 
-            // is TPP running with .gz files? (TPP's env(PEPXML_EXT)==pep.xml.gz )
-            if (!fileOutputXML.exists())
-            {
-                fileOutputXML = new File(dirWork.getAbsolutePath(), _baseName + ".xml.gz");
-                filePepXML = new File(_dirAnalysis, _baseName + "pep.xml.gz");
-            }
+            PepXMLFileType pepxft = new PepXMLFileType(true); // "true" == accept .xml as valid extension for older converters
+            fileOutputXML = new File(pepxft.getName(dirWork.getAbsolutePath(), _baseName));
+            // three possible output names: basename.xml, basename.pep.xml, basename.pep.xml.gz
+            String pepXMLFileName = _baseName + "." + pepxft.getDefaultRole() + (fileOutputXML.getName().endsWith(".gz")?".gz":"");
+            filePepXML = new File(_dirAnalysis, pepXMLFileName);
+
             // we let any error fall thru' to super.run() so that
             // MS2Run's status get updated correctly
             if (!fileOutputTGZ.exists() || !fileOutputXML.exists())
@@ -203,7 +205,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
                 // back to the working folder
                 if (filePepXMLTGZ.exists())
                     filePepXMLTGZ.renameTo (fileOutputTGZ);
-                if (filePepXML.exists())
+                if ((filePepXML != null) && filePepXML.exists())
                     filePepXML.renameTo (fileOutputXML);
                 setStatus(PipelineJob.ERROR_STATUS);
             }

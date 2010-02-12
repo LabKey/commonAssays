@@ -19,6 +19,8 @@ import org.apache.commons.lang.StringUtils;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PepXMLFileType;
+import org.labkey.api.util.ProtXMLFileType;
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 
 import java.io.File;
@@ -37,16 +39,18 @@ import java.util.Arrays;
 public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 {
     // note that TPP also handles these formats as .gz files (ex. .pep.xml.gz)
-    public static final FileType FT_PEP_XML = new FileType(".pep.xml",FileType.systemPreferenceGZ());
-    public static final FileType FT_PROT_XML = new FileType(".prot.xml",FileType.systemPreferenceGZ());
-    public static final FileType FT_INTERMEDIATE_PROT_XML = new FileType(".pep-prot.xml");
-    public static final FileType FT_TPP_PROT_XML = new FileType("-prot.xml");
+    public static final FileType FT_PEP_XML = new PepXMLFileType();
+    public static final FileType FT_PROT_XML = new ProtXMLFileType();
 
     /** Map of optional file outputs from the TPP to their input role names */
     public static final Map<FileType, String> FT_OPTIONAL_AND_IGNORABLES = new HashMap<FileType, String>();
 
     static
     {
+        // Outputs from ProphetModels.pl, added as part of TPP 4.3 or so
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".prot.xml_senserr.txt"), "ProtSensErr");
+        FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".prot.xml.gz_senserr.txt"), "ProtSensErr");
+
         // Outputs from ProphetModels.pl, added as part of TPP 4.2 or so
         FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep_FVAL_1.png"), "PepPropModel1");
         FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep_FVAL_2.png"), "PepPropModel2");
@@ -106,20 +110,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         {
             return FT_PROT_XML;
         }
-        if (FT_INTERMEDIATE_PROT_XML.isType(file))
-        {
-            return FT_INTERMEDIATE_PROT_XML;
-        }
-        if (FT_TPP_PROT_XML.isType(file))
-        {
-            return FT_TPP_PROT_XML;
-        }
         return null;
-    }
-
-    public static File getProtXMLIntermediateFile(File dirAnalysis, String baseName)
-    {
-        return FT_INTERMEDIATE_PROT_XML.newFile(dirAnalysis, baseName);
     }
 
     /**
@@ -432,14 +423,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 if (getJobSupport().isProphetEnabled())
                 {
                     // If we ran ProteinProphet, set up a step with the right inputs and outputs
-                    File fileWorkProtXML = _wd.newFile(FT_INTERMEDIATE_PROT_XML);
-                    if (!NetworkDrive.exists(fileWorkProtXML))
-                    {
-                        // TPP 4.0 changed the name of the output file from .pep-prot.xml to .prot.xml. If we can't
-                        // find a file with the old name, try the new one
-                        _wd.discardFile(fileWorkProtXML);
-                        fileWorkProtXML = _wd.newFile(FT_PROT_XML);
-                    }
+                    File fileWorkProtXML = _wd.newFile(FT_PROT_XML);
 
                     fileProtXML = _wd.outputFile(fileWorkProtXML, FT_PROT_XML.getName(_wd.getDir(), getJobSupport().getBaseName()));
 

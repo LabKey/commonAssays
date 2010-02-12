@@ -26,6 +26,8 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.collections.CsvSet;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.PepXMLFileType;
+import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.xml.stream.XMLStreamException;
@@ -338,33 +340,11 @@ public abstract class MS2Importer
         if (null != mzXmlFile)
         {
             fractionMap.put("MzXMLURL", FileUtil.getAbsoluteCaseSensitiveFile(mzXmlFile).toURI().toString());
-            String mzXmlFileName  = mzXmlFile.getName();
-            int extensionIndex = mzXmlFileName.lastIndexOf('.');
-            if (mzXmlFileName.endsWith(".gz")) // TPP treats .xml.gz as a native format
-            {
-                extensionIndex = mzXmlFileName.lastIndexOf('.',extensionIndex-1);
-            }
-            String pepXMLFileName;
-            if (extensionIndex != -1)
-            {
-                pepXMLFileName = mzXmlFileName.substring(0, extensionIndex) + ".pep.xml";
-            }
-            else
-            {
-                pepXMLFileName = mzXmlFileName + ".pep.xml";
-            }
-            File pepXMLFile = new File(path, pepXMLFileName);
-            if (!pepXMLFile.exists())
-            {
-                // TPP treats .xml.gz as a native format, try that
-                String pepXMLFileNameGZ = pepXMLFileName + ".gz";
-                File pepXMLFileGZ = new File(path, pepXMLFileName);
-                if (pepXMLFileGZ.exists())
-                {
-                    pepXMLFile = pepXMLFileGZ;
-                    pepXMLFileName = pepXMLFileNameGZ;
-                }
-            }
+            massSpecDataFileType msdft = new massSpecDataFileType();
+            String pepXMLFileName  = msdft.getBaseName(mzXmlFile); // strip off .mzxml or .mzxml.gz
+            PepXMLFileType ft = new PepXMLFileType();
+            pepXMLFileName = ft.getName(path, pepXMLFileName); // look for basename.pep.xml or basename.pep.xml.gz
+            File pepXMLFile = new File(pepXMLFileName);
 
             ExpData pepXMLData = ExperimentService.get().getExpDataByURL(pepXMLFile, c);
             if (pepXMLData != null)

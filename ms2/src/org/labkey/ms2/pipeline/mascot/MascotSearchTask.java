@@ -18,6 +18,7 @@ package org.labkey.ms2.pipeline.mascot;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PepXMLFileType;
 import org.labkey.ms2.pipeline.*;
 import org.apache.commons.lang.StringUtils;
 
@@ -340,20 +341,19 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             };
             getJob().runSubProcess(new ProcessBuilder(args), _wd.getDir());
 
-            // will autmagically pick up .xml.gz if that's what Mascot2XML wrote
-            File fileOutputPepXML = _wd.newFile(new FileType(".xml",FileType.systemPreferenceGZ()));
+            PepXMLFileType pepxft = new PepXMLFileType(true); // "true" == accept .xml as valid extension for older converters
+            File fileOutputPepXML = _wd.newFile(pepxft);
             File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
-                    getJobSupport().getBaseName());
+                    getJobSupport().getBaseName(),
+                    getJobSupport().getGZPreference());
+            // three possibilities: basename.xml, basename.pep.xml, basename.pep.xml.gz
+            if (fileOutputPepXML.getName().endsWith(".gz")&&!fileWorkPepXMLRaw.getName().endsWith(".gz"))
+            {
+                fileWorkPepXMLRaw = new File(fileWorkPepXMLRaw.getParent(),fileWorkPepXMLRaw.getName()+".gz");
+            }
             if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
             {
-                // will autmagically pick up .pep.xml.gz if that's what Mascot2XML wrote
-                fileOutputPepXML = _wd.newFile(new FileType(".pep.xml",FileType.systemPreferenceGZ()));
-                fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
-                    getJobSupport().getBaseName());
-                if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
-                {
-                    throw new IOException("Failed to rename " + fileOutputPepXML + " to " + fileWorkPepXMLRaw);
-                }
+                throw new IOException("Failed to rename " + fileOutputPepXML + " to " + fileWorkPepXMLRaw);
             }
 
             WorkDirectory.CopyingResource lock = null;
