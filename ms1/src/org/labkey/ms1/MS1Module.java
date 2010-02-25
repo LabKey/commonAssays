@@ -68,7 +68,7 @@ public class MS1Module extends SpringModule
 
     public double getVersion()
     {
-        return 9.30;
+        return 10.09;
     }
 
     protected void init()

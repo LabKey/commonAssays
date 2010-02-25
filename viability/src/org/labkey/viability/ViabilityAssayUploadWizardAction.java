@@ -17,9 +17,11 @@
 package org.labkey.viability;
 
 import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
+import org.labkey.api.util.GUID;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.HtmlView;
@@ -251,6 +253,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         collector.addHiddenFormFields(view, form);
 
         ButtonBar bbar = new ButtonBar();
+        bbar.setStyle(ButtonBar.Style.separateButtons);
         addFinishButtons(form, view, bbar);
         addResetButton(form, view, bbar);
 
@@ -326,17 +329,71 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             return valid;
         }
 
+        private ExpExperiment createExperiment(ViabilityAssayRunUploadForm form)
+        {
+            ExpProtocol protocol = form.getProtocol();
+            ViabilityAssayProvider provider = form.getProvider();
+
+            ExpExperiment exp = ExperimentService.get().createExpExperiment(form.getContainer(), GUID.makeGUID());
+            exp.save(form.getUser());
+            exp.setName(protocol.getName() + "-" + exp.getRowId());
+            exp.setComments("Re-importing any " + provider.getName() + " run in this run group will place the new run in this same run group.");
+            exp.save(form.getUser());
+            return exp;
+        }
+
+        private ExpExperiment findExperiment(ExpRun run)
+        {
+            ExpProtocol protocol = run.getProtocol();
+            String prefix = protocol.getName() + "-";
+            ExpExperiment[] experiments = run.getExperiments();
+            for (int i = 0; i < experiments.length; i++)
+            {
+                ExpExperiment exp = experiments[i];
+                if (exp.getName().startsWith(prefix) && exp.getBatchProtocol() == null)
+                    return exp;
+            }
+
+            return null;
+        }
+
         @Override
         protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
+            boolean transaction = ExperimentService.get().isTransactionActive();
             try
             {
+                 if (!transaction)
+                    ExperimentService.get().beginTransaction();
+
                 ExpRun run = saveExperimentRun(form);
 
-                if (form.isDelete() && form.getReRunId() != null)
+                ExpExperiment experiment = null;
+                if (form.getReRunId() != null)
                 {
-                    ExperimentService.get().deleteExperimentRunsByRowIds(getContainer(), getViewContext().getUser(), form.getReRunId().intValue());
+                    ExpRun reRun = ExperimentService.get().getExpRun(form.getReRunId());
+                    if (reRun != null)
+                    {
+                        experiment = findExperiment(reRun);
+
+                        if (form.isDelete())
+                        {
+                            ExperimentService.get().deleteExperimentRunsByRowIds(getContainer(), getViewContext().getUser(), form.getReRunId().intValue());
+                        }
+                        else if (experiment == null)
+                        {
+                            experiment = createExperiment(form);
+                            experiment.addRuns(form.getUser(), reRun);
+                        }
+                    }
                 }
+
+                if (experiment == null)
+                    experiment = createExperiment(form);
+                experiment.addRuns(form.getUser(), run);
+
+                if (!transaction)
+                    ExperimentService.get().commitTransaction();
 
                 return afterRunCreation(form, run, errors);
             }
@@ -356,6 +413,11 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             {
                 errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
                 return getResultsView(form, true, errors);
+            }
+            finally
+            {
+                if (!transaction)
+                    ExperimentService.get().closeTransaction();
             }
         }
 

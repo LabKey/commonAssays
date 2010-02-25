@@ -16,8 +16,10 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.util.NetworkDrive;
+import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
@@ -29,7 +31,7 @@ import java.util.*;
 
 /**
  */
-public class FCSHeader // implements SearchService.DocumentParser
+public class FCSHeader
 {
     private Map<String, String> keywords = new TreeMap<String,  String>();
     int dataLast;
@@ -191,59 +193,164 @@ public class FCSHeader // implements SearchService.DocumentParser
     }
 
 
+
+
     //
     // DocumentParser , tika like methods (w/o the imports)
     //
-
-    public String getMediaType()
+    public static SearchService.DocumentParser documentParser = new SearchService.DocumentParser()
     {
-        return "application/fcs";
-    }
-
-    public boolean detect(byte[] buf) throws IOException
-    {
-        if (buf.length < 58)
-            return false;
-        String header = new String(buf, 0, 58);
-
-        if (!header.startsWith("FCS2.0") && !header.startsWith("FCS3.0"))
-            return false;
-
-        try
+        public String getMediaType()
         {
-            version = header.substring(0, 6).trim();
-            textOffset = Integer.parseInt(header.substring(10, 18).trim());
-            textLast = Integer.parseInt(header.substring(18, 26).trim());
-            dataOffset = Integer.parseInt(header.substring(26, 34).trim());
-            dataLast = Integer.parseInt(header.substring(34, 42).trim());
-            return true;
+            return "application/fcs";
         }
-        catch (NumberFormatException x)
-        {
-            return false;
-        }
-    }
- 
-    public void parse(InputStream stream, ContentHandler handler) throws IOException, SAXException
-    {
-        // load is not reentrant, create a new instance
-        FCSHeader loader = new FCSHeader();
-        loader.load(stream);
 
-        Map<String,String> keywords = loader.keywords;
-        StringBuilder sb = new StringBuilder(1000);
-        char[] buf = new char[1000];
-        for (Map.Entry<String,String> e : keywords.entrySet())
+        public boolean detect(byte[] buf) throws IOException
         {
-            String k = e.getKey();
-            String v = e.getValue();
-            if (k.startsWith("$"))
-                continue;
-            sb.setLength(0);
-            sb.append(k).append(" ").append(v).append(" ");
+            if (buf.length < 58)
+                return false;
+            String header = new String(buf, 0, 58);
+
+            if (!header.startsWith("FCS2.0") && !header.startsWith("FCS3.0"))
+                return false;
+
+            try
+            {
+                //String version = header.substring(0, 6).trim();
+                int textOffset = Integer.parseInt(header.substring(10, 18).trim());
+                int textLast = Integer.parseInt(header.substring(18, 26).trim());
+                int dataOffset = Integer.parseInt(header.substring(26, 34).trim());
+                int dataLast = Integer.parseInt(header.substring(34, 42).trim());
+                return true;
+            }
+            catch (NumberFormatException x)
+            {
+                return false;
+            }
+        }
+
+        public void parse(InputStream stream, ContentHandler h) throws IOException, SAXException
+        {
+            StringBuilder sb = new StringBuilder(1000);
+            char[] buf = new char[1000];
+
+            FCSHeader loader = new FCSHeader();
+            loader.load(stream);
+            Map<String,String> keywords = loader.keywords;
+
+            _start(h,"html");
+            _start(h,"body");
+            _start(h,"pre");
+
+            // TODO: Metadata (TITLE, DATE)
+
+            String expName = keywords.get("EXPERIMENT NAME");
+            if (!StringUtils.isEmpty(expName))
+            {
+                sb.append(expName).append("\n");
+                _write(h, sb, buf);
+            }
+
+            for (Map.Entry<String,String> e : keywords.entrySet())
+            {
+                String k = e.getKey();
+                String v = e.getValue();
+                if (k.startsWith("$"))
+                    continue;
+                if (k.startsWith("P") && k.endsWith("DISPLAY"))
+                    continue;
+                if (k.equals("SPILL"))
+                    continue;
+                sb.setLength(0);
+                sb.append(k).append(" ").append(v).append("\n");
+                _write(h,sb,buf);
+            }
+
+            _end(h,"pre");
+            _end(h,"body");
+            _end(h,"html");
+        }
+
+
+        private void _start(ContentHandler h, String tag) throws SAXException
+        {
+            h.startElement("http://www.w3.org/1999/xhtml", tag, tag, emptyAttributes);
+        }
+
+        private void _end(ContentHandler h, String tag) throws SAXException
+        {
+            h.endElement("http://www.w3.org/1999/xhtml", tag, tag);
+        }
+
+        private void _write(ContentHandler h, StringBuilder sb, char[] buf) throws SAXException
+        {
             int len = Math.min(sb.length(),buf.length);
             sb.getChars(0, len, buf, 0);
-            handler.characters(buf,0,len);
+            h.characters(buf,0,len);
         }
-    }
+    };
+
+
+    static Attributes emptyAttributes = new Attributes()
+    {
+        public int getLength()
+        {
+            return 0;
+        }
+
+        public String getURI(int i)
+        {
+            return null;
+        }
+
+        public String getLocalName(int i)
+        {
+            return null;
+        }
+
+        public String getQName(int i)
+        {
+            return null;
+        }
+
+        public String getType(int i)
+        {
+            return null;
+        }
+
+        public String getValue(int i)
+        {
+            return null;
+        }
+
+        public int getIndex(String s, String s1)
+        {
+            return 0;
+        }
+
+        public int getIndex(String s)
+        {
+            return 0;
+        }
+
+        public String getType(String s, String s1)
+        {
+            return null;
+        }
+
+        public String getType(String s)
+        {
+            return null;
+        }
+
+        public String getValue(String s, String s1)
+        {
+            return null;
+        }
+
+        public String getValue(String s)
+        {
+            return null;
+        }
+    };
 }

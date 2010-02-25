@@ -26,6 +26,8 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.search.SearchService;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Search;
 import org.labkey.api.view.HttpView;
@@ -33,6 +35,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.DefaultWebPartFactory;
 import org.labkey.api.reports.ReportService;
+import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -70,7 +73,7 @@ public class FlowModule extends DefaultModule
 
     public double getVersion()
     {
-        return 9.30;
+        return 10.09;
     }
 
     protected void init()
@@ -143,6 +146,7 @@ public class FlowModule extends DefaultModule
         FlowProtocolImplementation.register();
         ModuleLoader.getInstance().registerFolderType(new FlowFolderType(this));
         Search.register(new FlowManager.FCSFileSearch(null,null));
+        ServiceRegistry.get(SearchService.class).addDocumentParser(FCSHeader.documentParser);
         FlowController.registerAdminConsoleLinks();
     }
 

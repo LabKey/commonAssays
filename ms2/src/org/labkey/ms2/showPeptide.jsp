@@ -24,6 +24,7 @@
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.ms2.*"%>
 <%@ page import="java.text.DecimalFormat"%>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
@@ -39,7 +40,7 @@
     <table>
     <tr><td height=60>
         <b><%=p.getPeptide()%></b>
-        <%=PageFlowUtil.generateButton("Blast", "http://www.ncbi.nlm.nih.gov/blast/Blast.cgi?CMD=Web&amp;LAYOUT=TwoWindows&amp;AUTO_FORMAT=Semiauto&amp;ALIGNMENTS=50&amp;ALIGNMENT_VIEW=Pairwise&amp;CDD_SEARCH=on&amp;CLIENT=web&amp;COMPOSITION_BASED_STATISTICS=on&amp;DATABASE=nr&amp;DESCRIPTIONS=100&amp;ENTREZ_QUERY=(none)&amp;EXPECT=1000&amp;FILTER=L&amp;FORMAT_OBJECT=Alignment&amp;FORMAT_TYPE=HTML&amp;I_THRESH=0.005&amp;MATRIX_NAME=BLOSUM62&amp;NCBI_GI=on&amp;PAGE=Proteins&amp;PROGRAM=blastp&amp;SERVICE=plain&amp;SET_DEFAULTS.x=41&amp;SET_DEFAULTS.y=5&amp;SHOW_OVERVIEW=on&amp;END_OF_HTTPGET=Yes&amp;SHOW_LINKOUT=yes&amp;QUERY=" + p.getTrimmedPeptide(), "", "target=\"cmt\"")%><br>
+        <%=PageFlowUtil.generateButton("Blast", AppProps.getInstance().getBLASTServerBaseURL() + p.getTrimmedPeptide(), "", "target=\"cmt\"")%><br>
         <%=p.getScan()%>&nbsp;&nbsp;<%=p.getCharge()%>+&nbsp;&nbsp;<%=p.getRawScore()%>&nbsp;&nbsp;<%=Formats.f3.format(p.getDiffScore())%>&nbsp;&nbsp;<%=Formats.f3.format(p.getZScore())%>&nbsp;&nbsp;<%=Formats.percent.format(p.getIonPercent())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getMass())%>&nbsp;&nbsp;<%=Formats.signf4.format(p.getDeltaMass())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getPeptideProphet())%>&nbsp;&nbsp;<%=p.getProteinHits()%><br>
         <%=p.getProtein()%><br>
 <%

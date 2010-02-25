@@ -497,6 +497,7 @@ luminex/resources/schemas/dbscripts/postgresql/luminex-9.10-9.11.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-9.10-9.20.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-9.11-9.12.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-9.12-9.13.sql -text
+luminex/resources/schemas/dbscripts/postgresql/luminex-9.30-10.09.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-9.30-9.31.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.01-0.02.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.02-0.03.sql -text
@@ -516,6 +517,7 @@ luminex/resources/schemas/dbscripts/sqlserver/luminex-9.10-9.11.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-9.10-9.20.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-9.11-9.12.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-9.12-9.13.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/luminex-9.30-10.09.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-9.30-9.31.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.01-0.02.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.02-0.03.sql -text
@@ -934,6 +936,7 @@ ms2/src/org/labkey/ms2/SpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/TotalFilteredPeptidesColumn.java -text
 ms2/src/org/labkey/ms2/UniqueFilteredPeptidesColumn.java -text
 ms2/src/org/labkey/ms2/annotLoadDetails.jsp -text
+ms2/src/org/labkey/ms2/blastAdmin.jsp -text
 ms2/src/org/labkey/ms2/compare/CompareDataRegion.java -text
 ms2/src/org/labkey/ms2/compare/CompareExcelWriter.java -text
 ms2/src/org/labkey/ms2/compare/CompareQuery.java -text
@@ -1314,7 +1317,9 @@ workbook/Workbook.iml -text
 workbook/build.xml -text
 workbook/module.properties -text
 workbook/resources/schemas/dbscripts/postgresql/workbook-0.00-0.01.sql -text
+workbook/resources/schemas/dbscripts/postgresql/workbook-0.00-1.00.sql -text
 workbook/resources/schemas/dbscripts/sqlserver/workbook-0.00-0.01.sql -text
+workbook/resources/schemas/dbscripts/sqlserver/workbook-0.00-1.00.sql -text
 workbook/resources/schemas/workbook.xml -text
 workbook/src/org/labkey/workbook/WorkbookContainerListener.java -text
 workbook/src/org/labkey/workbook/WorkbookController.java -text

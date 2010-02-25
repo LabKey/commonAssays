@@ -39,6 +39,8 @@ import org.labkey.api.security.*;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
+import org.labkey.api.settings.AppProps;
+import org.labkey.api.settings.WriteableAppProps;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
@@ -61,6 +63,7 @@ import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
+import org.springframework.beans.PropertyValues;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
@@ -1930,7 +1933,7 @@ public class MS2Controller extends SpringActionController
 
     private Map<String, String> getPreferences(Class<? extends AbstractRunListCreationAction> setupActionClass)
     {
-        return PropertyManager.getProperties(getUser().getUserId(), getContainer().getId(), setupActionClass.getName());
+        return PropertyManager.getWritableProperties(getUser().getUserId(), getContainer().getId(), setupActionClass.getName(), true);
     }
 
     @RequiresPermissionClass(ReadPermission.class)
@@ -2291,12 +2294,30 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    public static class BlastForm
+    {
+        private String _blastServerBaseURL;
+
+        public String getBlastServerBaseURL()
+        {
+            return _blastServerBaseURL;
+        }
+
+        public void setBlastServerBaseURL(String blastServerBaseURL)
+        {
+            _blastServerBaseURL = blastServerBaseURL;
+        }
+    }
 
     @RequiresSiteAdmin
-    public class ShowProteinAdminAction extends SimpleViewAction
+    public class ShowProteinAdminAction extends FormViewAction<BlastForm>
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        @Override
+        public ModelAndView getView(BlastForm form, boolean reshow, BindException errors) throws Exception
         {
+            JspView<String> blastView = new JspView<String>("/org/labkey/ms2/blastAdmin.jsp", AppProps.getInstance().getBLASTServerBaseURL(), errors);
+            blastView.setTitle("BLAST Configuration");
+
             GridView grid = getFastaAdminGrid();
             grid.setTitle("FASTA Files");
 
@@ -2307,7 +2328,25 @@ public class MS2Controller extends SpringActionController
 
             annots.getViewContext().setPermissions(ACL.PERM_READ);
 
-            return new VBox(grid, annots);
+            return new VBox(blastView, grid, annots);
+        }
+
+        @Override
+        public URLHelper getSuccessURL(BlastForm o)
+        {
+            return new ActionURL(ShowProteinAdminAction.class, ContainerManager.getRoot());
+        }
+
+        @Override
+        public void validateCommand(BlastForm target, Errors errors) {}
+
+        @Override
+        public boolean handlePost(BlastForm o, BindException errors) throws Exception
+        {
+            WriteableAppProps props = AppProps.getWriteableInstance();
+            props.setBLASTServerBaseURL(o.getBlastServerBaseURL());
+            props.save();
+            return true;
         }
 
         private DataRegion getAnnotInsertsGrid()
