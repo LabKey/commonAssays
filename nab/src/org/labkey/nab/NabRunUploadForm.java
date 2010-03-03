@@ -17,6 +17,7 @@
 package org.labkey.nab;
 
 import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayFileWriter;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.property.DomainProperty;
@@ -187,7 +188,7 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider>
                 {
                     AssayFileWriter writer = new AssayFileWriter();
                     File dup = writer.safeDuplicate(getViewContext(), dataFile);
-                    return Collections.singletonMap(inputs.get(0).getName(), dup);
+                    return Collections.singletonMap(AssayDataCollector.PRIMARY_FILE, dup);
                 }
             }
         }

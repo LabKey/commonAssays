@@ -114,7 +114,7 @@
             <list>
                 <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
                     <property name="parameter" value="pipeline, peakaboo enabled"/>
-                    <property name="default" value="false"/>
+                    <property name="default" value="true"/>
                     <property name="converters">
                         <map>
                             <entry key="false">
