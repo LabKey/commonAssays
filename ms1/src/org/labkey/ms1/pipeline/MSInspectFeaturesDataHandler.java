@@ -219,7 +219,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         //if file is .peptides.tsv, look to see if there is a corresponding .pepmatch.tsv, and if so, just return
         if (FT_PEPTIDES.isType(dataFile))
         {
-            File pepmatch = new File(dataFile.getParentFile(), FT_PEPMATCH.getName(FT_PEPTIDES.getBaseName(dataFile)));
+            File pepmatch = new File(dataFile.getParentFile(), FT_PEPMATCH.getDefaultName(FT_PEPTIDES.getBaseName(dataFile)));
             if (pepmatch.exists())
                 return;
         }
