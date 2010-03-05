@@ -16,19 +16,17 @@
 
 package org.labkey.viability;
 
+import junit.framework.TestCase;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.view.WebPartFactory;
 
 import java.util.*;
-
-import junit.framework.TestCase;
 
 public class ViabilityModule extends DefaultModule
 {
