@@ -21,6 +21,7 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.QueryViewAction;
 import org.labkey.api.action.GWTServiceAction;
+import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
@@ -580,7 +581,7 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            root.addChild("MS1 Admin");
+            PageFlowUtil.urlProvider(AdminUrls.class).appendAdminNavTrail(root, "MS1 Admin", null);
             return root;
         }
     }

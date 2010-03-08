@@ -16,10 +16,11 @@
 
 package org.labkey.flow.analysis.model;
 
+import com.sun.org.apache.xerces.internal.impl.Constants;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.util.SymbolTable;
-import org.apache.log4j.Category;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
@@ -34,8 +35,8 @@ import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.FlowJob;
 import org.w3c.dom.*;
-import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.ls.LSParserFilter;
+import org.w3c.dom.traversal.NodeFilter;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -44,8 +45,6 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.net.URI;
 import java.util.*;
-
-import com.sun.org.apache.xerces.internal.impl.Constants;
 
 
 abstract public class FlowJoWorkspace implements Serializable
@@ -468,7 +467,7 @@ abstract public class FlowJoWorkspace implements Serializable
             }
             catch (RuntimeException x)
             {
-                Category.getInstance(FlowJoWorkspace.class).error("Unexpected error", x);
+                Logger.getLogger(FlowJoWorkspace.class).error("Unexpected error", x);
                 throw x;
             }
         }

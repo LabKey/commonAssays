@@ -2445,7 +2445,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            setTitle("Protein Database Admin");  // TODO: Admin nav trail
+            PageFlowUtil.urlProvider(AdminUrls.class).appendAdminNavTrail(root, "Protein Database Admin", null);
             return root;
         }
     }
@@ -3309,7 +3309,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            root.addChild("MS2 Admin");  // TODO: Admin trail
+            PageFlowUtil.urlProvider(AdminUrls.class).appendAdminNavTrail(root, "MS2 Admin", null);
             return root;
         }
     }
