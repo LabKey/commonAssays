@@ -55,4 +55,8 @@ public class AnalyteImportHelper implements OntologyManager.ImportHelper
 
     }
 
+    public void updateStatistics(int currentRow) throws SQLException
+    {
+    }
+
 }

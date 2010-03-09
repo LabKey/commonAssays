@@ -71,11 +71,13 @@ public class MultiValueInputColumn extends DataColumn
         if (_values != null && _values.size() > 0)
         {
             out.write(", [");
-            for (String s : _values)
+            for (int i = 0; i < _values.size(); i++)
             {
                 out.write("'");
-                out.write(PageFlowUtil.filter(s));
-                out.write("', ");
+                out.write(PageFlowUtil.filter(_values.get(i)));
+                out.write("'");
+                if (i < _values.size() - 1)
+                    out.write(", ");
             }
             out.write("]");
         }

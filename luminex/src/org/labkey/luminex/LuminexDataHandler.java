@@ -488,6 +488,10 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 public void afterBatchInsert(int currentRow) throws SQLException
                 {
                 }
+
+                public void updateStatistics(int currentRow) throws SQLException
+                {
+                }
             }, excelRunColumns, excelRunPropsList, true);
 
             if (ownTransaction)

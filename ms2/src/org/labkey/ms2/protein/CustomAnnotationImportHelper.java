@@ -75,4 +75,8 @@ public class CustomAnnotationImportHelper implements OntologyManager.ImportHelpe
     public void afterBatchInsert(int currentRow) throws SQLException
     {
     }
+
+    public void updateStatistics(int currentRow) throws SQLException
+    {
+    }
 }

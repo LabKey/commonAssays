@@ -46,8 +46,10 @@ import java.util.*;
 public class FlowPipelineProvider extends PipelineProvider
 {
     public static final String NAME = "flow";
-    private static final String IMPORT_WORKSPACE_LABEL = "FlowJo Workspace";
-    private static final String IMPORT_DIRECTORY_LABEL = "Directory of FCS Files";
+
+    private static final String IMPORT_DIRECTORY_NAVTREE_LABEL = "Import FCS Files";
+    private static final String IMPORT_WORKSPACE_LABEL = "Import FlowJo Workspace";
+    private static final String IMPORT_DIRECTORY_LABEL = "Import Directory of FCS Files";
 
     public FlowPipelineProvider(Module owningModule)
     {
@@ -152,7 +154,7 @@ public class FlowPipelineProvider extends PipelineProvider
 
         if (includeAll || (dirs != null && dirs.length > 0))
         {
-            NavTree selectedDirsNavTree = new NavTree("FCS Files");
+            NavTree selectedDirsNavTree = new NavTree(IMPORT_DIRECTORY_NAVTREE_LABEL);
             selectedDirsNavTree.setId(baseId);
 
             NavTree child = new NavTree(IMPORT_DIRECTORY_LABEL, importRunsURL);
@@ -170,7 +172,7 @@ public class FlowPipelineProvider extends PipelineProvider
             if (includeAll || (fcsFiles != null && fcsFiles.length > 0))
             {
                 ActionURL url = importRunsURL.clone().addParameter("current", true);
-                NavTree tree = new NavTree("FCS Files");
+                NavTree tree = new NavTree(IMPORT_DIRECTORY_NAVTREE_LABEL);
                 tree.setId(baseId);
 
                 NavTree child = new NavTree("Current directory of " + (fcsFiles.length > 0 ? fcsFiles.length : "") + " FCS Files", url);
@@ -202,7 +204,7 @@ public class FlowPipelineProvider extends PipelineProvider
 
         // import directory of fcs files
         String actionId = createActionId(this.getClass(), null);
-        PipelineActionConfig importConfig = new PipelineActionConfig(actionId, PipelineActionConfig.displayState.enabled, "FCS Files");
+        PipelineActionConfig importConfig = new PipelineActionConfig(actionId, PipelineActionConfig.displayState.enabled, IMPORT_DIRECTORY_NAVTREE_LABEL);
 
         actionId = createActionId(this.getClass(), IMPORT_DIRECTORY_LABEL);
         importConfig.setLinks(Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, IMPORT_DIRECTORY_LABEL)));
