@@ -16,7 +16,6 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
-import org.apache.commons.collections.list.TreeList;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
@@ -26,6 +25,7 @@ import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.log4j.Logger;
 import org.labkey.api.ms2.SearchClient;
 import org.labkey.api.util.NetworkDrive;
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;

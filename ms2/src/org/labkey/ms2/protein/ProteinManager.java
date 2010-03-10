@@ -16,19 +16,20 @@
 
 package org.labkey.ms2.protein;
 
-import org.apache.commons.collections.map.MultiValueMap;
-import org.apache.log4j.Logger;
-import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConversionException;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.collections15.MultiMap;
+import org.apache.commons.collections15.multimap.MultiHashMap;
+import org.apache.log4j.Logger;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.*;
+import org.labkey.api.exp.DomainNotFoundException;
+import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Path;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.DomainNotFoundException;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.webdav.SimpleDocumentResource;
 import org.labkey.ms2.*;
 
@@ -1067,12 +1068,12 @@ public class ProteinManager
     }
 
 
-    public static MultiValueMap getIdentifiersFromId(int seqid) throws SQLException
+    public static MultiMap<String, String> getIdentifiersFromId(int seqid) throws SQLException
     {
         ResultSet rs = null;
         try
         {
-            MultiValueMap map = new MultiValueMap();
+            MultiMap<String, String> map = new MultiHashMap<String, String>();
             rs = Table.executeQuery(getSchema(),
                     "SELECT T.name AS name, I.identifier\n" +
                     "FROM " + getTableInfoIdentifiers() + " I INNER JOIN " + getTableInfoIdentTypes() + " T ON I.identtypeid = T.identtypeid\n" +
@@ -1084,7 +1085,7 @@ public class ProteinManager
                 String id = rs.getString(2);
                 if (name.startsWith("go_"))
                     name = "go";
-                map.put(name,id);
+                map.put(name, id);
             }
             return map;
         }
@@ -1335,23 +1336,13 @@ public class ProteinManager
                 try
                 {
                     Protein p = getProtein(id);
-                    MultiValueMap map = getIdentifiersFromId(id);
+                    MultiMap<String, String> map = getIdentifiersFromId(id);
                     StringBuilder sb = new StringBuilder();
                     sb.append(p.getBestName()).append("\n");
                     sb.append(p.getDescription()).append("\n");
-                    for (Object v : map.values())
+                    for (String v : map.values())
                     {
-                        if (v instanceof String)
-                        {
-                            sb.append((String)v).append(" ");
-                        }
-                        else
-                        {
-                            for (String ident : (Collection<String>)v)
-                            {
-                                sb.append(ident).append(" ");
-                            }
-                        }
+                        sb.append(v).append(" ");
                     }
 
                     String docid = "protein:" + id;

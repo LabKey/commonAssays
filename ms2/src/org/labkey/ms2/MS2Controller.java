@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2;
 
-import org.apache.commons.collections.map.MultiValueMap;
+import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
@@ -4101,21 +4101,21 @@ public class MS2Controller extends SpringActionController
             int seqId = protein.getSeqId();
             String[] empty = new String[0];
 
-            MultiValueMap identifiers = ProteinManager.getIdentifiersFromId(seqId);
+            MultiMap<String, String> identifiers = ProteinManager.getIdentifiersFromId(seqId);
 
             /* collect header info */
             String SeqName = protein.getBestName(); // ProteinManager.getSeqParamFromId("BestName", seqId);
             String SeqDesc = protein.getDescription(); // ProteinManager.getSeqParamFromId("Description", seqId);
-            Collection<String> GeneNames = identifiers.getCollection("genename");
+            Collection<String> GeneNames = identifiers.get("genename");
             /* collect first table info */
-            Collection<String> GenBankIds = identifiers.getCollection("genbank");
-            Collection<String> SwissProtNames = identifiers.getCollection("swissprot");
-            Collection<String> EnsemblIDs = identifiers.getCollection("ensembl");
-            Collection<String> GIs = identifiers.getCollection("gi");
-            Collection<String> SwissProtAccns = identifiers.getCollection(IdentifierType.SwissProtAccn.name().toLowerCase());
-            Collection<String> IPIds = identifiers.getCollection("ipi");
-            Collection<String> RefSeqIds = identifiers.getCollection("refseq");
-            Collection<String> GOCategories = identifiers.getCollection("go");
+            Collection<String> GenBankIds = identifiers.get("genbank");
+            Collection<String> SwissProtNames = identifiers.get("swissprot");
+            Collection<String> EnsemblIDs = identifiers.get("ensembl");
+            Collection<String> GIs = identifiers.get("gi");
+            Collection<String> SwissProtAccns = identifiers.get(IdentifierType.SwissProtAccn.name().toLowerCase());
+            Collection<String> IPIds = identifiers.get("ipi");
+            Collection<String> RefSeqIds = identifiers.get("refseq");
+            Collection<String> GOCategories = identifiers.get("go");
 
             HashSet<String> allGbIds = new HashSet<String>();
             if (null != GenBankIds)
