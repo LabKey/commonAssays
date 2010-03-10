@@ -113,7 +113,7 @@ public class SpectrumGraph extends Graph
     }
 
 
-    // Rotate font 90° to label the fragments
+    // Rotate font 90 degrees to label the fragments
     public void initializeDataPoints(Graphics2D g)
     {
         AffineTransform at = g.getFont().getTransform();
