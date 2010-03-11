@@ -16,9 +16,9 @@
 
 package org.labkey.flow.analysis.model;
 
-import com.sun.org.apache.xerces.internal.impl.Constants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.xerces.impl.Constants;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.util.SymbolTable;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
