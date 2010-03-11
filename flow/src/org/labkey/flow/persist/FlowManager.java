@@ -16,34 +16,26 @@
 
 package org.labkey.flow.persist;
 
-import org.apache.commons.collections15.MultiMap;
-import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.labkey.api.collections.CacheMap;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Handler;
-import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpObject;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.security.User;
-import org.labkey.api.util.*;
-import org.labkey.api.util.Search.SearchTermParser;
-import org.labkey.api.util.Search.Searchable;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.collections.CacheMap;
+import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.query.AttributeCache;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
-import org.labkey.flow.controllers.well.WellController;
 
-import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -250,7 +242,7 @@ public class FlowManager
             int ret = getAttributeId(attr);
             if (ret != 0)
                 return ret;
-            Map<String, Object> map = new HashMap();
+            Map<String, Object> map = new HashMap<String, Object>();
             map.put("Name", attr);
             Table.insert(null, getTinfoAttribute(), map);
             _attridCacheMap.remove(attr);
@@ -421,7 +413,7 @@ public class FlowManager
             return;
         StringBuilder sqlGetOIDs = new StringBuilder("SELECT flow.Object.RowId FROM flow.Object WHERE flow.Object.DataId IN (");
         String comma = "";
-        Set<Container> containers = new HashSet();
+        Set<Container> containers = new HashSet<Container>();
         for (ExpData data : datas)
         {
             sqlGetOIDs.append(comma);
@@ -668,158 +660,6 @@ public class FlowManager
         catch (SQLException x)
         {
             throw new RuntimeSQLException(x);
-        }
-    }
-
-
-    public MultiMap<String, String> searchFCSFiles(Collection<String> containerIds, Search.SearchTermParser parser)
-    {
-        FCSFileSearch search = new FCSFileSearch(containerIds, parser);
-        return search.search();
-    }
-
-
-    public static class FCSFileSearch implements Searchable
-    {
-        public static final String SEARCH_DOMAIN = "fcsfile";
-        public static final String SEARCH_RESULT_TYPE = "labkey/fcsfile";
-        public static final String SEARCH_RESULT_TYPE_DESCR = "FCS Files";
-
-        Collection<String> containerIds;
-        SearchTermParser parser;
-        
-        public FCSFileSearch(Collection<String> containerIds, SearchTermParser parser)
-        {
-            this.containerIds = containerIds;
-            this.parser = parser;
-        }
-
-        public void search(SearchTermParser parser, Set<Container> containers, List<SearchHit> hits, User user)
-        {
-            List<String> ids = new ArrayList<String>(containers.size());
-            for(Container c : containers)
-                ids.add(c.getId());
-            this.containerIds = ids;
-            this.parser = parser;
-
-            DbSchema s = FlowManager.get().getSchema();
-            String fromClause = "flow.attribute A inner join flow.keyword K on A.rowid=K.keywordid inner join flow.object O on K.objectid = O.rowid inner join exp.data D on O.dataid = D.rowid";
-            SQLFragment fragment = Search.getSQLFragment("container, FCSName, uri, dataid", "D.container, D.name AS FCSName, O.uri, O.dataid, A.name, K.value", fromClause, "D.Container", null, containerIds, parser, s.getSqlDialect(),  "A.name", "K.value");
-
-            ResultSet rs = null;
-
-            ActionURL url = WellController.getShowWellURL();
-
-            try
-            {
-                rs = Table.executeQuery(s, fragment);
-
-                while(rs.next())
-                {
-                    String containerId = rs.getString(1);
-                    String name = rs.getString(2);
-                    String uri = rs.getString(3);
-                    String wellId = String.valueOf(rs.getInt(4));
-
-                    String path = null;
-                    if (uri != null)
-                    {
-                        try
-                        {
-                            path = new File(new URI(uri)).getPath();
-                        }
-                        catch (URISyntaxException x)
-                        {
-                        }
-                    }
-                    Container c = ContainerManager.getForId(containerId);
-                    url.setContainer(c);
-                    url.replaceParameter("wellId", wellId);
-
-                    SimpleSearchHit hit = new SimpleSearchHit(SEARCH_DOMAIN, c.getPath(), path != null ? path : name,
-                            url.getLocalURIString(), SEARCH_RESULT_TYPE, SEARCH_RESULT_TYPE_DESCR);
-                    hits.add(hit);
-                }
-            }
-            catch(SQLException e)
-            {
-                ExceptionUtil.logExceptionToMothership(HttpView.currentRequest(), e);
-            }
-            finally
-            {
-                ResultSetUtil.close(rs);
-            }
-        }
-
-        protected MultiMap<String, String> search()
-        {
-            DbSchema s = FlowManager.get().getSchema();
-            String fromClause = "flow.attribute A inner join flow.keyword K on A.rowid=K.keywordid inner join flow.object O on K.objectid = O.rowid inner join exp.data D on O.dataid = D.rowid";
-            SQLFragment fragment = Search.getSQLFragment("container, FCSName, uri, dataid", "D.container, D.name AS FCSName, O.uri, O.dataid, A.name, K.value", fromClause, "D.Container", null, containerIds, parser, s.getSqlDialect(),  "A.name", "K.value");
-
-            MultiMap<String, String> map = new MultiHashMap<String, String>();
-            ResultSet rs = null;
-
-            ActionURL url = WellController.getShowWellURL();
-            StringBuilder link = new StringBuilder(200);
-
-            try
-            {
-                rs = Table.executeQuery(s, fragment);
-
-                while(rs.next())
-                {
-                    String containerId = rs.getString(1);
-                    String name = rs.getString(2);
-                    String uri = rs.getString(3);
-                    String wellId = String.valueOf(rs.getInt(4));
-                    
-                    String path = null;
-                    if (uri != null)
-                    {
-                        try
-                        {
-                            path = new File(new URI(uri)).getPath();
-                        }
-                        catch (URISyntaxException x)
-                        {
-                        }
-                    }
-                    Container c = ContainerManager.getForId(containerId);
-                    url.setContainer(c);
-                    url.replaceParameter("wellId", wellId);
-                    link.append("<a href=\"");
-                    link.append(url.getEncodedLocalURIString());
-                    link.append("\">");
-                    if (path != null)
-                        link.append(PageFlowUtil.filter(path));
-                    else
-                        link.append(name);
-                    link.append("</a>");
-                    map.put(containerId, link.toString());
-                    link.setLength(0);
-                }
-            }
-            catch(SQLException e)
-            {
-                ExceptionUtil.logExceptionToMothership(HttpView.currentRequest(), e);
-            }
-            finally
-            {
-                ResultSetUtil.close(rs);
-            }
-
-            return map;
-        }
-
-        public String getSearchResultNamePlural()
-        {
-            return SEARCH_RESULT_TYPE_DESCR;
-        }
-
-        public String getDomainName()
-        {
-            return SEARCH_DOMAIN;
         }
     }
 

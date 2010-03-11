@@ -16,8 +16,8 @@
 
 package org.labkey.flow;
 
-//import org.apache.log4j.Logger;
-import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
@@ -26,16 +26,17 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.Search;
+import org.labkey.api.view.DefaultWebPartFactory;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
-import org.labkey.api.view.DefaultWebPartFactory;
-import org.labkey.api.reports.ReportService;
 import org.labkey.flow.analysis.model.FCSHeader;
+import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.controllers.ReportsController;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -44,8 +45,6 @@ import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.controllers.remote.FlowRemoteController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
-import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.controllers.ReportsController;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocolImplementation;
@@ -53,13 +52,13 @@ import org.labkey.flow.persist.FlowContainerListener;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.reports.ControlsQCReport;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.webparts.*;
-import org.labkey.flow.reports.ControlsQCReport;
 
-import java.util.Set;
-import java.util.Collection;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
 
 public class FlowModule extends DefaultModule
 {
@@ -145,7 +144,6 @@ public class FlowModule extends DefaultModule
         ExperimentService.get().registerExperimentDataHandler(FlowDataHandler.instance);
         FlowProtocolImplementation.register();
         ModuleLoader.getInstance().registerFolderType(new FlowFolderType(this));
-        Search.register(new FlowManager.FCSFileSearch(null,null));
         ServiceRegistry.get(SearchService.class).addDocumentParser(FCSHeader.documentParser);
         FlowController.registerAdminConsoleLinks();
     }
