@@ -1,0 +1,4 @@
+{table}
+Filename|Component|Version|Source|License|LabKey Dev|Purpose
+xercesImpl.jar|Xerces|2.6.2|{link:Apache|http://xerces.apache.org/xerces2-j/}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|brittp|XML parser implementation
+{table}

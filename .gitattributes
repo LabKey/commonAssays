@@ -18,6 +18,7 @@ authentication/src/org/labkey/authentication/opensso/clientDefault.properties -t
 authentication/src/org/labkey/authentication/opensso/view/configure.jsp -text
 authentication/src/org/labkey/authentication/opensso/view/currentSettings.jsp -text
 authentication/src/org/labkey/authentication/opensso/view/referrerPrefix.jsp -text
+biotrue/lib/jaxrpc.jar -text
 biotrue/module.properties -text
 biotrue/resources/schemas/biotrue.xml -text
 biotrue/resources/schemas/dbscripts/postgresql/biotrue-0.00-2.10.sql -text
@@ -186,6 +187,7 @@ flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/graph/TransparentEventImage.jav
 flow/gwtsrc/org/labkey/flow/gateeditor/client/util/LogAxisFunction.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/util/RangeFunction.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/util/SimpleLogAxisFunction.java -text
+flow/lib/xercesImpl.jar -text
 flow/module.properties -text
 flow/resources/schemas/dbscripts/postgresql/flow-0.00-8.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-2.10-2.20.sql -text
@@ -212,6 +214,7 @@ flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-2.30-2.32.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-2.31-2.32.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-8.30-8.31.sql -text
 flow/resources/schemas/flow.xml -text
+flow/src/META-INF/flow/jars.txt -text
 flow/src/META-INF/qc.R -text
 flow/src/org/labkey/flow/FlowModule.java -text
 flow/src/org/labkey/flow/FlowPreference.java -text

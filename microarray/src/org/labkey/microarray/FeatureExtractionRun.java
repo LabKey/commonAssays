@@ -16,23 +16,14 @@
 
 package org.labkey.microarray;
 
-import org.labkey.api.data.Container;
 import org.labkey.api.data.Entity;
-import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.util.MemTracker;
 import org.labkey.api.view.ViewContext;
 
-import javax.ejb.*;
 import java.io.Serializable;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 
 
-@javax.ejb.Entity
-@Table(name = "FeatureExtractionRuns")
 public class FeatureExtractionRun extends Entity implements Serializable, Cloneable
 {
     protected byte[] _ts;
@@ -55,7 +46,6 @@ public class FeatureExtractionRun extends Entity implements Serializable, Clonea
         assert MemTracker.put(this);
     }
 
-    @Id(generate = GeneratorType.AUTO)
     public int getRowId()
     {
         return rowId;
@@ -66,12 +56,10 @@ public class FeatureExtractionRun extends Entity implements Serializable, Clonea
         this.rowId = rowId;
     }
 
-    @Transient
     public String getName() {
         return barcode;
     }
 
-    @Transient
     public String getCreatedByName(ViewContext context)
     {
         return UserManager.getDisplayName(getCreatedBy(), context);
