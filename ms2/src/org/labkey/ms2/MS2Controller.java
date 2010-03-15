@@ -63,7 +63,6 @@ import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
-import org.springframework.beans.PropertyValues;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
@@ -151,7 +150,7 @@ public class MS2Controller extends SpringActionController
 
     private NavTree appendRootNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
     {
-        page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic, HelpTopic.Area.CPAS));
+        page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic));
         root.addChild("MS2 Runs", getShowListURL(getContainer()));
         if (null != title)
             root.addChild(title);
@@ -176,7 +175,7 @@ public class MS2Controller extends SpringActionController
 
     private NavTree appendAdminNavTrail(NavTree root, String adminPageTitle, ActionURL adminPageURL, String title, PageConfig page, String helpTopic)
     {
-        page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic, HelpTopic.Area.CPAS));
+        page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic));
         root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
         root.addChild(adminPageTitle, adminPageURL);
         root.addChild(title);
@@ -945,7 +944,7 @@ public class MS2Controller extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             setTitle((GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO Annotations");
-            setHelpTopic(new HelpTopic("annotations", HelpTopic.Area.CPAS));
+            setHelpTopic(new HelpTopic("annotations"));
             return null;  // TODO: Admin navtrail
         }
 
@@ -1020,7 +1019,7 @@ public class MS2Controller extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             setTitle("GO Load Status");
-            setHelpTopic(new HelpTopic("annotations", HelpTopic.Area.CPAS));
+            setHelpTopic(new HelpTopic("annotations"));
             return null;
         }
     }

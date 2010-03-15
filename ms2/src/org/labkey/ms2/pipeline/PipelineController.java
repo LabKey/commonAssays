@@ -58,7 +58,7 @@ public class PipelineController extends SpringActionController
 
     private static HelpTopic getHelpTopic(String topic)
     {
-        return new HelpTopic(topic, HelpTopic.Area.CPAS);
+        return new HelpTopic(topic);
     }
 
     public PipelineController()

@@ -56,7 +56,7 @@ public class ScoringController extends SpringActionController
 
     private static HelpTopic getHelpTopic(String topic)
     {
-        return new HelpTopic(topic, HelpTopic.Area.CPAS);
+        return new HelpTopic(topic);
     }
 
     public ScoringController()

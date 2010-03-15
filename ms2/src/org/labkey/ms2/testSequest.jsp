@@ -65,7 +65,7 @@ If you're unfamiliar with your organization's Sequest services configuration you
 
 <ul>
 <li>Server is typically of the form http://servername.org/SequestQueue</li>
-<li><a href="<%=(new HelpTopic("configSequest", HelpTopic.Area.SERVER)).getHelpTopicLink()%>">More information...</a>
+<li><a href="<%=(new HelpTopic("configSequest" )).getHelpTopicLink()%>">More information...</a>
 </ul>
 <%
 }
