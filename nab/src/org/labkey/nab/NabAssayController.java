@@ -77,7 +77,8 @@ public class NabAssayController extends SpringActionController
 {
     private static final DefaultActionResolver _resolver = new DefaultActionResolver(NabAssayController.class,
             NabUploadWizardAction.class,
-            GetNabRunsAction.class
+            GetNabRunsAction.class,
+            getStudyNabRuns.class
         );
 
     public NabAssayController()

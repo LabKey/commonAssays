@@ -1247,6 +1247,7 @@ nab/module.properties -text
 nab/src/org/labkey/nab/AbstractNabDataHandler.java -text
 nab/src/org/labkey/nab/DilutionSummary.java -text
 nab/src/org/labkey/nab/GetNabRunsAction.java -text
+nab/src/org/labkey/nab/GetNabRunsBaseForm.java -text
 nab/src/org/labkey/nab/Luc5Assay.java -text
 nab/src/org/labkey/nab/NabAssayController.java -text
 nab/src/org/labkey/nab/NabAssayProvider.java -text
@@ -1259,6 +1260,7 @@ nab/src/org/labkey/nab/NabManager.java -text
 nab/src/org/labkey/nab/NabMaterialKey.java -text
 nab/src/org/labkey/nab/NabModule.java -text
 nab/src/org/labkey/nab/NabPlateTypeHandler.java -text
+nab/src/org/labkey/nab/NabRunPropertyMap.java -text
 nab/src/org/labkey/nab/NabRunUploadForm.java -text
 nab/src/org/labkey/nab/NabUpgradeCode.java -text
 nab/src/org/labkey/nab/NabUploadWizardAction.java -text
@@ -1266,6 +1268,7 @@ nab/src/org/labkey/nab/RunMetadata.java -text
 nab/src/org/labkey/nab/RunSettings.java -text
 nab/src/org/labkey/nab/SafeTextConverter.java -text
 nab/src/org/labkey/nab/SampleInfo.java -text
+nab/src/org/labkey/nab/getStudyNabRuns.java -text
 nab/src/org/labkey/nab/header.jsp -text
 nab/src/org/labkey/nab/legacyGraph.jsp -text
 nab/src/org/labkey/nab/multiRunGraph.jsp -text
