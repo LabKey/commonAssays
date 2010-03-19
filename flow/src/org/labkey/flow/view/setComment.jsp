@@ -121,11 +121,11 @@ var CommentField = Ext.extend(Ext.form.TextField, {
         switch (status)
         {
             case 'loading':
-                this.statusEl.setStyle("background-image", "url(<%=contextPath%>/ext-2.2/resources/images/default/grid/loading.gif)");
+                this.statusEl.setStyle("background-image", "url(<%=contextPath%>/ext-3.1.1/resources/images/default/grid/loading.gif)");
                 this.statusEl.setStyle("color", "silver");
                 break;
             case 'success':
-                this.statusEl.setStyle("background-image", "url(<%=contextPath%>/ext-2.2/resources/images/default/tree/drop-yes.gif)");
+                this.statusEl.setStyle("background-image", "url(<%=contextPath%>/ext-3.1.1/resources/images/default/tree/drop-yes.gif)");
                 this.statusEl.setStyle("color", "green");
                 if (!this.delayHide)
                 {
@@ -134,7 +134,7 @@ var CommentField = Ext.extend(Ext.form.TextField, {
                 this.delayHide.delay(4000);
                 break;
             case 'error':
-                this.statusEl.setStyle("background-image", "url(<%=contextPath%>/ext-2.2/resources/images/default/form/exclamation.gif)")
+                this.statusEl.setStyle("background-image", "url(<%=contextPath%>/ext-3.1.1/resources/images/default/form/exclamation.gif)")
                 this.statusEl.setStyle("color", "red");
                 break;
         }
