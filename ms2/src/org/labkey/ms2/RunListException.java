@@ -16,10 +16,11 @@
 
 package org.labkey.ms2;
 
-import org.springframework.validation.BindException;
+import org.apache.commons.lang.StringUtils;
 import org.labkey.api.action.LabkeyError;
+import org.springframework.validation.BindException;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Collections;
 
 /**
@@ -28,34 +29,26 @@ import java.util.Collections;
 */
 public class RunListException extends Exception
 {
-    private List<String> _messages;
+    private Collection<String> _messages;
 
     public RunListException(String message)
     {
         this(Collections.singletonList(message));
     }
 
-    public RunListException(List<String> messages)
+    public RunListException(Collection<String> messages)
     {
         _messages = messages;
     }
 
-    public List<String> getMessages()
+    public Collection<String> getMessages()
     {
         return _messages;
     }
 
     public String getMessage()
     {
-        StringBuffer sb = new StringBuffer();
-        String concat = "";
-        for (String msg : _messages)
-        {
-            sb.append(msg);
-            sb.append(concat);
-            concat = "\n";
-        }
-        return sb.toString();
+        return StringUtils.join(_messages, '\n');
     }
 
     public void addErrors(BindException errors)

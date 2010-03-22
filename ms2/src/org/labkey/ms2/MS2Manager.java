@@ -1909,7 +1909,7 @@ public class MS2Manager
     public static void validateRuns(List<MS2Run> runs, boolean requireSameType, User user) throws UnauthorizedException, RunListException
     {
         String type = null;
-        List<String> errors = new ArrayList<String>();
+        Set<String> errors = new LinkedHashSet<String>();
 
         for (MS2Run run : runs)
         {

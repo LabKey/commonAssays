@@ -43,6 +43,7 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.settings.WriteableAppProps;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
@@ -1756,7 +1757,7 @@ public class MS2Controller extends SpringActionController
             {
                 errors.addError(new LabkeyError(e));
                 SimpleErrorView view = new SimpleErrorView(errors);
-                view.render(getViewContext().getRequest(), response);
+                renderInTemplate(getViewContext(), this, getPageConfig(), view);
                 return;
             }
 
