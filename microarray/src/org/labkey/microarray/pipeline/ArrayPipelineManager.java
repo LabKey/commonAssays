@@ -152,8 +152,7 @@ public class ArrayPipelineManager {
         Set<File> knownFiles = new HashSet<File>();
         Set<File> checkedDirectories = new HashSet<File>();
         
-        File dirData = imageDir.getCanonicalFile();
-        File[] imageFiles = dirData.listFiles(getImageFileFilter());
+        File[] imageFiles = imageDir.listFiles(getImageFileFilter());
 
         Map<File, FileStatus> imageFileMap = new LinkedHashMap<File, FileStatus>();
         if (imageFiles != null && imageFiles.length > 0)
@@ -166,7 +165,7 @@ public class ArrayPipelineManager {
                 }
             });
 
-            File logFile = getExtractionLog(dirData, null);
+            File logFile = getExtractionLog(imageDir, null);
             boolean logExists = exists(logFile, knownFiles, checkedDirectories);
 
             for (File file : imageFiles)
@@ -175,7 +174,7 @@ public class ArrayPipelineManager {
                 if (logExists)
                 {
                     // Check to see if images match what is being or has been processed by the pipeline.
-                    PipelineStatusFile sf = PipelineService.get().getStatusFile(logFile.getCanonicalPath());
+                    PipelineStatusFile sf = PipelineService.get().getStatusFile(logFile.getAbsolutePath());
                     if (null == sf || !sf.isActive())
                         status = FileStatus.COMPLETE;
                     else

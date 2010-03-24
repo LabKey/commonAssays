@@ -17,6 +17,7 @@
 package org.labkey.microarray.pipeline;
 
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -25,10 +26,13 @@ import org.labkey.microarray.MicroarrayController;
 import org.labkey.microarray.MicroarrayModule;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
 
 public class MicroarrayPipelineProvider extends AssayPipelineProvider
 {
     public static final String NAME = "Array";
+    private static final String IMPORT_IMAGES_BUTTON_NAME = "Import Images";
 
     public MicroarrayPipelineProvider(MicroarrayAssayProvider assayProvider)
     {
@@ -44,10 +48,21 @@ public class MicroarrayPipelineProvider extends AssayPipelineProvider
             return;
         }
 
-        String actionId = createActionId(MicroarrayController.ImportImageFilesAction.class, "Import Images");
-        addAction(actionId, MicroarrayController.ImportImageFilesAction.class, "Import Images",
-                directory, directory.listFiles(ArrayPipelineManager.getImageFileFilter()), true, false, includeAll);
+        String actionId = createImportImagesActionId();
+        addAction(actionId, MicroarrayController.ImportImageFilesAction.class, IMPORT_IMAGES_BUTTON_NAME,
+                directory, directory.listFiles(ArrayPipelineManager.getImageFileFilter()), true, true, includeAll);
+    }
 
+    private String createImportImagesActionId()
+    {
+        return createActionId(MicroarrayController.ImportImageFilesAction.class, IMPORT_IMAGES_BUTTON_NAME);
+    }
+
+    @Override
+    public List<PipelineActionConfig> getDefaultActionConfig()
+    {
+        String actionId = createImportImagesActionId();
+        return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, IMPORT_IMAGES_BUTTON_NAME, true));
     }
 }
 
