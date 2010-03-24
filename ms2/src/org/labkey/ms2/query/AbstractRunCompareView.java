@@ -53,7 +53,7 @@ public abstract class AbstractRunCompareView extends QueryView
     private SimpleFilter _runFilter = new SimpleFilter();
     private List<FieldKey> _columns;
 
-    private Collection<String> _errors = new ArrayList<String>();
+    private Collection<String> _runErrors = new ArrayList<String>();
     protected final String _peptideViewName;
 
     public AbstractRunCompareView(ViewContext context, int runListIndex, boolean forExport, String tableName, String peptideViewName) throws ServletException
@@ -70,7 +70,7 @@ public abstract class AbstractRunCompareView extends QueryView
         catch (RunListException e)
         {
             _runs = null;
-            _errors = e.getMessages();
+            _runErrors = e.getMessages();
         }
 
         if (_runs != null)
@@ -99,11 +99,6 @@ public abstract class AbstractRunCompareView extends QueryView
         return _runs;
     }
     
-    public Collection<String> getErrors()
-    {
-        return _errors;
-    }
-
     private static QuerySettings createSettings(ViewContext context, String tableName)
     {
         QuerySettings settings = new QuerySettings(context, "Compare");

@@ -18,13 +18,11 @@ package org.labkey.ms2.protein.tools;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Table;
-import org.labkey.api.util.Path;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.CloseableIterator;
 import org.labkey.api.view.ViewServlet;
-import org.labkey.api.webdav.ModuleStaticResolverImpl;
-import org.labkey.api.webdav.Resource;
+import org.labkey.api.webdav.WebdavResource;
 import org.labkey.api.webdav.WebdavService;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.ms2.MS2Manager;
@@ -149,7 +147,7 @@ public class ProteinDictionaryHelpers
 
     private static InputStream getSProtOrgMap() throws IOException
     {
-        Resource r = WebdavService.get().lookup(FILE);
+        WebdavResource r = WebdavService.get().lookup(FILE);
         if (null != r)
         {
             InputStream is = r.getInputStream(null);
