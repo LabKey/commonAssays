@@ -491,7 +491,6 @@ public class PipelineController extends SpringActionController
             props.put("targetAction", SpringActionController.getActionName(getAction()) + ".view");
             props.put("path", form.getPath());
             GWTView result = new GWTView(org.labkey.ms2.pipeline.client.Search.class, props);
-            result.setImmediateLoad(true);
             return result;
         }
 
