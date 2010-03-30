@@ -427,7 +427,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
                 errors.rejectValue("folderName", ERROR_MSG, "There is already a folder with the name '" + form.getFolderName() + "'");
                 return false;
             }
-            StringBuffer error = new StringBuffer();
+            StringBuilder error = new StringBuilder();
             if (!Container.isLegalName(form.getFolderName(), error))
             {
                 errors.rejectValue("folderName", ERROR_MSG, error.toString());
