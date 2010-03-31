@@ -25,7 +25,6 @@
   </ns:table>
   <ns:table tableName="Keyword" tableDbType="TABLE">
     <ns:columns>
-      <ns:column columnName="RowId"/>
       <ns:column columnName="ObjectId"/>
       <ns:column columnName="KeywordId"/>
       <ns:column columnName="Value"/>
@@ -41,7 +40,6 @@
   </ns:table>
   <ns:table tableName="Statistic" tableDbType="TABLE">
     <ns:columns>
-      <ns:column columnName="RowId"/>
       <ns:column columnName="ObjectId"/>
       <ns:column columnName="StatisticId"/>
       <ns:column columnName="Value"/>

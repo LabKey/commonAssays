@@ -18,6 +18,7 @@ package org.labkey.flow;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
@@ -152,6 +153,12 @@ public class FlowModule extends DefaultModule
     public Set<String> getSchemaNames()
     {
         return PageFlowUtil.set(FlowManager.get().getSchemaName());
+    }
+
+
+    public Set<DbSchema> getSchemasToTest()
+    {
+        return PageFlowUtil.set(FlowManager.get().getSchema());
     }
 
 
