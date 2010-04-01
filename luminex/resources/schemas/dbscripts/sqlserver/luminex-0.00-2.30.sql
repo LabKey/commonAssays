@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 LabKey Corporation
+ * Copyright (c) 2007-2008 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  */
 /* luminex-0.00-2.20.sql */
 
-CREATE SCHEMA luminex;
+EXEC sp_addapprole 'luminex', 'password'
+GO
 
 CREATE TABLE luminex.Analyte
 (
-	RowId SERIAL NOT NULL,
-	LSID LSIDType NOT NULL,
+	RowId INT IDENTITY(1,1) NOT NULL,
+	LSID LSIDtype NOT NULL ,
     Name VARCHAR(50) NOT NULL,
     DataId INT NOT NULL,
     FitProb REAL,
@@ -32,18 +33,20 @@ CREATE TABLE luminex.Analyte
 
 	CONSTRAINT PK_Luminex_Analyte PRIMARY KEY (RowId),
 	CONSTRAINT FK_LuminexAnalyte_DataId FOREIGN KEY (DataId) REFERENCES exp.Data(RowId)
-);
+)
+GO
 
-CREATE INDEX IX_LuminexAnalyte_DataId ON luminex.Analyte (DataId);
+CREATE INDEX IX_LuminexAnalyte_DataId ON luminex.Analyte (DataId)
+GO
 
 CREATE TABLE luminex.DataRow
 (
-	RowId SERIAL NOT NULL,
+	RowId INT IDENTITY(1,1) NOT NULL,
     DataId INT NOT NULL,
     AnalyteId INT NOT NULL,
     Type VARCHAR(10),
     Well VARCHAR(50),
-    Outlier BOOLEAN,
+    Outlier BIT,
     Description VARCHAR(50),
     FIString VARCHAR(20),
     FI REAL,
@@ -66,23 +69,35 @@ CREATE TABLE luminex.DataRow
 	CONSTRAINT PK_Luminex_DataRow PRIMARY KEY (RowId),
 	CONSTRAINT FK_LuminexDataRow_DataId FOREIGN KEY (DataId) REFERENCES exp.Data(RowId),
 	CONSTRAINT FK_LuminexDataRow_AnalyteId FOREIGN KEY (DataId) REFERENCES exp.Data(RowId)
-);
+)
+GO
 
-CREATE INDEX IX_LuminexDataRow_DataId ON luminex.DataRow (DataId);
-CREATE INDEX IX_LuminexDataRow_AnalyteId ON luminex.DataRow (AnalyteId);
+CREATE INDEX IX_LuminexDataRow_DataId ON luminex.DataRow (DataId)
+GO
 
-ALTER TABLE luminex.DataRow ADD COLUMN Dilution REAL;
+CREATE INDEX IX_LuminexDataRow_AnalyteId ON luminex.DataRow (AnalyteId)
+GO
 
-ALTER TABLE luminex.DataRow ADD COLUMN DataRowGroup VARCHAR(25);
 
-ALTER TABLE luminex.DataRow ADD COLUMN Ratio VARCHAR(25);
+ALTER TABLE luminex.DataRow ADD Dilution REAL
+GO
 
-ALTER TABLE luminex.DataRow ADD COLUMN SamplingErrors VARCHAR(25);
+ALTER TABLE luminex.DataRow ADD DataRowGroup VARCHAR(25)
+GO
+
+ALTER TABLE luminex.DataRow ADD Ratio VARCHAR(25)
+GO
+
+ALTER TABLE luminex.DataRow ADD SamplingErrors VARCHAR(25)
+GO
 
 /* luminex-2.20-2.30.sql */
 
-ALTER TABLE luminex.DataRow ADD COLUMN PTID VARCHAR(32);
+ALTER TABLE luminex.DataRow ADD PTID NVARCHAR(32)
+GO
 
-ALTER TABLE luminex.DataRow ADD COLUMN VisitID FLOAT;
+ALTER TABLE luminex.DataRow ADD VisitID FLOAT
+GO
 
-ALTER TABLE luminex.DataRow ADD COLUMN Date TIMESTAMP;
+ALTER TABLE luminex.DataRow ADD Date DATETIME
+GO

@@ -38,6 +38,7 @@ CREATE VIEW ms2.ProteinGroupsWithQuantitation AS
     SELECT * FROM ms2.ProteinGroups LEFT JOIN ms2.ProteinQuantitation ON ProteinGroupId = RowId
 GO
 
+-- Union of all MS2Peptides columns; alias Score1 to RawScore and SpScore, Score2 to DiffScore and DeltaCn, etc.
 CREATE VIEW ms2.SimplePeptides AS SELECT
     frac.Run, run.Description AS RunDescription, pep.Fraction, CASE WHEN CHARINDEX('.', frac.FileName) >= 1 THEN LEFT(frac.FileName, CHARINDEX('.', frac.FileName) - 1) ELSE frac.FileName END AS FractionName, Scan, EndScan,
     RetentionTime, Charge, Score1 AS RawScore, Score2 AS DiffScore, Score3 AS ZScore, Score1 AS SpScore, Score2 AS DeltaCn, Score3 AS XCorr, Score4 AS SpRank, Score1 AS OrigScore,

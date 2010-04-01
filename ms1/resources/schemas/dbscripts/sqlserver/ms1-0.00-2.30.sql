@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 LabKey Corporation
+ * Copyright (c) 2007-2008 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,120 +19,121 @@
 /*
  * This only creates a schema, it doesn't create any tables
  */
- 
-CREATE SCHEMA ms1;
+EXEC sp_addapprole 'ms1', 'password'
+GO
 
 /* ms1-2.20-2.30.sql */
 
-/* PostgreSQL Version */
+/* SQL Server Version */
 
 /* table for storing information about the data files themselves (both features.tsv and peaks.xml) */
 CREATE TABLE ms1.Files
 (
-    FileId SERIAL NOT NULL,
+    FileId INT IDENTITY NOT NULL,
     ExpDataFileId INT NOT NULL,
-    Type SMALLINT NOT NULL,
-    MzXmlUrl VARCHAR(800) NULL,
-    Imported BOOLEAN NOT NULL DEFAULT FALSE,
-	Deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    Type TINYINT NOT NULL,
+    MzXmlUrl NVARCHAR(800) NULL,
+    Imported BIT NOT NULL DEFAULT 0,
+	Deleted bit NOT NULL DEFAULT 0,
 
-    CONSTRAINT PK_Files PRIMARY KEY (FileId)
+    CONSTRAINT PK_Files PRIMARY KEY NONCLUSTERED (FileId)
 )
-;
-CREATE INDEX IDX_Files_ExpDataFileId ON ms1.Files(ExpDataFileId)
-;
+GO
+CREATE CLUSTERED INDEX IDX_Files_ExpDataFileId ON ms1.Files(ExpDataFileId)
+GO
 
 /* table for storing information about software packages used to produce those files */
 CREATE TABLE ms1.Software
 (
-    SoftwareId SERIAL NOT NULL,
+    SoftwareId INT IDENTITY NOT NULL,
     FileId INT NOT NULL,
-    Name VARCHAR(400) NOT NULL,
-    Version VARCHAR(16) NULL,
-    Author VARCHAR(800) NULL,
+    Name NVARCHAR(400) NOT NULL,
+    Version NVARCHAR(16) NULL,
+    Author NVARCHAR(800) NULL,
 
-    CONSTRAINT PK_Software PRIMARY KEY (SoftwareId),
-    CONSTRAINT FK_Software_FileId FOREIGN KEY (FileId) REFERENCES ms1.Files(FileId)
+    CONSTRAINT PK_Software PRIMARY KEY NONCLUSTERED (SoftwareId),
+    CONSTRAINT FK_Software_FileId FOREIGN KEY (FileId) REFERENCES ms1.Files
 )
-;
-CREATE INDEX IDX_Software_FileId ON ms1.Software(FileId)
-;
+GO
+CREATE CLUSTERED INDEX IDX_Software_FileId ON ms1.Software(FileId)
+GO
 
 /* table to record parameters used by software to produce data files */
 CREATE TABLE ms1.SoftwareParams
 (
     SoftwareId INT NOT NULL,
-    Name VARCHAR(255) NOT NULL,
-    Value VARCHAR(255) NULL,
+    Name NVARCHAR(255) NOT NULL,
+    Value NVARCHAR(255) NULL,
 
     CONSTRAINT PK_FileSoftwareParams PRIMARY KEY (SoftwareId,Name),
     CONSTRAINT FK_FileSoftwareParams_SoftwareId FOREIGN KEY (SoftwareId) REFERENCES ms1.Software(SoftwareId)
 )
-;
+GO
 
 /* table to store information about scans */
 CREATE TABLE ms1.Scans
 (
-    ScanId SERIAL NOT NULL,
+    ScanId INT IDENTITY NOT NULL,
     FileId INT NOT NULL,
     Scan INT NOT NULL,
-    RetentionTime DOUBLE PRECISION NULL,
-    ObservationDuration DOUBLE PRECISION NULL,
+    RetentionTime FLOAT NULL,
+    ObservationDuration FLOAT NULL,
 
-    CONSTRAINT PK_Scans PRIMARY KEY (ScanId),
+    CONSTRAINT PK_Scans PRIMARY KEY NONCLUSTERED (ScanId),
     CONSTRAINT FK_Scans_FileId FOREIGN KEY (FileID) REFERENCES ms1.Files(FileId)
 )
-;
-CREATE INDEX IDX_Scans_FileId ON ms1.Scans(FileId)
-;
-CREATE INDEX IDX_Scans_Scan ON ms1.Scans(Scan);
+GO
+CREATE CLUSTERED INDEX IDX_Scans_FileId ON ms1.Scans(FileId)
+GO
+CREATE INDEX IDX_Scans_Scan ON ms1.Scans(Scan)
+GO
 
 
 /* table to store calibrations for each scan */
 CREATE TABLE ms1.Calibrations
 (
     ScanId INT NOT NULL,
-    Name VARCHAR(255) NOT NULL,
-    Value DOUBLE PRECISION NOT NULL,
+    Name NVARCHAR(255) NOT NULL,
+    Value FLOAT NOT NULL,
 
     CONSTRAINT PK_Calibrations PRIMARY KEY (ScanId,Name),
     CONSTRAINT FK_Calibrations_ScanId FOREIGN KEY (ScanId) REFERENCES ms1.Scans(ScanId)
 )
-;
+GO
 
 /* table to store information about peaks within a scan */
 CREATE TABLE ms1.Peaks
 (
-    PeakId SERIAL NOT NULL,
+    PeakId INT IDENTITY NOT NULL,
     ScanId INT NOT NULL,
-    MZ DOUBLE PRECISION NULL,
-    Intensity DOUBLE PRECISION NULL,
-    Area DOUBLE PRECISION NULL,
-    Error DOUBLE PRECISION NULL,
-    Frequency DOUBLE PRECISION NULL,
-    Phase DOUBLE PRECISION NULL,
-    Decay DOUBLE PRECISION NULL,
+    MZ FLOAT NULL,
+    Intensity FLOAT NULL,
+    Area FLOAT NULL,
+    Error FLOAT NULL,
+    Frequency FLOAT NULL,
+    Phase FLOAT NULL,
+    Decay FLOAT NULL,
 
-    CONSTRAINT PK_Peaks PRIMARY KEY (PeakId),
+    CONSTRAINT PK_Peaks PRIMARY KEY NONCLUSTERED (PeakId),
     CONSTRAINT FK_Peaks_ScanId FOREIGN KEY (ScanId) REFERENCES ms1.Scans(ScanId)
 )
-;
-CREATE INDEX IDX_Peaks_ScanId ON ms1.Peaks(ScanId)
-;
+GO
+CREATE CLUSTERED INDEX IDX_Peaks_ScanId ON ms1.Peaks(ScanId)
+GO
 
 /* table to store information about peak families, which are a set of related peaks */
 CREATE TABLE ms1.PeakFamilies
 (
-    PeakFamilyId SERIAL NOT NULL,
+    PeakFamilyId INT IDENTITY NOT NULL,
     ScanId INT NULL,
-    MzMono DOUBLE PRECISION NULL,
-    Charge SMALLINT NULL,
+    MzMono FLOAT NULL,
+    Charge TINYINT NULL,
 
-    CONSTRAINT PK_PeakFamilies PRIMARY KEY (PeakFamilyId)
+    CONSTRAINT PK_PeakFamilies PRIMARY KEY NONCLUSTERED (PeakFamilyId)
 )
-;
-CREATE INDEX IDX_PeakFamilies_ScanId ON ms1.PeakFamilies(ScanId)
-;
+GO
+CREATE CLUSTERED INDEX IDX_PeakFamilies_ScanId ON ms1.PeakFamilies(ScanId)
+GO
 
 /* table to link peak families to peaks (m:m) */
 CREATE TABLE ms1.PeaksToFamilies
@@ -144,38 +145,38 @@ CREATE TABLE ms1.PeaksToFamilies
     CONSTRAINT FK_PeaksToFamilies_PeakId FOREIGN KEY (PeakId) REFERENCES ms1.Peaks(PeakId),
     CONSTRAINT FK_PeaksToFamilies_PeakFamilyId FOREIGN KEY (PeakFamilyId) REFERENCES ms1.PeakFamilies(PeakFamilyId)
 )
-;
+GO
 
 /* table to store information about features */
 CREATE TABLE ms1.Features
 (
-    FeatureId SERIAL NOT NULL,
+    FeatureId INT IDENTITY NOT NULL,
 	FileId INT,
     Scan INT NULL,
-    Time DOUBLE PRECISION NULL,
-    MZ DOUBLE PRECISION NULL,
-    AccurateMZ BOOLEAN NULL,
-    Mass DOUBLE PRECISION NULL,
-    Intensity DOUBLE PRECISION NULL,
-    Charge SMALLINT NULL,
-    ChargeStates SMALLINT NULL,
-    KL DOUBLE PRECISION NULL,
-    Background DOUBLE PRECISION NULL,
-    Median DOUBLE PRECISION NULL,
+    Time FLOAT NULL,
+    MZ FLOAT NULL,
+    AccurateMZ BIT NULL,
+    Mass FLOAT NULL,
+    Intensity FLOAT NULL,
+    Charge TINYINT NULL,
+    ChargeStates TINYINT NULL,
+    KL FLOAT NULL,
+    Background FLOAT NULL,
+    Median FLOAT NULL,
     Peaks INT NULL,
     ScanFirst INT NULL,
     ScanLast INT NULL,
     ScanCount INT NULL,
-    TotalIntensity DOUBLE PRECISION NULL,
-    Description VARCHAR(300) NULL,
+    TotalIntensity FLOAT NULL,
+    Description NVARCHAR(300) NULL,
 
     /* extra cols for ceaders-sinai */
     MS2Scan INT NULL,
-    MS2ConnectivityProbability DOUBLE PRECISION NULL,
+    MS2ConnectivityProbability FLOAT NULL,
 
-    CONSTRAINT PK_Features PRIMARY KEY (FeatureId),
+    CONSTRAINT PK_Features PRIMARY KEY NONCLUSTERED (FeatureId),
     CONSTRAINT FK_Features_FileId FOREIGN KEY (FileID) REFERENCES ms1.Files(FileId)
 )
-;
-CREATE INDEX IDX_Features_FileId ON ms1.Features(FileId)
-;
+GO
+CREATE CLUSTERED INDEX IDX_Features_FileId ON ms1.Features(FileId)
+GO
