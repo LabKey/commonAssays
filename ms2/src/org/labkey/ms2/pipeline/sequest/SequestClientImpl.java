@@ -326,9 +326,9 @@ public class SequestClientImpl implements SearchClient
         if (!submitFile(databaseDir, taskId, sequestParamFile, mzXmlFile, xmlCommand))
         {
             _instanceLogger.info("Failed to submit search to Sequest server.");
-            _instanceLogger.info("Retreiving remote log file.");
+            _instanceLogger.info("Retrieving remote log file.");
             getLogFile( taskId);
-            _instanceLogger.info("Finished retreiving remote log file.");
+            _instanceLogger.info("Finished retrieving remote log file.");
             returnCode = 3;
         }
         else
@@ -361,9 +361,9 @@ public class SequestClientImpl implements SearchClient
                 if (!searchStatus.toLowerCase().contains("complete"))
                 {
                     _instanceLogger.info("Bad status returned '" + searchStatus + "'.");
-                    _instanceLogger.info("Retreiving remote log file.");
+                    _instanceLogger.info("Retrieving remote log file.");
                     getLogFile( taskId);
-                    _instanceLogger.info("Finished retreiving remote log file.");
+                    _instanceLogger.info("Finished retrieving remote log file.");
                     returnCode = 4;
                 }
                 else
@@ -372,18 +372,18 @@ public class SequestClientImpl implements SearchClient
                     if (getResultFile( taskId, resultFile))
                     {
                         _instanceLogger.info("Sequest search result retrieved.");
-                        _instanceLogger.info("Retreiving remote log file.");
+                        _instanceLogger.info("Retrieving remote log file.");
                         getLogFile( taskId);
-                        _instanceLogger.info("Finished retreiving remote log file.");
+                        _instanceLogger.info("Finished retrieving remote log file.");
                         _instanceLogger.info("Cleaning search file from remote sequest server.");
                         clean(taskId);
                         break;
                     }
                     else
                     {
-                        _instanceLogger.info("Retreiving remote log file.");
+                        _instanceLogger.info("Retrieving remote log file.");
                         getLogFile( taskId);
-                        _instanceLogger.info("Finished retreiving remote log file.");
+                        _instanceLogger.info("Finished retrieving remote log file.");
                         returnCode = 5;
                     }
                 }

@@ -154,7 +154,7 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createPeptidesTable(true);
+                return ms2Schema.createPeptidesTable(ContainerFilter.CURRENT);
             }
         },
         ProteinGroups
@@ -183,7 +183,7 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createPeptidesTable(true);
+                return ms2Schema.createPeptidesTable(ContainerFilter.CURRENT);
             }
         },
         ProteinGroupsForSearch
@@ -513,10 +513,9 @@ public class MS2Schema extends UserSchema
         return new SequencesTableInfo(this);
     }
 
-    public TableInfo createPeptidesTable(boolean restrictContainer)
+    public TableInfo createPeptidesTable(ContainerFilter containerFilter)
     {
-        PeptidesTableInfo result = new PeptidesTableInfo(this, true, restrictContainer);
-        return result;
+        return new PeptidesTableInfo(this, true, containerFilter);
     }
 
     private ExpRunTable createSearchTable(String name, ContainerFilter filter, String... protocolObjectPrefix)
@@ -688,7 +687,7 @@ public class MS2Schema extends UserSchema
 
     protected SQLFragment getPeptideSelectSQL(SimpleFilter filter, Collection<FieldKey> fieldKeys)
     {
-        TableInfo peptidesTable = createPeptidesTable(false);
+        TableInfo peptidesTable = createPeptidesTable(ContainerFilter.EVERYTHING);
 
         Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(peptidesTable, fieldKeys);
 

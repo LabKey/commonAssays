@@ -16,6 +16,7 @@
 
 package org.labkey.ms2;
 
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.SearchClient;
 import org.labkey.api.data.TableInfo;
@@ -56,7 +57,7 @@ public class MS2ServiceImpl implements MS2Service.Service
 
     public TableInfo createPeptidesTableInfo(User user, Container container, boolean includeFeatureFk, boolean restrictContainer, SimpleFilter filter, Iterable<FieldKey> defaultColumns)
     {
-        PeptidesTableInfo table = new PeptidesTableInfo(new MS2Schema(user, container), includeFeatureFk, restrictContainer);
+        PeptidesTableInfo table = new PeptidesTableInfo(new MS2Schema(user, container), includeFeatureFk, restrictContainer ? ContainerFilter.CURRENT : ContainerFilter.EVERYTHING);
         if(null != filter)
             table.addCondition(filter);
         if(null != defaultColumns)

@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
 import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.query.ExprColumn;
@@ -44,18 +45,19 @@ public class PeptidesTableInfo extends FilteredTable
 
     public PeptidesTableInfo(MS2Schema schema)
     {
-        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), true, true);
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), true, ContainerFilter.CURRENT);
     }
 
-    public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk, boolean restrictContainer)
+    public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk, ContainerFilter containerFilter)
     {
-        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), includeFeatureFk, restrictContainer);
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), includeFeatureFk, containerFilter);
     }
 
-    public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, boolean restrictContainer)
+    public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, ContainerFilter containerFilter)
     {
         super(MS2Manager.getTableInfoPeptidesData());
         _schema = schema;
+        setContainerFilter(containerFilter);
 
         // Stick EndScan column just after Scan column
         ColumnInfo scanColumn = getRealTable().getColumn("Scan");
@@ -221,6 +223,21 @@ public class PeptidesTableInfo extends FilteredTable
             addColumn(spectrumColumn);
         }
 
+        if(includeFeatureFk)
+            addFeatureInfoColumn();
+    }
+
+    @Override
+    public void setContainerFilter(@NotNull ContainerFilter filter)
+    {
+        super.setContainerFilter(filter);
+        addRunFilter();
+    }
+
+    private void addRunFilter()
+    {
+        getFilter().deleteConditions("Fraction/Run");
+
         SQLFragment sql = new SQLFragment();
         sql.append("Fraction IN (SELECT Fraction FROM ");
         sql.append(MS2Manager.getTableInfoFractions());
@@ -228,10 +245,20 @@ public class PeptidesTableInfo extends FilteredTable
         sql.append(MS2Manager.getTableInfoRuns());
         sql.append(" WHERE Deleted = ?");
         sql.add(Boolean.FALSE);
-        if(restrictContainer)
+        Collection<String> ids = getContainerFilter().getIds(_schema.getContainer());
+        if(ids != null)
         {
-            sql.append(" AND Container = ?"); 
-            sql.add(_schema.getContainer().getId());
+            sql.append(" AND Container IN (");
+            String separator = "";
+            for (String containerId : ids)
+            {
+                sql.append(separator);
+                separator = ", ";
+                sql.append("'");
+                sql.append(containerId);
+                sql.append("'");
+            }
+            sql.append(")");
         }
         if (_schema.getRuns() != null)
         {
@@ -239,10 +266,7 @@ public class PeptidesTableInfo extends FilteredTable
             _schema.appendRunInClause(sql);
         }
         sql.append("))");
-        addCondition(sql);
-
-        if(includeFeatureFk)
-            addFeatureInfoColumn();
+        addCondition(sql, "Fraction/Run");
     }
 
     private void addFeatureInfoColumn()

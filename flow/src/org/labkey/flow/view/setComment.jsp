@@ -22,7 +22,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     FlowObject flowObj = (FlowObject)getModelBean();
-    ActionURL setFlagUrl = urlProvider(ExperimentUrls.class).getSetFlagURL(request);
+    ActionURL setFlagUrl = urlProvider(ExperimentUrls.class).getSetFlagURL(getViewContext().getContainer());
     setFlagUrl.addParameter("lsid", flowObj.getLSID());
     setFlagUrl.addParameter("redirect", false);
 

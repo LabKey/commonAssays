@@ -164,7 +164,7 @@ public class PepXmlImporter extends MS2Importer
     }
 
     /**
-     * Save relatative quantitation summary information (for XPRESS, Q3, etc.)
+     * Save relative quantitation summary information (for XPRESS, Q3, etc.)
      */
     protected void writeQuantSummaries(int runId, List<RelativeQuantAnalysisSummary> quantSummaries) throws SQLException
     {
