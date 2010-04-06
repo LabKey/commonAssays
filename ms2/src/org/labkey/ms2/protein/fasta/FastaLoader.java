@@ -68,7 +68,7 @@ public class FastaLoader
                 String line = getLine();
 
                 //Iterator expects _proteinHeader to be initialized...
-                if (null != line && line.charAt(0) == '>')
+                if (null != line && line.length() > 0 && line.charAt(0) == '>')
                 {
                     _proteinHeader = line.substring(1);
                     _currentHeaderLine = _currentLine;
