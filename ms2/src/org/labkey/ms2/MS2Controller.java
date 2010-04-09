@@ -29,16 +29,12 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.gwt.server.BaseRemoteService;
-import org.labkey.api.module.SimpleAction;
-import org.labkey.api.module.SimpleActionResolver;
-import org.labkey.api.module.SimpleController;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.*;
 import org.labkey.api.reports.ReportService;
-import org.labkey.api.resource.Resource;
 import org.labkey.api.security.*;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.settings.AdminConsole;
@@ -91,7 +87,7 @@ import java.util.List;
  */
 public class MS2Controller extends SpringActionController
 {
-    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(MS2Controller.class, new SimpleActionResolver());
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(MS2Controller.class);
     private static final Logger _log = Logger.getLogger(MS2Controller.class);
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";
     private static final String MS2_DEFAULT_VIEW_CATEGORY = "MS2DefaultView";
@@ -228,7 +224,8 @@ public class MS2Controller extends SpringActionController
     {
         return new ActionURL(ShowListAction.class, c);
     }
-    
+
+
     @RequiresPermissionClass(ReadPermission.class)
     public class ShowListAction extends SimpleViewAction
     {
@@ -5994,6 +5991,7 @@ public class MS2Controller extends SpringActionController
             return root.addChild("Edit Elution Profile");
         }
     }
+
 
     public static class MS2UrlsImpl implements MS2Urls
     {
