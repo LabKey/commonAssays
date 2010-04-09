@@ -890,6 +890,7 @@ ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-8.34-8.35.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-drop.sql -text
 ms2/resources/schemas/ms2.xml -text
 ms2/resources/schemas/prot.xml -text
+ms2/resources/views/runsOverview.html -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
 ms2/src/org/labkey/ms2/CompareServiceImpl.java -text
 ms2/src/org/labkey/ms2/CumulativeTimer.java -text
