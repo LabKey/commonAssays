@@ -570,7 +570,6 @@ microarray/src/org/labkey/microarray/FeatureExtractionRun.java -text
 microarray/src/org/labkey/microarray/MicroarrayBulkPropertiesTemplateAction.java -text
 microarray/src/org/labkey/microarray/MicroarrayController.java -text
 microarray/src/org/labkey/microarray/MicroarrayFolderType.java -text
-microarray/src/org/labkey/microarray/MicroarrayManager.java -text
 microarray/src/org/labkey/microarray/MicroarrayModule.java -text
 microarray/src/org/labkey/microarray/MicroarrayRun.java -text
 microarray/src/org/labkey/microarray/MicroarrayRunType.java -text
