@@ -573,15 +573,25 @@ public class FlowManager
     public int getFCSFileCount(User user, Container container)
     {
         FlowSchema schema = new FlowSchema(user, container);
-        SimpleFilter filter = new SimpleFilter();
-        filter.addCondition("ProtocolStep", "Keywords", CompareType.EQUAL);
-        TableInfo table = schema.getTable(FlowTableType.Runs);
+
+
         try
         {
+            // count(fcsfile)
+            TableInfo table = schema.getTable(FlowTableType.FCSFiles);
+            List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
+            List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
+            SimpleFilter filter = null;
+
+/*        // sum of run.count where protocol = 'Keyword'
+            SimpleFilter filter = new SimpleFilter();
+            filter.addCondition("ProtocolStep", "Keywords", CompareType.EQUAL);
+            TableInfo table = schema.getTable(FlowTableType.Runs);
             List<Aggregate> aggregates = Collections.singletonList(new Aggregate("FCSFileCount", Aggregate.Type.SUM));
             List<ColumnInfo> columns = Collections.singletonList(table.getColumn("FCSFileCount"));
+*/
             Map<String, Aggregate.Result> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, filter, false);
-            Aggregate.Result result = agg.get("FCSFileCount");
+            Aggregate.Result result = agg.get(aggregates.get(0).getColumnName());
             if (result != null)
                 return ((Long)result.getValue()).intValue();
         }
