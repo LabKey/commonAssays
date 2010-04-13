@@ -21,11 +21,14 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.permissions.DesignAssayPermission;
@@ -34,9 +37,13 @@ import org.labkey.api.view.*;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
+import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
+import org.labkey.microarray.pipeline.MicroarrayUpgradeJob;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
@@ -172,6 +179,52 @@ public class MicroarrayController extends SpringActionController
         {
             _protocolName = protocolName;
         }
+    }
+
+    @RequiresSiteAdmin
+    public class AttachFilesUpgradeAction extends FormViewAction
+    {
+        private Container _container;
+
+        public void validateCommand(Object target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
+        {
+            return new JspView("/org/labkey/microarray/upgradeAttachFiles.jsp");
+        }
+
+        public boolean handlePost(Object o, BindException errors) throws Exception
+        {
+            // just grab any root, it doesn't matter
+            for (PipeRoot root : PipelineService.get().getAllPipelineRoots().values())
+            {
+                File rootPath = root.getRootPath();
+                if (rootPath.exists())
+                {
+                    ViewBackgroundInfo info = getViewBackgroundInfo();
+                    _container = root.getContainer();
+                    info.setContainer(_container);
+                    PipelineJob job = new MicroarrayUpgradeJob(MicroarrayPipelineProvider.NAME, info);
+                    PipelineService.get().getPipelineQueue().addJob(job);
+
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public ActionURL getSuccessURL(Object o)
+        {
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(_container);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Attach Related Files to Microarray Runs");
+        }
+
     }
 
     @RequiresPermissionClass(InsertPermission.class)

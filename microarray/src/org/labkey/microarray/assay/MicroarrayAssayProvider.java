@@ -149,7 +149,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
             ExpData mageData = createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE);
 
             outputDatas.put(mageData, MicroarrayModule.MAGE_ML_INPUT_TYPE.getRole());
-            addRelatedOutputDatas(context, outputDatas, mageMLFile, Arrays.asList(MicroarrayModule.THUMBNAIL_INPUT_TYPE, MicroarrayModule.QC_REPORT_INPUT_TYPE, MicroarrayModule.GRID_INPUT_TYPE, MicroarrayModule.FEATURES_INPUT_TYPE));
+            addRelatedOutputDatas(context.getContainer(), outputDatas, mageMLFile, MicroarrayModule.RELATED_INPUT_TYPES);
         }
         catch (IOException e)
         {

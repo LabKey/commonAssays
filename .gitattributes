@@ -586,7 +586,9 @@ microarray/src/org/labkey/microarray/pipeline/ArrayPipelineManager.java -text
 microarray/src/org/labkey/microarray/pipeline/FeatureExtractionPipelineJob.java -text
 microarray/src/org/labkey/microarray/pipeline/FileStatus.java -text
 microarray/src/org/labkey/microarray/pipeline/MicroarrayPipelineProvider.java -text
+microarray/src/org/labkey/microarray/pipeline/MicroarrayUpgradeJob.java -text
 microarray/src/org/labkey/microarray/statistics.jsp -text
+microarray/src/org/labkey/microarray/upgradeAttachFiles.jsp -text
 microarray/webapp/microarray/images/microarrayThumbnailIcon.png -text
 microarray/webapp/microarray/images/qcReportIcon.png -text
 ms1/gwtsrc/org/labkey/ms1/MS1VennDiagramView.gwt.xml -text
