@@ -16,19 +16,20 @@
 
 package org.labkey.flow.controllers.editscript;
 
+import org.labkey.api.util.Pair;
 import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
 import org.labkey.flow.gateeditor.client.model.GWTGraphInfo;
 import org.labkey.flow.analysis.web.PlotInfo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.lang.ref.SoftReference;
 
 public class GraphCache
 {
     static final private String key = GraphCache.class.getName();
     transient private GWTGraphOptions graphOptions;
-    transient private GWTGraphInfo graphInfo;
-    transient private PlotInfo plotInfo;
+    transient private SoftReference<Pair<GWTGraphInfo,PlotInfo>> ref;
 
     static public GraphCache get(HttpServletRequest request)
     {
@@ -43,28 +44,19 @@ public class GraphCache
         return ret;
     }
 
-    public GWTGraphInfo getGraphInfo(GWTGraphOptions options)
+    public synchronized Pair<GWTGraphInfo,PlotInfo> getInfo(GWTGraphOptions options)
     {
         if (!options.equals(this.graphOptions))
         {
+            ref = null;
             return null;
         }
-        return graphInfo;
+        return null==ref ? null : ref.get();
     }
 
-    public PlotInfo getPlotInfo(GWTGraphOptions options)
-    {
-        if (!options.equals(this.graphOptions))
-        {
-            return null;
-        }
-        return plotInfo;
-    }
-
-    public void setGraphInfo(GWTGraphOptions options, GWTGraphInfo info, PlotInfo plotInfo)
+    public synchronized void setGraphInfo(GWTGraphOptions options, GWTGraphInfo info, PlotInfo plotInfo)
     {
         this.graphOptions = options;
-        this.graphInfo = info;
-        this.plotInfo = plotInfo;
+        this.ref = new SoftReference<Pair<GWTGraphInfo,PlotInfo>>(new Pair<GWTGraphInfo,PlotInfo>(info,plotInfo));
     }
 }

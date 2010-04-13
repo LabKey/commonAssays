@@ -18,10 +18,7 @@ package org.labkey.flow.analysis.model;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Arrays;
 
 /**
@@ -92,35 +89,27 @@ public class FCS extends FCSHeader
         // DATA
         //
         {
-            byte[] dataBuf = new byte[(dataLast - dataOffset + 1)];
-            long read = is.read(dataBuf, 0, dataBuf.length);
-            assert read == dataBuf.length;
-            int expectedCount = eventCount;
-            int bitsPerRow = 0;
-            for (int i = 0; i < bitCounts.length; i++)
-                bitsPerRow += bitCounts[i];
-            int expectedBytes = (expectedCount * bitsPerRow + 7) / 8;
-            if (expectedBytes != dataBuf.length)
-            {
-                throw new IllegalArgumentException("dataBuf is of length " + dataBuf.length + " expected " + expectedBytes);
-            }
             if ("L".equals(getKeyword("$MODE")))
             {
                 switch (datatype.charAt(0))
                 {
                     case'I':
+                    {
                         if (packed)
                         {
-                            readListDataIntegerPacked(dataBuf, bitCounts, data);
+                            readListDataIntegerPacked(is, bitCounts, data);
                         }
                         else
                         {
-                            readListDataInteger(dataBuf, bitCounts, data);
+                            readListDataInteger(is, bitCounts, data);
                         }
                         break;
+                    }
                     case'F':
-                        readListDataFloat(dataBuf, bitCounts, data);
+                    {
+                        readListDataFloat(is, bitCounts, data);
                         break;
+                    }
                     case'D':
                     {
                         throw new java.lang.UnsupportedOperationException("Double data not supported");
@@ -135,15 +124,29 @@ public class FCS extends FCSHeader
             {
                 throw new java.lang.UnsupportedOperationException("only supports ListMode");
             }
+
+
             this.rawData = frame;
         }
     }
 
-    void readListDataInteger(byte[] dataBuf, int[] bitCounts, float[][] data)
+
+    void readListDataInteger(InputStream is, int[] bitCounts, float[][] data) throws IOException
     {
-        int ib = 0;
+        BufferedInputStream bis = new BufferedInputStream(is, 1024*1024);
+        int rowBitLength = 0;
+        for (int p = 0; p < bitCounts.length; p++)
+            rowBitLength += bitCounts[p];
+        int rowLength = rowBitLength/8;
+        byte[] dataBuf = new byte[rowLength];
+
         for (int row = 0; row < data[0].length; row++)
         {
+            int r = bis.read(dataBuf);
+            if (r < dataBuf.length)
+                throw new IOException("unexpected EOF");
+
+            int ib = 0;
             for (int p = 0; p < bitCounts.length; p++)
             {
                 int value = 0;
@@ -166,8 +169,20 @@ public class FCS extends FCSHeader
         }
     }
 
-    void readListDataIntegerPacked(byte[] dataBuf, int[] bitCounts, float[][] data)
+    void readListDataIntegerPacked(InputStream is, int[] bitCounts, float[][] data) throws IOException
     {
+        byte[] dataBuf = new byte[(dataLast - dataOffset + 1)];
+        long read = is.read(dataBuf, 0, dataBuf.length);
+        assert read == dataBuf.length;
+        int bitsPerRow = 0;
+        for (int i = 0; i < bitCounts.length; i++)
+            bitsPerRow += bitCounts[i];
+        int expectedBytes = (data[0].length * bitsPerRow + 7) / 8;
+        if (expectedBytes != read)
+        {
+            throw new IllegalArgumentException("dataBuf is of length " + dataBuf.length + " expected " + expectedBytes);
+        }
+
         int bitOffset = 0;
         for (int row = 0; row < data[0].length; row++)
         {
@@ -180,11 +195,22 @@ public class FCS extends FCSHeader
         }
     }
 
-    void readListDataFloat(byte[] dataBuf, int[] bitCounts, float[][] data)
+    void readListDataFloat(InputStream is, int[] bitCounts, float[][] data) throws IOException
     {
-        int ib = 0;
+        BufferedInputStream bis = new BufferedInputStream(is, 1024*1024);
+        int rowBitLength = 0;
+        for (int p = 0; p < bitCounts.length; p++)
+            rowBitLength += bitCounts[p];
+        int rowLength = rowBitLength/8;
+        byte[] dataBuf = new byte[rowLength];
+
         for (int row = 0; row < data[0].length; row++)
         {
+            int r = bis.read(dataBuf);
+            if (r < dataBuf.length)
+                throw new IOException("unexpected EOF");
+
+            int ib = 0;
             for (int p = 0; p < bitCounts.length; p++)
             {
                 float value = 0;

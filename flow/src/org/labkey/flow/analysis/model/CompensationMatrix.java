@@ -257,7 +257,15 @@ public class CompensationMatrix implements Serializable
     public DataFrame getCompensatedData(DataFrame data) throws FlowException
     {
         DataFrame comp = getCompensatedData(data, false);
-        DataFrame compDithered = getCompensatedData(data, true);
+        DataFrame compDithered = comp;
+        for (int i = 0; i < data.getColCount(); i ++)
+        {
+            if (data.getField(i).shouldDither())
+            {
+                compDithered = getCompensatedData(data, true);
+                break;
+            }
+        }
         int newFieldCount = data.getColCount() + _channelNames.length * 2;
         DataFrame.Field[] fields = new DataFrame.Field[newFieldCount];
         NumberArray[] cols = new NumberArray[newFieldCount];

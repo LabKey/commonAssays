@@ -772,18 +772,10 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
         public ModelAndView getView(GraphForm form, BindException errors) throws Exception
         {
             GateEditorServiceImpl service = new GateEditorServiceImpl(getViewContext());
-            GraphCache cache = GraphCache.get(getRequest());
             GWTGraphOptions options = form.getGraphOptions();
-            service.getGraphInfo(options);
-            cache.getGraphInfo(options);
-
-            service.getGraphInfo(form.getGraphOptions());
-            PlotInfo info = cache.getPlotInfo(options);
-            if (info == null)
-            {
-                // unexpected
+            PlotInfo info = service.getPlotInfo(options);
+            if (null == info)
                 return null;
-            }
             BufferedImage image = info.getImage();
             Gate gate = gateFromPoints(form.xAxis, form.yAxis, form.ptX, form.ptY, form.open);
             image = addSelection(image, info, gate, !form.open, true, form.xAxis, form.yAxis);

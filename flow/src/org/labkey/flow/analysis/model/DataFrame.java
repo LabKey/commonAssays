@@ -325,8 +325,14 @@ public class DataFrame
         private int _range;
         private ScalingFunction _scalingFunction;
 
+        // display/graphing hints (these do not affect the dataframe directly)
+
         // for FlowJo compatibility use simple log axis (for uncompensated integer mode data)
         private boolean _simpleLogAxis = false;
+        // set to true as an indication that data is quantized and should be dithered for graphing
+
+        private boolean _dither = false;
+
 
         public Field(int index, String name, int range)
         {
@@ -419,7 +425,15 @@ public class DataFrame
         {
             _simpleLogAxis = simpleLogAxis;
         }
+
+        public boolean shouldDither()
+        {
+            return _dither;
+        }
+
+        public void setDither(boolean dither)
+        {
+            _dither = dither;
+        }
     }
-
-
 }

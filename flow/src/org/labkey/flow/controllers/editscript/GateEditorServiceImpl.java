@@ -23,6 +23,7 @@ import org.jfree.chart.axis.ValueAxis;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.Pair;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -394,7 +395,22 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         return 0;
     }
 
+
     public GWTGraphInfo getGraphInfo(GWTGraphOptions graphOptions) throws GWTGraphException
+    {
+        Pair<GWTGraphInfo,PlotInfo> p = getGraphAndPlotInfo(graphOptions);
+        return null==p ? null : p.first;
+    }
+
+
+    public PlotInfo getPlotInfo(GWTGraphOptions graphOptions) throws GWTGraphException
+    {
+        Pair<GWTGraphInfo,PlotInfo> p = getGraphAndPlotInfo(graphOptions);
+        return null==p ? null : p.second;
+    }
+
+
+    public Pair<GWTGraphInfo,PlotInfo> getGraphAndPlotInfo(GWTGraphOptions graphOptions) throws GWTGraphException
     {
         try
         {
@@ -403,9 +419,10 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             {
                 FlowPreference.editScriptCompId.setValue(_request, Integer.toString(graphOptions.compensationMatrix.getCompId()));
             }
-            GWTGraphInfo ret = cache.getGraphInfo(graphOptions);
-            if (ret != null)
+            Pair<GWTGraphInfo,PlotInfo> ret = cache.getInfo(graphOptions);
+            if (null != ret)
                 return ret;
+            
             SubsetSpec subsetSpec = SubsetSpec.fromString(graphOptions.subset);
             SubsetSpec parentSubsetSpec = subsetSpec == null ? null : subsetSpec.getParent();
             GraphSpec graphSpec;
@@ -453,7 +470,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             cache.setGraphInfo(graphOptions, graphInfo, plotInfo);
             graphInfo.graphURL = url.toString();
             graphInfo.graphOptions = graphOptions;
-            return graphInfo;
+            return new Pair(graphInfo,plotInfo);
         }
         catch (FlowException e)
         {

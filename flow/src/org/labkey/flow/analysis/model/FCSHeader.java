@@ -181,6 +181,8 @@ public class FCSHeader
             f.setScalingFunction(ScalingFunction.makeFunction(decade, scale, range));
             if (datatypeI && facsCalibur && 0 != decade)
                 f.setSimpleLogAxis(true);
+            if (datatypeI)
+                f.setDither(true);
             fields[i] = f;
         }
         return new DataFrame(fields, data);
