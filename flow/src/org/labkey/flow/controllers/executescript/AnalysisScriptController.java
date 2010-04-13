@@ -682,6 +682,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
         private void stepAssociateFCSFiles(ImportAnalysisForm form, BindException errors) throws Exception
         {
+            String runFilePathRootString = form.getRunFilePathRoot();
             File runFilePathRoot = getRunPathRoot(form, errors);
             if (errors.hasErrors())
                 return;
@@ -722,7 +723,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
                 if (!found)
                 {
-                    String msg = "None of the samples used by the workspace were found in the selected directory '" + form.getRunFilePathRoot() + "'.";
+                    String msg = "None of the samples used by the workspace were found in the selected directory '" + runFilePathRootString + "'.";
                     errors.reject(ERROR_MSG, msg);
                     return;
                 }

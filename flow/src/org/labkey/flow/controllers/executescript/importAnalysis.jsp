@@ -16,6 +16,7 @@
  */
 %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
@@ -38,6 +39,7 @@
 <%@ page import="org.labkey.flow.script.FlowPipelineProvider" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="org.labkey.api.query.QueryParam" %>
+<%@ page import="org.labkey.api.util.Path" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -51,6 +53,12 @@
     boolean hasPipelineRoot = pipeRoot != null && pipeRoot.getUri() != null;
     boolean canSetPipelineRoot = context.getUser().isAdministrator() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
+<script type="text/javascript">
+    function endsWith(a,b)
+    {
+        return a.length >= b.length && a.indexOf(b) == (a.length-b.length);
+    }
+</script>
 <table border="0" style="border-collapse:collapse;" cellpadding="4">
     <tr>
         <% for (AnalysisScriptController.ImportAnalysisStep step : AnalysisScriptController.ImportAnalysisStep.values())
@@ -125,36 +133,61 @@
                 <%  if (!form.getWorkspace().getHiddenFields().containsKey("path")) { %>
                     <input type="hidden" id="<%=inputId%>" name="<%=inputId%>" value=""/>
                 <%  }  %>
-                <script type="text/javascript">
-                   LABKEY.requiresClientAPI(true);
-                   LABKEY.requiresScript("ColumnTree.js",false);
-                   LABKEY.requiresScript("FileTree.js",false);
-                </script>
-                <div id='tree' class='extContainer'></div>
-                <script type="text/javascript">
-                Ext.onReady(function ()
-                {
-                   var tree = new LABKEY.ext.FileTree({
-                     id : 'tree',
-                     renderTo : 'tree',
-                     title : "Select FlowJo Workspace XML file",
-                     inputId : "<%=inputId%>",
-                     path : <%=q(pipeRoot.getContainer().getPath() + "/@pipeline")%>,
-                     dirsSelectable : false,
-                     browsePipeline : true,
-                     relativeToRoot : true,
-                     fileFilter : /^.*\.xml/,
-                     listeners : {
-                         dblclick : function (node, e) {
-                             if (node.isLeaf() && !node.disabled)
-                                 document.forms["importAnalysis"].submit();
-                         }
-                     }
-                   });
-                   tree.render();
-                   tree.root.expand();
-                });
-                </script>
+<div id="treeDiv" class="extContainer"></div>
+<script type="text/javascript">
+    LABKEY.requiresScript("applet.js");
+    LABKEY.requiresScript("fileBrowser.js");
+    LABKEY.requiresScript("applet.js",true);
+    LABKEY.requiresScript("FileUploadField.js");
+</script>
+<script type="text/javascript">
+var inputId=<%=q(inputId)%>;
+var fileSystem;
+var fileBrowser;
+function selectRecord(record)
+{
+    Ext.get(inputId).dom.value=record.data.path;
+    // setTitle...
+}
+
+Ext.onReady(function()
+{
+    Ext.QuickTips.init();
+
+    fileSystem = new LABKEY.WebdavFileSystem({
+        baseUrl:<%=q(pipeRoot.getWebdavURL())%>,
+        rootName:<%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>});
+
+    fileBrowser = new LABKEY.FileBrowser({
+        fileSystem:fileSystem
+        ,helpEl:null
+        ,showAddressBar:false
+        ,showFolderTree:true
+        ,showDetails:false
+        ,showFileUpload:false
+        ,allowChangeDirectory:true
+        ,tbarItems:[]
+        ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".xml"); }}
+});
+
+    fileBrowser.on(BROWSER_EVENTS.doubleclick, function(record){
+        if (record && record.data.file)
+        {
+            selectRecord(record);
+            document.forms["importAnalysis"].submit();
+        }
+        return true;
+    });
+    fileBrowser.on(BROWSER_EVENTS.selectionchange, function(record){
+        if (record && record.data.file)
+            selectRecord(record);
+        return true;
+    });
+
+    fileBrowser.render('treeDiv');
+    fileBrowser.start('/');
+});
+</script>
                 <%
             } else {
                 %><p><em>The pipeline root has not been set for this folder.</em><br>
@@ -236,7 +269,8 @@
         %>
         <h3><%=keywordRuns.isEmpty() ? "Option 2" : "Option 3"%>: Browse the pipeline for a directory of FCS files:</h3>
         <div style="padding-left: 2em; padding-bottom: 1em;">
-            <% if (hasPipelineRoot) {
+            <% if (hasPipelineRoot)
+            {
                 String inputId = "runFilePathRoot";
                 String name = form.getWorkspace().getPath();
                 if (name == null)
@@ -248,39 +282,70 @@
                 The sample's keywords stored in the workspace will be used instead of those from the FCS files.
                 <br/><br/>
                 <input type="hidden" id="<%=inputId%>" name="<%=inputId%>" value="<%=form.getRunFilePathRoot() == null ? "" : form.getRunFilePathRoot()%>"/>
-                <script type="text/javascript">
-                   LABKEY.requiresClientAPI(true);
-                   LABKEY.requiresScript("ColumnTree.js",false);
-                   LABKEY.requiresScript("FileTree.js",false);
-                </script>
-                <div id='tree' class='extContainer'></div>
-                <script type="text/javascript">
-                Ext.onReady(function ()
-                {
-                   var tree = new LABKEY.ext.FileTree({
-                     id : 'tree',
-                     renderTo : 'tree',
-                     title : "Select directory of FCS files",
-                     inputId : "<%=inputId%>",
-                     path : <%=q(pipeRoot.getContainer().getPath() + "/@pipeline")%>,
-                     filesSelectable : false,
-                     browsePipeline : true,
-                     relativeToRoot : true,
-                     fileFilter : /^.*\.fcs/,
-                     initialSelection : '<%=form.getRunFilePathRoot()%>',
-                     listeners : {
-                         dblclick : function (node, e) {
-                             if (!node.isLeaf() && !node.disabled)
-                                 document.forms["importAnalysis"].submit();
-                         }
-                     }
-                   });
-                   tree.render();
-                   tree.root.expand();
-                });
-                </script>
-                <%
-            } else {
+
+
+<div id="treeDiv" class="extContainer"></div>
+<script type="text/javascript">
+    LABKEY.requiresScript("applet.js");
+    LABKEY.requiresScript("fileBrowser.js");
+    LABKEY.requiresScript("applet.js",true);
+    LABKEY.requiresScript("FileUploadField.js");
+</script>
+<script type="text/javascript">
+var inputId=<%=q(inputId)%>;
+var fileSystem;
+var fileBrowser;
+function selectRecord(path)
+{
+    Ext.get(inputId).dom.value=path;
+    // setTitle...
+}
+
+Ext.onReady(function()
+{
+    Ext.QuickTips.init();
+
+    fileSystem = new LABKEY.WebdavFileSystem({
+        baseUrl:<%=q(pipeRoot.getWebdavURL())%>,
+        rootName:<%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>});
+
+    fileBrowser = new LABKEY.FileBrowser({
+        fileSystem:fileSystem
+        ,helpEl:null
+        ,showAddressBar:false
+        ,showFolderTree:true
+        ,showDetails:false
+        ,showFileUpload:false
+        ,allowChangeDirectory:true
+        ,tbarItems:[]
+        ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".fcs"); }}
+});
+
+    fileBrowser.on(BROWSER_EVENTS.doubleclick, function(record){
+        if (!record || !record.data.file)
+            return;
+        var path = fileSystem.parentPath(record.data.path);
+        selectRecord(path);
+        document.forms["importAnalysis"].submit();
+        return true;
+    });
+    fileBrowser.on(BROWSER_EVENTS.selectionchange, function(record){
+        if (!record) return;
+        var path = record.data.path;
+        if (record.data.file)
+            path = fileSystem.parentPath(path);
+        selectRecord(path);
+        return true;
+    });
+
+    fileBrowser.render('treeDiv');
+    fileBrowser.start(<%=q(form.getRunFilePathRoot())%>);
+});
+</script>
+<%
+            } 
+            else
+            {
                 %><p><em>The pipeline root has not been set for this folder.</em><br>
                     You can safely skip this step, however no graphs can be generated
                     when importing the FlowJo workspace without the FCS files.</p><%
