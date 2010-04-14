@@ -16,6 +16,7 @@
 
 package org.labkey.flow.persist;
 
+import org.labkey.api.data.Container;
 import org.labkey.flow.flowdata.xml.*;
 import org.labkey.api.exp.api.ExpData;
 import org.fhcrc.cpas.exp.xml.DataBaseType;
@@ -236,27 +237,41 @@ public class AttributeSet implements Serializable
      * names from the cache, or two threads each trying to insert the same attribute name.
      * @throws SQLException
      */
-    public void prepareForSave() throws SQLException
+    public void prepareForSave(Container c) throws SQLException
     {
         if (_keywords != null)
         {
-            ensureIds(_keywords.keySet());
+            ensureKeywordIds(c, _keywords.keySet());
         }
         if (_statistics != null)
         {
-            ensureIds(_statistics.keySet());
+            ensureStatisticIds(c, _statistics.keySet());
         }
         if (_graphs != null)
         {
-            ensureIds(_graphs.keySet());
+            ensureGraphIds(c, _graphs.keySet());
         }
     }
 
-    public void ensureIds(Collection<? extends Object> ids) throws SQLException
+    public void ensureKeywordIds(Container c, Collection<? extends Object> ids) throws SQLException
     {
         for (Object id : ids)
         {
-            FlowManager.get().ensureAttributeId(id.toString());
+            FlowManager.get().ensureKeywordId(c, id.toString());
+        }
+    }
+    public void ensureStatisticIds(Container c, Collection<? extends Object> ids) throws SQLException
+    {
+        for (Object id : ids)
+        {
+            FlowManager.get().ensureStatisticId(c, id.toString());
+        }
+    }
+    public void ensureGraphIds(Container c, Collection<? extends Object> ids) throws SQLException
+    {
+        for (Object id : ids)
+        {
+            FlowManager.get().ensureGraphId(c, id.toString());
         }
     }
 
@@ -324,7 +339,7 @@ public class AttributeSet implements Serializable
 
     public void save(User user, ExpData data) throws SQLException
     {
-        prepareForSave();
+        prepareForSave(data.getContainer());
         doSave(user, data);
     }
     public void save(File file, DataBaseType dbt) throws Exception

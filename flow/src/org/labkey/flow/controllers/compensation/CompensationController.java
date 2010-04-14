@@ -130,7 +130,7 @@ public class CompensationController extends BaseFlowController<CompensationContr
             try
             {
                 AttributeSet attrs = new AttributeSet(comp);
-                attrs.prepareForSave();
+                attrs.prepareForSave(getContainer());
                 if (!svc.isTransactionActive())
                 {
                     svc.beginTransaction();

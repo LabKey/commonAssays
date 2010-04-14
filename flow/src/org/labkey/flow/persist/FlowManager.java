@@ -84,6 +84,20 @@ public class FlowManager
         return getSchema().getSqlDialect();
     }
 
+    public TableInfo getTinfoStatisticAttr()
+    {
+        return getSchema().getTable("StatisticAttr");
+    }
+
+    public TableInfo getTinfoGraphAttr()
+    {
+        return getSchema().getTable("GraphAttr");
+    }
+
+    public TableInfo getTinfoKeywordAttr()
+    {
+        return getSchema().getTable("KeywordAttr");
+    }
 
     public TableInfo getTinfoAttribute()
     {
@@ -230,7 +244,8 @@ public class FlowManager
         }
     }
 
-    public int ensureAttributeId(String attr) throws SQLException
+
+    private int ensureAttributeId(String attr) throws SQLException
     {
         DbSchema schema = getSchema();
         if (schema.getScope().isTransactionActive())
@@ -249,6 +264,43 @@ public class FlowManager
             return getAttributeId(attr);
         }
     }
+
+
+    public int ensureStatisticId(Container c, String attr) throws SQLException
+    {
+        int id = ensureAttributeId(attr);
+        TableInfo statkey = getTinfoStatisticAttr();
+        Table.execute(getSchema(), "INSERT INTO " + statkey + " (container, id) " +
+                "SELECT ? AS container, ? as id " +
+                "WHERE NOT EXISTS (SELECT id FROM " + statkey + " WHERE container=? and id=?)",
+                new Object[] {c.getId(), id, c.getId(), id});
+        return id;
+    }
+
+
+    public int ensureKeywordId(Container c, String attr) throws SQLException
+    {
+        int id = ensureAttributeId(attr);
+        TableInfo statkey = getTinfoKeywordAttr();
+        Table.execute(getSchema(), "INSERT INTO " + statkey + " (container, id) " +
+                "SELECT ? AS container, ? as id " +
+                "WHERE NOT EXISTS (SELECT id FROM " + statkey + " WHERE container=? and id=?)",
+                new Object[] {c.getId(), id, c.getId(), id});
+        return id;
+    }
+
+
+    public int ensureGraphId(Container c, String attr) throws SQLException
+    {
+        int id = ensureAttributeId(attr);
+        TableInfo statkey = getTinfoGraphAttr();
+        Table.execute(getSchema(), "INSERT INTO " + statkey + " (container, id) " +
+                "SELECT ? AS container, ? as id " +
+                "WHERE NOT EXISTS (SELECT id FROM " + statkey + " WHERE container=? and id=?)",
+                new Object[] {c.getId(), id, c.getId(), id});
+        return id;
+    }
+
 
     public List<AttrObject> getAttrObjects(Collection<ExpData> datas)
     {
@@ -666,6 +718,7 @@ public class FlowManager
         {
             SQLFragment sqlOIDs = new SQLFragment("(SELECT flow.object.rowid FROM flow.object INNER JOIN exp.data ON flow.object.dataid = exp.data.rowid AND exp.data.container = ?)", container.getId());
             deleteObjectIds(sqlOIDs, Collections.singleton(container));
+            Table.execute(getSchema(), "DELETE FROM " + getTinfoStatisticAttr() + " WHERE container=?", new Object[] {container});
         }
         catch (SQLException x)
         {

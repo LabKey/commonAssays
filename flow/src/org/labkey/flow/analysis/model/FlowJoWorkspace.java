@@ -1157,7 +1157,7 @@ abstract public class FlowJoWorkspace implements Serializable
                     attrs.setURI(uri);
             }
             attrs.setKeywords(sample.getKeywords());
-            attrs.prepareForSave();
+            attrs.prepareForSave(container);
             keywordsMap.put(sample, attrs);
 
             CompensationMatrix comp = sample.getCompensationMatrix();
@@ -1203,14 +1203,14 @@ abstract public class FlowJoWorkspace implements Serializable
                     }
                 }
 
-                results.prepareForSave();
+                results.prepareForSave(container);
                 analysisMap.put(sample, results);
             }
 
             if (comp != null)
             {
                 AttributeSet compAttrs = new AttributeSet(comp);
-                compAttrs.prepareForSave();
+                compAttrs.prepareForSave(container);
                 compMatrixMap.put(comp, compAttrs);
             }
         }

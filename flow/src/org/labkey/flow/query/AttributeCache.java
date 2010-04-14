@@ -171,15 +171,36 @@ abstract public class AttributeCache<T>
 //            sql.add(container.getId());
 //        }
 
-        sql.append("SELECT DISTINCT ");
-        sql.append(_attrIdColumn.getValueSql("property"));
-        sql.append(" AS attrId\nFROM ");
-        sql.append("flow.Object INNER JOIN (");
-        sql.append(_table.getFromSQL());
-        sql.append(") property ON flow.Object.RowId = ");
-        sql.append(_objectIdColumn.getValueSql("property"));
-        sql.append(" WHERE flow.Object.container=?");
-        sql.add(container.getId());
+
+
+        if ("statisticid".equalsIgnoreCase(_attrIdColumn.getName()))
+        {
+            sql.append("SELECT id AS attrId FROM " + FlowManager.get().getTinfoStatisticAttr() + " WHERE container=?");
+            sql.add(container.getId());
+        }
+        else if ("graphid".equalsIgnoreCase(_attrIdColumn.getName()))
+        {
+            sql.append("SELECT id AS attrId FROM " + FlowManager.get().getTinfoGraphAttr() + " WHERE container=?");
+            sql.add(container.getId());
+        }
+        else if ("keywordid".equalsIgnoreCase(_attrIdColumn.getName()))
+        {
+            sql.append("SELECT id AS attrId FROM " + FlowManager.get().getTinfoKeywordAttr() + " WHERE container=?");
+            sql.add(container.getId());
+        }
+        else
+        {
+            assert false;
+            sql.append("SELECT DISTINCT ");
+            sql.append(_attrIdColumn.getValueSql("property"));
+            sql.append(" AS attrId\nFROM ");
+            sql.append("flow.Object INNER JOIN (");
+            sql.append(_table.getFromSQL());
+            sql.append(") property ON flow.Object.RowId = ");
+            sql.append(_objectIdColumn.getValueSql("property"));
+            sql.append(" WHERE flow.Object.container=?");
+            sql.add(container.getId());
+        }
 
 //        SQLFragment sql = new SQLFragment();
 //        sql.append("SELECT rowid\nFROM flow.attribute");
