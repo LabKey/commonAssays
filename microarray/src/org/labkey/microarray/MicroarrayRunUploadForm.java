@@ -61,8 +61,8 @@ public class MicroarrayRunUploadForm extends BulkPropertiesUploadForm<Microarray
         try
         {
             DocumentBuilderFactory dbfact = DocumentBuilderFactory.newInstance();
-            dbfact.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd",false);
-            dbfact.setAttribute("http://apache.org/xml/features/disallow-doctype-decl",false);
+            dbfact.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            dbfact.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
             DocumentBuilder builder = dbfact.newDocumentBuilder();
             return builder.parse(new InputSource(new FileInputStream(f)));
         }
