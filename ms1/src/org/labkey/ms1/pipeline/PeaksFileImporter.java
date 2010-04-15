@@ -28,6 +28,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The SAX handler for .peaks.xml files.
@@ -152,7 +153,7 @@ public class PeaksFileImporter extends DefaultHandler
     protected Integer onFile(Attributes attrs) throws SQLException
     {
         //build up a map from our initialization parameters
-        HashMap<String,Object> map = newMap("FileId");
+        Map<String,Object> map = newMap("FileId");
         map.put("ExpDataFileId", Integer.valueOf(_expData.getRowId()));
         map.put("Type", Integer.valueOf(MS1Manager.FILETYPE_PEAKS));
         map.put("MzXmlUrl", _mzXmlUrl);
@@ -166,7 +167,7 @@ public class PeaksFileImporter extends DefaultHandler
 
     protected Integer onSoftware(Attributes attrs, Integer idFile) throws SQLException
     {
-        HashMap<String,Object> map = newMap("SoftwareId", "FileId", idFile);
+        Map<String,Object> map = newMap("SoftwareId", "FileId", idFile);
         map.put("Name", attrs.getValue("name"));
         map.put("Version", attrs.getValue("version"));
         map.put("Author", attrs.getValue("source"));
@@ -186,7 +187,7 @@ public class PeaksFileImporter extends DefaultHandler
 
     protected Integer onScan(Attributes attrs, Integer idFile) throws SQLException, SAXException
     {
-        HashMap<String,Object> map = newMap("ScanId", "FileId", idFile);
+        Map<String, Object> map = newMap("ScanId", "FileId", idFile);
         map.put("Scan", getAttrAsInteger(attrs, "scanNumber"));
         map.put("RetentionTime", getAttrAsDouble(attrs, "retentionTime"));
         map.put("ObservationDuration", getAttrAsDouble(attrs, "observationDuration"));
@@ -200,7 +201,7 @@ public class PeaksFileImporter extends DefaultHandler
     {
         //each attribute is a spearate calibration parameter for the given scan
         //where the attribute name is the calibration parameter name, and value is value
-        HashMap<String,Object> map = newMap("ScanId", idScan);
+        Map<String, Object> map = newMap("ScanId", idScan);
 
         for(int idx = 0; idx < attrs.getLength(); ++idx)
         {
@@ -212,7 +213,7 @@ public class PeaksFileImporter extends DefaultHandler
 
     protected Integer onPeakFamily(Attributes attrs, Integer idScan) throws SQLException, SAXException
     {
-        HashMap<String,Object> map = newMap("PeakFamilyId", "ScanId", idScan);
+        Map<String, Object> map = newMap("PeakFamilyId", "ScanId", idScan);
         map.put("MzMono", getAttrAsDouble(attrs, "mzMonoisotopic"));
         map.put("Charge", getAttrAsInteger(attrs, "charge"));
         map = Table.insert(_user, MS1Manager.get().getTable(MS1Manager.TABLE_PEAK_FAMILIES), map);
@@ -225,7 +226,7 @@ public class PeaksFileImporter extends DefaultHandler
         //since the database is setup for a m:m relationship between peaks
         //and peak families, we need to insert the peak and then also
         //insert a row into the join table (PeaksToFamilies)
-        HashMap<String,Object> map = newMap("PeakId", "ScanId", idScan);
+        Map<String,Object> map = newMap("PeakId", "ScanId", idScan);
 
         map.put("MZ", getAttrAsDouble(attrs, "mz"));
         map.put("Intensity", getAttrAsDouble(attrs, "intensity"));

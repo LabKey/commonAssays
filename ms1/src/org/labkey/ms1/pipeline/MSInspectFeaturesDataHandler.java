@@ -364,11 +364,11 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         map.put("MzXmlURL", PeaksFileDataHandler.getMzXmlFilePath(data));
         map.put("Imported", Boolean.TRUE);
 
-        map = Table.insert(user, schema.getTable(MS1Manager.TABLE_FILES), map);
-        if(null == map.get("FileId"))
+        Map outMap = Table.insert(user, schema.getTable(MS1Manager.TABLE_FILES), map);
+        if (null == outMap.get("FileId"))
             throw new ExperimentException("Unable to get new id for features file.");
         
-        return ((Integer) (map.get("FileId"))).intValue();
+        return ((Integer) (outMap.get("FileId"))).intValue();
     } //insertFeaturesFile()
 
     protected void insertSoftwareInfo(Map comments, int idFile, User user, DbSchema schema) throws SQLException
@@ -379,7 +379,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         software.put("Name", "msInspect");
         software.put("Author", "Fred Hutchinson Cancer Research Center");
 
-        software = Table.insert(user, schema.getTable(MS1Manager.TABLE_SOFTWARE), software);
+        Map<String, Object> outMap = Table.insert(user, schema.getTable(MS1Manager.TABLE_SOFTWARE), software);
 
         //now try to get the algorithm from the comments
         //if we can get it, add that as a named parameter
@@ -387,7 +387,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         if(null != algorithm && algorithm.length() > 0)
         {
             HashMap<String,Object> softwareParam = new HashMap<String,Object>();
-            softwareParam.put("SoftwareId", software.get("SoftwareId"));
+            softwareParam.put("SoftwareId", outMap.get("SoftwareId"));
             softwareParam.put("Name", "algorithm");
             softwareParam.put("Value", algorithm);
 
