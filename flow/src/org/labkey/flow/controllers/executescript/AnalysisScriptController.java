@@ -545,7 +545,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         private FlowRun getExistingKeywordRun(ImportAnalysisForm form, Errors errors)
         {
             int keywordRunId = form.getExistingKeywordRunId();
-            if (keywordRunId > 0 && form.getRunFilePathRoot() != null)
+            if (keywordRunId > 0 && StringUtils.isNotEmpty(form.getRunFilePathRoot()))
             {
                 errors.reject(ERROR_MSG, "Can't select both an existing run and a file path.");
                 return null;

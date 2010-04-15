@@ -144,9 +144,9 @@
 var inputId=<%=q(inputId)%>;
 var fileSystem;
 var fileBrowser;
-function selectRecord(record)
+function selectRecord(path)
 {
-    Ext.get(inputId).dom.value=record.data.path;
+    Ext.get(inputId).dom.value=path;
     // setTitle...
 }
 
@@ -179,8 +179,10 @@ Ext.onReady(function()
         return true;
     });
     fileBrowser.on(BROWSER_EVENTS.selectionchange, function(record){
+        var path = null;
         if (record && record.data.file)
-            selectRecord(record);
+            path = record.data.path;
+        selectRecord(path);
         return true;
     });
 
@@ -214,15 +216,26 @@ Ext.onReady(function()
         <h3>Option 1: Skip associating FCS Files:</h3>
         <div style="padding-left: 2em; padding-bottom: 1em;">
             <script type="text/javascript">
-                function clearSelections()
+                function clearExistingRunIdCombo()
                 {
                     var combo = document.forms.importAnalysis.existingKeywordRunId;
                     if (combo && combo.tagName.toLowerCase() == "select")
                         combo.selectedIndex = 0;
+                }
 
-                    var tree = Ext.getCmp('tree');
-                    if (tree)
-                        tree.getSelectionModel().clearSelections();
+                function clearRunFilePathRoot()
+                {
+                    if (fileBrowser)
+                    {
+                        fileBrowser.grid.getSelectionModel().clearSelections();
+                        selectRecord(null);
+                    }
+                }
+
+                function clearSelections()
+                {
+                    clearExistingRunIdCombo();
+                    clearRunFilePathRoot();
                     return true;
                 }
             </script>
@@ -257,7 +270,7 @@ Ext.onReady(function()
                 <div style="padding-left: 2em; padding-bottom: 1em;">
                     Choose a previously imported directory of FCS files
                     <br/><br/>
-                    <select name="existingKeywordRunId">
+                    <select name="existingKeywordRunId" onchange="if (this.selectedIndex > 0) clearRunFilePathRoot();">
                         <option value="0" selected="selected">&lt;Select FCS File run&gt;</option>
                         <% for (Map.Entry<FlowRun, String> entry : keywordRuns.entrySet()) { %>
                             <option value="<%=entry.getKey().getRunId()%>" title="<%=entry.getValue()%>"><%=entry.getKey().getName()%></option>
@@ -298,6 +311,8 @@ var fileBrowser;
 function selectRecord(path)
 {
     Ext.get(inputId).dom.value=path;
+    if (path)
+        clearExistingRunIdCombo();
     // setTitle...
 }
 
@@ -330,10 +345,13 @@ Ext.onReady(function()
         return true;
     });
     fileBrowser.on(BROWSER_EVENTS.selectionchange, function(record){
-        if (!record) return;
-        var path = record.data.path;
-        if (record.data.file)
-            path = fileSystem.parentPath(path);
+        var path = null;
+        if (record)
+        {
+            path = record.data.path;
+            if (record.data.file)
+                path = fileSystem.parentPath(path); // parent directory of selected .fcs file
+        }
         selectRecord(path);
         return true;
     });
