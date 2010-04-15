@@ -121,7 +121,7 @@ public class FeaturesView extends QueryView
         {
             //make sure we get all rows and not just the current page
             getSettings().setShowRows(ShowRows.ALL);
-            rs = getResultset();
+            rs = getResultSet();
             while(rs.next())
             {
                 id = rs.getInt("FeatureId");

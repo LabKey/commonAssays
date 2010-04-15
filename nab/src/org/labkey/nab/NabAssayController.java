@@ -652,7 +652,7 @@ public class NabAssayController extends SpringActionController
                 ResultSet rs = null;
                 try
                 {
-                    rs = dataView.getResultset();
+                    rs = dataView.getResultSet();
                     Set<Integer> graphableIds = new HashSet<Integer>();
                     while (rs.next())
                         graphableIds.add(rs.getInt("ObjectId"));
