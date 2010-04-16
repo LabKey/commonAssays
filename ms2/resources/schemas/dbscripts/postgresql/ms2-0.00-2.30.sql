@@ -333,31 +333,6 @@ CREATE TABLE prot.ProteinDataBases
 INSERT INTO prot.ProteinDataBases (DataBaseId, ProteinDataBase, Loaded) VALUES (0, NULL, NULL);
 
 
-CREATE TABLE prot.ProteinSequences
-(
-	DataBaseId INT NOT NULL,
-	SequenceId SERIAL,
-	SequenceMass REAL NOT NULL,
-	Sequence TEXT NOT NULL,
-	LookupString VARCHAR(200) NOT NULL,
-    SeqId INT NULL,
-
-	CONSTRAINT PK_ProteinSequences PRIMARY KEY (SequenceId),
-	CONSTRAINT UQ_ProteinSequences_DataBaseId_LookupString UNIQUE (DataBaseId, LookupString),
-    CONSTRAINT FK_ProteinSequences_ProtSequences FOREIGN KEY (SeqId) REFERENCES prot.ProtSequences(SeqId)
-);
-
-CREATE INDEX IX_ProteinSequences ON prot.ProteinSequences (DataBaseId, LookupString);
-
-CREATE TABLE prot.ProteinNames
-(
-	SequenceId INT NOT NULL,
-	Description VARCHAR(1000) NOT NULL
-);
-
-CREATE INDEX IX_ProteinNames ON prot.ProteinNames (SequenceId);
-
-
 CREATE SCHEMA ms2;
 
 /**** MS2Runs                                           */
@@ -415,34 +390,6 @@ CREATE TABLE ms2.MS2Modifications
 
 	CONSTRAINT PK_MS2Modifications PRIMARY KEY (Run, AminoAcid, Symbol)
 );
-
-
-CREATE TABLE ms2.MS2PeptidesData
-(
-	Fraction INT NOT NULL,
-	Scan INT NOT NULL,
-	Charge SMALLINT NOT NULL,
-	Score1 REAL NOT NULL DEFAULT 0,
-	Score2 REAL NOT NULL DEFAULT 0,
-	Score3 REAL NOT NULL DEFAULT 0,
-	Score4 REAL NULL,
-	Score5 REAL NULL,
-	IonPercent REAL NOT NULL,
-	Mass FLOAT8 NOT NULL,
-	DeltaMass REAL NOT NULL,
-	PeptideProphet REAL NOT NULL,
-	Peptide VARCHAR (200) NOT NULL,
-	PrevAA CHAR(1) NOT NULL DEFAULT '',
-	TrimmedPeptide VARCHAR(200) NOT NULL DEFAULT '',
-	NextAA CHAR(1) NOT NULL DEFAULT '',
-	ProteinHits SMALLINT NOT NULL,
-	SequencePosition INT NOT NULL DEFAULT 0,
-	Protein VARCHAR(100) NOT NULL,
-	SeqId INT NULL,
-
-	CONSTRAINT PK_MS2PeptidesData PRIMARY KEY (Fraction, Scan, Charge)
-);
-CREATE INDEX IX_MS2PeptidesData_Protein ON ms2.MS2PeptidesData (Protein);
 
 
 -- Store MS2 Spectrum data in separate table to improve performance of upload and MS2Peptides queries
@@ -651,7 +598,7 @@ UPDATE idents
 UPDATE prot.ProtOrganisms
 	SET IdentId = i.IdentID
 	FROM idents i
-	WHERE i.OrgId = prot.ProtOrganisms.OrgId;
+	WHERE i.OrgId = ProtOrganisms.OrgId;
 
 --SELECT i.*, PO.orgid, PO.IdentID, PI.IdentId
 -- FROM idents i
@@ -661,9 +608,6 @@ UPDATE prot.ProtOrganisms
 
 DROP TABLE idents;
 
-ALTER TABLE ms2.MS2PeptidesData RENAME TO MS2PeptidesDataOld;
-ALTER INDEX ms2.PK_MS2PeptidesData RENAME TO PK_MS2PeptidesDataOld;
-ALTER INDEX ms2.IX_MS2PeptidesData_Protein RENAME TO IX_MS2PeptidesData_ProteinOld;
 
 CREATE TABLE ms2.MS2PeptidesData
 (
@@ -690,14 +634,6 @@ CREATE TABLE ms2.MS2PeptidesData
 	SeqId INT NULL
 );
 
-INSERT INTO ms2.MS2PeptidesData (Fraction, Scan, Charge, Score1, Score2, Score3, Score4, Score5, IonPercent, Mass, DeltaMass,
-		PeptideProphet, Peptide, PrevAA, TrimmedPeptide, NextAA, ProteinHits, SequencePosition, Protein, SeqId)
-	SELECT ms2.MS2PeptidesDataOld.Fraction, Scan, Charge, Score1, Score2, Score3, Score4, Score5, IonPercent, Mass, DeltaMass,
-		PeptideProphet, Peptide, PrevAA, TrimmedPeptide, NextAA, ProteinHits, SequencePosition, Protein,
-		(SELECT SeqId FROM prot.ProteinSequences seq WHERE LookupString = Protein AND seq.DatabaseId = runs.DatabaseId) AS SeqId
-	FROM ms2.MS2PeptidesDataOld
-	INNER JOIN ms2.MS2Fractions frac ON ms2.MS2PeptidesDataOld.fraction = frac.fraction
-	INNER JOIN ms2.MS2Runs runs ON frac.run = runs.run;
 
 CREATE UNIQUE INDEX UQ_MS2PeptidesData_FractionScanCharge ON ms2.MS2PeptidesData (Fraction, Scan, Charge);
 
@@ -706,7 +642,6 @@ ALTER TABLE ms2.MS2PeptidesData
 
 CREATE INDEX IX_MS2PeptidesData_Protein ON ms2.MS2PeptidesData (Protein);
 
-DROP TABLE ms2.MS2PeptidesDataOld;
 
 CREATE TABLE ms2.MS2ProteinProphetFiles
 (
@@ -834,9 +769,6 @@ CREATE TABLE ms2.PeptideProphetSummaries
 UPDATE prot.ProtInfoSources SET Url = 'http://www.genecards.org/cgi-bin/carddisp?{}&alias=yes'
     WHERE Name = 'GeneCards';
 
--- Index to speed up determining which SeqIds came from a given FASTA file (e.g., MS2 showAllProteins.view)
-CREATE INDEX IX_ProteinSequences_SeqId ON prot.ProteinSequences(SeqId);
-
 
 /* ms2-1.30-1.40.sql */
 
@@ -848,11 +780,11 @@ ALTER TABLE ms2.MS2Runs
 -- Update counts for existing runs
 UPDATE ms2.MS2Runs SET PeptideCount = PepCount FROM
     (SELECT Run, COUNT(*) AS PepCount FROM ms2.MS2PeptidesData pd INNER JOIN ms2.MS2Fractions f ON pd.Fraction = f.Fraction GROUP BY Run) x
-WHERE ms2.MS2Runs.Run = x.Run;
+WHERE MS2Runs.Run = x.Run;
 
 UPDATE ms2.MS2Runs SET SpectrumCount = SpecCount FROM
     (SELECT Run, COUNT(*) AS SpecCount FROM ms2.MS2SpectraData sd INNER JOIN ms2.MS2Fractions f ON sd.Fraction = f.Fraction GROUP BY Run) x
-WHERE ms2.MS2Runs.Run = x.Run;
+WHERE MS2Runs.Run = x.Run;
 
 -- Relax contraints on quantitation result columns; q3 does not generate string representations of ratios.
 ALTER TABLE ms2.Quantitation ALTER COLUMN Ratio DROP NOT NULL;
@@ -880,22 +812,6 @@ CREATE TABLE ms2.QuantSummaries
 
 -- Add a QuantId column to ms2.Quantitation to allow multiple results for each peptide
 ALTER TABLE ms2.Quantitation ADD QuantId INT;
-
--- Generate stub quantitation summaries for existing runs (must be xpress with
--- a default mass tolerance; other params unknown)
-INSERT INTO ms2.QuantSummaries (Run, AnalysisType, MassTol)
-  SELECT DISTINCT(F.Run), 'xpress', 1.0
-    FROM ms2.MS2Fractions F
-         INNER JOIN ms2.MS2PeptidesData P ON F.Fraction = P.Fraction
-         INNER JOIN ms2.Quantitation Q ON P.RowId = Q.PeptideId;
-
--- Add a QuantId from these summaries to existing peptide quantitation records
-UPDATE ms2.Quantitation
-   SET QuantId = (SELECT S.QuantId FROM ms2.QuantSummaries S, ms2.MS2Runs R, ms2.MS2Fractions F, ms2.MS2PeptidesData P
-   WHERE ms2.Quantitation.PeptideId = P.RowId
-     AND P.Fraction = F.Fraction
-     AND F.Run = R.Run
-     AND S.Run = R.Run);
 
 -- QuantId must be non-null; eventually (PeptideId, QuantId) should become a compound PK
 ALTER TABLE ms2.Quantitation ALTER COLUMN QuantId SET NOT NULL;
@@ -928,7 +844,6 @@ ALTER TABLE prot.ProtAnnotations RENAME TO Annotations;
 ALTER TABLE prot.ProtAnnotationTypes RENAME TO AnnotationTypes;
 ALTER TABLE prot.ProtAnnotInsertions RENAME TO AnnotInsertions;
 ALTER TABLE prot.ProteinDatabases RENAME TO FastaFiles;
-ALTER TABLE prot.ProteinSequences RENAME TO FastaSequences;
 ALTER TABLE prot.ProtFastas RENAME TO FastaLoads;
 ALTER TABLE prot.ProtIdentifiers RENAME TO Identifiers;
 ALTER TABLE prot.ProtIdentTypes RENAME TO IdentTypes;
@@ -941,16 +856,6 @@ ALTER TABLE prot.ProtSProtOrgMap RENAME TO SProtOrgMap;
 ALTER TABLE prot.FastaFiles RENAME DataBaseId TO FastaId;
 ALTER TABLE prot.FastaFiles RENAME ProteinDataBase TO FileName;
 ALTER TABLE ms2.MS2Runs RENAME DataBaseId TO FastaId;
-ALTER TABLE prot.FastaSequences RENAME DataBaseId TO FastaId;
-
--- Drop obsolete table, PK and columns
-DROP TABLE prot.ProteinNames;
-
-ALTER TABLE prot.FastaSequences DROP CONSTRAINT PK_ProteinSequences;
-ALTER TABLE prot.FastaSequences
-    DROP COLUMN SequenceId,
-    DROP COLUMN SequenceMass,
-    DROP COLUMN Sequence;
 
 -- Add column for retention time
 ALTER TABLE ms2.MS2PeptidesData
@@ -978,9 +883,6 @@ ALTER TABLE ms2.MS2SpectraData RENAME TO SpectraData;
 -- More accurate column name
 ALTER TABLE ms2.Runs RENAME COLUMN SampleEnzyme TO SearchEnzyme;
 
--- Bug 2195 restructure prot.FastaSequences
-ALTER TABLE prot.FastaSequences RENAME TO FastaSequences_old;
-
 CREATE TABLE prot.FastaSequences
 (
     FastaId int NOT NULL,
@@ -988,14 +890,10 @@ CREATE TABLE prot.FastaSequences
     SeqId int NULL
 );
 
-INSERT INTO prot.FastaSequences (FastaId, LookupString, SeqId)
-    SELECT FastaId, LookupString,SeqId FROM prot.FastaSequences_old ORDER BY FastaId, LookupString;
-
 ALTER TABLE prot.FastaSequences ADD CONSTRAINT PK_FastaSequences PRIMARY KEY (FastaId,LookupString);
 ALTER TABLE prot.FastaSequences ADD CONSTRAINT FK_FastaSequences_Sequences FOREIGN KEY (SeqId) REFERENCES prot.Sequences (SeqId);
 CREATE INDEX IX_FastaSequences_FastaId_SeqId ON prot.FastaSequences(FastaId, SeqId);
 CREATE INDEX IX_FastaSequences_SeqId ON prot.FastaSequences(SeqId);
-DROP TABLE prot.FastaSequences_old;
 
 --Bug 2193
 CREATE INDEX IX_SequencesSource ON prot.Sequences(SourceId);
