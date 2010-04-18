@@ -600,12 +600,6 @@ UPDATE prot.ProtOrganisms
 	FROM idents i
 	WHERE i.OrgId = ProtOrganisms.OrgId;
 
---SELECT i.*, PO.orgid, PO.IdentID, PI.IdentId
--- FROM idents i
---INNER JOIN prot.ProtOrganisms PO ON (i.genus = PO.genus AND i.species = PO.species)
---INNER JOIN prot.ProtIdentifiers PI ON (i.Identifier = PI.Identifier AND i.IdentTypeID = PI.IdentTypeId)
-
-
 DROP TABLE idents;
 
 

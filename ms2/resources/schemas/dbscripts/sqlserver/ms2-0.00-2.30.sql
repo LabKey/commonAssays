@@ -347,32 +347,6 @@ INSERT INTO prot.ProteinDataBases (ProteinDataBase, Loaded) VALUES (NULL, NULL)
 GO
 
 
-CREATE TABLE prot.ProteinSequences
-(
-	DataBaseId INT NOT NULL,
-	SequenceId INT IDENTITY (1, 1) NOT NULL,
-	SequenceMass REAL NOT NULL,
-	Sequence TEXT NOT NULL,
-	LookupString VARCHAR (200) NOT NULL,
-	SeqId INT NULL,
-
-	CONSTRAINT PK_ProteinSequences PRIMARY KEY (SequenceId),
-	CONSTRAINT UQ_ProteinSequences_DataBaseId_LookupString UNIQUE (DataBaseId, LookupString),
-	CONSTRAINT FK_ProteinSequences_ProtSequences FOREIGN KEY (SeqId) REFERENCES prot.ProtSequences (SeqId)
-)
-CREATE INDEX IX_ProteinSequences ON prot.ProteinSequences (DataBaseId, LookupString)
-GO
-
-
-CREATE TABLE prot.ProteinNames
-(
-	SequenceId INT NOT NULL,
-	Description VARCHAR (1000) NOT NULL 
-)
-CREATE INDEX IX_ProteinNames ON prot.ProteinNames (SequenceId)
-GO
-
-
 EXEC sp_addapprole 'ms2', 'password'
 GO
 
@@ -436,35 +410,6 @@ CREATE TABLE ms2.MS2Modifications
 GO
 
 
-CREATE TABLE ms2.MS2PeptidesData
-(
-	Fraction INT NOT NULL,
-	Scan INT NOT NULL,
-	Charge TINYINT NOT NULL,
-	Score1 REAL NOT NULL DEFAULT 0,
-	Score2 REAL NOT NULL DEFAULT 0,
-	Score3 REAL NOT NULL DEFAULT 0,
-	Score4 REAL NULL,
-	Score5 REAL NULL,
-	IonPercent REAL NOT NULL,
-	Mass float NOT NULL,
-	DeltaMass REAL NOT NULL,
-	PeptideProphet REAL NOT NULL,
-	Peptide varchar (200) NOT NULL,
-	PrevAA char(1) NOT NULL DEFAULT '',
-	TrimmedPeptide VARCHAR(200) NOT NULL DEFAULT '',
-	NextAA char(1) NOT NULL DEFAULT '',
-	ProteinHits SMALLINT NOT NULL,
-	SequencePosition INT NOT NULL DEFAULT 0,
-	Protein VARCHAR (100) NOT NULL,
-	SeqId INT NULL,
-
-	CONSTRAINT PK_MS2PeptidesData PRIMARY KEY CLUSTERED (Fraction, Scan, Charge)
-)
-CREATE INDEX IX_MS2PeptidesData_Protein ON ms2.MS2PeptidesData (Protein)
-GO
-
-
 -- Store MS2 Spectrum data in separate table to improve performance of upload and MS2Peptides queries
 CREATE TABLE ms2.MS2SpectraData
 (
@@ -498,10 +443,6 @@ GO
 --
 
 -- GO Terms
-
-IF OBJECT_ID('prot.GoTerm','U') IS NOT NULL
-   DROP TABLE prot.GoTerm
-GO
 
 CREATE TABLE prot.GoTerm
 (
@@ -733,22 +674,9 @@ UPDATE prot.ProtOrganisms
 	FROM #idents i
 	WHERE i.OrgId = prot.ProtOrganisms.OrgId
 
---SELECT i.*, PO.orgid, PO.IdentID, PI.IdentId
--- FROM #idents i
---INNER JOIN prot.ProtOrganisms PO ON (i.genus = PO.genus AND i.species = PO.species)
---INNER JOIN prot.ProtIdentifiers PI ON (i.Identifier = PI.Identifier AND i.IdentTypeID = PI.IdentTypeId)
-
-
 DROP TABLE #idents
 GO
 
--- Create new version of MS2PeptidesData table and copy existing data.  This is faster than modifying the existing table since it adds
--- the RowId column and updates the SeqId column in a single pass
-EXEC sp_rename 'ms2.MS2PeptidesData', 'MS2PeptidesDataOld'
-GO
-
-EXEC sp_rename 'ms2.PK_MS2PeptidesData', 'PK_MS2PeptidesDataOld'
-GO
 
 CREATE TABLE ms2.MS2PeptidesData
 (
@@ -776,15 +704,6 @@ CREATE TABLE ms2.MS2PeptidesData
 )
 GO
 
-INSERT INTO ms2.MS2PeptidesData
-    SELECT old.Fraction, Scan, Charge, Score1, Score2, Score3, Score4, Score5, IonPercent, Mass, DeltaMass,
-        PeptideProphet, Peptide, PrevAA, TrimmedPeptide, NextAA, ProteinHits, SequencePosition, Protein,
-	    (SELECT SeqId FROM prot.ProteinSequences seq WHERE LookupString = Protein AND seq.DatabaseId = runs.DatabaseId) AS SeqId
-	FROM ms2.MS2PeptidesDataOld old
-	INNER JOIN ms2.MS2Fractions frac ON old.fraction = frac.fraction
-	INNER JOIN ms2.MS2Runs runs ON frac.run = runs.run
-GO
-
 CREATE UNIQUE CLUSTERED INDEX UQ_MS2PeptidesData_FractionScanCharge ON ms2.MS2PeptidesData(Fraction, Scan, Charge)
 GO
 
@@ -793,9 +712,6 @@ ALTER TABLE ms2.MS2PeptidesData
 GO
 
 CREATE INDEX IX_MS2PeptidesData_Protein ON ms2.MS2PeptidesData(Protein)
-GO
-
-DROP TABLE ms2.MS2PeptidesDataOld
 GO
 
 CREATE TABLE ms2.MS2ProteinProphetFiles
@@ -931,10 +847,6 @@ UPDATE prot.ProtInfoSources SET Url = 'http://www.genecards.org/cgi-bin/carddisp
     WHERE Name = 'GeneCards'
 GO
 
--- Index to speed up determining which SeqIds came from a given FASTA file (e.g., MS2 showAllProteins.view)
-CREATE INDEX IX_ProteinSequences_SeqId ON prot.ProteinSequences(SeqId)
-GO
-
 /* ms2-1.30-1.40.sql */
 
 -- Store peptide and spectrum counts with each run to make computing stats much faster
@@ -983,24 +895,6 @@ GO
 ALTER TABLE ms2.Quantitation ADD QuantId INT
 GO
 
--- Generate stub quantitation summaries for existing runs (must be xpress with
--- a default mass tolerance; other params unknown)
-INSERT INTO ms2.QuantSummaries (Run, AnalysisType, MassTol)
-  SELECT DISTINCT(F.Run), 'xpress', 1.0
-    FROM ms2.MS2Fractions F
-         INNER JOIN ms2.MS2PeptidesData P ON F.Fraction = P.Fraction
-         INNER JOIN ms2.Quantitation Q ON P.RowId = Q.PeptideId
-GO
-
--- Add a QuantId from these summaries to existing peptide quantitation records
-UPDATE ms2.Quantitation
-   SET QuantId = (SELECT S.QuantId FROM ms2.QuantSummaries S, ms2.MS2Runs R, ms2.MS2Fractions F, ms2.MS2PeptidesData P
-   WHERE ms2.Quantitation.PeptideId = P.RowId
-     AND P.Fraction = F.Fraction
-     AND F.Run = R.Run
-     AND S.Run = R.Run)
-GO
-
 -- QuantId must be non-null; eventually (PeptideId, QuantId) should become a compound PK
 ALTER TABLE ms2.Quantitation ALTER COLUMN QuantId INT NOT NULL
 GO
@@ -1036,7 +930,6 @@ EXEC sp_rename 'prot.ProtAnnotations', 'Annotations'
 EXEC sp_rename 'prot.ProtAnnotationTypes', 'AnnotationTypes'
 EXEC sp_rename 'prot.ProtAnnotInsertions', 'AnnotInsertions'
 EXEC sp_rename 'prot.ProteinDatabases', 'FastaFiles'
-EXEC sp_rename 'prot.ProteinSequences', 'FastaSequences'
 EXEC sp_rename 'prot.ProtFastas', 'FastaLoads'
 EXEC sp_rename 'prot.ProtIdentifiers', 'Identifiers'
 EXEC sp_rename 'prot.ProtIdentTypes', 'IdentTypes'
@@ -1050,36 +943,6 @@ GO
 EXEC sp_rename 'prot.FastaFiles.DataBaseId', 'FastaId', 'COLUMN'
 EXEC sp_rename 'prot.FastaFiles.ProteinDataBase', 'FileName', 'COLUMN'
 EXEC sp_rename 'ms2.MS2Runs.DataBaseId', 'FastaId', 'COLUMN'
-EXEC sp_rename 'prot.FastaSequences.DataBaseId', 'FastaId', 'COLUMN'
-GO
-
--- Drop obsolete table, PK and columns
-DROP TABLE prot.ProteinNames
-GO
-
-ALTER TABLE prot.FastaSequences DROP CONSTRAINT PK_ProteinSequences
-GO
-
--- On very old CPAS installations, IX_ProteinSequence includes SequenceMass.  Only in that case,
--- rebuild the index with two columns so we can drop SequenceMass
-DECLARE @idxid int
-DECLARE @objid int
-DECLARE @name varchar
-
-SELECT @objid = object_id('prot.FastaSequences')
-SELECT @idxid = indexproperty(@objid, 'IX_proteinsequences', 'IndexId')
-
-IF (col_name(@objid, indexkey_property(@objid, @idxid, 3, 'ColumnId')) IS NOT NULL)
-	BEGIN
-		DROP INDEX prot.FastaSequences.IX_ProteinSequences
-		CREATE INDEX IX_ProteinSequences ON prot.FastaSequences (FastaId, LookupString)
-	END
-GO
-
-ALTER TABLE prot.FastaSequences DROP
-    COLUMN SequenceId,
-    COLUMN SequenceMass,
-    COLUMN Sequence
 GO
 
 -- Add column for retention time
@@ -1118,41 +981,17 @@ EXEC sp_rename
 GO
 
 -- Bug 2195 restructure prot.FastaSequences
-SET NOCOUNT ON
-GO
-DECLARE @errsave int
-SELECT @errsave=0
-EXEC sp_rename 'prot.FastaSequences', 'FastaSequences_old'
-
-CREATE TABLE prot.FastaSequences (
-    FastaId int NOT NULL ,
-    LookupString varchar (200) NOT NULL ,
+CREATE TABLE prot.FastaSequences
+(
+    FastaId int NOT NULL,
+    LookupString varchar (200) NOT NULL,
     SeqId int NULL
-     )
-SELECT @errsave = CASE WHEN @@ERROR >0 THEN @@ERROR ELSE @errsave END
-
-INSERT INTO prot.FastaSequences (FastaId, LookupString,SeqId)
-SELECT FastaId, LookupString,SeqId FROM prot.FastaSequences_old ORDER BY FastaId, LookupString
-SELECT @errsave = CASE WHEN @@ERROR >0 THEN @@ERROR ELSE @errsave END
+)
 
 ALTER TABLE prot.FastaSequences ADD CONSTRAINT PK_FastaSequences PRIMARY KEY CLUSTERED(FastaId,LookupString)
-SELECT @errsave = CASE WHEN @@ERROR >0 THEN @@ERROR ELSE @errsave END
-
 ALTER TABLE prot.FastaSequences WITH NOCHECK ADD CONSTRAINT FK_FastaSequences_Sequences FOREIGN KEY (SeqId) REFERENCES prot.Sequences (SeqId)
-SELECT @errsave = CASE WHEN @@ERROR >0 THEN @@ERROR ELSE @errsave END
-
 CREATE INDEX IX_FastaSequences_FastaId_SeqId ON prot.FastaSequences(FastaId, SeqId)
-SELECT @errsave = CASE WHEN @@ERROR >0 THEN @@ERROR ELSE @errsave END
-
 CREATE INDEX IX_FastaSequences_SeqId ON prot.FastaSequences(SeqId)
-SELECT @errsave = CASE WHEN @@ERROR >0 THEN @@ERROR ELSE @errsave END
-
-IF (@errsave =0)
-    DROP TABLE prot.FastaSequences_old
-GO
-
-SET NOCOUNT OFF
-GO
 
 --Bug 2193
 CREATE INDEX IX_SequencesSource ON prot.Sequences(SourceId)
