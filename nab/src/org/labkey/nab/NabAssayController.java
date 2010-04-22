@@ -16,17 +16,6 @@
 
 package org.labkey.nab;
 
-import org.jfree.chart.ChartColor;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.LogarithmicAxis;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
@@ -46,13 +35,11 @@ import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.DilutionCurve;
-import org.labkey.api.study.WellData;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.Pair;
 import org.labkey.api.view.*;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -78,7 +65,9 @@ public class NabAssayController extends SpringActionController
     private static final DefaultActionResolver _resolver = new DefaultActionResolver(NabAssayController.class,
             NabUploadWizardAction.class,
             GetNabRunsAction.class,
-            getStudyNabRuns.class
+            GetStudyNabGraphURLAction.class,
+            StudyNabGraphAction.class,
+            GetStudyNabRunsAction.class
         );
 
     public NabAssayController()
@@ -539,6 +528,9 @@ public class NabAssayController extends SpringActionController
         }
     }
 
+    private static final int DEFAULT_WIDTH = 425;
+    private static final int DEFAULT_HEIGHT = 300;
+
     public static class GraphSelectedForm
     {
         private int _protocolId;
@@ -546,6 +538,8 @@ public class NabAssayController extends SpringActionController
         private String _captionColumn;
         private String _chartTitle;
         private DilutionCurve.FitType _fitType;
+        private int _height = DEFAULT_HEIGHT;
+        private int _width = DEFAULT_WIDTH;
 
         public int[] getId()
         {
@@ -600,6 +594,26 @@ public class NabAssayController extends SpringActionController
         public DilutionCurve.FitType getFitTypeEnum()
         {
             return _fitType;
+        }
+
+        public int getHeight()
+        {
+            return _height;
+        }
+
+        public void setHeight(int height)
+        {
+            _height = height;
+        }
+
+        public int getWidth()
+        {
+            return _width;
+        }
+
+        public void setWidth(int width)
+        {
+            _width = width;
         }
     }
 
@@ -818,6 +832,7 @@ public class NabAssayController extends SpringActionController
     }
 
     @RequiresPermissionClass(ReadPermission.class)
+    @ContextualRoles(RunDataSetContextualRoles.class)
     public class MultiGraphAction extends SimpleViewAction<GraphSelectedForm>
     {
         public ModelAndView getView(GraphSelectedForm form, BindException errors) throws Exception
@@ -830,7 +845,8 @@ public class NabAssayController extends SpringActionController
                 for (int cutoff : summary.getAssay().getCutoffs())
                     cutoffSet.add(cutoff);
             }
-            renderChartPNG(getViewContext().getResponse(), summaries, toArray(cutoffSet), false, form.getCaptionColumn(), form.getChartTitle());
+            NabGraph.renderChartPNG(getViewContext().getResponse(), summaries, toArray(cutoffSet), false,
+                    form.getCaptionColumn(), form.getChartTitle(), form.getHeight(), form.getWidth());
             return null;
         }
 
@@ -854,7 +870,7 @@ public class NabAssayController extends SpringActionController
             NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum());
             if (assay == null)
                 return HttpView.throwNotFound("Could not load NAb results for run " + form.getRowId() + ".");
-            renderChartPNG(getViewContext().getResponse(), assay, assay.isLockAxes(), null, null);
+            NabGraph.renderChartPNG(getViewContext().getResponse(), assay, assay.isLockAxes(), null, null, DEFAULT_HEIGHT, DEFAULT_WIDTH);
             return null;
         }
 
@@ -864,144 +880,4 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    private static final Color[] GRAPH_COLORS = {
-            ChartColor.BLUE,
-            ChartColor.RED,
-            ChartColor.DARK_GREEN,
-            ChartColor.DARK_YELLOW,
-            ChartColor.MAGENTA
-    };
-
-    private String getDefaultCaption(DilutionSummary summary, boolean longForm)
-    {
-        String sampleId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-        String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-        Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-        Date date = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
-        NabMaterialKey materialKey = new NabMaterialKey(sampleId, participantId, visitId, date);
-        return materialKey.getDisplayString(longForm);
-    }
-
-    private String formatCaption(Object captionValue)
-    {
-        if (captionValue instanceof Date)
-        {
-            Date date = (Date) captionValue;
-            if (date.getHours() == 0 && date.getMinutes() == 0 && date.getSeconds() == 0)
-                return DateUtil.formatDate(date);
-            else
-                return DateUtil.formatDateTime(date);
-        }
-        else
-            return captionValue.toString();
-    }
-
-    private void renderChartPNG(HttpServletResponse response, Map<DilutionSummary, NabAssayRun> summaries, int[] cutoffs, boolean lockAxes, String captionColumn, String chartTitle) throws IOException, DilutionCurve.FitFailedException
-    {
-        boolean longCaptions = false;
-        Set<String> shortCaptions = new HashSet<String>();
-        for (DilutionSummary summary : summaries.keySet())
-        {
-            String shortCaption = getDefaultCaption(summary, false);
-            if (shortCaptions.contains(shortCaption))
-                longCaptions = true;
-            shortCaptions.add(shortCaption);
-        }
-        List<Pair<String, DilutionSummary>> summaryMap = new ArrayList<Pair<String, DilutionSummary>>();
-        for (Map.Entry<DilutionSummary, NabAssayRun> sampleEntry : summaries.entrySet())
-        {
-            String caption = null;
-            DilutionSummary summary = sampleEntry.getKey();
-            if (captionColumn != null)
-            {
-                Object value = summary.getWellGroup().getProperty(captionColumn);
-                if (value != null)
-                    caption = formatCaption(value);
-                else
-                {
-                    Map<PropertyDescriptor, Object> runProperties = sampleEntry.getValue().getRunProperties();
-                    for (Map.Entry<PropertyDescriptor, Object> runProperty : runProperties.entrySet())
-                    {
-                        if (captionColumn.equals(runProperty.getKey().getName()) && runProperty.getValue() != null)
-                            caption = formatCaption(runProperty.getValue());
-                    }
-                }
-            }
-            if (caption == null || caption.length() == 0)
-                caption = getDefaultCaption(summary, longCaptions);
-            summaryMap.add(new Pair<String, DilutionSummary>(caption, summary));
-        }
-        renderChartPNG(response, summaryMap, cutoffs, lockAxes, chartTitle);
-    }
-
-    private void renderChartPNG(HttpServletResponse response, NabAssayRun assay, boolean lockAxes, String captionColumn, String chartTitle) throws IOException, DilutionCurve.FitFailedException
-    {
-        Map<DilutionSummary, NabAssayRun> samples = new LinkedHashMap<DilutionSummary, NabAssayRun>();
-        for (DilutionSummary summary : assay.getSummaries())
-            samples.put(summary, assay);
-        renderChartPNG(response, samples, assay.getCutoffs(), lockAxes, captionColumn, chartTitle);
-    }
-
-    private void renderChartPNG(HttpServletResponse response, List<Pair<String, DilutionSummary>> dilutionSummaries, int[] cutoffs, boolean lockAxes, String chartTitle) throws IOException, DilutionCurve.FitFailedException
-    {
-        XYSeriesCollection curvesDataset = new XYSeriesCollection();
-        XYSeriesCollection pointDataset = new XYSeriesCollection();
-        JFreeChart chart = ChartFactory.createXYLineChart(chartTitle, null, "Percent Neutralization", curvesDataset, PlotOrientation.VERTICAL, true, true, false);
-        XYPlot plot = chart.getXYPlot();
-        plot.setDataset(1, pointDataset);
-        plot.getRenderer(0).setStroke(new BasicStroke(1.5f));
-        if (lockAxes)
-            plot.getRangeAxis().setRange(-20, 120);
-        XYLineAndShapeRenderer pointRenderer = new XYLineAndShapeRenderer(true, true);
-        plot.setRenderer(1, pointRenderer);
-        pointRenderer.setStroke(new BasicStroke(
-                0.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-                1.0f, new float[]{4.0f, 4.0f}, 0.0f));
-        plot.getRenderer(0).setSeriesVisibleInLegend(false);
-        pointRenderer.setShapesFilled(true);
-        for (Pair<String, DilutionSummary> summaryEntry : dilutionSummaries)
-        {
-            String sampleId = summaryEntry.getKey();
-            DilutionSummary summary = summaryEntry.getValue();
-            XYSeries pointSeries = new XYSeries(sampleId);
-            for (WellData well : summary.getWellData())
-            {
-                double percentage = 100 * summary.getPercent(well);
-                double dilution = summary.getDilution(well);
-                pointSeries.add(dilution, percentage);
-            }
-            pointDataset.addSeries(pointSeries);
-            int pointDatasetCount = pointDataset.getSeriesCount();
-            Color currentColor;
-            if (pointDatasetCount <= GRAPH_COLORS.length)
-            {
-                currentColor = GRAPH_COLORS[pointDatasetCount - 1];
-                plot.getRenderer(0).setSeriesPaint(pointDatasetCount - 1, currentColor);
-            }
-            else
-                currentColor = (Color) plot.getRenderer(0).getSeriesPaint(pointDatasetCount - 1);
-
-            try
-            {
-                DilutionCurve.DoublePoint[] curve = summary.getCurve();
-                XYSeries curvedSeries = new XYSeries(sampleId);
-                for (DilutionCurve.DoublePoint point : curve)
-                    curvedSeries.add(point.getX(), point.getY());
-                curvesDataset.addSeries(curvedSeries);
-                if (currentColor != null)
-                    plot.getRenderer(1).setSeriesPaint(curvesDataset.getSeriesCount() - 1, currentColor);
-            }
-            catch (DilutionCurve.FitFailedException e)
-            {
-                // fall through; we'll just graph those that can be graphed.
-            }
-        }
-
-        chart.getXYPlot().setDomainAxis(new LogarithmicAxis("Dilution/Concentration"));
-        chart.getXYPlot().addRangeMarker(new ValueMarker(0f, Color.DARK_GRAY, new BasicStroke()));
-        for (int cutoff : cutoffs)
-            chart.getXYPlot().addRangeMarker(new ValueMarker(cutoff));
-        response.setContentType("image/png");
-        ChartUtilities.writeChartAsPNG(response.getOutputStream(), chart, 425, 300);
-    }
 }
