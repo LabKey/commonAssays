@@ -334,7 +334,6 @@ public class FlowSchema extends UserSchema
         addDataCountColumn(ret, "FCSFileCount", ObjectType.fcsKeywords);
         addDataCountColumn(ret, "CompensationControlCount", ObjectType.compensationControl);
         addDataCountColumn(ret, "FCSAnalysisCount", ObjectType.fcsAnalysis);
-        ret.setEditHelper(new RunEditHelper(this));
         return ret;
     }
 
@@ -602,11 +601,6 @@ public class FlowSchema extends UserSchema
             _expData.addLSIDCondition(lsidCondition);
         }
 
-        public void setEditHelper(TableEditHelper helper)
-        {
-            _expData.setEditHelper(helper);
-        }
-
         public ColumnInfo addPropertyColumns(String domainDescription, PropertyDescriptor[] pds, QuerySchema schema)
         {
             ColumnInfo col = _expData.addPropertyColumns(domainDescription, pds, schema);
@@ -624,7 +618,6 @@ public class FlowSchema extends UserSchema
         FlowPropertySet _fps;
 
         // ExpDataTable support
-        TableEditHelper _editHelper = null;
         final SimpleFilter _filter = new SimpleFilter();
         ExpExperiment _experiment = null;
         ExpRun _run = null;
@@ -909,27 +902,6 @@ public class FlowSchema extends UserSchema
         public void addLSIDCondition(SQLFragment lsidCondition)
         {
             _expData.addLSIDCondition(lsidCondition);
-            throw new UnsupportedOperationException();
-        }
-
-        public void setEditHelper(TableEditHelper helper)
-        {
-            _editHelper = helper;
-        }
-
-        public boolean hasPermission(User user, Class<? extends Permission> perm)
-        {
-            if (_editHelper != null)
-                return _editHelper.hasPermission(user, perm);
-            return false;
-        }
-
-        public ActionURL delete(User user, ActionURL srcURL, QueryUpdateForm form) throws Exception
-        {
-            if (_editHelper != null)
-            {
-                return _editHelper.delete(user, srcURL, form);
-            }
             throw new UnsupportedOperationException();
         }
 
