@@ -1,37 +1,11 @@
 <script type="text/javascript">
-
+var _panel = null;
+var _subPanels = {};
 var allContainers = null;
 var allRuns = null;
-var allRunsGrid = null;
-var peptidesGrid = null;
-var middleForm = null;
-var _pepData = null;     // Contains all data for the Queried peptides.
-var _protData = null;    // Contains all the data for the Queried proteins.
-var _pepCols = null;
-var _protCols = null;
-var _currentCols = null;
 var _filterMap = {};
-
-LABKEY.Security.getContainers(
-{
-    containerPath: "/",
-    includeSubfolders: true,
-    successCallback: function(containersInfo)
-    {
-        allContainers = {};
-        addContainer(containersInfo, allContainers);
-        showQueryOptions();
-    }
-});
-
-LABKEY.Query.selectRows(
-{
-    schemaName: "ms2",
-    queryName: "MS2SearchRuns",
-    successCallback: function(data) { allRuns = data; showQueryOptions(); },
-    containerFilter: "AllFolders",
-    columns: "Folder, Name, CreatedBy/DisplayName, Input/FASTA/Name"
-});
+var active = "Peptides";
+var inactive = "Proteins";
 
 function addContainer(container, allContainers)
 {
@@ -42,81 +16,74 @@ function addContainer(container, allContainers)
     }
 }
 
-function validateGrid(grid)
+function getPanelSignature(title, hidden, items)
 {
-    if(!(grid.selModel.hasSelection()))
-    {
-        alert("Please select the folder(s) you would like to see MS2 Runs from.");
-    }
-    else
-    {
-        var selections = grid.selModel.getSelections();
-        var concatIds = "";
-        for (var i = 0; i < selections.length; i++)
-        {
-            concatIds += selections[i].get("id") + ";";
-        }
-        showRunsGrid(grid, concatIds);
-        document.getElementById("newDiv").style.display="block";
-    }
+    var _panelSig = {
+        title: title,
+        id: 'id'+title,
+        autoHeight: true,
+        layout: 'form',
+        collapsed: true,
+        collapsible: true,
+        hidden: hidden,
+        items: items
+    };
+
+    return _panelSig;
 }
 
-function showRunsGrid(grid, concatIds)
+function init()
 {
-    var _store = new LABKEY.ext.Store({
-        schemaName: "ms2",
-        queryName: "MS2SearchRuns",
-        containerFilter: "AllFolders",
-        columns: "Name, Folder/Path, Input/FASTA, CreatedBy/DisplayName, MS2Details/Run",
-        filterArray: [ LABKEY.Filter.create("Folder/EntityId", concatIds, LABKEY.Filter.Types.EQUALS_ONE_OF) ]
+    // Initialize the main panel
+    _subPanels[1] = getPanelSignature("Run Filters", false, null);
+    _subPanels[2] = getPanelSignature("Matching MS2 Runs", false, null);
+    _subPanels[3] = getPanelSignature("Result Filters", false, null);
+    _subPanels[4] = getPanelSignature("Results", false, null);
+
+    _panel = new Ext.Panel({
+        title: 'Export Options',
+        id: 'export-panel',
+        width: 800,
+        frame: true,
+        renderTo: 'panelDiv',
+        items: [ _subPanels[1], _subPanels[2], _subPanels[3], _subPanels[4] ]
     });
 
-    if(middleForm != null)
-    {
-        middleForm.remove(allRunsGrid, true);
-
-        allRunsGrid.destroy();
-        allRunsGrid = new LABKEY.ext.EditorGridPanel({
-            store: _store,
-            autoHeight: true,
-            editable: false
-        });
-
-        middleForm.add(allRunsGrid);
-        middleForm.doLayout();
-    }
-    else{
-
-        allRunsGrid = new LABKEY.ext.EditorGridPanel({
-            store: _store,
-            autoHeight: true,
-            editable: false
-        });
-
-        middleForm = new Ext.FormPanel({
-            title: "Matching MS2 Runs",
-            width: 800,
-            frame: true,
-            bodyStyle: 'padding: 2px',
-            renderTo: "nextRunGrid",
-            items: [{
-                layout: 'form',
-                items: [allRunsGrid]
-            }]
-        });
-    }
-
-    document.getElementById("nextRunGrid").style.display='block';
+    getRunFiltersContent();
 }
 
-/* showQueryOptions is called each time a container is added or the Runs from all containers are added.*/
-function showQueryOptions()
+function getRunFiltersContent()
+{
+    LABKEY.Security.getContainers(
+    {
+        containerPath: "/",
+        includeSubfolders: true,
+        successCallback: function(containersInfo)
+        {
+            allContainers = {};
+            addContainer(containersInfo, allContainers);
+            setQueryOptions();
+        }
+    });
+
+    LABKEY.Query.selectRows(
+    {
+        schemaName: "ms2",
+        queryName: "MS2SearchRuns",
+        successCallback: function(data) { allRuns = data; setQueryOptions(); },
+        containerFilter: "AllFolders",
+        columns: "Folder, Name, CreatedBy/DisplayName, Input/FASTA/Name, MS2Details/SearchEngine"
+    });
+}
+
+function setQueryOptions()
 {
     if (allContainers && allRuns)
     {
         // All the Containers and their associated MS2 Runs are available.
         var validContainers = new Array();
-        var validFASTA = new Array();
+        var validFASTA = {};
+        var validEngine = {};
 
         for (var i = 0; i < allRuns.rows.length; i++)
         {
@@ -127,6 +94,24 @@ function showQueryOptions()
                 if (validContainers[j].id == run.Folder)
                 {
                     validContainers[j].runCount++;
+                    if (!(run["Input/FASTA/Name"] in validFASTA))
+                    {
+                        validFASTA[run["Input/FASTA/Name"]] = [run.Folder];
+                    }
+                    else
+                    {
+                        validFASTA[run["Input/FASTA/Name"]].push(run.Folder);
+                    }
+
+                    if(!(run["MS2Details/SearchEngine"] in validEngine))
+                    {
+                        validEngine[run["MS2Details/SearchEngine"]] = [run.Folder];
+                    }
+                    else
+                    {
+                        validEngine[run["MS2Details/SearchEngine"]].push(run.Folder);
+                    }
+
                     found = true;
                     break;
                 }
@@ -135,6 +120,23 @@ function showQueryOptions()
             {
                 allContainers[run.Folder].runCount = 1;
                 validContainers.push(allContainers[run.Folder]);
+                if (!(run["Input/FASTA/Name"] in validFASTA))
+                {
+                    validFASTA[run["Input/FASTA/Name"]] = [run.Folder];
+                }
+                else
+                {
+                    validFASTA[run["Input/FASTA/Name"]].push(run.Folder);
+                }
+
+                if(!(run["MS2Details/SearchEngine"] in validEngine))
+                {
+                    validEngine[run["MS2Details/SearchEngine"]] = [run.Folder];
+                }
+                else
+                {
+                    validEngine[run["MS2Details/SearchEngine"]].push(run.Folder);
+                }
             }
         }
 
@@ -151,32 +153,49 @@ function showQueryOptions()
 
         var grid = new Ext.grid.GridPanel({
             store: jStore,
+            id: 'runs-grid',
             columns: [
                 chkBoxSelectMdl,
                 {id:'path', header: "Folder", width: 200, sortable: true, dataIndex: 'path'},
                 {header: "Run Count", width: 75, sortable: true, dataIndex: 'runCount'}
             ],
-            //renderTo: 'myDiv',
             autoHeight: true,
             selModel: chkBoxSelectMdl
         });
 
-        var showRuns = new Ext.Button({text: "Show Matching MS2 Runs"});//, renderTo: "showRunsButton"});
-        showRuns.addListener("click", function() { validateGrid(grid); });
-
-        if(simple != null)
+        var fasta = [];
+        for(filename in validFASTA)
         {
-            simple.destroy();
+            fasta.push([filename]);
         }
+
+        var engine = [];
+        for(segine in validEngine)
+        {
+            engine.push([segine]);
+        }
+
+        var showRuns = new Ext.Button({text: "Show Matching MS2 Runs"});
+        showRuns.addListener('click', function(){
+            //Ext.getCmp('id' + 'Matching MS2 Runs').collapse();
+            _panel.remove(Ext.getCmp('id' + 'Results'));
+            _panel.insert(3, getPanelSignature('Results', false, null));
+            _panel.doLayout(true, true);
+            validateRunFilters();
+        });
+
+        var clearRunsFilters = new Ext.Button({text: 'Clear Runs Filters'});
 
         var simple = new Ext.FormPanel({
             labelWidth: 75,
-            frame: true,
-            title: "Run Filters",
+            id: 'runs-panel',
             width: 800,
-            renderTo: 'topPanel',
             items : [{
                 layout: 'column',
+                id: 'simple-column',
+                style: {
+                    margin: '9px'
+                },
                 items: [{
                     columnWidth: .5,
                     layout: 'form',
@@ -191,37 +210,290 @@ function showQueryOptions()
                         lazyRender:true,
                         mode: 'local',
                         store: new Ext.data.ArrayStore({
-                            id: 0,
-                            fields: [
-                                'searchType'
-                            ],
-                            data: [['XTandem'], ['Sequest']]
+                            fields: [ 'searchEngine' ],
+                            data: engine
                         }),
-                        valueField: 'searchType',
-                        displayField: 'searchType'
+                        valueField: 'searchEngine',
+                        displayField: 'searchEngine',
+                        listeners: {
+                            select: function(combo, rec, idx){
+                                _filterMap['filter-engine'] = LABKEY.Filter.create('MS2Details/SearchEngine', rec.data.searchEngine, LABKEY.Filter.Types.EQUAL);
+                            }
+                        }
                     }), new Ext.form.ComboBox({
+                        id: 'filter-fasta',
                         triggerAction: 'all',
                         fieldLabel: 'FASTA File',
+                        lazyRender: true,
                         emptyText: 'FASTA File sources...',
+                        style: {
+                            marginBottom: '20px'
+                        },
                         mode: 'local',
-                        store: new Ext.data.JsonStore({
-                            root: 'fileNames',
-                            fields: ['Input/FASTA/Name'],
-                            data: { fileNames: validFASTA }
+                        store: new Ext.data.ArrayStore({
+                            fields: ['fileName'],
+                            data: fasta
                         }),
-                        valueField: 'fileNames',
-                        displayField: 'fileNames'
+                        valueField: 'fileName',
+                        displayField: 'fileName',
+                        listeners: {
+                            select: function(combo, rec, idx){
+                                _filterMap['filter-fasta'] = LABKEY.Filter.create('Input/FASTA/Name', rec.data.fileName, LABKEY.Filter.Types.EQUAL);
+                            }
+                        }
                     })]
                 }]
             }],
-            buttons : [ showRuns ]
+            buttons : [ showRuns, clearRunsFilters ]
         });
+        var r = Ext.getCmp('id' + 'Run Filters');
+        if (r)
+        {
+            r.add(Ext.getCmp('simple-column'));
+            r.add(simple);
+            r.doLayout();
+            r.expand();
+        }
+        else
+        {
+            console.info('ERROR: The Run Filters did not load correctly.');
+        }
+
+    }
+
+    function validateRunFilters()
+    {
+        if(!(Ext.getCmp('runs-grid').selModel.hasSelection()))
+        {
+            alert("Please select the folder(s) you would like to see MS2 Runs from.");
+        }
+        else
+        {
+            var selections = Ext.getCmp('runs-grid').selModel.getSelections();
+            var concatIds = "";
+            for (var i = 0; i < selections.length; i++)
+            {
+                concatIds += selections[i].get("id") + ";";
+            }
+            setRunsGrid(concatIds);
+        }
+    }
+
+    function setRunsGrid(ids)
+    {
+        console.info(ids);
+        var runsFilterArray = [];
+
+        // Establish what filters to apply to chosen columns
+        for(var key in _filterMap)
+        {
+            if(_filterMap.hasOwnProperty(key))
+            {
+                runsFilterArray.push(_filterMap[key]);
+            }
+        }
+
+        runsFilterArray.push(LABKEY.Filter.create("Folder/EntityId", ids, LABKEY.Filter.Types.EQUALS_ONE_OF));
+
+        var _storeConfig = {
+            schemaName      : "ms2",
+            queryName       : "MS2SearchRuns",
+            containerFilter : "AllFolders",
+            columns         : "Name, Folder/Path, Input/FASTA, CreatedBy/DisplayName, MS2Details/Run, MS2Details/SearchEngine",
+            filterArray     : runsFilterArray
+        };
+
+        if (Ext.getCmp('matching-grid'))
+        {
+            Ext.getCmp('matching-grid').destroy();
+            _panel.remove(Ext.getCmp('id' + 'Matching MS2 Runs'));
+            _panel.insert(1, getPanelSignature('Matching MS2 Runs', false, null));
+            _panel.doLayout(true, true);
+        }
+
+        var _store = new LABKEY.ext.Store(_storeConfig);
+
+        var runsGrid = new LABKEY.ext.EditorGridPanel({
+            id               : 'matching-grid',
+            store            : _store,
+            autoHeight       : true,
+            editable         : false,
+            showExportButton : false
+        });
+
+        var r = Ext.getCmp('id' + 'Matching MS2 Runs');
+        if (r)
+        {
+            r.add(runsGrid);
+            r.expand();
+        }
+
+        showResultFilters(active);
     }
 }
 
-/* Generates the call to Filter the Exportable table produced by this form. */
-function viewExportableGrid(runIds, formValues, query)
+function showResultFilters(formChoice)
 {
+    var colItems = [];
+    var formItems = [];
+    if(formChoice == 'Peptides')
+    {
+        colItems = [{boxLabel: 'Run', name: "Fraction/Run", checked: true, labelStyle: "padding-right: 0px"}];
+        colItems.push({boxLabel: 'Run Project', name: 'Fraction/Run/Container/Name', checked: true, labelStyle: "padding-right: 0px"});
+        colItems.push({boxLabel: 'Delta Mass', name: 'DeltaMass', checked: true, labelStyle: "padding-right: 0px"});
+        colItems.push({boxLabel: 'Scan', name: 'Scan', checked: true, labelStyle: "padding-right: 0px"});
+        colItems.push({boxLabel: 'Z (Charge)', name: 'Charge', checked: true, labelStyle: "padding-right: 0px"});
+        colItems.push({
+            boxLabel: 'Peptide Prophet Probability',
+            id: 'prophet-box',
+            name: 'PeptideProphet',
+            checked: true,
+            labelStyle: "padding-right: 0px",
+            listeners: {
+                check: function() { /* Could disable associated filter here */ }
+            }
+        });
+        colItems.push({boxLabel: 'Peptide', name: 'Peptide', checked: true, labelStyle: "padding-right: 0px"});
+        colItems.push({boxLabel: 'Protein', name: 'Protein', checked: true, labelStyle: "padding-right: 0px"});
+
+        formItems = [{
+            xtype   : 'checkboxgroup',
+            columns : 3,
+            items   : colItems
+        },{
+            xtype      : 'numberfield',
+            name       : 'filter-peppp',
+            id         : 'filter-peppp',
+            style      : { margin: '15px 0px'},
+            fieldLabel : 'Probabilty >=',
+            labelStyle : 'margin: 20px',
+            minValue   : 0,
+            maxValue   : 1,
+            emptyText  : 0,
+            listeners  : {
+                change : function(formField, newValue, oldValue) {
+                    // Add a filter
+                    if(newValue)
+                    {
+                        _filterMap['filter-peppp'] = LABKEY.Filter.create('PeptideProphet', newValue, LABKEY.Filter.Types.GREATER_THAN_OR_EQUAL);
+                    }
+                    else{
+                        delete _filterMap['filter-peppp'];
+                    }
+                }
+            }
+        },{
+            xtype      : 'checkboxgroup',
+            name       : 'filter-charge',
+            id         : 'filter-charge',
+            fieldLabel : 'Charge',
+            labelStyle : 'padding-left: 20px',
+            columns    : [40,40,40,40,40,40],
+            items      : [
+                {boxLabel: '1+', name: 'filter-charge-1', value: 1, checked: true},
+                {boxLabel: '2+', name: 'filter-charge-2', value: 2, checked: true},
+                {boxLabel: '3+', name: 'filter-charge-3', value: 3, checked: true},
+                {boxLabel: '4+', name: 'filter-charge-4', value: 4, checked: true},
+                {boxLabel: '5+', name: 'filter-charge-5', value: 5, checked: true},
+                {boxLabel: '6+', name: 'filter-charge-6', value: 6, checked: true}
+            ],
+            listeners  : {
+                change : function(chkBoxGrp,checked){
+                    var checkedVals = "";
+                    if(checked.length > 0)
+                    {
+                        for(var i = 0; i < checked.length; i++)
+                        {
+                            checkedVals += checked[i].value + ";";
+                        }
+                        _filterMap['filter-charge'] = LABKEY.Filter.create('Charge', checkedVals, LABKEY.Filter.Types.EQUALS_ONE_OF);
+                    }
+                    else{
+                        delete _filterMap['filter-charge'];
+                    }
+                }
+            }
+
+        }];
+    }
+    else
+    {
+        colItems = [{boxLabel: 'Run', name: 'ProteinProphet/Run', checked: true, labelStyle: 'padding-right: 0px'}];
+        colItems.push({boxLabel: 'Group Probability', name: 'GroupProbability', checked: true, labelStyle: 'padding-right: 0px'});
+        colItems.push({boxLabel: 'Peptide Count', name: 'TotalNumberPeptides', checked: true, labelStyle: 'padding-right: 0px'});
+        colItems.push({boxLabel: 'Error', name: 'ErrorRate', checked: true, labelStyle: 'padding-right: 0px'});
+        colItems.push({boxLabel: 'AA Coverage', name: 'PercentCoverage', checked: true, labelStyle: 'padding-right: 0px'});
+        colItems.push({boxLabel: 'Spectrum Ids%', name: 'PctSpectrumIds', checked: true, labelStyle: 'padding-right: 0px'});
+        
+        formItems = [{
+            xtype: 'checkboxgroup',
+            columns: 6,
+            items: colItems
+        }];
+    }
+
+    if (Ext.getCmp('result-filters'))
+    {
+        _panel.remove(Ext.getCmp('id' + 'Result Filters'));
+        _panel.insert(2,getPanelSignature("Result Filters", false, null));
+        _panel.doLayout(true, true);
+    }
+
+    var filterForm = new Ext.FormPanel({
+        id      : 'result-filters',
+        items   : formItems,
+        buttons : [{
+            text    : 'Preview Results',
+            handler : function() { console.info('clicked Preview.'); validateFilters(false) }
+        },{
+            text    : 'Export Results',
+            handler : function() { validateFilters(true) }
+        },{
+            text    : 'Switch to ' + inactive,
+            handler : function() { switchForm() }
+        }]
+    });
+
+    var r = Ext.getCmp('id' + 'Result Filters');
+    r.add(filterForm);
+    r.expand();
+}
+
+function validateFilters(exportOnly)
+{
+    if(!(Ext.getCmp('matching-grid').selModel.hasSelection()))
+    {
+        alert("Please select one or more runs.");
+    }
+    else
+    {
+        var selectedRuns = Ext.getCmp('matching-grid').selModel.getSelections();
+        var runIds = "";
+        for (var i = 0; i < selectedRuns.length; i++)
+        {
+            runIds += selectedRuns[i].data['MS2Details/Run'] + ";";
+        }
+
+        if(Ext.getCmp('result-filters').getForm().isValid())
+        {
+            displayResults(runIds, Ext.getCmp('result-filters').getForm().getValues(false), exportOnly);
+        }
+        else{
+            console.info("ERROR!");
+        }
+    }
+}
+
+function displayResults(runIds, formValues, exportOnly)
+{
+    if(Ext.getCmp('results-grid'))
+    {
+        Ext.getCmp('results-grid').destroy();
+        _panel.remove(Ext.getCmp('id' + 'Results'));
+        _panel.insert(3,getPanelSignature("Results", false, null));
+        _panel.doLayout(true, true);
+    }
+
     var inputs = formValues;
     var columns = "";
     var separator = "";
@@ -247,272 +519,70 @@ function viewExportableGrid(runIds, formValues, query)
         if(_filterMap.hasOwnProperty(key))
         {
             exportFilterArray.push(_filterMap[key]);
+            console.info(_filterMap[key]);
         }
     }
 
     // Add the runs filter to the filter set
     exportFilterArray.push(LABKEY.Filter.create(filterColumn, runIds, LABKEY.Filter.Types.EQUALS_ONE_OF));
-    
-    // Add own SQL to support export of custom columns in EGP
-    var _storeConfig = {
-        schemaName: "ms2",
-        queryName: "Peptides",
-        containerFilter: "AllFolders",
-        columns: columns,
-        filterArray: exportFilterArray
-    };
 
+    var _storeConfig = {};
+    if(active == "Peptides")
+    {
+        console.info('Called for Peptides.');
+        _storeConfig = {
+            schemaName: "ms2",
+            queryName: "Peptides",
+            containerFilter: "AllFolders",
+            columns: columns,
+            filterArray: exportFilterArray
+        };
+    }
+    else
+    {
+        console.info('Called for Proteins.');
+        _storeConfig = {
+            schemaName: "ms2",
+            queryName: "ProteinGroups",
+            containerFilter: "AllFolders",
+            columns: columns,
+            filterArray: exportFilterArray
+        };
+    }
 
     var _store = new LABKEY.ext.Store(_storeConfig);
 
-    // Refresh the allRunsGrid
-    if(peptidesGrid != null)
+    if (exportOnly)
     {
-        peptidesGrid.destroy();
+        _store.exportData("excel");
     }
-
-    peptidesGrid = new LABKEY.ext.EditorGridPanel({
-        store: _store,
-        lookups: false,
-        title: "Peptides",
-        autoHeight: true,
-        renderTo: "peptidesGrid",
-        editable: false,
-        width: 800
-    });
-}
-
-function onSuccess()
-{
-    // Wait for both callBacks
-    if(_protData && _pepData)
+    else
     {
-        var optionsTabPanel = new Ext.TabPanel({
-            title: 'Export Options',
-            frame: true,
+        var _grid = new LABKEY.ext.EditorGridPanel({
+            id : 'results-grid',
+            store: _store,
+            editable: false,
+            lookups: false,
             autoHeight: true,
-            width: 800,
-            renderTo: 'newDiv2',
-            hidden: false,
-            activeTab: 0,
-            items: [{
-                xtype: 'form',
-                title: 'Peptides',
-                table: 'Peptides',
-                plain: true,
-                autoHeight: true,
-                items: [ _pepCols, _pepFilters ]
-            },{
-                xtype: 'form',
-                title: 'Proteins',
-                table: 'ProteinGroups',
-                plain: true,
-                autoHeight: true,
-                items: [ _protCols ]
-            }],
-            buttons: [{
-                text: 'Preview Results',
-                handler: function() {
-                    if(!(allRunsGrid.selModel.hasSelection()))
-                    {
-                        alert("Please select one or more runs.");
-                    }
-                    else
-                    {
-                        var selectedRuns = allRunsGrid.selModel.getSelections();
-                        var runIds = "";
-                        for (var i = 0; i < selectedRuns.length; i++)
-                        {
-                            runIds += selectedRuns[i].data['MS2Details/Run'] + ";";
-                        }
-
-                        if(optionsTabPanel.getActiveTab().getForm().isValid())
-                        {
-                            viewExportableGrid(runIds, optionsTabPanel.getActiveTab().getForm().getValues(false), optionsTabPanel.getActiveTab().table);
-                        }
-                        else
-                        {
-                            alert("Please correct erroneous input.");
-                        }
-                    }
-                }
-            },{
-                text: 'Clear All',
-                handler: function() {
-                    var inputs = Ext.DomQuery.select("input[type=checkbox]", optionsTabPanel.getEl().dom);
-                    for (var i = 0; i < inputs.length; i++)
-                    {
-                        inputs[i].checked = false;
-                    }
-                }
-            },{
-                text: 'Select All',
-                handler: function() {
-                    var inputs = Ext.DomQuery.select("input[type=checkbox]", optionsTabPanel.getEl().dom);
-                    for (var i = 0; i < inputs.length; i++)
-                    {
-                        inputs[i].checked = true;
-                    }
-                }
-            }]
+            selModel: null
         });
+
+        var r = Ext.getCmp('id' + 'Results');
+        r.add('results-grid');
+        r.expand();
+        r.focus();
     }
 }
 
-function pepSuccess(data)
+function switchForm()
 {
-    _pepData = data;
+    var temp = active;
+    active = inactive;
+    inactive = temp;
 
-    var colItems = [{boxLabel: 'Run', name: "Fraction/Run", checked: true, labelStyle: "padding-right: 0px"}];
-    colItems.push({boxLabel: 'Run Project', name: 'Fraction/Run/Container/Name', checked: true, labelStyle: "padding-right: 0px"});
-    colItems.push({boxLabel: 'Delta Mass', name: 'DeltaMass', checked: true, labelStyle: "padding-right: 0px"});
-    colItems.push({boxLabel: 'Scan', name: 'Scan', checked: true, labelStyle: "padding-right: 0px"});
-    colItems.push({boxLabel: 'Z (Charge)', name: 'Charge', checked: true, labelStyle: "padding-right: 0px"});
-    colItems.push({
-        boxLabel: 'Peptide Prophet Probability',
-        id: 'prophet-box',
-        name: 'PeptideProphet',
-        checked: true,
-        labelStyle: "padding-right: 0px",
-        listeners: {
-            check: function() { /* Could disable associated filter here */ }
-        }
-    });
-    colItems.push({boxLabel: 'Peptide', name: 'Peptide', checked: true, labelStyle: "padding-right: 0px"});
-    colItems.push({boxLabel: 'Protein', name: 'Protein', checked: true, labelStyle: "padding-right: 0px"});
-
-    _pepCols = {
-        title: 'Peptide Columns',
-        autoHeight: true,
-        height: 200,
-        layout: 'form',
-        collapsed: false,
-        collapsible: true,
-        items: [{
-            xtype: 'checkboxgroup',
-            columns: [80,80,80,80,80,80,80],
-            items: colItems
-        }]
-    };
-
-    _pepFilters = {
-        title: 'Peptide Filters',
-        autoHeight: true,
-        height: 200,
-        layout: 'form',
-        collapsed: false,
-        collapsible: true,
-        items: [{
-            xtype: 'numberfield',
-            name: 'filter-peppp',
-            fieldLabel: 'Peptide Prophet Probabilty (Lower Bound)',
-            minValue: 0,
-            maxValue: 1,
-            emptyText: 0,
-            listeners: {
-                change: function(formField, newValue, oldValue) {
-                    // Add a filter
-                    if(newValue)
-                    {
-                        _filterMap['filter-peppp'] = LABKEY.Filter.create('PeptideProphet', newValue, LABKEY.Filter.Types.GREATER_THAN_OR_EQUAL);
-                    }
-                    else{
-                        delete _filterMap['filter-peppp'];
-                    }
-                }
-            }
-        },{
-            xtype: 'checkboxgroup',
-            name: 'filter-charge',
-            fieldLabel: 'Charge (Multiselect)',
-            columns: [40,40,40,40,40,40],
-            items: [
-                {boxLabel: '1+', name: 'filter-charge-1', value: 1},
-                {boxLabel: '2+', name: 'filter-charge-2', value: 2},
-                {boxLabel: '3+', name: 'filter-charge-3', value: 3},
-                {boxLabel: '4+', name: 'filter-charge-4', value: 4},
-                {boxLabel: '5+', name: 'filter-charge-5', value: 5},
-                {boxLabel: '6+', name: 'filter-charge-6', value: 6}
-            ],
-            listeners: {
-                change: function(chkBoxGrp,checked){
-                    var checkedVals = "";
-                    if(checked.length > 0)
-                    {
-                        for(var i = 0; i < checked.length; i++)
-                        {
-                            checkedVals += checked[i].value + ";";
-                        }
-                        _filterMap['filter-charge'] = LABKEY.Filter.create('Charge', checkedVals, LABKEY.Filter.Types.EQUALS_ONE_OF);
-                    }
-                    else{
-                        delete _filterMap['filter-charge'];
-                    }
-                }
-            }
-
-        }]
-    };
-
-    onSuccess();
-}
-
-function protSuccess(data)
-{
-    _protData = data;
-
-    var colItems = [];
-    for(i=0; i < data.columns.length;i++)
-    {
-        colItems.push({boxLabel: data.columns[i]['caption'], name: data.columns[i]['name'], checked: true});
-    }
-
-    _protCols = {
-        title: 'Protein Columns',
-        autoHeight: true,
-        height: 200,
-        layout: 'form',
-        collapsed: false,
-        collapsible: true,
-        items: [{
-            xtype: 'checkboxgroup',
-            columns: 6,
-            items: colItems
-        }]
-    };
-    onSuccess();
-}
-
-function init()
-{
-    Ext.QuickTips.init();
-
-    Ext.form.Field.prototype.msgTarget = 'side';
-
-    // Start by calling for Query Details on both the Peptides/Proteins Queries
-    LABKEY.Query.getQueryDetails({
-        schemaName: 'ms2',
-        queryName: 'Peptides',
-        successCallback: pepSuccess,
-        errorCallback: function(x) {alert("ERROR")}
-    });
-
-    LABKEY.Query.getQueryDetails({
-        schemaName: 'ms2',
-        queryName: 'ProteinGroups',
-        successCallback: protSuccess,
-        errorCallback: function(x) {alert("ERROR")}
-    });
+    showResultFilters(active);
 }
 
 Ext.onReady(init);
 </script>
-        
-<div class="extContainer">
-    <div id="topPanel"></div>
-    <div id="nextRunGrid" style="display: none; padding-bottom: 5px"></div>
-    <div id="newDiv2"></div>
-    <div id="newDiv"></div>
-    <div id="checkboxGrpDiv" style="padding-bottom: 10px"></div>
-    <div id="peptidesGrid" style="padding-bottom: 5px"></div>
-</div>
+<div id="panelDiv"></div>
