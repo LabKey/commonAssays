@@ -628,8 +628,8 @@ public class NabManager
         if (study == null)
             throw new IllegalArgumentException("getReadableStudyObjectIds must be passed a valid study folder.");
 
-        DataSet[] dataSets = study.getDataSets();
-        if (dataSets == null || dataSets.length == 0)
+        List<? extends DataSet> dataSets = study.getDataSets();
+        if (dataSets == null || dataSets.isEmpty())
             return Collections.emptySet();
 
         // Gather a list of readable study dataset TableInfos associated with NAb protocols (these are created when NAb data
