@@ -19,12 +19,10 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.util.FileType;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 
 /**
  * SequestPipelineJob class
