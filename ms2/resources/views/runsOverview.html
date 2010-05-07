@@ -35,12 +35,13 @@ function getPanelSignature(title, hidden, items)
 
 function init()
 {   
-    // Initialize the main panel
+    // Initialize the sub-panels
     _subPanels[1] = getPanelSignature("Run Filters", false, null);
     _subPanels[2] = getPanelSignature("Matching MS2 Runs", false, null);
     _subPanels[3] = getPanelSignature("Result Filters", false, null);
     _subPanels[4] = getPanelSignature("Results", false, null);
 
+    // Initialize the main panel
     _panel = new Ext.Panel({
         title: 'Export Options',
         id: 'export-panel',
@@ -148,20 +149,20 @@ function setQueryOptions()
             },
             sm: chkBoxSelectMdl
         });
-
+        
         var fasta = [];
         for(filename in validFASTA)
         {
             fasta.push([filename]);
         }
-        fasta.sort();
+        fasta = fasta.sort();
 
         var engine = [];
         for(segine in validEngine)
         {
             engine.push([segine]);
         }
-        engine.sort();
+        engine = engine.sort();
 
         var showRuns = new Ext.Button({text: "Show Matching MS2 Runs"});
         showRuns.addListener('click', function(){
@@ -260,6 +261,7 @@ function setQueryOptions()
         {
             r.add(Ext.getCmp('simple-column'));
             r.add(simple);
+            r.collapse();
             r.doLayout();
             r.expand();
         }
@@ -315,18 +317,25 @@ function setQueryOptions()
             schemaName      : "ms2",
             queryName       : "MS2SearchRuns",
             containerFilter : "AllFolders",
-            columns         : "Name, Folder/Path, Input/FASTA, CreatedBy/DisplayName, MS2Details/Run, MS2Details/SearchEngine",
+            columns         : "Name, Folder/Path, Input/FASTA, CreatedBy/DisplayName, MS2Details/Run, MS2Details/SearchEngine, MS2Details/",
             filterArray     : runsFilterArray
         };
 
         var _store = new LABKEY.ext.Store(_storeConfig);
-
+        
         var runsGrid = new LABKEY.ext.EditorGridPanel({
             id               : 'matching-grid',
             store            : _store,
             autoHeight       : true,
-            tbar             : 'none'
+            tbar             : 'none',
+            listeners        : {
+                viewReady    : function(grid)
+                {
+                    grid.getSelectionModel().selectAll();
+                }
+            }
         });
+
 
         var r = Ext.getCmp('id' + 'Matching MS2 Runs');
         if (r)
