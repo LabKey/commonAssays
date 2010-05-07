@@ -51,7 +51,7 @@ public class ElispotModule extends DefaultModule
         addController("elispot-assay", ElispotController.class);
     }
 
-    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Collections.emptyList();
     }

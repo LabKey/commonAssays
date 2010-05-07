@@ -58,7 +58,7 @@ public class NabModule extends DefaultModule
         NabSchema.register();
     }
 
-    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Collections.emptyList();
     }

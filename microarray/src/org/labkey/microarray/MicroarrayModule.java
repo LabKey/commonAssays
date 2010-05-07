@@ -74,9 +74,9 @@ public class MicroarrayModule extends DefaultModule
         MicroarraySchema.register();
     }
 
-    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    protected Collection<WebPartFactory> createWebPartFactories()
     {
-        return Arrays.asList(
+        return new ArrayList<WebPartFactory>(Arrays.asList(
             new BaseWebPartFactory(WEBPART_MICROARRAY_RUNS)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
@@ -108,7 +108,7 @@ public class MicroarrayModule extends DefaultModule
                     return view;
                 }
             }
-        );
+        ));
     }
 
     public boolean hasScripts()

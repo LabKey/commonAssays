@@ -27,9 +27,7 @@ import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.module.ModuleContext;
-import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.module.SpringModule;
+import org.labkey.api.module.*;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
@@ -102,7 +100,19 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         return 10.10;
     }
 
-    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    /*
+    @NotNull
+    protected File[] getWebPartFiles()
+    {
+        File viewsDir = new File(getExplodedPath(), SimpleController.VIEWS_DIRECTORY);
+        boolean e = viewsDir.exists();
+        boolean d = viewsDir.isDirectory();
+        
+        return viewsDir.exists() && viewsDir.isDirectory() ? viewsDir.listFiles(org.labkey.api.module.SimpleWebPartFactory.webPartFileFilter) : new File[0];
+    }
+    */
+
+    protected Collection<WebPartFactory> createWebPartFactories()
     {
         BaseWebPartFactory legacyRunsFactory = new BaseWebPartFactory(MS2_RUNS_DEPRECATED_NAME)
         {
@@ -126,8 +136,13 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             }
         };
         runsFactory.addLegacyNames(MS2_RUNS_ENHANCED_LEGACY_NAME);
-        
-        return Arrays.asList(
+
+        //Collection<WebPartFactory> mylist = new ArrayList<WebPartFactory>();
+        //mylist.add(new SimpleWebPartFactory(this, getWebPartFiles()[0]));
+
+        //SimpleWebPartFactory simpleFactory = new SimpleWebPartFactory(this, getWebPartFiles()[0]);
+
+        return new ArrayList<WebPartFactory>(Arrays.asList(
                 legacyRunsFactory,
                 runsFactory,
             new BaseWebPartFactory(MS2_SAMPLE_PREPARATION_RUNS_NAME)
@@ -171,7 +186,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                     return result;
                 }
             }
-        );
+        ));
     }
 
     public boolean hasScripts()

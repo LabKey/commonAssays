@@ -85,9 +85,9 @@ public class MS1Module extends SpringModule
         SystemMaintenance.addTask(new PurgeTask());
     }
 
-    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    protected Collection<WebPartFactory> createWebPartFactories()
     {
-        return Arrays.asList(new BaseWebPartFactory(WEBPART_MS1_RUNS)
+        return new ArrayList<WebPartFactory>(Arrays.asList(new BaseWebPartFactory(WEBPART_MS1_RUNS)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
@@ -119,7 +119,7 @@ public class MS1Module extends SpringModule
                     return searchView;
                 }
             }
-        );
+        ));
     }
 
     public boolean hasScripts()

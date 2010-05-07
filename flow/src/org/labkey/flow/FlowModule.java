@@ -57,6 +57,7 @@ import org.labkey.flow.reports.ControlsQCReport;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.webparts.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
@@ -113,14 +114,14 @@ public class FlowModule extends DefaultModule
         ReportService.get().registerReport(new ControlsQCReport());
     }
 
-    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    protected Collection<WebPartFactory> createWebPartFactories()
     {
-        return Arrays.asList(OverviewWebPart.FACTORY,
+        return new ArrayList<WebPartFactory>(Arrays.asList(OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
                 AnalysisScriptsWebPart.FACTORY,
                 FlowSummaryWebPart.FACTORY,
                 new DefaultWebPartFactory("Flow Reports", ReportsController.BeginView.class)
-                );
+                ));
     }
 
     public boolean hasScripts()

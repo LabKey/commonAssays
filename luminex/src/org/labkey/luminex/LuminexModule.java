@@ -49,7 +49,7 @@ public class LuminexModule extends DefaultModule
         addController("luminex", LuminexController.class);
     }
 
-    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Collections.emptyList();
     }

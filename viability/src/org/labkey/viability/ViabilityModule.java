@@ -48,7 +48,7 @@ public class ViabilityModule extends DefaultModule
         return true;
     }
 
-    protected Collection<? extends WebPartFactory> createWebPartFactories()
+    protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Collections.emptyList();
     }
