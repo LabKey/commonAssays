@@ -35,9 +35,6 @@ END
 GO
 
 /* Back-fill the MS2Charge column for all existing features */
-BEGIN TRANSACTION
-GO
-
 UPDATE ms1.Features
 SET MS2Charge=
 (SELECT TOP 1 pd1.Charge
@@ -52,7 +49,4 @@ AND r1.Container=
 INNER JOIN ms1.Features AS fe2 ON (fi2.FileId=fe2.FileId) WHERE fe2.FeatureId=ms1.Features.FeatureId)
 ORDER BY pd1.PeptideProphet DESC)
 WHERE MS2Scan IS NOT NULL AND MS2Charge IS NULL
-GO
-
-COMMIT TRANSACTION
 GO
