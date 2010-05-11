@@ -27,6 +27,8 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.query.CustomView;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.ContextualRoles;
@@ -40,6 +42,7 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.*;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -451,11 +454,38 @@ public class NabAssayController extends SpringActionController
         }
     }
 
+    private Date getCustomViewModifiedDate(ExpRun run)
+    {
+        CustomView runView = QueryService.get().getCustomView(getUser(), getContainer(),
+               AssaySchema.NAME, AssayService.get().getRunsTableName(run.getProtocol()), NabAssayProvider.CUSTOM_DETAILS_VIEW_NAME);
+        if (runView != null)
+            return runView.getModified();
+        return null;
+    }
+
+    private NabAssayRun getCachedRun(ExpRun run)
+    {
+        Pair<NabAssayRun, Date> cache = (Pair<NabAssayRun, Date>) getViewContext().getSession().getAttribute(LAST_NAB_RUN_KEY);
+        if (cache == null)
+            return null;
+        NabAssayRun assay = cache.getKey();
+        Date customViewModified = getCustomViewModifiedDate(run);
+        // There's no custom view, so it can't have been modified since we cached the run:
+        if (customViewModified == null)
+            return assay;
+        // Check the view modification time against the time we cached the run.  If the view has been changed since
+        // the run was cached, return null.
+        Date cachedDate = cache.getValue();
+        if (cachedDate.after(customViewModified))
+            return assay;
+        return null;
+    }
+
     private NabAssayRun getNabAssayRun(ExpRun run, DilutionCurve.FitType fit) throws ExperimentException
     {
         // cache last NAb assay run in session.  This speeds up the case where users bring up details view and
         // then immediately hit the 'print' button.
-        NabAssayRun assay = (NabAssayRun) getViewContext().getSession().getAttribute(LAST_NAB_RUN_KEY);
+        NabAssayRun assay = getCachedRun(run);
         if (fit != null || assay == null ||
                 (assay.getRunRowId() != null && run.getRowId() != assay.getRunRowId().intValue()) ||
                 (assay.getRun() != null && run.getRowId() != assay.getRun().getRowId()))
@@ -464,7 +494,7 @@ public class NabAssayController extends SpringActionController
             {
                 assay = NabDataHandler.getAssayResults(run, getUser(), fit);
                 if (assay != null && fit == null)
-                    getViewContext().getSession().setAttribute(LAST_NAB_RUN_KEY, assay);
+                    getViewContext().getSession().setAttribute(LAST_NAB_RUN_KEY, new Pair<NabAssayRun, Date>(assay, new Date()));
             }
             catch (NabDataHandler.MissingDataFileException e)
             {
