@@ -225,7 +225,7 @@ public class ProteinGroupTableInfo extends FilteredTable
                         sql.append("\nWHERE fs.SeqId = ");
                         sql.append(ExprColumn.STR_TABLE_ALIAS);
                         sql.append(".SeqId AND fs.FastaId = r.FastaId AND r.Run = ppf.Run AND ppf.RowId = ");
-                        sql.append(ProteinGroupTableInfo.this.getColumn("ProteinProphetFileId").getValueSql());
+                        sql.append(ProteinGroupTableInfo.this.getColumn("ProteinProphetFileId").getValueSql(ExprColumn.STR_TABLE_ALIAS));
                         sql.append(" ORDER BY LookupString");
                         getSchema().getSqlDialect().limitRows(sql, 1);
                         // Wrap the whole thing in parenthesis after the LIMIT/TOP has been applied

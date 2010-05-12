@@ -91,7 +91,7 @@ public enum CustomAnnotationType
         sb.append(" FROM ");
         sb.append(ProteinManager.getTableInfoIdentifiers());
         sb.append(" WHERE SeqId = ");
-        sb.append(colSeqId.getValueSql());
+        sb.append(colSeqId.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         sb.append(" AND IdentTypeId IN ");
         sb.append(getIdentTypeIdSelect());
         return sb.toString();
