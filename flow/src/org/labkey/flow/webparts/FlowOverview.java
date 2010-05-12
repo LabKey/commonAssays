@@ -409,7 +409,20 @@ public class FlowOverview extends Overview
             ExpSampleSet ss = protocol.getSampleSet();
             if (ss != null)
             {
-                ret.setStatusHTML("There are <a href=\"" + h(ss.detailsURL()) + "\">" + ss.getSamples().length + " sample descriptions</a> in this folder.");
+                StringBuilder sb = new StringBuilder();
+                sb.append("There are <a href=\"").append(h(protocol.urlShowSamples(false))).append("\">").append(ss.getSamples().length).append(" sample descriptions</a> in this folder");
+
+                int unlinkedCount = protocol.getUnlinkedSampleCount();
+                if (unlinkedCount > 0)
+                {
+                    sb.append(", of which <a href=\"").append(h(protocol.urlShowSamples(true))).append("\">").append(unlinkedCount).append(" are not joined</a> to any FCS files.");
+                }
+                else
+                {
+                    sb.append(".");
+                }
+
+                ret.setStatusHTML(sb.toString());
 
                 if (_canUpdate)
                 {

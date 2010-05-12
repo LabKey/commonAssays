@@ -216,6 +216,14 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
+    public ActionURL urlShowSamples(boolean unlinkedOnly)
+    {
+        ActionURL ret = urlFor(ProtocolController.Action.showSamples);
+        if (unlinkedOnly)
+            ret.addParameter("unlinkedOnly", true);
+        return ret;
+    }
+
     public Map<SampleKey, ExpMaterial> getSampleMap(User user) throws SQLException
     {
         ExpSampleSet ss = getSampleSet();
@@ -228,12 +236,11 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
         ExpMaterialTable sampleTable = schema.getSampleTable(ss);
         List<ColumnInfo> selectedColumns = new ArrayList<ColumnInfo>();
-        ColumnInfo colProperty = sampleTable.getColumn(ExpMaterialTable.Column.Property.toString());
         ColumnInfo colRowId = sampleTable.getColumn(ExpMaterialTable.Column.RowId.toString());
         selectedColumns.add(colRowId);
         for (String propertyName : propertyNames)
         {
-            ColumnInfo lookupColumn = colProperty.getFk().createLookupColumn(colProperty, propertyName);
+            ColumnInfo lookupColumn = sampleTable.getColumn(propertyName);
             if (lookupColumn != null)
                 selectedColumns.add(lookupColumn);
         }
@@ -355,6 +362,48 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
         return ret;
     }
+
+    public int getUnlinkedSampleCount()
+    {
+        ExpSampleSet ss = getSampleSet();
+        if (ss == null)
+            return 0;
+
+        return getUnlinkedSampleCount(ss.getSamples());
+    }
+
+    public static int getUnlinkedSampleCount(ExpMaterial[] samples)
+    {
+        if (samples == null)
+            return 0;
+
+        int count = 0;
+        for (ExpMaterial material : samples)
+        {
+            List<FlowFCSFile> fcsFiles = getFCSFiles(material);
+            if (fcsFiles.size() == 0)
+                count++;
+        }
+        return count;
+    }
+
+    public static List<FlowFCSFile> getFCSFiles(ExpMaterial material)
+    {
+        if (material == null)
+            return Collections.emptyList();
+
+        ExpProtocolApplication[] apps = material.getTargetApplications();
+        if (apps == null || apps.length == 0)
+            Collections.emptyList();
+
+        ArrayList<FlowFCSFile> result = new ArrayList<FlowFCSFile>();
+        for (ExpProtocolApplication app : apps)
+        {
+            FlowDataObject.addDataOfType(app.getOutputDatas(), FlowDataType.FCSFile, result);
+        }
+        return result;
+    }
+
 
     public SampleKey makeSampleKey(String runName, String fileName, AttributeSet attrs)
     {

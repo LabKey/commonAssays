@@ -33,9 +33,14 @@
         No samples have been uploaded in this folder.<br>
         <labkey:link href="<%=protocol.urlUploadSamples(false)%>" text="Upload samples from a spreadsheet" /><br>
     <% } else { %>
-        <labkey:link href="<%=protocol.getSampleSet().detailsURL()%>" text="Show samples" /><br>
+        <labkey:link href="<%=protocol.getSampleSet().detailsURL()%>" text="Show sample set"/><br>
+        <labkey:link href="<%=protocol.urlShowSamples(false)%>" text="Show samples joined to FCS Files" /><br>
         <labkey:link href="<%=protocol.urlUploadSamples(true)%>" text="Upload more samples from a spreadsheet" /><br>
-        <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Join samples to FCS File Data" /><br>
+        <% if (protocol.getSampleSetJoinFields().size() != 0) { %>
+            <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Modify sample join fields" /><br>
+        <% } else { %>
+            <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Join samples to FCS File Data" /><br>
+        <% } %>
     <% } %>
 </p>
 <p><b>FCS Analysis Display Names</b><br>

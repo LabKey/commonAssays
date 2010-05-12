@@ -45,6 +45,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
     {
         begin,
         showProtocol,
+        showSamples,
         joinSampleSet,
         updateSamples,
         editFCSAnalysisName,
@@ -111,6 +112,31 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
         public NavTree appendNavTrail(NavTree root)
         {
             return appendFlowNavTrail(root, protocol, "Protocol", Action.showProtocol);
+        }
+    }
+
+    public static class ShowSamplesForm extends ProtocolForm
+    {
+        private boolean unlinkedOnly = false;
+
+        public boolean isUnlinkedOnly() { return unlinkedOnly; }
+        public void setUnlinkedOnly(boolean b) { unlinkedOnly = b; }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class ShowSamplesAction extends SimpleViewAction<ShowSamplesForm>
+    {
+        FlowProtocol protocol;
+
+        public ModelAndView getView(ShowSamplesForm form, BindException errors) throws Exception
+        {
+            protocol = form.getProtocol();
+            return FormPage.getView(ProtocolController.class, form, errors, "showSamples.jsp");
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, protocol, "Show Samples", Action.showSamples);
         }
     }
 

@@ -654,6 +654,30 @@ public class FlowManager
         return 0;
     }
 
+    // count FCSFiles with or without samples
+    public int getFCSFileSamplesCount(User user, Container container, boolean hasSamples)
+    {
+        FlowSchema schema = new FlowSchema(user, container);
+
+        try
+        {
+            TableInfo table = schema.getTable(FlowTableType.FCSFiles);
+            List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
+            List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
+            SimpleFilter filter = new SimpleFilter("Sample/Name", null, hasSamples ? CompareType.NONBLANK : CompareType.ISBLANK);
+
+            Map<String, Aggregate.Result> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, filter, false);
+            Aggregate.Result result = agg.get(aggregates.get(0).getColumnName());
+            if (result != null)
+                return ((Long)result.getValue()).intValue();
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        return 0;
+    }
+
     // counts Keyword runs
     public int getFCSFileOnlyRunsCount(User user, Container container)
     {
