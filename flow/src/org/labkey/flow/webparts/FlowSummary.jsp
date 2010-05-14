@@ -419,11 +419,12 @@
         <h3 class="summary-header">Manage</h3>
         <div><%= PageFlowUtil.textLink("Settings", _protocol.urlShow())%></div>
 
-        <div><%=PageFlowUtil.textLink("Upload Samples", _protocol.urlUploadSamples(_sampleSet != null))%></div><%
+        <%
         if (_sampleSet != null)
         {
-            %><div><%=PageFlowUtil.textLink("Sample Join Fields", _protocol.urlFor(ProtocolController.Action.joinSampleSet))%></div><%
+            %><div><%=PageFlowUtil.textLink("Show Samples", _protocol.urlShowSamples(false))%></div><%
         }
+        %><div><%=PageFlowUtil.textLink("Upload Samples", _protocol.urlUploadSamples(_sampleSet != null))%></div><%
         if (_fcsAnalysisCount > 0)
         {
             %><div><%=PageFlowUtil.textLink("Identify Background", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div><%

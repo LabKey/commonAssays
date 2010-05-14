@@ -49,8 +49,10 @@
     <labkey:link href="<%=protocol.urlUploadSamples(false)%>" text="Upload samples from a spreadsheet" /><br>
 <% } else { %>
 <p>
-There are <a href="<%=h(protocol.urlShowSamples(false))%>"><%=samples.length%> sample descriptions</a> in this folder,
-of which <a href="<%=h(protocol.urlShowSamples(true))%>"><%=unlinkedCount%> are not joined</a> to any FCS Files.
+There are <a href="<%=h(protocol.urlShowSamples(false))%>"><%=samples.length%> sample descriptions</a> in this folder.
+<% if (unlinkedCount > 0) { %>
+    <a href="<%=h(protocol.urlShowSamples(true))%>"><%=unlinkedCount%> <%=unlinkedCount == 1 ? "sample is" : "samples are"%> not joined</a> to any FCS Files.
+<% } %>
 </p>
 <p>
 <a href="<%=h(urlFcsFilesWithSamples)%>"><%=fcsFilesWithSamplesCount%> FCS Files</a> are have been joined with a sample and

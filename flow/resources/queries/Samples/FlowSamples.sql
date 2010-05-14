@@ -1,0 +1,27 @@
+-- the combined BaseSamples and Samples columns
+SELECT
+Samples.SampleSet,
+Samples.Flag AS DerivedFlag,
+Samples.Run.Input.Sample.Flag AS BaseFlag,
+--Samples.PTID_VISITNO,
+Samples.Run.Input.Sample.PTID,
+Samples.Run.Input.Sample.VISITNO,
+Samples.Run.Input.Sample.DRAWDT,
+Samples.Run.Input.Sample.NETWORK,
+Samples.Run.Input.Sample.LABID,
+Samples.Run.Input.Sample.SPECROLE,
+Samples.Run.Input.Sample.PTIDTYPE,
+Samples.Run.Input.Sample.CTRSAMPNAME,
+Samples.Run.Input.Sample.METHOD,
+Samples."ASSAY ID",
+Samples.SAMP_ORD,
+Samples.VIALID,
+Samples."PLT TEMPLATE",
+Samples.TESTDT,
+Samples."Collection Num",
+Samples.GUAVA_DATA_ID,
+Samples.VIABL,
+Samples.RECOVR,
+Samples."mls R10 (2M/ml)",
+Samples."mls R10 (5M/ml)"
+FROM Samples
