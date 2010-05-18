@@ -74,13 +74,14 @@ QC_levey_jennings_by_date <- function(D, image, type="jpeg", width=700, height=7
     return;
 
   # calculate the 1CV, 2CV, 3CV values for the plot
-  s1 = s / m * 100
-  s2 = 2 * s / m * 100
-  s3 = 3 * s / m * 100
-  s4 = 4 * s / m * 100
+  scale = 100 / max(1,m);
+  s1 = 1 * s * scale
+  s2 = 2 * s * scale
+  s3 = 3 * s * scale
+  s4 = 4 * s * scale
 
   # calculate the deviation from mean for each data point as a percentage
-  D$diff = (D$value - m) / m * 100
+  D$diff = (D$value - m) * scale
 
   xmax= ceiling(length * 1.05)
 
@@ -103,27 +104,29 @@ QC_levey_jennings_by_date <- function(D, image, type="jpeg", width=700, height=7
   s1 = round(s1, digits=0)
 
   # build the plot area without the data, y-limits to be 4CV above and below 0
-  plot(NA, NA, type = c("b"), ylim=c(-s4,s4), xlim=c(1,xmax), xlab="",
-        ylab="Deviation from mean (%)", axes=F, main=paste("Levey-Jennings Chart","(Mean:", m, "CV:", s1, "%)"))
+  plot(NA, NA, type = c("b"),
+        ylim=c(-s4,s4), ylab="Deviation from mean (%)",
+        xlim=c(1,xmax), xlab="",
+        axes=F, main=paste("Levey-Jennings Chart","(Mean:", m, "CV:", s1, "%)"))
 
   # add the horizontal lines for the mean, 1CV, -1CV, 2CV, -2CV, 3CV, and -3CV
   lines(x=c(1,length), y=c(0,0), col="black")
   text(x=xmax, y=0,labels=c("Mean"))
 
   lines(x=c(1,length), y=c(s1,s1), col="green", lty=2)
-  text(x=xmax, y=s1,labels=c("1CV"))
+  text(x=xmax, y=s1,labels=c("1 SD"))
   lines(x=c(1,length), y=c(-s1,-s1), col="green", lty=2)
-  text(x=xmax, y=-s1,labels=c("-1CV"))
+  text(x=xmax, y=-s1,labels=c("-1 SD"))
 
   lines(x=c(1,length), y=c(s2,s2), col="blue", lty=2)
-  text(x=xmax, y=s2,labels=c("2CV"))
+  text(x=xmax, y=s2,labels=c("2 SD"))
   lines(x=c(1,length), y=c(-s2,-s2), col="blue", lty=2)
-  text(x=xmax, y=-s2,labels=c("-2CV"))
+  text(x=xmax, y=-s2,labels=c("-2 SD"))
 
   lines(x=c(1,length), y=c(s3,s3), col="red", lty=2)
-  text(x=xmax, y=s3,labels=c("3CV"))
+  text(x=xmax, y=s3,labels=c("3 SD"))
   lines(x=c(1,length), y=c(-s3,-s3), col="red", lty=2)
-  text(x=xmax, y=-s3,labels=c("-3CV"))
+  text(x=xmax, y=-s3,labels=c("-3 SD"))
 
   # add the actual data lines and points
 #  lines(seq, D$diff, col='black')
@@ -188,4 +191,13 @@ if (length >= 2)
     dev.off();
 }
 
-write.table(D, file = "${tsvout:tsvfile}", sep = "\t", qmethod = "double", col.names=NA)
+PRINT <- data.frame(
+    date=D$date,
+    run=D$run,
+    run.href=D$run.href,
+    well=D$well,
+    well.href=D$well.href,
+    value=D$value
+)
+PRINT <- PRINT[order(PRINT$value),]
+write.table(PRINT, file = "${tsvout:tsvfile}", sep = "\t", qmethod = "double", col.names=NA)

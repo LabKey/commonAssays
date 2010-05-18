@@ -43,7 +43,11 @@ var report =
     for (int i=0 ; i<10 ; i++)
     {
         ControlsQCReport.Filter f = new ControlsQCReport.Filter(d,i);
-        %><%=comma%>{property:<%=PageFlowUtil.jsString(f.property)%>, value:<%=PageFlowUtil.jsString(f.value)%>, type:<%=PageFlowUtil.jsString(f.type)%>}<%
+        %><%=comma%>{
+            property:<%=q(f.property)%>,
+            value:<%=q(f.value)%>,
+            type:<%=q(f.type)%>,
+            op:<%=null==f.op?q("eq"):q(f.op)%>}<%
         comma =",";
     }
     %>]
@@ -52,11 +56,16 @@ var report =
 
 function Form_onSave()
 {
+    Ext.getBody().mask();
     form.getForm().submit({
         success:function(form, action)
         {
             report.reportId = action.result.reportId;
             window.location="execute.view?reportId=" + encodeURIComponent(report.reportId);
+        },
+        failure:function(form,action)
+        {
+            Ext.getBody().unmask();
         }
     });
 }
@@ -82,12 +91,23 @@ Ext.onReady(function() {
     var i;
     var keyword = [];
     var sample = [];
+    var startDate = null;
+    var endDate = null;
+    
     for (i=0; i<report.filter.length;i++)
     {
-        if (report.filter[i].type == 'keyword')
-            keyword.push(report.filter[i]);
-        if (report.filter[i].type == 'sample')
-            sample.push(report.filter[i]);
+        var f = report.filter[i];
+        if (f.type == 'keyword')
+        {
+            if (f.property == 'EXPORT TIME' && f.op == 'gte')
+                startDate = f.value;
+            else if (f.property == 'EXPORT TIME' && f.op == 'lt')
+                endDate = f.value;
+            else
+                keyword.push(f);
+        }
+        else if (f.type == 'sample')
+            sample.push(f);
     }
     for (i=1;i<=2;i++)
     {
@@ -104,21 +124,31 @@ Ext.onReady(function() {
             {fieldLabel:'Name', name:'reportName', value:report.name, allowBlank:false},
             {fieldLabel:'Statistic', name:'statistic', xtype:'statisticField', value:report.statistic, allowBlank:false},
 
-            {fieldLabel:'Keyword', name:'filter[0].property', xtype:'combo', store:FlowPropertySet.keywords, value:keyword[0].property},
             {xtype:'hidden', name:'filter[0].type', value:'keyword'},
+            {fieldLabel:'Keyword', name:'filter[0].property', xtype:'combo', store:FlowPropertySet.keywords, value:keyword[0].property},
             {fieldLabel:'Value', name:'filter[0].value', value:keyword[0].value},
 
-            {fieldLabel:'Keyword', name:'filter[1].property', xtype:'combo', store:FlowPropertySet.keywords, value:keyword[1].property},
             {xtype:'hidden', name:'filter[1].type', value:'keyword'},
+            {fieldLabel:'Keyword', name:'filter[1].property', xtype:'combo', store:FlowPropertySet.keywords, value:keyword[1].property},
             {fieldLabel:'Value', name:'filter[1].value', value:keyword[1].value},
 
-            {fieldLabel:'Sample Property', name:'filter[2].property', value:sample[0].property},
             {xtype:'hidden', name:'filter[2].type', value:'sample'},
+            {fieldLabel:'Sample Property', name:'filter[2].property', value:sample[0].property},
             {fieldLabel:'Value', name:'filter[2].value', value:sample[0].value},
 
-            {fieldLabel:'Sample Property', name:'filter[3].property', value:sample[1].property},
             {xtype:'hidden', name:'filter[3].type', value:'sample'},
-            {fieldLabel:'Value', name:'filter[3].value', value:sample[1].value}
+            {fieldLabel:'Sample Property', name:'filter[3].property', value:sample[1].property},
+            {fieldLabel:'Value', name:'filter[3].value', value:sample[1].value},
+
+            {xtype:'hidden', name:'filter[4].type', value:'keyword'},
+            {xtype:'hidden', name:'filter[4].property', value:'EXPORT TIME'},
+            {xtype:'hidden', name:'filter[4].op', value:'gte'},
+            {xtype:'datefield', fieldLabel:'On or After', name:'filter[4].value', value:startDate},
+
+            {xtype:'hidden', name:'filter[5].type', value:'keyword'},
+            {xtype:'hidden', name:'filter[5].property', value:'EXPORT TIME'},
+            {xtype:'hidden', name:'filter[5].op', value:'lt'},
+            {xtype:'datefield', fieldLabel:'Before', name:'filter[5].value', value:endDate}
         ],
         buttons:[
             {text:'Save', handler:Form_onSave},

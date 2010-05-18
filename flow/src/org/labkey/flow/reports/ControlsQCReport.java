@@ -69,6 +69,7 @@ public class ControlsQCReport extends FlowReport
         public String property;
         public String type;
         public String value;
+        public String op="eq";
 
         private String _get(PropertyValues pvs, String key)
         {
@@ -81,6 +82,7 @@ public class ControlsQCReport extends FlowReport
             property = _get(pvs,"filter[" + i + "].property");
             type = _get(pvs,"filter[" + i + "].type");
             value = _get(pvs,"filter[" + i + "].value");
+            op = _get(pvs, "filter[" + i + "].op");
         }
 
         public Filter(ReportDescriptor d, int i)
@@ -88,6 +90,7 @@ public class ControlsQCReport extends FlowReport
             property = d.getProperty("filter[" + i + "].property");
             type = d.getProperty("filter[" + i + "].type");
             value = d.getProperty("filter[" + i + "].value");
+            op = d.getProperty("filter[" + i + "].op");
         }
 
         boolean isValid()
@@ -182,6 +185,34 @@ public class ControlsQCReport extends FlowReport
     }
 
 
+    private CachedRowSetImpl filterDateRange(CachedRowSetImpl rs, String dateColumn, Date start, Date end) throws SQLException
+    {
+        int col = rs.findColumn(dateColumn);
+        if (null == start && null == end)
+            return rs;
+        int size = rs.getSize();
+        ArrayList<Map<String,Object>> rows = new ArrayList<Map<String,Object>>(size);
+        rs.beforeFirst();
+        while (rs.next())
+        {
+            Date d = rs.getTimestamp(col);
+            if (null == d || null != start && start.compareTo(d) > 0 || null != end && end.compareTo(d) <= 0)
+                continue;
+            rows.add(rs.getRowMap());
+        }
+        CachedRowSetImpl ret;
+        if (rs.getSize() == rows.size())
+            ret = rs;
+        else
+        {
+            ret = new CachedRowSetImpl(rs.getMetaData(), rows, true);
+            rs.close();
+        }
+        ret.beforeFirst();
+        return ret;
+    }
+
+
     ResultSet generateResultSet(ViewContext context) throws Exception
     {
         ReportDescriptor d = getDescriptor();
@@ -192,10 +223,12 @@ public class ControlsQCReport extends FlowReport
             if (f.isValid())
                 filters.add(f);
         }
-        String statistic = d.getProperty("statistic");
 
+        String statistic = d.getProperty("statistic");
         String wellURL = new ActionURL(WellController.ShowWellAction.class,context.getContainer()).addParameter("wellId","").getLocalURIString();
         String runURL = new ActionURL(RunController.ShowRunAction.class,context.getContainer()).addParameter("runId","").getLocalURIString();
+        Date startDate = null;
+        Date endDate = null;
 
         // UNDONE SQL ENCODING
         StringBuffer query = new StringBuffer();
@@ -214,6 +247,14 @@ public class ControlsQCReport extends FlowReport
         {
             if ("keyword".equals(f.type))
             {
+                if ("EXPORT TIME".equals(f.property))
+                {
+                    if ("gte".equals(f.op) && !StringUtils.isEmpty(f.value))
+                        try {startDate=new Date(DateUtil.parseDateTime(f.value));}catch(ConversionException x){}
+                    if ("lt".equals(f.op) && !StringUtils.isEmpty(f.value))
+                        try {endDate=new Date(DateUtil.parseDateTime(f.value));}catch(ConversionException x){}
+                    continue;
+                }
                 query.append(and);
                 query.append("A.FCSFile.Keyword.\"" + f.property + "\" = " + toSQL(f.value));
                 and = " AND ";
@@ -229,6 +270,7 @@ public class ControlsQCReport extends FlowReport
         QuerySchema flow = new FlowSchema(context);
         ResultSet rs = QueryService.get().select(flow, _query);
         convertDateColumn((CachedRowSetImpl)rs, "Xdatetime", "datetime");
+        rs = filterDateRange((CachedRowSetImpl)rs, "datetime", startDate, endDate);
         return rs;
     }
     
@@ -286,6 +328,7 @@ public class ControlsQCReport extends FlowReport
                 d.setProperty("filter[" + count + "].property", f.property);
                 d.setProperty("filter[" + count + "].type", f.type);
                 d.setProperty("filter[" + count + "].value", f.value);
+                d.setProperty("filter[" + count + "].op", null==f.op?"eq":f.op);
                 count++;
             }
         }
