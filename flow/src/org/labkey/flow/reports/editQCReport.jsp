@@ -28,6 +28,9 @@
     ReportDescriptor d = report.getDescriptor();
     String reportId = d.getReportId() == null ? null : d.getReportId().toString();
 %>
+<style>
+    .x-form-item { margin:2px;} 
+</style>
 <div id="form"></div>
 <script type="text/javascript">
 
@@ -115,6 +118,8 @@ Ext.onReady(function() {
         if (sample.length<i) sample.push({property:null, value:null});
     }
 
+    var spacer = {xtype:'spacer', minHeight:5, html:'<hr width=20 size=1 color=gray>', style:{'margin-left':'75px'}};
+    
     form = new Ext.form.FormPanel({
         url:window.location,
         defaults:{msgTarget:'side', width:300},
@@ -124,21 +129,31 @@ Ext.onReady(function() {
             {fieldLabel:'Name', name:'reportName', value:report.name, allowBlank:false},
             {fieldLabel:'Statistic', name:'statistic', xtype:'statisticField', value:report.statistic, allowBlank:false},
 
+            spacer,
+
             {xtype:'hidden', name:'filter[0].type', value:'keyword'},
             {fieldLabel:'Keyword', name:'filter[0].property', xtype:'combo', store:FlowPropertySet.keywords, value:keyword[0].property},
             {fieldLabel:'Value', name:'filter[0].value', value:keyword[0].value},
+
+            spacer,
 
             {xtype:'hidden', name:'filter[1].type', value:'keyword'},
             {fieldLabel:'Keyword', name:'filter[1].property', xtype:'combo', store:FlowPropertySet.keywords, value:keyword[1].property},
             {fieldLabel:'Value', name:'filter[1].value', value:keyword[1].value},
 
+            spacer,
+
             {xtype:'hidden', name:'filter[2].type', value:'sample'},
             {fieldLabel:'Sample Property', name:'filter[2].property', value:sample[0].property},
             {fieldLabel:'Value', name:'filter[2].value', value:sample[0].value},
 
+            spacer,
+
             {xtype:'hidden', name:'filter[3].type', value:'sample'},
             {fieldLabel:'Sample Property', name:'filter[3].property', value:sample[1].property},
             {fieldLabel:'Value', name:'filter[3].value', value:sample[1].value},
+
+            spacer,
 
             {xtype:'hidden', name:'filter[4].type', value:'keyword'},
             {xtype:'hidden', name:'filter[4].property', value:'EXPORT TIME'},
