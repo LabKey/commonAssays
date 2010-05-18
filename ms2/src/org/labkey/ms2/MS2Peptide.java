@@ -41,9 +41,9 @@ public class MS2Peptide
     private int _fractionId;
     private int _scan;
     private int _charge;
-    private int _rawScore;
-    private float _diffScore;
-    private float _zScore;
+    private Float _rawScore;
+    private Float _diffScore;
+    private Float _zScore;
     private float _ionPercent;
     private double _mass;
     private float _deltaMass;
@@ -467,37 +467,37 @@ public class MS2Peptide
     }
 
 
-    public int getRawScore()
+    public Float getRawScore()
     {
         return _rawScore;
     }
 
 
-    public void setRawScore(int rawScore)
+    public void setRawScore(Float rawScore)
     {
         _rawScore = rawScore;
     }
 
 
-    public float getDiffScore()
+    public Float getDiffScore()
     {
         return _diffScore;
     }
 
 
-    public void setDiffScore(float diffScore)
+    public void setDiffScore(Float diffScore)
     {
         _diffScore = diffScore;
     }
 
 
-    public float getZScore()
+    public Float getZScore()
     {
         return _zScore;
     }
 
 
-    public void setZScore(float zScore)
+    public void setZScore(Float zScore)
     {
         _zScore = zScore;
     }

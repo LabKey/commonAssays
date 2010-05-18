@@ -41,7 +41,7 @@
     <tr><td height=60>
         <b><%=p.getPeptide()%></b>
         <%=PageFlowUtil.generateButton("Blast", AppProps.getInstance().getBLASTServerBaseURL() + p.getTrimmedPeptide(), "", "target=\"cmt\"")%><br>
-        <%=p.getScan()%>&nbsp;&nbsp;<%=p.getCharge()%>+&nbsp;&nbsp;<%=p.getRawScore()%>&nbsp;&nbsp;<%=Formats.f3.format(p.getDiffScore())%>&nbsp;&nbsp;<%=Formats.f3.format(p.getZScore())%>&nbsp;&nbsp;<%=Formats.percent.format(p.getIonPercent())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getMass())%>&nbsp;&nbsp;<%=Formats.signf4.format(p.getDeltaMass())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getPeptideProphet())%>&nbsp;&nbsp;<%=p.getProteinHits()%><br>
+        <%=p.getScan()%>&nbsp;&nbsp;<%=p.getCharge()%>+&nbsp;&nbsp;<%=PageFlowUtil.filter(p.getRawScore())%>&nbsp;&nbsp;<%=p.getDiffScore() == null ? "" : Formats.f3.format(p.getDiffScore())%>&nbsp;&nbsp;<%=p.getZScore() == null ? "" : Formats.f3.format(p.getZScore())%>&nbsp;&nbsp;<%=Formats.percent.format(p.getIonPercent())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getMass())%>&nbsp;&nbsp;<%=Formats.signf4.format(p.getDeltaMass())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getPeptideProphet())%>&nbsp;&nbsp;<%=p.getProteinHits()%><br>
         <%=p.getProtein()%><br>
 <%
         if (fraction.wasloadedFromGzFile())
