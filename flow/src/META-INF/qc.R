@@ -218,6 +218,3 @@ PRINT <- data.frame(
 )
 PRINT <- PRINT[order(D$value),]
 write.table(PRINT, file = "${tsvout:tsvfile}", sep = "\t", qmethod = "double", col.names=NA)
-
-
-generateDateLabels(D$date)
