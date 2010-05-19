@@ -16,6 +16,8 @@
  */
 %>
 <%@ page import="org.labkey.ms2.pipeline.PipelineController" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page extends="org.labkey.ms2.pipeline.ConfigureSequenceDB" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
@@ -23,7 +25,7 @@
     <labkey:errors />
     <table>
         <tr>
-            <td>Local Path to Sequence Database Files:</td>
+            <td>Path on the web server for FASTA files to be used for MS2 searches:</td>
         </tr>
         <tr>
             <td><input type="text" name="localPathRoot" size="40" value="<%= h(getLocalPathRoot()) %>"></td>
@@ -32,7 +34,7 @@
             <td><input type="checkbox" name="allowUpload" <%= isAllowUpload() ? "checked" : "" %>> Allow Upload</td>
         </tr>
         <tr>
-            <td><%= generateSubmitButton("Done")%></td>
+            <td><%= generateSubmitButton("Save")%> <%= generateButton("Cancel", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer())) %></td>
         </tr>
     </table>
 </form>

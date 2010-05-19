@@ -522,7 +522,7 @@ public class PipelineController extends SpringActionController
 
         public boolean handlePost(SequenceDBRootForm form, BindException errors) throws Exception
         {
-            boolean ret = true;
+            boolean success = true;
 
             String newSequenceRoot = form.getLocalPathRoot();
             URI root = null;
@@ -530,14 +530,35 @@ public class PipelineController extends SpringActionController
             {
                 File file = new File(newSequenceRoot);
                 if (!NetworkDrive.exists(file))
-                    ret = false;    // Reshow the form, if non-existent.
+                {
+                    success = false;    // Reshow the form, if non-existent.
+                    errors.reject(ERROR_MSG, "FASTA root \"" + newSequenceRoot + "\" does not exist.");
+                }
+
+                try
+                {
+                    String canonicalPath = file.getCanonicalPath();
+                    String absolutePath = file.getAbsolutePath();
+                    if (!canonicalPath.equals(absolutePath) && canonicalPath.equalsIgnoreCase(absolutePath))
+                    {
+                        // On Windows, fix up case-only differences in the user's specified path compared to the canonical path
+                        file = file.getCanonicalFile();
+                    }
+                }
+                catch (IOException e)
+                {
+                    // OK, just leave the user's path unaltered
+                }
+
                 root = file.toURI();
             }
 
-            MS2PipelineManager.setSequenceDatabaseRoot(getUser(), getContainer(),
-                    root, form.isAllowUpload());
+            if (success)
+            {
+                MS2PipelineManager.setSequenceDatabaseRoot(getUser(), getContainer(), root, form.isAllowUpload());
+            }
 
-            return ret;
+            return success;
         }
 
         public ActionURL getSuccessURL(SequenceDBRootForm form)
@@ -557,7 +578,7 @@ public class PipelineController extends SpringActionController
             {
                 File fileRoot = new File(localSequenceRoot);
                 if (!NetworkDrive.exists(fileRoot))
-                    errors.reject(ERROR_MSG, "Sequence database root does not exist.");
+                    errors.reject(ERROR_MSG, "FASTA root \"" + fileRoot + "\" does not exist.");
                 boolean allowUpload = MS2PipelineManager.allowSequenceDatabaseUploads(getUser(), getContainer());
                 page.setAllowUpload(allowUpload);
                 page.setLocalPathRoot(fileRoot.toString());
@@ -568,7 +589,7 @@ public class PipelineController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Configure Sequence Databases");
+            return root.addChild("Configure FASTA Root");
         }
     }
 
@@ -723,7 +744,7 @@ public class PipelineController extends SpringActionController
 
         public ActionURL getSuccessURL(SetDefaultsForm form)
         {
-            return urlProjectStart(getContainer());
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer());
         }
     }
 

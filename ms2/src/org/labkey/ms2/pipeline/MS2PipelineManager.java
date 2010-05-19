@@ -48,7 +48,7 @@ import java.util.*;
 public class MS2PipelineManager
 {
     private static Logger _log = Logger.getLogger(MS2PipelineProvider.class);
-    protected static String _pipelineDBDir = "databases";
+    private static final String DEFAULT_FASTA_DIR = "databases";
 
     protected static String _pipelineDataAnnotationExt = ".xar.xml";
 
@@ -59,11 +59,6 @@ public class MS2PipelineManager
     
     //todo this the right way
     public static String _allFractionsMzXmlFileBase = "all";
-
-    public static File getMzXMLFile(File dirData, String baseName)
-    {
-        return AbstractMS2SearchProtocol.FT_MZXML.newFile(dirData, baseName);
-    }
 
     public static boolean isMzXMLFile(File file)
     {
@@ -260,7 +255,15 @@ public class MS2PipelineManager
             // return default root
             PipeRoot root = PipelineService.get().getPipelineRootSetting(container);
             if (root != null)
+            {
                 dbRoot = getSequenceDatabaseRoot(root);
+                File file = new File(dbRoot);
+                if (!NetworkDrive.exists(file) && NetworkDrive.exists(file.getParentFile()))
+                {
+                    // Try to create it if it doesn't exist
+                    file.mkdir();
+                }
+            }
         }
         return dbRoot;
     }
@@ -283,7 +286,7 @@ public class MS2PipelineManager
 
     private static URI getSequenceDatabaseRoot(PipeRoot root)
     {
-        return root.resolvePath(_pipelineDBDir).toURI();
+        return root.resolvePath(DEFAULT_FASTA_DIR).toURI();
     }
 
     public static boolean allowSequenceDatabaseUploads(User user, Container container) throws SQLException
