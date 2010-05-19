@@ -23,13 +23,12 @@ QC_dot_by_date <- function(D, label="Values")
   length = length(D$date)
   seq = 1:length
 
-  xmax= ceiling(length * 1.05)
+  xmax = ceiling(length * 1.05)
 
   # set up the x-axis labels to be the Experiment Dates
-# xtcks = 1:length
-  dates <- D[,"date"]
-  xtcks = (1:length)[1 <= c(1, dates[2:(length-1)]  - dates[1:(length-2)])]
-  xlabels <- D$date[xtcks]
+  ticks = generateDateLabels(D[,"date"])
+  xtcks = ticks[,"ticks"]
+  xlabels = ticks[,"labels"]
 
 
   ######## Values plot #########
@@ -86,11 +85,9 @@ QC_levey_jennings_by_date <- function(D, image, type="jpeg", width=700, height=7
   xmax= ceiling(length * 1.05)
 
   # set up the x-axis labels to be the Experiment Dates
-# xtcks = 1:length
-  dates <- D[,"date"]
-  xtcks = (1:length)[1 <= c(1, dates[2:(length-1)]  - dates[1:(length-2)])]
-  xlabels <- D$date[xtcks]
-
+  ticks = generateDateLabels(D[,"date"])
+  xtcks = ticks[,"ticks"]
+  xlabels = ticks[,"labels"]
 
   ######## Levey-Jennings plot #########
   # set the margins (bottom, left, top, right)
@@ -159,6 +156,26 @@ QC_boxplot_by_date <- function(D, label="Values")
 
 
 
+
+generateDateLabels <- function(dates)
+{
+    length <- length(dates)
+
+# find indexes where date changes
+    ticks = (1:length)[1 <= c(1, dates[2:(length-1)]  - dates[1:(length-2)])]
+    tickDates <- dates[ticks]
+    length <- length(ticks)
+
+# full date at new month, day only otherwise
+    formats <- c("%Y-%m-%d","%d");
+    labelFormats <- formats[1+c(FALSE, format(tickDates[2:(length-1)],"%Y-%m") == format(tickDates[1:(length-2)],"%Y-%m"))]
+    labels = format(tickDates, labelFormats)
+    data.frame(ticks=ticks, labels=labels)
+}
+
+
+
+
 labkey.data <- labkey.data[order(labkey.data$datetime),]
 labkey.data <- labkey.data[is.finite(labkey.data$value),]
 length = length(labkey.data$value)
@@ -197,7 +214,10 @@ PRINT <- data.frame(
     run.href=D$run.href,
     well=D$well,
     well.href=D$well.href,
-    value=D$value
+    value=format(D$value,digits=2)
 )
-PRINT <- PRINT[order(PRINT$value),]
+PRINT <- PRINT[order(D$value),]
 write.table(PRINT, file = "${tsvout:tsvfile}", sep = "\t", qmethod = "double", col.names=NA)
+
+
+generateDateLabels(D$date)
