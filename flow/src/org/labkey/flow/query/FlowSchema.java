@@ -1416,7 +1416,7 @@ public class FlowSchema extends UserSchema
             tok = new TempTableToken(name);
             TempTableTracker.track(FlowManager.get().getSchema(), name, tok);
             if (!tx)
-                staticCache.put(attr, tok, 10 * Cache.SECOND);
+                staticCache.put(attr, tok, 10 * Cache.MINUTE);
         }
         instanceCache.put(attr, tok);
         if (null != r)

@@ -68,7 +68,8 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         ColumnInfo colRowId = new AliasedColumn("RowId", table.getColumn("RowId"));
         if (getContainer().hasPermission(getUser(), UpdatePermission.class))
         {
-            ret.add(new PerformAnalysisColumn(colRowId));
+            // PerformAnalsysisColumn is too expensive
+            //ret.add(new PerformAnalysisColumn(colRowId));
             ret.add(new ScriptActionColumn("Copy", ScriptController.CopyAction.class, colRowId));
             ret.add(new ScriptActionColumn("Delete", ScriptController.DeleteAction.class, colRowId));
         }

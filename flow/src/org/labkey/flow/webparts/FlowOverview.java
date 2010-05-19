@@ -113,6 +113,9 @@ public class FlowOverview extends Overview
                     _compensationSeparateStep = true;
                 }
             }
+            // this loop is very expensive, break if there is nothing more to learn...
+            if (_requiresCompensation && null != _scriptAnalysis && _compensationSeparateStep && null != _scriptCompensation)
+                break;
         }
 
         addStep(getFCSFileStep());

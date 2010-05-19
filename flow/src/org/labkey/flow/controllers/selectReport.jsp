@@ -42,7 +42,7 @@
             continue;
         reports.put(r.getDescriptor().getReportName(), r);
     }
-    %><select onchange="window.location=this.value"><%
+    %><select onchange="Select_onChange(this.value)"><%
     for (Report r : reports.values())
     {
         if (!r.getType().startsWith("Flow."))
@@ -52,3 +52,10 @@
         %><option <%=selected?"selected":""%> value="<%=h(r.getRunReportURL(context))%>"><%=h(d.getReportName())%></option><%
     }
     %></select>
+<script type="text/javascript">
+    function Select_onChange(url)
+    {
+        Ext.getBody().mask();
+        window.location=url;
+    }
+</script>

@@ -222,7 +222,7 @@ public class FlowScript extends FlowDataObject
 
     public boolean isPrivate()
     {
-        return getRun() != null;
+        return getData().getRunId() != null;
     }
 
     public ActionURL urlShow()
