@@ -268,14 +268,15 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
             if (reRun != null)
             {
                 List<ExpData> inputs = reRun.getDataOutputs();
-                if (inputs.size() > 1)
-                    throw new IllegalStateException("Viability runs are expected to produce one output.");
-                File dataFile = inputs.get(0).getDataFile();
-                if (dataFile.exists())
+                if (inputs.size() > 0)
                 {
-                    AssayFileWriter writer = new AssayFileWriter();
-                    File dup = writer.safeDuplicate(getViewContext(), dataFile);
-                    return Collections.singletonMap(AssayDataCollector.PRIMARY_FILE, dup);
+                    File dataFile = inputs.get(0).getDataFile();
+                    if (dataFile.exists())
+                    {
+                        AssayFileWriter writer = new AssayFileWriter();
+                        File dup = writer.safeDuplicate(getViewContext(), dataFile);
+                        return Collections.singletonMap(AssayDataCollector.PRIMARY_FILE, dup);
+                    }
                 }
             }
         }
