@@ -284,23 +284,26 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
     {
         SimpleFilter coverageFilter = null;
+
         if (form.getSeqIdInt() != 0)
         {
             coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getSingleRun());
-            coverageFilter.addCondition("pgm.SeqId", form.getSeqIdInt());
+            // Can't use addCondition below because it's too dumb to handle alias.columnName
+            coverageFilter.addWhereClause("pgm.SeqId = ?", new Object[]{form.getSeqIdInt()}, "SeqId");
         }
         else if (form.getGroupNumber() != 0)
         {
             coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getSingleRun());
-            coverageFilter.addCondition("pg.GroupNumber", form.getGroupNumber());
-            coverageFilter.addCondition("pg.IndistinguishableCollectionId", form.getIndistinguishableCollectionId());
+            // Can't use addCondition below because it's too dumb to handle alias.columnName
+            coverageFilter.addWhereClause("pg.GroupNumber = ?", new Object[]{form.getGroupNumber()}, "GroupNumber");
+            coverageFilter.addWhereClause("pg.IndistinguishableCollectionId = ?", new Object[]{form.getIndistinguishableCollectionId()}, "IndistinguishableCollectionId");
         }
 
         if (coverageFilter != null)
         {
             coverageFilter = ProteinManager.reduceToValidColumns(coverageFilter, MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoProteinGroups(), MS2Manager.getTableInfoPeptideMemberships(), MS2Manager.getTableInfoProteinProphetFiles());
             String sql = "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " p, " +
-                    MS2Manager.getTableInfoPeptideMemberships() + " pm," +
+                    MS2Manager.getTableInfoPeptideMemberships() + " pm, " +
                     MS2Manager.getTableInfoProteinGroupMemberships() + " pgm, " +
                     MS2Manager.getTableInfoProteinGroups() + " pg, " +
                     "(SELECT Run as PPRun, RowId FROM " + MS2Manager.getTableInfoProteinProphetFiles() + ") ppf " +
@@ -312,6 +315,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
                     " AND ppf.RowId = pg.ProteinProphetFileId";
             return Table.executeArray(ProteinManager.getSchema(), sql, coverageFilter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), String.class);
         }
+
         return null;
     }
 
