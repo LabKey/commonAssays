@@ -390,7 +390,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             ActionURL reRunURL = getImportURL(getContainer(), _protocol);
             reRunURL.addParameter("reRunId", "${RowId}");
 
-            DisplayColumn reRunDisplayCol = new UrlColumn(StringExpressionFactory.createURL(reRunURL), "re-import");
+            DisplayColumn reRunDisplayCol = new UrlColumn(StringExpressionFactory.createURL(reRunURL), "rerun");
             reRunDisplayCol.setNoWrap(true);
 
             List<DisplayColumn> cols = super.getDisplayColumns();
@@ -456,13 +456,13 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
                         ActionURL reRunURL = getImportURL(c, protocol);
                         reRunURL.addParameter("reRunId", runId);
 
-                        links.add(new NavTree("re-import", reRunURL));
+                        links.add(new NavTree("rerun", reRunURL));
 
                         if (canDelete)
                         {
                             ActionURL deleteReRunURL = reRunURL.clone();
                             deleteReRunURL.addParameter("delete", "true");
-                            links.add(new NavTree("delete and re-import", deleteReRunURL));
+                            links.add(new NavTree("delete and rerun", deleteReRunURL));
                         }
                     }
                 }
