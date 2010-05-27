@@ -87,6 +87,9 @@ public abstract class AbstractNabDataHandler extends AbstractExperimentDataHandl
                 if (!group.containsKey(WELLGROUP_NAME_PROPERTY))
                     throw new ExperimentException("The row must contain a value for the well group name : " + WELLGROUP_NAME_PROPERTY);
 
+                if (group.get(WELLGROUP_NAME_PROPERTY) == null)
+                    throw new ExperimentException("The row must contain a value for the well group name : " + WELLGROUP_NAME_PROPERTY);
+
                 String groupName = group.get(WELLGROUP_NAME_PROPERTY).toString();
                 String dataRowLsid = getDataRowLSID(data, groupName).toString();
 
