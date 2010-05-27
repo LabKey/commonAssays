@@ -65,14 +65,17 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
         {
             ElispotAssayProvider plateProvider = (ElispotAssayProvider)provider;
             PlateTemplate template = plateProvider.getPlateTemplate(viewContext.getContainer(), protocol);
-            DomainProperty[] props = plateProvider.getSampleWellGroupDomain(protocol).getProperties();
-            DomainProperty[] antigenProps = plateProvider.getAntigenWellGroupDomain(protocol).getProperties();
+            if (template != null)
+            {
+                DomainProperty[] props = plateProvider.getSampleWellGroupDomain(protocol).getProperties();
+                DomainProperty[] antigenProps = plateProvider.getAntigenWellGroupDomain(protocol).getProperties();
 
-            Map<String, Map<DomainProperty, String>>specimens = createTestSampleProperties(props, template, WellGroup.Type.SPECIMEN);
-            Map<String, Map<DomainProperty, String>>antigens = createTestSampleProperties(antigenProps, template, WellGroup.Type.ANTIGEN);
-            
-            addSampleProperties(SAMPLE_DATA_PROP_NAME, GROUP_COLUMN_NAME, specimens, template, WellGroup.Type.SPECIMEN);
-            addSampleProperties(ANTIGEN_DATA_PROP_NAME, GROUP_COLUMN_NAME, antigens, template, WellGroup.Type.ANTIGEN);
+                Map<String, Map<DomainProperty, String>>specimens = createTestSampleProperties(props, template, WellGroup.Type.SPECIMEN);
+                Map<String, Map<DomainProperty, String>>antigens = createTestSampleProperties(antigenProps, template, WellGroup.Type.ANTIGEN);
+
+                addSampleProperties(SAMPLE_DATA_PROP_NAME, GROUP_COLUMN_NAME, specimens, template, WellGroup.Type.SPECIMEN);
+                addSampleProperties(ANTIGEN_DATA_PROP_NAME, GROUP_COLUMN_NAME, antigens, template, WellGroup.Type.ANTIGEN);
+            }
         }
         super.createSampleData(protocol, viewContext, scriptDir);
     }
