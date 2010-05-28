@@ -79,7 +79,6 @@ public class GraphView extends GridView
             DataRegion region = getDataRegion();
             ctx.setCurrentRegion(region);
             ResultSet rs = region.getResultSet(ctx);
-            region.writeFilterHtml(ctx, out);
             List<DisplayColumn> dataColumns = new ArrayList();
             List<GraphColumn> graphColumns = new ArrayList();
 
