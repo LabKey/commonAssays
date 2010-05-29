@@ -3096,6 +3096,10 @@ public class MS2Controller extends SpringActionController
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
 
+            if (form.charge < 1 || form.charge > 3)
+            {
+                throw new NotFoundException("Unable to chart charge state " + form.charge);
+            }
             PeptideProphetGraphs.renderDistribution(response, summary, form.charge, form.cumulative);
         }
     }
@@ -3110,7 +3114,10 @@ public class MS2Controller extends SpringActionController
                 return;
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
-
+            if (form.charge < 1 || form.charge > 3)
+            {
+                throw new NotFoundException("Unable to chart charge state " + form.charge);
+            }
             PeptideProphetGraphs.renderObservedVsModel(response, summary, form.charge, form.cumulative);
         }
     }
@@ -3856,6 +3863,10 @@ public class MS2Controller extends SpringActionController
                 return HttpView.throwNotFound("Protein sequence not found");
 
             _protein = ProteinManager.getProtein(seqId);
+            if (_protein == null)
+            {
+                throw new NotFoundException("Could not find protein with SeqId " + seqId);
+            }
 
             AbstractMS2RunView peptideView = null;
 

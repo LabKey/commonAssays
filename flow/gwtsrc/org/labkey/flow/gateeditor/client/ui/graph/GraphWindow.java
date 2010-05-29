@@ -18,8 +18,8 @@ package org.labkey.flow.gateeditor.client.ui.graph;
 
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.Timer;
+import org.labkey.api.gwt.client.util.ErrorDialogAsyncCallback;
 import org.labkey.flow.gateeditor.client.GateEditor;
-import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.FlowUtil;
 import org.labkey.flow.gateeditor.client.GWTGraphException;
 import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
@@ -214,15 +214,15 @@ public class GraphWindow extends GateComponent
             }
         }
         status.setText(loadingText);
-        editor.getService().getGraphInfo(options, new GateCallback<GWTGraphInfo>()
+        editor.getService().getGraphInfo(options, new ErrorDialogAsyncCallback<GWTGraphInfo>()
         {
             @Override
-            public void onFailure(Throwable caught)
+            public void reportFailure(String message, Throwable caught)
             {
                 if (caught instanceof GWTGraphException)
                     setGraphError((GWTGraphException)caught);
                 else
-                    super.onFailure(caught);
+                    super.reportFailure(message, caught);
             }
 
             public void onSuccess(GWTGraphInfo graphInfo)

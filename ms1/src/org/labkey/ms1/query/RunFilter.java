@@ -18,6 +18,7 @@ package org.labkey.ms1.query;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlDialect;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.NotFoundException;
 
 import java.util.*;
 
@@ -36,7 +37,14 @@ public class RunFilter extends ListFilterBase implements FeaturesFilter
     public RunFilter(String runIds)
     {
         //comma-delimited list
-        _runIds = PageFlowUtil.toInts(runIds.split(","));
+        try
+        {
+            _runIds = PageFlowUtil.toInts(runIds.split(","));
+        }
+        catch (NumberFormatException e)
+        {
+            throw new NotFoundException("RunIds " + runIds);
+        }
     }
 
     public RunFilter(int runId)

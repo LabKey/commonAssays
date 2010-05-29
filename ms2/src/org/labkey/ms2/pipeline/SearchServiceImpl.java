@@ -476,7 +476,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             Arrays.sort(fileNames, String.CASE_INSENSITIVE_ORDER);
             for (String name : fileNames)
             {
-                if (name.indexOf("..") != -1 || name.indexOf("/") != -1 || name.indexOf("\\") != -1)
+                if (name == null || name.indexOf("..") != -1 || name.indexOf("/") != -1 || name.indexOf("\\") != -1)
                 {
                     results.appendError("Invalid file name " + name);
                 }

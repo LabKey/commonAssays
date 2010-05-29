@@ -19,8 +19,8 @@ package org.labkey.flow.gateeditor.client.ui;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
+import org.labkey.api.gwt.client.util.ErrorDialogAsyncCallback;
 import org.labkey.flow.gateeditor.client.GateEditor;
-import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.model.GWTCompensationMatrix;
 import org.labkey.flow.gateeditor.client.model.GWTRun;
 
@@ -64,7 +64,7 @@ public class CompensationMatrixList extends GateComponent
         listBox.addChangeHandler(changeHandler);
         widget.add(listBox);
         editor.addListener(listener);
-        editor.getService().getCompensationMatrices(new GateCallback<GWTCompensationMatrix[]>()
+        editor.getService().getCompensationMatrices(new ErrorDialogAsyncCallback<GWTCompensationMatrix[]>()
         {
             public void onSuccess(GWTCompensationMatrix[] result)
             {
@@ -112,7 +112,7 @@ public class CompensationMatrixList extends GateComponent
             return;
         if (run != null)
         {
-            editor.getService().getRunCompensationMatrix(run.getRunId(), new GateCallback<Integer>()
+            editor.getService().getRunCompensationMatrix(run.getRunId(), new ErrorDialogAsyncCallback<Integer>()
             {
                 public void onSuccess(Integer compId)
                 {

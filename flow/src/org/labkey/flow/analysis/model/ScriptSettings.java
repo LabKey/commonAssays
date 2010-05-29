@@ -34,7 +34,7 @@ public class ScriptSettings implements Serializable
     {
         return new FilterInfo(
                 filter.getField(),
-                filter.getOp() == null ? CompareType.NONBLANK.getUrlKey() : filter.getOp().toString(),
+                filter.getOp() == null ? CompareType.NONBLANK.getPreferredUrlKey() : filter.getOp().toString(),
                 filter.getValue());
     }
 
@@ -188,7 +188,7 @@ public class ScriptSettings implements Serializable
             {
                 FilterDef filterDef = filtersDef.addNewFilter();
                 filterDef.setField(filter.getField().toString());
-                filterDef.setOp(OpDef.Enum.forString(filter.getOp().getUrlKey()));
+                filterDef.setOp(OpDef.Enum.forString(filter.getOp().getPreferredUrlKey()));
                 if (filter.getValue() != null)
                     filterDef.setValue(filter.getValue());
             }

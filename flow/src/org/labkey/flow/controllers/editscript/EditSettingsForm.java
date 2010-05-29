@@ -147,6 +147,6 @@ public class EditSettingsForm extends EditScriptForm
 
     private void addCompare(Map<String, String> options, CompareType ct)
     {
-        options.put(ct.getUrlKey(), ct.getDisplayValue());
+        options.put(ct.getPreferredUrlKey(), ct.getDisplayValue());
     }
 }

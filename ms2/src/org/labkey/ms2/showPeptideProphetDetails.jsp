@@ -19,13 +19,13 @@
 
 <table>
 <%
-    ActionURL dist = me.cloneActionURL().setAction("showPeptideProphetDistributionPlot");
+    ActionURL dist = me.cloneActionURL().setAction(MS2Controller.ShowPeptideProphetDistributionPlotAction.class);
     ActionURL distCumulative = dist.clone().addParameter("cumulative", "1");
 
-    ActionURL versus = me.cloneActionURL().setAction("showPeptideProphetObservedVsModelPlot");
+    ActionURL versus = me.cloneActionURL().setAction(MS2Controller.ShowPeptideProphetObservedVsModelPlotAction.class);
     ActionURL versusCumulative = versus.clone().addParameter("cumulative", "1");
 
-    ActionURL versusPP = me.cloneActionURL().setAction("showPeptideProphetObservedVsPPScorePlot");
+    ActionURL versusPP = me.cloneActionURL().setAction(MS2Controller.ShowPeptideProphetObservedVsPPScorePlotAction.class);
 
     for (int i=1; i<4; i++)
     {

@@ -27,7 +27,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%! void addCompare(Map<String, String> options, CompareType ct)
 {
-    options.put(ct.getUrlKey(), ct.getDisplayValue());
+    options.put(ct.getPreferredUrlKey(), ct.getDisplayValue());
 }%>
 <%
     EditICSMetadataForm form = (EditICSMetadataForm)__form;
@@ -102,7 +102,7 @@
                 <tr>
                     <td><%=i == 0 ? "&nbsp;" : "and"%></td>
                     <td><select name="backgroundField"><labkey:options value="<%=filter == null ? null : filter.getField()%>" map="<%=fieldOptions%>" /></select></td>
-                    <td><select name="backgroundOp"><labkey:options value="<%=filter == null ? null : filter.getOp().getUrlKey()%>" map="<%=opOptions%>" /></select></td>
+                    <td><select name="backgroundOp"><labkey:options value="<%=filter == null ? null : filter.getOp().getPreferredUrlKey()%>" map="<%=opOptions%>" /></select></td>
                     <td><input name="backgroundValue" type="text" value="<%=h(filter == null ? null : filter.getValue())%>"></td>
                 </tr>
                 <%

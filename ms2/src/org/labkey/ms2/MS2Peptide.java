@@ -111,6 +111,8 @@ public class MS2Peptide
     public void renderGraph(HttpServletResponse response, double tolerance, double xStart, double xEnd, int width, int height) throws IOException
     {
         init(tolerance, xStart, xEnd);
+        width = Math.max(width, 50);
+        height = Math.max(height, 50);
         SpectrumGraph g = new SpectrumGraph(this, width, height, tolerance, xStart, xEnd);
         g.render(response);
     }

@@ -126,7 +126,7 @@ public class EditICSMetadataForm extends ProtocolForm
                 
                 String op;
                 if (backgroundFilterOps.length < i || backgroundFilterOps[i] == null)
-                    op = CompareType.NONBLANK.getUrlKey();
+                    op = CompareType.NONBLANK.getPreferredUrlKey();
                 else
                     op = backgroundFilterOps[i];
 

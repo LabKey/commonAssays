@@ -21,6 +21,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.Window;
+import org.labkey.api.gwt.client.util.ErrorDialogAsyncCallback;
 import org.labkey.api.gwt.client.util.PropertyUtil;
 import org.labkey.api.gwt.client.util.ServiceUtil;
 import org.labkey.flow.gateeditor.client.model.*;
@@ -86,7 +87,7 @@ public class GateEditor implements EntryPoint
 
     void init(GWTWorkspaceOptions workspaceOptions)
     {
-        getService().getWorkspace(workspaceOptions, new GateCallback<GWTWorkspace>()
+        getService().getWorkspace(workspaceOptions, new ErrorDialogAsyncCallback<GWTWorkspace>()
         {
             public void onSuccess(GWTWorkspace result)
             {
@@ -112,7 +113,7 @@ public class GateEditor implements EntryPoint
 
     public void save(GWTScript script)
     {
-        getService().save(script, new GateCallback<GWTScript>()
+        getService().save(script, new ErrorDialogAsyncCallback<GWTScript>()
         {
             public void onSuccess(GWTScript result)
             {
@@ -123,7 +124,7 @@ public class GateEditor implements EntryPoint
 
     public void save(GWTWell well, GWTScript script)
     {
-        getService().save(well, script, new GateCallback<GWTWell>()
+        getService().save(well, script, new ErrorDialogAsyncCallback<GWTWell>()
         {
             public void onSuccess(GWTWell well)
             {

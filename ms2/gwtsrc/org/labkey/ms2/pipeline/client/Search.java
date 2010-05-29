@@ -21,6 +21,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.Window;
+import org.labkey.api.gwt.client.util.ErrorDialogAsyncCallback;
 import org.labkey.api.gwt.client.util.PropertyUtil;
 import org.labkey.api.gwt.client.util.ServiceUtil;
 import org.labkey.api.gwt.client.ui.ImageButton;
@@ -655,9 +656,9 @@ public class Search implements EntryPoint
         }
     }
 
-    private class SequenceDbServiceCallback implements AsyncCallback<GWTSearchServiceResult>
+    private class SequenceDbServiceCallback extends ErrorDialogAsyncCallback<GWTSearchServiceResult>
     {
-        public void onFailure(Throwable caught)
+        public void reportFailure(String message, Throwable caught)
         {
             if(caught.getMessage().indexOf("User does not have permission") != -1)
             {
@@ -666,7 +667,7 @@ public class Search implements EntryPoint
             else if(!(GWT.getTypeName(caught).equals("com.google.gwt.user.client.rpc.InvocationException")
                     && caught.getMessage().length() == 0))
             {
-                Window.alert(caught.getMessage() + GWT.getTypeName(caught));
+                super.reportFailure(message, caught);
             }
         }
 
@@ -725,13 +726,8 @@ public class Search implements EntryPoint
         sequenceDbComposite.setEnabled(true, true);
     }
 
-    private class ProtocolServiceAsyncCallback implements AsyncCallback<GWTSearchServiceResult>
+    private class ProtocolServiceAsyncCallback extends ErrorDialogAsyncCallback<GWTSearchServiceResult>
     {
-        public void onFailure(Throwable caught)
-        {
-            Window.alert(caught.getMessage());
-        }
-
         public void onSuccess(GWTSearchServiceResult gwtResult)
         {
             clearDisplay();
@@ -753,13 +749,8 @@ public class Search implements EntryPoint
         }
     }
 
-    private class SearchServiceAsyncCallback implements AsyncCallback<GWTSearchServiceResult>
+    private class SearchServiceAsyncCallback extends ErrorDialogAsyncCallback<GWTSearchServiceResult>
     {
-        public void onFailure(Throwable caught)
-        {
-            Window.alert(caught.getMessage());
-        }
-
         public void onSuccess(GWTSearchServiceResult gwtResult)
         {
             setError(PropertyUtil.getServerProperty("errors"));

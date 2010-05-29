@@ -108,7 +108,7 @@ public class ICSMetadata
                     FilterDef xFilterDef = xBackgroundFilter.addNewFilter();
 
                     xFilterDef.setField(filterInfo.getField().toString());
-                    xFilterDef.setOp(OpDef.Enum.forString(filterInfo.getOp().getUrlKey()));
+                    xFilterDef.setOp(OpDef.Enum.forString(filterInfo.getOp().getPreferredUrlKey()));
                     if (filterInfo.getValue() != null)
                         xFilterDef.setValue(filterInfo.getValue());
                 }

@@ -19,8 +19,8 @@ package org.labkey.flow.gateeditor.client.ui;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
+import org.labkey.api.gwt.client.util.ErrorDialogAsyncCallback;
 import org.labkey.flow.gateeditor.client.GateEditor;
-import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.model.*;
 
 import java.util.Arrays;
@@ -29,7 +29,7 @@ public class RunList extends GateComponent
 {
     HorizontalPanel widget;
     ListBox listBox;
-    GateCallback<GWTWorkspace> currentRequest;
+    ErrorDialogAsyncCallback<GWTWorkspace> currentRequest;
     GWTRun[] runs;
     GateEditorListener listener = new GateEditorListener()
     {
@@ -60,7 +60,7 @@ public class RunList extends GateComponent
                 }
             }
             editor.getState().fireBeforeWorkspaceChanged();
-            currentRequest = new GateCallback<GWTWorkspace>()
+            currentRequest = new ErrorDialogAsyncCallback<GWTWorkspace>()
             {
                 public void onSuccess(GWTWorkspace result)
                 {
@@ -111,7 +111,7 @@ public class RunList extends GateComponent
         listBox.addChangeHandler(changeHandler);
         widget.add(listBox);
         editor.addListener(listener);
-        editor.getService().getRuns(new GateCallback<GWTRun[]>()
+        editor.getService().getRuns(new ErrorDialogAsyncCallback<GWTRun[]>()
         {
             public void onSuccess(GWTRun[] result)
             {
