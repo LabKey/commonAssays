@@ -34,74 +34,84 @@
     ExpSampleSet ss = protocol.getSampleSet();
     ExpMaterial[] samples = ss == null ? null : ss.getSamples();
     boolean unlinkedOnly = form.isUnlinkedOnly();
-    int unlinkedCount = protocol.getUnlinkedSampleCount(samples);
-    int fcsFilesWithSamplesCount = FlowManager.get().getFCSFileSamplesCount(getUser(), getContainer(), true);
-    int fcsFilesWithoutSamplesCount = FlowManager.get().getFCSFileSamplesCount(getUser(), getContainer(), false);
-
-    ActionURL urlFcsFilesWithSamples = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
-            .addParameter("query.Sample/Name~isnonblank", "");
-
-    ActionURL urlFcsFilesWithoutSamples = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
-            .addParameter("query.Sample/Name~isblank", "");
 %>
-<% if (protocol.getSampleSet() == null || samples == null || samples.length == 0) { %>
+<% if (ss == null || samples == null || samples.length == 0) { %>
     No samples have been uploaded in this folder.<br>
-    <labkey:link href="<%=protocol.urlUploadSamples(false)%>" text="Upload samples from a spreadsheet" /><br>
+    <labkey:link href="<%=protocol.urlUploadSamples(ss != null)%>" text="Upload samples from a spreadsheet" /><br>
 <% } else { %>
 <p>
-There are <a href="<%=h(protocol.urlShowSamples(false))%>"><%=samples.length%> sample descriptions</a> in this folder.
-<% if (unlinkedCount > 0) { %>
-    <a href="<%=h(protocol.urlShowSamples(true))%>"><%=unlinkedCount%> <%=unlinkedCount == 1 ? "sample is" : "samples are"%> not joined</a> to any FCS Files.
-<% } %>
-</p>
-<p>
-<a href="<%=h(urlFcsFilesWithSamples)%>"><%=fcsFilesWithSamplesCount%> FCS Files</a> are have been joined with a sample and
-<a href="<%=h(urlFcsFilesWithoutSamples)%>"><%=fcsFilesWithoutSamplesCount%> FCS Files</a> are not joined with any samples.
-</p>
+There are <a href="<%=h(ss.detailsURL())%>"><%=samples.length%> sample descriptions</a> in this folder.
 
-<p><% if (unlinkedOnly) { %><b>Showing Unlinked Samples</b><% } %>
-<table class="labkey-data-region labkey-show-borders">
-    <thead>
-    <tr>
-        <td class="labkey-column-header">Sample Name</td>
-        <td class="labkey-column-header">FCS Files</td>
-    </tr>
-    </thead>
+<% if (protocol.getSampleSetJoinFields().size() == 0) { %>
+    <p>
+    <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Join samples to FCS File Data" /><br>
+    No sample join fields have been defined yet.  The samples are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.
+<% } else { %>
     <%
-        for (int i = 0; i < samples.length; i++)
-        {
-            ExpMaterial sample = samples[i];
-            List<FlowFCSFile> fcsFiles = FlowProtocol.getFCSFiles(sample);
-            if (unlinkedOnly && fcsFiles.size() > 0)
-                continue;
+        int unlinkedCount = FlowProtocol.getUnlinkedSampleCount(samples);
+        int fcsFilesWithSamplesCount = FlowManager.get().getFCSFileSamplesCount(getUser(), getContainer(), true);
+        int fcsFilesWithoutSamplesCount = FlowManager.get().getFCSFileSamplesCount(getUser(), getContainer(), false);
 
-            %>
-            <tr class="<%=i%2==0 ? "labkey-alternate-row":"labkey-row"%>">
-            <td valign="top"><a href="<%=h(sample.detailsURL())%>"><%= sample.getName()%></a></td>
-            <td>
-                <% if (fcsFiles.size() > 0) { %>
-                    <% for (FlowFCSFile fcsFile : fcsFiles) { %>
-                        <a href="<%=h(fcsFile.urlShow())%>"><%=fcsFile.getName()%></a><br>
-                    <% } %>
-                <% } else { %>
-                    <em>unlinked</em>
-                <% } %>
-            </td>
-            </tr>
-            <%
-        }
+        ActionURL urlFcsFilesWithSamples = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
+                .addParameter("query.Sample/Name~isnonblank", "");
+
+        ActionURL urlFcsFilesWithoutSamples = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
+                .addParameter("query.Sample/Name~isblank", "");
     %>
-</table>
-</p>
 
-<p>
-    <labkey:link href="<%=ss.detailsURL()%>" text="Show sample set"/><br>
-    <labkey:link href="<%=protocol.urlUploadSamples(true)%>" text="Upload more samples from a spreadsheet" /><br>
-    <% if (protocol.getSampleSetJoinFields().size() != 0) { %>
-        <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Modify sample join fields" /><br>
-    <% } else { %>
-        <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Join samples to FCS File Data" /><br>
+    <% if (unlinkedCount > 0) { %>
+        <a href="<%=h(protocol.urlShowSamples(true))%>"><%=unlinkedCount%> <%=unlinkedCount == 1 ? "sample is" : "samples are"%> not joined</a> to any FCS Files.
     <% } %>
-</p>
-<% } %>
+    </p>
+    <p>
+    <a href="<%=h(urlFcsFilesWithSamples)%>"><%=fcsFilesWithSamplesCount%> FCS Files</a> are have been joined with a sample and
+    <a href="<%=h(urlFcsFilesWithoutSamples)%>"><%=fcsFilesWithoutSamplesCount%> FCS Files</a> are not joined with any samples.
+    </p>
 
+    <p><% if (unlinkedOnly) { %><b>Showing Unlinked Samples</b><% } %>
+    <table class="labkey-data-region labkey-show-borders">
+        <thead>
+        <tr>
+            <td class="labkey-column-header">Sample Name</td>
+            <td class="labkey-column-header">FCS Files</td>
+        </tr>
+        </thead>
+        <%
+            for (int i = 0; i < samples.length; i++)
+            {
+                ExpMaterial sample = samples[i];
+                List<FlowFCSFile> fcsFiles = FlowProtocol.getFCSFiles(sample);
+                if (unlinkedOnly && fcsFiles.size() > 0)
+                    continue;
+
+                %>
+                <tr class="<%=i%2==0 ? "labkey-alternate-row":"labkey-row"%>">
+                <td valign="top"><a href="<%=h(sample.detailsURL())%>"><%= sample.getName()%></a></td>
+                <td>
+                    <% if (fcsFiles.size() > 0) { %>
+                        <% for (FlowFCSFile fcsFile : fcsFiles) { %>
+                            <a href="<%=h(fcsFile.urlShow())%>"><%=fcsFile.getName()%></a><br>
+                        <% } %>
+                    <% } else { %>
+                        <em>unlinked</em>
+                    <% } %>
+                </td>
+                </tr>
+                <%
+            }
+        %>
+    </table>
+    </p>
+
+    <p>
+        <labkey:link href="<%=ss.detailsURL()%>" text="Show sample set"/><br>
+        <labkey:link href="<%=protocol.urlUploadSamples(true)%>" text="Upload more samples from a spreadsheet" /><br>
+        <% if (protocol.getSampleSetJoinFields().size() != 0) { %>
+            <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Modify sample join fields" /><br>
+        <% } else { %>
+            <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Join samples to FCS File Data" /><br>
+        <% } %>
+    </p>
+    <% } %>
+
+<% } %>

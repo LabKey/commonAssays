@@ -413,17 +413,7 @@ public class FlowOverview extends Overview
             if (ss != null)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.append("There are <a href=\"").append(h(protocol.urlShowSamples(false))).append("\">").append(ss.getSamples().length).append(" sample descriptions</a> in this folder");
-
-                int unlinkedCount = protocol.getUnlinkedSampleCount();
-                if (unlinkedCount > 0)
-                {
-                    sb.append(", of which <a href=\"").append(h(protocol.urlShowSamples(true))).append("\">").append(unlinkedCount).append(" are not joined</a> to any FCS files.");
-                }
-                else
-                {
-                    sb.append(".");
-                }
+                sb.append("There are <a href=\"").append(h(protocol.urlShowSamples(false))).append("\">").append(ss.getSamples().length).append(" sample descriptions</a> in this folder.");
 
                 ret.setStatusHTML(sb.toString());
 
@@ -435,7 +425,7 @@ public class FlowOverview extends Overview
                     if (protocol.getSampleSetJoinFields().size() != 0)
                     {
                         Action action = new Action("Modify sample description join fields", protocol.urlFor(ProtocolController.Action.joinSampleSet));
-                        action.setDescriptionHTML("<i>The sample descriptions are linked to the FCS files using some keywords.  When new samples are added or FCS files are loaded, new links will be created.</i>");
+                        action.setDescriptionHTML("<i>The sample descriptions are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.</i>");
                         ret.addAction(action);
                     }
                     else
