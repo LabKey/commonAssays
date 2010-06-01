@@ -21,6 +21,9 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.FilterInfo;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.query.AttributeCache;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.data.ICSMetadata;
@@ -185,8 +188,20 @@ public class EditICSMetadataForm extends ProtocolForm
                 ret.put(new FieldKey(sampleProperty, pd.getName()), "Sample " + pd.getName());
             }
         }
-        
+
+
+        // ADD statistics too.
+        // this is to filter for minimum count in background control
+        // e.g. Statistic."S/Lv/L/3+/4+:Count" > 5000
+        Map<StatisticSpec,Integer> stats = AttributeCache.STATS.getAttrValues(getContainer(), null);
+        FieldKey statisticProperty = FieldKey.fromParts("Statistic");
+        for (StatisticSpec stat : stats.keySet())
+        {
+            if (stat.getStatistic() != StatisticSpec.STAT.Count)
+                continue;
+            ret.put(new FieldKey(statisticProperty, stat.toString()), "Statistic " + stat.toString());
+        }
+
         return ret;
     }
-
 }

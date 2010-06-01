@@ -1501,7 +1501,7 @@ public class FlowSchema extends UserSchema
             tok = new TempTableToken(name);
             TempTableTracker.track(FlowManager.get().getSchema(), name, tok);
             if (!tx)
-                staticCache.put(attr, tok, 10 * Cache.SECOND);
+                staticCache.put(attr, tok, 10 * Cache.MINUTE);
         }
         instanceCache.put(attr, tok);
         if (null != r)
@@ -1535,7 +1535,12 @@ public class FlowSchema extends UserSchema
             bgFields.addAll(bgMap.values());
             SimpleFilter filter = new SimpleFilter();
             for (FilterInfo f : ics.getBackgroundFilter())
-                filter.addCondition(bgMap.get(f.getField()), f.getValue(), f.getOp());
+            {
+                Object value = f.getValue();
+                if (value instanceof String && f.getField().getParts().get(0).equalsIgnoreCase("Statistic"))
+                    value = Double.parseDouble((String)value);
+                filter.addCondition(bgMap.get(f.getField()), value, f.getOp());
+            }
             SQLFragment bgSQL = Table.getSelectSQL(bg, bgFields, null, null);
             if (filter.getClauses().size() > 0)
             {
