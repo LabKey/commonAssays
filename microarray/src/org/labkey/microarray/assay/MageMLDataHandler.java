@@ -177,6 +177,6 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
         {
             if (fIn != null) { try { fIn.close(); } catch (IOException e) {} }
         }
-        throw new UnsupportedOperationException();
+        return Collections.emptyMap();
     }
 }
