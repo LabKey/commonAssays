@@ -42,29 +42,6 @@ public class GraphView extends GridView
         super(otherDataView.getDataRegion(), otherDataView.getRenderContext());
     }
 
-    protected void renderGraph(RenderContext ctx, Writer out, String description) throws IOException
-    {
-        try
-        {
-            int wellId = (Integer) ctx.getRow().get("RowId");
-            ActionURL src = PageFlowUtil.urlFor(WellController.Action.showGraph, ctx.getContainer());
-            src.addParameter("wellId", Integer.toString(wellId));
-            src.addParameter("graph", description);
-            out.write("<img src=\"" + src + "\">");
-        }
-        catch (Exception e)
-        {
-            out.write(e.toString());
-        }
-
-    }
-
-    protected void renderDataColumn(RenderContext ctx, Writer out, DisplayColumn column) throws IOException, SQLException
-    {
-        column.renderGridHeaderCell(ctx, out);
-        column.renderGridDataCell(ctx, out);
-    }
-
     protected void _renderDataRegion(RenderContext ctx, Writer out) throws IOException, SQLException
     {
         if (!ctx.getViewContext().hasPermission(ACL.PERM_READ))

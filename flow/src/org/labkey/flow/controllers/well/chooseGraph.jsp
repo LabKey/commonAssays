@@ -212,18 +212,6 @@
         urlGenerateGraph.addParameter("graph", graphspec.toString());
 
 %>
-<script type="text/javascript">
-    function imgError(img)
-    {
-        img.onerror = null;
-        img.src = '<%=AppProps.getInstance().getContextPath()%>/_images/exclaim.gif';
-
-        var msg = 'There was an error generating the graph.  See the server log for more information.';
-        var node = document.createElement("span");
-        node.className = 'labkey-error';
-        node.innerHTML = msg;
-        img.parentNode.appendChild(node);
-    }
-</script>
-<p><img src="<%=h(urlGenerateGraph)%>" onerror="imgError(this);"></p>
+<script type="text/javascript" src="<%=AppProps.getInstance().getContextPath()%>/Flow/util.js"></script>
+<p><img src="<%=h(urlGenerateGraph)%>" onerror="flowImgError(this);"></p>
 <% } %>

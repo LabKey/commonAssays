@@ -35,6 +35,7 @@
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%!
     String compImg(FlowWell well, String param, String graphSize) throws Exception
@@ -47,9 +48,12 @@
             return "N/A";
         ActionURL urlGraph = well.urlFor(WellController.Action.showGraph);
         urlGraph.addParameter(FlowParam.graph.toString(), spec.toString());
-        return "<img style=\"height: " + graphSize + ";width: " + graphSize + ";\" class=\"labkey-flow-graph\" src=\"" + h(urlGraph) + "\">";
+        return "<span style=\"display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize + "\">\n" +
+               "<img style=\"width:" + graphSize + ";height:" + graphSize + ";\" class='labkey-flow-graph' src=\"" + h(urlGraph) + "\" onerror=\"flowImgError(this);\">\n" +
+               "</span><wbr>";
     }
 %>
+<script type="text/javascript" src="<%=AppProps.getInstance().getContextPath()%>/Flow/util.js"></script>
 <%
     final FlowCompensationMatrix flowComp = FlowCompensationMatrix.fromURL(getViewContext().getActionURL(), request);
     if (null == flowComp)

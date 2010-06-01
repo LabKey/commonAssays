@@ -43,10 +43,12 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <style type="text/css">
     .right {text-align:right;}
 </style>
+<script type="text/javascript" src="<%=AppProps.getInstance().getContextPath()%>/Flow/util.js"></script>
 <script type="text/javascript">
 LABKEY.requiresClientAPI(true);
 LABKEY.requiresScript("ColumnTree.js");
@@ -353,7 +355,11 @@ if (getGraphs().length > 0)
     include(new JspView(JspLoader.createPage(request, GraphView.class, "setGraphSize.jsp")), out);
     for (GraphSpec graph : getGraphs())
     {
-        %><img style="width:<%=graphSize%>;height:<%=graphSize%>;"class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.Action.showGraph))%>&amp;graph=<%=u(graph.toString())%>"><wbr><%
+        %>
+        <span style="display:inline-block; vertical-align:top; height:<%=graphSize%>; width:<%=graphSize%>;">
+        <img style="width:<%=graphSize%>;height:<%=graphSize%>;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.Action.showGraph))%>&amp;graph=<%=u(graph.toString())%>" onerror="flowImgError(this);">
+        </span><wbr>
+        <%
     }
 }
 

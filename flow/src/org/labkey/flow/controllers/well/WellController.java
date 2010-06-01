@@ -32,10 +32,7 @@ import org.labkey.api.security.SecurityPolicy;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.ResultSetUtil;
-import org.labkey.api.util.ReturnURLString;
-import org.labkey.api.util.URIUtil;
+import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.FCSViewer;
@@ -280,20 +277,32 @@ public class WellController extends BaseFlowController<WellController.Action>
 
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            well = getWell();
-            if (well == null)
+            byte[] bytes = null;
+            try
             {
-                int objectId = getIntParam(FlowParam.objectId);
-                if (objectId == 0)
-                    return null;
-                FlowObject obj = FlowDataObject.fromAttrObjectId(objectId);
-                if (!(obj instanceof FlowWell))
-                    return null;
-                well = (FlowWell) obj;
-                well.checkContainer(getActionURL());
+                well = getWell();
+                if (well == null)
+                {
+                    int objectId = getIntParam(FlowParam.objectId);
+                    if (objectId == 0)
+                        return null;
+                    FlowObject obj = FlowDataObject.fromAttrObjectId(objectId);
+                    if (!(obj instanceof FlowWell))
+                        return null;
+                    well = (FlowWell) obj;
+                    well.checkContainer(getActionURL());
+                }
+                long now = System.currentTimeMillis();
+                if (now % 3 == 0)
+                    throw new RuntimeException("uh-oh time");
+                String graph = getParam(FlowParam.graph);
+                bytes = well.getGraphBytes(new GraphSpec(graph));
             }
-            String graph = getParam(FlowParam.graph);
-            byte[] bytes = well.getGraphBytes(new GraphSpec(graph));
+            catch (Exception ex)
+            {
+                _log.error("Error retrieving graph", ex);
+                ExceptionUtil.logExceptionToMothership(getRequest(), ex);
+            }
             if (bytes != null)
             {
                 streamBytes(getViewContext().getResponse(),
