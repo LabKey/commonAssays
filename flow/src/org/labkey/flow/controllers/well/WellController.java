@@ -292,9 +292,6 @@ public class WellController extends BaseFlowController<WellController.Action>
                     well = (FlowWell) obj;
                     well.checkContainer(getActionURL());
                 }
-                long now = System.currentTimeMillis();
-                if (now % 3 == 0)
-                    throw new RuntimeException("uh-oh time");
                 String graph = getParam(FlowParam.graph);
                 bytes = well.getGraphBytes(new GraphSpec(graph));
             }
