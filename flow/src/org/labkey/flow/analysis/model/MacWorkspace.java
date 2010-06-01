@@ -445,9 +445,9 @@ public class MacWorkspace extends FlowJoWorkspace
                         pi.calibrationTable = _calibrationTables.get(index - 1);
                     }
                 }
-                else
-                {
 
+                if (pi.calibrationTable == null)
+                {
                     pi.calibrationTable = new IdentityCalibrationTable(getRange(elParameter));
                 }
                 _parameters.put(name, pi);
