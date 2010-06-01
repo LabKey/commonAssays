@@ -60,7 +60,10 @@ public abstract class FlowJob extends PipelineJob
     public void run()
     {
         _start = new Date();
-        setStatus("Running");
+        if (!setStatus("Running"))
+        {
+            return;
+        }
         addStatus("Job started at " + DateUtil.formatDateTime(_start));
         try
         {
@@ -119,11 +122,6 @@ public abstract class FlowJob extends PipelineJob
     {
         _errors = true;
         error(message);
-    }
-
-    public boolean isStarted()
-    {
-        return _start != null;
     }
 
     public boolean isComplete()
@@ -195,7 +193,7 @@ public abstract class FlowJob extends PipelineJob
 
     public String getStatusFilePath()
     {
-        return PipelineJobService.statusPathOf(getStatusFile().getAbsolutePath());
+        return PipelineJobService.statusPathOf(getLogFile().getAbsolutePath());
     }
 
     public ActionURL urlCancel()

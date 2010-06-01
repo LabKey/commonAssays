@@ -86,7 +86,10 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 
     public void run()
     {
-        setStatus("TRANSLATING");
+        if (!setStatus("TRANSLATING"))
+        {
+            return;
+        }
 
         String _dirAnalysis = _file.getParent();
         String _baseName = FileUtil.getBaseName(_file);

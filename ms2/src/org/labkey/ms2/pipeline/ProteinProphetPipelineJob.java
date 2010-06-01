@@ -57,7 +57,10 @@ public class ProteinProphetPipelineJob extends PipelineJob
 
     public void run()
     {
-        setStatus("LOADING");
+        if (!setStatus("LOADING"))
+        {
+            return;
+        }
         boolean completeStatus = false;
         try
         {

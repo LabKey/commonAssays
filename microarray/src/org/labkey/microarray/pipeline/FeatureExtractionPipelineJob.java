@@ -100,7 +100,10 @@ public class FeatureExtractionPipelineJob extends PipelineJob
 
     public void run()
     {
-        setStatus("RUNNING");
+        if (!setStatus("RUNNING"))
+        {
+            return;
+        }
 
         boolean completeStatus = false;
         try

@@ -127,7 +127,10 @@ public class WorkspaceJob extends FlowJob
 
     protected void doRun() throws Throwable
     {
-        setStatus("LOADING");
+        if (!setStatus("LOADING"))
+        {
+            return;
+        }
 
         boolean completeStatus = false;
         ObjectInputStream ois = null;
@@ -141,7 +144,6 @@ public class WorkspaceJob extends FlowJob
                 addruns.setLogFile(getLogFile());
                 addruns.setLogLevel(getLogLevel());
                 addruns.setStatus(getStatusText());
-                addruns.setStatusFile(getStatusFile());
                 addruns.setSubmitted();
 
                 List<FlowRun> runs = addruns.go();
