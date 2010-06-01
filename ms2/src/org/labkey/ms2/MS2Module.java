@@ -257,7 +257,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         //We are the first creator of this...
         ContainerManager.addContainerListener(this);
-        ModuleLoader.getInstance().registerFolderType(new MS2FolderType(this));
+        ModuleLoader.getInstance().registerFolderType(this, new MS2FolderType(this));
 
         ReportService.get().registerReport(new SpectraCountRReport());
         ReportService.get().registerReport(new SingleMS2RunRReport());

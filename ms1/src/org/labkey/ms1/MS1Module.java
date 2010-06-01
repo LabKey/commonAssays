@@ -171,7 +171,7 @@ public class MS1Module extends SpringModule
         });
 
         //register the MS1 folder type
-        ModuleLoader.getInstance().registerFolderType(new MS1FolderType(this));
+        ModuleLoader.getInstance().registerFolderType(this, new MS1FolderType(this));
         MS1Controller.registerAdminConsoleLinks();
 
         ReportService.get().registerReport(new FeaturesRReport());

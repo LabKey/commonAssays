@@ -123,7 +123,7 @@ public class MicroarrayModule extends DefaultModule
 
     public void startup(ModuleContext moduleContext)
     {
-        ModuleLoader.getInstance().registerFolderType(new MicroarrayFolderType(this));
+        ModuleLoader.getInstance().registerFolderType(this, new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
         ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
