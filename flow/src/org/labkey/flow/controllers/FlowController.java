@@ -110,7 +110,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return getFlowNavStart(getViewContext());
+            return getFlowNavStart(getPageConfig(), getViewContext());
         }
     }
 
