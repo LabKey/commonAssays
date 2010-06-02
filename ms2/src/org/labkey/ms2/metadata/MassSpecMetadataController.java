@@ -58,7 +58,7 @@ public class MassSpecMetadataController extends SpringActionController
     {
         public ActionURL getRedirectURL(Object o) throws Exception
         {
-            return getContainer().getStartURL(getViewContext());
+            return getContainer().getStartURL(getViewContext().getUser());
         }
     }
 

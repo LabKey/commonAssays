@@ -143,7 +143,6 @@ public class WorkspaceJob extends FlowJob
                 AddRunsJob addruns = new AddRunsJob(getInfo(), protocol, Collections.singletonList(_runFilePathRoot));
                 addruns.setLogFile(getLogFile());
                 addruns.setLogLevel(getLogLevel());
-                addruns.setStatus(getStatusText());
                 addruns.setSubmitted();
 
                 List<FlowRun> runs = addruns.go();
