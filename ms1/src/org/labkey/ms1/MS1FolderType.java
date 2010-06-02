@@ -18,6 +18,7 @@ package org.labkey.ms1;
 
 import org.labkey.api.module.DefaultFolderType;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.NavTree;
 import static org.labkey.api.util.PageFlowUtil.set;
@@ -49,5 +50,11 @@ public class MS1FolderType extends DefaultFolderType
             ),
             getDefaultModuleSet(module, getModule("MS2"), getModule("Pipeline")),
             module);
+    }
+
+    @Override
+    public HelpTopic getHelpTopic()
+    {
+        return new HelpTopic("ms1");
     }
 }

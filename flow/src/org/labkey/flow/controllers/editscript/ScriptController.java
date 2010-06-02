@@ -1250,7 +1250,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, object, "Gate Editor", Action.gateEditor);
+            return appendFlowNavTrail(getPageConfig(), root, object, "Gate Editor", Action.gateEditor);
         }
     }
 

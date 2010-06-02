@@ -160,7 +160,7 @@ public class CompensationController extends BaseFlowController<CompensationContr
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, null, "Upload a new compensation matrix", Action.upload);
+            return appendFlowNavTrail(getPageConfig(), root, null, "Upload a new compensation matrix", Action.upload);
         }
     }
 
@@ -182,7 +182,7 @@ public class CompensationController extends BaseFlowController<CompensationContr
                 return root;
             // show run this compensation was derived from
             if (_comp.getParent() != null)
-                return appendFlowNavTrail(root, _comp, "Show Compensation " + _comp.getName(), Action.showCompensation);
+                return appendFlowNavTrail(getPageConfig(), root, _comp, "Show Compensation " + _comp.getName(), Action.showCompensation);
             // fall back on showing compensaion query 
             else
                 return (new BeginAction().appendNavTrail(root)).addChild(_comp.getLabel(), _comp.urlShow());

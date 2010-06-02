@@ -16,6 +16,8 @@
 
 package org.labkey.flow.controllers;
 
+import org.labkey.api.action.BaseViewAction;
+import org.labkey.api.action.HasPageConfig;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.jsp.JspBase;
@@ -24,10 +26,12 @@ import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.User;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.template.PageConfig;
 import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
@@ -43,6 +47,8 @@ import java.util.ArrayList;
 
 public abstract class BaseFlowController<A extends Enum> extends SpringActionController
 {
+    public static HelpTopic DEFAULT_HELP_TOPIC = new HelpTopic("flowDefault");
+    
     protected BaseFlowController.FlowPage getFlowPage(String name) throws Exception
     {
         return getFlowPage(name, getClass().getPackage());
@@ -79,18 +85,23 @@ public abstract class BaseFlowController<A extends Enum> extends SpringActionCon
         return forward;
     }
 
-
+    public HelpTopic getHelpTopic()
+    {
+        return DEFAULT_HELP_TOPIC;
+    }
 
     // override to append root nav to all paths
     @Override
     protected void appendNavTrail(Controller action, NavTree root)
     {
-        root.addChild(getFlowNavStart(getViewContext()));
+        PageConfig page = null;
+        if (action instanceof HasPageConfig)
+            page = ((HasPageConfig)action).getPageConfig();
+        root.addChild(getFlowNavStart(page, getViewContext()));
         super.appendNavTrail(action, root);
     }
-    
 
-    public NavTree appendFlowNavTrail(NavTree root, FlowObject object, String title, A action)
+    public NavTree appendFlowNavTrail(PageConfig page, NavTree root, FlowObject object, String title, A action)
     {
         ArrayList<NavTree> children = new ArrayList<NavTree>();
         while (object != null)
@@ -103,18 +114,21 @@ public abstract class BaseFlowController<A extends Enum> extends SpringActionCon
         if (title != null)
             root.addChild(title);
 
-// UNDONE
-//        ntc.setHelpTopic(new HelpTopic(PFUtil.helpTopic(action), HelpTopic.Area.FLOW));
+        if (page.getHelpTopic() == HelpTopic.DEFAULT_HELP_TOPIC)
+            page.setHelpTopic(getHelpTopic());
+
         return root;
     }
 
 
-    public NavTree getFlowNavStart(ViewContext context)
+    public NavTree getFlowNavStart(PageConfig page, ViewContext context)
     {
         NavTree project;
         if (context.getContainer().getFolderType() instanceof FlowFolderType)
         {
             project = new NavTree("Dashboard", PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(context.getContainer()));
+            if (page.getHelpTopic() == HelpTopic.DEFAULT_HELP_TOPIC)
+                page.setHelpTopic(getHelpTopic());
         }
         else
         {

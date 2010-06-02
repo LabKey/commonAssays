@@ -94,7 +94,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, script, null, Action.begin);
+            return appendFlowNavTrail(getPageConfig(), root, script, null, Action.begin);
         }
     }
 
@@ -148,7 +148,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, script, nav.first, nav.second);
+            return appendFlowNavTrail(getPageConfig(), root, script, nav.first, nav.second);
         }
     }
 
@@ -349,7 +349,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, null, "Import Flow FCS Files", Action.confirmRunsToImport);
+            return appendFlowNavTrail(getPageConfig(), root, null, "Import Flow FCS Files", Action.confirmRunsToImport);
         }
     }
 

@@ -17,6 +17,7 @@
 package org.labkey.ms2;
 
 import org.labkey.api.module.DefaultFolderType;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.NavTree;
@@ -55,6 +56,12 @@ public class MS2FolderType extends DefaultFolderType
     public String getStartPageLabel(ViewContext ctx)
     {
         return super.getStartPageLabel(ctx);
+    }
+
+    @Override
+    public HelpTopic getHelpTopic()
+    {
+        return new HelpTopic("ms2");
     }
 
     @Override

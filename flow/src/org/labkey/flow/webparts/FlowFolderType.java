@@ -20,9 +20,11 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.module.DefaultFolderType;
 import org.labkey.api.security.User;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Portal;
 import org.labkey.flow.FlowModule;
+import org.labkey.flow.controllers.BaseFlowController;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,5 +51,11 @@ public class FlowFolderType extends DefaultFolderType
         ActionURL ret = super.getStartURL(c, user);
         ret.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
         return ret;
+    }
+
+    @Override
+    public HelpTopic getHelpTopic()
+    {
+        return BaseFlowController.DEFAULT_HELP_TOPIC;
     }
 }

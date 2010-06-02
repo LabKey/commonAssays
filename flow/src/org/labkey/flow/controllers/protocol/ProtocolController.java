@@ -111,7 +111,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, protocol, "Protocol", Action.showProtocol);
+            return appendFlowNavTrail(getPageConfig(), root, protocol, "Protocol", Action.showProtocol);
         }
     }
 
@@ -136,7 +136,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, protocol, "Show Samples", Action.showSamples);
+            return appendFlowNavTrail(getPageConfig(), root, protocol, "Show Samples", Action.showSamples);
         }
     }
 
@@ -175,7 +175,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, getProtocol(), "Join Samples", Action.joinSampleSet);
+            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Join Samples", Action.joinSampleSet);
         }
     }
 
@@ -193,7 +193,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, protocol, "Update Samples", Action.updateSamples);
+            return appendFlowNavTrail(getPageConfig(), root, protocol, "Update Samples", Action.updateSamples);
         }
     }
 
@@ -224,7 +224,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, getProtocol(), "Edit FCS Analysis Name", Action.editFCSAnalysisName);
+            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Name", Action.editFCSAnalysisName);
         }
     }
 
@@ -254,7 +254,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, getProtocol(), "Edit FCS Analysis Filter", Action.editFCSAnalysisFilter);
+            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Filter", Action.editFCSAnalysisFilter);
         }
     }
 
@@ -305,7 +305,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, getProtocol(), "Edit ICS Metadata", Action.editICSMetadata);
+            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit ICS Metadata", Action.editICSMetadata);
         }
     }
 }

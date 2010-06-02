@@ -133,7 +133,7 @@ public class WellController extends BaseFlowController<WellController.Action>
         public NavTree appendNavTrail(NavTree root)
         {
             String label = well != null ? null : "Well not found";
-            return appendFlowNavTrail(root, well, label, Action.showWell);
+            return appendFlowNavTrail(getPageConfig(), root, well, label, Action.showWell);
         }
     }
 
@@ -218,7 +218,7 @@ public class WellController extends BaseFlowController<WellController.Action>
         public NavTree appendNavTrail(NavTree root)
         {
             String label = well != null ? "Edit " + well.getLabel() : "Well not found";
-            return appendFlowNavTrail(root, well, label, Action.editWell);
+            return appendFlowNavTrail(getPageConfig(), root, well, label, Action.editWell);
         }
     }
 
@@ -266,7 +266,7 @@ public class WellController extends BaseFlowController<WellController.Action>
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, well, "Choose Graph", Action.chooseGraph);
+            return appendFlowNavTrail(getPageConfig(), root, well, "Choose Graph", Action.chooseGraph);
         }
     }
 

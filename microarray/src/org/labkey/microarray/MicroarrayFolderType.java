@@ -17,6 +17,7 @@
 package org.labkey.microarray;
 
 import org.labkey.api.module.DefaultFolderType;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.Portal;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.exp.api.ExperimentService;
@@ -45,5 +46,11 @@ public class MicroarrayFolderType extends DefaultFolderType
             ),
             getDefaultModuleSet(module, getModule(MicroarrayModule.NAME), getModule(PipelineService.MODULE_NAME), getModule(ExperimentService.MODULE_NAME)),
             module);
+    }
+
+    @Override
+    public HelpTopic getHelpTopic()
+    {
+        return new HelpTopic("microarrayTutorial");
     }
 }
