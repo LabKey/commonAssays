@@ -30,7 +30,10 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.ms2.MS2Urls;
-import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.PipelineRootContainerTree;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.*;
@@ -43,7 +46,6 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.settings.WriteableAppProps;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
-import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
@@ -1144,6 +1146,10 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             MS2Run run = MS2Manager.getRun(form.getRun());
+
+            if (null == run)
+                HttpView.throwNotFound("Run not found: " + form.getRun());
+
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
             getPageConfig().setTemplate(PageConfig.Template.None);
 
@@ -4867,6 +4873,10 @@ public class MS2Controller extends SpringActionController
             url.setAction(ShowRunAction.class);
 
             MS2Run run = MS2Manager.getRun(request.getParameter("run"));
+
+            if (null == run)
+                HttpView.throwNotFound("Run not found: " + request.getParameter("run"));
+
             String paramName = run.getChargeFilterParamName();
 
             // Stick posted values onto showRun URL and forward.  URL shouldn't have any rawScores or tryptic (they are

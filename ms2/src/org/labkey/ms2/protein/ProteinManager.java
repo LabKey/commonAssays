@@ -1035,7 +1035,13 @@ public class ProteinManager
             sql.append('\n');
         }
         if (addOrderBy)
-            sql.append(getProteinGroupCombinedOrderBy(currentUrl, "ProteinGroupId"));
+        {
+            // Work around ambiguous column problem on SQL Server 2000.  Need this string replacement hack since Sort
+            // doesn't handle schema/table-qualified names correctly and a simple aliasing of the column name breaks
+            // expectations in other code.  See #10460.
+            String orderBy = getProteinGroupCombinedOrderBy(currentUrl, "ProteinGroupId");
+            sql.append(orderBy.replace("ProteinGroupId", MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId"));
+        }
         if (maxProteinRows > 0)
         {
             getSqlDialect().limitRows(sql, maxProteinRows + 1);

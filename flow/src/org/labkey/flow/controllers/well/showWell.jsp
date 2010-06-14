@@ -44,6 +44,8 @@
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="java.text.NumberFormat" %>
+<%@ page import="java.text.DecimalFormat" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <style type="text/css">
     .right {text-align:right;}
@@ -51,7 +53,7 @@
 <script type="text/javascript" src="<%=AppProps.getInstance().getContextPath()%>/Flow/util.js"></script>
 <script type="text/javascript">
 LABKEY.requiresClientAPI(true);
-LABKEY.requiresScript("ColumnTree.js");
+LABKEY.requiresScript("TreeGrid.js");
 </script>
 <%
     ViewContext context = HttpView.currentContext();
@@ -60,6 +62,9 @@ LABKEY.requiresScript("ColumnTree.js");
     FlowScript script = well.getScript();
     FlowCompensationMatrix matrix = well.getCompensationMatrix();
 
+    NumberFormat percentageFormat = new DecimalFormat("0.0%");
+    NumberFormat integerFormat = NumberFormat.getIntegerInstance();
+    NumberFormat decimalFormat = new DecimalFormat("#,##0.00");
     StringBuilder jsonStats = new StringBuilder();
     jsonStats.append("[");
     String comma = "";
@@ -80,7 +85,24 @@ LABKEY.requiresScript("ColumnTree.js");
         }
         jsonStats.append("stat:").append(PageFlowUtil.jsString(spec.getStatistic().getShortName())).append(",");
         jsonStats.append("param:").append(PageFlowUtil.jsString(spec.getParameter())).append(",");
-        jsonStats.append("value:").append(value);
+        String formattedValue;
+        switch (spec.getStatistic())
+        {
+            case Frequency:
+            case Freq_Of_Parent:
+            case Freq_Of_Grandparent:
+            case Percentile:
+                formattedValue = percentageFormat.format(value/100);
+                break;
+
+            case Count:
+                formattedValue = integerFormat.format(value);
+                break;
+
+            default:
+                formattedValue = decimalFormat.format(value);
+        }
+        jsonStats.append("value:'").append(formattedValue).append("'");
         jsonStats.append("}");
         comma = ",\n";
     }
@@ -123,7 +145,7 @@ function statisticsTree(statistics)
     var map = {};
     for (var i=0 ; i<statistics.length ; i++)
     {
-        s = statistics[i];
+        var s = statistics[i];
         node = map[s.subset];
         if (!node)
         {
@@ -132,7 +154,7 @@ function statisticsTree(statistics)
                 text = text.substring(s.parent.length+1);
             if (0==text.indexOf("(") && text.length-1 == text.lastIndexOf(")"))
                 text = text.substring(1,text.length-2);
-            node = new Ext.tree.TreeNode(Ext.apply({},{text:text, qtipCfg:{text:s.subset}, expanded:true, uiProvider:Ext.tree.ColumnNodeUI, parentNode:null}, s));    // stash original object in data
+            node = new Ext.tree.TreeNode(Ext.apply({},{text:text, qtipCfg:{text:s.subset}, expanded:true, uiProvider:Ext.ux.tree.TreeGridNodeUI, parentNode:null}, s));    // stash original object in data
             map[s.subset] = node;
         }
         var name = s.stat;
@@ -157,7 +179,7 @@ function statisticsTree(statistics)
     for (subset in map)
     {
         node = map[subset];
-        if (!node.attributes.parentNode && (node.childNodes.length > 0 /* || node.attributes.stats.length > 0 */))
+        if (!node.attributes.parentNode /*&& (node.childNodes.length > 0 || node.attributes.stats.length > 0 )*/)
             treeData.push(node);
     }
     return treeData;
@@ -179,7 +201,8 @@ function statisticsColumns(statistics)
             var renderer = null;
             if ('Count' != s.stat)
                 renderer = _toFixed;
-            var col = {header:Ext.util.Format.htmlEncode(name), dataIndex:'__'+name, width:80, cls:'right', renderer:renderer, stat:s.stat, param:s.param}
+            var dataIndex = '__' + name;
+            var col = {header:Ext.util.Format.htmlEncode(name), dataIndex:dataIndex, tpl: "{[values['" + dataIndex + "']]}", width:80, align:'right', renderer:renderer, stat:s.stat, param:s.param};
             map[name] = col;
             columns.push(col);
         }
@@ -231,7 +254,7 @@ function showStatistics()
     var population = [{header:'Population', dataIndex:'text', width:300}];
     var columns = population.concat(statsColumns);
 
-    var tree = new Ext.tree.ColumnTree({
+    var tree = new Ext.ux.tree.TreeGrid({
         el:'statsTree',
         rootVisible:false,
         useArrows:true,
@@ -248,6 +271,7 @@ function showStatistics()
         root.appendChild(treeData[i]);
     tree.setRootNode(root);
     tree.render();
+    tree.updateColumnWidths();
 }
 
 function showKeywords()

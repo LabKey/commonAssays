@@ -47,100 +47,109 @@ public class ProteinDictionaryHelpers
     private static final String FILE = "/MS2/externalData/ProtSprotOrgMap.txt";
     private static final int SPOM_BATCH_SIZE = 1000;
 
+    private static final Object SPOM_LOCK = new Object();
+
     public static void loadProtSprotOrgMap() throws SQLException
     {
-        int orgLineCount = 0;
-        PreparedStatement ps = null;
-        Connection conn = null;
-        CloseableIterator<Map<String, Object>> it = null;
-        DbScope scope = ProteinManager.getSchema().getScope();
-        try
+        synchronized(SPOM_LOCK)
         {
-            Table.execute(ProteinManager.getSchema(), "DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap(), null);
-
-            TabLoader t = new TabLoader(new InputStreamReader(getSProtOrgMap()), false);
-            conn = scope.getConnection();
-            ps = conn.prepareStatement(
-                    "INSERT INTO " + ProteinManager.getTableInfoSprotOrgMap() +
-                            " (SprotSuffix,SuperKingdomCode,TaxonId,FullName,Genus,Species,CommonName,Synonym) " +
-                            " VALUES (?,?,?,?,?,?,?,?)");
-
-            Set<String> sprotSuffixes = new HashSet<String>();
-
-            for (Map<String, Object> curRec : t)
+            long start = System.currentTimeMillis();
+            _log.info("Reloading ProtSprotOrgMap");
+            int orgLineCount = 0;
+            PreparedStatement ps = null;
+            Connection conn = null;
+            CloseableIterator<Map<String, Object>> it = null;
+            DbScope scope = ProteinManager.getSchema().getScope();
+            try
             {
-                // SprotSuffix
-                String sprotSuffix = (String) curRec.get("column0");
-                if (sprotSuffix == null)
-                {
-                    throw new IllegalArgumentException("Sprot suffix was blank on line " + (orgLineCount + 1));
-                }
-                ps.setString(1, sprotSuffix);
+                Table.execute(ProteinManager.getSchema(), "DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap(), null);
 
-                if (!sprotSuffixes.add(sprotSuffix))
+                TabLoader t = new TabLoader(new InputStreamReader(getSProtOrgMap()), false);
+                conn = scope.getConnection();
+                ps = conn.prepareStatement(
+                        "INSERT INTO " + ProteinManager.getTableInfoSprotOrgMap() +
+                                " (SprotSuffix,SuperKingdomCode,TaxonId,FullName,Genus,Species,CommonName,Synonym) " +
+                                " VALUES (?,?,?,?,?,?,?,?)");
+
+                Set<String> sprotSuffixes = new HashSet<String>();
+
+                for (Map<String, Object> curRec : t)
                 {
-                    throw new IllegalArgumentException("Duplicate SprotSuffix: " + sprotSuffix);
+                    // SprotSuffix
+                    String sprotSuffix = (String) curRec.get("column0");
+                    if (sprotSuffix == null)
+                    {
+                        throw new IllegalArgumentException("Sprot suffix was blank on line " + (orgLineCount + 1));
+                    }
+                    ps.setString(1, sprotSuffix);
+
+                    if (!sprotSuffixes.add(sprotSuffix))
+                    {
+                        throw new IllegalArgumentException("Duplicate SprotSuffix: " + sprotSuffix);
+                    }
+
+                    // SuperKingdomCode
+                    ps.setString(2, (String)curRec.get("column1"));
+                    // TaxonId
+                    if (curRec.get("column2") == null)
+                    {
+                        ps.setNull(3, Types.INTEGER);
+                    }
+                    else
+                    {
+                        ps.setInt(3, ((Number)curRec.get("column2")).intValue());
+                    }
+                    String fullName = (String) curRec.get("column3");
+                    if (fullName == null)
+                    {
+                        throw new IllegalArgumentException("Full name was blank on line " + (orgLineCount + 1));
+                    }
+                    ps.setString(4, fullName);
+
+                    String genus = (String) curRec.get("column4");
+                    if (genus == null)
+                    {
+                        throw new IllegalArgumentException("Genus was blank on line " + (orgLineCount + 1));
+                    }
+                    ps.setString(5, genus);
+
+                    String species = (String) curRec.get("column5");
+                    if (species == null)
+                    {
+                        throw new IllegalArgumentException("Species was blank on line " + (orgLineCount + 1));
+                    }
+                    ps.setString(6, species);
+
+                    // CommonName
+                    ps.setNull(7, Types.VARCHAR);
+                    // Synonym
+                    ps.setNull(8, Types.VARCHAR);
+
+                    ps.addBatch();
+                    orgLineCount++;
+
+                    if (0 == orgLineCount % SPOM_BATCH_SIZE)
+                    {
+                        ps.executeBatch();
+                        ps.clearBatch();
+                        _log.debug("SprotOrgMap: " + orgLineCount + " lines loaded");
+                    }
                 }
 
-                // SuperKingdomCode
-                ps.setString(2, (String)curRec.get("column1"));
-                // TaxonId
-                if (curRec.get("column2") == null)
-                {
-                    ps.setNull(3, Types.INTEGER);
-                }
-                else
-                {
-                    ps.setInt(3, ((Number)curRec.get("column2")).intValue());
-                }
-                String fullName = (String) curRec.get("column3");
-                if (fullName == null)
-                {
-                    throw new IllegalArgumentException("Full name was blank on line " + (orgLineCount + 1));
-                }
-                ps.setString(4, fullName);
-
-                String genus = (String) curRec.get("column4");
-                if (genus == null)
-                {
-                    throw new IllegalArgumentException("Genus was blank on line " + (orgLineCount + 1));
-                }
-                ps.setString(5, genus);
-
-                String species = (String) curRec.get("column5");
-                if (species == null)
-                {
-                    throw new IllegalArgumentException("Species was blank on line " + (orgLineCount + 1));
-                }
-                ps.setString(6, species);
-
-                // CommonName
-                ps.setNull(7, Types.VARCHAR);
-                // Synonym
-                ps.setNull(8, Types.VARCHAR);
-
-                ps.addBatch();
-                orgLineCount++;
-
-                if (0 == orgLineCount % SPOM_BATCH_SIZE)
-                {
-                    ps.executeBatch();
-                    ps.clearBatch();
-                    _log.debug("SprotOrgMap: " + orgLineCount + " lines loaded");
-                }
+                ps.executeBatch();
+            }
+            catch (IOException e)
+            {
+                throw new UnexpectedException(e, "Problem loading ProtSprotOrgMap on line " + (orgLineCount + 1));
+            }
+            finally
+            {
+                if (ps != null) { try { ps.close(); } catch (SQLException e) {} }
+                try{ if (null != conn) scope.releaseConnection(conn); } catch (SQLException e) {}
+                if (it != null) { try { it.close(); } catch (IOException e) {} }
             }
 
-            ps.executeBatch();
-        }
-        catch (IOException e)
-        {
-            throw new UnexpectedException(e, "Problem loading ProtSprotOrgMap on line " + (orgLineCount + 1));
-        }
-        finally
-        {
-            if (ps != null) { try { ps.close(); } catch (SQLException e) {} }
-            try{ if (null != conn) scope.releaseConnection(conn); } catch (SQLException e) {}
-            if (it != null) { try { it.close(); } catch (IOException e) {} }
+            _log.info("Finished reloading ProtSprotOrgMap in " + (System.currentTimeMillis() - start)/1000.0 + " seconds");
         }
     }
 

@@ -186,7 +186,21 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);
         filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getSingleRun()));
-        filter.addCondition(peptideView._selectedNestingOption.getRowIdColumnName(), Integer.parseInt(proteinGroupingId));
+
+        Integer groupId = null;
+
+        try
+        {
+            groupId = Integer.parseInt(proteinGroupingId);
+        }
+        catch (NumberFormatException e)
+        {
+        }
+
+        if (null == groupId)
+            HttpView.throwNotFound("Invalid proteinGroupingId parameter");
+
+        filter.addCondition(peptideView._selectedNestingOption.getRowIdColumnName(), groupId.intValue());
         result.getRenderContext().setBaseFilter(filter);
 
         return result;
