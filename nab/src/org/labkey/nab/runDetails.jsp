@@ -111,7 +111,7 @@
     <tr>
         <td class="labkey-form-label">
             This run is shown with a <strong><%= assay.getRenderedCurveFitType().getLabel() %></strong> curve fit,
-           but is saved with a <strong><%= assay.getSavedCurveFitType().getLabel() %></strong> curve fit.
+           but is saved with a <strong><%= assay.getSavedCurveFitType() != null ? assay.getSavedCurveFitType().getLabel() : "unknown" %></strong> curve fit.
             To replace<br>the saved data with the displayed data,
             <%
             if (deleteAndInsertPerms)

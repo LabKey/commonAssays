@@ -673,6 +673,16 @@ public class PepXmlLoader extends MS2Loader
                         String proteinName = _parser.getAttributeValue(null, "protein");
                         if (proteinName != null)
                         {
+                            // Sequest splits FASTA header lines differently from us, on both '|' and whitespace.
+                            // Normalize to the same description by moving them to the lookup and use same rules as protein.java
+                            String proteinDescr = _parser.getAttributeValue(null, "protein_descr");
+                            if (proteinDescr != null && proteinDescr.startsWith("|"))
+                            {
+                                // Append the full header line again
+                                proteinDescr = proteinDescr.replaceAll("\t", " ");
+                                proteinName = proteinName + proteinDescr;
+                            }
+
                             Protein p = new Protein(proteinName, new byte[0]);
                             _protein = p.getLookup();
                         }

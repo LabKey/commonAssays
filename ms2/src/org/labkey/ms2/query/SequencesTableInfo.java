@@ -208,35 +208,37 @@ public class SequencesTableInfo extends FilteredTable
         return result;
     }
 
-    /*package*/ static String getIdentifierClause(List<String> params, String columnName, boolean exactMatch)
+    /**
+     * Build up a SQLFragment that filters identifiers based on a set of possible values. Passing in an empty
+     * list will result in no matches
+     */
+    /*package*/ static SQLFragment getIdentifierClause(List<String> params, String columnName, boolean exactMatch)
     {
-        StringBuilder sb = new StringBuilder();
+        SQLFragment sqlFragment = new SQLFragment();
         String separator = "";
-        sb.append("(");
+        sqlFragment.append("(");
         if (params.isEmpty())
         {
-            sb.append("1 = 2");
+            sqlFragment.append("1 = 2");
         }
         for (String param : params)
         {
-            sb.append(separator);
-            sb.append(columnName);
+            sqlFragment.append(separator);
+            sqlFragment.append(columnName);
             if (exactMatch)
             {
-                sb.append(" = '");
-                sb.append(param.replaceAll("'", "''"));
-                sb.append("'");
+                sqlFragment.append(" = ?");
+                sqlFragment.add(param);
             }
             else
             {
-                sb.append(" LIKE '");
-                sb.append(param.replaceAll("'", "''"));
-                sb.append("%'");
+                sqlFragment.append(" LIKE ?");
+                sqlFragment.add(param + "%");
             }
             separator = " OR ";
         }
-        sb.append(")");
-        return sb.toString();
+        sqlFragment.append(")");
+        return sqlFragment;
     }
 
     public void addContainerCondition(Container c, User u, boolean includeSubfolders)

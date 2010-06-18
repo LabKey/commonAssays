@@ -180,10 +180,24 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider>
             ExpRun reRun = getReRun();
             if (reRun != null)
             {
-                List<ExpData> inputs = reRun.getDataOutputs();
-                if (inputs.size() > 1)
-                    throw new IllegalStateException("NAb runs are expected to produce one output.");
-                File dataFile = inputs.get(0).getDataFile();
+                List<ExpData> outputs = reRun.getDataOutputs();
+                File dataFile = null;
+                for (ExpData data : outputs)
+                {
+                    File possibleFile = data.getDataFile();
+                    if (possibleFile != null && possibleFile.getName().toLowerCase().endsWith(".xls"))
+                    {
+                        if (dataFile != null)
+                        {
+                            throw new IllegalStateException("NAb runs are expected to produce a single file output. " +
+                                    dataFile.getPath() + " and " + possibleFile.getPath() + " are both associated with run " + reRun.getRowId());
+                        }
+                        dataFile = possibleFile;
+                    }
+                }
+                if (dataFile == null)
+                    throw new IllegalStateException("NAb runs are expected to produce a file output.");
+
                 if (dataFile.exists())
                 {
                     AssayFileWriter writer = new AssayFileWriter();

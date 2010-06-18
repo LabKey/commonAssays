@@ -316,6 +316,14 @@ public class NabManager
         for (int i = 0; i < sampleInfos.length; i++)
         {
             SampleInfo info = sampleInfos[i];
+
+            if (info.getMethod() == null || info.getInitialDilution() == null || info.getFactor() == null)
+            {
+                throw new IOException("Method (concentration or dilution), initial concentration/dilution, and concentration/dilution factor are required but were not found.  " +
+                        "This could be due to missing user input or a mis-configured plate template.  " +
+                        "Contact your administrator if you are not able to resolve this problem.");
+            }
+
             WellGroup group = specimenGroups.get(i);
             group.setProperty(SampleProperty.InitialDilution.name(), info.getInitialDilution());
             group.setProperty(SampleProperty.SampleId.name(), info.getSampleId());

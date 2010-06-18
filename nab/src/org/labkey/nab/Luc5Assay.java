@@ -237,7 +237,14 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
             if (entry.getValue().equals(material))
                 return entry.getKey();
         }
-        return null;
+        // Extra logging to help track down bug 10347:
+        StringBuilder exceptionMsg = new StringBuilder("Couldn't find material " + material.getLSID() + " on run " + this.getRunRowId());
+        exceptionMsg.append("\nAvailable materials are:");
+        for (Map.Entry<WellGroup, ExpMaterial> entry : _wellGroupMaterialMapping.entrySet())
+        {
+            exceptionMsg.append("\nWell group ").append(entry.getKey().getName()).append(": ").append(entry.getValue().getLSID());
+        }
+        throw new RuntimeException(exceptionMsg.toString());
     }
 
     public File getDataFile()

@@ -316,7 +316,9 @@ public abstract class CompareQuery extends SQLFragment
     // CONSIDER: Split into getCompareGrid (for Excel export) and getCompareGridForDisplay?
     public CompareDataRegion getCompareGrid(boolean export) throws SQLException
     {
-        int maxRows = export ? Table.ALL_ROWS : 1000;
+        // Limit Excel export to 65,535 rows. Should change this when we support .xlsx export, which doesn't have the
+        // same row count limits
+        int maxRows = export ? ExcelWriter.MAX_ROWS : 1000;
         CompareDataRegion rgn = new CompareDataRegion(createResultSet(export, maxRows));
         rgn.setMaxRows(maxRows);
         TableInfo ti = MS2Manager.getTableInfoCompare();

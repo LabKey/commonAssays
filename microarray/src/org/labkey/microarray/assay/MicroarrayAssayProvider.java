@@ -52,6 +52,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.*;
 
@@ -137,6 +138,20 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     public boolean canCopyToStudy()
     {
         return true;
+    }
+
+    @Override
+    protected FileFilter getRelatedOutputDataFileFilter(final File primaryFile, final String baseName)
+    {
+        return new FileFilter()
+        {
+            public boolean accept(File f)
+            {
+                // MicroArray, unlike the other assay providers, wants to associate myrun_FEATURES.tsv
+                // with myrun.tsv, so we don't include the "." when comparing other files against the base file name. 
+                return f.getName().startsWith(baseName) && !primaryFile.equals(f);
+            }
+        };
     }
 
     protected void addOutputDatas(AssayRunUploadContext context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
