@@ -22,7 +22,8 @@ import org.apache.log4j.Logger;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.action.*;
 import org.labkey.api.admin.AdminUrls;
-import org.labkey.api.collections.Cache;
+import org.labkey.api.cache.CacheManager;
+import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpRun;
@@ -1112,7 +1113,7 @@ public class MS2Controller extends SpringActionController
             bean.pieHelperObjName = "piechart-" + (new Random().nextInt(1000000000));
             bean.chartURL = new ActionURL(DoOnePeptideChartAction.class, getContainer()).addParameter("ctype", _goChartType.toString()).addParameter("helpername", bean.pieHelperObjName);
 
-            Cache.getShared().put(bean.pieHelperObjName, pjch, Cache.HOUR * 2);
+            PIE_CHART_CACHE.put(bean.pieHelperObjName, pjch, CacheManager.HOUR * 2);
 
             return new JspView<GoChartBean>("/org/labkey/ms2/peptideChart.jsp", bean);
         }
@@ -4676,6 +4677,8 @@ public class MS2Controller extends SpringActionController
     }
 
 
+    private static final StringKeyCache<PieJChartHelper> PIE_CHART_CACHE = CacheManager.getShared();
+
     @RequiresPermissionClass(ReadPermission.class)
     public class DoOnePeptideChartAction extends ExportAction
     {
@@ -4690,7 +4693,7 @@ public class MS2Controller extends SpringActionController
             response.setContentType("image/png");
             OutputStream out = response.getOutputStream();
 
-            PieJChartHelper pjch = (PieJChartHelper) Cache.getShared().get(helperName);
+            PieJChartHelper pjch = PIE_CHART_CACHE.get(helperName);
 
             if (null == pjch)
                 throw new NotFoundException("Pie chart was not found.");
@@ -4705,7 +4708,7 @@ public class MS2Controller extends SpringActionController
             }
             finally
             {
-                Cache.getShared().remove(helperName);
+                PIE_CHART_CACHE.remove(helperName);
             }
         }
     }

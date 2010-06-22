@@ -16,7 +16,7 @@
 
 package org.labkey.flow.analysis.model;
 
-import org.labkey.api.collections.TTLCacheMap;
+import org.labkey.api.cache.TTLCacheMap;
 
 import java.net.URI;
 import java.io.File;

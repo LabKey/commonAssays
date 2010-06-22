@@ -17,18 +17,23 @@
 package org.labkey.flow.query;
 
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.labkey.api.cache.CacheI;
+import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.query.*;
 import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.query.*;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.util.*;
+import org.labkey.api.util.GUID;
+import org.labkey.api.util.IdentifierString;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.collections.Cache;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.controllers.FlowParam;
@@ -40,7 +45,6 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.view.FlowQueryView;
-import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -1388,18 +1392,17 @@ public class FlowSchema extends UserSchema
      * need better notification of changes per container
      */
 
-    Map<String,TempTableToken> instanceCache = new HashMap<String,TempTableToken>();
-    static Cache staticCache = Cache.getShared();
+    private Map<String, TempTableToken> instanceCache = new HashMap<String,TempTableToken>();
+    private static final CacheI<String, TempTableToken> staticCache = CacheManager.getShared();
 
     String getFastFlowObjectTableName(Container c, int typeid)
     {
-        TempTableToken tok = null;
         boolean tx = FlowManager.get().getSchema().getScope().isTransactionActive();
         HttpServletRequest r = HttpView.currentRequest();
         String tkey = "" + FlowManager.get().flowObjectModificationCount.get();
         String attr = FlowSchema.class.getName() + "." + typeid + "." + tkey + ".flow.object$" + c.getId();
 
-        tok = instanceCache.get(attr);
+        TempTableToken tok = instanceCache.get(attr);
         if (tok != null)
             return tok.name;
         tok = r == null ? null : (TempTableToken)r.getAttribute(attr);
@@ -1409,14 +1412,14 @@ public class FlowSchema extends UserSchema
             return tok.name;
         }
         if (!tx)
-            tok = (TempTableToken)staticCache.get(attr);
+            tok = staticCache.get(attr);
         if (tok == null)
         {
             String name = createFastFlowObjectTableName(c, typeid);
             tok = new TempTableToken(name);
             TempTableTracker.track(FlowManager.get().getSchema(), name, tok);
             if (!tx)
-                staticCache.put(attr, tok, 30 * Cache.MINUTE);
+                staticCache.put(attr, tok, 30 * CacheManager.MINUTE);
         }
         instanceCache.put(attr, tok);
         if (null != r)
@@ -1492,7 +1495,7 @@ public class FlowSchema extends UserSchema
             return tok.name;
         }
         if (!tx)
-            tok = (TempTableToken)staticCache.get(attr);
+            tok = staticCache.get(attr);
         if (tok == null)
         {
             String name = createBackgroundJunctionTableName(c);
@@ -1501,7 +1504,7 @@ public class FlowSchema extends UserSchema
             tok = new TempTableToken(name);
             TempTableTracker.track(FlowManager.get().getSchema(), name, tok);
             if (!tx)
-                staticCache.put(attr, tok, 10 * Cache.MINUTE);
+                staticCache.put(attr, tok, 10 * CacheManager.MINUTE);
         }
         instanceCache.put(attr, tok);
         if (null != r)

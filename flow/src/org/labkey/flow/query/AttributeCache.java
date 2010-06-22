@@ -16,9 +16,9 @@
 
 package org.labkey.flow.query;
 
+import org.labkey.api.cache.LimitedCacheMap;
 import org.labkey.api.data.*;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.api.collections.LimitedCacheMap;
 import org.apache.log4j.Logger;
 
 import java.util.Map;

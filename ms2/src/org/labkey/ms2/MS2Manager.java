@@ -26,7 +26,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
-import org.labkey.api.collections.Cache;
+import org.labkey.api.cache.CacheManager;
+import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Filter;
@@ -48,11 +49,7 @@ import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
-import org.labkey.ms2.reader.PeptideProphetSummary;
-import org.labkey.ms2.reader.RandomAccessMzxmlIteratorFactory;
-import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
-import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
-import org.labkey.ms2.reader.SimpleScan;
+import org.labkey.ms2.reader.*;
 
 import javax.servlet.ServletException;
 import javax.xml.stream.XMLStreamException;
@@ -81,8 +78,11 @@ public class MS2Manager
     private static PeptideIndexCache _peptideIndexCache = new PeptideIndexCache();
 
     private static final String FRACTION_CACHE_PREFIX = "MS2Fraction/";
+    private static final StringKeyCache<MS2Fraction> FRACTION_CACHE = CacheManager.getShared();
+    private static final String PEPTIDE_PROPHET_SUMMARY_CACHE_PREFIX = "PeptideProphetSummary/";
+    private static final StringKeyCache<PeptideProphetSummary> PEPTIDE_PROPHET_SUMMARY_CACHE = CacheManager.getShared();
     private static final String RUN_CACHE_PREFIX = "MS2Run/";
-    private static final String PEPTIDEPROPHET_SUMMARY_CACHE_PREFIX = "PeptideProphetSummary/";
+    private static final StringKeyCache<MS2Run> RUN_CACHE = CacheManager.getShared();
 
     public static DbSchema getSchema()
     {
@@ -1181,19 +1181,19 @@ public class MS2Manager
 
     private static void _addRunToCache(String runId, MS2Run run)
     {
-        Cache.getShared().put(RUN_CACHE_PREFIX + runId, run);
+        RUN_CACHE.put(RUN_CACHE_PREFIX + runId, run);
     }
 
 
     private static MS2Run _getRunFromCache(String runId)
     {
-        return (MS2Run) Cache.getShared().get(RUN_CACHE_PREFIX + runId);
+        return RUN_CACHE.get(RUN_CACHE_PREFIX + runId);
     }
 
 
     private static void _removeRunFromCache(Integer runId)
     {
-        Cache.getShared().remove(RUN_CACHE_PREFIX + runId);
+        RUN_CACHE.remove(RUN_CACHE_PREFIX + runId);
     }
 
 
@@ -1206,13 +1206,13 @@ public class MS2Manager
 
     private static void _addPeptideProphetSummaryToCache(PeptideProphetSummary summary)
     {
-        Cache.getShared().put(PEPTIDEPROPHET_SUMMARY_CACHE_PREFIX + summary.getRun(), summary);
+        PEPTIDE_PROPHET_SUMMARY_CACHE.put(PEPTIDE_PROPHET_SUMMARY_CACHE_PREFIX + summary.getRun(), summary);
     }
 
 
     private static PeptideProphetSummary _getPeptideProphetSummaryFromCache(int runId)
     {
-        return (PeptideProphetSummary) Cache.getShared().get(PEPTIDEPROPHET_SUMMARY_CACHE_PREFIX + runId);
+        return PEPTIDE_PROPHET_SUMMARY_CACHE.get(PEPTIDE_PROPHET_SUMMARY_CACHE_PREFIX + runId);
     }
 
 
@@ -1355,19 +1355,19 @@ public class MS2Manager
 
     private static void _addFractionToCache(int fractionId, MS2Fraction fraction)
     {
-        Cache.getShared().put(FRACTION_CACHE_PREFIX + fractionId, fraction);
+        FRACTION_CACHE.put(FRACTION_CACHE_PREFIX + fractionId, fraction);
     }
 
 
     private static MS2Fraction _getFractionFromCache(int fractionId)
     {
-        return (MS2Fraction) Cache.getShared().get(FRACTION_CACHE_PREFIX + fractionId);
+        return FRACTION_CACHE.get(FRACTION_CACHE_PREFIX + fractionId);
     }
 
 
     private static void _removeFractionFromCache(int fractionId)
     {
-        Cache.getShared().remove(FRACTION_CACHE_PREFIX + fractionId);
+        FRACTION_CACHE.remove(FRACTION_CACHE_PREFIX + fractionId);
     }
 
 
@@ -1408,11 +1408,10 @@ public class MS2Manager
     private static class PeptideIndexCache extends DatabaseCache<long[]>
     {
         private static int CACHE_SIZE = 10;
-        private static long TIME_OUT = HOUR;
 
         public PeptideIndexCache()
         {
-            super(getSchema().getScope(), CACHE_SIZE, TIME_OUT, "Peptide Index");
+            super(getSchema().getScope(), CACHE_SIZE, CacheManager.HOUR, "Peptide Index");
         }
     }
 

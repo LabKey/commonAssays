@@ -18,7 +18,7 @@ package org.labkey.ms2.protein.organism;
 
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.Table;
-import org.labkey.api.collections.LimitedCacheMap;
+import org.labkey.api.cache.LimitedCacheMap;
 import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.protein.IdentifierType;
 import org.labkey.ms2.protein.ProteinManager;
