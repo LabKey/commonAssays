@@ -422,7 +422,10 @@ public class MacWorkspace extends FlowJoWorkspace
     {
         for (Element elKeyword : getElementsByTagName(el, "Keyword"))
         {
-            sample._keywords.put(elKeyword.getAttribute("name"), elKeyword.getAttribute("value"));
+            String name = StringUtils.trimToNull(elKeyword.getAttribute("name"));
+            if (null == name)
+                continue;
+            sample._keywords.put(name, elKeyword.getAttribute("value"));
         }
     }
 

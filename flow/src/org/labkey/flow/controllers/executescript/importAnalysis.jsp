@@ -333,7 +333,7 @@ Ext.onReady(function()
         ,showFileUpload:false
         ,allowChangeDirectory:true
         ,tbarItems:[]
-        ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".fcs"); }}
+        ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".fcs") || endsWith(data.name,".facs")|| endsWith(data.name, ".lmd"); }}
 });
 
     fileBrowser.on(BROWSER_EVENTS.doubleclick, function(record){

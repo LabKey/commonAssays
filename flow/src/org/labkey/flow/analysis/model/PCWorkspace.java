@@ -16,6 +16,7 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -42,7 +43,10 @@ public class PCWorkspace extends FlowJoWorkspace
         {
             for (Element elKeyword : getElementsByTagName(elKeywords, "Keyword"))
             {
-                sampleInfo._keywords.put(elKeyword.getAttribute("name"), elKeyword.getAttribute("value"));
+                String name = StringUtils.trimToNull(elKeyword.getAttribute("name"));
+                if (null == name)
+                    continue;
+                sampleInfo._keywords.put(name, elKeyword.getAttribute("value"));
             }
         }
         for (int i = 1; i < 100; i ++)

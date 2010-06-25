@@ -294,6 +294,11 @@ public class FCS extends FCSHeader
 
     static public FcsFileFilter FCSFILTER = new FcsFileFilter();
 
+    /**
+     * assume that any .FCS .FACS or .LMD file is an FCS file
+     * assume any other extension is NOT an FCS file
+     * if no extension (or numeric extension) inspect the file
+     */
     static class FcsFileFilter implements IOFileFilter
     {
         private FcsFileFilter() {}
@@ -304,7 +309,7 @@ public class FCS extends FCSHeader
             if (-1 != (i= file.getName().lastIndexOf(".")))
             {
                 String ext = file.getName().substring(i).toLowerCase();
-                if (ext.equals(".fcs") || ext.equals(".facs"))
+                if (ext.equals(".fcs") || ext.equals(".facs") || ext.equals(".lmd"))
 					return true;
 
 				// fall through if this look like a bogus numeric extension e.g. .001
@@ -326,7 +331,7 @@ public class FCS extends FCSHeader
             if (-1 != (i= name.indexOf(".")))
             {
                 String ext = name.substring(i).toLowerCase();
-                return ext.equals(".fcs") || ext.equals(".facs");
+                return ext.equals(".fcs") || ext.equals(".facs") || ext.equals(".lmd");
             }
             else
                 return isFCSFile(new File(dir,name));
