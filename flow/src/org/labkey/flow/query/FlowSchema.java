@@ -18,7 +18,7 @@ package org.labkey.flow.query;
 
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.cache.CacheI;
+import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -1393,7 +1393,7 @@ public class FlowSchema extends UserSchema
      */
 
     private Map<String, TempTableToken> instanceCache = new HashMap<String,TempTableToken>();
-    private static final CacheI<String, TempTableToken> staticCache = CacheManager.getShared();
+    private static final Cache<String, TempTableToken> staticCache = CacheManager.getShared();
 
     String getFastFlowObjectTableName(Container c, int typeid)
     {

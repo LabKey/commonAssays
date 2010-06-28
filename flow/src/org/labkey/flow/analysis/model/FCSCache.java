@@ -65,7 +65,7 @@ public class FCSCache
 
         private FCSHeaderCacheMap()
         {
-            super(CACHE_SIZE,  "FCS header cache");
+            super(CACHE_SIZE, "FCS header cache");
         }
 
         protected FCSHeader loadObject(URI uri) throws IOException
@@ -80,7 +80,7 @@ public class FCSCache
 
         private FCSCacheMap()
         {
-            super(CACHE_SIZE,  "FCS cache");
+            super(CACHE_SIZE, "FCS cache");
         }
 
         protected FCS loadObject(URI uri) throws IOException
