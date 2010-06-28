@@ -62,18 +62,7 @@ The analysis section describes which gates in the analysis, as well as the stati
         form.setSchemaName(FlowSchema.SCHEMANAME);
         form.setQueryName(FlowTableType.Runs.toString());
 
-        // HACK: work around for bug 6520 : can't set filter/sort on QuerySettings progamatically
-        QueryView view = new QueryView(form, null) {
-            protected void setupDataView(DataView ret)
-            {
-                super.setupDataView(ret);
-                SimpleFilter filter = (SimpleFilter)ret.getRenderContext().getBaseFilter();
-                if (filter == null)
-                    filter = new SimpleFilter();
-                filter.addCondition("AnalysisScript/RowId", script.getScriptId(), CompareType.EQUAL);
-                ret.getRenderContext().setBaseFilter(filter);
-            }
-        };
+        QueryView view = new QueryView(form, null);
         view.setShadeAlternatingRows(true);
         view.setShowPagination(false);
         view.setShowBorders(true);
@@ -83,24 +72,7 @@ The analysis section describes which gates in the analysis, as well as the stati
         view.getSettings().setAllowChooseQuery(false);
         view.getSettings().setAllowChooseView(false);
         view.getSettings().setAllowCustomizeView(false);
-
-//        RunsForm runsForm = new RunsForm();
-//        runsForm.setViewContext(getViewContext());
-//        runsForm.setScriptId(script.getScriptId());
-//        runsForm.setExperimentId(FlowObject.getIntParam(url, request, FlowParam.experimentId));
-//        FlowQueryView view = new FlowQueryView(runsForm);
-//        // HACK: work around for bug 6520 : can't set filter/sort on QuerySettings progamatically
-//        view.getViewContext().setActionURL(script.getRunsUrl(getViewContext().getActionURL()));
-//    view.setShadeAlternatingRows(true);
-//    view.setShowPagination(false);
-//    view.setShowBorders(true);
-//    view.setShowRecordSelectors(false);
-//    view.setShowExportButtons(false);
-//    view.getSettings().setMaxRows(0);
-//    view.getSettings().setAllowChooseQuery(false);
-//    view.getSettings().setAllowChooseView(false);
-//    view.getSettings().setAllowCustomizeView(false);
-
+        view.getSettings().getBaseFilter().addCondition("AnalysisScript/RowId", script.getScriptId(), CompareType.EQUAL);
         include(view, out);
     } else {
         %><labkey:link href='<%=url.clone().replaceParameter("showRuns", "1")%>' text="Show Runs"/><%

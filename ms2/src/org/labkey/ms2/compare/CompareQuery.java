@@ -254,7 +254,7 @@ public abstract class CompareQuery extends SQLFragment
         appendNewLine();
         // ORDER BY RunCount DESC, Pattern DESC, Protein ASC (plus apply any URL sort)
         Sort sort = new Sort("-RunCount,-Pattern," + getLabelColumn());
-        sort.applyURLSort(_currentUrl, MS2Manager.getDataRegionNameCompare());
+        sort.addURLSort(_currentUrl, MS2Manager.getDataRegionNameCompare());
         for (Sort.SortField sortField : sort.getSortList())
         {
             sortField.getColumnName();

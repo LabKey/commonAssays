@@ -1297,7 +1297,7 @@ public class FlowSchema extends UserSchema
 
     protected QuerySettings createQuerySettings(String dataRegionName)
     {
-        return new FlowQuerySettings(dataRegionName);    //To change body of overridden methods use File | Settings | File Templates.
+        return new FlowQuerySettings(dataRegionName);
     }
 
     public QueryDefinition getQueryDefForTable(String name)

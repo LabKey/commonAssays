@@ -1807,7 +1807,7 @@ public class MS2Controller extends SpringActionController
     private void exportSpectra(List<MS2Run> runs, ActionURL currentURL, SimpleFilter filter, String extension) throws IOException
     {
         Sort sort = ProteinManager.getPeptideBaseSort();
-        sort.applyURLSort(currentURL, MS2Manager.getDataRegionNamePeptides());
+        sort.addURLSort(currentURL, MS2Manager.getDataRegionNamePeptides());
         SpectrumIterator iter = new ResultSetSpectrumIterator(runs, filter, sort);
 
         SpectrumRenderer sr;

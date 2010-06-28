@@ -830,7 +830,7 @@ public class ProteinManager
         if (maxRows > 0)
         {
             Sort proteinSort = new Sort("Protein");
-            proteinSort.applyURLSort(currentUrl, MS2Manager.getDataRegionNameProteins());
+            proteinSort.addURLSort(currentUrl, MS2Manager.getDataRegionNameProteins());
             String proteinOrderBy = proteinSort.getOrderByClause(getSqlDialect());
             proteinOrderBy = proteinOrderBy.replaceAll("Description", "prot.Description");
             proteinSql.append(proteinOrderBy);
@@ -862,7 +862,7 @@ public class ProteinManager
 
         // Have to sort again to ensure correct order after the join
         Sort proteinSort = new Sort("Protein");
-        proteinSort.applyURLSort(currentUrl, MS2Manager.getDataRegionNameProteins());
+        proteinSort.addURLSort(currentUrl, MS2Manager.getDataRegionNameProteins());
         sql.append(proteinSort.getOrderByClause(getSqlDialect()));
 
         return sql;
@@ -879,7 +879,7 @@ public class ProteinManager
     public static String getCombinedOrderBy(ActionURL currentUrl, String orderByColumnName)
     {
         Sort peptideSort = ProteinManager.getPeptideBaseSort();
-        peptideSort.applyURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
+        peptideSort.addURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
         Sort proteinSort = new Sort(currentUrl, MS2Manager.getDataRegionNameProteins());
         Sort combinedSort = new Sort();
         combinedSort.insertSort(peptideSort);
@@ -895,7 +895,7 @@ public class ProteinManager
     public static String getProteinGroupCombinedOrderBy(ActionURL currentUrl, String orderByColumnName)
     {
         Sort peptideSort = ProteinManager.getPeptideBaseSort();
-        peptideSort.applyURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
+        peptideSort.addURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
         Sort proteinSort = new Sort(currentUrl, MS2Manager.getDataRegionNameProteinGroups());
         Sort combinedSort = new Sort();
         combinedSort.insertSort(peptideSort);
