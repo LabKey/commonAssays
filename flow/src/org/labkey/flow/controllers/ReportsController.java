@@ -186,16 +186,6 @@ public class ReportsController extends BaseFlowController<ReportsController.Acti
             return new FormView(UpdateAction.class, form, r.getConfigureForm());
         }
 
-        public ActionURL getSuccessURL(IdForm form)
-        {
-            return new ActionURL(ExecuteAction.class,getViewContext().getContainer());
-        }
-
-        public void validateCommand(IdForm form, Errors errors)
-        {
-
-        }
-
         public ApiResponse execute(IdForm form, BindException errors) throws Exception
         {
             if (null == form.getReportId())
