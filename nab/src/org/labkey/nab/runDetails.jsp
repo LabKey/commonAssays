@@ -25,12 +25,13 @@
 <%@ page import="org.labkey.api.study.DilutionCurve" %>
 <%@ page import="org.labkey.api.study.WellData" %>
 <%@ page import="org.labkey.api.util.Pair" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.nab.*" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.*" %>
-<%@ page import="org.labkey.api.view.*" %>
-<%@ page import="org.labkey.api.security.ACL" %>
-<%@ page import="org.labkey.api.study.assay.AbstractAssayProvider" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <labkey:errors/>

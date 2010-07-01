@@ -30,7 +30,6 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.security.ACL;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -47,8 +46,6 @@ import org.labkey.api.view.*;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletResponse;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -57,7 +54,6 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 
 /**
  * User: jeckels
@@ -425,11 +421,11 @@ public class NabAssayController extends SpringActionController
             links.add(new NavTree("View Runs", PageFlowUtil.addLastFilterParameter(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getViewContext().getContainer(), _protocol, _containerFilter))));
             links.add(new NavTree("View Results", PageFlowUtil.addLastFilterParameter(PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(getViewContext().getContainer(), _protocol, _containerFilter))));
 
-            if (getViewContext().hasPermission(ACL.PERM_INSERT))
+            if (getViewContext().hasPermission(InsertPermission.class))
             {
                 links.add(new NavTree(AbstractAssayProvider.IMPORT_DATA_LINK_NAME, _provider.getImportURL(getContainer(), _protocol)));
 
-                if (getViewContext().hasPermission(ACL.PERM_DELETE))
+                if (getViewContext().hasPermission(DeletePermission.class))
                 {
                     ActionURL reRunURL = new ActionURL(NabUploadWizardAction.class, getContainer());
                     reRunURL.addParameter("rowId", _protocol.getRowId());

@@ -444,7 +444,7 @@ public class MS2Controller extends SpringActionController
             RunSummaryBean bean = runSummary.getModelBean();
             bean.run = run;
             bean.modHref = modificationHref(run);
-            bean.writePermissions = getViewContext().hasPermission(ACL.PERM_UPDATE);
+            bean.writePermissions = getViewContext().hasPermission(UpdatePermission.class);
             bean.quantAlgorithm = MS2Manager.getQuantAnalysisAlgorithm(form.run);
             vBox.addView(runSummary);
 
@@ -2327,13 +2327,8 @@ public class MS2Controller extends SpringActionController
 
             GridView grid = getFastaAdminGrid();
             grid.setTitle("FASTA Files");
-
-            grid.getViewContext().setPermissions(ACL.PERM_READ);
-
             GridView annots = new GridView(getAnnotInsertsGrid(), errors);
             annots.setTitle("Protein Annotations Loaded");
-
-            annots.getViewContext().setPermissions(ACL.PERM_READ);
 
             return new VBox(blastView, grid, annots);
         }
@@ -3377,6 +3372,9 @@ public class MS2Controller extends SpringActionController
     }
 
 
+    // TODO: Remove this check?  This action is typically invoked from the root (by a site admin), but there are times
+    // when an admin would want to forward this URL to a non-admin.  IN clause below ensures non-admins see only runs
+    // for which they have permission.
     @RequiresPermissionClass(ReadPermission.class)
     public class ShowAllRunsAction extends SimpleViewAction
     {
@@ -3417,7 +3415,7 @@ public class MS2Controller extends SpringActionController
 
             GridView gridView = new GridView(rgn, errors);
             gridView.getRenderContext().setUseContainerFilter(false);
-            gridView.getViewContext().setPermissions(ACL.PERM_READ);
+            gridView.getViewContext().addContextualRole(ReadPermission.class);  // TODO: Not really necessary, since we've required container read above
             SimpleFilter runFilter = new SimpleFilter();
 
             if (!getUser().isAdministrator())
