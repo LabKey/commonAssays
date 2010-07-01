@@ -16,26 +16,25 @@
 
 package org.labkey.flow.webparts;
 
-import org.labkey.flow.view.FlowQueryView;
-import org.labkey.flow.query.FlowSchema;
-import org.labkey.flow.query.FlowQuerySettings;
-import org.labkey.flow.query.FlowTableType;
-import org.labkey.flow.controllers.editscript.ScriptController;
-import org.labkey.flow.controllers.executescript.AnalysisScriptController;
-import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.FlowProtocolStep;
-import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.query.AliasedColumn;
-import org.labkey.api.security.ACL;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.*;
+import org.labkey.flow.controllers.editscript.ScriptController;
+import org.labkey.flow.controllers.executescript.AnalysisScriptController;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.query.FlowQuerySettings;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
+import org.labkey.flow.view.FlowQueryView;
 import org.springframework.web.servlet.mvc.Controller;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.io.Writer;
 import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class AnalysisScriptsWebPart extends FlowQueryView
@@ -79,7 +78,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
 
     protected void populateButtonBar(DataView view, ButtonBar bar)
     {
-        if (!getViewContext().hasPermission(ACL.PERM_UPDATE))
+        if (!getViewContext().hasPermission(UpdatePermission.class))
             return;
         ActionButton btnNewScript = new ActionButton("Create New Analysis Script", PageFlowUtil.urlFor(ScriptController.Action.newProtocol, getContainer()));
         bar.add(btnNewScript);

@@ -19,7 +19,7 @@ package org.labkey.flow.webparts;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.security.ACL;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.*;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.data.FlowProtocolStep;
@@ -49,7 +49,7 @@ public class AnalysesWebPart extends FlowQueryView
 
     protected void populateButtonBar(DataView view, ButtonBar bar)
     {
-        if (!getViewContext().hasPermission(ACL.PERM_INSERT))
+        if (!getViewContext().hasPermission(InsertPermission.class))
             return;
         FlowScript[] scripts = FlowScript.getScripts(getContainer());
         FlowScript analysisScript = null;

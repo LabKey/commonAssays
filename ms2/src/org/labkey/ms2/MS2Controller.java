@@ -3372,9 +3372,6 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    // TODO: Remove this check?  This action is typically invoked from the root (by a site admin), but there are times
-    // when an admin would want to forward this URL to a non-admin.  IN clause below ensures non-admins see only runs
-    // for which they have permission.
     @RequiresPermissionClass(ReadPermission.class)
     public class ShowAllRunsAction extends SimpleViewAction
     {
@@ -3415,7 +3412,6 @@ public class MS2Controller extends SpringActionController
 
             GridView gridView = new GridView(rgn, errors);
             gridView.getRenderContext().setUseContainerFilter(false);
-            gridView.getViewContext().addContextualRole(ReadPermission.class);  // TODO: Not really necessary, since we've required container read above
             SimpleFilter runFilter = new SimpleFilter();
 
             if (!getUser().isAdministrator())

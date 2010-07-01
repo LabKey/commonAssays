@@ -16,7 +16,7 @@
  */
 %>
 <%@ page buffer="none" %>
-<%@ page import="org.labkey.api.security.ACL"%>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.flow.controllers.run.RunsForm" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
@@ -28,7 +28,7 @@
     RunsForm form = (RunsForm) HttpView.currentModel();
     FlowExperiment experiment = form.getExperiment();
 
-    boolean canEdit = getViewContext().hasPermission(ACL.PERM_UPDATE);
+    boolean canEdit = getViewContext().hasPermission(UpdatePermission.class);
 %>
 <% if (experiment != null && (canEdit || experiment.getExpObject().getComment() != null)) { %>
 <p>

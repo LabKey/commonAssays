@@ -17,8 +17,8 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Overview;
@@ -55,7 +55,7 @@ public class ScriptOverview extends Overview
         super(user, container);
         _script = script;
         _runCount = _script.getRunCount();
-        _canEdit = _runCount == 0 && hasPermission(ACL.PERM_UPDATE);
+        _canEdit = _runCount == 0 && hasPermission(UpdatePermission.class);
 
         ActionURL runsUrl = _script.getRunsUrl();
 
@@ -71,7 +71,7 @@ public class ScriptOverview extends Overview
         addStep(getCompensationCalculationStep());
         addStep(getAnalysisStep());
         addStep(getExecuteStep());
-        if (hasPermission(ACL.PERM_UPDATE) && (hasStep(FlowProtocolStep.analysis) || hasStep(FlowProtocolStep.calculateCompensation)))
+        if (hasPermission(UpdatePermission.class) && (hasStep(FlowProtocolStep.analysis) || hasStep(FlowProtocolStep.calculateCompensation)))
         {
             Action action = new Action("Make a copy of this analysis script", _script.urlFor(ScriptController.Action.copy));
             if (_runCount != 0)

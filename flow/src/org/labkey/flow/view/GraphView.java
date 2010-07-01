@@ -19,12 +19,9 @@ import org.labkey.api.collections.ResultSetRowMapFactory;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
-import org.labkey.api.security.ACL;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.ActionURL;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.GridView;
-import org.labkey.flow.controllers.well.WellController;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -44,7 +41,7 @@ public class GraphView extends GridView
 
     protected void _renderDataRegion(RenderContext ctx, Writer out) throws IOException, SQLException
     {
-        if (!ctx.getViewContext().hasPermission(ACL.PERM_READ))
+        if (!ctx.getViewContext().hasPermission(ReadPermission.class))
         {
             out.write("You do not have permission to read this data");
             return;

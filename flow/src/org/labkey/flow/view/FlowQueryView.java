@@ -23,8 +23,8 @@ import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.*;
@@ -71,7 +71,7 @@ public class FlowQueryView extends QueryView
 
     public boolean showRecordSelectors()
     {
-        if (!getViewContext().hasPermission(ACL.PERM_DELETE))
+        if (!getViewContext().hasPermission(DeletePermission.class))
             return false;
         TableInfo mainTable = null;
         try

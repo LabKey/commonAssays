@@ -17,12 +17,10 @@
 %>
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.labkey.api.data.SimpleFilter" %>
 <%@ page import="org.labkey.api.query.QueryForm" %>
 <%@ page import="org.labkey.api.query.QueryView" %>
-<%@ page import="org.labkey.api.security.ACL" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.DataView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ScriptOverview" %>
@@ -37,7 +35,7 @@
     ViewContext context = getViewContext();
     ActionURL url = context.getActionURL();
 
-    boolean canEdit = getViewContext().hasPermission(ACL.PERM_UPDATE);
+    boolean canEdit = getViewContext().hasPermission(UpdatePermission.class);
 %>
 Analysis scripts may have up to two sections in them.
 The compensation calculation describes how to locate the compensation controls in each run, and which gates need to be applied to them.

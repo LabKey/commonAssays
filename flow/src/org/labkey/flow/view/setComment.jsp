@@ -16,7 +16,7 @@
  */
 %>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls"%>
-<%@ page import="org.labkey.api.security.ACL"%>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.data.FlowObject" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -26,7 +26,7 @@
     setFlagUrl.addParameter("lsid", flowObj.getLSID());
     setFlagUrl.addParameter("redirect", false);
 
-    boolean canEdit = getViewContext().hasPermission(ACL.PERM_UPDATE);
+    boolean canEdit = getViewContext().hasPermission(UpdatePermission.class);
     String contextPath = getViewContext().getContextPath();
 %>
 <% if (canEdit) { %>

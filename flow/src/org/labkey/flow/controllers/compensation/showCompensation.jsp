@@ -17,17 +17,18 @@
 %>
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.jsp.JspLoader" %>
-<%@ page import="org.labkey.api.security.ACL" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="org.labkey.flow.analysis.model.CompensationMatrix" %>
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
 <%@ page import="org.labkey.flow.controllers.FlowParam" %>
-<%@ page import="org.labkey.flow.controllers.well.WellController" %>
+<%@ page import="org.labkey.flow.controllers.well.WellController"%>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
 <%@ page import="org.labkey.flow.data.FlowDataType"%>
-<%@ page import="org.labkey.flow.data.FlowRun"%>
+<%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.data.FlowWell" %>
 <%@ page import="org.labkey.flow.view.GraphView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
@@ -35,7 +36,6 @@
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%!
     String compImg(FlowWell well, String param, String graphSize) throws Exception
@@ -74,7 +74,7 @@
     format.setMaximumFractionDigits(3);
     format.setMinimumFractionDigits(3);
 
-    boolean canEdit = getViewContext().hasPermission(ACL.PERM_UPDATE);
+    boolean canEdit = getViewContext().hasPermission(UpdatePermission.class);
 %>
 
 <table>

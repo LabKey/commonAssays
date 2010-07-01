@@ -18,10 +18,9 @@
 <%@ page buffer="none" %>
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls"%>
-<%@ page import="org.labkey.api.security.ACL"%>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
 <%@ page import="org.labkey.api.view.ActionURL"%>
-<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.compensation.CompensationController" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
@@ -41,7 +40,7 @@
     FlowRun run = form.getRun();
     FlowCompensationMatrix comp = run.getCompensationMatrix();
 
-    boolean canEdit = getViewContext().hasPermission(ACL.PERM_UPDATE);
+    boolean canEdit = getViewContext().hasPermission(UpdatePermission.class);
 %>
 <% if (canEdit || run.getExpObject().getComment() != null) { %>
 <p>

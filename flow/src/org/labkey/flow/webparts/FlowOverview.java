@@ -22,19 +22,20 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.QueryAction;
-import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
+import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Overview;
-import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.FlowModule;
+import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
+import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowScript;
@@ -71,8 +72,8 @@ public class FlowOverview extends Overview
         PipeRoot pipeRoot = pipeService.findPipelineRoot(getContainer());
         _hasPipelineRoot = pipeRoot != null && pipeRoot.getUri() != null;
         _canSetPipelineRoot = isGlobalAdmin();
-        _canInsert = hasPermission(ACL.PERM_INSERT);
-        _canUpdate = hasPermission(ACL.PERM_UPDATE);
+        _canInsert = hasPermission(InsertPermission.class);
+        _canUpdate = hasPermission(UpdatePermission.class);
         _canCreateFolder = getContainer().getParent() != null && !getContainer().getParent().isRoot() &&
                 getContainer().getParent().hasPermission(getUser(), AdminPermission.class);
 
