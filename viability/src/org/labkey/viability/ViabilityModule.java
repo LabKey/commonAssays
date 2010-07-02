@@ -31,7 +31,6 @@ import java.util.*;
 public class ViabilityModule extends DefaultModule
 {
     public static final String NAME = "Viability";
-    private static final double VERSION = 10.10;
 
     public String getName()
     {
@@ -40,7 +39,7 @@ public class ViabilityModule extends DefaultModule
 
     public double getVersion()
     {
-        return VERSION;
+        return 10.19;
     }
 
     public boolean hasScripts()

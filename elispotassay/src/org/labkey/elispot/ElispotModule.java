@@ -33,7 +33,6 @@ import java.util.Collections;
 
 public class ElispotModule extends DefaultModule
 {
-    public static final String NAME = "ELISpotAssay";
     private static final Logger _log = Logger.getLogger(ElispotModule.class);
 
     public String getName()
@@ -43,7 +42,7 @@ public class ElispotModule extends DefaultModule
 
     public double getVersion()
     {
-        return 10.10;
+        return 10.19;
     }
 
     protected void init()

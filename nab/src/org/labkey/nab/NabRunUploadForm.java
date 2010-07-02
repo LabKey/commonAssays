@@ -16,16 +16,13 @@
 
 package org.labkey.nab;
 
+import org.labkey.api.exp.*;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayFileWriter;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.data.RuntimeSQLException;
@@ -185,7 +182,8 @@ public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider>
                 for (ExpData data : outputs)
                 {
                     File possibleFile = data.getDataFile();
-                    if (possibleFile != null && possibleFile.getName().toLowerCase().endsWith(".xls"))
+                    String dataLsid = data.getLSID();
+                    if (possibleFile != null && dataLsid != null && getProvider().getDataType().matches(new Lsid(dataLsid)))
                     {
                         if (dataFile != null)
                         {

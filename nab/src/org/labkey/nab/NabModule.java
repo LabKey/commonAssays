@@ -47,7 +47,7 @@ public class NabModule extends DefaultModule
 
     public double getVersion()
     {
-        return 10.10;
+        return 10.19;
     }
 
     protected void init()
