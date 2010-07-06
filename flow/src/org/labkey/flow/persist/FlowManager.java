@@ -48,13 +48,13 @@ public class FlowManager
     private static final String SCHEMA_NAME = "flow";
 
     // NOTE: don't use a LimitedCacheMap, blowing it out kills performance
-    private final Map<String, Integer> _attridCacheMap = new CacheMap<String, Integer>(1000, "flow attribute cache", true);
+    private final Map<String, Integer> _attridCacheMap = new CacheMap<String, Integer>(1000, "flow attribute cache", true, null);
 
     class AttrNameCacheMap extends CacheMap<Integer, String>
     {
         public AttrNameCacheMap(int initialSize)
         {
-            super(initialSize, "flow attribute name cache", true);
+            super(initialSize, "flow attribute name cache", true, null);
         }
         public Entry<Integer, String> findEntry(Object key)
         {
