@@ -78,11 +78,11 @@ public class MS2Manager
     private static PeptideIndexCache _peptideIndexCache = new PeptideIndexCache();
 
     private static final String FRACTION_CACHE_PREFIX = "MS2Fraction/";
-    private static final StringKeyCache<MS2Fraction> FRACTION_CACHE = CacheManager.getShared();
+    private static final StringKeyCache<MS2Fraction> FRACTION_CACHE = CacheManager.getSharedCache();
     private static final String PEPTIDE_PROPHET_SUMMARY_CACHE_PREFIX = "PeptideProphetSummary/";
-    private static final StringKeyCache<PeptideProphetSummary> PEPTIDE_PROPHET_SUMMARY_CACHE = CacheManager.getShared();
+    private static final StringKeyCache<PeptideProphetSummary> PEPTIDE_PROPHET_SUMMARY_CACHE = CacheManager.getSharedCache();
     private static final String RUN_CACHE_PREFIX = "MS2Run/";
-    private static final StringKeyCache<MS2Run> RUN_CACHE = CacheManager.getShared();
+    private static final StringKeyCache<MS2Run> RUN_CACHE = CacheManager.getSharedCache();
 
     public static DbSchema getSchema()
     {

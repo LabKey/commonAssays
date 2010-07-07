@@ -19,6 +19,7 @@ package org.labkey.flow.persist;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.labkey.api.cache.CacheManager;
 import org.labkey.api.cache.CacheMap;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Handler;
@@ -48,21 +49,8 @@ public class FlowManager
     private static final String SCHEMA_NAME = "flow";
 
     // NOTE: don't use a LimitedCacheMap, blowing it out kills performance
-    private final Map<String, Integer> _attridCacheMap = new CacheMap<String, Integer>(1000, "flow attribute cache", true, null);
-
-    class AttrNameCacheMap extends CacheMap<Integer, String>
-    {
-        public AttrNameCacheMap(int initialSize)
-        {
-            super(initialSize, "flow attribute name cache", true, null);
-        }
-        public Entry<Integer, String> findEntry(Object key)
-        {
-            return super.findEntry(key);
-        }
-    }
-
-    private final AttrNameCacheMap _attrNameCacheMap = new AttrNameCacheMap(1000);
+    private final Map<String, Integer> _attridCacheMap = CacheManager.getCacheMap(1000, "flow attribute cache");
+    private final CacheMap<Integer, String> _attrNameCacheMap = CacheManager.getCacheMap(1000, "flow attribute name cache");
 
     static public FlowManager get()
     {

@@ -16,11 +16,12 @@
 
 package org.labkey.flow.analysis.model;
 
-import org.labkey.api.cache.TTLCacheMap;
+import org.labkey.api.cache.CacheManager;
+import org.labkey.api.cache.CacheMap;
 
-import java.net.URI;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 
 public class FCSCache
 {
@@ -30,11 +31,11 @@ public class FCSCache
     abstract static class AbstractCacheMap<K, V>
     {
         private Object READING_LOCK = new Object();
-        TTLCacheMap<K, V> _map;
+        CacheMap<K, V> _map;
 
-        public AbstractCacheMap(int size, String debugName)
+        public AbstractCacheMap(int limit, String debugName)
         {
-            _map = new TTLCacheMap<K, V>(size, debugName);
+            _map = CacheManager.getTTLCacheMap(limit, debugName);
         }
 
         abstract protected V loadObject(K key) throws IOException;

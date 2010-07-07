@@ -16,13 +16,13 @@
 
 package org.labkey.ms2.protein.organism;
 
+import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.Table;
-import org.labkey.api.cache.LimitedCacheMap;
-import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.protein.IdentifierType;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinPlus;
+import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 
 import java.sql.SQLException;
@@ -49,8 +49,8 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
     /* for parsing header lines of FASTA files */
     public static final String SEPARATOR_PATTERN = "\\|";
     public static final String SEPARATOR_CHAR = "|";
-    private Map<String, String> _identCache = new LimitedCacheMap<String, String>(1000, 1000, "GuessOrgBySharedIdents ident cache");
-    private Map<String, String> _sprotCache = new LimitedCacheMap<String, String>(1000, 1000, "GuessOrgBySharedIdents sprot cache");
+    private Map<String, String> _identCache = CacheManager.getLimitedCacheMap(1000, 1000, "GuessOrgBySharedIdents ident cache");
+    private Map<String, String> _sprotCache = CacheManager.getLimitedCacheMap(1000, 1000, "GuessOrgBySharedIdents sprot cache");
     private static final String CACHED_MISS_VALUE = "GuessOrgBySharedIdents.CACHED_MISS_VALUE";
 
     private enum SPROTload

@@ -1393,7 +1393,7 @@ public class FlowSchema extends UserSchema
      */
 
     private Map<String, TempTableToken> instanceCache = new HashMap<String,TempTableToken>();
-    private static final Cache<String, TempTableToken> staticCache = CacheManager.getShared();
+    private static final Cache<String, TempTableToken> staticCache = CacheManager.getSharedCache();
 
     String getFastFlowObjectTableName(Container c, int typeid)
     {

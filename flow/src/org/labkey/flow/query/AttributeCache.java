@@ -16,24 +16,24 @@
 
 package org.labkey.flow.query;
 
-import org.labkey.api.cache.LimitedCacheMap;
-import org.labkey.api.data.*;
-import org.labkey.flow.persist.FlowManager;
 import org.apache.log4j.Logger;
-
-import java.util.Map;
-import java.util.Collections;
-import java.util.TreeMap;
-import java.util.Arrays;
-import java.sql.SQLException;
-
-import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.api.cache.CacheManager;
+import org.labkey.api.cache.CacheMap;
+import org.labkey.api.data.*;
 import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.persist.FlowManager;
+
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 
 abstract public class AttributeCache<T>
 {
     private static final Logger _log = Logger.getLogger(AttributeCache.class);
-    private static final LimitedCacheMap<CacheKey, Map.Entry<Integer, String>[]> _cache = new LimitedCacheMap<CacheKey, Map.Entry<Integer, String>[]>(200, 200, "Flow AttributeCache");
+    private static final CacheMap<CacheKey, Map.Entry<Integer, String>[]> _cache = CacheManager.getLimitedCacheMap(200, 200, "Flow AttributeCache");
     private static long _transactionCount;
     private static Container _lastContainerInvalidated;
     private static class CacheKey

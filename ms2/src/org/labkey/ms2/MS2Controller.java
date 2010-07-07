@@ -4671,7 +4671,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private static final StringKeyCache<PieJChartHelper> PIE_CHART_CACHE = CacheManager.getShared();
+    private static final StringKeyCache<PieJChartHelper> PIE_CHART_CACHE = CacheManager.getSharedCache();
 
     @RequiresPermissionClass(ReadPermission.class)
     public class DoOnePeptideChartAction extends ExportAction
