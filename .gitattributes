@@ -189,7 +189,7 @@ flow/lib/xercesImpl.jar -text
 flow/module.properties -text
 flow/resources/queries/Samples/FlowSamples.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-0.00-8.10.sql -text
-flow/resources/schemas/dbscripts/postgresql/flow-10.10-10.19.sql -text
+flow/resources/schemas/dbscripts/postgresql/flow-10.10-10.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-2.30-8.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-8.30-9.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-1.50-1.60.sql -text
@@ -202,7 +202,7 @@ flow/resources/schemas/dbscripts/postgresql/obsolete/flow-2.30-2.32.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-2.31-2.32.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-8.30-8.31.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-0.00-8.10.sql -text
-flow/resources/schemas/dbscripts/sqlserver/flow-10.10-10.19.sql -text
+flow/resources/schemas/dbscripts/sqlserver/flow-10.10-10.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-2.30-8.10.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-8.30-9.10.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-1.50-1.60.sql -text
@@ -891,6 +891,7 @@ ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-8.34-8.35.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-drop.sql -text
 ms2/resources/schemas/ms2.xml -text
 ms2/resources/schemas/prot.xml -text
+ms2/resources/views/MS2[!!-~]Runs[!!-~]Browser.webpart.xml -text
 ms2/resources/views/runsOverview.html -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
 ms2/src/org/labkey/ms2/CompareServiceImpl.java -text

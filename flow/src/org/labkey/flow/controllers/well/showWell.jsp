@@ -54,6 +54,7 @@
 <script type="text/javascript">
 LABKEY.requiresClientAPI(true);
 LABKEY.requiresScript("TreeGrid.js");
+Ext.QuickTips.init();
 </script>
 <%
     ViewContext context = HttpView.currentContext();

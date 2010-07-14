@@ -173,6 +173,7 @@ public class NabAssayController extends SpringActionController
             }
             filter.addCondition("Name", _assay.getDataFile().getName());
             filter.addCondition("RowId", _run.getRowId(), CompareType.NEQ);
+            view.getRenderContext().setBaseFilter(filter);
             return view;
         }
 

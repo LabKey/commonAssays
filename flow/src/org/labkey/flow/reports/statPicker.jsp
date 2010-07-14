@@ -51,6 +51,7 @@
     jsonStats.append("]");
 %>
 <script type="text/javascript">
+Ext.QuickTips.init();
 
 function statisticsTree(statistics)
 {
