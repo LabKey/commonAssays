@@ -347,12 +347,6 @@ public class MS2Controller extends SpringActionController
         deleteRuns.setDisplayPermission(DeletePermission.class);
         bb.add(deleteRuns);
 
-        ActionButton wrapRuns = new ActionButton("wrapRun.view", "Wrap");
-        wrapRuns.setRequiresSelection(true);
-        wrapRuns.setActionType(ActionButton.Action.POST);
-        wrapRuns.setDisplayPermission(InsertPermission.class);
-        bb.add(wrapRuns);
-
         return bb;
     }
 
@@ -5919,33 +5913,6 @@ public class MS2Controller extends SpringActionController
         public void setQuantitationCharge(int quantitationCharge)
         {
             this.quantitationCharge = quantitationCharge;
-        }
-    }
-
-    @RequiresPermissionClass(InsertPermission.class)
-    public class WrapRunAction extends FormHandlerAction<RunForm>
-    {
-        private ExpRun _expRun;
-        public void validateCommand(RunForm target, Errors errors)
-        {
-
-        }
-
-        public boolean handlePost(RunForm runForm, BindException errors) throws Exception
-        {
-            Set<String> ids = DataRegionSelection.getSelected(getViewContext(), true);
-            for (String id : ids)
-            {
-                int runId = Integer.parseInt(id);
-                MS2Run run = MS2Manager.getRun(runId);
-                _expRun = MS2Manager.ensureWrapped(run, getUser());
-            }
-            return true;
-        }
-
-        public ActionURL getSuccessURL(RunForm runForm)
-        {
-            return PageFlowUtil.urlProvider(ExperimentUrls.class).getRunGraphURL(_expRun);
         }
     }
 
