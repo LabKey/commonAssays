@@ -56,6 +56,8 @@ import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.query.MS2Schema;
+import org.labkey.ms2.reader.MzMLDocumentParser;
+import org.labkey.ms2.reader.MzXMLDocumentParser;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
@@ -267,6 +269,10 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         AssayService.get().registerAssayProvider(new MassSpecMetadataAssayProvider());
 
         initWebApplicationContext();
+
+        ServiceRegistry.get(SearchService.class).addDocumentParser(new MzXMLDocumentParser());
+        ServiceRegistry.get(SearchService.class).addDocumentParser(new MzMLDocumentParser());
+
     }
 
     @Override

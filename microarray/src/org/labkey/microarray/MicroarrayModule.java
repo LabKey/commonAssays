@@ -25,6 +25,8 @@ import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.search.SearchService;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.PageFlowUtil;
@@ -137,6 +139,7 @@ public class MicroarrayModule extends DefaultModule
                 return Collections.emptySet();
             }
         });
+        ServiceRegistry.get(SearchService.class).addDocumentParser(new MageMLDocumentParser());
     }
 
     public Set<String> getSchemaNames()
