@@ -34,7 +34,7 @@ CREATE TABLE ms1.Files
     Type TINYINT NOT NULL,
     MzXmlUrl NVARCHAR(800) NULL,
     Imported BIT NOT NULL DEFAULT 0,
-	Deleted bit NOT NULL DEFAULT 0,
+    Deleted bit NOT NULL DEFAULT 0,
 
     CONSTRAINT PK_Files PRIMARY KEY NONCLUSTERED (FileId)
 )
@@ -151,7 +151,7 @@ GO
 CREATE TABLE ms1.Features
 (
     FeatureId INT IDENTITY NOT NULL,
-	FileId INT,
+    FileId INT,
     Scan INT NULL,
     Time FLOAT NULL,
     MZ FLOAT NULL,

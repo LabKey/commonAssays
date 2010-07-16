@@ -29,8 +29,8 @@ WHERE column_name ='MS2Charge'
 AND table_name = 'Features'
 AND table_schema = 'ms1')
 BEGIN
-	ALTER TABLE ms1.Features
-	ADD MS2Charge TINYINT NULL
+    ALTER TABLE ms1.Features
+    ADD MS2Charge TINYINT NULL
 END 
 GO
 

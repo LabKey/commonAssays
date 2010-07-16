@@ -20,7 +20,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.cache.CacheMap;
+import org.labkey.api.cache.implementation.CacheMap;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExpData;

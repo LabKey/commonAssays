@@ -18,7 +18,7 @@ package org.labkey.flow.query;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.cache.CacheMap;
+import org.labkey.api.cache.implementation.CacheMap;
 import org.labkey.api.data.*;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;

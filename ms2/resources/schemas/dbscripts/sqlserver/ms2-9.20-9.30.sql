@@ -38,7 +38,7 @@ left join sysobjects AS T
 where isnull(objectproperty(O.id,'IsMSShipped'),1) = 0
     and O.name not like '%dtproper%'
     and O.name not like 'dt[_]%'
-	and T.name = 'peptidesdata'
+    and T.name = 'peptidesdata'
     and O.name like 'DF__MS2Peptid%__Score%'
 -- delete if found
 if not @name is null
@@ -57,7 +57,7 @@ left join sysobjects AS T
 where isnull(objectproperty(O.id,'IsMSShipped'),1) = 0
     and O.name not like '%dtproper%'
     and O.name not like 'dt[_]%'
-	and T.name = 'peptidesdata'
+    and T.name = 'peptidesdata'
     and O.name like 'DF__MS2Peptid%__Score%'
 -- delete if found
 if not @name is null
@@ -76,7 +76,7 @@ left join sysobjects AS T
 where isnull(objectproperty(O.id,'IsMSShipped'),1) = 0
     and O.name not like '%dtproper%'
     and O.name not like 'dt[_]%'
-	and T.name = 'peptidesdata'
+    and T.name = 'peptidesdata'
     and O.name like 'DF__MS2Peptid%__Score%'
 -- delete if found
 if not @name is null

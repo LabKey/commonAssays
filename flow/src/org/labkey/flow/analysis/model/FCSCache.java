@@ -17,7 +17,7 @@
 package org.labkey.flow.analysis.model;
 
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.cache.CacheMap;
+import org.labkey.api.cache.implementation.CacheMap;
 
 import java.io.File;
 import java.io.IOException;

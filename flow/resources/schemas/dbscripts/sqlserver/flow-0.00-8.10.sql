@@ -24,15 +24,15 @@ CREATE TABLE flow.Attribute(
 
 CREATE TABLE flow.Object(
     RowId int IDENTITY(1,1) NOT NULL,
-	Container entityid NOT NULL,
+    Container entityid NOT NULL,
     DataId INT,
     TypeId INT NOT NULL,
     Uri VARCHAR(400),
-	compid int,
-	scriptid int,
-	fcsid int,
+    compid int,
+    scriptid int,
+    fcsid int,
     CONSTRAINT PK_Object PRIMARY KEY (RowId),
-	CONSTRAINT UQ_Object UNIQUE(DataId),
+    CONSTRAINT UQ_Object UNIQUE(DataId),
     CONSTRAINT FK_Object_Data FOREIGN KEY(DataId) REFERENCES exp.Data(RowId)
 );
 CREATE INDEX flow_object_typeid ON flow.object (container, typeid)

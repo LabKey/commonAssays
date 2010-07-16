@@ -38,10 +38,10 @@ ALTER TABLE luminex.datarow ALTER COLUMN Container SET NOT NULL;
 ALTER TABLE luminex.datarow ALTER COLUMN ProtocolID SET NOT NULL;
 
 ALTER TABLE luminex.datarow
-	ADD CONSTRAINT FK_DataRow_Container FOREIGN KEY (Container) REFERENCES core.Containers (EntityID);
+    ADD CONSTRAINT FK_DataRow_Container FOREIGN KEY (Container) REFERENCES core.Containers (EntityID);
 
 ALTER TABLE luminex.datarow
-	ADD CONSTRAINT FK_DataRow_ProtocolID FOREIGN KEY (ProtocolID) REFERENCES exp.Protocol (RowID);
+    ADD CONSTRAINT FK_DataRow_ProtocolID FOREIGN KEY (ProtocolID) REFERENCES exp.Protocol (RowID);
 
 CREATE INDEX IDX_DataRow_Container_ProtocolID ON luminex.datarow(Container, ProtocolID);
 

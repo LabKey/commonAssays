@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 CREATE VIEW ms2.Spectra AS
-	SELECT f.Run AS Run, sd.*
-	FROM ms2.SpectraData sd INNER JOIN
-	ms2.Fractions f ON sd.Fraction = f.Fraction
+    SELECT f.Run AS Run, sd.*
+    FROM ms2.SpectraData sd INNER JOIN
+    ms2.Fractions f ON sd.Fraction = f.Fraction
 GO
 
 CREATE VIEW prot.FastaAdmin AS
@@ -45,9 +45,9 @@ CREATE VIEW ms2.SimplePeptides AS SELECT
     Score1 AS Hyper, Score2 AS Next, Score3 AS B, Score4 AS Y, Score5 AS Expect, Score1 AS Ion, Score2 AS "Identity", Score3 AS Homology,
     IonPercent, pep.Mass, DeltaMass, (pep.Mass + DeltaMass) AS PrecursorMass, ABS(DeltaMass - ROUND(DeltaMass, 0)) AS FractionalDeltaMass,
     CASE WHEN pep.Mass = 0 THEN 0 ELSE ABS(1000000 * ABS(DeltaMass - ROUND(DeltaMass, 0)) / (pep.Mass + (Charge - 1) * 1.007276)) END AS FractionalDeltaMassPPM,
-	CASE WHEN pep.Mass = 0 THEN 0 ELSE ABS(1000000 * DeltaMass / (pep.Mass + (Charge - 1) * 1.007276)) END AS DeltaMassPPM,
+    CASE WHEN pep.Mass = 0 THEN 0 ELSE ABS(1000000 * DeltaMass / (pep.Mass + (Charge - 1) * 1.007276)) END AS DeltaMassPPM,
     CASE WHEN Charge = 0 THEN 0 ELSE (pep.Mass + DeltaMass + (Charge - 1) * 1.007276) / Charge END AS MZ, PeptideProphet, PeptideProphetErrorRate, Peptide, ProteinHits,
-    Protein, PrevAA, TrimmedPeptide, NextAA, LTRIM(RTRIM(PrevAA + TrimmedPeptide + NextAA)) AS StrippedPeptide,	SequencePosition, pep.SeqId, pep.RowId,
+    Protein, PrevAA, TrimmedPeptide, NextAA, LTRIM(RTRIM(PrevAA + TrimmedPeptide + NextAA)) AS StrippedPeptide, SequencePosition, pep.SeqId, pep.RowId,
     quant.DecimalRatio, quant.Heavy2LightRatio, quant.HeavyArea, quant.HeavyFirstScan, quant.HeavyLastScan, quant.HeavyMass, quant.LightArea, quant.LightFirstScan, quant.LightLastScan, quant.LightMass, quant.Ratio,
     proph.ProphetFVal, proph.ProphetDeltaMass, proph.ProphetNumTrypticTerm, proph.ProphetNumMissedCleav
     FROM ms2.PeptidesData pep
