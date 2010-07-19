@@ -30,7 +30,7 @@ import java.beans.PropertyChangeEvent;
  */
 public class NabContainerListener implements ContainerListener
 {
-    public void containerCreated(Container c)
+    public void containerCreated(Container c, User user)
     {
     }
 

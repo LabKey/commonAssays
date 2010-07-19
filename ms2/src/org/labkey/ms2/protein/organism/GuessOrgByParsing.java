@@ -168,4 +168,8 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
             return null;
         }
     }
+
+    public void close()
+    {
+    }
 }

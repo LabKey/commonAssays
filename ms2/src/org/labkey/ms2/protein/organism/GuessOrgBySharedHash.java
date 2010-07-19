@@ -62,4 +62,8 @@ public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
         stopTimer();
         return retVal;
     }
+
+    public void close()
+    {
+    }
 }

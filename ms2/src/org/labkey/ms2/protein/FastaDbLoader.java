@@ -155,6 +155,10 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                 {
                     if (null != conn)
                         try { ProteinManager.getSchema().getScope().releaseConnection(conn); } catch (SQLException e) {}
+
+                    // Release all resources used by the guessing strategies (e.g., caches)
+                    _parsingStrategy.close();
+                    _sharedIdentsStrategy.close();
                 }
             }
 

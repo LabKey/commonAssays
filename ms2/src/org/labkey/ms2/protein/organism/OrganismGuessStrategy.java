@@ -28,4 +28,5 @@ import java.sql.SQLException;
 public interface OrganismGuessStrategy
 {
     public String guess(ProteinPlus p) throws SQLException;
+    public void close();
 }

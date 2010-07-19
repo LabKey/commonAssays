@@ -1419,7 +1419,7 @@ public class MS2Manager
     public static long getRunCount(Container c)
             throws SQLException
     {
-        return Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoRuns() + " WHERE Deleted= ? AND Container = ?", new Object[]{Boolean.FALSE, c.getId()}, Long.class);
+        return Table.executeSingleton(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoRuns() + " WHERE Deleted = ? AND Container = ?", new Object[]{Boolean.FALSE, c.getId()}, Long.class);
     }
 
     public static final String NEGATIVE_HIT_PREFIX = "rev_";

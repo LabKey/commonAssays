@@ -300,7 +300,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     //
     // ContainerListener
     //
-    public void containerCreated(Container c)
+    public void containerCreated(Container c, User user)
     {
     }
 

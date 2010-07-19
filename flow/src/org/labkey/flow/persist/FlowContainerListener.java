@@ -22,13 +22,12 @@ import org.labkey.api.security.User;
 import org.apache.log4j.Logger;
 
 import java.beans.PropertyChangeEvent;
-import java.sql.SQLException;
 
 public class FlowContainerListener implements ContainerManager.ContainerListener
 {
     static final private Logger _log = Logger.getLogger(FlowContainerListener.class);
 
-    public void containerCreated(Container c)
+    public void containerCreated(Container c, User user)
     {
     }
 

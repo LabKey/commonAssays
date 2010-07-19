@@ -47,7 +47,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
 
     private enum SPROTload
     {
-        not_tried_yet,tried_and_failed,tried_and_succeeded
+        not_tried_yet, tried_and_failed, tried_and_succeeded
     }
 
     SPROTload sprotLoadStatus = SPROTload.not_tried_yet;
@@ -106,5 +106,10 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
         );
         _sprotCache.put(pName, retVal != null ? retVal : CACHED_MISS_VALUE);
         return retVal;
+    }
+
+    public void close()
+    {
+        _sprotCache.close();
     }
 }
