@@ -16,8 +16,8 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.cache.implementation.CacheMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,46 +25,46 @@ import java.net.URI;
 
 public class FCSCache
 {
-    FCSHeaderCacheMap _fcsHeaderCache = new FCSHeaderCacheMap();
+    FCSHeaderCache _fcsHeaderCache = new FCSHeaderCache();
     FCSCacheMap _fcsCache = new FCSCacheMap();
 
-    abstract static class AbstractCacheMap<K, V>
+    abstract static class AbstractCache<K, V>
     {
-        private Object READING_LOCK = new Object();
-        CacheMap<K, V> _map;
+        private final Object READING_LOCK = new Object();
+        private final Cache<K, V> _cache;
 
-        public AbstractCacheMap(int limit, String debugName)
+        public AbstractCache(int limit, String debugName)
         {
-            _map = CacheManager.getTTLCacheMap(limit, debugName);
+            _cache = CacheManager.getCache(limit, CacheManager.DAY, debugName);
         }
 
         abstract protected V loadObject(K key) throws IOException;
 
         public V get(K key) throws IOException
         {
-            V ret = _map.get(key);
+            V ret = _cache.get(key);
             if (ret != null)
                 return ret;
 
             synchronized(READING_LOCK)
             {
-                ret = _map.get(key);
+                ret = _cache.get(key);
                 if (ret != null)
                     return ret;
                 ret = loadObject(key);
                 if (ret != null)
-                    _map.put(key, ret);
+                    _cache.put(key, ret);
             }
 
             return ret;
         }
     }
 
-    private static class FCSHeaderCacheMap extends AbstractCacheMap<URI, FCSHeader>
+    private static class FCSHeaderCache extends AbstractCache<URI, FCSHeader>
     {
         private static final int CACHE_SIZE = 100;
 
-        private FCSHeaderCacheMap()
+        private FCSHeaderCache()
         {
             super(CACHE_SIZE, "FCS header cache");
         }
@@ -75,7 +75,7 @@ public class FCSCache
         }
     }
 
-    private static class FCSCacheMap extends AbstractCacheMap<URI, FCS>
+    private static class FCSCacheMap extends AbstractCache<URI, FCS>
     {
         private static final int CACHE_SIZE = 20;
 

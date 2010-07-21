@@ -19,8 +19,6 @@ package org.labkey.flow.persist;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.cache.CacheManager;
-import org.labkey.api.cache.implementation.CacheMap;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExpData;
@@ -44,13 +42,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class FlowManager
 {
-    static private FlowManager instance = new FlowManager();
-    static private final Logger _log = Logger.getLogger(FlowManager.class);
+    private static final FlowManager instance = new FlowManager();
+    private static final Logger _log = Logger.getLogger(FlowManager.class);
     private static final String SCHEMA_NAME = "flow";
 
-    // NOTE: don't use a LimitedCacheMap, blowing it out kills performance
-    private final Map<String, Integer> _attridCacheMap = CacheManager.getCacheMap(1000, "flow attribute cache");
-    private final CacheMap<Integer, String> _attrNameCacheMap = CacheManager.getCacheMap(1000, "flow attribute name cache");
+    private final HashMap<String, Integer> _attridCacheMap = new HashMap<String, Integer>(1000);
+    private final HashMap<Integer, String> _attrNameCacheMap = new HashMap<Integer, String>(1000);
 
     static public FlowManager get()
     {
@@ -65,11 +62,6 @@ public class FlowManager
     public DbSchema getSchema()
     {
         return DbSchema.get(SCHEMA_NAME);
-    }
-
-    public SqlDialect getDialect()
-    {
-        return getSchema().getSqlDialect();
     }
 
     public TableInfo getTinfoStatisticAttr()
@@ -181,26 +173,56 @@ public class FlowManager
         {
             quickFillCache();
 
-            Map.Entry<Integer, String>ret = _attrNameCacheMap.findEntry(id);
-            if (ret == null)
+            String name = _attrNameCacheMap.get(id);
+            if (name == null)
             {
                 try
                 {
-                    String name = Table.executeSingleton(getSchema(), "SELECT Name FROM flow.Attribute WHERE RowId = ?", new Object[] { id }, String.class);
+                    name = Table.executeSingleton(getSchema(), "SELECT Name FROM flow.Attribute WHERE RowId = ?", new Object[] { id }, String.class);
                     if (name == null)
                     {
                         return null;
                     }
                     _attrNameCacheMap.put(id, name);
                     _attridCacheMap.put(name, id);
-                    return _attrNameCacheMap.findEntry(id);
                 }
                 catch (SQLException e)
                 {
                     throw new RuntimeSQLException(e);
                 }
             }
-            return ret;
+
+            return new FlowEntry(id, name);
+        }
+    }
+
+    private static class FlowEntry implements Map.Entry<Integer, String>
+    {
+        private final Integer _key;
+        private final String _value;
+
+        private FlowEntry(Integer key, String value)
+        {
+            _key = key;
+            _value = value;
+        }
+
+        @Override
+        public Integer getKey()
+        {
+            return _key;
+        }
+
+        @Override
+        public String getValue()
+        {
+            return _value;
+        }
+
+        @Override
+        public String setValue(String value)
+        {
+            throw new IllegalStateException("Can't set value on a FlowEntry");
         }
     }
 

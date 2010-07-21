@@ -17,9 +17,10 @@
 package org.labkey.flow.query;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.cache.implementation.CacheMap;
 import org.labkey.api.data.*;
+import org.labkey.api.util.Filter;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.persist.FlowManager;
@@ -33,7 +34,7 @@ import java.util.TreeMap;
 abstract public class AttributeCache<T>
 {
     private static final Logger _log = Logger.getLogger(AttributeCache.class);
-    private static final CacheMap<CacheKey, Map.Entry<Integer, String>[]> _cache = CacheManager.getLimitedCacheMap(200, 200, "Flow AttributeCache");
+    private static final Cache<CacheKey, Map.Entry<Integer, String>[]> _cache = CacheManager.getCache(200, CacheManager.DAY, "Flow AttributeCache");
     private static long _transactionCount;
     private static Container _lastContainerInvalidated;
     private static class CacheKey
@@ -94,7 +95,7 @@ abstract public class AttributeCache<T>
         }
     }
 
-    static public void invalidateCache(Container container)
+    static public void invalidateCache(final Container container)
     {
         synchronized(_cache)
         {
@@ -108,13 +109,13 @@ abstract public class AttributeCache<T>
             }
             else
             {
-                for (CacheKey key : _cache.keySet().toArray(new CacheKey[_cache.keySet().size()]))
-                {
-                    if (key._container == null || key._container.equals(container))
+                _cache.removeUsingFilter(new Filter<CacheKey>(){
+                    @Override
+                    public boolean accept(CacheKey key)
                     {
-                        _cache.remove(key);
+                        return key._container == null || key._container.equals(container);
                     }
-                }
+                });
             }
             _transactionCount ++;
             _lastContainerInvalidated = container;
