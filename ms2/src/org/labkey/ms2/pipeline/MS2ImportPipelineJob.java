@@ -40,8 +40,7 @@ public class MS2ImportPipelineJob extends PipelineJob
     private final String _description;
     private MS2Importer.RunInfo _runInfo;
 
-    public MS2ImportPipelineJob(ViewBackgroundInfo info, File file, String description,
-                                MS2Importer.RunInfo runInfo, boolean appendLog) throws SQLException
+    public MS2ImportPipelineJob(ViewBackgroundInfo info, File file, String description, MS2Importer.RunInfo runInfo) throws SQLException
     {
         super(MS2PipelineProvider.name, info);
         _file = file;

@@ -168,11 +168,11 @@ public class PipelineController extends SpringActionController
                     }
                     else if (TPPTask.isPepXMLFile(file))
                     {
-                        MS2Manager.addRunToQueue(info, file, description, false);
+                        MS2Manager.addRunToQueue(info, file, description);
                     }
                     else if (MascotSearchTask.isNativeOutputFile(file))
                     {
-                        MS2Manager.addMascotRunToQueue(info, file, description, false);
+                        MS2Manager.addMascotRunToQueue(info, file, description);
                     }
                 }
                 catch (IOException e)

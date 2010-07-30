@@ -45,6 +45,7 @@ public class DeltaScanColumn extends SimpleDisplayColumn
     private ColumnInfo _scanColInfo;
     private ColumnInfo _peptideColInfo;
 
+    /** This constructor is invoked through reflection - don't delete */
     public DeltaScanColumn()
     {
         this(null);

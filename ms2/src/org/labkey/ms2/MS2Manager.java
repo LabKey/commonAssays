@@ -539,24 +539,22 @@ public class MS2Manager
 
     public static MS2Importer.RunInfo addMascotRunToQueue(ViewBackgroundInfo info,
                                                     File file,
-                                                    String description,
-                                                    boolean appendLog) throws SQLException, IOException
+                                                    String description) throws SQLException, IOException
     {
         MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
-        MascotImportPipelineJob job = new MascotImportPipelineJob(info, file, description, runInfo, appendLog);
+        MascotImportPipelineJob job = new MascotImportPipelineJob(info, file, description, runInfo);
         PipelineService.get().queueJob(job);
         return runInfo;
     }
 
     public static MS2Importer.RunInfo addRunToQueue(ViewBackgroundInfo info,
                                                     File file,
-                                                    String description,
-                                                    boolean appendLog) throws SQLException, IOException
+                                                    String description) throws SQLException, IOException
     {
         MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
-        MS2ImportPipelineJob job = new MS2ImportPipelineJob(info, file, description, runInfo, appendLog);
+        MS2ImportPipelineJob job = new MS2ImportPipelineJob(info, file, description, runInfo);
         PipelineService.get().queueJob(job);
         return runInfo;
     }

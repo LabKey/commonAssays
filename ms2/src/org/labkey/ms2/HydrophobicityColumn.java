@@ -30,6 +30,7 @@ public class HydrophobicityColumn extends SimpleDisplayColumn
 {
     private ColumnInfo _colInfo;
 
+    /** This constructor is invoked through reflection - don't delete */
     public HydrophobicityColumn()
     {
         this(null);

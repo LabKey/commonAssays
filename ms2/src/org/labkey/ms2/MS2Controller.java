@@ -4824,13 +4824,11 @@ public class MS2Controller extends SpringActionController
                     int run;
                     if (MascotSearchProtocolFactory.get().getClass().equals(protocolFactory.getClass()))
                     {
-                        run = MS2Manager.addMascotRunToQueue(info,
-                                f, form.getDescription(), false).getRunId();
+                        run = MS2Manager.addMascotRunToQueue(info, f, form.getDescription()).getRunId();
                     }
                     else
                     {
-                        run = MS2Manager.addRunToQueue(info,
-                                f, form.getDescription(), false).getRunId();
+                        run = MS2Manager.addRunToQueue(info, f, form.getDescription()).getRunId();
                     }
 
                     if (run == -1)
