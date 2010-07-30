@@ -55,10 +55,8 @@ public class PendingMageMLFilesView extends QueryView
 
     private QuerySettings createSettings(ViewContext context)
     {
-        QuerySettings result = new QuerySettings(context, "PendingMageMLFiles");
-        result.setSchemaName(getSchema().getSchemaName());
+        QuerySettings result = getSchema().getSettings(context, "PendingMageMLFiles", ExpSchema.TableType.Datas.name());
         result.setAllowChooseQuery(false);
-        result.setQueryName(ExpSchema.TableType.Datas.name());
         return result;
     }
 

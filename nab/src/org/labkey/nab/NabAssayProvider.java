@@ -25,6 +25,7 @@ import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.TimepointType;
@@ -330,10 +331,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
         private static QuerySettings getDefaultSettings(ExpProtocol protocol, ViewContext context, AssayProvider provider)
         {
+            UserSchema schema = AssayService.get().createSchema(context.getUser(), context.getContainer());
             String name = AssayService.get().getResultsTableName(protocol);
-            QuerySettings settings = new QuerySettings(context, name);
-            settings.setSchemaName(AssaySchema.NAME);
-            settings.setQueryName(name);
+            QuerySettings settings = schema.getSettings(context, name, name);
             return settings;
         }
 

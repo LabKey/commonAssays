@@ -110,7 +110,10 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
 
     private List<ExpRun> getRuns(String tableName, GetNabRunsForm form)
     {
-        QuerySettings settings = new QuerySettings(form.getViewContext(), QueryView.DATAREGIONNAME_DEFAULT);
+        UserSchema assaySchema = QueryService.get().getUserSchema(form.getViewContext().getUser(),
+                form.getViewContext().getContainer(), AssaySchema.NAME);
+
+        QuerySettings settings = assaySchema.getSettings(form.getViewContext(), QueryView.DATAREGIONNAME_DEFAULT, tableName);
         //show all rows by default
        if(null == form.getMaxRows()
             && null == getViewContext().getRequest().getParameter(QueryView.DATAREGIONNAME_DEFAULT + "." + QueryParam.maxRows))
@@ -135,11 +138,6 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
                 ContainerFilter.Type.valueOf(form.getContainerFilter());
             settings.setContainerFilterName(containerFilterType.name());
         }
-
-        settings.setQueryName(tableName);
-
-        UserSchema assaySchema = QueryService.get().getUserSchema(form.getViewContext().getUser(),
-                form.getViewContext().getContainer(), AssaySchema.NAME);
 
         DataView dataView;
         try

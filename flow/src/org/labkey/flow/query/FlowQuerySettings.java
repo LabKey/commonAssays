@@ -24,7 +24,7 @@ public class FlowQuerySettings extends QuerySettings
     private boolean _showGraphs;
     private boolean _subtractBackground;
 
-    public FlowQuerySettings(String dataRegionName)
+    protected FlowQuerySettings(String dataRegionName)
     {
         super(dataRegionName);
     }

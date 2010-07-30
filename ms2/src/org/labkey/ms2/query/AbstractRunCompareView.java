@@ -58,7 +58,8 @@ public abstract class AbstractRunCompareView extends QueryView
 
     public AbstractRunCompareView(ViewContext context, int runListIndex, boolean forExport, String tableName, String peptideViewName) throws ServletException
     {
-        super(new MS2Schema(context.getUser(), context.getContainer()), createSettings(context, tableName));
+        super(new MS2Schema(context.getUser(), context.getContainer()));
+        setSettings(createSettings(context, tableName));
         _peptideViewName = peptideViewName;
 
         _viewContext.setActionURL(context.getActionURL());
@@ -99,11 +100,9 @@ public abstract class AbstractRunCompareView extends QueryView
         return _runs;
     }
     
-    private static QuerySettings createSettings(ViewContext context, String tableName)
+    private QuerySettings createSettings(ViewContext context, String tableName)
     {
-        QuerySettings settings = new QuerySettings(context, "Compare");
-        settings.setSchemaName(MS2Schema.SCHEMA_NAME);
-        settings.setQueryName(tableName);
+        QuerySettings settings = getSchema().getSettings(context, "Compare", tableName);
         settings.setAllowChooseQuery(false);
         return settings;
     }

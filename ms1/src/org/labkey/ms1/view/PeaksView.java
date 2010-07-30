@@ -60,9 +60,7 @@ public class PeaksView extends QueryView
         _scanFirst = scanFirst;
         _scanLast = scanLast;
 
-        QuerySettings settings = new QuerySettings(ctx, QueryView.DATAREGIONNAME_DEFAULT);
-        settings.setSchemaName(schema.getSchemaName());
-        settings.setQueryName(MS1Schema.TABLE_PEAKS);
+        QuerySettings settings = schema.getSettings(ctx, QueryView.DATAREGIONNAME_DEFAULT, MS1Schema.TABLE_PEAKS);
         settings.setAllowChooseQuery(false);
         setSettings(settings);
 

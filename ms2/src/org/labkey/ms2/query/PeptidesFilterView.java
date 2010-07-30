@@ -39,8 +39,14 @@ public class PeptidesFilterView extends QueryView
 
     public PeptidesFilterView(ViewContext context, PeptideFilter filter)
     {
-        super(new MS2Schema(context.getUser(), context.getContainer()), new QuerySettings(context, MS2Controller.PEPTIDES_FILTER, MS2Schema.HiddenTableType.PeptidesFilter.toString()));
+        super(new MS2Schema(context.getUser(), context.getContainer()));
+        setSettings(createSettings(context));
         _filter = filter;
+    }
+
+    private QuerySettings createSettings(ViewContext context)
+    {
+        return getSchema().getSettings(context, MS2Controller.PEPTIDES_FILTER, MS2Schema.HiddenTableType.PeptidesFilter.toString());
     }
 
     public void renderCustomizeViewLink(Writer out) throws IOException

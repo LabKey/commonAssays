@@ -31,6 +31,7 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
@@ -334,10 +335,9 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
 
     public ElispotResultsQueryView createResultsQueryView(ViewContext context, ExpProtocol protocol)
     {
+        UserSchema schema = AssayService.get().createSchema(context.getUser(), context.getContainer());
         String name = AssayService.get().getResultsTableName(protocol);
-        QuerySettings settings = new QuerySettings(context, name);
-        settings.setSchemaName(AssaySchema.NAME);
-        settings.setQueryName(name);
+        QuerySettings settings = schema.getSettings(context, name, name);
         return new ElispotResultsQueryView(protocol, context, settings);
     }
 

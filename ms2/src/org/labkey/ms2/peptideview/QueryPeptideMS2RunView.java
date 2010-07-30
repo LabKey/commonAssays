@@ -39,8 +39,6 @@ import org.springframework.validation.BindException;
  */
 public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 {
-    private static final String DATA_REGION_NAME = "MS2Peptides";
-
     public QueryPeptideMS2RunView(ViewContext viewContext, MS2Run[] runs)
     {
         super(viewContext, "Peptides", runs);
@@ -48,12 +46,10 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
     protected QuerySettings createQuerySettings(MS2Schema schema) throws RedirectException
     {
-        QuerySettings settings = new QuerySettings(_url.getPropertyValues(), DATA_REGION_NAME);
+        QuerySettings settings = schema.getSettings(_url.getPropertyValues(), MS2Manager.getDataRegionNamePeptides());
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
-        settings.setSchemaName(schema.getSchemaName());
         settings.setQueryName(MS2Schema.TableType.Peptides.toString());
-        settings.setDataRegionName(MS2Manager.getDataRegionNamePeptides());
         String columnNames = _url.getParameter("columns");
         if (columnNames != null)
         {
@@ -74,7 +70,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             settings.setViewName("columns");
             ActionURL url = _url.clone();
             url.deleteParameter("columns");
-            url.addParameter(DATA_REGION_NAME + ".viewName", "columns");
+            url.addParameter(MS2Manager.getDataRegionNamePeptides() + ".viewName", "columns");
             throw new RedirectException(url.toString());
         }
 

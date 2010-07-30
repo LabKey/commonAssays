@@ -68,16 +68,12 @@ public class SpectraCountRReport extends RReport
     private SpectraCountQueryView getQueryView(ViewContext context) throws Exception
     {
         String spectraConfig = context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.spectraConfig);
-        QuerySettings settings = new QuerySettings(context, "SpectraCount");
-        settings.setViewName(getDescriptor().getProperty(ReportDescriptor.Prop.viewName));
-        settings.setAllowChooseQuery(false);
         final SpectraCountConfiguration config = SpectraCountConfiguration.findByTableName(spectraConfig);
         if (config == null)
         {
             throw new NotFoundException("Could not find spectra count config: " + spectraConfig);
         }
 
-        MS2Schema schema = new MS2Schema(context.getUser(), context.getContainer());
         MS2Controller.SpectraCountForm form = new MS2Controller.SpectraCountForm();
         form.setRunList(new Integer(getRunList(context)));
         form.setPeptideFilterType(context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType));
@@ -90,11 +86,15 @@ public class SpectraCountRReport extends RReport
         }
         catch (NumberFormatException e) {}
 
-        settings.setQueryName(config.getTableName());
-
         List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList().intValue(), false, context);
 
+        MS2Schema schema = new MS2Schema(context.getUser(), context.getContainer());
         schema.setRuns(runs);
+
+        QuerySettings settings = schema.getSettings(context, "SpectraCount", config.getTableName());
+        settings.setViewName(getDescriptor().getProperty(ReportDescriptor.Prop.viewName));
+        settings.setAllowChooseQuery(false);
+
         return new SpectraCountQueryView(schema, settings, config, form);
     }
 

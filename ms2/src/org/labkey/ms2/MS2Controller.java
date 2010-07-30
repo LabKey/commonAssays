@@ -2021,8 +2021,6 @@ public class MS2Controller extends SpringActionController
         protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
             _form = form;
-            QuerySettings settings = new QuerySettings(getViewContext(), "SpectraCount");
-            settings.setAllowChooseQuery(false);
             _config = SpectraCountConfiguration.findByTableName(form.getSpectraConfig());
             if (_config == null)
             {
@@ -2040,10 +2038,10 @@ public class MS2Controller extends SpringActionController
             }
 
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
-
-            settings.setQueryName(_config.getTableName());
-
             schema.setRuns(_runs);
+
+            QuerySettings settings = schema.getSettings(getViewContext(), "SpectraCount", _config.getTableName());
+            settings.setAllowChooseQuery(false);
             QueryView view = new SpectraCountQueryView(schema, settings, _config, _form);
             // ExcelWebQueries won't be part of the same HTTP session so we won't have access to the run list anymore
             view.setAllowExportExternalQuery(false);
@@ -2718,9 +2716,7 @@ public class MS2Controller extends SpringActionController
         private QueryView createProteinGroupSearchView(final ProteinSearchForm form) throws ServletException
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
-            QuerySettings groupsSettings = new QuerySettings(getViewContext(), PROTEIN_DATA_REGION);
-            groupsSettings.setSchemaName(schema.getSchemaName());
-            groupsSettings.setQueryName(MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
+            QuerySettings groupsSettings = schema.getSettings(getViewContext(), PROTEIN_DATA_REGION, MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
             groupsSettings.setAllowChooseQuery(false);
             QueryView groupsView = new QueryView(schema, groupsSettings)
             {
