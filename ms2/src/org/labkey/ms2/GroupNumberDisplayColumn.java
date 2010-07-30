@@ -49,7 +49,7 @@ public class GroupNumberDisplayColumn extends DataColumn
         _groupNumber = groupNumber;
         _collectionId = collectionId;
         ActionURL actionURL = url.clone();
-        actionURL.setAction("showProteinGroup.view");
+        actionURL.setAction(MS2Controller.ShowProteinGroupAction.class);
         setURL(actionURL.toString() + "&groupNumber=${" + _groupNumber + "}&indistinguishableCollectionId=${" + _collectionId + "}");
         setLinkTarget("prot");
         setWidth("50");
@@ -128,7 +128,7 @@ public class GroupNumberDisplayColumn extends DataColumn
             columns.add(groupIdCol);
 
             ActionURL url = new ActionURL(MS2Controller.ShowProteinGroupAction.class, _container);
-            setURL(url.toString() + "&grouping=proteinprophet&proteinGroupId=${" + thisFieldKey.toString() + "}");
+            setURL(url.toString() + "&grouping=proteinprophet&proteinGroupId=${" + groupIdKey.toString() + "}");
             setLinkTarget("prot");
         }
     }
