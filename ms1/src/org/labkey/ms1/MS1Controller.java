@@ -211,7 +211,7 @@ public class MS1Controller extends SpringActionController
 
         protected ModelAndView getHtmlView(ShowFeaturesForm form, BindException errors) throws Exception
         {
-            //this action requires that a sepcific experiment run has been specified
+            //this action requires that a specific experiment run has been specified
             if(!form.runSpecified())
                 return HttpView.redirect(new ActionURL(MS1Controller.BeginAction.class, getViewContext().getContainer()));
 
