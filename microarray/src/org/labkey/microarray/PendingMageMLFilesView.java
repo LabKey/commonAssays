@@ -121,7 +121,7 @@ public class PendingMageMLFilesView extends QueryView
                     for (ExpProtocol protocol : microarrayProtocols)
                     {
                         ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getImportURL(getContainer(), protocol, null, null);
-                        menu.addMenuItem("Import using " + protocol.getName(), "javascript: if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(false) + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference(false) + ".submit(); }");
+                        menu.addMenuItem("Import using " + protocol.getName(), "javascript: if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(false) + ", '" + url.getLocalURIString() + "', 'POST', 'files')) { " + view.getDataRegion().getJavascriptFormReference(false) + ".submit(); }");
                     }
                 }
                 ActionURL browseURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), getReturnURL().toString());

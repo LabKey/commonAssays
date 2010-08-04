@@ -35,6 +35,7 @@ import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.AssayHeaderView;
+import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
@@ -47,6 +48,7 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.beans.PropertyValue;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -475,5 +477,23 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     {
         return new AssayPipelineProvider(ViabilityModule.class,
                 new PipelineProvider.FileTypesEntryFilter(new FileType(".csv")), this, "Import Viability");
+    }
+
+    @Override
+    public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles, AssayRunUploadForm context)
+    {
+        ViabilityAssayRunUploadForm form = (ViabilityAssayRunUploadForm)context;
+        if (form.getReRunId() != null && !form.isDelete())
+        {
+            // 10684 : When performing a re-run (without delete), set the initially selected collector to the file upload collector.
+            // By passing an empty set of previously uploaded files, the PreviouslyUploadedDataCollector will be added
+            // to the list, but won't be visible.  The FileUploadDataCollector will be first in the list of visible
+            // collectors and will therefore be selected in the AssayDataCollectorDisplayColumn's dataUpload.jsp.
+            return super.getDataCollectors(Collections.<String, File>emptyMap(), context);
+        }
+        else
+        {
+            return super.getDataCollectors(uploadedFiles, context);
+        }
     }
 }
