@@ -16,18 +16,16 @@
 
 package org.labkey.ms1.query;
 
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.ms1.query.MS1Schema;
 import org.labkey.ms1.MS1Manager;
 
 /**
  * User schema table info over ms1.Scans
- * Created by IntelliJ IDEA.
  * User: Dave
  * Date: Oct 23, 2007
  * Time: 2:52:32 PM
