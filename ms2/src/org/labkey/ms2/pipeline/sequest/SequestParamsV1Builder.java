@@ -16,7 +16,7 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
-import java.net.URI;
+import java.io.File;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Set;
@@ -29,9 +29,9 @@ import java.util.Set;
 public class SequestParamsV1Builder extends SequestParamsBuilder
 {
 
-    public SequestParamsV1Builder(Map<String, String> sequestInputParser, URI uriSequenceRoot)
+    public SequestParamsV1Builder(Map<String, String> sequestInputParser, File sequenceRoot)
     {
-        super(sequestInputParser, uriSequenceRoot);
+        super(sequestInputParser, sequenceRoot);
 
         this._params = new SequestParamsV1();
 

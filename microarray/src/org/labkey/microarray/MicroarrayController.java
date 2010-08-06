@@ -43,7 +43,6 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
@@ -200,8 +199,7 @@ public class MicroarrayController extends SpringActionController
             // just grab any root, it doesn't matter
             for (PipeRoot root : PipelineService.get().getAllPipelineRoots().values())
             {
-                File rootPath = root.getRootPath();
-                if (rootPath.exists())
+                if (root.isValid())
                 {
                     ViewBackgroundInfo info = getViewBackgroundInfo();
                     _container = root.getContainer();

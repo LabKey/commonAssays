@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
@@ -24,8 +25,6 @@ import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,7 +76,7 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     }
 
     public abstract JOB createPipelineJob(ViewBackgroundInfo info,
-                                          File[] filesInput,
+                                          PipeRoot root, File[] filesInput,
                                           File fileParameters
     ) throws IOException;
 
@@ -109,9 +108,9 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
         return new FileType[] { FT_MZXML };
     }
 
-    public void validate(URI uriRoot) throws PipelineValidationException
+    public void validate(PipeRoot root) throws PipelineValidationException
     {
-        super.validate(uriRoot);
+        super.validate(root);
 
         if (_dbNames.length == 0 || _dbNames[0] == null || _dbNames[0].length() == 0)
             throw new PipelineValidationException("Select a sequence database.");

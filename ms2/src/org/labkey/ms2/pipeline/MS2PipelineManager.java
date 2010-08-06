@@ -178,12 +178,12 @@ public class MS2PipelineManager
 
     public static void addSequenceDB(Container container, String name, BufferedReader reader) throws IOException, SQLException
     {
-        URI uriSequenceRoot = getSequenceDatabaseRoot(container);
-        if (uriSequenceRoot == null)
+        File sequenceRoot = getSequenceDatabaseRoot(container);
+        if (sequenceRoot == null)
         {
             throw new IllegalArgumentException("Sequence root directory is not set.");
         }
-        File fileDB = getSequenceDBFile(uriSequenceRoot, name);
+        File fileDB = getSequenceDBFile(sequenceRoot, name);
         if (fileDB.exists())
         {
             throw new IllegalArgumentException("The sequence database '" + name +
@@ -228,18 +228,11 @@ public class MS2PipelineManager
         }
     }
 
-    public static boolean removeSequenceDB(URI uriSequenceRoot, String name)
+    public static File getSequenceDBFile(File fileRoot, String name)
     {
-        File fileDB = getSequenceDBFile(uriSequenceRoot, name);
-        return fileDB.delete();
-    }
-
-    public static File getSequenceDBFile(URI uriSequenceRoot, String name)
-    {
-        if (uriSequenceRoot == null)
+        if (fileRoot == null)
             throw new IllegalArgumentException("Invalid sequence root directory.");
-        File fileRoot = new File(uriSequenceRoot);
-        File file = new File(uriSequenceRoot.getPath() + name);
+        File file = new File(fileRoot, name);
         if (!file.getAbsolutePath().startsWith(fileRoot.getAbsolutePath()))
             throw new IllegalArgumentException("Invalid sequence database '" + name + "'.");
 
@@ -247,25 +240,29 @@ public class MS2PipelineManager
     }
 
 
-    public static URI getSequenceDatabaseRoot(Container container)
+    public static File getSequenceDatabaseRoot(Container container)
     {
-        URI dbRoot = PipelineService.get().getPipelineRootSetting(container, SEQUENCE_DB_ROOT_TYPE);
+        PipeRoot dbRoot = PipelineService.get().getPipelineRootSetting(container, SEQUENCE_DB_ROOT_TYPE);
         if (dbRoot == null)
         {
             // return default root
             PipeRoot root = PipelineService.get().getPipelineRootSetting(container);
             if (root != null)
             {
-                dbRoot = getSequenceDatabaseRoot(root);
-                File file = new File(dbRoot);
+                File file = getSequenceDatabaseRoot(root);
                 if (!NetworkDrive.exists(file) && NetworkDrive.exists(file.getParentFile()))
                 {
                     // Try to create it if it doesn't exist
                     file.mkdir();
                 }
+                if (NetworkDrive.exists(file))
+                {
+                    return file;
+                }
             }
+            return null;
         }
-        return dbRoot;
+        return dbRoot.getRootPath();
     }
 
     public static void setSequenceDatabaseRoot(User user, Container container, URI rootSeq, boolean allowUpload) throws SQLException
@@ -274,7 +271,7 @@ public class MS2PipelineManager
 
         // If the new root is just the default, then clear the entry.
         PipeRoot root = service.getPipelineRootSetting(container);
-        if (rootSeq != null && root != null && rootSeq.equals(getSequenceDatabaseRoot(root)))
+        if (rootSeq != null && root != null && rootSeq.equals(getSequenceDatabaseRoot(root).toURI()))
              rootSeq = null;
 
         service.setPipelineRoot(user, container, rootSeq, SEQUENCE_DB_ROOT_TYPE, null, false);
@@ -284,9 +281,9 @@ public class MS2PipelineManager
             service.setPipelineProperty(container, ALLOW_SEQUENCE_DB_UPLOAD_KEY, null);
     }
 
-    private static URI getSequenceDatabaseRoot(PipeRoot root)
+    private static File getSequenceDatabaseRoot(PipeRoot root)
     {
-        return root.resolvePath(DEFAULT_FASTA_DIR).toURI();
+        return root.resolvePath(DEFAULT_FASTA_DIR);
     }
 
     public static boolean allowSequenceDatabaseUploads(User user, Container container) throws SQLException

@@ -23,7 +23,6 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.pipeline.client.GWTSearchServiceResult;
@@ -70,22 +69,22 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         return results;
     }
 
-    private URI getPipelineRootURI()
+    private PipeRoot getPipelineRoot()
     {
         PipeRoot pipeRoot = PipelineService.get().findPipelineRoot(getContainer());
         if (pipeRoot == null)
         {
-            throw new NotFoundException("No pipeline root configurd for " + getContainer().getPath());
+            throw new NotFoundException("No pipeline root configured for " + getContainer().getPath());
         }
-        return pipeRoot.getRootPath().toURI();
+        return pipeRoot;
     }
 
-    private URI getSequenceRootURI()
+    private File getSequenceRoot()
     {
         PipeRoot pipeRoot = PipelineService.get().findPipelineRoot(getContainer());
         if (pipeRoot == null)
         {
-            throw new NotFoundException("No pipeline root configurd for " + getContainer().getPath());
+            throw new NotFoundException("No pipeline root configured for " + getContainer().getPath());
         }
         return MS2PipelineManager.getSequenceDatabaseRoot(pipeRoot.getContainer());
     }
@@ -115,7 +114,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             getMzXml(path, fileNames, searchEngine, false);
             return results;
         }
-        URI uriRoot = getPipelineRootURI();
+        PipeRoot root = getPipelineRoot();
 
         boolean protocolExists = false;
         AbstractMS2SearchProtocolFactory protocolFactory = provider.getProtocolFactory();
@@ -123,7 +122,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         {
             if(protocol == null)
             {
-                File protocolFile = protocolFactory.getParametersFile(new File(URIUtil.resolve(uriRoot, path)), protocolName);
+                File protocolFile = protocolFactory.getParametersFile(root.resolvePath(path), protocolName);
                 if (NetworkDrive.exists(protocolFile))
                 {
                     protocolExists = true;
@@ -134,7 +133,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                 }
                 else
                 {
-                    protocol = protocolFactory.load(uriRoot, protocolName);
+                    protocol = protocolFactory.load(root, protocolName);
                 }
             }
         }
@@ -154,7 +153,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             if (protocol.getDbNames().length > 0)
             {
                 results.setDefaultSequenceDb(protocol.getDbNames()[0]);
-                if(!provider.dbExists(getSequenceRootURI(), protocol.getDbNames()[0]))
+                if(!provider.dbExists(getSequenceRoot(), protocol.getDbNames()[0]))
                     results.appendError("The database " + protocol.getDbNames()[0] + " cannot be found.");
             }
             else
@@ -252,20 +251,15 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         }
         getProtocol(searchEngine, defaultProtocol, path, fileNames);
 
-        URI dirRootURI = getPipelineRootURI();
+        PipeRoot root = getPipelineRoot();
 
-        String[] protocols = provider.getProtocolFactory().getProtocolNames(dirRootURI, new File(URIUtil.resolve(dirRootURI, path)));
+        String[] protocols = provider.getProtocolFactory().getProtocolNames(root, root.resolvePath(path));
         for(String protName:protocols)
         {
             if(!protName.equals("default"))
                 protocolList.add(protName);
         }
         results.setProtocols(protocolList);
-    }
-
-    public void getSequenceDbPaths(String searchEngine)
-    {
-        getSequenceDbPaths(searchEngine, false);
     }
 
     private void getSequenceDbPaths(String searchEngine, boolean refresh)
@@ -282,8 +276,8 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         {
             try
             {
-                URI dirSequenceRootURI = getSequenceRootURI();
-                sequenceDbPaths =  provider.getSequenceDbPaths(dirSequenceRootURI);
+                File dirSequenceRoot = getSequenceRoot();
+                sequenceDbPaths =  provider.getSequenceDbPaths(dirSequenceRoot);
                 if(sequenceDbPaths == null) throw new IOException("Fasta directory not found.");
                 if(provider.remembersDirectories())
                 {
@@ -372,11 +366,11 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
         if(relativePath.equals("/"))
         {
-            defaultDbPath = getSequenceRootURI().getPath();
+            defaultDbPath = getSequenceRoot().toURI().getPath();
         }
         else
         {
-            defaultDbPath = getSequenceRootURI().getPath() + relativePath;
+            defaultDbPath = getSequenceRoot().toURI().getPath() + relativePath;
         }
         URI defaultDbPathURI;
         try
@@ -385,18 +379,18 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             {
                 relativePath = relativePath.replaceAll(" ","%20");
                 URI uriPath = new URI(relativePath);
-                sequenceDbs =  provider.getSequenceDbDirList(uriPath);
+                sequenceDbs =  provider.getSequenceDbDirList(new File(uriPath));
             }
             else
             {
                 defaultDbPathURI = new File(defaultDbPath).toURI();
-                sequenceDbs =  provider.getSequenceDbDirList(defaultDbPathURI);
+                sequenceDbs =  provider.getSequenceDbDirList(new File(defaultDbPathURI));
             }          
             if(sequenceDbs == null)
             {
                 results.appendError("Could not find the default sequence database path : " + defaultDbPath);
-                defaultDbPathURI = getSequenceRootURI();
-                sequenceDbs = provider.getSequenceDbDirList(defaultDbPathURI);
+                defaultDbPathURI = getSequenceRoot().toURI();
+                sequenceDbs = provider.getSequenceDbDirList(new File(defaultDbPathURI));
             }
             else
             {
@@ -451,20 +445,14 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             protocolExists = false;
 
         PipeRoot pr;
-        URI uriRoot;
         try
         {
             Container c = getContainer();
             pr = PipelineService.get().findPipelineRoot(c);
-            if (pr == null || !URIUtil.exists(pr.getUri()))
+            if (pr == null || !pr.isValid())
                 throw new IOException("Can't find root directory.");
 
-            uriRoot = pr.getUri();
-            URI uriData = URIUtil.resolve(uriRoot, path);
-            if (uriData == null)
-                throw new IOException("Invalid data directory.");
-
-            File dirData = new File(uriData);
+            File dirData = pr.resolvePath(path);
             File dirAnalysis = null;
             if (protocol != null)
                 dirAnalysis = protocol.getAnalysisDir(dirData);

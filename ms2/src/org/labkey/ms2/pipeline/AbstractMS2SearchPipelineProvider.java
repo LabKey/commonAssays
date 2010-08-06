@@ -59,9 +59,9 @@ abstract public class AbstractMS2SearchPipelineProvider
         return null; 
     }
 
-    public boolean dbExists(URI dirSequenceRoot, String db)
+    public boolean dbExists(File sequenceRoot, String db)
     {
-        File dbFile = new File(new File(dirSequenceRoot), db);
+        File dbFile = new File(sequenceRoot, db);
         return NetworkDrive.exists(dbFile);
     }
 
@@ -75,9 +75,9 @@ abstract public class AbstractMS2SearchPipelineProvider
 
     abstract public void ensureEnabled() throws PipelineProtocol.PipelineValidationException;
 
-    abstract public List<String> getSequenceDbPaths(URI sequenceRoot) throws IOException;
+    abstract public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException;
 
-    abstract public List<String> getSequenceDbDirList(URI sequenceRoot) throws IOException;
+    abstract public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException;
 
     abstract public List<String> getTaxonomyList() throws IOException;
 

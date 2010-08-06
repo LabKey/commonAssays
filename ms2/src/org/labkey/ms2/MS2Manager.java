@@ -563,7 +563,7 @@ public class MS2Manager
                              File file,
                              boolean restart, XarContext context) throws SQLException, IOException, XMLStreamException
     {
-        MS2Importer importer = createImporter(file, info, file.getName() + (context.getJobDescription() != null ? file.getName() + " (" + context.getJobDescription() + ")" : ""), log, context);
+        MS2Importer importer = createImporter(file, info, file.getName() + (context.getJobDescription() != null ? " - " + context.getJobDescription() : ""), log, context);
         MS2Importer.RunInfo runInfo = importer.prepareRun(restart);
 
         return importRun(info, log, file, runInfo, context);

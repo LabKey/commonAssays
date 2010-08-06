@@ -43,13 +43,14 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
 
     public XTandemPipelineJob(XTandemSearchProtocol protocol,
                               ViewBackgroundInfo info,
+                              PipeRoot root,
                               String name,
                               File dirSequenceRoot,
                               File filesMzXML[],
                               File fileInputXML
     ) throws IOException
     {
-        super(protocol, XTandemCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML);
+        super(protocol, XTandemCPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
         header("X! Tandem search for " + getBaseName());
     }
@@ -57,11 +58,6 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
     public XTandemPipelineJob(XTandemPipelineJob job, File fileFraction)
     {
         super(job, fileFraction);        
-    }
-
-    public String getSearchEngine()
-    {
-        return "x!tandem";
     }
 
     public TaskId getTaskPipelineId()

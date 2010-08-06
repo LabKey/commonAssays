@@ -38,18 +38,17 @@ import java.util.*;
 public abstract class SequestParamsBuilder
 {
     Map<String, String> sequestInputParams;
-    URI uriSequenceRoot;
+    File sequenceRoot;
     char[] _validResidues = {'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'O','[',']'};
     protected HashMap<String, String> supportedEnzymes = new HashMap<String, String>();
     protected SequestParams _params;
 
 
 
-    public SequestParamsBuilder(Map<String, String> sequestInputParams, URI uriSequenceRoot)
+    public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot)
     {
         this.sequestInputParams = sequestInputParams;
-        this.uriSequenceRoot = uriSequenceRoot;
-
+        this.sequenceRoot = sequenceRoot;
     }
 
     public abstract String initXmlValues();
@@ -87,7 +86,7 @@ public abstract class SequestParamsBuilder
         }
 
         Param database1 = _params.getParam("first_database_name");
-        File databaseFile = MS2PipelineManager.getSequenceDBFile(uriSequenceRoot, databases.get(0));
+        File databaseFile = MS2PipelineManager.getSequenceDBFile(sequenceRoot, databases.get(0));
         if (!databaseFile.exists())
         {
             parserError = "pipeline, database; The database does not exist on the local server (" + databases.get(0) + ").\n";
@@ -107,7 +106,7 @@ public abstract class SequestParamsBuilder
             //check for duplicate database entries
             if (!database1.getValue().equals(databases.get(1)))
             {
-                databaseFile = MS2PipelineManager.getSequenceDBFile(uriSequenceRoot, databases.get(1));
+                databaseFile = MS2PipelineManager.getSequenceDBFile(sequenceRoot, databases.get(1));
                 if (!databaseFile.exists())
                 {
                     parserError = "pipeline, database; The database does not exist(" + databases.get(1) + ").\n";
@@ -1005,7 +1004,7 @@ public abstract class SequestParamsBuilder
                 projectRoot = "C:/CPAS";
             root = new File(new File(projectRoot), "/sampledata/xarfiles/ms2pipe/databases");
             dbPath = root.getCanonicalPath();
-            spb = SequestParamsBuilderFactory.createVersion2Builder(ip.getInputParameters(), root.toURI());
+            spb = SequestParamsBuilderFactory.createVersion2Builder(ip.getInputParameters(), root);
         }
 
         protected void tearDown()
@@ -1017,7 +1016,7 @@ public abstract class SequestParamsBuilder
         public void parseParams(String xml)
         {
             ip.parse(xml);
-            spb = SequestParamsBuilderFactory.createVersion2Builder(ip.getInputParameters(), root.toURI());
+            spb = SequestParamsBuilderFactory.createVersion2Builder(ip.getInputParameters(), root);
         }
 
         public void testInitDatabasesNormal() throws IOException

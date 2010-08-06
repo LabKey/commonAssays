@@ -33,17 +33,4 @@ public class NewProtocolForm extends ViewForm
     {
         ff_name = name;
     }
-
-    public List<String> getTemplateNames(String suffix) throws Exception
-    {
-        Set<String> uris = ModuleLoader.getServletContext().getResourcePaths("/Flow/templates/");
-        List<String> ret = new ArrayList<String>();
-        for (String uri : uris)
-        {
-            String name = URIUtil.getFilename(new URI(uri));
-            if (name.endsWith(suffix))
-                ret.add(name);
-        }
-        return ret;
-    }
 }

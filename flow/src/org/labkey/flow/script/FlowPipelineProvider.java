@@ -16,12 +16,9 @@
 
 package org.labkey.flow.script;
 
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
@@ -39,7 +36,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileFilter;
-import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -109,13 +105,10 @@ public class FlowPipelineProvider extends PipelineProvider
         if (!hasFlowModule(context))
             return;
 
-        PipeRoot root;
         final Set<File> usedPaths = new HashSet<File>();
 
         try
         {
-            // UNDONE: is this ever different than pr???
-            root = PipelineService.get().findPipelineRoot(context.getContainer());
             for (FlowRun run : FlowRun.getRunsForContainer(context.getContainer(), FlowProtocolStep.keywords))
                 usedPaths.add(run.getExperimentRun().getFilePathRoot());
         }
@@ -123,8 +116,6 @@ public class FlowPipelineProvider extends PipelineProvider
         {
             return;
         }
-
-        URI rootURI = root != null ? root.getUri() : pr.getUri();
 
         File[] dirs = directory.listFiles(new FileFilter()
         {
@@ -165,10 +156,10 @@ public class FlowPipelineProvider extends PipelineProvider
             directory.addAction(new PipelineAction(selectedDirsNavTree, dirs, true, true));
         }
 
-        File currentDir = new File(directory.getURI().getPath());
+        File currentDir = directory.getDir();
         if (includeAll || !usedPaths.contains(currentDir))
         {
-            File[] fcsFiles = directory.listFiles((FileFilter)FCS.FCSFILTER);
+            File[] fcsFiles = directory.listFiles(FCS.FCSFILTER);
             if (includeAll || (fcsFiles != null && fcsFiles.length > 0))
             {
                 ActionURL url = importRunsURL.clone().addParameter("current", true);

@@ -39,13 +39,14 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements 
 
     public SequestPipelineJob(SequestSearchProtocol protocol,
                               ViewBackgroundInfo info,
+                              PipeRoot root,
                               String name,
                               File dirSequenceRoot,
                               File filesMzXML[],
                               File fileInputXML
     ) throws IOException
     {
-        super(protocol, SequestLocalPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML);
+        super(protocol, SequestLocalPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
         AppProps appProps = AppProps.getInstance();
         _sequestServer = appProps.getSequestServer();
@@ -63,11 +64,6 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements 
     public String getSequestServer()
     {
         return _sequestServer;
-    }
-
-    public String getSearchEngine()
-    {
-        return "sequest";
     }
 
     public AbstractFileAnalysisJob createSingleFileJob(File file)

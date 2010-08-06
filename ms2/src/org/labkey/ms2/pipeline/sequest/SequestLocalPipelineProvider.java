@@ -27,9 +27,9 @@ import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.ms2.pipeline.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.util.*;
 
 /**
@@ -109,7 +109,7 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
         return SequestSearchProtocolFactory.get();
     }
 
-    public List<String> getSequenceDbPaths(URI sequenceRoot) throws IOException
+    public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException
     {
         AppProps appProps = AppProps.getInstance();
         SequestClientImpl sequestClient = new SequestClientImpl(appProps.getSequestServer(), _log);
@@ -118,11 +118,11 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
         return dbList;
     }
 
-    public List<String> getSequenceDbDirList(URI sequenceRoot) throws IOException
+    public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException
     {
         AppProps appProps = AppProps.getInstance();
         SequestClientImpl sequestClient = new SequestClientImpl(appProps.getSequestServer(), _log);
-        List<String> dbList = sequestClient.getSequenceDbDirList(sequenceRoot.getPath());
+        List<String> dbList = sequestClient.getSequenceDbDirList(sequenceRoot.toURI().getPath());
         if(dbList == null) throw new IOException("Trouble connecting to the Sequest server.");
         return dbList;
     }

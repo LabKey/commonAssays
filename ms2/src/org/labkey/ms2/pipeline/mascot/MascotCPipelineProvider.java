@@ -31,6 +31,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.PipelineController;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
@@ -119,12 +120,12 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return MascotSearchProtocolFactory.get();
     }
 
-    public List<String> getSequenceDbPaths(URI sequenceRoot) throws IOException
+    public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException
     {
         return null;//No directories for Mascot databases.
     }
 
-    public List<String> getSequenceDbDirList(URI sequenceRoot) throws IOException {
+    public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException {
         AppProps appProps = AppProps.getInstance();
         if (!appProps.hasMascotServer())
             throw new IOException("Mascot server has not been specified in site customization.");

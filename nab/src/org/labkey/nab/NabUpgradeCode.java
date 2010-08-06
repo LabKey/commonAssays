@@ -70,7 +70,7 @@ public class NabUpgradeCode implements UpgradeCode
             PipeRoot root = PipelineService.get().findPipelineRoot(getInfo().getContainer());
             if (root == null)
             {
-                throw new FileNotFoundException("Could not find pipeline root on disk: " + (root == null ? null : root.getRootPath()));
+                throw new FileNotFoundException("Could not find pipeline root on disk.");
             }
             File logFile = File.createTempFile("upgradeAUC", ".log", root.getRootPath());
             setLogFile(logFile);

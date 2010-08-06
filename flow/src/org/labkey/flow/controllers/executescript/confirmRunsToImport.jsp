@@ -16,27 +16,15 @@
  */
 %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%@ page import="org.labkey.api.pipeline.PipeRoot" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.util.URIUtil" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportRunsForm" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ page import="org.labkey.api.pipeline.browse.PipelinePathForm" %>
-<%@ page import="java.net.URI" %>
-<%@ page import="org.labkey.api.pipeline.PipelineService" %>
-<%@ page import="java.io.File" %>
-<%@ page import="java.io.FileFilter" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.labkey.flow.analysis.model.FCS" %>
 <%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.util.FileUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ImportRunsForm> me = (JspView<ImportRunsForm>) HttpView.currentView();
@@ -44,8 +32,6 @@
     ViewContext context = HttpView.getRootContext();
 
     Container c = context.getContainer();
-    PipeRoot pr = PipelineService.get().findPipelineRoot(c);
-    URI rootURI = pr.getUri();
 
     Map<String, String> paths = form.getNewPaths();
 

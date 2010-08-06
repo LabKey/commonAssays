@@ -23,7 +23,6 @@ import org.labkey.ms2.pipeline.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.*;
 
 /**
@@ -244,16 +243,16 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
     private void writeSequestV1ParamFile(File fileParams, Map<String, String> params) throws SequestParamsException
     {
-        URI uriSequenceRoot = getJobSupport().getSequenceRootDirectory().toURI();
+        File sequenceRoot = getJobSupport().getSequenceRootDirectory();
         writeSequestParamFile(fileParams,
-            SequestParamsBuilderFactory.createVersion1Builder(params, uriSequenceRoot));
+            SequestParamsBuilderFactory.createVersion1Builder(params, sequenceRoot));
     }
 
     private void writeSequestV2ParamFile(File fileParams, Map<String, String> params) throws SequestParamsException
     {
-        URI uriSequenceRoot = getJobSupport().getSequenceRootDirectory().toURI();
+        File sequenceRoot = getJobSupport().getSequenceRootDirectory();
         writeSequestParamFile(fileParams,
-            SequestParamsBuilderFactory.createVersion2Builder(params, uriSequenceRoot));
+            SequestParamsBuilderFactory.createVersion2Builder(params, sequenceRoot));
     }
 
     private void writeSequestParamFile(File fileParams, SequestParamsBuilder builder)

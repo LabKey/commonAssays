@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.pipeline.ParamParser;
 
@@ -55,9 +56,9 @@ abstract public class AbstractMS2SearchProtocolFactory extends AbstractFileAnaly
 
     public abstract String getDefaultParametersResource();
 
-    public String getDefaultParametersXML(File dirRoot) throws IOException
+    public String getDefaultParametersXML(PipeRoot root) throws IOException
     {
-        String xml = super.getDefaultParametersXML(dirRoot);
+        String xml = super.getDefaultParametersXML(root);
         if (xml != null)
             return xml;
         return new ResourceDefaultsReader().readXML();

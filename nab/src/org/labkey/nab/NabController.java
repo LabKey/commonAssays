@@ -1700,8 +1700,7 @@ public class NabController extends SpringActionController
                 // just grab any root, it doesn't matter
                 for (PipeRoot root : PipelineService.get().getAllPipelineRoots().values())
                 {
-                    File rootPath = root.getRootPath();
-                    if (rootPath.exists())
+                    if (root.isValid())
                     {
                         ViewBackgroundInfo info = getViewBackgroundInfo();
                         _container = root.getContainer();

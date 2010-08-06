@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.TaskId;
@@ -53,8 +54,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         FileType ft = new FileType(getRawPepXMLSuffix(),
                 gzSupport);
         String name = ft.getName(dirAnalysis,baseName);
-        File f = new File(dirAnalysis, name);
-        return f;
+        return new File(dirAnalysis, name);
     }
 
     // useful for locating an existing file that may or may not be .gz
@@ -69,13 +69,14 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     public AbstractMS2SearchPipelineJob(AbstractMS2SearchProtocol protocol,
                                         String providerName,
                                         ViewBackgroundInfo info,
+                                        PipeRoot root,
                                         String protocolName,
                                         File dirSequenceRoot,
                                         File fileParameters,
                                         File filesInput[]
     ) throws IOException
     {
-        super(protocol, providerName, info, protocolName, fileParameters, filesInput);
+        super(protocol, providerName, info, root, protocolName, fileParameters, filesInput);
 
         _dirSequenceRoot = dirSequenceRoot;
 
@@ -162,9 +163,6 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         return new File(getAnalysisDirectory(), name);
     }
 
-    abstract public String getSearchEngine();
-
-
     /**
      * Override to turn off PeptideProphet and ProteinProphet analysis.
      * @return true if Prophets should run.
@@ -249,15 +247,10 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         {
             String[] databases = paramDatabase.split(";");
             for (String path : databases)
-                arrFiles.add(MS2PipelineManager.getSequenceDBFile(_dirSequenceRoot.toURI(), path));
+                arrFiles.add(MS2PipelineManager.getSequenceDBFile(_dirSequenceRoot, path));
         }
 
         return arrFiles.toArray(new File[arrFiles.size()]);
-    }
-
-    public boolean isXPressQuantitation()
-    {
-        return "xpress".equalsIgnoreCase(getParameters().get("pipeline quantitation, algorithm"));
     }
 
     public boolean isFractions()

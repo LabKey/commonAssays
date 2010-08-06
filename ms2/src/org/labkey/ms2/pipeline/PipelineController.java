@@ -79,22 +79,6 @@ public class PipelineController extends SpringActionController
         return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(container);
     }
 
-    public String getErrorMessage(BindException errors)
-    {
-        StringBuffer s = new StringBuffer();
-        if (errors != null && errors.getGlobalErrors() != null)
-        {
-            for (ObjectError error : (List<ObjectError>) errors.getGlobalErrors())
-            {
-                if (s.length() > 0)
-                    s.append("<br>");
-                s.append(error.getDefaultMessage());
-            }
-        }
-
-        return StringUtils.trimToNull(s.toString());
-    }
-
     @RequiresPermissionClass(ReadPermission.class)
     public class BeginAction extends SimpleRedirectAction
     {
@@ -191,11 +175,6 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static ActionURL urlSearchXTandem(Container container)
-    {
-        return new ActionURL(SearchXTandemAction.class, container);
-    }
-
     @RequiresPermissionClass(InsertPermission.class)
     public class SearchXTandemAction extends SearchAction
     {
@@ -205,11 +184,6 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static ActionURL urlSearchMascot(Container container)
-    {
-        return new ActionURL(SearchMascotAction.class, container);
-    }
-
     @RequiresPermissionClass(InsertPermission.class)
     public class SearchMascotAction extends SearchAction
     {
@@ -217,11 +191,6 @@ public class PipelineController extends SpringActionController
         {
             return MascotCPipelineProvider.name;
         }
-    }
-
-    public static ActionURL urlSearchSequest(Container container)
-    {
-        return new ActionURL(SearchSequestAction.class, container);
     }
 
     @RequiresPermissionClass(InsertPermission.class)
@@ -247,7 +216,7 @@ public class PipelineController extends SpringActionController
     @RequiresPermissionClass(InsertPermission.class)
     public class SearchAction extends FormViewAction<MS2SearchForm>
     {
-        private File _dirRoot;
+        private PipeRoot _root;
         private File _dirSeqRoot;
         private File _dirData;
         private AbstractMS2SearchPipelineProvider _provider;
@@ -271,19 +240,14 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView handleRequest(MS2SearchForm form, BindException errors) throws Exception
         {
-            PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
-            if (pr == null || !URIUtil.exists(pr.getUri()))
+            _root = PipelineService.get().findPipelineRoot(getContainer());
+            if (_root == null || !_root.isValid())
                 return HttpView.throwNotFound();
 
-            URI uriRoot = pr.getUri();
-            _dirRoot = new File(uriRoot);
-            _dirSeqRoot = new File(MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()));
+            _dirSeqRoot = MS2PipelineManager.getSequenceDatabaseRoot(_root.getContainer());
 
-            URI uriData = URIUtil.resolve(uriRoot, form.getPath());
-            if (uriData == null)
-                throw new NotFoundException("Invalid path " + form.getPath());
-            _dirData = new File(uriData);
-            if (!NetworkDrive.exists(_dirData))
+            _dirData = _root.resolvePath(form.getPath());
+            if (_dirData == null || !NetworkDrive.exists(_dirData))
                 throw new NotFoundException("Path does not exist " + form.getPath());
 
             if (getProviderName() != null)
@@ -302,7 +266,7 @@ public class PipelineController extends SpringActionController
                         getContainer(), getUser());
                 if (protocolNameLast != null && !"".equals(protocolNameLast))
                 {
-                    String[] protocolNames = protocolFactory.getProtocolNames(_dirRoot.toURI(), _dirData);
+                    String[] protocolNames = protocolFactory.getProtocolNames(_root, _dirData);
                     // Make sure it is still around.
                     if (Arrays.asList(protocolNames).contains(protocolNameLast))
                         form.setProtocol(protocolNameLast);
@@ -329,7 +293,7 @@ public class PipelineController extends SpringActionController
                     }
                     else
                     {
-                        _protocol = protocolFactory.load(uriRoot, protocolName);
+                        _protocol = protocolFactory.load(_root, protocolName);
                     }
 
                     form.setProtocolName(_protocol.getName());
@@ -353,7 +317,7 @@ public class PipelineController extends SpringActionController
             {
                 getPageConfig().setTemplate(PageConfig.Template.None);
 
-                if (success && null != form)
+                if (success)
                     validate(form, errors);
                 success = errors == null || !errors.hasErrors();
 
@@ -412,10 +376,10 @@ public class PipelineController extends SpringActionController
                     _protocol.setDbPath(form.getSequenceDBPath());
                     _protocol.setDbNames(new String[] {form.getSequenceDB()});
                     _protocol.setEmail(getUser().getEmail());
-                    _protocol.validateToSave(_dirRoot.toURI());
+                    _protocol.validateToSave(_root);
                     if (form.isSaveProtocol())
                     {
-                        _protocol.saveDefinition(_dirRoot.toURI());
+                        _protocol.saveDefinition(_root);
                         PipelineService.get().rememberLastProtocolSetting(_protocol.getFactory(),
                                 getContainer(), getUser(), form.getProtocolName());   
                     }
@@ -437,7 +401,7 @@ public class PipelineController extends SpringActionController
                     }
                 }
 
-                _protocol.getFactory().ensureDefaultParameters(_dirRoot);
+                _protocol.getFactory().ensureDefaultParameters(_root);
 
                 File fileParameters = _protocol.getParametersFile(_dirData);
                 // Make sure parameters XML file exists for the job when it runs.
@@ -448,7 +412,7 @@ public class PipelineController extends SpringActionController
                 }
 
                 AbstractMS2SearchPipelineJob job =
-                        _protocol.createPipelineJob(getViewBackgroundInfo(), mzXMLFiles, fileParameters);
+                        _protocol.createPipelineJob(getViewBackgroundInfo(), _root, mzXMLFiles, fileParameters);
 
                 PipelineService.get().queueJob(job);
             }
@@ -490,8 +454,7 @@ public class PipelineController extends SpringActionController
             props.put("searchEngine", form.getSearchEngine());
             props.put("targetAction", SpringActionController.getActionName(getAction()) + ".view");
             props.put("path", form.getPath());
-            GWTView result = new GWTView(org.labkey.ms2.pipeline.client.Search.class, props);
-            return result;
+            return new GWTView(org.labkey.ms2.pipeline.client.Search.class, props);
         }
 
         private String getErrors(BindException errors)
@@ -571,12 +534,11 @@ public class PipelineController extends SpringActionController
             ConfigureSequenceDB page = (ConfigureSequenceDB) FormPage.get(
                     PipelineController.class, form, "ConfigureSequenceDB.jsp");
 
-            URI localSequenceRoot = MS2PipelineManager.getSequenceDatabaseRoot(getContainer());
-            if (localSequenceRoot == null)
+            File fileRoot = MS2PipelineManager.getSequenceDatabaseRoot(getContainer());
+            if (fileRoot == null)
                 page.setLocalPathRoot("");
             else
             {
-                File fileRoot = new File(localSequenceRoot);
                 if (!NetworkDrive.exists(fileRoot))
                     errors.reject(ERROR_MSG, "FASTA root \"" + fileRoot + "\" does not exist.");
                 boolean allowUpload = MS2PipelineManager.allowSequenceDatabaseUploads(getUser(), getContainer());
@@ -682,7 +644,7 @@ public class PipelineController extends SpringActionController
 
     protected abstract class SetDefaultsActionBase extends FormViewAction<SetDefaultsForm>
     {
-        private File _dirRoot;
+        private PipeRoot _root;
         private AbstractMS2SearchPipelineProvider _provider;
 
         public abstract String getProviderName();
@@ -691,11 +653,10 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView handleRequest(SetDefaultsForm setDefaultsForm, BindException errors) throws Exception
         {
-            PipeRoot pr = PipelineService.get().getPipelineRootSetting(getContainer());
-            if (pr == null)
+            _root = PipelineService.get().getPipelineRootSetting(getContainer());
+            if (_root == null)
                 return HttpView.throwNotFound("A pipeline root is not set on this folder.");
 
-            _dirRoot = new File(pr.getUri());
             _provider = (AbstractMS2SearchPipelineProvider)
                     PipelineService.get().getPipelineProvider(getProviderName());
 
@@ -710,7 +671,7 @@ public class PipelineController extends SpringActionController
         {
             try
             {
-                _provider.getProtocolFactory().setDefaultParametersXML(_dirRoot, form.getConfigureXml());
+                _provider.getProtocolFactory().setDefaultParametersXML(_root, form.getConfigureXml());
             }
             catch (IllegalArgumentException e)
             {
@@ -738,7 +699,7 @@ public class PipelineController extends SpringActionController
         {
             setHelpTopic(getHelpTopic());
             if (!reshow)
-                form.setConfigureXml(_provider.getProtocolFactory().getDefaultParametersXML(_dirRoot));
+                form.setConfigureXml(_provider.getProtocolFactory().getDefaultParametersXML(_root));
             return getJspView(form, errors);
         }
 

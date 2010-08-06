@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
+import java.io.File;
 import java.net.URI;
 import java.util.Map;
 
@@ -25,13 +26,13 @@ import java.util.Map;
  * Time: 4:45:24 PM
  */
 public class SequestParamsBuilderFactory {
-    public static SequestParamsBuilder createVersion1Builder(Map<String, String> sequestInputParams, URI uriSequenceRoot)
+    public static SequestParamsBuilder createVersion1Builder(Map<String, String> sequestInputParams, File sequenceRoot)
     {
-         return new SequestParamsV1Builder(sequestInputParams, uriSequenceRoot);
+         return new SequestParamsV1Builder(sequestInputParams, sequenceRoot);
     }
 
-    public static SequestParamsBuilder createVersion2Builder(Map<String, String> sequestInputParams, URI uriSequenceRoot)
+    public static SequestParamsBuilder createVersion2Builder(Map<String, String> sequestInputParams, File sequenceRoot)
     {
-         return new SequestParamsV2Builder(sequestInputParams, uriSequenceRoot);
+         return new SequestParamsV2Builder(sequestInputParams, sequenceRoot);
     }
 }

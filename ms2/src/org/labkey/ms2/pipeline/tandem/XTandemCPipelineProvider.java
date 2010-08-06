@@ -28,7 +28,6 @@ import org.labkey.ms2.pipeline.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -143,14 +142,14 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return XTandemSearchProtocolFactory.get();
     }
 
-    public List<String> getSequenceDbPaths(URI sequenceRoot) throws IOException
+    public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException
     {
-        return MS2PipelineManager.addSequenceDbPaths(new File(sequenceRoot), "", new ArrayList<String>());
+        return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<String>());
     }
 
-    public List<String> getSequenceDbDirList(URI sequenceRoot) throws IOException
+    public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException
     {
-        return MS2PipelineManager.getSequenceDirList(new File(sequenceRoot), "");
+        return MS2PipelineManager.getSequenceDirList(sequenceRoot, "");
     }
 
     public List<String> getTaxonomyList() throws IOException

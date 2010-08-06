@@ -18,14 +18,13 @@ package org.labkey.ms2.pipeline.comet;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -86,12 +85,12 @@ public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }
 
-    public List<String> getSequenceDbPaths(URI sequenceRoot) throws IOException {
+    public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException {
         // No user interface for this search type.
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }
 
-    public List<String> getSequenceDbDirList(URI sequenceRoot) throws IOException {
+    public List<String> getSequenceDbDirList(File sequenceRoot) throws IOException {
         // No user interface for this search type.
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }

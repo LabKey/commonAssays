@@ -47,7 +47,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
 import java.io.File;
 import java.net.URI;
 import java.util.*;
@@ -206,14 +205,8 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         }
         form.setDisplayPath(displayPath);
 
-        URI uri = URIUtil.resolve(root.getUri(), form.getPath());
-        if (null == uri)
-        {
-            errors.reject(ERROR_MSG, "The path " + displayPath + " is invalid.");
-            return;
-        }
-        File directory = new File(uri);
-        if (!root.isUnderRoot(directory))
+        File directory = root.resolvePath(form.getPath());
+        if (directory == null)
         {
             errors.reject(ERROR_MSG, "The path " + displayPath + " is invalid.");
             return;
@@ -269,7 +262,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                         displayName = file.getName() + " (" + fcsFiles.length + " fcs files)";
 
                         // make relative to the path parameter
-                        URI relativeURI = URIUtil.relativize(uri, file.toURI());
+                        URI relativeURI = URIUtil.relativize(directory.toURI(), file.toURI());
                         if (relativeURI == null)
                         {
                             errors.reject(ERROR_MSG, file.getName() + " is not under '" + displayPath + "'");
@@ -305,7 +298,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
     public abstract class ImportRunsBaseAction extends SimpleViewAction<ImportRunsForm>
     {
-        protected void validatePipeline() throws ServletException
+        protected void validatePipeline()
         {
             PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
             root.requiresPermission(getContainer(), getUser(), InsertPermission.class);
@@ -316,8 +309,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             validatePipeline();
 
             collectNewPaths(form, errors);
-            JspView<PipelinePathForm> view = new JspView<PipelinePathForm>(AnalysisScriptController.class, "confirmRunsToImport.jsp", form, errors);
-            return view;
+            return new JspView<PipelinePathForm>(AnalysisScriptController.class, "confirmRunsToImport.jsp", form, errors);
         }
 
         protected ModelAndView uploadRuns(ImportRunsForm form, BindException errors) throws Exception
@@ -335,9 +327,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             if (form.isCurrent())
             {
                 PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
-                URI rootURI = pr.getUri();
-                URI dirURI = URIUtil.resolve(rootURI, form.getPath());
-                files = Collections.singletonList(new File(dirURI));
+                files = Collections.singletonList(pr.resolvePath(form.getPath()));
             }
             else
                 files = form.getValidatedFiles(form.getContainer());

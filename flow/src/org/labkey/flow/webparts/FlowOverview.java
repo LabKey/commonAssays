@@ -70,7 +70,7 @@ public class FlowOverview extends Overview
         super(user, container);
         PipelineService pipeService = PipelineService.get();
         PipeRoot pipeRoot = pipeService.findPipelineRoot(getContainer());
-        _hasPipelineRoot = pipeRoot != null && pipeRoot.getUri() != null;
+        _hasPipelineRoot = pipeRoot != null;
         _canSetPipelineRoot = isGlobalAdmin();
         _canInsert = hasPermission(InsertPermission.class);
         _canUpdate = hasPermission(UpdatePermission.class);

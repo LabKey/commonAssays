@@ -16,13 +16,13 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -82,12 +82,12 @@ public class MascotSearchProtocol extends AbstractMS2SearchProtocol<MascotPipeli
     }
 
     public MascotPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                               File[] filesInput,
+                                               PipeRoot root, File[] filesInput,
                                                File fileParameters
     )
             throws IOException
     {
-        return new MascotPipelineJob(this, info, getName(), getDirSeqRoot(),
+        return new MascotPipelineJob(this, info, root, getName(), getDirSeqRoot(),
                 filesInput, fileParameters);
     }
 }

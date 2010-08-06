@@ -18,6 +18,7 @@ package org.labkey.ms2;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
@@ -547,7 +548,7 @@ public abstract class MS2Importer
         }
         catch (SQLException e)
         {
-            _systemLog.error(e);
+            throw new RuntimeSQLException(e);
         }
     }
 

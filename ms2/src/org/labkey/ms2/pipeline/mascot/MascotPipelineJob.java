@@ -45,13 +45,14 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
 
     public MascotPipelineJob(MascotSearchProtocol protocol,
                              ViewBackgroundInfo info,
+                             PipeRoot root,
                              String name,
                              File dirSequenceRoot,
                              File filesMzXML[],
                              File fileInputXML
     ) throws IOException
     {
-        super(protocol, MascotCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML);
+        super(protocol, MascotCPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
         AppProps appProps = AppProps.getInstance();
         _mascotServer = appProps.getMascotServer();
@@ -102,11 +103,6 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
     public void setMascotSequenceRelease(String sequenceRelease)
     {
         _mascotSequenceRelease = sequenceRelease;
-    }
-
-    public String getSearchEngine()
-    {
-        return "mascot";
     }
 
     public TaskId getTaskPipelineId()

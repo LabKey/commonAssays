@@ -16,14 +16,13 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
-import org.apache.log4j.Logger;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 
 /**
  * User: billnelson@uky.edu
@@ -43,16 +42,16 @@ public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipe
     }
 
     public SequestPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                                File[] filesInput,
+                                                PipeRoot root, File[] filesInput,
                                                 File fileParameters
     )
             throws IOException
     {
-        return new SequestPipelineJob(this, info, getName(), getDirSeqRoot(),
+        return new SequestPipelineJob(this, info, root, getName(), getDirSeqRoot(),
                 filesInput, fileParameters);
     }
 
-    public void validate(URI uriRoot) throws PipelineValidationException
+    public void validate(PipeRoot root) throws PipelineValidationException
     {
         String[] dbNames = getDbNames();
         if(dbNames == null || dbNames.length == 0)
@@ -62,6 +61,6 @@ public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipe
         if (!fileSequenceDB.exists())
             throw new IllegalArgumentException("Sequence database '" + dbNames[0] + "' is not found in local FASTA root.");
 
-        super.validate(uriRoot);
+        super.validate(root);
     }
 }
