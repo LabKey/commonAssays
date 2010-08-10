@@ -18,9 +18,11 @@ package org.labkey.elispot;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.study.*;
+import org.labkey.api.util.Pair;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Arrays;
 
@@ -42,9 +44,15 @@ public class ElispotPlateTypeHandler implements PlateTypeHandler
         return names;
     }
 
-    public PlateTemplate createPlate(String templateTypeName, Container container) throws SQLException
+    @Override
+    public List<Pair<Integer, Integer>> getSupportedPlateSizes()
     {
-        PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType());
+        return Collections.singletonList(new Pair<Integer, Integer>(8, 12));
+    }
+
+    public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount) throws SQLException
+    {
+        PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
 
         for (int sample = 0; sample < 4; sample++)
         {

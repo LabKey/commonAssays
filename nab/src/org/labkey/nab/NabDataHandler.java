@@ -53,8 +53,6 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
     public static final DataType NAB_TRANSFORMED_DATA_TYPE = new DataType("AssayRunNabTransformedData"); // a marker data type
     private static final int START_ROW = 6; //0 based, row 7 inthe workshet
     private static final int START_COL = 0;
-    private static final int PLATE_WIDTH = 12;
-    private static final int PLATE_HEIGHT = 8;
 
     class NabExcelParser implements NabDataFileParser
     {
@@ -375,7 +373,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
         for (int sheet = 0; sheet < workbook.getNumberOfSheets() && dataLocation == null; sheet++)
         {
             plateSheet = workbook.getSheet(sheet);
-            dataLocation = getPlateDataLocation(plateSheet);
+            dataLocation = getPlateDataLocation(plateSheet, nabTemplate.getRows(), nabTemplate.getColumns());
         }
 
         int startRow;
@@ -468,13 +466,13 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
         return null;
     }
 
-    private static Pair<Integer, Integer> getPlateDataLocation(Sheet plateSheet)
+    private static Pair<Integer, Integer> getPlateDataLocation(Sheet plateSheet, int plateHeight, int plateWidth)
     {
-        for (int row = 0; row < plateSheet.getRows() - PLATE_HEIGHT; row++)
+        for (int row = 0; row < plateSheet.getRows() - plateHeight; row++)
         {
-            for (int col = 0; col < plateSheet.getColumns() - PLATE_WIDTH; col++)
+            for (int col = 0; col < plateSheet.getColumns() - plateWidth; col++)
             {
-                if (isPlateMatrix(plateSheet, row, col))
+                if (isPlateMatrix(plateSheet, row, col, plateHeight, plateWidth))
                 {
                     // add one to row and col, since (row,col) is the index of the data grid
                     // where the first row is column labels and the first column is row labels.
@@ -485,20 +483,20 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
         return null;
     }
 
-    private static boolean isPlateMatrix(Sheet plateSheet, int startRow, int startCol)
+    private static boolean isPlateMatrix(Sheet plateSheet, int startRow, int startCol, int plateHeight, int plateWidth)
     {
         Cell[] row = plateSheet.getRow(startRow);
         // make sure that there are plate_width + 1 cells to the right of startCol:
-        if (startCol + PLATE_WIDTH + 1 > row.length)
+        if (startCol + plateWidth + 1 > row.length)
             return false;
 
         Cell[] column = plateSheet.getColumn(startCol);
         // make sure that there are plate_width + 1 cells to the right of startCol:
-        if (startRow + PLATE_HEIGHT + 1 > column.length)
+        if (startRow + plateHeight + 1 > column.length)
             return false;
 
         // check for 1-12 in the row:
-        for (int colIndex = startCol + 1; colIndex < startCol + PLATE_WIDTH + 1; colIndex++)
+        for (int colIndex = startCol + 1; colIndex < startCol + plateWidth + 1; colIndex++)
         {
             Cell current = row[colIndex];
             String indexString = String.valueOf(colIndex - startCol);
@@ -507,7 +505,7 @@ public class NabDataHandler extends AbstractNabDataHandler implements TransformD
         }
 
         char start = 'A';
-        for (int rowIndex = startRow + 1; rowIndex < startRow + PLATE_HEIGHT + 1; rowIndex++)
+        for (int rowIndex = startRow + 1; rowIndex < startRow + plateHeight + 1; rowIndex++)
         {
             Cell current = column[rowIndex];
             String indexString = String.valueOf(start++);

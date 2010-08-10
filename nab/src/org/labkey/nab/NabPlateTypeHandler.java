@@ -18,8 +18,10 @@ package org.labkey.nab;
 
 import org.labkey.api.study.*;
 import org.labkey.api.data.Container;
+import org.labkey.api.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.sql.SQLException;
 
@@ -42,9 +44,18 @@ public class NabPlateTypeHandler implements PlateTypeHandler
         return names;
     }
 
-    public PlateTemplate createPlate(String templateTypeName, Container container) throws SQLException
+    @Override
+    public List<Pair<Integer, Integer>> getSupportedPlateSizes()
     {
-        PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType());
+        List<Pair<Integer, Integer>> sizes = new ArrayList<Pair<Integer, Integer>>();
+        sizes.add(new Pair<Integer, Integer>(8, 12));
+        sizes.add(new Pair<Integer, Integer>(16, 24));
+        return sizes;
+    }
+
+    public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount) throws SQLException
+    {
+        PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
         for (NabManager.PlateProperty prop : NabManager.PlateProperty.values())
             template.setProperty(prop.name(), "");
 
@@ -57,13 +68,13 @@ public class NabPlateTypeHandler implements PlateTypeHandler
 
         if (templateTypeName != null && templateTypeName.equalsIgnoreCase("Default"))
         {
-            for (int sample = 0; sample < 5; sample++)
+            for (int sample = 0; sample < (template.getColumns() - 2)/2; sample++)
             {
                 int firstCol = (sample * 2) + 2;
                 // create the overall specimen group, consisting of two adjacent columns:
                 WellGroupTemplate sampleGroup = template.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
                         PlateService.get().createPosition(container, 0, firstCol),
-                        PlateService.get().createPosition(container, 7, firstCol + 1));
+                        PlateService.get().createPosition(container, template.getRows() - 1, firstCol + 1));
 //                sampleGroup.setProperty(prop.name(), "");
                 for (NabManager.SampleProperty prop : NabManager.SampleProperty.values())
                 {
