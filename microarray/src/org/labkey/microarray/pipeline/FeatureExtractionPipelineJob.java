@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 
 import org.labkey.api.microarray.FeatureExtractionClient;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -44,9 +45,9 @@ public class FeatureExtractionPipelineJob extends PipelineJob
 
     public FeatureExtractionPipelineJob(ViewBackgroundInfo info,
                                         String protocol,
-                                        List<File> imageFiles, String extractionEngine) throws SQLException
+                                        List<File> imageFiles, String extractionEngine, PipeRoot root) throws SQLException
     {
-        super(MicroarrayPipelineProvider.NAME, info);
+        super(MicroarrayPipelineProvider.NAME, info, root);
 
         _protocol = protocol;
         _extractionEngine = extractionEngine;

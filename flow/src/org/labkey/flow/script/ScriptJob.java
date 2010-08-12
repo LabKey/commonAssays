@@ -22,6 +22,7 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.*;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
@@ -178,9 +179,9 @@ abstract public class ScriptJob extends FlowJob
         InputRole role;
     }
 
-    public ScriptJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript script, FlowProtocolStep step) throws Exception
+    public ScriptJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript script, FlowProtocolStep step, PipeRoot root) throws Exception
     {
-        super(FlowPipelineProvider.NAME, info);
+        super(FlowPipelineProvider.NAME, info, root);
         _runAnalysisScript = script;
         _step = step;
         _experimentName = experimentName;

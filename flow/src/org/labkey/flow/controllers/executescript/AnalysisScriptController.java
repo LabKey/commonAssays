@@ -136,7 +136,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                 experimentName = experiment.getName();
             }
             FlowScript analysis = form.getProtocol();
-            AnalyzeJob job = new AnalyzeJob(getViewBackgroundInfo(), experimentName, experimentLSID, FlowProtocol.ensureForContainer(getUser(), getContainer()), analysis, form.getProtocolStep(), runIds);
+            AnalyzeJob job = new AnalyzeJob(getViewBackgroundInfo(), experimentName, experimentLSID, FlowProtocol.ensureForContainer(getUser(), getContainer()), analysis, form.getProtocolStep(), runIds, PipelineService.get().findPipelineRoot(getContainer()));
             if (form.getCompensationMatrixId() != 0)
             {
                 job.setCompensationMatrix(FlowCompensationMatrix.fromCompId(form.getCompensationMatrixId()));
@@ -324,16 +324,16 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
             validatePipeline();
             List<File> files;
+            PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
             if (form.isCurrent())
             {
-                PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
                 files = Collections.singletonList(pr.resolvePath(form.getPath()));
             }
             else
                 files = form.getValidatedFiles(form.getContainer());
 
             ViewBackgroundInfo vbi = getViewBackgroundInfo();
-            AddRunsJob job = new AddRunsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), files);
+            AddRunsJob job = new AddRunsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), files, pr);
             return HttpView.redirect(executeScript(job));
         }
 
@@ -815,7 +815,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
             boolean createKeywordRun = keywordRun == null && runFilePathRoot != null;
             WorkspaceJob job = new WorkspaceJob(info, experiment,
-                    workspaceData, runFilePathRoot, createKeywordRun, false);
+                    workspaceData, runFilePathRoot, createKeywordRun, false, getPipeRoot());
             HttpView.throwRedirect(executeScript(job));
         }
 

@@ -30,6 +30,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.ms2.MS2Urls;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.PipelineRootContainerTree;
 import org.labkey.api.pipeline.PipelineService;
@@ -4817,14 +4818,15 @@ public class MS2Controller extends SpringActionController
                     AbstractMS2SearchProtocolFactory protocolFactory =
                             AbstractMS2SearchProtocolFactory.fromFile(AbstractMS2SearchPipelineProvider.class, f);
 
+                    PipeRoot pipeRoot = PipelineService.get().findPipelineRoot(getContainer());
                     int run;
                     if (MascotSearchProtocolFactory.get().getClass().equals(protocolFactory.getClass()))
                     {
-                        run = MS2Manager.addMascotRunToQueue(info, f, form.getDescription()).getRunId();
+                        run = MS2Manager.addMascotRunToQueue(info, f, form.getDescription(), pipeRoot).getRunId();
                     }
                     else
                     {
-                        run = MS2Manager.addRunToQueue(info, f, form.getDescription()).getRunId();
+                        run = MS2Manager.addRunToQueue(info, f, form.getDescription(), pipeRoot).getRunId();
                     }
 
                     if (run == -1)
@@ -4974,7 +4976,7 @@ public class MS2Controller extends SpringActionController
             {
                 if (f.isFile())
                 {
-                    ProteinProphetPipelineJob job = new ProteinProphetPipelineJob(getViewBackgroundInfo(), f);
+                    ProteinProphetPipelineJob job = new ProteinProphetPipelineJob(getViewBackgroundInfo(), f, form.getPipeRoot(getContainer()));
                     PipelineService.get().queueJob(job);
                 }
                 else

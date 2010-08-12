@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -37,9 +38,9 @@ public class ProteinProphetPipelineJob extends PipelineJob
 {
     private final File _file;
 
-    public ProteinProphetPipelineJob(ViewBackgroundInfo info, File file) throws SQLException
+    public ProteinProphetPipelineJob(ViewBackgroundInfo info, File file, PipeRoot root) throws SQLException
     {
-        super(ProteinProphetPipelineProvider.NAME, info);
+        super(ProteinProphetPipelineProvider.NAME, info, root);
         _file = file;
 
         setLogFile(new File(_file.getParentFile(), _file.getName() + ".log"));

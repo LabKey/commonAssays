@@ -43,9 +43,9 @@ public class MicroarrayUpgradeJob extends PipelineJob implements Serializable
     private static final String UPGRADE_EXCEPTION = "An unexpected error occurred attempting to upgrade the microarray run: %s, skipping.";
     private static final String UPGRADE_STATS = "Upgrade job complete. Number of assay instances checked: %s. Number of assay runs checked: %s.";
 
-    public MicroarrayUpgradeJob(String provider, ViewBackgroundInfo info) throws IOException
+    public MicroarrayUpgradeJob(String provider, ViewBackgroundInfo info, PipeRoot root) throws IOException
     {
-        super(provider, info);
+        super(provider, info, root);
         init();
     }
 
@@ -56,7 +56,8 @@ public class MicroarrayUpgradeJob extends PipelineJob implements Serializable
         {
             throw new FileNotFoundException("Could not find pipeline root on disk for container " + getInfo().getContainer().getPath());
         }
-        File logFile = File.createTempFile("upgradeMicroarray", ".log", root.getRootPath());
+        
+        File logFile = File.createTempFile("upgradeMicroarray", ".log", root.ensureSystemDirectory());
         setLogFile(logFile);
     }
 

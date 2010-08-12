@@ -19,6 +19,7 @@ package org.labkey.flow.controllers.run;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -309,7 +310,7 @@ public class RunController extends BaseFlowController<RunController.Action>
                 errors.reject(ERROR_MSG, "This run cannot be moved to this analysis because there is already a run there.");
                 return false;
             }
-            MoveRunFromWorkspaceJob job = new MoveRunFromWorkspaceJob(getViewBackgroundInfo(), experiment, run);
+            MoveRunFromWorkspaceJob job = new MoveRunFromWorkspaceJob(getViewBackgroundInfo(), experiment, run, PipelineService.get().findPipelineRoot(getContainer()));
             successURL = executeScript(job);
             return true;
         }

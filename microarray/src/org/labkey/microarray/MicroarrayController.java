@@ -204,7 +204,7 @@ public class MicroarrayController extends SpringActionController
                     ViewBackgroundInfo info = getViewBackgroundInfo();
                     _container = root.getContainer();
                     info.setContainer(_container);
-                    PipelineJob job = new MicroarrayUpgradeJob(MicroarrayPipelineProvider.NAME, info);
+                    PipelineJob job = new MicroarrayUpgradeJob(MicroarrayPipelineProvider.NAME, info, root);
                     PipelineService.get().getPipelineQueue().addJob(job);
 
                     return true;
@@ -239,7 +239,7 @@ public class MicroarrayController extends SpringActionController
 
             try
             {
-                PipelineJob job = new FeatureExtractionPipelineJob(getViewBackgroundInfo(), form.getProtocolName(), form.getValidatedFiles(c), form.getExtractionEngine());
+                PipelineJob job = new FeatureExtractionPipelineJob(getViewBackgroundInfo(), form.getProtocolName(), form.getValidatedFiles(c), form.getExtractionEngine(), PipelineService.get().findPipelineRoot(getContainer()));
                 PipelineService.get().queueJob(job);
 
                 HttpView.throwRedirect(PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(c));

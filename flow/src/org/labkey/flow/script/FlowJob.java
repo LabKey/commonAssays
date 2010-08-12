@@ -17,6 +17,7 @@
 package org.labkey.flow.script;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.DateUtil;
@@ -44,15 +45,10 @@ public abstract class FlowJob extends PipelineJob
 
     private transient ActionURL _statusHref;
 
-    public FlowJob(String provider, ViewBackgroundInfo info)
+    public FlowJob(String provider, ViewBackgroundInfo info, PipeRoot root)
             throws SQLException
     {
-        super(provider, info);
-    }
-
-    public FlowJob(PipelineJob job)
-    {
-        super(job);
+        super(provider, info, root);
     }
 
     abstract protected void doRun() throws Throwable;

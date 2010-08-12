@@ -17,6 +17,7 @@
 package org.labkey.flow.script;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
@@ -32,9 +33,9 @@ public class AnalyzeJob extends ScriptJob
 
     int[] _runIds;
 
-    public AnalyzeJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript analysis, FlowProtocolStep step, int[] runIds) throws Exception
+    public AnalyzeJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript analysis, FlowProtocolStep step, int[] runIds, PipeRoot root) throws Exception
     {
-        super(info, experimentName, experimentLSID, protocol, analysis, step);
+        super(info, experimentName, experimentLSID, protocol, analysis, step, root);
         _runIds = runIds;
     }
 

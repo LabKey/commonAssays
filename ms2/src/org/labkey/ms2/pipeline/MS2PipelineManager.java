@@ -274,7 +274,7 @@ public class MS2PipelineManager
         if (rootSeq != null && root != null && rootSeq.equals(getSequenceDatabaseRoot(root).toURI()))
              rootSeq = null;
 
-        service.setPipelineRoot(user, container, rootSeq, SEQUENCE_DB_ROOT_TYPE, null, false);
+        service.setPipelineRoot(user, container, SEQUENCE_DB_ROOT_TYPE, null, false, rootSeq);
         if (root != null)
             service.setPipelineProperty(container, ALLOW_SEQUENCE_DB_UPLOAD_KEY, allowUpload ? "true" : "false");
         else

@@ -1705,7 +1705,7 @@ public class NabController extends SpringActionController
                         ViewBackgroundInfo info = getViewBackgroundInfo();
                         _container = root.getContainer();
                         info.setContainer(_container);
-                        PipelineJob job = new NabUpgradeCode.NabAUCUpgradeJob(null, info, upgradeType);
+                        PipelineJob job = new NabUpgradeCode.NabAUCUpgradeJob(null, info, upgradeType, root);
                         PipelineService.get().getPipelineQueue().addJob(job);
 
                         return true;

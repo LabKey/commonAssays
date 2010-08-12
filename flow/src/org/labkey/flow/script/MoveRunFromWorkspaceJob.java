@@ -17,6 +17,7 @@
 package org.labkey.flow.script;
 
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
@@ -26,9 +27,9 @@ import org.labkey.flow.data.FlowRun;
 public class MoveRunFromWorkspaceJob extends ScriptJob
 {
     FlowRun _run;
-    public MoveRunFromWorkspaceJob(ViewBackgroundInfo info, FlowExperiment experiment, FlowRun run) throws Exception
+    public MoveRunFromWorkspaceJob(ViewBackgroundInfo info, FlowExperiment experiment, FlowRun run, PipeRoot root) throws Exception
     {
-        super(info, experiment.getName(), experiment.getLSID(), new FlowProtocol(run.getExperimentRun().getProtocol()), run.getScript(), FlowProtocolStep.analysis);
+        super(info, experiment.getName(), experiment.getLSID(), new FlowProtocol(run.getExperimentRun().getProtocol()), run.getScript(), FlowProtocolStep.analysis, root);
         _run = run;
     }
 

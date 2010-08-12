@@ -58,9 +58,9 @@ public class NabUpgradeCode implements UpgradeCode
             pAUC,
         }
 
-        public NabAUCUpgradeJob(String provider, ViewBackgroundInfo info, UpgradeType type) throws IOException
+        public NabAUCUpgradeJob(String provider, ViewBackgroundInfo info, UpgradeType type, PipeRoot root) throws IOException
         {
-            super(provider, info);
+            super(provider, info, root);
             _type = type;
             init();
         }
@@ -72,7 +72,7 @@ public class NabUpgradeCode implements UpgradeCode
             {
                 throw new FileNotFoundException("Could not find pipeline root on disk.");
             }
-            File logFile = File.createTempFile("upgradeAUC", ".log", root.getRootPath());
+            File logFile = File.createTempFile("upgradeAUC", ".log", root.ensureSystemDirectory());
             setLogFile(logFile);
         }
 

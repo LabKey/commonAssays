@@ -18,7 +18,9 @@ package org.labkey.flow.script;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
@@ -57,10 +59,11 @@ public class WorkspaceJob extends FlowJob
                         WorkspaceData workspaceData,
                         File runFilePathRoot,
                         boolean createKeywordRun,
-                        boolean failOnError)
+                        boolean failOnError,
+                        PipeRoot root)
             throws Exception
     {
-        super(FlowPipelineProvider.NAME, info);
+        super(FlowPipelineProvider.NAME, info, root);
         _experiment = experiment;
         _createKeywordRun = createKeywordRun;
         _runFilePathRoot = runFilePathRoot;
@@ -140,7 +143,7 @@ public class WorkspaceJob extends FlowJob
             if (_createKeywordRun)
             {
                 FlowProtocol protocol = FlowProtocol.ensureForContainer(getInfo().getUser(), getInfo().getContainer());
-                AddRunsJob addruns = new AddRunsJob(getInfo(), protocol, Collections.singletonList(_runFilePathRoot));
+                AddRunsJob addruns = new AddRunsJob(getInfo(), protocol, Collections.singletonList(_runFilePathRoot), PipelineService.get().findPipelineRoot(getContainer()));
                 addruns.setLogFile(getLogFile());
                 addruns.setLogLevel(getLogLevel());
                 addruns.setSubmitted();

@@ -50,7 +50,7 @@
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
 
     ActionURL cancelUrl = PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(container);
-    boolean hasPipelineRoot = pipeRoot != null && pipeRoot.getRootPath() != null;
+    boolean hasPipelineRoot = pipeRoot != null;
     boolean canSetPipelineRoot = context.getUser().isAdministrator() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
 <script type="text/javascript">

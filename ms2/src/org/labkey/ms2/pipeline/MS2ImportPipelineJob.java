@@ -17,6 +17,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.exp.XarContext;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
@@ -40,9 +41,9 @@ public class MS2ImportPipelineJob extends PipelineJob
     private final String _description;
     private MS2Importer.RunInfo _runInfo;
 
-    public MS2ImportPipelineJob(ViewBackgroundInfo info, File file, String description, MS2Importer.RunInfo runInfo) throws SQLException
+    public MS2ImportPipelineJob(ViewBackgroundInfo info, File file, String description, MS2Importer.RunInfo runInfo, PipeRoot root) throws SQLException
     {
-        super(MS2PipelineProvider.name, info);
+        super(MS2PipelineProvider.name, info, root);
         _file = file;
         _description = description;
         _runInfo = runInfo;

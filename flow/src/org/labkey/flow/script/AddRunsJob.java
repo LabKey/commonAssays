@@ -17,6 +17,7 @@
 package org.labkey.flow.script;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.flow.data.*;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -32,9 +33,9 @@ public class AddRunsJob extends ScriptJob
 
     List<File> _paths;
 
-    public AddRunsJob(ViewBackgroundInfo info, FlowProtocol protocol, List<File> paths) throws Exception
+    public AddRunsJob(ViewBackgroundInfo info, FlowProtocol protocol, List<File> paths, PipeRoot root) throws Exception
     {
-        super(info, FlowExperiment.getExperimentRunExperimentName(info.getContainer()), FlowExperiment.getExperimentRunExperimentLSID(info.getContainer()), protocol, null, FlowProtocolStep.keywords);
+        super(info, FlowExperiment.getExperimentRunExperimentName(info.getContainer()), FlowExperiment.getExperimentRunExperimentLSID(info.getContainer()), protocol, null, FlowProtocolStep.keywords, root);
 
         _paths = paths;
     }

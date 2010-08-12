@@ -41,9 +41,9 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
     private final File _file;
 
     public MascotImportPipelineJob(ViewBackgroundInfo info, File file, String description,
-                                MS2Importer.RunInfo runInfo) throws SQLException
+                                MS2Importer.RunInfo runInfo, PipeRoot root) throws SQLException
     {
-        super(info, TPPTask.getPepXMLFile(file.getParentFile(), FileUtil.getBaseName(file)), description, runInfo);
+        super(info, TPPTask.getPepXMLFile(file.getParentFile(), FileUtil.getBaseName(file)), description, runInfo, root);
         _file = file;
     }
 

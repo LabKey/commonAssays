@@ -148,15 +148,15 @@ public class PipelineController extends SpringActionController
                 {
                     if (AbstractMS2SearchProtocol.FT_SEARCH_XAR.isType(file))
                     {
-                        ExperimentService.get().importXarAsync(info, file, description);
+                        ExperimentService.get().importXarAsync(info, file, description, form.getPipeRoot(getContainer()));
                     }
                     else if (TPPTask.isPepXMLFile(file))
                     {
-                        MS2Manager.addRunToQueue(info, file, description);
+                        MS2Manager.addRunToQueue(info, file, description, form.getPipeRoot(getContainer()));
                     }
                     else if (MascotSearchTask.isNativeOutputFile(file))
                     {
-                        MS2Manager.addMascotRunToQueue(info, file, description);
+                        MS2Manager.addMascotRunToQueue(info, file, description, form.getPipeRoot(getContainer()));
                     }
                 }
                 catch (IOException e)
