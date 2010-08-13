@@ -16,8 +16,6 @@
 package org.labkey.ms2.protein.fasta;
 
 import org.labkey.api.collections.CaseInsensitiveHashSet;
-import org.labkey.ms2.protein.fasta.FastaLoader;
-import org.labkey.ms2.protein.fasta.Protein;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -47,9 +45,9 @@ public class FastaValidator
         Set<String> proteinNames = new CaseInsensitiveHashSet(1000);
         List<String> errors = new ArrayList<String>();
         Format lineFormat = DecimalFormat.getIntegerInstance();
-        FastaLoader curLoader = new FastaLoader(_fastaFile);
+        ProteinFastaLoader curLoader = new ProteinFastaLoader(_fastaFile);
 
-        for (FastaLoader.ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
+        for (ProteinFastaLoader.ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
         {
             Protein protein = proteinIterator.next();
 

@@ -107,7 +107,6 @@ cbcassay/src/org/labkey/cbcassay/EditResultsQueryView.java -text
 cbcassay/src/org/labkey/cbcassay/data/CBCData.java -text
 cbcassay/src/org/labkey/cbcassay/data/CBCDataDisplayColumn.java -text
 cbcassay/src/org/labkey/cbcassay/data/CBCDataProperty.java -text
-cbcassay/src/org/labkey/cbcassay/data/DisplayColumnDecorator.java -text
 cbcassay/src/org/labkey/cbcassay/view/showDetails.jsp -text
 elispotassay/module.properties -text
 elispotassay/src/org/labkey/elispot/AbstractElispotDataHandler.java -text

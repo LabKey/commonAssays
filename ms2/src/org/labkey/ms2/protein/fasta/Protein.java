@@ -95,14 +95,14 @@ public class Protein
 
         // Check for special case of repeated gi| at start... if so, remove the initial text, but use it for lookup string
         if (header.startsWith("gi|"))
-            {
+        {
             firstAliasIndex = header.indexOf(" gi|", 2) + 1;
             if (firstAliasIndex < 0 || firstAliasIndex > 30)
                 firstAliasIndex = 0;
-            }
+        }
 
         if (0 == firstAliasIndex)
-            {
+        {
             header = header.replaceAll("\t", " "); // Some annoying FASTA files have tabs instead of spaces 
 
             int firstSpace = header.indexOf(" ");
@@ -114,7 +114,7 @@ public class Protein
 
             if (_lookup.length() > 79)
                 _lookup = _lookup.substring(0, 79);   // Comet truncates protein after first 79 characters
-            }
+        }
         else
             _lookup = header.substring(0, firstAliasIndex).trim();
 
@@ -123,14 +123,14 @@ public class Protein
         if (massStart >= 0)
         {
             try
-                {
+            {
                 int massEnd = header.indexOf(']', massStart);
                 _mass = Double.parseDouble(header.substring(massStart + 6, massEnd));
-                }
+            }
             catch(Exception e)
-                {
+            {
                 // fall through
-                }
+            }
         }
         else
             massStart = header.length();
@@ -151,9 +151,11 @@ public class Protein
         _header = header;
     }
 
-    public String getOrigHeader() {
+    public String getOrigHeader()
+    {
        return _origHeader;
     }
+
     public void setOrigHeader(String h) {
        this._origHeader = h;
     }
@@ -184,7 +186,7 @@ public class Protein
     }
 
     public Alias[] getAliases()
-        {
+    {
         String[] aliasStrings = _header.split("\01");
         Alias[] aliases = new Alias[aliasStrings.length];
 
@@ -192,22 +194,22 @@ public class Protein
             aliases[i] = new Alias(aliasStrings[i]);
 
         return aliases;
-        }
+    }
 
     public double getMass()
-        {
+    {
         return _mass;
-        }
+    }
 
     public String getLookup()
-        {
+    {
         return _lookup;
-        }
+    }
 
     public void setLookup(String lookup)
-        {
+    {
         _lookup = lookup;
-        }
+    }
 
     //lazily parse the header for identifiers
     public Map<String, Set<String>> getIdentifierMap()
@@ -247,19 +249,19 @@ public class Protein
     {
         PrintWriter pw = null;
         try
-            {
+        {
             pw = new PrintWriter(new FileOutputStream(outFastaFile));
             saveProteinArrayToFasta(proteins,pw);
-            }
+        }
         catch (IOException x)
-            {
+        {
                 throw x;
-            }
-           finally
-                {
-                if (null != pw)
-                    pw.close();
-                }
+        }
+        finally
+        {
+            if (null != pw)
+                pw.close();
+        }
     }
 
     /**
@@ -298,8 +300,8 @@ public class Protein
         if (fastaIdentifierString.indexOf(" ") != -1) fastaIdentifierString = fastaIdentifierString.substring(0, fastaIdentifierString.indexOf(" "));
         fastaIdentifierString = fastaIdentifierString.replaceAll(":", "|");
         fastaIdentifierString = fastaIdentifierString.replace("|$", "");
-
         String tokens[] = fastaIdentifierString.split(SEPARATOR_PATTERN);
+
         for (int i = 0; i < tokens.length; i++)
         {
             Map<String, Set<String>>  additionalIds=null;
@@ -313,6 +315,7 @@ public class Protein
                     if (null!=additionalIds) break;
                 }
             }
+
             // if the pattern matching found identifiers, add them to the map and
             // go to the next token.  if the pattern matching found multiple identifiers,
             // bump the token an extra bump for each identifier beyond 1
@@ -324,6 +327,7 @@ public class Protein
             }
 
             String key = tokens[i];
+
             if (key.equalsIgnoreCase("gnl"))
             {
                 if (i < (tokens.length - 2))
@@ -331,7 +335,9 @@ public class Protein
                     key = tokens[++i];
                 }
             }
+
             String value = null;
+
             if (i + 1 < tokens.length)
             {
                 value = tokens[++i];
@@ -348,67 +354,66 @@ public class Protein
                 identifiers = IdPattern.addIdMap(identifiers, additionalIds);
             }
         }
+
         if (wholeHeader != null)
         {
-            Map<String, Set<String>>  additionalIds=null;
             for (String typeName : IdPattern.WHOLE_HEADER_ID_PATTERN_LIST)
             {
-                additionalIds = IdPattern.ID_PATTERN_MAP.get(typeName).getIdFromPattern(new String[]{wholeHeader}, 0);
-                if (null!=additionalIds && additionalIds.size() > 0)
+                Map<String, Set<String>> additionalIds = IdPattern.ID_PATTERN_MAP.get(typeName).getIdFromPattern(new String[]{wholeHeader}, 0);
+
+                if (null != additionalIds && additionalIds.size() > 0)
                 {
                     identifiers = IdPattern.addIdMap(identifiers, additionalIds);
                 }
             }
 
         }
+
         return identifiers;
     }
 
     public class Alias
-        {
+    {
         private String _remaining = "";
         private String _description = "";
 
         public Alias(String s)
-            {
+        {
             _description = s;
-            }
+        }
 
         public String getRemaining()
-            {
+        {
             return _remaining;
-            }
+        }
 
         public String getDescription()
-            {
+        {
             return _description;
-            }
         }
+    }
 
     public static class SequenceComparator implements Comparator
-        {
+    {
         public int compare(Object o1, Object o2)
-            {                
+        {
             return ((Protein) o1).getSequenceAsString().compareTo(((Protein) o2).getSequenceAsString());
-            }
         }
+    }
 
     public static class LookupComparator implements Comparator
-        {
+    {
         public int compare(Object o1, Object o2)
-            {
+        {
             return ((Protein) o1).getLookup().compareTo(((Protein) o2).getLookup());
-
-            }
         }
+    }
 
     public static class HeaderComparator implements Comparator
-        {
+    {
         public int compare(Object o1, Object o2)
-            {
+        {
             return ((Protein) o1).getHeader().compareTo(((Protein) o2).getHeader());
-
-            }
         }
-
+    }
 }

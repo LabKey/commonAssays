@@ -223,11 +223,11 @@ public class PeptideGenerator implements Runnable
 
     public void run()
     {
-        FastaLoader loader = null;
+        ProteinFastaLoader loader = null;
         try
         {
             File fastaFile = new File(_inputFileName);
-            loader = new FastaLoader(fastaFile);
+            loader = new ProteinFastaLoader(fastaFile);
         }
         catch (Exception x)
         {
