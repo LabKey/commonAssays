@@ -235,18 +235,15 @@ public class PeptideGenerator implements Runnable
             return;
         }
 
-        Iterator it = loader.iterator();
-
         double[] massTab = getMasses(false);
         if (_minResidues == -1)
             _minResidues = (int) (_minMass / massTab['W']);
         if (_maxResidues == Integer.MAX_VALUE)
             _maxResidues = (int) (_maxMass / massTab['G']);
 
-        while (it.hasNext())
+        for (Protein p : loader)
         {
             _protNum++;
-            Protein p = (Protein) it.next();
             byte[] bytes = p.getBytes();
             _aaCount += bytes.length;
             if (_digest == DIGEST_TRYPTIC)

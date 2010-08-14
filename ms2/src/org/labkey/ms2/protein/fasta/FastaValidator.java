@@ -47,6 +47,7 @@ public class FastaValidator
         Format lineFormat = DecimalFormat.getIntegerInstance();
         ProteinFastaLoader curLoader = new ProteinFastaLoader(_fastaFile);
 
+        //noinspection ForLoopReplaceableByForEach
         for (ProteinFastaLoader.ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
         {
             Protein protein = proteinIterator.next();
@@ -57,7 +58,7 @@ public class FastaValidator
 
             if (proteinNames.contains(lookup))
             {
-                errors.add("Line " + lineFormat.format(proteinIterator.getLastHeaderLine()) + ": " + lookup + " is a duplicate protein name");
+                errors.add("Line " + lineFormat.format(proteinIterator.getLastHeaderLineNum()) + ": " + lookup + " is a duplicate protein name");
 
                 if (errors.size() > 999)
                 {
