@@ -117,8 +117,6 @@ public class FeaturesView extends QueryView
         int id;
         try
         {
-            //make sure we get all rows and not just the current page
-            getSettings().setShowRows(ShowRows.ALL);
             rs = getResultSet();
             while(rs.next())
             {
