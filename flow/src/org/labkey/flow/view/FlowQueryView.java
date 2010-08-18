@@ -37,6 +37,7 @@ import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.webparts.FlowFolderType;
+import org.springframework.validation.Errors;
 
 import java.io.PrintWriter;
 import java.util.*;
@@ -48,12 +49,12 @@ public class FlowQueryView extends QueryView
 
     public FlowQueryView(FlowQueryForm form)
     {
-        this(form.getViewContext(), (FlowSchema) form.getSchema(), (FlowQuerySettings) form.getQuerySettings());
+        this((FlowSchema) form.getSchema(), (FlowQuerySettings) form.getQuerySettings(), null);
     }
 
-    public FlowQueryView(ViewContext context, FlowSchema schema, FlowQuerySettings settings)
+    public FlowQueryView(FlowSchema schema, FlowQuerySettings settings, Errors errors)
     {
-        super(schema, settings);
+        super(schema, settings, errors);
         setShadeAlternatingRows(true);
         setShowBorders(true);
     }

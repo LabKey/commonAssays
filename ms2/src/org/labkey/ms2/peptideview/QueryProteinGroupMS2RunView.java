@@ -96,12 +96,14 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
                 rgn = new DataRegion();
                 rgn.setDisplayColumns(originalColumns);
             }
+            rgn.setSettings(getSettings());
+            rgn.getSettings().setMaxRows(getMaxRows());
+            rgn.getSettings().setOffset(getOffset());
+            rgn.getSettings().setDataRegionName(getDataRegionName());
+            rgn.getSettings().setSelectionKey(getSelectionKey());
+
             rgn.setShowPagination(false);
-            rgn.setMaxRows(getMaxRows());
-            rgn.setOffset(getOffset());
-            rgn.setSelectionKey(getSelectionKey());
             rgn.setShowRecordSelectors(showRecordSelectors());
-            rgn.setName(getDataRegionName());
 
             rgn.setShowRecordSelectors(true);
             rgn.setFixedWidthColumns(true);

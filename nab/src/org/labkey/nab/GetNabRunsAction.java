@@ -108,7 +108,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         }
     }
 
-    private List<ExpRun> getRuns(String tableName, GetNabRunsForm form)
+    private List<ExpRun> getRuns(String tableName, GetNabRunsForm form, BindException errors)
     {
         UserSchema assaySchema = QueryService.get().getUserSchema(form.getViewContext().getUser(),
                 form.getViewContext().getContainer(), AssaySchema.NAME);
@@ -142,7 +142,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         DataView dataView;
         try
         {
-            QueryView queryView = QueryView.create(getViewContext(), assaySchema, settings);
+            QueryView queryView = QueryView.create(getViewContext(), assaySchema, settings, errors);
             dataView = queryView.createDataView();
         }
         catch (ServletException e)
@@ -206,7 +206,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         _properties.put("assayName", protocol.getName());
         _properties.put("assayDescription", protocol.getDescription());
         _properties.put("assayId", protocol.getRowId());
-        for (ExpRun run : getRuns(tableName, form))
+        for (ExpRun run : getRuns(tableName, form, errors))
         {
             runList.add(new NabRunPropertyMap(NabDataHandler.getAssayResults(run, form.getViewContext().getUser()),
                     form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut(), form.isIncludeFitParameters()));

@@ -20,6 +20,7 @@ import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.Sort;
 import org.labkey.api.query.DetailsURL;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.*;
@@ -37,8 +38,10 @@ public class CustomProteinListView extends VBox
 
     public CustomProteinListView(ViewContext context, boolean includeButtons)
     {
+        QuerySettings settings = new QuerySettings(context, NAME);
+
         DataRegion rgn = new DataRegion();
-        rgn.setName(NAME);
+        rgn.setSettings(settings);
         rgn.setColumns(ProteinManager.getTableInfoCustomAnnotationSet().getColumns("Name, Created, CreatedBy, CustomAnnotationSetId"));
         rgn.getDisplayColumn("Name").setURLExpression(new DetailsURL(new ActionURL(ProteinController.ShowAnnotationSetAction.class, context.getContainer()), Collections.singletonMap("CustomAnnotation.queryName", "Name")));
         rgn.getDisplayColumn("CustomAnnotationSetId").setVisible(false);

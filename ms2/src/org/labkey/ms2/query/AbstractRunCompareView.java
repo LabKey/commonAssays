@@ -255,7 +255,6 @@ public abstract class AbstractRunCompareView extends QueryView
     {
         CompareDataRegion rgn = new CompareDataRegion(null, getGroupHeader());
         configureDataRegion(rgn);
-        configureDataRegion(rgn);
         List<DisplayColumn> displayColumns = getDisplayColumns();
         int offset = 0;
         for (DisplayColumn col : displayColumns)

@@ -35,7 +35,7 @@ public class AnalysesWebPart extends FlowQueryView
 
     public AnalysesWebPart(ViewContext context, Portal.WebPart wp)
     {
-        super(context, new FlowSchema(context.getUser(), context.getContainer()), null);
+        super(new FlowSchema(context.getUser(), context.getContainer()), null, null);
         FlowQuerySettings settings = (FlowQuerySettings) getSchema().getSettings(wp, context);
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(false);

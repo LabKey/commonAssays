@@ -47,7 +47,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
 
     public AnalysisScriptsWebPart(ViewContext portalCtx, Portal.WebPart wp) throws Exception
     {
-        super(portalCtx, new FlowSchema(portalCtx.getUser(), portalCtx.getContainer()), null);
+        super(new FlowSchema(portalCtx.getUser(), portalCtx.getContainer()), null, null);
         FlowQuerySettings settings = (FlowQuerySettings)getSchema().getSettings(wp, portalCtx);
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(false);

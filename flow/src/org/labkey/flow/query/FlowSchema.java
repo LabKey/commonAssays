@@ -45,6 +45,7 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.view.FlowQueryView;
+import org.springframework.validation.BindException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -263,7 +264,13 @@ public class FlowSchema extends UserSchema
 
     public QueryView createView(ViewContext context, QuerySettings settings) throws ServletException
     {
-        return new FlowQueryView(context, new FlowSchema(context, this), (FlowQuerySettings) settings);
+        return createView(context, settings, null);
+    }
+
+    @Override
+    public QueryView createView(ViewContext context, QuerySettings settings, BindException errors) throws ServletException
+    {
+        return new FlowQueryView(new FlowSchema(context, this), (FlowQuerySettings) settings, errors);
     }
 
 /*    private SQLFragment sqlObjectTypeId(SQLFragment sqlDataId)

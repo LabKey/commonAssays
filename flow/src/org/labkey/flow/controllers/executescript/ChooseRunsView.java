@@ -33,7 +33,7 @@ public class ChooseRunsView extends FlowQueryView
         super(form);
         getSettings().setAllowChooseQuery(false);
         getSettings().setAllowChooseView(false);
-        getSettings().setMaxRows(0);
+        getSettings().setMaxRows(Table.ALL_ROWS);
         _form = form;
     }
 
@@ -44,15 +44,8 @@ public class ChooseRunsView extends FlowQueryView
 
     protected DataRegion createDataRegion()
     {
-        List<DisplayColumn> displayColumns = getDisplayColumns();
         DataRegion rgn = new ChooseRunsRegion(_form);
-        rgn.setMaxRows(getMaxRows());
-        rgn.setOffset(getOffset());
-        rgn.setSelectionKey(getSelectionKey());
-        rgn.setShowRecordSelectors(showRecordSelectors());
-        rgn.setShowRows(getShowRows());
-        rgn.setName(getDataRegionName());
-        rgn.setDisplayColumns(displayColumns);
+        configureDataRegion(rgn);
         return rgn;
     }
 

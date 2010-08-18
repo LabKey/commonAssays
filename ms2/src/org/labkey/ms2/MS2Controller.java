@@ -4244,9 +4244,11 @@ public class MS2Controller extends SpringActionController
         bb.add(ActionButton.BUTTON_CLEAR_ALL);
 
         // Hack up a DataRegion/DataView so we can create the compare menu
+        QuerySettings settings = new QuerySettings(getViewContext(), formName);
+        settings.setSelectionKey(selectionKey);
+
         DataRegion rgn = new DataRegion();
-        rgn.setName(formName);
-        rgn.setSelectionKey(selectionKey);
+        rgn.setSettings(settings);
         GridView view = new GridView(rgn, (BindException)null);
 
         bb.add(createCompareMenu(getContainer(), view, false));
