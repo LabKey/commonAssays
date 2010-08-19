@@ -1121,9 +1121,8 @@ public class ProteinManager
         retVal.addAll(Arrays.asList(rvString));
 
         String org = Table.executeSingleton(getSchema(),
-                "SELECT genus" + getSqlDialect().getConcatenationOperator() +
-                        "' '" + getSqlDialect().getConcatenationOperator() +
-                        "species FROM " + getTableInfoOrganisms() +
+                "SELECT " + getSchema().getSqlDialect().concatenate("genus", "' '", "species") +
+                        " FROM " + getTableInfoOrganisms() +
                         " WHERE orgid=(SELECT orgid FROM " + getTableInfoSequences() +
                         " WHERE seqid=?)",
                 paramArr, String.class);

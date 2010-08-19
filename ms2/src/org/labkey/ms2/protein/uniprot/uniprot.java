@@ -35,7 +35,6 @@ import java.util.*;
 
 public class uniprot extends ParseActions
 {
-
     private static Logger _log = Logger.getLogger(XMLProteinLoader.class);
     private static SqlDialect _dialect = CoreSchema.getInstance().getSqlDialect();
     private long _startTime;
@@ -183,7 +182,7 @@ public class uniprot extends ParseActions
                 "species varchar(100), " +
                 "comments varchar(200) NULL, " +
                 "identID varchar(50), " +
-                "entry_date " + _dialect.getDefaultDateTimeDatatype() + " NULL " +
+                "entry_date " + _dialect.getDefaultDateTimeDataType() + " NULL " +
                 ")";
         executeUpdate(createOTableCommand, c);
         _sTableName = _dialect.getTempTablePrefix() + "sequences" + randomTableSuffix;
@@ -192,8 +191,8 @@ public class uniprot extends ParseActions
                         "ProtSequence text NULL , " +
                         "hash varchar(100) NULL , " +
                         "description varchar(200) NULL ," +
-                        "source_change_date " + _dialect.getDefaultDateTimeDatatype() + " NULL ," +
-                        "source_insert_date " + _dialect.getDefaultDateTimeDatatype() + " NULL ," +
+                        "source_change_date " + _dialect.getDefaultDateTimeDataType() + " NULL ," +
+                        "source_insert_date " + _dialect.getDefaultDateTimeDataType() + " NULL ," +
                         "genus varchar(100) NULL, " +
                         "species varchar(100) NULL, " +
                         "mass float NULL , " +
@@ -201,7 +200,7 @@ public class uniprot extends ParseActions
                         "best_name varchar(50) NULL, " +
                         "source varchar(50) NULL," +
                         "best_gene_name varchar(50) NULL, " +
-                        "entry_date " + _dialect.getDefaultDateTimeDatatype() + " NULL" +
+                        "entry_date " + _dialect.getDefaultDateTimeDataType() + " NULL" +
                         ")";
         executeUpdate(createSTableCommand, c);
         _iTableName = _dialect.getTempTablePrefix() + "identifiers" + randomTableSuffix;
@@ -212,7 +211,7 @@ public class uniprot extends ParseActions
                 "species varchar(100) NULL, " +
                 "hash varchar(100) NULL, " +
                 "seq_id int NULL, " +
-                "entry_date " + _dialect.getDefaultDateTimeDatatype() + " NULL" +
+                "entry_date " + _dialect.getDefaultDateTimeDataType() + " NULL" +
                 ")";
         executeUpdate(createITableCommand, c);
         _aTableName = _dialect.getTempTablePrefix() + "annotations" + randomTableSuffix;
@@ -229,7 +228,7 @@ public class uniprot extends ParseActions
                         "identifier varchar(50) NULL," +
                         "identType varchar(50) NULL, " +
                         "ident_id int NULL, " +
-                        "entry_date " + _dialect.getDefaultDateTimeDatatype() + " NULL" +
+                        "entry_date " + _dialect.getDefaultDateTimeDataType() + " NULL" +
                         ")";
         executeUpdate(createATableCommand, c);
 

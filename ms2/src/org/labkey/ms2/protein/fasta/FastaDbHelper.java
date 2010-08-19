@@ -32,7 +32,6 @@ import java.util.Random;
 public class FastaDbHelper
 {
     private static final SqlDialect _dialect = CoreSchema.getInstance().getSqlDialect();
-    private static final String CONCAT = _dialect.getConcatenationOperator();
 
     private static final String INITIAL_INSERTION_COMMAND =
             "INSERT INTO " + ProteinManager.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,DefaultOrganism,OrgShouldBeGuessed,InsertDate) VALUES (?,'fasta',?,?,?,?)";
@@ -117,7 +116,7 @@ public class FastaDbHelper
                 "fullorg varchar(200) NULL," +
                 "lookup varchar(200) NULL," +
                 "orgId int NULL, " +
-                "entry_date " + _dialect.getDefaultDateTimeDatatype() + " NULL" +
+                "entry_date " + _dialect.getDefaultDateTimeDataType() + " NULL" +
                 ")");
 
         c.createStatement().execute("CREATE INDEX IX_" + _seqTableName + "_HASH_ORGID_SROWID ON " + _seqTableName + "(hash, orgId, srowid)");
@@ -128,7 +127,7 @@ public class FastaDbHelper
                 "identType varchar(50) NULL, " +
                 "IdentTypeID int NULL, " +
                 "SeqId int NULL, " +
-                "entry_date " + _dialect.getDefaultDateTimeDatatype() + " NULL" +
+                "entry_date " + _dialect.getDefaultDateTimeDataType() + " NULL" +
                 ")");
 
         c.createStatement().execute("CREATE INDEX IX_" + _identTableName + " ON " + _identTableName + "(Identifier,IdentTypeId,SeqId)");
@@ -144,7 +143,7 @@ public class FastaDbHelper
                 _seqTableName + ".species) = UPPER(" + ProteinManager.getTableInfoOrganisms() + ".species))");
 
         _updateSTempWithGuessedOrgStmt = c.prepareStatement("UPDATE " + _seqTableName + " SET genus = x.genus, species = x.species, fullorg = x.fullorg \n" +
-            "FROM ( SELECT a.genus" + _dialect.getConcatenationOperator() + "' '" + _dialect.getConcatenationOperator() + "a.species AS fullorg, a.species as species, a.genus as genus, c.identifier as identifier " +
+            "FROM ( SELECT " + _dialect.concatenate("a.genus", "' '", "a.species") + " AS fullorg, a.species as species, a.genus as genus, c.identifier as identifier " +
                 "  FROM " + ProteinManager.getTableInfoOrganisms() + " a JOIN " + ProteinManager.getTableInfoSequences() + " b ON (a.orgid=b.orgid) JOIN " + ProteinManager.getTableInfoIdentifiers() + " c ON (c.seqid=b.seqid)) x \n" +
                 " WHERE " + _seqTableName + ".fullorg IS NULL AND x.identifier=" + _seqTableName + ".lookup");
 
@@ -216,7 +215,7 @@ public class FastaDbHelper
                         "        s.fullorg IS NOT NULL AND " +
                         "        NOT EXISTS (" +
                         "           SELECT * FROM " + ProteinManager.getTableInfoOrganisms() +
-                        "             WHERE genus" + CONCAT + "' '" + CONCAT + "species=s.fullorg " +
+                        "             WHERE " +  _dialect.concatenate("genus", "' '", "species") + " = s.fullorg " +
                         "        )                     AND " +
                         "        NOT EXISTS (" +
                         "           SELECT * FROM " + ProteinManager.getTableInfoAnnotations() + " c " +

@@ -106,7 +106,7 @@ public class PeptidesTableInfo extends FilteredTable
         mz.setLabel("ObsMZ");
         addColumn(mz);
 
-        SQLFragment strippedPeptideSQL = new SQLFragment("LTRIM(RTRIM(" + ExprColumn.STR_TABLE_ALIAS + ".PrevAA " + dialect.getConcatenationOperator() + " " + ExprColumn.STR_TABLE_ALIAS + ".TrimmedPeptide " + dialect.getConcatenationOperator() + " " + ExprColumn.STR_TABLE_ALIAS + ".NextAA))");
+        SQLFragment strippedPeptideSQL = new SQLFragment("LTRIM(RTRIM(" + dialect.concatenate(ExprColumn.STR_TABLE_ALIAS + ".PrevAA", ExprColumn.STR_TABLE_ALIAS + ".TrimmedPeptide", ExprColumn.STR_TABLE_ALIAS + ".NextAA") + "))");
         ColumnInfo strippedPeptide = new ExprColumn(this, "StrippedPeptide", strippedPeptideSQL, Types.VARCHAR);
         strippedPeptide.setWidth("320");
         addColumn(strippedPeptide);

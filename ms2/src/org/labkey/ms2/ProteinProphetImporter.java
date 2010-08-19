@@ -120,12 +120,12 @@ public class ProteinProphetImporter
                     "\tProteinGroupId INT NOT NULL,\n" +
                     "\tNSPAdjustedProbability REAL NOT NULL,\n" +
                     "\tWeight REAL NOT NULL,\n" +
-                    "\tNondegenerateEvidence " + dialect.getBooleanDatatype() + " NOT NULL,\n" +
+                    "\tNondegenerateEvidence " + dialect.getBooleanDataType() + " NOT NULL,\n" +
                     "\tEnzymaticTermini INT NOT NULL,\n" +
                     "\tSiblingPeptides REAL NOT NULL,\n" +
                     "\tSiblingPeptidesBin INT NOT NULL,\n" +
                     "\tInstances INT NOT NULL,\n" +
-                    "\tContributingEvidence " + dialect.getBooleanDatatype() + " NOT NULL,\n" +
+                    "\tContributingEvidence " + dialect.getBooleanDataType() + " NOT NULL,\n" +
                     "\tCalcNeutralPepMass REAL NOT NULL" +
                     ")";
 

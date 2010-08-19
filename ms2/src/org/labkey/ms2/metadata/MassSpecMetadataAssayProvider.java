@@ -175,12 +175,9 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         for (String prefix : MS2Module._ms2SearchRunFilter.getProtocolPrefixes())
         {
             searchCountSQL.append(separator);
-            searchCountSQL.append("er.ProtocolLSID LIKE '%'");
-            searchCountSQL.append(ExperimentService.get().getSchema().getSqlDialect().getConcatenationOperator());
-            searchCountSQL.append("?");
+            searchCountSQL.append("er.ProtocolLSID LIKE ");
+            searchCountSQL.append(ExperimentService.get().getSchema().getSqlDialect().concatenate("'%'", "?", "'%'"));
             searchCountSQL.add(prefix);
-            searchCountSQL.append(ExperimentService.get().getSchema().getSqlDialect().getConcatenationOperator());
-            searchCountSQL.append("'%'");
             separator = " OR ";
         }
         searchCountSQL.append(")");

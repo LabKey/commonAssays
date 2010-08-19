@@ -39,7 +39,7 @@ public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
 
     static
     {
-        StringBuilder sb = new StringBuilder("SELECT d.genus" + _schema.getSqlDialect().getConcatenationOperator() + "' '" + _schema.getSqlDialect().getConcatenationOperator() + "d.species " +
+        StringBuilder sb = new StringBuilder("SELECT " + _schema.getSqlDialect().concatenate("d.genus", "' '", "d.species") + 
                 " FROM " + ProteinManager.getTableInfoSequences() + " c JOIN " + ProteinManager.getTableInfoOrganisms() + " d ON (c.orgid=d.orgid)" +
                 " WHERE c.orgid IN " +
                 "   (SELECT a.orgid FROM " + ProteinManager.getTableInfoSequences() + " a JOIN " + ProteinManager.getTableInfoOrganisms() + " b ON (a.orgid=b.orgid) WHERE a.hash=?) " +

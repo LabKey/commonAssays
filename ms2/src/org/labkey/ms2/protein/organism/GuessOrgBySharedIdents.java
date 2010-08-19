@@ -100,7 +100,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
 
         retVal = Table.executeSingleton(
                 _schema,
-                "SELECT genus" + _schema.getSqlDialect().getConcatenationOperator() + "' '" + _schema.getSqlDialect().getConcatenationOperator() + "species FROM " + ProteinManager.getTableInfoSprotOrgMap() + " " +
+                "SELECT " + _schema.getSqlDialect().concatenate("genus", "' '", "species") + " FROM " + ProteinManager.getTableInfoSprotOrgMap() + " " +
                         " WHERE SprotSuffix=?",
                 new String[]{pName}, String.class
         );

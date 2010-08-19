@@ -41,7 +41,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
     private static Logger _log = Logger.getLogger(GuessOrgByParsing.class);
 
     private static final String _organismFromTaxIdSql =
-                                    "SELECT genus" + _schema.getSqlDialect().getConcatenationOperator() + "' '" + _schema.getSqlDialect().getConcatenationOperator() + "species FROM " +
+                                    "SELECT " + _schema.getSqlDialect().concatenate("genus", "' '", "species") + " FROM " +
                                             ProteinManager.getTableInfoOrganisms() +
                                             " WHERE identid = (SELECT identid FROM " +
                                             ProteinManager.getTableInfoIdentifiers() +

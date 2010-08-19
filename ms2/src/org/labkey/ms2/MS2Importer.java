@@ -417,10 +417,8 @@ public abstract class MS2Importer
 
     static
     {
-        String concat = MS2Manager.getSqlDialect().getConcatenationOperator();
-        String searchString = "CASE WHEN (PrevAA = ' ' OR PrevAA = '-') THEN '' ELSE CAST(PrevAA AS VARCHAR) END " +
-                                concat + " TrimmedPeptide " + concat +
-                             " CASE WHEN (NextAA = ' ' OR NextAA = '-') THEN '' ELSE CAST(NextAA AS VARCHAR) END ";
+        String searchString = MS2Manager.getSqlDialect().concatenate("CASE WHEN (PrevAA = ' ' OR PrevAA = '-') THEN '' ELSE CAST(PrevAA AS VARCHAR) END",
+                "TrimmedPeptide", "CASE WHEN (NextAA = ' ' OR NextAA = '-') THEN '' ELSE CAST(NextAA AS VARCHAR) END");
         String positionText = MS2Manager.getSqlDialect().getStringIndexOfFunction(searchString, "ProtSequence");
 
         _updateSequencePositionSql = "UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET SequencePosition = COALESCE(\n" +
