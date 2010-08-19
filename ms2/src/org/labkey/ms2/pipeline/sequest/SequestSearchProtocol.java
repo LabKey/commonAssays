@@ -23,6 +23,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * User: billnelson@uky.edu
@@ -42,10 +43,8 @@ public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipe
     }
 
     public SequestPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                                PipeRoot root, File[] filesInput,
-                                                File fileParameters
-    )
-            throws IOException
+                                                PipeRoot root, List<File> filesInput,
+                                                File fileParameters) throws IOException
     {
         return new SequestPipelineJob(this, info, root, getName(), getDirSeqRoot(),
                 filesInput, fileParameters);

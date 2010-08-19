@@ -391,15 +391,7 @@ public class PipelineController extends SpringActionController
                 {
                     throw new NotFoundException("No files specified");
                 }
-                File[] mzXMLFiles = new File[form.getFile().length];
-                for (int i = 0; i < form.getFile().length; i++)
-                {
-                    mzXMLFiles[i] = new File(_dirData, form.getFile()[i]);
-                    if (!NetworkDrive.exists(mzXMLFiles[i]))
-                    {
-                        throw new NotFoundException("Could not find file " + form.getFile()[i]);
-                    }
-                }
+                List<File> mzXMLFiles = form.getValidatedFiles(getContainer());
 
                 _protocol.getFactory().ensureDefaultParameters(_root);
 

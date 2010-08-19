@@ -18,6 +18,7 @@ package org.labkey.ms2.pipeline.sequest;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.pipeline.PipelineActionConfig;
+import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.*;

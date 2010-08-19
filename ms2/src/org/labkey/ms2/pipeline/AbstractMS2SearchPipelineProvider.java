@@ -23,7 +23,6 @@ import org.labkey.api.module.Module;
 
 import java.io.IOException;
 import java.io.File;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 

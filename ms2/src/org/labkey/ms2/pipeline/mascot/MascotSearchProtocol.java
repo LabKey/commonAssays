@@ -23,6 +23,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -82,7 +83,7 @@ public class MascotSearchProtocol extends AbstractMS2SearchProtocol<MascotPipeli
     }
 
     public MascotPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                               PipeRoot root, File[] filesInput,
+                                               PipeRoot root, List<File> filesInput,
                                                File fileParameters
     )
             throws IOException

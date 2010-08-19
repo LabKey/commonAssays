@@ -23,6 +23,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * SequestPipelineJob class
@@ -42,7 +43,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements 
                               PipeRoot root,
                               String name,
                               File dirSequenceRoot,
-                              File filesMzXML[],
+                              List<File> filesMzXML,
                               File fileInputXML
     ) throws IOException
     {

@@ -122,12 +122,12 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         /**
          * List of pepXML files to use as inputs to "xinteract".
          */
-        File[] getInteractInputFiles();
+        List<File> getInteractInputFiles();
 
         /**
          * List of mzXML files to use as inputs to "xinteract" quantitation.
          */
-        File[] getInteractSpectraFiles();
+        List<File> getInteractSpectraFiles();
 
         /**
          * True if PeptideProphet and ProteinProphet can be run on the input files.
@@ -254,30 +254,30 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
             // TODO: mzXML files may be required, and input disk space requirements
             //          may be too great to copy to a temporary directory.
-            File[] inputFiles = getJobSupport().getInteractInputFiles();
-            File[] inputWorkFiles = new File[inputFiles.length];
+            List<File> inputFiles = getJobSupport().getInteractInputFiles();
+            File[] inputWorkFiles = new File[inputFiles.size()];
             for (File fileInput : inputFiles)
             {
                 pepXMLAction.addInput(fileInput, "RawPepXML");
             }
 
-            if (inputFiles.length > 0)
+            if (inputFiles.size() > 0)
             {
                 WorkDirectory.CopyingResource lock = null;
                 try
                 {
                     lock = _wd.ensureCopyingLock();
-                    for (int i = 0; i < inputFiles.length; i++)
-                        inputWorkFiles[i] = _wd.inputFile(inputFiles[i], false);
+                    for (int i = 0; i < inputFiles.size(); i++)
+                        inputWorkFiles[i] = _wd.inputFile(inputFiles.get(i), false);
 
                     if (isSpectraProcessor(params))
                     {
-                        File[] spectraFiles = getJobSupport().getInteractSpectraFiles();
-                        for (int i = 0; i < spectraFiles.length; i++)
+                        List<File> spectraFiles = getJobSupport().getInteractSpectraFiles();
+                        for (int i = 0; i < spectraFiles.size(); i++)
                         {
-                            spectraFiles[i] = _wd.inputFile(spectraFiles[i], false);
+                            spectraFiles.set(i, _wd.inputFile(spectraFiles.get(i), false));
                             if (dirMzXml == null)
-                                dirMzXml = spectraFiles[i].getParentFile();
+                                dirMzXml = spectraFiles.get(i).getParentFile();
                         }
                     }
                 }
@@ -487,7 +487,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
             // If no combined analysis is coming or this is the combined analysis, remove
             // the raw pepXML file(s).
-            if (!getJobSupport().isFractions() || inputFiles.length > 1)
+            if (!getJobSupport().isFractions() || inputFiles.size() > 1)
             {
                 for (File fileInput : inputFiles)
                 {

@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline.comet;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.module.Module;

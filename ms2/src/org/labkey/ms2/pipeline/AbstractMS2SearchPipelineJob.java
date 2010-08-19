@@ -73,8 +73,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                                         String protocolName,
                                         File dirSequenceRoot,
                                         File fileParameters,
-                                        File filesInput[]
-    ) throws IOException
+                                        List<File> filesInput) throws IOException
     {
         super(protocol, providerName, info, root, protocolName, fileParameters, filesInput);
 
@@ -86,21 +85,13 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
             throw new IOException("Missing required input parameter 'pipeline, database'");
 
         // Set the fractions attribute correctly.
-        _fractions = (filesInput.length > 1);
+        _fractions = (filesInput.size() > 1);
         if (_fractions)
         {
             String paramDataType = getParameters().get("pipeline, data type");
             if (!DATATYPE_BOTH.equalsIgnoreCase(paramDataType))
             {
-                if (!NetworkDrive.exists(MS2PipelineManager.getAnnotationFile(getDataDirectory())) &&
-                        !NetworkDrive.exists(MS2PipelineManager.getLegacyAnnotationFile(getDataDirectory())))
-                {
-                    _fractions = DATATYPE_FRACTIONS.equalsIgnoreCase(paramDataType);
-                }
-                else
-                {
-                    _fractions = !DATATYPE_SAMPLES.equalsIgnoreCase(paramDataType);
-                }
+                _fractions = DATATYPE_FRACTIONS.equalsIgnoreCase(paramDataType);
             }
         }
     }
@@ -181,7 +172,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         return false;
     }
 
-    public File[] getInteractInputFiles()
+    public List<File> getInteractInputFiles()
     {
         ArrayList<File> files = new ArrayList<File>();
         for (File fileSpectra : getInputFiles())
@@ -190,10 +181,10 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                     FileUtil.getBaseName(fileSpectra),
                     getGZPreference()));
         }
-        return files.toArray(new File[files.size()]);
+        return files;
     }
 
-    public File[] getInteractSpectraFiles()
+    public List<File> getInteractSpectraFiles()
     {
         // Default to looking for just mzXML files
         FileType[] types = new FileType[] { AbstractMS2SearchProtocol.FT_MZXML };
@@ -225,7 +216,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                 }
             }
         }
-        return files.toArray(new File[files.size()]);
+        return files;
     }
 
     public File getSearchNativeSpectraFile()

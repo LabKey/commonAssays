@@ -26,6 +26,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -76,9 +77,9 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     }
 
     public abstract JOB createPipelineJob(ViewBackgroundInfo info,
-                                          PipeRoot root, File[] filesInput,
-                                          File fileParameters
-    ) throws IOException;
+                                          PipeRoot root,
+                                          List<File> filesInput,
+                                          File fileParameters) throws IOException;
 
     @Override
     protected void save(File file, Map<String, String> addParams, Map<String, String> instanceParams) throws IOException

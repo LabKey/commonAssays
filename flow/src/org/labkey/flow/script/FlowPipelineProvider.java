@@ -98,19 +98,19 @@ public class FlowPipelineProvider extends PipelineProvider
     }
 
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
+    public void updateFileProperties(ViewContext context, final PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
             return;
         if (!hasFlowModule(context))
             return;
 
-        final Set<File> usedPaths = new HashSet<File>();
+        final Set<String> usedRelativePaths = new HashSet<String>();
 
         try
         {
             for (FlowRun run : FlowRun.getRunsForContainer(context.getContainer(), FlowProtocolStep.keywords))
-                usedPaths.add(run.getExperimentRun().getFilePathRoot());
+                usedRelativePaths.add(pr.relativePath(run.getExperimentRun().getFilePathRoot()));
         }
         catch (SQLException e)
         {
@@ -124,14 +124,11 @@ public class FlowPipelineProvider extends PipelineProvider
                 if (!dir.isDirectory())
                     return false;
 
-                if (usedPaths.contains(dir))
+                if (usedRelativePaths.contains(pr.relativePath(dir)))
                     return false;
 
                 File[] fcsFiles = dir.listFiles((FileFilter)FCS.FCSFILTER);
-                if (null == fcsFiles || 0 == fcsFiles.length)
-                    return false;
-
-                return true;
+                return null != fcsFiles && 0 != fcsFiles.length;
             }
         });
 
@@ -156,8 +153,7 @@ public class FlowPipelineProvider extends PipelineProvider
             directory.addAction(new PipelineAction(selectedDirsNavTree, dirs, true, true));
         }
 
-        File currentDir = directory.getDir();
-        if (includeAll || !usedPaths.contains(currentDir))
+        if (includeAll || !usedRelativePaths.contains(directory.getRelativePath()))
         {
             File[] fcsFiles = directory.listFiles(FCS.FCSFILTER);
             if (includeAll || (fcsFiles != null && fcsFiles.length > 0))
@@ -170,7 +166,7 @@ public class FlowPipelineProvider extends PipelineProvider
                 child.setId(baseId + ":FCS Files");
                 tree.addChild(child);
 
-                directory.addAction(new PipelineAction(tree, new File[] { currentDir }, false, true));
+                directory.addAction(new PipelineAction(tree, new File[] { pr.resolvePath(directory.getRelativePath()) }, false, true));
             }
         }
 

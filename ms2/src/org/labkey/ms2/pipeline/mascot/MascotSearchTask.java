@@ -80,16 +80,6 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
          * Return password for Mascot server connection.
          */
         String getMascotUserPassword();
-
-        /**
-         * Set the sequence DB info returned from Mascot search.
-         */
-        void setMascotSequenceDB(String sequenceDB);
-
-        /**
-         * Set the sequence release info return from the Mascot search.
-         */
-        void setMascotSequenceRelease(String sequenceRelease);
     }
 
     public static class Factory extends AbstractMS2SearchTaskFactory<Factory>

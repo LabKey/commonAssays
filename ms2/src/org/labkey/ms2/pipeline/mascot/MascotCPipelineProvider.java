@@ -18,6 +18,7 @@ package org.labkey.ms2.pipeline.mascot;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
+import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.settings.AppProps;
@@ -274,11 +275,6 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
     public String getHelpTopic()
     {
         return "pipelineMascot";
-    }
-
-    public boolean dbExists(URI dirSequenceRoot, String db)
-    {
-        return true;
     }
 
     public boolean supportsDirectories()

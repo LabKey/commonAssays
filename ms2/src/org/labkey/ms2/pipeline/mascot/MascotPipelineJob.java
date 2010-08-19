@@ -20,10 +20,10 @@ import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * MascotPipelineJob class
@@ -40,17 +40,14 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
     private String _mascotHTTPProxy;
     private String _mascotUserAccount;
     private String _mascotUserPassword;
-    private String _mascotSequenceDB;
-    private String _mascotSequenceRelease;
 
     public MascotPipelineJob(MascotSearchProtocol protocol,
                              ViewBackgroundInfo info,
                              PipeRoot root,
                              String name,
                              File dirSequenceRoot,
-                             File filesMzXML[],
-                             File fileInputXML
-    ) throws IOException
+                             List<File> filesMzXML,
+                             File fileInputXML) throws IOException
     {
         super(protocol, MascotCPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
@@ -71,8 +68,6 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         _mascotHTTPProxy = job._mascotHTTPProxy;
         _mascotUserAccount = job._mascotUserAccount;
         _mascotUserPassword = job._mascotUserPassword;
-        _mascotSequenceDB = job._mascotSequenceDB;
-        _mascotSequenceRelease = job._mascotSequenceRelease;
     }
 
     public String getMascotServer()
@@ -95,16 +90,6 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         return _mascotUserPassword;
     }
 
-    public void setMascotSequenceDB(String sequenceDB)
-    {
-        _mascotSequenceDB = sequenceDB;
-    }
-
-    public void setMascotSequenceRelease(String sequenceRelease)
-    {
-        _mascotSequenceRelease = sequenceRelease;
-    }
-
     public TaskId getTaskPipelineId()
     {
         return _tid;
@@ -113,15 +98,6 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
     public AbstractFileAnalysisJob createSingleFileJob(File file)
     {
         return new MascotPipelineJob(this, file);
-    }
-
-    public File[] getSequenceFiles()
-    {
-        if (_mascotSequenceDB == null || _mascotSequenceRelease == null)
-            return super.getSequenceFiles();
-
-        return new File[] { MS2PipelineManager.getLocalMascotFile(getSequenceRootDirectory().getAbsolutePath(),
-                _mascotSequenceDB, _mascotSequenceRelease) };
     }
 
     public File getSearchNativeSpectraFile()

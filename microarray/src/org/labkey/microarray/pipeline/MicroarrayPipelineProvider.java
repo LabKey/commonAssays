@@ -18,6 +18,7 @@ package org.labkey.microarray.pipeline;
 
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
+import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -25,7 +26,6 @@ import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.MicroarrayController;
 import org.labkey.microarray.MicroarrayModule;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.List;
 

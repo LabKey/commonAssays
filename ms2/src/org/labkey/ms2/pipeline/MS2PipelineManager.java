@@ -17,21 +17,15 @@ package org.labkey.ms2.pipeline;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.cmd.ConvertTaskId;
-import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
 
 import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -50,40 +44,14 @@ public class MS2PipelineManager
     private static Logger _log = Logger.getLogger(MS2PipelineProvider.class);
     private static final String DEFAULT_FASTA_DIR = "databases";
 
-    protected static String _pipelineDataAnnotationExt = ".xar.xml";
-
     private static final String ALLOW_SEQUENCE_DB_UPLOAD_KEY = "allowSequenceDbUpload";
     public static final String SEQUENCE_DB_ROOT_TYPE = "SEQUENCE_DATABASE";
 
     public static final TaskId MZXML_CONVERTER_TASK_ID = new TaskId(ConvertTaskId.class, "mzxmlConverter");
     
-    //todo this the right way
-    public static String _allFractionsMzXmlFileBase = "all";
-
     public static boolean isMzXMLFile(File file)
     {
         return AbstractMS2SearchProtocol.FT_MZXML.isType(file);
-    }
-
-    public static File getAnnotationFile(File dirData)
-    {
-        return getAnnotationFile(dirData, _allFractionsMzXmlFileBase);
-    }
-
-    public static File getAnnotationFile(File dirData, String baseName)
-    {
-        File xarDir = new File(dirData, "xars");
-        return new File(xarDir, baseName + _pipelineDataAnnotationExt);
-    }
-
-    public static File getLegacyAnnotationFile(File dirData)
-    {
-        return getLegacyAnnotationFile(dirData, _allFractionsMzXmlFileBase);
-    }
-
-    public static File getLegacyAnnotationFile(File dirData, String baseName)
-    {
-        return new File(dirData, baseName + _pipelineDataAnnotationExt);
     }
 
     public static class UploadFileFilter extends PipelineProvider.FileEntryFilter
@@ -222,7 +190,6 @@ public class MS2PipelineManager
                 catch (IOException eio)
                 {
                     _log.error("Error writing sequence database.", eio);
-                    throw eio;
                 }
             }
         }
@@ -319,150 +286,6 @@ public class MS2PipelineManager
             return knownFiles.contains(file);
         }
         return file.exists();
-    }
-
-    public static Map<File, FileStatus> getAnalysisFileStatus(File dirData, File dirAnalysis, Container c) throws IOException
-    {
-        Set<File> knownFiles = new HashSet<File>();
-        Set<File> checkedDirectories = new HashSet<File>();
-        
-        String dirDataURL = dirData.toURI().toURL().toString();
-
-        File[] mzXMLFiles = dirData.listFiles(getAnalyzeFilter());
-
-        Map<File, FileStatus> analysisMap = new LinkedHashMap<File, FileStatus>();
-        if (mzXMLFiles != null && mzXMLFiles.length > 0)
-        {
-            Arrays.sort(mzXMLFiles, new Comparator<File>()
-            {
-                public int compare(File o1, File o2)
-                {
-                    return o1.getName().compareToIgnoreCase(o2.getName());
-                }
-            });
-
-            if (dirAnalysis != null && !NetworkDrive.exists(dirAnalysis))
-                dirAnalysis = null;
-
-            String baseNameDataSet = AbstractFileAnalysisProtocol.getDataSetBaseName(dirData);
-            File fileDataSetLog = PipelineJob.FT_LOG.newFile(dirAnalysis, baseNameDataSet);
-            boolean all = exists(fileDataSetLog, knownFiles, checkedDirectories);
-            boolean allComplete = all;
-            if (allComplete)
-            {
-                File fileDataSetXar = AbstractMS2SearchProtocol.FT_SEARCH_XAR.newFile(dirAnalysis, baseNameDataSet);
-                allComplete = exists(fileDataSetXar, knownFiles, checkedDirectories);
-            }
-
-            ExpData[] allContainerDatas = null;
-
-            for (File file : mzXMLFiles)
-            {
-                FileStatus status = FileStatus.UNKNOWN;
-                String baseName = FileUtil.getBaseName(file);
-                if (dirAnalysis != null)
-                {
-                    if (allComplete ||
-                            (!all && exists(AbstractMS2SearchProtocol.FT_SEARCH_XAR.newFile(dirAnalysis, baseName), knownFiles, checkedDirectories)))
-                        status = FileStatus.COMPLETE;
-                    else if (exists(PipelineJob.FT_LOG.newFile(dirAnalysis, baseName), knownFiles, checkedDirectories))
-                        status = FileStatus.RUNNING;
-                }
-                if (status == FileStatus.UNKNOWN)
-                {
-                    if (findAnnotationFile(file, knownFiles, checkedDirectories, baseName) != null)
-                    {
-                        status = FileStatus.ANNOTATED;
-                    }
-                }
-                if (status == FileStatus.UNKNOWN)
-                {
-                    try
-                    {
-                        String fileURL;
-                        try
-                        {
-                            URI localURI = new URI("file", null, "/" + file.getName(), null);
-                            // Strip off the leading "file:/" to get just the encoded file name
-                            fileURL = dirDataURL + localURI.toString().substring("file:/".length());
-                        }
-                        catch (URISyntaxException e)
-                        {
-                            throw new IllegalStateException(e);
-                        }
-                        if (allContainerDatas == null)
-                        {
-                            allContainerDatas = ExperimentService.get().getExpData(c);
-                        }
-                        for (ExpData data : allContainerDatas)
-                        {
-                            if (fileURL.equals(data.getDataFileUrl()))
-                            {
-                                if (data.getRun() != null)
-                                {
-                                    status = FileStatus.ANNOTATED;
-                                }
-                                break;
-                            }
-                        }
-                    }
-                    catch (SQLException e)
-                    {
-                        throw new RuntimeSQLException(e);
-                    }
-                }
-                analysisMap.put(file, status);
-            }
-        }
-        return analysisMap;
-    }
-
-    public static File findAnnotationFile(File file)
-    {
-        return findAnnotationFile(file, new HashSet<File>(), new HashSet<File>());
-    }
-
-    public static File findAnnotationFile(File file, Set<File> knownFiles, Set<File> checkedDirectories)
-    {
-        return findAnnotationFile(file, knownFiles, checkedDirectories, FileUtil.getBaseName(file));
-    }
-
-    private static File findAnnotationFile(File file, Set<File> knownFiles, Set<File> checkedDirectories, String baseName)
-    {
-        File dirData = file.getParentFile();
-        File annotationFile = getAnnotationFile(dirData, baseName);
-        if (exists(annotationFile, knownFiles, checkedDirectories))
-        {
-            return annotationFile;
-        }
-        annotationFile = getAnnotationFile(dirData);
-        if (exists(annotationFile, knownFiles, checkedDirectories))
-        {
-            return annotationFile;
-        }
-        annotationFile =getLegacyAnnotationFile(dirData, baseName);
-        if (exists(annotationFile, knownFiles, checkedDirectories))
-        {
-            return annotationFile;
-        }
-        annotationFile = getLegacyAnnotationFile(dirData);
-        if (exists(annotationFile, knownFiles, checkedDirectories))
-        {
-            return annotationFile;
-        }
-        return null;
-    }
-
-    public static File[] getAnalysisFiles(File dirData, File dirAnalysis, FileStatus status, Container c) throws IOException
-    {
-        Map<File, FileStatus> mzXMLFileStatus = getAnalysisFileStatus(dirData, dirAnalysis, c);
-        List<File> fileList = new ArrayList<File>();
-        for (File fileMzXML : mzXMLFileStatus.keySet())
-        {
-            if (status == null || status.equals(mzXMLFileStatus.get(fileMzXML)))
-                fileList.add(fileMzXML);
-        }
-        return fileList.toArray(new File[fileList.size()]);
     }
 
     private static class SequenceDbFileFilter implements FileFilter

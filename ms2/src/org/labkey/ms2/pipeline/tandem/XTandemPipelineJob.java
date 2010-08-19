@@ -23,6 +23,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * XTandemPipelineJob class
@@ -46,9 +47,8 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
                               PipeRoot root,
                               String name,
                               File dirSequenceRoot,
-                              File filesMzXML[],
-                              File fileInputXML
-    ) throws IOException
+                              List<File> filesMzXML,
+                              File fileInputXML) throws IOException
     {
         super(protocol, XTandemCPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
