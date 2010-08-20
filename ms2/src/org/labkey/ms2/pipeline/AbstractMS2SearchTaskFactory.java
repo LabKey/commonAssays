@@ -22,14 +22,15 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * <code>AbstractMS2SearchTaskFactory</code>
  */
 abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractMS2SearchTaskFactory<FactoryType>> extends AbstractTaskFactory<AbstractTaskFactorySettings, FactoryType>
 {
-    private FileType[] _inputTypes;
+    private List<FileType> _inputTypes;
 
     protected AbstractMS2SearchTaskFactory(Class namespaceClass)
     {
@@ -48,16 +49,16 @@ abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractM
         return result;
     }
 
-    public void setInputTypes(FileType[] inputTypes)
+    public void setInputTypes(List<FileType> inputTypes)
     {
         _inputTypes = inputTypes;
     }
 
-    public FileType[] getInputTypes()
+    public List<FileType> getInputTypes()
     {
         if (_inputTypes == null)
         {
-            return new FileType[] { AbstractMS2SearchProtocol.FT_MZXML };
+            return Collections.singletonList(AbstractMS2SearchProtocol.FT_MZXML);
         }
         return _inputTypes;
     }
@@ -77,6 +78,6 @@ abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractM
                 return f;
             }
         }
-        throw new PipelineJobException("Could not find a file in '" + dataDirectory + "' that matches input types: " + Arrays.toString(getInputTypes()));
+        throw new PipelineJobException("Could not find a file in '" + dataDirectory + "' that matches input types: " + getInputTypes());
     }
 }

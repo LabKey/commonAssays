@@ -25,6 +25,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,14 +100,14 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
         super.save(file, addParams, instanceParams);        
     }
 
-    public FileType[] getInputTypes()
+    public List<FileType> getInputTypes()
     {
         TaskFactory taskFactory = PipelineJobService.get().getTaskFactory(MS2PipelineManager.MZXML_CONVERTER_TASK_ID);
         if (taskFactory != null)
         {
             return taskFactory.getInputTypes();
         }
-        return new FileType[] { FT_MZXML };
+        return Collections.singletonList(FT_MZXML);
     }
 
     public void validate(PipeRoot root) throws PipelineValidationException

@@ -31,10 +31,12 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.PipelineRootContainerTree;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.*;
@@ -55,6 +57,7 @@ import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.pipeline.MSPictureUpgradeJob;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
@@ -2674,24 +2677,24 @@ public class MS2Controller extends SpringActionController
         {
             if (PROTEIN_DATA_REGION.equalsIgnoreCase(dataRegion))
             {
-                return createProteinGroupSearchView(form);
+                return createProteinGroupSearchView(form, errors);
             }
             else if (POTENTIAL_PROTEIN_DATA_REGION.equalsIgnoreCase(dataRegion))
             {
-                return createProteinSearchView(form);
+                return createProteinSearchView(form, errors);
             }
 
             throw new IllegalArgumentException("Unsupported dataRegion name" + dataRegion);
         }
 
-        private QueryView createProteinSearchView(ProteinSearchForm form)
+        private QueryView createProteinSearchView(ProteinSearchForm form, BindException errors)
             throws ServletException
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
             QuerySettings proteinsSettings = schema.getSettings(getViewContext(), POTENTIAL_PROTEIN_DATA_REGION);
             proteinsSettings.setQueryName(MS2Schema.TableType.Sequences.toString());
             proteinsSettings.setAllowChooseQuery(false);
-            QueryView proteinsView = new QueryView(schema, proteinsSettings, null);
+            QueryView proteinsView = new QueryView(schema, proteinsSettings, errors);
             // Disable R and other reporting until there's an implementation that respects the search criteria
             proteinsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
@@ -2714,12 +2717,12 @@ public class MS2Controller extends SpringActionController
             return proteinsView;
         }
 
-        private QueryView createProteinGroupSearchView(final ProteinSearchForm form) throws ServletException
+        private QueryView createProteinGroupSearchView(final ProteinSearchForm form, BindException errors) throws ServletException
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
             QuerySettings groupsSettings = schema.getSettings(getViewContext(), PROTEIN_DATA_REGION, MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
             groupsSettings.setAllowChooseQuery(false);
-            QueryView groupsView = new QueryView(schema, groupsSettings)
+            QueryView groupsView = new QueryView(schema, groupsSettings, errors)
             {
                 protected TableInfo createTable()
                 {
@@ -3521,7 +3524,7 @@ public class MS2Controller extends SpringActionController
                 MS2Run run = MS2Manager.getRun(_returnURL.getParameter("run"));
                 if (run == null)
                 {
-                    HttpView.throwNotFound("Could not find run with id " + _returnURL.getParameter("run"));
+                    throw new NotFoundException("Could not find run with id " + _returnURL.getParameter("run"));
                 }
                 AbstractMS2RunView view = getPeptideView(_returnURL.getParameter("grouping"), run);
                 view.savePeptideColumnNames(run.getType(), columnNames);
@@ -3939,7 +3942,7 @@ public class MS2Controller extends SpringActionController
             // proteinGroupId
             if (form.getProteinGroupId() != null)
             {
-                ProteinGroupWithQuantitation group = MS2Manager.getProteinGroup(form.getProteinGroupId());
+                ProteinGroupWithQuantitation group = MS2Manager.getProteinGroup(form.getProteinGroupId().intValue());
                 if (group != null)
                 {
                     ProteinProphetFile file = MS2Manager.getProteinProphetFile(group.getProteinProphetFileId());
@@ -4866,7 +4869,7 @@ public class MS2Controller extends SpringActionController
             MS2Run run = MS2Manager.getRun(request.getParameter("run"));
 
             if (null == run)
-                HttpView.throwNotFound("Run not found: " + request.getParameter("run"));
+                throw new NotFoundException("Run not found: " + request.getParameter("run"));
 
             String paramName = run.getChargeFilterParamName();
 
@@ -5200,7 +5203,7 @@ public class MS2Controller extends SpringActionController
             }
             else if ("fasta".equalsIgnoreCase(form.getFileType()))
             {
-                FastaDbLoader fdbl = new FastaDbLoader(fname == null ? null : new File(fname));
+                FastaDbLoader fdbl = new FastaDbLoader(new File(fname));
                 fdbl.setDefaultOrganism(form.getDefaultOrganism());
                 fdbl.setOrganismIsToGuessed(form.getShouldGuess() != null);
                 loader = fdbl;
@@ -6035,6 +6038,50 @@ public class MS2Controller extends SpringActionController
         public Form getForm()
         {
             return _form;
+        }
+    }
+
+    @RequiresSiteAdmin
+    public class AttachFilesUpgradeAction extends FormViewAction
+    {
+        private Container _container;
+
+        public void validateCommand(Object target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
+        {
+            return new JspView("/org/labkey/microarray/upgradeAttachFiles.jsp");
+        }
+
+        public boolean handlePost(Object o, BindException errors) throws Exception
+        {
+            // just grab any root, it doesn't matter
+            for (PipeRoot root : PipelineService.get().getAllPipelineRoots().values())
+            {
+                if (root.isValid())
+                {
+                    ViewBackgroundInfo info = getViewBackgroundInfo();
+                    _container = root.getContainer();
+                    info.setContainer(_container);
+                    PipelineJob job = new MSPictureUpgradeJob(info, root);
+                    PipelineService.get().getPipelineQueue().addJob(job);
+
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public ActionURL getSuccessURL(Object o)
+        {
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(_container);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Attach mspicture Files to Existing MS2 Runs");
         }
     }
 }

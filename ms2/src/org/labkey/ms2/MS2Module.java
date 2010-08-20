@@ -72,8 +72,8 @@ import java.util.*;
  */
 public class MS2Module extends SpringModule implements ContainerManager.ContainerListener, SearchService.DocumentProvider
 {
-    public static final MS2SearchExperimentRunType _ms2SearchRunFilter = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
-    private static ExperimentRunType _samplePrepRunType = new ExperimentRunType("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.TableType.SamplePrepRuns.toString())
+    public static final MS2SearchExperimentRunType SEARCH_RUN_TYPE = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
+    private static final ExperimentRunType SAMPLE_PREP_RUN_TYPE = new ExperimentRunType("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.TableType.SamplePrepRuns.toString())
     {
         public Priority getPriority(ExpProtocol protocol)
         {
@@ -102,18 +102,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         return 10.20;
     }
 
-    /*
-    @NotNull
-    protected File[] getWebPartFiles()
-    {
-        File viewsDir = new File(getExplodedPath(), SimpleController.VIEWS_DIRECTORY);
-        boolean e = viewsDir.exists();
-        boolean d = viewsDir.isDirectory();
-        
-        return viewsDir.exists() && viewsDir.isDirectory() ? viewsDir.listFiles(org.labkey.api.module.SimpleWebPartFactory.webPartFileFilter) : new File[0];
-    }
-    */
-
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         BaseWebPartFactory legacyRunsFactory = new BaseWebPartFactory(MS2_RUNS_DEPRECATED_NAME)
@@ -132,17 +120,12 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         {
             public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
             {
-                QueryView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _ms2SearchRunFilter);
+                QueryView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), SEARCH_RUN_TYPE);
                 result.setTitle("MS2 Experiment Runs");
                 return result;
             }
         };
         runsFactory.addLegacyNames(MS2_RUNS_ENHANCED_LEGACY_NAME);
-
-        //Collection<WebPartFactory> mylist = new ArrayList<WebPartFactory>();
-        //mylist.add(new SimpleWebPartFactory(this, getWebPartFiles()[0]));
-
-        //SimpleWebPartFactory simpleFactory = new SimpleWebPartFactory(this, getWebPartFiles()[0]);
 
         return new ArrayList<WebPartFactory>(Arrays.asList(
                 legacyRunsFactory,
@@ -151,7 +134,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _samplePrepRunType);
+                    WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), SAMPLE_PREP_RUN_TYPE);
                     result.setTitle(MS2_SAMPLE_PREPARATION_RUNS_NAME);
                     return result;
                 }
@@ -235,8 +218,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         service.registerPipelineProvider(new ProteinProphetPipelineProvider(this));
 
         final Set<ExperimentRunType> runTypes = new HashSet<ExperimentRunType>();
-        runTypes.add(_samplePrepRunType);
-        runTypes.add(_ms2SearchRunFilter);
+        runTypes.add(SAMPLE_PREP_RUN_TYPE);
+        runTypes.add(SEARCH_RUN_TYPE);
         runTypes.add(new MS2SearchExperimentRunType("Imported Searches", MS2Schema.TableType.ImportedSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX));
         runTypes.add(new MS2SearchExperimentRunType("X!Tandem Searches", MS2Schema.TableType.XTandemSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX));
         runTypes.add(new MS2SearchExperimentRunType("Mascot Searches", MS2Schema.TableType.MascotSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX));
@@ -360,7 +343,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     }
 
 
-    public void enumerateDocuments(@NotNull SearchService.IndexTask task, Container c, Date modifiedSince)
+    public void enumerateDocuments(@NotNull SearchService.IndexTask task, @NotNull Container c, Date modifiedSince)
     {
         if (c == ContainerManager.getSharedContainer())
         {

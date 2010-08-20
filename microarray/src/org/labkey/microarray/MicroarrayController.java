@@ -16,35 +16,37 @@
 
 package org.labkey.microarray;
 
-import org.labkey.api.action.*;
+import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
+import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.RequiresSiteAdmin;
-import org.labkey.api.security.permissions.*;
-import org.labkey.api.study.actions.ProtocolIdForm;
+import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.*;
-import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.util.URLHelper;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.GWTView;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
-import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
-import org.labkey.microarray.pipeline.MicroarrayUpgradeJob;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.Map;
 
 public class MicroarrayController extends SpringActionController
 {
@@ -59,21 +61,6 @@ public class MicroarrayController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    public static class DesignerForm extends ProtocolIdForm
-    {
-        public boolean isCopy()
-        {
-            return _copy;
-        }
-
-        public void setCopy(boolean copy)
-        {
-            _copy = copy;
-        }
-
-        private boolean _copy;
-    }
-    
     @RequiresPermissionClass(DesignAssayPermission.class)
     public class DesignerAction extends org.labkey.api.study.actions.DesignerAction
     {
@@ -164,7 +151,7 @@ public class MicroarrayController extends SpringActionController
             return _extractionEngine;
         }
 
-        public void setExtractionhEngine(String extractionEngine)
+        public void setExtractionEngine(String extractionEngine)
         {
             _extractionEngine = extractionEngine;
         }
@@ -180,76 +167,33 @@ public class MicroarrayController extends SpringActionController
         }
     }
 
-    @RequiresSiteAdmin
-    public class AttachFilesUpgradeAction extends FormViewAction
-    {
-        private Container _container;
-
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
-
-        public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
-        {
-            return new JspView("/org/labkey/microarray/upgradeAttachFiles.jsp");
-        }
-
-        public boolean handlePost(Object o, BindException errors) throws Exception
-        {
-            // just grab any root, it doesn't matter
-            for (PipeRoot root : PipelineService.get().getAllPipelineRoots().values())
-            {
-                if (root.isValid())
-                {
-                    ViewBackgroundInfo info = getViewBackgroundInfo();
-                    _container = root.getContainer();
-                    info.setContainer(_container);
-                    PipelineJob job = new MicroarrayUpgradeJob(MicroarrayPipelineProvider.NAME, info, root);
-                    PipelineService.get().getPipelineQueue().addJob(job);
-
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public ActionURL getSuccessURL(Object o)
-        {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(_container);
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Attach Related Files to Microarray Runs");
-        }
-
-    }
-
     @RequiresPermissionClass(InsertPermission.class)
-    public class ImportImageFilesAction extends SimpleViewAction<ExtractionForm>
+    public class ImportImageFilesAction extends RedirectAction<ExtractionForm>
     {
-        public NavTree appendNavTrail(NavTree root)
+
+        @Override
+        public URLHelper getSuccessURL(ExtractionForm extractionForm)
         {
-            throw new UnsupportedOperationException();
+            return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());
         }
 
-        public ModelAndView getView(ExtractionForm form, BindException errors) throws Exception
+        @Override
+        public boolean doAction(ExtractionForm form, BindException errors) throws Exception
         {
-            Container c = getContainer();
-
             try
             {
-                PipelineJob job = new FeatureExtractionPipelineJob(getViewBackgroundInfo(), form.getProtocolName(), form.getValidatedFiles(c), form.getExtractionEngine(), PipelineService.get().findPipelineRoot(getContainer()));
+                PipelineJob job = new FeatureExtractionPipelineJob(getViewBackgroundInfo(), form.getProtocolName(), form.getValidatedFiles(getContainer()), form.getExtractionEngine(), PipelineService.get().findPipelineRoot(getContainer()));
                 PipelineService.get().queueJob(job);
-
-                HttpView.throwRedirect(PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(c));
+                return true;
             }
             catch (FileNotFoundException e)
             {
-                //TODO - need to buid an error page to display the pipeline errors
+                //TODO - need to build an error page to display the pipeline errors
                 throw new ExperimentException("Import image process failed", e);
             }
-            return null;
         }
+
+        @Override
+        public void validateCommand(ExtractionForm target, Errors errors) {}
     }
 }

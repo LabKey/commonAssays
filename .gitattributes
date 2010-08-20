@@ -588,9 +588,7 @@ microarray/src/org/labkey/microarray/pipeline/ArrayPipelineManager.java -text
 microarray/src/org/labkey/microarray/pipeline/FeatureExtractionPipelineJob.java -text
 microarray/src/org/labkey/microarray/pipeline/FileStatus.java -text
 microarray/src/org/labkey/microarray/pipeline/MicroarrayPipelineProvider.java -text
-microarray/src/org/labkey/microarray/pipeline/MicroarrayUpgradeJob.java -text
 microarray/src/org/labkey/microarray/statistics.jsp -text
-microarray/src/org/labkey/microarray/upgradeAttachFiles.jsp -text
 microarray/webapp/microarray/images/microarrayThumbnailIcon.png -text
 microarray/webapp/microarray/images/qcReportIcon.png -text
 ms1/gwtsrc/org/labkey/ms1/MS1VennDiagramView.gwt.xml -text
@@ -1043,6 +1041,7 @@ ms2/src/org/labkey/ms2/pipeline/MS2PipelineManager.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2SearchForm.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2SearchJobSupport.java -text
+ms2/src/org/labkey/ms2/pipeline/MSPictureUpgradeJob.java -text
 ms2/src/org/labkey/ms2/pipeline/PipelineController.java -text
 ms2/src/org/labkey/ms2/pipeline/ProteinProphetPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/ProteinProphetPipelineProvider.java -text
@@ -1051,6 +1050,7 @@ ms2/src/org/labkey/ms2/pipeline/SearchServiceImpl.java -text
 ms2/src/org/labkey/ms2/pipeline/TPPTask.java -text
 ms2/src/org/labkey/ms2/pipeline/UnknownMS2Run.java -text
 ms2/src/org/labkey/ms2/pipeline/addSequenceDB.jsp -text
+ms2/src/org/labkey/ms2/pipeline/attachMSPictureFiles.jsp -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometRun.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotCPipelineProvider.java -text
@@ -1282,7 +1282,6 @@ nab/src/org/labkey/nab/NabModule.java -text
 nab/src/org/labkey/nab/NabPlateTypeHandler.java -text
 nab/src/org/labkey/nab/NabRunPropertyMap.java -text
 nab/src/org/labkey/nab/NabRunUploadForm.java -text
-nab/src/org/labkey/nab/NabUpgradeCode.java -text
 nab/src/org/labkey/nab/NabUploadWizardAction.java -text
 nab/src/org/labkey/nab/RunMetadata.java -text
 nab/src/org/labkey/nab/RunSettings.java -text
@@ -1300,7 +1299,6 @@ nab/src/org/labkey/nab/query/NabSchema.java -text
 nab/src/org/labkey/nab/runDetails.jsp -text
 nab/src/org/labkey/nab/runProperties.jsp -text
 nab/src/org/labkey/nab/runResults.jsp -text
-nab/src/org/labkey/nab/upgradeAUC.jsp -text
 portal/module.properties -text
 portal/src/org/labkey/portal/PortalModule.java -text
 portal/src/org/labkey/portal/customizeErrors.jsp -text

@@ -48,7 +48,7 @@ import java.util.*;
 
 /**
  * Main module class for MS1. Allows the module to register the services
- * it provides with CPAS.
+ * it provides with LabKey Server.
  */
 
 public class MS1Module extends SpringModule

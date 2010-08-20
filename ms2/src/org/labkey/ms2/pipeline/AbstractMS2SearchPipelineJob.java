@@ -19,6 +19,7 @@ package org.labkey.ms2.pipeline;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.TaskFactory;
+import org.labkey.api.pipeline.TaskFactorySettings;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.util.FileType;
@@ -134,7 +135,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         // Look through all of the tasks in this pipeline
         for (TaskId taskId : getTaskPipeline().getTaskProgression())
         {
-            TaskFactory factory = PipelineJobService.get().getTaskFactory(taskId);
+            TaskFactory<? extends TaskFactorySettings> factory = PipelineJobService.get().getTaskFactory(taskId);
             // Try to find one that does an MS2 search
             if (factory instanceof AbstractMS2SearchTaskFactory)
             {
@@ -187,7 +188,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     public List<File> getInteractSpectraFiles()
     {
         // Default to looking for just mzXML files
-        FileType[] types = new FileType[] { AbstractMS2SearchProtocol.FT_MZXML };
+        List<FileType> types = Collections.singletonList(AbstractMS2SearchProtocol.FT_MZXML);
 
         for (TaskId taskId : getTaskPipeline().getTaskProgression())
         {

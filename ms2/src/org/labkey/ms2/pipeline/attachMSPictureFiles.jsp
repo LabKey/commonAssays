@@ -19,7 +19,7 @@
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 
-<form action="attachFilesUpgrade.view" method="post">
+<form method="post">
     <table width="75%">
         <tr>
             <td>This upgrade will inspect all existing microarray runs in the system. It will attach related files
@@ -28,7 +28,7 @@
                 the <a href="<%=PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(ContainerManager.getRoot())%>">pipeline status </a>page.</td>
     </tr>
     <tr><td>&nbsp;</td></tr>
-    <tr><td><%= PageFlowUtil.generateSubmitButton("Upgrade")%></td></tr>
+    <tr><td><%= PageFlowUtil.generateSubmitButton("Attach Files")%></td></tr>
 </table>
 </form>
 

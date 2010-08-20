@@ -172,7 +172,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
                 " AND r.deleted = ? AND d.RunId = " + runIdSQL + " AND d.RowId = di.DataId AND (" );
         searchCountSQL.add(Boolean.FALSE);
         String separator = "";
-        for (String prefix : MS2Module._ms2SearchRunFilter.getProtocolPrefixes())
+        for (String prefix : MS2Module.SEARCH_RUN_TYPE.getProtocolPrefixes())
         {
             searchCountSQL.append(separator);
             searchCountSQL.append("er.ProtocolLSID LIKE ");

@@ -159,9 +159,9 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             return new TPPTask(this, job);
         }
 
-        public FileType[] getInputTypes()
+        public List<FileType> getInputTypes()
         {
-            return new FileType[] { FT_PEP_XML };
+            return Collections.singletonList(FT_PEP_XML);
         }
 
         public String getStatusName()

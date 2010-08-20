@@ -94,7 +94,7 @@ public class MassSpecMetadataController extends SpringActionController
                 throw new UnauthorizedException();
             }
 
-            QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module._ms2SearchRunFilter);
+            QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module.SEARCH_RUN_TYPE);
             ExpRunTable table = (ExpRunTable) result.getTable();
 
             SQLFragment searchSQL = MassSpecMetadataAssayProvider.getSearchRunSQL(getContainer(), table.getContainerFilter(), Integer.toString(form.getRunId()), "DISTINCT(er.RowId)");
