@@ -39,7 +39,7 @@
 <td valign=top width="610">
     <table>
     <tr><td height=60>
-        <b><%=p.getPeptide()%></b>
+        <strong><%=p.getPeptide()%></strong>
         <%=PageFlowUtil.generateButton("Blast", AppProps.getInstance().getBLASTServerBaseURL() + p.getTrimmedPeptide(), "", "target=\"cmt\"")%><br>
         <%=p.getScan()%>&nbsp;&nbsp;<%=p.getCharge()%>+&nbsp;&nbsp;<%=PageFlowUtil.filter(p.getRawScore())%>&nbsp;&nbsp;<%=p.getDiffScore() == null ? "" : Formats.f3.format(p.getDiffScore())%>&nbsp;&nbsp;<%=p.getZScore() == null ? "" : Formats.f3.format(p.getZScore())%>&nbsp;&nbsp;<%=Formats.percent.format(p.getIonPercent())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getMass())%>&nbsp;&nbsp;<%=Formats.signf4.format(p.getDeltaMass())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getPeptideProphet())%>&nbsp;&nbsp;<%=p.getProteinHits()%><br>
         <%=p.getProtein()%><br>
@@ -198,7 +198,7 @@
 <%
 if (p.getQuantitation() != null)
 {
-    Quantitation quant = p.getQuantitation();
+    PeptideQuantitation quant = p.getQuantitation();
     ActionURL elutionGraphUrl = ctx.url.clone();
     String errorMessage = ctx.url.getParameter("elutionProfileError");
 
@@ -218,10 +218,12 @@ if (p.getQuantitation() != null)
     DecimalFormat format = new DecimalFormat();
     ActionURL editUrl = ctx.url.clone();
     editUrl.setAction(MS2Controller.EditElutionGraphAction.class);
+    ActionURL toggleUrl = ctx.url.clone();
+    toggleUrl.setAction(MS2Controller.ToggleValidQuantitationAction.class);
 
     if (errorMessage != null)
     { %>
-        <font class="labkey-error"><%= errorMessage %></font>
+        <span class="labkey-error"><%= errorMessage %></span>
 <%  }
 %>
 <table>
@@ -238,7 +240,10 @@ if (p.getQuantitation() != null)
                     <a href="<%= chargeUrl %>#quantitation"><%= i %>+</a><%
                 }
             } %>
-            <% if (quant.findScanFile() != null && ctx.container.hasPermission(ctx.user, UpdatePermission.class) && ! "q3".equals(ctx.run.getQuantAnalysisType())) { %><a href="<%= editUrl %>">Edit elution profile selection</a><% } %>
+            <% if (ctx.container.hasPermission(ctx.user, UpdatePermission.class)) {
+                if (quant.findScanFile() != null && !"q3".equals(ctx.run.getQuantAnalysisType())) { %>[<a href="<%= editUrl %>">edit elution profile</a>]<% } %>
+                [<a href="<%= toggleUrl %>"><%= quant.includeInProteinCalc() ? "invalidate" : "revalidate" %> quantitation results</a>]<%
+            }%>
         </td>
     </tr>
     <tr>
@@ -246,16 +251,16 @@ if (p.getQuantitation() != null)
             <table align="center">
                 <tr><td colspan="2" align="center"><strong>Light</strong></td></tr>
                 <tr>
-                    <td><font size="-1">Scans:</font></td>
-                    <td><font size="-1"><%= quant.getLightFirstScan()%> - <%= quant.getLightLastScan()%></font></td>
+                    <td><span style="font-size: smaller; ">Scans:</span></td>
+                    <td><span style="font-size: smaller; "><%= quant.getLightFirstScan()%> - <%= quant.getLightLastScan()%></span></td>
                 </tr>
                 <tr>
-                    <td><font size="-1"><%= p.getCharge() %>+ Mass:</font></td>
-                    <td><font size="-1"><%= quant.getLightMass() %></font></td>
+                    <td><span style="font-size: smaller; "><%= p.getCharge() %>+ Mass:</span></td>
+                    <td><span style="font-size: smaller; "><%= quant.getLightMass() %></span></td>
                 </tr>
                 <tr>
-                    <td><font size="-1"><%= p.getCharge() %>+ Area:</font></td>
-                    <td><font size="-1"><%= format.format(quant.getLightArea()) %></font></td>
+                    <td><span style="font-size: smaller; "><%= p.getCharge() %>+ Area:</span></td>
+                    <td><span style="font-size: smaller; "><%= format.format(quant.getLightArea()) %></span></td>
                 </tr>
             </table>
         </td>
@@ -269,16 +274,16 @@ if (p.getQuantitation() != null)
             <table align="center">
                 <tr><td colspan="2" align="center"><strong>Heavy</strong></td></tr>
                 <tr>
-                    <td><font size="-1">Scans:</font></td>
-                    <td><font size="-1"><%= quant.getHeavyFirstScan()%> - <%= quant.getHeavyLastScan()%></font></td>
+                    <td><span style="font-size: smaller; ">Scans:</span></td>
+                    <td><span style="font-size: smaller; "><%= quant.getHeavyFirstScan()%> - <%= quant.getHeavyLastScan()%></span></td>
                 </tr>
                 <tr>
-                    <td><font size="-1"><%= p.getCharge() %>+ Mass:</font></td>
-                    <td><font size="-1"><%= quant.getHeavyMass() %></font></td>
+                    <td><span style="font-size: smaller; "><%= p.getCharge() %>+ Mass:</span></td>
+                    <td><span style="font-size: smaller; "><%= quant.getHeavyMass() %></span></td>
                 </tr>
                 <tr>
-                    <td><font size="-1"><%= p.getCharge() %>+ Area:</font></td>
-                    <td><font size="-1"><%= format.format(quant.getHeavyArea()) %></font></td>
+                    <td><span style="font-size: smaller; "><%= p.getCharge() %>+ Area:</span></td>
+                    <td><span style="font-size: smaller; "><%= format.format(quant.getHeavyArea()) %></span></td>
                 </tr>
             </table>
         </td>
@@ -292,12 +297,12 @@ if (p.getQuantitation() != null)
             <table align="center">
                 <tr><td colspan="2" align="center"><strong>Combined</strong></td></tr>
                 <tr>
-                    <td><font size="-1"><%= p.getCharge() %>+ Heavy to light ratio:</font></td>
-                    <td><font size="-1"><%= quant.getHeavy2LightRatio()%></font></td>
+                    <td><span style="font-size: smaller; "><%= p.getCharge() %>+ Heavy to light ratio:</span></td>
+                    <td><span style="font-size: smaller; "><%= quant.getHeavy2LightRatio()%></span></td>
                 </tr>
                 <tr>
-                    <td><font size="-1"><%= p.getCharge() %>+ Light to heavy ratio:</font></td>
-                    <td><font size="-1"><%= quant.getRatio()%></font></td>
+                    <td><span style="font-size: smaller; "><%= p.getCharge() %>+ Light to heavy ratio:</span></td>
+                    <td><span style="font-size: smaller; "><%= quant.getRatio()%></span></td>
                 </tr>
             </table>
         </td>

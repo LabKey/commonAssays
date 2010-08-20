@@ -36,7 +36,7 @@ import java.util.List;
  * User: jeckels
  * Date: Mar 21, 2006
  */
-public class Quantitation
+public class PeptideQuantitation
 {
     public static final int SCAN_RANGE = 25;
     public static final float DEFAULT_MASS_TOLERANCE = 1.0f;
@@ -63,6 +63,7 @@ public class Quantitation
     private float _lightArea;
     private float _heavyArea;
     private float _decimalRatio;
+    private Boolean _invalidated;
 
     private List<ScanInfo>[] _heavyProfiles;
     private List<ScanInfo>[] _lightProfiles;
@@ -210,7 +211,7 @@ public class Quantitation
         _decimalRatio = decimalRatio;
     }
 
-    public List<ScanInfo> getHeavyElutionProfile(int charge) throws IOException, SQLException
+    public List<ScanInfo> getHeavyElutionProfile(int charge) throws IOException
     {
         if (charge < 1 || charge > MAX_CHARGE)
         {
@@ -227,7 +228,7 @@ public class Quantitation
         return _heavyProfiles[charge - 1];
     }
 
-    public List<ScanInfo> getLightElutionProfile(int charge) throws IOException, SQLException
+    public List<ScanInfo> getLightElutionProfile(int charge) throws IOException
     {
         if (charge < 1 || charge > MAX_CHARGE)
         {
@@ -244,7 +245,7 @@ public class Quantitation
         return _lightProfiles[charge - 1];
     }
 
-    private MS2Fraction getFraction() throws SQLException
+    private MS2Fraction getFraction()
     {
         if (_fraction != null)
         {
@@ -262,7 +263,7 @@ public class Quantitation
         return _fraction;
     }
 
-    public File findScanFile() throws IOException, SQLException
+    public File findScanFile() throws IOException
     {
         MS2Fraction fraction = getFraction();
         if (fraction == null || fraction.getMzXmlURL() == null)
@@ -287,7 +288,7 @@ public class Quantitation
         return mzXmlFile;
     }
 
-    private void fetchElutionProfiles() throws IOException, SQLException
+    private void fetchElutionProfiles() throws IOException
     {
         MS2Fraction fraction = getFraction();
         if (fraction == null)
@@ -346,6 +347,27 @@ public class Quantitation
                 iterator.close();
             }
         }
+    }
+
+    public boolean includeInProteinCalc()
+    {
+        return _invalidated == null || !_invalidated.booleanValue();
+    }
+
+    public Boolean getInvalidated()
+    {
+        return _invalidated;
+    }
+
+    public void setInvalidated(Boolean invalidated)
+    {
+        // So that we don't have to do a massively expensive upgrade script, use null
+        // instead of false for the invalidated column
+        if (invalidated != null && !invalidated.booleanValue())
+        {
+            invalidated = null;
+        }
+        _invalidated = invalidated;
     }
 
     public int getMaxDisplayScan()

@@ -887,25 +887,32 @@ public class MS2Manager
         return null;
     }
 
-    public static Protein[] getProteinsForGroup(int rowId, int groupNumber, int indistinguishableCollectionId) throws SQLException
+    public static Protein[] getProteinsForGroup(int rowId, int groupNumber, int indistinguishableCollectionId)
     {
-        String sql = "SELECT seq.SeqId, seq.ProtSequence AS Sequence, seq.Mass, seq.Description, seq.BestName, seq.BestGeneName, fs.LookupString FROM " +
-            getTableInfoProteinGroupMemberships() + " pgm," +
-            getTableInfoProteinGroups() + " pg, " +
-            getTableInfoProteinProphetFiles() + " ppf, " +
-            getTableInfoRuns() + " r, " +
-            ProteinManager.getTableInfoFastaSequences() + " fs, " +
-            ProteinManager.getTableInfoSequences() + " seq " +
-            "WHERE pg.RowId = pgm.ProteinGroupId " +
-            "AND seq.SeqId = pgm.SeqId " +
-            "AND pg.ProteinProphetFileId = ppf.RowId " +
-            "AND ppf.Run = r.Run " +
-            "AND fs.FastaId = r.FastaId " +
-            "AND fs.SeqId = seq.SeqId " +
-            "AND pg.GroupNumber = ? " +
-            "AND pg.IndistinguishableCollectionId = ? " +
-            "AND pg.ProteinProphetFileId = ?";
-        return Table.executeQuery(getSchema(), sql, new Object[] {groupNumber, indistinguishableCollectionId, rowId}, Protein.class);
+        try
+        {
+            String sql = "SELECT seq.SeqId, seq.ProtSequence AS Sequence, seq.Mass, seq.Description, seq.BestName, seq.BestGeneName, fs.LookupString FROM " +
+                getTableInfoProteinGroupMemberships() + " pgm," +
+                getTableInfoProteinGroups() + " pg, " +
+                getTableInfoProteinProphetFiles() + " ppf, " +
+                getTableInfoRuns() + " r, " +
+                ProteinManager.getTableInfoFastaSequences() + " fs, " +
+                ProteinManager.getTableInfoSequences() + " seq " +
+                "WHERE pg.RowId = pgm.ProteinGroupId " +
+                "AND seq.SeqId = pgm.SeqId " +
+                "AND pg.ProteinProphetFileId = ppf.RowId " +
+                "AND ppf.Run = r.Run " +
+                "AND fs.FastaId = r.FastaId " +
+                "AND fs.SeqId = seq.SeqId " +
+                "AND pg.GroupNumber = ? " +
+                "AND pg.IndistinguishableCollectionId = ? " +
+                "AND pg.ProteinProphetFileId = ?";
+            return Table.executeQuery(getSchema(), sql, new Object[] {groupNumber, indistinguishableCollectionId, rowId}, Protein.class);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
     }
 
     public static ProteinGroupWithQuantitation getProteinGroup(int proteinGroupId) throws SQLException
@@ -922,7 +929,25 @@ public class MS2Manager
             return groups[0];
         }
         throw new IllegalStateException("Expected zero or one protein groups for rowId=" + proteinGroupId);
+    }
 
+    public static ProteinGroupWithQuantitation[] getProteinGroupsWithPeptide(MS2Peptide peptide)
+    {
+        try
+        {
+            SQLFragment sql = new SQLFragment("SELECT pg.* FROM ");
+            sql.append(getTableInfoProteinGroupsWithQuantitation());
+            sql.append(" pg WHERE pg.RowId IN (SELECT ProteinGroupId FROM ");
+            sql.append(getTableInfoPeptideMemberships());
+            sql.append(" WHERE PeptideId = ?)");
+            sql.add(peptide.getRowId());
+
+            return Table.executeQuery(getSchema(), sql, ProteinGroupWithQuantitation.class);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
     }
 
     public static ProteinGroupWithQuantitation getProteinGroup(int proteinProphetFileId, int groupNumber, int indistinguishableCollectionId) throws SQLException
@@ -1049,21 +1074,27 @@ public class MS2Manager
         }
         catch (SQLException e)
         {
-            _log.error("getModifications", e);
-            return new MS2Modification[0];
+            throw new RuntimeSQLException(e);
         }
     }
 
-    public static MS2Peptide getPeptide(long peptideId) throws SQLException
+    public static MS2Peptide getPeptide(long peptideId)
     {
-        Filter filter = new SimpleFilter("RowId", peptideId);
-        return Table.selectObject(getTableInfoPeptides(), filter, null, MS2Peptide.class);
+        try
+        {
+            Filter filter = new SimpleFilter("RowId", peptideId);
+            return Table.selectObject(getTableInfoPeptides(), filter, null, MS2Peptide.class);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
     }
 
-    public static Quantitation getQuantitation(long peptideId)
+    public static PeptideQuantitation getQuantitation(long peptideId)
     {
         Object[] pk = new Object[]{new Long(peptideId)};
-        return Table.selectObject(getTableInfoQuantitation(), pk, Quantitation.class);
+        return Table.selectObject(getTableInfoQuantitation(), pk, PeptideQuantitation.class);
     }
 
     public static int verifyRowIndex(long[] index, int rowIndex, long peptideId)

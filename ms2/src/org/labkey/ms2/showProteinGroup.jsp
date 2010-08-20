@@ -20,59 +20,65 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.Protein" %>
 <%@ page import="org.labkey.ms2.ProteinGroupWithQuantitation" %>
+<%@ page import="java.text.Format" %>
 <%
     ProteinGroupWithQuantitation group = ((JspView<ProteinGroupWithQuantitation>)HttpView.currentView()).getModelBean();
+    Format floatFormat = Formats.f2;
 %>
 <table>
     <tr>
-        <td>Group number:</td>
+        <td class="labkey-form-label">Group number</td>
         <td><%= group.getGroupNumber() %><% if (group.getIndistinguishableCollectionId() != 0) { %>-<%= group.getIndistinguishableCollectionId() %><% } %></td>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td>Group probability:</td>
-        <td><%= group.getGroupProbability() %></td>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td>Protein probability:</td>
-        <td><%= group.getProteinProbability() %></td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td class="labkey-form-label">Group probability</td>
+        <td><%= floatFormat.format(group.getGroupProbability()) %></td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td class="labkey-form-label">Protein probability</td>
+        <td><%= floatFormat.format(group.getProteinProbability()) %></td>
     </tr>
     <tr>
-        <td>Total number of peptides:</td>
+        <td class="labkey-form-label">Total number of peptides</td>
         <td><%= group.getTotalNumberPeptides() %></td>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td>Number of unique peptides:</td>
+        <td />
+        <td class="labkey-form-label">Number of unique peptides</td>
         <td><%= group.getUniquePeptidesCount() %></td>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td>Percent spectrum ids:</td>
-        <td><%= group.getPctSpectrumIds() == null ? "" : Formats.percent2.format(group.getPctSpectrumIds()) %></td>
+        <td />
+        <% if (group.getPctSpectrumIds() != null) { %>
+            <td class="labkey-form-label">Percent spectrum ids</td>
+            <td><%= Formats.percent2.format(group.getPctSpectrumIds()) %></td>
+        <% } %>
     </tr>
-    <tr>
-        <td>Percent coverage:</td>
-        <td><%= group.getPercentCoverage() == null ? "" : Formats.percent2.format(group.getPercentCoverage()) %></td>
-    </tr>
+    <% if (group.getPercentCoverage() != null) { %>}
+        <tr>
+            <td class="labkey-form-label">Percent coverage</td>
+            <td><%= Formats.percent2.format(group.getPercentCoverage()) %></td>
+        </tr>
+    <% } %>
 
     <% if (group.getRatioMean() != null) { %>
         <tr>
-            <td>Ratio mean:</td>
-            <td><%= group.getRatioMean() %></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td>Ratio standard dev:</td>
-            <td><%= group.getRatioStandardDev() %></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td>Number of quantitation peptides:</td>
+            <td class="labkey-form-label">Ratio mean</td>
+            <td><%= floatFormat.format(group.getRatioMean()) %></td>
+            <td />
+            <td class="labkey-form-label">Ratio standard dev</td>
+            <td><%= floatFormat.format(group.getRatioStandardDev()) %></td>
+            <td />
+            <td class="labkey-form-label">Number of quantitation peptides</td>
             <td><%= group.getRatioNumberPeptides() %></td>
         </tr>
         <tr>
-            <td>Heavy to light ratio mean:</td>
-            <td><%= group.getHeavy2LightRatioMean() %></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td>Heavy to light standard dev:</td>
-            <td><%= group.getHeavy2LightRatioStandardDev() %></td>
+            <td class="labkey-form-label">Heavy to light ratio mean</td>
+            <td><%= floatFormat.format(group.getHeavy2LightRatioMean()) %></td>
+            <td />
+            <td class="labkey-form-label">Heavy to light standard dev</td>
+            <td><%= floatFormat.format(group.getHeavy2LightRatioStandardDev()) %></td>
         </tr>
     <% } %>
     <tr>
         <td>&nbsp;</td>
     </tr>
     <tr>
-        <td>Jump to:</td>
+        <td class="labkey-form-label">Jump to</td>
         <td colspan="7"><%
             Protein[] proteins = group.lookupProteins();
             for (int i = 0; i < proteins.length; i++)

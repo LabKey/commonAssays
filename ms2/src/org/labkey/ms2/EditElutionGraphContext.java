@@ -26,8 +26,8 @@ import java.util.List;
 */
 public class EditElutionGraphContext
 {
-    private final List<Quantitation.ScanInfo> _lightElutionProfile;
-    private final List<Quantitation.ScanInfo> _heavyElutionProfile;
+    private final List<PeptideQuantitation.ScanInfo> _lightElutionProfile;
+    private final List<PeptideQuantitation.ScanInfo> _heavyElutionProfile;
     private final ActionURL _url;
     private final MS2Peptide _peptide;
 
@@ -44,14 +44,14 @@ public class EditElutionGraphContext
     private float _maxLightIntensity;
     private float _maxHeavyIntensity;
 
-    public Quantitation getQuantitation()
+    public PeptideQuantitation getQuantitation()
     {
         return _quantitation;
     }
 
-    private Quantitation _quantitation;
+    private PeptideQuantitation _quantitation;
 
-    public EditElutionGraphContext(List<Quantitation.ScanInfo> lightElutionProfile, List<Quantitation.ScanInfo> heavyElutionProfile, Quantitation quant, ActionURL url, MS2Peptide peptide)
+    public EditElutionGraphContext(List<PeptideQuantitation.ScanInfo> lightElutionProfile, List<PeptideQuantitation.ScanInfo> heavyElutionProfile, PeptideQuantitation quant, ActionURL url, MS2Peptide peptide)
     {
         _lightElutionProfile = lightElutionProfile;
         _heavyElutionProfile = heavyElutionProfile;
@@ -68,19 +68,19 @@ public class EditElutionGraphContext
         return _url;
     }
 
-    private float findMaxIntensity(List<Quantitation.ScanInfo> scanInfos)
+    private float findMaxIntensity(List<PeptideQuantitation.ScanInfo> scanInfos)
     {
         float max = 0f;
-        for (Quantitation.ScanInfo scanInfo : scanInfos)
+        for (PeptideQuantitation.ScanInfo scanInfo : scanInfos)
         {
             max = Math.max(max, scanInfo.getIntensity());
         }
         return max;
     }
 
-    private Float getProfileValue(int scan, List<Quantitation.ScanInfo> infos)
+    private Float getProfileValue(int scan, List<PeptideQuantitation.ScanInfo> infos)
     {
-        for (Quantitation.ScanInfo scanInfo : infos)
+        for (PeptideQuantitation.ScanInfo scanInfo : infos)
         {
             if (scanInfo.getScan() == scan)
             {
@@ -101,12 +101,12 @@ public class EditElutionGraphContext
         return getProfileValue(scan, _heavyElutionProfile);
     }
 
-    public List<Quantitation.ScanInfo> getLightElutionProfile()
+    public List<PeptideQuantitation.ScanInfo> getLightElutionProfile()
     {
         return _lightElutionProfile;
     }
 
-    public List<Quantitation.ScanInfo> getHeavyElutionProfile()
+    public List<PeptideQuantitation.ScanInfo> getHeavyElutionProfile()
     {
         return _heavyElutionProfile;
     }

@@ -16,190 +16,273 @@
 
 package org.labkey.ms2;
 
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Table;
+import org.labkey.api.security.User;
+import org.labkey.ms2.reader.ProteinGroup;
+
 import java.sql.SQLException;
 
 /**
  * User: jeckels
  * Date: Dec 1, 2006
  */
-public class ProteinGroupWithQuantitation
+public class ProteinGroupWithQuantitation extends ProteinGroup
 {
-    private int _rowId;
-    private float _groupProbability;
-    private int _proteinProphetFileId;
-    private int _groupNumber;
-    private int _indistinguishableCollectionId;
-    private int _uniquePeptidesCount;
-    private int _totalNumberPeptides;
-    private Float _pctSpectrumIds;
-    private Float _percentCoverage;
-    private float _proteinProbability;
-
-    private Float _ratioMean;
-    private Float _ratioStandardDev;
-    private Integer _ratioNumberPeptides;
-    private Float _heavy2LightRatioMean;
-    private Float _heavy2LightRatioStandardDev;
+    private ProteinQuantitation _quantitation;
 
     private Protein[] _proteins;
-
-
-    public int getGroupNumber()
-    {
-        return _groupNumber;
-    }
-
-    public void setGroupNumber(int groupNumber)
-    {
-        _groupNumber = groupNumber;
-    }
-
-    public float getGroupProbability()
-    {
-        return _groupProbability;
-    }
-
-    public void setGroupProbability(float groupProbability)
-    {
-        _groupProbability = groupProbability;
-    }
+    private MS2Peptide[] _peptides;
 
     public Float getHeavy2LightRatioMean()
     {
-        return _heavy2LightRatioMean;
+        return _quantitation == null ? null : _quantitation.getHeavy2lightRatioMean();
     }
 
     public void setHeavy2LightRatioMean(Float heavy2LightRatioMean)
     {
-        _heavy2LightRatioMean = heavy2LightRatioMean;
+        if (heavy2LightRatioMean != null)
+        {
+            ensureQuantitation().setHeavy2lightRatioMean(heavy2LightRatioMean.floatValue());
+        }
     }
 
     public Float getHeavy2LightRatioStandardDev()
     {
-        return _heavy2LightRatioStandardDev;
+        return _quantitation == null ? null : _quantitation.getHeavy2lightRatioStandardDev();
     }
 
     public void setHeavy2LightRatioStandardDev(Float heavy2LightRatioStandardDev)
     {
-        _heavy2LightRatioStandardDev = heavy2LightRatioStandardDev;
-    }
-
-    public int getIndistinguishableCollectionId()
-    {
-        return _indistinguishableCollectionId;
-    }
-
-    public void setIndistinguishableCollectionId(int indistinguishableCollectionId)
-    {
-        _indistinguishableCollectionId = indistinguishableCollectionId;
-    }
-
-    public Float getPctSpectrumIds()
-    {
-        return _pctSpectrumIds;
-    }
-
-    public void setPctSpectrumIds(Float pctSpectrumIds)
-    {
-        _pctSpectrumIds = pctSpectrumIds;
-    }
-
-    public Float getPercentCoverage()
-    {
-        return _percentCoverage;
-    }
-
-    public void setPercentCoverage(Float percentCoverage)
-    {
-        _percentCoverage = percentCoverage;
-    }
-
-    public float getProteinProbability()
-    {
-        return _proteinProbability;
-    }
-
-    public void setProteinProbability(float proteinProbability)
-    {
-        _proteinProbability = proteinProbability;
-    }
-
-    public int getProteinProphetFileId()
-    {
-        return _proteinProphetFileId;
-    }
-
-    public void setProteinProphetFileId(int proteinProphetFileId)
-    {
-        _proteinProphetFileId = proteinProphetFileId;
+        if (heavy2LightRatioStandardDev != null)
+        {
+            ensureQuantitation().setHeavy2lightRatioStandardDev(heavy2LightRatioStandardDev.floatValue());
+        }
     }
 
     public Float getRatioMean()
     {
-        return _ratioMean;
+        return _quantitation == null ? null : _quantitation.getRatioMean();
     }
 
     public void setRatioMean(Float ratioMean)
     {
-        _ratioMean = ratioMean;
+        if (ratioMean != null)
+        {
+            ensureQuantitation().setRatioMean(ratioMean.floatValue());
+        }
     }
 
     public Integer getRatioNumberPeptides()
     {
-        return _ratioNumberPeptides;
+        return _quantitation == null ? null : _quantitation.getRatioNumberPeptides();
     }
 
     public void setRatioNumberPeptides(Integer ratioNumberPeptides)
     {
-        _ratioNumberPeptides = ratioNumberPeptides;
+        if (ratioNumberPeptides != null)
+        {
+            ensureQuantitation().setRatioNumberPeptides(ratioNumberPeptides.intValue());
+        }
+    }
+
+    private ProteinQuantitation ensureQuantitation()
+    {
+        if (_quantitation == null)
+        {
+            _quantitation = new ProteinQuantitation();
+            _quantitation.setProteinGroupId(getRowId());
+        }
+        return _quantitation;
     }
 
     public Float getRatioStandardDev()
     {
-        return _ratioStandardDev;
+        return _quantitation == null ? null : _quantitation.getRatioStandardDev();
     }
 
     public void setRatioStandardDev(Float ratioStandardDev)
     {
-        _ratioStandardDev = ratioStandardDev;
+        if (ratioStandardDev != null)
+        {
+            ensureQuantitation().setRatioStandardDev(ratioStandardDev.floatValue());
+        }
     }
 
-    public int getRowId()
-    {
-        return _rowId;
-    }
-
-    public void setRowId(int rowId)
-    {
-        _rowId = rowId;
-    }
-
-    public int getTotalNumberPeptides()
-    {
-        return _totalNumberPeptides;
-    }
-
-    public void setTotalNumberPeptides(int totalNumberPeptides)
-    {
-        _totalNumberPeptides = totalNumberPeptides;
-    }
-
-    public int getUniquePeptidesCount()
-    {
-        return _uniquePeptidesCount;
-    }
-
-    public void setUniquePeptidesCount(int uniquePeptidesCount)
-    {
-        _uniquePeptidesCount = uniquePeptidesCount;
-    }
-
-    public Protein[] lookupProteins() throws SQLException
+    public Protein[] lookupProteins()
     {
         if (_proteins == null)
         {
-            _proteins = MS2Manager.getProteinsForGroup(_proteinProphetFileId, _groupNumber, _indistinguishableCollectionId);
+            _proteins = MS2Manager.getProteinsForGroup(getProteinProphetFileId(), getGroupNumber(), getIndistinguishableCollectionId());
         }
         return _proteins;
+    }
+
+    public MS2Peptide[] lookupPeptides()
+    {
+        if (_peptides == null)
+        {
+            SQLFragment sql = new SQLFragment("SELECT * FROM ");
+            sql.append(MS2Manager.getTableInfoPeptidesData());
+            sql.append(" WHERE RowId IN (SELECT PeptideId FROM ");
+            sql.append(MS2Manager.getTableInfoPeptideMemberships());
+            sql.append(" WHERE ProteinGroupId = ?)");
+            sql.add(getRowId());
+            try
+            {
+                _peptides = Table.executeQuery(MS2Manager.getSchema(), sql, MS2Peptide.class);
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+        return _peptides;
+    }
+
+    private static final int MAX_LOG = 3;
+
+    /**
+     * This code is translated from the TPP C++ source at revision 5114 in:
+     * https://sashimi.svn.sourceforge.net/svnroot/sashimi/trunk/trans_proteomic_pipeline/src/Quantitation/Q3/Q3ProteinRatioParser/Q3GroupPeptideParser.cxx
+     */
+    public void recalcQuantitation(User user)
+    {
+        int ratioNum = 0;
+        double h2LRatioSquareSum = 0;
+        double h2LRatioLogSum = 0;
+        double ratioSquareSum = 0;
+        double ratioLogSum = 0;
+
+        for (MS2Peptide ms2Peptide : lookupPeptides())
+        {
+            PeptideQuantitation quant = ms2Peptide.getQuantitation();
+            if (quant != null && quant.includeInProteinCalc())
+            {
+                double ratio;
+                if (quant.getHeavyArea() == 0.0) // inf ratio
+                {
+                    ratio = Math.pow(10.0, MAX_LOG);
+                }
+                else
+                {
+                    ratio = quant.getLightArea() / quant.getHeavyArea();
+
+                    if (ratio > Math.pow(10.0, MAX_LOG))
+                    {
+                        ratio = Math.pow(10.0, MAX_LOG);
+                    }
+                    else if (ratio < Math.pow(10.0, -1 * MAX_LOG))
+                    {
+                        ratio = Math.pow(10.0, -1 * MAX_LOG);
+                    }
+                }
+                double h2LRatio;
+                if (ratio <= Math.pow(10.0, -1 * MAX_LOG))
+                {
+                    h2LRatio = Math.pow(10.0, MAX_LOG);
+                }
+                else if (ratio >= Math.pow(10.0, MAX_LOG))
+                {
+                    h2LRatio = Math.pow(10.0, -1 * MAX_LOG);
+                }
+                else
+                {
+                    h2LRatio = 1 / ratio;
+                }
+
+                h2LRatioSquareSum += Math.log10(h2LRatio) * Math.log10(h2LRatio);
+                h2LRatioLogSum += Math.log10(h2LRatio);
+
+                ratioSquareSum += Math.log10(ratio) * Math.log10(ratio);
+                ratioLogSum += Math.log10(ratio);
+                ratioNum++;
+            }
+        }
+
+        if (ratioNum == 0)
+        {
+            // No peptides available for quantitation
+            if (_quantitation != null)
+            {
+                try
+                {
+                    Table.delete(MS2Manager.getTableInfoProteinQuantitation(), getRowId());
+                }
+                catch (SQLException e)
+                {
+                    throw new RuntimeSQLException(e);
+                }
+                _quantitation = null;
+            }
+        }
+        else
+        {
+            boolean insert = _quantitation == null;
+            // Come up with the aggregates
+            double logmean = ratioLogSum / ratioNum;
+            double h2LogMean = h2LRatioLogSum / ratioNum;
+
+            if (logmean >= MAX_LOG) // infinite ratio
+            {
+                setRatioMean(999f);
+            }
+            else if (logmean <= -1 * MAX_LOG) // zero ratio
+            {
+                setRatioMean(0f);
+            }
+            else
+            {
+                setRatioMean((float)Math.pow(10, logmean));
+            }
+
+            if (h2LogMean >= MAX_LOG) // infinite ratio
+            {
+                setHeavy2LightRatioMean(999f);
+            }
+            else if (h2LogMean <= -1 * MAX_LOG) // zero ratio
+            {
+                setHeavy2LightRatioMean(0.0f);
+            }
+            else
+            {
+                setHeavy2LightRatioMean((float)Math.pow(10, h2LogMean));
+            }
+
+            if (ratioNum == 1)
+            {
+                setRatioStandardDev(0f);
+                setHeavy2LightRatioStandardDev(0f);
+            }
+            else
+            {
+                double variance = (ratioSquareSum / ratioNum) - (logmean * logmean);
+                double h2l_variance = (h2LRatioSquareSum / ratioNum) - (h2LogMean * h2LogMean);
+                if (variance < 0.0)
+                    variance = 0.0;
+                if (h2l_variance < 0.0)
+                    h2l_variance = 0.0;
+
+                setRatioStandardDev((float)Math.sqrt(variance) * getRatioMean().floatValue()); //sqrt((ratio_square_sum_ / ratio_num_) - (logmean * logmean));
+                setHeavy2LightRatioStandardDev((float)Math.sqrt(h2l_variance) * getHeavy2LightRatioMean().floatValue());
+            }
+            setRatioNumberPeptides(ratioNum);
+            try
+            {
+                if (insert)
+                {
+                    Table.insert(user, MS2Manager.getTableInfoProteinQuantitation(), _quantitation);
+                }
+                else
+                {
+                    Table.update(user, MS2Manager.getTableInfoProteinQuantitation(), _quantitation, getRowId());
+                }
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
     }
 }

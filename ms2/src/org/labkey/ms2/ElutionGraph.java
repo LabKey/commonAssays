@@ -48,13 +48,13 @@ public class ElutionGraph
                 false
         );
 
-    public void addInfo(List<Quantitation.ScanInfo> scanInfos, int firstSelectedScan, int lastSelectedScan, int minScan, int maxScan, Color color)
+    public void addInfo(List<PeptideQuantitation.ScanInfo> scanInfos, int firstSelectedScan, int lastSelectedScan, int minScan, int maxScan, Color color)
     {
         XYSeries selectedSeries = new XYSeries("Selected", false, false);
         XYSeries surroundingSeries = new XYSeries("Surrounding", false, false);
 
         Set<Integer> scans = new HashSet<Integer>();
-        for (Quantitation.ScanInfo scanInfo : scanInfos)
+        for (PeptideQuantitation.ScanInfo scanInfo : scanInfos)
         {
             if (!scans.contains(scanInfo.getScan()))
             {

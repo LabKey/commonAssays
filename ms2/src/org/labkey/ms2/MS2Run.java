@@ -162,12 +162,7 @@ public abstract class MS2Run implements Serializable
 
     public String getQuantitationPeptideColumnNames()
     {
-        return "LightFirstScan, LightLastScan, LightMass, HeavyFirstScan, HeavyLastScan, HeavyMass, Ratio, Heavy2LightRatio, LightArea, HeavyArea, DecimalRatio";
-    }
-
-    public String getPeptideProphetColumnNames()
-    {
-        return "ProphetFVal, ProphetDeltaMass, ProphetNumTrypticTerm, ProphetNumMissedCleav";
+        return "LightFirstScan, LightLastScan, LightMass, HeavyFirstScan, HeavyLastScan, HeavyMass, Ratio, Heavy2LightRatio, LightArea, HeavyArea, DecimalRatio, Invalidated";
     }
 
     public static String getCommonProteinColumnNames()
@@ -341,12 +336,12 @@ public abstract class MS2Run implements Serializable
         public String toCSVString()
         {
             StringBuffer sb = new StringBuffer();
-            for (Iterator iter = iterator(); iter.hasNext();)
+            for (Object o : this)
             {
                 if (sb.length() > 0)
                     sb.append(',');
 
-                sb.append(iter.next());
+                sb.append(o);
             }
             return sb.toString();
         }

@@ -723,6 +723,7 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemResidueModComposite.java
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemSequenceDbComposite.java -text
 ms2/module.properties -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-8.20.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-10.20-10.21.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-8.30-9.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
@@ -802,6 +803,7 @@ ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-8.34-8.35.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-9.20-9.21.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-9.21-9.22.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-0.00-8.20.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/ms2-10.20-10.21.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-8.30-9.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
@@ -929,6 +931,7 @@ ms2/src/org/labkey/ms2/MascotDatImporter.java -text
 ms2/src/org/labkey/ms2/PepXmlExperimentDataHandler.java -text
 ms2/src/org/labkey/ms2/PepXmlImporter.java -text
 ms2/src/org/labkey/ms2/PeptideProphetGraphs.java -text
+ms2/src/org/labkey/ms2/PeptideQuantitation.java -text
 ms2/src/org/labkey/ms2/PklSpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/PlainTextRenderer.java -text
 ms2/src/org/labkey/ms2/Protein.java -text
@@ -940,8 +943,8 @@ ms2/src/org/labkey/ms2/ProteinName.java -text
 ms2/src/org/labkey/ms2/ProteinProphetExperimentDataHandler.java -text
 ms2/src/org/labkey/ms2/ProteinProphetFile.java -text
 ms2/src/org/labkey/ms2/ProteinProphetImporter.java -text
+ms2/src/org/labkey/ms2/ProteinQuantitation.java -text
 ms2/src/org/labkey/ms2/ProteinSummary.java -text
-ms2/src/org/labkey/ms2/Quantitation.java -text
 ms2/src/org/labkey/ms2/RunListCache.java -text
 ms2/src/org/labkey/ms2/RunListException.java -text
 ms2/src/org/labkey/ms2/ShowPeptideContext.java -text

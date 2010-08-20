@@ -415,7 +415,7 @@ public class ProteinProphetImporter
     private int insertProteinGroup(ProtXmlReader.Protein protein, PreparedStatement groupStmt, int groupNumber, float groupProbability, int collectionId, ProteinProphetFile file, ViewBackgroundInfo info)
         throws SQLException
     {
-        ProtXmlReader.QuantitationRatio xpressRatio = protein.getQuantitationRatio();
+        ProteinQuantitation xpressRatio = protein.getQuantitationRatio();
 
         int groupIndex = 1;
         groupStmt.setInt(groupIndex++, groupNumber);

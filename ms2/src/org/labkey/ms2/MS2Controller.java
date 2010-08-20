@@ -71,6 +71,7 @@ import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.ms2.query.*;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
+import org.labkey.ms2.reader.SensitivitySummary;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
@@ -3987,12 +3988,13 @@ public class MS2Controller extends SpringActionController
             setTitle(title);
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
-            ModelAndView titleView = new HtmlView("<table><tr><td><span class=\"navPageHeader\">" + title + " from " + run1.getDescription() + "</span></td></tr></table>\n");
-            AbstractMS2RunView peptideView = new ProteinProphetPeptideView(getViewContext(), run1);
+            ProteinProphetPeptideView peptideView = new ProteinProphetPeptideView(getViewContext(), run1);
             VBox view = new ProteinsView(getViewContext().getActionURL(), run1, form, proteins, null, peptideView);         // TODO: clone?
             JspView summaryView = new JspView<ProteinGroupWithQuantitation>("/org/labkey/ms2/showProteinGroup.jsp", group);
+            summaryView.setTitle(title + " from " + run1.getDescription());
+            summaryView.setFrame(WebPartView.FrameType.PORTAL);
 
-            return new VBox(titleView, summaryView, view);
+            return new VBox(summaryView, view);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -4042,6 +4044,7 @@ public class MS2Controller extends SpringActionController
 
             if (showPeptides)
             {
+                addView(new HtmlView("<a name=\"Peptides\" />"));
                 List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
                 String peptideFilterString = ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run).getFilterText();
                 sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilterString));
@@ -4278,7 +4281,7 @@ public class MS2Controller extends SpringActionController
 
         if (null != peptide)
         {
-            Quantitation quantitation = peptide.getQuantitation();
+            PeptideQuantitation quantitation = peptide.getQuantitation();
             if (quantitation == null)
             {
                 renderErrorImage("No quantitation data for this peptide", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
@@ -4292,7 +4295,7 @@ public class MS2Controller extends SpringActionController
             {
                 ElutionGraph g = new ElutionGraph();
                 int charge = form.getQuantitationCharge() == Integer.MIN_VALUE ? peptide.getCharge() : form.getQuantitationCharge();
-                if (charge < 1 || charge > Quantitation.MAX_CHARGE)
+                if (charge < 1 || charge > PeptideQuantitation.MAX_CHARGE)
                 {
                     renderErrorImage("Invalid charge state: " + charge, response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
                 }
@@ -5920,6 +5923,53 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
+    public class ToggleValidQuantitationAction extends RedirectAction<DetailsForm>
+    {
+        @Override
+        public URLHelper getSuccessURL(DetailsForm detailsForm)
+        {
+            ActionURL result = getViewContext().getActionURL().clone();
+            result.setAction(ShowPeptideAction.class);
+            return result;
+        }
+
+        @Override
+        public boolean doAction(DetailsForm form, BindException errors) throws Exception
+        {
+            long peptideId = form.getPeptideIdLong();
+            MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
+
+            if (peptide == null)
+                throw new NotFoundException("Could not find peptide with RowId " + peptideId);
+
+            int runId = peptide.getRun();
+
+            if (!isAuthorized(runId))
+                throw new UnauthorizedException();
+
+            PeptideQuantitation quantitation = peptide.getQuantitation();
+            if (quantitation == null)
+            {
+                throw new NotFoundException("No quantitation data found for peptide");
+            }
+
+            // Toggle its validation state
+            quantitation.setInvalidated(quantitation.includeInProteinCalc());
+            Table.update(getUser(), MS2Manager.getTableInfoQuantitation(), quantitation, quantitation.getPeptideId());
+
+            for (ProteinGroupWithQuantitation proteinGroup : MS2Manager.getProteinGroupsWithPeptide(peptide))
+            {
+                proteinGroup.recalcQuantitation(getUser());
+            }
+
+            return true;
+        }
+
+        @Override
+        public void validateCommand(DetailsForm target, Errors errors) {}
+    }
+
+    @RequiresPermissionClass(UpdatePermission.class)
     public class EditElutionGraphAction extends FormViewAction<ElutionProfileForm>
     {
         public void validateCommand(ElutionProfileForm target, Errors errors)
@@ -5932,7 +5982,7 @@ public class MS2Controller extends SpringActionController
                 return null;
 
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
-            Quantitation quant = peptide.getQuantitation();
+            PeptideQuantitation quant = peptide.getQuantitation();
 
             EditElutionGraphContext ctx = new EditElutionGraphContext(quant.getLightElutionProfile(peptide.getCharge()), quant.getHeavyElutionProfile(peptide.getCharge()), quant, getViewContext().getActionURL(), peptide);
             return new JspView<EditElutionGraphContext>("/org/labkey/ms2/editElution.jsp", ctx, errors);
@@ -5948,7 +5998,7 @@ public class MS2Controller extends SpringActionController
             {
                 throw new NotFoundException();
             }
-            Quantitation quant = peptide.getQuantitation();
+            PeptideQuantitation quant = peptide.getQuantitation();
             if (quant == null)
             {
                 throw new NotFoundException();

@@ -18,6 +18,7 @@ package org.labkey.ms2.reader;
 
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
+import org.labkey.ms2.ProteinQuantitation;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -71,7 +72,7 @@ public class ProtXmlReader
             try
             {
                 if (null == _nextProteinGroup)
-                    _nextProteinGroup = ProteinGroup.getProteinGroup(_parser);
+                    _nextProteinGroup = getProteinGroup();
             }
             catch (XMLStreamException e)
             {
@@ -80,6 +81,35 @@ public class ProtXmlReader
 
             return null != _nextProteinGroup;
         }
+
+        public ProteinGroup getProteinGroup() throws XMLStreamException
+        {
+            while (_parser.hasNext())
+            {
+                if (!_parser.skipToStart("protein_group"))
+                {
+                    return null;
+                }
+
+                if (_parser.hasNext())
+                {
+                    ProteinGroup group = new ProteinGroup();
+                    String groupNumberString = _parser.getAttributeValue(null, "group_number");
+                    String probabilityString = _parser.getAttributeValue(null, "probability");
+                    if (groupNumberString != null && !"".equals(groupNumberString) &&
+                        probabilityString != null && !"".equals(probabilityString))
+                    {
+                        group.setGroupNumber(Integer.parseInt(groupNumberString));
+                        group.setProbability(Float.parseFloat(probabilityString));
+                        group.setParser(_parser);
+                        return group;
+                    }
+                }
+            }
+
+            return null;
+        }
+
 
 
         public ProteinGroup next()
@@ -130,7 +160,7 @@ public class ProtXmlReader
 
         private List<Peptide> _peptides = new ArrayList<Peptide>();
         private List<String> _indistinguishableProteinNames = new ArrayList<String>();
-        private QuantitationRatio _quantRatio;
+        private ProteinQuantitation _quantRatio;
 
         public Protein()
         {
@@ -194,7 +224,12 @@ public class ProtXmlReader
                     }
                     else if ("XPressRatio".equals(name) || "Q3Ratio".equals(name))
                     {
-                        _quantRatio = new QuantitationRatio(parser);
+                        _quantRatio = new ProteinQuantitation();
+                        _quantRatio.setHeavy2lightRatioMean(Float.parseFloat(parser.getAttributeValue(null, "heavy2light_ratio_mean")));
+                        _quantRatio.setHeavy2lightRatioStandardDev(Float.parseFloat(parser.getAttributeValue(null, "heavy2light_ratio_standard_dev")));
+                        _quantRatio.setRatioMean(Float.parseFloat(parser.getAttributeValue(null, "ratio_mean")));
+                        _quantRatio.setRatioStandardDev(Float.parseFloat(parser.getAttributeValue(null, "ratio_standard_dev")));
+                        _quantRatio.setRatioNumberPeptides(Integer.parseInt(parser.getAttributeValue(null, "ratio_number_peptides")));
                     }
                 }
             }
@@ -297,7 +332,7 @@ public class ProtXmlReader
             _uniquePeptidesCount = uniquePeptidesCount;
         }
 
-        public QuantitationRatio getQuantitationRatio()
+        public ProteinQuantitation getQuantitationRatio()
         {
             return _quantRatio;
         }
@@ -486,87 +521,4 @@ public class ProtXmlReader
         }
     }
 
-    public static class QuantitationRatio
-    {
-        private int _proteinGroupId;
-        private float _ratioMean;
-        private float _ratioStandardDev;
-        private int _ratioNumberPeptides;
-        private float _heavy2lightRatioMean;
-        private float _heavy2lightRatioStandardDev;
-
-        public QuantitationRatio()
-        {
-            super();
-        }
-
-        public QuantitationRatio(SimpleXMLStreamReader parser)
-        {
-            setHeavy2lightRatioMean(Float.parseFloat(parser.getAttributeValue(null, "heavy2light_ratio_mean")));
-            setHeavy2lightRatioStandardDev(Float.parseFloat(parser.getAttributeValue(null, "heavy2light_ratio_standard_dev")));
-            setRatioMean(Float.parseFloat(parser.getAttributeValue(null, "ratio_mean")));
-            setRatioStandardDev(Float.parseFloat(parser.getAttributeValue(null, "ratio_standard_dev")));
-            setRatioNumberPeptides(Integer.parseInt(parser.getAttributeValue(null, "ratio_number_peptides")));
-        }
-
-        public int getProteinGroupId()
-        {
-            return _proteinGroupId;
-        }
-
-        public void setProteinGroupId(int proteinGroupId)
-        {
-            _proteinGroupId = proteinGroupId;
-        }
-
-        public float getRatioMean()
-        {
-            return _ratioMean;
-        }
-
-        public void setRatioMean(float ratioMean)
-        {
-            _ratioMean = ratioMean;
-        }
-
-        public float getRatioStandardDev()
-        {
-            return _ratioStandardDev;
-        }
-
-        public void setRatioStandardDev(float ratioStandardDev)
-        {
-            _ratioStandardDev = ratioStandardDev;
-        }
-
-        public int getRatioNumberPeptides()
-        {
-            return _ratioNumberPeptides;
-        }
-
-        public void setRatioNumberPeptides(int ratioNumberPeptides)
-        {
-            _ratioNumberPeptides = ratioNumberPeptides;
-        }
-
-        public float getHeavy2lightRatioMean()
-        {
-            return _heavy2lightRatioMean;
-        }
-
-        public void setHeavy2lightRatioMean(float heavy2lightRatioMean)
-        {
-            _heavy2lightRatioMean = heavy2lightRatioMean;
-        }
-
-        public float getHeavy2lightRatioStandardDev()
-        {
-            return _heavy2lightRatioStandardDev;
-        }
-
-        public void setHeavy2lightRatioStandardDev(float heavy2lightRatioStandardDev)
-        {
-            _heavy2lightRatioStandardDev = heavy2lightRatioStandardDev;
-        }
-    }
 }

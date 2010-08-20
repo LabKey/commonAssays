@@ -18,7 +18,6 @@ package org.labkey.ms2;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.ms2.Hydrophobicity3;
 import org.labkey.ms2.protein.fasta.Peptide;
 import org.labkey.api.util.Pair;
 
@@ -70,7 +69,7 @@ public class MS2Peptide
     private int _ionCount = 0;
     private String _trimmedPeptide;
 
-    private Quantitation _quantitation;
+    private PeptideQuantitation _quantitation;
     private String _spectrumErrorMessage;
 
     public MS2Peptide()
@@ -598,7 +597,7 @@ public class MS2Peptide
         _rowId = rowId;
     }
 
-    public Quantitation getQuantitation()
+    public PeptideQuantitation getQuantitation()
     {
         if (_quantitation == null)
         {

@@ -21,14 +21,14 @@
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.ms2.EditElutionGraphContext"%>
 <%@ page import="org.labkey.ms2.MS2Peptide"%>
-<%@ page import="org.labkey.ms2.Quantitation"%>
+<%@ page import="org.labkey.ms2.PeptideQuantitation"%>
 <%@ page import="java.text.DecimalFormat"%>
 <%
     JspView<EditElutionGraphContext> me = (JspView<EditElutionGraphContext>) HttpView.currentView();
     org.labkey.ms2.EditElutionGraphContext ctx = me.getModelBean();
     String contextPath = request.getContextPath();
     MS2Peptide p = ctx.getPeptide();
-    Quantitation quant = ctx.getQuantitation();
+    PeptideQuantitation quant = ctx.getQuantitation();
     DecimalFormat format = new DecimalFormat();
     DecimalFormat decimalRatioFormat = new DecimalFormat();
     decimalRatioFormat.setMaximumFractionDigits(2);
@@ -214,7 +214,7 @@ areas.heavy = <%= quant.getHeavyArea() %>;
 var intensities = new Object();
 intensities.light = new Object();
 <%
-    for (Quantitation.ScanInfo scanInfo : ctx.getLightElutionProfile())
+    for (PeptideQuantitation.ScanInfo scanInfo : ctx.getLightElutionProfile())
     {
     %>
         intensities.light[<%= scanInfo.getScan() %>] = <%= scanInfo.getIntensity() %>;
@@ -223,7 +223,7 @@ intensities.light = new Object();
 %>
 intensities.heavy = new Object();
 <%
-    for (Quantitation.ScanInfo scanInfo : ctx.getHeavyElutionProfile())
+    for (PeptideQuantitation.ScanInfo scanInfo : ctx.getHeavyElutionProfile())
     {
     %>
         intensities.heavy[<%= scanInfo.getScan() %>] = <%= scanInfo.getIntensity() %>;

@@ -35,43 +35,14 @@ public class ProteinGroup
     private int _proteinProphetFileId;
     private int _indistinguishableCollectionId;
     private Float _errorRate;
-
-    private SimpleXMLStreamReader _parser;
-    private List<ProtXmlReader.Protein> _proteins = new ArrayList<ProtXmlReader.Protein>();
-    private float _pctSpectrumIds;
+    private Float _pctSpectrumIds;
     private int _uniquePeptidesCount;
     private Float _percentCoverage;
     private int _totalNumberPeptides;
-    private Float _proteinProbability;
+    private float _proteinProbability;
 
-    public static ProteinGroup getProteinGroup(SimpleXMLStreamReader parser) throws XMLStreamException
-    {
-        while (parser.hasNext())
-        {
-            if (!parser.skipToStart("protein_group"))
-            {
-                return null;
-            }
-
-            if (parser.hasNext())
-            {
-                ProteinGroup group = new ProteinGroup();
-                String groupNumberString = parser.getAttributeValue(null, "group_number");
-                String probabilityString = parser.getAttributeValue(null, "probability");
-                if (groupNumberString != null && !"".equals(groupNumberString) &&
-                    probabilityString != null && !"".equals(probabilityString))
-                {
-                    group.setGroupNumber(Integer.parseInt(groupNumberString));
-                    group.setProbability(Float.parseFloat(probabilityString));
-                    group.setParser(parser);
-                    return group;
-                }
-            }
-        }
-
-        return null;
-    }
-
+    private SimpleXMLStreamReader _parser;
+    private List<ProtXmlReader.Protein> _proteins = new ArrayList<ProtXmlReader.Protein>();
 
     public void setParser(SimpleXMLStreamReader parser)
     {
@@ -169,12 +140,12 @@ public class ProteinGroup
         _indistinguishableCollectionId = indistinguishableCollectionId;
     }
 
-    public void setPctSpectrumIds(float pctSpectrumIds)
+    public void setPctSpectrumIds(Float pctSpectrumIds)
     {
         _pctSpectrumIds = pctSpectrumIds;
     }
 
-    public float getPctSpectrumIds()
+    public Float getPctSpectrumIds()
     {
         return _pctSpectrumIds;
     }
@@ -209,12 +180,12 @@ public class ProteinGroup
         return _totalNumberPeptides;
     }
 
-    public void setProteinProbability(Float proteinProbability)
+    public void setProteinProbability(float proteinProbability)
     {
         _proteinProbability = proteinProbability;
     }
 
-    public Float getProteinProbability()
+    public float getProteinProbability()
     {
         return _proteinProbability;
     }

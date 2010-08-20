@@ -1048,7 +1048,7 @@
         <ns:displayWidth>50</ns:displayWidth>
       </ns:column>
       <ns:column columnName="DecimalRatio">
-          <ns:formatString>0.##</ns:formatString>
+          <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="Heavy2LightRatio"/>
       <ns:column columnName="HeavyArea">
@@ -1057,7 +1057,7 @@
       <ns:column columnName="HeavyFirstScan"/>
       <ns:column columnName="HeavyLastScan"/>
       <ns:column columnName="HeavyMass">
-          <ns:formatString>0.##</ns:formatString>
+          <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="LightArea">
           <ns:formatString>0.##</ns:formatString>
@@ -1065,9 +1065,10 @@
       <ns:column columnName="LightFirstScan"/>
       <ns:column columnName="LightLastScan"/>
       <ns:column columnName="LightMass">
-          <ns:formatString>0.##</ns:formatString>
+          <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="Ratio"/>
+      <ns:column columnName="Invalidated"/>
       <ns:column columnName="ProphetFVal"/>
       <ns:column columnName="ProphetDeltaMass"/>
       <ns:column columnName="ProphetNumTrypticTerm"/>
@@ -1501,7 +1502,7 @@
         <ns:displayWidth>50</ns:displayWidth>
       </ns:column>
       <ns:column columnName="DecimalRatio">
-          <ns:formatString>0.##</ns:formatString>
+          <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="Heavy2LightRatio"/>
       <ns:column columnName="HeavyArea">
@@ -1510,7 +1511,7 @@
       <ns:column columnName="HeavyFirstScan"/>
       <ns:column columnName="HeavyLastScan"/>
       <ns:column columnName="HeavyMass">
-          <ns:formatString>0.##</ns:formatString>
+          <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="LightArea">
           <ns:formatString>0.##</ns:formatString>
@@ -1518,9 +1519,10 @@
       <ns:column columnName="LightFirstScan"/>
       <ns:column columnName="LightLastScan"/>
       <ns:column columnName="LightMass">
-          <ns:formatString>0.##</ns:formatString>
+          <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="Ratio"/>
+      <ns:column columnName="Invalidated"/>
       <ns:column columnName="ProphetFVal"/>
       <ns:column columnName="ProphetDeltaMass"/>
       <ns:column columnName="ProphetNumTrypticTerm"/>
@@ -1898,18 +1900,22 @@
       </ns:column>
       <ns:column columnName="RatioMean">
         <ns:columnTitle>L2H Mean</ns:columnTitle>
+        <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="RatioStandardDev">
         <ns:columnTitle>L2H StdDev</ns:columnTitle>
+        <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="RatioNumberPeptides">
         <ns:columnTitle>Ratio Peps</ns:columnTitle>
       </ns:column>
       <ns:column columnName="Heavy2LightRatioMean">
         <ns:columnTitle>H2L Mean</ns:columnTitle>
+        <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="Heavy2LightRatioStandardDev">
         <ns:columnTitle>H2L StdDev</ns:columnTitle>
+        <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="ProteinGroupId"/>
     </ns:columns>
@@ -1966,12 +1972,12 @@
       <ns:column columnName="LightFirstScan"/>
       <ns:column columnName="LightLastScan"/>
       <ns:column columnName="LightMass">
-          <ns:formatString>0.##</ns:formatString>
+          <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="HeavyFirstScan"/>
       <ns:column columnName="HeavyLastScan"/>
       <ns:column columnName="HeavyMass">
-          <ns:formatString>0.##</ns:formatString>
+          <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="Ratio"/>
       <ns:column columnName="Heavy2LightRatio"/>
@@ -1982,8 +1988,9 @@
           <ns:formatString>0.##</ns:formatString>
       </ns:column>
       <ns:column columnName="DecimalRatio">
-          <ns:formatString>0.##</ns:formatString>
+          <ns:formatString>0.00</ns:formatString>
       </ns:column>
+      <ns:column columnName="Invalidated" />
     </ns:columns>
     <ns:description>Contains a row for every peptide with quantitation data in this folder.</ns:description>
   </ns:table>
