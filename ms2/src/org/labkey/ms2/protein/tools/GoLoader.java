@@ -20,7 +20,7 @@ import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.labkey.api.util.CloseableIterator;
+import org.labkey.api.iterator.CloseableIterator;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FTPUtil;
 import org.labkey.api.util.JobRunner;

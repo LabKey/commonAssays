@@ -103,9 +103,9 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
 
             if (_runDomain != null)
             {
-                Map<String, Object> comments = (Map<String, Object>)tl.getComments();
+                Map<String, String> comments = tl.getComments();
                 Map<DomainProperty, Object> runData = new HashMap<DomainProperty, Object>(comments.size());
-                for (Map.Entry<String, Object> comment : comments.entrySet())
+                for (Map.Entry<String, String> comment : comments.entrySet())
                 {
                     DomainProperty property = _runDomain.getPropertyByName(comment.getKey());
                     if (property != null)

@@ -20,7 +20,7 @@ import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Table;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.util.CloseableIterator;
+import org.labkey.api.iterator.CloseableIterator;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.api.webdav.WebdavResource;
 import org.labkey.api.webdav.WebdavService;

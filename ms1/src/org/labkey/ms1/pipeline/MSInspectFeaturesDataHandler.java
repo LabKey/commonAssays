@@ -371,7 +371,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         return ((Integer) (outMap.get("FileId"))).intValue();
     } //insertFeaturesFile()
 
-    protected void insertSoftwareInfo(Map comments, int idFile, User user, DbSchema schema) throws SQLException
+    protected void insertSoftwareInfo(Map<String, String> comments, int idFile, User user, DbSchema schema) throws SQLException
     {
         HashMap<String,Object> software = new HashMap<String,Object>();
         software.put("SoftwareId", null);
@@ -383,7 +383,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
         //now try to get the algorithm from the comments
         //if we can get it, add that as a named parameter
-        String algorithm = (String)comments.get("algorithm");
+        String algorithm = comments.get("algorithm");
         if(null != algorithm && algorithm.length() > 0)
         {
             HashMap<String,Object> softwareParam = new HashMap<String,Object>();
