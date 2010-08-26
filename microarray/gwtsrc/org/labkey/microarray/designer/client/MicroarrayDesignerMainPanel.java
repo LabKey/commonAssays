@@ -102,9 +102,4 @@ public class MicroarrayDesignerMainPanel extends AssayDesignerMainPanel
 
         return result;
     }
-
-    protected PropertiesEditor<GWTDomain<GWTPropertyDescriptor>, GWTPropertyDescriptor> createPropertiesEditor(GWTDomain domain)
-    {
-        return super.createPropertiesEditor(domain);
-    }
 }
