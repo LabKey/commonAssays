@@ -17,6 +17,7 @@ package org.labkey.ms2.metadata;
 
 import jxl.Workbook;
 import jxl.write.*;
+import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -62,7 +63,7 @@ public class MassSpecBulkPropertiesTemplateAction extends BaseAssayAction<MassSp
         WritableSheet sheet = workbook.createSheet("MicroarrayTemplate", 0);
         int col = 0;
 
-        WritableFont boldFont = new WritableFont(WritableFont.ARIAL, 10, WritableFont.BOLD);
+        WritableFont boldFont = new WritableFont(ExcelWriter.DEFAULT_FONT, 10, WritableFont.BOLD);
         WritableCellFormat cellFormat = new WritableCellFormat(boldFont);
         cellFormat.setWrap(false);
         cellFormat.setVerticalAlignment(jxl.format.VerticalAlignment.TOP);
