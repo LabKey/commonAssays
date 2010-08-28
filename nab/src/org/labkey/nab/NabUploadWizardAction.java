@@ -16,6 +16,7 @@
 
 package org.labkey.nab;
 
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.api.ExpRun;
@@ -70,7 +71,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         NabAssayProvider provider = (NabAssayProvider) getProvider(newRunForm);
         InsertView parent = super.createRunInsertView(newRunForm, errorReshow, errors);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
-        PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm, newRunForm.getProtocol(), resolverType);
+        PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(newRunForm, resolverType);
         try
         {
             helper.addSampleColumns(parent, newRunForm.getUser(), newRunForm, errorReshow);
@@ -97,18 +98,24 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
             boolean runPropsValid = super.validatePost(form, errors);
 
             NabAssayProvider provider = (NabAssayProvider) getProvider(form);
-            PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(form, _protocol,
-                    getSelectedParticipantVisitResolverType(provider, form));
+            PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
 
             boolean samplePropsValid = true;
-            _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
-            for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
+            try
             {
-                // if samplePropsValid flips to false, we want to leave it false (via the "&&" below).  We don't
-                // short-circuit the loop because we want to run through all samples every time, so all errors can be reported.
-                samplePropsValid = validatePostedProperties(entry.getValue(), errors) && samplePropsValid;
+                _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
+                for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
+                {
+                    // if samplePropsValid flips to false, we want to leave it false (via the "&&" below).  We don't
+                    // short-circuit the loop because we want to run through all samples every time, so all errors can be reported.
+                    samplePropsValid = validatePostedProperties(entry.getValue(), errors) && samplePropsValid;
+                }
             }
-            return runPropsValid && samplePropsValid;
+            catch (ExperimentException e)
+            {
+                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+            }
+            return runPropsValid && samplePropsValid && !errors.hasErrors();
         }
 
         protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException errors) throws SQLException, ServletException

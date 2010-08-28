@@ -81,7 +81,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(newRunForm);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
 
-        PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm, newRunForm.getProtocol(), resolverType);
+        PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(newRunForm, resolverType);
         try
         {
             helper.addSampleColumns(parent, newRunForm.getUser(), newRunForm, errorReshow);
@@ -129,8 +129,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             addHiddenRunProperties(form, view);
 
             ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(form);
-            PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(form, _protocol,
-                    getSelectedParticipantVisitResolverType(provider, form));
+            PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
             for (Map.Entry<String, Map<DomainProperty, String>> sampleEntry : helper.getPostedPropertyValues(form.getRequest()).entrySet())
                 addHiddenProperties(sampleEntry.getValue(), view, sampleEntry.getKey());
 
@@ -216,8 +215,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                         errors.reject(SpringActionController.ERROR_MSG, "The template for this assay is either missing or invalid.");
                         return false;
                     }
-                    PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(form, _protocol,
-                            getSelectedParticipantVisitResolverType(provider, form));
+                    PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
                     _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
                     for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
                     {
@@ -285,7 +283,14 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     form.getProtocol(), (ElispotAssayProvider)form.getProvider());
 
             boolean antigenPropsValid = true;
-            _postedAntigenProperties = helper.getPostedPropertyValues(form.getRequest());
+            try
+            {
+                _postedAntigenProperties = helper.getPostedPropertyValues(form.getRequest());
+            }
+            catch (ExperimentException e)
+            {
+                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+            }
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAntigenProperties.entrySet())
             {
                 // if samplePropsValid flips to false, we want to leave it false (via the "&&" below).  We don't
@@ -299,7 +304,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         {
             try
             {
-                PlateSamplePropertyHelper helper = form.getProvider().createSamplePropertyHelper(form, _protocol,
+                PlateSamplePropertyHelper helper = form.getProvider().getSamplePropertyHelper(form, 
                         getSelectedParticipantVisitResolverType(form.getProvider(), form));
                 form.setSampleProperties(helper.getPostedPropertyValues(form.getRequest()));
 

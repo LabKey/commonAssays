@@ -68,15 +68,22 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String CURVE_FIT_METHOD_PROPERTY_CAPTION = "Curve Fit Method";
     public static final String LOCK_AXES_PROPERTY_NAME = "LockYAxis";
     public static final String LOCK_AXES_PROPERTY_CAPTION = "Lock Graph Y-Axis";
-    public static final String NAB_RUN_LSID_PREFIX = "NabAssayRun";
+    private static final String NAB_RUN_LSID_PREFIX = "NabAssayRun";
+    private static final String NAB_ASSAY_PROTOCOL = "NabAssayProtocol";
 
     public NabAssayProvider()
     {
-        super("NabAssayProtocol", NAB_RUN_LSID_PREFIX, NabDataHandler.NAB_DATA_TYPE, new AssayTableMetadata(
+        this(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, NabDataHandler.NAB_DATA_TYPE);
+    }
+
+    public NabAssayProvider(String protocolLSIDPrefix, String runLSIDPrefix, AssayDataType dataType)
+    {
+        super(protocolLSIDPrefix, runLSIDPrefix, dataType, new AssayTableMetadata(
             FieldKey.fromParts("Properties", NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
             FieldKey.fromParts("Run"),
             FieldKey.fromParts("ObjectId")));
     }
+
 
     protected void registerLsidHandler()
     {
@@ -120,6 +127,17 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             cutoff.setFormat("0.0##");
         }
 
+        addPassThroughRunProperties(runDomain);
+
+        Container lookupContainer = c.getProject();
+        DomainProperty method = addProperty(runDomain, CURVE_FIT_METHOD_PROPERTY_NAME, CURVE_FIT_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
+        method.setLookup(new Lookup(lookupContainer, NabSchema.SCHEMA_NAME, NabSchema.CURVE_FIT_METHOD_TABLE_NAME));
+        method.setRequired(true);
+        return result;
+    }
+
+    protected void addPassThroughRunProperties(Domain runDomain)
+    {
         addProperty(runDomain, "VirusName", "Virus Name", PropertyType.STRING);
         addProperty(runDomain, "VirusID", "Virus ID", PropertyType.STRING);
         addProperty(runDomain, "HostCell", "Host Cell", PropertyType.STRING);
@@ -131,12 +149,6 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         addProperty(runDomain, "ExperimentDate", "Experiment Date", PropertyType.DATE_TIME);
         addProperty(runDomain, "FileID", "File ID", PropertyType.STRING);
         addProperty(runDomain, LOCK_AXES_PROPERTY_NAME, LOCK_AXES_PROPERTY_CAPTION, PropertyType.BOOLEAN);
-
-        Container lookupContainer = c.getProject();
-        DomainProperty method = addProperty(runDomain, CURVE_FIT_METHOD_PROPERTY_NAME, CURVE_FIT_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
-        method.setLookup(new Lookup(lookupContainer, NabSchema.SCHEMA_NAME, NabSchema.CURVE_FIT_METHOD_TABLE_NAME));
-        method.setRequired(true);
-        return result;
     }
 
     protected Pair<Domain, Map<DomainProperty, Object>> createSampleWellGroupDomain(Container c, User user)

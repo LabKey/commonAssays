@@ -21,7 +21,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.util.Pair;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.sql.SQLException;
 
@@ -32,6 +31,10 @@ import java.sql.SQLException;
  */
 public class NabPlateTypeHandler implements PlateTypeHandler
 {
+    public static final String SINGLE_PLATE_TYPE = "single-plate";
+    public static final String HIGH_THROUGHPUT_PLATE_TYPE = "high-throughput";
+    public static final String BLANK_PLATE_TYPE = "blank";
+
     public String getAssayType()
     {
         return "NAb";
@@ -40,7 +43,9 @@ public class NabPlateTypeHandler implements PlateTypeHandler
     public List<String> getTemplateTypes()
     {
         List<String> names = new ArrayList<String>();
-        names.add("Default");
+        names.add(BLANK_PLATE_TYPE);
+        names.add(SINGLE_PLATE_TYPE);
+        names.add(HIGH_THROUGHPUT_PLATE_TYPE);
         return names;
     }
 
@@ -65,8 +70,8 @@ public class NabPlateTypeHandler implements PlateTypeHandler
         template.addWellGroup(NabManager.VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(container, 0, 1),
                 PlateService.get().createPosition(container, template.getRows() - 1, 1));
-
-        if (templateTypeName != null && templateTypeName.equalsIgnoreCase("Default"))
+        
+        if (templateTypeName != null && templateTypeName.equalsIgnoreCase(SINGLE_PLATE_TYPE))
         {
             for (int sample = 0; sample < (template.getColumns() - 2)/2; sample++)
             {
@@ -87,6 +92,23 @@ public class NabPlateTypeHandler implements PlateTypeHandler
                     template.addWellGroup("Specimen " + (sample + 1) + ", Replicate " + (replicate + 1), WellGroup.Type.REPLICATE,
                             PlateService.get().createPosition(container, replicate, firstCol),
                             PlateService.get().createPosition(container, replicate, firstCol + 1));
+                }
+            }
+        }
+        else if (templateTypeName != null && templateTypeName.equalsIgnoreCase(HIGH_THROUGHPUT_PLATE_TYPE))
+        {
+            int sample = 1;
+            for (int col = 2; col < (template.getColumns() - 1); col += 2)
+            {
+                for (int row = 0; row < template.getRows(); row++)
+                {
+                    int currentSampleIndex = sample++;
+                    template.addWellGroup("Specimen " + currentSampleIndex, WellGroup.Type.SPECIMEN,
+                            PlateService.get().createPosition(container, row, col),
+                            PlateService.get().createPosition(container, row, col+1));
+                    template.addWellGroup("Specimen " + currentSampleIndex, WellGroup.Type.REPLICATE,
+                        PlateService.get().createPosition(container, row, col),
+                        PlateService.get().createPosition(container, row, col+1));
                 }
             }
         }

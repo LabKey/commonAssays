@@ -1270,6 +1270,8 @@ nab/src/org/labkey/nab/GetNabRunsAction.java -text
 nab/src/org/labkey/nab/GetNabRunsBaseForm.java -text
 nab/src/org/labkey/nab/GetStudyNabGraphURLAction.java -text
 nab/src/org/labkey/nab/GetStudyNabRunsAction.java -text
+nab/src/org/labkey/nab/HighThroughputNabAssayProvider.java -text
+nab/src/org/labkey/nab/HighThroughputNabDataHandler.java -text
 nab/src/org/labkey/nab/Luc5Assay.java -text
 nab/src/org/labkey/nab/NabAssayController.java -text
 nab/src/org/labkey/nab/NabAssayProvider.java -text

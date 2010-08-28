@@ -41,6 +41,8 @@ public class ElispotPlateTypeHandler implements PlateTypeHandler
     public List<String> getTemplateTypes()
     {
         List<String> names = new ArrayList<String>();
+        names.add("blank");
+        names.add("default");
         return names;
     }
 
@@ -54,36 +56,39 @@ public class ElispotPlateTypeHandler implements PlateTypeHandler
     {
         PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
 
-        for (int sample = 0; sample < 4; sample++)
+        if (templateTypeName != null && templateTypeName.equals("Default"))
         {
-            int row = sample * 2;
-            // create the overall specimen group, consisting of two adjacent rows:
-            template.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
-                    PlateService.get().createPosition(container, row, 0),
-                    PlateService.get().createPosition(container, row+1, template.getColumns() - 1));
-        }
-
-        // populate the antigen groups
-        for (int antigen = 0; antigen < 4; antigen++)
-        {
-            List<Position> position1 = new ArrayList<Position>();
-            List<Position> position2 = new ArrayList<Position>();
-
             for (int sample = 0; sample < 4; sample++)
             {
                 int row = sample * 2;
-                int col = antigen * 3;
-
-                position1.add(template.getPosition(row, col));
-                position1.add(template.getPosition(row, col + 1));
-                position1.add(template.getPosition(row, col + 2));
-
-                position2.add(template.getPosition(row + 1, col));
-                position2.add(template.getPosition(row + 1, col + 1));
-                position2.add(template.getPosition(row + 1, col + 2));
+                // create the overall specimen group, consisting of two adjacent rows:
+                template.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
+                        PlateService.get().createPosition(container, row, 0),
+                        PlateService.get().createPosition(container, row+1, template.getColumns() - 1));
             }
-            template.addWellGroup("Antigen " + (antigen*2 + 1), WellGroup.Type.ANTIGEN, position1);
-            template.addWellGroup("Antigen " + (antigen*2 + 2), WellGroup.Type.ANTIGEN, position2);
+
+            // populate the antigen groups
+            for (int antigen = 0; antigen < 4; antigen++)
+            {
+                List<Position> position1 = new ArrayList<Position>();
+                List<Position> position2 = new ArrayList<Position>();
+
+                for (int sample = 0; sample < 4; sample++)
+                {
+                    int row = sample * 2;
+                    int col = antigen * 3;
+
+                    position1.add(template.getPosition(row, col));
+                    position1.add(template.getPosition(row, col + 1));
+                    position1.add(template.getPosition(row, col + 2));
+
+                    position2.add(template.getPosition(row + 1, col));
+                    position2.add(template.getPosition(row + 1, col + 1));
+                    position2.add(template.getPosition(row + 1, col + 2));
+                }
+                template.addWellGroup("Antigen " + (antigen*2 + 1), WellGroup.Type.ANTIGEN, position1);
+                template.addWellGroup("Antigen " + (antigen*2 + 2), WellGroup.Type.ANTIGEN, position2);
+            }
         }
         return template;
     }

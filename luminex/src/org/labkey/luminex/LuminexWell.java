@@ -74,6 +74,12 @@ public class LuminexWell implements Well
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public String getDescription()
+    {
+        throw new UnsupportedOperationException();
+    }
+
     public int getColumn()
     {
         return _column;

@@ -16,26 +16,41 @@
 
 package org.labkey.nab;
 
+import jxl.format.PaperSize;
+import jxl.write.*;
+import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.*;
+import org.labkey.api.defaults.DefaultValueService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.RawValueColumn;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.nab.NabUrls;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.study.PlateQueryView;
+import org.labkey.api.study.PlateService;
+import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.WellGroup;
+import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
@@ -46,8 +61,11 @@ import org.labkey.api.view.*;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.lang.Boolean;
+import java.lang.Number;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -73,6 +91,17 @@ public class NabAssayController extends SpringActionController
     {
         super();
         setActionResolver(_resolver);
+    }
+
+    public static class NabUrlsImpl implements NabUrls
+    {
+        @Override
+        public ActionURL getSampleXLSTemplateURL(Container container, ExpProtocol protocol)
+        {
+            ActionURL url = new ActionURL(SampleSpreadsheetTemplateAction.class, container);
+            url.addParameter("protocol", protocol.getRowId());
+            return url;
+        }
     }
 
     @RequiresPermissionClass(ReadPermission.class)
@@ -907,4 +936,133 @@ public class NabAssayController extends SpringActionController
         }
     }
 
+    public static class SampleSpreadsheetForm
+    {
+        private int _protocol;
+
+        public int getProtocol()
+        {
+            return _protocol;
+        }
+
+        public void setProtocol(int protocol)
+        {
+            _protocol = protocol;
+        }
+    }
+
+    private static class SampleTemplateWriter extends ExcelWriter
+    {
+        private Container _container;
+        private User _user;
+        private Domain _sampleDomain;
+        private List<WellGroupTemplate> _sampleGroups;
+
+        public SampleTemplateWriter(Container container, User user, Domain sampleDomain, List<WellGroupTemplate> sampleGroups)
+        {
+            _sampleDomain = sampleDomain;
+            _sampleGroups = sampleGroups;
+            _container = container;
+            _user = user;
+        }
+
+        @Override
+        public void renderSheet(WritableWorkbook workbook, int sheetNumber)
+        {
+            WritableSheet sheet = workbook.createSheet(getSheetName(), sheetNumber);
+            sheet.getSettings().setPaperSize(PaperSize.LETTER);
+
+            try
+            {
+                // Render the header row:
+                List<String> headers = new ArrayList<String>();
+                headers.add(PlateSampleFilePropertyHelper.WELLGROUP_COLUMN);
+                headers.add(PlateSampleFilePropertyHelper.PLATELOCATION_COLUMN);
+
+                Map<DomainProperty, Object> defaultValues = DefaultValueService.get().getDefaultValues(_container, _sampleDomain);
+                Map<Integer, Object> columnToDefaultValue = new HashMap<Integer, Object>();
+                for (DomainProperty property : _sampleDomain.getProperties())
+                {
+                    columnToDefaultValue.put(headers.size(), defaultValues.get(property));
+                    headers.add(property.getName());
+                }
+
+                for (int column = 0; column < headers.size(); column++)
+                {
+                    String header = headers.get(column);
+                    WritableCell cell = new Label(column, 0, header, getBoldFormat());
+                    sheet.addCell(cell);
+                }
+
+                // Render the rows, which just contain well group names:
+                for (int group = 0; group < _sampleGroups.size(); group++)
+                {
+                    int row = group + 1;
+                    WellGroupTemplate sample = _sampleGroups.get(group);
+                    WritableCell wellgroupNameCell = new Label(0, row, sample.getName());
+                    sheet.addCell(wellgroupNameCell);
+                    WritableCell plateLocationCell = new Label(1, row, sample.getPositionDescription());
+                    sheet.addCell(plateLocationCell);
+                    for (int column = 2; column < headers.size(); column++)
+                    {
+                        Object defaultValue = columnToDefaultValue.get(column);
+                        if (defaultValue != null)
+                        {
+                            WritableCell defaultValueCell;
+                            if (defaultValue instanceof Number)
+                                defaultValueCell = new jxl.write.Number(column, row, ((Number) defaultValue).doubleValue());
+                            else if (defaultValue instanceof Date)
+                                defaultValueCell = new DateTime(column, row, (Date) defaultValue);
+                            else if (defaultValue instanceof Boolean)
+                                defaultValueCell = new jxl.write.Boolean(column, row, ((Boolean) defaultValue).booleanValue());
+                            else
+                                defaultValueCell = new Label(column, row, defaultValue.toString());
+                            sheet.addCell(defaultValueCell);
+                        }
+                    }
+                }
+            }
+            catch (WriteException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class SampleSpreadsheetTemplateAction extends ExportAction<SampleSpreadsheetForm>
+    {
+        @Override
+        public void export(SampleSpreadsheetForm sampleSpreadsheetForm, HttpServletResponse response, BindException errors) throws Exception
+        {
+            ViewContext context = getViewContext();
+            ExpProtocol protocol = ExperimentService.get().getExpProtocol(sampleSpreadsheetForm.getProtocol());
+            if (protocol == null)
+                HttpView.throwNotFound("Protocol " + sampleSpreadsheetForm.getProtocol() + " does not exist.");
+
+            AssayProvider provider = AssayService.get().getProvider(protocol);
+            if (provider == null || !(provider instanceof NabAssayProvider))
+            {
+                HttpView.throwNotFound("Protocol " + sampleSpreadsheetForm.getProtocol() + " is not a NAb protocol: " +
+                        (protocol != null ? protocol.getName() : "null"));
+                // Return to eliminate IntelliJ warnings.
+                return;
+            }
+            NabAssayProvider nabProvider = ((NabAssayProvider) provider);
+            Domain sampleDomain = nabProvider.getSampleWellGroupDomain(protocol);
+            PlateTemplate template = nabProvider.getPlateTemplate(context.getContainer(), protocol);
+            if (template == null)
+                HttpView.throwNotFound("The plate template for this assay design could not be found.  It may have been deleted by an administrator.");
+            List<WellGroupTemplate> sampleGroups = new ArrayList<WellGroupTemplate>();
+            for (WellGroupTemplate group : template.getWellGroups())
+            {
+                if (group.getType() == WellGroup.Type.SPECIMEN)
+                    sampleGroups.add(group);
+            }
+
+            ExcelWriter xl = new SampleTemplateWriter(getViewContext().getContainer(), getUser(), sampleDomain, sampleGroups);
+            xl.setFilenamePrefix("metadata");
+            xl.write(response);
+        }
+    }
 }
