@@ -52,7 +52,6 @@ public class ProteinGroupTableInfo extends FilteredTable
         super(MS2Manager.getTableInfoProteinGroups());
         _schema = schema;
 
-
         ColumnInfo groupNumberColumn = wrapColumn("Group", getRealTable().getColumn("GroupNumber"));
         groupNumberColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
@@ -65,6 +64,8 @@ public class ProteinGroupTableInfo extends FilteredTable
         addColumn(groupNumberColumn);
 
         wrapAllColumns(true);
+
+        setTitleColumn("Group");
         addColumn(wrapColumn("ProteinProphet", getRealTable().getColumn("ProteinProphetFileId")));
         getColumn("ProteinProphetFileId").setHidden(true);
 

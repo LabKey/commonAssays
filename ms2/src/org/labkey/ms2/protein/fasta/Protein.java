@@ -15,10 +15,6 @@
  */
 package org.labkey.ms2.protein.fasta;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +42,6 @@ public class Protein
 
     /* for parsing header lines of FASTA files */
     public static final String SEPARATOR_PATTERN = "\\|";
-    public static final String SEPARATOR_CHAR = "|";
 
     //populate the hashmap of known identifier types
     static
@@ -185,17 +180,6 @@ public class Protein
         return new String(getBytes());
     }
 
-    public Alias[] getAliases()
-    {
-        String[] aliasStrings = _header.split("\01");
-        Alias[] aliases = new Alias[aliasStrings.length];
-
-        for (int i=0; i<aliasStrings.length; i++)
-            aliases[i] = new Alias(aliasStrings[i]);
-
-        return aliases;
-    }
-
     public double getMass()
     {
         return _mass;
@@ -227,57 +211,6 @@ public class Protein
     }
 
     /**
-     * Save out to a PrintWriter in fasta format
-     * @param out
-     */
-    public void saveFastaFormat(PrintWriter out)
-    {
-        out.println(">" + _header);
-        out.println(new String(_bytes));
-        out.flush();
-    }
-
-    /**
-     * Save a protein array in fasta format
-     * @param proteins
-     * @param outFastaFile
-     * @return
-     */
-    public static void saveProteinArrayToFasta(Protein[] proteins,
-                                               File outFastaFile)
-            throws IOException
-    {
-        PrintWriter pw = null;
-        try
-        {
-            pw = new PrintWriter(new FileOutputStream(outFastaFile));
-            saveProteinArrayToFasta(proteins,pw);
-        }
-        catch (IOException x)
-        {
-                throw x;
-        }
-        finally
-        {
-            if (null != pw)
-                pw.close();
-        }
-    }
-
-    /**
-     * Save a protein array in fasta format
-     * @param proteins
-     * @param pw
-     */
-    public static void saveProteinArrayToFasta(Protein[] proteins, PrintWriter pw)
-    {
-        for (int i=0; i<proteins.length; i++)
-        {
-            proteins[i].saveFastaFormat(pw);
-        }
-    }
-
-    /**
      *  New version of parseIdent using regular expressions.  Identifiers found in the lookup string
      *  portion of the header come in two basic flavors-- typed and untyped.  Typed ids look like
      *          <typename>|<idvalue>|<typename>|<idvalue>...
@@ -289,8 +222,6 @@ public class Protein
      *
      * 2/09/2008 added a third mechanism, a single regex that looks at the whole header rather than tokens
      *
-     * @param fastaIdentifierString
-     * @param wholeHeader
      * @return a map of identifiers parsed from the header;  might be empty
      */
     public static Map<String, Set<String>> identParse(String fastaIdentifierString, String wholeHeader)
@@ -370,50 +301,5 @@ public class Protein
         }
 
         return identifiers;
-    }
-
-    public class Alias
-    {
-        private String _remaining = "";
-        private String _description = "";
-
-        public Alias(String s)
-        {
-            _description = s;
-        }
-
-        public String getRemaining()
-        {
-            return _remaining;
-        }
-
-        public String getDescription()
-        {
-            return _description;
-        }
-    }
-
-    public static class SequenceComparator implements Comparator
-    {
-        public int compare(Object o1, Object o2)
-        {
-            return ((Protein) o1).getSequenceAsString().compareTo(((Protein) o2).getSequenceAsString());
-        }
-    }
-
-    public static class LookupComparator implements Comparator
-    {
-        public int compare(Object o1, Object o2)
-        {
-            return ((Protein) o1).getLookup().compareTo(((Protein) o2).getLookup());
-        }
-    }
-
-    public static class HeaderComparator implements Comparator
-    {
-        public int compare(Object o1, Object o2)
-        {
-            return ((Protein) o1).getHeader().compareTo(((Protein) o2).getHeader());
-        }
     }
 }

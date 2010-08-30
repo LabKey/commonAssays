@@ -95,6 +95,10 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         public PeptideQueryView(MS2Schema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
         {
             super(schema, settings, expanded, allowNesting);
+            // We want the default to be 1000 instead of 100
+            settings.setMaxRows(1000);
+            // Reapply in case the user has specifically requested a row count
+            settings.init(getViewContext());
         }
 
         public List<DisplayColumn> getDisplayColumns()
@@ -122,10 +126,17 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             if (proteinProphetNesting.isNested(originalColumns))
             {
                 _selectedNestingOption = proteinProphetNesting;
+                setShowPagination(false);
             }
             else if (standardProteinNesting.isNested(originalColumns))
             {
                 _selectedNestingOption = standardProteinNesting;
+                setShowPagination(false);
+            }
+            else
+            {
+                setShowPagination(true);
+                setShowPaginationCount(true);
             }
 
             DataRegion rgn;
@@ -138,12 +149,8 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             {
                 rgn = new DataRegion();
                 rgn.setDisplayColumns(originalColumns);
-                getSettings().setMaxRows(1000);
             }
             rgn.setSettings(getSettings());
-
-            rgn.setShowPagination(false);
-            rgn.setShowRecordSelectors(showRecordSelectors());
 
             rgn.setShowRecordSelectors(true);
             rgn.setFixedWidthColumns(true);
