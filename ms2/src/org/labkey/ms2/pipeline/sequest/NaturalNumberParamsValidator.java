@@ -82,6 +82,7 @@ public class NaturalNumberParamsValidator implements IParamsValidator
             return suite;
         }
 
+        @Override
         protected void setUp() throws Exception
         {
             _property = new SequestParam(
@@ -95,6 +96,7 @@ public class NaturalNumberParamsValidator implements IParamsValidator
             _property.setInputXmlLabels("sequest, num_description_lines");
         }
 
+        @Override
         protected void tearDown()
         {
             _property = null;

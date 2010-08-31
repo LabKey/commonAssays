@@ -68,6 +68,7 @@ public class RealNumberParamsValidator implements IParamsValidator
             return suite;
         }
 
+        @Override
         protected void setUp() throws Exception
         {
             _property = new SequestParam(
@@ -81,6 +82,7 @@ public class RealNumberParamsValidator implements IParamsValidator
             _property.setInputXmlLabels().setInputXmlLabels("protein, cleavage C-terminal mass change");
         }
 
+        @Override
         protected void tearDown()
         {
             _property = null;

@@ -996,6 +996,7 @@ public abstract class SequestParamsBuilder
             return suite;
         }
 
+        @Override
         protected void setUp() throws Exception
         {
             ip = PipelineJobService.get().createParamParser();
@@ -1007,6 +1008,7 @@ public abstract class SequestParamsBuilder
             spb = SequestParamsBuilderFactory.createVersion2Builder(ip.getInputParameters(), root);
         }
 
+        @Override
         protected void tearDown()
         {
             ip = null;

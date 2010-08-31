@@ -64,6 +64,7 @@ public class BooleanParamsValidator implements IParamsValidator
             return suite;
         }
 
+        @Override
         protected void setUp() throws Exception
         {
             _property = new SequestParam(
@@ -77,6 +78,7 @@ public class BooleanParamsValidator implements IParamsValidator
             _property.setInputXmlLabels("sequest, show_fragment_ions");
         }
 
+        @Override
         protected void tearDown()
         {
             _property = null;

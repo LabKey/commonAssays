@@ -88,6 +88,7 @@ public class ListParamsValidator implements IParamsValidator
             return suite;
         }
 
+        @Override
         protected void setUp() throws Exception
         {
                           _property = new SequestParam(
@@ -101,6 +102,7 @@ public class ListParamsValidator implements IParamsValidator
                   ).setInputXmlLabels("spectrum, parent monoisotopic mass error units");
         }
 
+        @Override
         protected void tearDown()
         {
             _property = null;
