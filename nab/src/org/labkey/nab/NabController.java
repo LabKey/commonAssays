@@ -147,11 +147,11 @@ public class NabController extends SpringActionController
             if (form.isReset())
             {
                 assayForm = new UploadAssayForm(true);
-                NabManager.get().saveAsLastInputs(getViewContext(), null);
+                OldNabManager.get().saveAsLastInputs(getViewContext(), null);
             }
             else
             {
-                assayForm = NabManager.get().getLastInputs(getViewContext());
+                assayForm = OldNabManager.get().getLastInputs(getViewContext());
                 if (form.getPlateTemplate() != null)
                     assayForm.setPlateTemplate(form.getPlateTemplate(), getContainer(), getUser());
             }
@@ -259,11 +259,11 @@ public class NabController extends SpringActionController
             for (Integer cutoff : cutoffSet)
                 cutoffs[idx++] = cutoff.intValue();
 
-            NabManager.get().saveAsLastInputs(getViewContext(), form);
-            Luc5Assay assay;
+            OldNabManager.get().saveAsLastInputs(getViewContext(), form);
+            OldNabAssayRun assay;
             try
             {
-                assay = NabManager.get().saveResults(getContainer(), getUser(),
+                assay = OldNabManager.get().saveResults(getContainer(), getUser(),
                         form.getPlateTemplate(), form.getMetadata(),
                         form.getSampleInfos(), cutoffs, datafile);
             }
@@ -317,7 +317,7 @@ public class NabController extends SpringActionController
             if (null == _fileName && null == dataFile)
                 errors.reject("main", "Please upload a file.");
 
-            List<String> templateErrors = NabManager.get().isValidNabPlateTemplate(c, user, getPlateTemplate());
+            List<String> templateErrors = OldNabManager.get().isValidNabPlateTemplate(c, user, getPlateTemplate());
             for (String templateError : templateErrors)
                 errors.reject("main", templateError);
 
@@ -444,7 +444,7 @@ public class NabController extends SpringActionController
 
                 if (template == null)
                 {
-                    template = NabManager.get().ensurePlateTemplate(container, user);
+                    template = OldNabManager.get().ensurePlateTemplate(container, user);
                     _plateTemplate = template.getName();
                 }
                 return template;
@@ -462,7 +462,7 @@ public class NabController extends SpringActionController
                 PlateTemplate[] templates = PlateService.get().getPlateTemplates(container);
                 if (templates == null || templates.length == 0)
                 {
-                    PlateTemplate defaultTemplate = NabManager.get().ensurePlateTemplate(container, user);
+                    PlateTemplate defaultTemplate = OldNabManager.get().ensurePlateTemplate(container, user);
                     templates = new PlateTemplate[] { defaultTemplate };
                 }
                 return templates;
@@ -596,7 +596,7 @@ public class NabController extends SpringActionController
             if (form.getRowId() < 0)
                 HttpView.throwRedirect(getBeginURL());
 
-            Luc5Assay assay = getCachedAssay(form.getRowId());
+            OldNabAssayRun assay = getCachedAssay(form.getRowId());
 
             JspView<RenderAssayBean> assayView = new JspView<RenderAssayBean>("/org/labkey/nab/runResults.jsp", new RenderAssayBean(assay, form.isNewRun(), form.isPrint()));
 
@@ -624,18 +624,18 @@ public class NabController extends SpringActionController
 
     public static class RenderAssayBean
     {
-        private Luc5Assay _assay;
+        private OldNabAssayRun _assay;
         private boolean _newRun;
         private boolean _printView;
 
-        public RenderAssayBean(Luc5Assay assay, boolean newRun, boolean printView)
+        public RenderAssayBean(OldNabAssayRun assay, boolean newRun, boolean printView)
         {
             _assay = assay;
             _newRun = newRun;
             _printView = printView;
         }
 
-        public Luc5Assay getAssay()
+        public OldNabAssayRun getAssay()
         {
             return _assay;
         }
@@ -645,7 +645,7 @@ public class NabController extends SpringActionController
             return _newRun;
         }
 
-        public PlateQueryView getDuplicateDataFileView(ViewContext context, Luc5Assay assay)
+        public PlateQueryView getDuplicateDataFileView(ViewContext context, OldNabAssayRun assay)
         {
             SimpleFilter filter = new SimpleFilter("Property/DataFile", assay.getPlate().getProperty("DataFile"));
             filter.addCondition("RowId", assay.getRunRowId(), CompareType.NEQ);
@@ -700,7 +700,7 @@ public class NabController extends SpringActionController
             customizeLink = ((PlateQueryView) view).getCustomizeURL();
         JspView<HeaderBean> headerView = new JspView<HeaderBean>("/org/labkey/nab/header.jsp",
                 new HeaderBean(getViewContext(), printLink,
-                        dataFilePlate != null ? NabManager.get().getDataFileDownloadLink(dataFilePlate) : null, customizeLink));
+                        dataFilePlate != null ? OldNabManager.get().getDataFileDownloadLink(dataFilePlate) : null, customizeLink));
         return new VBox(headerView, view);
     }
 
@@ -747,14 +747,14 @@ public class NabController extends SpringActionController
     }
 
 
-    private Luc5Assay getCachedAssay(int rowId) throws Exception
+    private OldNabAssayRun getCachedAssay(int rowId) throws Exception
     {
         HttpSession session = getViewContext().getRequest().getSession(true);
-        Luc5Assay assay = (Luc5Assay)session.getAttribute("nabAssay");
+        OldNabAssayRun assay = (OldNabAssayRun)session.getAttribute("nabAssay");
 
         if (assay == null || assay.getRunRowId().intValue() != rowId)
         {
-            assay = NabManager.get().loadFromDatabase(getUser(), getContainer(), rowId);
+            assay = OldNabManager.get().loadFromDatabase(getUser(), getContainer(), rowId);
             session.setAttribute("nabAssay", assay);
         }
 
@@ -762,7 +762,7 @@ public class NabController extends SpringActionController
     }
 
 
-    private void cacheAssay(Luc5Assay assay)
+    private void cacheAssay(OldNabAssayRun assay)
     {
         HttpSession session = getViewContext().getRequest().getSession(true);
         session.setAttribute("nabAssay", assay);
@@ -848,7 +848,7 @@ public class NabController extends SpringActionController
     {
         public ActionURL getRedirectURL(RowIdForm form) throws Exception
         {
-            NabManager.get().deletePlate(getContainer(), form.getRowId());
+            OldNabManager.get().deletePlate(getContainer(), form.getRowId());
             return getBeginURL();
         }
     }
@@ -1097,7 +1097,7 @@ public class NabController extends SpringActionController
         {
             try
             {
-                DilutionSummary summary = NabManager.get().getDilutionSummary(getContainer(), wellgroupId);
+                DilutionSummary summary = OldNabManager.get().getDilutionSummary(getContainer(), wellgroupId);
                 summaries.add(summary);
             }
             catch (NumberFormatException e)
@@ -1164,7 +1164,7 @@ public class NabController extends SpringActionController
                     try
                     {
                         int rowid = Integer.parseInt(rowidStr);
-                        NabManager.get().deletePlate(getContainer(), rowid);
+                        OldNabManager.get().deletePlate(getContainer(), rowid);
                     }
                     catch (NumberFormatException e)
                     {
@@ -1543,8 +1543,8 @@ public class NabController extends SpringActionController
             {
                 public int compare(WellGroup group1, WellGroup group2)
                 {
-                    String sampleId1 = (String) group1.getProperty(NabManager.SampleProperty.SampleId.name());
-                    String sampleId2 = (String) group2.getProperty(NabManager.SampleProperty.SampleId.name());
+                    String sampleId1 = (String) group1.getProperty(OldNabManager.SampleProperty.SampleId.name());
+                    String sampleId2 = (String) group2.getProperty(OldNabManager.SampleProperty.SampleId.name());
                     return sampleId1.compareToIgnoreCase(sampleId2);
                 }
             });
@@ -1552,7 +1552,7 @@ public class NabController extends SpringActionController
             Map<WellGroup, ParticipantVisit> sampleInfoMap = new LinkedHashMap<WellGroup, ParticipantVisit>();
             for (WellGroup wellgroup : sortedGroups)
             {
-                String sampleId = (String) wellgroup.getProperty(NabManager.SampleProperty.SampleId.name());
+                String sampleId = (String) wellgroup.getProperty(OldNabManager.SampleProperty.SampleId.name());
                 ParticipantVisit sampleInfo = form.getReshowData(sampleId);
                 if (sampleInfo == null)
                     sampleInfo = SpecimenService.get().getSampleInfo(targetContainer, sampleId);
@@ -1627,12 +1627,12 @@ public class NabController extends SpringActionController
                             else
                                 samplePropertyMap.put("sequencenum", visitId);
                             samplePropertyMap.put("sourceLsid", sample.getLSID());
-                            String virusName = (String) samplePropertyMap.get(NabManager.PlateProperty.VirusName.name());
-                            String virusId = (String) samplePropertyMap.get(NabManager.PlateProperty.VirusId.name());
+                            String virusName = (String) samplePropertyMap.get(OldNabManager.PlateProperty.VirusName.name());
+                            String virusId = (String) samplePropertyMap.get(OldNabManager.PlateProperty.VirusId.name());
                             String virusKey = (virusId != null && virusId.length() > 0) ? virusId : "Unknown";
                             if (virusName != null && virusName.length() > 0)
                                 virusKey +=  " (" + virusName + ")";
-                            samplePropertyMap.put(NabManager.PlateProperty.VirusId.name(), virusKey);
+                            samplePropertyMap.put(OldNabManager.PlateProperty.VirusId.name(), virusKey);
                             sampleProperties.add(samplePropertyMap);
                         }
                     }
@@ -1643,8 +1643,8 @@ public class NabController extends SpringActionController
                     List<String> sampleErrors = new ArrayList<String>();
                     _returnURL = AssayPublishService.get().publishAssayData(getUser(), getContainer(), targetContainer,
                             "NAB", null, sampleProperties,
-                            NabManager.get().getPropertyTypes(plates),
-                            NabManager.PlateProperty.VirusId.name(), sampleErrors);
+                            OldNabManager.get().getPropertyTypes(plates),
+                            OldNabManager.PlateProperty.VirusId.name(), sampleErrors);
 
                     if (errors != null && !sampleErrors.isEmpty())
                     {
@@ -1762,7 +1762,7 @@ public class NabController extends SpringActionController
             Set<String> propertySet = new HashSet<String>();
             for (WellGroup group : sampleInfoMap.keySet())
                 propertySet.addAll(group.getPropertyNames());
-            propertySet.remove(NabManager.SampleProperty.SampleId.name());
+            propertySet.remove(OldNabManager.SampleProperty.SampleId.name());
             _sampleProperties = new ArrayList<String>(propertySet);
             Collections.sort(_sampleProperties);
         }

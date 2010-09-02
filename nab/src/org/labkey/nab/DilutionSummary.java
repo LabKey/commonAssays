@@ -94,7 +94,7 @@ public class DilutionSummary implements Serializable
         if (getPercent(data) == 0)
             return 0;
         else
-            return getStdDev(data) / _assay.getControlRange();
+            return getStdDev(data) / _assay.getControlRange(data.getPlate());
     }
 
     public List<WellData> getWellData()

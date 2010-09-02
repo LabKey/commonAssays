@@ -57,6 +57,11 @@ public class HighThroughputNabAssayProvider extends NabAssayProvider
                         "A.M. Kruisbeek, D.H. Margulies, E.M. Shevach, W. Strober, and R. Coico, eds.), John Wiley & Sons, 12.11.1-12.11.15.", true);
     }
 
+    public AbstractNabDataHandler getDataHandler()
+    {
+        return new HighThroughputNabDataHandler();
+    }
+
     @Override
     protected void addPassThroughRunProperties(Domain runDomain)
     {

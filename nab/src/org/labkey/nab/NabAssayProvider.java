@@ -334,6 +334,11 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
     }
 
+    public AbstractNabDataHandler getDataHandler()
+    {
+        return new NabDataHandler();
+    }
+
     public static class NabResultsQueryView extends ResultsQueryView
     {
         public NabResultsQueryView(ExpProtocol protocol, ViewContext context, AssayProvider provider)

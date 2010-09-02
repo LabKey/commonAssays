@@ -2,6 +2,7 @@ package org.labkey.nab;
 
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.study.Plate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.Well;
 import org.labkey.api.study.WellGroup;
@@ -99,15 +100,24 @@ public class NabRunPropertyMap extends HashMap<String, Object>
         }
         put("samples", samples);
 
-        WellGroup cellControl = assay.getPlate().getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
-        Map<String, Object> cellControlProperties = new HashMap<String, Object>();
-        addStandardWellProperties(cellControl, cellControlProperties, includeStats, includeWells);
-        put("cellControl", cellControlProperties);
+        Plate[] plates = assay.getPlates();
+        if (plates != null)
+        {
+            for (int i = 0; i < plates.length; i++)
+            {
+                String indexSuffix = plates.length > 1 ? "" + (i + 1) : "";
+                Plate plate = plates[i];
+                WellGroup cellControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
+                Map<String, Object> cellControlProperties = new HashMap<String, Object>();
+                addStandardWellProperties(cellControl, cellControlProperties, includeStats, includeWells);
+                put("cellControl" + indexSuffix, cellControlProperties);
 
-        WellGroup virusControl = assay.getPlate().getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
-        Map<String, Object> virusControlProperties = new HashMap<String, Object>();
-        addStandardWellProperties(virusControl, virusControlProperties, includeStats, includeWells);
-        put("virusControl", virusControlProperties);
+                WellGroup virusControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
+                Map<String, Object> virusControlProperties = new HashMap<String, Object>();
+                addStandardWellProperties(virusControl, virusControlProperties, includeStats, includeWells);
+                put("virusControl" + indexSuffix, virusControlProperties);
+            }
+        }
     }
 
     private void addStandardWellProperties(WellGroup group, Map<String, Object> properties, boolean includeStats, boolean includeWells)

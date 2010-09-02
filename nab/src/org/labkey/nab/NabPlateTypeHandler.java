@@ -61,8 +61,6 @@ public class NabPlateTypeHandler implements PlateTypeHandler
     public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount) throws SQLException
     {
         PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
-        for (NabManager.PlateProperty prop : NabManager.PlateProperty.values())
-            template.setProperty(prop.name(), "");
 
         template.addWellGroup(NabManager.CELL_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(container, 0, 0),

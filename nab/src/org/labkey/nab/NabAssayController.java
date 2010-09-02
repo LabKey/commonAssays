@@ -411,6 +411,19 @@ public class NabAssayController extends SpringActionController
         }
     }
 
+    protected NabAssayProvider getProvider(ExpRun run)
+    {
+        AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
+        if (!(provider instanceof NabAssayProvider))
+            throw new IllegalArgumentException("Run " + run.getRowId() + " is not a NAb run.");
+        return (NabAssayProvider) provider;
+    }
+
+    protected AbstractNabDataHandler getDataHandler(ExpRun run)
+    {
+        return getProvider(run).getDataHandler();
+    }
+
     @RequiresPermissionClass(ReadPermission.class)
     public class DownloadDatafileAction extends SimpleViewAction<RenderAssayForm>
     {
@@ -421,7 +434,7 @@ public class NabAssayController extends SpringActionController
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             if (run == null)
                 HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
-            File file = NabDataHandler.getDataFile(run);
+            File file = getDataHandler(run).getDataFile(run);
             if (file == null)
                 HttpView.throwNotFound("Data file for run " + run.getName() + " was not found.  Deleted from the file system?");
             PageFlowUtil.streamFile(getViewContext().getResponse(), file, true);
@@ -518,7 +531,7 @@ public class NabAssayController extends SpringActionController
         {
             try
             {
-                assay = NabDataHandler.getAssayResults(run, getUser(), fit);
+                assay = getDataHandler(run).getAssayResults(run, getUser(), fit);
                 if (assay != null && fit == null)
                     getViewContext().getSession().setAttribute(LAST_NAB_RUN_KEY, new Pair<NabAssayRun, Date>(assay, new Date()));
             }
@@ -792,7 +805,8 @@ public class NabAssayController extends SpringActionController
             }
 
             Set<Integer> cutoffSet = new HashSet<Integer>();
-            Map<DilutionSummary, NabAssayRun> summaries = NabDataHandler.getDilutionSummaries(getUser(), form.getFitTypeEnum(), objectIds);
+            NabAssayProvider provider = (NabAssayProvider) AssayService.get().getProvider(_protocol);
+            Map<DilutionSummary, NabAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getUser(), form.getFitTypeEnum(), objectIds);
             for (DilutionSummary summary : summaries.keySet())
             {
                 for (int cutoff : summary.getAssay().getCutoffs())
@@ -803,7 +817,7 @@ public class NabAssayController extends SpringActionController
 
             JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/multiRunGraph.jsp", bean);
 
-            return new VBox(new AssayHeaderView(_protocol, AssayService.get().getProvider(_protocol), false, null), multiGraphView);
+            return new VBox(new AssayHeaderView(_protocol, provider, false, null), multiGraphView);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -854,7 +868,7 @@ public class NabAssayController extends SpringActionController
             File file = null;
             if (deleteRunForm.isReupload())
             {
-                file = NabDataHandler.getDataFile(run);
+                file = getDataHandler(run).getDataFile(run);
                 if (file == null)
                     HttpView.throwNotFound("Data file for run " + run.getName() + " was not found.  Deleted from the file system?");
             }
@@ -894,7 +908,9 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(GraphSelectedForm form, BindException errors) throws Exception
         {
             int[] ids = form.getId();
-            Map<DilutionSummary, NabAssayRun> summaries = NabDataHandler.getDilutionSummaries(getUser(), form.getFitTypeEnum(), ids);
+            ExpProtocol protocol = ExperimentService.get().getExpProtocol(form.getProtocolId());
+            NabAssayProvider provider = (NabAssayProvider) AssayService.get().getProvider(protocol);
+            Map<DilutionSummary, NabAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getUser(), form.getFitTypeEnum(), ids);
             Set<Integer> cutoffSet = new HashSet<Integer>();
             for (DilutionSummary summary : summaries.keySet())
             {

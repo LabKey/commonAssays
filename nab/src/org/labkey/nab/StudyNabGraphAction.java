@@ -1,9 +1,12 @@
 package org.labkey.nab;
 
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.NavTree;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -49,7 +52,9 @@ public class StudyNabGraphAction extends SimpleViewAction<NabAssayController.Gra
     public ModelAndView getView(NabAssayController.GraphSelectedForm graphForm, BindException errors) throws Exception
     {
         Collection<Integer> ids = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(), getViewContext().getUser(), graphForm.getId());
-        Map<DilutionSummary, NabAssayRun> summaries = NabDataHandler.getDilutionSummaries(getViewContext().getUser(), graphForm.getFitTypeEnum(), toArray(ids));
+        ExpProtocol protocol = ExperimentService.get().getExpProtocol(graphForm.getProtocolId());
+        NabAssayProvider provider = (NabAssayProvider) AssayService.get().getProvider(protocol);
+        Map<DilutionSummary, NabAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getViewContext().getUser(), graphForm.getFitTypeEnum(), toArray(ids));
         Set<Integer> cutoffSet = new HashSet<Integer>();
         for (DilutionSummary summary : summaries.keySet())
         {

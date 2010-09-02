@@ -1,12 +1,21 @@
 package org.labkey.nab;
 
+import org.apache.log4j.Logger;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.security.User;
+import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.study.Plate;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.FileType;
+import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright (c) 2010 LabKey Corporation
@@ -27,7 +36,7 @@ import java.io.File;
  * User: brittp
  * Date: Aug 27, 2010 11:07:33 AM
  */
-public class HighThroughputNabDataHandler extends NabDataHandler
+public class HighThroughputNabDataHandler extends AbstractNabDataHandler
 {
     public static final AssayDataType NAB_HIGH_THROUGHPUT_DATA_TYPE = new AssayDataType("HighThroughputAssayRunNabData", new FileType(".csv"));
 
@@ -39,5 +48,26 @@ public class HighThroughputNabDataHandler extends NabDataHandler
             return Priority.HIGH;
         }
         return null;
+    }
+
+    private static class HighThroughputNabDataParser implements NabDataFileParser
+    {
+        @Override
+        public List<Map<String, Object>> getResults() throws ExperimentException
+        {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+    }
+
+    @Override
+    protected NabAssayRun createNabAssayRun(NabAssayProvider provider, ExpRun run, Plate plate, User user, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
+    {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public NabDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

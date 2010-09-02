@@ -33,7 +33,6 @@ import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.HttpView;
@@ -49,10 +48,10 @@ import java.util.*;
  * Time: 5:43:01 PM
  */
 
-public class NabAssayRun extends Luc5Assay
+public abstract class NabAssayRun extends Luc5Assay
 {
     private ExpProtocol _protocol;
-    private AbstractPlateBasedAssayProvider _provider;
+    private NabAssayProvider _provider;
     private Map<PropertyDescriptor, Object> _runProperties;
     private Map<PropertyDescriptor, Object> _runDisplayProperties;
     List<SampleResult> _sampleResults;
@@ -60,10 +59,10 @@ public class NabAssayRun extends Luc5Assay
     private User _user;
     private DilutionCurve.FitType _savedCurveFitType = null;
 
-    public NabAssayRun(AbstractPlateBasedAssayProvider provider, ExpRun run, Plate plate,
+    public NabAssayRun(NabAssayProvider provider, ExpRun run,
                        User user, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
     {
-        super(plate, cutoffs, renderCurveFitType);
+        super(run.getRowId(), cutoffs, renderCurveFitType);
         _run = run;
         _user = user;
         _protocol = run.getProtocol();
@@ -77,6 +76,17 @@ public class NabAssayRun extends Luc5Assay
                 _savedCurveFitType = DilutionCurve.FitType.fromLabel(fitTypeLabel);
             }
         }
+    }
+
+    public AbstractNabDataHandler getDataHandler()
+    {
+        return _provider.getDataHandler();
+    }
+
+    @Override
+    public String getRunName()
+    {
+        return _run.getName();
     }
 
     private Map<FieldKey, PropertyDescriptor> getFieldKeys()
@@ -213,7 +223,7 @@ public class NabAssayRun extends Luc5Assay
                 captions.add(shortCaption);
 
                 NabResultProperties props = allProperties.get(summary.getWellGroup().getName());
-                _sampleResults.add(new SampleResult(outputObject, summary, key, props.getSampleProperties(), props.getDataProperties()));
+                _sampleResults.add(new SampleResult(_provider, outputObject, summary, key, props.getSampleProperties(), props.getDataProperties()));
             }
 
             if (longCaptions)
@@ -268,7 +278,7 @@ public class NabAssayRun extends Luc5Assay
             // "output" data object.
             Map<PropertyDescriptor, Object> dataProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
             WellGroup wellGroup = getWellGroup(material);
-            String dataRowLsid = NabDataHandler.getDataRowLSID(outputData, wellGroup.getName()).toString();
+            String dataRowLsid = getDataHandler().getDataRowLSID(outputData, wellGroup.getName()).toString();
             Map<String, ObjectProperty> outputProperties;
             try
             {
@@ -300,14 +310,14 @@ public class NabAssayRun extends Luc5Assay
         private Map<PropertyDescriptor, Object> _dataProperties;
         private boolean _longCaptions = false;
 
-        public SampleResult(ExpData data, DilutionSummary dilutionSummary, NabMaterialKey materialKey,
+        public SampleResult(NabAssayProvider provider, ExpData data, DilutionSummary dilutionSummary, NabMaterialKey materialKey,
                             Map<PropertyDescriptor, Object> sampleProperties, Map<PropertyDescriptor, Object> dataProperties)
         {
             _dilutionSummary = dilutionSummary;
             _materialKey = materialKey;
             _sampleProperties = sortProperties(sampleProperties);
             _dataProperties = sortProperties(dataProperties);
-            _dataRowLsid = NabDataHandler.getDataRowLSID(data, dilutionSummary.getWellGroup().getName()).toString();
+            _dataRowLsid = provider.getDataHandler().getDataRowLSID(data, dilutionSummary.getWellGroup().getName()).toString();
             _dataContainer = data.getContainer();
         }
 

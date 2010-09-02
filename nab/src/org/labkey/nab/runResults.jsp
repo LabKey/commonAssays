@@ -27,12 +27,13 @@
 <%@ page import="org.labkey.nab.SampleInfo" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.nab.OldNabAssayRun" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.RenderAssayBean> me = (JspView<NabController.RenderAssayBean>) HttpView.currentView();
     NabController.RenderAssayBean bean = me.getModelBean();
-    Luc5Assay assay = bean.getAssay();
+    OldNabAssayRun assay = bean.getAssay();
     ViewContext context = me.getViewContext();
     boolean writer = context.getContainer().hasPermission(context.getUser(), InsertPermission.class);
     %>

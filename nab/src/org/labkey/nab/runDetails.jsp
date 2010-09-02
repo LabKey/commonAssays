@@ -32,6 +32,7 @@
 <%@ page import="org.labkey.nab.*" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.*" %>
+<%@ page import="org.labkey.api.study.Plate" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <labkey:errors/>
@@ -52,9 +53,9 @@
     List<Map<PropertyDescriptor, Object>> sampleData = new ArrayList<Map<PropertyDescriptor, Object>>();
     Set<String> pdsWithData = new HashSet<String>();
 
-    String aucPropertyName = bean.getFitType() == null ? NabDataHandler.AUC_PREFIX : NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, bean.getFitType());
+    String aucPropertyName = bean.getFitType() == null ? NabDataHandler.AUC_PREFIX : assay.getDataHandler().getPropertyName(NabDataHandler.AUC_PREFIX, bean.getFitType());
     Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), aucPropertyName);
-    String paucPropertyName = bean.getFitType() == null ? NabDataHandler.pAUC_PREFIX : NabDataHandler.getPropertyName(NabDataHandler.pAUC_PREFIX, bean.getFitType());
+    String paucPropertyName = bean.getFitType() == null ? NabDataHandler.pAUC_PREFIX : assay.getDataHandler().getPropertyName(NabDataHandler.pAUC_PREFIX, bean.getFitType());
     Lsid pAucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), paucPropertyName);
     PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), context.getContainer());
     PropertyDescriptor pAucPD = OntologyManager.getPropertyDescriptor(pAucURI.toString(), context.getContainer());
@@ -167,7 +168,7 @@
     }
 %>
 <tr class="labkey-wp-header">
-    <th>Run Summary<%= assay.getName() != null ? ": " + h(assay.getName()) : "" %></th>
+    <th>Run Summary<%= assay.getRunName() != null ? ": " + h(assay.getRunName()) : "" %></th>
 </tr>
     <tr>
         <td>
@@ -316,18 +317,66 @@
                 <tr>
                     <td colspan="2" valign="top">
                         <table width="100%">
+                            <%
+                                if (assay.getPlates().length > 1)
+                                {
+                            %>
+                            <tr>
+                                <th>Plate</th>
+                                <%
+                                    Plate[] plates = assay.getPlates();
+                                    for (int i = 0; i < plates.length; i++)
+                                    {
+                                        Plate plate = plates[i];
+                                %>
+                                <th><%= i + 1 %></th>
+                                <%
+                                    }
+                                %>
+                            </tr>
+                            <%
+                                }
+                            %>
                             <tr>
                                 <th class="labkey-header">Range</th>
-                                <td
-                                    align=left><%=Luc5Assay.intString(assay.getControlRange())%></td>
+                                <%
+                                    for (Plate plate : assay.getPlates())
+                                    {
+                                %>
+                                <td align=left>
+                                    <%=Luc5Assay.intString(assay.getControlRange(plate))%>
+                                </td>
+                                <%
+                                    }
+                                %>
                             </tr>
                             <tr>
                                 <th class="labkey-header">Virus Control</th>
-                                <td align="left"><%=Luc5Assay.intString(assay.getVirusControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getVirusControlPlusMinus())%></td>
+                                <%
+                                    for (Plate plate : assay.getPlates())
+                                    {
+                                %>
+                                <td align="left">
+                                    <%=Luc5Assay.intString(assay.getVirusControlMean(plate))%> &plusmn;
+                                    <%=Luc5Assay.percentString(assay.getVirusControlPlusMinus(plate))%>
+                                </td>
+                                <%
+                                    }
+                                %>
                             </tr>
                             <tr>
                                 <th class="labkey-header">Cell Control</th>
-                                <td align=left><%=Luc5Assay.intString(assay.getCellControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getCellControlPlusMinus())%></td>
+                                <%
+                                    for (Plate plate : assay.getPlates())
+                                    {
+                                %>
+                                <td align=left>
+                                    <%=Luc5Assay.intString(assay.getCellControlMean(plate))%> &plusmn;
+                                    <%=Luc5Assay.percentString(assay.getCellControlPlusMinus(plate))%>
+                                </td>
+                                <%
+                                    }
+                                %>
                             </tr>
                         </table>
                     </td>
@@ -459,13 +508,17 @@
     <tr>
         <td>
             <table>
+                <%
+                    for (Plate plate : assay.getPlates())
+                    {
+                %>
                 <tr>
                     <td valign=top>
                         <table>
                             <tr>
                                 <td>&nbsp;</td>
                                 <%
-                                    for (int c = 1; c <= assay.getPlate().getColumns(); c++)
+                                    for (int c = 1; c <= plate.getColumns(); c++)
                                     {
                                 %>
                                 <td style="font-weight:bold"><%=c %></td>
@@ -474,18 +527,18 @@
                                 %>
                             </tr>
                             <%
-                                for (int row = 0; row < assay.getPlate().getRows(); row++)
+                                for (int row = 0; row < plate.getRows(); row++)
                                 {
                             %>
                             <tr>
                                 <td style="font-weight:bold"><%=(char) ('A' + row)%></td>
 
                                 <%
-                                    for (int col = 0; col < assay.getPlate().getColumns(); col++)
+                                    for (int col = 0; col < plate.getColumns(); col++)
                                     {
                                 %>
                                 <td align=right>
-                                    <%=Luc5Assay.intString(assay.getPlate().getWell(row, col).getValue())%></td>
+                                    <%=Luc5Assay.intString(plate.getWell(row, col).getValue())%></td>
                                 <%
                                     }
                                 %>
@@ -496,6 +549,9 @@
                         </table>
                     </td>
                 </tr>
+                <%
+                    }
+                %>
             </table>
         </td>
     </tr>

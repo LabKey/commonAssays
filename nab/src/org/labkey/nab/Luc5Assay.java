@@ -18,7 +18,6 @@ package org.labkey.nab;
 import java.io.Serializable;
 import java.io.File;
 import java.util.List;
-import java.util.Date;
 import java.util.Map;
 
 import org.labkey.api.study.*;
@@ -30,31 +29,26 @@ import org.labkey.api.exp.api.ExpMaterial;
  * Date: Feb 10, 2006
  * Time: 2:15:41 PM
  */
-public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
+public abstract class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
 {
     private Integer _runRowId;
-    private Plate _plate;
-    private DilutionSummary[] _dilutionSummaries;
     private int[] _cutoffs;
     private Map<Integer, String> _cutoffFormats;
     private Map<WellGroup, ExpMaterial> _wellGroupMaterialMapping;
     private File _dataFile;
-    private DilutionCurve.FitType _renderedCurveFitType;
+    protected DilutionCurve.FitType _renderedCurveFitType;
     private boolean _lockAxes;
 
-    public Luc5Assay(Plate plate, int[] cutoffs, DilutionCurve.FitType renderCurveFitType)
+    public Luc5Assay(Integer runRowId, int[] cutoffs, DilutionCurve.FitType renderCurveFitType)
     {
         _renderedCurveFitType = renderCurveFitType;
-        assert plate != null : "plate cannot be null";
-        _runRowId = plate.getRowId();
+        _runRowId = runRowId;
         _cutoffs = cutoffs;
-        _plate = plate;
-        init();
     }
 
-    public Luc5Assay(Plate plate, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
+    public Luc5Assay(int runRowId, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
     {
-        this(plate, toIntArray(cutoffs), renderCurveFitType);
+        this(runRowId, toIntArray(cutoffs), renderCurveFitType);
     }
 
     private static int[] toIntArray(List<Integer> cutoffs)
@@ -65,29 +59,18 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
         return cutoffArray;
     }
 
-    private void init()
+    protected DilutionSummary[] getDilutionSumariesForWellGroups(List<? extends WellGroup> specimenGroups)
     {
-        List<? extends WellGroup> specimenGroups = _plate.getWellGroups(WellGroup.Type.SPECIMEN);
         int sampleIndex = 0;
-        _dilutionSummaries = new DilutionSummary[specimenGroups.size()];
+        DilutionSummary[] dilutionSummaries = new DilutionSummary[specimenGroups.size()];
         for (WellGroup specimenGroup : specimenGroups)
-            _dilutionSummaries[sampleIndex++] = new DilutionSummary(this, specimenGroup, null, _renderedCurveFitType);
+            dilutionSummaries[sampleIndex++] = new DilutionSummary(this, specimenGroup, null, _renderedCurveFitType);
+        return dilutionSummaries;
     }
 
-    public DilutionSummary[] getSummaries()
-    {
-        return _dilutionSummaries;
-    }
+    public abstract String getRunName();
 
-    public String getName()
-    {
-        return (String) _plate.getProperty(NabManager.PlateProperty.DataFile.name());
-    }
-
-    public Plate getPlate()
-    {
-        return _plate;
-    }
+    public abstract DilutionSummary[] getSummaries();
 
     public Integer getRunRowId()
     {
@@ -109,19 +92,13 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
         return _cutoffs;
     }
 
-    public double getControlRange()
-    {
-        WellData cellControl = _plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
-        WellData virusControl = _plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
-        return virusControl.getMean() - cellControl.getMean();
-    }
-
     public double getPercent(WellGroup group, WellData data) throws DilutionCurve.FitFailedException
     {
-        WellData cellControl = _plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
+        Plate plate = group.getPlate();
+        WellData cellControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
         if (cellControl == null)
             throw new DilutionCurve.FitFailedException("Invalid plate template: no cell control well group was found.");
-        WellData virusControl = _plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
+        WellData virusControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
         if (virusControl == null)
             throw new DilutionCurve.FitFailedException("Invalid plate template: no virus control well group was found.");
         double controlRange = virusControl.getMean() - cellControl.getMean();
@@ -132,82 +109,41 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
             return 1 - (data.getMean() - cellControlMean) / controlRange;
     }
 
-    public double getVirusControlMean()
+    public abstract Plate[] getPlates();
+
+    public double getControlRange(Plate plate)
     {
-        WellData virusControl = _plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
+        WellData cellControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
+        WellData virusControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
+        return virusControl.getMean() - cellControl.getMean();
+    }
+
+    public double getVirusControlMean(Plate plate)
+    {
+        WellData virusControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
         return virusControl.getMean();
     }
 
-    public double getCellControlMean()
+    public double getCellControlMean(Plate plate)
     {
-        WellData cellControl = _plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
+        WellData cellControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
         return cellControl.getMean();
     }
 
-    public double getVirusControlPlusMinus()
+    public double getVirusControlPlusMinus(Plate plate)
     {
-        WellData virusControl = _plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
+        WellData virusControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE);
         double virusControlMean = virusControl.getMean();
         double virusControlStdDev = virusControl.getStdDev();
         return virusControlStdDev / virusControlMean;
     }
 
-    public double getCellControlPlusMinus()
+    public double getCellControlPlusMinus(Plate plate)
     {
-        WellData cellControl = _plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
+        WellData cellControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
         double cellControlMean = cellControl.getMean();
         double cellControlStdDev = cellControl.getStdDev();
         return cellControlStdDev / cellControlMean;
-    }
-
-    public Date getExperimentDate()
-    {
-        return (Date) _plate.getProperty(NabManager.PlateProperty.ExperimentDate.name());
-    }
-
-    public String getExperimentId()
-    {
-        return (String) _plate.getProperty(NabManager.PlateProperty.ExperimentId.name());
-    }
-
-    public String getExperimentPerformer()
-    {
-        return (String) _plate.getProperty(NabManager.PlateProperty.ExperimentPerformer.name());
-    }
-
-    public String getFileId()
-    {
-        return (String) _plate.getProperty(NabManager.PlateProperty.FileId.name());
-    }
-
-    public String getHostCell()
-    {
-        return (String) _plate.getProperty(NabManager.PlateProperty.HostCell.name());
-    }
-
-    public String getIncubationTime()
-    {
-        return (String) _plate.getProperty(NabManager.PlateProperty.IncubationTime.name());
-    }
-
-    public String getPlateNumber()
-    {
-        return (String) _plate.getProperty(NabManager.PlateProperty.PlateNumber.name());
-    }
-
-    public String getStudyName()
-    {
-        return (String) _plate.getProperty(NabManager.PlateProperty.StudyName.name());
-    }
-
-    public String getVirusId()
-    {
-        return (String) _plate.getProperty(NabManager.PlateProperty.VirusId.name());
-    }
-
-    public String getVirusName()
-    {
-        return (String) _plate.getProperty(NabManager.PlateProperty.VirusName.name());
     }
 
     public Map<Integer, String> getCutoffFormats()
