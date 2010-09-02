@@ -16,10 +16,10 @@
 
 package org.labkey.ms2.protein;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.util.HashHelpers;
@@ -818,21 +818,9 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
     }
 
     //JUnit TestCase
-    public static class TestCase extends junit.framework.TestCase
+    public static class TestCase extends Assert
     {
-
-        TestCase(String name)
-        {
-            super(name);
-        }
-
-        public static Test suite()
-        {
-            TestSuite suite = new TestSuite();
-            suite.addTest(new TestCase("testValidateIdentParser"));
-            return suite;
-        }
-
+        @Test
         public void testValidateIdentParser()
         {
             Map<String, Set<String>> idMapE;
@@ -870,7 +858,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ","NP_446360.1"));
             parseAndCompare("gi|16758788|ref|NP_446360.1|", idMapE);
 
-
             idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","1705439"));
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(),"BCCP_BACSU"));
@@ -880,7 +867,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","17233017"));
             parseAndCompare("gi|17233017|COG0589:COG0077", idMapE);
-
 
             idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","17233017"));
@@ -1010,7 +996,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00844156.2"));
             parseAndCompare("IPI:IPI00844156.2|TREMBL:Q7KYQ5;Q7KYY4;Q8IZZ8;Q8IZZ9;Q8J000;Q8J001;Q8TCE1;Q9UBW9|ENSEMBL:ENSP00000307953", idMapE, "IPI:IPI00844156.2|TREMBL:Q7KYQ5;Q7KYY4;Q8IZZ8;Q8IZZ9;Q8J000;Q8J001;Q8TCE1;Q9UBW9|ENSEMBL:ENSP00000307953 Tax_Id=9606 Gene_Symbol=SERPINC1 SERPINC1 protein");
 
-
             // return empty map
             idMapE=new HashMap<String,Set<String>>();
             parseAndCompare("GENSCAN00000048050", idMapE);
@@ -1036,7 +1021,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             parseAndCompare("\r\t\n\"", idMapE);
             parseAndCompare(null, idMapE);
             parseAndCompare("UniRef100_Q4U9M9;UniRef100_Q4U123;UniRef100_Q4U456;", idMapE);
-
         }
 
         protected boolean compareIdMaps (Map<String, Set<String>> idMapExpected, Map<String, Set<String>> idMapReturned)
@@ -1069,6 +1053,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             }
             return true;
         }
+
         protected void parseAndCompare(String strLookup, Map<String, Set<String>> idMapExpected)
         {
             parseAndCompare(strLookup, idMapExpected, null);
@@ -1079,9 +1064,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             Map<String, Set<String>> idMapReturned = Protein.identParse(strLookup, wholeHeader);
             assert(compareIdMaps(idMapExpected, idMapReturned));
         }
-
     }
-
-} // class FastaDbLoader
+}
 
 

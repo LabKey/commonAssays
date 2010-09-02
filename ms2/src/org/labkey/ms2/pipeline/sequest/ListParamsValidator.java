@@ -16,8 +16,10 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * User: billnelson@uky.edu
@@ -26,7 +28,6 @@ import junit.framework.TestSuite;
  */
 public class ListParamsValidator implements IParamsValidator
 {
-
     private String[] list;
 
     public ListParamsValidator(String[] list)
@@ -68,28 +69,12 @@ public class ListParamsValidator implements IParamsValidator
     }
 
     //JUnit TestCase
-    public static class TestCase extends junit.framework.TestCase
+    public static class TestCase extends Assert
     {
-
         private Param _property;
 
-        TestCase(String name)
-        {
-            super(name);
-        }
-
-        public static Test suite()
-        {
-            TestSuite suite = new TestSuite();
-            suite.addTest(new TestCase("testValidateNormal"));
-            suite.addTest(new TestCase("testValidateMissingValue"));
-            suite.addTest(new TestCase("testValidateGarbage"));
-
-            return suite;
-        }
-
-        @Override
-        protected void setUp() throws Exception
+        @Before
+        public void setUp() throws Exception
         {
                           _property = new SequestParam(
                           50,                                                       //sortOrder
@@ -102,12 +87,13 @@ public class ListParamsValidator implements IParamsValidator
                   ).setInputXmlLabels("spectrum, parent monoisotopic mass error units");
         }
 
-        @Override
-        protected void tearDown()
+        @After
+        public void tearDown()
         {
             _property = null;
         }
 
+        @Test
         public void testValidateNormal()
         {
             _property.setValue("0");
@@ -127,6 +113,7 @@ public class ListParamsValidator implements IParamsValidator
 
         }
 
+        @Test
         public void testValidateMissingValue()
         {
             _property.setValue("");
@@ -138,6 +125,7 @@ public class ListParamsValidator implements IParamsValidator
             assertEquals(_property.getInputXmlLabels().get(0) + ", " + "this value is not set.\n", parserError);
         }
 
+        @Test
         public void testValidateGarbage()
         {
             _property.setValue("foo");

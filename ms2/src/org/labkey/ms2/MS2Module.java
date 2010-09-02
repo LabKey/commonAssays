@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2;
 
-import junit.framework.TestCase;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -27,7 +26,9 @@ import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.module.*;
+import org.labkey.api.module.ModuleContext;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
@@ -37,7 +38,11 @@ import org.labkey.api.security.User;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.*;
+import org.labkey.api.view.BaseWebPartFactory;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
@@ -48,7 +53,14 @@ import org.labkey.ms2.pipeline.PipelineController;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineProvider;
 import org.labkey.ms2.pipeline.comet.CometCPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
-import org.labkey.ms2.pipeline.sequest.*;
+import org.labkey.ms2.pipeline.sequest.BooleanParamsValidator;
+import org.labkey.ms2.pipeline.sequest.ListParamsValidator;
+import org.labkey.ms2.pipeline.sequest.NaturalNumberParamsValidator;
+import org.labkey.ms2.pipeline.sequest.PositiveDoubleParamsValidator;
+import org.labkey.ms2.pipeline.sequest.PositiveIntegerParamsValidator;
+import org.labkey.ms2.pipeline.sequest.RealNumberParamsValidator;
+import org.labkey.ms2.pipeline.sequest.SequestLocalPipelineProvider;
+import org.labkey.ms2.pipeline.sequest.SequestParamsBuilder;
 import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomProteinListView;
@@ -63,7 +75,14 @@ import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * User: migra
@@ -317,9 +336,9 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     }
 
     @Override
-    public Set<Class<? extends TestCase>> getJUnitTests()
+    public Set<Class> getJUnitTests()
     {
-        return new HashSet<Class<? extends TestCase>>(Arrays.asList(
+        return new HashSet<Class>(Arrays.asList(
             SequestParamsBuilder.TestCase.class,
             PositiveDoubleParamsValidator.TestCase.class,
             NaturalNumberParamsValidator.TestCase.class,

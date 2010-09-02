@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.reader;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import java.io.IOException;
 
@@ -32,7 +32,7 @@ public abstract class RandomAccessMzxmlIterator extends AbstractMzxmlIterator
     }
 
     // helper for unit testing of child classes
-    static protected void compare_mzxml(junit.framework.TestCase test, RandomAccessMzxmlIterator mzxmlA,RandomAccessMzxmlIterator mzxmlB)
+    static protected void compare_mzxml(Assert test, RandomAccessMzxmlIterator mzxmlA, RandomAccessMzxmlIterator mzxmlB)
     {
         try
         {
@@ -58,8 +58,5 @@ public abstract class RandomAccessMzxmlIterator extends AbstractMzxmlIterator
         {
             test.fail(e.toString());
         }
-        finally {
-        }
     }
-
 }

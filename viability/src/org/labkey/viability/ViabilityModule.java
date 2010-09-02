@@ -16,7 +16,6 @@
 
 package org.labkey.viability;
 
-import junit.framework.TestCase;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
@@ -26,7 +25,11 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.WebPartFactory;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ViabilityModule extends DefaultModule
 {
@@ -85,9 +88,9 @@ public class ViabilityModule extends DefaultModule
     }
 
     @Override
-    public Set<Class<? extends TestCase>> getJUnitTests()
+    public Set<Class> getJUnitTests()
     {
-        return new HashSet<Class<? extends TestCase>>(Arrays.asList(
+        return new HashSet<Class>(Arrays.asList(
                 ViabilityManager.TestCase.class,
                 GuavaDataHandler.TestCase.class
         ));

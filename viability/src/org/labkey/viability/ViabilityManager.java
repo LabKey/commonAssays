@@ -16,23 +16,40 @@
 
 package org.labkey.viability;
 
-import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.data.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.Table;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.OntologyObject;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.*;
-import org.labkey.api.security.User;
-import org.labkey.api.util.TestContext;
-import org.labkey.api.util.JunitUtil;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.User;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.JunitUtil;
+import org.labkey.api.util.TestContext;
 
-import java.util.*;
 import java.sql.SQLException;
-
-import junit.framework.TestSuite;
-import junit.framework.Test;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 public class ViabilityManager
 {
@@ -287,19 +304,15 @@ public class ViabilityManager
         }
     }
 
-    public static class TestCase extends junit.framework.TestCase
+    public static class TestCase extends Assert
     {
         private ExpProtocol _protocol;
         private ExpData _data;
         private PropertyDescriptor _propertyA;
         private PropertyDescriptor _propertyB;
 
-        public TestCase() { super(); }
-        public TestCase(String name) { super(name); }
-        public static Test suite() { return new TestSuite(TestCase.class); }
-
-        @Override
-        protected void setUp() throws Exception
+        @Before
+        public void setUp() throws Exception
         {
             cleanup();
 
@@ -320,8 +333,8 @@ public class ViabilityManager
             OntologyManager.insertPropertyDescriptor(_propertyB);
         }
 
-        @Override
-        protected void tearDown() throws Exception
+        @After
+        public void tearDown() throws Exception
         {
             cleanup();
         }
@@ -346,6 +359,7 @@ public class ViabilityManager
             OntologyManager.deleteAllObjects(c);
         }
 
+        @Test
         public void testViability()
             throws Exception
         {

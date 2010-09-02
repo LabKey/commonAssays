@@ -16,9 +16,7 @@
 
 package org.labkey.ms2;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 import org.labkey.api.util.Pair;
 
 import java.util.ArrayList;
@@ -154,8 +152,9 @@ public class MS2Modification
 
     private static final String VALID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    public static class MS2ModificationTest extends TestCase
+    public static class MS2ModificationTest
     {
+        @Test
         public void test()
         {
             List<Pair<String, Boolean>> testAminoAcids = new ArrayList<Pair<String, Boolean>>(300);
@@ -201,12 +200,6 @@ public class MS2Modification
                     throw new RuntimeException("Amino acid \"" + pair.first + "\" failed validation in setAminoAcid()");
                 }
             }
-        }
-
-
-        public static Test suite()
-        {
-            return new TestSuite(MS2ModificationTest.class);
         }
     }
 }

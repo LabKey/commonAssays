@@ -16,8 +16,10 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.settings.AppProps;
@@ -27,8 +29,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 /**
  * User: billnelson@uky.edu
@@ -939,65 +946,15 @@ public abstract class SequestParamsBuilder
         }
     }
     //JUnit TestCase
-    public static class TestCase extends junit.framework.TestCase
+    public static class TestCase extends Assert
     {
-
         SequestParamsBuilder spb;
         ParamParser ip;
         String dbPath;
         File root;
 
-        TestCase(String name)
-        {
-            super(name);
-        }
-
-        public static Test suite()
-        {
-            TestSuite suite = new TestSuite();
-            suite.addTest(new TestCase("testInitPeptideMassToleranceNormal"));
-            suite.addTest(new TestCase("testInitPeptideMassToleranceMissingValue"));
-            suite.addTest(new TestCase("testInitPeptideMassToleranceMissingInput"));
-            suite.addTest(new TestCase("testInitPeptideMassToleranceDefault"));
-            suite.addTest(new TestCase("testInitPeptideMassToleranceNegative"));
-            suite.addTest(new TestCase("testInitPeptideMassToleranceInvalid"));
-            suite.addTest(new TestCase("testInitMassTypeNormal"));
-            suite.addTest(new TestCase("testInitMassTypeMissingValue"));
-            suite.addTest(new TestCase("testInitMassTypeDefault"));
-            suite.addTest(new TestCase("testInitMassTypeGarbage"));
-            suite.addTest(new TestCase("testInitIonScoringNormal"));
-            suite.addTest(new TestCase("testInitIonScoringMissingValue"));
-            suite.addTest(new TestCase("testInitIonScoringMissingDefault"));
-            suite.addTest(new TestCase("testInitIonScoringDefault"));
-            suite.addTest(new TestCase("testInitIonScoringGarbage"));
-            suite.addTest(new TestCase("testInitEnzymeInfoNormal"));
-            suite.addTest(new TestCase("testInitEnzymeInfoDefault"));
-            suite.addTest(new TestCase("testInitEnzymeInfoMissingValue"));
-            suite.addTest(new TestCase("testInitEnzymeInfoGarbage"));
-            suite.addTest(new TestCase("testInitDynamicModsNormal"));
-            suite.addTest(new TestCase("testInitDynamicModsMissingValue"));
-            suite.addTest(new TestCase("testInitDynamicModsDefault"));
-            suite.addTest(new TestCase("testInitDynamicModsGarbage"));
-            suite.addTest(new TestCase("testInitTermDynamicModsNormal"));
-            suite.addTest(new TestCase("testInitTermDynamicModsMissingValue"));
-            suite.addTest(new TestCase("testInitTermDynamicModsDefault"));
-            suite.addTest(new TestCase("testInitStaticModsNormal"));
-            suite.addTest(new TestCase("testInitStaticModsMissingValue"));
-            suite.addTest(new TestCase("testInitStaticModsDefault"));
-            suite.addTest(new TestCase("testInitStaticModsGarbage"));
-            suite.addTest(new TestCase("testInitPassThroughsNormal"));
-            suite.addTest(new TestCase("testInitPassThroughsMissingValue"));
-            suite.addTest(new TestCase("testInitPassThroughsNegative"));
-            suite.addTest(new TestCase("testInitPassThroughsGarbage"));
-            suite.addTest(new TestCase("testInitDatabasesNormal"));
-            suite.addTest(new TestCase("testInitDatabasesMissingValue"));
-            suite.addTest(new TestCase("testInitDatabasesMissingInput"));
-            suite.addTest(new TestCase("testInitDatabasesGarbage"));
-            return suite;
-        }
-
-        @Override
-        protected void setUp() throws Exception
+        @Before
+        public void setUp() throws Exception
         {
             ip = PipelineJobService.get().createParamParser();
             String projectRoot = AppProps.getInstance().getProjectRoot();
@@ -1008,8 +965,8 @@ public abstract class SequestParamsBuilder
             spb = SequestParamsBuilderFactory.createVersion2Builder(ip.getInputParameters(), root);
         }
 
-        @Override
-        protected void tearDown()
+        @After
+        public void tearDown()
         {
             ip = null;
             spb = null;
@@ -1021,6 +978,7 @@ public abstract class SequestParamsBuilder
             spb = SequestParamsBuilderFactory.createVersion2Builder(ip.getInputParameters(), root);
         }
 
+        @Test
         public void testInitDatabasesNormal() throws IOException
         {
             String value = "Bovine_mini.fasta";
@@ -1036,6 +994,7 @@ public abstract class SequestParamsBuilder
 
         }
 
+        @Test
         public void testInitDatabasesMissingValue()
         {
             String value = "";
@@ -1049,6 +1008,7 @@ public abstract class SequestParamsBuilder
             assertEquals("pipeline, database; No value entered for database.\n", parserError);
         }
 
+        @Test
         public void testInitDatabasesMissingInput()
         {
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1060,6 +1020,7 @@ public abstract class SequestParamsBuilder
             assertEquals("pipeline, database; No value entered for database.\n", parserError);
         }
 
+        @Test
         public void testInitDatabasesGarbage()
         {
             String value = "garbage";
@@ -1093,6 +1054,7 @@ public abstract class SequestParamsBuilder
             assertEquals("pipeline, database; The database does not exist on the local server (garbage).\n", parserError);
         }
 
+        @Test
         public void testInitPeptideMassToleranceNormal()
         {
             float expected = 30.0f;
@@ -1109,6 +1071,7 @@ public abstract class SequestParamsBuilder
             assertEquals("peptide_mass_tolerance", expected, actual, 0.00);
         }
 
+        @Test
         public void testInitPeptideMassToleranceMissingValue()
         {
             String expected = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
@@ -1147,6 +1110,7 @@ public abstract class SequestParamsBuilder
             assertEquals("No values were entered for spectrum, parent monoisotopic mass error minus/plus.\n", parserError);
         }
 
+        @Test
         public void testInitPeptideMassToleranceNegative()
         {
             float expected = -30.0f;
@@ -1164,6 +1128,7 @@ public abstract class SequestParamsBuilder
             assertEquals("Negative values not permitted for parent monoisotopic mass error(" + expected + ").\n", parserError);
         }
 
+        @Test
         public void testInitPeptideMassToleranceInvalid()
         {
             String expected = "garbage";
@@ -1182,6 +1147,7 @@ public abstract class SequestParamsBuilder
         }
 
 
+        @Test
         public void testInitPeptideMassToleranceMissingInput()
         {
             String expected = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
@@ -1207,6 +1173,7 @@ public abstract class SequestParamsBuilder
             assertEquals("Sequest does not support asymmetric parent error ranges (minus=5.0 plus=null).\n", parserError);
         }
 
+        @Test
         public void testInitPeptideMassToleranceDefault()
         {
             String expected = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
@@ -1220,6 +1187,7 @@ public abstract class SequestParamsBuilder
             assertEquals("peptide_mass_tolerance", expected, actual);
         }
 
+        @Test
         public void testInitMassTypeNormal()
         {
             String expected = "AveRage";
@@ -1247,6 +1215,7 @@ public abstract class SequestParamsBuilder
             assertEquals("mass_type_fragment", "1", actual);
         }
 
+        @Test
         public void testInitMassTypeMissingValue()
         {
             String expected = "1";
@@ -1263,6 +1232,7 @@ public abstract class SequestParamsBuilder
             assertEquals("mass_type_fragment", "spectrum, fragment mass type contains no value.\n", parserError);
         }
 
+        @Test
         public void testInitMassTypeDefault()
         {
             String expected = "1";
@@ -1277,6 +1247,7 @@ public abstract class SequestParamsBuilder
             assertEquals("mass_type_fragment", expected, actual);
         }
 
+        @Test
         public void testInitMassTypeGarbage()
         {
             String expected = "1";
@@ -1293,6 +1264,7 @@ public abstract class SequestParamsBuilder
             assertEquals("mass_type_fragment", "spectrum, fragment mass type contains an invalid value(garbage).\n", parserError);
         }
 
+        @Test
         public void testInitIonScoringNormal()
         {
             String expected = "0 0 0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0";
@@ -1342,6 +1314,7 @@ public abstract class SequestParamsBuilder
             assertEquals("ion_series", expected, actual);
         }
 
+        @Test
         public void testInitIonScoringMissingValue()
         {
             String expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
@@ -1417,6 +1390,7 @@ public abstract class SequestParamsBuilder
             assertEquals("ion_series", "sequest, d ions did not contain a value.\n", parserError);
         }
 
+        @Test
         public void testInitIonScoringMissingDefault()
         {
             String expected = "0 0 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0";
@@ -1442,6 +1416,7 @@ public abstract class SequestParamsBuilder
 
         }
 
+        @Test
         public void testInitIonScoringDefault()
         {
             String expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
@@ -1456,6 +1431,7 @@ public abstract class SequestParamsBuilder
             assertEquals("ion_series", expected, actual);
         }
 
+        @Test
         public void testInitIonScoringGarbage()
         {
             String expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
@@ -1532,6 +1508,7 @@ public abstract class SequestParamsBuilder
         }
 
 
+        @Test
         public void testInitEnzymeInfoNormal()
         {
             //Testing no enzyme
@@ -1628,6 +1605,7 @@ public abstract class SequestParamsBuilder
 //
 //        }
 
+        @Test
         public void testInitEnzymeInfoDefault()
         {
 //            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
@@ -1651,6 +1629,7 @@ public abstract class SequestParamsBuilder
             assertEquals("enzyme_description", expected2, actual);
         }
 
+        @Test
         public void testInitEnzymeInfoMissingValue()
         {
             String expected2 = "trypsin 1 1 KR P";
@@ -1666,9 +1645,9 @@ public abstract class SequestParamsBuilder
             String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("enzyme_description", "protein, cleavage site did not contain a value.", parserError);
-
         }
 
+        @Test
         public void testInitEnzymeInfoGarbage()
         {
             String expected2 = "trypsin 1 1 KR P";
@@ -1751,6 +1730,7 @@ public abstract class SequestParamsBuilder
             assertEquals("Invalid enzyme definition:[X]|P", parserError);
         }
 
+        @Test
         public void testInitDynamicModsNormal()
         {
             String expected1 = "16.0 M 0.000000 S 0.000000 C 0.000000 X 0.000000 T 0.000000 Y";
@@ -1803,6 +1783,7 @@ public abstract class SequestParamsBuilder
             assertEquals("diff_search_options", expected1, actual);
         }
 
+        @Test
         public void testInitDynamicModsMissingValue()
         {
             String expected1 = "0.000000 C 0.000000 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
@@ -1818,6 +1799,7 @@ public abstract class SequestParamsBuilder
             assertEquals("diff_search_options", expected1, actual);
         }
 
+        @Test
         public void testInitDynamicModsDefault()
         {
             String expected1 = "0.000000 C 0.000000 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
@@ -1832,6 +1814,7 @@ public abstract class SequestParamsBuilder
             assertEquals("diff_search_options", expected1, actual);
         }
 
+        @Test
         public void testInitDynamicModsGarbage()
         {
             String expected1 = "0.000000 C 0.000000 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
@@ -1862,6 +1845,7 @@ public abstract class SequestParamsBuilder
 
         }
 
+        @Test
         public void testInitTermDynamicModsNormal()
         {
             Param sp = spb.getProperties().getParam("term_diff_search_options");
@@ -1906,6 +1890,7 @@ public abstract class SequestParamsBuilder
 
         }
 
+        @Test
         public void testInitTermDynamicModsMissingValue()
         {
             Param sp = spb.getProperties().getParam("term_diff_search_options");
@@ -1936,6 +1921,7 @@ public abstract class SequestParamsBuilder
             assertEquals("term_diff_search_options", expected1, actual);
         }
 
+        @Test
         public void testInitTermDynamicModsDefault()
         {
             String expected1 = "0.0 0.0";
@@ -1950,6 +1936,7 @@ public abstract class SequestParamsBuilder
             assertEquals("term_diff_search_options", expected1, actual);
         }
 
+        @Test
         public void testInitStaticModsNormal()
         {
             char[] validResidues = spb.getValidResidues();
@@ -2030,6 +2017,7 @@ public abstract class SequestParamsBuilder
         }
 
 
+        @Test
         public void testInitStaticModsMissingValue()
         {
             char[] validResidues = spb.getValidResidues();
@@ -2062,6 +2050,7 @@ public abstract class SequestParamsBuilder
             }
         }
 
+        @Test
         public void testInitStaticModsDefault()
         {
             char[] validResidues = spb.getValidResidues();
@@ -2071,7 +2060,6 @@ public abstract class SequestParamsBuilder
                 parseParams("<?xml version=\"1.0\"?>" +
                     "<bioml>" +
                     "</bioml>");
-
 
                 String parserError = spb.initStaticMods();
                 if (!parserError.equals("")) fail(parserError);
@@ -2093,6 +2081,7 @@ public abstract class SequestParamsBuilder
             }
         }
 
+        @Test
         public void testInitStaticModsGarbage()
         {
             String value = "garbage";
@@ -2101,12 +2090,12 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"residue, modification mass\">" + value + "</note>" +
                 "</bioml>");
 
-
             String parserError = spb.initStaticMods();
             if (parserError.equals("")) fail("Expected error.");
             assertEquals("modification mass contained an invalid value(" + value + ").\n", parserError);
         }
 
+        @Test
         public void testInitPassThroughsNormal()
         {
             Collection<SequestParam> passThroughs = spb.getProperties().getPassThroughs();
@@ -2167,6 +2156,7 @@ public abstract class SequestParamsBuilder
             }
         }
 
+        @Test
         public void testInitPassThroughsMissingValue()
         {
             Collection<SequestParam> passThroughs = spb.getProperties().getPassThroughs();
@@ -2219,6 +2209,7 @@ public abstract class SequestParamsBuilder
             }
         }
 
+        @Test
         public void testInitPassThroughsNegative()
         {
             Collection<SequestParam> passThroughs = spb.getProperties().getPassThroughs();
@@ -2272,6 +2263,7 @@ public abstract class SequestParamsBuilder
 
         }
 
+        @Test
         public void testInitPassThroughsGarbage()
         {
             Collection<SequestParam> passThroughs = spb.getProperties().getPassThroughs();

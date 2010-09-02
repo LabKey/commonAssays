@@ -15,23 +15,22 @@
  */
 package org.labkey.ms2.reader;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.xmlbeans.GDuration;
+import org.junit.Assert;
+import org.junit.Test;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.massSpecDataFileType;
-import org.labkey.api.settings.AppProps;
 import org.systemsbiology.jrap.MSXMLParser;
-import org.systemsbiology.jrap.ScanHeader;
 import org.systemsbiology.jrap.Scan;
-import org.apache.xmlbeans.GDuration;
+import org.systemsbiology.jrap.ScanHeader;
 
-import java.io.IOException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 
 /**
- * Created by IntelliJ IDEA.
  * User: mbellew
  * Date: Oct 6, 2005
  * Time: 9:03:43 AM
@@ -162,20 +161,9 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
     }
 
     //JUnit TestCase
-    public static class TestCase extends junit.framework.TestCase
+    public static class TestCase extends Assert
     {
-        public TestCase() { super(); }
-
-        public TestCase(String name)
-        {
-            super(name);
-        }
-
-        public static Test suite()
-        {
-            return new TestSuite(TestCase.class);
-        }
-
+        @Test
         public void testMzxml()
         {
             massSpecDataFileType FT_MZXML = new massSpecDataFileType();
@@ -194,8 +182,6 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
             catch (IOException e)
             {
                 fail(e.toString());
-            }
-            finally {
             }
         }
     }

@@ -15,54 +15,26 @@
  */
 package org.labkey.ms2.protein.fasta;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * User: migra
  * Date: Oct 20, 2004
  * Time: 9:59:18 AM
  */
-public class PeptideTestCase extends junit.framework.TestCase
-    {
-    public PeptideTestCase()
-        {
-        super();
-        }
-
-
-    public PeptideTestCase(String name)
-        {
-        super(name);
-        }
-
-    public static Test suite()
-        {
-        TestSuite suite = new TestSuite(PeptideTestCase.class);
-        return suite;
-        }
-
+public class PeptideTestCase extends Assert
+{
+    @Test
     public void testHydrophobicity()
-        {
+    {
         for (int i = 0; i < peptides.length; i++)
-            {
+        {
             String peptide = peptides[i];
             double h = Peptide.getHydrophobicity(peptide.getBytes(), 0, peptide.length());
             assertTrue(Math.abs(h - hydrophobicity[i]) < .01);
-            }
         }
-
-    public static void main(String[] args)
-        {
-        for (int i = 0; i < peptides.length; i++)
-            {
-            String peptide = peptides[i];
-            double h = Peptide.getHydrophobicity(peptide.getBytes(), 0, peptide.length());
-            if (Math.abs(h - hydrophobicity[i]) >= .01)
-                System.out.println(peptide + ": " + h + ", " + hydrophobicity[i]);
-            }
-        }
-
+    }
 
     private static final double[] hydrophobicity = {
         9.29,
@@ -761,4 +733,4 @@ public class PeptideTestCase extends junit.framework.TestCase
         "QHMDSSTSAASSSNYCNQMMK",
         "CKPVNTFVHESLADVQAVCSQK"
     };
-    }
+}

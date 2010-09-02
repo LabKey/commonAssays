@@ -15,22 +15,21 @@
  */
 package org.labkey.ms2.reader;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Assert;
+import org.junit.Test;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.massSpecDataFileType;
-import org.labkey.api.settings.AppProps;
 import proteowizard.pwiz.RAMPAdapter.Scan;
 import proteowizard.pwiz.RAMPAdapter.pwiz_RAMPAdapter;
 import proteowizard.pwiz.RAMPAdapter.vectord;
 
-import java.io.IOException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 
 /**
- * Created by IntelliJ IDEA.
  * User: bpratt
  * Date: March 5, 2009
  * Time: 9:03:43 AM
@@ -167,22 +166,10 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
     }
 
     //JUnit TestCase
-    public static class TestCase extends junit.framework.TestCase
+    public static class TestCase extends Assert
     {
-        public TestCase() { }
-
-        public TestCase(String name)
-        {
-            super(name);
-        }
-
-        public static Test suite()
-        {
-            return new TestSuite(TestCase.class);
-        }
-
-        public void testPwizMSData()
-                throws java.io.IOException
+        @Test
+        public void testPwizMSData() throws java.io.IOException
         {
             massSpecDataFileType FT_MZXML = new massSpecDataFileType();
             String projectRoot = AppProps.getInstance().getProjectRoot();
@@ -203,13 +190,11 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
                     // test mslevel filtering while we're at it
                     RandomAccessMzxmlIterator mzxml2 = new RandomAccessPwizMSDataIterator(mzxml2Fname, 1);
                     RandomAccessMzxmlIterator mzxml3 = new RandomAccessJrapMzxmlIterator(mzxml2Fname, 1);
-                    RandomAccessMzxmlIterator.compare_mzxml(this,mzxml2, mzxml3);
+                    RandomAccessMzxmlIterator.compare_mzxml(this, mzxml2, mzxml3);
                 }
                 catch (IOException e)
                 {
                     fail(e.toString());
-                }
-                finally {
                 }
             }
         }
@@ -225,8 +210,6 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
             catch (IOException e)
             {
                 fail(e.toString());
-            }
-            finally {
             }
         }
     }

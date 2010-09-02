@@ -16,37 +16,38 @@
 
 package org.labkey.viability;
 
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.beanutils.Converter;
+import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.reader.TabLoader;
-import org.labkey.api.reader.ColumnDescriptor;
-import org.labkey.api.settings.AppProps;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.study.assay.AssayUploadXarContext;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.api.reader.ColumnDescriptor;
+import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
+import org.labkey.api.settings.AppProps;
+import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayUploadXarContext;
 import org.labkey.api.util.FileType;
-import org.apache.commons.beanutils.Converter;
-import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.log4j.Logger;
+import org.labkey.api.view.ViewBackgroundInfo;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.FileReader;
 import java.io.BufferedReader;
-import java.util.*;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: kevink
@@ -250,12 +251,9 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
     }
 
 
-    public static class TestCase extends junit.framework.TestCase
+    public static class TestCase extends Assert
     {
-        public TestCase() { super(); }
-        public TestCase(String name) { super(name); }
-        public static Test suite() { return new TestSuite(TestCase.class); }
-
+        @Test
         public void testGuava() throws Exception
         {
             AppProps props = AppProps.getInstance();
