@@ -24,10 +24,10 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.api.*;
-import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.study.actions.PlateUploadForm;
+import org.labkey.api.view.NotFoundException;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -46,7 +46,6 @@ public class NabRunUploadForm extends PlateUploadForm<NabAssayProvider> implemen
     private ExpRun _reRun;
     private Integer _reRunId;
     private Map<String, Map<DomainProperty, String>> _sampleProperties;
-    private PlateSamplePropertyHelper _samplePropertyHelper;
 
     public Integer getReRunId()
     {
@@ -68,7 +67,7 @@ public class NabRunUploadForm extends PlateUploadForm<NabAssayProvider> implemen
         _sampleProperties = sampleProperties;
     }
 
-    private ExpRun getReRun()
+    public ExpRun getReRun()
     {
         if (_reRunId != null)
         {
@@ -97,7 +96,7 @@ public class NabRunUploadForm extends PlateUploadForm<NabAssayProvider> implemen
                     }
                 }
                 if (selected == null)
-                    HttpView.throwNotFound("NAb run input " + scope + " could not be found for run " + _reRunId + ".");
+                    throw new NotFoundException("NAb run input " + scope + " could not be found for run " + getReRunId() + ".");
                 Map<String, Object> values = OntologyManager.getProperties(getContainer(), selected.getLSID());
                 Map<DomainProperty, Object> ret = new HashMap<DomainProperty, Object>();
                 for (DomainProperty property : domain.getProperties())

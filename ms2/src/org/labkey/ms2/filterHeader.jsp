@@ -94,13 +94,13 @@
                 </td>
                 <td style="height: 100%">
                     <fieldset>
-                        <legend>Tryptic&nbsp;ends</legend>
+                        <legend>Minimum&nbsp;tryptic&nbsp;ends</legend>
                         <table>
                             <tr>
                                 <td nowrap style="vertical-align: middle;">
-                                    <input type="radio" name="tryptic"<%=(0 == bean.tryptic ? " checked" : "")%> value="0">0 <%=PageFlowUtil.helpPopup("0 tryptic ends", "All peptides will be shown, regardless of tryptic ends")%>
-                                    <input type="radio" name="tryptic"<%=(1 == bean.tryptic ? " checked" : "")%> value="1">1 <%=PageFlowUtil.helpPopup("1 tryptic end", "At least one end of the peptide must be tryptic")%>
-                                    <input type="radio" name="tryptic"<%=(2 == bean.tryptic ? " checked" : "")%> value="2">2 <%=PageFlowUtil.helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")%>
+                                    <input type="radio" name="tryptic"<%=(0 == bean.tryptic ? " checked" : "")%> value="0">0<%=PageFlowUtil.helpPopup("0 tryptic ends", "All peptides will be shown, regardless of tryptic ends")%>
+                                    <input type="radio" name="tryptic"<%=(1 == bean.tryptic ? " checked" : "")%> value="1">1<%=PageFlowUtil.helpPopup("1 tryptic end", "At least one end of the peptide must be tryptic")%>
+                                    <input type="radio" name="tryptic"<%=(2 == bean.tryptic ? " checked" : "")%> value="2">2<%=PageFlowUtil.helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")%>
                                 </td>
                                 <td nowrap style="vertical-align: middle;"><%=PageFlowUtil.generateSubmitButton("Go", "", "id=\"AddTrypticEndsFilterButton\"")%></td>
                             </tr>

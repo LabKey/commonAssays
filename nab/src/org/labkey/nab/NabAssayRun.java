@@ -15,9 +15,7 @@
  */
 package org.labkey.nab;
 
-import org.apache.commons.lang.math.NumberUtils;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -27,7 +25,6 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
@@ -86,9 +83,9 @@ public class NabAssayRun extends Luc5Assay
     {
         Map<FieldKey, PropertyDescriptor> fieldKeys = new HashMap<FieldKey, PropertyDescriptor>();
         for (DomainProperty property : _provider.getBatchDomain(_protocol).getProperties())
-            fieldKeys.put(FieldKey.fromParts(AssayService.BATCH_COLUMN_NAME, AssayService.BATCH_PROPERTIES_COLUMN_NAME, property.getName()), property.getPropertyDescriptor());
+            fieldKeys.put(FieldKey.fromParts(AssayService.BATCH_COLUMN_NAME, property.getName()), property.getPropertyDescriptor());
         for (DomainProperty property : _provider.getRunDomain(_protocol).getProperties())
-            fieldKeys.put(FieldKey.fromParts(AssayService.RUN_PROPERTIES_COLUMN_NAME, property.getName()), property.getPropertyDescriptor());
+            fieldKeys.put(FieldKey.fromParts(property.getName()), property.getPropertyDescriptor());
 
         // Add all of the hard columns to the set of properties we can show
         TableInfo runTableInfo = AssayService.get().createRunTable(_protocol, _provider, _user, _run.getContainer());
@@ -423,146 +420,5 @@ public class NabAssayRun extends Luc5Assay
     public ExpRun getRun()
     {
         return _run;
-    }
-
-    private static final String INSERT_AUC_COLUMNS = "Inserting new AUC and IC values for curve fit type: %s";
-    private static final String INSERT_pAUC_COLUMNS = "Inserting new Positive AUC values for curve fit type: %s";
-    private static final String INVALID_pAUC_COMPUTED = "A positive AUC value less than the total AUC value was calculated for NAb run: %s/%s values:[pAUC: %e  AUC: %e]";
-    private static final String NAN_COMPUTED = "NaN positive AUC value was calculated for NAb run: %s/%s";
-    private static final String DELETE_PREV_COLUMN = "Deleting previous IC column : %s";
-
-    public void upgradeAUCValues(PipelineJob job) throws Exception
-    {
-        Container container = getRun().getContainer();
-
-        for (SampleResult result : getSampleResults())
-        {
-            Map<String, ObjectProperty> rowMap = OntologyManager.getPropertyObjects(container, result.getDataRowLsid());
-
-            for (DilutionCurve.FitType type : DilutionCurve.FitType.values())
-            {
-                // if we don't find an AUC colunmn for that fit type, lets go ahead and recalculate AUC and IC values and remove the old columns
-                Lsid propertyURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getProtocol().getName(), NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, type));
-
-                if (!rowMap.containsKey(propertyURI.toString()))
-                {
-                    job.info(String.format(INSERT_AUC_COLUMNS, type.getLabel()));
-                    List<ObjectProperty> results = new ArrayList<ObjectProperty>();
-                    DilutionSummary dilution = result.getDilutionSummary();
-                    Map<Integer, String> cutoffFormats = NabDataHandler.getCutoffFormats(getProtocol(), getRun());
-                    Map<String, Object> props = new HashMap<String, Object>();
-                    Lsid dataRowLsid = new Lsid(result.getDataRowLsid());
-
-                    double auc = dilution.getAUC(type, DilutionCurve.AUCType.NORMAL);
-                    if (!Double.isNaN(auc))
-                    {
-                        props.put(NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, type), auc);
-                        if (getRenderedCurveFitType() == type)
-                            props.put(NabDataHandler.AUC_PREFIX, auc);
-                    }
-                    
-                    for (Integer cutoff : getCutoffs())
-                    {
-                        NabDataHandler.saveICValue(NabDataHandler.getPropertyName(NabDataHandler.CURVE_IC_PREFIX, cutoff, type),
-                                dilution.getCutoffDilution(cutoff / 100.0, type),
-                                dilution, getProtocol(), container, cutoffFormats, props, type);
-                    }
-
-                    // convert to object properties
-                    for (Map.Entry<String, Object> entry : props.entrySet())
-                    {
-                        ObjectProperty objProp = NabDataHandler.getObjectProperty(container, getProtocol(), result.getDataRowLsid(), entry.getKey(), entry.getValue(), cutoffFormats);
-                        if (objProp != null)
-                            results.add(objProp);
-                    }
-                    OntologyManager.insertProperties(container, result.getDataRowLsid(), results.toArray(new ObjectProperty[results.size()]));
-                }
-            }
-        }
-        // delete old IC columns (point and curve plus OOR indicators)
-/*
-        for (Integer cutoff : getCutoffs())
-        {
-            List<String> prevColumns = new ArrayList<String>();
-
-            prevColumns.add(new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getProtocol().getName(), NabDataHandler.CURVE_IC_PREFIX + cutoff).toString());
-            prevColumns.add(new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getProtocol().getName(), NabDataHandler.CURVE_IC_PREFIX + cutoff + NabDataHandler.OORINDICATOR_SUFFIX).toString());
-
-            for (String uri : prevColumns)
-            {
-                PropertyDescriptor pd = OntologyManager.getPropertyDescriptor(uri, container);
-                if (pd != null)
-                {
-                    job.info(String.format(DELETE_PREV_COLUMN, pd.getName()));
-                    OntologyManager.deletePropertyDescriptor(pd);
-                }
-            }
-        }
-*/
-    }
-
-    public void upgradePositiveAUCValues(PipelineJob job) throws Exception
-    {
-        Container container = getRun().getContainer();
-        Map<Integer, String> cutoffFormats = NabDataHandler.getCutoffFormats(getProtocol(), getRun());
-
-        for (SampleResult result : getSampleResults())
-        {
-            Map<String, ObjectProperty> rowMap = OntologyManager.getPropertyObjects(container, result.getDataRowLsid());
-            Lsid pAucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getProtocol().getName(), NabDataHandler.pAUC_PREFIX);
-            List<ObjectProperty> results = new ArrayList<ObjectProperty>();
-            Map<String, Object> props = new HashMap<String, Object>();
-
-            // delete the Positive AUC property if it exists
-            if (rowMap.containsKey(pAucURI.toString()))
-            {
-                ObjectProperty prop = rowMap.get(pAucURI.toString());
-                OntologyManager.deleteProperty(prop.getObjectURI(), prop.getPropertyURI(), container, container);
-            }
-
-            for (DilutionCurve.FitType type : DilutionCurve.FitType.values())
-            {
-                Lsid propertyURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getProtocol().getName(), NabDataHandler.getPropertyName(NabDataHandler.pAUC_PREFIX, type));
-                Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, getProtocol().getName(), NabDataHandler.getPropertyName(NabDataHandler.AUC_PREFIX, type));
-                double aucValue = 0;
-
-                // note the value of the AUC calculation, this is used to validate our Positive AUC calculation
-                ObjectProperty aucProp = rowMap.get(aucURI.toString());
-                if (aucProp != null && aucProp.getFloatValue() != null)
-                    aucValue = aucProp.getFloatValue();
-
-                // delete any previous curve fit specific pAUC properties
-                if (rowMap.containsKey(propertyURI.toString()))
-                {
-                    ObjectProperty prop = rowMap.get(propertyURI.toString());
-                    OntologyManager.deleteProperty(prop.getObjectURI(), prop.getPropertyURI(), container, container);
-                }
-
-                job.info(String.format(INSERT_pAUC_COLUMNS, type.getLabel()));
-                DilutionSummary dilution = result.getDilutionSummary();
-
-                double pauc = dilution.getAUC(type, DilutionCurve.AUCType.POSITIVE);
-                if (!Double.isNaN(pauc))
-                {
-                    if (pauc < aucValue)
-                         job.warn(String.format(INVALID_pAUC_COMPUTED, container.getPath(), getRun().getName(), pauc, aucValue));
-
-                    props.put(NabDataHandler.getPropertyName(NabDataHandler.pAUC_PREFIX, type), pauc);
-                    if (getSavedCurveFitType() == type)
-                        props.put(NabDataHandler.pAUC_PREFIX, pauc);
-                }
-                else
-                    job.warn(String.format(NAN_COMPUTED, container.getPath(), getRun().getName()));
-            }
-
-            // convert to object properties
-            for (Map.Entry<String, Object> entry : props.entrySet())
-            {
-                ObjectProperty objProp = NabDataHandler.getObjectProperty(container, getProtocol(), result.getDataRowLsid(), entry.getKey(), entry.getValue(), cutoffFormats);
-                if (objProp != null)
-                    results.add(objProp);
-            }
-            OntologyManager.insertProperties(container, result.getDataRowLsid(), results.toArray(new ObjectProperty[results.size()]));
-        }
     }
 }

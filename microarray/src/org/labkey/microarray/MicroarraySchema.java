@@ -23,6 +23,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
@@ -78,6 +79,7 @@ public class MicroarraySchema extends UserSchema
     public ExpRunTable createRunsTable()
     {
         ExpRunTable result = _expSchema.getRunsTable();
+        result.addAllowablePermission(UpdatePermission.class);
         ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getRunTextURL(getContainer(), -1);
         url.replaceParameter("rowId", "${RowId}");
         result.getColumn(ExpRunTable.Column.Name).setURL(StringExpressionFactory.createURL(url));
@@ -128,10 +130,5 @@ public class MicroarraySchema extends UserSchema
     public static DbSchema getSchema()
     {
         return DbSchema.get("microarray");
-    }
-
-    public static SqlDialect getSqlDialect()
-    {
-        return getSchema().getSqlDialect();
     }
 }

@@ -20,7 +20,7 @@ import org.labkey.api.action.LabkeyError;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
@@ -30,7 +30,6 @@ import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.BulkPropertiesDisplayColumn;
 import org.labkey.api.study.assay.BulkPropertiesUploadWizardAction;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
-import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.RedirectException;
@@ -39,6 +38,7 @@ import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.Document;
 
 import javax.servlet.ServletException;
@@ -62,7 +62,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
         super(MicroarrayRunUploadForm.class);
     }
 
-    protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
+    protected void addSampleInputColumns(MicroarrayRunUploadForm form, InsertView insertView)
     {
         int maxCount = _channelCount == null ? MicroarrayAssayProvider.MAX_SAMPLE_COUNT : _channelCount.intValue();
         int minCount = _channelCount == null ? MicroarrayAssayProvider.MIN_SAMPLE_COUNT : _channelCount.intValue();
@@ -151,7 +151,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
         }
         catch (ExperimentException e)
         {
-            errors.addError(new LabkeyError("Unable to get properties from MageML file:" + e.getMessage()));
+            errors.addError(new LabkeyError("Unable to get properties from MageML file: " + e.getMessage()));
             mageMLProperties = new HashMap<DomainProperty, String>();
         }
 

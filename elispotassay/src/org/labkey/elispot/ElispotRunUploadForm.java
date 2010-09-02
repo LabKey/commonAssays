@@ -16,7 +16,6 @@
 
 package org.labkey.elispot;
 
-import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.actions.PlateUploadForm;
 

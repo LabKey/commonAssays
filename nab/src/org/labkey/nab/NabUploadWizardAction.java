@@ -20,7 +20,6 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.*;
@@ -49,11 +48,6 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
     public NabUploadWizardAction()
     {
         super(NabRunUploadForm.class);
-    }
-
-    public ModelAndView getView(NabRunUploadForm assayRunUploadForm, BindException errors) throws Exception
-    {
-        return super.getView(assayRunUploadForm, errors);
     }
 
     @Override
@@ -138,8 +132,8 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
 
     protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ServletException
     {
-        if (form.getReRunId() != null)
-            ExperimentService.get().deleteExperimentRunsByRowIds(getContainer(), getViewContext().getUser(), form.getReRunId().intValue());
+        if (form.getReRun() != null)
+            form.getReRun().delete(getViewContext().getUser());
         if (form.isMultiRunUpload())
             return super.afterRunCreation(form, run, errors);
         else

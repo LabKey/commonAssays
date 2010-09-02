@@ -23,7 +23,6 @@ import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -189,7 +188,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
     }
 
-    protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
+    protected void addSampleInputColumns(LuminexRunUploadForm form, InsertView insertView)
     {
         // Don't add any columns - they're part of the uploaded spreadsheet
     }

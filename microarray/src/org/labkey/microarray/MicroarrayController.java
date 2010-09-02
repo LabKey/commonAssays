@@ -16,6 +16,8 @@
 
 package org.labkey.microarray;
 
+import org.labkey.api.action.FormHandlerAction;
+import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
@@ -31,6 +33,7 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
@@ -38,6 +41,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GWTView;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.UpdateView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
@@ -141,11 +145,6 @@ public class MicroarrayController extends SpringActionController
             _protocolId = protocol;
         }
 
-        public ExpProtocol lookupProtocol()
-        {
-            return ExperimentService.get().getExpProtocol(_protocolId);
-        }
-
         public String getExtractionEngine()
         {
             return _extractionEngine;
@@ -170,7 +169,6 @@ public class MicroarrayController extends SpringActionController
     @RequiresPermissionClass(InsertPermission.class)
     public class ImportImageFilesAction extends RedirectAction<ExtractionForm>
     {
-
         @Override
         public URLHelper getSuccessURL(ExtractionForm extractionForm)
         {

@@ -747,7 +747,7 @@ public class MS2Manager
             return;
 
         // Save these to delete after we've deleted the runs
-        List<Integer> experimentRunsToDelete = new ArrayList<Integer>();
+        List<ExpRun> experimentRunsToDelete = new ArrayList<ExpRun>();
 
         for (Integer runId : runIds)
         {
@@ -761,7 +761,7 @@ public class MS2Manager
                     ExpRun expRun = data.getRun();
                     if (expRun != null)
                     {
-                        experimentRunsToDelete.add(expRun.getRowId());
+                        experimentRunsToDelete.add(expRun);
                     }
                 }
             }
@@ -769,9 +769,9 @@ public class MS2Manager
 
         markDeleted(runIds, c);
 
-        for (Integer experimentRunId : experimentRunsToDelete)
+        for (ExpRun run : experimentRunsToDelete)
         {
-            ExperimentService.get().deleteExperimentRunsByRowIds(c, user, experimentRunId);
+            run.delete(user);
         }
     }
 

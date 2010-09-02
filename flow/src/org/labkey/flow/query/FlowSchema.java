@@ -21,8 +21,8 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.query.*;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
@@ -429,6 +429,12 @@ public class FlowSchema extends UserSchema
             return ret;
         }
 
+        @Override
+        public void addAllowablePermission(Class<? extends Permission> permission)
+        {
+            _expData.addAllowablePermission(permission);
+        }
+
         ColumnInfo addExpColumn(ColumnInfo underlyingColumn)
         {
             ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
@@ -612,9 +618,9 @@ public class FlowSchema extends UserSchema
             _expData.addLSIDCondition(lsidCondition);
         }
 
-        public ColumnInfo addPropertyColumns(String domainDescription, PropertyDescriptor[] pds, QuerySchema schema)
+        public ColumnInfo addColumns(Domain domain, String legacyName)
         {
-            ColumnInfo col = _expData.addPropertyColumns(domainDescription, pds, schema);
+            ColumnInfo col = _expData.addColumns(domain, legacyName);
             return addExpColumn(col);
         }
     }
@@ -652,6 +658,12 @@ public class FlowSchema extends UserSchema
         {
             // 7471 Let schema explorer resolve lookup table names to "exp.Datas" table.
             return ExpSchema.TableType.Datas.toString();
+        }
+
+        @Override
+        public void addAllowablePermission(Class<? extends Permission> permission)
+        {
+            _expData.addAllowablePermission(permission);
         }
 
         ColumnInfo addStatisticColumn(String columnAlias)
@@ -916,9 +928,8 @@ public class FlowSchema extends UserSchema
             throw new UnsupportedOperationException();
         }
 
-        public ColumnInfo addPropertyColumns(String domainDescription, PropertyDescriptor[] pds, QuerySchema schema)
+        public ColumnInfo addColumns(Domain domain, String legacyName)
         {
-            ColumnInfo col = _expData.addPropertyColumns(domainDescription, pds, schema);
             throw new UnsupportedOperationException();
         }
     }

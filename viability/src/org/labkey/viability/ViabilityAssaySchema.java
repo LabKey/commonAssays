@@ -324,7 +324,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 fields.add(volume);
                 fields.add(globalUniqueId);
                 fields.add(FieldKey.fromParts("SpecimenID", "Specimen", "VolumeUnits"));
-                fields.add(FieldKey.fromParts("ResultID", "Run", "Batch", "BatchProperties", "TargetStudy"));
+                fields.add(FieldKey.fromParts("ResultID", "Run", "Batch", "TargetStudy"));
                 Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(rs, fields);
 
                 SQLFragment sub = QueryService.get().getSelectSQL(rs, columnMap.values(), filter, null, 0, 0);

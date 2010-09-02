@@ -366,7 +366,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         }
         for (DomainProperty runProperty : getRunDomain(protocol).getProperties())
         {
-            cols.add(FieldKey.fromParts(ExpDataTable.Column.Run.toString(), "Run Properties", runProperty.getName()));
+            cols.add(FieldKey.fromParts(ExpDataTable.Column.Run.toString(), runProperty.getName()));
         }
         cols.add(0, FieldKey.fromParts(ExpDataTable.Column.Run.toString(), SEARCHES_COLUMN));
         result.setDefaultVisibleColumns(cols);

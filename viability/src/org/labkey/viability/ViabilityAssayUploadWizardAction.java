@@ -17,7 +17,6 @@
 package org.labkey.viability;
 
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
@@ -187,10 +186,9 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 }
 
                 String inputName = getInputName(resultDomainProperty, ViabilityAssayRunUploadForm.INPUT_PREFIX + poolID + "_" + rowIndex);
-                Object initialValue = null;
 
                 // first, get the property's default value set in the assay design
-                initialValue = view.getInitialValues().get(propertyName);
+                Object initialValue = view.getInitialValues().get(propertyName);
 
                 // second, get the value from the parsed file
                 if (!errorReshow && row.containsKey(propertyName))
@@ -347,9 +345,8 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             ExpProtocol protocol = run.getProtocol();
             String prefix = protocol.getName() + "-";
             ExpExperiment[] experiments = run.getExperiments();
-            for (int i = 0; i < experiments.length; i++)
+            for (ExpExperiment exp : experiments)
             {
-                ExpExperiment exp = experiments[i];
                 if (exp.getName().startsWith(prefix) && exp.getBatchProtocol() == null)
                     return exp;
             }
@@ -378,7 +375,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
 
                         if (form.isDelete())
                         {
-                            ExperimentService.get().deleteExperimentRunsByRowIds(getContainer(), getViewContext().getUser(), form.getReRunId().intValue());
+                            reRun.delete(getViewContext().getUser());
                         }
                         else if (experiment == null)
                         {

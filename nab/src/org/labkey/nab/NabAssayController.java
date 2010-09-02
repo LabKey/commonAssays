@@ -850,7 +850,7 @@ public class NabAssayController extends SpringActionController
                 HttpView.throwNotFound("No run specified");
             ExpRun run = ExperimentService.get().getExpRun(deleteRunForm.getRowId());
             if (run == null)
-                HttpView.throwNotFound("Run " + deleteRunForm.getRowId() + " does not exist.");
+                throw new NotFoundException("Run " + deleteRunForm.getRowId() + " does not exist.");
             File file = null;
             if (deleteRunForm.isReupload())
             {
@@ -859,7 +859,7 @@ public class NabAssayController extends SpringActionController
                     HttpView.throwNotFound("Data file for run " + run.getName() + " was not found.  Deleted from the file system?");
             }
 
-            ExperimentService.get().deleteExperimentRunsByRowIds(getContainer(), getUser(), deleteRunForm.getRowId());
+            run.delete(getUser());
 
             if (deleteRunForm.isReupload())
             {

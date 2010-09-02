@@ -75,7 +75,7 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
                     ExpRun run = ExperimentService.get().getCreatingRun(file, c);
                     if (run != null)
                     {
-                        ExperimentService.get().deleteExperimentRunsByRowIds(c, form.getUser(), run.getRowId());
+                        run.delete(form.getUser());
                     }
                 }
             }
@@ -138,9 +138,9 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
     }
 
     @Override
-    protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
+    protected void addSampleInputColumns(MassSpecMetadataAssayForm form, InsertView insertView)
     {
-        super.addSampleInputColumns(protocol, insertView);
+        super.addSampleInputColumns(form, insertView);
         insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(1, 2, Collections.<ExpMaterial>emptyList(), 1));
     }
 }

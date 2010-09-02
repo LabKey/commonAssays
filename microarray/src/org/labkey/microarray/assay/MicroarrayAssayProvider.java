@@ -147,7 +147,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         {
             public boolean accept(File f)
             {
-                // MicroArray, unlike the other assay providers, wants to associate myrun_FEATURES.tsv
+                // Microarray, unlike the other assay providers, wants to associate myrun_FEATURES.tsv
                 // with myrun.tsv, so we don't include the "." when comparing other files against the base file name. 
                 return f.getName().startsWith(baseName) && !primaryFile.equals(f);
             }
@@ -309,6 +309,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     public RunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
     {
         RunListQueryView result = super.createRunQueryView(context, protocol);
+        result.setShowUpdateColumn(true);
         result.setShowAddToRunGroupButton(true);
         return result;
     }

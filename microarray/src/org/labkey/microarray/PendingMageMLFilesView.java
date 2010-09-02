@@ -46,11 +46,12 @@ public class PendingMageMLFilesView extends QueryView
     {
         super(new ExpSchema(context.getUser(), context.getContainer()));
         setSettings(createSettings(context));
+        setShadeAlternatingRows(true);
+        setShowBorders(true);
         setShowExportButtons(false);
         setShowRecordSelectors(true);
         setShowDetailsColumn(false);
         setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
-        setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
     }
 
     private QuerySettings createSettings(ViewContext context)
