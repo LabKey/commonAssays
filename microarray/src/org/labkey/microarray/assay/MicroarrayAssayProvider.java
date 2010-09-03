@@ -316,6 +316,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 
     public PipelineProvider getPipelineProvider()
     {
-        return new MicroarrayPipelineProvider(this);
+        return new AssayPipelineProvider(MicroarrayModule.class,
+                new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()), this, "Import MAGE-ML");
     }
 }

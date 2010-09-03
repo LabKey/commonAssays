@@ -24,6 +24,7 @@ import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.services.ServiceRegistry;
@@ -34,6 +35,7 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.view.*;
 import org.labkey.microarray.assay.MageMLDataHandler;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
+import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
 
 import java.util.*;
 
@@ -127,6 +129,7 @@ public class MicroarrayModule extends DefaultModule
     {
         ModuleLoader.getInstance().registerFolderType(this, new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
+        PipelineService.get().registerPipelineProvider(new MicroarrayPipelineProvider(this));
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
         ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
         {
