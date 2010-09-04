@@ -71,7 +71,6 @@ import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.ms2.query.*;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
-import org.labkey.ms2.reader.SensitivitySummary;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
@@ -120,42 +119,30 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private boolean isAuthorized(int runId) throws ServletException
+    private MS2Run validateRun(int runId) throws ServletException
     {
-        String message = null;
-        boolean success = false;
-
         Container c = getContainer();
         MS2Run run = MS2Manager.getRun(runId);
 
         if (null == run)
-            message = "Run not found";
-        else if (run.isDeleted())
-            message = "Run has been deleted.";
-        else if (run.getStatusId() == MS2Importer.STATUS_RUNNING)
-            message = "Run is still loading.  Current status: " + run.getStatus();
-        else if (run.getStatusId() == MS2Importer.STATUS_FAILED)
-            message = "Run failed loading.  Status: " + run.getStatus();
-        else
-        {
-            Container container = run.getContainer();
+            throw new NotFoundException("Run " + runId + " not found");
+        if (run.isDeleted())
+            throw new NotFoundException("Run has been deleted.");
+        if (run.getStatusId() == MS2Importer.STATUS_RUNNING)
+            throw new NotFoundException("Run is still loading.  Current status: " + run.getStatus());
+        if (run.getStatusId() == MS2Importer.STATUS_FAILED)
+            throw new NotFoundException("Run failed loading.  Status: " + run.getStatus());
 
-            if (null != container && container.equals(c))
-                success = true;
-            else
-            {
-                ActionURL url = getViewContext().getActionURL().clone();
-                url.setContainer(run.getContainer());
-                HttpView.throwRedirect(url);
-            }
+        Container container = run.getContainer();
+
+        if (null == container || !container.equals(c))
+        {
+            ActionURL url = getViewContext().getActionURL().clone();
+            url.setContainer(run.getContainer());
+            throw new RedirectException(url);
         }
 
-        if (null != message)
-        {
-            HttpView.throwNotFound(message);
-        }
-
-        return success;
+        return run;
     }
 
 
@@ -384,8 +371,7 @@ public class MS2Controller extends SpringActionController
             if (errors.hasErrors())
                 return new SimpleErrorView(errors);
 
-            if (!isAuthorized(form.run))
-                return null;
+            MS2Run run = validateRun(form.run);
 
             ActionURL currentURL = getViewContext().getActionURL();
 
@@ -418,8 +404,6 @@ public class MS2Controller extends SpringActionController
                 props.put(MS2Controller.LAST_VIEW, newURL.getRawQuery());
                 PropertyManager.saveProperties(props);
             }
-
-            MS2Run run = MS2Manager.getRun(form.run);
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
@@ -738,11 +722,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(RenameForm form, boolean reshow, BindException errors) throws Exception
         {
-            _run = MS2Manager.getRun(form.getRun());
-            if (_run == null || !_run.getContainer().equals(getContainer()))
-            {
-                throw new NotFoundException();
-            }
+            _run = validateRun(form.getRun());
             _returnURL = form.getReturnURLHelper(getShowRunURL(getContainer(), form.getRun()));
 
             String description = form.getDescription();
@@ -761,11 +741,7 @@ public class MS2Controller extends SpringActionController
 
         public boolean handlePost(RenameForm form, BindException errors) throws Exception
         {
-            _run = MS2Manager.getRun(form.getRun());
-            if (_run == null || !_run.getContainer().equals(getContainer()))
-            {
-                throw new NotFoundException();
-            }
+            _run = validateRun(form.getRun());
             MS2Manager.renameRun(form.getRun(), form.getDescription());
             return true;
         }
@@ -803,15 +779,13 @@ public class MS2Controller extends SpringActionController
 
             int runId = peptide.getRun();
 
-            if (!isAuthorized(runId))
-                return HttpView.throwUnauthorized();
+            MS2Run run = validateRun(runId);
 
             ActionURL currentURL = getViewContext().getActionURL();
 
             int sqlRowIndex = form.getRowIndex();
             int rowIndex = sqlRowIndex - 1;  // Switch 1-based, JDBC row index to 0-based row index for array lookup
 
-            MS2Run run = MS2Manager.getRun(runId);
             long[] peptideIndex = null;
 
             //if no row index was passed, don't try to look it up, as it always results
@@ -884,10 +858,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return null;
-
-            MS2Run run = MS2Manager.getRun(form.run);
+            MS2Run run = validateRun(form.run);
 
             getPageConfig().setTemplate(PageConfig.Template.Print);
             getPageConfig().setTitle("Modifications");
@@ -1057,26 +1028,8 @@ public class MS2Controller extends SpringActionController
             ActionURL queryURL = ctx.cloneActionURL();
             String queryString = (String) ctx.get("queryString");
             queryURL.setRawQuery(queryString);
-            String runString = queryURL.getParameter("run");
-            if (runString == null)
-            {
-                return HttpView.throwNotFound("No run specified");
-            }
 
-            int runId;
-            try
-            {
-                runId = Integer.parseInt(runString);
-            }
-            catch (NumberFormatException e)
-            {
-                return HttpView.throwNotFound("Invalid run specified: " +runString);
-            }
-
-            if (!isAuthorized(runId))
-                return null;
-
-            MS2Run run = MS2Manager.getRun(runId);
+            MS2Run run = validateRun(form.getRun());
 
             _goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
 
@@ -1147,10 +1100,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
-            MS2Run run = MS2Manager.getRun(form.getRun());
-
-            if (null == run)
-                HttpView.throwNotFound("Run not found: " + form.getRun());
+            MS2Run run = validateRun(form.getRun());
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
             getPageConfig().setTemplate(PageConfig.Template.None);
@@ -1223,11 +1173,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ManageViewsForm form, boolean reshow, BindException errors) throws Exception
         {
-            _run = MS2Manager.getRun(form.getRun());
-            if (null == _run)
-            {
-                return HttpView.throwNotFound("Could not find run " + form.getRun());
-            }
+            _run = validateRun(form.getRun());
 
             _returnURL = form.getReturnActionURL();
 
@@ -2205,13 +2151,16 @@ public class MS2Controller extends SpringActionController
 
             if (null != peptide)
             {
-                if (!isAuthorized(peptide.getRun()))
-                    return;
+                validateRun(peptide.getRun());
 
                 response.setDateHeader("Expires", System.currentTimeMillis() + DateUtils.MILLIS_PER_HOUR);
                 response.setHeader("Pragma", "");
                 response.setContentType("image/png");
                 peptide.renderGraph(response, form.getTolerance(), form.getxStartDouble(), form.getxEnd(), form.getWidth(), form.getHeight());
+            }
+            else
+            {
+                throw new NotFoundException();
             }
         }
     }
@@ -2501,8 +2450,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return;
+            validateRun(form.run);
 
             ViewContext ctx = getViewContext();
             List<String> proteins = ctx.getList(DataRegion.SELECT_CHECKBOX_NAME);
@@ -2517,15 +2465,15 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            if (isAuthorized(form.run))
-                exportProteinGroups(response, form, null);
+            validateRun(form.run);
+            exportProteinGroups(response, form, null);
         }
     }
 
 
     private void exportProteinGroups(HttpServletResponse response, ExportForm form, List<String> proteins) throws Exception
     {
-        MS2Run run = MS2Manager.getRun(form.getRun());
+        MS2Run run = validateRun(form.getRun());
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         String where = null;
@@ -2593,7 +2541,7 @@ public class MS2Controller extends SpringActionController
 
     private void exportProteins(ExportForm form, HttpServletResponse response, String extraWhere, List<String> proteins) throws Exception
     {
-        MS2Run run = MS2Manager.getRun(form.getRun());
+        MS2Run run = validateRun(form.getRun());
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         if ("Excel".equals(form.getExportFormat()))
@@ -2620,8 +2568,9 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            if (isAuthorized(form.run))
-                exportProteins(form, response, null, null);
+            validateRun(form.run);
+
+            exportProteins(form, response, null, null);
         }
     }
 
@@ -2631,8 +2580,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return;
+            validateRun(form.run);
 
             ViewContext ctx = getViewContext();
             List<String> proteins = ctx.getList(DataRegion.SELECT_CHECKBOX_NAME);
@@ -2989,10 +2937,7 @@ public class MS2Controller extends SpringActionController
 
     private void exportPeptides(ExportForm form, HttpServletResponse response, boolean selected) throws Exception
     {
-        if (!isAuthorized(form.run))
-            return;
-
-        MS2Run run = MS2Manager.getRun(form.run);
+        MS2Run run = validateRun(form.run);
 
         ActionURL currentURL = getViewContext().getActionURL();
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
@@ -3090,8 +3035,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return;
+            validateRun(form.run);
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
 
@@ -3109,8 +3053,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return;
+            validateRun(form.run);
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
             if (form.charge < 1 || form.charge > 3)
@@ -3127,8 +3070,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return;
+            validateRun(form.run);
 
             PeptideProphetGraphs.renderObservedVsPPScore(response, getContainer(), form.run, form.charge, form.cumulative);
         }
@@ -3140,8 +3082,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return;
+            validateRun(form.run);
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
 
@@ -3182,10 +3123,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return null;
-
-            MS2Run run = MS2Manager.getRun(form.run);
+            MS2Run run = validateRun(form.run);
 
             String title = "Peptide Prophet Details";
             setTitle(title);
@@ -3225,8 +3163,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(RunForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return;
+            validateRun(form.run);
 
             ProteinProphetFile summary = MS2Manager.getProteinProphetFileByRun(form.run);
 
@@ -3240,10 +3177,8 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return null;
+            MS2Run run = validateRun(form.run);
 
-            MS2Run run = MS2Manager.getRun(form.run);
             String title = "Protein Prophet Details";
             setTitle(title);
             getPageConfig().setTemplate(PageConfig.Template.Print);
@@ -3476,11 +3411,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ColumnForm form, boolean reshow, BindException errors) throws Exception
         {
-            _run = MS2Manager.getRun(form.run);
-            if (_run == null)
-            {
-                return HttpView.throwNotFound("Could not find run");
-            }
+            _run = validateRun(form.run);
             _returnURL = form.getReturnActionURL();
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), _run);
@@ -3584,11 +3515,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ColumnForm form, boolean reshow, BindException errors) throws Exception
         {
-            _run = MS2Manager.getRun(form.run);
-            if (_run == null)
-            {
-                return HttpView.throwNotFound("Could not find run " + form.run);
-            }
+            _run = validateRun(form.run);
 
             _returnURL = form.getReturnActionURL();
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), _run);
@@ -3715,10 +3642,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(MS2ViewForm form, boolean reshow, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.getRun()))
-            {
-                return null;
-            }
+            _run = validateRun(form.getRun());
 
             _returnURL = getViewContext().cloneActionURL().setAction(ShowRunAction.class);
             JspView<SaveViewBean> saveView = new JspView<SaveViewBean>("/org/labkey/ms2/saveView.jsp", new SaveViewBean());
@@ -3729,7 +3653,6 @@ public class MS2Controller extends SpringActionController
             ActionURL newURL = bean.returnURL.clone().deleteParameter("run");
             bean.viewParams = newURL.getRawQuery();
 
-            _run = MS2Manager.getRun(form.getRun());
             getPageConfig().setFocusId("name");
 
             return saveView;
@@ -3871,11 +3794,7 @@ public class MS2Controller extends SpringActionController
             // runId is not set when linking from compare
             if (runId != 0)
             {
-                _run = MS2Manager.getRun(runId);
-                if (!isAuthorized(runId))
-                {
-                    return HttpView.throwUnauthorized();
-                }
+                _run = validateRun(runId);
 
                 peptideView = new StandardProteinPeptideView(getViewContext(), _run);
 
@@ -3901,8 +3820,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return null;
+            MS2Run run = validateRun(form.run);
 
             long peptideId = form.getPeptideIdLong();
 
@@ -3913,8 +3831,6 @@ public class MS2Controller extends SpringActionController
 
             if (null == peptide)
                 return HttpView.throwNotFound("Could not locate peptide with this ID: " + peptideId);
-
-            MS2Run run = MS2Manager.getRun(form.run);
 
             setTitle("Proteins Containing " + peptide);
             getPageConfig().setTemplate(PageConfig.Template.Print);
@@ -3951,10 +3867,8 @@ public class MS2Controller extends SpringActionController
                     {
                         form.run = file.getRun();
 
-                        if (!isAuthorized(form.run))
-                            return null;
+                        MS2Run run = validateRun(form.run);
 
-                        MS2Run run = MS2Manager.getRun(form.run);
                         ActionURL url = getViewContext().cloneActionURL();
                         url.deleteParameter("proteinGroupId");
                         url.replaceParameter("run", Integer.toString(form.run));
@@ -3967,10 +3881,7 @@ public class MS2Controller extends SpringActionController
                 }
             }
 
-            if (!isAuthorized(form.run))
-                return null;
-
-            MS2Run run1 = MS2Manager.getRun(form.run);
+            MS2Run run1 = validateRun(form.run);
 
             ProteinProphetFile proteinProphet = run1.getProteinProphetFile();
             if (proteinProphet == null)
@@ -4274,8 +4185,7 @@ public class MS2Controller extends SpringActionController
 
     protected void showElutionGraph(HttpServletResponse response, DetailsForm form, boolean showLight, boolean showHeavy) throws Exception
     {
-        if (!isAuthorized(form.run))
-            return;
+        validateRun(form.run);
 
         MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
 
@@ -4699,7 +4609,7 @@ public class MS2Controller extends SpringActionController
             }
             catch (Exception e)
             {
-                _log.error("Chart rendering failed: " + e);
+                _log.error("Chart rendering failed", e);
             }
             finally
             {
@@ -5028,24 +4938,6 @@ public class MS2Controller extends SpringActionController
         ReturnURLString returnUrl;
         ArrayList<String> errors = new ArrayList<String>();
 
-        private int toInt(String s, String field)
-        {
-            try
-            {
-                return Integer.parseInt(s);
-            }
-            catch (NumberFormatException e)
-            {
-                errors.add("Error: " + s + " is not a valid value for " + field + ".");
-                return 0;
-            }
-        }
-
-        public List<String> getErrors()
-        {
-            return errors;
-        }
-
         public void setExpanded(boolean expanded)
         {
             this.expanded = expanded;
@@ -5056,24 +4948,24 @@ public class MS2Controller extends SpringActionController
             return this.expanded;
         }
 
-        public void setRun(String run)
+        public void setRun(int run)
         {
-            this.run = toInt(run, "Run");
+            this.run = run;
         }
 
-        public String getRun()
+        public int getRun()
         {
-            return String.valueOf(this.run);
+            return run;
         }
 
-        public void setTryptic(String tryptic)
+        public void setTryptic(int tryptic)
         {
-            this.tryptic = toInt(tryptic, "Tryptic");
+            this.tryptic = tryptic;
         }
 
-        public String getTryptic()
+        public int getTryptic()
         {
-            return null;
+            return tryptic;
         }
 
         public void setGrouping(String grouping)
@@ -5653,7 +5545,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            MS2Run run = MS2Manager.getRun(form.getRun());
+            MS2Run run = validateRun(form.getRun());
 
             try
             {
@@ -5702,8 +5594,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return;
+            validateRun(form.run);
 
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
 
@@ -5944,8 +5835,7 @@ public class MS2Controller extends SpringActionController
 
             int runId = peptide.getRun();
 
-            if (!isAuthorized(runId))
-                throw new UnauthorizedException();
+            validateRun(runId);
 
             PeptideQuantitation quantitation = peptide.getQuantitation();
             if (quantitation == null)
@@ -5978,8 +5868,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ElutionProfileForm form, boolean reshow, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return null;
+            validateRun(form.run);
 
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
             PeptideQuantitation quant = peptide.getQuantitation();
@@ -5990,8 +5879,7 @@ public class MS2Controller extends SpringActionController
 
         public boolean handlePost(ElutionProfileForm form, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return false;
+            validateRun(form.run);
 
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
             if (peptide == null)
