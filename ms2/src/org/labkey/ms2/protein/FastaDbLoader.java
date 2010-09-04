@@ -687,7 +687,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         //Main loop
         for (ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
         {
-            ProteinPlus p = new ProteinPlus(proteinIterator.next());
+            ProteinPlus p = new ProteinPlus((Protein)proteinIterator.next());
 
             if (skipEntries > 0)
             {

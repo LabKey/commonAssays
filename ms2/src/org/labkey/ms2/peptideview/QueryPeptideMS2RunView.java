@@ -95,10 +95,6 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         public PeptideQueryView(MS2Schema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
         {
             super(schema, settings, expanded, allowNesting);
-            // We want the default to be 1000 instead of 100
-            settings.setMaxRows(1000);
-            // Reapply in case the user has specifically requested a row count
-            settings.init(getViewContext());
         }
 
         public List<DisplayColumn> getDisplayColumns()
@@ -126,24 +122,16 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             if (proteinProphetNesting.isNested(originalColumns))
             {
                 _selectedNestingOption = proteinProphetNesting;
-                setShowPagination(false);
             }
             else if (standardProteinNesting.isNested(originalColumns))
             {
                 _selectedNestingOption = standardProteinNesting;
-                setShowPagination(false);
-            }
-            else
-            {
-                setShowPagination(true);
-                setShowPaginationCount(true);
             }
 
             DataRegion rgn;
             if (_selectedNestingOption != null && (_allowNesting || !_expanded))
             {
-                rgn = _selectedNestingOption.createDataRegion(originalColumns, _runs, _url, getDataRegionName(), _expanded);
-                getSettings().setMaxRows(_selectedNestingOption.getResultSetRowLimit());
+                rgn = _selectedNestingOption.createDataRegion(originalColumns, _url, getDataRegionName(), _expanded);
             }
             else
             {
@@ -159,9 +147,6 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
             rgn.addHiddenFormField("queryString", _url.getRawQuery());  // Pass query string for exportSelectedToExcel post case... need to display filter & sort to user, and to show the right columns
             rgn.addHiddenFormField(MS2Manager.getDataRegionNamePeptides() + ".sort", _url.getParameter(MS2Manager.getDataRegionNamePeptides() + ".sort"));     // Stick sort on the request as well so DataRegion sees it
-            //rgn.addHiddenFormField("columns", _url.getParameter("columns"));
-            //rgn.addHiddenFormField("run", _url.getParameter("run"));
-            //rgn.addHiddenFormField("grouping", _url.getParameter("grouping"));
 
             return rgn;
         }
@@ -169,7 +154,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         public DataView createDataView()
         {
             DataRegion rgn = createDataRegion();
-            GridView result = new GridView(rgn, new SortRewriterRenderContext(_selectedNestingOption, getViewContext()));
+            GridView result = new GridView(rgn, new NestedRenderContext(_selectedNestingOption, getViewContext()));
             setupDataView(result);
 
             Sort customViewSort = result.getRenderContext().getBaseSort();

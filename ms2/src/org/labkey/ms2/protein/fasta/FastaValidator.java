@@ -50,7 +50,7 @@ public class FastaValidator
         //noinspection ForLoopReplaceableByForEach
         for (ProteinFastaLoader.ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
         {
-            Protein protein = proteinIterator.next();
+            Protein protein = (Protein)proteinIterator.next();
 
             // Creating a new string here is critical for handling large FASTA files -- see issue #6441 
             //noinspection RedundantStringConstructorCall

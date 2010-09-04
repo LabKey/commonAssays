@@ -34,18 +34,13 @@ import java.util.List;
 public class QueryPeptideDataRegion extends AbstractProteinDataRegion
 {
     private final List<DisplayColumn> _allColumns;
-    private final int _resultSetRowLimit;
-    private final int _outerGroupLimit;
 
-    public QueryPeptideDataRegion(List<DisplayColumn> allColumns, String groupingColumnName, ActionURL url, int resultSetRowLimit, int outerGroupLimit)
+    public QueryPeptideDataRegion(List<DisplayColumn> allColumns, String groupingColumnName, ActionURL url)
     {
         super(groupingColumnName, url);
         _allColumns = allColumns;
-        _resultSetRowLimit = resultSetRowLimit;
-        _outerGroupLimit = outerGroupLimit;
         setShadeAlternatingRows(true);
     }
-
 
     public ResultSet getResultSet(RenderContext ctx, boolean async) throws SQLException, IOException
     {
@@ -55,8 +50,9 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
         ResultSet rs = super.getResultSet(ctx, async);
         setDisplayColumns(realColumns);
 
-        _groupedRS = new GroupedResultSet(rs, _uniqueColumnName, _resultSetRowLimit, _outerGroupLimit);
+        _groupedRS = new GroupedResultSet(rs, _uniqueColumnName, getMaxRows());
         _nestedFieldMap = ctx.getFieldMap();
+        ctx.setResultSet(_groupedRS, _nestedFieldMap);
         return _groupedRS;
     }
 

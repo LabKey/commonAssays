@@ -46,13 +46,12 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         super(viewContext, "Peptides", runs);
     }
 
-    protected QuerySettings createQuerySettings(UserSchema schema, int maxRows) throws RedirectException
+    protected QuerySettings createQuerySettings(UserSchema schema) throws RedirectException
     {
         QuerySettings settings = schema.getSettings(_url.getPropertyValues(), DATA_REGION_NAME);
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
         settings.setQueryName(MS2Schema.HiddenTableType.ProteinGroupsForRun.toString());
-        settings.setMaxRows(maxRows);
 
         return settings;
     }
@@ -61,9 +60,9 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
 
-        QuerySettings settings = createQuerySettings(schema, _maxPeptideRows);
+        QuerySettings settings = createQuerySettings(schema);
 
-        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(_viewContext, schema, settings, expanded, allowNesting);
+        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(schema, settings, expanded, allowNesting);
 
         peptideView.setTitle("Protein Groups");
         return peptideView;
@@ -71,7 +70,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
 
     public class ProteinGroupQueryView extends AbstractMS2QueryView
     {
-        public ProteinGroupQueryView(ViewContext context, UserSchema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
+        public ProteinGroupQueryView(UserSchema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
         {
             super(schema, settings, expanded, allowNesting);
         }
@@ -89,7 +88,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             DataRegion rgn;
             if (_selectedNestingOption != null && (_allowNesting || !_expanded))
             {
-                rgn = _selectedNestingOption.createDataRegion(originalColumns, _runs, _url, getDataRegionName(), _expanded);
+                rgn = _selectedNestingOption.createDataRegion(originalColumns, _url, getDataRegionName(), _expanded);
             }
             else
             {
@@ -97,9 +96,6 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
                 rgn.setDisplayColumns(originalColumns);
             }
             rgn.setSettings(getSettings());
-
-            rgn.setShowPagination(false);
-            rgn.setShowRecordSelectors(showRecordSelectors());
 
             rgn.setShowRecordSelectors(true);
             rgn.setFixedWidthColumns(true);
@@ -110,7 +106,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         public DataView createDataView()
         {
             DataRegion rgn = createDataRegion();
-            GridView result = new GridView(rgn, new SortRewriterRenderContext(_selectedNestingOption, getViewContext()));
+            GridView result = new GridView(rgn, new NestedRenderContext(_selectedNestingOption, getViewContext()));
             setupDataView(result);
 
             Sort customViewSort = result.getRenderContext().getBaseSort();
@@ -168,13 +164,13 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         QuerySettings settings;
         try
         {
-            settings = createQuerySettings(schema, _maxPeptideRows);
+            settings = createQuerySettings(schema);
         }
         catch (RedirectException e)
         {
             throw new RuntimeException(e);
         }
-        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(_viewContext, schema, settings, true, true);
+        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(schema, settings, true, true);
         QueryPeptideDataRegion rgn = (QueryPeptideDataRegion)peptideView.createDataRegion();
 
         DataRegion nestedRegion = rgn.getNestedRegion();

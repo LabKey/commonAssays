@@ -1794,10 +1794,11 @@
       </ns:column>
       <ns:column columnName="PctSpectrumIds">
         <ns:columnTitle>Spectrum Ids%</ns:columnTitle>
-        <ns:tsvFormatString>0.00</ns:tsvFormatString>
+        <ns:formatString>0.0000</ns:formatString>
       </ns:column>
       <ns:column columnName="PercentCoverage">
         <ns:columnTitle>AACoverage</ns:columnTitle>
+        <ns:formatString>0.000</ns:formatString>
       </ns:column>
       <ns:column columnName="ErrorRate">
         <ns:columnTitle>Error</ns:columnTitle>

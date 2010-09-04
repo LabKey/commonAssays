@@ -37,32 +37,138 @@ import java.text.DecimalFormat;
  */
 public class ProteinListDisplayColumn extends SimpleDisplayColumn
 {
-    private String _sequenceColumn;
+    private final SequenceColumnType _sequenceColumn;
     private final ProteinGroupProteins _proteins;
 
     private static final DecimalFormat MASS_FORMAT = new DecimalFormat("0.0000");
     private ColumnInfo _columnInfo;
     private String _columnName = "ProteinGroupId";
 
-    public static final List<String> ALL_SEQUENCE_COLUMNS = Collections.unmodifiableList(Arrays.asList("Protein", "BestName", "BestGeneName", "SequenceMass", "Description"));
-    private static final Map<String, String> ALL_SEQUENCE_COLUMNS_MAP;
+    public static final List<String> SEQUENCE_COLUMN_NAMES;
+    /** Case insensitive map from name to enum type */
+    private static final Map<String, SequenceColumnType> ALL_SEQUENCE_COLUMNS_MAP;
 
     static
     {
-        Map<String, String> values = new CaseInsensitiveHashMap<String>();
-        for (String s : ALL_SEQUENCE_COLUMNS)
+        Map<String, SequenceColumnType> values = new CaseInsensitiveHashMap<SequenceColumnType>();
+        for (SequenceColumnType sequenceColumnType : SequenceColumnType.values())
         {
-            values.put(s, s);
+            values.put(sequenceColumnType.toString(), sequenceColumnType);
         }
+
+        SEQUENCE_COLUMN_NAMES = Collections.unmodifiableList(new ArrayList<String>(values.keySet()));
         ALL_SEQUENCE_COLUMNS_MAP = Collections.unmodifiableMap(values);
+    }
+
+    public enum SequenceColumnType
+    {
+        Protein
+        {
+            @Override
+            public Object getValue(ProteinSummary summary)
+            {
+                return summary.getName();
+            }
+
+            @Override
+            public void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
+            {
+                url.replaceParameter("proteinGroupId", Integer.toString(groupId));
+                url.replaceParameter("seqId", Integer.toString(summary.getSeqId()));
+                out.write("<a href=\"");
+                out.write(url.toString());
+                out.write("\" target=\"prot\">");
+                out.write(PageFlowUtil.filter(summary.getName()));
+                out.write("</a>");
+            }
+        },
+        Description
+        {
+            public Object getValue(ProteinSummary summary)
+            {
+                return summary.getDescription();
+            }
+
+            @Override
+            public void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
+            {
+                out.write(PageFlowUtil.filter(summary.getDescription()));
+            }
+        },
+        BestName
+        {
+            @Override
+            public Object getValue(ProteinSummary summary)
+            {
+                return summary.getBestName();
+            }
+
+            @Override
+            public void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
+            {
+                out.write(PageFlowUtil.filter(summary.getBestName()));
+            }
+        },
+        BestGeneName
+        {
+            @Override
+            public Object getValue(ProteinSummary summary)
+            {
+                return summary.getBestGeneName();
+            }
+
+            @Override
+            public void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
+            {
+                String geneName = summary.getBestGeneName();
+                if (geneName != null)
+                {
+                    out.write(PageFlowUtil.filter(geneName));
+                }
+            }
+        },
+        SequenceMass
+        {
+            @Override
+            public Object getValue(ProteinSummary summary)
+            {
+                return summary.getSequenceMass();
+            }
+
+            @Override
+            public void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
+            {
+                out.write(PageFlowUtil.filter(MASS_FORMAT.format(summary.getSequenceMass())));
+            }
+
+            @Override
+            public String getTextAlign()
+            {
+                return "right";
+            }
+        };
+
+        public abstract Object getValue(ProteinSummary summary);
+
+        public abstract void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException;
+
+        public String getTextAlign()
+        {
+            return "left";
+        }
     }
 
     public ProteinListDisplayColumn(String sequenceColumn, ProteinGroupProteins proteins)
     {
         _sequenceColumn = ALL_SEQUENCE_COLUMNS_MAP.get(FieldKey.fromString(sequenceColumn).getName());
+        if (_sequenceColumn == null)
+        {
+            throw new IllegalArgumentException("Could not find sequence column for " + sequenceColumn);
+        }
         _proteins = proteins;
         setNoWrap(true);
-        setCaption(_sequenceColumn);
+        setCaption(_sequenceColumn.toString());
+        setTextAlign(_sequenceColumn.getTextAlign());
     }
 
     public ColumnInfo getColumnInfo()
@@ -96,29 +202,10 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
                     sb.append(proteinSeparator);
                     proteinSeparator = ", ";
 
-                    if (_sequenceColumn.equalsIgnoreCase("Protein"))
+                    Object value = _sequenceColumn.getValue(summary);
+                    if (value != null)
                     {
-                        sb.append(summary.getName());
-                    }
-                    else if (_sequenceColumn.equalsIgnoreCase("Description"))
-                    {
-                        sb.append(summary.getDescription());
-                    }
-                    else if (_sequenceColumn.equalsIgnoreCase("BestName"))
-                    {
-                        sb.append(summary.getBestName());
-                    }
-                    else if (_sequenceColumn.equalsIgnoreCase("BestGeneName"))
-                    {
-                        String geneName = summary.getBestGeneName();
-                        if (geneName != null)
-                        {
-                            sb.append(geneName);
-                        }
-                    }
-                    else if (_sequenceColumn.equalsIgnoreCase("SequenceMass"))
-                    {
-                        sb.append(summary.getSequenceMass());
+                        sb.append(value);
                     }
                 }
             }
@@ -145,7 +232,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
             List<ProteinSummary> summaryList = _proteins.getSummaries(groupId, ctx, _columnName);
 
             ActionURL url = ctx.getViewContext().cloneActionURL();
-            url.setAction("showProtein.view");
+            url.setAction(MS2Controller.ShowProteinAction.class);
 
             if (summaryList != null)
             {
@@ -169,36 +256,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
 
     private void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
     {
-        if (_sequenceColumn.equalsIgnoreCase("Protein"))
-        {
-                url.replaceParameter("proteinGroupId", Integer.toString(groupId));
-            url.replaceParameter("seqId", Integer.toString(summary.getSeqId()));
-            out.write("<a href=\"");
-            out.write(url.toString());
-            out.write("\" target=\"prot\">");
-            out.write(PageFlowUtil.filter(summary.getName()));
-            out.write("</a>");
-        }
-        else if (_sequenceColumn.equalsIgnoreCase("Description"))
-        {
-            out.write(PageFlowUtil.filter(summary.getDescription()));
-        }
-        else if (_sequenceColumn.equalsIgnoreCase("BestName"))
-        {
-            out.write(PageFlowUtil.filter(summary.getBestName()));
-        }
-        else if (_sequenceColumn.equalsIgnoreCase("BestGeneName"))
-        {
-            String geneName = summary.getBestGeneName();
-            if (geneName != null)
-            {
-                out.write(PageFlowUtil.filter(geneName));
-            }
-        }
-        else if (_sequenceColumn.equalsIgnoreCase("SequenceMass"))
-        {
-            out.write(PageFlowUtil.filter(MASS_FORMAT.format(summary.getSequenceMass())));
-        }
+        _sequenceColumn.writeInfo(summary, out, url, groupId);
         out.write("<br/>");
     }
 

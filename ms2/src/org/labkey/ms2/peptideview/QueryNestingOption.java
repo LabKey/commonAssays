@@ -20,7 +20,6 @@ import org.labkey.api.data.*;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.view.ActionURL;
-import org.labkey.ms2.MS2Run;
 
 import java.util.List;
 import java.util.Map;
@@ -43,9 +42,6 @@ public abstract class QueryNestingOption
         _allowNesting = allowNesting;
     }
 
-    public abstract int getResultSetRowLimit();
-    public abstract int getOuterGroupLimit();
-
     public void setupGroupIdColumn(List<DisplayColumn> allColumns, List<DisplayColumn> outerColumns, TableInfo parentTable)
     {
         if (_groupIdColumn != null)
@@ -53,13 +49,13 @@ public abstract class QueryNestingOption
             return;
         }
         Map<FieldKey, ColumnInfo> infos = QueryService.get().getColumns(parentTable, Collections.singleton(FieldKey.fromString(_rowIdColumnName)));
-        for (ColumnInfo info : infos.values())
-        {
-            _groupIdColumn = new DataColumn(info);
-            _groupIdColumn.setVisible(false);
-            allColumns.add(_groupIdColumn);
-            outerColumns.add(_groupIdColumn);
-        }
+        assert infos.size() == 1;
+
+        ColumnInfo info = infos.values().iterator().next();
+        _groupIdColumn = new DataColumn(info);
+        _groupIdColumn.setVisible(false);
+        allColumns.add(_groupIdColumn);
+        outerColumns.add(_groupIdColumn);
     }
 
     public boolean isNested(List<DisplayColumn> columns)
@@ -93,7 +89,7 @@ public abstract class QueryNestingOption
         return _rowIdColumnName;
     }
 
-    public QueryPeptideDataRegion createDataRegion(List<DisplayColumn> originalColumns, MS2Run[] runs, ActionURL url, String dataRegionName, boolean expanded)
+    public QueryPeptideDataRegion createDataRegion(List<DisplayColumn> originalColumns, ActionURL url, String dataRegionName, boolean expanded)
     {
         List<DisplayColumn> innerColumns = new ArrayList<DisplayColumn>();
         List<DisplayColumn> outerColumns = new ArrayList<DisplayColumn>();
@@ -112,7 +108,7 @@ public abstract class QueryNestingOption
             }
         }
 
-        QueryPeptideDataRegion dataRegion = new QueryPeptideDataRegion(allColumns, _groupIdColumn.getColumnInfo().getAlias(), url, getResultSetRowLimit(), getOuterGroupLimit());
+        QueryPeptideDataRegion dataRegion = new QueryPeptideDataRegion(allColumns, _groupIdColumn.getColumnInfo().getAlias(), url);
         // Set the nested button bar as not visible so that we don't render a bunch of nested <form>s which mess up IE.
         dataRegion.setButtonBar(ButtonBar.BUTTON_BAR_EMPTY);
         dataRegion.setExpanded(expanded);
@@ -121,6 +117,7 @@ public abstract class QueryNestingOption
         nestedRgn.setName(dataRegionName);
         ButtonBar bar = new ButtonBar();
         bar.setVisible(false);
+        nestedRgn.setShowFilterDescription(false);
         nestedRgn.setButtonBar(bar);
         nestedRgn.setDisplayColumns(innerColumns);
         dataRegion.setNestedRegion(nestedRgn);

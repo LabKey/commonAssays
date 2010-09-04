@@ -25,7 +25,7 @@ import java.io.File;
  * Time: 2:40:58 PM
  *
  */
-public class ProteinFastaLoader extends FastaLoader<Protein>
+public class ProteinFastaLoader extends FastaLoader<Protein> implements Iterable<Protein>
 {
     public ProteinFastaLoader(File fastaFile)
     {

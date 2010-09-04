@@ -31,8 +31,6 @@ public class ProteinPlus
     protected String _species;
     protected String _genus;
     protected Protein _protein;
-    private String _description;
-
 
     public ProteinPlus(Protein p)
     {

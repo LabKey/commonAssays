@@ -466,7 +466,7 @@ public class ProteinManager
             updatePeptidesSQL.append("\tAND " + MS2Manager.getTableInfoPeptidesData() + ".SeqId = map.OldSeqId \n");
             updatePeptidesSQL.append("\tAND r.FastaId = " + oldFastaId);
 
-            int peptideUpdateCount = Table.execute(MS2Manager.getSchema(), updatePeptidesSQL);
+            Table.execute(MS2Manager.getSchema(), updatePeptidesSQL);
 
             SQLFragment updateProteinsSQL = new SQLFragment();
             updateProteinsSQL.append("UPDATE " + MS2Manager.getTableInfoProteinGroupMemberships() + " SET SeqId= map.NewSeqId\n");
@@ -482,7 +482,7 @@ public class ProteinManager
             updateProteinsSQL.append("\tAND " + MS2Manager.getTableInfoProteinGroupMemberships() + ".SeqId = map.OldSeqId\n");
             updateProteinsSQL.append("\tAND r.FastaId = " + oldFastaId);
 
-            int proteinUpdateCount = Table.execute(MS2Manager.getSchema(), updateProteinsSQL);
+            Table.execute(MS2Manager.getSchema(), updateProteinsSQL);
 
             Table.execute(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", new Object[] { newFastaId, oldFastaId } );
             MS2Manager.getSchema().getScope().commitTransaction();
@@ -614,8 +614,8 @@ public class ProteinManager
 
     public static Sort getPeptideBaseSort()
     {
-        Sort baseSort = new Sort("Fraction,Scan,Charge");     // Always sort peptide lists by Fraction, Scan, Charge
-        return baseSort;
+        // Always sort peptide lists by Fraction, Scan, Charge
+        return new Sort("Fraction,Scan,Charge");
     }
 
     public static SimpleFilter getPeptideFilter(ActionURL currentUrl, List<MS2Run> runs, int mask)
@@ -780,7 +780,7 @@ public class ProteinManager
     }
 
 
-    public static void addProteinQuery(SQLFragment sql, MS2Run run, ActionURL currentUrl, String extraPeptideWhere, int maxRows, long offset, boolean peptideQuery)
+    public static void addProteinQuery(SQLFragment sql, MS2Run run, ActionURL currentUrl, String extraPeptideWhere, int maxRows, boolean peptideQuery)
     {
         // SELECT (TOP n) Protein, SequenceMass, etc.
         StringBuilder proteinSql = new StringBuilder("SELECT Protein");
@@ -841,21 +841,21 @@ public class ProteinManager
         sql.append(proteinSql);
     }
 
-    public static ResultSet getProteinRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, long offset) throws SQLException
+    public static ResultSet getProteinRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows) throws SQLException
     {
-        SQLFragment sql = getProteinSql(currentUrl, run, extraPeptideWhere, maxRows, offset);
+        SQLFragment sql = getProteinSql(currentUrl, run, extraPeptideWhere, maxRows);
 
         return Table.executeQuery(getSchema(), sql, maxRows);
     }
 
-    public static SQLFragment getProteinSql(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, long offset)
+    public static SQLFragment getProteinSql(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows)
     {
         SQLFragment sql = new SQLFragment();
 
         // Join the selected proteins to ProteinSequences to get the actual Sequence for computing AA coverage
         // We need to do a second join to ProteinSequences because we can't GROUP BY Sequence, a text data type
         sql.append("SELECT Protein, SequenceMass, Peptides, UniquePeptides, SeqId, ProtSequence AS Sequence, Description, BestName, BestGeneName FROM\n(");
-        addProteinQuery(sql, run, currentUrl, extraPeptideWhere, maxRows, offset, false);
+        addProteinQuery(sql, run, currentUrl, extraPeptideWhere, maxRows, false);
         sql.append("\n) X LEFT OUTER JOIN ");
         sql.append(getTableInfoSequences(), "seq");
         sql.append(" ON seq.SeqId = sSeqId\n");
@@ -868,9 +868,9 @@ public class ProteinManager
         return sql;
     }
 
-    public static ResultSet getProteinProphetRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, long offset) throws SQLException
+    public static ResultSet getProteinProphetRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows) throws SQLException
     {
-        return new ResultSetCollapser(getProteinProphetPeptideRS(currentUrl, run, extraPeptideWhere, maxRows, offset, "Scan"), "ProteinGroupId", maxRows);
+        return new ResultSetCollapser(getProteinProphetPeptideRS(currentUrl, run, extraPeptideWhere, maxRows, "Scan"), "ProteinGroupId", maxRows);
     }
 
     // Combine protein sort and peptide sort into a single ORDER BY.  Must sort by "Protein" before sorting peptides to ensure
@@ -907,21 +907,21 @@ public class ProteinManager
 
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static GroupedResultSet getPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames) throws SQLException
+    public static GroupedResultSet getPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames) throws SQLException
     {
-        SQLFragment sql = getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, offset, columnNames);
+        SQLFragment sql = getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames);
 
         ResultSet rs = Table.executeQuery(getSchema(), sql, Table.ALL_ROWS, false, true);
         return new GroupedResultSet(rs, "Protein");
     }
 
-    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames)
+    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
     {
-        return getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, offset, columnNames, true);
+        return getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, true);
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames, boolean addOrderBy)
+    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy)
     {
         SQLFragment sql = new SQLFragment();
 
@@ -932,7 +932,7 @@ public class ProteinManager
         sql.append(MS2Manager.getTableInfoPeptides());
         sql.append(" RIGHT OUTER JOIN\n(");
 
-        ProteinManager.addProteinQuery(sql, run, currentUrl, extraWhere, maxProteinRows, offset, true);
+        ProteinManager.addProteinQuery(sql, run, currentUrl, extraWhere, maxProteinRows, true);
         sql.append(") s ON ");
         sql.append(MS2Manager.getTableInfoPeptides());
         sql.append(".SeqId = sSeqId\n");
@@ -950,22 +950,20 @@ public class ProteinManager
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static Table.TableResultSet getProteinProphetPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames) throws SQLException
+    public static Table.TableResultSet getProteinProphetPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames) throws SQLException
     {
-        SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, offset, columnNames);
+        SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames);
 
         return (Table.TableResultSet)Table.executeQuery(getSchema(), sql, 0, false, true);
-
-//        return (Table.TableResultSet)Table.executeQuery(getSchema(), sql, 0, maxProteinRows != 0, maxProteinRows == 0);
     }
 
-    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames)
+    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
     {
-        return getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, offset, columnNames, true);
+        return getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, true);
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames, boolean addOrderBy)
+    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy)
     {
         SQLFragment sql = new SQLFragment("SELECT ");
         sql.append(MS2Manager.getTableInfoPeptideMemberships());
@@ -1050,30 +1048,6 @@ public class ProteinManager
         return sql;
     }
 
-    public static int getSeqIdFromLookup(Protein p, int dbId) throws SQLException
-    {
-        Object lookup[] = {p.getLookupString(), dbId};
-
-        Integer rvAsInteger = Table.executeSingleton(getSchema(),
-                        "SELECT SeqId FROM " + getTableInfoFastaSequences() + " WHERE LookupString = ? AND FastaId=?",
-                        lookup, Integer.class);
-
-        return (null == rvAsInteger ? 0 : rvAsInteger);
-    }
-
-    public static String getSeqParamFromId(String param, int id) throws SQLException
-    {
-        return Table.executeSingleton(getSchema(),
-                "SELECT " + param + " FROM " + getTableInfoSequences() + " WHERE seqId=?",
-                new Integer[]{id}, String.class);
-    }
-
-    public static String[] getIdentifiersFromId(IdentifierType identType, int id) throws SQLException
-    {
-        return getIdentifiersFromId(identType.toString(), id);
-    }
-
-
     public static MultiMap<String, String> getIdentifiersFromId(int seqid) throws SQLException
     {
         ResultSet rs = null;
@@ -1102,13 +1076,6 @@ public class ProteinManager
     }
 
 
-    public static String[] getIdentifiersFromId(String identType, int id) throws SQLException
-    {
-        return Table.executeArray(getSchema(),
-                "SELECT identifier FROM " + getTableInfoIdentifiers() + " WHERE identtypeid IN (SELECT IdentTypeId FROM " + getTableInfoIdentTypes() + " WHERE LOWER(name) = ?) AND seqId = ?",
-                new Object[]{identType.toLowerCase(), id}, String.class);
-    }
-
     public static Set<String> getOrganismsFromId(int id) throws SQLException
     {
         HashSet<String> retVal = new HashSet<String>();
@@ -1132,21 +1099,6 @@ public class ProteinManager
     }
 
 
-    public static String[] getGOCategoriesFromId(int id) throws SQLException
-    {
-        try
-        {
-            return Table.executeArray(getSchema(), "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annottypeid in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " 'GO;_%' ESCAPE ';') AND seqId =?",
-                    new Integer[]{id}, String.class);
-        }
-        catch (SQLException e)
-        {
-            _log.error("Problem in GO-category display");
-            throw e;
-        }
-    }
-
-
     public static String makeIdentURLString(String identifier, String infoSourceURLString) throws UnsupportedEncodingException
     {
         if (identifier == null || infoSourceURLString == null)
@@ -1158,34 +1110,15 @@ public class ProteinManager
     }
 
 
-//    public static String makeAnyKnownIdentURLString(String identifier, int sourceId) throws Exception
-//    {
-//        if (identifier == null)
-//            return null;
-//
-//        String url = Table.executeSingleton(
-//                ProteinManager.getSchema(),
-//                "SELECT Url FROM " + ProteinManager.getTableInfoInfoSources() + " WHERE sourceId=?",
-//                new Integer[]{sourceId}, String.class);
-//        if (url == null) return null;
-//        return makeIdentURLString(identifier, url);
-//    }
-
-
     static final String NOTFOUND = "NOTFOUND";
-    static Map cacheURLs = Collections.synchronizedMap(new HashMap(200));
-
-    public static void clearURLCache()
-    {
-        cacheURLs.clear();
-    }
+    static Map<String, String> cacheURLs = Collections.synchronizedMap(new HashMap<String, String>(200));
 
     public static String makeIdentURLStringWithType(String identifier, String identType) throws Exception
     {
         if (identifier == null || identType == null)
             return null;
 
-        String url = (String)cacheURLs.get(identType);
+        String url = cacheURLs.get(identType);
         if (url == null)
         {
             url = Table.executeSingleton(getSchema(), 

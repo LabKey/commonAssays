@@ -56,7 +56,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         ProteinColumnNameList originalNames = new ProteinColumnNameList(requestedProteinColumnNames);
         List<DisplayColumn> displayColumns = new ArrayList<DisplayColumn>();
         ProteinGroupProteins proteins = new ProteinGroupProteins(Arrays.asList(_runs));
-        Set<String> sequenceColumnNames = new CaseInsensitiveHashSet(ProteinListDisplayColumn.ALL_SEQUENCE_COLUMNS);
+        Set<String> sequenceColumnNames = new CaseInsensitiveHashSet(ProteinListDisplayColumn.SEQUENCE_COLUMN_NAMES);
 
         for (String name : originalNames)
         {
@@ -213,7 +213,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     {
         MS2Run run = getSingleRun();
         String sqlColumnNames = getPeptideSQLColumnNames(requestedPeptideColumnNames, run);
-        return ProteinManager.getProteinProphetPeptideRS(_url, run, extraWhere, maxRows, offset, sqlColumnNames);
+        return ProteinManager.getProteinProphetPeptideRS(_url, run, extraWhere, maxRows, sqlColumnNames);
     }
 
     private String getPeptideSQLColumnNames(String peptideColumnNames, MS2Run run)
@@ -254,7 +254,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
             while(rs.next())
                 rowIdsLong.add(rs.getLong(columnIndex));
 
-            return rowIdsLong.toArray(new Long[]{});
+            return rowIdsLong.toArray(new Long[rowIdsLong.size()]);
         }
         finally
         {
@@ -276,7 +276,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         {
             extraWhere = MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".GroupNumber = " + form.getGroupNumber() + " AND " +
                 MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".IndistinguishableCollectionId = " + form.getIndistinguishableCollectionId();
-            peptidesGridView.setResultSet(ProteinManager.getProteinProphetPeptideRS(_url, getSingleRun(), extraWhere, 250, 0, sqlColumnNames));
+            peptidesGridView.setResultSet(ProteinManager.getProteinProphetPeptideRS(_url, getSingleRun(), extraWhere, 250, sqlColumnNames));
         }
         return peptidesGridView;
     }
@@ -353,7 +353,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 
     public void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException
     {
-        ResultSet proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, 0, 0);
+        ResultSet proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, 0);
 
         ewProtein.setResultSet(proteinRS);
         ewProtein.setExpanded(expanded);
@@ -362,7 +362,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumnNames);
         String sqlPeptideColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
 
-        GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS, 0, sqlPeptideColumnNames), "ProteinGroupId");
+        GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS, sqlPeptideColumnNames), "ProteinGroupId");
         ewProtein.setGroupedResultSet(peptideRS);
 
         if (expanded)
@@ -381,13 +381,10 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     {
         String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumns);
         String peptideSqlColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
-        GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, 0, 0, peptideSqlColumnNames), "ProteinGroupId", false);
+        GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, 0, peptideSqlColumnNames), "ProteinGroupId");
         tw.setGroupedResultSet(peptideRS);
         if (tw.getExpanded())
         {
-
-
-
             TSVGridWriter twPeptide = new TSVGridWriter(peptideRS, getPeptideDisplayColumns(peptideColumnNames))
             {
                 protected StringBuilder getRow(RenderContext ctx, List<DisplayColumn> displayColumns)
@@ -405,7 +402,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         ResultSet proteinRS = null;
         try
         {
-            proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, 0, 0);
+            proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, 0);
             tw.writeResultSet(proteinRS);
         }
         finally
@@ -434,7 +431,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         SQLFragment fragment = new SQLFragment();
         fragment.append("SELECT DISTINCT PGM.SeqId FROM ");
         fragment.append(MS2Manager.getTableInfoProteinGroupMemberships() + " PGM, ( ");
-        fragment.append(ProteinManager.getProteinProphetPeptideSql(queryUrl, run, null, -1, 0, "ms2.ProteinGroupsWithQuantitation.ProteinGroupId AS GroupId", false));
+        fragment.append(ProteinManager.getProteinProphetPeptideSql(queryUrl, run, null, -1, "ms2.ProteinGroupsWithQuantitation.ProteinGroupId AS GroupId", false));
         fragment.append(" ) x WHERE x.ProteinGroupId = PGM.ProteinGroupId");
         return fragment;
     }

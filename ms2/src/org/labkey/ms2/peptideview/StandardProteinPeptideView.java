@@ -58,7 +58,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         proteinRgn.setTable(MS2Manager.getTableInfoProteins());
         GridView proteinView = new GridView(proteinRgn, (BindException)null);
         proteinRgn.setShowPagination(false);
-        proteinView.setResultSet(ProteinManager.getProteinRS(_url, getSingleRun(), null, proteinRgn.getMaxRows(), proteinRgn.getOffset()));
+        proteinView.setResultSet(ProteinManager.getProteinRS(_url, getSingleRun(), null, proteinRgn.getMaxRows()));
         proteinView.setContainer(getContainer());
         proteinView.setTitle("Proteins");
         return proteinView;
@@ -118,7 +118,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     public GroupedResultSet createPeptideResultSet(String columnNames, MS2Run run, int maxRows, long offset, String extraWhere) throws SQLException
     {
         String sqlColumnNames = getPeptideSQLColumnNames(columnNames, run);
-        return ProteinManager.getPeptideRS(_url, run, extraWhere, maxRows, offset, sqlColumnNames);
+        return ProteinManager.getPeptideRS(_url, run, extraWhere, maxRows, sqlColumnNames);
     }
 
     public StandardProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException
@@ -145,8 +145,8 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumnNames);
         String sqlPeptideColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
 
-        ResultSet proteinRS = ProteinManager.getProteinRS(_url, run, where, ExcelWriter.MAX_ROWS, 0);
-        GroupedResultSet peptideRS = ProteinManager.getPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS, 0, sqlPeptideColumnNames);
+        ResultSet proteinRS = ProteinManager.getProteinRS(_url, run, where, ExcelWriter.MAX_ROWS);
+        GroupedResultSet peptideRS = ProteinManager.getPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS, sqlPeptideColumnNames);
         DataRegion peptideRgn = getPeptideGrid(peptideColumnNames, 0, 0);
 
         ewProtein.setResultSet(proteinRS);
@@ -174,8 +174,8 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
         try
         {
-            proteinRS = ProteinManager.getProteinRS(_url, run, where, 0, 0);
-            peptideRS = ProteinManager.getPeptideRS(_url, run, where, 0, 0, peptideSqlColumnNames);
+            proteinRS = ProteinManager.getProteinRS(_url, run, where, 0);
+            peptideRS = ProteinManager.getPeptideRS(_url, run, where, 0, peptideSqlColumnNames);
 
             TSVGridWriter twPeptide = new TSVGridWriter(peptideRS, getPeptideDisplayColumns(peptideColumnNames))
             {
@@ -222,7 +222,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     {
         SQLFragment fragment = new SQLFragment();
         fragment.append("SELECT DISTINCT sSeqId AS SeqId FROM ( ");
-        ProteinManager.addProteinQuery(fragment, run, queryUrl, null, 0, 0, false);
+        ProteinManager.addProteinQuery(fragment, run, queryUrl, null, 0, false);
         fragment.append(" ) seqids");
         return fragment;
     }

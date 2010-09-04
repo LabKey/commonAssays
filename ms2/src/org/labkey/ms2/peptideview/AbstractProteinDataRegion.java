@@ -119,7 +119,7 @@ public abstract class AbstractProteinDataRegion extends DataRegion
     public void setNestedRegion(DataRegion nestedRegion)
     {
         _nestedRegion = nestedRegion;
-        _nestedRegion.setShowPagination(false);
+        _nestedRegion.setSettings(getSettings());
     }
 
     protected void renderNestedGrid(Writer out, RenderContext ctx, ResultSet nestedRS, int rowIndex)

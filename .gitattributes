@@ -722,6 +722,8 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemInputXmlComposite.java -
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemResidueModComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemSequenceDbComposite.java -text
 ms2/module.properties -text
+ms2/resources/queries/ms2/Peptides/ProteinProphet.qview.xml -text
+ms2/resources/queries/ms2/Peptides/SearchEngineProtein.qview.xml -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-8.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-10.20-10.21.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-8.30-9.10.sql -text
@@ -1002,6 +1004,7 @@ ms2/src/org/labkey/ms2/peptideview/FlatPeptideView.java -text
 ms2/src/org/labkey/ms2/peptideview/MS2ResultSet.java -text
 ms2/src/org/labkey/ms2/peptideview/MS2RunViewType.java -text
 ms2/src/org/labkey/ms2/peptideview/MultiRunRenderContext.java -text
+ms2/src/org/labkey/ms2/peptideview/NestedRenderContext.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinDisplayColumnFactory.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinGroupQueryNestingOption.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinProphetDataRegion.java -text
@@ -1018,7 +1021,6 @@ ms2/src/org/labkey/ms2/peptideview/QueryPeptideMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/QueryProteinGroupMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/ResultSetSpectrumIterator.java -text
 ms2/src/org/labkey/ms2/peptideview/SingleMS2RunRReport.java -text
-ms2/src/org/labkey/ms2/peptideview/SortRewriterRenderContext.java -text
 ms2/src/org/labkey/ms2/peptideview/StandardProteinDataRegion.java -text
 ms2/src/org/labkey/ms2/peptideview/StandardProteinExcelWriter.java -text
 ms2/src/org/labkey/ms2/peptideview/StandardProteinPeptideView.java -text
