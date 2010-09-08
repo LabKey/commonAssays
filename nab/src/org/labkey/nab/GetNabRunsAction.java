@@ -206,7 +206,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         _properties.put("assayName", protocol.getName());
         _properties.put("assayDescription", protocol.getDescription());
         _properties.put("assayId", protocol.getRowId());
-        AbstractNabDataHandler dataHandler = ((NabAssayProvider) provider).getDataHandler();
+        NabDataHandler dataHandler = ((NabAssayProvider) provider).getDataHandler();
         for (ExpRun run : getRuns(tableName, form, errors))
         {
             runList.add(new NabRunPropertyMap(dataHandler.getAssayResults(run, form.getViewContext().getUser()),

@@ -44,6 +44,9 @@ import java.util.*;
  */
 public class NabGraph
 {
+    private static final int DEFAULT_WIDTH = 425;
+    private static final int DEFAULT_HEIGHT = 300;
+
     private static final Color[] GRAPH_COLORS = {
             ChartColor.BLUE,
             ChartColor.RED,
@@ -52,12 +55,104 @@ public class NabGraph
             ChartColor.MAGENTA
     };
 
+    public static class Config
+    {
+        private int[] _cutoffs;
+        private boolean _lockAxes = false;
+        private String _captionColumn;
+        private String _chartTitle;
+        private int _height = DEFAULT_HEIGHT;
+        private int _width = DEFAULT_WIDTH;
+        private int _firstSample = 0;
+        private int _maxSamples = -1;
+
+        public int[] getCutoffs()
+        {
+            return _cutoffs;
+        }
+
+        public void setCutoffs(int[] cutoffs)
+        {
+            _cutoffs = cutoffs;
+        }
+
+        public boolean isLockAxes()
+        {
+            return _lockAxes;
+        }
+
+        public void setLockAxes(boolean lockAxes)
+        {
+            _lockAxes = lockAxes;
+        }
+
+        public String getCaptionColumn()
+        {
+            return _captionColumn;
+        }
+
+        public void setCaptionColumn(String captionColumn)
+        {
+            _captionColumn = captionColumn;
+        }
+
+        public String getChartTitle()
+        {
+            return _chartTitle;
+        }
+
+        public void setChartTitle(String chartTitle)
+        {
+            _chartTitle = chartTitle;
+        }
+
+        public int getHeight()
+        {
+            return _height;
+        }
+
+        public void setHeight(int height)
+        {
+            _height = height;
+        }
+
+        public int getWidth()
+        {
+            return _width;
+        }
+
+        public void setWidth(int width)
+        {
+            _width = width;
+        }
+
+        public int getFirstSample()
+        {
+            return _firstSample;
+        }
+
+        public void setFirstSample(int firstSample)
+        {
+            _firstSample = firstSample;
+        }
+
+        public int getMaxSamples()
+        {
+            return _maxSamples;
+        }
+
+        public void setMaxSamples(int maxSamples)
+        {
+            _maxSamples = maxSamples;
+        }
+    }
+
     private static String getDefaultCaption(DilutionSummary summary, boolean longForm)
     {
-        String sampleId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-        String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-        Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-        Date date = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
+        String sampleId = (String) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
+        String participantId = (String) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
+        Double visitId = (Double) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
+        Date date = (Date) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
         NabMaterialKey materialKey = new NabMaterialKey(sampleId, participantId, visitId, date);
         return materialKey.getDisplayString(longForm);
     }
@@ -76,7 +171,7 @@ public class NabGraph
             return captionValue.toString();
     }
 
-    public static void renderChartPNG(HttpServletResponse response, Map<DilutionSummary, NabAssayRun> summaries, int[] cutoffs, boolean lockAxes, String captionColumn, String chartTitle, int height, int width) throws IOException, DilutionCurve.FitFailedException
+    public static void renderChartPNG(HttpServletResponse response, Map<DilutionSummary, NabAssayRun> summaries, Config config) throws IOException, DilutionCurve.FitFailedException
     {
         boolean longCaptions = false;
         Set<String> shortCaptions = new HashSet<String>();
@@ -92,9 +187,9 @@ public class NabGraph
         {
             String caption = null;
             DilutionSummary summary = sampleEntry.getKey();
-            if (captionColumn != null)
+            if (config.getCaptionColumn() != null)
             {
-                Object value = summary.getWellGroup().getProperty(captionColumn);
+                Object value = summary.getFirstWellGroup().getProperty(config.getCaptionColumn());
                 if (value != null)
                     caption = formatCaption(value);
                 else
@@ -102,7 +197,7 @@ public class NabGraph
                     Map<PropertyDescriptor, Object> runProperties = sampleEntry.getValue().getRunProperties();
                     for (Map.Entry<PropertyDescriptor, Object> runProperty : runProperties.entrySet())
                     {
-                        if (captionColumn.equals(runProperty.getKey().getName()) && runProperty.getValue() != null)
+                        if (config.getCaptionColumn().equals(runProperty.getKey().getName()) && runProperty.getValue() != null)
                             caption = formatCaption(runProperty.getValue());
                     }
                 }
@@ -111,26 +206,28 @@ public class NabGraph
                 caption = getDefaultCaption(summary, longCaptions);
             summaryMap.add(new Pair<String, DilutionSummary>(caption, summary));
         }
-        renderChartPNG(response, summaryMap, cutoffs, lockAxes, chartTitle, height, width);
+        renderChartPNG(response, summaryMap, config);
     }
 
-    public static void renderChartPNG(HttpServletResponse response, NabAssayRun assay, boolean lockAxes, String captionColumn, String chartTitle, int height, int width) throws IOException, DilutionCurve.FitFailedException
+    public static void renderChartPNG(HttpServletResponse response, NabAssayRun assay, Config config) throws IOException, DilutionCurve.FitFailedException
     {
         Map<DilutionSummary, NabAssayRun> samples = new LinkedHashMap<DilutionSummary, NabAssayRun>();
         for (DilutionSummary summary : assay.getSummaries())
             samples.put(summary, assay);
-        renderChartPNG(response, samples, assay.getCutoffs(), lockAxes, captionColumn, chartTitle, height, width);
+        if (config.getCutoffs() == null)
+            config.setCutoffs(assay.getCutoffs());
+        renderChartPNG(response, samples, config);
     }
 
-    public static void renderChartPNG(HttpServletResponse response, java.util.List<Pair<String, DilutionSummary>> dilutionSummaries, int[] cutoffs, boolean lockAxes, String chartTitle, int height, int width) throws IOException, DilutionCurve.FitFailedException
+    public static void renderChartPNG(HttpServletResponse response, java.util.List<Pair<String, DilutionSummary>> dilutionSummaries, Config config) throws IOException, DilutionCurve.FitFailedException
     {
         XYSeriesCollection curvesDataset = new XYSeriesCollection();
         XYSeriesCollection pointDataset = new XYSeriesCollection();
-        JFreeChart chart = ChartFactory.createXYLineChart(chartTitle, null, "Percent Neutralization", curvesDataset, PlotOrientation.VERTICAL, true, true, false);
+        JFreeChart chart = ChartFactory.createXYLineChart(config.getChartTitle(), null, "Percent Neutralization", curvesDataset, PlotOrientation.VERTICAL, true, true, false);
         XYPlot plot = chart.getXYPlot();
         plot.setDataset(1, pointDataset);
         plot.getRenderer(0).setStroke(new BasicStroke(1.5f));
-        if (lockAxes)
+        if (config.isLockAxes())
             plot.getRangeAxis().setRange(-20, 120);
         XYLineAndShapeRenderer pointRenderer = new XYLineAndShapeRenderer(true, true);
         plot.setRenderer(1, pointRenderer);
@@ -139,8 +236,17 @@ public class NabGraph
                 1.0f, new float[]{4.0f, 4.0f}, 0.0f));
         plot.getRenderer(0).setSeriesVisibleInLegend(false);
         pointRenderer.setShapesFilled(true);
+
+        int count = 0;
         for (Pair<String, DilutionSummary> summaryEntry : dilutionSummaries)
         {
+            count++;
+            if ((config.getFirstSample() > 0 && count <= config.getFirstSample()) || // before the first sample we want to show
+                (config.getMaxSamples() >= 0 && count > config.getMaxSamples() + config.getFirstSample()))// ) // after the last sample we want to show
+            {
+                continue;
+            }
+
             String sampleId = summaryEntry.getKey();
             DilutionSummary summary = summaryEntry.getValue();
             XYSeries pointSeries = new XYSeries(sampleId);
@@ -179,9 +285,9 @@ public class NabGraph
 
         chart.getXYPlot().setDomainAxis(new LogarithmicAxis("Dilution/Concentration"));
         chart.getXYPlot().addRangeMarker(new ValueMarker(0f, Color.DARK_GRAY, new BasicStroke()));
-        for (int cutoff : cutoffs)
+        for (int cutoff : config.getCutoffs())
             chart.getXYPlot().addRangeMarker(new ValueMarker(cutoff));
         response.setContentType("image/png");
-        ChartUtilities.writeChartAsPNG(response.getOutputStream(), chart, width, height);
+        ChartUtilities.writeChartAsPNG(response.getOutputStream(), chart, config.getWidth(), config.getHeight());
     }
 }

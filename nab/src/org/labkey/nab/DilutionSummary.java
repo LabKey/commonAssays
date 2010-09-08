@@ -16,10 +16,13 @@
 
 package org.labkey.nab;
 
+import org.labkey.api.study.PlateService;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellData;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -33,7 +36,8 @@ import org.labkey.api.study.DilutionCurve;
  */
 public class DilutionSummary implements Serializable
 {
-    private WellGroup _sampleGroup;
+    private List<WellGroup> _sampleGroups;
+    private WellGroup _firstGroup;
     private Map<DilutionCurve.FitType, DilutionCurve> _dilutionCurve = new HashMap<DilutionCurve.FitType, DilutionCurve>() ;
     private Luc5Assay _assay;
     private String _lsid;
@@ -41,13 +45,39 @@ public class DilutionSummary implements Serializable
 
     public DilutionSummary(Luc5Assay assay, WellGroup sampleGroup, String lsid, DilutionCurve.FitType curveFitType)
     {
-        assert sampleGroup!= null : "sampleGroup cannot be null";
-        assert sampleGroup.getPlate() != null : "sampleGroup must have a plate.";
+        this(assay, Collections.singletonList(sampleGroup), lsid, curveFitType);
+    }
+
+    public DilutionSummary(Luc5Assay assay, List<WellGroup> sampleGroups, String lsid, DilutionCurve.FitType curveFitType)
+    {
+        assert sampleGroups != null && !sampleGroups.isEmpty() : "sampleGroups cannot be null or empty";
         assert assay != null : "assay cannot be null";
+        ensureSameSample(sampleGroups);
         _curveFitType = curveFitType;
-        _sampleGroup = sampleGroup;
+        _sampleGroups = sampleGroups;
+        _firstGroup = sampleGroups.get(0);
         _assay = assay;
         _lsid = lsid;
+    }
+
+    private void ensureSameSample(List<WellGroup> groups)
+    {
+        String templateName = groups.get(0).getPlate().getName();
+        String wellgroupName = groups.get(0).getName();
+        for (int groupIndex = 1; groupIndex < groups.size(); groupIndex++)
+        {
+            if (!templateName.equals(groups.get(groupIndex).getPlate().getName()))
+            {
+                throw new IllegalStateException("Cannot generate single dilution summary for multiple plate templates: " +
+                        templateName + ", " + groups.get(groupIndex).getPlate().getName());
+            }
+
+            if (!wellgroupName.equals(groups.get(groupIndex).getName()))
+            {
+                throw new IllegalStateException("Cannot generate single dilution summary for multiple samples: " +
+                        wellgroupName + ", " + groups.get(groupIndex).getName());
+            }
+        }
     }
 
     public double getDilution(WellData data)
@@ -65,26 +95,50 @@ public class DilutionSummary implements Serializable
         return data.getStdDev();
     }
 
+    /**
+     * @deprecated used only by old NAb assay; always null for new NAb runs
+     */
     public String getSampleId()
     {
-        return (String) _sampleGroup.getProperty(NabManager.SampleProperty.SampleId.name());
+        return (String) _firstGroup.getProperty(NabManager.SampleProperty.SampleId.name());
     }
 
+    /**
+     * @deprecated used only by old NAb assay; always null for new NAb runs
+     */
     public String getSampleDescription()
     {
-        return (String) _sampleGroup.getProperty(NabManager.SampleProperty.SampleDescription.name());
+        return (String) _firstGroup.getProperty(NabManager.SampleProperty.SampleDescription.name());
+    }
+
+    private Map<WellData, WellGroup> _dataToSample;
+    private Map<WellData, WellGroup> getDataToSampleMap()
+    {
+        if (_dataToSample == null)
+        {
+            _dataToSample = new HashMap<WellData, WellGroup>();
+            for (WellGroup sampleGroup : _sampleGroups)
+            {
+                for (WellData data : sampleGroup.getWellData(true))
+                {
+                    _dataToSample.put(data, sampleGroup);
+                }
+            }
+        }
+        return _dataToSample;
     }
 
     public double getPercent(WellData data) throws DilutionCurve.FitFailedException
     {
-        return _assay.getPercent(_sampleGroup, data);
+        return _assay.getPercent(getDataToSampleMap().get(data), data);
     }
 
     private DilutionCurve getDilutionCurve(DilutionCurve.FitType type) throws DilutionCurve.FitFailedException
     {
         if (!_dilutionCurve.containsKey(type))
         {
-            _dilutionCurve.put(type, _sampleGroup.getDilutionCurve(_assay, getMethod() == SampleInfo.Method.Dilution, type));
+            DilutionCurve curve = PlateService.get().getDilutionCurve(_sampleGroups, getMethod() == SampleInfo.Method.Dilution, _assay, type);
+            _dilutionCurve.put(type, curve);
         }
         return _dilutionCurve.get(type);
     }
@@ -99,22 +153,25 @@ public class DilutionSummary implements Serializable
 
     public List<WellData> getWellData()
     {
-        return _sampleGroup.getWellData(true);
+        List<WellData> data = new ArrayList<WellData>();
+        for (WellGroup sampleGroup : _sampleGroups)
+            data.addAll(sampleGroup.getWellData(true));
+        return data;
     }
 
     public double getInitialDilution()
     {
-        return (Double) _sampleGroup.getProperty(NabManager.SampleProperty.InitialDilution.name());
+        return (Double) _firstGroup.getProperty(NabManager.SampleProperty.InitialDilution.name());
     }
 
     public double getFactor()
     {
-        return (Double) _sampleGroup.getProperty(NabManager.SampleProperty.Factor.name());
+        return (Double) _firstGroup.getProperty(NabManager.SampleProperty.Factor.name());
     }
 
     public SampleInfo.Method getMethod()
     {
-        String name = (String) _sampleGroup.getProperty(NabManager.SampleProperty.Method.name());
+        String name = (String) _firstGroup.getProperty(NabManager.SampleProperty.Method.name());
         return SampleInfo.Method.valueOf(name);
     }
 
@@ -158,9 +215,14 @@ public class DilutionSummary implements Serializable
         return _assay;
     }
 
-    public WellGroup getWellGroup()
+    public List<WellGroup> getWellGroups()
     {
-        return _sampleGroup;
+        return _sampleGroups;
+    }
+
+    public WellGroup getFirstWellGroup()
+    {
+        return _firstGroup;
     }
 
     public DilutionCurve.Parameters getCurveParameters(DilutionCurve.FitType type) throws DilutionCurve.FitFailedException

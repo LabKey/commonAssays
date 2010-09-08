@@ -4,6 +4,7 @@ import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.WellGroup;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -52,9 +53,9 @@ public class OldNabAssayRun extends Luc5Assay
     }
 
     @Override
-    public Plate[] getPlates()
+    public List<Plate> getPlates()
     {
-        return new Plate[] { _plate };
+        return Collections.singletonList(_plate);
     }
 
     public String getName()

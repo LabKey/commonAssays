@@ -34,7 +34,6 @@ public abstract class Luc5Assay implements Serializable, DilutionCurve.PercentCa
     private Integer _runRowId;
     private int[] _cutoffs;
     private Map<Integer, String> _cutoffFormats;
-    private Map<WellGroup, ExpMaterial> _wellGroupMaterialMapping;
     private File _dataFile;
     protected DilutionCurve.FitType _renderedCurveFitType;
     private boolean _lockAxes;
@@ -109,7 +108,7 @@ public abstract class Luc5Assay implements Serializable, DilutionCurve.PercentCa
             return 1 - (data.getMean() - cellControlMean) / controlRange;
     }
 
-    public abstract Plate[] getPlates();
+    public abstract List<Plate> getPlates();
 
     public double getControlRange(Plate plate)
     {
@@ -154,33 +153,6 @@ public abstract class Luc5Assay implements Serializable, DilutionCurve.PercentCa
     public void setCutoffFormats(Map<Integer, String> cutoffFormats)
     {
         _cutoffFormats = cutoffFormats;
-    }
-
-    public void setWellGroupMaterialMapping(Map<WellGroup, ExpMaterial> wellGroupMaterialMapping)
-    {
-        _wellGroupMaterialMapping = wellGroupMaterialMapping;
-    }
-
-    public ExpMaterial getMaterial(WellGroup wellgroup)
-    {
-        return _wellGroupMaterialMapping.get(wellgroup);
-    }
-
-    public WellGroup getWellGroup(ExpMaterial material)
-    {
-        for (Map.Entry<WellGroup, ExpMaterial> entry : _wellGroupMaterialMapping.entrySet())
-        {
-            if (entry.getValue().equals(material))
-                return entry.getKey();
-        }
-        // Extra logging to help track down bug 10347:
-        StringBuilder exceptionMsg = new StringBuilder("Couldn't find material " + material.getLSID() + " on run " + this.getRunRowId());
-        exceptionMsg.append("\nAvailable materials are:");
-        for (Map.Entry<WellGroup, ExpMaterial> entry : _wellGroupMaterialMapping.entrySet())
-        {
-            exceptionMsg.append("\nWell group ").append(entry.getKey().getName()).append(": ").append(entry.getValue().getLSID());
-        }
-        throw new RuntimeException(exceptionMsg.toString());
     }
 
     public File getDataFile()

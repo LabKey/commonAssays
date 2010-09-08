@@ -1,5 +1,6 @@
 package org.labkey.nab;
 
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
 import org.labkey.api.study.DilutionCurve;
@@ -7,7 +8,9 @@ import org.labkey.api.study.Plate;
 import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright (c) 2008-2010 LabKey Corporation
@@ -49,8 +52,8 @@ public class SinglePlateNabAssayRun extends NabAssayRun
     }
 
     @Override
-    public Plate[] getPlates()
+    public List<Plate> getPlates()
     {
-        return new Plate[] { _plate };
+        return Collections.singletonList(_plate);
     }
 }

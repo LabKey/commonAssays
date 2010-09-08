@@ -83,11 +83,9 @@ public class NabModule extends DefaultModule
 
         PlateService.get().registerPlateTypeHandler(new NabPlateTypeHandler());
         AssayService.get().registerAssayProvider(new NabAssayProvider());
-        ExperimentService.get().registerExperimentDataHandler(new NabDataHandler());
-        /*
+        ExperimentService.get().registerExperimentDataHandler(new SinglePlateNabDataHandler());
         AssayService.get().registerAssayProvider(new HighThroughputNabAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new HighThroughputNabDataHandler());
-        */
         ContainerManager.addContainerListener(new NabContainerListener());
     }
 

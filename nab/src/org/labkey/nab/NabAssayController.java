@@ -22,13 +22,11 @@ import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.*;
 import org.labkey.api.defaults.DefaultValueService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
-import org.labkey.api.exp.RawValueColumn;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -46,8 +44,6 @@ import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.DilutionCurve;
-import org.labkey.api.study.PlateQueryView;
-import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellGroupTemplate;
@@ -157,6 +153,32 @@ public class NabAssayController extends SpringActionController
         public DilutionCurve.FitType getFitTypeEnum()
         {
             return _fitType;
+        }
+    }
+
+    public static class GraphForm extends RenderAssayForm
+    {
+        private int _firstSample = 0;
+        private int _maxSamples = -1;
+
+        public int getFirstSample()
+        {
+            return _firstSample;
+        }
+
+        public void setFirstSample(int firstSample)
+        {
+            _firstSample = firstSample;
+        }
+
+        public int getMaxSamples()
+        {
+            return _maxSamples;
+        }
+
+        public void setMaxSamples(int maxSamples)
+        {
+            _maxSamples = maxSamples;
         }
     }
 
@@ -419,7 +441,7 @@ public class NabAssayController extends SpringActionController
         return (NabAssayProvider) provider;
     }
 
-    protected AbstractNabDataHandler getDataHandler(ExpRun run)
+    protected NabDataHandler getDataHandler(ExpRun run)
     {
         return getProvider(run).getDataHandler();
     }
@@ -535,7 +557,7 @@ public class NabAssayController extends SpringActionController
                 if (assay != null && fit == null)
                     getViewContext().getSession().setAttribute(LAST_NAB_RUN_KEY, new Pair<NabAssayRun, Date>(assay, new Date()));
             }
-            catch (NabDataHandler.MissingDataFileException e)
+            catch (SinglePlateNabDataHandler.MissingDataFileException e)
             {
                 HttpView.throwNotFound(e.getMessage());
             }
@@ -597,9 +619,6 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    private static final int DEFAULT_WIDTH = 425;
-    private static final int DEFAULT_HEIGHT = 300;
-
     public static class GraphSelectedForm
     {
         private int _protocolId;
@@ -607,8 +626,8 @@ public class NabAssayController extends SpringActionController
         private String _captionColumn;
         private String _chartTitle;
         private DilutionCurve.FitType _fitType;
-        private int _height = DEFAULT_HEIGHT;
-        private int _width = DEFAULT_WIDTH;
+        private int _height = -1;
+        private int _width = -1;
 
         public int[] getId()
         {
@@ -917,8 +936,15 @@ public class NabAssayController extends SpringActionController
                 for (int cutoff : summary.getAssay().getCutoffs())
                     cutoffSet.add(cutoff);
             }
-            NabGraph.renderChartPNG(getViewContext().getResponse(), summaries, toArray(cutoffSet), false,
-                    form.getCaptionColumn(), form.getChartTitle(), form.getHeight(), form.getWidth());
+
+            NabGraph.Config config = new NabGraph.Config();
+            config.setCutoffs(toArray(cutoffSet));
+            config.setLockAxes(false);
+            config.setCaptionColumn(form.getCaptionColumn());
+            config.setChartTitle(form.getChartTitle());
+            config.setHeight(form.getHeight());
+            config.setWidth(form.getWidth());
+            NabGraph.renderChartPNG(getViewContext().getResponse(), summaries, config);
             return null;
         }
 
@@ -930,9 +956,9 @@ public class NabAssayController extends SpringActionController
 
     @RequiresPermissionClass(ReadPermission.class)
     @ContextualRoles(RunDataSetContextualRoles.class)
-    public class GraphAction extends SimpleViewAction<RenderAssayForm>
+    public class GraphAction extends SimpleViewAction<GraphForm>
     {
-        public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
+        public ModelAndView getView(GraphForm form, BindException errors) throws Exception
         {
             if (form.getRowId() == -1)
                 return HttpView.throwNotFound("Run ID not specified.");
@@ -942,7 +968,14 @@ public class NabAssayController extends SpringActionController
             NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum());
             if (assay == null)
                 return HttpView.throwNotFound("Could not load NAb results for run " + form.getRowId() + ".");
-            NabGraph.renderChartPNG(getViewContext().getResponse(), assay, assay.isLockAxes(), null, null, DEFAULT_HEIGHT, DEFAULT_WIDTH);
+
+            NabGraph.Config config = new NabGraph.Config();
+            config.setCutoffs(assay.getCutoffs());
+            config.setLockAxes(assay.isLockAxes());
+            config.setFirstSample(form.getFirstSample());
+            config.setMaxSamples(form.getMaxSamples());
+
+            NabGraph.renderChartPNG(getViewContext().getResponse(), assay, config);
             return null;
         }
 

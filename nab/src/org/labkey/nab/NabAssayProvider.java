@@ -73,13 +73,13 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
     public NabAssayProvider()
     {
-        this(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, NabDataHandler.NAB_DATA_TYPE);
+        this(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, SinglePlateNabDataHandler.NAB_DATA_TYPE);
     }
 
     public NabAssayProvider(String protocolLSIDPrefix, String runLSIDPrefix, AssayDataType dataType)
     {
         super(protocolLSIDPrefix, runLSIDPrefix, dataType, new AssayTableMetadata(
-            FieldKey.fromParts("Properties", NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
+            FieldKey.fromParts("Properties", SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
             FieldKey.fromParts("Run"),
             FieldKey.fromParts("ObjectId")));
     }
@@ -279,7 +279,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                 for (PropertyDescriptor pd : dataPDs)
                 {
                     Object value = rowProperties.get(pd.getPropertyURI());
-                    if (!NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY.equals(pd.getName()))
+                    if (!SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY.equals(pd.getName()))
                         addProperty(pd, value, dataMap, tempTypes);
                     else
                         materialLsid = (String) value;
@@ -334,9 +334,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
     }
 
-    public AbstractNabDataHandler getDataHandler()
+    public NabDataHandler getDataHandler()
     {
-        return new NabDataHandler();
+        return new SinglePlateNabDataHandler();
     }
 
     public static class NabResultsQueryView extends ResultsQueryView

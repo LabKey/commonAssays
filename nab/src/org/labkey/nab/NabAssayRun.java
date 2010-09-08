@@ -30,7 +30,6 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.study.DilutionCurve;
-import org.labkey.api.study.Plate;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
@@ -58,6 +57,8 @@ public abstract class NabAssayRun extends Luc5Assay
     private ExpRun _run;
     private User _user;
     private DilutionCurve.FitType _savedCurveFitType = null;
+    private Map<ExpMaterial, List<WellGroup>> _materialWellGroupMapping;
+    private Map<WellGroup, ExpMaterial> _wellGroupMaterialMapping;
 
     public NabAssayRun(NabAssayProvider provider, ExpRun run,
                        User user, List<Integer> cutoffs, DilutionCurve.FitType renderCurveFitType)
@@ -78,7 +79,7 @@ public abstract class NabAssayRun extends Luc5Assay
         }
     }
 
-    public AbstractNabDataHandler getDataHandler()
+    public NabDataHandler getDataHandler()
     {
         return _provider.getDataHandler();
     }
@@ -198,9 +199,10 @@ public abstract class NabAssayRun extends Luc5Assay
     {
         if (_sampleResults == null)
         {
-            _sampleResults = new ArrayList<SampleResult>();
+            List<SampleResult> sampleResults = new ArrayList<SampleResult>();
 
-            ExpData[] outputDatas = _run.getOutputDatas(NabDataHandler.NAB_DATA_TYPE);
+            NabDataHandler handler = _provider.getDataHandler();
+            ExpData[] outputDatas = _run.getOutputDatas(handler.getDataType());
             if (outputDatas.length != 1)
                 throw new IllegalStateException("Expected a single data file output for this NAb run.  Found " + outputDatas.length);
             ExpData outputObject = outputDatas[0];
@@ -211,10 +213,10 @@ public abstract class NabAssayRun extends Luc5Assay
 
             for (DilutionSummary summary : getSummaries())
             {
-                String specimenId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-                Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-                String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-                Date visitDate = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
+                String specimenId = (String) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
+                Double visitId = (Double) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
+                String participantId = (String) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
+                Date visitDate = (Date) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
                 NabMaterialKey key = new NabMaterialKey(specimenId, participantId, visitId, visitDate);
 
                 String shortCaption = key.getDisplayString(false);
@@ -222,15 +224,17 @@ public abstract class NabAssayRun extends Luc5Assay
                     longCaptions = true;
                 captions.add(shortCaption);
 
-                NabResultProperties props = allProperties.get(summary.getWellGroup().getName());
-                _sampleResults.add(new SampleResult(_provider, outputObject, summary, key, props.getSampleProperties(), props.getDataProperties()));
+                NabResultProperties props = allProperties.get(summary.getFirstWellGroup().getName());
+                sampleResults.add(new SampleResult(_provider, outputObject, summary, key, props.getSampleProperties(), props.getDataProperties()));
             }
 
             if (longCaptions)
             {
-                for (SampleResult result : _sampleResults)
+                for (SampleResult result : sampleResults)
                     result.setLongCaptions(true);
             }
+
+            _sampleResults = sampleResults;
         }
         return _sampleResults;
     }
@@ -277,8 +281,8 @@ public abstract class NabAssayRun extends Luc5Assay
             // in addition to the properties saved on the sample object, we'll add the properties associated with each sample's
             // "output" data object.
             Map<PropertyDescriptor, Object> dataProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
-            WellGroup wellGroup = getWellGroup(material);
-            String dataRowLsid = getDataHandler().getDataRowLSID(outputData, wellGroup.getName()).toString();
+            String wellGroupName = getWellGroupName(material);
+            String dataRowLsid = getDataHandler().getDataRowLSID(outputData, wellGroupName).toString();
             Map<String, ObjectProperty> outputProperties;
             try
             {
@@ -294,7 +298,7 @@ public abstract class NabAssayRun extends Luc5Assay
                 throw new RuntimeSQLException(e);
             }
             
-            samplePropertyMap.put(wellGroup.getName(), new NabResultProperties(sampleProperties,  dataProperties));
+            samplePropertyMap.put(wellGroupName, new NabResultProperties(sampleProperties,  dataProperties));
         }
         return samplePropertyMap;
     }
@@ -317,7 +321,7 @@ public abstract class NabAssayRun extends Luc5Assay
             _materialKey = materialKey;
             _sampleProperties = sortProperties(sampleProperties);
             _dataProperties = sortProperties(dataProperties);
-            _dataRowLsid = provider.getDataHandler().getDataRowLSID(data, dilutionSummary.getWellGroup().getName()).toString();
+            _dataRowLsid = provider.getDataHandler().getDataRowLSID(data, dilutionSummary.getFirstWellGroup().getName()).toString();
             _dataContainer = data.getContainer();
         }
 
@@ -430,5 +434,36 @@ public abstract class NabAssayRun extends Luc5Assay
     public ExpRun getRun()
     {
         return _run;
+    }
+
+    public void setMaterialWellGroupMapping(Map<ExpMaterial, List<WellGroup>> materialWellGroupMapping)
+    {
+        _materialWellGroupMapping = materialWellGroupMapping;
+        _wellGroupMaterialMapping = new HashMap<WellGroup, ExpMaterial>();
+        for (Map.Entry<ExpMaterial, List<WellGroup>> entry : materialWellGroupMapping.entrySet())
+        {
+            for (WellGroup wellGroup : entry.getValue())
+            {
+                _wellGroupMaterialMapping.put(wellGroup, entry.getKey());
+            }
+        }
+    }
+
+    public ExpMaterial getMaterial(WellGroup wellgroup)
+    {
+        return _wellGroupMaterialMapping.get(wellgroup);
+    }
+
+    public List<WellGroup> getWellGroups(ExpMaterial material)
+    {
+        return _materialWellGroupMapping.get(material);
+    }
+
+    protected String getWellGroupName(ExpMaterial material)
+    {
+        List<WellGroup> groups = getWellGroups(material);
+        // All current NAb assay types don't mix well groups for a single sample- there may be muliple
+        // instances of the same well group on different plates, but they'll all have the same name.
+        return groups != null ? groups.get(0).getName() : null;
     }
 }

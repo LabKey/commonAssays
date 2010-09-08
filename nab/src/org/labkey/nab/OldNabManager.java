@@ -405,7 +405,8 @@ public class OldNabManager extends AbstractNabManager
         OldNabAssayRun temp = new OldNabAssayRun(plate, cutoffs, DilutionCurve.FitType.FIVE_PARAMETER);
         for (DilutionSummary dilution : temp.getSummaries())
         {
-            WellGroup group = dilution.getWellGroup();
+            // Old NAb runs will only have one well group, so there's no need to iterate the list:
+            WellGroup group = dilution.getFirstWellGroup();
             try
             {
                 assert groupInPlate(plate, group) : "Group not found in plate";
@@ -502,7 +503,7 @@ public class OldNabManager extends AbstractNabManager
         OldNabAssayRun assay = new OldNabAssayRun(group.getPlate(), getCutoffs(group.getPlate()), DilutionCurve.FitType.FIVE_PARAMETER);
         for (DilutionSummary summary : assay.getSummaries())
         {
-            if (summary.getWellGroup().getRowId().intValue() == wellGroupRowId)
+            if (summary.getFirstWellGroup().getRowId().intValue() == wellGroupRowId)
                 return summary;
         }
         return null;

@@ -40,21 +40,15 @@ import org.labkey.api.attachments.SpringAttachmentFile;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayPublishService;
 import org.labkey.api.util.DateUtil;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig.Template;
 import org.springframework.validation.BindException;
@@ -1075,7 +1069,7 @@ public class NabController extends SpringActionController
         {
             for (int i = 0; i < summaries.length && cacheValid; i++)
             {
-                if (ids[i] != summaries[i].getWellGroup().getRowId().intValue())
+                if (ids[i] != summaries[i].getFirstWellGroup().getRowId().intValue())
                     cacheValid = false;
             }
         }

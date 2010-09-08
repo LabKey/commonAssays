@@ -30,7 +30,7 @@ import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.nab.NabAssayProvider;
-import org.labkey.nab.NabDataHandler;
+import org.labkey.nab.SinglePlateNabDataHandler;
 import org.labkey.nab.SampleInfo;
 
 import java.sql.SQLException;
@@ -138,7 +138,7 @@ public class NabSchema extends AssaySchema
 
     public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException
     {
-        String propPrefix = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, protocol.getName(), "").toString();
+        String propPrefix = new Lsid(SinglePlateNabDataHandler.NAB_PROPERTY_LSID_PREFIX, protocol.getName(), "").toString();
         SimpleFilter propertyFilter = new SimpleFilter();
         propertyFilter.addCondition("PropertyURI", propPrefix, CompareType.STARTS_WITH);
         propertyFilter.addCondition("Project", protocol.getContainer().getProject());

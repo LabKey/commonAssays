@@ -53,10 +53,10 @@
     List<Map<PropertyDescriptor, Object>> sampleData = new ArrayList<Map<PropertyDescriptor, Object>>();
     Set<String> pdsWithData = new HashSet<String>();
 
-    String aucPropertyName = bean.getFitType() == null ? NabDataHandler.AUC_PREFIX : assay.getDataHandler().getPropertyName(NabDataHandler.AUC_PREFIX, bean.getFitType());
-    Lsid aucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), aucPropertyName);
-    String paucPropertyName = bean.getFitType() == null ? NabDataHandler.pAUC_PREFIX : assay.getDataHandler().getPropertyName(NabDataHandler.pAUC_PREFIX, bean.getFitType());
-    Lsid pAucURI = new Lsid(NabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), paucPropertyName);
+    String aucPropertyName = bean.getFitType() == null ? SinglePlateNabDataHandler.AUC_PREFIX : assay.getDataHandler().getPropertyName(SinglePlateNabDataHandler.AUC_PREFIX, bean.getFitType());
+    Lsid aucURI = new Lsid(SinglePlateNabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), aucPropertyName);
+    String paucPropertyName = bean.getFitType() == null ? SinglePlateNabDataHandler.pAUC_PREFIX : assay.getDataHandler().getPropertyName(SinglePlateNabDataHandler.pAUC_PREFIX, bean.getFitType());
+    Lsid pAucURI = new Lsid(SinglePlateNabDataHandler.NAB_PROPERTY_LSID_PREFIX, assay.getProtocol().getName(), paucPropertyName);
     PropertyDescriptor aucPD = OntologyManager.getPropertyDescriptor(aucURI.toString(), context.getContainer());
     PropertyDescriptor pAucPD = OntologyManager.getPropertyDescriptor(pAucURI.toString(), context.getContainer());
 
@@ -219,8 +219,16 @@
                                 graphAction.addParameter("rowId", bean.getRunId());
                                 if (bean.getFitType() != null)
                                     graphAction.addParameter("fitType", bean.getFitType().name());
+                                int maxSamplesPerGraph = 8;
+                                for (int firstSample = 0; firstSample < bean.getSampleResults().size(); firstSample += maxSamplesPerGraph)
+                                {
+                                    graphAction.replaceParameter("firstSample", "" + firstSample);
+                                    graphAction.replaceParameter("maxSamples", "" + maxSamplesPerGraph);
                             %>
                             <img src="<%= graphAction.getLocalURIString() %>">
+                            <%
+                                }
+                            %>
                         </td>
                         <td valign="top">
                         <table class="labkey-data-region labkey-show-borders" style="background-color:#FFFFA0;border:0">
@@ -318,16 +326,16 @@
                     <td colspan="2" valign="top">
                         <table width="100%">
                             <%
-                                if (assay.getPlates().length > 1)
+                                if (assay.getPlates().size() > 1)
                                 {
                             %>
                             <tr>
                                 <th>Plate</th>
                                 <%
-                                    Plate[] plates = assay.getPlates();
-                                    for (int i = 0; i < plates.length; i++)
+                                    List<Plate> plates = assay.getPlates();
+                                    for (int i = 0; i < plates.size(); i++)
                                     {
-                                        Plate plate = plates[i];
+                                        Plate plate = plates.get(i);
                                 %>
                                 <th><%= i + 1 %></th>
                                 <%
@@ -458,6 +466,8 @@
             <table>
                 <tr>
                     <%
+                        int count = 0;
+                        int maxPerRow = 6;
                         for (NabAssayRun.SampleResult results : bean.getSampleResults())
                         {
                             DilutionSummary summary = results.getDilutionSummary();
@@ -496,6 +506,12 @@
                         </table>
                     </td>
                     <%
+                            if (++count % maxPerRow == 0)
+                            {
+                    %>
+                                </tr><tr>
+                    <%
+                            }
                         }
                     %>
                 </tr>

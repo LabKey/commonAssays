@@ -21,7 +21,7 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.query.PlateBasedAssayRunDataTable;
-import org.labkey.nab.NabDataHandler;
+import org.labkey.nab.SinglePlateNabDataHandler;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -55,12 +55,12 @@ public class NabRunDataTable extends PlateBasedAssayRunDataTable
 
     public String getInputMaterialPropertyName()
     {
-        return NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY;
+        return SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY;
     }
 
     public String getDataRowLsidPrefix()
     {
-        return NabDataHandler.NAB_DATA_ROW_LSID_PREFIX;
+        return SinglePlateNabDataHandler.NAB_DATA_ROW_LSID_PREFIX;
     }
 
     @Override
@@ -73,9 +73,9 @@ public class NabRunDataTable extends PlateBasedAssayRunDataTable
             for (PropertyDescriptor prop : getExistingDataProperties(protocol))
             {
                 String propName = prop.getName();
-                if (propName.startsWith(NabDataHandler.CURVE_IC_PREFIX) ||
-                        propName.startsWith(NabDataHandler.AUC_PREFIX) ||
-                        propName.startsWith(NabDataHandler.pAUC_PREFIX))
+                if (propName.startsWith(SinglePlateNabDataHandler.CURVE_IC_PREFIX) ||
+                        propName.startsWith(SinglePlateNabDataHandler.AUC_PREFIX) ||
+                        propName.startsWith(SinglePlateNabDataHandler.pAUC_PREFIX))
                 {
                     if (propName.indexOf('_') != -1)
                         hiddenCols.add(propName);

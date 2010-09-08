@@ -66,7 +66,7 @@ public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetSt
             AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
             if (!(provider instanceof NabAssayProvider))
                 throw new IllegalStateException("Non-NAb run found.");
-            AbstractNabDataHandler dataHandler = ((NabAssayProvider) provider).getDataHandler();
+            NabDataHandler dataHandler = ((NabAssayProvider) provider).getDataHandler();
 
             runList.add(new NabRunPropertyMap(dataHandler.getAssayResults(run, form.getViewContext().getUser()),
                     form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut(), form.isIncludeFitParameters()));

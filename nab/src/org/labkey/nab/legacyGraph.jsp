@@ -33,7 +33,7 @@
     for (int i = 0; i < summaries.length; i++)
     {
         DilutionSummary summary = summaries[i];
-        chartURL.append("wellGroupId=").append(summary.getWellGroup().getRowId());
+        chartURL.append("wellGroupId=").append(summary.getFirstWellGroup().getRowId());
         if (i < summaries.length - 1)
             chartURL.append("&");
     }

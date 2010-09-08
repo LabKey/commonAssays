@@ -55,7 +55,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
             sample.put("properties", new PropertyNameMap(result.getSampleProperties()));
             DilutionSummary dilutionSummary = result.getDilutionSummary();
             sample.put("objectId", result.getObjectId());
-            sample.put("wellgroupName", dilutionSummary.getWellGroup().getName());
+            sample.put("wellgroupName", dilutionSummary.getFirstWellGroup().getName());
             try
             {
                 if (includeStats)
@@ -77,17 +77,20 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                     sample.put("fitParameters", dilutionSummary.getCurveParameters(assay.getRenderedCurveFitType()).toMap());
                 }
                 List<Map<String, Object>> replicates = new ArrayList<Map<String, Object>>();
-                for (WellGroup replicate : dilutionSummary.getWellGroup().getOverlappingGroups(WellGroup.Type.REPLICATE))
+                for (WellGroup sampleGroup : dilutionSummary.getWellGroups())
                 {
-                    Map<String, Object> replicateProps = new HashMap<String, Object>();
-                    replicateProps.put("dilution", replicate.getDilution());
-                    if (calculateNeut)
+                    for (WellGroup replicate : sampleGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
                     {
-                        replicateProps.put("neutPercent", dilutionSummary.getPercent(replicate));
-                        replicateProps.put("neutPlusMinus", dilutionSummary.getPlusMinus(replicate));
+                        Map<String, Object> replicateProps = new HashMap<String, Object>();
+                        replicateProps.put("dilution", replicate.getDilution());
+                        if (calculateNeut)
+                        {
+                            replicateProps.put("neutPercent", dilutionSummary.getPercent(replicate));
+                            replicateProps.put("neutPlusMinus", dilutionSummary.getPlusMinus(replicate));
+                        }
+                        addStandardWellProperties(replicate, replicateProps, includeStats, includeWells);
+                        replicates.add(replicateProps);
                     }
-                    addStandardWellProperties(replicate, replicateProps, includeStats, includeWells);
-                    replicates.add(replicateProps);
                 }
                 sample.put("replicates", replicates);
             }
@@ -100,13 +103,13 @@ public class NabRunPropertyMap extends HashMap<String, Object>
         }
         put("samples", samples);
 
-        Plate[] plates = assay.getPlates();
+        List<Plate> plates = assay.getPlates();
         if (plates != null)
         {
-            for (int i = 0; i < plates.length; i++)
+            for (int i = 0; i < plates.size(); i++)
             {
-                String indexSuffix = plates.length > 1 ? "" + (i + 1) : "";
-                Plate plate = plates[i];
+                String indexSuffix = plates.size() > 1 ? "" + (i + 1) : "";
+                Plate plate = plates.get(i);
                 WellGroup cellControl = plate.getWellGroup(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE);
                 Map<String, Object> cellControlProperties = new HashMap<String, Object>();
                 addStandardWellProperties(cellControl, cellControlProperties, includeStats, includeWells);
