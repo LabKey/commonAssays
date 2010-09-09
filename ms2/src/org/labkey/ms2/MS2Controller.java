@@ -1021,6 +1021,7 @@ public class MS2Controller extends SpringActionController
     public class PeptideChartsAction extends SimpleViewAction<ChartForm>
     {
         private ProteinDictionaryHelpers.GoTypes _goChartType;
+        private MS2Run _run;
 
         public ModelAndView getView(ChartForm form, BindException errors) throws Exception
         {
@@ -1029,13 +1030,29 @@ public class MS2Controller extends SpringActionController
             String queryString = (String) ctx.get("queryString");
             queryURL.setRawQuery(queryString);
 
-            MS2Run run = validateRun(form.getRun());
+            String runString = queryURL.getParameter("run");
+            if (runString == null)
+            {
+                return HttpView.throwNotFound("No run specified");
+            }
+
+            int runId;
+            try
+            {
+                runId = Integer.parseInt(runString);
+            }
+            catch (NumberFormatException e)
+            {
+                return HttpView.throwNotFound("Invalid run specified: " +runString);
+            }
+
+            _run = validateRun(runId);
 
             _goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
 
-            AbstractMS2RunView<? extends WebPartView> peptideView = getPeptideView(queryURL.getParameter("grouping"), run);
+            AbstractMS2RunView<? extends WebPartView> peptideView = getPeptideView(queryURL.getParameter("grouping"), _run);
 
-            Map<String, SimpleFilter> filters = peptideView.getFilter(queryURL, run);
+            Map<String, SimpleFilter> filters = peptideView.getFilter(queryURL, _run);
             String peptideFilterInfo = "";
             String proteinFilterInfo = "";
             String proteinGroupFilterInfo = "";
@@ -1050,12 +1067,12 @@ public class MS2Controller extends SpringActionController
             }
 
             String chartTitle = "GO " + _goChartType + " Classifications";
-            SQLFragment fragment = peptideView.getProteins(queryURL, run, form);
+            SQLFragment fragment = peptideView.getProteins(queryURL, _run, form);
             PieJChartHelper pjch = PieJChartHelper.prepareGOPie(chartTitle, fragment, _goChartType);
             pjch.renderAsPNG(new NullOutputStream());
 
             GoChartBean bean = new GoChartBean();
-            bean.run = run;
+            bean.run = _run;
             bean.chartTitle = chartTitle;
             bean.goChartType = _goChartType;
             bean.peptideFilterInfo = peptideFilterInfo;
@@ -1074,7 +1091,8 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRootNavTrail(root, "GO " + _goChartType + " Chart", getPageConfig(), null);
+            return appendRootNavTrail(root, _run.getDescription(), getPageConfig(), null).
+                    addChild("GO " + _goChartType + " Chart");
         }
     }
 

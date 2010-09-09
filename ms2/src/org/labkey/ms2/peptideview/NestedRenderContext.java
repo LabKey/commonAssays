@@ -81,24 +81,50 @@ public class NestedRenderContext extends RenderContext
     protected SimpleFilter buildFilter(TableInfo tinfo, ActionURL url, String name, int maxRows, long offset, Sort sort)
     {
         SimpleFilter result = super.buildFilter(tinfo, url, name, maxRows, offset, sort);
-        if (_nestingOption != null)
+        if (_nestingOption != null && (maxRows > 0 || offset > 0))
         {
             // We have to apply pagination as a subquery, since we want to paginate based
             // on groups, not on the actual rows in the query we end up executing
             result.addCondition(_nestingOption.getRowIdColumnName(), null, CompareType.NONBLANK);
 
-            SQLFragment fromSQL = new SQLFragment();
-            ColumnInfo groupColumn = appendFromSQL(tinfo, name, sort, fromSQL);
+            // We only need to sort on the columns that are part of the grouping, not the nested
+            // columns. These will also form the basis of the GROUP BY clause
+            Sort groupingSort = new Sort();
+            for (Sort.SortField sortField : sort.getSortList())
+            {
+                if (_nestingOption.isOuter(sortField.getColumnName()))
+                {
+                    // Only include ones that are part of the grouping data, and preserve their order
+                    groupingSort.insertSortColumn(sortField.getSortDirection().getDir() + sortField.getColumnName(), sortField.isUrlClause(), groupingSort.getSortList().size());
+                }
+            }
+
+            SQLFragment fromSQL = new SQLFragment(" FROM (");
+            ColumnInfo groupColumn = appendFromSQL(tinfo, name, groupingSort, fromSQL);
+            fromSQL.append(" ) FilterOnly ");
+
+            Collection<ColumnInfo> cols = Collections.singletonList(groupColumn);
+            SQLFragment withoutSort = QueryService.get().getSelectSQL(tinfo, cols, new SimpleFilter(), new Sort(), Table.ALL_ROWS, 0);
+            SQLFragment withSort = QueryService.get().getSelectSQL(tinfo, cols, new SimpleFilter(), groupingSort, Table.ALL_ROWS, 0);
+
+            // Figure out what the ORDER BY is
+            String sortSQL = withSort.getSQL().substring(withSort.getSQL().toUpperCase().lastIndexOf("ORDER BY"));
+
+            // The ORDER BY shouldn't include any parameters of its own
+            assert withoutSort.getParams().size() == withSort.getParams().size();
+
+            // Our GROUP BY is exactly the same set of columns as the ORDER BY, but without the
+            // ASC or DESC. In buildSort we explicitly include the grouping PK in the Sort
+            String groupBySQL = sortSQL.replaceAll(" DESC", "").replaceAll(" ASC", "").replaceAll("ORDER BY ", "GROUP BY ");
 
             // Add one to the limit so we can tell if there are more groups or not, and should therefore show pagination
-            fromSQL = tinfo.getSchema().getSqlDialect().limitRows(new SQLFragment("SELECT " + groupColumn.getAlias()),
-                    fromSQL, null, null, maxRows == 0 ? 0 : maxRows + 1, offset);
-
-            fromSQL.insert(0, " " + groupColumn.getAlias() + " IN (");
-            fromSQL.append(")");
+            SQLFragment fullSQL = new SQLFragment(" " + groupColumn.getAlias() + " IN (SELECT " + groupColumn.getAlias() + " FROM (");
+            fullSQL.append(tinfo.getSchema().getSqlDialect().limitRows(new SQLFragment("SELECT "  + groupColumn.getAlias() + " "),
+                    fromSQL, null, sortSQL, groupBySQL, maxRows == 0 ? 0 : maxRows + 1, offset));
+            fullSQL.append(" ) Limited )");
 
             // Apply a filter that restricts the group ids to the right "page" of data
-            result.addClause(new SimpleFilter.SQLClause(fromSQL.getSQL(), fromSQL.getParamsArray()));
+            result.addClause(new SimpleFilter.SQLClause(fullSQL.getSQL(), fullSQL.getParamsArray()));
         }
         return result;
     }
@@ -116,10 +142,11 @@ public class NestedRenderContext extends RenderContext
 
         // We want to do the aggregate query on the grouped data, since ultimately we want
         // a count of the number of groups
-        Sort sort = new Sort();
+        Sort sort = new Sort(_nestingOption.getRowIdColumnName());
         final SQLFragment fromSQL = new SQLFragment();
         ColumnInfo groupColumn = appendFromSQL(tinfo, dataRegionName, sort, fromSQL);
-        fromSQL.insert(0, "SELECT " + groupColumn.getAlias());
+        fromSQL.insert(0, "SELECT " + groupColumn.getAlias() + " FROM (");
+        fromSQL.append(") FilterOnly GROUP BY " + groupColumn.getAlias());
 
         // Create a TableInfo that wraps the GROUP BY query
         VirtualTable aggTableInfo = new VirtualTable(tinfo.getSchema())
@@ -155,18 +182,6 @@ public class NestedRenderContext extends RenderContext
         // To do this, we take the full query, do a GROUP BY on the grouping columns, and apply
         // the limit and offset
 
-        // We only need to sort on the columns that are part of the grouping, not the nested
-        // columns. These will also form the basis of the GROUP BY clause
-        Sort groupingSort = new Sort();
-        for (Sort.SortField sortField : sort.getSortList())
-        {
-            if (_nestingOption.isOuter(sortField.getColumnName()))
-            {
-                // Only include ones that are part of the grouping data
-                groupingSort.insertSortColumn(sortField.getSortDirection().getDir() + sortField.getColumnName());
-            }
-        }
-
         // Use Query to build up the SQL that we need
         Collection<ColumnInfo> cols = new ArrayList<ColumnInfo>();
         FieldKey groupFieldKey = FieldKey.fromString(_nestingOption.getRowIdColumnName());
@@ -175,29 +190,13 @@ public class NestedRenderContext extends RenderContext
         ColumnInfo groupColumn = groupColumns.get(groupFieldKey);
         assert groupColumn != null;
         cols.add(groupColumn);
-        cols = QueryService.get().ensureRequiredColumns(tinfo, cols, filter, groupingSort, _ignoredColumnFilters);
+        cols = QueryService.get().ensureRequiredColumns(tinfo, cols, filter, sort, _ignoredColumnFilters);
 
         // We need to stick the GROUP BY before the ORDER BY. QueryService won't help us generate
         // the GROUP BY, so get the query with and without the ORDER BY
         SQLFragment withoutSort = QueryService.get().getSelectSQL(tinfo, cols, filter, new Sort(), Table.ALL_ROWS, 0);
-        SQLFragment withSort = QueryService.get().getSelectSQL(tinfo, cols, filter, new Sort(), Table.ALL_ROWS, 0);
 
-        // The ORDER BY shouldn't include any parameters of its own
-        assert withoutSort.getParams().size() == withSort.getParams().size();
-
-        // Figure out what the ORDER BY is
-        String sortSQL = withSort.getSQL().substring(withoutSort.getSQL().length());
-
-        sql.append(" FROM (");
         sql.append(withoutSort);
-
-        // Our GROUP BY is exactly the same set of columns as the ORDER BY, but without the
-        // ASC or DESC. In buildSort we explicitly include the grouping PK in the Sort
-        String groupBySQL = sortSQL.replaceAll(" DESC", "").replaceAll(" ASC", "").replaceAll("ORDER BY ", "GROUP BY");
-        sql.append(groupBySQL);
-        sql.append(sortSQL);
-        
-        sql.append(" ) x ");
 
         return groupColumn;
     }

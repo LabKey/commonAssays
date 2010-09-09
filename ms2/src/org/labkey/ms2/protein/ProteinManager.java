@@ -367,12 +367,19 @@ public class ProteinManager
             throw new RuntimeException(e);
         }
 
+        boolean existingTransaction = getSchema().getScope().isTransactionActive();
         try
         {
-            getSchema().getScope().beginTransaction();
+            if (!existingTransaction)
+            {
+                getSchema().getScope().beginTransaction();
+            }
             Table.execute(getSchema(), "DELETE FROM " + getTableInfoCustomAnnotation() + " WHERE CustomAnnotationSetId = ?", new Object[] {set.getCustomAnnotationSetId()});
             Table.delete(getTableInfoCustomAnnotationSet(), set.getCustomAnnotationSetId());
-            getSchema().getScope().commitTransaction();
+            if (!existingTransaction)
+            {
+                getSchema().getScope().commitTransaction();
+            }
         }
         catch (SQLException e)
         {
@@ -380,7 +387,10 @@ public class ProteinManager
         }
         finally
         {
-            getSchema().getScope().closeConnection();
+            if (!existingTransaction)
+            {
+                getSchema().getScope().closeConnection();
+            }
         }
     }
 

@@ -44,7 +44,6 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.*;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
-import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
 import org.springframework.web.servlet.mvc.Controller;
 
 import javax.xml.xpath.XPath;

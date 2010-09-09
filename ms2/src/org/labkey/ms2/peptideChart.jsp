@@ -24,7 +24,6 @@
 <%
     MS2Controller.GoChartBean bean = ((JspView<MS2Controller.GoChartBean>) HttpView.currentView()).getModelBean();
 %>
-Run: <%=h(bean.run.toString())%><br>
 <%=h(bean.peptideFilterInfo)%><br>
 <%=h(bean.proteinFilterInfo)%><br>
 <%=h(bean.proteinGroupFilterInfo)%><br>
