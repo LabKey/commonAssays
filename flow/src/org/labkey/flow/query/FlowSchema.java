@@ -179,7 +179,7 @@ public class FlowSchema extends UserSchema
 
     public QueryDefinition getQueryDef(String name)
     {
-        return QueryService.get().getQueryDef(getContainer(), getSchemaName(), name);
+        return QueryService.get().getQueryDef(getUser(), getContainer(), getSchemaName(), name);
     }
 
     public QueryDefinition getQueryDef(FlowTableType qt)
