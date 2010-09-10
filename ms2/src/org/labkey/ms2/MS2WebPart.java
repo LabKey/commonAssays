@@ -47,12 +47,12 @@ public class MS2WebPart extends GridView
         DataRegion rgn = new DataRegion();
         rgn.setName(MS2Manager.getDataRegionNameExperimentRuns());
         TableInfo ti = MS2Manager.getTableInfoExperimentRuns();
-        List<ColumnInfo> cols = ti.getColumns("Description", "Path", "Created", "Run", "ExperimentRunLSID", "ProtocolName", "ExperimentRunRowId");
+        List<ColumnInfo> cols = ti.getColumns("Description", "Path", "Created", "Run", "ExperimentRunLSID", "ProtocolName", "ExperimentRunRowId", "PeptideCount", "NegativeHitCount");
         rgn.setColumns(cols);
-        rgn.getDisplayColumn(3).setVisible(false);
-        rgn.getDisplayColumn(4).setVisible(false);
-        rgn.getDisplayColumn(5).setVisible(false);
-        rgn.getDisplayColumn(6).setVisible(false);
+        for (int i = 3; i <= 8; i++)
+        {
+            rgn.getDisplayColumn(i).setVisible(false);
+        }
 
         rgn.setButtonBar(ButtonBar.BUTTON_BAR_EMPTY, DataRegion.MODE_GRID);
         return rgn;

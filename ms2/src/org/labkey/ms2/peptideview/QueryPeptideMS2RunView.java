@@ -23,7 +23,6 @@ import org.labkey.api.view.*;
 import org.labkey.api.query.*;
 import org.labkey.api.util.Pair;
 
-import javax.servlet.ServletException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -77,7 +76,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         return settings;
     }
 
-    public PeptideQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException, SQLException
+    public PeptideQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws RedirectException
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
         schema.setRuns(_runs);
@@ -176,7 +175,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             return result;
         }
 
-        protected PeptidesTableInfo createTable()
+        public PeptidesTableInfo createTable()
         {
             return new PeptidesTableInfo((MS2Schema) getSchema(), _url.clone(), true, ContainerFilter.CURRENT);
         }
@@ -184,11 +183,6 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
     public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
-    }
-
-    public MS2RunViewType getViewType()
-    {
-        return MS2RunViewType.QUERY_PEPTIDES;
     }
 
     public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)

@@ -228,22 +228,9 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            DataRegion rgn = new DataRegion();
-            rgn.setName(MS2Manager.getDataRegionNameExperimentRuns());
-            rgn.setColumns(MS2Manager.getTableInfoExperimentRuns().getColumns("Description, Path, Created, Status, ExperimentRunLSID, ExperimentRunRowId, ProtocolName, PeptideCount, NegativeHitCount"));
-            for (int i = 4; i < rgn.getDisplayColumns().size(); i++)
-                rgn.getDisplayColumn(i).setVisible(false);
-
-            ActionURL url = new ActionURL(ShowRunAction.class, getContainer());
-            rgn.getDisplayColumn(0).setURL(url.getLocalURIString() + "&run=${Run}");
-            // TODO: What does this do?
-            rgn.setFixedWidthColumns(false);
+            MS2WebPart gridView = new MS2WebPart(getViewContext());
+            DataRegion rgn = gridView.getDataRegion();
             rgn.setShowRecordSelectors(true);
-
-            GridView gridView = new GridView(rgn, errors);
-            gridView.setTitle("MS2 Runs");
-            gridView.setFilter(new SimpleFilter("Deleted", Boolean.FALSE));
-            gridView.setSort(MS2Manager.getRunsBaseSort());
 
             ButtonBar bb = getListButtonBar(getContainer(), gridView);
             rgn.addDisplayColumn(new HideShowScoringColumn(bb));
@@ -310,32 +297,31 @@ public class MS2Controller extends SpringActionController
 
         bb.add(createCompareMenu(c, view, false));
 
-        ActionButton compareScoring = new ActionButton("", CAPTION_SCORING_BUTTON);
-        compareScoring.setURL(new ActionURL(ScoringController.CompareAction.class, c));
+        ActionButton compareScoring = new ActionButton(new ActionURL(ScoringController.CompareAction.class, c), CAPTION_SCORING_BUTTON);
         compareScoring.setRequiresSelection(true);
         compareScoring.setActionType(ActionButton.Action.GET);
         compareScoring.setDisplayPermission(ReadPermission.class);
         compareScoring.setVisible(false);   // Hidden unless turned on during grid rendering.
         bb.add(compareScoring);
 
-        ActionButton exportRuns = new ActionButton("pickExportRunsView.view", "MS2 Export");
+        ActionButton exportRuns = new ActionButton(PickExportRunsView.class, "MS2 Export");
         exportRuns.setRequiresSelection(true);
         exportRuns.setActionType(ActionButton.Action.GET);
         exportRuns.setDisplayPermission(ReadPermission.class);
         bb.add(exportRuns);
 
-        ActionButton showHierarchy = new ActionButton("showHierarchy.view", "Show Hierarchy");
+        ActionButton showHierarchy = new ActionButton(ShowHierarchyAction.class, "Show Hierarchy");
         showHierarchy.setActionType(ActionButton.Action.LINK);
         showHierarchy.setDisplayPermission(ReadPermission.class);
         bb.add(showHierarchy);
 
-        ActionButton moveRuns = new ActionButton("selectMoveLocation.view", "Move");
+        ActionButton moveRuns = new ActionButton(SelectMoveLocationAction.class, "Move");
         moveRuns.setRequiresSelection(true);
         moveRuns.setActionType(ActionButton.Action.GET);
         moveRuns.setDisplayPermission(DeletePermission.class);
         bb.add(moveRuns);
 
-        ActionButton deleteRuns = new ActionButton("deleteRuns.view", "Delete");
+        ActionButton deleteRuns = new ActionButton(DeleteRunsAction.class, "Delete");
         deleteRuns.setRequiresSelection(true);
         deleteRuns.setActionType(ActionButton.Action.POST);
         deleteRuns.setDisplayPermission(DeletePermission.class);
@@ -1053,18 +1039,6 @@ public class MS2Controller extends SpringActionController
             AbstractMS2RunView<? extends WebPartView> peptideView = getPeptideView(queryURL.getParameter("grouping"), _run);
 
             Map<String, SimpleFilter> filters = peptideView.getFilter(queryURL, _run);
-            String peptideFilterInfo = "";
-            String proteinFilterInfo = "";
-            String proteinGroupFilterInfo = "";
-            if (filters != null)
-            {
-                if (filters.containsKey("peptideFilter"))
-                    peptideFilterInfo = "Peptide Filter: " + filters.get("peptideFilter").getFilterText();
-                if (filters.containsKey("proteinFilter"))
-                    proteinFilterInfo = "Protein Filter: " + filters.get("proteinFilter").getFilterText();
-                if (filters.containsKey("proteinGroupFilter"))
-                    proteinFilterInfo = "Protein Group Filter: " + filters.get("proteinGroupFilter").getFilterText();
-            }
 
             String chartTitle = "GO " + _goChartType + " Classifications";
             SQLFragment fragment = peptideView.getProteins(queryURL, _run, form);
@@ -1075,10 +1049,9 @@ public class MS2Controller extends SpringActionController
             bean.run = _run;
             bean.chartTitle = chartTitle;
             bean.goChartType = _goChartType;
-            bean.peptideFilterInfo = peptideFilterInfo;
-            bean.proteinFilterInfo = proteinFilterInfo;
-            bean.proteinGroupFilterInfo = proteinGroupFilterInfo;
+            bean.filterInfos = filters;
             bean.imageMap = ImageMapUtilities.getImageMap("pie1", pjch.getChartRenderingInfo());
+            bean.foundData = !pjch.getDataset().getExtraInfo().isEmpty();
             bean.queryString = queryString;
             bean.grouping = form.getGrouping();
             bean.pieHelperObjName = "piechart-" + (new Random().nextInt(1000000000));
@@ -1091,8 +1064,11 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRootNavTrail(root, _run.getDescription(), getPageConfig(), null).
-                    addChild("GO " + _goChartType + " Chart");
+            ActionURL runURL = new ActionURL(ShowRunAction.class, getContainer());
+            String queryString = getViewContext().getActionURL().getParameter("queryString");
+            runURL.setRawQuery(queryString);
+
+            return appendRunNavTrail(root, _run, runURL, "GO " + _goChartType + " Chart", getPageConfig(), "viewingGeneOntologyData");
         }
     }
 
@@ -1102,12 +1078,11 @@ public class MS2Controller extends SpringActionController
         public MS2Run run;
         public ProteinDictionaryHelpers.GoTypes goChartType;
         public String chartTitle;
-        public String peptideFilterInfo = "";
-        public String proteinFilterInfo = "";
-        public String proteinGroupFilterInfo = "";
+        public Map<String, SimpleFilter> filterInfos;
         public String pieHelperObjName;
         public ActionURL chartURL;
         public String imageMap;
+        public boolean foundData;
         public String queryString;
         public String grouping;
     }
@@ -2338,7 +2313,7 @@ public class MS2Controller extends SpringActionController
 
             ButtonBar bb = new ButtonBar();
 
-            ActionButton delete = new ActionButton("deleteAnnotInsertEntries.post", "Delete");
+            ActionButton delete = new ActionButton(DeleteAnnotInsertEntriesAction.class, "Delete");
             delete.setRequiresSelection(true, "Are you sure you want to remove the entries on this list?\\n(Note: actual annotations won't be deleted.)");
             delete.setActionType(ActionButton.Action.GET);
             bb.add(delete);
@@ -2351,9 +2326,9 @@ public class MS2Controller extends SpringActionController
             testFastaHeader.setActionType(ActionButton.Action.LINK);
             bb.add(testFastaHeader);
 
-            bb.add(new ActionButton("reloadSPOM.post", "Reload SWP Org Map"));
+            bb.add(new ActionButton(ReloadSPOMAction.class, "Reload SWP Org Map"));
 
-            ActionButton reloadGO = new ActionButton("loadGo.view", (GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO");
+            ActionButton reloadGO = new ActionButton(LoadGoAction.class, (GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO");
             reloadGO.setActionType(ActionButton.Action.LINK);
             bb.add(reloadGO);
 
@@ -2375,14 +2350,12 @@ public class MS2Controller extends SpringActionController
 
             ButtonBar bb = new ButtonBar();
 
-            ActionButton delete = new ActionButton("", "Delete");
-            delete.setURL(new ActionURL(DeleteDataBasesAction.class, getContainer()));
+            ActionButton delete = new ActionButton(new ActionURL(DeleteDataBasesAction.class, getContainer()), "Delete");
             delete.setActionType(ActionButton.Action.POST);
             delete.setRequiresSelection(true);
             bb.add(delete);
 
-            ActionButton reload = new ActionButton("button", "Reload FASTA");
-            reload.setURL(new ActionURL(ReloadFastaAction.class, getContainer()));
+            ActionButton reload = new ActionButton(ReloadFastaAction.class, "Reload FASTA");
             reload.setActionType(ActionButton.Action.POST);
             reload.setRequiresSelection(true);
             bb.add(reload);
@@ -4188,7 +4161,7 @@ public class MS2Controller extends SpringActionController
 
         bb.add(createCompareMenu(getContainer(), view, false));
 
-        ActionButton exportRuns = new ActionButton("button", "MS2 Export");
+        ActionButton exportRuns = new ActionButton(PickExportRunsView.class, "MS2 Export");
         exportRuns.setScript("return verifySelected(this.form, \"pickExportRunsView.view\", \"post\", \"runs\")");
         exportRuns.setActionType(ActionButton.Action.GET);
         exportRuns.setDisplayPermission(ReadPermission.class);

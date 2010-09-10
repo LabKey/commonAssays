@@ -56,7 +56,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         return settings;
     }
 
-    public ProteinGroupQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException, SQLException
+    public ProteinGroupQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
 
@@ -128,7 +128,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             return result;
         }
 
-        protected ProteinGroupTableInfo createTable()
+        public ProteinGroupTableInfo createTable()
         {
             ProteinGroupTableInfo result = ((MS2Schema)getSchema()).createProteinGroupsForRunTable(false);
             result.setRunFilter(Arrays.asList(_runs));
@@ -139,11 +139,6 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
     public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
 
-    }
-
-    public MS2RunViewType getViewType()
-    {
-        return MS2RunViewType.QUERY_PROTEIN_GROUPS;
     }
 
     public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)

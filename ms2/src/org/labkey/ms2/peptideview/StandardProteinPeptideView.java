@@ -105,7 +105,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
             proteinColumn.setLinkTarget("prot");
         }
 
-        ButtonBar bb = createButtonBar("exportAllProteins", "exportSelectedProteins", "proteins", proteinRgn);
+        ButtonBar bb = createButtonBar(MS2Controller.ExportAllProteinsAction.class, MS2Controller.ExportSelectedProteinsAction.class, "proteins", proteinRgn);
         proteinRgn.addHiddenFormField("queryString", _url.getRawQuery());
         //proteinRgn.addHiddenFormField("run", _url.getParameter("run"));
         //proteinRgn.addHiddenFormField("grouping", _url.getParameter("grouping"));
@@ -213,11 +213,6 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         sqlSummaries.add(new Pair<String, String>("Protein Sort", new Sort(_url, MS2Manager.getDataRegionNameProteins()).getSortText()));
     }
 
-    public MS2RunViewType getViewType()
-    {
-        return MS2RunViewType.PROTEIN;
-    }
-
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         SQLFragment fragment = new SQLFragment();
@@ -230,8 +225,8 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     public HashMap<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
         HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
-        map.put("peptideFilter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
-        map.put("proteinFilter", ProteinManager.getProteinFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, null, run));
+        map.put("Peptide filter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
+        map.put("Protein filter", ProteinManager.getProteinFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, null, run));
         return map;
     }
 

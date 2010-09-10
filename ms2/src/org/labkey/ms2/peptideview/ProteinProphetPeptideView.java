@@ -190,7 +190,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         DataRegion peptideGrid = createPeptideDataRegion(requestedPeptideColumnNames);
         proteinRgn.setNestedRegion(peptideGrid);
 
-        ButtonBar bb = createButtonBar("exportProteinGroups", "exportSelectedProteinGroups", "protein groups", proteinRgn);
+        ButtonBar bb = createButtonBar(MS2Controller.ExportProteinGroupsAction.class, MS2Controller.ExportSelectedProteinGroupsAction.class, "protein groups", proteinRgn);
 
         proteinRgn.addHiddenFormField("queryString", _url.getRawQuery());
         //proteinRgn.addHiddenFormField("run", _url.getParameter("run"));
@@ -421,11 +421,6 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         sqlSummaries.add(new Pair<String, String>("Protein Group Sort", new Sort(_url, MS2Manager.getDataRegionNameProteinGroups()).getSortText()));
     }
 
-    public MS2RunViewType getViewType()
-    {
-        return MS2RunViewType.PROTEIN_PROPHET;
-    }
-
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         SQLFragment fragment = new SQLFragment();
@@ -439,8 +434,8 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     public HashMap<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
         HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
-        map.put("peptideFilter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
-        map.put("proteinGroupFilter", ProteinManager.getProteinGroupFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, null, run));
+        map.put("Peptide filter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
+        map.put("Protein group filter", ProteinManager.getProteinGroupFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, null, run));
         return map;
     }
 

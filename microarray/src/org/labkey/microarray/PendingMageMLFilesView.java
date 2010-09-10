@@ -77,9 +77,8 @@ public class PendingMageMLFilesView extends QueryView
 
         PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
 
-        ActionButton deleteButton = new ActionButton("placeholder", "Delete");
         ActionURL deleteURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getDeleteDatasURL(view.getViewContext().getContainer(), getReturnURL());
-        deleteButton.setURL(deleteURL);
+        ActionButton deleteButton = new ActionButton(deleteURL, "Delete");
         deleteButton.setRequiresSelection(true, null, view.getDataRegion().getJavascriptFormReference(true));
         deleteButton.setActionType(ActionButton.Action.POST);
         deleteButton.setDisplayPermission(DeletePermission.class);

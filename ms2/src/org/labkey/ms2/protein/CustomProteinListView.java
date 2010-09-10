@@ -53,9 +53,8 @@ public class CustomProteinListView extends VBox
 
         if (includeButtons)
         {
-            ActionButton deleteButton = new ActionButton("", "Delete");
             ActionURL deleteURL = new ActionURL(ProteinController.DeleteCustomAnnotationSetsAction.class, context.getContainer());
-            deleteButton.setURL(deleteURL);
+            ActionButton deleteButton = new ActionButton(deleteURL, "Delete");
             deleteButton.setRequiresSelection(true);
             deleteButton.setActionType(ActionButton.Action.POST);
             deleteButton.setDisplayPermission(DeletePermission.class);

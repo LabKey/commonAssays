@@ -55,7 +55,8 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
     private ActionButton createButton(ViewContext context, Class<? extends Controller> action, String description, ActionButton.Action method)
     {
         ActionURL url = new ActionURL(action, context.getContainer());
-        ActionButton button = new ActionButton(url.getLocalURIString() + "ExperimentRunIds=true", description);
+        url.addParameter("ExperimentRunIds", true);
+        ActionButton button = new ActionButton(url, description);
         button.setActionType(method);
         button.setDisplayModes(DataRegion.MODE_GRID);
         return button;
@@ -68,10 +69,9 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
         compareMenu.setRequiresSelection(true);
         bar.add(compareMenu);
 
-        ActionButton exportRuns = new ActionButton("button", "MS2 Export");
         ActionURL url = new ActionURL(MS2Controller.PickExportRunsView.class, context.getContainer());
         url.addParameter("experimentRunIds", "true");
-        exportRuns.setURL(url);
+        ActionButton exportRuns = new ActionButton(url, "MS2 Export");
         exportRuns.setActionType(ActionButton.Action.POST);
         exportRuns.setRequiresSelection(true);
         exportRuns.setDisplayPermission(ReadPermission.class);

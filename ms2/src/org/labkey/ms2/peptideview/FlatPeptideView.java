@@ -193,7 +193,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
 
         setPeptideUrls(rgn, null);
 
-        ButtonBar bb = createButtonBar("exportAllPeptides", "exportSelectedPeptides", "peptides", rgn);
+        ButtonBar bb = createButtonBar(MS2Controller.ExportAllPeptidesAction.class, MS2Controller.ExportSelectedPeptidesAction.class, "peptides", rgn);
 
         rgn.addHiddenFormField("queryString", _url.getRawQuery());  // Pass query string for exportSelectedToExcel post case... need to display filter & sort to user, and to show the right columns
         rgn.addHiddenFormField(MS2Manager.getDataRegionNamePeptides() + ".sort", _url.getParameter(MS2Manager.getDataRegionNamePeptides() + ".sort"));     // Stick sort on the request as well so DataRegion sees it
@@ -208,11 +208,6 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
     {
         sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText()));
         sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(_url, MS2Manager.getDataRegionNamePeptides()).getSortText()));
-    }
-
-    public MS2RunViewType getViewType()
-    {
-        return MS2RunViewType.NONE;
     }
 
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
@@ -230,7 +225,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
     public HashMap<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
         HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
-        map.put("peptideFilter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
+        map.put("Peptide filter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
         return map;
     }
 

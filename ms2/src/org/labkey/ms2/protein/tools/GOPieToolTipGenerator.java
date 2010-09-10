@@ -43,6 +43,6 @@ public class GOPieToolTipGenerator implements PieToolTipGenerator
         {
         }
         if (tip == null) return "'" + skey + "' is an unknown or defunct category";
-        return tip;
+        return skey + ": " + tip;
     }
 }

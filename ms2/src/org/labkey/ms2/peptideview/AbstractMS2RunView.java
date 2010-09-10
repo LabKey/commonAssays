@@ -33,6 +33,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -93,18 +94,16 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     public abstract void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries);
 
-    public abstract MS2RunViewType getViewType();
+    public abstract SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form) throws ServletException;
 
-    public abstract SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form);
-
-    public abstract Map<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run);
+    public abstract Map<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run) throws ServletException;
 
     public Container getContainer()
     {
         return _container;
     }
 
-    protected ButtonBar createButtonBar(String exportAllAction, String exportSelectedAction, String whatWeAreSelecting, DataRegion dataRegion)
+    protected ButtonBar createButtonBar(Class<? extends Controller> exportAllAction, Class<? extends Controller> exportSelectedAction, String whatWeAreSelecting, DataRegion dataRegion)
     {
         ButtonBar result = new ButtonBar();
 
@@ -129,8 +128,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         }
         result.add(exportSelected);
 
-        // TODO: Temp hack -- need to support GO charts in protein views
-        if (getViewType().supportsGOPiechart() && GoLoader.isGoLoaded())
+        if (GoLoader.isGoLoaded())
         {
             MenuButton goButton = new MenuButton("Gene Ontology Charts");
             List<ProteinDictionaryHelpers.GoTypes> types = new ArrayList<ProteinDictionaryHelpers.GoTypes>();

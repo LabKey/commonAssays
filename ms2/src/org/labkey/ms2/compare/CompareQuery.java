@@ -372,9 +372,8 @@ public abstract class CompareQuery extends SQLFragment
         ButtonBar bb = new ButtonBar();
 
         ActionURL excelUrl = _currentUrl.clone();
-        ActionButton exportAll = new ActionButton("ExportAll", "Export to Excel");
+        ActionButton exportAll = new ActionButton(excelUrl, "Export to Excel");
         excelUrl.setAction(MS2Controller.ExportCompareToExcel.class);
-        exportAll.setURL(excelUrl);
         exportAll.setActionType(ActionButton.Action.LINK);
         bb.add(exportAll);
 

@@ -30,26 +30,11 @@ import java.util.HashSet;
  */
 public class GOPieURLGenerator extends StandardPieURLGenerator
 {
-    public String getUrlPrefix()
-    {
-        return urlPrefix;
-    }
-
-    public void setUrlPrefix(String urlPrefix)
-    {
-        this.urlPrefix = urlPrefix;
-    }
-
     protected String urlPrefix;
 
     public GOPieURLGenerator(String urlPrefix)
     {
         this.urlPrefix = urlPrefix;
-    }
-
-    private GOPieURLGenerator()
-    {
-        super();
     }
 
     public String generateURL(
@@ -63,9 +48,9 @@ public class GOPieURLGenerator extends StandardPieURLGenerator
         HashSet<Integer> sqids = extra.get(key);
         if (sqids == null) return null;
         String sqdstr = "";
-        for (Integer I : sqids)
+        for (Integer i : sqids)
         {
-            sqdstr += I.toString() + ",";
+            sqdstr += i.toString() + ",";
         }
         if (sqdstr.endsWith(",")) sqdstr = sqdstr.substring(0, sqdstr.length() - 1);
         String retVal = urlPrefix + "?" + "sliceTitle=" + key.toString().replace(' ', '+') + "&sqids=" + sqdstr;

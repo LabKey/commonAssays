@@ -46,7 +46,7 @@ public class NestedRenderContext extends RenderContext
         _nestingOption = nestingOption;
     }
 
-    protected Sort buildSort(TableInfo tinfo, ActionURL url, String name)
+    public Sort buildSort(TableInfo tinfo, ActionURL url, String name)
     {
         Sort standardSort = super.buildSort(tinfo, url, name);
         if (_nestingOption != null)
@@ -78,7 +78,7 @@ public class NestedRenderContext extends RenderContext
         }
     }
 
-    protected SimpleFilter buildFilter(TableInfo tinfo, ActionURL url, String name, int maxRows, long offset, Sort sort)
+    public SimpleFilter buildFilter(TableInfo tinfo, ActionURL url, String name, int maxRows, long offset, Sort sort)
     {
         SimpleFilter result = super.buildFilter(tinfo, url, name, maxRows, offset, sort);
         if (_nestingOption != null && (maxRows > 0 || offset > 0))

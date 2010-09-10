@@ -1299,7 +1299,7 @@ public class NabController extends SpringActionController
             clearButton.setDisplayPermission(InsertPermission.class);
             buttons.add(clearButton);
 
-            ActionButton graphSelectedButton = new ActionButton("graphSelected.view", "Graph Selected");
+            ActionButton graphSelectedButton = new ActionButton(GraphSelectedAction.class, "Graph Selected");
             graphSelectedButton.setActionType(ActionButton.Action.POST);
             graphSelectedButton.setRequiresSelection(true);
             buttons.add(graphSelectedButton);

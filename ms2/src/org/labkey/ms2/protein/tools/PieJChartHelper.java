@@ -33,7 +33,7 @@ import java.util.Set;
  * Date: Oct 28, 2005
  * Time: 3:44:19 PM
  */
-public class PieJChartHelper extends JChartHelper
+public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
 {
     private void init()
     {
@@ -41,7 +41,7 @@ public class PieJChartHelper extends JChartHelper
         this.setChart(
                 ChartFactory.createPieChart(
                         this.getChartTitle(),
-                        (ProteinPieDataset) this.getDataset(),
+                        this.getDataset(),
                         false, // legend?
                         true,  // tooltips?
                         true  // URLs?
@@ -57,11 +57,6 @@ public class PieJChartHelper extends JChartHelper
         ((PiePlot) plot).setShadowPaint(null);
         ((PiePlot) plot).setToolTipGenerator(new GOPieToolTipGenerator());
         ((PiePlot) plot).setURLGenerator(new GOPieURLGenerator("pieSliceSection.view"));
-    }
-
-    public PieJChartHelper()
-    {
-        init();
     }
 
     public PieJChartHelper(String title)
@@ -81,18 +76,6 @@ public class PieJChartHelper extends JChartHelper
     }
 
     protected int otherMin;
-
-    public HashSet<Integer> getOtherClassifications()
-    {
-        return otherClassifications;
-    }
-
-    public void setOtherClassifications(HashSet<Integer> otherClassifications)
-    {
-        this.otherClassifications = otherClassifications;
-    }
-
-    protected HashSet<Integer> otherClassifications = null;
 
     private static final int PIESLICE_MAX = 25;
 
@@ -153,7 +136,7 @@ public class PieJChartHelper extends JChartHelper
 
         try
         {
-            rs = Table.executeQuery(ProteinManager.getSchema(), sql.getSQL(), sql.getParams().toArray());
+            rs = Table.executeQuery(ProteinManager.getSchema(), sql);
             int prevSeqId = -1;
             int prevLocId = -1;
 
@@ -200,7 +183,7 @@ public class PieJChartHelper extends JChartHelper
                 rs.close();
         }
 
-        ((ProteinPieDataset) retVal.getDataset()).setExtraInfo(extra);
+        retVal.getDataset().setExtraInfo(extra);
 
         // This section looks for pie-slices with too few members.  PIESLICE_MAX is
         // an approximation of the number of slices which will look good on a
@@ -233,7 +216,7 @@ public class PieJChartHelper extends JChartHelper
             int n = thirdLevTallies.get(k).intValue();
             if (n >= retVal.getOtherMin())
             {
-                ((ProteinPieDataset) retVal.getDataset()).setValue(k, n);
+                retVal.getDataset().setValue(k, n);
             }
             else
             {
@@ -245,7 +228,7 @@ public class PieJChartHelper extends JChartHelper
         // for the image map
         if (otherCount > 0)
         {
-            ((ProteinPieDataset) retVal.getDataset()).setValue("Other", otherCount);
+            retVal.getDataset().setValue("Other", otherCount);
             HashSet<Integer> otherSet = new HashSet<Integer>();
             extra.put("Other", otherSet);
             for (String k : list)
@@ -255,7 +238,7 @@ public class PieJChartHelper extends JChartHelper
                     int ocount = thirdLevTallies.get(k).intValue();
                     if (ocount < retVal.getOtherMin())
                     {
-                        otherSet.addAll(((ProteinPieDataset) retVal.getDataset()).getExtraInfo().get(k));
+                        otherSet.addAll(retVal.getDataset().getExtraInfo().get(k));
                     }
                 }
             }
