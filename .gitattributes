@@ -1300,6 +1300,7 @@ nab/src/org/labkey/nab/SampleInfo.java -text
 nab/src/org/labkey/nab/SinglePlateNabAssayRun.java -text
 nab/src/org/labkey/nab/SinglePlateNabDataHandler.java -text
 nab/src/org/labkey/nab/StudyNabGraphAction.java -text
+nab/src/org/labkey/nab/editRunProperties.jsp -text
 nab/src/org/labkey/nab/header.jsp -text
 nab/src/org/labkey/nab/legacyGraph.jsp -text
 nab/src/org/labkey/nab/multiRunGraph.jsp -text
@@ -1308,9 +1309,16 @@ nab/src/org/labkey/nab/publishVerify.jsp -text
 nab/src/org/labkey/nab/query/NabDataLinkDisplayColumn.java -text
 nab/src/org/labkey/nab/query/NabRunDataTable.java -text
 nab/src/org/labkey/nab/query/NabSchema.java -text
-nab/src/org/labkey/nab/runDetails.jsp -text
-nab/src/org/labkey/nab/runProperties.jsp -text
 nab/src/org/labkey/nab/runResults.jsp -text
+nab/src/org/labkey/nab/view/controlSummary.jsp -text
+nab/src/org/labkey/nab/view/cutoffDilutions.jsp -text
+nab/src/org/labkey/nab/view/plateData.jsp -text
+nab/src/org/labkey/nab/view/runDetails.jsp -text
+nab/src/org/labkey/nab/view/runGraph.jsp -text
+nab/src/org/labkey/nab/view/runNotes.jsp -text
+nab/src/org/labkey/nab/view/runProperties.jsp -text
+nab/src/org/labkey/nab/view/sampleDilutions.jsp -text
+nab/src/org/labkey/nab/view/sampleProperties.jsp -text
 portal/module.properties -text
 portal/src/org/labkey/portal/PortalModule.java -text
 portal/src/org/labkey/portal/customizeErrors.jsp -text

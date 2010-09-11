@@ -160,6 +160,8 @@ public class NabAssayController extends SpringActionController
     {
         private int _firstSample = 0;
         private int _maxSamples = -1;
+        private int _height = -1;
+        private int _width = -1;
 
         public int getFirstSample()
         {
@@ -179,6 +181,26 @@ public class NabAssayController extends SpringActionController
         public void setMaxSamples(int maxSamples)
         {
             _maxSamples = maxSamples;
+        }
+
+        public int getHeight()
+        {
+            return _height;
+        }
+
+        public void setHeight(int height)
+        {
+            _height = height;
+        }
+
+        public int getWidth()
+        {
+            return _width;
+        }
+
+        public void setWidth(int width)
+        {
+            _width = width;
         }
     }
 
@@ -243,7 +265,7 @@ public class NabAssayController extends SpringActionController
         private Set<String> _hiddenRunColumns;
         private Map<String, Object> _displayProperties;
         private DilutionCurve.FitType _fitType;
-
+        private Boolean _dupFile = null;
 
         public RenderAssayBean(ViewContext context, NabAssayRun assay, DilutionCurve.FitType fitType, boolean newRun, boolean printView)
         {
@@ -345,24 +367,28 @@ public class NabAssayController extends SpringActionController
 
         private boolean isDuplicateDataFile()
         {
-            ResultSet rs = null;
-            try
+            if (_dupFile == null)
             {
-                SimpleFilter filter = new SimpleFilter("ProtocolLsid", _assay.getProtocol().getLSID());
-                filter.addCondition("Name", _assay.getDataFile().getName());
-                filter.addCondition("RowId", _assay.getRun().getRowId(), CompareType.NEQ);
-                rs = Table.select(ExperimentService.get().getTinfoExperimentRun(), Table.ALL_COLUMNS, filter, null);
-                return rs.next();
+                ResultSet rs = null;
+                try
+                {
+                    SimpleFilter filter = new SimpleFilter("ProtocolLsid", _assay.getProtocol().getLSID());
+                    filter.addCondition("Name", _assay.getDataFile().getName());
+                    filter.addCondition("RowId", _assay.getRun().getRowId(), CompareType.NEQ);
+                    rs = Table.select(ExperimentService.get().getTinfoExperimentRun(), Table.ALL_COLUMNS, filter, null);
+                    _dupFile = rs.next();
+                }
+                catch (SQLException e)
+                {
+                    throw new RuntimeSQLException(e);
+                }
+                finally
+                {
+                    if (rs != null)
+                        try { rs.close(); } catch (SQLException e) { /* fall through */ }
+                }
             }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
-            finally
-            {
-                if (rs != null)
-                    try { rs.close(); } catch (SQLException e) { /* fall through */ }
-            }
+            return _dupFile;
         }
 
         public QueryView getDuplicateDataFileView(ViewContext context)
@@ -373,6 +399,66 @@ public class NabAssayController extends SpringActionController
             }
             else
                 return null;
+        }
+
+        public HttpView getControlsView()
+        {
+            return new JspView<RenderAssayBean>("/org/labkey/nab/view/controlSummary.jsp", this);
+        }
+
+        public HttpView getCutoffsView()
+        {
+            return new JspView<RenderAssayBean>("/org/labkey/nab/view/cutoffDilutions.jsp", this);
+        }
+
+        public HttpView getGraphView()
+        {
+            return new JspView<RenderAssayBean>("/org/labkey/nab/view/runGraph.jsp", this);
+        }
+
+        public HttpView getSamplePropertiesView()
+        {
+            return new JspView<RenderAssayBean>("/org/labkey/nab/view/sampleProperties.jsp", this);
+        }
+
+        public HttpView getRunPropertiesView()
+        {
+            return new JspView<RenderAssayBean>("/org/labkey/nab/view/runProperties.jsp", this);
+        }
+
+        public HttpView getSampleDilutionsView()
+        {
+            return new JspView<RenderAssayBean>("/org/labkey/nab/view/sampleDilutions.jsp", this);
+        }
+
+        public HttpView getPlateDataView()
+        {
+            return new JspView<RenderAssayBean>("/org/labkey/nab/view/plateData.jsp", this);
+        }
+
+        public HttpView getRunNotesView()
+        {
+            return new JspView<RenderAssayBean>("/org/labkey/nab/view/runNotes.jsp", this);
+        }
+
+        public boolean needsCurveNote()
+        {
+            return _assay.getRenderedCurveFitType() != _assay.getSavedCurveFitType();
+        }
+
+        public boolean needsNewRunNote()
+        {
+            return  !isPrintView() && isNewRun();
+        }
+
+        public boolean needsDupFileNote()
+        {
+            return !isPrintView() &&  isDuplicateDataFile();
+        }
+
+        public boolean needsNotesView()
+        {
+            return needsCurveNote() || needsNewRunNote() || needsDupFileNote();
         }
 
         public boolean isPrintView()
@@ -602,7 +688,7 @@ public class NabAssayController extends SpringActionController
             _protocol = run.getProtocol();
             AbstractPlateBasedAssayProvider provider = (AbstractPlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
 
-            HttpView view = new JspView<RenderAssayBean>("/org/labkey/nab/runDetails.jsp",
+            HttpView view = new JspView<RenderAssayBean>("/org/labkey/nab/view/runDetails.jsp",
                     new RenderAssayBean(getViewContext(), assay, form.getFitTypeEnum(), form.isNewRun(), isPrint()));
             if (!isPrint())
                 view = new VBox(new NabDetailsHeaderView(_protocol, provider, _runRowId), view);
@@ -942,7 +1028,9 @@ public class NabAssayController extends SpringActionController
             config.setLockAxes(false);
             config.setCaptionColumn(form.getCaptionColumn());
             config.setChartTitle(form.getChartTitle());
-            config.setHeight(form.getHeight());
+            if (form.getHeight() > 0)
+                config.setHeight(form.getHeight());
+            if (form.getWidth() > 0)
             config.setWidth(form.getWidth());
             NabGraph.renderChartPNG(getViewContext().getResponse(), summaries, config);
             return null;
@@ -974,6 +1062,10 @@ public class NabAssayController extends SpringActionController
             config.setLockAxes(assay.isLockAxes());
             config.setFirstSample(form.getFirstSample());
             config.setMaxSamples(form.getMaxSamples());
+            if (form.getHeight() > 0)
+                config.setHeight(form.getHeight());
+            if (form.getWidth() > 0)
+                config.setWidth(form.getWidth());
 
             NabGraph.renderChartPNG(getViewContext().getResponse(), assay, config);
             return null;

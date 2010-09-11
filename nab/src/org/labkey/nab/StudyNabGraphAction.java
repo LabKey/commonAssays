@@ -65,8 +65,10 @@ public class StudyNabGraphAction extends SimpleViewAction<NabAssayController.Gra
         config.setCutoffs(toArray(cutoffSet));
         config.setCaptionColumn(graphForm.getCaptionColumn());
         config.setChartTitle(graphForm.getChartTitle());
-        config.setHeight(graphForm.getHeight());
-        config.setWidth(graphForm.getWidth());
+        if (graphForm.getHeight() > 0)
+            config.setHeight(graphForm.getHeight());
+        if (graphForm.getWidth() > 0)
+            config.setWidth(graphForm.getWidth());
         NabGraph.renderChartPNG(getViewContext().getResponse(), summaries, config);
         return null;
     }

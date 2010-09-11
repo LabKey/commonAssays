@@ -206,7 +206,7 @@ public class NabController extends SpringActionController
     {
         private EditParametersView(UploadAssayForm form)
         {
-            super("/org/labkey/nab/runProperties.jsp", form);
+            super("/org/labkey/nab/editRunProperties.jsp", form);
         }
     }
 
