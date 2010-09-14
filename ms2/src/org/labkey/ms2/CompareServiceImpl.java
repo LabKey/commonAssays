@@ -19,12 +19,14 @@ package org.labkey.ms2;
 import org.apache.log4j.Logger;
 import org.labkey.api.gwt.client.model.GWTComparisonResult;
 import org.labkey.api.gwt.server.BaseRemoteService;
+import org.labkey.api.query.ComparisonCrosstabView;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.client.CompareService;
 import org.labkey.ms2.query.CompareProteinsView;
 import org.labkey.ms2.query.MS2Schema;
+import org.labkey.ms2.query.NormalizedProteinProphetCrosstabView;
 import org.labkey.ms2.query.ProteinProphetCrosstabView;
 
 import java.util.List;
@@ -73,6 +75,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
             String probString = url.getParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability);
             form.setPeptideProphetProbability(probString == null || "".equals(probString) ? null : Float.parseFloat(probString));
             form.setPeptideFilterType(url.getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType));
+            form.setNormalizeProteinGroups(Boolean.parseBoolean(url.getParameter(MS2Controller.NORMALIZE_PROTEIN_GROUPS_NAME)));
 
             ViewContext queryContext = new ViewContext(_context);
             queryContext.setActionURL(url);
@@ -82,7 +85,8 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             schema.setRuns(runs);
 
-            ProteinProphetCrosstabView view = new ProteinProphetCrosstabView(schema, form, url);
+            ComparisonCrosstabView view = form.isNormalizeProteinGroups() ? new NormalizedProteinProphetCrosstabView(schema, form, url) :
+                    new ProteinProphetCrosstabView(schema, form, url);
 
             return view.createComparisonResult();
         }

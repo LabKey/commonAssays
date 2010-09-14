@@ -1196,6 +1196,7 @@ ms2/src/org/labkey/ms2/query/ComparePeptidesView.java -text
 ms2/src/org/labkey/ms2/query/CompareProteinProphetTableInfo.java -text
 ms2/src/org/labkey/ms2/query/CompareProteinsView.java -text
 ms2/src/org/labkey/ms2/query/MS2Schema.java -text
+ms2/src/org/labkey/ms2/query/NormalizedProteinProphetCrosstabView.java -text
 ms2/src/org/labkey/ms2/query/OrganismTableInfo.java -text
 ms2/src/org/labkey/ms2/query/PeptideAggregrationDisplayColumn.java -text
 ms2/src/org/labkey/ms2/query/PeptideCountCoverageColumn.java -text

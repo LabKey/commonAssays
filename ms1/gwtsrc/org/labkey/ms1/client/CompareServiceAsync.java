@@ -17,6 +17,7 @@
 package org.labkey.ms1.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.labkey.api.gwt.client.model.GWTComparisonResult;
 
 /**
  * User: jeckels
@@ -24,5 +25,5 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public interface CompareServiceAsync
 {
-    void getFeaturesByPeptideComparison(String originalURL, AsyncCallback async);
+    void getFeaturesByPeptideComparison(String originalURL, AsyncCallback<GWTComparisonResult> async);
 }

@@ -53,6 +53,7 @@ import org.labkey.api.settings.WriteableAppProps;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.ms2.client.MS2VennDiagramView;
 import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
@@ -84,6 +85,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.*;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -1372,6 +1374,7 @@ public class MS2Controller extends SpringActionController
             form.setPeptideFilterType(prefs.get(PeptideFilteringFormElements.peptideFilterType.name()) == null ? "none" : prefs.get(PeptideFilteringFormElements.peptideFilterType.name()));
             form.setOrCriteriaForEachRun(Boolean.parseBoolean(prefs.get(PeptideFilteringFormElements.orCriteriaForEachRun.name())));
             form.setDefaultCustomView(prefs.get(PEPTIDES_FILTER_VIEW_NAME));
+            form.setNormalizeProteinGroups(Boolean.parseBoolean(prefs.get(NORMALIZE_PROTEIN_GROUPS_NAME)));
             if (prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name()) != null)
             {
                 try
@@ -1413,6 +1416,7 @@ public class MS2Controller extends SpringActionController
         private Float _peptideProphetProbability;
         private boolean _orCriteriaForEachRun;
         private String _defaultCustomView;
+        private boolean _normalizeProteinGroups;
 
         public String getPeptideFilterType()
         {
@@ -1496,10 +1500,20 @@ public class MS2Controller extends SpringActionController
                 title.append("No peptide filter");
             }
         }
+
+        public boolean isNormalizeProteinGroups()
+        {
+            return _normalizeProteinGroups;
+        }
+
+        public void setNormalizeProteinGroups(boolean normalizeProteinGroups)
+        {
+            _normalizeProteinGroups = normalizeProteinGroups;
+        }
     }
 
     @RequiresPermissionClass(ReadPermission.class)
-    public class CompareProteinProphetQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, ProteinProphetCrosstabView>
+    public class CompareProteinProphetQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, ComparisonCrosstabView>
     {
         private PeptideFilteringComparisonForm _form;
 
@@ -1516,7 +1530,7 @@ public class MS2Controller extends SpringActionController
 
         protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
-            ProteinProphetCrosstabView view = createInitializedQueryView(form, errors, false, null);
+            ComparisonCrosstabView view = createInitializedQueryView(form, errors, false, null);
 
             if (!getUser().isGuest())
             {
@@ -1524,30 +1538,47 @@ public class MS2Controller extends SpringActionController
                 prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
                 prefs.put(PeptideFilteringFormElements.orCriteriaForEachRun.name(), Boolean.toString(form.isOrCriteriaForEachRun()));
                 prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getCustomViewName(getViewContext()));
+                prefs.put(NORMALIZE_PROTEIN_GROUPS_NAME, Boolean.toString(form.isNormalizeProteinGroups()));
                 prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
                 PropertyManager.saveProperties(prefs);
             }
 
-
-            HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein columns under the <em>Protein</em> node in the tree, or expand <em>Protein Group</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>");
-
             Map<String, String> props = new HashMap<String, String>();
             props.put("originalURL", getViewContext().getActionURL().toString());
+            props.put("PeptidesFilter.viewName", getViewContext().getActionURL().getParameter("PeptidesFilter.viewName"));
             props.put("comparisonName", "ProteinProphetCrosstab");
             GWTView gwtView = new GWTView(org.labkey.ms2.client.MS2VennDiagramView.class, props);
             gwtView.setTitle("Comparison Overview");
             gwtView.setFrame(WebPartView.FrameType.PORTAL);
             gwtView.enableExpandCollapse("ProteinProphetQueryCompare", true);
 
-            return new VBox(gwtView, helpView, view);
+            VBox result = new VBox(gwtView);
+            if (!_form.isNormalizeProteinGroups())
+            {
+                result.addView(new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein columns under the <em>Protein</em> node in the tree, or expand <em>Protein Group</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>"));
+            }
+            else
+            {
+                view.setTitle("Comparison Details");
+                view.setFrame(WebPartView.FrameType.PORTAL);
+            }
+            result.addView(view);
+            return result;
         }
 
-        protected ProteinProphetCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
+        protected ComparisonCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
             schema.setRuns(runs);
-            return new ProteinProphetCrosstabView(schema, form, getViewContext().getActionURL());
+            if (form.isNormalizeProteinGroups())
+            {
+                return new NormalizedProteinProphetCrosstabView(schema, form, getViewContext().getActionURL());
+            }
+            else
+            {
+                return new ProteinProphetCrosstabView(schema, form, getViewContext().getActionURL());
+            }
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1563,6 +1594,7 @@ public class MS2Controller extends SpringActionController
                 setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList() == null ? -1 : _form.getRunList());
                 setupURL.addParameter(PeptideFilteringFormElements.orCriteriaForEachRun, _form.isOrCriteriaForEachRun());
                 setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getCustomViewName(getViewContext()));
+                setupURL.addParameter(NORMALIZE_PROTEIN_GROUPS_NAME, _form.isNormalizeProteinGroups());
                 root.addChild("MS2 Dashboard");
                 root.addChild("Setup Compare ProteinProphet", setupURL);
                 StringBuilder title = new StringBuilder("Compare ProteinProphet (Query): ");
@@ -1575,6 +1607,10 @@ public class MS2Controller extends SpringActionController
                 else
                 {
                     title.append("Show only in runs that meet criteria");
+                }
+                if (_form.isNormalizeProteinGroups())
+                {
+                    title.append(", Normalized protein groups");
                 }
                 return root.addChild(title.toString());
             }
@@ -1835,6 +1871,7 @@ public class MS2Controller extends SpringActionController
 
     public static final String PEPTIDES_FILTER = "PeptidesFilter";
     public static final String PEPTIDES_FILTER_VIEW_NAME = PEPTIDES_FILTER + "." + QueryParam.viewName.toString();
+    public static final String NORMALIZE_PROTEIN_GROUPS_NAME = "normalizeProteinGroups";
 
     @RequiresPermissionClass(ReadPermission.class)
     public abstract class AbstractRunListCreationAction<FormType extends RunListForm> extends SimpleViewAction<FormType>

@@ -16,6 +16,7 @@
 
 package org.labkey.ms1.client;
 
+import org.labkey.api.gwt.client.model.GWTComparisonResult;
 import org.labkey.api.gwt.client.ui.VennDiagramView;
 import org.labkey.api.gwt.client.util.ServiceUtil;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -50,7 +51,7 @@ public class MS1VennDiagramView extends VennDiagramView implements EntryPoint
         return _service;
     }
 
-    protected void requestComparison(String originalURL, String comparisonGroup, AsyncCallback callbackHandler)
+    protected void requestComparison(String originalURL, String comparisonGroup, AsyncCallback<GWTComparisonResult> callbackHandler)
     {
         if (FEATURES_BY_PEPTIDE.equalsIgnoreCase(comparisonGroup))
         {

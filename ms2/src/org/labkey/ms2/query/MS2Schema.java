@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
@@ -25,6 +26,7 @@ import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.util.StringExpression;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
@@ -35,6 +37,8 @@ import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
@@ -211,8 +215,7 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo createTable(MS2Schema ms2Schema)
             {
-                ComparePeptideTableInfo result = ms2Schema.createPeptidesCompareTable(false, null, null);
-                return result;
+                return ms2Schema.createPeptidesCompareTable(false, null, null);
             }
         },
         ProteinProphetCrosstab
@@ -220,6 +223,13 @@ public class MS2Schema extends UserSchema
             public TableInfo createTable(MS2Schema ms2Schema)
             {
                 return ms2Schema.createProteinProphetCrosstabTable(null, null);
+            }
+        },
+        ProteinProphetNormalizedCrosstab
+        {
+            public TableInfo createTable(MS2Schema ms2Schema)
+            {
+                return ms2Schema.createNormalizedProteinProphetComparisonTable(null, null);
             }
         };
 
@@ -623,31 +633,6 @@ public class MS2Schema extends UserSchema
 
         result.setDefaultVisibleColumns(columns);
         return result;
-
-//        FieldKey fieldLinks = FieldKey.fromParts("Links");
-//        FieldKey fieldMS2Links = FieldKey.fromParts("MS2Details", "Links");
-//        boolean ms2LinksAdded = false;
-//        List<FieldKey> columns = new ArrayList<FieldKey>();
-//        for (FieldKey field : result.getDefaultVisibleColumns())
-//        {
-//            columns.add(field);
-//            if (!ms2LinksAdded && fieldLinks.equals(field))
-//            {
-//                columns.add(fieldMS2Links);
-//                ms2LinksAdded = true;
-//            }
-//        }
-//        columns.remove(FieldKey.fromParts("Name"));
-//        columns.remove(FieldKey.fromParts("Protocol"));
-//        columns.remove(FieldKey.fromParts("CreatedBy"));
-//        if (!ms2LinksAdded)
-//        {
-//            columns.add(fieldMS2Links);
-//        }
-//        columns.add(FieldKey.fromParts("MS2Details", "Path"));
-//        columns.add(FieldKey.fromParts("Input", "FASTA"));
-//        result.setDefaultVisibleColumns(columns);
-//        return result;
     }
 
     public void setRuns(MS2Run[] runs)
@@ -733,6 +718,218 @@ public class MS2Schema extends UserSchema
         }
         return getPeptideSelectSQL(filter, fieldKeys);
     }
+
+    public CrosstabTableInfo createNormalizedProteinProphetComparisonTable(final MS2Controller.PeptideFilteringComparisonForm form, final ViewContext context)
+    {
+        VirtualTable rawTable;
+
+        ColumnInfo normalizedIdCol = new ColumnInfo("NormalizedId");
+        normalizedIdCol.setSqlTypeName("INT");
+        normalizedIdCol.setHidden(true);
+
+        ColumnInfo proteinGroupIdCol = new ColumnInfo("ProteinGroupId");
+        proteinGroupIdCol.setSqlTypeName("INT");
+        proteinGroupIdCol.setIsUnselectable(true);
+        proteinGroupIdCol.setFk(new LookupForeignKey("RowId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return new ProteinGroupTableInfo(MS2Schema.this, true);
+            }
+
+            @Override
+            public StringExpression getURL(ColumnInfo parent)
+            {
+                return getURL(parent, true);
+            }
+        });
+
+        final String name;
+
+        if (form != null && form.getRunList() != null)
+        {
+            try
+            {
+                name = ensureNormalizedProteinGroups(form.getRunList().intValue());
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+        else
+        {
+            name = "bogusTable";
+        }
+
+        rawTable = new VirtualTable(getDbSchema())
+        {
+            @NotNull
+            @Override
+            public SQLFragment getFromSQL()
+            {
+                return new SQLFragment("SELECT * FROM " + name);
+            }
+        };
+        rawTable.setName(name);
+
+        rawTable.addColumn(normalizedIdCol);
+        normalizedIdCol.setParentTable(rawTable);
+        rawTable.addColumn(proteinGroupIdCol);
+        proteinGroupIdCol.setParentTable(rawTable);
+
+        FilteredTable baseTable = new FilteredTable(rawTable);
+        baseTable.wrapAllColumns(true);
+
+        ExprColumn normalizedProteinCountCol = new ExprColumn(baseTable, "ProteinCount", new SQLFragment("(SELECT COUNT (DISTINCT SeqId) FROM " + name + " n,  " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId and n.NormalizedId = " + ExprColumn.STR_TABLE_ALIAS + ".NormalizedId)"), Types.INTEGER);
+        baseTable.addColumn(normalizedProteinCountCol);
+
+        ExprColumn firstProteinCol = new ExprColumn(baseTable, "FirstProtein", new SQLFragment("(SELECT MIN (SeqId) FROM " + name + " n,  " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId and n.NormalizedId = " + ExprColumn.STR_TABLE_ALIAS + ".NormalizedId)"), Types.INTEGER);
+        baseTable.addColumn(firstProteinCol);
+        firstProteinCol.setFk(new LookupForeignKey("SeqId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return createSequencesTable();
+            }
+        });
+
+        TableInfo proteinGroupMembershipTable = createProteinGroupMembershipTable(form, context, false);
+        ColumnInfo proteinGroupColumn = proteinGroupMembershipTable.getColumn("ProteinGroupId");
+
+        SQLFragment selectSQL = QueryService.get().getSelectSQL(proteinGroupMembershipTable, Collections.singleton(proteinGroupColumn), null, null, Table.ALL_ROWS, 0);
+        SQLFragment filterSQL = new SQLFragment("ProteinGroupId IN (SELECT " + proteinGroupColumn.getAlias() + " FROM (");
+        filterSQL.append(selectSQL);
+        filterSQL.append(") x)");
+
+        baseTable.addCondition(filterSQL, "ProteinGroupId");
+
+        CrosstabTableInfo result;
+        CrosstabSettings settings = new CrosstabSettings(baseTable);
+        CrosstabMeasure firstProteinGroupMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.MIN, "Run First Protein Group");
+        CrosstabMeasure groupCountMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.COUNT, "Run Protein Group Count");
+
+        settings.setInstanceCountCaption("Found In Runs");
+        settings.getRowAxis().setCaption("Normalized Protein Group");
+        settings.getColumnAxis().setCaption("Runs");
+
+        settings.getRowAxis().addDimension(normalizedIdCol.getFieldKey());
+        settings.getRowAxis().addDimension(normalizedProteinCountCol.getFieldKey());
+        settings.getRowAxis().addDimension(firstProteinCol.getFieldKey());
+
+        CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
+        colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);
+
+        if(null != _runs)
+        {
+            ArrayList<CrosstabMember> members = new ArrayList<CrosstabMember>();
+            //build up the list of column members
+            for (MS2Run run : _runs)
+            {
+                members.add(new CrosstabMember(Integer.valueOf(run.getRun()), colDim, run.getDescription()));
+            }
+            result = new CrosstabTableInfo(settings, members);
+        }
+        else
+        {
+            result = new CrosstabTableInfo(settings);
+        }
+        if (form != null)
+        {
+            result.setOrAggFitlers(form.isOrCriteriaForEachRun());
+        }
+        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        defaultCols.add(FieldKey.fromParts(CrosstabTableInfo.COL_INSTANCE_COUNT));
+        defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, firstProteinGroupMeasure), "Group"));
+        defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, groupCountMeasure)));
+        result.setDefaultVisibleColumns(defaultCols);
+        return result;
+    }
+
+    private static class NormalizedProteinGroupsTracker
+    {
+        private String _name;
+
+        public NormalizedProteinGroupsTracker(String name)
+        {
+            _name = name;
+        }
+
+        public String getName()
+        {
+            return _name;
+        }
+    }
+
+    private final static Map<Integer, NormalizedProteinGroupsTracker> NORMALIZED_PROTEIN_GROUP_CACHE = new HashMap<Integer, NormalizedProteinGroupsTracker>();
+
+    private String ensureNormalizedProteinGroups(int runListId) throws SQLException
+    {
+        synchronized (NORMALIZED_PROTEIN_GROUP_CACHE)
+        {
+            if (NORMALIZED_PROTEIN_GROUP_CACHE.containsKey(runListId))
+            {
+                // See if we've already built a temp table
+                return NORMALIZED_PROTEIN_GROUP_CACHE.get(runListId).getName();
+            }
+
+            Connection connection = MS2Manager.getSchema().getScope().getConnection();
+
+            String shortName = "RunList" + runListId;
+            String tempTableName = getDbSchema().getSqlDialect().getGlobalTempTablePrefix() + shortName;
+
+            NormalizedProteinGroupsTracker tracker = new NormalizedProteinGroupsTracker(tempTableName);
+            TempTableTracker.track(MS2Manager.getSchema(), tempTableName, tracker);
+            try
+            {
+                // Populate the temp table with all of the protein groups from the selected runs
+                SQLFragment insertSQL = new SQLFragment("SELECT x.RowId AS ProteinGroupId, x.RowId as NormalizedId INTO " + tempTableName +
+                        " FROM (SELECT pg.RowId FROM " + MS2Manager.getTableInfoProteinGroups() + " pg, " +
+                        MS2Manager.getTableInfoProteinProphetFiles() + " ppf WHERE pg.ProteinProphetFileId = ppf.RowId AND ppf.Run IN (");
+                String separator = "";
+                for (MS2Run run : getRuns())
+                {
+                    insertSQL.append(separator);
+                    separator = ", ";
+                    insertSQL.append(run.getRun());
+                }
+                insertSQL.append(") ) AS x");
+
+                Table.execute(connection, insertSQL.getSQL(), new Object[0]);
+
+                // Use the protein group's RowId as the normalized group id
+                Table.execute(connection, "UPDATE " + tempTableName + " SET NormalizedId = ProteinGroupId", new Object[0]);
+
+                // Figure out the minimum group id that contains a protein (SeqId) that's also in this group
+                String updateSubQuery = "SELECT MIN(MinNormalizedId) AS NewNormalizedId, GroupId FROM \n" +
+                        "(SELECT CASE WHEN g1.NormalizedId < g2.NormalizedId THEN g1.NormalizedId ELSE g2.NormalizedId END AS MinNormalizedId, g1.ProteinGroupId AS GroupId FROM " +
+                        tempTableName + " g1, " + tempTableName + " g2, " + MS2Manager.getTableInfoProteinGroupMemberships() + " pg1, " +
+                        MS2Manager.getTableInfoProteinGroupMemberships() + " pg2 WHERE pg1.SeqId = pg2.SeqId AND " +
+                        "g2.ProteinGroupId = pg1.ProteinGroupId AND g1.ProteinGroupId = pg2.ProteinGroupId) Innermost GROUP BY GroupId)";
+
+                String updateSQL = "UPDATE " + tempTableName + " SET NormalizedId = \n" +
+                        "(SELECT NewNormalizedId FROM (" + updateSubQuery + " x \n" +
+                        "WHERE GroupId = ProteinGroupId) WHERE NormalizedId != (SELECT NewNormalizedId FROM (" + updateSubQuery + " x WHERE GroupId = ProteinGroupId)";
+
+                int rowsUpdated;
+                do
+                {
+                    // Set the normalized group id to be the minimum id from all the groups that share the same proteins
+                    rowsUpdated = Table.execute(connection, updateSQL, new Object[0]);
+                }
+                // Keep going while any value changed. When we're done, we've found the transitive closure and any
+                // groups that share proteins (including transitively) are lumped into the same normalized group
+                while (rowsUpdated > 0);
+                NORMALIZED_PROTEIN_GROUP_CACHE.put(runListId, tracker);
+            }
+            finally
+            {
+                if (connection != null) { try { connection.close(); } catch (SQLException e) {} }
+            }
+            return tempTableName;
+        }
+    }
+
 
     public CrosstabTableInfo createProteinProphetCrosstabTable(MS2Controller.PeptideFilteringComparisonForm form, ViewContext context)
     {

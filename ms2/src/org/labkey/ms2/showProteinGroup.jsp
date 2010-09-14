@@ -48,7 +48,7 @@
             <td><%= Formats.percent2.format(group.getPctSpectrumIds()) %></td>
         <% } %>
     </tr>
-    <% if (group.getPercentCoverage() != null) { %>}
+    <% if (group.getPercentCoverage() != null) { %>
         <tr>
             <td class="labkey-form-label">Percent coverage</td>
             <td><%= Formats.percent2.format(group.getPercentCoverage()) %></td>
