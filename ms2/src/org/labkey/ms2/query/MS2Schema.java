@@ -786,7 +786,7 @@ public class MS2Schema extends UserSchema
         ColumnInfo proteinsCol = baseTable.wrapColumn("Proteins", rawTable.getColumn("NormalizedId"));
         proteinsCol.setHidden(false);
         baseTable.addColumn(proteinsCol);
-        proteinsCol.setFk(new MultiValuedForeignKey(new LookupForeignKey("NormalizedId")
+        LookupForeignKey proteinsFK = new LookupForeignKey("NormalizedId")
         {
             public TableInfo getLookupTableInfo()
             {
@@ -805,13 +805,15 @@ public class MS2Schema extends UserSchema
                 result.addColumn(normalizedIdCol);
                 ColumnInfo seqIdCol = new ColumnInfo("SeqId", result);
                 seqIdCol.setSqlTypeName("INT");
-                seqIdCol.setFk(new LookupForeignKey("SeqId")
+                LookupForeignKey seqFK = new LookupForeignKey("SeqId")
                 {
                     public TableInfo getLookupTableInfo()
                     {
                         return new SequencesTableInfo(MS2Schema.this);
                     }
-                });
+                };
+                seqFK.setPrefixColumnCaption(false);
+                seqIdCol.setFk(seqFK);
                 result.addColumn(seqIdCol);
                 result.setName("InnerTable");
 
@@ -823,7 +825,8 @@ public class MS2Schema extends UserSchema
             {
                 return super.getURL(parent, true);
             }
-        }, "SeqId"));
+        };
+        proteinsCol.setFk(new MultiValuedForeignKey(proteinsFK, "SeqId"));
 
         ExprColumn firstProteinCol = new ExprColumn(baseTable, "FirstProtein", new SQLFragment("(SELECT MIN (SeqId) FROM " + name + " n,  " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId and n.NormalizedId = " + ExprColumn.STR_TABLE_ALIAS + ".NormalizedId)"), Types.INTEGER);
         baseTable.addColumn(firstProteinCol);

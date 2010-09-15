@@ -71,14 +71,7 @@ public class SequencesTableInfo extends FilteredTable
         url.addParameter("seqId", "${SeqId}");
         ColumnInfo bnColumn = getColumn("BestName");
         bnColumn.setURL(StringExpressionFactory.createURL(url));
-        bnColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                DataColumn dc = new DataColumn(colInfo);
-                dc.setLinkTarget("prot");
-                return dc;
-            }
-        });
+        bnColumn.setURLTargetWindow("prot");
 
         ColumnInfo annotationColumn = wrapColumn("CustomAnnotations", _rootTable.getColumn("SeqId"));
         annotationColumn.setIsUnselectable(true);
