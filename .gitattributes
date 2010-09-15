@@ -1190,6 +1190,7 @@ ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_protein_recommendedName_ful
 ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_protein_recommendedName_shortName.java -text
 ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_sequence.java -text
 ms2/src/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp -text
+ms2/src/org/labkey/ms2/query/AbstractProteinProphetCrosstabView.java -text
 ms2/src/org/labkey/ms2/query/AbstractRunCompareView.java -text
 ms2/src/org/labkey/ms2/query/ComparePeptideTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ComparePeptidesView.java -text

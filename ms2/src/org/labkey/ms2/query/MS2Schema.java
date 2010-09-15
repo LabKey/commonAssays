@@ -729,7 +729,6 @@ public class MS2Schema extends UserSchema
 
         ColumnInfo proteinGroupIdCol = new ColumnInfo("ProteinGroupId");
         proteinGroupIdCol.setSqlTypeName("INT");
-        proteinGroupIdCol.setIsUnselectable(true);
         proteinGroupIdCol.setFk(new LookupForeignKey("RowId")
         {
             public TableInfo getLookupTableInfo()
@@ -784,6 +783,48 @@ public class MS2Schema extends UserSchema
         ExprColumn normalizedProteinCountCol = new ExprColumn(baseTable, "ProteinCount", new SQLFragment("(SELECT COUNT (DISTINCT SeqId) FROM " + name + " n,  " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId and n.NormalizedId = " + ExprColumn.STR_TABLE_ALIAS + ".NormalizedId)"), Types.INTEGER);
         baseTable.addColumn(normalizedProteinCountCol);
 
+        ColumnInfo proteinsCol = baseTable.wrapColumn("Proteins", rawTable.getColumn("NormalizedId"));
+        proteinsCol.setHidden(false);
+        baseTable.addColumn(proteinsCol);
+        proteinsCol.setFk(new MultiValuedForeignKey(new LookupForeignKey("NormalizedId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                // Create a junction query that connects normalized group ids with protein identifications
+                VirtualTable result = new VirtualTable(getDbSchema())
+                {
+                    @NotNull
+                    @Override
+                    public SQLFragment getFromSQL()
+                    {
+                        return new SQLFragment("SELECT DISTINCT NormalizedId, SeqId FROM " + name + " n, " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId");
+                    }
+                };
+                ColumnInfo normalizedIdCol = new ColumnInfo("NormalizedId", result);
+                normalizedIdCol.setSqlTypeName("INT");
+                result.addColumn(normalizedIdCol);
+                ColumnInfo seqIdCol = new ColumnInfo("SeqId", result);
+                seqIdCol.setSqlTypeName("INT");
+                seqIdCol.setFk(new LookupForeignKey("SeqId")
+                {
+                    public TableInfo getLookupTableInfo()
+                    {
+                        return new SequencesTableInfo(MS2Schema.this);
+                    }
+                });
+                result.addColumn(seqIdCol);
+                result.setName("InnerTable");
+
+                return result;
+            }
+
+            @Override
+            public StringExpression getURL(ColumnInfo parent)
+            {
+                return super.getURL(parent, true);
+            }
+        }, "SeqId"));
+
         ExprColumn firstProteinCol = new ExprColumn(baseTable, "FirstProtein", new SQLFragment("(SELECT MIN (SeqId) FROM " + name + " n,  " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId and n.NormalizedId = " + ExprColumn.STR_TABLE_ALIAS + ".NormalizedId)"), Types.INTEGER);
         baseTable.addColumn(firstProteinCol);
         firstProteinCol.setFk(new LookupForeignKey("SeqId")
@@ -816,6 +857,7 @@ public class MS2Schema extends UserSchema
         settings.getRowAxis().addDimension(normalizedIdCol.getFieldKey());
         settings.getRowAxis().addDimension(normalizedProteinCountCol.getFieldKey());
         settings.getRowAxis().addDimension(firstProteinCol.getFieldKey());
+        settings.getRowAxis().addDimension(proteinsCol.getFieldKey());
 
         CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
         colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);
