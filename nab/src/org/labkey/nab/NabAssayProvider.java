@@ -23,12 +23,14 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.TimepointType;
+import org.labkey.api.study.actions.AssayDetailRedirectAction;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.ResultsQueryView;
@@ -108,6 +110,23 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 //                return c.hasPermission(user, perm, RunDataSetContextualRoles.getContextualRolesForRun(c, user, run));
             }
         });
+    }
+
+    @Override
+    public ExpRunTable createRunTable(AssaySchema schema, ExpProtocol protocol)
+    {
+        final ExpRunTable runTable = super.createRunTable(schema, protocol);
+        ColumnInfo nameColumn = runTable.getColumn(ExpRunTable.Column.Name);
+        // NAb has two detail type views of a run - the filtered results/data grid, and the run details page that
+        // shows the graph. Set the run's name to be a link to the grid instead of the default details page.
+        nameColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new AssayDataLinkDisplayColumn(colInfo, runTable.getContainerFilter());
+            }
+        });
+        return runTable;
     }
 
     protected Pair<Domain, Map<DomainProperty, Object>> createRunDomain(Container c, User user)
