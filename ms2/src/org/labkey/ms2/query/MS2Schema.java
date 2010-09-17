@@ -828,16 +828,6 @@ public class MS2Schema extends UserSchema
         };
         proteinsCol.setFk(new MultiValuedForeignKey(proteinsFK, "SeqId"));
 
-        ExprColumn firstProteinCol = new ExprColumn(baseTable, "FirstProtein", new SQLFragment("(SELECT MIN (SeqId) FROM " + name + " n,  " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId and n.NormalizedId = " + ExprColumn.STR_TABLE_ALIAS + ".NormalizedId)"), Types.INTEGER);
-        baseTable.addColumn(firstProteinCol);
-        firstProteinCol.setFk(new LookupForeignKey("SeqId")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                return createSequencesTable();
-            }
-        });
-
         TableInfo proteinGroupMembershipTable = createProteinGroupMembershipTable(form, context, false);
         ColumnInfo proteinGroupColumn = proteinGroupMembershipTable.getColumn("ProteinGroupId");
 
@@ -852,6 +842,7 @@ public class MS2Schema extends UserSchema
         CrosstabSettings settings = new CrosstabSettings(baseTable);
         CrosstabMeasure firstProteinGroupMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.MIN, "Run First Protein Group");
         CrosstabMeasure groupCountMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.COUNT, "Run Protein Group Count");
+//        CrosstabMeasure groupsMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.GROUP_CONCAT, "Run Protein Groups");
 
         settings.setInstanceCountCaption("Found In Runs");
         settings.getRowAxis().setCaption("Normalized Protein Group");
@@ -859,7 +850,6 @@ public class MS2Schema extends UserSchema
 
         settings.getRowAxis().addDimension(normalizedIdCol.getFieldKey());
         settings.getRowAxis().addDimension(normalizedProteinCountCol.getFieldKey());
-        settings.getRowAxis().addDimension(firstProteinCol.getFieldKey());
         settings.getRowAxis().addDimension(proteinsCol.getFieldKey());
 
         CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
@@ -887,6 +877,7 @@ public class MS2Schema extends UserSchema
         defaultCols.add(FieldKey.fromParts(CrosstabTableInfo.COL_INSTANCE_COUNT));
         defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, firstProteinGroupMeasure), "Group"));
         defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, groupCountMeasure)));
+        defaultCols.add(FieldKey.fromParts(proteinsCol.getName(), "BestName"));
         result.setDefaultVisibleColumns(defaultCols);
         return result;
     }

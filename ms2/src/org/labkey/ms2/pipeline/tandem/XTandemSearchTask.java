@@ -162,7 +162,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                 writeRunParameters(pathSpectra, fileWorkParameters, fileWorkTaxonomy, fileWorkOutputXML);
 
                 String ver = getJob().getParameters().get("pipeline tandem, version");
-                String exePath = PipelineJobService.get().getExecutablePath("tandem.exe", "xtandem", ver);
+                String exePath = PipelineJobService.get().getExecutablePath("tandem.exe", "xtandem", ver, getJob().getLogger());
                 xTandemPB = new ProcessBuilder(exePath, INPUT_XML);
 
                 getJob().runSubProcess(xTandemPB, _wd.getDir());
@@ -175,7 +175,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(), baseName, support.getGZPreference());
 
             String ver = TPPTask.getTPPVersion(getJob());
-            String exePath = PipelineJobService.get().getExecutablePath("Tandem2XML", "tpp", ver);
+            String exePath = PipelineJobService.get().getExecutablePath("Tandem2XML", "tpp", ver, getJob().getLogger());
             ProcessBuilder tandem2XmlPB = new ProcessBuilder(exePath,
                 _wd.getRelativePath(fileWorkOutputXML),
                 fileWorkPepXMLRaw.getName());

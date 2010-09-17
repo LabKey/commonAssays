@@ -141,7 +141,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 throw new IOException("Failed to create output directory for DTA files '" + dirOutputDta + "'.");
             ArrayList<String> command = new ArrayList<String>();
             String ver = TPPTask.getTPPVersion(getJob());
-            command.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver));
+            command.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver, getJob().getLogger()));
             command.add("-dta");
             command.add("-O" + dirOutputDta.getName());
             Mzxml2SearchParams mzXml2SearchParams = new Mzxml2SearchParams();
@@ -174,7 +174,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 throw new IOException("Failed running Sequest.");
 
             // TODO: This limits SequestSearchTask to running only on LabKey Server
-            String exePath = PipelineJobService.get().getExecutablePath("tar", null, null);
+            String exePath = PipelineJobService.get().getExecutablePath("tar", null, null, getJob().getLogger());
             getJob().runSubProcess(new ProcessBuilder(exePath,
                     "czf", fileWorkTgz.getAbsolutePath(), "."), dirOutputDta);
 

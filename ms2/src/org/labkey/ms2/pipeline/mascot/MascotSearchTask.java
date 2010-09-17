@@ -174,7 +174,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             File fileWorkSpectra = _wd.inputFile(fileMzXML, true);
             ArrayList<String> argsM2S = new ArrayList<String>();
             String ver = TPPTask.getTPPVersion(getJob());
-            argsM2S.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver));
+            argsM2S.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver, getJob().getLogger()));
             argsM2S.add("-mgf");
             String paramMinParent = params.get("spectrum, minimum parent m+h");
             if (paramMinParent != null)
@@ -315,7 +315,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
 
             // 2. translate Mascot result file to pep.xml format
             File fileSequenceDatabase = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
-            String exePath = PipelineJobService.get().getExecutablePath("Mascot2XML", "tpp", ver);
+            String exePath = PipelineJobService.get().getExecutablePath("Mascot2XML", "tpp", ver, getJob().getLogger());
             String[] args =
             {
                 exePath,

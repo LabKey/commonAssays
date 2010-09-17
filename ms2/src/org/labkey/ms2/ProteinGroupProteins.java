@@ -30,8 +30,8 @@ import java.sql.ResultSet;
  */
 public class ProteinGroupProteins
 {
-    private Map<Integer, List<ProteinSummary>> _summaries;
     private List<MS2Run> _runs;
+    private Map<ResultSet, Map<Integer, List<ProteinSummary>>> _summaries = new WeakHashMap<ResultSet, Map<Integer, List<ProteinSummary>>>();
 
     public ProteinGroupProteins()
     {
@@ -43,11 +43,10 @@ public class ProteinGroupProteins
         _runs = runs;
     }
 
-    private Map<Integer, List<ProteinSummary>> calculateSummaries(RenderContext context, String columnName) throws SQLException
+    private Map<Integer, List<ProteinSummary>> calculateSummaries(ResultSet rs, String columnName) throws SQLException
     {
         Map<Integer, List<ProteinSummary>> result = new HashMap<Integer, List<ProteinSummary>>();
 
-        ResultSet rs = context.getResultSet();
         int originalRow = rs.getRow();
         rs.beforeFirst();
 
@@ -131,11 +130,14 @@ public class ProteinGroupProteins
 
     public List<ProteinSummary> getSummaries(int proteinGroupId, RenderContext context, String columnName) throws SQLException
     {
-        if (_summaries == null)
+        ResultSet rs = context.getResultSet();
+        Map<Integer, List<ProteinSummary>> summaries = _summaries.get(rs);
+        if (summaries == null)
         {
-            _summaries = calculateSummaries(context, columnName);
+            summaries = calculateSummaries(rs, columnName);
+            _summaries.put(rs, summaries);
         }
-        return _summaries.get(proteinGroupId);
+        return summaries.get(proteinGroupId);
     }
 
 
