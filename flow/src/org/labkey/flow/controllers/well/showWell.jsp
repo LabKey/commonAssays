@@ -377,7 +377,7 @@ for (ExpMaterial sample : well.getSamples())
 if (getGraphs().length > 0)
 {
     final String graphSize = FlowPreference.graphSize.getValue(request);
-    include(new JspView(JspLoader.createPage(request, GraphView.class, "setGraphSize.jsp")), out);
+    include(new JspView(JspLoader.createPage(GraphView.class, "setGraphSize.jsp")), out);
     for (GraphSpec graph : getGraphs())
     {
         %>

@@ -16,7 +16,6 @@
 
 package org.labkey.flow.controllers;
 
-import org.labkey.api.action.BaseViewAction;
 import org.labkey.api.action.HasPageConfig;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
@@ -32,12 +31,12 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.flow.FlowModule;
 import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.webparts.FlowFolderType;
-import org.labkey.flow.FlowModule;
 import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
@@ -56,7 +55,7 @@ public abstract class BaseFlowController<A extends Enum> extends SpringActionCon
 
     protected BaseFlowController.FlowPage getFlowPage(String name, Package thePackage) throws Exception
     {
-        BaseFlowController.FlowPage ret = (BaseFlowController.FlowPage) JspLoader.createPage(getRequest(), thePackage.getName(), name);
+        BaseFlowController.FlowPage ret = (BaseFlowController.FlowPage) JspLoader.createPage(thePackage.getName(), name);
         ret._controller = this;
         return ret;
     }

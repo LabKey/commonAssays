@@ -155,7 +155,7 @@
                     }
             };
 %>
-<% include(new JspView(JspLoader.createPage(request, GraphView.class, "setGraphSize.jsp")), out);%>
+<% include(new JspView(JspLoader.createPage(GraphView.class, "setGraphSize.jsp")), out);%>
 <% for (Callback callback : callbacks)
 { %>
 <p><%=callback.title%></p>

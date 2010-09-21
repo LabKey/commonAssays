@@ -120,7 +120,7 @@ public class FlowQueryView extends QueryView
                     ActionURL urlHide = getViewContext().cloneActionURL();
                     urlHide.deleteParameter(param("showGraphs"));
                     out.write(textLink("Hide Graphs", urlHide));
-                    JspView view = new JspView(JspLoader.createPage(getViewContext().getRequest(), FlowQueryView.class, "setGraphSize.jsp"));
+                    JspView view = new JspView(JspLoader.createPage(FlowQueryView.class, "setGraphSize.jsp"));
                     view.setFrame(FrameType.NONE);
                     HttpView.currentView().include(view, out);
                 }
