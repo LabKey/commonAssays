@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.protein.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -27,7 +28,6 @@ import org.labkey.api.query.*;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.SequencesTableInfo;
-import org.jetbrains.annotations.NotNull;
 
 import java.sql.Types;
 import java.util.ArrayList;
@@ -43,6 +43,7 @@ public class CustomAnnotationTable extends FilteredTable
     private final boolean _includeSeqId;
 
     private final QuerySchema _schema;
+    private Domain _domain;
 
     public CustomAnnotationTable(CustomAnnotationSet annotationSet, QuerySchema schema)
     {
@@ -58,10 +59,10 @@ public class CustomAnnotationTable extends FilteredTable
         _annotationSet = annotationSet;
 
         ColumnInfo propertyCol = addColumn(createPropertyColumn("Property"));
-        Domain domain = PropertyService.get().getDomain(_annotationSet.lookupContainer(), _annotationSet.getLsid());
-        if (domain != null)
+        _domain = PropertyService.get().getDomain(_annotationSet.lookupContainer(), _annotationSet.getLsid());
+        if (_domain != null)
         {
-            propertyCol.setFk(new PropertyForeignKey(domain, schema));
+            propertyCol.setFk(new PropertyForeignKey(_domain, schema));
         }
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
@@ -84,6 +85,12 @@ public class CustomAnnotationTable extends FilteredTable
         sql.add(annotationSet.getCustomAnnotationSetId());
         addCondition(sql);
 
+    }
+
+    @Override
+    public Domain getDomain()
+    {
+        return _domain;
     }
 
     private void addProteinDetailsColumn()

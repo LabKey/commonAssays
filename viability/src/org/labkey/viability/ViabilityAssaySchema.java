@@ -16,26 +16,28 @@
 
 package org.labkey.viability;
 
+import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.*;
-import org.labkey.api.query.*;
-import org.labkey.api.study.assay.*;
-import org.labkey.api.security.User;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.query.ExpRunTable;
-import org.labkey.api.exp.query.ExpDataTable;
-import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.view.HttpView;
+import org.labkey.api.exp.query.ExpDataTable;
+import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.query.*;
+import org.labkey.api.security.User;
+import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.util.PageFlowUtil;
-import org.apache.commons.lang.StringUtils;
+import org.labkey.api.view.HttpView;
 
-import java.util.*;
-import java.sql.Types;
-import java.io.Writer;
 import java.io.IOException;
+import java.io.Writer;
+import java.sql.Types;
+import java.util.*;
 
 public class ViabilityAssaySchema extends AssaySchema
 {
@@ -269,6 +271,12 @@ public class ViabilityAssaySchema extends AssaySchema
             SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
             protocolIDFilter.add(_protocol.getRowId());
             addCondition(protocolIDFilter,"ProtocolID");
+        }
+
+        @Override
+        public Domain getDomain()
+        {
+            return _resultsDomain;
         }
 
         private void addResultDomainPropertiesColumn()
