@@ -86,7 +86,7 @@ public class PendingMageMLFilesView extends QueryView
 
         if (root == null)
         {
-            SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to import because pipeline has not been configured. [<a href=\"" + PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer()) + "\">setup pipeline</a>]", true);
+            SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to import because pipeline has not been configured. " + PageFlowUtil.textLink("setup pipeline", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer())), true);
             element.setDisplayPermission(InsertPermission.class);
             bar.add(element);
         }

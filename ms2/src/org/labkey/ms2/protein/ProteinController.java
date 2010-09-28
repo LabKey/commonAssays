@@ -123,13 +123,13 @@ public class ProteinController extends SpringActionController
             {
                 url = new ActionURL(ShowAnnotationSetAction.class, getContainer());
                 url.addParameter("CustomAnnotation.queryName", settings.getQueryName());
-                header = "This view shows your protein list with all the proteins that match. If more than one sequence matches you will get multiple rows. [<a href=\"" + url.getLocalURIString() + "\">show without proteins</a>]";
+                header = "This view shows your protein list with all the proteins that match. If more than one sequence matches you will get multiple rows. " + PageFlowUtil.textLink("show without proteins", url.getLocalURIString());
             }
             else
             {
                 url = new ActionURL(ShowAnnotationSetWithSequencesAction.class, getContainer());
                 url.addParameter("CustomAnnotation.queryName", settings.getQueryName());
-                header = "This view shows just the data uploaded as part of the list. [<a href=\"" + url.getLocalURIString() + "\">show with matching proteins loaded into this server</a>]";
+                header = "This view shows just the data uploaded as part of the list. " + PageFlowUtil.textLink("show with matching proteins loaded into this server", url.getLocalURIString());
             }
 
             HtmlView linkView = new HtmlView(header);

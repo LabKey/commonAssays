@@ -64,5 +64,5 @@
         <%}%>
         </tr><%
     }
-    %><tr><td>[<a href="<%=h(new ActionURL(ReportsController.UpdateAction.class,c))%>">create qc report</a>]</td></tr>
+    %><tr><td><%=textLink("create qc report", new ActionURL(ReportsController.UpdateAction.class, c))%></td></tr>
     </table>
