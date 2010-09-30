@@ -35,7 +35,6 @@ import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.AssayHeaderView;
-import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
@@ -418,7 +417,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     {
         public ViabilityDetailsHeaderView(ExpProtocol protocol, AssayProvider provider, boolean minimizeLinks, ContainerFilter containerFilter)
         {
-            super(protocol, provider, minimizeLinks, containerFilter);
+            super(protocol, provider, minimizeLinks, true, containerFilter);
         }
 
         @Override

@@ -53,31 +53,7 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
     public boolean isStatusViewableFile(Container container, String name, String basename)
     {
         String nameParameters = XTandemSearchProtocolFactory.get().getParametersFileName();
-        if (nameParameters.equals(name) || (nameParameters + ".err").equals(name))
-            return true;
-
-        return super.isStatusViewableFile(container, name, basename);
-    }
-
-    public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf)
-            throws HandlerException
-    {        
-        ActionURL url = super.handleStatusAction(ctx, name, sf);
-        if (url != null)
-            return url;
-
-        if (PipelineProvider.CAPTION_RETRY_BUTTON.equals(name) &&
-                "ERROR".equals(sf.getStatus()) &&
-                "type=database".equals(sf.getInfo()))
-        {
-            String nameParameters = XTandemSearchProtocolFactory.get().getParametersFileName();
-            File analysisDir = new File(sf.getFilePath()).getParentFile();
-            File tandemXml = new File(analysisDir, nameParameters);
-            File tandemErr = new File(analysisDir, nameParameters + ".err");
-            tandemErr.renameTo(tandemXml);
-        }
-
-        return null;
+        return nameParameters.equals(name) || super.isStatusViewableFile(container, name, basename);
     }
 
     public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)

@@ -560,7 +560,7 @@ public class NabAssayController extends SpringActionController
         private int _runId;
         public NabDetailsHeaderView(ExpProtocol protocol, AssayProvider provider, int runId)
         {
-            super(protocol, provider, true, null);
+            super(protocol, provider, true, true, null);
             _runId = runId;
         }
 
@@ -922,7 +922,7 @@ public class NabAssayController extends SpringActionController
 
             JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/multiRunGraph.jsp", bean);
 
-            return new VBox(new AssayHeaderView(_protocol, provider, false, null), multiGraphView);
+            return new VBox(new AssayHeaderView(_protocol, provider, false, true, null), multiGraphView);
         }
 
         public NavTree appendNavTrail(NavTree root)
