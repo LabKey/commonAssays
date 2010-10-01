@@ -435,7 +435,9 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                     if (runId != null)
                     {
                         ActionURL url = new ActionURL(NabAssayController.DetailsAction.class, ctx.getContainer()).addParameter("rowId", "" + runId);
-                        out.write("[<a href=\"" + url.getLocalURIString() + "\" title=\"View run details\">run&nbsp;details</a>]");
+                        Map<String, String> title = new HashMap<String, String>();
+                        title.put("title", "View run details");
+                        out.write(PageFlowUtil.textLink("run details", url.getLocalURIString(), "", "", title));
                     }
                 }
 

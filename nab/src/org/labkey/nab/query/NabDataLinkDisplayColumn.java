@@ -19,11 +19,14 @@ package org.labkey.nab.query;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.nab.NabAssayController;
 
 import java.io.Writer;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -37,7 +40,9 @@ public class NabDataLinkDisplayColumn extends SimpleDisplayColumn
         if (runId != null)
         {
             ActionURL url = new ActionURL(NabAssayController.DetailsAction.class, ctx.getContainer()).addParameter("rowId", "" + runId);
-            out.write("[<a href=\"" + url.getLocalURIString() + "\" title=\"View run details\">details</a>]");
+            Map<String, String> title = new HashMap<String, String>();
+            title.put("title", "View run details");
+            out.write(PageFlowUtil.textLink("details", url.getLocalURIString(), "", "", title)); 
         }
     }
 }

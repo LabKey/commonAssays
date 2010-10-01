@@ -19,11 +19,15 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.nab.NabController" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.HashMap" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.HeaderBean> me = (JspView<NabController.HeaderBean>) HttpView.currentView();
     NabController.HeaderBean bean = me.getModelBean();
+    Map<String, String> print = new HashMap<String, String>();
+    print.put("target", "_blank");
 %>
 <%
     if (bean.showNewRunLink())
@@ -39,19 +43,19 @@
     if (bean.showPrintView())
     {
 %>
-[<a href="<%=h(bean.getPrintURL())%>" target="_blank">Print View</a>]
+<%=textLink("Print View", bean.getPrintURL().getLocalURIString(), "", "", print)%>
 <%
     }
     if (bean.getDatafileURL() != null)
     {
 %>
-[<a href="<%=h(bean.getDatafileURL())%>">Download Datafile</a>]
+<%=textLink("Download Datafile", bean.getDatafileURL())%>
 <%
     }
     if (bean.getCustomizeURL() != null)
     {
 %>
-[<a href="<%=h(bean.getCustomizeURL())%>">Customize View</a>]
+<%=textLink("Customize View", bean.getCustomizeURL())%>
 <%
     }
 %>

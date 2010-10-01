@@ -25,6 +25,7 @@
 <%@ page import="org.labkey.ms1.model.Feature" %>
 <%@ page import="org.labkey.ms1.model.FeatureDetailsModel" %>
 <%@ page import="org.labkey.ms1.model.Peptide" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<FeatureDetailsModel> me = (JspView<FeatureDetailsModel>) HttpView.currentView();
     FeatureDetailsModel model = me.getModelBean();
@@ -226,7 +227,7 @@
                 <tr>
                     <td class="labkey-alternate-row">m/z</td>
                     <td><%=model.formatNumber(feature.getMz())%>
-                        &nbsp;[<a href="<%=model.getFindSimilarUrl()%>">find&nbsp;similar</a>]
+                        &nbsp;<%=textLink("find similar", model.getFindSimilarUrl())%>
                     </td>
                 </tr>
                 <tr>
@@ -320,8 +321,7 @@
                                     out.print(pep.getPeptide());
                                     out.print("</a>");
 
-                                    out.print("&nbsp;[<a href=\"" + model.getPepSearchUrl(pep.getTrimmedPeptide()) + "\">");
-                                    out.print("features with same</a>]");
+                                    out.print("&nbsp;" + textLink("features with same", model.getPepSearchUrl(pep.getTrimmedPeptide())));
                                 }
                             }
                         %>

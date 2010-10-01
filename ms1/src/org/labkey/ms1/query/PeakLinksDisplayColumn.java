@@ -16,6 +16,7 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.*;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
@@ -68,16 +69,12 @@ public class PeakLinksDisplayColumn extends DataColumn
         ActionURL detailsUrl = _baseDetailsUrl.clone();
         detailsUrl.addParameter("featureId", featureId.intValue());
 
-        out.write("[<a href=\"");
-        out.write(detailsUrl.getLocalURIString());
-        out.write("\">details</a>]");
+        out.write(PageFlowUtil.textLink("details", detailsUrl.getLocalURIString()));
 
         ActionURL peaksUrl = _basePeaksUrl.clone();
         peaksUrl.addParameter("featureId", featureId.intValue());
 
-        out.write("&nbsp;[<a href=\"");
-        out.write(peaksUrl.getLocalURIString());
-        out.write("\">peaks</a>]");
+        out.write("&nbsp;" + PageFlowUtil.textLink("peaks", peaksUrl.getLocalURIString()));
     }
 
     public void renderTitle(RenderContext ctx, Writer out) throws IOException

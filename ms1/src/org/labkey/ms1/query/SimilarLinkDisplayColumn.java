@@ -18,6 +18,7 @@ package org.labkey.ms1.query;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.MS1Controller;
 
@@ -55,9 +56,7 @@ public class SimilarLinkDisplayColumn extends DataColumn
         assert val instanceof Integer : "Value for SimilarLinkDisplayColumn was not an Integer!";
         int featureId = ((Integer)val).intValue();
         _similarUrl.replaceParameter(MS1Controller.SimilarSearchForm.ParamNames.featureId.name(), String.valueOf(featureId));
-        out.write("[<a href=\"");
-        out.write(_similarUrl.getLocalURIString());
-        out.write("\">similar</a>]");
+        out.write(PageFlowUtil.textLink("similar", _similarUrl.getLocalURIString()));
     }
 
     public void renderTitle(RenderContext ctx, Writer out) throws IOException

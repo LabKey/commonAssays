@@ -241,8 +241,8 @@ if (p.getQuantitation() != null)
                 }
             } %>
             <% if (ctx.container.hasPermission(ctx.user, UpdatePermission.class)) {
-                if (quant.findScanFile() != null && !"q3".equals(ctx.run.getQuantAnalysisType())) { %>[<a href="<%= editUrl %>">edit elution profile</a>]<% } %>
-                [<a href="<%= toggleUrl %>"><%= quant.includeInProteinCalc() ? "invalidate" : "revalidate" %> quantitation results</a>]<%
+                if (quant.findScanFile() != null && !"q3".equals(ctx.run.getQuantAnalysisType())) { %><%=textLink("edit elution profile", editUrl)%><% } %>
+                <%=textLink((quant.includeInProteinCalc() ? "invalidate" : "revalidate") + " quantitation results", toggleUrl)%><%
             }%>
         </td>
     </tr>
