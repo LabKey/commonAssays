@@ -106,9 +106,9 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
                 {
                     sb.append("Some of the selected files have already been annotated. You must delete the existing runs to re-annotate them.");
                 }
-                sb.append("</span> [<a onclick=\"");
+                sb.append("</span>");
                 //noinspection StringConcatenationInsideStringBufferAppend
-                sb.append("if (window.confirm('Are you sure you want to delete the existing assay runs associated with these files?'))" +
+                String click = "if (window.confirm('Are you sure you want to delete the existing assay runs associated with these files?'))" +
                         "{" +
                         "Ext.Ajax.request(" +
                         "{" +
@@ -117,9 +117,9 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
                         "failure: function() { alert('failure'); }" +
                         "});" +
                         "}" +
-                        "return false;");
-                sb.append("\">");
-                sb.append("delete assay runs</a>]</div>");
+                        "return false;";
+                sb.append(PageFlowUtil.textLink("delete assay runs", "", click, ""));
+                sb.append("</div>");
             }
         }
 
