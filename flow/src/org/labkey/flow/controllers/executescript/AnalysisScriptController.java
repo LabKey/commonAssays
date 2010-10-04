@@ -67,11 +67,10 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         analyzeSelectedRuns,
     }
 
-    static SpringActionController.DefaultActionResolver _actionResolver = new SpringActionController.DefaultActionResolver(AnalysisScriptController.class);
+    private static final SpringActionController.DefaultActionResolver _actionResolver = new SpringActionController.DefaultActionResolver(AnalysisScriptController.class);
 
     public AnalysisScriptController() throws Exception
     {
-        super();
         setActionResolver(_actionResolver);
     }
 

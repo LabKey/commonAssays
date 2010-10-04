@@ -354,7 +354,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
                     Container c = getContainer();
                     PipelineService.get().getPipelineQueue().cancelJob(c, sf.getJobId());
 
-                    // Attempting to stay consistent previously existing code, create a FlowJob
+                    // Attempting to stay consistent with previously existing code, create a FlowJob
                     // from the job store, and go to its status href.  This URL is not set in the
                     // PipelineStatusFile until the job completes.  Apparently FlowJobs have useful
                     // information to show at this URL, even when the job has not completed.
