@@ -20,7 +20,6 @@ import org.labkey.api.action.LabkeyError;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
@@ -38,7 +37,6 @@ import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.validation.BindException;
-import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.Document;
 
 import javax.servlet.ServletException;
@@ -155,12 +153,19 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
             mageMLProperties = new HashMap<DomainProperty, String>();
         }
 
-        for (Map.Entry<DomainProperty, String> entry : form.getRunProperties().entrySet())
+        try
         {
-            DomainProperty runPD = entry.getKey();
-            String mageMLValue = mageMLProperties.get(runPD);
-            if (mageMLValue == null)
-                userProperties.add(runPD);
+            for (Map.Entry<DomainProperty, String> entry : form.getRunProperties().entrySet())
+            {
+                DomainProperty runPD = entry.getKey();
+                String mageMLValue = mageMLProperties.get(runPD);
+                if (mageMLValue == null)
+                    userProperties.add(runPD);
+            }
+        }
+        catch (ExperimentException e)
+        {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
         InsertView result = createInsertView(ExperimentService.get().getTinfoExperimentRun(),

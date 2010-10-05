@@ -46,7 +46,6 @@ import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
-import org.labkey.api.view.JspView;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
@@ -74,7 +73,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         addStepHandler(new AntigenStepHandler());
     }
 
-    protected InsertView createRunInsertView(ElispotRunUploadForm newRunForm, boolean errorReshow, BindException errors)
+    protected InsertView createRunInsertView(ElispotRunUploadForm newRunForm, boolean errorReshow, BindException errors) throws ExperimentException
     {
         InsertView parent = super.createRunInsertView(newRunForm, errorReshow, errors);
 
@@ -121,7 +120,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 "lsid", new DomainProperty[0], errorReshow, AntigenStepHandler.NAME, form, errors);
 
         try {
-            PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), (ElispotAssayProvider)form.getProvider());
+            PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
             antigenHelper.addSampleColumns(view, form.getUser(), form, errorReshow);
 
             // add existing page properties
@@ -156,38 +155,6 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         return view;
     }
 
-    private ModelAndView getPlateSummary(ElispotRunUploadForm form, ExpRun run)
-    {
-        try {
-            ElispotAssayProvider provider = form.getProvider();
-            PlateTemplate template = provider.getPlateTemplate(form.getContainer(), form.getProtocol());
-
-            if (run != null)
-            {
-                ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
-                assert(data.length == 1);
-
-/*
-                Lsid dataRowLsid = new Lsid(data[0].getLSID());
-                dataRowLsid.setNamespacePrefix(ElispotDataHandler.ELISPOT_DATA_ROW_LSID_PREFIX);
-                dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + "1" + ':' + "1");
-
-                Map<String, ObjectProperty> props = OntologyManager.getPropertyObjects(form.getContainer().getId(), dataRowLsid.toString());
-*/
-                ModelAndView view = new JspView<ElispotRunUploadForm>("/org/labkey/elispot/view/plateSummary.jsp", form);
-                view.addObject("plateTemplate", template);
-                view.addObject("dataLsid", data[0].getLSID());
-                return view;
-            }
-
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
-        return null;
-    }
-
     protected ElispotRunStepHandler getRunStepHandler()
     {
         return new ElispotRunStepHandler();
@@ -198,7 +165,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         private Map<String, Map<DomainProperty, String>> _postedSampleProperties = null;
 
         @Override
-        protected boolean validatePost(ElispotRunUploadForm form, BindException errors)
+        protected boolean validatePost(ElispotRunUploadForm form, BindException errors) throws ExperimentException
         {
             boolean runPropsValid = super.validatePost(form, errors);
             boolean samplePropsValid = true;
@@ -234,7 +201,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
 
         @Override
-        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException
+        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
         {
             form.setSampleProperties(_postedSampleProperties);
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
@@ -267,7 +234,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         public static final String NAME = "ANTIGEN";
         private Map<String, Map<DomainProperty, String>> _postedAntigenProperties = null;
 
-        public ModelAndView handleStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException
+        public ModelAndView handleStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
         {
             if (!form.isResetDefaultValues() && validatePost(form, errors))
                 return handleSuccessfulPost(form, errors);
@@ -279,8 +246,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
         protected boolean validatePost(ElispotRunUploadForm form, BindException errors)
         {
-            PlateAntigenPropertyHelper helper = createAntigenPropertyHelper(form.getContainer(),
-                    form.getProtocol(), (ElispotAssayProvider)form.getProvider());
+            PlateAntigenPropertyHelper helper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
 
             boolean antigenPropsValid = true;
             try
@@ -300,7 +266,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             return antigenPropsValid;
         }
 
-        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException
+        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
         {
             try
             {

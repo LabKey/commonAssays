@@ -70,7 +70,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         return new RunStepHandler()
         {
             @Override
-            protected boolean validatePost(ViabilityAssayRunUploadForm form, BindException errors)
+            protected boolean validatePost(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
             {
                 if (!super.validatePost(form, errors))
                     return false;
@@ -295,7 +295,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         }
 
         @Override
-        public ModelAndView handleStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException
+        public ModelAndView handleStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
         {
             if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
             {
@@ -309,7 +309,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         }
 
         @Override
-        protected boolean validatePost(ViabilityAssayRunUploadForm form, BindException errors)
+        protected boolean validatePost(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
         {
             boolean valid = super.validatePost(form, errors);
             try

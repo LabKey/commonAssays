@@ -90,7 +90,7 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
     }
 
     @Override
-    protected InsertView createRunInsertView(MassSpecMetadataAssayForm form, boolean reshow, BindException errors)
+    protected InsertView createRunInsertView(MassSpecMetadataAssayForm form, boolean reshow, BindException errors) throws ExperimentException
     {
         InsertView parent = super.createRunInsertView(form, reshow, errors);
         parent.getDataRegion().addHiddenFormField(FractionsDisplayColumn.FRACTIONS_FIELD_NAME, Boolean.toString(form.isFractions()));

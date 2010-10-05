@@ -24,7 +24,6 @@ import org.labkey.api.study.actions.BulkPropertiesUploadForm;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
 import org.labkey.api.study.assay.AssayDataCollector;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.w3c.dom.Document;
@@ -152,19 +151,12 @@ public class MicroarrayRunUploadForm extends BulkPropertiesUploadForm<Microarray
     }
 
     @Override
-    public Map<DomainProperty, String> getRunProperties()
+    public Map<DomainProperty, String> getRunProperties() throws ExperimentException
     {
         if (_runProperties == null)
         {
-            try
-            {
-                super.getRunProperties();
-                _runProperties.putAll(getMageMLProperties());
-            }
-            catch (ExperimentException e)
-            {
-                throw new UnexpectedException(e);
-            }
+            super.getRunProperties();
+            _runProperties.putAll(getMageMLProperties());
         }
         return _runProperties;
     }

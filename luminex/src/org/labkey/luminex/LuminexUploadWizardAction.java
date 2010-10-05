@@ -202,7 +202,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     protected class LuminexRunStepHandler extends RunStepHandler
     {
         @Override
-        protected ModelAndView handleSuccessfulPost(LuminexRunUploadForm form, BindException errors) throws SQLException, ServletException
+        protected ModelAndView handleSuccessfulPost(LuminexRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
         {
             try {
                 String[] analyteNames = getAnalyteNames(form);
@@ -225,7 +225,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         public static final String NAME = "ANALYTE";
 
         @Override
-        public ModelAndView handleStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException
+        public ModelAndView handleStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
         {
             try
             {

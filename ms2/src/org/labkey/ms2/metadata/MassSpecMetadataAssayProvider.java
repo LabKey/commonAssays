@@ -360,9 +360,13 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
 
         List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
         cols.remove(FieldKey.fromParts(ExpDataTable.Column.DataFileUrl));
-        for (DomainProperty fractionProperty : getFractionDomain(protocol).getProperties())
+        Domain fractionDomain = getFractionDomain(protocol);
+        if (fractionDomain != null)
         {
-            cols.add(getDataFractionPropertyFieldKey(fractionProperty));
+            for (DomainProperty fractionProperty : fractionDomain.getProperties())
+            {
+                cols.add(getDataFractionPropertyFieldKey(fractionProperty));
+            }
         }
         for (DomainProperty runProperty : getRunDomain(protocol).getProperties())
         {

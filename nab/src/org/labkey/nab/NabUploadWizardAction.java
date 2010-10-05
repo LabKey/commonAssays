@@ -60,7 +60,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
     }
 
     @Override
-    protected InsertView createRunInsertView(NabRunUploadForm newRunForm, boolean errorReshow, BindException errors)
+    protected InsertView createRunInsertView(NabRunUploadForm newRunForm, boolean errorReshow, BindException errors) throws ExperimentException
     {
         NabAssayProvider provider = (NabAssayProvider) getProvider(newRunForm);
         InsertView parent = super.createRunInsertView(newRunForm, errorReshow, errors);
@@ -87,7 +87,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         private Map<String, Map<DomainProperty, String>> _postedSampleProperties = null;
 
         @Override
-        protected boolean validatePost(NabRunUploadForm form, BindException errors)
+        protected boolean validatePost(NabRunUploadForm form, BindException errors) throws ExperimentException
         {
             boolean runPropsValid = super.validatePost(form, errors);
 
@@ -112,7 +112,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
             return runPropsValid && samplePropsValid && !errors.hasErrors();
         }
 
-        protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException errors) throws SQLException, ServletException
+        protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException errors) throws SQLException, ServletException, ExperimentException
         {
             form.setSampleProperties(_postedSampleProperties);
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
@@ -130,7 +130,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         }
     }
 
-    protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ServletException
+    protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ServletException, ExperimentException
     {
         if (form.getReRun() != null)
             form.getReRun().delete(getViewContext().getUser());
