@@ -109,7 +109,7 @@ public class FeaturesTableInfo extends VirtualTable
                 public TableInfo getLookupTableInfo()
                 {
                     return MS2Service.get().createPeptidesTableInfo(_schema.getUser(), _schema.getContainer(),
-                            false, _schema.isRestrictContainer(), null, null);
+                            false, _schema.isRestrictContainer() ? ContainerFilter.CURRENT : ContainerFilter.EVERYTHING, null, null);
                 }
             });
 

@@ -104,8 +104,9 @@ public class PeptidesView extends QueryView
         defCols.add(FieldKey.fromParts("ProteinHits"));
         defCols.add(FieldKey.fromParts("Protein"));
 
+        ContainerFilter containerFilter = _searchSubfolders ? ContainerFilter.CURRENT : ContainerFilter.Type.CurrentAndSubfolders.create(getUser());
         return MS2Service.get().createPeptidesTableInfo(getViewContext().getUser(),
-                getViewContext().getContainer(), false, !_searchSubfolders, filter, defCols);
+                getViewContext().getContainer(), false, containerFilter, filter, defCols);
     }
 
     protected DataRegion createDataRegion()
