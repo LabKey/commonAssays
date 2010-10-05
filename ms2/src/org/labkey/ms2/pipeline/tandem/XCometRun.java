@@ -52,11 +52,6 @@ public class XCometRun extends MS2Run
         return "-PeptideProphet, Expect, -DiffScore * RawScore, -DiffScore, -RawScore";
     }
 
-    protected String[] getPepXmlScoreNames()
-    {
-        return new String[] { "dotproduct", "delta", "zscore", "deltastar", "expect" };
-    }
-
     public String[] getGZFileExtensions()
     {
         return new String[]{};

@@ -1187,12 +1187,15 @@ public class MS2Controller extends SpringActionController
             }
 
             ManageViewsBean bean = new ManageViewsBean(_returnURL, defaultViewType, getViewMap(true, getContainer().hasPermission(getUser(), DeletePermission.class)), viewName);
-            return new JspView<ManageViewsBean>("/org/labkey/ms2/manageViews.jsp", bean);
+            JspView<ManageViewsBean> view = new JspView<ManageViewsBean>("/org/labkey/ms2/manageViews.jsp", bean);
+            view.setFrame(WebPartView.FrameType.PORTAL);
+            view.setTitle("Manage Views");
+            return view;
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRunNavTrail(root, _run, _returnURL, "Manage Views", getPageConfig(), "viewRun");
+            return appendRunNavTrail(root, _run, _returnURL, "Customize Views", getPageConfig(), "viewRun");
         }
 
         public boolean handlePost(ManageViewsForm form, BindException errors) throws Exception
@@ -3445,6 +3448,8 @@ public class MS2Controller extends SpringActionController
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), _run);
 
             JspView<PickColumnsBean> pickColumns = new JspView<PickColumnsBean>("/org/labkey/ms2/pickPeptideColumns.jsp", new PickColumnsBean());
+            pickColumns.setFrame(WebPartView.FrameType.PORTAL);
+            pickColumns.setTitle("Choose Peptide Columns");
             PickColumnsBean bean = pickColumns.getModelBean();
             bean.commonColumns = _run.getCommonPeptideColumnNames();
             bean.proteinProphetColumns = _run.getProteinProphetPeptideColumnNames();
@@ -3461,7 +3466,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            appendRunNavTrail(root, _run, _returnURL, "Pick Peptide Columns", getPageConfig(), "pickPeptideColumns");
+            appendRunNavTrail(root, _run, _returnURL, "Customize View", getPageConfig(), "pickPeptideColumns");
             return root;
         }
 
@@ -3549,6 +3554,8 @@ public class MS2Controller extends SpringActionController
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), _run);
 
             JspView<PickColumnsBean> pickColumns = new JspView<PickColumnsBean>("/org/labkey/ms2/pickProteinColumns.jsp", new PickColumnsBean());
+            pickColumns.setFrame(WebPartView.FrameType.PORTAL);
+            pickColumns.setTitle("Pick Protein Columns");
             PickColumnsBean bean = pickColumns.getModelBean();
 
             bean.commonColumns = MS2Run.getCommonProteinColumnNames();
@@ -3566,7 +3573,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRunNavTrail(root, _run, _returnURL, "Pick Protein Columns", getPageConfig(), "pickProteinColumns");
+            return appendRunNavTrail(root, _run, _returnURL, "Customize View", getPageConfig(), "pickProteinColumns");
         }
 
         public void validateCommand(ColumnForm target, Errors errors)
@@ -3927,8 +3934,14 @@ public class MS2Controller extends SpringActionController
             setTitle(title);
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
-            ProteinProphetPeptideView peptideView = new ProteinProphetPeptideView(getViewContext(), run1);
-            VBox view = new ProteinsView(getViewContext().getActionURL(), run1, form, proteins, null, peptideView);         // TODO: clone?
+            ProteinProphetPeptideView peptideView = new ProteinProphetPeptideView(getViewContext(), run1)
+            {
+                public String getStandardPeptideColumnNames()
+                {
+                    return super.getStandardPeptideColumnNames() + ", FractionName";
+                }
+            };
+            VBox view = new ProteinsView(getViewContext().getActionURL(), run1, form, proteins, null, peptideView);
             JspView summaryView = new JspView<ProteinGroupWithQuantitation>("/org/labkey/ms2/showProteinGroup.jsp", group);
             summaryView.setTitle(title + " from " + run1.getDescription());
             summaryView.setFrame(WebPartView.FrameType.PORTAL);

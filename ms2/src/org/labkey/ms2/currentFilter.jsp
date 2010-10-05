@@ -22,7 +22,7 @@
 <%
     MS2Controller.CurrentFilterView.CurrentFilterBean bean = ((MS2Controller.CurrentFilterView) HttpView.currentView()).getModelBean();
 %>
-  <table class="labkey-data-region"><col width="10%"><col width="90%"><%
+  <table><col width="10%"><col width="90%"><%
     if (null != bean.headers)
     {
         for (String header : bean.headers)

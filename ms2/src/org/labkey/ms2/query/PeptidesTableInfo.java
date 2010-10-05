@@ -346,6 +346,8 @@ public class PeptidesTableInfo extends FilteredTable
         for (MS2RunType runType : runTypes)
         {
             int index = 1;
+            // Since some search engines have the same names for different scores, build a list of all of the
+            // possible intepretations for a given score name based on the run type
             for (String name : runType.getScoreColumnList())
             {
                 List<Pair<MS2RunType, Integer>> l = columnMap.get(name);

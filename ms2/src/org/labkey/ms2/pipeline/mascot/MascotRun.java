@@ -63,12 +63,6 @@ public class MascotRun extends MS2Run
         return "-Identity";
     }
 
-    protected String[] getPepXmlScoreNames()
-    {
-        return new String[] { "ionscore", "identityscore", "homologyscore", "null", "expect" };  // TODO: star score?  qmatch?
-    }
-
-
     public String[] getGZFileExtensions()
     {
         return new String[]{"out", "dta"};

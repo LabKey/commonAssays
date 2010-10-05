@@ -60,11 +60,6 @@ public class PhenyxRun extends MS2Run
         return null;
     }
 
-    protected String[] getPepXmlScoreNames()
-    {
-        return new String[] { "origScore", "bogus", "zscore" };
-    }
-
     public String[] getGZFileExtensions()
     {
         return new String[0];

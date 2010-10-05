@@ -16,6 +16,7 @@
 
 package org.labkey.ms2;
 
+import org.labkey.api.util.Pair;
 import org.labkey.ms2.pipeline.tandem.XCometRun;
 import org.labkey.ms2.pipeline.tandem.XTandemcometRun;
 import org.labkey.ms2.pipeline.tandem.XTandemRun;
@@ -25,7 +26,7 @@ import org.labkey.ms2.pipeline.comet.CometRun;
 import org.labkey.ms2.pipeline.sequest.SequestRun;
 import org.labkey.ms2.pipeline.UnknownMS2Run;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,32 +35,66 @@ import java.util.List;
  */
 public enum MS2RunType
 {
-    Comet(CometRun.class, "RawScore", "DiffScore", "ZScore"),
-    Mascot(MascotRun.class, "Ion", "Identity", "Homology", "Expect"),
-    Phenyx(PhenyxRun.class, "OrigScore", "Bogus", "ZScore"),
-    Sequest(SequestRun.class, "SpRank", "SpScore", "DeltaCn", "XCorr"),
-    XComet(XCometRun.class, "RawScore", "DiffScore", "Expect"),
-    XTandem(XTandemRun.class, "Hyper", "Next", "B", "Y", "Expect"),
-    XTandemcomet(XTandemcometRun.class, "RawScore", "DiffScore", "Expect"),
+    Comet(CometRun.class,
+            new Pair<String, String>("RawScore", "dotproduct"),
+            new Pair<String, String>("Delta", "delta"),
+            new Pair<String, String>("ZScore", "zscore")),
+    Mascot(MascotRun.class,
+            new Pair<String, String>("Ion", "ionscore"),
+            new Pair<String, String>("Identity", "identityscore"),
+            new Pair<String, String>("Homology", "homologyscore"),
+            new Pair<String, String>("NullScore", "null"),
+            new Pair<String, String>("Expect", "expect")),
+    Phenyx(PhenyxRun.class,
+           new Pair<String, String>("OrigScore", "origScore"),
+           new Pair<String, String>("Bogus", "bogus"),
+           new Pair<String, String>("ZScore", "zscore")),
+    Sequest(SequestRun.class,
+            new Pair<String, String>("SpScore", "spscore"),
+            new Pair<String, String>("DeltaCn", "deltacn"),
+            new Pair<String, String>("XCorr", "xcorr"),
+            new Pair<String, String>("SpRank", "sprank")),
+    XComet(XCometRun.class,
+            new Pair<String, String>("RawScore", "dotproduct"),
+            new Pair<String, String>("Delta", "delta"),
+            new Pair<String, String>("ZScore", "zscore"),
+            new Pair<String, String>("DeltaStar", "deltastar"),
+            new Pair<String, String>("Expect", "expect")),
+    XTandem(XTandemRun.class,
+            new Pair<String, String>("Hyper", "hyperscore"),
+            new Pair<String, String>("Next", "nextscore"),
+            new Pair<String, String>("B", "bscore"),
+            new Pair<String, String>("Y", "yscore"),
+            new Pair<String, String>("Expect", "expect")),
+    XTandemcomet(XTandemcometRun.class,
+            new Pair<String, String>("RawScore", "dotproduct"),
+            new Pair<String, String>("Delta", "delta"),
+            new Pair<String, String>("ZScore", "zscore"),
+            new Pair<String, String>("DeltaStar", "deltastar"),
+            new Pair<String, String>("Expect", "expect")),
     Unknown(UnknownMS2Run.class);
 
     private final Class<? extends MS2Run> _runClass;
     private final String _scoreColumnNames;
-    private final List<String> _scoreColumnList;
+    private final List<String> _scoreColumnList = new ArrayList<String>();
+    private final List<String> _pepXmlScoreNames = new ArrayList<String>();
 
-    private MS2RunType(Class<? extends MS2Run> runClass, String... scoreColumnNames)
+    private MS2RunType(Class<? extends MS2Run> runClass, Pair<String, String>... scoreNames)
     {
         _runClass = runClass;
         StringBuilder sb = new StringBuilder();
         String separator = "";
-        for (String name : scoreColumnNames)
+        for (Pair<String, String> p : scoreNames)
         {
+            String scoreColumnName = p.getKey();
+            String pepXmlName = p.getValue(); 
             sb.append(separator);
             separator = ", ";
-            sb.append(name);
+            sb.append(scoreColumnName);
+            _scoreColumnList.add(scoreColumnName);
+            _pepXmlScoreNames.add(pepXmlName);
         }
         _scoreColumnNames = sb.toString();
-        _scoreColumnList = Arrays.asList(scoreColumnNames);
     }
 
     public Class<? extends MS2Run> getRunClass()
@@ -112,5 +147,11 @@ public enum MS2RunType
         }
         
         return Unknown;
+    }
+
+    /** The scores to read from pepXML files, specified in the order they appear in the prepared statement that inserts rows into MS2PeptidesData */
+    public List<String> getPepXmlScoreNames()
+    {
+        return _pepXmlScoreNames;
     }
 }

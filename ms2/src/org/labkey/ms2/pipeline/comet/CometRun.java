@@ -48,12 +48,6 @@ public class CometRun extends MS2Run
         return "rawScore";
     }
 
-
-    protected String[] getPepXmlScoreNames()
-    {
-        return new String[] { "dotproduct", "delta", "zscore" };
-    }
-
     public String getDiscriminateExpressions()
     {
         return "-PeptideProphet, -ZScore, -DiffScore, -DiffScore * RawScore, -RawScore";

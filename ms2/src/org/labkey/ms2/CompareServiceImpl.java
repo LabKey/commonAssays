@@ -22,6 +22,7 @@ import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.query.ComparisonCrosstabView;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.client.CompareService;
 import org.labkey.ms2.query.CompareProteinsView;
@@ -71,9 +72,27 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
             ActionURL url = new ActionURL(originalURL);
 
             MS2Controller.PeptideFilteringComparisonForm form = new MS2Controller.PeptideFilteringComparisonForm();
-            form.setRunList(Integer.parseInt(url.getParameter("runList")));
+            int listId;
+            try
+            {
+                listId = Integer.parseInt(url.getParameter("runList"));
+            }
+            catch (NumberFormatException e)
+            {
+                throw new NotFoundException("Invalid run list id: " + url.getParameter("runList"));
+            }
+            form.setRunList(listId);
             String probString = url.getParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability);
-            form.setPeptideProphetProbability(probString == null || "".equals(probString) ? null : Float.parseFloat(probString));
+            Float peptideProphet = null;
+            if (probString != null && !"".equals(probString))
+            {
+                try
+                {
+                    peptideProphet = Float.parseFloat(probString);
+                }
+                catch (NumberFormatException e) {} // Just ignore if illegal value
+            }
+            form.setPeptideProphetProbability(peptideProphet);
             form.setPeptideFilterType(url.getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType));
             form.setNormalizeProteinGroups(Boolean.parseBoolean(url.getParameter(MS2Controller.NORMALIZE_PROTEIN_GROUPS_NAME)));
 

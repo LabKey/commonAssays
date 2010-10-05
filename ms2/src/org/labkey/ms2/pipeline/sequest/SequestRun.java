@@ -53,13 +53,6 @@ public class SequestRun extends MS2Run
         return "-SpRank, -DeltaCn, -XCorr";
     }
 
-
-    protected String[] getPepXmlScoreNames()
-    {
-        return new String[] { "spscore", "deltacn", "xcorr", "sprank" };
-    }
-
-
     public String[] getGZFileExtensions()
     {
         return new String[]{"out", "dta"};

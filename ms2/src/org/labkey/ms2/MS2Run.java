@@ -221,22 +221,12 @@ public abstract class MS2Run implements Serializable
 
     public abstract String getDiscriminateExpressions();
 
-    // The scores to read from pepXML files, specified in the order they appear in the prepared statement that
-    // inserts rows into MS2PeptidesData
-    protected abstract String[] getPepXmlScoreNames();
-
     public abstract String[] getGZFileExtensions();
 
     // PepXml score names in the order they get written to the database
     public Collection<String> getPepXmlScoreColumnNames()
     {
-        String[] scoreNameArray = getPepXmlScoreNames();
-        Collection<String> scoreNames = new ArrayList<String>(scoreNameArray.length);
-
-        for (String scoreName : scoreNameArray)
-            scoreNames.add(scoreName.trim());
-
-        return scoreNames;
+        return getRunType().getPepXmlScoreNames();
     }
 
 

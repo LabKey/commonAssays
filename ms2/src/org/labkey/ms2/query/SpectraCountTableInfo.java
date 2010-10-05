@@ -270,14 +270,14 @@ public class SpectraCountTableInfo extends VirtualTable
         peptideFieldKeys.add(FieldKey.fromParts("Charge"));
 
         SQLFragment peptidesSQL;
-        if (_form.isCustomViewPeptideFilter())
+        if (_form != null && _form.isCustomViewPeptideFilter())
         {
             peptidesSQL = _ms2Schema.getPeptideSelectSQL(_context.getRequest(), _form.getCustomViewName(_context), peptideFieldKeys);
         }
         else
         {
             SimpleFilter filter = new SimpleFilter();
-            if (_form.isPeptideProphetFilter() && _form.getPeptideProphetProbability() != null)
+            if (_form != null && _form.isPeptideProphetFilter() && _form.getPeptideProphetProbability() != null)
             {
                 filter.addClause(new CompareType.CompareClause("PeptideProphet", CompareType.GTE, _form.getPeptideProphetProbability()));
             }

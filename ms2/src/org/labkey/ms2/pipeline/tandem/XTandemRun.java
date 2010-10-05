@@ -51,11 +51,6 @@ public class XTandemRun extends MS2Run
         return "-PeptideProphet, Expect, Next - Hyper, (Next/Hyper) - 1, -Hyper";
     }
 
-    protected String[] getPepXmlScoreNames()
-    {
-        return new String[] { "hyperscore", "nextscore", "bscore", "yscore", "expect" };
-    }
-
     public String[] getGZFileExtensions()
     {
         return new String[]{};

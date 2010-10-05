@@ -330,6 +330,12 @@ public abstract class MS2Importer
     {
         HashMap<String, Object> runMap = new HashMap<String, Object>();
 
+        MS2Run run = MS2Manager.getRunByFileName(_path, _fileName, _container);
+        if (run != null)
+        {
+            throw new IllegalStateException("There is already a run for " + _path + "/" + _fileName + " in " + _container.getPath());
+        }
+
         runMap.put("Description", _description);
         runMap.put("Container", _container.getId());
         runMap.put("Path", _path);

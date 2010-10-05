@@ -28,7 +28,7 @@
     MS2Controller.RunSummaryBean bean = me.getModelBean();
     MS2Run run = bean.run;
 %>
-<table class="labkey-data-region">
+<table>
     <tr>
     <td>Search Enzyme:</td><td><%=MS2Controller.defaultIfNull(run.getSearchEnzyme(), "n/a")%></td>
     <td>File Name:</td><td><%=MS2Controller.defaultIfNull(run.getFileName(), "n/a")%></td>

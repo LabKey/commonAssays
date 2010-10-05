@@ -49,11 +49,6 @@ public class UnknownMS2Run extends MS2Run
         return null;
     }
 
-    protected String[] getPepXmlScoreNames()
-    {
-        return new String[0];
-    }
-
     public MS2RunType getRunType()
     {
         return MS2RunType.Unknown;
