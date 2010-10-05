@@ -123,7 +123,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             if(protocol == null)
             {
                 File protocolFile = protocolFactory.getParametersFile(root.resolvePath(path), protocolName);
-                if (NetworkDrive.exists(protocolFile))
+                if (protocolFile != null && NetworkDrive.exists(protocolFile))
                 {
                     protocolExists = true;
                     protocol = protocolFactory.loadInstance(protocolFile);

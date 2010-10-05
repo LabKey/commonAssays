@@ -43,7 +43,7 @@ public class RunFilter extends ListFilterBase implements FeaturesFilter
         }
         catch (NumberFormatException e)
         {
-            throw new NotFoundException("RunIds " + runIds);
+            throw new NotFoundException("Invalid RunIds: '" + runIds + "'");
         }
     }
 
