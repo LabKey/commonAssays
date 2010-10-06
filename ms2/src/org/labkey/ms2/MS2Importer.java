@@ -296,15 +296,8 @@ public abstract class MS2Importer
             logError("Error closing PeptideProphet data prepared statement", e);
         }
 
-        try
-        {
-            if (null != _conn)
-                MS2Manager.getSchema().getScope().releaseConnection(_conn);
-        }
-        catch (SQLException e)
-        {
-            logError("Error releasing connection", e);
-        }
+        if (null != _conn)
+            MS2Manager.getSchema().getScope().releaseConnection(_conn);
     }
 
 

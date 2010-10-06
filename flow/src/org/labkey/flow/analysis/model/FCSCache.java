@@ -16,7 +16,9 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.labkey.api.cache.BlockingCache;
 import org.labkey.api.cache.Cache;
+import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 
 import java.io.File;
@@ -28,75 +30,87 @@ public class FCSCache
     FCSHeaderCache _fcsHeaderCache = new FCSHeaderCache();
     FCSCacheMap _fcsCache = new FCSCacheMap();
 
-    abstract static class AbstractCache<K, V>
-    {
-        private final Object READING_LOCK = new Object();
-        private final Cache<K, V> _cache;
 
-        public AbstractCache(int limit, String debugName)
-        {
-            _cache = CacheManager.getCache(limit, CacheManager.DAY, debugName);
-        }
-
-        abstract protected V loadObject(K key) throws IOException;
-
-        public V get(K key) throws IOException
-        {
-            V ret = _cache.get(key);
-            if (ret != null)
-                return ret;
-
-            synchronized(READING_LOCK)
-            {
-                ret = _cache.get(key);
-                if (ret != null)
-                    return ret;
-                ret = loadObject(key);
-                if (ret != null)
-                    _cache.put(key, ret);
-            }
-
-            return ret;
-        }
-    }
-
-    private static class FCSHeaderCache extends AbstractCache<URI, FCSHeader>
+    private static class FCSHeaderCache
+            extends BlockingCache<URI,FCSHeader>  implements CacheLoader<URI,FCSHeader>
     {
         private static final int CACHE_SIZE = 100;
 
         private FCSHeaderCache()
         {
-            super(CACHE_SIZE, "FCS header cache");
+            _cache = CacheManager.getCache(CACHE_SIZE, CacheManager.DAY, "FCS header cache");
+            _loader = this;
         }
 
-        protected FCSHeader loadObject(URI uri) throws IOException
+
+        public FCSHeader load(URI uri, Object argument)
         {
-            return new FCSHeader(new File(uri));
+            // should CacheLoader.load() deckare throw Exception?
+            try
+            {
+                return new FCSHeader(new File(uri));
+            }
+            catch (IOException x)
+            {
+                throw new RuntimeException(x);
+            }
         }
     }
 
-    private static class FCSCacheMap extends AbstractCache<URI, FCS>
+
+    private static class FCSCacheMap
+            extends BlockingCache<URI,FCS>  implements CacheLoader<URI,FCS>
     {
         private static final int CACHE_SIZE = 20;
 
         private FCSCacheMap()
         {
-            super(CACHE_SIZE, "FCS cache");
+            _cache = CacheManager.getCache(CACHE_SIZE, CacheManager.DAY, "FCS cache");
+            _loader = this;
         }
 
-        protected FCS loadObject(URI uri) throws IOException
+
+        public FCS load(URI uri, Object argument)
         {
-            return new FCS(new File(uri));
+            // should CacheLoader.load() declare throw Exception?
+            try
+            {
+                return new FCS(new File(uri));
+            }
+            catch (IOException x)
+            {
+                throw new RuntimeException(x);
+            }
         }
     }
+
 
     public FCS readFCS(URI uri) throws IOException
     {
-        return _fcsCache.get(uri);
+        try
+        {
+            return _fcsCache.get(uri);
+        }
+        catch (RuntimeException x)
+        {
+            if (x.getCause() instanceof IOException)
+                throw (IOException)x.getCause();
+            throw x;
+        }
     }
+
 
     public FCSHeader readFCSHeader(URI uri) throws IOException
     {
-        return _fcsHeaderCache.get(uri);
+        try
+        {
+            return _fcsHeaderCache.get(uri);
+        }
+        catch (RuntimeException x)
+        {
+            if (x.getCause() instanceof IOException)
+                throw (IOException)x.getCause();
+            throw x;
+        }
     }
 }

@@ -161,13 +161,13 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
 
 
     @Override @NotNull
-    public SQLFragment getFromSQL()
+    public SQLFragment getFromSQL(String alias)
     {
         String innerAlias = "_innerCPP";
         SQLFragment result = new SQLFragment();
-        result.append("SELECT * FROM (");
-        result.append(super.getFromSQL());
-        result.append(") " + innerAlias + ", (SELECT InnerSeqId ");
+        result.append("(SELECT * FROM ");
+        result.append(super.getFromSQL(innerAlias));
+        result.append(", (SELECT InnerSeqId ");
         for (MS2Run run : _runs)
         {
             result.append(",\n");
@@ -211,6 +211,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         result.append(" AS RunProteinGroups WHERE RunProteinGroups.InnerSeqId = ");
         result.append(innerAlias);
         result.append(".SeqId");
+        result.append(") ").append(alias);
         return result;
     }
     

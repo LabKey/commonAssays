@@ -330,7 +330,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         {
             //final cleanup
             try{if(null != pstmt) pstmt.close();}catch(SQLException ignore){}
-            try{if(null != cn) scope.releaseConnection(cn);}catch(SQLException ignore){}
+            if(null != cn) scope.releaseConnection(cn);
         } //finally
 
     } //importFile()

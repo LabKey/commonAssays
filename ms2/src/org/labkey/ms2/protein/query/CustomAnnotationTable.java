@@ -117,17 +117,17 @@ public class CustomAnnotationTable extends FilteredTable
 
 
     @Override @NotNull
-    public SQLFragment getFromSQL()
+    public SQLFragment getFromSQL(String alias)
     {
-        SQLFragment sql = super.getFromSQL();
         if (!_includeSeqId)
-            return sql;
-        
-        SQLFragment result = new SQLFragment("SELECT CustomAnnotationWithoutSeqId.*, i.seqId FROM (");
-        result.append(sql);
-        result.append(") CustomAnnotationWithoutSeqId LEFT OUTER JOIN (");
+            return super.getFromSQL(alias);
+
+        SQLFragment result = new SQLFragment("(SELECT CustomAnnotationWithoutSeqId.*, i.seqId FROM ");
+        result.append(super.getFromSQL("CustomAnnotationWithoutSeqId"));
+        result.append(" LEFT OUTER JOIN (");
         result.append(_annotationSet.lookupCustomAnnotationType().getSeqIdSelect());
         result.append(") i ON (CustomAnnotationWithoutSeqId.LookupString = i.ident)");
+        result.append(") ").append(alias);
         return result;
     }
 }

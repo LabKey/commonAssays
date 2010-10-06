@@ -271,17 +271,9 @@ public class SpectrumImporter
                 _systemLog.error(e);
             }
 
-            try
+            if (null != conn)
             {
-                if (null != conn)
-                {
-                    schema.getScope().releaseConnection(conn);
-                }
-            }
-            catch (SQLException e)
-            {
-                _log.error(e);
-                _systemLog.error(e);
+                schema.getScope().releaseConnection(conn);
             }
         }
     }
