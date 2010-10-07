@@ -47,32 +47,29 @@ public class GateEditorForm extends ViewForm
 
     public int getRunId()
     {
-        int ret = runId;
-        if (ret == 0)
+        if (runId != 0)
+            return runId;
+        
+        try
         {
-            ret = FlowPreference.editScriptRunId.getIntValue(getRequest());
-            try
+            int savedId = FlowPreference.editScriptRunId.getIntValue(getRequest());
+            if (savedId != 0)
             {
-                if (ret != 0 && FlowRun.fromRunId(ret) == null)
-                {
-                    ret = 0;
-                }
-                if (ret == 0)
-                {
-                    FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-                    if (runs.length > 0)
-                    {
-                        ret = runs[0].getRunId();
-                    }
-
-                }
+                FlowRun run = FlowRun.fromRunId(savedId);
+                // ignore the saved run 'preference' if it is not in the current container
+                if (null != run && getContainer().getId().equals(run.getContainerId()))
+                    return savedId;
             }
-            catch (SQLException e)
-            {
-                throw UnexpectedException.wrap(e);
-            }
+            
+            FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+            if (runs.length > 0)
+                return runs[0].getRunId();
+            return 0;
         }
-        return ret;
+        catch (SQLException e)
+        {
+            throw UnexpectedException.wrap(e);
+        }
     }
 
     public void setRunId(int runId)
