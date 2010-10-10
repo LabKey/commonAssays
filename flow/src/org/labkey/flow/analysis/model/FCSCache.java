@@ -17,7 +17,6 @@
 package org.labkey.flow.analysis.model;
 
 import org.labkey.api.cache.BlockingCache;
-import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 
@@ -32,14 +31,27 @@ public class FCSCache
 
 
     private static class FCSHeaderCache
-            extends BlockingCache<URI,FCSHeader>  implements CacheLoader<URI,FCSHeader>
+            extends BlockingCache<URI,FCSHeader>  implements CacheLoader<URI, FCSHeader>
     {
         private static final int CACHE_SIZE = 100;
 
         private FCSHeaderCache()
         {
-            _cache = CacheManager.getCache(CACHE_SIZE, CacheManager.DAY, "FCS header cache");
-            _loader = this;
+            super(CacheManager.<URI, Object>getCache(CACHE_SIZE, CacheManager.DAY, "FCS header cache"), new CacheLoader<URI, FCSHeader>(){
+                @Override
+                public FCSHeader load(URI uri, Object argument)
+                {
+                    // should CacheLoader.load() deckare throw Exception?
+                    try
+                    {
+                        return new FCSHeader(new File(uri));
+                    }
+                    catch (IOException x)
+                    {
+                        throw new RuntimeException(x);
+                    }
+                }
+            });
         }
 
 
@@ -58,29 +70,27 @@ public class FCSCache
     }
 
 
-    private static class FCSCacheMap
-            extends BlockingCache<URI,FCS>  implements CacheLoader<URI,FCS>
+    private static class FCSCacheMap extends BlockingCache<URI,FCS>
     {
         private static final int CACHE_SIZE = 20;
 
         private FCSCacheMap()
         {
-            _cache = CacheManager.getCache(CACHE_SIZE, CacheManager.DAY, "FCS cache");
-            _loader = this;
-        }
-
-
-        public FCS load(URI uri, Object argument)
-        {
-            // should CacheLoader.load() declare throw Exception?
-            try
-            {
-                return new FCS(new File(uri));
-            }
-            catch (IOException x)
-            {
-                throw new RuntimeException(x);
-            }
+            super(CacheManager.<URI, Object>getCache(CACHE_SIZE, CacheManager.DAY, "FCS cache"), new CacheLoader<URI, FCS>(){
+                @Override
+                public FCS load(URI uri, Object argument)
+                {
+                    // should CacheLoader.load() declare throw Exception?
+                    try
+                    {
+                        return new FCS(new File(uri));
+                    }
+                    catch (IOException x)
+                    {
+                        throw new RuntimeException(x);
+                    }
+                }
+            });
         }
     }
 
