@@ -23,6 +23,7 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.Plate;
@@ -172,6 +173,32 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
             results.put(name + OORINDICATOR_SUFFIX, outOfRange);
         }
     }
+
+    protected void throwParseError(File dataFile, String msg) throws ExperimentException
+    {
+        throwParseError(dataFile, msg, null);
+    }
+
+    protected void throwParseError(File dataFile, String msg, Exception cause) throws ExperimentException
+    {
+        StringBuilder fullMessage = new StringBuilder("There was an error parsing ");
+        fullMessage.append(dataFile.getName()).append(".\n");
+        if (!dataFile.getName().toLowerCase().endsWith(getPreferredDataFileExtension().toLowerCase()))
+        {
+            fullMessage.append("Your data file may not be in ").append(getPreferredDataFileExtension()).append(" format.\nError details: ");
+        }
+        if (msg != null)
+        {
+            fullMessage.append(msg);
+            fullMessage.append("\n");
+        }
+        if (cause != null)
+            throw new ExperimentException(fullMessage.toString(), cause);
+        else
+            throw new ExperimentException(fullMessage.toString());
+    }
+
+    protected abstract String getPreferredDataFileExtension();
 
     public static class MissingDataFileException extends ExperimentException
     {

@@ -15,24 +15,11 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="org.labkey.api.exp.Lsid"%>
-<%@ page import="org.labkey.api.exp.OntologyManager" %>
-<%@ page import="org.labkey.api.exp.PropertyDescriptor" %>
-<%@ page import="org.labkey.api.query.QueryView" %>
-<%@ page import="org.labkey.api.security.permissions.DeletePermission" %>
 <%@ page import="org.labkey.api.security.permissions.InsertPermission" %>
-<%@ page import="org.labkey.api.study.DilutionCurve" %>
-<%@ page import="org.labkey.api.study.WellData" %>
-<%@ page import="org.labkey.api.util.Pair" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.nab.*" %>
-<%@ page import="java.text.DecimalFormat" %>
-<%@ page import="java.util.*" %>
-<%@ page import="org.labkey.api.study.Plate" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <labkey:errors/>

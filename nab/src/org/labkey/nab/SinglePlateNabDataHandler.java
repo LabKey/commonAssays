@@ -53,6 +53,12 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     private static final int START_COL = 0;
 
     @Override
+    protected String getPreferredDataFileExtension()
+    {
+        return "xls";
+    }
+
+    @Override
     protected DataType getDataType()
     {
         return NAB_DATA_TYPE;
@@ -103,11 +109,11 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         }
         catch (IOException e)
         {
-            throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: " + e.getMessage(), e);
+            throwParseError(dataFile, null, e);
         }
         catch (BiffException e)
         {
-            throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: " + e.getMessage(), e);
+            throwParseError(dataFile, null, e);
         }
         double[][] cellValues = new double[nabTemplate.getRows()][nabTemplate.getColumns()];
 
@@ -130,7 +136,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             startRow = START_ROW;
             startColumn = START_COL;
             if (workbook.getSheets().length < 2)
-                throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: no plate data was found.");
+                throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: no plate data was found.");
             plateSheet = workbook.getSheet(1);
         }
         else
@@ -141,7 +147,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
         if (nabTemplate.getRows() + startRow > plateSheet.getRows() || nabTemplate.getColumns() + startColumn > plateSheet.getColumns())
         {
-            throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: expected " +
+            throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: expected " +
                     (nabTemplate.getRows() + startRow) + " rows and " + (nabTemplate.getColumns() + startColumn) + " colums, but found "+
                     plateSheet.getRows() + " rows and " + plateSheet.getColumns() + " colums.");
         }
@@ -158,7 +164,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                 }
                 catch (NumberFormatException e)
                 {
-                    throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: could not parse '" +
+                    throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: could not parse '" +
                             cellContents + "' as a number.", e);
                 }
             }

@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.nab.NabAssayRun" %>
 <%@ page import="org.labkey.nab.NabAssayController" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
@@ -31,25 +30,48 @@
     NabAssayController.RenderAssayBean bean = me.getModelBean();
     NabAssayRun assay = bean.getAssay();
 %>
-<table class="labkey-data-region labkey-show-borders" style="background-color:#FFFFA0;border:0">
+<style type="text/css">
+	table.cutoff-table {
+        border-collapse:collapse;
+	}
+
+	td.cutoff-data {
+		background-color: #FFFFA0;
+        border: 1px solid #DDDDDD;
+        text-align:right;
+    }
+
+    td.cutoff-heading {
+        background-color: #FFFFCC;
+        border: 1px solid #AAAAAA;
+        font-weight:bold;
+        text-align: center;
+    }
+
+    td.sample-heading {
+        background-color: #FFFFCC;
+        border: 1px solid #AAAAAA;
+    }
+</style>
+<table class="cutoff-table" cellspacing="0px">
     <tr>
-        <td style="background-color:#FFFFFF;border:0">&nbsp;</td>
-        <th colspan="<%= 2* assay.getCutoffs().length %>">Cutoff Dilutions</th>
+        <td>&nbsp;</td>
+        <td class="cutoff-heading" colspan="<%= 2* assay.getCutoffs().length %>">Cutoff Dilutions</td>
     </tr>
     <tr>
-        <td style="background-color:#FFFFFF;border:0">&nbsp;</td>
-        <th style="text-align:center" colspan=<%= assay.getCutoffs().length %>>Curve Based</th>
-        <th style="text-align:center" colspan=<%= assay.getCutoffs().length %>>Point Based</th>
+        <td>&nbsp;</td>
+        <td class="cutoff-heading" colspan=<%= assay.getCutoffs().length %>>Curve Based</td>
+        <td class="cutoff-heading" colspan=<%= assay.getCutoffs().length %>>Point Based</td>
     </tr>
     <tr>
-        <td style="background-color:#FFFFFF;border:0 1px 0 0">&nbsp;</td>
+        <td>&nbsp;</td>
         <%
             for (int set = 0; set < 2; set++)
             {
                 for (int cutoff : assay.getCutoffs())
                 {
             %>
-            <th  style="text-align:center"><%= cutoff %>%</th>
+            <td class="cutoff-heading"><%= cutoff %>%</td>
             <%
                 }
             }
@@ -71,7 +93,7 @@
             }
     %>
     <tr>
-        <td>
+        <td class="sample-heading">
             <%=h(results.getCaption())%>
         </td>
         <%
@@ -80,7 +102,7 @@
                 for (int cutoff : assay.getCutoffs())
                 {
                     %>
-        <td style="text-align:right">
+        <td class="cutoff-data">
                     <%
                     boolean curveBased = set == 0;
 
@@ -94,20 +116,26 @@
                     {
                         double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0, assay.getRenderedCurveFitType()) :
                                 summary.getInterpolatedCutoffDilution(cutoff / 100.0, assay.getRenderedCurveFitType());
-                        if (val == Double.NEGATIVE_INFINITY)
-                            out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution(assay.getRenderedCurveFitType())));
-                        else if (val == Double.POSITIVE_INFINITY)
-                            out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution(assay.getRenderedCurveFitType())));
-                        else
-                        {
-                            DecimalFormat shortDecFormat;
-                            if (summary.getMethod() == SampleInfo.Method.Concentration)
-                                shortDecFormat = new DecimalFormat("0.###");
-                            else
-                                shortDecFormat = new DecimalFormat("0");
 
-                            out.write(shortDecFormat.format(val));
+                        String modifier = "";
+                        if (val == Double.NEGATIVE_INFINITY)
+                        {
+                            modifier = "&lt; ";
+                            val = summary.getMinDilution(assay.getRenderedCurveFitType());
                         }
+                        else if (val == Double.POSITIVE_INFINITY)
+                        {
+                            modifier = "&gt; ";
+                            val = summary.getMaxDilution(assay.getRenderedCurveFitType());
+                        }
+
+                        DecimalFormat shortDecFormat;
+                        if (summary.getMethod() == SampleInfo.Method.Concentration || (val > -1 && val < 1))
+                            shortDecFormat = new DecimalFormat("0.###");
+                        else
+                            shortDecFormat = new DecimalFormat("0");
+
+                        out.write(modifier + shortDecFormat.format(val));
                     }
                         %>
             </td>

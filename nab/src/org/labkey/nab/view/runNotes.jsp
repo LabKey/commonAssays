@@ -42,7 +42,7 @@
         context.getContainer().hasPermission(context.getUser(), InsertPermission.class);
 %>
 <tr>
-    <td class="labkey-form-label">
+    <td>
         This run is shown with a <strong><%= assay.getRenderedCurveFitType().getLabel() %></strong> curve fit,
        but is saved with a <strong><%= assay.getSavedCurveFitType() != null ? assay.getSavedCurveFitType().getLabel() : "unknown" %></strong> curve fit.
         To replace<br>the saved data with the displayed data,
@@ -60,6 +60,7 @@
         <%
         }
         %>
+        <p>
     </td>
 </tr>
 <%
@@ -81,6 +82,7 @@
     <%
             }
     %>
+        <p>
     </td>
 </tr>
 <%
@@ -92,7 +94,8 @@
 <tr>
     <td class="labkey-form-label">
         <span class="labkey-error"><b>WARNING</b>: The following runs use a data file by the same name.</span><br><br>
-        <% include(duplicateDataFileView, out); %>
+        <% include(duplicateDataFileView, out); %><p>
+
     </td>
 </tr>
 <%

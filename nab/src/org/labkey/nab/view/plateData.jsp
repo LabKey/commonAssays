@@ -22,6 +22,7 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.nab.Luc5Assay" %>
 <%@ page import="org.labkey.api.study.Plate" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();
@@ -29,21 +30,36 @@
     NabAssayRun assay = bean.getAssay();
     ViewContext context = me.getViewContext();
 %>
-<table>
+<table cellspacing="5px">
 <%
-    for (Plate plate : assay.getPlates())
+    int plateIndex = 0;
+    List<Plate> plates = assay.getPlates();
+    boolean multiPlate = plates.size() > 1;
+    for (Plate plate : plates)
     {
 %>
 <tr>
     <td valign=top>
-        <table>
+        <table class="labkey-data-region labkey-show-borders">
+            <%
+                if (multiPlate)
+                {
+            %>
+            <tr>
+                <td class="labkey-data-region-header-container" style="text-align:center;" colspan="<%= plate.getColumns() + 1 %>">
+                    Plate <%= ++plateIndex %>
+                </td>
+            </tr>
+            <%
+                }
+            %>
             <tr>
                 <td>&nbsp;</td>
                 <%
                     for (int c = 1; c <= plate.getColumns(); c++)
                     {
                 %>
-                <th><%=c %></th>
+                <td style="border-bottom:1px solid;text-align:center;"><%=c %></td>
                 <%
                     }
                 %>
@@ -53,7 +69,7 @@
                 {
             %>
             <tr>
-                <th><%=(char) ('A' + row)%></th>
+                <td style="border-right:1px solid"><%=(char) ('A' + row)%></td>
 
                 <%
                     for (int col = 0; col < plate.getColumns(); col++)

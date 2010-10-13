@@ -31,37 +31,38 @@
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();
     NabAssayController.RenderAssayBean bean = me.getModelBean();
 %>
-<table>
+<table cellspacing="5px">
     <tr>
         <%
             int count = 0;
-            int maxPerRow = 6;
+            int maxPerRow = 5;
             for (NabAssayRun.SampleResult results : bean.getSampleResults())
             {
                 DilutionSummary summary = results.getDilutionSummary();
         %>
         <td>
-            <table>
+            <table class="labkey-data-region">
                 <tr>
-                    <th colspan="4" style="text-align:center"><%= h(results.getCaption()) %></th>
+                    <td colspan="4" class="labkey-data-region-header-container" style="text-align:center;"><%= h(results.getCaption()) %></td>
                 </tr>
                 <tr>
-                    <th align="right"><%= summary.getMethod().getAbbreviation() %></th>
-                    <th align="center" colspan="3">Neut.</th>
+                    <td align="right" style="text-decoration:underline"><%= summary.getMethod().getAbbreviation() %></td>
+                    <td align="center" colspan="3"  style="text-decoration:underline">Neut.</td>
                 </tr>
                 <%
                     List<WellData> dataList = summary.getWellData();
                     for (int dataIndex = dataList.size() - 1; dataIndex >= 0; dataIndex--)
                     {
                         WellData data = dataList.get(dataIndex);
+                        double dilution = summary.getDilution(data);
                         DecimalFormat shortDecFormat;
-                        if (summary.getMethod() == SampleInfo.Method.Concentration)
+                        if (summary.getMethod() == SampleInfo.Method.Concentration || (dilution > -1 && dilution < 1))
                             shortDecFormat = new DecimalFormat("0.###");
                         else
                             shortDecFormat = new DecimalFormat("0");
                 %>
                 <tr>
-                    <td align=right><%= shortDecFormat.format(summary.getDilution(data)) %></td>
+                    <td align=right><%= shortDecFormat.format(dilution) %></td>
                     <td
                         align=right><%= Luc5Assay.percentString(summary.getPercent(data)) %></td>
                     <td>&plusmn;</td>

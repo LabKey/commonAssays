@@ -585,7 +585,7 @@ public class NabAssayController extends SpringActionController
                 }
             }
 
-            NavTree changeCurveMenu = new NavTree("View With Curve Type");
+            NavTree changeCurveMenu = new NavTree("Change Curve Type");
             for (DilutionCurve.FitType type : DilutionCurve.FitType.values())
             {
                 ActionURL changeCurveURL = getViewContext().cloneActionURL();
@@ -697,11 +697,8 @@ public class NabAssayController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            ActionURL assayListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer());
-            ActionURL runListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol);
             ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(getContainer(), _protocol, _runRowId);
-            return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
-                    " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _runRowId + " Details");
+            return root.addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _runRowId + " Details");
         }
     }
 

@@ -60,6 +60,12 @@ public class HighThroughputNabDataHandler extends NabDataHandler
     }
 
     @Override
+    protected String getPreferredDataFileExtension()
+    {
+        return "csv";
+    }
+
+    @Override
     protected DataType getDataType()
     {
         return NAB_HIGH_THROUGHPUT_DATA_TYPE;
@@ -68,7 +74,7 @@ public class HighThroughputNabDataHandler extends NabDataHandler
     private static final String ROW_COLUMNN_HEADER = "Row";
     private static final String COLUMN_COLUMNN_HEADER = "Column";
 
-    private int getPlateRow(Map<String, Object> rowData, int line, int max) throws ExperimentException
+    private int getPlateRow(File dataFile, Map<String, Object> rowData, int line, int max) throws ExperimentException
     {
         Object rowValue = rowData.get(ROW_COLUMNN_HEADER);
         int row;
@@ -86,12 +92,13 @@ public class HighThroughputNabDataHandler extends NabDataHandler
         }
         else
         {
-            throw new ExperimentException("No valid plate row specified for line " + line + ".  Expected an integer " +
+            throwParseError(dataFile, "No valid plate row specified for line " + line + ".  Expected an integer " +
                     " or single letter value in a column with header \"" + ROW_COLUMNN_HEADER + "\", found: " + rowValue);
+            return -1;
         }
         if (row <= 0 || row > max)
         {
-            throw new ExperimentException("Row " + row + " is not valid for the current plate template.  " + max +
+            throwParseError(dataFile, "Row " + row + " is not valid for the current plate template.  " + max +
                     " rows are expected per plate.  Error on line " + line + ".");
         }
         return row;
@@ -100,9 +107,10 @@ public class HighThroughputNabDataHandler extends NabDataHandler
     @Override
     protected List<Plate> createPlates(File dataFile, PlateTemplate template) throws ExperimentException
     {
+        TabLoader loader = null;
         try
         {
-            TabLoader loader = new TabLoader(dataFile, true);
+            loader = new TabLoader(dataFile, true);
             loader.parseAsCSV();
             int wellsPerPlate = template.getRows() * template.getColumns();
 
@@ -115,24 +123,24 @@ public class HighThroughputNabDataHandler extends NabDataHandler
                 // Current line in the data file is calculated by the number of wells we've already read,
                 // plus one for the current row, plus one for the header row:
                 int line = plateCount * wellsPerPlate + wellCount + 2;
-                int plateRow = getPlateRow(rowData, line, template.getRows());
+                int plateRow = getPlateRow(dataFile, rowData, line, template.getRows());
                 Object colValue = rowData.get(COLUMN_COLUMNN_HEADER);
                 if (colValue == null || !(colValue instanceof Integer))
                 {
-                    throw new ExperimentException("No valid plate column specified for line " + line + ".  Expected an integer " +
+                    throwParseError(dataFile, "No valid plate column specified for line " + line + ".  Expected an integer " +
                             "value in a column with header \"" + COLUMN_COLUMNN_HEADER + "\", found: " + colValue);
                 }
                 int plateCol = (Integer) colValue;
                 if (plateCol <= 0 || plateCol > template.getColumns())
                 {
-                    throw new ExperimentException("Column " + plateCol + " is not valid for the current plate template.  " + template.getColumns() +
+                    throwParseError(dataFile, "Column " + plateCol + " is not valid for the current plate template.  " + template.getColumns() +
                             " columns are expected per plate.  Error on line " + line + ".");
 
                 }
                 Object dataValue = rowData.get(RESULT_COLUMNN_HEADER);
                 if (dataValue == null || !(dataValue instanceof Integer))
                 {
-                    throw new ExperimentException("No valid result value specified for line " + line + ".  Expected an integer " +
+                    throwParseError(dataFile, "No valid result value specified for line " + line + ".  Expected an integer " +
                             "value in a column with header \"" + RESULT_COLUMNN_HEADER + "\", found: " + dataValue);
                 }
 
@@ -146,14 +154,15 @@ public class HighThroughputNabDataHandler extends NabDataHandler
             }
             if (wellCount != 0)
             {
-                throw new ExperimentException("Expected well data in multiples of " + wellsPerPlate + ".  The file provided included " +
+                throwParseError(dataFile, "Expected well data in multiples of " + wellsPerPlate + ".  The file provided included " +
                         plateCount + " complete plates of data, plus " + wellCount + " extra rows.");
             }
             return plates;
         }
         catch (IOException e)
         {
-            throw new ExperimentException(e);
+            throwParseError(dataFile, null, e);
+            return null;
         }
     }
 
