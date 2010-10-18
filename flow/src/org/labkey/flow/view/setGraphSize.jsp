@@ -29,8 +29,8 @@
 
 
 <script type="text/javascript">
-    var urlUpdateSize = <%=q(FlowPreference.graphSize.urlUpdate())%>
-    var currentSize = <%=graphSize%>;
+    var urlUpdateSize = <%=q(FlowPreference.graphSize.urlUpdate())%>;
+    var currentSize = <%=q(graphSize)%>;
     var fullSize = 300;
     var curImage;
     var zoomImage;
@@ -89,7 +89,7 @@
         zoomImage.style.top = (event.clientY - offsetY + scrollTop);
         zoomImage.src = el.src;
         zoomImage.style.visibility="visible";
-    }
+    };
 
     function setGraphClasses(name, className)
     {
@@ -101,17 +101,21 @@
     }
     function setGraphSize(size)
     {
-        var graphs = Ext.DomQuery.select("[@class *= 'labkey-flow-graph']");
+        var unitSize = size + "px";
+        
+        var graphs  = Ext.DomQuery.select("IMG.labkey-flow-graph");
         for (var i = 0; i < graphs.length; i ++)
         {
             var graph = graphs[i];
-            graph.style.width = size;
-            graph.style.height = size;
+            graph.style.width = unitSize;
+            graph.style.height = unitSize;
         }
 
+        // update link style
         setGraphClasses("graphSize" + currentSize, "");
         currentSize = size;
         setGraphClasses("graphSize" + currentSize, "labkey-selected-link");
+        // update user preference
         document.getElementById("updateGraphSize").src = urlUpdateSize + currentSize;
     }
 </script>
