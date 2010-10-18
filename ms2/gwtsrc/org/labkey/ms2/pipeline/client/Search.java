@@ -19,8 +19,6 @@ package org.labkey.ms2.pipeline.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.Window;
 import org.labkey.api.gwt.client.util.ErrorDialogAsyncCallback;
 import org.labkey.api.gwt.client.util.PropertyUtil;
 import org.labkey.api.gwt.client.util.ServiceUtil;
@@ -99,7 +97,9 @@ public class Search implements EntryPoint
         //form
         searchFormPanel.setAction(PropertyUtil.getServerProperty("targetAction"));
         searchFormPanel.setMethod(FormPanel.METHOD_POST);
-        searchFormPanel.addFormHandler(new SearchFormHandler());
+        SearchFormHandler formHandler = new SearchFormHandler();
+        searchFormPanel.addSubmitCompleteHandler(formHandler);
+        searchFormPanel.addSubmitHandler(formHandler);
         searchFormPanel.setWidth("100%");
 
         runSearch.setName("runSearch");
@@ -131,7 +131,7 @@ public class Search implements EntryPoint
         saveProtocolCheckBoxLabel.setText("Save protocol:");
         saveProtocolCheckBoxLabel.setStylePrimaryName("labkey-form-label-nowrap");
         saveProtocolCheckBox.setName("saveProtocol");
-        saveProtocolCheckBox.setChecked(new Boolean(PropertyUtil.getServerProperty("saveProtocol")).booleanValue());
+        saveProtocolCheckBox.setValue(Boolean.valueOf(PropertyUtil.getServerProperty("saveProtocol")));
         buttonPanel.setSpacing(5);
         buttonPanel.add(searchButton);
         buttonPanel.add(cancelButton);
@@ -529,9 +529,8 @@ public class Search implements EntryPoint
         searchButton.setEnabled(enabled);
     }
 
-       private class SearchButton extends ImageButton
+    private class SearchButton extends ImageButton
     {
-        boolean enabled = true;
         SearchButton()
         {
             super("Search");
@@ -606,18 +605,21 @@ public class Search implements EntryPoint
             okButton.setFocus(true);
         }
     }    
-    private class SearchFormHandler implements FormHandler
+    private class SearchFormHandler implements FormPanel.SubmitCompleteHandler, FormPanel.SubmitHandler
     {
-        public void onSubmit(FormSubmitEvent event)
+        public void onSubmit(FormPanel.SubmitEvent event)
         {
             clearDisplay();
             appendError(protocolComposite.validate());
             appendError(sequenceDbComposite.validate());
-            event.setCancelled(hasErrors());
+            if (hasErrors())
+            {
+                event.cancel();
+            }
             WindowUtil.scrollTo(0, 0);
         }
 
-        public void onSubmitComplete(FormSubmitCompleteEvent event)
+        public void onSubmitComplete(FormPanel.SubmitCompleteEvent event)
         {
             String results = event.getResults();
             if(results == null)

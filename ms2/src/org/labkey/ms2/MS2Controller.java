@@ -362,6 +362,7 @@ public class MS2Controller extends SpringActionController
             MS2Run run = validateRun(form.run);
 
             ActionURL currentURL = getViewContext().getActionURL();
+            AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
             // If the user hasn't customized the view at all, show them their default view
             if (currentURL.getParameters().length == 1)
@@ -389,11 +390,16 @@ public class MS2Controller extends SpringActionController
             {
                 PropertyManager.PropertyMap props = PropertyManager.getWritableProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY, true);
                 ActionURL newURL = currentURL.clone().deleteParameter("run");
+                for (String paramName : newURL.getParameterMap().keySet())
+                {
+                    if (paramName.endsWith("." + QueryParam.offset))
+                    {
+                        newURL.deleteParameter(paramName);
+                    }
+                }
                 props.put(MS2Controller.LAST_VIEW, newURL.getRawQuery());
                 PropertyManager.saveProperties(props);
             }
-
-            AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
             WebPartView grid = peptideView.createGridView(form);
             List<DisplayColumn> displayColumns;
