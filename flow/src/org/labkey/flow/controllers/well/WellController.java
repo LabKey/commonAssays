@@ -303,7 +303,7 @@ public class WellController extends BaseFlowController<WellController.Action>
             if (bytes != null)
             {
                 streamBytes(getViewContext().getResponse(),
-                        bytes, "image/png", System.currentTimeMillis() + DateUtils.MILLIS_PER_HOUR);
+                        bytes, "image/png", HeartBeat.currentTimeMillis() + DateUtils.MILLIS_PER_HOUR);
             }
             return null;
         }
