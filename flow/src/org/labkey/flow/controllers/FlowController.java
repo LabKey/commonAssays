@@ -22,6 +22,7 @@ import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
@@ -29,6 +30,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryDefinition;
+import org.labkey.api.query.QueryParseException;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.RequiresSiteAdmin;
@@ -150,13 +152,19 @@ public class FlowController extends BaseFlowController<FlowController.Action>
             }
             FlowSchema schema = new FlowSchema(getViewContext());
             QueryDefinition queryDef = settings.getQueryDef(schema);
+
             if (queryDef == null)
             {
                 HttpView.throwNotFound("Query definition '" + settings.getQueryName() + "' in flow schema not found");
             }
-            if (schema.getTable(settings.getQueryName(), false) == null)
+            try
             {
-                HttpView.throwNotFound("Query name '" + settings.getQueryName() + "' in flow schema not found");
+                if (schema.getTable(settings.getQueryName(), false) == null)
+                    HttpView.throwNotFound("Query name '" + settings.getQueryName() + "' in flow schema not found");
+            }
+            catch (QueryParseException qpe)
+            {
+                HttpView.throwNotFound(qpe.getMessage());
             }
 
             experiment = schema.getExperiment();
