@@ -84,6 +84,10 @@ public abstract class FlowJob extends PipelineJob
         {
             setStatus(INTERRUPTED_STATUS);
         }
+        else if (hasErrors())
+        {
+            setStatus(ERROR_STATUS);
+        }
         else
         {
             setStatus(COMPLETE_STATUS);
@@ -118,6 +122,7 @@ public abstract class FlowJob extends PipelineJob
     {
         _errors = true;
         error(message);
+        setStatus(ERROR_STATUS);
     }
 
     public boolean isComplete()
