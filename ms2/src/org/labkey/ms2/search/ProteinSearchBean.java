@@ -17,7 +17,7 @@
 package org.labkey.ms2.search;
 
 import org.labkey.ms2.query.PeptideFilter;
-import org.labkey.ms2.query.PeptidesFilterView;
+import org.labkey.ms2.query.FilterView;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.api.view.ViewContext;
 
@@ -29,7 +29,7 @@ public class ProteinSearchBean implements PeptideFilter
 {
     private boolean _horizontal;
     private final MS2Controller.ProteinSearchForm _form;
-    private PeptidesFilterView _peptideView;
+    private FilterView _peptideView;
     
     public ProteinSearchBean(boolean horizontal, MS2Controller.ProteinSearchForm form)
     {
@@ -37,16 +37,16 @@ public class ProteinSearchBean implements PeptideFilter
         _form = form;
     }
 
-    public PeptidesFilterView getPeptideView(ViewContext viewContext)
+    public FilterView getPeptideView(ViewContext viewContext)
     {
         if (_peptideView == null)
         {
-            _peptideView = new PeptidesFilterView(viewContext, this);
+            _peptideView = new FilterView(viewContext, true);
         }
         return _peptideView;
     }
     
-    public String getCustomViewName(ViewContext context)
+    public String getPeptideCustomViewName(ViewContext context)
     {
         return _form.getCustomViewName(context);
     }

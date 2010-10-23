@@ -51,11 +51,10 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         {
             ActionURL url = new ActionURL(originalURL);
             int runList = Integer.parseInt(url.getParameter("runList"));
-            String viewName = url.getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME);
             ViewContext queryContext = new ViewContext(_context);
             queryContext.setActionURL(url);
 
-            CompareProteinsView view = new CompareProteinsView(queryContext, runList, false, viewName);
+            CompareProteinsView view = new CompareProteinsView(queryContext, runList, false);
             return view.createCompareResult();
         }
         catch (Exception e)
@@ -82,18 +81,10 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
                 throw new NotFoundException("Invalid run list id: " + url.getParameter("runList"));
             }
             form.setRunList(listId);
-            String probString = url.getParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability);
-            Float peptideProphet = null;
-            if (probString != null && !"".equals(probString))
-            {
-                try
-                {
-                    peptideProphet = Float.parseFloat(probString);
-                }
-                catch (NumberFormatException e) {} // Just ignore if illegal value
-            }
-            form.setPeptideProphetProbability(peptideProphet);
+            form.setPeptideProphetProbability(getProbability(url, MS2Controller.PeptideFilteringFormElements.peptideProphetProbability));
+            form.setProteinProphetProbability(getProbability(url, MS2Controller.PeptideFilteringFormElements.proteinProphetProbability));
             form.setPeptideFilterType(url.getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType));
+            form.setProteinGroupFilterType(url.getParameter(MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType));
             form.setNormalizeProteinGroups(Boolean.parseBoolean(url.getParameter(MS2Controller.NORMALIZE_PROTEIN_GROUPS_NAME)));
 
             ViewContext queryContext = new ViewContext(_context);
@@ -116,17 +107,22 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         }
     }
 
+    private Float getProbability(ActionURL url, MS2Controller.PeptideFilteringFormElements type)
+    {
+        String probString = url.getParameter(type);
+        if (probString != null && !"".equals(probString))
+        {
+            try
+            {
+                return Float.parseFloat(probString);
+            }
+            catch (NumberFormatException e) {} // Just ignore if illegal value
+        }
+        return null;
+    }
+
     public GWTComparisonResult getPeptideComparison(String originalURL)
     {
-/*        ActionURL url = new ActionURL(originalURL);
-        int runList = Integer.parseInt(url.getParameter("runList"));
-        String viewName = url.getParameter(MS2Controller..COMPARE_PEPTIDES_PEPTIDES_FILTER + "." + QueryParam.viewName.toString());
-        ViewContext queryContext = new ViewContext(_context);
-        queryContext.setActionURL(url);
-
-        ComparePeptidesView view = new ComparePeptidesView(queryContext, _controller, runList, false, viewName);
-        return view.createComparisonResult();
-        */
         throw new UnsupportedOperationException();
     }
 }

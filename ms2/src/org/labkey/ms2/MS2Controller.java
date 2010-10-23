@@ -53,7 +53,6 @@ import org.labkey.api.settings.WriteableAppProps;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
-import org.labkey.ms2.client.MS2VennDiagramView;
 import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
@@ -63,7 +62,6 @@ import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
 import org.labkey.ms2.pipeline.sequest.SequestClientImpl;
-import org.labkey.ms2.pipeline.tandem.XTandemRun;
 import org.labkey.ms2.protein.*;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
@@ -85,7 +83,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.*;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -435,22 +432,8 @@ public class MS2Controller extends SpringActionController
 
             vBox.addView(new CurrentFilterView(null, sqlSummaries));
 
-            boolean exploratoryFeatures = false;
-            for (DisplayColumn displayColumn : displayColumns)
-            {
-                if (displayColumn.getName().equalsIgnoreCase("H") ||
-                    displayColumn.getName().equalsIgnoreCase("DeltaScan") ||
-                    run instanceof XTandemRun && run.getHasPeptideProphet() && displayColumn.getName().equalsIgnoreCase("PeptideProphet"))
-                {
-                    exploratoryFeatures = true;
-                    break;
-                }
-            }
-
             vBox.addView(grid);
             _run = run;
-
-            getPageConfig().setExploratoryFeatures(exploratoryFeatures);
 
             return vBox;
         }
@@ -1380,15 +1363,25 @@ public class MS2Controller extends SpringActionController
         {
             PeptideFilteringComparisonForm form = super.getCommand(request);
             Map<String, String> prefs = getPreferences(CompareProteinProphetQuerySetupAction.class);
-            form.setPeptideFilterType(prefs.get(PeptideFilteringFormElements.peptideFilterType.name()) == null ? "none" : prefs.get(PeptideFilteringFormElements.peptideFilterType.name()));
+            form.setPeptideFilterType(prefs.get(PeptideFilteringFormElements.peptideFilterType.name()) == null ? ProphetFilterType.none.toString() : prefs.get(PeptideFilteringFormElements.peptideFilterType.name()));
+            form.setProteinGroupFilterType(prefs.get(PeptideFilteringFormElements.proteinGroupFilterType.name()) == null ? ProphetFilterType.none.toString() : prefs.get(PeptideFilteringFormElements.proteinGroupFilterType.name()));
             form.setOrCriteriaForEachRun(Boolean.parseBoolean(prefs.get(PeptideFilteringFormElements.orCriteriaForEachRun.name())));
-            form.setDefaultCustomView(prefs.get(PEPTIDES_FILTER_VIEW_NAME));
+            form.setDefaultPeptideCustomView(prefs.get(PEPTIDES_FILTER_VIEW_NAME));
+            form.setDefaultProteinGroupCustomView(prefs.get(PROTEIN_GROUPS_FILTER_VIEW_NAME));
             form.setNormalizeProteinGroups(Boolean.parseBoolean(prefs.get(NORMALIZE_PROTEIN_GROUPS_NAME)));
             if (prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name()) != null)
             {
                 try
                 {
                     form.setPeptideProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
+                }
+                catch (NumberFormatException e) {}
+            }
+            if (prefs.get(PeptideFilteringFormElements.proteinProphetProbability.name()) != null)
+            {
+                try
+                {
+                    form.setProteinProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.proteinProphetProbability.name())));
                 }
                 catch (NumberFormatException e) {}
             }
@@ -1411,20 +1404,23 @@ public class MS2Controller extends SpringActionController
 
     public enum PeptideFilteringFormElements
     {
-        peptideFilterType, peptideProphetProbability, orCriteriaForEachRun, runList, spectraConfig
+        peptideFilterType, peptideProphetProbability, proteinGroupFilterType, proteinProphetProbability, orCriteriaForEachRun, runList, spectraConfig
     }
 
-    public enum PeptideFilterType
+    public enum ProphetFilterType
     {
-        none, peptideProphet, customView
+        none, probability, customView
     }
 
     public static class PeptideFilteringComparisonForm extends RunListForm implements PeptideFilter
     {
-        private String _peptideFilterType = "none";
+        private String _peptideFilterType = ProphetFilterType.none.toString();
+        private String _proteinGroupFilterType = ProphetFilterType.none.toString();
         private Float _peptideProphetProbability;
+        private Float _proteinProphetProbability;
         private boolean _orCriteriaForEachRun;
-        private String _defaultCustomView;
+        private String _defaultPeptideCustomView;
+        private String _defaultProteinGroupCustomView;
         private boolean _normalizeProteinGroups;
 
         public String getPeptideFilterType()
@@ -1439,17 +1435,53 @@ public class MS2Controller extends SpringActionController
 
         public boolean isPeptideProphetFilter()
         {
-            return PeptideFilterType.peptideProphet.toString().equals(getPeptideFilterType());
+            return ProphetFilterType.probability.toString().equals(getPeptideFilterType());
         }
 
         public boolean isCustomViewPeptideFilter()
         {
-            return PeptideFilterType.customView.toString().equals(getPeptideFilterType());
+            return ProphetFilterType.customView.toString().equals(getPeptideFilterType());
         }
 
         public void setPeptideFilterType(String peptideFilterType)
         {
             _peptideFilterType = peptideFilterType;
+        }
+
+        public boolean isNoProteinGroupFilter()
+        {
+            return !isCustomViewProteinGroupFilter() && !isProteinProphetFilter();
+        }
+
+        public boolean isProteinProphetFilter()
+        {
+            return ProphetFilterType.probability.toString().equals(getProteinGroupFilterType());
+        }
+
+        public boolean isCustomViewProteinGroupFilter()
+        {
+            return ProphetFilterType.customView.toString().equals(getProteinGroupFilterType());
+        }
+
+
+        public String getProteinGroupFilterType()
+        {
+            return _proteinGroupFilterType;
+        }
+
+        public void setProteinGroupFilterType(String proteinGroupFilterType)
+        {
+            _proteinGroupFilterType = proteinGroupFilterType;
+        }
+
+        public Float getProteinProphetProbability()
+        {
+            return _proteinProphetProbability;
+        }
+
+        public void setProteinProphetProbability(Float proteinProphetProbability)
+        {
+            _proteinProphetProbability = proteinProphetProbability;
         }
 
         public Float getPeptideProphetProbability()
@@ -1462,17 +1494,41 @@ public class MS2Controller extends SpringActionController
             _peptideProphetProbability = peptideProphetProbability;
         }
 
-        public void setDefaultCustomView(String defaultCustomView)
+        public void setDefaultPeptideCustomView(String defaultPeptideCustomView)
         {
-            _defaultCustomView = defaultCustomView;
+            _defaultPeptideCustomView = defaultPeptideCustomView;
         }
 
-        public String getCustomViewName(ViewContext context)
+        public String getPeptideCustomViewName(ViewContext context)
         {
             String result = context.getRequest().getParameter(PEPTIDES_FILTER_VIEW_NAME);
             if (result == null)
             {
-                result = _defaultCustomView;
+                result = _defaultPeptideCustomView;
+            }
+            if ("".equals(result))
+            {
+                return null;
+            }
+            return result;
+        }
+
+        public String getDefaultProteinGroupCustomView()
+        {
+            return _defaultProteinGroupCustomView;
+        }
+
+        public void setDefaultProteinGroupCustomView(String defaultProteinGroupCustomView)
+        {
+            _defaultProteinGroupCustomView = defaultProteinGroupCustomView;
+        }
+
+        public String getProteinGroupCustomViewName(ViewContext context)
+        {
+            String result = context.getRequest().getParameter(PROTEIN_GROUPS_FILTER_VIEW_NAME);
+            if (result == null)
+            {
+                result = _defaultProteinGroupCustomView;
             }
             if ("".equals(result))
             {
@@ -1501,12 +1557,31 @@ public class MS2Controller extends SpringActionController
             else if (isCustomViewPeptideFilter())
             {
                 title.append("\"");
-                title.append(getCustomViewName(context) == null ? "<default>" : getCustomViewName(context));
+                title.append(getPeptideCustomViewName(context) == null ? "<default>" : getPeptideCustomViewName(context));
                 title.append("\" peptide filter");
             }
             else
             {
                 title.append("No peptide filter");
+            }
+        }
+
+        public void appendProteinGroupFilterDescription(StringBuilder title, ViewContext context)
+        {
+            if (isProteinProphetFilter() && getProteinProphetProbability() != null)
+            {
+                title.append("ProteinProphet >= ");
+                title.append(getProteinProphetProbability());
+            }
+            else if (isCustomViewProteinGroupFilter())
+            {
+                title.append("\"");
+                title.append(getProteinGroupCustomViewName(context) == null ? "<default>" : getProteinGroupCustomViewName(context));
+                title.append("\" protein group filter");
+            }
+            else
+            {
+                title.append("No protein group filter");
             }
         }
 
@@ -1541,20 +1616,25 @@ public class MS2Controller extends SpringActionController
         {
             ComparisonCrosstabView view = createInitializedQueryView(form, errors, false, null);
 
+            Map<String, String> prefs = getPreferences(CompareProteinProphetQuerySetupAction.class);
+            prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
+            prefs.put(PeptideFilteringFormElements.proteinGroupFilterType.name(), form.getProteinGroupFilterType());
+            prefs.put(PeptideFilteringFormElements.orCriteriaForEachRun.name(), Boolean.toString(form.isOrCriteriaForEachRun()));
+            prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getPeptideCustomViewName(getViewContext()));
+            prefs.put(PROTEIN_GROUPS_FILTER_VIEW_NAME, form.getProteinGroupCustomViewName(getViewContext()));
+            prefs.put(NORMALIZE_PROTEIN_GROUPS_NAME, Boolean.toString(form.isNormalizeProteinGroups()));
+            prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
+            prefs.put(PeptideFilteringFormElements.proteinProphetProbability.name(), form.getProteinProphetProbability() == null ? null : form.getProteinProphetProbability().toString());
             if (!getUser().isGuest())
             {
-                Map<String, String> prefs = getPreferences(CompareProteinProphetQuerySetupAction.class);
-                prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
-                prefs.put(PeptideFilteringFormElements.orCriteriaForEachRun.name(), Boolean.toString(form.isOrCriteriaForEachRun()));
-                prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getCustomViewName(getViewContext()));
-                prefs.put(NORMALIZE_PROTEIN_GROUPS_NAME, Boolean.toString(form.isNormalizeProteinGroups()));
-                prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
+                // Non-guests are stored in the database, guests get it stored in their session
                 PropertyManager.saveProperties(prefs);
             }
 
             Map<String, String> props = new HashMap<String, String>();
             props.put("originalURL", getViewContext().getActionURL().toString());
-            props.put("PeptidesFilter.viewName", getViewContext().getActionURL().getParameter("PeptidesFilter.viewName"));
+            props.put(PEPTIDES_FILTER_VIEW_NAME, getViewContext().getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME));
+            props.put(PROTEIN_GROUPS_FILTER_VIEW_NAME, getViewContext().getActionURL().getParameter(PROTEIN_GROUPS_FILTER_VIEW_NAME));
             props.put("comparisonName", "ProteinProphetCrosstab");
             GWTView gwtView = new GWTView(org.labkey.ms2.client.MS2VennDiagramView.class, props);
             gwtView.setTitle("Comparison Overview");
@@ -1596,18 +1676,25 @@ public class MS2Controller extends SpringActionController
             {
                 ActionURL setupURL = new ActionURL(CompareProteinProphetQuerySetupAction.class, getContainer());
                 setupURL.addParameter(PeptideFilteringFormElements.peptideFilterType, _form.getPeptideFilterType());
+                setupURL.addParameter(PeptideFilteringFormElements.proteinGroupFilterType, _form.getProteinGroupFilterType());
                 if (_form.getPeptideProphetProbability() != null)
                 {
                     setupURL.addParameter(PeptideFilteringFormElements.peptideProphetProbability, _form.getPeptideProphetProbability().toString());
                 }
+                if (_form.getProteinProphetProbability() != null)
+                {
+                    setupURL.addParameter(PeptideFilteringFormElements.proteinProphetProbability, _form.getProteinProphetProbability().toString());
+                }
                 setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList() == null ? -1 : _form.getRunList());
                 setupURL.addParameter(PeptideFilteringFormElements.orCriteriaForEachRun, _form.isOrCriteriaForEachRun());
-                setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getCustomViewName(getViewContext()));
+                setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getPeptideCustomViewName(getViewContext()));
                 setupURL.addParameter(NORMALIZE_PROTEIN_GROUPS_NAME, _form.isNormalizeProteinGroups());
                 root.addChild("MS2 Dashboard");
                 root.addChild("Setup Compare ProteinProphet", setupURL);
                 StringBuilder title = new StringBuilder("Compare ProteinProphet (Query): ");
                 _form.appendPeptideFilterDescription(title, getViewContext());
+                title.append(", ");
+                _form.appendProteinGroupFilterDescription(title, getViewContext());
                 title.append(", ");
                 if (_form.isOrCriteriaForEachRun())
                 {
@@ -1880,6 +1967,8 @@ public class MS2Controller extends SpringActionController
 
     public static final String PEPTIDES_FILTER = "PeptidesFilter";
     public static final String PEPTIDES_FILTER_VIEW_NAME = PEPTIDES_FILTER + "." + QueryParam.viewName.toString();
+    public static final String PROTEIN_GROUPS_FILTER = "ProteinGroupsFilter";
+    public static final String PROTEIN_GROUPS_FILTER_VIEW_NAME = PROTEIN_GROUPS_FILTER + "." + QueryParam.viewName.toString();
     public static final String NORMALIZE_PROTEIN_GROUPS_NAME = "normalizeProteinGroups";
 
     @RequiresPermissionClass(ReadPermission.class)
@@ -1926,7 +2015,21 @@ public class MS2Controller extends SpringActionController
 
     private Map<String, String> getPreferences(Class<? extends AbstractRunListCreationAction> setupActionClass)
     {
-        return PropertyManager.getWritableProperties(getUser().getUserId(), getContainer().getId(), setupActionClass.getName(), true);
+        if (getUser().isGuest())
+        {
+            String attributeKey = setupActionClass.getName() + "." + getContainer().getId();
+            Map<String, String> prefs = (Map<String, String>)getViewContext().getSession().getAttribute(attributeKey);
+            if (prefs == null)
+            {
+                prefs = new HashMap<String, String>();
+                getViewContext().getSession().setAttribute(attributeKey, prefs);
+            }
+            return prefs;
+        }
+        else
+        {
+            return PropertyManager.getWritableProperties(getUser().getUserId(), getContainer().getId(), setupActionClass.getName(), true);
+        }
     }
 
     @RequiresPermissionClass(ReadPermission.class)
@@ -1943,7 +2046,7 @@ public class MS2Controller extends SpringActionController
             Map<String, String> prefs = getPreferences(SpectraCountSetupAction.class);
             form.setPeptideFilterType(prefs.get(PeptideFilteringFormElements.peptideFilterType.name()) == null ? "none" : prefs.get(PeptideFilteringFormElements.peptideFilterType.name()));
             form.setSpectraConfig(prefs.get(PeptideFilteringFormElements.spectraConfig.name()));
-            form.setDefaultCustomView(prefs.get(PEPTIDES_FILTER_VIEW_NAME));
+            form.setDefaultPeptideCustomView(prefs.get(PEPTIDES_FILTER_VIEW_NAME));
             if (prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name()) != null)
             {
                 try
@@ -2017,13 +2120,14 @@ public class MS2Controller extends SpringActionController
                 HttpView.throwNotFound("Could not find spectra count config: " + form.getSpectraConfig());
             }
 
+            Map<String, String> prefs = getPreferences(SpectraCountSetupAction.class);
+            prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
+            prefs.put(PeptideFilteringFormElements.spectraConfig.name(), form.getSpectraConfig());
+            prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getPeptideCustomViewName(getViewContext()));
+            prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
             if (!getUser().isGuest())
             {
-                Map<String, String> prefs = getPreferences(SpectraCountSetupAction.class);
-                prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
-                prefs.put(PeptideFilteringFormElements.spectraConfig.name(), form.getSpectraConfig());
-                prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getCustomViewName(getViewContext()));
-                prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
+                // Real users have their preferences stored in the database, guests keep it in session
                 PropertyManager.saveProperties(prefs);
             }
 
@@ -2049,7 +2153,7 @@ public class MS2Controller extends SpringActionController
                 {
                     setupURL.addParameter(PeptideFilteringFormElements.peptideProphetProbability, _form.getPeptideProphetProbability().toString());
                 }
-                setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getCustomViewName(getViewContext()));
+                setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getPeptideCustomViewName(getViewContext()));
                 setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList());
                 setupURL.addParameter(PeptideFilteringFormElements.spectraConfig, _form.getSpectraConfig());
 
@@ -2870,12 +2974,12 @@ public class MS2Controller extends SpringActionController
 
         public boolean isPeptideProphetFilter()
         {
-            return PeptideFilterType.peptideProphet.toString().equals(getPeptideFilterType());
+            return ProphetFilterType.probability.toString().equals(getPeptideFilterType());
         }
 
         public boolean isCustomViewPeptideFilter()
         {
-            return PeptideFilterType.customView.toString().equals(getPeptideFilterType());
+            return ProphetFilterType.customView.toString().equals(getPeptideFilterType());
         }
 
         public String getIdentifier()
@@ -5992,7 +6096,8 @@ public class MS2Controller extends SpringActionController
 
     public class CompareOptionsBean<Form extends PeptideFilteringComparisonForm>
     {
-        private final PeptidesFilterView _peptideView;
+        private final FilterView _peptideView;
+        private final FilterView _proteinGroupView;
         private final ActionURL _targetURL;
         private final int _runList;
         private final Form _form;
@@ -6002,12 +6107,18 @@ public class MS2Controller extends SpringActionController
             _targetURL = targetURL;
             _runList = runList;
             _form = form;
-            _peptideView = new PeptidesFilterView(getViewContext(), _form);
+            _peptideView = new FilterView(getViewContext(), true);
+            _proteinGroupView = new FilterView(getViewContext(), false);
         }
 
-        public PeptidesFilterView getPeptideView()
+        public FilterView getPeptideView()
         {
             return _peptideView;
+        }
+
+        public FilterView getProteinGroupView()
+        {
+            return _proteinGroupView;
         }
 
         public ActionURL getTargetURL()

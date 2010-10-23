@@ -87,12 +87,9 @@ public class MS2Schema extends UserSchema
         });
     }
 
-    private ExpSchema _expSchema;
-
     public MS2Schema(User user, Container container)
     {
         super(SCHEMA_NAME, SCHEMA_DESCR, user, container, ExperimentService.get().getSchema());
-        _expSchema = new ExpSchema(user, container);
     }
 
     public enum TableType
@@ -188,6 +185,13 @@ public class MS2Schema extends UserSchema
             public TableInfo createTable(MS2Schema ms2Schema)
             {
                 return ms2Schema.createPeptidesTable(ContainerFilter.CURRENT);
+            }
+        },
+        ProteinGroupsFilter
+        {
+            public TableInfo createTable(MS2Schema ms2Schema)
+            {
+                return ms2Schema.createProteinGroupsForRunTable(null);
             }
         },
         ProteinGroupsForSearch
@@ -350,13 +354,13 @@ public class MS2Schema extends UserSchema
                 {
                     totalSQL = new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".RowId IS NULL THEN NULL ELSE (SELECT COUNT(p.RowId) FROM " + MS2Manager.getTableInfoPeptideMemberships() + " pm, ");
                     totalSQL.append("(");
-                    totalSQL.append(getPeptideSelectSQL(context.getRequest(), form.getCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"), FieldKey.fromParts("TrimmedPeptide"))));
+                    totalSQL.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"), FieldKey.fromParts("TrimmedPeptide"))));
                     totalSQL.append(") p ");
                     totalSQL.append("WHERE p.RowId = pm.PeptideId AND pm.ProteinGroupId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId) END)");
 
                     uniqueSQL = new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".RowId IS NULL THEN NULL ELSE (SELECT COUNT(DISTINCT p.TrimmedPeptide) FROM " + MS2Manager.getTableInfoPeptideMemberships() + " pm, ");
                     uniqueSQL.append("(");
-                    uniqueSQL.append(getPeptideSelectSQL(context.getRequest(), form.getCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"), FieldKey.fromParts("TrimmedPeptide"))));
+                    uniqueSQL.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"), FieldKey.fromParts("TrimmedPeptide"))));
                     uniqueSQL.append(") p ");
                     uniqueSQL.append("WHERE p.RowId = pm.PeptideId AND pm.ProteinGroupId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId) END)");
                 }
@@ -411,30 +415,66 @@ public class MS2Schema extends UserSchema
             result.addCondition(sql, "ProteinGroupId");
         }
 
-        if (form != null && form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
+        if (form != null)
         {
-            SQLFragment sql = new SQLFragment("ProteinGroupID IN (SELECT pm.ProteinGroupID FROM ");
-            sql.append(MS2Manager.getTableInfoPeptideMemberships() + " pm ");
-            sql.append(", " + MS2Manager.getTableInfoPeptidesData() + " pd, ");
-            sql.append(MS2Manager.getTableInfoFractions() + " f ");
-            sql.append("WHERE f.Fraction = pd.Fraction AND f.Run IN ");
-            appendRunInClause(sql);
-            sql.append(" AND pd.RowId = pm.PeptideId AND pd.peptideprophet >= ");
-            sql.append(form.getPeptideProphetProbability());
-            sql.append(")");
-            result.addCondition(sql, "ProteinGroupId");
-        }
-        if (form != null && form.isCustomViewPeptideFilter())
-        {
-            SQLFragment sql = new SQLFragment("ProteinGroupID IN (SELECT pm.ProteinGroupID FROM ");
-            sql.append(MS2Manager.getTableInfoPeptideMemberships() + " pm ");
-            sql.append(" WHERE pm.PeptideId IN (");
-            sql.append(getPeptideSelectSQL(context.getRequest(), form.getCustomViewName(context), Collections.singletonList(FieldKey.fromParts("RowId"))));
-            sql.append("))");
-            result.addCondition(sql, "ProteinGroupId");
+            if (form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
+            {
+                SQLFragment sql = new SQLFragment("ProteinGroupID IN (SELECT pm.ProteinGroupID FROM ");
+                sql.append(MS2Manager.getTableInfoPeptideMemberships() + " pm ");
+                sql.append(", " + MS2Manager.getTableInfoPeptidesData() + " pd, ");
+                sql.append(MS2Manager.getTableInfoFractions() + " f ");
+                sql.append("WHERE f.Fraction = pd.Fraction AND f.Run IN ");
+                appendRunInClause(sql);
+                sql.append(" AND pd.RowId = pm.PeptideId AND pd.peptideprophet >= ");
+                sql.append(form.getPeptideProphetProbability());
+                sql.append(")");
+                result.addCondition(sql, "ProteinGroupId");
+            }
+            else if (form.isCustomViewPeptideFilter())
+            {
+                SQLFragment sql = new SQLFragment("ProteinGroupID IN (SELECT pm.ProteinGroupID FROM ");
+                sql.append(MS2Manager.getTableInfoPeptideMemberships() + " pm ");
+                sql.append(" WHERE pm.PeptideId IN (");
+                sql.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Collections.singletonList(FieldKey.fromParts("RowId"))));
+                sql.append("))");
+                result.addCondition(sql, "ProteinGroupId");
+            }
+
+            if (form.isProteinProphetFilter() && form.getProteinProphetProbability() != null)
+            {
+                SQLFragment sql = new SQLFragment("ProteinGroupID IN (SELECT pg.RowId FROM ");
+                sql.append(MS2Manager.getTableInfoProteinGroups() + " pg ");
+                sql.append("WHERE pg.GroupProbability >= ");
+                sql.append(form.getProteinProphetProbability());
+                sql.append(")");
+                result.addCondition(sql, "ProteinGroupId");
+            }
+            else if (form.isCustomViewProteinGroupFilter())
+            {
+                SQLFragment sql = new SQLFragment("ProteinGroupID IN (");
+                getProteinGroupSelectSQL(form, context, sql);
+                sql.append(")");
+                result.addCondition(sql, "ProteinGroupId");
+            }
         }
 
         return result;
+    }
+
+    public void getProteinGroupSelectSQL(MS2Controller.PeptideFilteringComparisonForm form, ViewContext context, SQLFragment sql)
+    {
+        QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, HiddenTableType.ProteinGroupsFilter.toString());
+        SimpleFilter filter = new SimpleFilter();
+        CustomView view = queryDef.getCustomView(getUser(), context.getRequest(), form.getProteinGroupCustomViewName(context));
+        if (view != null)
+        {
+            ActionURL url = new ActionURL();
+            view.applyFilterAndSortToURL(url, "InternalName");
+            filter.addUrlFilters(url, "InternalName");
+        }
+        ProteinGroupTableInfo tableInfo = new ProteinGroupTableInfo(this, false);
+        tableInfo.setContainerFilter(ContainerFilter.EVERYTHING);
+        sql.append(getSelectSQL(tableInfo, filter, Collections.singleton(FieldKey.fromParts("RowId"))));
     }
 
     public void appendRunInClause(SQLFragment sql)
@@ -672,15 +712,18 @@ public class MS2Schema extends UserSchema
 
     protected SQLFragment getPeptideSelectSQL(SimpleFilter filter, Collection<FieldKey> fieldKeys)
     {
-        TableInfo peptidesTable = createPeptidesTable(ContainerFilter.EVERYTHING);
+        return getSelectSQL(createPeptidesTable(ContainerFilter.EVERYTHING), filter, fieldKeys);
+    }
 
-        Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(peptidesTable, fieldKeys);
+    protected SQLFragment getSelectSQL(TableInfo tableInfo, SimpleFilter filter, Collection<FieldKey> fieldKeys)
+    {
+        Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(tableInfo, fieldKeys);
 
         Collection<ColumnInfo> reqCols = new ArrayList<ColumnInfo>(columnMap.values());
         Set<String> unresolvedColumns = new HashSet<String>();
-        reqCols = QueryService.get().ensureRequiredColumns(peptidesTable, reqCols, filter, null, unresolvedColumns);
+        reqCols = QueryService.get().ensureRequiredColumns(tableInfo, reqCols, filter, null, unresolvedColumns);
 
-        SQLFragment innerSelect = Table.getSelectSQL(peptidesTable, reqCols, null, null);
+        SQLFragment innerSelect = Table.getSelectSQL(tableInfo, reqCols, null, null);
 
         Map<String, ColumnInfo> map = new HashMap<String, ColumnInfo>(reqCols.size());
         for(ColumnInfo col : reqCols)
@@ -699,7 +742,7 @@ public class MS2Schema extends UserSchema
         }
         sql.append(" FROM (\n");
         sql.append(innerSelect);
-        sql.append("\n) AS InnerPeptides ");
+        sql.append("\n) AS InnerSubquery ");
 
         sql.append(filter.getSQLFragment(getDbSchema().getSqlDialect(), map));
         return sql;

@@ -272,7 +272,7 @@ public class SpectraCountTableInfo extends VirtualTable
         SQLFragment peptidesSQL;
         if (_form != null && _form.isCustomViewPeptideFilter())
         {
-            peptidesSQL = _ms2Schema.getPeptideSelectSQL(_context.getRequest(), _form.getCustomViewName(_context), peptideFieldKeys);
+            peptidesSQL = _ms2Schema.getPeptideSelectSQL(_context.getRequest(), _form.getPeptideCustomViewName(_context), peptideFieldKeys);
         }
         else
         {

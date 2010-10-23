@@ -32,32 +32,41 @@ import java.util.LinkedHashMap;
  * User: jeckels
  * Date: Mar 3, 2008
  */
-public class PeptidesFilterView extends QueryView
+public class FilterView extends QueryView
 {
     private static final String PEPTIDE_FILTER_LINK_ID = "peptideFilterLink";
-    private PeptideFilter _filter;
+    private static final String PROTEIN_GROUP_FILTER_LINK_ID = "proteinGroupFilterLink";
+    public static final String PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON = "customViewRadioButton";
+    public static final String PROTEIN_GROUPS_CUSTOM_VIEW_RADIO_BUTTON = "customViewProteinGroupRadioButton";
 
-    public PeptidesFilterView(ViewContext context, PeptideFilter filter)
+    private final String _linkID;
+    private final String _radioButtonID;
+
+    public FilterView(ViewContext context, boolean peptides)
     {
         super(new MS2Schema(context.getUser(), context.getContainer()));
-        setSettings(createSettings(context));
-        _filter = filter;
+        setSettings(createSettings(context, peptides));
+        _linkID = peptides ? PEPTIDE_FILTER_LINK_ID : PROTEIN_GROUP_FILTER_LINK_ID;
+        _radioButtonID = peptides ? PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON : PROTEIN_GROUPS_CUSTOM_VIEW_RADIO_BUTTON;
     }
 
-    private QuerySettings createSettings(ViewContext context)
+    private QuerySettings createSettings(ViewContext context, boolean peptides)
     {
-        return getSchema().getSettings(context, MS2Controller.PEPTIDES_FILTER, MS2Schema.HiddenTableType.PeptidesFilter.toString());
+        return getSchema().getSettings(
+                context,
+                peptides ? MS2Controller.PEPTIDES_FILTER : MS2Controller.PROTEIN_GROUPS_FILTER,
+                peptides ? MS2Schema.HiddenTableType.PeptidesFilter.toString() : MS2Schema.HiddenTableType.ProteinGroupsFilter.toString());
     }
 
-    public void renderCustomizeViewLink(Writer out) throws IOException
+    public void renderCustomizeViewLink(Writer out, String viewName) throws IOException
     {
         ActionURL url = urlFor(QueryAction.chooseColumns);
-        url.addParameter(QueryParam.viewName, _filter.getCustomViewName(getViewContext()));
+        url.addParameter(QueryParam.viewName, viewName);
         url.addParameter(QueryParam.defaultTab, "filter");
-        out.write(textLink("edit peptide filter", url, PEPTIDE_FILTER_LINK_ID));
+        out.write(textLink("edit view", url, _linkID));
     }
 
-    public void renderViewList(HttpServletRequest request, Writer out) throws IOException
+    public void renderViewList(HttpServletRequest request, Writer out, String viewName) throws IOException
     {
         Map<String, CustomView> customViews = getQueryDef().getCustomViews(getUser(), request);
         Map<String, String> options = new LinkedHashMap<String, String>();
@@ -72,38 +81,37 @@ public class PeptidesFilterView extends QueryView
             options.put(view.getName(), label);
         }
 
-        String _currentValue = _filter.getCustomViewName(getViewContext());
         int count = options.size();
         boolean currentMissing = false;
-        if (_currentValue != null && !options.containsKey(_currentValue))
+        if (viewName != null && !options.containsKey(viewName))
         {
             count ++;
             currentMissing = true;
         }
         if (count <= 1)
             return;
-        out.write("Peptide filter:");
+        out.write("Custom view:");
         out.write("<select name=\"" + h(param(QueryParam.viewName)) + "\"");
         ActionURL url = urlFor(QueryAction.chooseColumns);
         url.deleteParameter(QueryParam.viewName.toString());
         url.addParameter(QueryParam.defaultTab, "filter");
         url.addParameter(QueryParam.viewName, "");
         out.write(" onchange=\"document.getElementById('");
-        out.write(PEPTIDE_FILTER_LINK_ID);
+        out.write(_linkID);
         out.write("').href='");
         out.write(url.toString());
-        out.write("' + this.value; document.getElementById('customViewRadioButton').checked=true;\"");
+        out.write("' + this.value; document.getElementById('" + _radioButtonID + "').checked=true;\"");
         out.write(">");
         if (currentMissing)
         {
-            out.write("<option selected value=\"" + h(_currentValue) + "\">");
-            out.write("&lt;" + h(_currentValue) + ">");
+            out.write("<option selected value=\"" + h(viewName) + "\">");
+            out.write("&lt;" + h(viewName) + ">");
             out.write("</option>");
         }
         for (Map.Entry<?, String> entry : options.entrySet())
         {
             out.write("\n<option");
-            if (ObjectUtils.equals(entry.getKey(), _currentValue))
+            if (ObjectUtils.equals(entry.getKey(), viewName))
             {
                 out.write(" selected");
             }

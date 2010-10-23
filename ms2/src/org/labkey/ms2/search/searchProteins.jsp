@@ -30,7 +30,7 @@
     ViewContext ctx = me.getViewContext();
 
     ActionURL url = new ActionURL(MS2Controller.DoProteinSearchAction.class, ctx.getContainer());
-
+    String viewName = bean.getPeptideCustomViewName(ctx);
     String separator = bean.isHorizontal() ? "<td>&nbsp;</td>" : "</tr><tr>";
 %>
 <form action="<%= url %>" method="get">
@@ -67,10 +67,10 @@
                     <span style="padding-right: 10px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="peptideProphetRadioButton" value="peptideProphet" <%= bean.getForm().isPeptideProphetFilter() ? "checked=\"true\"" : "" %>/>Pep prob &ge; <input onfocus="document.getElementById('peptideProphetRadioButton').checked=true;" type="text" size="1" name="<%= MS2Controller.PeptideFilteringFormElements.peptideProphetProbability %>" value="<%= bean.getForm().getPeptideProphetProbability() == null ? "" : bean.getForm().getPeptideProphetProbability() %>" /><%= helpPopup("Peptide Filter: PeptideProphet", "Only show protein groups where at least one peptide has a PeptideProphet probability above some threshold.") %></span>
                     <span style="padding-right: 10px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="customViewRadioButton" value="customView" <%= bean.getForm().isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>Custom
                         <%
-                        bean.getPeptideView(ctx).renderViewList(request, out);
+                        bean.getPeptideView(ctx).renderViewList(request, out, viewName);
                         %><%= helpPopup("Peptide Filter: Custom", "Only show protein groups where at least one peptide meets a custom filter.") %>
                         <%
-                        bean.getPeptideView(ctx).renderCustomizeViewLink(out);
+                        bean.getPeptideView(ctx).renderCustomizeViewLink(out, viewName);
                         %>
                     </span>
                 </td>

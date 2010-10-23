@@ -23,5 +23,5 @@ import org.labkey.api.view.ViewContext;
  */
 public interface PeptideFilter
 {
-    public String getCustomViewName(ViewContext viewContext);
+    public String getPeptideCustomViewName(ViewContext viewContext);
 }

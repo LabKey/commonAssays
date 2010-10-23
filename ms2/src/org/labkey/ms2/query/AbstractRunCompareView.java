@@ -54,13 +54,11 @@ public abstract class AbstractRunCompareView extends QueryView
     private List<FieldKey> _columns;
 
     private Collection<String> _runErrors = new ArrayList<String>();
-    protected final String _peptideViewName;
 
-    public AbstractRunCompareView(ViewContext context, int runListIndex, boolean forExport, String tableName, String peptideViewName) throws ServletException
+    public AbstractRunCompareView(ViewContext context, int runListIndex, boolean forExport, String tableName) throws ServletException
     {
         super(new MS2Schema(context.getUser(), context.getContainer()));
         setSettings(createSettings(context, tableName));
-        _peptideViewName = peptideViewName;
 
         _viewContext.setActionURL(context.getActionURL());
 

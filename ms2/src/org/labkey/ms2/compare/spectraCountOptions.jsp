@@ -52,10 +52,11 @@ MS2Controller.SpectraCountForm form = bean.getForm();
     <p class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" value="none" <%= form.isNoPeptideFilter() ? "checked=\"true\"" : "" %> /> Use all the peptides</p>
     <p class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="peptideProphetRadioButton" value="peptideProphet" <%= form.isPeptideProphetFilter() ? "checked=\"true\"" : "" %>/> All peptides with PeptideProphet probability &ge; <input onfocus="document.getElementById('peptideProphetRadioButton').checked=true;" type="text" size="2" name="<%= MS2Controller.PeptideFilteringFormElements.peptideProphetProbability %>" value="<%= form.getPeptideProphetProbability() == null ? "" : form.getPeptideProphetProbability() %>" /></p>
     <p class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="customViewRadioButton" value="customView" <%= form.isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>
-        Use a customized Peptides view to establish criteria for which peptides to include in the comparison.
+        Use a customized Peptides view to filter the peptides included in the comparison.
         <%
-        bean.getPeptideView().renderCustomizeViewLink(out);
-        bean.getPeptideView().renderViewList(request, out);
+        String viewName = form.getPeptideCustomViewName(HttpView.currentContext());
+        bean.getPeptideView().renderCustomizeViewLink(out, viewName);
+        bean.getPeptideView().renderViewList(request, out, viewName);
         %>
     </p>
     <p><labkey:button text="Go"/></p>

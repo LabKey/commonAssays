@@ -28,9 +28,9 @@ import javax.servlet.ServletException;
  */
 public class CompareProteinsView extends AbstractRunCompareView
 {
-    public CompareProteinsView(ViewContext context, int runListIndex, boolean forExport, String peptideViewName) throws ServletException
+    public CompareProteinsView(ViewContext context, int runListIndex, boolean forExport) throws ServletException
     {
-        super(context, runListIndex, forExport, MS2Schema.HiddenTableType.CompareProteinProphet.toString(), peptideViewName);
+        super(context, runListIndex, forExport, MS2Schema.HiddenTableType.CompareProteinProphet.toString());
     }
 
     protected String getGroupingColumnName()
