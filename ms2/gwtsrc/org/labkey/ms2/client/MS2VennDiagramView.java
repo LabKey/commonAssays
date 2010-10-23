@@ -21,7 +21,6 @@ import org.labkey.api.gwt.client.ui.VennDiagramView;
 import org.labkey.api.gwt.client.util.PropertyUtil;
 import org.labkey.api.gwt.client.util.ServiceUtil;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.EntryPoint;
@@ -35,7 +34,8 @@ import java.util.Map;
  */
 public class MS2VennDiagramView extends VennDiagramView implements EntryPoint
 {
-    public static final String VIEW_PARAMETER_NAME = "PeptidesFilter.viewName";
+    public static final String PEPTIDES_VIEW_PARAMETER_NAME = "PeptidesFilter.viewName";
+    public static final String PROTEIN_GROUPS_VIEW_PARAMETER_NAME = "ProteinGroupsFilter.viewName";
 
     public void onModuleLoad()
     {
@@ -51,9 +51,13 @@ public class MS2VennDiagramView extends VennDiagramView implements EntryPoint
         {
             _service = (CompareServiceAsync) GWT.create(CompareService.class);
             Map<String, String> params = new HashMap<String, String>();
-            if (PropertyUtil.getServerProperty(VIEW_PARAMETER_NAME) != null)
+            if (PropertyUtil.getServerProperty(PEPTIDES_VIEW_PARAMETER_NAME) != null)
             {
-                params.put(VIEW_PARAMETER_NAME, PropertyUtil.getServerProperty(VIEW_PARAMETER_NAME));
+                params.put(PEPTIDES_VIEW_PARAMETER_NAME, PropertyUtil.getServerProperty(PEPTIDES_VIEW_PARAMETER_NAME));
+            }
+            if (PropertyUtil.getServerProperty(PROTEIN_GROUPS_VIEW_PARAMETER_NAME) != null)
+            {
+                params.put(PROTEIN_GROUPS_VIEW_PARAMETER_NAME, PropertyUtil.getServerProperty(PROTEIN_GROUPS_VIEW_PARAMETER_NAME));
             }
             ServiceUtil.configureEndpoint(_service, "compareService", null, params);
         }
