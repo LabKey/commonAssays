@@ -35,21 +35,29 @@ import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.permissions.DesignAssayPermission;
+import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GWTView;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.UpdateView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
+import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class MicroarrayController extends SpringActionController
@@ -163,6 +171,64 @@ public class MicroarrayController extends SpringActionController
         public void setProtocolName(String protocolName)
         {
             _protocolName = protocolName;
+        }
+    }
+
+    /**
+     * Basic approach:
+     * 1. The user logs in to LabKey Server and selects the files they want to analyze, and clicks on a new "Launch in Analyst" button.
+     * 2. LabKey Server will then package up the files as a ZIP or just copy them into a new directory. In either case, the file(s) will end up on a network share that LabKey Server can write to, and Analyst can read from.
+     * 3. LabKey Server will then cause the user's browser to navigate to a URL of the general form that you described. It will include a GET parameter that gives the path to the ZIP file or directory.
+     * 4. The Analyst plugin takes over from here.
+     */
+    @RequiresPermissionClass(ReadPermission.class)
+    public class GeneDataAnalysisAction extends RedirectAction<PipelinePathForm>
+    {
+        private URLHelper _successURL;
+
+        @Override
+        public URLHelper getSuccessURL(PipelinePathForm pipelinePathForm)
+        {
+            return _successURL;
+        }
+
+        @Override
+        public void validateCommand(PipelinePathForm target, Errors errors) {}
+
+        @Override
+        public boolean doAction(PipelinePathForm form, BindException errors) throws Exception
+        {
+            String baseURL = GeneDataPipelineProvider.getGeneDataBaseURL();
+            File root = GeneDataPipelineProvider.getGeneDataFileRoot();
+
+            if (baseURL == null || root == null)
+            {
+                throw new NotFoundException("GeneData URL or file root not configured");
+            }
+
+            if (getUser().isGuest())
+            {
+                throw new UnauthorizedException();
+            }
+
+            String simpleDirName = getUser().getDisplayName(getUser()) + DateUtil.formatDateTime(new Date(), "yyyy-MM-dd-HH-mm");
+            File analysisDir = new File(root, simpleDirName);
+            int suffix = 1;
+            while (analysisDir.exists())
+            {
+                analysisDir = new File(root, simpleDirName + "-" + (suffix++));
+            }
+            analysisDir.mkdir();
+
+            // Copy over all of the files
+            List<File> files = form.getValidatedFiles(getContainer());
+            for (File selectedFile : files)
+            {
+                FileUtil.copyFile(selectedFile, new File(analysisDir, selectedFile.getName()));
+            }
+
+            _successURL = new URLHelper(baseURL + analysisDir.getAbsolutePath());
+            return true;
         }
     }
 
