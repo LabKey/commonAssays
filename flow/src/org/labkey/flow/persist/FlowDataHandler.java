@@ -27,6 +27,8 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
+import org.labkey.flow.controllers.executescript.AnalysisScriptController;
+import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.flowdata.xml.FlowdataDocument;
@@ -78,7 +80,13 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
 
     public ActionURL getContentURL(Container container, ExpData data)
     {
+        String url = data.getDataFileUrl();
+        if (url.endsWith(EXT_DATA))
+            return new ActionURL(RunController.ShowRunAction.class,container).addParameter("runId",data.getRunId());
+        if (url.endsWith((EXT_SCRIPT)))
+            return new ActionURL(AnalysisScriptController.BeginAction.class,container).addParameter("scriptId",data.getRunId());
         return null;
+        //http://localhost:8080/labkey/flow-run/DRT/Flow%20Verify%20Project/FlowTest/showRun.view?runId=15
     }
 
     public Priority getPriority(ExpData data)

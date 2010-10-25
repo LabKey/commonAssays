@@ -218,6 +218,7 @@ flow/src/META-INF/flow/jars.txt -text
 flow/src/META-INF/qc.R -text
 flow/src/org/labkey/flow/FlowModule.java -text
 flow/src/org/labkey/flow/FlowPreference.java -text
+flow/src/org/labkey/flow/FlowServiceImpl.java -text
 flow/src/org/labkey/flow/FlowSettings.java -text
 flow/src/org/labkey/flow/ScriptParser.java -text
 flow/src/org/labkey/flow/analysis/chart/DataFrameXYDataset.java -text
