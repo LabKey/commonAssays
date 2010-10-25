@@ -42,12 +42,12 @@ public class HighThroughputNabAssayProvider extends NabAssayProvider
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("The high-throughput NAb data file is a specially formatted text file with a .csv extension.");
+        return new HtmlView("The high-throughput NAb data file is a specially formatted file with a .csv or .xls extension.");
     }
 
     public String getDescription()
     {
-        return "Imports a specially formatted CSV file that contains data from multiple plates.  The high-throughput NAb " +
+        return "Imports a specially formatted CSV or XLS file that contains data from multiple plates.  The high-throughput NAb " +
                 "assay differs from the standard NAb assay in that dilutions are assumed to occur across plates, rather than" +
                 "within a single plate.  Both NAb assay types measure neutralization in TZM-bl cells as a function of a " +
                 "reduction in Tat-induced luciferase (Luc) reporter gene expression after a single round of infection. Montefiori, D.C. 2004" +

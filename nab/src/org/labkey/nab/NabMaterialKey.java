@@ -95,7 +95,7 @@ public class NabMaterialKey
         if (_date != null ? !_date.equals(that._date) : that._date != null) return false;
         if (_participantId != null ? !_participantId.equals(that._participantId) : that._participantId != null)
             return false;
-        if (_specimenId != null ? !_specimenId.equals(that._specimenId) : that._specimenId != null) return false;
+        if (_specimenId != null ? !_specimenId.equalsIgnoreCase(that._specimenId) : that._specimenId != null) return false;
         if (_visitId != null ? !_visitId.equals(that._visitId) : that._visitId != null) return false;
 
         return true;
@@ -104,7 +104,7 @@ public class NabMaterialKey
     @Override
     public int hashCode()
     {
-        int result = _specimenId != null ? _specimenId.hashCode() : 0;
+        int result = _specimenId != null ? _specimenId.toLowerCase().hashCode() : 0;
         result = 31 * result + (_participantId != null ? _participantId.hashCode() : 0);
         result = 31 * result + (_visitId != null ? _visitId.hashCode() : 0);
         result = 31 * result + (_date != null ? _date.hashCode() : 0);

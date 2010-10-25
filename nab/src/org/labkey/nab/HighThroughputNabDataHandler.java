@@ -7,6 +7,9 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.reader.ColumnDescriptor;
+import org.labkey.api.reader.DataLoader;
+import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.study.DilutionCurve;
@@ -17,6 +20,7 @@ import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,49 +74,82 @@ public class HighThroughputNabDataHandler extends NabDataHandler
     {
         return NAB_HIGH_THROUGHPUT_DATA_TYPE;
     }
-    private static final String RESULT_COLUMNN_HEADER = "Measure";
-    private static final String ROW_COLUMNN_HEADER = "Row";
-    private static final String COLUMN_COLUMNN_HEADER = "Column";
 
-    private int getPlateRow(File dataFile, Map<String, Object> rowData, int line, int max) throws ExperimentException
+    private static final String LOCATION_COLUMNN_HEADER = "Well Location";
+
+    private void throwWellLocationParseError(File dataFile, int lineNumber, Object locationValue) throws ExperimentException
     {
-        Object rowValue = rowData.get(ROW_COLUMNN_HEADER);
-        int row;
-        if (rowValue instanceof Integer)
+        throwParseError(dataFile, "Failed to find valid location in column \"" + LOCATION_COLUMNN_HEADER + "\" on line " + lineNumber +
+                    ".  Locations should be identified by a single row letter and column number, such as " +
+                    "A1 or P24.  Found \"" + (locationValue != null ? locationValue.toString() : "") + "\".");
+    }
+
+    private Pair<Integer, Integer> getWellLocation(PlateTemplate template, File dataFile, Map<String, Object> line, int lineNumber) throws ExperimentException
+    {
+        Object locationValue = line.get(LOCATION_COLUMNN_HEADER);
+        if (locationValue == null || !(locationValue instanceof String) || ((String) locationValue).length() < 2)
+            throwWellLocationParseError(dataFile, lineNumber, locationValue);
+        String location = (String) locationValue;
+        Character rowChar = location.charAt(0);
+        rowChar = Character.toUpperCase(rowChar);
+        if (!(rowChar >= 'A' && rowChar <= 'Z'))
+            throwWellLocationParseError(dataFile, lineNumber, locationValue);
+
+        Integer col;
+        try
         {
-            row = (Integer) rowValue;
+            col = Integer.parseInt(location.substring(1));
         }
-        else if (rowValue instanceof String && ((String) rowValue).length() == 1)
+        catch (NumberFormatException e)
         {
-            char rowchar = ((String) rowValue).charAt(0);
-            if (Character.isUpperCase(rowchar))
-                row = rowchar - 'A' + 1;
-            else
-                row = rowchar - 'a' + 1;
+            throwWellLocationParseError(dataFile, lineNumber, locationValue);
+            // return to suppress intellij warnings (line will never be reached)
+            return null;
         }
-        else
+        int row = rowChar - 'A' + 1;
+
+        // 1-based row and column indexing:
+        if (row > template.getRows())
         {
-            throwParseError(dataFile, "No valid plate row specified for line " + line + ".  Expected an integer " +
-                    " or single letter value in a column with header \"" + ROW_COLUMNN_HEADER + "\", found: " + rowValue);
-            return -1;
+            throwParseError(dataFile, "Invalid row " + row + " specified on line " + lineNumber +
+                    ".  The current plate template defines " + template.getRows() + " rows.");
         }
-        if (row <= 0 || row > max)
+
+        // 1-based row and column indexing:
+        if (col > template.getColumns())
         {
-            throwParseError(dataFile, "Row " + row + " is not valid for the current plate template.  " + max +
-                    " rows are expected per plate.  Error on line " + line + ".");
+            throwParseError(dataFile, "Invalid column " + col + " specified on line " + lineNumber +
+                    ".  The current plate template defines " + template.getColumns() + " columns.");
         }
-        return row;
+        return new Pair<Integer, Integer>(row, col);
     }
 
     @Override
     protected List<Plate> createPlates(File dataFile, PlateTemplate template) throws ExperimentException
     {
-        TabLoader loader = null;
+        DataLoader loader;
         try
         {
-            loader = new TabLoader(dataFile, true);
-            loader.parseAsCSV();
+            if (dataFile.getName().toLowerCase().endsWith(".csv"))
+            {
+                loader = new TabLoader(dataFile, true);
+                ((TabLoader) loader).parseAsCSV();
+            }
+            else
+                loader = new ExcelLoader(dataFile, true);
+
             int wellsPerPlate = template.getRows() * template.getColumns();
+
+            ColumnDescriptor[] columns = loader.getColumns();
+            if (columns == null || columns.length == 0)
+            {
+                throwParseError(dataFile, "No columns found in data file.");
+                // return to suppress intellij warnings (line above will always throw):
+                return null;
+            }
+
+            // The results column is defined as the last column in the file for this file format:
+            String resultColumnHeader = columns[columns.length - 1].name;
 
             int wellCount = 0;
             int plateCount = 0;
@@ -123,25 +160,16 @@ public class HighThroughputNabDataHandler extends NabDataHandler
                 // Current line in the data file is calculated by the number of wells we've already read,
                 // plus one for the current row, plus one for the header row:
                 int line = plateCount * wellsPerPlate + wellCount + 2;
-                int plateRow = getPlateRow(dataFile, rowData, line, template.getRows());
-                Object colValue = rowData.get(COLUMN_COLUMNN_HEADER);
-                if (colValue == null || !(colValue instanceof Integer))
-                {
-                    throwParseError(dataFile, "No valid plate column specified for line " + line + ".  Expected an integer " +
-                            "value in a column with header \"" + COLUMN_COLUMNN_HEADER + "\", found: " + colValue);
-                }
-                int plateCol = (Integer) colValue;
-                if (plateCol <= 0 || plateCol > template.getColumns())
-                {
-                    throwParseError(dataFile, "Column " + plateCol + " is not valid for the current plate template.  " + template.getColumns() +
-                            " columns are expected per plate.  Error on line " + line + ".");
+                Pair<Integer, Integer> location = getWellLocation(template, dataFile, rowData, line);
+                int plateRow = location.getKey();
+                int plateCol = location.getValue();
 
-                }
-                Object dataValue = rowData.get(RESULT_COLUMNN_HEADER);
+                Object dataValue = rowData.get(resultColumnHeader);
                 if (dataValue == null || !(dataValue instanceof Integer))
                 {
-                    throwParseError(dataFile, "No valid result value specified for line " + line + ".  Expected an integer " +
-                            "value in a column with header \"" + RESULT_COLUMNN_HEADER + "\", found: " + dataValue);
+                    throwParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
+                            "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue);
+                    return null;
                 }
 
                 wellValues[plateRow - 1][plateCol - 1] = (Integer) dataValue;

@@ -21,13 +21,10 @@ import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellData;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 
 /**
  * User: brittp
@@ -42,6 +39,9 @@ public class DilutionSummary implements Serializable
     private Luc5Assay _assay;
     private String _lsid;
     private DilutionCurve.FitType _curveFitType;
+    private NabMaterialKey _materialKey = null;
+    public static final NabMaterialKey BLANK_NAB_MATERIAL = new NabMaterialKey("Blank", null, null, null);
+
 
     public DilutionSummary(Luc5Assay assay, WellGroup sampleGroup, String lsid, DilutionCurve.FitType curveFitType)
     {
@@ -78,6 +78,25 @@ public class DilutionSummary implements Serializable
                         wellgroupName + ", " + groups.get(groupIndex).getName());
             }
         }
+    }
+
+    public NabMaterialKey getMaterialKey()
+    {
+        if (_materialKey == null)
+        {
+            WellGroup firstWellGroup = getFirstWellGroup();
+            String specimenId = (String) firstWellGroup.getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
+            Double visitId = (Double) firstWellGroup.getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
+            String participantId = (String) firstWellGroup.getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
+            Date visitDate = (Date) firstWellGroup.getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
+            _materialKey = new NabMaterialKey(specimenId, participantId, visitId, visitDate);
+        }
+        return _materialKey;
+    }
+
+    public boolean isBlank()
+    {
+        return BLANK_NAB_MATERIAL.equals(getMaterialKey());
     }
 
     public double getDilution(WellData data)

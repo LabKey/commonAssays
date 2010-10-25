@@ -213,19 +213,17 @@ public abstract class NabAssayRun extends Luc5Assay
 
             for (DilutionSummary summary : getSummaries())
             {
-                String specimenId = (String) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-                Double visitId = (Double) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-                String participantId = (String) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-                Date visitDate = (Date) summary.getFirstWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
-                NabMaterialKey key = new NabMaterialKey(specimenId, participantId, visitId, visitDate);
+                if (!summary.isBlank())
+                {
+                    NabMaterialKey key = summary.getMaterialKey();
+                    String shortCaption = key.getDisplayString(false);
+                    if (captions.contains(shortCaption))
+                        longCaptions = true;
+                    captions.add(shortCaption);
 
-                String shortCaption = key.getDisplayString(false);
-                if (captions.contains(shortCaption))
-                    longCaptions = true;
-                captions.add(shortCaption);
-
-                NabResultProperties props = allProperties.get(summary.getFirstWellGroup().getName());
-                sampleResults.add(new SampleResult(_provider, outputObject, summary, key, props.getSampleProperties(), props.getDataProperties()));
+                    NabResultProperties props = allProperties.get(summary.getFirstWellGroup().getName());
+                    sampleResults.add(new SampleResult(_provider, outputObject, summary, key, props.getSampleProperties(), props.getDataProperties()));
+                }
             }
 
             if (longCaptions)

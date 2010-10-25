@@ -213,7 +213,10 @@ public class NabGraph
     {
         Map<DilutionSummary, NabAssayRun> samples = new LinkedHashMap<DilutionSummary, NabAssayRun>();
         for (DilutionSummary summary : assay.getSummaries())
-            samples.put(summary, assay);
+        {
+            if (!summary.isBlank())
+                samples.put(summary, assay);
+        }
         if (config.getCutoffs() == null)
             config.setCutoffs(assay.getCutoffs());
         renderChartPNG(response, samples, config);
