@@ -20,6 +20,7 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.view.ActionURL;
 
 import java.io.Writer;
@@ -76,6 +77,13 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
 
         renderNestedGrid(out, ctx, nestedRS, rowIndex);
         nestedRS.close();
+    }
+
+    public void setSettings(QuerySettings settings)
+    {
+        super.setSettings(settings);
+        if (_nestedRegion != null)
+            _nestedRegion.setSettings(settings);
     }
 
     public DataRegion getNestedRegion()
