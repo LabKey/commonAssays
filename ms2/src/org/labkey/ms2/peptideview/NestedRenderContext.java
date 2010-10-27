@@ -100,7 +100,7 @@ public class NestedRenderContext extends RenderContext
             }
 
             SQLFragment fromSQL = new SQLFragment(" FROM (");
-            ColumnInfo groupColumn = appendFromSQL(tinfo, name, groupingSort, fromSQL);
+            ColumnInfo groupColumn = appendFromSQL(tinfo, name, groupingSort, fromSQL, _nestingOption.getRowIdColumnName());
             fromSQL.append(" ) FilterOnly ");
 
             Collection<ColumnInfo> cols = Collections.singletonList(groupColumn);
@@ -144,7 +144,7 @@ public class NestedRenderContext extends RenderContext
         // a count of the number of groups
         Sort sort = new Sort(_nestingOption.getRowIdColumnName());
         final SQLFragment fromSQL = new SQLFragment();
-        ColumnInfo groupColumn = appendFromSQL(tinfo, dataRegionName, sort, fromSQL);
+        ColumnInfo groupColumn = appendFromSQL(tinfo, dataRegionName, sort, fromSQL, _nestingOption.getAggregateRowIdColumnName());
         fromSQL.insert(0, "SELECT " + groupColumn.getAlias() + " FROM (");
         fromSQL.append(") FilterOnly GROUP BY " + groupColumn.getAlias());
 
@@ -173,7 +173,7 @@ public class NestedRenderContext extends RenderContext
         return Collections.emptyMap();
     }
 
-    private ColumnInfo appendFromSQL(TableInfo tinfo, String dataRegionName, Sort sort, SQLFragment sql)
+    private ColumnInfo appendFromSQL(TableInfo tinfo, String dataRegionName, Sort sort, SQLFragment sql, String groupingColumnName)
     {
         SimpleFilter filter = super.buildFilter(tinfo, getViewContext().getActionURL(), dataRegionName, Table.ALL_ROWS, 0, sort);
 
@@ -184,7 +184,7 @@ public class NestedRenderContext extends RenderContext
 
         // Use Query to build up the SQL that we need
         Collection<ColumnInfo> cols = new ArrayList<ColumnInfo>();
-        FieldKey groupFieldKey = FieldKey.fromString(_nestingOption.getRowIdColumnName());
+        FieldKey groupFieldKey = FieldKey.fromString(groupingColumnName);
         Map<FieldKey, ColumnInfo> groupColumns = QueryService.get().getColumns(tinfo, Collections.singleton(groupFieldKey));
         assert groupColumns.size() == 1;
         ColumnInfo groupColumn = groupColumns.get(groupFieldKey);

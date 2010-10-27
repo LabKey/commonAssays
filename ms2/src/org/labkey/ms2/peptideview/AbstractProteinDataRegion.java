@@ -105,12 +105,6 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         _groupedRS = groupedRS;
     }
 
-    public GroupedResultSet getNestedResultSet()
-    {
-        return _groupedRS;
-    }
-
-
     public void setExpanded(boolean expanded)
     {
         _expanded = expanded;

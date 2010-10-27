@@ -22,16 +22,16 @@ package org.labkey.ms2.peptideview;
  */
 public class ProteinProphetQueryNestingOption extends QueryNestingOption
 {
-    private static final String PREFIX = "ProteinProphetData/ProteinGroupId/";
-    private static final String PROTEIN_GROUP_ROWID = PREFIX + "RowId";
+    private static final String PREFIX = "ProteinProphetData/ProteinGroupId";
+    private static final String PROTEIN_GROUP_ROWID = PREFIX + "/RowId";
 
     public ProteinProphetQueryNestingOption(boolean allowNesting)
     {
-        super(PROTEIN_GROUP_ROWID, allowNesting);
+        super(PROTEIN_GROUP_ROWID, PREFIX, allowNesting);
     }
 
     public boolean isOuter(String columnName)
     {
-        return columnName.toLowerCase().startsWith(PREFIX.toLowerCase());
+        return columnName.toLowerCase().startsWith(PREFIX.toLowerCase() + "/");
     }
 }

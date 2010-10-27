@@ -33,12 +33,19 @@ import java.util.ArrayList;
 public abstract class QueryNestingOption
 {
     private String _rowIdColumnName;
+    private String _aggregateRowIdColumnName;
     private DataColumn _groupIdColumn;
     protected boolean _allowNesting;
 
     public QueryNestingOption(String rowIdColumnName, boolean allowNesting)
     {
+        this(rowIdColumnName, rowIdColumnName, allowNesting);
+    }
+
+    public QueryNestingOption(String rowIdColumnName, String aggregateRowIdColumnName, boolean allowNesting)
+    {
         _rowIdColumnName = rowIdColumnName;
+        _aggregateRowIdColumnName = aggregateRowIdColumnName;
         _allowNesting = allowNesting;
     }
 
@@ -87,6 +94,11 @@ public abstract class QueryNestingOption
     public String getRowIdColumnName()
     {
         return _rowIdColumnName;
+    }
+
+    public String getAggregateRowIdColumnName()
+    {
+        return _aggregateRowIdColumnName;
     }
 
     public QueryPeptideDataRegion createDataRegion(List<DisplayColumn> originalColumns, ActionURL url, String dataRegionName, boolean expanded)
