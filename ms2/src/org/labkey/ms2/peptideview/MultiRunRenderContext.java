@@ -72,7 +72,8 @@ public class MultiRunRenderContext extends RenderContext
         {
             ProteinManager.replaceRunCondition(_filter, null, _iter.next());
             // XXX: we're ignoring offset for now
-            return Table.selectForDisplay(_table, _columns, _filter, _sort, _maxRows, 0, _cache);
+            //msi: We are using a scrollable resultset here for reasons I am not sure of...
+            return Table.selectForDisplay(_table, _columns, _filter, _sort, _maxRows, 0, _cache, true);
         }
     }
 }
