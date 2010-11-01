@@ -207,12 +207,18 @@ public class NestedRenderContext extends RenderContext
         if (_nestingOption != null)
         {
             // We're handling paging on our own, so don't rely on the default implementation. Force it to not limit the rows
-            return super.selectForDisplay(table, columns, filter, sort, Table.ALL_ROWS, 0, async);
+            maxRows = Table.ALL_ROWS;
+            offset = 0;
+        }
+
+        // Force the result set to be cached so that we can do our nesting
+        if (async)
+        {
+            return Table.selectForDisplayAsync(table, columns, filter, sort, maxRows, offset, getCache(), true, getViewContext().getResponse());
         }
         else
         {
-            // Standard paging should apply
-            return super.selectForDisplay(table, columns, filter, sort, maxRows, offset, async);
+            return Table.selectForDisplay(table, columns, filter, sort, maxRows, offset, getCache(), true);
         }
     }
 }
