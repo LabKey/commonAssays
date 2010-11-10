@@ -251,14 +251,12 @@ public class MS2Controller extends SpringActionController
         MenuButton compareMenu = new MenuButton("Compare");
         compareMenu.setDisplayPermission(ReadPermission.class);
 
-        ActionURL proteinProphetURL = new ActionURL(MS2Controller.CompareProteinProphetSetupAction.class, container);
-        String selectionKey = view.getDataRegion().getSelectionKey();
-        proteinProphetURL.addParameter("selectionKey", selectionKey);
+        ActionURL proteinProphetQueryURL = new ActionURL(MS2Controller.CompareProteinProphetQuerySetupAction.class, container);
         if (experimentRunIds)
         {
-            proteinProphetURL.addParameter("experimentRunIds", "true");
+            proteinProphetQueryURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("ProteinProphet", view.createVerifySelectedScript(proteinProphetURL, "runs", false));
+        compareMenu.addMenuItem("ProteinProphet", view.createVerifySelectedScript(proteinProphetQueryURL, "runs", false));
 
         ActionURL searchEngineURL = new ActionURL(MS2Controller.CompareSearchEngineProteinSetupAction.class, container);
         if (experimentRunIds)
@@ -274,12 +272,14 @@ public class MS2Controller extends SpringActionController
         }
         compareMenu.addMenuItem("Peptide", view.createVerifySelectedScript(peptidesURL, "runs", false));
 
-        ActionURL proteinProphetQueryURL = new ActionURL(MS2Controller.CompareProteinProphetQuerySetupAction.class, container);
+        ActionURL proteinProphetURL = new ActionURL(MS2Controller.CompareProteinProphetSetupAction.class, container);
+        String selectionKey = view.getDataRegion().getSelectionKey();
+        proteinProphetURL.addParameter("selectionKey", selectionKey);
         if (experimentRunIds)
         {
-            proteinProphetQueryURL.addParameter("experimentRunIds", "true");
+            proteinProphetURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("ProteinProphet (Query)", view.createVerifySelectedScript(proteinProphetQueryURL, "runs", false));
+        compareMenu.addMenuItem("ProteinProphet (Legacy)", view.createVerifySelectedScript(proteinProphetURL, "runs", false));
 
         ActionURL spectraURL = new ActionURL(MS2Controller.SpectraCountSetupAction.class, container);
         if (experimentRunIds)
@@ -1345,7 +1345,7 @@ public class MS2Controller extends SpringActionController
     {
         public CompareProteinProphetSetupAction()
         {
-            super("/org/labkey/ms2/compare/compareProteinProphetOptions.jsp", "Compare ProteinProphet Setup");
+            super("/org/labkey/ms2/compare/compareProteinProphetOptions.jsp", "Compare ProteinProphet (Legacy) Setup");
         }
     }
 
@@ -1398,7 +1398,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Compare ProteinProphet (Query) Options");
+            return root.addChild("Compare ProteinProphet Options");
         }
     }
 
@@ -1691,7 +1691,7 @@ public class MS2Controller extends SpringActionController
                 setupURL.addParameter(NORMALIZE_PROTEIN_GROUPS_NAME, _form.isNormalizeProteinGroups());
                 root.addChild("MS2 Dashboard");
                 root.addChild("Setup Compare ProteinProphet", setupURL);
-                StringBuilder title = new StringBuilder("Compare ProteinProphet (Query): ");
+                StringBuilder title = new StringBuilder("Compare ProteinProphet: ");
                 _form.appendPeptideFilterDescription(title, getViewContext());
                 title.append(", ");
                 _form.appendProteinGroupFilterDescription(title, getViewContext());
@@ -1710,7 +1710,7 @@ public class MS2Controller extends SpringActionController
                 }
                 return root.addChild(title.toString());
             }
-            return root.addChild("Compare ProteinProphet (Query)");
+            return root.addChild("Compare ProteinProphet");
         }
     }
 

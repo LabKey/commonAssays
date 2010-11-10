@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class ProteinProphetCompareQuery extends CompareQuery
 {
-    public static final String COMPARISON_DESCRIPTION = "Compare ProteinProphet Proteins";
+    public static final String COMPARISON_DESCRIPTION = "Compare ProteinProphet (Legacy) Proteins";
 
     protected ProteinProphetCompareQuery(ActionURL currentUrl, List<MS2Run> runs)
     {

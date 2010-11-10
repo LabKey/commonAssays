@@ -30,7 +30,31 @@ import java.sql.SQLException;
  */
 public enum MS2RunViewType
 {
-    NONE("None", "none")
+    QUERY_PEPTIDES("Standard", "query")
+    {
+        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
+        {
+            return new QueryPeptideMS2RunView(viewContext, runs);
+        }
+    },
+    QUERY_PROTEIN_GROUPS("Protein Groups", "queryproteingroups")
+    {
+        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
+        {
+            return new QueryProteinGroupMS2RunView(viewContext, runs);
+        }
+
+        public boolean supportsRun(MS2Run run) throws SQLException
+        {
+            return run.hasProteinProphet();
+        }
+
+        public boolean supportsExtraFilters()
+        {
+            return false;
+        }
+    },
+    NONE("Peptides (Legacy)", "none")
     {
         public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
         {
@@ -47,7 +71,7 @@ public enum MS2RunViewType
             return true;
         }
     },
-    PROTEIN("Protein", "protein")
+    PROTEIN("Protein (Legacy)", "protein")
     {
         public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
         {
@@ -64,7 +88,7 @@ public enum MS2RunViewType
             return true;
         }
     },
-    PROTEIN_PROPHET("Protein Prophet", "proteinprophet")
+    PROTEIN_PROPHET("ProteinProphet (Legacy)", "proteinprophet")
     {
         public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
         {
@@ -84,30 +108,6 @@ public enum MS2RunViewType
         public boolean supportsProteinColumnPicker()
         {
             return true;
-        }
-    },
-    QUERY_PEPTIDES("Query - Peptides", "query")
-    {
-        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
-        {
-            return new QueryPeptideMS2RunView(viewContext, runs);
-        }
-    },
-    QUERY_PROTEIN_GROUPS("Query - Protein Groups", "queryproteingroups")
-    {
-        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
-        {
-            return new QueryProteinGroupMS2RunView(viewContext, runs);
-        }
-
-        public boolean supportsRun(MS2Run run) throws SQLException
-        {
-            return run.hasProteinProphet();
-        }
-
-        public boolean supportsExtraFilters()
-        {
-            return false;
         }
     };
 
@@ -162,7 +162,7 @@ public enum MS2RunViewType
     {
         if (urlName == null)
         {
-            return NONE;
+            return QUERY_PEPTIDES;
         }
         for (MS2RunViewType type : values())
         {

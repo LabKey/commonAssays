@@ -104,14 +104,13 @@ abstract public class FlowJoWorkspace implements Serializable
             {
                 return null;
             }
+
             int id = Integer.parseInt(_compensationId);
             if (id < 0)
             {
-                String spill = StringUtils.trimToNull(_keywords.get("SPILL"));
-                if (null == spill)
-                    return null;
-                return CompensationMatrix.fromSpillKeyword(spill);
+                return CompensationMatrix.fromSpillKeyword(_keywords);
             }
+
             if (_compensationMatrices.size() == 0)
             {
                 return null;

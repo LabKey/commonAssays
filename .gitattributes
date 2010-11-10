@@ -728,6 +728,7 @@ ms2/resources/queries/ms2/Peptides/ProteinProphet.qview.xml -text
 ms2/resources/queries/ms2/Peptides/SearchEngineProtein.qview.xml -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-8.20.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-10.20-10.21.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-10.20-10.29.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-8.30-9.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
@@ -808,6 +809,7 @@ ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-9.20-9.21.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-9.21-9.22.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-0.00-8.20.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-10.20-10.21.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/ms2-10.20-10.29.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-8.30-9.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
