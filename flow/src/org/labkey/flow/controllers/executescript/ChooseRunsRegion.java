@@ -45,9 +45,10 @@ public class ChooseRunsRegion extends DataRegion
         return;
     }
 
-    protected void renderFormHeader(Writer out, int mode) throws IOException
+    @Override
+    protected void renderFormHeader(RenderContext ctx, Writer out, int mode) throws IOException
     {
-        renderHiddenFormFields(out, mode);
+        renderHiddenFormFields(ctx, out, mode);
     }
 
     protected String getNoRowsMessage()
