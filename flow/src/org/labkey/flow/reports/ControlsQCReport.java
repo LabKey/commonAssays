@@ -18,6 +18,7 @@ package org.labkey.flow.reports;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.CachedRowSetImpl;
+import org.labkey.api.data.Results;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.reports.report.RReport;

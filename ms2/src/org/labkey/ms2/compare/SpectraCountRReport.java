@@ -17,8 +17,8 @@
 package org.labkey.ms2.compare;
 
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.Results;
 import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.report.RReport;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.view.ActionURL;
@@ -31,7 +31,6 @@ import org.labkey.ms2.RunListCache;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.SpectraCountConfiguration;
 
-import java.sql.ResultSet;
 import java.util.List;
 
 /**
