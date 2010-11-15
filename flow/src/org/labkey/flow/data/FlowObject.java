@@ -44,6 +44,8 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
 {
     static public final String PROP_CATEGORY = "flow";
     protected T _expObject;
+    protected String _entityId;
+
     public FlowObject(T expObject)
     {
         _expObject = expObject;
@@ -273,5 +275,15 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         if (!(o instanceof FlowObject))
             return 0;
         return getName().compareTo(((FlowObject) o).getName());
+    }
+
+    public void setEntityId(String entityId)
+    {
+        _entityId = entityId;    
+    }
+
+    public String getEntityId()
+    {
+        return _entityId;
     }
 }

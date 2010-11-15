@@ -32,36 +32,42 @@
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.view.FlowQueryView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
+<%@ page import="org.labkey.api.attachments.Attachment" %>
+<%@ page import="org.labkey.api.attachments.AttachmentService" %>
+<%@ page import="org.labkey.api.util.MimeMap" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     RunForm form = (RunForm) HttpView.currentModel();
     ViewContext context = HttpView.currentContext();
-    FlowRun run = form.getRun();
+    final FlowRun run = form.getRun();
     FlowCompensationMatrix comp = run.getCompensationMatrix();
 
     boolean canEdit = getViewContext().hasPermission(UpdatePermission.class);
-%>
-<% if (canEdit || run.getExpObject().getComment() != null) { %>
-<p>
-    Run Comment: <% include(new SetCommentView(run), out); %>
-</p>
-<% } %>
-<%
+
+    if (canEdit || run.getExpObject().getComment() != null)
+    {
+        %><p> Run Comment: <% include(new SetCommentView(run), out); %></p><%
+    }
+
+    run.getLSID();
+    
     FlowQueryView view = new FlowQueryView(form);
-    include(view, out);%>
-<%
+    include(view, out);
+    
     FlowLog[] logs = run.getLogs();
     if (logs.length != 0)
-    {%>
-<p>Log Files: <%
-    for (FlowLog log : logs)
-    { %>
-    <br><a href="<%=h(log.urlShow())%>"><%=h(log.getName())%></a>
-    <%} %>
-</p>
-<% } %>
-<% if (context.getContainer().hasPermission(context.getUser(), UpdatePermission.class) &&
+    {
+        %><p>Log Files: <%
+        for (FlowLog log : logs)
+        {
+            %><br><a href="<%=h(log.urlShow())%>"><%=h(log.getName())%></a><%
+        }
+        %></p><%
+     }
+
+    if (context.getContainer().hasPermission(context.getUser(), UpdatePermission.class) &&
         (run.getStep() == FlowProtocolStep.analysis || run.isInWorkspace()))
     {
         if (run.isInWorkspace()) { %>
@@ -76,34 +82,52 @@
                 You can modify the gates on individual FCS files in this run.<br>
                 <labkey:link href="<%=run.urlFor(RunController.Action.moveToWorkspace)%>" text="Move this run to the workspace" /><br>
             </p>
+    <% } 
+    }
+%><p><%
 
-    <% } } %>
-<p>
-    <%
-        if (comp != null)
-    { %>
-    <labkey:link text="Show Compensation" href="<%=comp.urlFor(CompensationController.Action.showCompensation)%>"/><br>
-    <% } %>
-    <%  ActionURL urlShowRunGraph = urlProvider(ExperimentUrls.class).getShowRunGraphURL(run.getExperimentRun()); %>
-    <labkey:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br>
-    <%
-        ActionURL showFileURL = run.getDownloadWorkspaceURL();
-        if (showFileURL != null)
+    if (comp != null)
+    {
+        %><labkey:link text="Show Compensation" href="<%=comp.urlFor(CompensationController.Action.showCompensation)%>"/><br><%
+    }
+
+    ActionURL urlShowRunGraph = urlProvider(ExperimentUrls.class).getShowRunGraphURL(run.getExperimentRun()); %>
+    <labkey:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br><%
+        
+    ActionURL showFileURL = run.getDownloadWorkspaceURL();
+    if (showFileURL != null)
+    {
+        %><labkey:link href="<%=showFileURL%>" text="Download Workspace XML File"/><br/><%
+    }
+    if (run.getPath() != null)
+    {
+        %><labkey:link href="<%=run.urlFor(RunController.Action.download)%>" text="Download FCS Files" /><br><% 
+    }
+    
+    DiscussionService.Service service = DiscussionService.get();
+    DiscussionService.DiscussionView discussion = service.getDisussionArea(
+            getViewContext(),
+            run.getLSID(),
+            run.urlShow(),
+            "Discussion of " + run.getLabel(),
+            false, true);
+    include(discussion, out);
+
+    AttachmentService.Service att = AttachmentService.get();
+    Attachment[] attachments = att.getAttachments(run);
+    MimeMap mm = new MimeMap();
+    %><table><tr><%
+    for (Attachment a : attachments)
+    {
+        // Shouldn't Attachment have getContentType()
+        String contentType = mm.getContentType(a.getFileExtension());
+        if (contentType.startsWith("image/"))
         {
-            %><labkey:link href="<%=showFileURL%>" text="Download Workspace XML File"/><br/><%
+            ActionURL download = new ActionURL(RunController.DownloadImageAction.class, run.getContainer());
+            download.addParameter("runId", run.getRunId());
+            download.addParameter("name", a.getName());
+            %><td><img src="<%=h(download)%>"></td><%
         }
-    %>
-    <%if (run.getPath() != null) {%>
-    <labkey:link href="<%=run.urlFor(RunController.Action.download)%>" text="Download FCS Files" /><br>
-    <% } %>
-    <%
-        DiscussionService.Service service = DiscussionService.get();
-        DiscussionService.DiscussionView discussion = service.getDisussionArea(
-                getViewContext(),
-                run.getLSID(),
-                run.urlShow(),
-                "Discussion of " + run.getLabel(),
-                false, true);
-        include(discussion, out);
-    %>
+    }
+    %></tr></table>
 </p>

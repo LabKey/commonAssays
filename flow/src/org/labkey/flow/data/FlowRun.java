@@ -17,6 +17,8 @@
 package org.labkey.flow.data;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.attachments.Attachment;
+import org.labkey.api.attachments.AttachmentParent;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.query.QueryService;
@@ -40,7 +42,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.io.File;
 
-public class FlowRun extends FlowObject<ExpRun>
+public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 {
     private static final Logger _log = Logger.getLogger(FlowRun.class);
     Integer ACTIONSEQUENCE_LOG = 0;
@@ -57,6 +59,12 @@ public class FlowRun extends FlowObject<ExpRun>
     public FlowRun(ExpRun run)
     {
         super(run);
+    }
+
+
+    public String getEntityId()
+    {
+        return getExperimentRun().getEntityId();
     }
 
     public ExpRun getExperimentRun()
@@ -574,5 +582,12 @@ public class FlowRun extends FlowObject<ExpRun>
             }
         }
         return FlowTableType.FCSFiles;
+    }
+
+
+    @Override
+    public void setAttachments(Collection<Attachment> attachments)
+    {
+        throw new IllegalStateException();
     }
 }

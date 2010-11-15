@@ -19,6 +19,7 @@ package org.labkey.flow.controllers.run;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
@@ -29,6 +30,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.template.PageConfig;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
@@ -42,6 +44,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -324,6 +327,48 @@ public class RunController extends BaseFlowController<RunController.Action>
         {
             String label = run != null ? "Move '" + run.getLabel() + "' to an analysis" : "Run not found";
             return appendFlowNavTrail(getPageConfig(), root, run, label, Action.moveToWorkspace);
+        }
+    }
+
+
+    public static class AttachmentForm extends RunForm
+    {
+        public String getName()
+        {
+            return name;
+        }
+
+        public void setName(String name)
+        {
+            this.name = name;
+        }
+
+        private String name;
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class DownloadImageAction extends SimpleViewAction<AttachmentForm>
+    {
+        public ModelAndView getView(final AttachmentForm form, BindException errors) throws Exception
+        {
+            final FlowRun run = form.getRun();
+            if (null == run)
+                HttpView.throwNotFound();
+
+            getPageConfig().setTemplate(PageConfig.Template.None);
+
+            return new HttpView()
+            {
+                protected void renderInternal(Object model, HttpServletRequest request, HttpServletResponse response) throws Exception
+                {
+                    AttachmentService.get().download(response, run, form.getName());
+                }
+            };
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
         }
     }
 
