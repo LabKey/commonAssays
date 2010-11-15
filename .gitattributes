@@ -443,10 +443,12 @@ flow/src/org/labkey/flow/script/AnalyzeJob.java -text
 flow/src/org/labkey/flow/script/BaseHandler.java -text
 flow/src/org/labkey/flow/script/CompensationCalculationHandler.java -text
 flow/src/org/labkey/flow/script/FlowAnalyzer.java -text
+flow/src/org/labkey/flow/script/FlowExperimentJob.java -text
 flow/src/org/labkey/flow/script/FlowJob.java -text
 flow/src/org/labkey/flow/script/FlowPipelineProvider.java -text
 flow/src/org/labkey/flow/script/FlowTaskSet.java -text
 flow/src/org/labkey/flow/script/FlowThreadPool.java -text
+flow/src/org/labkey/flow/script/ImportJob.java -text
 flow/src/org/labkey/flow/script/KeywordsHandler.java -text
 flow/src/org/labkey/flow/script/MoveRunFromWorkspaceJob.java -text
 flow/src/org/labkey/flow/script/ScriptJob.java -text

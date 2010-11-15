@@ -37,65 +37,19 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
 
-abstract public class ScriptJob extends FlowJob
+abstract public class ScriptJob extends FlowExperimentJob
 {
-    private static Logger _log = getJobLogger(ScriptJob.class);
-
-    public Logger getClassLogger()
-    {
-        return _log;
-    }
 
     private Map<SampleKey, ExpMaterial> _sampleMap;
-    private File _containerFolder;
 
     FlowScript _runAnalysisScript;
-    FlowProtocolStep _step;
     FlowCompensationMatrix _compensationMatrix;
-    String _experimentLSID;
     String _compensationExperimentLSID;
-    String _experimentName;
 
-    RunData _runData;
     List<String> _pendingRunLSIDs = new ArrayList();
     private final Map<FlowProtocolStep, List<String>> _processedRunLSIDs = new HashMap();
-    FlowProtocol _protocol;
 
     private transient ScriptHandlerGroup _handlers;
-
-    class RunData
-    {
-        public RunData(ExperimentRunType run)
-        {
-            _run = run;
-        }
-        ExperimentRunType _run;
-        Map<LogType, StringBuffer> _logs = new EnumMap(LogType.class);
-        Map<String, StartingInput> _runOutputs = new LinkedHashMap();
-        Map<String, StartingInput> _startingDataInputs = new HashMap();
-        Map<String, StartingInput> _startingMaterialInputs = new HashMap();
-        public void logError(String lsid, String propertyURI, String message)
-        {
-            StringBuffer buf = _logs.get(LogType.error);
-            if (buf == null)
-            {
-                buf = new StringBuffer();
-                _logs.put(LogType.error, buf);
-            }
-            EnumMap<LogField, Object> values = new EnumMap(LogField.class);
-            values.put(LogField.date, new Date());
-            values.put(LogField.type, LogType.error);
-            values.put(LogField.user, getUser());
-            values.put(LogField.objectURI, lsid);
-            values.put(LogField.propertyURI, propertyURI);
-            values.put(LogField.message, message);
-            FlowLog.append(buf, values);
-        }
-        public String getLSID()
-        {
-            return _run.getAbout();
-        }
-    }
 
     class ScriptHandlerGroup
     {
@@ -166,30 +120,10 @@ abstract public class ScriptJob extends FlowJob
         }
     }
 
-    class StartingInput
-    {
-        public StartingInput(String name, File file, InputRole role)
-        {
-            this.name = name;
-            this.file = file;
-            this.role = role;
-        }
-        String name;
-        File file;
-        InputRole role;
-    }
-
     public ScriptJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript script, FlowProtocolStep step, PipeRoot root) throws Exception
     {
-        super(FlowPipelineProvider.NAME, info, root);
+        super(info, root, experimentLSID, protocol, experimentName, step);
         _runAnalysisScript = script;
-        _step = step;
-        _experimentName = experimentName;
-        _experimentLSID = experimentLSID;
-        _protocol = protocol;
-        _containerFolder = getWorkingFolder(getContainer());
-
-        initStatus();
     }
 
     private ScriptHandlerGroup getHandlers()
@@ -227,29 +161,6 @@ abstract public class ScriptJob extends FlowJob
     public FlowCompensationMatrix getCompensationMatrix()
     {
         return _compensationMatrix;
-    }
-
-    public FlowExperiment getExperiment()
-    {
-        return FlowExperiment.fromLSID(_experimentLSID);
-    }
-
-    public ActionURL urlData()
-    {
-        FlowExperiment experiment = getExperiment();
-        if (experiment == null)
-            return null;
-        return experiment.urlShow();
-    }
-
-    public FlowRun[] findRuns(File path, FlowProtocolStep step) throws SQLException
-    {
-        FlowExperiment experiment = getExperiment();
-        if (experiment == null)
-        {
-            return new FlowRun[0];
-        }
-        return experiment.findRun(path, step);
     }
 
     public FlowCompensationMatrix findCompensationMatrix(FlowRun run) throws SQLException
@@ -301,15 +212,6 @@ abstract public class ScriptJob extends FlowJob
         return "Upload";
     }
 
-    public String getLog()
-    {
-        if (!getLogFile().exists())
-        {
-            return "No status";
-        }
-        return PageFlowUtil.getFileContentsAsString(getLogFile());
-    }
-
     public Map<FlowProtocolStep, String[]> getProcessedRunLSIDs()
     {
         TreeMap<FlowProtocolStep, String[]> ret = new TreeMap<FlowProtocolStep, String[]>(new Comparator<FlowProtocolStep>() {
@@ -326,27 +228,6 @@ abstract public class ScriptJob extends FlowJob
             }
         }
         return ret;
-    }
-
-    public void addError(String lsid, String propertyURI, String message)
-    {
-        super.addError(lsid, propertyURI, message);
-        if (_runData != null)
-        {
-            _runData.logError(lsid, propertyURI, message);
-        }
-    }
-
-    protected boolean checkProcessPath(File path, FlowProtocolStep step) throws SQLException
-    {
-        FlowRun[] existing = findRuns(path, step);
-        if (existing.length > 0)
-        {
-            addStatus("Skipping " + path.toString() + " because it already exists.");
-            return false;
-        }
-        addStatus("Processing " + path.toString());
-        return true;
     }
 
     public ExperimentArchiveDocument createExperimentArchive()
@@ -548,87 +429,6 @@ abstract public class ScriptJob extends FlowJob
     public boolean allowMultipleSimultaneousJobs()
     {
         return true;
-    }
-
-    private File getWorkingFolder(Container container) throws Exception
-    {
-        File dirRoot = FlowAnalyzer.getAnalysisDirectory();
-        File dirFolder = new File(dirRoot, "Folder" + container.getRowId());
-        if (!dirFolder.exists())
-        {
-            dirFolder.mkdir();
-        }
-        return dirFolder;
-    }
-
-    private void initStatus() throws Exception
-    {
-        String guid = GUID.makeGUID();
-        File logFile = new File(_containerFolder, guid + ".flow.log");
-        logFile.createNewFile();
-        setLogFile(logFile);
-    }
-
-    public File createAnalysisDirectory(File runDirectory, FlowProtocolStep step) throws Exception
-    {
-        File dirFolder = getWorkingFolder(getContainer());
-        File dirRun = new File(dirFolder, runDirectory.getName());
-        if (!dirRun.exists())
-        {
-            dirRun.mkdir();
-        }
-        for (int i = 1; ; i ++)
-        {
-            File dirData = new File(dirRun, step.getLabel() + i);
-            if (!dirData.exists())
-            {
-                dirData.mkdir();
-                return dirData;
-            }
-        }
-    }
-
-    public void deleteAnalysisDirectory(File directory)
-    {
-        if (!FlowSettings.getDeleteFiles())
-            return;
-        if (hasErrors())
-            return;
-        try
-        {
-            File dirCompare = FlowAnalyzer.getAnalysisDirectory();
-            if (!directory.toString().startsWith(dirCompare.toString()))
-            {
-                return;
-            }
-            for (File file : directory.listFiles())
-            {
-                file.delete();
-            }
-            directory.delete();
-        }
-        catch (Exception ioe)
-        {
-            _log.error("Error", ioe);
-        }
-    }
-
-    synchronized public File decideFileName(File directory, String name, String extension)
-    {
-        File fileTry = new File(directory, name + "." + extension);
-        if (!fileTry.exists())
-            return fileTry;
-        for (int i = 1; ; i++)
-        {
-            fileTry = new File(directory, name + i + "." + extension);
-            if (!fileTry.exists())
-                return fileTry;
-        }
-    }
-
-    public FlowProtocol getProtocol()
-    {
-        return _protocol;
     }
 
     public Map<SampleKey, ExpMaterial> getSampleMap()

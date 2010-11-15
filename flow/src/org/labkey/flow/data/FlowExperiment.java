@@ -35,6 +35,9 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * Also known as "Analysis Folder" in flow terms or "Run Group" in exp terms.
+ */
 public class FlowExperiment extends FlowObject<ExpExperiment>
 {
     static private final Logger _log = Logger.getLogger(FlowExperiment.class);

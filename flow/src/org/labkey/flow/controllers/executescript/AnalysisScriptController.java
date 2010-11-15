@@ -38,10 +38,7 @@ import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.*;
-import org.labkey.flow.script.AddRunsJob;
-import org.labkey.flow.script.AnalyzeJob;
-import org.labkey.flow.script.FlowPipelineProvider;
-import org.labkey.flow.script.WorkspaceJob;
+import org.labkey.flow.script.*;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
@@ -832,4 +829,53 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         }
     }
 
+
+    // XXX: Merge R analysis import with ImportAnalysisAction wizard above
+    @RequiresPermissionClass(UpdatePermission.class)
+    public class ImportAnalysisResultsAction extends SimpleViewAction<PipelinePathForm>
+    {
+        @Override
+        public ModelAndView getView(PipelinePathForm form, BindException errors) throws Exception
+        {
+            File f = form.getValidatedSingleFile(getContainer());
+
+            // Get an experiment based on the parent folder name
+            int suffix = 0;
+            String parent = f.getParent();
+            while (true)
+            {
+                String name = parent + (suffix == 0 ? "" : suffix);
+                FlowExperiment experiment = FlowExperiment.getForName(getUser(), getContainer(), name);
+                if (experiment == null)
+                    break;
+
+                if (!experiment.hasRun(f.getParentFile(), FlowProtocolStep.analysis))
+                    break;
+
+                suffix++;
+            }
+
+            FlowExperiment experiment = FlowExperiment.createForName(getUser(), getContainer(), parent + (suffix == 0 ? "" : suffix));
+
+            PipeRoot root = form.getPipeRoot(getContainer());
+            ViewBackgroundInfo info = getViewBackgroundInfo();
+            if (root == null)
+            {
+                // root-less pipeline job for summaryStats.txt uploaded via the browser
+                info.setURL(null);
+            }
+
+            FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
+            ImportJob job = new ImportJob(info, root, experiment, protocol);
+            HttpView.throwRedirect(executeScript(job));
+            return null;
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Import Analysis");
+        }
+
+    }
 }

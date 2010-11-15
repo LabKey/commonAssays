@@ -46,6 +46,7 @@ public class FlowPipelineProvider extends PipelineProvider
     private static final String IMPORT_DIRECTORY_NAVTREE_LABEL = "Import FCS Files";
     private static final String IMPORT_WORKSPACE_LABEL = "Import FlowJo Workspace";
     private static final String IMPORT_DIRECTORY_LABEL = "Import Directory of FCS Files";
+    private static final String IMPORT_ANALYSIS_LABEL = "Import Analysis";
 
     public FlowPipelineProvider(Module owningModule)
     {
@@ -117,6 +118,7 @@ public class FlowPipelineProvider extends PipelineProvider
             return;
         }
 
+        // UNDONE: walk directory once instead of multiple times
         File[] dirs = directory.listFiles(new FileFilter()
         {
             public boolean accept(File dir)
@@ -155,6 +157,7 @@ public class FlowPipelineProvider extends PipelineProvider
 
         if (includeAll || !usedRelativePaths.contains(directory.getRelativePath()))
         {
+            // UNDONE: walk directory once instead of multiple times
             File[] fcsFiles = directory.listFiles(FCS.FCSFILTER);
             if (includeAll || (fcsFiles != null && fcsFiles.length > 0))
             {
@@ -170,6 +173,7 @@ public class FlowPipelineProvider extends PipelineProvider
             }
         }
 
+        // UNDONE: walk directory once instead of multiple times
         File[] workspaces = directory.listFiles(new IsFlowJoWorkspaceFilter());
         if (includeAll || (workspaces != null && workspaces.length > 0))
         {
@@ -182,6 +186,21 @@ public class FlowPipelineProvider extends PipelineProvider
         }
 
         // UNDONE: import FlowJo exported compensation matrix file: CompensationController.UploadAction
+
+
+        // UNDONE: walk directory once instead of multiple times
+        File[] summaryStats = directory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file)
+            {
+                return file.getName().equalsIgnoreCase("summaryStats.txt");
+            }
+        });
+        if (includeAll || (summaryStats != null && summaryStats.length > 0))
+        {
+            String actionId = createActionId(AnalysisScriptController.ImportAnalysisResultsAction.class, IMPORT_ANALYSIS_LABEL);
+            addAction(actionId, AnalysisScriptController.ImportAnalysisResultsAction.class, IMPORT_ANALYSIS_LABEL, directory, summaryStats, false, true, includeAll);
+        }
     }
 
     @Override
