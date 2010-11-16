@@ -841,7 +841,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
             // Get an experiment based on the parent folder name
             int suffix = 0;
-            String parent = f.getParent();
+            String parent = f.getParentFile().getName();
             while (true)
             {
                 String name = parent + (suffix == 0 ? "" : suffix);
@@ -865,8 +865,18 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                 info.setURL(null);
             }
 
+            // XXX: Hard code path to existing fcs keyword run for now
+            FlowRun[] keywordRuns = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+            FlowRun keywordRun = null;
+            for (FlowRun run : keywordRuns)
+                if (run.getName().equals("extdata"))
+                {
+                    keywordRun = run;
+                    break;
+                }
+
             FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
-            ImportJob job = new ImportJob(info, root, experiment, protocol);
+            ImportJob job = new ImportJob(info, root, experiment, protocol, keywordRun, f);
             HttpView.throwRedirect(executeScript(job));
             return null;
         }

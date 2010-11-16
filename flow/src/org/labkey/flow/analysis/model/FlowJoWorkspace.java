@@ -1127,7 +1127,9 @@ abstract public class FlowJoWorkspace implements Serializable
 
     public FlowRun createExperimentRun(FlowJob job, User user, Container container, FlowExperiment experiment, String workspaceName, File workspaceFile, File runFilePathRoot, boolean failOnError) throws Exception
     {
+        // Fake file URI set on the FCSFile/FCSAnalsyis ExpData to ensure it's recognized by the FlowDataHandler.
         URI dataFileURI = new File(workspaceFile.getParent(), "attributes.flowdata.xml").toURI();
+        
         ExperimentService.Interface svc = ExperimentService.get();
         Map<SampleInfo, AttributeSet> keywordsMap = new LinkedHashMap();
         Map<CompensationMatrix, AttributeSet> compMatrixMap = new LinkedHashMap();
