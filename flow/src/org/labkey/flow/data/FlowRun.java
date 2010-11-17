@@ -588,6 +588,5 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     @Override
     public void setAttachments(Collection<Attachment> attachments)
     {
-        throw new IllegalStateException();
     }
 }

@@ -1,9 +1,14 @@
 package org.labkey.flow.script;
 
+import org.apache.commons.io.IOUtils;
+import org.labkey.api.attachments.AttachmentFile;
+import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.attachments.FileAttachmentFile;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.data.*;
@@ -11,10 +16,11 @@ import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,12 +51,21 @@ public class ImportJob extends FlowExperimentJob
     // Read stats results summaryStats.txt file.
     private Map<String, AttributeSet> loadAnalysis() throws Exception
     {
+        File dir = _summaryStats.getParentFile();
+        String[] imageNames = dir.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name)
+            {
+                return name.endsWith(".png");
+            }
+        });
+        
         TabLoader loader = new TabLoader(_summaryStats, true);
 
         Map<String, AttributeSet> results = new LinkedHashMap<String, AttributeSet>();
         for (Map<String, Object> row : loader)
         {
-            String sample = (String)row.get(ResultColumn.sample.name());
+            final String sample = (String)row.get(ResultColumn.sample.name());
             AttributeSet attrs = results.get(sample);
             if (attrs == null)
             {
@@ -58,8 +73,8 @@ public class ImportJob extends FlowExperimentJob
                 results.put(sample, attrs);
             }
 
-            String population = (String)row.get(ResultColumn.population.name());
-            SubsetSpec subset = SubsetSpec.fromString(population);
+            String statPopulation = (String)row.get(ResultColumn.population.name());
+            SubsetSpec subset = SubsetSpec.fromString(statPopulation);
 
             Integer count = (Integer)row.get(ResultColumn.count.name());
             StatisticSpec countStat = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
@@ -69,7 +84,40 @@ public class ImportJob extends FlowExperimentJob
             StatisticSpec percentStat = new StatisticSpec(subset, StatisticSpec.STAT.Frequency, null);
             attrs.setStatistic(percentStat, percent);
 
-            // XXX: add graphs
+            // Collect graph images.
+            for (String imageName : imageNames)
+            {
+                if (!imageName.startsWith(sample))
+                    continue;
+
+                String[] parts = imageName.substring(sample.length()+1).split("_");
+                GraphSpec graphSpec;
+                if (parts.length == 3)
+                {
+                    String xaxis = parts[0];
+                    String yaxis = parts[1];
+                    String graphPopulation = parts[2];
+                    SubsetSpec subsetSpec = SubsetSpec.fromString(graphPopulation);
+                    graphSpec = new GraphSpec(subsetSpec, xaxis, yaxis);
+                }
+                else if (parts.length == 2)
+                {
+                    String xaxis = parts[0];
+                    String graphPopulation = parts[1];
+                    SubsetSpec subsetSpec = SubsetSpec.fromString(graphPopulation);
+                    graphSpec = new GraphSpec(subsetSpec, xaxis);
+                }
+                else
+                {
+                    addStatus(String.format("Skipping graph '%s'; Expected image to be named: %s_<x-axis>_<y-axis>_<population>.png or %s_<x-axis>_<population>.png", imageName, sample, sample));
+                    continue;
+                }
+
+                InputStream is = new FileInputStream(new File(dir, imageName));
+                byte[] b = IOUtils.toByteArray(is);
+                is.close();
+                attrs.setGraph(graphSpec, b);
+            }
 
             attrs.prepareForSave(getContainer());
         }
@@ -136,7 +184,24 @@ public class ImportJob extends FlowExperimentJob
 
         FlowManager.get().updateFlowObjectCols(getContainer());
 
-        return new FlowRun(run);
+
+        // Add run level graphs as attachments to the run
+        FlowRun flowRun = new FlowRun(run);
+
+        File[] runImages = _summaryStats.getParentFile().listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name)
+            {
+                return name.startsWith(_experimentName) && name.endsWith(".png");
+            }
+        });
+
+        AttachmentService.Service att = AttachmentService.get();
+        List<AttachmentFile> attachments = new LinkedList<AttachmentFile>();
+        for (File runImage : runImages)
+            attachments.add(new FileAttachmentFile(runImage));
+        att.addAttachments(getUser(), flowRun, attachments);
+
+        return flowRun;
     }
 
     @Override
@@ -167,7 +232,7 @@ public class ImportJob extends FlowExperimentJob
             {
                 svc.rollbackTransaction();
                 error("Import failed to complete", e);
-                addError(null, null, e.getMessage());
+                addError(null, null, e.toString());
             }
             FlowManager.analyze();
         }
