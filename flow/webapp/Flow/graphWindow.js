@@ -237,13 +237,13 @@ function polygonPoint(index)
         this.img.style.display = 'inline';
         if (isInterval)
         {
-            this.img.style.left = ptS.x + xOffset;
-            this.img.style.top = rcData.y;
+            this.img.style.left = ptS.x + xOffset + "px";
+            this.img.style.top = rcData.y + "px";
         }
         else
         {
-            this.img.style.left = ptS.x - 1 + xOffset;
-            this.img.style.top = ptS.y - 1 + yOffset;
+            this.img.style.left = ptS.x - 1 + xOffset + "px";
+            this.img.style.top = ptS.y - 1 + yOffset + "px";
         }
     },
     ret.update = function()
@@ -255,12 +255,12 @@ function polygonPoint(index)
     ret.img.style.position = "absolute";
     if (isInterval)
     {
-        ret.img.style.width = 1;
+        ret.img.style.width = "1px";
         ret.img.style.height = rcData.height;
     }
     else
     {
-        ret.img.style.width = ret.img.style.height = 3;
+        ret.img.style.width = ret.img.style.height = "3px";
     }
     document.body.appendChild(ret.img);
     ret.update();

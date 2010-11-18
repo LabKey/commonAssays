@@ -48,7 +48,7 @@ public class MS1FolderType extends DefaultFolderType
                 Portal.getPortalPart("Run Groups").createWebPart(),
                 Portal.getPortalPart("Run Types").createWebPart()
             ),
-            getDefaultModuleSet(module, getModule("MS2"), getModule("Pipeline")),
+            getDefaultModuleSet(module, getModule("MS2"), getModule("Pipeline"), getModule("Experiment")),
             module);
     }
 

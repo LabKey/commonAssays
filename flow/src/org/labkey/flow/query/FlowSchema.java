@@ -262,11 +262,6 @@ public class FlowSchema extends UserSchema
 //        }
     }
 
-    public QueryView createView(ViewContext context, QuerySettings settings) throws ServletException
-    {
-        return createView(context, settings, null);
-    }
-
     @Override
     public QueryView createView(ViewContext context, QuerySettings settings, BindException errors) throws ServletException
     {

@@ -482,7 +482,7 @@ Ext.onReady(function()
         </div>
     <% } %>
 
-    <%=PageFlowUtil.generateButton("Back", "javascript:window.history.back();")%>
+    <%=PageFlowUtil.generateBackButton()%>
     <%=PageFlowUtil.generateSubmitButton("Next")%>
     <%=PageFlowUtil.generateButton("Cancel", cancelUrl)%>
     
@@ -563,7 +563,7 @@ Ext.onReady(function()
         </li>
     </ul>
 
-    <%=PageFlowUtil.generateButton("Back", "javascript:window.history.back();")%>
+    <%=PageFlowUtil.generateBackButton()%>
     <%=PageFlowUtil.generateSubmitButton("Finish")%>
     <%=PageFlowUtil.generateButton("Cancel", cancelUrl)%>
 <% } %>

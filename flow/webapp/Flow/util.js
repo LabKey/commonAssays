@@ -7,8 +7,8 @@ function flowImgError(img)
 {
     img.onerror = null;
     img.src = LABKEY.ActionURL.getContextPath() + '/_images/exclaim.gif';
-    img.style.width = 12;
-    img.style.height = 12;
+    img.style.width = "12px";
+    img.style.height = "12px";
 
     var msg = 'Error generating graph.<br>See the server log for more information.';
     var node = document.createElement("span");

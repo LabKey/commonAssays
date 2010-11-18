@@ -177,7 +177,10 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
         public PeptidesTableInfo createTable()
         {
-            return new PeptidesTableInfo((MS2Schema) getSchema(), _url.clone(), true, ContainerFilter.CURRENT);
+            PeptidesTableInfo result = new PeptidesTableInfo((MS2Schema) getSchema(), _url.clone(), true, ContainerFilter.CURRENT);
+            // Manually apply the metadata
+            result.overlayMetadata(result.getPublicName(), getSchema(), new ArrayList<QueryException>());
+            return result;
         }
     }
 

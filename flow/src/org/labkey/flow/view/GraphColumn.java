@@ -60,7 +60,7 @@ public class GraphColumn extends DataColumn
         }
 
         Object boundValue = getColumnInfo().getValue(ctx);
-        String graphSize = FlowPreference.graphSize.getValue(ctx.getRequest());
+        String graphSize = FlowPreference.graphSize.getValue(ctx.getRequest()) + "px";
         Object displayValue = getColumnInfo().getDisplayField().getValue(ctx);
         String graphTitle = PageFlowUtil.filter(displayValue.toString());
 

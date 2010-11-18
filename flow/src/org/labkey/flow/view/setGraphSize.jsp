@@ -57,8 +57,7 @@
             zoomImage = document.createElement("img");
             document.body.appendChild(zoomImage);
             zoomImage.style.position = "absolute";
-            zoomImage.style.height = fullSize;
-            zoomImage.style.width = fullSize;
+            zoomImage.style.border = "2px solid gray";
             zoomImage.onclick = zoomOut;
         }
         var scrollTop = 0;
@@ -85,8 +84,9 @@
             offsetY = 50;
         }
 
-        zoomImage.style.left = (event.clientX - offsetX + scrollLeft);
-        zoomImage.style.top = (event.clientY - offsetY + scrollTop);
+        // Don't size the zoomed image -- let it be the image's natural width/height.
+        zoomImage.style.left = (event.clientX - offsetX + scrollLeft) + "px";
+        zoomImage.style.top = (event.clientY - offsetY + scrollTop) + "px";
         zoomImage.src = el.src;
         zoomImage.style.visibility="visible";
     };
@@ -102,13 +102,22 @@
     function setGraphSize(size)
     {
         var unitSize = size + "px";
-        
-        var graphs  = Ext.DomQuery.select("IMG.labkey-flow-graph");
+
+        // resize both images and "No graph for..." span
+        var graphs  = Ext.DomQuery.select(".labkey-flow-graph");
         for (var i = 0; i < graphs.length; i ++)
         {
             var graph = graphs[i];
             graph.style.width = unitSize;
             graph.style.height = unitSize;
+
+            // resize the parent span as well
+            var parentSpan = graph.parentNode;
+            if (parentSpan)
+            {
+                parentSpan.style.width = unitSize;
+                parentSpan.style.height = unitSize;
+            }
         }
 
         // update link style
@@ -116,7 +125,7 @@
         currentSize = size;
         setGraphClasses("graphSize" + currentSize, "labkey-selected-link");
         // update user preference
-        document.getElementById("updateGraphSize").src = urlUpdateSize + currentSize;
+        document.getElementById("updateGraphSize").src = urlUpdateSize + currentSize + "&_dc=" + new Date().getTime();
     }
 </script>
 <%

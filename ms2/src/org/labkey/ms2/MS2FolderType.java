@@ -48,7 +48,7 @@ public class MS2FolderType extends DefaultFolderType
                 Portal.getPortalPart("Sample Sets").createWebPart(),
                 Portal.getPortalPart("Protocols").createWebPart()
             ),
-            getDefaultModuleSet(module, getModule("MS1"), getModule("Pipeline")),
+            getDefaultModuleSet(module, getModule("MS1"), getModule("Pipeline"), getModule("Experiment")),
             module);
     }
 

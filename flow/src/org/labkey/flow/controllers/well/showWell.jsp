@@ -381,8 +381,8 @@ if (getGraphs().length > 0)
     for (GraphSpec graph : getGraphs())
     {
         %>
-        <span style="display:inline-block; vertical-align:top; height:<%=graphSize%>; width:<%=graphSize%>;">
-        <img style="width:<%=graphSize%>;height:<%=graphSize%>;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.Action.showGraph))%>&amp;graph=<%=u(graph.toString())%>" onerror="flowImgError(this);">
+        <span style="display:inline-block; vertical-align:top; height:<%=graphSize%>px; width:<%=graphSize%>px;">
+        <img style="width:<%=graphSize%>px; height:<%=graphSize%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.Action.showGraph))%>&amp;graph=<%=u(graph.toString())%>" onerror="flowImgError(this);">
         </span><wbr>
         <%
     }

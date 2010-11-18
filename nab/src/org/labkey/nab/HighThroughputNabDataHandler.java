@@ -210,7 +210,7 @@ public class HighThroughputNabDataHandler extends NabDataHandler
     }
 
     @Override
-    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(NabAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs)
+    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(NabAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs) throws ExperimentException
     {
         Map<String, ExpMaterial> nameToMaterial = new HashMap<String, ExpMaterial>();
         for (ExpMaterial material : sampleInputs)
@@ -224,6 +224,11 @@ public class HighThroughputNabDataHandler extends NabDataHandler
             {
                 String name = specimenGroup.getName();
                 ExpMaterial material = nameToMaterial.get(name);
+                if (material == null)
+                {
+                    throw new ExperimentException("Unable to find sample metadata for sample well group \"" + name +
+                            "\": your sample metadata file may contain incorrect well group names, or it may not list all required samples.");
+                }
                 List<WellGroup> materialWellGroups = mapping.get(material);
                 if (materialWellGroups == null)
                 {
