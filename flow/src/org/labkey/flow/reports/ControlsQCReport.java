@@ -19,6 +19,7 @@ import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.CachedRowSetImpl;
 import org.labkey.api.data.Results;
+import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.reports.report.RReport;
@@ -113,7 +114,7 @@ public class ControlsQCReport extends FlowReport
                 public Results generateResults(ViewContext context) throws Exception
                 {
                     ResultSet rs = ControlsQCReport.this.generateResultSet(context);
-                    return rs == null ? null : new Results(rs,null);
+                    return rs == null ? null : new ResultsImpl(rs,null);
                 }
 
                 @Override
