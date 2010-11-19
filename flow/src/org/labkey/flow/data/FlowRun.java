@@ -583,10 +583,4 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         }
         return FlowTableType.FCSFiles;
     }
-
-
-    @Override
-    public void setAttachments(Collection<Attachment> attachments)
-    {
-    }
 }
