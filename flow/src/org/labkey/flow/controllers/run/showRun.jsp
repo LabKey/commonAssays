@@ -35,6 +35,7 @@
 <%@ page import="org.labkey.api.attachments.Attachment" %>
 <%@ page import="org.labkey.api.attachments.AttachmentService" %>
 <%@ page import="org.labkey.api.util.MimeMap" %>
+<%@ page import="java.util.Collection" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -113,7 +114,7 @@
     include(discussion, out);
 
     AttachmentService.Service att = AttachmentService.get();
-    Attachment[] attachments = att.getAttachments(run);
+    Collection<Attachment> attachments = att.getAttachments(run);
     MimeMap mm = new MimeMap();
     %><table><tr><%
     for (Attachment a : attachments)

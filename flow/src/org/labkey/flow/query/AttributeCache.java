@@ -37,11 +37,13 @@ abstract public class AttributeCache<T>
     private static final Cache<CacheKey, Map.Entry<Integer, String>[]> _cache = CacheManager.getCache(200, CacheManager.DAY, "Flow AttributeCache");
     private static long _transactionCount;
     private static Container _lastContainerInvalidated;
+
     private static class CacheKey
     {
         final public Container _container;
         final public String _sql;
         final public Object[] _params;
+
         public CacheKey(Container container, String sql, Object[] params)
         {
             _container = container;
