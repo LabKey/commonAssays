@@ -50,18 +50,11 @@ public class CompensationController extends BaseFlowController<CompensationContr
         delete
     }
 
-    static DefaultActionResolver _actionResolver = new DefaultActionResolver(CompensationController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(CompensationController.class);
 
     public CompensationController() throws Exception
     {
-        super();
         setActionResolver(_actionResolver);
-    }
-
-
-    private ActionURL actionURL(Action action)
-    {
-        return new ActionURL("flow-compensation", action.name(), getContainer());
     }
 
 
@@ -76,7 +69,7 @@ public class CompensationController extends BaseFlowController<CompensationContr
 
         public NavTree appendNavTrail(NavTree root)
         {
-            root.addChild("Compensation Matrices", actionURL(Action.begin));
+            root.addChild("Compensation Matrices", new ActionURL(BeginAction.class, getContainer()));
             return root;
         }
     }

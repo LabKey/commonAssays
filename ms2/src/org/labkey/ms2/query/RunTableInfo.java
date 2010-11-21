@@ -16,12 +16,15 @@
 
 package org.labkey.ms2.query;
 
+import org.labkey.api.admin.CoreUrls;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.ContainerTable;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Manager;
 
@@ -40,9 +43,7 @@ public class RunTableInfo extends FilteredTable
 
         wrapAllColumns(true);
 
-        ActionURL url = new ActionURL("core", "containerRedirect", "");
-        url.addParameter("action", "showList.view");
-        url.addParameter("pageflow", "MS2");
+        ActionURL url = PageFlowUtil.urlProvider(CoreUrls.class).getContainerRedirectURL(ContainerManager.getRoot(), "ms2", "showList.view");
         LookupForeignKey containerFK = new LookupForeignKey(url, "containerId", "EntityId", "Name")
         {
             public TableInfo getLookupTableInfo()

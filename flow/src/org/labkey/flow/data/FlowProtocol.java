@@ -194,7 +194,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public void setSampleSetJoinFields(User user, Map<String, FieldKey> values) throws Exception
     {
-        List<String> strings = new ArrayList();
+        List<String> strings = new ArrayList<String>();
         for (Map.Entry<String, FieldKey> entry : values.entrySet())
         {
             strings.add(PageFlowUtil.encode(entry.getKey()) + "=" + PageFlowUtil.encode(entry.getValue().toString()));
@@ -206,7 +206,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public ActionURL urlUploadSamples(boolean importMoreSamples)
     {
-        ActionURL ret = new ActionURL("Experiment", "showUploadMaterials", getContainer());
+        ActionURL ret = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowUploadMaterialsURL(getContainer());
         ret.addParameter("name", SAMPLESET_NAME);
         ret.addParameter("nameReadOnly", "true");
         if (importMoreSamples)
