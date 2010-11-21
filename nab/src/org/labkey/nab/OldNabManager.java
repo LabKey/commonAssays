@@ -447,7 +447,7 @@ public class OldNabManager extends AbstractNabManager
 
     public ActionURL getDataFileDownloadLink(Plate plate)
     {
-        return PlateService.get().getDataFileURL(plate, "Nab");
+        return PlateService.get().getDataFileURL(plate, NabController.DownloadAction.class);
     }
 
 
