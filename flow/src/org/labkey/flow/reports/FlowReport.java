@@ -25,6 +25,7 @@ import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.ReportsController;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -93,7 +94,7 @@ abstract public class FlowReport extends AbstractReport
         InputStream is = null;
         try
         {
-            Module m =  ModuleLoader.getInstance().getModule("Flow");
+            Module m =  ModuleLoader.getInstance().getModule(FlowModule.NAME);
             is = m.getResourceStream("/META-INF/" + file);
             return IOUtils.toString(is);
         }

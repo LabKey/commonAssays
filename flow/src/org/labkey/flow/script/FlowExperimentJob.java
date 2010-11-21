@@ -119,8 +119,13 @@ public abstract class FlowExperimentJob extends FlowJob
 
     public File createAnalysisDirectory(File runDirectory, FlowProtocolStep step) throws Exception
     {
+        return createAnalysisDirectory(runDirectory.getName(), step);
+    }
+
+    public File createAnalysisDirectory(String dirName, FlowProtocolStep step) throws Exception
+    {
         File dirFolder = getWorkingFolder(getContainer());
-        File dirRun = new File(dirFolder, runDirectory.getName());
+        File dirRun = new File(dirFolder, dirName);
         if (!dirRun.exists())
         {
             dirRun.mkdir();

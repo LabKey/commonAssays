@@ -118,12 +118,13 @@ public class FlowModule extends DefaultModule
 
     protected Collection<WebPartFactory> createWebPartFactories()
     {
-        return new ArrayList<WebPartFactory>(Arrays.asList(OverviewWebPart.FACTORY,
+        return Arrays.asList(OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
                 AnalysisScriptsWebPart.FACTORY,
                 FlowSummaryWebPart.FACTORY,
-                new DefaultWebPartFactory("Flow Reports", ReportsController.BeginView.class)
-                ));
+                new DefaultWebPartFactory("Flow Reports", ReportsController.BeginView.class),
+                new DefaultWebPartFactory("Flow R Demo", AnalysisScriptController.DemoView.class)
+                );
     }
 
     public boolean hasScripts()

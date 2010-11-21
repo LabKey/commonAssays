@@ -216,6 +216,7 @@ flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-8.30-8.31.sql -text
 flow/resources/schemas/flow.xml -text
 flow/src/META-INF/flow/jars.txt -text
 flow/src/META-INF/qc.R -text
+flow/src/META-INF/ranalysis-demo.r -text
 flow/src/org/labkey/flow/FlowModule.java -text
 flow/src/org/labkey/flow/FlowPreference.java -text
 flow/src/org/labkey/flow/FlowServiceImpl.java -text
@@ -343,6 +344,7 @@ flow/src/org/labkey/flow/controllers/executescript/ScriptOverview.java -text
 flow/src/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/chooseRunsToAnalyze.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/confirmRunsToImport.jsp -text
+flow/src/org/labkey/flow/controllers/executescript/demo.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysis.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/main.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/showScript.jsp -text
@@ -448,9 +450,10 @@ flow/src/org/labkey/flow/script/FlowJob.java -text
 flow/src/org/labkey/flow/script/FlowPipelineProvider.java -text
 flow/src/org/labkey/flow/script/FlowTaskSet.java -text
 flow/src/org/labkey/flow/script/FlowThreadPool.java -text
-flow/src/org/labkey/flow/script/ImportJob.java -text
 flow/src/org/labkey/flow/script/KeywordsHandler.java -text
 flow/src/org/labkey/flow/script/MoveRunFromWorkspaceJob.java -text
+flow/src/org/labkey/flow/script/RImportJob.java -text
+flow/src/org/labkey/flow/script/RScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptXarSource.java -text
 flow/src/org/labkey/flow/script/WorkspaceJob.java -text

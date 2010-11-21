@@ -93,6 +93,33 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return ret.toArray(new FlowExperiment[0]);
     }
 
+    /**
+     * Generate an unused FlowExperiment name using "Analysis" as the starting name.
+     * @param container
+     * @return
+     */
+    static public String generateUnusedName(Container container)
+    {
+        return generateUnusedName(container, DEFAULT_ANALYSIS_NAME);
+    }
+
+    static public String generateUnusedName(Container container, String baseName)
+    {
+        Set<String> namesInUse = new HashSet<String>();
+        for (FlowExperiment analysis : FlowExperiment.getAnalyses(container))
+            namesInUse.add(analysis.getName().toLowerCase());
+
+        String newAnalysisName = baseName;
+        int nameIndex = 0;
+        while (namesInUse.contains(newAnalysisName.toLowerCase()))
+        {
+            nameIndex++;
+            newAnalysisName = baseName + nameIndex;
+        }
+
+        return newAnalysisName;
+    }
+
     static public FlowExperiment getForName(User user, Container container, String name) throws Exception
     {
         String lsid = ExperimentService.get().generateLSID(container, ExpExperiment.class, name);

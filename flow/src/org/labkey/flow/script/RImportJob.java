@@ -18,28 +18,27 @@ import org.labkey.flow.persist.ObjectType;
 
 import java.io.*;
 import java.net.URI;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: kevink
  */
-public class ImportJob extends FlowExperimentJob
+public class RImportJob extends FlowExperimentJob
 {
+    public static final String SUMMARY_STATS_FILENAME = "summaryStats.txt";
+    
     private File _summaryStats = null;
     private FlowExperiment _experiment = null;
     private FlowRun _keywordsRun = null;
-    private String _runName = null;
+    private String _analysisRunName = null;
 
-    public ImportJob(ViewBackgroundInfo info, PipeRoot root, FlowExperiment experiment, FlowProtocol protocol, FlowRun keywordsRun, File summaryStats) throws Exception
+    public RImportJob(ViewBackgroundInfo info, PipeRoot root, FlowExperiment experiment, FlowProtocol protocol, FlowRun keywordsRun, File summaryStats, String analysisRunName) throws Exception
     {
         super(info, root, experiment.getLSID(), protocol, experiment.getName(), FlowProtocolStep.analysis);
         _experiment = experiment;
         _keywordsRun = keywordsRun;
         _summaryStats = summaryStats;
-        _runName = _summaryStats.getParentFile().getName();
+        _analysisRunName = analysisRunName != null ? analysisRunName : _summaryStats.getParentFile().getName();
     }
 
     @Override
@@ -132,7 +131,7 @@ public class ImportJob extends FlowExperimentJob
         URI dataFileURI = new File(_summaryStats.getParentFile(), "attributes.flowdata.xml").toURI();
 
         // Create experiment run
-        ExpRun run = svc.createExperimentRun(getContainer(), _runName);
+        ExpRun run = svc.createExperimentRun(getContainer(), _analysisRunName);
         FlowProtocol flowProtocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
         ExpProtocol protocol = flowProtocol.getProtocol();
         run.setProtocol(protocol);
@@ -188,10 +187,11 @@ public class ImportJob extends FlowExperimentJob
         // Add run level graphs as attachments to the run
         FlowRun flowRun = new FlowRun(run);
 
+        // XXX: sort BeforeNorm, AfterNorm images for each parameter
         File[] runImages = _summaryStats.getParentFile().listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name)
             {
-                return name.startsWith(_experimentName) && name.endsWith(".png");
+                return name.startsWith(_analysisRunName) && name.endsWith(".png");
             }
         });
 
@@ -252,8 +252,4 @@ public class ImportJob extends FlowExperimentJob
         count
     }
 
-    private static class SampleInfo
-    {
-        String label;
-    }
 }

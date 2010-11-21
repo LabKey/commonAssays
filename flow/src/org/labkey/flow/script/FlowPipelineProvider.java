@@ -193,7 +193,7 @@ public class FlowPipelineProvider extends PipelineProvider
             @Override
             public boolean accept(File file)
             {
-                return file.getName().equalsIgnoreCase("summaryStats.txt");
+                return file.getName().equalsIgnoreCase(RImportJob.SUMMARY_STATS_FILENAME);
             }
         });
         if (includeAll || (summaryStats != null && summaryStats.length > 0))

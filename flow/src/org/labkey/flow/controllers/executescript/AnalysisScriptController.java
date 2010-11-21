@@ -46,6 +46,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
 import java.net.URI;
+import java.sql.SQLException;
 import java.util.*;
 
 public class AnalysisScriptController extends BaseFlowController<AnalysisScriptController.Action>
@@ -830,32 +831,207 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
     }
 
 
+    public static class DemoView extends JspView
+    {
+        public DemoView()
+        {
+            this(null, null);
+        }
+
+        public DemoView(DemoForm form, Errors errors)
+        {
+            super(AnalysisScriptController.class, "demo.jsp", form, errors);
+            setTitle("Flow R Demo");
+            setTitleHref(new ActionURL(DemoAction.class, getViewContext().getContainer()));
+        }
+
+    }
+
+    public static class DemoForm
+    {
+        private String runName;
+        private Integer experimentId;
+
+        public String getRunName()
+        {
+            return runName;
+        }
+
+        public void setRunName(String runName)
+        {
+            this.runName = runName;
+        }
+
+        public Integer getExperimentId()
+        {
+            return experimentId;
+        }
+
+        public void setExperimentId(Integer experimentId)
+        {
+            this.experimentId = experimentId;
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class DemoAction extends FormViewAction<DemoForm>
+    {
+        FlowExperiment _experiment;
+        FlowRun _keywordRun;
+
+        public DemoAction() { }
+
+        public DemoAction(ViewContext context)
+        {
+            setViewContext(context);
+        }
+
+        @Override
+        public void validateCommand(DemoForm form, Errors errors)
+        {
+            String runName = StringUtils.trimToNull(form.getRunName());
+            if (runName == null)
+            {
+                errors.rejectValue("runName", ERROR_MSG, "Run name required");
+                return;
+            }
+
+            Integer experimentId = form.getExperimentId();
+            if (experimentId != null)
+            {
+                _experiment = FlowExperiment.fromExperimentId(experimentId);
+                if (_experiment == null)
+                {
+                    errors.reject(ERROR_MSG, String.format("Experiment with id '%d' not found", experimentId));
+                    return;
+                }
+            }
+
+            // XXX: Hard code path to existing fcs keyword run for now
+            _keywordRun = null;
+            try
+            {
+                FlowRun[] keywordRuns = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+                for (FlowRun run : keywordRuns)
+                {
+                    if (run.getName().equals("extdata"))
+                    {
+                        _keywordRun = run;
+                        break;
+                    }
+                }
+            }
+            catch (SQLException e)
+            {
+                errors.reject(ERROR_MSG, e.toString());
+            }
+
+            if (_keywordRun == null)
+                errors.reject(ERROR_MSG, "Need to import 'extdata' directory of FCS files");
+        }
+
+        @Override
+        public ModelAndView getView(DemoForm form, boolean reshow, BindException errors) throws Exception
+        {
+            return new DemoView(form, errors);
+        }
+
+        @Override
+        public boolean handlePost(DemoForm form, BindException errors) throws Exception
+        {
+            if (_experiment == null)
+            {
+                // UNDONE: Let user name the experiment instead of autogenerating
+                String newAnalysisName = FlowExperiment.generateUnusedName(getContainer());
+                _experiment = FlowExperiment.createForName(getUser(), getContainer(), newAnalysisName);
+            }
+
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            ViewBackgroundInfo info = getViewBackgroundInfo();
+            if (root == null)
+            {
+                // root-less pipeline job for summaryStats.txt uploaded via the browser
+                info.setURL(null);
+            }
+
+            FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
+            RScriptJob job = new RScriptJob(info, root, _experiment, protocol, _keywordRun, form.getRunName());
+            HttpView.throwRedirect(executeScript(job));
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(DemoForm form)
+        {
+            return null;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Flow R Demo", new ActionURL(DemoAction.class, getViewContext().getContainer()));
+            return root;
+        }
+    }
+
     // XXX: Merge R analysis import with ImportAnalysisAction wizard above
     @RequiresPermissionClass(UpdatePermission.class)
     public class ImportAnalysisResultsAction extends SimpleViewAction<PipelinePathForm>
     {
+        File _summaryStats = null;
+        FlowRun _keywordRun = null;
+
+        @Override
+        public void validate(PipelinePathForm form, BindException errors)
+        {
+            _summaryStats = form.getValidatedSingleFile(getContainer());
+
+            // XXX: only allow 'summaryStats.txt' file for now
+            if (!_summaryStats.getName().equalsIgnoreCase(RImportJob.SUMMARY_STATS_FILENAME))
+                errors.reject(ERROR_MSG, "Can only import '" + RImportJob.SUMMARY_STATS_FILENAME + "' R analysis file at this time.");
+
+            // XXX: Hard code path to existing fcs keyword run for now
+            _keywordRun = null;
+            try
+            {
+                FlowRun[] keywordRuns = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+                for (FlowRun run : keywordRuns)
+                {
+                    if (run.getName().equals("extdata"))
+                    {
+                        _keywordRun = run;
+                        break;
+                    }
+                }
+            }
+            catch (SQLException e)
+            {
+                errors.reject(ERROR_MSG, e.toString());
+            }
+
+            if (_keywordRun == null)
+                errors.reject(ERROR_MSG, "Need to import 'extdata' directory of FCS files");
+        }
+
         @Override
         public ModelAndView getView(PipelinePathForm form, BindException errors) throws Exception
         {
-            File f = form.getValidatedSingleFile(getContainer());
-
             // Get an experiment based on the parent folder name
             int suffix = 0;
-            String parent = f.getParentFile().getName();
+            String runName = _summaryStats.getParentFile().getName();
             while (true)
             {
-                String name = parent + (suffix == 0 ? "" : suffix);
-                FlowExperiment experiment = FlowExperiment.getForName(getUser(), getContainer(), name);
+                String experimentName = runName + (suffix == 0 ? "" : suffix);
+                FlowExperiment experiment = FlowExperiment.getForName(getUser(), getContainer(), experimentName);
                 if (experiment == null)
                     break;
 
-                if (!experiment.hasRun(f.getParentFile(), FlowProtocolStep.analysis))
+                if (!experiment.hasRun(_summaryStats.getParentFile(), FlowProtocolStep.analysis))
                     break;
 
                 suffix++;
             }
 
-            FlowExperiment experiment = FlowExperiment.createForName(getUser(), getContainer(), parent + (suffix == 0 ? "" : suffix));
+            FlowExperiment experiment = FlowExperiment.createForName(getUser(), getContainer(), runName + (suffix == 0 ? "" : suffix));
 
             PipeRoot root = form.getPipeRoot(getContainer());
             ViewBackgroundInfo info = getViewBackgroundInfo();
@@ -865,18 +1041,8 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                 info.setURL(null);
             }
 
-            // XXX: Hard code path to existing fcs keyword run for now
-            FlowRun[] keywordRuns = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-            FlowRun keywordRun = null;
-            for (FlowRun run : keywordRuns)
-                if (run.getName().equals("extdata"))
-                {
-                    keywordRun = run;
-                    break;
-                }
-
             FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
-            ImportJob job = new ImportJob(info, root, experiment, protocol, keywordRun, f);
+            RImportJob job = new RImportJob(info, root, experiment, protocol, _keywordRun, _summaryStats, runName);
             HttpView.throwRedirect(executeScript(job));
             return null;
         }
