@@ -24,6 +24,7 @@ import java.util.List;
 import java.sql.ResultSet;
 
 import jxl.write.*;
+import org.labkey.api.data.Results;
 
 /**
  * User: adam
@@ -36,7 +37,7 @@ public class CompareExcelWriter extends ExcelWriter
     private int _offset = 0;
     private int _colSpan;
 
-    public CompareExcelWriter(ResultSet rs, List<DisplayColumn> displayColumns)
+    public CompareExcelWriter(Results rs, List<DisplayColumn> displayColumns)
     {
         super(rs, displayColumns);
     }

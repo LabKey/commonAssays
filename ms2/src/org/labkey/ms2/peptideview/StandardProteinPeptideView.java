@@ -151,7 +151,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
         ewProtein.setResultSet(proteinRS);
         ewProtein.setGroupedResultSet(peptideRS);
-        ExcelWriter ewPeptide = new ExcelWriter(peptideRS, peptideRgn.getDisplayColumns());
+        ExcelWriter ewPeptide = new ExcelWriter(new ResultsImpl(peptideRS), peptideRgn.getDisplayColumns());
         if (expanded)
         {
             ExcelColumn ec = ewPeptide.getExcelColumn("Protein");
@@ -177,7 +177,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
             proteinRS = ProteinManager.getProteinRS(_url, run, where, 0);
             peptideRS = ProteinManager.getPeptideRS(_url, run, where, 0, peptideSqlColumnNames);
 
-            TSVGridWriter twPeptide = new TSVGridWriter(peptideRS, getPeptideDisplayColumns(peptideColumnNames))
+            TSVGridWriter twPeptide = new TSVGridWriter(new ResultsImpl(peptideRS), getPeptideDisplayColumns(peptideColumnNames))
             {
                 protected StringBuilder getRow(RenderContext ctx, List<DisplayColumn> displayColumns)
                 {
@@ -194,7 +194,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
             // TODO: Consider getting rid of tw.setResultSet(), pass back resultset to controller
             tw.setGroupedResultSet(peptideRS);
             tw.setTSVGridWriter(twPeptide);
-            tw.writeResultSet(proteinRS);
+            tw.writeResultSet(new ResultsImpl(proteinRS));
         }
         finally
         {

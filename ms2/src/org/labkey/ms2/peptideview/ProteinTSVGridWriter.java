@@ -18,6 +18,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.GroupedResultSet;
+import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.data.TSVGridWriter;
 import org.labkey.api.data.RenderContext;
 import org.apache.log4j.Logger;
@@ -123,7 +124,7 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
 
         RenderContext peptideCtx = new RenderContext(ctx.getViewContext());
         peptideCtx.put("ProteinRow", proteinRow);
-        _nestedTSVGridWriter.writeResultSet(peptideCtx, nestedRS);
+        _nestedTSVGridWriter.writeResultSet(peptideCtx, new ResultsImpl(nestedRS));
     }
 
 

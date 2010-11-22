@@ -368,7 +368,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         if (expanded)
         {
             DataRegion peptideRgn = getPeptideGrid(peptideColumnNames, 0, 0);
-            ExcelWriter ewPeptide = new ExcelWriter(peptideRS, peptideRgn.getDisplayColumns());
+            ExcelWriter ewPeptide = new ExcelWriter(new ResultsImpl(peptideRS), peptideRgn.getDisplayColumns());
             ExcelColumn ec = ewPeptide.getExcelColumn("Protein");
             if (null != ec)
                 ec.setVisible(false);
@@ -385,7 +385,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         tw.setGroupedResultSet(peptideRS);
         if (tw.getExpanded())
         {
-            TSVGridWriter twPeptide = new TSVGridWriter(peptideRS, getPeptideDisplayColumns(peptideColumnNames))
+            TSVGridWriter twPeptide = new TSVGridWriter(new ResultsImpl(peptideRS), getPeptideDisplayColumns(peptideColumnNames))
             {
                 protected StringBuilder getRow(RenderContext ctx, List<DisplayColumn> displayColumns)
                 {
@@ -403,7 +403,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         try
         {
             proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, 0);
-            tw.writeResultSet(proteinRS);
+            tw.writeResultSet(new ResultsImpl(proteinRS));
         }
         finally
         {

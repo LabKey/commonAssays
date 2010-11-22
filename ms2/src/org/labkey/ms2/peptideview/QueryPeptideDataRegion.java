@@ -20,6 +20,8 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.Results;
+import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.view.ActionURL;
 
@@ -43,7 +45,7 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
         setShadeAlternatingRows(true);
     }
 
-    public ResultSet getResultSet(RenderContext ctx, boolean async) throws SQLException, IOException
+    public Results getResultSet(RenderContext ctx, boolean async) throws SQLException, IOException
     {
         List<DisplayColumn> realColumns = getDisplayColumns();
         setDisplayColumns(_allColumns);
@@ -53,8 +55,8 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
 
         _groupedRS = new GroupedResultSet(rs, _uniqueColumnName, getMaxRows());
         _nestedFieldMap = ctx.getFieldMap();
-        ctx.setResultSet(_groupedRS, _nestedFieldMap);
-        return _groupedRS;
+        ctx.setResults(new ResultsImpl(_groupedRS, _nestedFieldMap));
+        return ctx.getResults();
     }
 
     @Override
@@ -75,7 +77,7 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
         }
         nestedRS.beforeFirst();
 
-        renderNestedGrid(out, ctx, nestedRS, rowIndex);
+        renderNestedGrid(out, ctx, new ResultsImpl(nestedRS), rowIndex);
         nestedRS.close();
     }
 

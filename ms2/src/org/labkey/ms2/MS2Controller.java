@@ -2218,7 +2218,7 @@ public class MS2Controller extends SpringActionController
         if (exportToExcel)
         {
             ResultSet rs = rgn.getResultSet();
-            CompareExcelWriter ew = new CompareExcelWriter(rs, rgn.getDisplayColumns());
+            CompareExcelWriter ew = new CompareExcelWriter(new ResultsImpl(rs), rgn.getDisplayColumns());
             ew.setAutoSize(true);
             ew.setSheetName(query.getComparisonDescription());
             ew.setFooter(query.getComparisonDescription());

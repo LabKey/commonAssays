@@ -26,6 +26,7 @@ import java.util.List;
 
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
+import org.labkey.api.data.Results;
 
 /**
  * User: jeckels
@@ -38,7 +39,7 @@ public abstract class AbstractProteinExcelWriter extends ExcelWriter
     protected GroupedResultSet _groupedRS = null;
 
     @Override
-    public void renderGrid(WritableSheet sheet, List<ExcelColumn> columns, ResultSet rs) throws SQLException, WriteException, MaxRowsExceededException
+    public void renderGrid(WritableSheet sheet, List<ExcelColumn> columns, Results rs) throws SQLException, WriteException, MaxRowsExceededException
     {
         super.renderGrid(sheet, columns, rs);
 

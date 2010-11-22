@@ -114,7 +114,7 @@ public class ControlsQCReport extends FlowReport
                 public Results generateResults(ViewContext context) throws Exception
                 {
                     ResultSet rs = ControlsQCReport.this.generateResultSet(context);
-                    return rs == null ? null : new ResultsImpl(rs,null);
+                    return rs == null ? null : new ResultsImpl(rs);
                 }
 
                 @Override
