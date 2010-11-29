@@ -18,7 +18,7 @@ package org.labkey.ms2.protein.uniprot;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.CoreSchema;
-import org.labkey.api.data.SqlDialect;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.ms2.protein.ParseActions;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.XMLProteinLoader;

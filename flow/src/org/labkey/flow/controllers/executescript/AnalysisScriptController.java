@@ -51,21 +51,18 @@ import java.util.*;
 
 public class AnalysisScriptController extends BaseFlowController<AnalysisScriptController.Action>
 {
-    private static final Logger _log = Logger.getLogger(SpringActionController.class);
+    private static final Logger _log = Logger.getLogger(AnalysisScriptController.class);
 
     public enum Action
     {
         begin,
-
         confirmRunsToImport,
-        importRuns,
-
         chooseRunsToAnalyze,
         chooseAnalysisName,
         analyzeSelectedRuns,
     }
 
-    private static final SpringActionController.DefaultActionResolver _actionResolver = new SpringActionController.DefaultActionResolver(AnalysisScriptController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(AnalysisScriptController.class);
 
     public AnalysisScriptController() throws Exception
     {
@@ -82,7 +79,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             script = FlowScript.fromURL(getActionURL(), getRequest());
             if (script == null)
             {
-                return HttpView.redirect(getContainer().urlFor(FlowController.Action.begin));
+                return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
             }
             FlowPreference.showRuns.updateValue(getRequest());
             return new JspView<FlowScript>(AnalysisScriptController.class, "showScript.jsp", script, errors);

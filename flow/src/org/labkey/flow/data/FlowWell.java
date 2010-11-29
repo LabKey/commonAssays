@@ -157,7 +157,7 @@ public class FlowWell extends FlowDataObject
 
     public ActionURL urlShow()
     {
-        return addParams(pfURL(WellController.Action.showWell));
+        return urlFor(WellController.Action.showWell);
     }
 
     public ActionURL urlEditAnalysisScript() throws Exception

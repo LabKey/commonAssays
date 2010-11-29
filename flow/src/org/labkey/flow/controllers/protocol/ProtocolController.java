@@ -89,7 +89,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
     {
         public ModelAndView getView(ProtocolForm form, BindException errors) throws Exception
         {
-            return HttpView.redirect(urlFor(ProtocolController.Action.showProtocol));
+            return HttpView.redirect(urlFor(ProtocolController.ShowProtocolAction.class));
         }
 
         public NavTree appendNavTrail(NavTree root)

@@ -27,6 +27,8 @@
 <%@ page import="org.labkey.flow.data.FlowObject" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collection" %>
+<%@ page import="org.labkey.flow.controllers.BaseFlowController" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <style type="text/css">
@@ -52,7 +54,7 @@
     PopulationSet analysis = form.getProtocol().getCompensationCalcOrAnalysis(form.getProtocolStep());
 %>
 <labkey:errors/>
-<form method="POST" action="<%=org.labkey.api.util.PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, context.getContainer())%>">
+<form method="POST" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, context.getContainer())%>">
     <table>
         <tr><td>Analysis script to use:</td>
             <td><select name="scriptId" onchange="this.form.submit()">

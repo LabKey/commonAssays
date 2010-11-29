@@ -363,12 +363,6 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
         }
     }
 
-    public ActionURL urlFor(Enum action)
-    {
-        // Methods in ScriptController should use form.urlFor().
-        throw new UnsupportedOperationException();
-    }
-
     abstract static public class EditPage extends Page
     {
         public ScriptParser.Error scriptParseError;
@@ -1203,7 +1197,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
             {
                 ExpData protocol = form.analysisScript.getExpObject();
                 protocol.delete(getUser());
-                return HttpView.redirect(PageFlowUtil.urlFor(FlowController.Action.begin, getContainer()));
+                return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
             }
             return new JspView<EditScriptForm>(getPage("delete.jsp", form), form, errors);
         }

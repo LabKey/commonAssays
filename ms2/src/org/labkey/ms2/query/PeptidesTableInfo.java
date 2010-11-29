@@ -18,6 +18,7 @@ package org.labkey.ms2.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;

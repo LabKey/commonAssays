@@ -18,6 +18,7 @@ package org.labkey.viability;
 
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.*;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;

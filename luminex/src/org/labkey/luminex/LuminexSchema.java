@@ -17,7 +17,7 @@
 package org.labkey.luminex;
 
 import org.labkey.api.data.*;
-import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
@@ -31,7 +31,6 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 
-import java.sql.Types;
 import java.util.*;
 
 public class LuminexSchema extends AssaySchema

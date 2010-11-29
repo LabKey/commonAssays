@@ -236,12 +236,12 @@ public class CompensationController extends BaseFlowController<CompensationContr
 
         public ActionURL getFailURL(ViewForm viewForm, BindException errors)
         {
-            return urlFor(Action.begin);
+            return urlFor(BeginAction.class);
         }
 
         public ActionURL getSuccessURL(ViewForm viewForm)
         {
-            return urlFor(Action.begin);
+            return urlFor(BeginAction.class);
         }
     }
 

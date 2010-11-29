@@ -71,7 +71,7 @@ public class GraphColumn extends DataColumn
         }
         else
         {
-            ActionURL urlGraph = PageFlowUtil.urlFor(WellController.Action.showGraph, ctx.getContainer());
+            ActionURL urlGraph = new ActionURL(WellController.ShowGraphAction.class, ctx.getContainer());
             urlGraph.addParameter(FlowParam.objectId.toString(), boundValue.toString());
             urlGraph.addParameter(FlowParam.graph.toString(), displayValue.toString());
             out.write("<img alt=\"Graph of: " + graphTitle + "\" title=\"" + graphTitle + "\"");

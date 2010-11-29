@@ -17,7 +17,6 @@
 package org.labkey.flow.data;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentParent;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.*;
@@ -307,7 +306,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 
     public ActionURL urlShow()
     {
-        return addParams(pfURL(RunController.Action.showRun));
+        return urlFor(RunController.Action.showRun);
     }
 
     public String getLabel()

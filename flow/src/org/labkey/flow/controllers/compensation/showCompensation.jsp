@@ -46,7 +46,7 @@
         GraphSpec spec = new GraphSpec(null, param);
         if (well.getGraphBytes(spec) == null)
             return "N/A";
-        ActionURL urlGraph = well.urlFor(WellController.Action.showGraph);
+        ActionURL urlGraph = well.urlFor(WellController.ShowGraphAction.class);
         urlGraph.addParameter(FlowParam.graph.toString(), spec.toString());
         return "<span style=\"display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize + "\">\n" +
                "<img style=\"width:" + graphSize + ";height:" + graphSize + ";\" class='labkey-flow-graph' src=\"" + h(urlGraph) + "\" onerror=\"flowImgError(this);\">\n" +

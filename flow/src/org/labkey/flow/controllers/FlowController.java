@@ -22,7 +22,6 @@ import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
@@ -41,7 +40,11 @@ import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
@@ -69,24 +72,12 @@ public class FlowController extends BaseFlowController<FlowController.Action>
 
     public enum Action
     {
-        begin,
-        cancelJob,
-        showJobs,
-        showStatusJob,
-        executeQuery,
-        showStatusFile,
-        flowAdmin,
-        newFolder,
-        errors,
-        setFlag,
-        savePreferences
     }
 
-    static DefaultActionResolver _actionResolver = new DefaultActionResolver(FlowController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(FlowController.class);
 
     public FlowController() throws Exception
     {
-        super();
         setActionResolver(_actionResolver);
     }
 
@@ -106,6 +97,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
                 startUrl.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
                 HttpView.throwRedirect(startUrl);
             }
+
             HttpView v = new OverviewWebPart(getViewContext());
             return v;
         }

@@ -17,7 +17,11 @@
 package org.labkey.flow.view;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.TSVGridWriter;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.module.ModuleLoader;
@@ -27,7 +31,12 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTrailConfig;
+import org.labkey.api.view.NavTree;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
@@ -40,7 +49,11 @@ import org.labkey.flow.webparts.FlowFolderType;
 import org.springframework.validation.Errors;
 
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FlowQueryView extends QueryView
 {
@@ -241,7 +254,7 @@ public class FlowQueryView extends QueryView
         }
         else
         {
-            children.add(0, new NavTree(FlowModule.getShortProductName(), PageFlowUtil.urlFor(FlowController.Action.begin, getContainer())));
+            children.add(0, new NavTree(FlowModule.getShortProductName(), new ActionURL(FlowController.BeginAction.class, getContainer())));
         }
         if (run != null)
         {

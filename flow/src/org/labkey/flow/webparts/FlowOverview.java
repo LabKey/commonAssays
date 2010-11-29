@@ -130,14 +130,14 @@ public class FlowOverview extends Overview
             int jobCount = PipelineService.get().getQueuedStatusFiles(getContainer()).length;
             if (jobCount != 0)
             {
-                Action action = new Action("Show jobs", PageFlowUtil.urlFor(FlowController.Action.showJobs, getContainer()));
+                Action action = new Action("Show jobs", new ActionURL(FlowController.ShowJobsAction.class, getContainer()));
                 action.setDescriptionHTML("There are " + jobCount + " jobs running in this folder.");
                 addAction(action);
             }
         }
         if (_hasPipelineRoot && _canCreateFolder && _protocol != null)
         {
-            Action action = new Action("Create new folder", PageFlowUtil.urlFor(FlowController.Action.newFolder, getContainer()));
+            Action action = new Action("Create new folder", new ActionURL(FlowController.NewFolderAction.class, getContainer()));
             action.setDescriptionHTML("<i>If you want to analyze a new set of experiment runs with a different protocol, you should create a new folder to do this work in. You can copy some of the settings from this folder.</i>");
             addAction(action);
         }
@@ -274,7 +274,7 @@ public class FlowOverview extends Overview
             }
         }
         if (_canInsert)
-            ret.addAction(new Action("Create a new Analysis script", PageFlowUtil.urlFor(ScriptController.Action.newProtocol, getContainer())));
+            ret.addAction(new Action("Create a new Analysis script", new ActionURL(ScriptController.NewProtocolAction.class, getContainer())));
         return ret;
     }
 
@@ -343,7 +343,7 @@ public class FlowOverview extends Overview
             {
                 ret.addAction(new Action("Calculate compensation matrices", _scriptCompensation.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation)));
             }
-            ret.addAction(new Action("Upload a compensation matrix", PageFlowUtil.urlFor(CompensationController.Action.upload, getContainer())));
+            ret.addAction(new Action("Upload a compensation matrix", new ActionURL(CompensationController.UploadAction.class, getContainer())));
         }
         return ret;
     }

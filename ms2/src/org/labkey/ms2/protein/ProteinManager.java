@@ -23,6 +23,7 @@ import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.apache.log4j.Logger;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.*;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.DomainNotFoundException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.search.SearchService;

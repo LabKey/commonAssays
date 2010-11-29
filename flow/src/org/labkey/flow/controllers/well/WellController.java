@@ -89,7 +89,7 @@ public class WellController extends BaseFlowController<WellController.Action>
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return HttpView.redirect(urlFor(FlowController.Action.begin));
+            return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
         }
 
         public NavTree appendNavTrail(NavTree root)

@@ -131,7 +131,7 @@ public abstract class BaseFlowController<A extends Enum> extends SpringActionCon
         }
         else
         {
-            ActionURL url = PageFlowUtil.urlFor(FlowController.Action.begin, context.getContainer());
+            ActionURL url = new ActionURL(FlowController.BeginAction.class, context.getContainer());
             project = new NavTree(FlowModule.getShortProductName(), url.clone());
         }
         return project;
@@ -169,9 +169,9 @@ public abstract class BaseFlowController<A extends Enum> extends SpringActionCon
     }
 
 
-    public ActionURL urlFor(Enum action)
+    protected ActionURL urlFor(Class<? extends Controller> actionClass)
     {
-        return PageFlowUtil.urlFor(action, getContainer());
+        return new ActionURL(actionClass, getContainer());
     }
 
 

@@ -22,6 +22,7 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
@@ -60,7 +61,7 @@ public class LogController extends BaseFlowController<LogController.Action>
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return HttpView.redirect(urlFor(FlowController.Action.begin));
+            return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
         }
 
         public NavTree appendNavTrail(NavTree root)

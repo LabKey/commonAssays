@@ -16,11 +16,22 @@
 
 package org.labkey.flow.webparts;
 
-import org.labkey.api.data.*;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.SimpleWebPartFactory;
+import org.labkey.api.view.ViewContext;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.data.FlowProtocolStep;
@@ -80,7 +91,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
     {
         if (!getViewContext().hasPermission(UpdatePermission.class))
             return;
-        ActionButton btnNewScript = new ActionButton("Create New Analysis Script", PageFlowUtil.urlFor(ScriptController.Action.newProtocol, getContainer()));
+        ActionButton btnNewScript = new ActionButton("Create New Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, getContainer()));
         bar.add(btnNewScript);
     }
 

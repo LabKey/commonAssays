@@ -25,24 +25,29 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.exp.property.SystemProperty;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.query.ValidationException;
 import org.labkey.flow.controllers.FlowParam;
+import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 abstract public class FlowObject<T extends ExpObject> implements Comparable<Object>, Serializable
 {
-    static public final String PROP_CATEGORY = "flow";
     protected T _expObject;
     protected String _entityId;
 
@@ -55,9 +60,11 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     {
         return _expObject;
     }
+
     abstract public FlowObject getParent();
     abstract public void addParams(Map<FlowParam, Object> map);
     abstract public ActionURL urlShow();
+
     public String getLSID()
     {
         return _expObject.getLSID();
@@ -78,20 +85,24 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         return _expObject.getContainer().getId();
     }
 
-    protected ActionURL pfURL(Enum action)
+    public ActionURL urlFor(Class<? extends Controller> actionClass)
     {
-        return PageFlowUtil.urlFor(action, getContainer());
+        return addParams(new ActionURL(actionClass, getContainer()));
     }
 
+    @Deprecated  // Use urlFor(actionClass) instead
     public ActionURL urlFor(Enum action)
     {
-        return addParams(pfURL(action));
+        String pageFlowName = ModuleLoader.getInstance().getPageFlowForPackage(action.getClass().getPackage());
+        ActionURL url = new ActionURL(pageFlowName, action.toString(), getContainer());
+        return addParams(url);
     }
 
     final public ActionURL addParams(ActionURL url)
     {
-        EnumMap<FlowParam, Object> map = new EnumMap(FlowParam.class);
+        EnumMap<FlowParam, Object> map = new EnumMap<FlowParam, Object>(FlowParam.class);
         addParams(map);
+
         for (Map.Entry<FlowParam,Object> param : map.entrySet())
         {
             url.replaceParameter(param.getKey().toString(), param.getValue().toString());
@@ -100,9 +111,9 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     }
 
 
-    final public Map<FlowParam,Object> getParams()
+    final public Map<FlowParam, Object> getParams()
     {
-        Map<FlowParam,Object> ret = new EnumMap(FlowParam.class);
+        Map<FlowParam, Object> ret = new EnumMap<FlowParam, Object>(FlowParam.class);
         addParams(ret);
         return ret;
     }

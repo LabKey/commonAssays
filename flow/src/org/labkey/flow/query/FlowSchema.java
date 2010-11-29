@@ -20,16 +20,46 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.data.*;
-import org.labkey.api.exp.api.*;
+import org.labkey.api.data.AbstractTableInfo;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.FilterInfo;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TempTableTracker;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExpExperiment;
+import org.labkey.api.exp.api.ExpMaterialRunInput;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.query.*;
-import org.labkey.api.query.*;
+import org.labkey.api.exp.query.ExpDataTable;
+import org.labkey.api.exp.query.ExpExperimentTable;
+import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.exp.query.SamplesSchema;
+import org.labkey.api.query.DetailsURL;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QueryAction;
+import org.labkey.api.query.QueryDefinition;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
+import org.labkey.api.query.RowIdForeignKey;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.IdentifierString;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -41,7 +71,13 @@ import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
-import org.labkey.flow.data.*;
+import org.labkey.flow.data.FlowDataType;
+import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.ICSMetadata;
+import org.labkey.flow.data.InputRole;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.view.FlowQueryView;
@@ -51,7 +87,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class FlowSchema extends UserSchema
 {
@@ -290,7 +336,7 @@ public class FlowSchema extends UserSchema
 //        }
 
         ret.addColumn(ExpRunTable.Column.RowId);
-        ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(RunController.Action.showRun, _container), Collections.singletonMap(FlowParam.runId.toString(), ExpRunTable.Column.RowId.toString())));
+        ret.setDetailsURL(new DetailsURL(new ActionURL(RunController.ShowRunAction.class, _container), Collections.singletonMap(FlowParam.runId.toString(), ExpRunTable.Column.RowId.toString())));
         if (type == null || type == FlowDataType.FCSFile || type == FlowDataType.FCSAnalysis)
         {
             ColumnInfo flag = ret.addColumn(ExpRunTable.Column.Flag);
@@ -304,14 +350,14 @@ public class FlowSchema extends UserSchema
 
         ColumnInfo analysisFolder = ret.addColumn(ExpRunTable.Column.RunGroups);
         analysisFolder.setLabel("Analysis Folder");
-        ActionURL url = PageFlowUtil.urlFor(RunController.Action.showRuns, getContainer()).addParameter(FlowQueryView.DATAREGIONNAME_DEFAULT + ".sort", "ProtocolStep");
+        ActionURL url = new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter(FlowQueryView.DATAREGIONNAME_DEFAULT + ".sort", "ProtocolStep");
         analysisFolder.setURL(StringExpressionFactory.create(url.getLocalURIString() + "&experimentId=${experimentId}"));
 
         if (type != FlowDataType.FCSFile)
         {
             ColumnInfo colAnalysisScript;
             colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.toString());
-            colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
+            colAnalysisScript.setFk(new LookupForeignKey(new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()),
                     FlowParam.scriptId.toString(),
                     FlowTableType.AnalysisScripts.toString(),
                     "RowId", "Name"){
@@ -958,7 +1004,7 @@ public class FlowSchema extends UserSchema
         protocol.setHidden(true);
 
         ColumnInfo colRun = ret.addColumn(ExpDataTable.Column.Run);
-        colRun.setFk(new LookupForeignKey(PageFlowUtil.urlFor(RunController.Action.showRun, getContainer()), FlowParam.runId, "RowId", "Name")
+        colRun.setFk(new LookupForeignKey(new ActionURL(RunController.ShowRunAction.class, getContainer()), FlowParam.runId, "RowId", "Name")
         {
             public TableInfo getLookupTableInfo()
             {
@@ -1111,7 +1157,7 @@ public class FlowSchema extends UserSchema
     public FlowDataTable createFCSFileTable(String name)
     {
         final FlowDataTable ret = createDataTable(name, FlowDataType.FCSFile);
-        ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
+        ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         final ColumnInfo colKeyword = ret.addKeywordColumn("Keyword");
         ExpSampleSet ss = null;
         if (_protocol != null)
@@ -1143,7 +1189,7 @@ public class FlowSchema extends UserSchema
 
         FlowDataTable ret = createDataTable(name, type);
         ColumnInfo colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.toString());
-        colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
+        colAnalysisScript.setFk(new LookupForeignKey(new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()),
                 FlowParam.scriptId.toString(), FlowTableType.AnalysisScripts.toString(), "RowId", "Name"){
             public TableInfo getLookupTableInfo()
             {
@@ -1151,7 +1197,7 @@ public class FlowSchema extends UserSchema
             }
         });
         ColumnInfo colCompensationMatrix = ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.toString());
-        colCompensationMatrix.setFk(new LookupForeignKey(PageFlowUtil.urlFor(CompensationController.Action.showCompensation, getContainer()), FlowParam.compId.toString(),
+        colCompensationMatrix.setFk(new LookupForeignKey(new ActionURL(CompensationController.ShowCompensationAction.class, getContainer()), FlowParam.compId.toString(),
                 FlowTableType.CompensationMatrices.toString(), "RowId", "Name"){
             public TableInfo getLookupTableInfo()
             {
@@ -1159,7 +1205,7 @@ public class FlowSchema extends UserSchema
             }
         });
 
-        ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
+        ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         if (getExperiment() != null)
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
@@ -1171,7 +1217,7 @@ public class FlowSchema extends UserSchema
             colBackground = ret.addBackgroundColumn("Background");
         ColumnInfo colGraph = ret.addGraphColumn("Graph");
         ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.toString());
-        colFCSFile.setFk(new LookupForeignKey(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()),
+        colFCSFile.setFk(new LookupForeignKey(new ActionURL(WellController.ShowWellAction.class, getContainer()),
                 FlowParam.wellId.toString(),
                 FlowTableType.FCSFiles.toString(), "RowId", "Name") {
                 public TableInfo getLookupTableInfo()
@@ -1190,7 +1236,7 @@ public class FlowSchema extends UserSchema
 
         ColumnInfo colAnalysisScript = new ExprColumn(ret, "AnalysisScript", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".scriptid"), Types.INTEGER);
         ret.addColumn(colAnalysisScript);
-        colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
+        colAnalysisScript.setFk(new LookupForeignKey(new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()),
                 FlowParam.scriptId.toString(), "RowId", "Name"){
             public TableInfo getLookupTableInfo()
             {
@@ -1200,7 +1246,7 @@ public class FlowSchema extends UserSchema
 
         ColumnInfo colCompensationMatrix = new ExprColumn(ret, "CompensationMatrix", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".compid"), Types.INTEGER);
         ret.addColumn(colCompensationMatrix);
-        colCompensationMatrix.setFk(new LookupForeignKey(PageFlowUtil.urlFor(CompensationController.Action.showCompensation, getContainer()), FlowParam.compId.toString(),
+        colCompensationMatrix.setFk(new LookupForeignKey(new ActionURL(CompensationController.ShowCompensationAction.class, getContainer()), FlowParam.compId.toString(),
                 "RowId", "Name"){
             public TableInfo getLookupTableInfo()
             {
@@ -1208,7 +1254,7 @@ public class FlowSchema extends UserSchema
             }
         });
 
-        ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
+        ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         if (getExperiment() != null)
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
@@ -1225,7 +1271,7 @@ public class FlowSchema extends UserSchema
 
         ColumnInfo colFCSFile = new ExprColumn(ret, "FCSFile", new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".fcsid"), Types.INTEGER);
         ret.addColumn(colFCSFile);
-        colFCSFile.setFk(new LookupForeignKey(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()),
+        colFCSFile.setFk(new LookupForeignKey(new ActionURL(WellController.ShowWellAction.class, getContainer()),
                 FlowParam.wellId.toString(),
                 "RowId", "Name") {
                 public TableInfo getLookupTableInfo()
@@ -1256,7 +1302,7 @@ public class FlowSchema extends UserSchema
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
-        ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(CompensationController.Action.showCompensation, getContainer()), Collections.singletonMap(FlowParam.compId.toString(), ExpDataTable.Column.RowId.toString())));
+        ret.setDetailsURL(new DetailsURL(new ActionURL(CompensationController.ShowCompensationAction.class, getContainer()), Collections.singletonMap(FlowParam.compId.toString(), ExpDataTable.Column.RowId.toString())));
         ret.addStatisticColumn("Value");
         return ret;
     }
@@ -1271,7 +1317,7 @@ public class FlowSchema extends UserSchema
         }
         ret.addInputRunCountColumn("RunCount");
         ret.getColumn(ExpDataTable.Column.Run.toString()).setHidden(true);
-        ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()), Collections.singletonMap(FlowParam.scriptId.toString(), "RowId")));
+        ret.setDetailsURL(new DetailsURL(new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()), Collections.singletonMap(FlowParam.scriptId.toString(), "RowId")));
         return ret;
     }
 
@@ -1298,7 +1344,7 @@ public class FlowSchema extends UserSchema
             ret.addColumn(colAnalysisRunCount);
         }
 
-        DetailsURL detailsUrl = new DetailsURL(PageFlowUtil.urlFor(RunController.Action.showRuns, getContainer()).addParameter(FlowQueryView.DATAREGIONNAME_DEFAULT + ".sort", "ProtocolStep"),
+        DetailsURL detailsUrl = new DetailsURL(new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter(FlowQueryView.DATAREGIONNAME_DEFAULT + ".sort", "ProtocolStep"),
                 Collections.singletonMap(FlowParam.experimentId.toString(), ExpExperimentTable.Column.RowId.toString()));
         ret.setDetailsURL(detailsUrl);
         SQLFragment lsidCondition = new SQLFragment("LSID <> ");

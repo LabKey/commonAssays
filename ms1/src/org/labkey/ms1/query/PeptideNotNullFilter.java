@@ -16,7 +16,7 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SqlDialect;
+import org.labkey.api.data.dialect.SqlDialect;
 
 import java.util.Map;
 

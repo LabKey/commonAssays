@@ -88,7 +88,7 @@ public class RunController extends BaseFlowController<RunController.Action>
     {
         public ModelAndView getView(RunForm runForm, BindException errors) throws Exception
         {
-            return HttpView.redirect(urlFor(RunController.Action.showRun));
+            return HttpView.redirect(urlFor(RunController.ShowRunAction.class));
         }
 
         public NavTree appendNavTrail(NavTree root)

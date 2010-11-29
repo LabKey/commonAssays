@@ -31,6 +31,7 @@ import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Filter;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.pipeline.PipeRoot;

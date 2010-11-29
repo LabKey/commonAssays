@@ -29,6 +29,7 @@
 <%@ page import="org.labkey.flow.controllers.FlowParam" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="org.labkey.flow.controllers.BaseFlowController" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -195,7 +196,7 @@
             params = new String[]{form.getXaxis()};
         }
         GraphSpec graphspec = new GraphSpec(SubsetSpec.fromString(form.getSubset()), params);
-        ActionURL urlGenerateGraph = org.labkey.api.util.PageFlowUtil.urlFor(WellController.Action.generateGraph, getContainer());
+        ActionURL urlGenerateGraph = new ActionURL(WellController.GenerateGraphAction.class, getContainer());
         well.addParams(urlGenerateGraph);
         if (script != null)
         {

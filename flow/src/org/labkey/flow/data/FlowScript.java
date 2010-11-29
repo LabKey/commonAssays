@@ -28,7 +28,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.analysis.model.PopulationSet;
@@ -39,7 +38,6 @@ import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowAnalyzer;
 
 import javax.servlet.ServletException;
@@ -359,7 +357,7 @@ public class FlowScript extends FlowDataObject
     public ActionURL getRunsUrl(ActionURL runsUrl)
     {
         if (runsUrl == null)
-            runsUrl = pfURL(RunController.Action.showRuns);
+            runsUrl = new ActionURL(RunController.ShowRunsAction.class, getContainer());
         if (runsUrl.isReadOnly())
             runsUrl = runsUrl.clone();
         FieldKey key = FieldKey.fromParts("AnalysisScript", "RowId");

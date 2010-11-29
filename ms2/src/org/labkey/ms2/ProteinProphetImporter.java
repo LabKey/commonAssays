@@ -18,7 +18,7 @@ package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.SqlDialect;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
