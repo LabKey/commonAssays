@@ -16,6 +16,7 @@
 
 package org.labkey.flow.persist;
 
+import org.apache.commons.collections15.iterators.ArrayIterator;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -397,15 +398,30 @@ public class FlowManager
     }
 
 
+    int MAX_BATCH = 1000;
+
+    private String join(Integer[] oids, int from, int to)
+    {
+        Iterator i = new ArrayIterator(oids, from, to);
+        return StringUtils.join(i, ',');
+    }
+
     private void deleteAttributes(Integer[] oids) throws SQLException
     {
         if (oids.length == 0)
             return;
-        String list = StringUtils.join(oids,',');
-        Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN (" + list + ")", null);
-        Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN (" + list + ")", null);
-        Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN (" + list + ")", null);
-        Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN (" + list + ")", null);
+        for (int from = 0, to; from < oids.length; from = to)
+        {
+            to = from + MAX_BATCH;
+            if (to > oids.length)
+                to = oids.length;
+
+            String list = join(oids, from, to);
+            Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN (" + list + ")", null);
+            Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN (" + list + ")", null);
+            Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN (" + list + ")", null);
+            Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN (" + list + ")", null);
+        }
     }
 
 

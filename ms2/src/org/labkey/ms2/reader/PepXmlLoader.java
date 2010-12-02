@@ -374,7 +374,12 @@ public class PepXmlLoader extends MS2Loader
 
         public PeptideIterator getPeptideIterator()
         {
-            return new PeptideIterator(_parser, _modifications);
+            return new PeptideIterator(_parser, _modifications, this);
+        }
+
+        public boolean isSequest()
+        {
+            return "sequest".equalsIgnoreCase(getSearchEngine());
         }
     }
 
@@ -386,14 +391,16 @@ public class PepXmlLoader extends MS2Loader
         private SimpleXMLStreamReader _parser;
         private PepXmlPeptide _peptide = null;
         private MS2ModificationList _modifications;
+        private final PepXmlFraction _fraction;
 
         private Map<Character, Integer> _unknownNTerminalModifications = new HashMap<Character, Integer>();
         private Map<Character, Integer> _unknownNonNTerminalModifications = new HashMap<Character, Integer>();
 
-        protected PeptideIterator(SimpleXMLStreamReader parser, MS2ModificationList modifications)
+        protected PeptideIterator(SimpleXMLStreamReader parser, MS2ModificationList modifications, PepXmlFraction fraction)
         {
             _parser = parser;
             _modifications = modifications;
+            _fraction = fraction;
         }
 
         protected void incrementUnknownModCount(Map<Character, Integer> mapToIncrement,
@@ -409,7 +416,7 @@ public class PepXmlLoader extends MS2Loader
         {
             try
             {
-                _peptide = PepXmlPeptide.getNextPeptide(_parser, _modifications);
+                _peptide = PepXmlPeptide.getNextPeptide(_parser, _modifications, _fraction);
 
                 boolean result = (null != _peptide);
 
@@ -497,6 +504,7 @@ public class PepXmlLoader extends MS2Loader
         private Integer hitRank = null;
         private HashMap<String, String> _scores;
         private MS2ModificationList _modifications;
+        private final PepXmlFraction _fraction;
         private static final Pattern SCAN_REGEX = Pattern.compile("\\.??(\\d{1,6})\\.(\\d{1,6})\\.(\\d{1})\\.??[a-zA-z0-9_]*?$");
 
         //This variable stays null unless there are actually modificationsIf there are,
@@ -507,10 +515,10 @@ public class PepXmlLoader extends MS2Loader
 
         private static Logger _log = Logger.getLogger(PepXmlPeptide.class);
 
-        protected static PepXmlPeptide getNextPeptide(SimpleXMLStreamReader parser, MS2ModificationList modifications)
+        protected static PepXmlPeptide getNextPeptide(SimpleXMLStreamReader parser, MS2ModificationList modifications, PepXmlFraction fraction)
                 throws XMLStreamException
         {
-            PepXmlPeptide peptide = new PepXmlPeptide(parser, modifications);
+            PepXmlPeptide peptide = new PepXmlPeptide(parser, modifications, fraction);
             boolean success = peptide.load();
 
             if (success)
@@ -520,10 +528,11 @@ public class PepXmlLoader extends MS2Loader
         }
 
 
-        private PepXmlPeptide(SimpleXMLStreamReader parser, MS2ModificationList modifications)
+        private PepXmlPeptide(SimpleXMLStreamReader parser, MS2ModificationList modifications, PepXmlFraction fraction)
         {
             _parser = parser;
             _modifications = modifications;
+            _fraction = fraction;
         }
 
         private static final int UNKNOWN = 0;
@@ -638,7 +647,7 @@ public class PepXmlLoader extends MS2Loader
                             _matchedIons = Integer.parseInt(numMatchedIons.trim());
                         else
                             _matchedIons = 0;
-                        
+
                         String totNumIons = _parser.getAttributeValue(null, "tot_num_ions");
                         if (totNumIons!= null)
                             _totalIons = Integer.parseInt(totNumIons.trim());
@@ -673,14 +682,17 @@ public class PepXmlLoader extends MS2Loader
                         String proteinName = _parser.getAttributeValue(null, "protein");
                         if (proteinName != null)
                         {
-                            // Sequest splits FASTA header lines differently from us, on both '|' and whitespace.
-                            // Normalize to the same description by moving them to the lookup and use same rules as protein.java
-                            String proteinDescr = _parser.getAttributeValue(null, "protein_descr");
-                            if (proteinDescr != null && proteinDescr.startsWith("|"))
+                            if (_fraction.isSequest())
                             {
-                                // Append the full header line again
-                                proteinDescr = proteinDescr.replaceAll("\t", " ");
-                                proteinName = proteinName + proteinDescr;
+                                // Sequest splits FASTA header lines differently from us, on both '|' and whitespace.
+                                // Normalize to the same description by moving them to the lookup and use same rules as protein.java
+                                String proteinDescr = _parser.getAttributeValue(null, "protein_descr");
+                                if (proteinDescr != null && proteinDescr.startsWith("|"))
+                                {
+                                    // Append the full header line again
+                                    proteinDescr = proteinDescr.replaceAll("\t", " ");
+                                    proteinName = proteinName + proteinDescr;
+                                }
                             }
 
                             Protein p = new Protein(proteinName, new byte[0]);
@@ -731,7 +743,7 @@ public class PepXmlLoader extends MS2Loader
                             //paranoia
                             if (position <= _modifiedAminoAcids.length)
                                 _modifiedAminoAcids[position] = new ModifiedAminoAcid(aa, modifiedMass);
-                            
+
                             _parser.next();     // end element
                         }
                         else
@@ -780,7 +792,7 @@ public class PepXmlLoader extends MS2Loader
                     endOfRun = true;
                     break;
             }
-        }        
+        }
 
         /**
          * Called after peptide loading is complete

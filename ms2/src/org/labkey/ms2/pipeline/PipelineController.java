@@ -283,7 +283,7 @@ public class PipelineController extends SpringActionController
             {
                 try
                 {
-                    File protocolFile = protocolFactory.getParametersFile(_dirData, protocolName);
+                    File protocolFile = protocolFactory.getParametersFile(_dirData, protocolName, _root);
                     if (NetworkDrive.exists(protocolFile))
                     {
                         _protocol = protocolFactory.loadInstance(protocolFile);
@@ -395,7 +395,7 @@ public class PipelineController extends SpringActionController
 
                 _protocol.getFactory().ensureDefaultParameters(_root);
 
-                File fileParameters = _protocol.getParametersFile(_dirData);
+                File fileParameters = _protocol.getParametersFile(_dirData, _root);
                 // Make sure parameters XML file exists for the job when it runs.
                 if (!fileParameters.exists())
                 {

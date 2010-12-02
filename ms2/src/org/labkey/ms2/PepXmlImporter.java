@@ -235,7 +235,7 @@ public class PepXmlImporter extends MS2Importer
         String baseName = fraction.getDataBasename();
         String newFilename = new File(baseName).getName();
         // Build the name of the tgz file
-        if(fraction.getSearchEngine().equalsIgnoreCase("sequest"))
+        if(fraction.isSequest())
         {
            _gzFileName = newFilename + "." + "pep." + dataSuffix;
         }
@@ -428,7 +428,7 @@ public class PepXmlImporter extends MS2Importer
         {
             errorRate = peptideProphetSummary.calculateErrorRate(pp.getProbability());
         }
-        
+
         if (errorRate != null)
         {
             stmt.setFloat(n++, errorRate.floatValue());
@@ -475,7 +475,7 @@ public class PepXmlImporter extends MS2Importer
             rs = stmt.getResultSet();
             if (!rs.next())
                 throw new IllegalArgumentException("No peptideID found in result set");
-            
+
             return rs.getLong(1);
         }
         finally
@@ -502,7 +502,7 @@ public class PepXmlImporter extends MS2Importer
         {
             _log.error("Failed to insert scan " + peptide.getScan() + " with charge " +
                     peptide.getCharge() + " from " + _gzFileName);
-            throw e;                    
+            throw e;
         }
 
 

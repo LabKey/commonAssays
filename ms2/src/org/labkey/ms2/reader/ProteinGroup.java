@@ -16,6 +16,7 @@
 package org.labkey.ms2.reader;
 
 import org.labkey.api.reader.SimpleXMLStreamReader;
+import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.reader.ProtXmlReader;
 
 import javax.xml.stream.XMLStreamException;
@@ -42,11 +43,13 @@ public class ProteinGroup
     private float _proteinProbability;
 
     private SimpleXMLStreamReader _parser;
+    private MS2Run _run;
     private List<ProtXmlReader.Protein> _proteins = new ArrayList<ProtXmlReader.Protein>();
 
-    public void setParser(SimpleXMLStreamReader parser)
+    public void setParser(SimpleXMLStreamReader parser, MS2Run run)
     {
         _parser = parser;
+        _run = run;
     }
 
 
@@ -96,7 +99,7 @@ public class ProteinGroup
 
             if (_parser.isStartElement() && "protein".equals(_parser.getLocalName()))
             {
-                ProtXmlReader.Protein p = new ProtXmlReader.Protein(_parser);
+                ProtXmlReader.Protein p = new ProtXmlReader.Protein(_parser, _run);
                 _proteins.add(p);
             }
         }

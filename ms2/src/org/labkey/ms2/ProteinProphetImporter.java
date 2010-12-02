@@ -145,7 +145,7 @@ public class ProteinProphetImporter
             connection.commit();
             createdTempTables = true;
 
-            ProtXmlReader reader = new ProtXmlReader(_file);
+            ProtXmlReader reader = new ProtXmlReader(_file, run);
 
             peptideStmt = connection.prepareStatement("INSERT INTO " + peptidesTempTableName + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             proteinStmt = connection.prepareStatement("INSERT INTO " + proteinsTempTableName + " (ProteinGroupId, Probability, LookupString) VALUES (?, ?, ?)");

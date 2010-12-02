@@ -18,7 +18,9 @@ package org.labkey.ms2.reader;
 
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
+import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.ProteinQuantitation;
+import org.labkey.ms2.pipeline.sequest.SequestRun;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -29,10 +31,12 @@ import java.util.*;
 public class ProtXmlReader
 {
     private File _file;
+    private final MS2Run _run;
 
-    public ProtXmlReader(File file)
+    public ProtXmlReader(File file, MS2Run run)
     {
         _file = file;
+        _run = run;
     }
 
     public ProteinGroupIterator iterator() throws FileNotFoundException, XMLStreamException
@@ -101,7 +105,7 @@ public class ProtXmlReader
                     {
                         group.setGroupNumber(Integer.parseInt(groupNumberString));
                         group.setProbability(Float.parseFloat(probabilityString));
-                        group.setParser(_parser);
+                        group.setParser(_parser, _run);
                         return group;
                     }
                 }
@@ -157,18 +161,21 @@ public class ProtXmlReader
         private int _totalNumberPeptides;
         private int _uniquePeptidesCount;
         private Float _pctSpectrumIds;
+        private String _proteinDescription;
 
         private List<Peptide> _peptides = new ArrayList<Peptide>();
         private List<String> _indistinguishableProteinNames = new ArrayList<String>();
         private ProteinQuantitation _quantRatio;
+        private MS2Run _run;
 
         public Protein()
         {
             super();
         }
 
-        public Protein(SimpleXMLStreamReader parser) throws XMLStreamException
+        public Protein(SimpleXMLStreamReader parser, MS2Run run) throws XMLStreamException
         {
+            _run = run;
             String spectrumIdsString = parser.getAttributeValue(null, "pct_spectrum_ids");
             Float spectrumIds = null;
             if (spectrumIdsString != null)
@@ -198,6 +205,12 @@ public class ProtXmlReader
             setUniquePeptidesCount(uniquePeptidesCount);
 
             loadChildren(parser);
+
+            // Do this after the children have been loaded so that we have the protein description available
+            if (_run instanceof SequestRun && getProteinDescription() != null && getProteinDescription().startsWith("|"))
+            {
+                setProteinName(getProteinName() + getProteinDescription().replaceAll("\t", " "));
+            }
         }
 
         private void loadChildren(SimpleXMLStreamReader parser) throws XMLStreamException
@@ -210,17 +223,46 @@ public class ProtXmlReader
                 {
                     String name = parser.getLocalName();
 
+                    if ("annotation".equalsIgnoreCase(name))
+                        setProteinDescription(parser.getAttributeValue(null, "protein_description"));
+
                     if ("peptide".equals(name))
                         _peptides.add(new Peptide(parser));
                     else if ("indistinguishable_protein".equals(name))
                     {
+                        String indistinguishableProteinName = null;
+                        String proteinDescr = null;
                         for (int i = 0; i < parser.getAttributeCount(); i++)
                         {
                             if ("protein_name".equals(parser.getAttributeLocalName(i)))
                             {
-                                _indistinguishableProteinNames.add(parser.getAttributeValue(i));
+                                indistinguishableProteinName = parser.getAttributeValue(i);
                             }
                         }
+
+                        // Sequest has different rules on how to split FASTA header lines. It splits on the first |,
+                        // and we don't when the parse and load FASTAs, so use their same logic to reconstitute the same
+                        // name we have
+                        if (_run instanceof SequestRun)
+                        {
+                            while (parser.hasNext() && !(parser.isEndElement() && "indistinguishable_protein".equals(parser.getLocalName())))
+                            {
+                                parser.next();
+
+                                if (parser.isStartElement() && "annotation".equalsIgnoreCase(parser.getLocalName()))
+                                {
+                                    proteinDescr = parser.getAttributeValue(null, "protein_description");
+                                }
+                            }
+                            if (proteinDescr != null && proteinDescr.startsWith("|"))
+                            {
+                                // Append the full header line again
+                                proteinDescr = proteinDescr.replaceAll("\t", " ");
+                                indistinguishableProteinName = indistinguishableProteinName + proteinDescr;
+                            }
+                        }
+
+                        _indistinguishableProteinNames.add(indistinguishableProteinName);
                     }
                     else if ("XPressRatio".equals(name) || "Q3Ratio".equals(name))
                     {
@@ -258,6 +300,15 @@ public class ProtXmlReader
             this._proteinName = proteinName;
         }
 
+        public String getProteinDescription()
+        {
+            return _proteinDescription;
+        }
+
+        public void setProteinDescription(String proteinDescription)
+        {
+            _proteinDescription = proteinDescription;
+        }
 
         public Float getPctSpectrumIds()
         {
