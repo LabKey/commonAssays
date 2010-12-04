@@ -41,6 +41,7 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * User: arauch
@@ -1122,7 +1123,7 @@ public class ProteinManager
 
 
     static final String NOTFOUND = "NOTFOUND";
-    static Map<String, String> cacheURLs = Collections.synchronizedMap(new HashMap<String, String>(200));
+    static final Map<String, String> cacheURLs = new ConcurrentHashMap<String, String>(200);
 
     public static String makeIdentURLStringWithType(String identifier, String identType) throws Exception
     {
