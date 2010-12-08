@@ -33,6 +33,9 @@ import java.util.Arrays;
  */
 public class ElispotPlateTypeHandler implements PlateTypeHandler
 {
+    public static final String BLANK_PLATE = "blank";
+    public static final String DEFAULT_PLATE = "default";
+
     public String getAssayType()
     {
         return "ELISpot";
@@ -41,8 +44,8 @@ public class ElispotPlateTypeHandler implements PlateTypeHandler
     public List<String> getTemplateTypes()
     {
         List<String> names = new ArrayList<String>();
-        names.add("blank");
-        names.add("default");
+        names.add(BLANK_PLATE);
+        names.add(DEFAULT_PLATE);
         return names;
     }
 
@@ -56,7 +59,8 @@ public class ElispotPlateTypeHandler implements PlateTypeHandler
     {
         PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
 
-        if (templateTypeName != null && templateTypeName.equals("Default"))
+        // for the default elispot plate, we pre-populate it with specimen and antigen groups
+        if (templateTypeName != null && templateTypeName.equals(DEFAULT_PLATE))
         {
             for (int sample = 0; sample < 4; sample++)
             {
