@@ -6,30 +6,25 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.reports.ExternalScriptEngine;
-import org.labkey.api.reports.Report;
-import org.labkey.api.reports.report.ExternalScriptEngineReport;
-import org.labkey.api.reports.report.ModuleRReportDescriptor;
-import org.labkey.api.reports.report.RReport;
-import org.labkey.api.reports.report.ScriptEngineReport;
-import org.labkey.api.reports.report.r.ParamReplacement;
-import org.labkey.api.resource.FileResource;
 import org.labkey.api.resource.Resource;
 import org.labkey.api.services.ServiceRegistry;
-import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewContext;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 
-import javax.script.*;
-import java.io.*;
-import java.util.ArrayList;
+import javax.script.Bindings;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -119,7 +114,7 @@ public class RScriptJob extends FlowExperimentJob
         Map<String, String> replacements = (Map<String, String>)bindings.get(ExternalScriptEngine.PARAM_REPLACEMENT_MAP);
         if (replacements == null)
             bindings.put(ExternalScriptEngine.PARAM_REPLACEMENT_MAP, replacements = new HashMap<String, String>());
-        replacements.put(OUTPUT_DIRECTORY_REPLACEMENT, workingDir.getAbsolutePath().toString()); // ? escape
+        replacements.put(OUTPUT_DIRECTORY_REPLACEMENT, workingDir.getAbsolutePath()); // ? escape
         replacements.put(RUN_NAME_REPLACEMENT, _analysisRunName); // ? escape
 
         String script = getScript();

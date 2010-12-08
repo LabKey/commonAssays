@@ -20,9 +20,9 @@ import java.util.LinkedList;
 
 public class FlowThreadPool
 {
-    static private FlowThreadPool instance;
+    private static FlowThreadPool instance;
     private Thread[] _threads;
-    private LinkedList<FlowTaskSet> _taskSets = new LinkedList();
+    private LinkedList<FlowTaskSet> _taskSets = new LinkedList<FlowTaskSet>();
     private boolean _alive = true;
     private int _idleCount;
 
@@ -78,7 +78,7 @@ public class FlowThreadPool
 
     synchronized private FlowTaskSet[] getTaskSets()
     {
-        return _taskSets.toArray(new FlowTaskSet[0]);
+        return _taskSets.toArray(new FlowTaskSet[_taskSets.size()]);
     }
 
     class FlowThreadRunner implements Runnable

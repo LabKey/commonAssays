@@ -18,20 +18,21 @@ package org.labkey.flow.script;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.flow.data.*;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AddRunsJob extends ScriptJob
 {
-    private static Logger _log = Logger.getLogger(AddRunsJob.class);
+    private static final Logger _log = Logger.getLogger(AddRunsJob.class);
 
-    List<File> _paths;
+    private final List<File> _paths;
 
     public AddRunsJob(ViewBackgroundInfo info, FlowProtocol protocol, List<File> paths, PipeRoot root) throws Exception
     {
@@ -48,12 +49,15 @@ public class AddRunsJob extends ScriptJob
     List<FlowRun> go() throws Exception
     {
         List<FlowRun> runs = new ArrayList<FlowRun>();
+
         for (File path : _paths)
         {
             if (checkInterrupted())
                 return runs;
+
             if (!checkProcessPath(path, FlowProtocolStep.keywords))
                 continue;
+
             try
             {
                 runs.add(getRunHandler().run(path));
@@ -64,6 +68,7 @@ public class AddRunsJob extends ScriptJob
                 addStatus("Exception:" + t.toString());
             }
         }
+
         return runs;
     }
 }

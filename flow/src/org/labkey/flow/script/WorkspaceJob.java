@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class WorkspaceJob extends FlowJob
 {
-    private static Logger _log = getJobLogger(WorkspaceJob.class);
+    private static final Logger _log = getJobLogger(WorkspaceJob.class);
 
     private final FlowExperiment _experiment;
     private final File _workspaceFile;

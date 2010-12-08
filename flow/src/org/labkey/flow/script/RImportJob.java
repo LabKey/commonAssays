@@ -251,5 +251,4 @@ public class RImportJob extends FlowExperimentJob
         percent,
         count
     }
-
 }

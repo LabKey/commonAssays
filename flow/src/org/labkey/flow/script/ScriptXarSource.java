@@ -34,7 +34,6 @@ public class ScriptXarSource extends XarSource
     private static final Logger _log = Logger.getLogger(ScriptXarSource.class);
     File _root;
     File _workingDirectory;
-    File _xarFile;
     File _logFile;
     ExperimentArchiveDocument _doc;
 

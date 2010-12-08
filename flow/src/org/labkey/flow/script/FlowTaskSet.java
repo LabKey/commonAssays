@@ -26,8 +26,8 @@ public class FlowTaskSet
 
     public FlowTaskSet(Runnable[] tasks)
     {
-        _pendingTasks = new LinkedList(Arrays.asList(tasks));
-        _runningTasks = new LinkedList();
+        _pendingTasks = new LinkedList<Runnable>(Arrays.asList(tasks));
+        _runningTasks = new LinkedList<Runnable>();
     }
 
     public boolean runNextTask()

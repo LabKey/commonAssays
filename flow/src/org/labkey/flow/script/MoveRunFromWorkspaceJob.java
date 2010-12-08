@@ -16,7 +16,6 @@
 
 package org.labkey.flow.script;
 
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.data.FlowExperiment;

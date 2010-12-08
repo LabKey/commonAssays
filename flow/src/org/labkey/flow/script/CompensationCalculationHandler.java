@@ -51,7 +51,7 @@ public class CompensationCalculationHandler extends BaseHandler
         _job.addStatus("Calculating compensation matrix for " + run.getName());
         List<FCSRef> uris = FlowAnalyzer.getFCSRefs(run);
         CompensationCalculation calc = FlowAnalyzer.makeCompensationCalculation(_settings, _compensationCalculationElement);
-        List<CompensationResult> results = new ArrayList();
+        List<CompensationResult> results = new ArrayList<CompensationResult>();
         CompensationMatrix matrix = FCSAnalyzer.get().calculateCompensationMatrix(uris, calc, results);
         ProtocolApplicationBaseType appComp = addProtocolApplication(runElement);
         AttributeSet attrsComp = new AttributeSet(matrix);
