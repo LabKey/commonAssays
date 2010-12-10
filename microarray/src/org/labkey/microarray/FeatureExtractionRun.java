@@ -17,6 +17,7 @@
 package org.labkey.microarray;
 
 import org.labkey.api.data.Entity;
+import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.util.MemTracker;
 import org.labkey.api.view.ViewContext;
@@ -60,9 +61,9 @@ public class FeatureExtractionRun extends Entity implements Serializable, Clonea
         return barcode;
     }
 
-    public String getCreatedByName(ViewContext context)
+    public String getCreatedByName(User currentUser)
     {
-        return UserManager.getDisplayName(getCreatedBy(), context);
+        return UserManager.getDisplayName(getCreatedBy(), currentUser);
     }
 
     public String getBarcode() {
