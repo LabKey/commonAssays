@@ -2788,7 +2788,6 @@ public class MS2Controller extends SpringActionController
             // Disable R and other reporting until there's an implementation that respects the search criteria
             proteinsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
-            proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
             SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
             Integer[] seqIds = getSeqIds(form);
             if (seqIds.length <= 500)
@@ -2833,7 +2832,6 @@ public class MS2Controller extends SpringActionController
                 }
 
             };
-            groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
             // Disable R and other reporting until there's an implementation that respects the search criteria
             groupsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
