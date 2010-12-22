@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2008 LabKey Corporation
+ * Copyright (c) 2006-2010 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,15 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.labkey.api.data.ExcelWriter;
-import org.labkey.api.data.GroupedResultSet;
-import org.labkey.api.data.ExcelColumn;
-
-import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.util.List;
-
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
+import org.labkey.api.data.ExcelColumn;
+import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.Results;
+
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * User: jeckels
