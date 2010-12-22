@@ -2464,7 +2464,8 @@ public class MS2Controller extends SpringActionController
             ButtonBar bb = new ButtonBar();
 
             ActionButton delete = new ActionButton(DeleteAnnotInsertEntriesAction.class, "Delete");
-            delete.setRequiresSelection(true, "Are you sure you want to remove the entries on this list?\\n(Note: actual annotations won't be deleted.)");
+            delete.setRequiresSelection(true, "Are you sure you want to remove this entry from the list?\\n(Note: actual annotations won't be deleted.)", "Are you sure you want to remove these entries from the list?\\n(Note: actual annotations won't be deleted.)"
+            );
             delete.setActionType(ActionButton.Action.GET);
             bb.add(delete);
 

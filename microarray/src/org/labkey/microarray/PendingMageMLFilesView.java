@@ -79,7 +79,7 @@ public class PendingMageMLFilesView extends QueryView
 
         ActionURL deleteURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getDeleteDatasURL(view.getViewContext().getContainer(), getReturnURL());
         ActionButton deleteButton = new ActionButton(deleteURL, "Delete");
-        deleteButton.setRequiresSelection(true, null, view.getDataRegion().getJavascriptFormReference(true));
+        deleteButton.setRequiresSelection(true, null, null, view.getDataRegion().getJavascriptFormReference(true));
         deleteButton.setActionType(ActionButton.Action.POST);
         deleteButton.setDisplayPermission(DeletePermission.class);
         bar.add(deleteButton);
@@ -108,7 +108,7 @@ public class PendingMageMLFilesView extends QueryView
                     ExpProtocol protocol = protocols.get(0);
                     ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getImportURL(getContainer(), protocol, null, null);
                     ActionButton button = new ActionButton(url, "Import using " + protocol.getName());
-                    button.setRequiresSelection(true, null, view.getDataRegion().getJavascriptFormReference(true));
+                    button.setRequiresSelection(true, null, null, view.getDataRegion().getJavascriptFormReference(true));
                     button.setActionType(ActionButton.Action.POST);
                     button.setDisplayPermission(InsertPermission.class);
                     bar.add(button);
