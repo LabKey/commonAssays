@@ -6147,7 +6147,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
         {
-            return new JspView("/org/labkey/microarray/upgradeAttachFiles.jsp");
+            return new JspView("/org/labkey/ms2/pipeline/attachMSPictureFiles.jsp");
         }
 
         public boolean handlePost(Object o, BindException errors) throws Exception
