@@ -43,6 +43,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
@@ -331,7 +332,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         return Collections.<AssayDataCollector>singletonList(new MassSpecMetadataDataCollector());
     }
 
-    public ExpData getDataForDataRow(Object dataRowId)
+    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
     {
         return ExperimentService.get().getExpData(((Number)dataRowId).intValue());
     }
@@ -388,7 +389,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
                         fractionProperty.getName());
     }
 
-    public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {
@@ -397,9 +398,9 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
             SimpleFilter filter = new SimpleFilter();
             filter.addInClause(getTableMetadata().getResultRowIdFieldKey().toString(), dataKeys.keySet());
 
-            AssaySchema schema = AssayService.get().createSchema(user, protocol.getContainer());
+            AssaySchema schema = AssayService.get().createSchema(viewContext.getUser(), protocol.getContainer());
             ExpDataTable tableInfo = createDataTable(schema, protocol);
-            tableInfo.setContainerFilter(new ContainerFilter.CurrentAndSubfolders(user));
+            tableInfo.setContainerFilter(new ContainerFilter.CurrentAndSubfolders(viewContext.getUser()));
 
             List<FieldKey> fieldKeys = new ArrayList<FieldKey>();
             DomainProperty[] fractionProperties = getFractionDomain(protocol).getProperties();
@@ -419,7 +420,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
 
             List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>();
 
-            CopyToStudyContext context = new CopyToStudyContext(protocol, user);
+            CopyToStudyContext context = new CopyToStudyContext(protocol, viewContext.getUser());
 
             Set<PropertyDescriptor> typeList = new LinkedHashSet<PropertyDescriptor>();
             typeList.add(createPublishPropertyDescriptor(study, getTableMetadata().getResultRowIdFieldKey().toString(), PropertyType.INTEGER));
@@ -481,7 +482,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
                 dataMaps.add(dataMap);
                 tempTypes = null;
             }
-            return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,
+            return AssayPublishService.get().publishAssayData(viewContext.getUser(), sourceContainer, study, protocol.getName(), protocol,
                     dataMaps, new ArrayList<PropertyDescriptor>(typeList), getTableMetadata().getResultRowIdFieldKey().toString(), errors);
         }
         catch (SQLException e)

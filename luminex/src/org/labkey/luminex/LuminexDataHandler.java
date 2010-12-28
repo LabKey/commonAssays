@@ -388,13 +388,6 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
 
     /**
      * Handles persisting of uploaded run data into the database
-     * @param excelRunColumns
-     * @param expRun
-     * @param container
-     * @param data
-     * @param user
-     * @throws SQLException
-     * @throws ExperimentException
      */
     private void _importData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, Map<Analyte, List<LuminexDataRow>> inputData, Map<String, Object> excelRunProps) throws SQLException, ExperimentException
     {

@@ -45,6 +45,7 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.view.ViewContext;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -84,12 +85,12 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         {
             public ExpData getObject(Lsid lsid)
             {
-                return getDataForDataRow(lsid.getObjectId());
+                return getDataForDataRow(lsid.getObjectId(), null);
             }
 
             public String getDisplayURL(Lsid lsid)
             {
-                ExpData data = getDataForDataRow(lsid.getObjectId());
+                ExpData data = getDataForDataRow(lsid.getObjectId(), null);
                 if (data == null)
                     return null;
                 ExpRun expRun = data.getRun();
@@ -117,7 +118,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         LuminexSchema luminexSchema = new LuminexSchema(schema.getUser(), schema.getContainer(), protocol);
         luminexSchema.setTargetStudy(schema.getTargetStudy());
         FilteredTable table = luminexSchema.createDataRowTable();
-        addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
+        addCopiedToStudyColumns(table, protocol, schema.getUser(), true);
         return table;
     }
 
@@ -229,7 +230,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexUploadWizardAction.class);
     }
     
-    public ExpData getDataForDataRow(Object dataRowId)
+    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
     {
         // on Postgres 8.3, we must pass in an integer row ID; passing a string that happens to be all digits isn't
         // sufficient, since 8.3 no longer does implicit type casting in this situation.
@@ -257,7 +258,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return ExperimentService.get().getExpData(dataRow.getDataId());
     }
 
-    public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {
@@ -270,7 +271,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             Map<Integer, Pair<Analyte, Map<String, ObjectProperty>>> analytes = new HashMap<Integer, Pair<Analyte, Map<String, ObjectProperty>>>();
 
             PropertyDescriptor[] excelRunPDs = getPropertyDescriptors(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN));
-            CopyToStudyContext context = new CopyToStudyContext(protocol, user, excelRunPDs);
+            CopyToStudyContext context = new CopyToStudyContext(protocol, viewContext.getUser(), excelRunPDs);
 
             TimepointType timepointType = AssayPublishService.get().getTimepointType(study);
 
@@ -314,7 +315,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 addProperty(study, "ExtraSpecimenInfo", luminexDataRow.getExtraSpecimenInfo(), dataMap, tempTypes);
                 addProperty(study, "SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, tempTypes);
 
-                ExpRun run = copyRunProperties(user, study, tempTypes, luminexDataRow, dataMap, context);
+                ExpRun run = copyRunProperties(viewContext.getUser(), study, tempTypes, luminexDataRow, dataMap, context);
                 sourceContainer = run.getContainer();
                 copyAnalyteProperties(study, analytes, tempTypes, luminexDataRow, dataMap, sourceContainer, protocol);
 
@@ -334,7 +335,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 dataMaps.add(dataMap);
                 tempTypes = null;
             }
-            return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol, dataMaps, types, getTableMetadata().getResultRowIdFieldKey().toString(), errors);
+            return AssayPublishService.get().publishAssayData(viewContext.getUser(), sourceContainer, study, protocol.getName(), protocol, dataMaps, types, getTableMetadata().getResultRowIdFieldKey().toString(), errors);
         }
         catch (SQLException e)
         {

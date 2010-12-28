@@ -16,22 +16,19 @@
 
 package org.labkey.viability;
 
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.api.*;
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.util.Pair;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.apache.log4j.Logger;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConversionException;
 
@@ -197,15 +194,10 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         return null;
     }
 
-    public void deleteData(ExpData data, Container container, User user)
-    {
-        // results should have been deleted in beforeDeleteData()
-        super.deleteData(data, container, user);
-    }
-
     @Override
     public void beforeDeleteData(List<ExpData> datas) throws ExperimentException
     {
+        // Don't bother calling super, since we aren't storing data in StorageProvisioner backed tables
         Container c = datas.get(0).getContainer();
         ViabilityManager.deleteAll(datas, c);
     }
@@ -257,18 +249,14 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     }
 
     @Override
-    protected void insertRowData(ExpData data, User user, Container container, PropertyDescriptor[] dataProperties, List<Map<String, Object>> fileData) throws SQLException, ValidationException
+    protected void insertRowData(ExpData data, User user, Container container, Domain dataDomain, List<Map<String, Object>> fileData, TableInfo tableInfo) throws SQLException, ValidationException
     {
-        Map<String, PropertyDescriptor> importMap = new HashMap();
-        for (PropertyDescriptor pd : dataProperties)
+        Map<String, PropertyDescriptor> importMap = new HashMap<String, PropertyDescriptor>();
+        for (DomainProperty prop : dataDomain.getProperties())
         {
-            importMap.put(pd.getName(), pd);
+            importMap.put(prop.getName(), prop.getPropertyDescriptor());
         }
-        _insertRowData(data, user, container, importMap, fileData);
-    }
 
-    /*package*/ static void _insertRowData(ExpData data, User user, Container container, Map<String, PropertyDescriptor> importMap, List<Map<String, Object>> fileData) throws SQLException, ValidationException
-    {
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
 
@@ -288,7 +276,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         }
     }
 
-    /*package*/ static Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, PropertyDescriptor> importMap)
+    private Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, PropertyDescriptor> importMap)
     {
         Map<String, Object> base = new CaseInsensitiveHashMap<Object>();
         Map<PropertyDescriptor, Object> extra = new HashMap<PropertyDescriptor, Object>();

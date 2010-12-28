@@ -91,7 +91,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
             FieldKey.fromParts("ObjectId")));
     }
 
-    public ExpData getDataForDataRow(Object dataRowId)
+    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
     {
         if (!(dataRowId instanceof Integer))
             return null;
@@ -129,7 +129,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     public TableInfo createDataTable(AssaySchema schema, ExpProtocol protocol)
     {
         ElispotRunDataTable table = new ElispotRunDataTable(schema, protocol);
-        addCopiedToStudyColumns(table, protocol, schema.getUser(), "objectId", true);
+        addCopiedToStudyColumns(table, protocol, schema.getUser(), true);
         return table;
     }
 
@@ -215,13 +215,13 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         reader.save(user);
     }
 
-    public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {
             TimepointType studyType = AssayPublishService.get().getTimepointType(study);
 
-            CopyToStudyContext context = new CopyToStudyContext(protocol, user);
+            CopyToStudyContext context = new CopyToStudyContext(protocol, viewContext.getUser());
 
             PropertyDescriptor[] samplePDs = getPropertyDescriptors(getSampleWellGroupDomain(protocol));
             PropertyDescriptor[] dataPDs = ElispotSchema.getExistingDataProperties(protocol);
@@ -294,7 +294,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
                 dataMaps.add(dataMap);
                 tempTypes = null;
             }
-            return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,
+            return AssayPublishService.get().publishAssayData(viewContext.getUser(), sourceContainer, study, protocol.getName(), protocol,
                     dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getTableMetadata().getResultRowIdFieldKey().toString(), errors);
         }
         catch (SQLException se)

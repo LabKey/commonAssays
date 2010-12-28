@@ -356,7 +356,7 @@ public class ViabilityManager
             }
 
             ExperimentService.get().deleteAllExpObjInContainer(c, context.getUser());
-            OntologyManager.deleteAllObjects(c);
+            OntologyManager.deleteAllObjects(c, context.getUser());
         }
 
         @Test

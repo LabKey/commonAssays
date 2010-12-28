@@ -33,6 +33,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.reports.ReportService;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -65,15 +66,15 @@ public class PendingMageMLFilesView extends QueryView
     {
 //        super.populateButtonBar(view, bar);
 
-        List<ExpProtocol> protocols = AssayService.get().getAssayProtocols(getContainer());
         List<ExpProtocol> microarrayProtocols = new ArrayList<ExpProtocol>();
-        for (ExpProtocol protocol : protocols)
+        for (ExpProtocol protocol : AssayService.get().getAssayProtocols(getContainer()))
         {
             if (AssayService.get().getProvider(protocol) instanceof MicroarrayAssayProvider)
             {
                 microarrayProtocols.add(protocol);
             }
         }
+        Collections.sort(microarrayProtocols);
 
         PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
 
@@ -105,7 +106,7 @@ public class PendingMageMLFilesView extends QueryView
             {
                 if (microarrayProtocols.size() == 1)
                 {
-                    ExpProtocol protocol = protocols.get(0);
+                    ExpProtocol protocol = microarrayProtocols.get(0);
                     ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getImportURL(getContainer(), protocol, null, null);
                     ActionButton button = new ActionButton(url, "Import using " + protocol.getName());
                     button.setRequiresSelection(true, null, null, view.getDataRegion().getJavascriptFormReference(true));

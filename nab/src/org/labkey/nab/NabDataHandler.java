@@ -18,12 +18,12 @@ package org.labkey.nab;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.OORDisplayColumnFactory;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.ValidationException;
-import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.Plate;
@@ -63,7 +63,6 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
     public static final String POINT_IC_PREFIX = "Point IC";
     public static final String AUC_PREFIX = "AUC";
     public static final String pAUC_PREFIX = "PositiveAUC";
-    public static final String OORINDICATOR_SUFFIX = "OORIndicator";
     public static final String DATA_ROW_LSID_PROPERTY = "Data Row LSID";
     public static final String AUC_PROPERTY_FORMAT = "0.000";
 
@@ -170,7 +169,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
                 icValue = dilution.getMaxDilution(type);
             }
             results.put(name, icValue);
-            results.put(name + OORINDICATOR_SUFFIX, outOfRange);
+            results.put(name + OORDisplayColumnFactory.OORINDICATOR_COLUMN_SUFFIX, outOfRange);
         }
     }
 
@@ -578,7 +577,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
 
     public Integer getCutoffFromPropertyName(String propertyName)
     {
-        if (propertyName.startsWith(CURVE_IC_PREFIX) && !propertyName.endsWith(OORINDICATOR_SUFFIX))
+        if (propertyName.startsWith(CURVE_IC_PREFIX) && !propertyName.endsWith(OORDisplayColumnFactory.OORINDICATOR_COLUMN_SUFFIX))
         {
             // parse out the cutoff number
             int idx = propertyName.indexOf('_');
@@ -590,7 +589,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
 
             return Integer.valueOf(num);
         }
-        else if (propertyName.startsWith(POINT_IC_PREFIX) && !propertyName.endsWith(OORINDICATOR_SUFFIX))
+        else if (propertyName.startsWith(POINT_IC_PREFIX) && !propertyName.endsWith(OORDisplayColumnFactory.OORINDICATOR_COLUMN_SUFFIX))
         {
             return Integer.valueOf(propertyName.substring(POINT_IC_PREFIX.length()));
         }

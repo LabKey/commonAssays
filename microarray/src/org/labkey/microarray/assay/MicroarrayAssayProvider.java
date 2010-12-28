@@ -18,7 +18,6 @@ package org.labkey.microarray.assay;
 
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.XarContext;
@@ -75,7 +74,7 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_INPUT_TYPE, new AssayTableMetadata(
             null,
             FieldKey.fromParts("Run"),
-            FieldKey.fromParts("ObjectId")
+            FieldKey.fromParts(AbstractTsvAssayProvider.ROW_ID_COLUMN_NAME)
         ));
     }
 
@@ -97,9 +96,9 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return new HtmlView("The MAGE-ML data file is an XML file that contains the results of the microarray run.");
     }
 
-    public TableInfo createDataTable(AssaySchema schema, ExpProtocol protocol)
+    public AssayResultTable createDataTable(AssaySchema schema, ExpProtocol protocol)
     {
-        RunDataTable result = new RunDataTable(schema, protocol);
+        AssayResultTable result = new AssayResultTable(schema, protocol, this);
         if (getDomainByPrefix(protocol, ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().length > 0)
         {
             List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());

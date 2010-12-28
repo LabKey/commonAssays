@@ -220,7 +220,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return null;
     }
 
-    public ExpData getDataForDataRow(Object dataRowId)
+    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
     {
         if (!(dataRowId instanceof Integer))
             return null;
@@ -248,7 +248,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         NabSchema nabSchema = new NabSchema(schema.getUser(), schema.getContainer());
         nabSchema.setTargetStudy(schema.getTargetStudy());
         NabRunDataTable table = nabSchema.createDataRowTable(protocol);
-        addCopiedToStudyColumns(table, protocol, schema.getUser(), "objectId", true);
+        addCopiedToStudyColumns(table, protocol, schema.getUser(), true);
         return table;
     }
 
@@ -257,7 +257,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return PropertyType.INTEGER;
     }
 
-    public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {
@@ -272,7 +272,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
             DomainProperty[] samplePDs = sampleDomain.getProperties();
 
             PropertyDescriptor[] dataPDs = NabSchema.getExistingDataProperties(protocol);
-            CopyToStudyContext context = new CopyToStudyContext(protocol, user);
+            CopyToStudyContext context = new CopyToStudyContext(protocol, viewContext.getUser());
 
             SimpleFilter filter = new SimpleFilter();
             filter.addInClause(getTableMetadata().getResultRowIdFieldKey().toString(), dataKeys.keySet());
@@ -332,7 +332,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                 dataMaps.add(dataMap);
                 tempTypes = null;
             }
-            return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,
+            return AssayPublishService.get().publishAssayData(viewContext.getUser(), sourceContainer, study, protocol.getName(), protocol,
                     dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getTableMetadata().getResultRowIdFieldKey().toString(), errors);
         }
         catch (SQLException e)

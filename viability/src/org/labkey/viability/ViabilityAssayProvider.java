@@ -211,7 +211,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return table;
     }
 
-    public ExpData getDataForDataRow(Object resultRowId)
+    public ExpData getDataForDataRow(Object resultRowId, ExpProtocol protocol)
     {
         if (resultRowId == null)
             return null;
@@ -346,7 +346,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return false;
     }
 
-    public ActionURL copyToStudy(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         throw new UnsupportedOperationException("NYI");
     }
