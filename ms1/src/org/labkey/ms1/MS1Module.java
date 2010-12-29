@@ -128,12 +128,6 @@ public class MS1Module extends SpringModule
     }
 
     @Override
-    protected ContextType getContextType()
-    {
-        return ContextType.config;
-    }
-
-    @Override
     public Collection<String> getSummary(Container c)
     {
         Collection<String> ret;
@@ -150,10 +144,9 @@ public class MS1Module extends SpringModule
         return ret;
     }
 
-    public void startup(ModuleContext moduleContext)
+    @Override
+    protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
-        initWebApplicationContext();
-
         // Tell the pipeline that we know how to handle msInspect files
         ExperimentService.get().registerExperimentDataHandler(new MSInspectFeaturesDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new PeaksFileDataHandler());

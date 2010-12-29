@@ -213,12 +213,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     }
 
     @Override
-    protected ContextType getContextType()
-    {
-        return ContextType.config;
-    }
-
-    public void startup(ModuleContext context)
+    protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
         SearchService ss = ServiceRegistry.get().getService(SearchService.class);
         if (null != ss)
@@ -270,11 +265,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         
         AssayService.get().registerAssayProvider(new MassSpecMetadataAssayProvider());
 
-        initWebApplicationContext();
-
         ServiceRegistry.get(SearchService.class).addDocumentParser(new MzXMLDocumentParser());
         ServiceRegistry.get(SearchService.class).addDocumentParser(new MzMLDocumentParser());
-
     }
 
     @Override

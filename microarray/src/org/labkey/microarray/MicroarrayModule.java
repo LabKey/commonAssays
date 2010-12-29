@@ -21,9 +21,9 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.ExperimentRunType;
-import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.module.SpringModule;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.search.SearchService;
@@ -40,7 +40,7 @@ import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
 
 import java.util.*;
 
-public class MicroarrayModule extends DefaultModule
+public class MicroarrayModule extends SpringModule
 {
     public static final String NAME = "Microarray";
     public static final String WEBPART_MICROARRAY_RUNS = "Microarray Runs";
@@ -50,6 +50,8 @@ public class MicroarrayModule extends DefaultModule
 
     public static final AssayDataType MAGE_ML_INPUT_TYPE =
             new AssayDataType("MicroarrayAssayData", new FileType(Arrays.asList("_MAGEML.xml", "MAGE-ML.xml", ".mage"), "_MAGEML.xml"), "MageML");
+    public static final AssayDataType TIFF_INPUT_TYPE =
+            new AssayDataType("MicroarrayTIFF", new FileType(Arrays.asList(".tiff", ".tif"), ".tiff"), "Image");
     public static final AssayDataType QC_REPORT_INPUT_TYPE =
             new AssayDataType("MicroarrayQCData", new FileType(".pdf"), "QCReport");
     public static final AssayDataType THUMBNAIL_INPUT_TYPE =
@@ -126,7 +128,8 @@ public class MicroarrayModule extends DefaultModule
         return Collections.emptyList();
     }
 
-    public void startup(ModuleContext moduleContext)
+    @Override
+    protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
         ModuleLoader.getInstance().registerFolderType(this, new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());

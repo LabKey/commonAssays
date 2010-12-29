@@ -50,12 +50,6 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
     private static final int MAX_RETRIES = 3;
     private static final int PING_DELAY = 30; // In seconds
 
-
-    public AgilentFeatureExtractionClientImpl(String url)
-    {
-        this(url, Logger.getLogger("null"));
-    }
-
     public AgilentFeatureExtractionClientImpl(String url, Logger instanceLogger)
     {
         _url = url;
@@ -71,17 +65,6 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         // initalize a TaskID to submit the job for this client
         _instanceLogger.info("Creating FeatureExtraction client taskId...");
         _taskId = Long.toString(new Date().getTime());
-    }
-
-    public boolean setProxyURL(String proxyURL)
-    {
-        return false;
-    }
-
-    public void testConnectivity() throws ExtractionException
-    {
-        // to test and report connectivity problem
-        startSession();
     }
 
     public void findWorkableSettings() throws ExtractionConfigException

@@ -31,7 +31,7 @@ import java.util.List;
 public class MicroarrayPipelineProvider extends PipelineProvider
 {
     public static final String NAME = "Array";
-    private static final String IMPORT_IMAGES_BUTTON_NAME = "Import Images";
+    private static final String IMPORT_IMAGES_BUTTON_NAME = "Import Microarray Images";
 
     public MicroarrayPipelineProvider(MicroarrayModule module)
     {

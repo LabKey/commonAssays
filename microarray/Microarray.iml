@@ -3,12 +3,9 @@
   <component name="FacetManager">
     <facet type="gwt" name="GWT">
       <configuration>
-        <setting name="additionalCompilerParameters" value="" />
         <setting name="compilerMaxHeapSize" value="128" />
-        <setting name="compilerOutputPath" value="" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
         <setting name="gwtSdkUrl" value="file://$GWT_HOME$" />
-        <setting name="runGwtCompilerOnMake" value="false" />
         <packaging>
           <module name="org.labkey.microarray.designer.MicroarrayAssayDesigner" path="/org.labkey.microarray.designer.MicroarrayAssayDesigner" />
           <module name="org.labkey.microarray.sampleset.SampleChooser" path="/org.labkey.microarray.sampleset.SampleChooser" />
@@ -28,6 +25,15 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Internal" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jai_imageio.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
 

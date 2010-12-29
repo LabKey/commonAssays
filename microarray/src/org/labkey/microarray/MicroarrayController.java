@@ -16,14 +16,11 @@
 
 package org.labkey.microarray;
 
-import org.labkey.api.action.FormHandlerAction;
-import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
@@ -33,7 +30,6 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
@@ -45,7 +41,6 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.UnauthorizedException;
-import org.labkey.api.view.UpdateView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
@@ -244,17 +239,9 @@ public class MicroarrayController extends SpringActionController
         @Override
         public boolean doAction(ExtractionForm form, BindException errors) throws Exception
         {
-            try
-            {
-                PipelineJob job = new FeatureExtractionPipelineJob(getViewBackgroundInfo(), form.getProtocolName(), form.getValidatedFiles(getContainer()), form.getExtractionEngine(), PipelineService.get().findPipelineRoot(getContainer()));
-                PipelineService.get().queueJob(job);
-                return true;
-            }
-            catch (FileNotFoundException e)
-            {
-                //TODO - need to build an error page to display the pipeline errors
-                throw new ExperimentException("Import image process failed", e);
-            }
+            PipelineJob job = new FeatureExtractionPipelineJob(getViewBackgroundInfo(), form.getProtocolName(), form.getValidatedFiles(getContainer()), form.getExtractionEngine(), PipelineService.get().findPipelineRoot(getContainer()));
+            PipelineService.get().queueJob(job);
+            return true;
         }
 
         @Override
