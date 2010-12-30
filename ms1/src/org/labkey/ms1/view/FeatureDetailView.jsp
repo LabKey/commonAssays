@@ -15,13 +15,9 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="java.text.DecimalFormat" %>
-<%@ page import="java.text.Format" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.ms1.*" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms1.model.Feature" %>
 <%@ page import="org.labkey.ms1.model.FeatureDetailsModel" %>
 <%@ page import="org.labkey.ms1.model.Peptide" %>
@@ -44,10 +40,10 @@
     function showMzFilter(elem)
     {
         var filterbox = document.getElementById("mzFilterUI");
-        if(!filterbox)
+        if (!filterbox)
             return;
 
-        if("none" == filterbox.style.display)
+        if ("none" == filterbox.style.display)
         {
             _oldMzLow = <%=model.getMzWindowLow()%>;
             _oldMzHigh = <%=model.getMzWindowHigh()%>;
@@ -55,10 +51,10 @@
             _slider.recalculate();
 
             var scc = document.getElementById("spectrumChartContainer");
-            if(scc)
+            if (scc)
                 scc.className = "labkey-frame";
             var bcc = document.getElementById("bubbleChartContainer");
-            if(bcc)
+            if (bcc)
                 bcc.className = "labkey-frame";
 
             document.getElementById("sliderMzWindow").focus();
@@ -70,14 +66,14 @@
     function hideMzFilter()
     {
         var filterbox = document.getElementById("mzFilterUI");
-        if(filterbox)
+        if (filterbox)
             filterbox.style.display = "none";
 
         var scc = document.getElementById("spectrumChartContainer");
-        if(scc)
+        if (scc)
             scc.className = "";
         var bcc = document.getElementById("bubbleChartContainer");
-        if(bcc)
+        if (bcc)
             bcc.className = "";
     }
 
@@ -91,17 +87,17 @@
     function submitMzWindowFilter()
     {
         var frm = document.getElementById("frmMzWindowFilter");
-        if(null != frm)
+        if (null != frm)
             frm.submit();
     }
 
     function resetMzWindowFilter()
     {
         var txt = document.getElementById("txtMzWindowLow");
-        if(null != txt)
+        if (null != txt)
             txt.value = "-1.0";
         txt = document.getElementById("txtMzWindowHigh");
-        if(null != txt)
+        if (null != txt)
             txt.value = "5.0";
 
         submitMzWindowFilter();
@@ -110,10 +106,10 @@
     function showScanFilter(elem)
     {
         var filterbox = document.getElementById("scanFilterUI");
-        if(!filterbox)
+        if (!filterbox)
             return;
 
-        if("none" == filterbox.style.display)
+        if ("none" == filterbox.style.display)
         {
             _oldScanLow = <%=model.getScanWindowLow()%>;
             _oldScanHigh = <%=model.getScanWindowHigh()%>;
@@ -153,7 +149,7 @@
     function submitScanWindowFilter()
     {
         var frm = document.getElementById("frmScanWindowFilter");
-        if(null != frm)
+        if (null != frm)
             frm.submit();
     }
 
@@ -167,14 +163,14 @@
     function setElemDisplay(elemid, val)
     {
         var elem = document.getElementById(elemid);
-        if(elem)
+        if (elem)
             elem.style.display = val;
     }
 
     function setElemClassName(elemid, val)
     {
         var elem = document.getElementById(elemid);
-        if(elem)
+        if (elem)
             elem.className = val;
     }
 
@@ -194,17 +190,17 @@
                 String prevFeatureCaption = "<< Previous Feature";
                 String nextFeatureCaption = "Next Feature >>";
 
-                if(model.getPrevFeatureId() < 0)
+                if (model.getPrevFeatureId() < 0)
                     out.write(PageFlowUtil.generateDisabledButton(prevFeatureCaption));
                 else
-                    out.print(PageFlowUtil.generateButton(prevFeatureCaption, model.getPrevFeatureUrl()));
+                    out.print(generateButton(prevFeatureCaption, model.getPrevFeatureUrl()));
 
                 out.write("&nbsp;");
 
-                if(model.getNextFeatureId() < 0)
+                if (model.getNextFeatureId() < 0)
                     out.write(PageFlowUtil.generateDisabledButton(nextFeatureCaption));
                 else
-                    out.print(PageFlowUtil.generateButton(nextFeatureCaption, model.getNextFeatureUrl()));
+                    out.print(generateButton(nextFeatureCaption, model.getNextFeatureUrl()));
             %>
         </td>
 
@@ -232,7 +228,7 @@
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Accurate</td>
-                    <td><%=PageFlowUtil.filter(feature.getAccurateMz())%></td>
+                    <td><%=h(feature.getAccurateMz())%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Mass</td>
@@ -244,11 +240,11 @@
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Charge</td>
-                    <td>+<%=PageFlowUtil.filter(feature.getCharge())%></td>
+                    <td>+<%=h(feature.getCharge())%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Charge States</td>
-                    <td><%=PageFlowUtil.filter(feature.getChargeStates())%></td>
+                    <td><%=h(feature.getChargeStates())%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">KL</td>
@@ -264,15 +260,15 @@
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Peaks</td>
-                    <td><%=PageFlowUtil.filter(feature.getPeaks())%></td>
+                    <td><%=h(feature.getPeaks())%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">First Scan</td>
-                    <td><%=PageFlowUtil.filter(feature.getScanFirst())%></td>
+                    <td><%=h(feature.getScanFirst())%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Last Scan</td>
-                    <td><%=PageFlowUtil.filter(feature.getScanLast())%></td>
+                    <td><%=h(feature.getScanLast())%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">Total Intensity</td>
@@ -282,7 +278,7 @@
                     <td class="labkey-alternate-row">MS2 Scan</td>
                     <td>
                         <%
-                            if(feature.getMs2Scan() != null)
+                            if (feature.getMs2Scan() != null)
                             {
                                 out.print("<a href=\"" + model.getPepUrl() + "\" target=\"peptide\">");
                                 out.print(feature.getMs2Scan());
@@ -295,7 +291,7 @@
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">MS2 Charge</td>
-                    <td>+<%=PageFlowUtil.filter(feature.getMs2Charge())%></td>
+                    <td>+<%=h(feature.getMs2Charge())%></td>
                 </tr>
                 <tr>
                     <td class="labkey-alternate-row">MS2 Probability</td>
@@ -310,7 +306,7 @@
                                 Peptide pep = null;
                                 for(int idx = 0; idx < peptides.length; ++idx)
                                 {
-                                    if(idx > 0)
+                                    if (idx > 0)
                                         out.print(", ");
 
                                     pep = peptides[idx];
@@ -331,7 +327,7 @@
                     <td class="labkey-alternate-row">Experiment Run</td>
                     <td>
                         <a href="<%=model.getRunDetailsUrl()%>">
-                        <%=feature.getExpRun() == null ? "&nbsp;" : PageFlowUtil.filter(feature.getExpRun().getName())%>
+                        <%=feature.getExpRun() == null ? "&nbsp;" : h(feature.getExpRun().getName())%>
                         </a>
                     </td>
                 </tr>
@@ -353,14 +349,14 @@
                 if (null == prevScanUrl)
                     out.print(PageFlowUtil.generateDisabledButton(prevScanCaption));
                 else
-                    out.print(PageFlowUtil.generateButton(prevScanCaption, prevScanUrl));
+                    out.print(generateButton(prevScanCaption, prevScanUrl));
 
                 out.print("&nbsp;");
 
                 if (null == nextScanUrl)
                     out.print(PageFlowUtil.generateDisabledButton(nextScanCaption));
                 else
-                    out.print(PageFlowUtil.generateButton(nextScanCaption, nextScanUrl));
+                    out.print(generateButton(nextScanCaption, nextScanUrl));
 
             %>
             <!-- m/z and intensity peaks mass chart -->

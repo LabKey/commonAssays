@@ -15,46 +15,52 @@
  * limitations under the License.
  */
 %>
-<%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.EditPage" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.flow.ScriptParser"%>
-<%@ page import="org.labkey.flow.data.FlowScript"%>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="org.labkey.flow.data.FlowScript"%>
+<%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.EditPage" %>
 <%=pageHeader(ScriptController.Action.editScript)%>
-<% FlowScript script = getScript();
+<%
+    FlowScript script = getScript();
     ScriptParser.Error error = scriptParseError;
 %>
 <form method="POST" action="<%=h(formAction(ScriptController.Action.editScript))%>">
 <% if (error != null) { %>
-<p class="labkey-error"><%=PageFlowUtil.filter(error.getMessage(), true).replaceAll("\\n", "<br>")%></p>
+<p class="labkey-error"><%=h(error.getMessage(), true).replaceAll("\\n", "<br>")%></p>
 <% if (error.getLine() != 0) { %>
 <script>
-function findOffset(text, line, column)
-{
-var offset = 0;
-text = text.replace("\r\n", "\n");
-while (line > 0)
+    function findOffset(text, line, column)
     {
-    line --;
-    offset = text.indexOf("\n", offset);
-    if (offset < 0)
-        return text.length();
-    offset ++;
+        var offset = 0;
+        text = text.replace("\r\n", "\n");
+
+        while (line > 0)
+        {
+            line --;
+            offset = text.indexOf("\n", offset);
+            if (offset < 0)
+                return text.length();
+            offset ++;
+        }
+
+        return offset + column;
     }
-return offset + column;
-}
-function positionCursor()
-{
-    var textArea = document.getElementById("scriptTextArea");
-    var tr = textArea.createTextRange();
-    tr.moveStart("character", findOffset(textArea.innerText, <%=error.getLine() - 1%>, <%= error.getColumn() - 1%>));
-    tr.collapse(true);
-    tr.select();
-}
-window.setTimeout(positionCursor, 1);
+
+    function positionCursor()
+    {
+        var textArea = document.getElementById("scriptTextArea");
+        var tr = textArea.createTextRange();
+        tr.moveStart("character", findOffset(textArea.innerText, <%=error.getLine() - 1%>, <%= error.getColumn() - 1%>));
+        tr.collapse(true);
+        tr.select();
+    }
+
+    window.setTimeout(positionCursor, 1);
 </script>
-<%}%>
-<%}%>
+<%
+    }
+}
+%>
 
 
 <textarea id="scriptTextArea" wrap="off" rows="20" cols="80" name="script"><%=h(script.getAnalysisScript())%></textarea>

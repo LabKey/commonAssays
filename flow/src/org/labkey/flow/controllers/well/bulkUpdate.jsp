@@ -15,19 +15,18 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-WellController.UpdateKeywordsForm form = (WellController.UpdateKeywordsForm)HttpView.currentModel();
-ViewContext context = HttpView.currentContext();
-
+    WellController.UpdateKeywordsForm form = (WellController.UpdateKeywordsForm)HttpView.currentModel();
+    ViewContext context = HttpView.currentContext();
 %>
-<span style="color:green;"><%=PageFlowUtil.filter(form.message)%></span><br>
+<span style="color:green;"><%=h(form.message)%></span><br>
 <labkey:errors />
 <div id="updateForm" />
 <script type="text/javascript">

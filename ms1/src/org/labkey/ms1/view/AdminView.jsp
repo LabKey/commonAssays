@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms1.view.AdminViewContext" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<AdminViewContext> me = (JspView<AdminViewContext>)HttpView.currentView();
     AdminViewContext ctx = me.getModelBean();
@@ -31,13 +31,13 @@
     </tr>
 </table>
 
-<% if(ctx.getNumDeleted() > 0 && (!(ctx.isPurgeRunning()))) { %>
+<% if (ctx.getNumDeleted() > 0 && (!(ctx.isPurgeRunning()))) { %>
 <p>Data marked for deletion will be automatically purged during the scheduled system maintenance process,
 but you can manually start a purge now by clicking the button below.
 </p>
-<p><%=PageFlowUtil.generateButton("Purge Deleted MS1 Data Now", ctx.getPurgeNowUrl())%></p>
+<p><%=generateButton("Purge Deleted MS1 Data Now", ctx.getPurgeNowUrl())%></p>
 <% } %>
 
-<% if(ctx.isPurgeRunning()) { %>
+<% if (ctx.isPurgeRunning()) { %>
 <p>MS1 data is currently being purged...<a href="javascript:window.location.reload(true)">refresh</a> this page to view updated status.</p>
 <% } %>
