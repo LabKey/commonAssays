@@ -126,12 +126,6 @@ public class FeatureExtractorTask extends WorkDirectoryTask<FeatureExtractorTask
             setJoin(true);
         }
 
-        public Factory(String name)
-        {
-            super(FeatureExtractorTask.class, name);    
-            setJoin(true);
-        }
-
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new FeatureExtractorTask(this, job);

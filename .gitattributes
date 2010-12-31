@@ -588,13 +588,11 @@ microarray/src/org/labkey/microarray/PendingMageMLFilesView.java -text
 microarray/src/org/labkey/microarray/assay/MageMLDataHandler.java -text
 microarray/src/org/labkey/microarray/assay/MicroarrayAssayProvider.java -text
 microarray/src/org/labkey/microarray/assay/TrimmedFileInputStream.java -text
-microarray/src/org/labkey/microarray/pipeline/AgilentFeatureExtractionClientImpl.java -text
 microarray/src/org/labkey/microarray/pipeline/ArrayPipelineManager.java -text
-microarray/src/org/labkey/microarray/pipeline/FeatureExtractionPipelineJob.java -text
 microarray/src/org/labkey/microarray/pipeline/FeatureExtractorTask.java -text
 microarray/src/org/labkey/microarray/pipeline/FileStatus.java -text
 microarray/src/org/labkey/microarray/pipeline/GeneDataPipelineProvider.java -text
-microarray/src/org/labkey/microarray/pipeline/MicroarrayPipelineProvider.java -text
+microarray/src/org/labkey/microarray/pipeline/MageMLDataCreatorTask.java -text
 microarray/src/org/labkey/microarray/pipeline/ProtocolFileBuilder.java -text
 microarray/src/org/labkey/microarray/statistics.jsp -text
 microarray/webapp/WEB-INF/microarray/microarrayContext.xml -text

@@ -35,7 +35,6 @@ import org.labkey.ms2.pipeline.PipelineController;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +86,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
             String actionId = createActionId(PipelineController.SearchMascotAction.class, ACTION_LABEL);
             return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
         }
-        return super.getDefaultActionConfig();        
+        return super.getDefaultActionConfig();
     }
 
     public HttpView getSetupWebPart(Container container)

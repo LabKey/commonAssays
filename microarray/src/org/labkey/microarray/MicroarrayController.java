@@ -20,7 +20,6 @@ import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
@@ -43,14 +42,12 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
-import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -225,26 +222,5 @@ public class MicroarrayController extends SpringActionController
             _successURL = new URLHelper(baseURL + analysisDir.getAbsolutePath());
             return true;
         }
-    }
-
-    @RequiresPermissionClass(InsertPermission.class)
-    public class ImportImageFilesAction extends RedirectAction<ExtractionForm>
-    {
-        @Override
-        public URLHelper getSuccessURL(ExtractionForm extractionForm)
-        {
-            return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());
-        }
-
-        @Override
-        public boolean doAction(ExtractionForm form, BindException errors) throws Exception
-        {
-            PipelineJob job = new FeatureExtractionPipelineJob(getViewBackgroundInfo(), form.getProtocolName(), form.getValidatedFiles(getContainer()), form.getExtractionEngine(), PipelineService.get().findPipelineRoot(getContainer()));
-            PipelineService.get().queueJob(job);
-            return true;
-        }
-
-        @Override
-        public void validateCommand(ExtractionForm target, Errors errors) {}
     }
 }

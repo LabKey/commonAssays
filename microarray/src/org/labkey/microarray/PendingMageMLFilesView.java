@@ -117,6 +117,7 @@ public class PendingMageMLFilesView extends QueryView
                 else
                 {
                     MenuButton menu = new MenuButton("Import selected using...");
+                    menu.setRequiresSelection(true);
                     menu.setDisplayPermission(InsertPermission.class);
                     bar.add(menu);
                     for (ExpProtocol protocol : microarrayProtocols)

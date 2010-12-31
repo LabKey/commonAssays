@@ -36,7 +36,6 @@ import org.labkey.api.view.*;
 import org.labkey.microarray.assay.MageMLDataHandler;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
-import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
 
 import java.util.*;
 
@@ -133,7 +132,6 @@ public class MicroarrayModule extends SpringModule
     {
         ModuleLoader.getInstance().registerFolderType(this, new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
-        PipelineService.get().registerPipelineProvider(new MicroarrayPipelineProvider(this));
         PipelineService.get().registerPipelineProvider(new GeneDataPipelineProvider(this));
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
         ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()

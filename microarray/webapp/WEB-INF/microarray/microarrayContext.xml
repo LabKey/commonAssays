@@ -7,6 +7,7 @@
         <property name="factoryImpls">
             <list>
                 <bean class="org.labkey.microarray.pipeline.FeatureExtractorTask$Factory" />
+                <bean class="org.labkey.microarray.pipeline.MageMLDataCreatorTask$Factory" />
             </list>
         </property>
         <property name="pipelines">
@@ -18,23 +19,19 @@
                     <property name="protocolObjectId" value="Microarray.FeatureExtraction" />
                     <property name="protocolName" value="Feature extraction" />
                     <property name="protocolFactoryName" value="featureExtractor"/>
-                    <!--<property name="defaultDisplayState" value="toolbar" />-->
+                    <property name="defaultDisplayState" value="toolbar" />
 
                     <property name="initialInputExt" ref="tiffFileType" />
 
                     <property name="taskProgressionSpec">
                         <list>
-                            <ref bean="featureExtractorTask"/>
+                            <value type="java.lang.Class">org.labkey.microarray.pipeline.FeatureExtractorTask</value>
+                            <value type="java.lang.Class">org.labkey.microarray.pipeline.MageMLDataCreatorTask</value>
                         </list>
                     </property>
                 </bean>
             </list>
         </property>
-    </bean>
-
-    <!-- TaskIds for tasks registered in factoryImpls -->
-    <bean id="featureExtractorTask" class="org.labkey.api.pipeline.TaskId">
-        <constructor-arg><value type="java.lang.Class">org.labkey.microarray.pipeline.FeatureExtractorTask</value></constructor-arg>
     </bean>
 
     <bean id="tiffFileType" class="org.labkey.api.util.FileType">
