@@ -18,13 +18,13 @@
                     <property name="protocolObjectId" value="Microarray.FeatureExtraction" />
                     <property name="protocolName" value="Feature extraction" />
                     <property name="protocolFactoryName" value="featureExtractor"/>
+                    <!--<property name="defaultDisplayState" value="toolbar" />-->
 
                     <property name="initialInputExt" ref="tiffFileType" />
 
                     <property name="taskProgressionSpec">
                         <list>
                             <ref bean="featureExtractorTask"/>
-                            <ref bean="expGenerator"/>
                         </list>
                     </property>
                 </bean>
@@ -35,13 +35,6 @@
     <!-- TaskIds for tasks registered in factoryImpls -->
     <bean id="featureExtractorTask" class="org.labkey.api.pipeline.TaskId">
         <constructor-arg><value type="java.lang.Class">org.labkey.microarray.pipeline.FeatureExtractorTask</value></constructor-arg>
-    </bean>
-
-    <!-- Experiment derived tasks -->
-    <bean id="expGenerator" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
-        <constructor-arg value="expGenerator"/>
-        <property name="outputExt" value=".xar.xml"/>
-        <property name="dependencyId" ref="featureExtractorTask"/>
     </bean>
 
     <bean id="tiffFileType" class="org.labkey.api.util.FileType">

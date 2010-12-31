@@ -2,21 +2,19 @@ package org.labkey.microarray.pipeline;
 
 import com.sun.media.imageio.plugins.tiff.TIFFDirectory;
 import com.sun.media.imageio.plugins.tiff.TIFFField;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.pipeline.PipelineJobException;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,12 +37,24 @@ public class ProtocolFileBuilder
     private static String sqlProtocolName = "SELECT Protocol.Name FROM Protocol, GridTemplate WHERE Protocol.Id = GridTemplate.ProtocolId AND GridTemplate.GridName = ?";
     private static String sqlOneColorProtocolName = "SELECT Protocol.Name FROM Protocol, GridTemplate WHERE Protocol.Id = GridTemplate.OneColorProtocolId AND GridTemplate.GridName = ?";
 
-    public void build(File protocolFile, Collection<File> images) throws IOException, PipelineJobException
+    public void build(File protocolFile, FeatureExtractorTask.Factory factory, Collection<File> images) throws IOException, PipelineJobException
     {
         String resultsDirectory = protocolFile.getParent();
         PrintWriter outputWriter = null;
+        Connection conn = null;
         try
         {
+            try
+            {
+                Class.forName("net.sourceforge.jtds.jdbc.Driver").newInstance();
+            }
+            catch (Throwable t)
+            {
+                throw new RuntimeException(t);
+            }
+
+            conn = DriverManager.getConnection(factory.getJdbcURL(), factory.getJdbcUser(), factory.getJdbcPassword());
+
             outputWriter = new PrintWriter(new FileWriter(protocolFile));
 
             //Determine extraction sets by finding unique extraction names
@@ -70,9 +80,9 @@ public class ProtocolFileBuilder
                 outputWriter.println(getImageTag(hiImage.getAbsolutePath()));
                 if (loImage != null)
                     outputWriter.println(getImageXDR2Tag(loImage.getAbsolutePath()));
-                String gridName = getGridName(hiImage);
+                String gridName = getGridName(hiImage, conn);
                 outputWriter.println(getGridTag(gridName));
-                outputWriter.println(getProtocolTag(getProtocolName(gridName, hiImage)));
+                outputWriter.println(getProtocolTag(getProtocolName(gridName, hiImage, conn)));
                 outputWriter.println(getExtractionTagEnd());
             }
 
@@ -81,22 +91,21 @@ public class ProtocolFileBuilder
             outputWriter.println();
             outputWriter.close();
         }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
         finally
         {
             if (outputWriter != null)
             {
                 outputWriter.close();
             }
+            if (conn != null) { try { conn.close(); } catch (SQLException e) {} }
         }
     }
 
-    private static DataSource getJdbcConnectionPool() throws NamingException
-    {
-        Context c = new InitialContext();
-        return (DataSource) c.lookup("java:comp/env/jdbc/AgilentDataSource");
-    }
-
-    private static String getTiffMetaTagValue(String tagName, File image) throws IOException
+    private String getTiffMetaTagValue(String tagName, File image) throws IOException
     {
         String value = null;
         Iterator<ImageReader> it = ImageIO.getImageReadersByFormatName("tiff");
@@ -155,9 +164,8 @@ public class ProtocolFileBuilder
         return scanId;
     }
 
-    protected String getProtocolName(String gridName, File image) throws IOException, PipelineJobException
+    protected String getProtocolName(String gridName, File image, Connection connection) throws IOException, SQLException, PipelineJobException
     {
-        Connection connection = null;
         ResultSet rs = null;
         String queryName;
         String tagValue = getTiffMetaTagValue(sidTag, image);
@@ -180,9 +188,6 @@ public class ProtocolFileBuilder
 
         try
         {
-            DataSource dataSource = getJdbcConnectionPool();
-            connection = dataSource.getConnection();
-
             PreparedStatement stat = connection.prepareStatement(queryName);
             stat.setString(1, gridName);
             rs = stat.executeQuery();
@@ -193,14 +198,6 @@ public class ProtocolFileBuilder
                 throw new PipelineJobException("No protocol found for scan channel " + tagValue + " with grid name " + gridName);
             }
             return rs.getString(1);
-        }
-        catch (SQLException e)
-        {
-            throw new PipelineJobException(e);
-        }
-        catch (NamingException e)
-        {
-            throw new PipelineJobException(e);
         }
         finally
         {
@@ -214,28 +211,16 @@ public class ProtocolFileBuilder
                 {
                 }
             }
-            if (connection != null)
-            {
-                try
-                {
-                    connection.close();
-                }
-                catch (SQLException e)
-                {
-                }
-            }
         }
     }
 
-    protected String getGridName(File image) throws PipelineJobException
+    protected String getGridName(File image, Connection connection) throws PipelineJobException, SQLException
     {
-        Connection connection = null;
         ResultSet rs = null;
-        String name = null;
 
         try
         {
-            List<String> designIds = getDesignIds();
+            List<String> designIds = getDesignIds(connection);
             String designId = null;
 
             for (String id : designIds)
@@ -251,9 +236,6 @@ public class ProtocolFileBuilder
                 throw new PipelineJobException("No matching designs for image " + image.getName());
             }
 
-            DataSource dataSource = getJdbcConnectionPool();
-            connection = dataSource.getConnection();
-
             PreparedStatement stat = connection.prepareStatement(sqlGridName);
             stat.setString(1, designId);
             rs = stat.executeQuery();
@@ -265,28 +247,19 @@ public class ProtocolFileBuilder
             }
             return rs.getString(1);
         }
-        catch (Exception e)
-        {
-            throw new PipelineJobException(e);
-        }
         finally
         {
             if (rs != null) { try { rs.close(); } catch (SQLException e) {} }
-            if (connection != null) { try { connection.close(); } catch (SQLException e) {} }
         }
     }
 
-    protected List<String> getDesignIds() throws PipelineJobException
+    protected List<String> getDesignIds(Connection connection) throws PipelineJobException, SQLException
     {
-        Connection connection = null;
         ResultSet rs = null;
         List<String> list = new ArrayList<String>();
 
         try
         {
-            DataSource dataSource = getJdbcConnectionPool();
-            connection = dataSource.getConnection();
-
             PreparedStatement stat = connection.prepareStatement(sqlDesignId);
             rs = stat.executeQuery();
 
@@ -296,18 +269,9 @@ public class ProtocolFileBuilder
             }
             return list;
         }
-        catch (SQLException e)
-        {
-            throw new PipelineJobException(e);
-        }
-        catch (NamingException e)
-        {
-            throw new PipelineJobException(e);
-        }
         finally
         {
             if (rs != null) { try { rs.close(); } catch (SQLException e) {} }
-            if (connection != null) { try { connection.close(); } catch (SQLException e) {} }
         }
     }
 
