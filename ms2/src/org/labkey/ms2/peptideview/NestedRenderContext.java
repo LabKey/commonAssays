@@ -132,6 +132,9 @@ public class NestedRenderContext extends RenderContext
     @Override
     public Map<String, Aggregate.Result> getAggregates(List<DisplayColumn> displayColumns, TableInfo tinfo, String dataRegionName, List<Aggregate> aggregatesIn, boolean async) throws SQLException, IOException
     {
+        if (aggregatesIn == null || aggregatesIn.isEmpty())
+            return Collections.emptyMap();
+
         // We only support a single aggregate - COUNT(*)
         assert aggregatesIn.size() <= 1;
         if (_nestingOption == null)
