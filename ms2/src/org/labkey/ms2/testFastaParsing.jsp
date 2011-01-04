@@ -35,7 +35,7 @@
         </tr>
         <tr>
             <td />
-            <td><%= PageFlowUtil.generateSubmitButton("Submit")%></td>
+            <td><%=generateSubmitButton("Submit")%></td>
         </tr>
 
         <% if (form.getHeader() != null) {

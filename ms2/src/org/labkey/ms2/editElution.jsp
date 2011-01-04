@@ -16,13 +16,13 @@
  */
 %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.ms2.EditElutionGraphContext"%>
 <%@ page import="org.labkey.ms2.MS2Peptide"%>
 <%@ page import="org.labkey.ms2.PeptideQuantitation"%>
 <%@ page import="java.text.DecimalFormat"%>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<EditElutionGraphContext> me = (JspView<EditElutionGraphContext>) HttpView.currentView();
     org.labkey.ms2.EditElutionGraphContext ctx = me.getModelBean();
@@ -46,15 +46,15 @@
            <table>
                <tr>
                    <td class="labkey-form-label">Sequence</td>
-                   <td><%=PageFlowUtil.filter(p.getPeptide())%></td>
+                   <td><%=h(p.getPeptide())%></td>
                </tr>
                <tr>
                    <td class="labkey-form-label">Charge</td>
-                   <td>+<%=PageFlowUtil.filter(p.getCharge())%></td>
+                   <td>+<%=h(p.getCharge())%></td>
                </tr>
                <tr>
                    <td class="labkey-form-label">Scan</td>
-                   <td>+<%=PageFlowUtil.filter(p.getScan())%></td>
+                   <td>+<%=h(p.getScan())%></td>
                </tr>
                <tr>
                    <td class="labkey-form-label">Light to heavy ratio</td>

@@ -50,7 +50,7 @@ if (null != bean.quantAlgorithm)
 
         if (bean.writePermissions)
         { %>
-            <%=PageFlowUtil.generateButton("Rename", MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%><%
+            <%=generateButton("Rename", MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%><%
         } %>
             <%=bean.modHref%><%
 
@@ -71,7 +71,7 @@ if (null != bean.quantAlgorithm)
 
         if(run.getNegativeHitCount() > run.getPeptideCount() / 3)
         { %>
-            <%=PageFlowUtil.generateButton("Discriminate", "discriminateScore.view?run=" + run.getRun())%><%
+            <%=generateButton("Discriminate", "discriminateScore.view?run=" + run.getRun())%><%
         } %>
         </div>
     </td></tr>

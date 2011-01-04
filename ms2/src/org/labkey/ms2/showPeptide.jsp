@@ -16,15 +16,21 @@
  */
 %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
+<%@ page import="org.labkey.api.settings.AppProps"%>
 <%@ page import="org.labkey.api.util.Formats"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.util.URLHelper"%>
 <%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.ms2.*"%>
-<%@ page import="java.text.DecimalFormat"%>
-<%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="org.labkey.ms2.MS2Controller"%>
+<%@ page import="org.labkey.ms2.MS2Fraction" %>
+<%@ page import="org.labkey.ms2.MS2GZFileRenderer" %>
+<%@ page import="org.labkey.ms2.MS2Manager" %>
+<%@ page import="org.labkey.ms2.MS2Peptide" %>
+<%@ page import="org.labkey.ms2.PeptideQuantitation" %>
+<%@ page import="org.labkey.ms2.ShowPeptideContext" %>
+<%@ page import="java.text.DecimalFormat" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
@@ -41,7 +47,7 @@
     <tr><td height=60>
         <strong><%=p.getPeptide()%></strong>
         <%=PageFlowUtil.generateButton("Blast", AppProps.getInstance().getBLASTServerBaseURL() + p.getTrimmedPeptide(), "", "target=\"cmt\"")%><br>
-        <%=p.getScan()%>&nbsp;&nbsp;<%=p.getCharge()%>+&nbsp;&nbsp;<%=PageFlowUtil.filter(p.getRawScore())%>&nbsp;&nbsp;<%=p.getDiffScore() == null ? "" : Formats.f3.format(p.getDiffScore())%>&nbsp;&nbsp;<%=p.getZScore() == null ? "" : Formats.f3.format(p.getZScore())%>&nbsp;&nbsp;<%=Formats.percent.format(p.getIonPercent())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getMass())%>&nbsp;&nbsp;<%=Formats.signf4.format(p.getDeltaMass())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getPeptideProphet())%>&nbsp;&nbsp;<%=p.getProteinHits()%><br>
+        <%=p.getScan()%>&nbsp;&nbsp;<%=p.getCharge()%>+&nbsp;&nbsp;<%=h(p.getRawScore())%>&nbsp;&nbsp;<%=p.getDiffScore() == null ? "" : Formats.f3.format(p.getDiffScore())%>&nbsp;&nbsp;<%=p.getZScore() == null ? "" : Formats.f3.format(p.getZScore())%>&nbsp;&nbsp;<%=Formats.percent.format(p.getIonPercent())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getMass())%>&nbsp;&nbsp;<%=Formats.signf4.format(p.getDeltaMass())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getPeptideProphet())%>&nbsp;&nbsp;<%=p.getProteinHits()%><br>
         <%=p.getProtein()%><br>
 <%
         if (fraction.wasloadedFromGzFile())
@@ -52,13 +58,13 @@
         if (null == ctx.previousUrl)
             out.print(PageFlowUtil.generateDisabledButton("<< Prev"));
         else
-            out.print("    " + PageFlowUtil.generateButton("<< Prev", ctx.previousUrl));
+            out.print("    " + generateButton("<< Prev", ctx.previousUrl));
 %>&nbsp;
 <%
     if (null == ctx.nextUrl)
         out.print(PageFlowUtil.generateDisabledButton("Next >>"));
     else
-        out.print("    " + PageFlowUtil.generateButton("Next >>", ctx.nextUrl));
+        out.print("    " + generateButton("Next >>", ctx.nextUrl));
 %>&nbsp;
 <%
     if (fraction.wasloadedFromGzFile() && null != ctx.showGzUrl)
@@ -68,7 +74,7 @@
         for (String gzFileExtension : gzFileExtensions)
         {
             ctx.showGzUrl.replaceParameter("extension", gzFileExtension);
-            out.println("    " + PageFlowUtil.generateButton("Show " + gzFileExtension.toUpperCase(), ctx.showGzUrl) + "&nbsp;");
+            out.println("    " + generateButton("Show " + gzFileExtension.toUpperCase(), ctx.showGzUrl) + "&nbsp;");
         }
     }
     out.print(ctx.modificationHref);
@@ -97,8 +103,8 @@
     <form method=get action="updateShowPeptide.post">
         X&nbsp;Start&nbsp;<input name="xStart" id="xStart" value="<%=ctx.actualXStart%>" size=8>
         X&nbsp;End&nbsp;<input name="xEnd" id="xEnd" value="<%=ctx.actualXEnd%>" size=8>
-        <input name="queryString" type="hidden" value="<%=PageFlowUtil.filter(ctx.url.getRawQuery())%>">
-        <%=PageFlowUtil.generateSubmitButton("Scale Graph")%>
+        <input name="queryString" type="hidden" value="<%=h(ctx.url.getRawQuery())%>">
+        <%=generateSubmitButton("Scale Graph")%>
     </form>
     </td></tr>
     </table>

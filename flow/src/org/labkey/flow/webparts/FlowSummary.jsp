@@ -383,7 +383,7 @@
     <%
         if (_canSetPipelineRoot)
         {
-            ActionURL urlPipelineRoot = PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(c);
+            ActionURL urlPipelineRoot = urlProvider(PipelineUrls.class).urlSetup(c);
             if (!_hasPipelineRoot)
             {
                 %><div><%=PageFlowUtil.textLink("Setup Pipeline", urlPipelineRoot)%></div><%
@@ -402,7 +402,7 @@
             }
             else
             {
-                %><div><%=PageFlowUtil.textLink("Upload and Import", PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(c, getViewContext().getActionURL().getLocalURIString()))%></div><%
+                %><div><%=PageFlowUtil.textLink("Upload and Import", urlProvider(PipelineUrls.class).urlBrowse(c, getViewContext().getActionURL().getLocalURIString()))%></div><%
             }
 
             if (_fcsRealRunCount > 0)
@@ -431,7 +431,7 @@
         }
 
         int jobCount = PipelineService.get().getQueuedStatusFiles(c).length;
-        %><div><%=PageFlowUtil.textLink("Show Jobs" + (jobCount > 0 ? " (" + jobCount + " running)" : ""), PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(c))%></div><%
+        %><div><%=PageFlowUtil.textLink("Show Jobs" + (jobCount > 0 ? " (" + jobCount + " running)" : ""), urlProvider(PipelineStatusUrls.class).urlBegin(c))%></div><%
 
         if (_canCreateFolder && _hasPipelineRoot)
         {

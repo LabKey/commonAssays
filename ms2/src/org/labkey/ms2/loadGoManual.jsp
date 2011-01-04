@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.util.DateUtil" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.tools.GoLoader" %>
-<%@ page import="org.labkey.api.util.DateUtil" %>
 <%@ page import="java.util.Date" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     boolean loaded = GoLoader.isGoLoaded().booleanValue();
 %>
@@ -61,7 +61,7 @@ you can monitor the process by refreshing the status information on the next pag
 Click "Cancel" to return to the Protein Databases Admin page.<br><br><br>
 <form action="loadGo.post?manual=1" enctype="multipart/form-data" method="post">
     <input type="file" name="gofile" size="60" onChange="showPathname(this, 'filename')">&nbsp;<label id="filename"></label><br><br>
-    <%=PageFlowUtil.generateSubmitButton("Continue")%>
-    <%=PageFlowUtil.generateButton("Cancel", MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl())%>
+    <%=generateSubmitButton("Continue")%>
+    <%=generateButton("Cancel", MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl())%>
 </form>
 </td></tr></table>

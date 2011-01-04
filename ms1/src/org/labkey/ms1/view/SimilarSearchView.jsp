@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.ms1.model.SimilarSearchModel" %>
-<%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms1.MS1Controller" %>
+<%@ page import="org.labkey.ms1.model.SimilarSearchModel" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<SimilarSearchModel> me = (JspView<SimilarSearchModel>) HttpView.currentView();
     SimilarSearchModel model = me.getModelBean();
@@ -35,7 +36,7 @@
         if(units == "<%=MS1Controller.SimilarSearchForm.TimeOffsetUnits.scans.name()%>")
         {
             lblTime.innerHTML = "<%=model.getTimeUnitsLabel(MS1Controller.SimilarSearchForm.TimeOffsetUnits.scans)%>";
-            txtTimeSource.value = "<%=PageFlowUtil.filter(model.getFeatureScan())%>";
+            txtTimeSource.value = "<%=h(model.getFeatureScan())%>";
         }
         else
         {
@@ -47,7 +48,7 @@
 <form action="<%=model.getResultsUri()%>" method="get">
     <% if(model.getFeatureId() != null) { %>
     <input type="hidden" name="<%=MS1Controller.SimilarSearchForm.ParamNames.featureId.name()%>"
-           value="<%=PageFlowUtil.filter(model.getFeatureId())%>"/>
+           value="<%=h(model.getFeatureId())%>"/>
     <% } %>
     <table>
         <tr>
@@ -61,7 +62,7 @@
                                 value="<%=model.formatMzSource()%>"/>
                         </td>
                         <td>&#177;<input name="<%=MS1Controller.SimilarSearchForm.ParamNames.mzOffset.name()%>"
-                                         value="<%=PageFlowUtil.filter(model.getMzOffset())%>" size="7"/>
+                                         value="<%=h(model.getMzOffset())%>" size="7"/>
                             <select name="<%=MS1Controller.SimilarSearchForm.ParamNames.mzUnits.name()%>">
                                 <option value="<%=MS1Controller.SimilarSearchForm.MzOffsetUnits.ppm.name()%>"
                                         <%=model.getMzUnits() == MS1Controller.SimilarSearchForm.MzOffsetUnits.ppm ? "selected=\"1\"" : ""%>
@@ -87,7 +88,7 @@
                         </td>
                         <td>&#177;<input id="txtTimeOffset" 
                                          name="<%=MS1Controller.SimilarSearchForm.ParamNames.timeOffset.name()%>"
-                                         value="<%=PageFlowUtil.filter(model.getTimeOffset())%>" size="7"/>
+                                         value="<%=h(model.getTimeOffset())%>" size="7"/>
                             <select name="<%=MS1Controller.SimilarSearchForm.ParamNames.timeUnits.name()%>" onchange="onTimeUnitsChange(this.value);">
                                 <option value="<%=MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt.name()%>"
                                         <%=model.getTimeUnits() == MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt ? "selected=\"1\"" : ""%>

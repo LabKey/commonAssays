@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
@@ -32,7 +31,7 @@
         <td><input type="text" size="70" name="description" id="description" value="<%=h(bean.description)%>"/></td>
     </tr>
     <tr>
-        <td colspan="2"><%=PageFlowUtil.generateSubmitButton("Rename")%><%=PageFlowUtil.generateButton("Cancel", bean.returnURL)%></td>
+        <td colspan="2"><%=generateSubmitButton("Rename")%><%=generateButton("Cancel", bean.returnURL)%></td>
     </tr>
 </table>
 </form>

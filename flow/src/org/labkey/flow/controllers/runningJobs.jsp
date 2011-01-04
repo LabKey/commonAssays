@@ -50,10 +50,10 @@
 %>
     <tr><td><a href="<%=h(job.urlStatus())%>"><%=h(job.getStatusText())%></a></td>
         <td><%=h(job.getDescription())%></td>
-        <td><a href="<%=h(PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(job.getContainer()))%>"><%=h(job.getContainer().getPath())%></a></td>
+        <td><a href="<%=h(urlProvider(ProjectUrls.class).getStartURL(job.getContainer()))%>"><%=h(job.getContainer().getPath())%></a></td>
         <td><%=h(String.valueOf(job.getUser()))%></td><td><labkey:button text="Cancel" href="<%=job.urlCancel()%>"/></tr>
 <% } %>
 </table>
 <% } %>
-<labkey:link href="<%=h(PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(c))%>" text="all jobs in this folder (including completed ones)"/>
+<labkey:link href="<%=h(urlProvider(PipelineStatusUrls.class).urlBegin(c))%>" text="all jobs in this folder (including completed ones)"/>
 

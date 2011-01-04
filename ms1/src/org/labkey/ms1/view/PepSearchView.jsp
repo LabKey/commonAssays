@@ -29,10 +29,10 @@
 <p class="error"><%=model.getErrorMsg()%></p>
 <% } %>
 <form action="<%=model.getResultsUri()%>" method="get">
-    <input type="hidden" name="<%=MS1Controller.PepSearchForm.ParamNames.runIds.name()%>" value="<%=PageFlowUtil.filter(model.getRunIds())%>"/>
+    <input type="hidden" name="<%=MS1Controller.PepSearchForm.ParamNames.runIds.name()%>" value="<%=h(model.getRunIds())%>"/>
     <p>Peptide Sequence:
         <input type="text" name="<%=MS1Controller.PepSearchForm.ParamNames.pepSeq.name()%>"
-               value="<%=PageFlowUtil.filter(model.getPepSeq())%>" size="40"/>
+               value="<%=h(model.getPepSeq())%>" size="40"/>
         <%=helpPopup("Peptide Sequence", "Enter the peptide sequence to find, or multiple sequences separated by commas. Use * to match any sequence of characters.")%>
         &nbsp;
         <input id="cbxExact" type="checkbox" name="<%=MS1Controller.PepSearchForm.ParamNames.exact.name()%>"

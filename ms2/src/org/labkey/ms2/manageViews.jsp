@@ -15,10 +15,8 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.ms2.MS2Controller.ManageViewsBean" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="java.util.TreeSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -33,7 +31,7 @@
                     <input type=hidden value="<%=h(bean.getReturnURL())%>">
                     <% for (MS2Controller.DefaultViewType defaultViewType : MS2Controller.DefaultViewType.values())
                     { %>
-                        <input onchange="updateForm();" type="radio" <% if (bean.getDefaultViewType() == defaultViewType) { %>checked<% } %> name="defaultViewType" value="<%= PageFlowUtil.filter(defaultViewType.toString()) %>" id="defaultViewType<%= PageFlowUtil.filter(defaultViewType.toString()) %>"/> <%= PageFlowUtil.filter(defaultViewType.getDescription()) %><br/>
+                        <input onchange="updateForm();" type="radio" <% if (bean.getDefaultViewType() == defaultViewType) { %>checked<% } %> name="defaultViewType" value="<%=h(defaultViewType.toString()) %>" id="defaultViewType<%=h(defaultViewType.toString()) %>"/> <%=h(defaultViewType.getDescription()) %><br/>
                     <% } %>
                 </p>
                 <table class="labkey-data-region">
@@ -47,18 +45,18 @@
                     { %>
                         <tr>
                             <td>
-                                <input <% if (name.equals(bean.getViewName())) { %>checked <% } %> type="radio" name="defaultViewName" value="<%= PageFlowUtil.filter(name) %>" />
+                                <input <% if (name.equals(bean.getViewName())) { %>checked <% } %> type="radio" name="defaultViewName" value="<%=h(name) %>" />
                             </td>
                             <td>
-                                <input type="checkbox" name="viewsToDelete" value="<%= PageFlowUtil.filter(name) %>" />
+                                <input type="checkbox" name="viewsToDelete" value="<%=h(name) %>" />
                             </td>
                             <td>
-                                <%= PageFlowUtil.filter(name) %>
+                                <%=h(name) %>
                             </td>
                         </tr>
                     <% } %>
                     <tr>
-                        <td colspan="3"><%=generateSubmitButton("OK")%> <%=PageFlowUtil.generateButton("Cancel", bean.getReturnURL())%></td>
+                        <td colspan="3"><%=generateSubmitButton("OK")%> <%=generateButton("Cancel", bean.getReturnURL())%></td>
                     </tr>
                 </table>
             </form>

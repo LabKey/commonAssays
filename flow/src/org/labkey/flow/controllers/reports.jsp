@@ -60,8 +60,8 @@
         %><tr>
         <td><a href="<%=h(r.getRunReportURL(context))%>"><%=h(d.getReportName())%></a></td><%
         if (canEdit){
-        %><td><%=PageFlowUtil.generateButton("edit",editURL)%></td>
-        <td><form id="form<%=h(id)%>" method=POST action="<%=h(copyURL.getLocalURIString())%>"><%=PageFlowUtil.generateSubmitButton("copy")%></form></td>
+        %><td><%=generateButton("edit", editURL)%></td>
+        <td><form id="form<%=h(id)%>" method=POST action="<%=h(copyURL.getLocalURIString())%>"><%=generateSubmitButton("copy")%></form></td>
         <%}%>
         </tr><%
     }

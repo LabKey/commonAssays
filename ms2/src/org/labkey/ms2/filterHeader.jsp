@@ -30,12 +30,12 @@
     <table>
         <tr>
             <td valign=bottom><%=bean.applyView%></td>
-            <td valign=bottom><%=PageFlowUtil.generateSubmitButton("Go")%></td>
+            <td valign=bottom><%=generateSubmitButton("Go")%></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td valign=bottom><% if (!user.isGuest()) { %>
-                <%=PageFlowUtil.generateButton("Save View", bean.saveViewURL)%><% } %></td>
+                <%=generateButton("Save View", bean.saveViewURL)%><% } %></td>
             <td valign=bottom><% if (!user.isGuest()) { %>
-                <%=PageFlowUtil.generateButton("Manage Views", bean.manageViewsURL)%><% } %></td><%
+                <%=generateButton("Manage Views", bean.manageViewsURL)%><% } %></td><%
             if (bean.currentViewType.supportsPeptideColumnPicker())
             { %>
             <td valign=bottom>

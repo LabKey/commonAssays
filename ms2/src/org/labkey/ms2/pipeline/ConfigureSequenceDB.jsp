@@ -34,7 +34,7 @@
             <td><input type="checkbox" name="allowUpload" <%= isAllowUpload() ? "checked" : "" %>> Allow Upload</td>
         </tr>
         <tr>
-            <td><%= generateSubmitButton("Save")%> <%= generateButton("Cancel", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer())) %></td>
+            <td><%= generateSubmitButton("Save")%> <%=generateButton("Cancel", urlProvider(PipelineUrls.class).urlSetup(getContainer())) %></td>
         </tr>
     </table>
 </form>

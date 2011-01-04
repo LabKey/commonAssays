@@ -46,7 +46,7 @@
                             <option value="<%=GoTypes.PROCESS%>"<%=GoTypes.PROCESS == bean.goChartType ? " selected" : ""%>><%=GoTypes.PROCESS%></option>
                         </select>
                     </td>
-                    <td valign="middle"><%=PageFlowUtil.generateSubmitButton("Submit")%></td>
+                    <td valign="middle"><%=generateSubmitButton("Submit")%></td>
                 </tr>
             </table>
         </td>

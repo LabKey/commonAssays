@@ -69,7 +69,7 @@
     </tr>
     <tr>
       <td/>
-      <td><%=PageFlowUtil.generateSubmitButton("Load Annotations")%></td>
+      <td><%=generateSubmitButton("Load Annotations")%></td>
    </tr>
 </table>
 </form>

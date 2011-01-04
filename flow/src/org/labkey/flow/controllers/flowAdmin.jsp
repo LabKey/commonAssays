@@ -32,5 +32,5 @@
         <input size=50 type="text" id="workingDirectory" name="workingDirectory" value="<%=h(form.getWorkingDirectory())%>">
     </p>
     <labkey:button text="update" />
-    <labkey:button text="cancel" href="<%=PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL()%>" />
+    <labkey:button text="cancel" href="<%=urlProvider(AdminUrls.class).getAdminConsoleURL()%>" />
 </form>

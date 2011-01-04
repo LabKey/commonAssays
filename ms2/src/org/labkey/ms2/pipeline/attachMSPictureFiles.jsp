@@ -18,7 +18,7 @@
 <%@ page import="org.labkey.api.data.ContainerManager" %>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <form method="post">
     <table width="75%">
         <tr>
@@ -27,10 +27,10 @@
                 discovered files will be added.
                 The upgrade task may be long running but will be
                 invoked as a pipeline job; you will be able to monitor progress and view log information from
-                the <a href="<%=PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(ContainerManager.getRoot())%>">pipeline status </a>page.</td>
+                the <a href="<%=urlProvider(PipelineUrls.class).urlBegin(ContainerManager.getRoot())%>">pipeline status </a>page.</td>
     </tr>
     <tr><td>&nbsp;</td></tr>
-    <tr><td><%= PageFlowUtil.generateSubmitButton("Attach Files")%></td></tr>
+    <tr><td><%=generateSubmitButton("Attach Files")%></td></tr>
 </table>
 </form>
 

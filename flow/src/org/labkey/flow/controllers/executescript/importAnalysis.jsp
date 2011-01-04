@@ -16,30 +16,32 @@
  */
 %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page import="org.labkey.api.portal.ProjectUrls" %>
+<%@ page import="org.labkey.api.query.QueryParam" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
+<%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
+<%@ page import="org.labkey.flow.data.FlowRun" %>
+<%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="java.io.File" %>
 <%@ page import="java.sql.SQLException" %>
-<%@ page import="java.util.*" %>
-<%@ page import="org.labkey.flow.data.FlowObject" %>
-<%@ page import="org.labkey.flow.data.FlowRun" %>
-<%@ page import="org.labkey.flow.script.FlowPipelineProvider" %>
-<%@ page import="org.labkey.flow.query.FlowTableType" %>
-<%@ page import="org.labkey.api.query.QueryParam" %>
-<%@ page import="org.labkey.api.util.Path" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.HashSet" %>
+<%@ page import="java.util.Iterator" %>
+<%@ page import="java.util.LinkedHashMap" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.Set" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -49,7 +51,7 @@
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
 
-    ActionURL cancelUrl = PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(container);
+    ActionURL cancelUrl = urlProvider(ProjectUrls.class).getStartURL(container);
     boolean hasPipelineRoot = pipeRoot != null;
     boolean canSetPipelineRoot = context.getUser().isAdministrator() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
@@ -109,8 +111,8 @@
 <% if (form.getWizardStep() == AnalysisScriptController.ImportAnalysisStep.INIT) { %>
     <p>You can import results from a FlowJo workspace containing statistics that FlowJo has calculated.
         To do this, use FlowJo to save the workspace as XML.</p>
-    <%=PageFlowUtil.generateSubmitButton("Begin")%>
-    <%=PageFlowUtil.generateButton("Cancel", cancelUrl)%>
+    <%=generateSubmitButton("Begin")%>
+    <%=generateButton("Cancel", cancelUrl)%>
 <% } else if (form.getWizardStep().getNumber() < AnalysisScriptController.ImportAnalysisStep.CONFIRM.getNumber()) { %>
 
     <% if (form.getWizardStep() == AnalysisScriptController.ImportAnalysisStep.UPLOAD_WORKSPACE) { %>
@@ -198,7 +200,7 @@ Ext.onReady(function()
                     from a central location.
                     </p><%
                 if (canSetPipelineRoot) {
-                    %><%=PageFlowUtil.generateButton("Set pipeline root", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(container))%><%
+                    %><%=generateButton("Set pipeline root", urlProvider(PipelineUrls.class).urlSetup(container))%><%
                 } else {
                     %>Contact your administrator to set the pipeline root for this folder.<%
                 }
@@ -368,7 +370,7 @@ Ext.onReady(function()
                     You can safely skip this step, however no graphs can be generated
                     when importing the FlowJo workspace without the FCS files.</p><%
                 if (canSetPipelineRoot) {
-                    %><%=PageFlowUtil.generateButton("Set pipeline root", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(container))%><%
+                    %><%=generateButton("Set pipeline root", urlProvider(PipelineUrls.class).urlSetup(container))%><%
                 } else {
                     %>Contact your administrator to set the pipeline root for this folder.<%
                 }
@@ -482,9 +484,9 @@ Ext.onReady(function()
         </div>
     <% } %>
 
-    <%=PageFlowUtil.generateBackButton()%>
-    <%=PageFlowUtil.generateSubmitButton("Next")%>
-    <%=PageFlowUtil.generateButton("Cancel", cancelUrl)%>
+    <%=generateBackButton()%>
+    <%=generateSubmitButton("Next")%>
+    <%=generateButton("Cancel", cancelUrl)%>
     
 <% } else { %>
     <input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
@@ -563,8 +565,8 @@ Ext.onReady(function()
         </li>
     </ul>
 
-    <%=PageFlowUtil.generateBackButton()%>
-    <%=PageFlowUtil.generateSubmitButton("Finish")%>
-    <%=PageFlowUtil.generateButton("Cancel", cancelUrl)%>
+    <%=generateBackButton()%>
+    <%=generateSubmitButton("Finish")%>
+    <%=generateButton("Cancel", cancelUrl)%>
 <% } %>
 </form>

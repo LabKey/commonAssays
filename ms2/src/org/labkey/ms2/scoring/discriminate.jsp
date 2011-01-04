@@ -15,12 +15,10 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<%@ page import="org.labkey.api.view.ActionURL"%>
-<%@ page import="org.labkey.ms2.scoring.ScoringController" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.data.Container"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.ms2.scoring.ScoringController" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -76,7 +74,7 @@
             </table>
 </td></tr>
 <tr>
-    <td colspan="2"><%=PageFlowUtil.generateSubmitButton("Submit")%></td>
+    <td colspan="2"><%=generateSubmitButton("Submit")%></td>
 </tr>
 </table>
 </td>

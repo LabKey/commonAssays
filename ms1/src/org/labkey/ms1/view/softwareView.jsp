@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.HttpView"%>
-<%@ page import="org.labkey.ms1.model.Software" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.ms1.model.Software" %>
 <%@ page import="org.labkey.ms1.model.SoftwareParam" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<Software[]> me = (JspView<Software[]>) HttpView.currentView();
     Software[] swares = me.getModelBean();
@@ -27,15 +28,15 @@
 <table>
     <% for(Software sware : swares) {%>
     <tr class="labkey-alternate-row">
-        <td><b><%=PageFlowUtil.filter(sware.getName())%></b>
+        <td><b><%=h(sware.getName())%></b>
         <%
         String version = sware.getVersion();
         if(null != version && version.length() > 0)
-            out.print(" version " + PageFlowUtil.filter(version));
+            out.print(" version " + h(version));
 
         String author = sware.getAuthor();
         if(null != author && author.length() > 0)
-            out.print(" (" + PageFlowUtil.filter(author) + ")");
+            out.print(" (" + h(author) + ")");
 %>
         </td>
     </tr>
@@ -43,12 +44,12 @@
         <td>
             <table>
                 <% SoftwareParam[] params = sware.getParameters();
-                    if(null != params && params.length > 0)
+                    if (null != params && params.length > 0)
                     {
-                        for(SoftwareParam param : sware.getParameters()) { %>
+                        for (SoftwareParam param : sware.getParameters()) { %>
                 <tr>
-                    <td><%=PageFlowUtil.filter(param.getName())%>:</td>
-                    <td><%=PageFlowUtil.filter(param.getValue())%></td>
+                    <td><%=h(param.getName())%>:</td>
+                    <td><%=h(param.getValue())%></td>
                 </tr>
                 <%}}%>
             </table>
