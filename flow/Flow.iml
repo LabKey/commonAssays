@@ -24,15 +24,6 @@
     </orderEntry>
     <orderEntry type="module" module-name="API" />
     <orderEntry type="module" module-name="FlowGWT" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/xercesImpl.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
   </component>
 </module>
 
