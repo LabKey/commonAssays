@@ -26,7 +26,7 @@ public class StatisticMethod extends AbstractTableMethodInfo
     ColumnInfo _objectIdColumn;
     public StatisticMethod(ColumnInfo objectIdColumn)
     {
-        super(Types.DOUBLE);
+        super(JdbcType.DOUBLE);
         _objectIdColumn = objectIdColumn;
     }
 

@@ -27,7 +27,7 @@ public class KeywordMethod extends AbstractTableMethodInfo
     ColumnInfo _objectIdColumn;
     public KeywordMethod(ColumnInfo objectIdColumn)
     {
-        super(Types.VARCHAR);
+        super(JdbcType.VARCHAR);
         _objectIdColumn = objectIdColumn;
     }
 

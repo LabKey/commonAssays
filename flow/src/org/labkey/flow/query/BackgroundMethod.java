@@ -18,6 +18,7 @@ package org.labkey.flow.query;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.snapshot.AbstractTableMethodInfo;
@@ -32,7 +33,7 @@ public class BackgroundMethod extends AbstractTableMethodInfo
 
     public BackgroundMethod(FlowSchema schema, ColumnInfo objectIdColumn)
     {
-        super(Types.DOUBLE);
+        super(JdbcType.DOUBLE);
         _schema = schema;
         _objectIdColumn = objectIdColumn;
     }
