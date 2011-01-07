@@ -18,6 +18,7 @@ package org.labkey.viability;
 
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.study.actions.StudyPickerColumn;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.GUID;
@@ -215,7 +216,11 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 col.setInputLength(rdp != null ? rdp.inputLength : 9);
 
                 DisplayColumn displayCol;
-                if (propertyName.equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
+                if (propertyName.equals(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME))
+                {
+                    displayCol = new StudyPickerColumn(col, inputName);
+                }
+                else if (propertyName.equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
                 {
                     List<String> values = (List<String>) initialValue;
                     displayCol = new MultiValueInputColumn(col, values);

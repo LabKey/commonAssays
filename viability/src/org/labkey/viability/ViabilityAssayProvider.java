@@ -110,6 +110,12 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         {
             return FieldKey.fromParts(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
         }
+
+        @Override
+        protected FieldKey getTargetStudyFieldKeyOnResults()
+        {
+            return new FieldKey(getResultRowIdFieldKey(), AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME);
+        }
     }
 
     /*package*/ static class ResultDomainProperty
@@ -322,13 +328,18 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return getResultDomainUserProperties(getResultsDomain(protocol));
     }
 
+    public static boolean isResultDomainUserProperty(DomainProperty property)
+    {
+        return RESULT_DOMAIN_PROPERTIES.containsKey(property.getName());
+    }
+
     public static DomainProperty[] getResultDomainUserProperties(Domain resultsDomain)
     {
         DomainProperty[] allProperties = resultsDomain.getProperties();
         List<DomainProperty> filtered = new ArrayList<DomainProperty>(allProperties.length);
         for (DomainProperty property : allProperties)
         {
-            if (RESULT_DOMAIN_PROPERTIES.containsKey(property.getName()))
+            if (isResultDomainUserProperty(property))
                 continue;
             filtered.add(property);
         }
