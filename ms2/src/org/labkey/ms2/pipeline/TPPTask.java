@@ -24,8 +24,10 @@ import org.labkey.api.util.ProtXMLFileType;
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.RandomAccessFile;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.Arrays;
@@ -261,6 +263,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 pepXMLAction.addInput(fileInput, "RawPepXML");
             }
 
+            boolean proteinProphetOutput = getJobSupport().isProphetEnabled();
             if (inputFiles.size() > 0)
             {
                 WorkDirectory.CopyingResource lock = null;
@@ -406,8 +409,46 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             // tell TPP tools not to mess with tmpdirs, we handle this at higher level
             builder.environment().put("WEBSERVER_TMP","");
 
-           
-            getJob().runSubProcess(builder, _wd.getDir());
+            try
+            {
+                getJob().runSubProcess(builder, _wd.getDir());
+            }
+            catch (ToolExecutionException e)
+            {
+                // We want to ignore the ProteinProphet error that results if PeptideProphet fails to model
+                // all change states. It results in an exit code of 1 from xinteract
+                boolean ignoreError = false;
+                if (e.getExitCode() == 1)
+                {
+                    File logFile = getJob().getLogFile();
+                    RandomAccessFile file = new RandomAccessFile(logFile, "r");
+                    try
+                    {
+                        // Look at the last 1K of the log file
+                        file.seek(Math.max(0, file.length() - 1024));
+                        String line;
+                        while ((line = file.readLine()) != null)
+                        {
+                            // Check for the specific error message to make sure we don't silently continue for
+                            // other types of errors that create the same exit code
+                            if (line.endsWith(": no data - quitting"))
+                            {
+                                // Safe to ignore error, and don't expect a prot.xml output file
+                                proteinProphetOutput = false;
+                                ignoreError = true;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        try { file.close(); } catch (IOException ioe) {}
+                    }
+                }
+                if (!ignoreError)
+                {
+                    throw e;
+                }
+            }
 
             WorkDirectory.CopyingResource lock = null;
             try
@@ -420,7 +461,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
                 File fileProtXML = null;
 
-                if (getJobSupport().isProphetEnabled())
+                if (proteinProphetOutput)
                 {
                     // If we ran ProteinProphet, set up a step with the right inputs and outputs
                     File fileWorkProtXML = _wd.newFile(FT_PROT_XML);

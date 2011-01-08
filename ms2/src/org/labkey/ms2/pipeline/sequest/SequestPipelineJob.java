@@ -17,7 +17,6 @@ package org.labkey.ms2.pipeline.sequest;
 
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 
@@ -32,11 +31,9 @@ import java.util.List;
  *
  * @author bmaclean
  */
-public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements SequestSearchTask.JobSupport
+public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
 {
     private static TaskId _tid = new TaskId(SequestPipelineJob.class);
-
-    private String _sequestServer;
 
     public SequestPipelineJob(SequestSearchProtocol protocol,
                               ViewBackgroundInfo info,
@@ -49,22 +46,12 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements 
     {
         super(protocol, SequestLocalPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
-        AppProps appProps = AppProps.getInstance();
-        _sequestServer = appProps.getSequestServer();
-
         header("Sequest search for " + getBaseName());
     }
 
     public SequestPipelineJob(SequestPipelineJob job, File fileFraction)
     {
         super(job, fileFraction);
-
-        _sequestServer = job._sequestServer;
-    }
-
-    public String getSequestServer()
-    {
-        return _sequestServer;
     }
 
     public AbstractFileAnalysisJob createSingleFileJob(File file)

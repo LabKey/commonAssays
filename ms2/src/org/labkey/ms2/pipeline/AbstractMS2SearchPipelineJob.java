@@ -46,7 +46,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     public static String getRawPepXMLSuffix()
     {
         PepXMLFileType pepxft = new PepXMLFileType();
-        return "_raw."+pepxft.getDefaultRole();
+        return "_raw." + pepxft.getDefaultRole();
     }
 
     // useful for constructing a filename for creation, will append .gz if indicated

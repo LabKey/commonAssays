@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline.sequest;
 
+import org.apache.commons.io.FileUtils;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
@@ -22,7 +23,11 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.*;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -31,9 +36,6 @@ import java.util.*;
 public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.Factory>
 {
     private static final String SEQUEST_PARAMS = "sequest.params";
-    private static final String REMOTE_PARAMS = "remote.params";
-
-    private static final FileType FT_SPECTRA_ARCHIVE = new FileType(".pep.tgz");
 
     private static final String ACTION_NAME = "Sequest Search";
 
@@ -44,20 +46,11 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         return AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis,baseName,gzSupport);
     }
 
-    /**
-     * Interface for support required from the PipelineJob to run this task,
-     * beyond the base PipelineJob methods.
-     */
-    public interface JobSupport extends MS2SearchJobSupport
-    {
-        /**
-         * Returns Sequest server name.
-         */
-        String getSequestServer();
-    }
-
     public static class Factory extends AbstractMS2SearchTaskFactory<Factory>
     {
+        private String _executable;
+        private List<String> _sequestOptions = new ArrayList<String>();
+
         public Factory()
         {
             super(SequestSearchTask.class);
@@ -70,7 +63,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
         public boolean isJobComplete(PipelineJob job)
         {
-            JobSupport support = (JobSupport) job;
+            SequestPipelineJob support = (SequestPipelineJob) job;
             String baseName = support.getBaseName();
             String baseNameJoined = support.getJoinedBaseName();
             File dirAnalysis = support.getAnalysisDirectory();
@@ -91,6 +84,26 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         {
             return "sequest";
         }
+
+        public String getExecutable()
+        {
+            return _executable;
+        }
+
+        public void setExecutable(String executable)
+        {
+            _executable = executable;
+        }
+
+        public List<String> getSequestOptions()
+        {
+            return _sequestOptions;
+        }
+
+        public void setSequestOptions(List<String> sequestOptions)
+        {
+            _sequestOptions = sequestOptions;
+        }
     }
 
     protected SequestSearchTask(Factory factory, PipelineJob job)
@@ -98,9 +111,9 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         super(factory, job);
     }
 
-    public JobSupport getJobSupport()
+    public SequestPipelineJob getJobSupport()
     {
-        return getJob().getJobSupport(JobSupport.class);
+        return (SequestPipelineJob)getJob();
     }
 
     public RecordedActionSet run() throws PipelineJobException
@@ -114,88 +127,74 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
             RecordedAction action = new RecordedAction(ACTION_NAME);
 
-            File fileParamsLocal = new File(getJobSupport().getAnalysisDirectory(), SEQUEST_PARAMS);
-            File fileWorkParamsLocal = _wd.newFile(SEQUEST_PARAMS);
-            if (!NetworkDrive.exists(fileParamsLocal))
-            {
-                // Never write directly to the results directory.  Always write to
-                // a working directory, and rename to results, to avoid file truncation in
-                // case of failure.
-                writeSequestV1ParamFile(fileWorkParamsLocal, params);
-                _wd.outputFile(fileWorkParamsLocal);
-            }
-            
-            File fileWorkParamsRemote = _wd.newFile(REMOTE_PARAMS);
-            writeSequestV2ParamFile(fileWorkParamsRemote, params);
-
             File dirOutputDta = new File(_wd.getDir(), getJobSupport().getBaseName());
-            File fileWorkTgz = _wd.newFile(FT_SPECTRA_ARCHIVE);
+            File fileMzXML = _factory.findInputFile(getJobSupport().getDataDirectory(), getJobSupport().getBaseName());
+            String tppVersion = TPPTask.getTPPVersion(getJob());
+
+            // Translate the mzXML file to dta using MzXML2Search
+            convertToDTA(params, dirOutputDta, fileMzXML, tppVersion);
+            File dtaListFile = writeDtaList(dirOutputDta);
+
+            // Write out sequest.params file
+            File fileWorkParams = _wd.newFile(SEQUEST_PARAMS);
+            writeSequestV2ParamFile(fileWorkParams, params);
+            // Have a copy in both the work directory to retain with the results, and in the dta subdirectory for
+            // Sequest to use
+            FileUtils.copyFileToDirectory(fileWorkParams, dirOutputDta);
+
+            // Perform Sequest search
+            List<String> sequestArgs = new ArrayList<String>();
+            sequestArgs.add(_factory.getExecutable());
+            sequestArgs.addAll(_factory.getSequestOptions());
+            sequestArgs.add("-R" + dtaListFile.getAbsolutePath());
+            sequestArgs.add("-F" + dirOutputDta.getAbsolutePath());
+            // Trailing argument that makes Sequest not barf
+            sequestArgs.add("x");
+            ProcessBuilder sequestPB = new ProcessBuilder(sequestArgs);
+            getJob().runSubProcess(sequestPB, dirOutputDta);
+
+            // Convert to pepXML using out2xml
+            List<String> out2XMLArgs = new ArrayList<String>();
+            out2XMLArgs.add(PipelineJobService.get().getExecutablePath("out2xml", "tpp", tppVersion, getJob().getLogger()));
+            String enzyme =
+                new SequestParamsV2Builder(params, null).getSupportedEnzyme(params.get("protein, cleavage site"));
+            Out2XmlParams out2XmlParams = new Out2XmlParams();
+            out2XMLArgs.add(dirOutputDta.getName());
+            out2XMLArgs.add("1");
+            out2XMLArgs.add("-all");
+            out2XmlParams.getParam("-E").setValue(enzyme);
+            out2XMLArgs.addAll(convertParams(out2XmlParams.getParams(), params));
+            ProcessBuilder out2XMLPB = new ProcessBuilder(out2XMLArgs);
+            getJob().runSubProcess(out2XMLPB, _wd.getDir());
+
+            File pepXmlFile = TPPTask.getPepXMLFile(_wd.getDir(), getJobSupport().getBaseName());
+            if (!pepXmlFile.exists())
+                throw new IOException("Failed running out2xml or Sequest - could not find expected file: " + pepXmlFile);
+
+            if (!FileUtil.deleteDir(dirOutputDta))
+                throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());
+
             File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
                     getJobSupport().getBaseName(),
                     getJobSupport().getGZPreference());
 
-            /*
-            0. pre-Sequest search: c) translate the mzXML file to dta for Sequest (MzXML2Search)
-            */
-            if (!dirOutputDta.mkdir())
-                throw new IOException("Failed to create output directory for DTA files '" + dirOutputDta + "'.");
-            ArrayList<String> command = new ArrayList<String>();
-            String ver = TPPTask.getTPPVersion(getJob());
-            command.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver, getJob().getLogger()));
-            command.add("-dta");
-            command.add("-O" + dirOutputDta.getName());
-            Mzxml2SearchParams mzXml2SearchParams = new Mzxml2SearchParams();
-            Collection<String> inputXmlParams = convertParams(mzXml2SearchParams.getParams(), params);
-            command.addAll(inputXmlParams);
-            File fileMzXML = _factory.findInputFile(getJobSupport().getDataDirectory(), getJobSupport().getBaseName());
-            command.add(fileMzXML.getAbsolutePath());
-
-            getJob().runSubProcess(new ProcessBuilder(command), _wd.getDir());
-
-            String enzyme =
-                SequestParamsBuilderFactory.createVersion1Builder(params, null).getSupportedEnzyme(params.get("protein, cleavage site"));
-            Out2XmlParams out2XmlParams = new Out2XmlParams();
-            out2XmlParams.getParam("-E").setValue(enzyme);
-            inputXmlParams.addAll(convertParams(out2XmlParams.getParams(), params));
-
-            /*
-            1. perform Sequest search
-            */
-            SequestClientImpl sequestClient = new SequestClientImpl(getJobSupport().getSequestServer(),
-                    getJob().getLogger());
-            String sequenceRoot = getJobSupport().getSequenceRootDirectory().getAbsolutePath() + File.separator;
-            int iReturn = sequestClient.search(sequenceRoot,
-                    fileWorkParamsRemote.getAbsolutePath(),
-                    fileMzXML.getAbsolutePath(),
-                    fileWorkPepXMLRaw.getAbsolutePath(),
-                    inputXmlParams);
-
-            if (iReturn != 0 || !fileWorkPepXMLRaw.exists())
-                throw new IOException("Failed running Sequest.");
-
-            // TODO: This limits SequestSearchTask to running only on LabKey Server
-            String exePath = PipelineJobService.get().getExecutablePath("tar", null, null, getJob().getLogger());
-            getJob().runSubProcess(new ProcessBuilder(exePath,
-                    "czf", fileWorkTgz.getAbsolutePath(), "."), dirOutputDta);
-
-            if (!FileUtil.deleteDir(dirOutputDta))
-                throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());
+            if (!pepXmlFile.renameTo(fileWorkPepXMLRaw))
+            {
+                throw new PipelineJobException("Failed to rename " + pepXmlFile + " to " + fileWorkPepXMLRaw);
+            }
 
             // TODO: TGZ file is only required to get spectra loaded into CPAS.  Fix to use mzXML instead.
             WorkDirectory.CopyingResource lock = null;
             try
             {
                 lock = _wd.ensureCopyingLock();
-                action.addOutput(_wd.outputFile(fileWorkTgz), "TGZ", false);
+                action.addOutput(_wd.outputFile(fileWorkParams), "SequestParams", true);
                 action.addOutput(_wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
             }
             finally
             {
                 if (lock != null) { lock.release(); }
             }
-
-            _wd.discardFile(fileWorkParamsLocal);
-            _wd.discardFile(fileWorkParamsRemote);
 
             for (File file : getJobSupport().getSequenceFiles())
             {
@@ -213,6 +212,50 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         {
             throw new PipelineJobException(e);
         }
+    }
+
+    private void convertToDTA(Map<String, String> params, File dirOutputDta, File fileMzXML, String tppVersion)
+            throws IOException, SequestParamsException, PipelineJobException
+    {
+        if (!dirOutputDta.mkdir())
+            throw new IOException("Failed to create output directory for DTA files '" + dirOutputDta + "'.");
+        ArrayList<String> mzXML2SearchArgs = new ArrayList<String>();
+        mzXML2SearchArgs.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", tppVersion, getJob().getLogger()));
+        mzXML2SearchArgs.add("-dta");
+        mzXML2SearchArgs.add("-O" + dirOutputDta.getName());
+        Mzxml2SearchParams mzXml2SearchParams = new Mzxml2SearchParams();
+        Collection<String> inputXmlParams = convertParams(mzXml2SearchParams.getParams(), params);
+        mzXML2SearchArgs.addAll(inputXmlParams);
+        mzXML2SearchArgs.add(fileMzXML.getAbsolutePath());
+
+        getJob().runSubProcess(new ProcessBuilder(mzXML2SearchArgs), _wd.getDir());
+    }
+
+    private File writeDtaList(File dirOutputDta) throws IOException
+    {
+        File[] dtaFiles = dirOutputDta.listFiles(new FilenameFilter()
+        {
+            public boolean accept(File dir, String name)
+            {
+                return name.toLowerCase().endsWith(".dta");
+            }
+        });
+        File result = new File(dirOutputDta, "DtaFiles.txt");
+        OutputStream out = null;
+        try
+        {
+            out = new FileOutputStream(result);
+            PrintWriter writer = new PrintWriter(out);
+            for (File dtaFile : dtaFiles)
+            {
+                writer.println(dtaFile.getName());
+            }
+        }
+        finally
+        {
+            if (out != null) { try { out.close(); } catch (IOException e) {} }
+        }
+        return result;
     }
 
     Collection<String> convertParams(Collection<Param> converters, Map<String, String> paramsXml) throws SequestParamsException
@@ -241,27 +284,15 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         return paramsCmd;
     }
 
-    private void writeSequestV1ParamFile(File fileParams, Map<String, String> params) throws SequestParamsException
-    {
-        File sequenceRoot = getJobSupport().getSequenceRootDirectory();
-        writeSequestParamFile(fileParams,
-            SequestParamsBuilderFactory.createVersion1Builder(params, sequenceRoot));
-    }
-
     private void writeSequestV2ParamFile(File fileParams, Map<String, String> params) throws SequestParamsException
     {
         File sequenceRoot = getJobSupport().getSequenceRootDirectory();
-        writeSequestParamFile(fileParams,
-            SequestParamsBuilderFactory.createVersion2Builder(params, sequenceRoot));
-    }
-
-    private void writeSequestParamFile(File fileParams, SequestParamsBuilder builder)
-            throws SequestParamsException
-    {
+        SequestParamsBuilder builder = new SequestParamsV2Builder(params, sequenceRoot);
         String parseError = builder.initXmlValues();
         if (!"".equals(parseError))
             throw new SequestParamsException(parseError);
 
         builder.writeFile(fileParams);
     }
+
 }
