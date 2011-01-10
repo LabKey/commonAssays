@@ -56,9 +56,12 @@ import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.reports.ControlsQCReport;
 import org.labkey.flow.script.FlowPipelineProvider;
-import org.labkey.flow.webparts.*;
+import org.labkey.flow.webparts.AnalysesWebPart;
+import org.labkey.flow.webparts.AnalysisScriptsWebPart;
+import org.labkey.flow.webparts.FlowFolderType;
+import org.labkey.flow.webparts.FlowSummaryWebPart;
+import org.labkey.flow.webparts.OverviewWebPart;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;

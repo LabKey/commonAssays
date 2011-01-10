@@ -38,20 +38,12 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
 
-public class LogController extends BaseFlowController<LogController.Action>
+public class LogController extends BaseFlowController
 {
-    public enum Action
-    {
-        begin,
-        showLog,
-    }
-
-
-    static DefaultActionResolver _actionResolver = new DefaultActionResolver(LogController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(LogController.class);
 
     public LogController() throws Exception
     {
-        super();
         setActionResolver(_actionResolver);
     }
 
