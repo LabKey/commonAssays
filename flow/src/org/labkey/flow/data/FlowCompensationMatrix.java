@@ -127,7 +127,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         if (channelNames.size() == 0)
             return null;
         CompensationMatrix ret = new CompensationMatrix("Compensation");
-        String[] arrChannelNames = channelNames.toArray(new String[0]);
+        String[] arrChannelNames = channelNames.toArray(new String[channelNames.size()]);
 
         for (int iChannel = 0; iChannel < arrChannelNames.length; iChannel ++)
         {
@@ -144,7 +144,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
 
     public ActionURL urlShow()
     {
-        return urlFor(CompensationController.Action.showCompensation);
+        return urlFor(CompensationController.ShowCompensationAction.class);
     }
 
     public void addParams(Map<FlowParam, Object> map)

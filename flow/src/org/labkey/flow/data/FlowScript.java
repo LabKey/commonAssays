@@ -16,7 +16,6 @@
 
 package org.labkey.flow.data;
 
-//import org.apache.log4j.Logger;
 import org.fhcrc.cpas.flow.script.xml.ChannelDef;
 import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
@@ -39,6 +38,7 @@ import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.script.FlowAnalyzer;
+import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -51,14 +51,7 @@ import java.util.Map;
 
 public class FlowScript extends FlowDataObject
 {
-//    private static final Logger _log = Logger.getLogger(FlowScript.class);
-    public static final String STAT_COLUMN_PREFIX = "statistic.";
-    public static final String KEYWORD_COLUMN_PREFIX = "keyword.";
-    public static final String DEFAULT_UPLOAD_PROTOCOL_NAME = "Default Upload Settings";
-    public static final String PRIVATE_SCRIPT_SUFFIX = "_modified";
-
     private String strScript;
-
 
     static public FlowScript fromScriptId(int id)
     {
@@ -105,18 +98,6 @@ public class FlowScript extends FlowDataObject
             if (script.isPrivate())
                 continue;
             ret.add(script);
-        }
-        return ret.toArray(new FlowScript[ret.size()]);
-    }
-
-    static public FlowScript[] getUploadRunProtocols(Container container) throws SQLException
-    {
-        FlowScript[] all = getScripts(container);
-        List<FlowScript> ret = new ArrayList<FlowScript>();
-        for (FlowScript prot : all)
-        {
-            if (prot.hasStep(FlowProtocolStep.keywords))
-                ret.add(prot);
         }
         return ret.toArray(new FlowScript[ret.size()]);
     }
@@ -225,7 +206,7 @@ public class FlowScript extends FlowDataObject
 
     public ActionURL urlShow()
     {
-        return urlFor(AnalysisScriptController.Action.begin);
+        return urlFor(AnalysisScriptController.BeginAction.class);
     }
 
     public String getLabel()
@@ -312,34 +293,9 @@ public class FlowScript extends FlowDataObject
         return FlowAnalyzer.makeAnalysis(script.getSettings(), script.getAnalysis());
     }
 
-    public String getProtocolType()
+    public ActionURL urlFor(Class<? extends Controller> actionClass, FlowProtocolStep step)
     {
-        StringBuilder ret = new StringBuilder();
-        String strAnd = "";
-        if (hasStep(FlowProtocolStep.keywords))
-        {
-            strAnd = " and ";
-            ret.append("Upload");
-        }
-        if (hasStep(FlowProtocolStep.calculateCompensation))
-        {
-            ret.append(strAnd);
-            strAnd = " and ";
-            ret.append("Compensation");
-        }
-        if (hasStep(FlowProtocolStep.analysis))
-        {
-            ret.append(strAnd);
-            ret.append("Analysis");
-        }
-        if (ret.length() == 0)
-            return "None";
-        return ret.toString();
-    }
-
-    public ActionURL urlFor(Enum action, FlowProtocolStep step)
-    {
-        ActionURL ret = super.urlFor(action);
+        ActionURL ret = super.urlFor(actionClass);
         step.addParams(ret);
         return ret;
     }

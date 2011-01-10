@@ -33,7 +33,7 @@
     FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
 %>
 <labkey:errors/>
-<form action="<%=form.urlFor(ScriptController.Action.editSettings)%>" method="POST">
+<form action="<%=form.urlFor(ScriptController.EditSettingsAction.class)%>" method="POST">
     <table>
         <tr class="labkey-wp-header"><td>Filter FCS files by keyword:</td></tr>
         <tr><td>
@@ -41,7 +41,7 @@
             value pairs <i>must</i> all match in the FCS header to be included in the analysis.
         <% if (protocol != null) { %>
             Alternatively, you may
-            <a href="<%= protocol.urlFor(ProtocolController.Action.editFCSAnalysisFilter) %>">create protocol filters</a>
+            <a href="<%= protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class) %>">create protocol filters</a>
             that will be applied to all analysis scripts in the project folder.
         <% } %>
         </td></tr>
@@ -85,9 +85,9 @@
 
     <% if (canEdit) { %>
         <labkey:button text="Update" />
-        <labkey:button text="Cancel" href="<%=form.urlFor(ScriptController.Action.begin)%>" />
+        <labkey:button text="Cancel" href="<%=form.urlFor(ScriptController.BeginAction.class)%>" />
     <% } else { %>
-        <labkey:button text="Go Back" href="<%=form.urlFor(ScriptController.Action.begin)%>" />
+        <labkey:button text="Go Back" href="<%=form.urlFor(ScriptController.BeginAction.class)%>" />
     <% } %>
 
     <p/>
@@ -120,9 +120,9 @@
 
 <% if (canEdit) { %>
     <labkey:button text="Update" />
-    <labkey:button text="Cancel" href="<%=form.urlFor(ScriptController.Action.begin)%>" />
+    <labkey:button text="Cancel" href="<%=form.urlFor(ScriptController.BeginAction.class)%>" />
 <% } else { %>
-    <labkey:button text="Go Back" href="<%=form.urlFor(ScriptController.Action.begin)%>" /> 
+    <labkey:button text="Go Back" href="<%=form.urlFor(ScriptController.BeginAction.class)%>" />
 <% } %>
 </form>
 

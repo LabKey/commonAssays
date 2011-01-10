@@ -37,8 +37,7 @@
         return ret.toString();
     }
 %>
-<%=pageHeader(ScriptController.Action.uploadAnalysis)%>
-<form method="POST" action="<%=formAction(ScriptController.Action.uploadAnalysis)%>" enctype="multipart/form-data">
+<form method="POST" action="<%=formAction(ScriptController.UploadAnalysisAction.class)%>" enctype="multipart/form-data">
     <% if (form.workspaceObject != null)
     { %>
     <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form.workspaceObject)%>">

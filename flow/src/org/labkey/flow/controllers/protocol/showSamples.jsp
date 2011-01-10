@@ -15,17 +15,17 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController"%>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.Action"%>
-<%@ page import="org.labkey.flow.data.FlowProtocol" %>
-<%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>
-<%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
-<%@ page import="org.labkey.flow.data.FlowFCSFile" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.labkey.flow.persist.FlowManager" %>
+<%@ page import="org.labkey.api.exp.api.ExpMaterial"%>
+<%@ page import="org.labkey.api.exp.api.ExpSampleSet"%>
+<%@ page import="org.labkey.api.query.QueryAction"%>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleSetAction" %>
+<%@ page import="org.labkey.flow.data.FlowFCSFile" %>
+<%@ page import="org.labkey.flow.data.FlowProtocol" %>
+<%@ page import="org.labkey.flow.persist.FlowManager" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
-<%@ page import="org.labkey.api.query.QueryAction" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -44,7 +44,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=samples.length%> sample descripti
 
 <% if (protocol.getSampleSetJoinFields().size() == 0) { %>
     <p>
-    <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Join samples to FCS File Data" /><br>
+    <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Join samples to FCS File Data" /><br>
     No sample join fields have been defined yet.  The samples are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.
 <% } else { %>
     <%
@@ -107,9 +107,9 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=samples.length%> sample descripti
         <labkey:link href="<%=ss.detailsURL()%>" text="Show sample set"/><br>
         <labkey:link href="<%=protocol.urlUploadSamples(true)%>" text="Upload more samples from a spreadsheet" /><br>
         <% if (protocol.getSampleSetJoinFields().size() != 0) { %>
-            <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Modify sample join fields" /><br>
+            <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Modify sample join fields" /><br>
         <% } else { %>
-            <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Join samples to FCS File Data" /><br>
+            <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Join samples to FCS File Data" /><br>
         <% } %>
     </p>
     <% } %>

@@ -22,7 +22,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% CopyProtocolForm form = (CopyProtocolForm) this.form; %>
 <labkey:errors/>
-<form action="<%=urlFor(ScriptController.Action.copy)%>" method="POST">
+<form action="<%=formAction(ScriptController.CopyAction.class)%>" method="POST">
     <p>
         What do you want to call the new script?<br>
         <input type="text" name="name" value="<%=h(form.name)%>">

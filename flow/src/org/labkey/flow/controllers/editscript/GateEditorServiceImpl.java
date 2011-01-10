@@ -454,7 +454,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             }
             PlotInfo plotInfo = FCSAnalyzer.get().generateDesignGraph(FlowAnalyzer.getFCSUri(well), comp == null ? null : comp.getCompensationMatrix(), group, graphSpec, graphOptions.width, graphOptions.height, false);
             GWTGraphInfo graphInfo = makeGraphInfo(plotInfo);
-            ActionURL url = script.urlFor(ScriptController.Action.graphImage);
+            ActionURL url = script.urlFor(ScriptController.GraphImageAction.class);
             well.addParams(url);
             if (comp != null)
             {

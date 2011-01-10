@@ -20,83 +20,96 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlObject;
-import org.fhcrc.cpas.flow.script.xml.*;
+import org.fhcrc.cpas.flow.script.xml.AnalysisDef;
+import org.fhcrc.cpas.flow.script.xml.FilterDef;
+import org.fhcrc.cpas.flow.script.xml.FiltersDef;
+import org.fhcrc.cpas.flow.script.xml.GraphDef;
+import org.fhcrc.cpas.flow.script.xml.OpDef;
+import org.fhcrc.cpas.flow.script.xml.ParameterDef;
+import org.fhcrc.cpas.flow.script.xml.ScriptDef;
+import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.fhcrc.cpas.flow.script.xml.SettingsDef;
+import org.fhcrc.cpas.flow.script.xml.StatisticDef;
+import org.fhcrc.cpas.flow.script.xml.SubsetDef;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.permissions.*;
+import org.labkey.api.security.permissions.DeletePermission;
+import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.GWTView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
 import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.flow.ScriptParser;
-import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.model.Analysis;
+import org.labkey.flow.analysis.model.CompensationCalculation;
+import org.labkey.flow.analysis.model.FlowException;
+import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.analysis.model.Gate;
+import org.labkey.flow.analysis.model.IntervalGate;
 import org.labkey.flow.analysis.model.Polygon;
+import org.labkey.flow.analysis.model.PolygonGate;
+import org.labkey.flow.analysis.model.Population;
+import org.labkey.flow.analysis.model.PopulationSet;
+import org.labkey.flow.analysis.model.RegionGate;
+import org.labkey.flow.analysis.model.ScriptComponent;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.PlotInfo;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.BaseFlowController;
-import org.labkey.flow.data.*;
+import org.labkey.flow.data.FlowObject;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowRunWorkspace;
+import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-import org.w3c.dom.Element;
+import org.springframework.web.servlet.mvc.Controller;
 
 import javax.imageio.ImageIO;
-import javax.servlet.ServletException;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * User: kevink
  * Date: Nov 25, 2008 5:27:35 PM
  */
-public class ScriptController extends BaseFlowController<ScriptController.Action>
+public class ScriptController extends BaseFlowController
 {
     private static Logger _log = Logger.getLogger(ScriptController.class);
 
-    public enum Action
-    {
-        begin,
-        editScript,
-        newProtocol,
-        editSettings,
-        editProperties,
-        editCompensationCalculation,
-        showCompensationCalulation,
-        uploadCompensationCalculation,
-        chooseCompensationRun,
-        editAnalysis,
-        editGateTree,
-        uploadAnalysis,
-        graphImage,
-        copy,
-        delete,
-        gateEditor,
-    }
-
-    static SpringActionController.DefaultActionResolver _actionResolver =
-            new SpringActionController.DefaultActionResolver(ScriptController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ScriptController.class);
 
     public ScriptController() throws Exception
     {
-        super();
         setActionResolver(_actionResolver);
     }
 
@@ -133,7 +146,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
                     error = validateScript(script);
                     if (error == null)
                     {
-                        ActionURL forward = form.urlFor(ScriptController.Action.editScript);
+                        ActionURL forward = form.urlFor(ScriptController.EditScriptAction.class);
                         return HttpView.redirect(forward);
                     }
                 }
@@ -227,35 +240,6 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
         return ret;
     }
 
-    static public ScriptDocument ensureScript(FlowScript analysisScript) throws ServletException
-    {
-        try
-        {
-            return analysisScript.getAnalysisScriptDocument();
-        }
-        catch (Exception e)
-        {
-            ActionURL redirect = analysisScript.urlFor(Action.editScript);
-            redirect.addParameter("checkSyntax", "1");
-            HttpView.throwRedirect(redirect.toString());
-            return null;
-        }
-    }
-
-    static void setAttribute(XmlObject obj, String attribute, String value)
-    {
-        Element el = (Element) obj.getDomNode();
-        value = StringUtils.trimToNull(value);
-        if (value == null)
-        {
-            el.removeAttribute(attribute);
-        }
-        else
-        {
-            el.setAttribute(attribute, value);
-        }
-    }
-
     @RequiresPermissionClass(UpdatePermission.class)
     public class EditAnalysisAction extends SimpleViewAction<AnalysisForm>
     {
@@ -281,7 +265,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
         {
             try
             {
-                Set<StatisticSpec> stats = new LinkedHashSet();
+                Set<StatisticSpec> stats = new LinkedHashSet<StatisticSpec>();
                 StringTokenizer stStats = new StringTokenizer(StringUtils.trimToEmpty(form.statistics), "\n");
                 while (stStats.hasMoreElements())
                 {
@@ -291,7 +275,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
                         stats.add(new StatisticSpec(strStat));
                     }
                 }
-                Set<GraphSpec> graphs = new LinkedHashSet();
+                Set<GraphSpec> graphs = new LinkedHashSet<GraphSpec>();
                 StringTokenizer stGraphs = new StringTokenizer(StringUtils.trimToEmpty(form.graphs), "\n");
                 while (stGraphs.hasMoreElements())
                 {
@@ -301,7 +285,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
                         graphs.add(new GraphSpec(strGraph));
                     }
                 }
-                Set<SubsetSpec> subsets = new LinkedHashSet();
+                Set<SubsetSpec> subsets = new LinkedHashSet<SubsetSpec>();
                 StringTokenizer stSubsets = new StringTokenizer(StringUtils.trimToEmpty(form.subsets), "\n");
                 while (stSubsets.hasMoreElements())
                 {
@@ -372,11 +356,6 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
     {
         public F form;
 
-        public String pageHeader(Action action)
-        {
-            return "";
-        }
-
         public void setForm(F form)
         {
             this.form = form;
@@ -392,24 +371,9 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
             return form.analysisScript;
         }
 
-        public FlowProtocolStep getStep()
+        public String formAction(Class<? extends Controller> actionClass)
         {
-            return form.step;
-        }
-
-        public PopulationSet getAnalysis() throws Exception
-        {
-            return this.form.getAnalysis();
-        }
-
-        public String formAction(Action action)
-        {
-            return urlFor(action).toString();
-        }
-
-        public ActionURL urlFor(Action action)
-        {
-            return form.urlFor(action);
+            return form.urlFor(actionClass).toString();
         }
     }
 
@@ -419,7 +383,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
         {
             if (form.workspaceObject == null)
                 return new String[0];
-            List<String> ret = new ArrayList();
+            List<String> ret = new ArrayList<String>();
             for (Analysis analysis : form.workspaceObject.getGroupAnalyses().values())
             {
                 if (analysis.getPopulations().size() > 0)
@@ -427,14 +391,16 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
                     ret.add(analysis.getName());
                 }
             }
-            return ret.toArray(new String[0]);
+            return ret.toArray(new String[ret.size()]);
         }
 
         public Map<String, String> getSampleAnalysisNames()
         {
             if (form.workspaceObject == null)
-                return Collections.EMPTY_MAP;
-            Map<String, String> ret = new LinkedHashMap();
+                return Collections.emptyMap();
+
+            Map<String, String> ret = new LinkedHashMap<String, String>();
+
             for (FlowJoWorkspace.SampleInfo sample : form.workspaceObject.getSamples())
             {
                 Analysis analysis = form.workspaceObject.getSampleAnalysis(sample);
@@ -700,7 +666,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
             if (form.workspace == null)
                 return null;
             workspace = form.workspace;
-            Map<String, FlowJoWorkspace.CompensationChannelData> dataMap = new HashMap();
+            Map<String, FlowJoWorkspace.CompensationChannelData> dataMap = new HashMap<String, FlowJoWorkspace.CompensationChannelData>();
             for (int i = 0; i < form.parameters.length; i ++)
             {
                 String parameter = form.parameters[i];
@@ -717,7 +683,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
                 cd.negativeSubset = StringUtils.trimToNull(form.negativeSubset[i]);
                 dataMap.put(parameter, cd);
             }
-            List<String> errorslist = new ArrayList();
+            List<String> errorslist = new ArrayList<String>();
             CompensationCalculation calc = workspace.makeCompensationCalculation(dataMap, form.selectGroupName, errorslist);
             if (errorslist.size() > 0)
             {
@@ -735,7 +701,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
             FlowAnalyzer.makeCompensationCalculationDef(doc, calc);
             if (!safeSetAnalysisScript(form.analysisScript, doc.toString(), errors))
                 return null;
-            return form.urlFor(Action.editCompensationCalculation);
+            return form.urlFor(EditCompensationCalculationAction.class);
         }
     }
 
@@ -932,7 +898,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
                 }
                 if (fSuccess)
                 {
-                    return HttpView.redirect(form.urlFor(Action.editGateTree));
+                    return HttpView.redirect(form.urlFor(EditGateTreeAction.class));
                 }
             }
 
@@ -1071,7 +1037,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
             {
                 ExpData protocol = form.analysisScript.getExpObject();
                 protocol.setComment(getUser(), form.ff_description);
-                return HttpView.redirect(form.urlFor(Action.begin));
+                return HttpView.redirect(form.urlFor(BeginAction.class));
             }
             return new JspView<EditPropertiesForm>(getPage("editProperties.jsp", form), form, errors);
         }
@@ -1095,7 +1061,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
                     updateSettingsFilter(form, doc) &&
                     safeSetAnalysisScript(form.analysisScript, doc.toString(), errors))
                 {
-                    return HttpView.redirect(form.urlFor(Action.begin));
+                    return HttpView.redirect(form.urlFor(BeginAction.class));
                 }
             }
 
@@ -1244,7 +1210,7 @@ public class ScriptController extends BaseFlowController<ScriptController.Action
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, object, "Gate Editor", Action.gateEditor);
+            return appendFlowNavTrail(getPageConfig(), root, object, "Gate Editor");
         }
     }
 

@@ -25,7 +25,6 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.exp.property.SystemProperty;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.util.GUID;
@@ -88,14 +87,6 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     public ActionURL urlFor(Class<? extends Controller> actionClass)
     {
         return addParams(new ActionURL(actionClass, getContainer()));
-    }
-
-    @Deprecated  // Use urlFor(actionClass) instead
-    public ActionURL urlFor(Enum action)
-    {
-        String pageFlowName = ModuleLoader.getInstance().getPageFlowForPackage(action.getClass().getPackage());
-        ActionURL url = new ActionURL(pageFlowName, action.toString(), getContainer());
-        return addParams(url);
     }
 
     final public ActionURL addParams(ActionURL url)

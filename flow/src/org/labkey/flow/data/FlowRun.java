@@ -306,7 +306,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 
     public ActionURL urlShow()
     {
-        return urlFor(RunController.Action.showRun);
+        return urlFor(RunController.ShowRunAction.class);
     }
 
     public String getLabel()

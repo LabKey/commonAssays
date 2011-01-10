@@ -87,7 +87,7 @@ public class LogController extends BaseFlowController<LogController.Action>
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, _page.log, "Log " + _page.log.getName(), Action.showLog);
+            return appendFlowNavTrail(getPageConfig(), root, _page.log, "Log " + _page.log.getName());
         }
     }
 

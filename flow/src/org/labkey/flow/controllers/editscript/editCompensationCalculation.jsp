@@ -104,7 +104,7 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
 var keywordValueSubsetListMap = KV; 
 </script>
 
-<form method="POST" action="<%=formAction(ScriptController.Action.editCompensationCalculation)%>">
+<form method="POST" action="<%=formAction(ScriptController.EditCompensationCalculationAction.class)%>">
 
 <% if (hasAutoCompScripts) { %>
     <p/>

@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <labkey:errors />
-<form method="POST" action="<%=formAction(ScriptController.Action.editCompensationCalculation)%>"
+<form method="POST" action="<%=formAction(ScriptController.EditCompensationCalculationAction.class)%>"
       enctype="multipart/form-data">
     <p>
         The compensation calculation tells <%=FlowModule.getLongProductName()%> how

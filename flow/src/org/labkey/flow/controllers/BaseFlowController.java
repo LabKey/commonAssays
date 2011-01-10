@@ -44,7 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
 
-public abstract class BaseFlowController<A extends Enum> extends SpringActionController
+public abstract class BaseFlowController extends SpringActionController
 {
     public static HelpTopic DEFAULT_HELP_TOPIC = new HelpTopic("flowDefault");
     
@@ -100,7 +100,7 @@ public abstract class BaseFlowController<A extends Enum> extends SpringActionCon
         super.appendNavTrail(action, root);
     }
 
-    public NavTree appendFlowNavTrail(PageConfig page, NavTree root, FlowObject object, String title, A action)
+    public NavTree appendFlowNavTrail(PageConfig page, NavTree root, FlowObject object, String title)
     {
         ArrayList<NavTree> children = new ArrayList<NavTree>();
         while (object != null)

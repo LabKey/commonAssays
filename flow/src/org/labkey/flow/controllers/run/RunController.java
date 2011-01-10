@@ -58,27 +58,14 @@ import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class RunController extends BaseFlowController<RunController.Action>
+public class RunController extends BaseFlowController
 {
-    static private final Logger _log = Logger.getLogger(RunController.class);
-    public enum Action
-    {
-        begin,
-        showRun,
-        showRuns,
-        showCompensation,
-        export,
-        details,
-        download,
-        moveToWorkspace,
-        moveToAnalysis
-    }
+    private static final Logger _log = Logger.getLogger(RunController.class);
 
-    static DefaultActionResolver _actionResolver = new DefaultActionResolver(RunController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(RunController.class);
 
     public RunController() throws Exception
     {
-        super();
         setActionResolver(_actionResolver);
     }
 
@@ -113,7 +100,7 @@ public class RunController extends BaseFlowController<RunController.Action>
         public NavTree appendNavTrail(NavTree root)
         {
             String label = run != null ? null : "Run not found";
-            return appendFlowNavTrail(getPageConfig(), root, run, label, Action.showRun);
+            return appendFlowNavTrail(getPageConfig(), root, run, label);
         }
     }
 
@@ -272,13 +259,13 @@ public class RunController extends BaseFlowController<RunController.Action>
 
         public ActionURL getSuccessURL(RunForm form)
         {
-            return form.getRun().urlFor(ScriptController.Action.gateEditor);
+            return form.getRun().urlFor(ScriptController.GateEditorAction.class);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
             String label = run != null ? "Move '" + run.getLabel() + "' to the workspace" : "Run not found";
-            return appendFlowNavTrail(getPageConfig(), root, run, label, Action.moveToWorkspace);
+            return appendFlowNavTrail(getPageConfig(), root, run, label);
         }
     }
 
@@ -326,7 +313,7 @@ public class RunController extends BaseFlowController<RunController.Action>
         public NavTree appendNavTrail(NavTree root)
         {
             String label = run != null ? "Move '" + run.getLabel() + "' to an analysis" : "Run not found";
-            return appendFlowNavTrail(getPageConfig(), root, run, label, Action.moveToWorkspace);
+            return appendFlowNavTrail(getPageConfig(), root, run, label);
         }
     }
 

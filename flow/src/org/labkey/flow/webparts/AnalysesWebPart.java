@@ -65,7 +65,7 @@ public class AnalysesWebPart extends FlowQueryView
         {
             return;
         }
-        ActionButton btnAnalyze = new ActionButton("Choose runs to analyze", analysisScript.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze));
+        ActionButton btnAnalyze = new ActionButton("Choose runs to analyze", analysisScript.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class));
         bar.add(btnAnalyze);
     }
 }

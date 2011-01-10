@@ -49,14 +49,12 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 
-public class AnalysisScriptController extends BaseFlowController<AnalysisScriptController.Action>
+public class AnalysisScriptController extends BaseFlowController
 {
     private static final Logger _log = Logger.getLogger(AnalysisScriptController.class);
 
     public enum Action
     {
-        begin,
-        confirmRunsToImport,
         chooseRunsToAnalyze,
         chooseAnalysisName,
         analyzeSelectedRuns,
@@ -87,7 +85,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, script, null, Action.begin);
+            return appendFlowNavTrail(getPageConfig(), root, script, null);
         }
     }
 
@@ -141,7 +139,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, script, nav.first, nav.second);
+            return appendFlowNavTrail(getPageConfig(), root, script, nav.first);
         }
     }
 
@@ -333,7 +331,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, null, "Import Flow FCS Files", Action.confirmRunsToImport);
+            return appendFlowNavTrail(getPageConfig(), root, null, "Import Flow FCS Files");
         }
     }
 

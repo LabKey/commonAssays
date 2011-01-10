@@ -16,20 +16,19 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.labkey.flow.controllers.editscript.ScriptController.Action;
-import org.labkey.flow.controllers.editscript.ScriptController.Page;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
+import org.labkey.flow.controllers.editscript.ScriptController.Page;
 
 import java.io.Writer;
 
 abstract public class TemplatePage extends Page
 {
     public Page body;
-    public Action curAction;
+
     public void renderBody(Writer out) throws Exception
     {
         HttpView view = new JspView(body);
-        ((HttpView) HttpView.currentView()).include(view, out);
+        (HttpView.currentView()).include(view, out);
     }
 }

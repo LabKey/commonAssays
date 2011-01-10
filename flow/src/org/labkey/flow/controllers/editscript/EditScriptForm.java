@@ -35,6 +35,7 @@ import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.*;
 import org.labkey.flow.query.FlowPropertySet;
 import org.labkey.flow.query.FlowSchema;
+import org.springframework.web.servlet.mvc.Controller;
 
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -260,9 +261,10 @@ public class EditScriptForm extends ViewForm
         return ret;
     }
 
-    public ActionURL urlFor(ScriptController.Action action)
+    public ActionURL urlFor(Class<? extends Controller> actionClass)
     {
-        ActionURL url = analysisScript.urlFor(action);
+        ActionURL url = analysisScript.urlFor(actionClass);
+
         if (step != null)
         {
             step.addParams(url);
@@ -274,6 +276,7 @@ public class EditScriptForm extends ViewForm
     public String[] getAvailableKeywords()
     {
         HashSet<String> keywords = new HashSet<String>();
+
         try
         {
             FlowRun run = getRun();
@@ -287,6 +290,7 @@ public class EditScriptForm extends ViewForm
         {
             _log.error("Error", t);
         }
+
         String[] ret = keywords.toArray(new String[keywords.size()]);
         Arrays.sort(ret);
         return ret;

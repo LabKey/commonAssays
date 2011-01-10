@@ -368,7 +368,7 @@ for (ExpMaterial sample : well.getSamples())
 <%
     if (getContainer().hasPermission(getUser(), UpdatePermission.class))
     {
-%><%=generateButton("edit", well.urlFor(WellController.Action.editWell))%><br>
+%><%=generateButton("edit", well.urlFor(WellController.EditWellAction.class))%><br>
 <%
     }
 
@@ -382,7 +382,7 @@ if (getGraphs().length > 0)
     {
         %>
         <span style="display:inline-block; vertical-align:top; height:<%=graphSize%>px; width:<%=graphSize%>px;">
-        <img style="width:<%=graphSize%>px; height:<%=graphSize%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.Action.showGraph))%>&amp;graph=<%=u(graph.toString())%>" onerror="flowImgError(this);">
+        <img style="width:<%=graphSize%>px; height:<%=graphSize%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class))%>&amp;graph=<%=u(graph.toString())%>" onerror="flowImgError(this);">
         </span><wbr>
         <%
     }
@@ -430,8 +430,8 @@ else
                 File f = r.resolvePath(rel.getPath());
                 if (f != null && f.canRead())
                 {
-                    %><p><a href="<%=h(getWell().urlFor(WellController.Action.chooseGraph))%>">More Graphs</a><br><%
-                    %><a href="<%=h(getWell().urlFor(WellController.Action.keywords))%>">Keywords from the FCS file</a><br><%
+                    %><p><a href="<%=h(getWell().urlFor(WellController.ChooseGraphAction.class))%>">More Graphs</a><br><%
+                    %><a href="<%=h(getWell().urlFor(WellController.KeywordsAction.class))%>">Keywords from the FCS file</a><br><%
                     String url = context.getContextPath() + "/" + WebdavService.getServletPath() + r.getContainer().getPath() + "/@pipeline/" + rel.toString();
                     %><a href="<%=h(url)%>">Download FCS file</a><%
                 }

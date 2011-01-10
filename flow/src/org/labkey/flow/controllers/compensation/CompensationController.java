@@ -40,16 +40,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 
-public class CompensationController extends BaseFlowController<CompensationController.Action>
+public class CompensationController extends BaseFlowController
 {
-    public enum Action
-    {
-        begin,
-        showCompensation,
-        upload,
-        delete
-    }
-
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(CompensationController.class);
 
     public CompensationController() throws Exception
@@ -153,7 +145,7 @@ public class CompensationController extends BaseFlowController<CompensationContr
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, null, "Upload a new compensation matrix", Action.upload);
+            return appendFlowNavTrail(getPageConfig(), root, null, "Upload a new compensation matrix");
         }
     }
 
@@ -175,7 +167,7 @@ public class CompensationController extends BaseFlowController<CompensationContr
                 return root;
             // show run this compensation was derived from
             if (_comp.getParent() != null)
-                return appendFlowNavTrail(getPageConfig(), root, _comp, "Show Compensation " + _comp.getName(), Action.showCompensation);
+                return appendFlowNavTrail(getPageConfig(), root, _comp, "Show Compensation " + _comp.getName());
             // fall back on showing compensaion query 
             else
                 return (new BeginAction().appendNavTrail(root)).addChild(_comp.getLabel(), _comp.urlShow());

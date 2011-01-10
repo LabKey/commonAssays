@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.data.FlowScript" %>
 <%@ page import="org.fhcrc.cpas.flow.script.xml.ScriptDocument" %>
-<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController.Action" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController.ChooseRunsToAnalyzeAction" %>
+<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
+<%@ page import="org.labkey.flow.data.FlowScript" %>
 <%@ page extends="org.labkey.flow.controllers.executescript.AnalysisScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -50,7 +50,7 @@ to calculate, and what graphs to generate.</p>
     <b>Compensation Calculation</b><br>
     <% if (hasCompensation)
     {%>
-    <a href="<%=h(analysisScript.urlFor(Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation))%>">Calculate some
+    <a href="<%=h(analysisScript.urlFor(ChooseRunsToAnalyzeAction.class, FlowProtocolStep.calculateCompensation))%>">Calculate some
         compensation matrices.</a><br>
     <% }
     else
@@ -63,7 +63,7 @@ to calculate, and what graphs to generate.</p>
     <b>Analysis</b><br>
     <% if (hasAnalysis)
     { %>
-    <a href="<%=h(analysisScript.urlFor(Action.chooseRunsToAnalyze, FlowProtocolStep.analysis))%>">Analyze some flow runs</a>
+    <a href="<%=h(analysisScript.urlFor(ChooseRunsToAnalyzeAction.class, FlowProtocolStep.analysis))%>">Analyze some flow runs</a>
     <br>
     <% } else { %>
     This analysis script does not contain an analysis section.
@@ -71,8 +71,8 @@ to calculate, and what graphs to generate.</p>
 </p>
 
 <p>
-    <a href="<%=h(analysisScript.urlFor(ScriptController.Action.begin))%>">Edit the analysis script.</a><br>
-    <a href="<%=h(analysisScript.urlFor(ScriptController.Action.copy))%>">Make a copy of this analysis script.</a><br>
-    <a href="<%=h(analysisScript.urlFor(ScriptController.Action.delete))%>">Delete this analysis script.</a><br>
+    <a href="<%=h(analysisScript.urlFor(ScriptController.BeginAction.class))%>">Edit the analysis script.</a><br>
+    <a href="<%=h(analysisScript.urlFor(ScriptController.CopyAction.class))%>">Make a copy of this analysis script.</a><br>
+    <a href="<%=h(analysisScript.urlFor(ScriptController.DeleteAction.class))%>">Delete this analysis script.</a><br>
 </p>
 

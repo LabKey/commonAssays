@@ -195,17 +195,17 @@ public class FlowOverview extends Overview
             StringBuilder status = new StringBuilder();
             ActionURL urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
                     .addParameter("query.Run/ProtocolStep~eq", "Keywords");
-            status.append("<a href=\"" + h(urlShowFCSFiles) + "\">" + _fcsFileCount + " FCS files</a> have been imported.");
+            status.append("<a href=\"").append(h(urlShowFCSFiles)).append("\">").append(_fcsFileCount).append(" FCS files</a> have been imported.");
             ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer())
                     .addParameter("query.FCSFileCount~neq", 0)
                     .addParameter("query.ProtocolStep~eq", "Keywords");
             if (_fcsRunCount == 1)
             {
-                status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">1 run</a>.");
+                status.append(" These are in <a href=\"").append(h(urlShowRuns)).append("\">1 run</a>.");
             }
             else
             {
-                status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">" + _fcsRunCount + " runs</a>.");
+                status.append(" These are in <a href=\"").append(h(urlShowRuns)).append("\">").append(_fcsRunCount).append(" runs</a>.");
             }
             ret.setStatusHTML(status.toString());
         }
@@ -326,14 +326,14 @@ public class FlowOverview extends Overview
                 statusHTML.append("<br>");
             }
             ActionURL urlFlowComp = FlowTableType.CompensationMatrices.urlFor(getUser(), getContainer(), QueryAction.executeQuery);
-            statusHTML.append("There are <a href=\"" + h(urlFlowComp.getLocalURIString()) + "\">" + _compensationMatrixCount + " compensation matrices</a>.");
+            statusHTML.append("There are <a href=\"").append(h(urlFlowComp.getLocalURIString())).append("\">").append(_compensationMatrixCount).append(" compensation matrices</a>.");
             if (_compensationRunCount != 0)
             {
                 ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter("query.CompensationControlCount~neq", 0);
                 if (_compensationRunCount == 1)
-                    statusHTML.append(" These have been calculated in <a href=\"" + h(urlShowRuns) + "\"> 1 run</a>.");
+                    statusHTML.append(" These have been calculated in <a href=\"").append(h(urlShowRuns)).append("\"> 1 run</a>.");
                 else
-                    statusHTML.append(" These have been calculated in <a href=\"" + h(urlShowRuns) + "\">" + _compensationRunCount + " runs</a>.");
+                    statusHTML.append(" These have been calculated in <a href=\"").append(h(urlShowRuns)).append("\">").append(_compensationRunCount).append(" runs</a>.");
             }
         }
         ret.setStatusHTML(statusHTML.toString());
@@ -341,7 +341,7 @@ public class FlowOverview extends Overview
         {
             if (_scriptCompensation != null)
             {
-                ret.addAction(new Action("Calculate compensation matrices", _scriptCompensation.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation)));
+                ret.addAction(new Action("Calculate compensation matrices", _scriptCompensation.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.calculateCompensation)));
             }
             ret.addAction(new Action("Upload a compensation matrix", new ActionURL(CompensationController.UploadAction.class, getContainer())));
         }
@@ -388,17 +388,17 @@ public class FlowOverview extends Overview
             else
             {
                 ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter("query.FCSAnalysisCount~neq", 0);
-                statusHTML.append("<a href=\"" + h(FlowTableType.FCSAnalyses.urlFor(getUser(), getContainer(), QueryAction.executeQuery)) + "\">" + _fcsAnalysisCount + " FCS files</a>");
+                statusHTML.append("<a href=\"").append(h(FlowTableType.FCSAnalyses.urlFor(getUser(), getContainer(), QueryAction.executeQuery))).append("\">").append(_fcsAnalysisCount).append(" FCS files</a>");
                 if (_fcsAnalysisRunCount == 1)
-                    statusHTML.append(" have been analyzed in " + "<a href=\"" + h(urlShowRuns) + "\"> 1 run</a>.");
+                    statusHTML.append(" have been analyzed in " + "<a href=\"").append(h(urlShowRuns)).append("\"> 1 run</a>.");
                 else
-                    statusHTML.append(" have been analyzed in " + "<a href=\"" + h(urlShowRuns) + "\">" + _fcsAnalysisRunCount + " runs</a>.");
+                    statusHTML.append(" have been analyzed in " + "<a href=\"").append(h(urlShowRuns)).append("\">").append(_fcsAnalysisRunCount).append(" runs</a>.");
             }
         }
         ret.setStatusHTML(statusHTML.toString());
         if (_canUpdate && _scriptAnalysis != null)
         {
-            ret.addAction(new Action("Choose runs to analyze", _scriptAnalysis.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze)));
+            ret.addAction(new Action("Choose runs to analyze", _scriptAnalysis.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class)));
         }
         return ret;
     }
@@ -425,13 +425,13 @@ public class FlowOverview extends Overview
                     
                     if (protocol.getSampleSetJoinFields().size() != 0)
                     {
-                        Action action = new Action("Modify sample description join fields", protocol.urlFor(ProtocolController.Action.joinSampleSet));
+                        Action action = new Action("Modify sample description join fields", protocol.urlFor(ProtocolController.JoinSampleSetAction.class));
                         action.setDescriptionHTML("<i>The sample descriptions are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.</i>");
                         ret.addAction(action);
                     }
                     else
                     {
-                        Action action = new Action("Define sample description join fields", protocol.urlFor(ProtocolController.Action.joinSampleSet));
+                        Action action = new Action("Define sample description join fields", protocol.urlFor(ProtocolController.JoinSampleSetAction.class));
                         action.setDescriptionHTML("You can specify how these sample descriptions should be linked to FCS files.");
                         ret.addAction(action);
                     }

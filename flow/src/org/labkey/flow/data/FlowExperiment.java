@@ -21,19 +21,23 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.query.FlowSchema;
-import org.labkey.flow.query.FlowTableType;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Also known as "Analysis Folder" in flow terms or "Run Group" in exp terms.
@@ -227,7 +231,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 
     public ActionURL urlShow()
     {
-        return addParams(urlFor(RunController.Action.showRuns));
+        return addParams(urlFor(RunController.ShowRunsAction.class));
     }
 
     public boolean hasRun(File filePath, FlowProtocolStep step) throws SQLException

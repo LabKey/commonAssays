@@ -16,13 +16,12 @@
  */
 %>
 <%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.data.FilterInfo" %>
+<%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="org.labkey.flow.controllers.protocol.EditICSMetadataForm" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="java.util.LinkedHashMap" %>
-<%@ page import="org.labkey.flow.analysis.model.ScriptSettings" %>
-<%@ page import="org.labkey.api.data.FilterInfo" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%! void addCompare(Map<String, String> options, CompareType ct)
@@ -53,7 +52,7 @@
 %>
 <labkey:errors />
 <br>
-<form action="<%=form.getProtocol().urlFor(ProtocolController.Action.editICSMetadata)%>" method="POST">
+<form action="<%=form.getProtocol().urlFor(ProtocolController.EditICSMetadataAction.class)%>" method="POST">
     <table class="labkey-wp">
         <tr class="labkey-wp-header"><th align="left">Background and Foreground Match Columns:</th></tr>
         <tr><td>

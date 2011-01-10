@@ -26,14 +26,14 @@
     {
         return StringUtils.repeat("+", subset.getSubsets().length);
     }
-    %>
+%>
 <% EditGateTreeForm form = (EditGateTreeForm) getForm(); %>
 <labkey:errors/>
 <p>
     Use this page to rename populations.  To delete a population, delete its name.<br>
-    Use the <a href="<%=urlFor(ScriptController.Action.gateEditor)%>">edit gates</a> page to define new populations.
+    Use the <a href="<%=formAction(ScriptController.GateEditorAction.class)%>">edit gates</a> page to define new populations.
 </p>
-<form action="<%=formAction(ScriptController.Action.editGateTree)%>" method="POST">
+<form action="<%=formAction(ScriptController.EditGateTreeAction.class)%>" method="POST">
     <%
         for (int i = 0; i < form.populationNames.length; i ++)
         {

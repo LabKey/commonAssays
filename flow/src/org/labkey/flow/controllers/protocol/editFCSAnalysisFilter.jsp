@@ -46,7 +46,7 @@
     value pairs <i>must</i> all match in the FCS header to be included in the analysis.
     Alternatively, you may create filters on individual analysis scripts.
 </p>
-<form action="<%=form.getProtocol().urlFor(ProtocolController.Action.editFCSAnalysisFilter)%>" method="POST">
+<form action="<%=form.getProtocol().urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" method="POST">
     <table>
         <tr class="labkey-wp-header"><th colspan="3" align="left">Filter FCS files by keyword:</th></tr>
         <% for (int i = 0; i < clauseCount; i ++) {

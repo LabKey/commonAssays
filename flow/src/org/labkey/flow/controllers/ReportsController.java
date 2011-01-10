@@ -39,30 +39,17 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 
 /**
- * Created by IntelliJ IDEA.
  * User: matthewb
  * Date: Sep 1, 2009
  * Time: 5:15:39 PM
  */
-public class ReportsController extends BaseFlowController<ReportsController.Action>
+public class ReportsController extends BaseFlowController
 {
-    private static Logger _log = Logger.getLogger(ReportsController.class);
-
-    public enum Action
-    {
-        begin,
-        create,
-        edit,
-        delete,
-        execute
-    }
-
-    static DefaultActionResolver _actionResolver = new DefaultActionResolver(ReportsController.class);
-
+    private static final Logger _log = Logger.getLogger(ReportsController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ReportsController.class);
 
     public ReportsController() throws Exception
     { 
-        super();
         setActionResolver(_actionResolver);
     }
 

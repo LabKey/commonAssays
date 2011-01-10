@@ -73,14 +73,14 @@
         if (run.isInWorkspace()) { %>
             <p>
                 This run is in the workspace.<br>
-                <labkey:link href="<%=run.urlFor(ScriptController.Action.gateEditor)%>" text="Edit Gates on Individual Wells" /><br>
+                <labkey:link href="<%=run.urlFor(ScriptController.GateEditorAction.class)%>" text="Edit Gates on Individual Wells" /><br>
                 When you are finished editing the gates, you can recalculate the statistics and move this run back into an analysis.<br>
-                <labkey:link href="<%=run.urlFor(RunController.Action.moveToAnalysis)%>" text="Finish editing gates" />
+                <labkey:link href="<%=run.urlFor(RunController.MoveToAnalysisAction.class)%>" text="Finish editing gates" />
             </p>
         <% } else { %>
             <p>
                 You can modify the gates on individual FCS files in this run.<br>
-                <labkey:link href="<%=run.urlFor(RunController.Action.moveToWorkspace)%>" text="Move this run to the workspace" /><br>
+                <labkey:link href="<%=run.urlFor(RunController.MoveToWorkspaceAction.class)%>" text="Move this run to the workspace" /><br>
             </p>
     <% } 
     }
@@ -88,7 +88,7 @@
 
     if (comp != null)
     {
-        %><labkey:link text="Show Compensation" href="<%=comp.urlFor(CompensationController.Action.showCompensation)%>"/><br><%
+        %><labkey:link text="Show Compensation" href="<%=comp.urlFor(CompensationController.ShowCompensationAction.class)%>"/><br><%
     }
 
     ActionURL urlShowRunGraph = urlProvider(ExperimentUrls.class).getShowRunGraphURL(run.getExperimentRun()); %>
@@ -101,7 +101,7 @@
     }
     if (run.getPath() != null)
     {
-        %><labkey:link href="<%=run.urlFor(RunController.Action.download)%>" text="Download FCS Files" /><br><% 
+        %><labkey:link href="<%=run.urlFor(RunController.DownloadAction.class)%>" text="Download FCS Files" /><br><%
     }
     
     DiscussionService.Service service = DiscussionService.get();

@@ -18,7 +18,6 @@ package org.labkey.flow.controllers.protocol;
 
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.action.SpringActionController;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.RequiresNoPermission;
@@ -39,25 +38,12 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ProtocolController extends BaseFlowController<ProtocolController.Action>
+public class ProtocolController extends BaseFlowController
 {
-    public enum Action
-    {
-        begin,
-        showProtocol,
-        showSamples,
-        joinSampleSet,
-        updateSamples,
-        editFCSAnalysisName,
-        editFCSAnalysisFilter,
-        editICSMetadata,
-    }
-
-    static SpringActionController.DefaultActionResolver _actionResolver = new SpringActionController.DefaultActionResolver(ProtocolController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ProtocolController.class);
 
     public ProtocolController() throws Exception
     {
-        super();
         setActionResolver(_actionResolver);
     }
 
@@ -111,7 +97,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, protocol, "Protocol", Action.showProtocol);
+            return appendFlowNavTrail(getPageConfig(), root, protocol, "Protocol");
         }
     }
 
@@ -136,7 +122,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, protocol, "Show Samples", Action.showSamples);
+            return appendFlowNavTrail(getPageConfig(), root, protocol, "Show Samples");
         }
     }
 
@@ -170,12 +156,12 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public ActionURL getSuccessURL(JoinSampleSetForm form)
         {
-            return getProtocol().urlFor(Action.updateSamples);
+            return getProtocol().urlFor(UpdateSamplesAction.class);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Join Samples", Action.joinSampleSet);
+            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Join Samples");
         }
     }
 
@@ -193,7 +179,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, protocol, "Update Samples", Action.updateSamples);
+            return appendFlowNavTrail(getPageConfig(), root, protocol, "Update Samples");
         }
     }
 
@@ -224,7 +210,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Name", Action.editFCSAnalysisName);
+            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Name");
         }
     }
 
@@ -254,7 +240,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Filter", Action.editFCSAnalysisFilter);
+            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Filter");
         }
     }
 
@@ -305,7 +291,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit ICS Metadata", Action.editICSMetadata);
+            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit ICS Metadata");
         }
     }
 }

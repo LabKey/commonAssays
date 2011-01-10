@@ -71,24 +71,27 @@ public class ScriptOverview extends Overview
         addStep(getCompensationCalculationStep());
         addStep(getAnalysisStep());
         addStep(getExecuteStep());
+
         if (hasPermission(UpdatePermission.class) && (hasStep(FlowProtocolStep.analysis) || hasStep(FlowProtocolStep.calculateCompensation)))
         {
-            Action action = new Action("Make a copy of this analysis script", _script.urlFor(ScriptController.Action.copy));
+            Action action = new Action("Make a copy of this analysis script", _script.urlFor(ScriptController.CopyAction.class));
             if (_runCount != 0)
             {
                 action.setDescriptionHTML("This script cannot be edited anymore because it has been used <a href=\"" + PageFlowUtil.filter(runsUrl) + "\">" + _runCount + " times</a>.");
             }
             addAction(action);
         }
+
         if (_canEdit)
         {
-            Action action = new Action("Delete this analysis script", _script.urlFor(ScriptController.Action.delete));
+            Action action = new Action("Delete this analysis script", _script.urlFor(ScriptController.DeleteAction.class));
             addAction(action);
         }
-        Action actionSettings = new Action("Edit Settings", _script.urlFor(ScriptController.Action.editSettings));
+
+        Action actionSettings = new Action("Edit Settings", _script.urlFor(ScriptController.EditSettingsAction.class));
         actionSettings.setExplanatoryHTML("The script has settings that affect the way that graphs are drawn and statistics are calculated.");
         addAction(actionSettings);
-        Action actionSource = new Action("View Source", _script.urlFor(ScriptController.Action.editScript));
+        Action actionSource = new Action("View Source", _script.urlFor(ScriptController.EditScriptAction.class));
         actionSource.setExplanatoryHTML("Advanced: Analysis scripts are XML documents that can be edited by hand");
         addAction(actionSource);
     }
@@ -130,14 +133,14 @@ public class ScriptOverview extends Overview
         {
             try
             {
-                Action action = new Action("Show compensation calculation", _script.urlFor(ScriptController.Action.editCompensationCalculation));
+                Action action = new Action("Show compensation calculation", _script.urlFor(ScriptController.EditCompensationCalculationAction.class));
                 CompensationCalculation calc = (CompensationCalculation) _script.getCompensationCalcOrAnalysis(FlowProtocolStep.calculateCompensation);
                 action.setDescriptionHTML("The compensation calculation involves " + calc.getChannelCount() + " channels and " + countChildPopulations(calc) + " gates.");
                 ret.addAction(action);
             }
             catch (Exception e)
             {
-                Action action = new Action("View Source", _script.urlFor(ScriptController.Action.editScript));
+                Action action = new Action("View Source", _script.urlFor(ScriptController.EditScriptAction.class));
                 action.setDescriptionHTML("An exception occurred: " + e);
                 ret.addAction(action);
             }
@@ -147,10 +150,10 @@ public class ScriptOverview extends Overview
             ret.setStatusHTML("This script does not have a compensation calculation section.");
             if (_canEdit)
             {
-                Action actionUpload = new Action("Upload a FlowJo workspace", _script.urlFor(ScriptController.Action.uploadCompensationCalculation));
+                Action actionUpload = new Action("Upload a FlowJo workspace", _script.urlFor(ScriptController.UploadCompensationCalculationAction.class));
                 actionUpload.setExplanatoryHTML("You can upload a FlowJo workspace to define the compensation calculation.");
                 ret.addAction(actionUpload);
-                Action actionFromScratch = new Action("Define compensation calculation from scratch", _script.urlFor(ScriptController.Action.chooseCompensationRun));
+                Action actionFromScratch = new Action("Define compensation calculation from scratch", _script.urlFor(ScriptController.ChooseCompensationRunAction.class));
                 actionFromScratch.setExplanatoryHTML("You can also embark on the long process of using the online gate editor to define the compensation calculation");
                 ret.addAction(actionFromScratch);
             }
@@ -158,6 +161,7 @@ public class ScriptOverview extends Overview
 
         return ret;
     }
+
     protected Step getAnalysisStep()
     {
         Step.Status stepStatus;
@@ -196,7 +200,7 @@ public class ScriptOverview extends Overview
             }
             catch (Exception e)
             {
-                Action action = new Action("View Source", _script.urlFor(ScriptController.Action.editScript));
+                Action action = new Action("View Source", _script.urlFor(ScriptController.EditScriptAction.class));
                 action.setDescriptionHTML("An exception occurred: " + e);
                 ret.addAction(action);
             }
@@ -204,7 +208,7 @@ public class ScriptOverview extends Overview
 
         if (_canEdit)
         {
-            Action action = new Action("Upload a FlowJo workspace", _script.urlFor(ScriptController.Action.uploadAnalysis));
+            Action action = new Action("Upload a FlowJo workspace", _script.urlFor(ScriptController.UploadAnalysisAction.class));
             if (hasStep)
             {
                 action.setExplanatoryHTML("You can modify the gate definitions by uploading a FlowJo workspace");
@@ -216,7 +220,7 @@ public class ScriptOverview extends Overview
             ret.addAction(action);
         }
         Action actionEditGates = new Action(_canEdit ? "Edit gate definitions" :
-                "View gate definitions", _script.urlFor(ScriptController.Action.gateEditor, FlowProtocolStep.analysis));
+                "View gate definitions", _script.urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.analysis));
         if (hasStep)
         {
             actionEditGates.setExplanatoryHTML("You can use the online gate editor");
@@ -227,19 +231,23 @@ public class ScriptOverview extends Overview
         }
 
         ret.addAction(actionEditGates);
+
         if (hasStep)
         {
             Action actionStats = new Action(_canEdit ? "Choose which statistics and graphs should be calculated" :
-                    "View which statistics and graphs are to be calculated",  _script.urlFor(ScriptController.Action.editAnalysis));
+                    "View which statistics and graphs are to be calculated",  _script.urlFor(ScriptController.EditAnalysisAction.class));
             ret.addAction(actionStats);
+
             if (_canEdit)
             {
-                Action actionRename = new Action("Rename populations", _script.urlFor(ScriptController.Action.editGateTree, FlowProtocolStep.analysis));
+                Action actionRename = new Action("Rename populations", _script.urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.analysis));
                 ret.addAction(actionRename);
             }
         }
+
         return ret;
     }
+
     protected Step getExecuteStep()
     {
         boolean hasAnalysis = hasStep(FlowProtocolStep.analysis);
@@ -268,7 +276,7 @@ public class ScriptOverview extends Overview
         }
         else if (hasAnalysis || hasComp)
         {
-            Action action = new Action(hasAnalysis ? "Analyze some runs" : "Calculate some compensation matrices", _script.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze));
+            Action action = new Action(hasAnalysis ? "Analyze some runs" : "Calculate some compensation matrices", _script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class));
             ret.addAction(action);
         }
         else

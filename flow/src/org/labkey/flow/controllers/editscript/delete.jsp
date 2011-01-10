@@ -29,7 +29,7 @@
 </p>
 <% } else { %>
 <p>Are you sure that you want to delete the analysis script '<%=h(script.getName())%>'?<br>
-    <form action="<%=script.urlFor(ScriptController.Action.delete)%>" method="POST">
+    <form action="<%=script.urlFor(ScriptController.DeleteAction.class)%>" method="POST">
         <labkey:button text="OK" /> <labkey:button text="Cancel" href="<%=script.urlShow()%>" />
     </form>
 </p>

@@ -22,7 +22,6 @@
 <%@ page import="org.labkey.flow.controllers.editscript.AnalysisForm" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%=pageHeader(ScriptController.Action.editAnalysis)%>
 <% AnalysisForm bean = (AnalysisForm) form; %>
 <%Map<String, String> params = form.getParameters();
     Collection<SubsetSpec> subsets = form.analysisScript.getSubsets();
@@ -122,7 +121,7 @@
     }
 </script>
 
-<form method="post" action="<%=formAction(ScriptController.Action.editAnalysis)%>">
+<form method="post" action="<%=formAction(ScriptController.EditAnalysisAction.class)%>">
     <p>
         <b>Statistics</b><br>
         Which statistics do you want to calculate? Enter one statistic per line.<br>

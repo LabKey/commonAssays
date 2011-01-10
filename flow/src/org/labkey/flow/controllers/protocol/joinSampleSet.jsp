@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.controllers.protocol.JoinSampleSetForm"%>
-<%@ page import="java.util.Map"%>
 <%@ page import="org.labkey.api.query.FieldKey"%>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.Action"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.flow.controllers.protocol.JoinSampleSetForm"%>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController"%>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% JoinSampleSetForm form = (JoinSampleSetForm) __form;
@@ -28,7 +28,7 @@
     {
         %>
         <p>You must first upload a sample set before specifying how to match samples to FCS files.</p>
-        <%=PageFlowUtil.textLink("Upload Sample Descriptions", form.getProtocol().urlUploadSamples(false))%>
+        <%=textLink("Upload Sample Descriptions", form.getProtocol().urlUploadSamples(false))%>
         <%
     }
     else
@@ -39,7 +39,7 @@
 
         <p>Use this page to set which properties of the sample need to match keywords of the FCS files.</p>
 
-        <form action="<%=form.getProtocol().urlFor(Action.joinSampleSet)%>" method="POST">
+        <form action="<%=form.getProtocol().urlFor(ProtocolController.JoinSampleSetAction.class)%>" method="POST">
             <table><tr><th>Sample Property</th><th>FCS Property</th></tr>
                 <% for (int i = 0; i < form.ff_samplePropertyURI.length; i ++)
                 { %>

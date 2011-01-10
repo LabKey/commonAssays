@@ -26,10 +26,8 @@
 <%@ page import="org.labkey.api.query.QueryAction" %>
 <%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.api.security.permissions.AdminPermission" %>
-<%@ page import="org.labkey.api.security.permissions.InsertPermission" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.flow.controllers.FlowController" %>
@@ -37,7 +35,11 @@
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="org.labkey.flow.controllers.run.RunController" %>
-<%@ page import="org.labkey.flow.data.*" %>
+<%@ page import="org.labkey.flow.data.FlowDataType" %>
+<%@ page import="org.labkey.flow.data.FlowExperiment" %>
+<%@ page import="org.labkey.flow.data.FlowProtocol" %>
+<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
+<%@ page import="org.labkey.flow.data.FlowScript" %>
 <%@ page import="org.labkey.flow.persist.FlowManager" %>
 <%@ page import="org.labkey.flow.persist.ObjectType" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
@@ -53,7 +55,6 @@
     PipeRoot pipeRoot = pipeService.findPipelineRoot(c);
     boolean _hasPipelineRoot = pipeRoot != null;
     boolean _canSetPipelineRoot = user.isAdministrator();
-    boolean _canInsert = c.hasPermission(user, InsertPermission.class);
     boolean _canUpdate = c.hasPermission(user, UpdatePermission.class);
     boolean _canCreateFolder = c.getParent() != null && !c.getParent().isRoot() &&
             c.getParent().hasPermission(user, AdminPermission.class);
@@ -275,37 +276,37 @@
                                 '<a href="<%=script.urlShow()%>">edited</a> before it can be used.</div>',
                             <% } %>
                             <% if (script.hasStep(FlowProtocolStep.calculateCompensation)) { %>
-                                '<div><a href="<%=script.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation)%>">Compensation</a></div>',
+                                '<div><a href="<%=script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.calculateCompensation)%>">Compensation</a></div>',
                             <% } %>
                             <% if (script.hasStep(FlowProtocolStep.analysis)) { %>
-                                '<div><a href="<%=script.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.analysis)%>">Statistics and Graphs</a></div>',
+                                '<div><a href="<%=script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.analysis)%>">Statistics and Graphs</a></div>',
                             <% } %>
                         '</div>',
                         <% if (canEditScript || script.hasStep(FlowProtocolStep.calculateCompensation) || script.hasStep(FlowProtocolStep.analysis)) { %>
                             '<div class="summary-div">',
                                 '<div class="summary-header">Analysis Definition</div>',
                                 <% if (script.hasStep(FlowProtocolStep.calculateCompensation)) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.Action.editCompensationCalculation)%>">Show Compensation</a></div>',
+                                    '<div><a href="<%=script.urlFor(ScriptController.EditCompensationCalculationAction.class)%>">Show Compensation</a></div>',
                                 <% } else if (canEditScript) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.Action.uploadCompensationCalculation)%>">Upload FlowJo Compensation</a></div>',
+                                    '<div><a href="<%=script.urlFor(ScriptController.UploadCompensationCalculationAction.class)%>">Upload FlowJo Compensation</a></div>',
                                 <% } %>
                                 <% if (script.hasStep(FlowProtocolStep.analysis)) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.Action.gateEditor, FlowProtocolStep.analysis)%>"><%=canEditScript ? "Edit" : "View"%> Gate Definitions</a></div>',
-                                    '<div><a href="<%=script.urlFor(ScriptController.Action.editAnalysis)%>"><%=canEditScript ? "Edit" : "View"%> Statistics and Graphs</a></div>',
+                                    '<div><a href="<%=script.urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.analysis)%>"><%=canEditScript ? "Edit" : "View"%> Gate Definitions</a></div>',
+                                    '<div><a href="<%=script.urlFor(ScriptController.EditAnalysisAction.class)%>"><%=canEditScript ? "Edit" : "View"%> Statistics and Graphs</a></div>',
                                     <% if (canEditScript) { %>
-                                        '<div><a href="<%=script.urlFor(ScriptController.Action.editGateTree, FlowProtocolStep.analysis)%>">Rename Populations</a></div>',
+                                        '<div><a href="<%=script.urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.analysis)%>">Rename Populations</a></div>',
                                     <% } %>
                                 <% } else if (canEditScript) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.Action.uploadAnalysis)%>">Upload FlowJo Analysis</a></div>',
+                                    '<div><a href="<%=script.urlFor(ScriptController.UploadAnalysisAction.class)%>">Upload FlowJo Analysis</a></div>',
                                 <% } %>
                             '</div>',
                         <% } %>
                         '<div class="summary-div">',
                             '<div class="summary-header">Manage</div>',
-                            '<div><a href="<%=script.urlFor(ScriptController.Action.editSettings)%>">Settings</a></div>',
-                            '<div><a href="<%=script.urlFor(ScriptController.Action.copy)%>">Copy</a></div>',
+                            '<div><a href="<%=script.urlFor(ScriptController.EditSettingsAction.class)%>">Settings</a></div>',
+                            '<div><a href="<%=script.urlFor(ScriptController.CopyAction.class)%>">Copy</a></div>',
                             <% if (runCount == 0) { %>
-                                '<div><a href="<%=script.urlFor(ScriptController.Action.delete)%>">Delete</a></div>',
+                                '<div><a href="<%=script.urlFor(ScriptController.DeleteAction.class)%>">Delete</a></div>',
                             <% } %>
                         '</div>',
                         <% if (runCount > 0) { %>
@@ -386,11 +387,11 @@
             ActionURL urlPipelineRoot = urlProvider(PipelineUrls.class).urlSetup(c);
             if (!_hasPipelineRoot)
             {
-                %><div><%=PageFlowUtil.textLink("Setup Pipeline", urlPipelineRoot)%></div><%
+                %><div><%=textLink("Setup Pipeline", urlPipelineRoot)%></div><%
             }
             else if (_fcsFileCount == 0)
             {
-                %><div><%=PageFlowUtil.textLink("Change Pipeline", urlPipelineRoot)%></div><%
+                %><div><%=textLink("Change Pipeline", urlPipelineRoot)%></div><%
             }
         }
 
@@ -398,16 +399,16 @@
         {
             if (!_hasPipelineRoot)
             {
-                %><div><%=PageFlowUtil.textLink("Import Workspace", new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, c))%></div><%
+                %><div><%=textLink("Import Workspace", new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, c))%></div><%
             }
             else
             {
-                %><div><%=PageFlowUtil.textLink("Upload and Import", urlProvider(PipelineUrls.class).urlBrowse(c, getViewContext().getActionURL().getLocalURIString()))%></div><%
+                %><div><%=textLink("Upload and Import", urlProvider(PipelineUrls.class).urlBrowse(c, getViewContext().getActionURL().getLocalURIString()))%></div><%
             }
 
             if (_fcsRealRunCount > 0)
             {
-                %><div><%=PageFlowUtil.textLink("Create Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, c))%></div><%
+                %><div><%=textLink("Create Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, c))%></div><%
             }
         }
     %>
@@ -417,25 +418,25 @@
 <% if (_protocol != null && _canUpdate) { %>
     <div class="summary-div">
         <h3 class="summary-header">Manage</h3>
-        <div><%= PageFlowUtil.textLink("Settings", _protocol.urlShow())%></div>
+        <div><%= textLink("Settings", _protocol.urlShow())%></div>
 
         <%
         if (_sampleSet != null)
         {
-            %><div><%=PageFlowUtil.textLink("Show Samples", _protocol.urlShowSamples(false))%></div><%
+            %><div><%=textLink("Show Samples", _protocol.urlShowSamples(false))%></div><%
         }
-        %><div><%=PageFlowUtil.textLink("Upload Samples", _protocol.urlUploadSamples(_sampleSet != null))%></div><%
+        %><div><%=textLink("Upload Samples", _protocol.urlUploadSamples(_sampleSet != null))%></div><%
         if (_fcsAnalysisCount > 0)
         {
-            %><div><%=PageFlowUtil.textLink("Identify Background", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div><%
+            %><div><%=textLink("Identify Background", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div><%
         }
 
         int jobCount = PipelineService.get().getQueuedStatusFiles(c).length;
-        %><div><%=PageFlowUtil.textLink("Show Jobs" + (jobCount > 0 ? " (" + jobCount + " running)" : ""), urlProvider(PipelineStatusUrls.class).urlBegin(c))%></div><%
+        %><div><%=textLink("Show Jobs" + (jobCount > 0 ? " (" + jobCount + " running)" : ""), urlProvider(PipelineStatusUrls.class).urlBegin(c))%></div><%
 
         if (_canCreateFolder && _hasPipelineRoot)
         {
-            %><div><%=PageFlowUtil.textLink("Copy Folder", new ActionURL(FlowController.NewFolderAction.class, c))%></div><%
+            %><div><%=textLink("Copy Folder", new ActionURL(FlowController.NewFolderAction.class, c))%></div><%
         }
         %>
     </div>

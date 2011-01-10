@@ -27,7 +27,7 @@
 <%  EditWellForm form = (EditWellForm) __form;
 FlowWell well = form.getWell();%>
 <labkey:errors />
-<form method="POST" action="<%=h(well.urlFor(WellController.Action.editWell))%>">
+<form method="POST" action="<%=h(well.urlFor(WellController.EditWellAction.class))%>">
     <table>
         <tr><td>Run Name:</td><td><a href="<%= new ActionURL(RunController.ShowRunAction.class, getContainer())%>?runId=<%=well.getRun().getRunId()%>"><%=h(well.getRun().getName())%></a></td></tr>
         <tr><td>Well Name:</td><td><input type="text" name="ff_name" value="<%=h(form.ff_name)%>"></td></tr>
@@ -46,7 +46,7 @@ FlowWell well = form.getWell();%>
 <% } %>
     </table>
     <labkey:button text="update" />
-    <labkey:button text="cancel" href="<%=well.urlFor(WellController.Action.showWell)%>"/>
+    <labkey:button text="cancel" href="<%=well.urlFor(WellController.ShowWellAction.class)%>"/>
 </form>
 
 

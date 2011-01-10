@@ -137,7 +137,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public ActionURL urlShow()
     {
-        return urlFor(ProtocolController.Action.showProtocol);
+        return urlFor(ProtocolController.ShowProtocolAction.class);
     }
 
     public FlowProtocolStep getStep()
@@ -218,7 +218,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public ActionURL urlShowSamples(boolean unlinkedOnly)
     {
-        ActionURL ret = urlFor(ProtocolController.Action.showSamples);
+        ActionURL ret = urlFor(ProtocolController.ShowSamplesAction.class);
         if (unlinkedOnly)
             ret.addParameter("unlinkedOnly", true);
         return ret;

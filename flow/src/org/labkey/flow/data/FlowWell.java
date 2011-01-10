@@ -157,13 +157,13 @@ public class FlowWell extends FlowDataObject
 
     public ActionURL urlShow()
     {
-        return urlFor(WellController.Action.showWell);
+        return urlFor(WellController.ShowWellAction.class);
     }
 
     public ActionURL urlEditAnalysisScript() throws Exception
     {
         FlowScript analysisScript = getScript();
-        ActionURL ret = analysisScript.urlFor(ScriptController.Action.begin);
+        ActionURL ret = analysisScript.urlFor(ScriptController.BeginAction.class);
         addParams(ret);
         return ret;
     }

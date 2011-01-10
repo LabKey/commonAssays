@@ -152,14 +152,14 @@ public class AnalysisScriptsWebPart extends FlowQueryView
 
                 if (script.hasStep(FlowProtocolStep.calculateCompensation))
                 {
-                    ActionURL url = script.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation);
+                    ActionURL url = script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.calculateCompensation);
                     out.write("<a href='" + PageFlowUtil.filter(url) + "'>Compensation</a>");
                     and = "<br>";
                 }
 
                 if (script.hasStep(FlowProtocolStep.analysis))
                 {
-                    ActionURL url = script.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.analysis);
+                    ActionURL url = script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.analysis);
                     out.write(and);
                     out.write("<a href='" + PageFlowUtil.filter(url) + "'>Statistics and Graphs</a>");
                 }

@@ -50,7 +50,7 @@ public class FlowLog extends FlowDataObject
 
     public ActionURL urlShow()
     {
-        return urlFor(LogController.Action.showLog);
+        return urlFor(LogController.ShowLogAction.class);
     }
 
     public String getText() throws SQLException

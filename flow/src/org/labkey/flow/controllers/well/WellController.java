@@ -62,19 +62,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class WellController extends BaseFlowController<WellController.Action>
+public class WellController extends BaseFlowController
 {
-    static private final Logger _log = Logger.getLogger(WellController.class);
-    public enum Action
-    {
-        begin,
-        showWell,
-        editWell,
-        chooseGraph,
-        showGraph,
-        generateGraph,
-        keywords,
-    }
+    private static final Logger _log = Logger.getLogger(WellController.class);
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WellController.class);
 
@@ -133,7 +123,7 @@ public class WellController extends BaseFlowController<WellController.Action>
         public NavTree appendNavTrail(NavTree root)
         {
             String label = well != null ? null : "Well not found";
-            return appendFlowNavTrail(getPageConfig(), root, well, label, Action.showWell);
+            return appendFlowNavTrail(getPageConfig(), root, well, label);
         }
     }
 
@@ -212,13 +202,13 @@ public class WellController extends BaseFlowController<WellController.Action>
 
         public ActionURL getSuccessURL(EditWellForm form)
         {
-            return form.getWell().urlFor(Action.showWell);
+            return form.getWell().urlFor(ShowWellAction.class);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
             String label = well != null ? "Edit " + well.getLabel() : "Well not found";
-            return appendFlowNavTrail(getPageConfig(), root, well, label, Action.editWell);
+            return appendFlowNavTrail(getPageConfig(), root, well, label);
         }
     }
 
@@ -266,7 +256,7 @@ public class WellController extends BaseFlowController<WellController.Action>
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, well, "Choose Graph", Action.chooseGraph);
+            return appendFlowNavTrail(getPageConfig(), root, well, "Choose Graph");
         }
     }
 
