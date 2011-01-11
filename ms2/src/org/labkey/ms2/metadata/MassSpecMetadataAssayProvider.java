@@ -337,6 +337,11 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         return ExperimentService.get().getExpData(((Number)dataRowId).intValue());
     }
 
+    public Domain getResultsDomain(ExpProtocol protocol)
+    {
+        return null;
+    }
+    
     public Domain getFractionDomain(ExpProtocol protocol)
     {
         return getDomainByPrefix(protocol, FRACTION_DOMAIN_PREFIX);
