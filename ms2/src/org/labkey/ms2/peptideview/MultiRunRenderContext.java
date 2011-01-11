@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * User: adam
@@ -42,10 +43,10 @@ public class MultiRunRenderContext extends RenderContext
     }
 
     @Override
-    protected Results selectForDisplay(TableInfo table, Collection<ColumnInfo> columns, SimpleFilter filter, Sort sort, int maxRows, long offset, boolean async) throws SQLException
+    protected Results selectForDisplay(TableInfo table, Collection<ColumnInfo> columns, Map<String,Object> parameters, SimpleFilter filter, Sort sort, int maxRows, long offset, boolean async) throws SQLException
     {
         // XXX: we're ignoring offset for now
-        ResultSet rs = new MultiRunResultSet(_runs, table, columns, filter, sort, maxRows, getCache());
+        ResultSet rs = new MultiRunResultSet(_runs, table, columns, parameters, filter, sort, maxRows, getCache());
         return new ResultsImpl(rs, columns);
     }
 
@@ -54,14 +55,16 @@ public class MultiRunRenderContext extends RenderContext
     {
         private TableInfo _table;
         private Collection<ColumnInfo> _columns;
+        private Map<String,Object> _parameters;
         private int _maxRows;
         private boolean _cache;
 
-        MultiRunResultSet(List<MS2Run> runs, TableInfo table, Collection<ColumnInfo> columns, SimpleFilter filter, Sort sort, int maxRows, boolean cache)
+        MultiRunResultSet(List<MS2Run> runs, TableInfo table, Collection<ColumnInfo> columns, Map<String,Object> parameters, SimpleFilter filter, Sort sort, int maxRows, boolean cache)
         {
             super(runs, filter, sort);
             _table = table;
             _columns = columns;
+            _parameters = parameters;
             _maxRows = maxRows;
             _cache = cache;
 
@@ -74,7 +77,7 @@ public class MultiRunRenderContext extends RenderContext
             ProteinManager.replaceRunCondition(_filter, null, _iter.next());
             // XXX: we're ignoring offset for now
             //msi: We are using a scrollable resultset here for reasons I am not sure of...
-            return Table.selectForDisplay(_table, _columns, _filter, _sort, _maxRows, 0, _cache, true);
+            return Table.selectForDisplay(_table, _columns, _parameters, _filter, _sort, _maxRows, 0, _cache, true);
         }
     }
 }

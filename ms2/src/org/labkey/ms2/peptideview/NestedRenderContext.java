@@ -205,7 +205,7 @@ public class NestedRenderContext extends RenderContext
     }
 
     @Override
-    protected Results selectForDisplay(TableInfo table, Collection<ColumnInfo> columns, SimpleFilter filter, Sort sort, int maxRows, long offset, boolean async) throws SQLException, IOException
+    protected Results selectForDisplay(TableInfo table, Collection<ColumnInfo> columns, Map<String,Object> parameters, SimpleFilter filter, Sort sort, int maxRows, long offset, boolean async) throws SQLException, IOException
     {
         if (_nestingOption != null)
         {
@@ -217,11 +217,11 @@ public class NestedRenderContext extends RenderContext
         // Force the result set to be cached so that we can do our nesting
         if (async)
         {
-            return Table.selectForDisplayAsync(table, columns, filter, sort, maxRows, offset, getCache(), true, getViewContext().getResponse());
+            return Table.selectForDisplayAsync(table, columns, parameters, filter, sort, maxRows, offset, getCache(), true, getViewContext().getResponse());
         }
         else
         {
-            return Table.selectForDisplay(table, columns, filter, sort, maxRows, offset, getCache(), true);
+            return Table.selectForDisplay(table, columns, parameters, filter, sort, maxRows, offset, getCache(), true);
         }
     }
 }
