@@ -1188,7 +1188,7 @@ public class NabController extends SpringActionController
             _plateIds = plateIds;
         }
 
-        public Map<Container, String> getValidTargets()
+        public Set<Study> getValidTargets()
         {
             return AssayPublishService.get().getValidPublishTargets(_user, InsertPermission.class);
         }
@@ -1426,7 +1426,8 @@ public class NabController extends SpringActionController
                 {
                     String sequenceNum =  _sequenceNums != null ?  _sequenceNums[index] : null;
                     String date =  _dates != null ?  _dates[index] : null;
-                    return new PublishSampleInfo(_participantIds[index], sampleId, sequenceNum, date);
+                    Container targetContainer = _targetContainerId != null ? ContainerManager.getForId(_targetContainerId) : null;
+                    return new PublishSampleInfo(_participantIds[index], sampleId, sequenceNum, date, targetContainer);
                 }
             }
             return null;
@@ -1671,13 +1672,21 @@ public class NabController extends SpringActionController
         private String _specimenID;
         private String _visitID;
         private String _dateString;
+        private Container _studyContainer;
 
-        public PublishSampleInfo(String ptid, String sampleId, String sequenceNum, String dateString)
+        public PublishSampleInfo(String ptid, String sampleId, String sequenceNum, String dateString, Container studyContainer)
         {
             _visitID = sequenceNum;
             _specimenID = sampleId;
             _ptid = ptid;
             _dateString = dateString;
+            _studyContainer = studyContainer;
+        }
+
+        @Override
+        public Container getStudyContainer()
+        {
+            return _studyContainer;
         }
 
         public String getParticipantID()

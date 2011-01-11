@@ -660,7 +660,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 specimenID = value;
             }
             // First try resolving the whole description column as a specimen id
-            ParticipantVisit match = resolver.resolve(specimenID, null, null, null);
+            ParticipantVisit match = resolver.resolve(specimenID, null, null, null, null);
             String extraSpecimenInfo = null;
             if (!isResolved(match))
             {
@@ -684,7 +684,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 if (index != -1)
                 {
                     specimenID = value.substring(0, index);
-                    match = resolver.resolve(specimenID, null, null, null);
+                    match = resolver.resolve(specimenID, null, null, null, null);
                 }
 
                 // If that doesn't work either, try to parse as "<PTID>, Visit <VisitNumber>, <Date>, <ExtraInfo>"
@@ -754,7 +754,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         {
             date = null;
         }
-        return resolver.resolve(specimenID, participantId, visitId, date);
+        return resolver.resolve(specimenID, participantId, visitId, date, null);
     }
 
     public ActionURL getContentURL(Container container, ExpData data)

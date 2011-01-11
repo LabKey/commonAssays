@@ -20,6 +20,7 @@
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.nab.NabController" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.study.Study" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.PublishBean> me = (JspView<NabController.PublishBean>) HttpView.currentView();
@@ -41,10 +42,10 @@
             <td>
                 <select name="targetContainerId">
                 <%
-                    for (Map.Entry<Container, String> entry : bean.getValidTargets().entrySet())
+                    for (Study study : bean.getValidTargets())
                     {
                 %>
-                    <option value="<%= h(entry.getKey().getId()) %>"><%= h(entry.getKey().getPath()) %> (<%= h(entry.getValue()) %>)</option>
+                    <option value="<%= h(study.getContainer().getId()) %>"><%= h(study.getContainer().getPath()) %> (<%= h(study.getLabel()) %>)</option>
                 <%
                     }
                 %>
