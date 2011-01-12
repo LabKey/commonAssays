@@ -25,7 +25,6 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.security.User;
 import org.labkey.api.query.FieldKey;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
-import org.labkey.ms2.pipeline.sequest.SequestClientImpl;
 import org.labkey.ms2.query.PeptidesTableInfo;
 import org.labkey.ms2.query.MS2Schema;
 import org.apache.log4j.Logger;
@@ -45,8 +44,6 @@ public class MS2ServiceImpl implements MS2Service.Service
     {
         if(server.equalsIgnoreCase("mascot"))
             return new MascotClientImpl(url, instanceLogger, userAccount, userPassword);
-        if(server.equalsIgnoreCase("sequest"))
-            return new SequestClientImpl(url, instanceLogger);
         return null;
     }
 

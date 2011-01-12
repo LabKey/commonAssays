@@ -1097,7 +1097,6 @@ ms2/src/org/labkey/ms2/pipeline/sequest/PositiveDoubleParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/PositiveIntegerParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/RealNumberParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestBasicConverter.java -text
-ms2/src/org/labkey/ms2/pipeline/sequest/SequestClientImpl.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestDefaults.xml -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestEnzymeConverter.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestHeaderConverter.java -text
