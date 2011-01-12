@@ -42,9 +42,9 @@ public class ParamParser
     protected   static String XML_FOOTER    = "</bioml>";
     protected   static String SEQUENCE_DB   = "pipeline, database";
     protected   static String TAXONOMY      = "protein, taxon";
-    protected   static String ENZYME        = "protein, cleavage site";
-    protected   static String STATIC_MOD    = "residue, modification mass";
-    protected   static String DYNAMIC_MOD   = "residue, potential modification mass";
+    public      static String ENZYME        = "protein, cleavage site";
+    public      static String STATIC_MOD    = "residue, modification mass";
+    public      static String DYNAMIC_MOD   = "residue, potential modification mass";
 
     StringBuffer error;
     Document xmlDoc;

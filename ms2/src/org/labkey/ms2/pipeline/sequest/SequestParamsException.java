@@ -16,17 +16,26 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
+import org.apache.commons.lang.StringUtils;
+import org.labkey.api.pipeline.PipelineJobException;
+
+import java.util.List;
+
 /**
  * User: billnelson@uky.edu
  * Date: Sep 8, 2006
  * Time: 12:21:56 PM
  */
-public class SequestParamsException extends Exception
+public class SequestParamsException extends PipelineJobException
 {
-
     public SequestParamsException(String message)
     {
         super(message);
+    }
+
+    public SequestParamsException(List<String> messages)
+    {
+        super(StringUtils.join(messages, '\n'));
     }
 
     public SequestParamsException(Exception e)

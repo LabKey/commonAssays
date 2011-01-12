@@ -148,7 +148,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             File fileWorkDAT = _wd.newFile(FT_MASCOT_DAT);
 
             // Mascot starts with remote sequence file names, so it has to look at the
-            // raw parameter, rather than using getJobSupport().getSequenceFiles().
+            // raw parameter, rather than using getJob().getSequenceFiles().
             String paramDatabase = params.get("pipeline, database");
             if (paramDatabase == null)
             {
@@ -176,10 +176,10 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             String ver = TPPTask.getTPPVersion(getJob());
             argsM2S.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver, getJob().getLogger()));
             argsM2S.add("-mgf");
-            String paramMinParent = params.get("spectrum, minimum parent m+h");
+            String paramMinParent = params.get(MINIMUM_PARENT_M_H);
             if (paramMinParent != null)
                 argsM2S.add("-B" + paramMinParent);
-            String paramMaxParent = params.get("spectrum, maximum parent m+h");
+            String paramMaxParent = params.get(MAXIMUM_PARENT_M_H);
             if (paramMaxParent != null)
                 argsM2S.add("-T" + paramMaxParent);
             String paramMinPeakIntensity = params.get("spectrum, minimum peak intensity");

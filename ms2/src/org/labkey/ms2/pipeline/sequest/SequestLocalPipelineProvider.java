@@ -57,7 +57,7 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
     private boolean hasSequest()
     {
         SequestSearchTask.Factory factory = (SequestSearchTask.Factory)PipelineJobService.get().getTaskFactory(new TaskId(SequestSearchTask.class));
-        return factory.getLocation() != null || factory.getExecutable() != null;
+        return factory.getLocation() != null || factory.getSequestInstallDir() != null;
     }
 
     public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)

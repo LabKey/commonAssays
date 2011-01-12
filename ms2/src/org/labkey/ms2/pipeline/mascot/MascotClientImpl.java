@@ -29,6 +29,7 @@ import org.labkey.api.ms2.SearchClient;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.HelpTopic;
+import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.client.Enzyme;
 import org.labkey.ms2.pipeline.client.CutSite;
 import org.labkey.ms2.pipeline.SearchFormUtil;
@@ -1066,7 +1067,7 @@ public class MascotClientImpl implements SearchClient
                 {"it_mods", "mascot, variable modifications", "search, it_mods"},
                 {"mods", "mascot, fixed modifications", "search, mods"},
                 {"overview", "mascot, overview", "search, overview"},
-                {"pfa", "scoring, maximum missed cleavage sites", "search, pfa"},
+                {"pfa", AbstractMS2SearchTask.MAXIMUM_MISSED_CLEAVAGE_SITES, "search, pfa"},
                 {"precursor", "mascot, precursor", "search, precursor"},
                 {"report", "mascot, report top results", "search, report"},
                 {"reptype", "mascot, report type", "default, reptype"},

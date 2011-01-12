@@ -183,7 +183,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             return "ANALYSIS";
         }
 
-        public boolean isParticipant(PipelineJob job) throws IOException, SQLException
+        public boolean isParticipant(PipelineJob job) throws IOException
         {
             return job.getJobSupport(JobSupport.class).isSamples();
         }
@@ -230,7 +230,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             setJoin(true);
         }
 
-        public boolean isParticipant(PipelineJob job) throws IOException, SQLException
+        public boolean isParticipant(PipelineJob job) throws IOException
         {
             return job.getJobSupport(JobSupport.class).isFractions();
         }

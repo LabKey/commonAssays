@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,6 +24,7 @@ import org.junit.Test;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.settings.AppProps;
+import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import java.io.BufferedWriter;
@@ -31,7 +33,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -42,24 +46,74 @@ import java.util.TreeSet;
  * Date: Sep 7, 2006
  * Time: 8:24:51 PM
  */
-public abstract class SequestParamsBuilder
+public class SequestParamsBuilder
 {
     Map<String, String> sequestInputParams;
     File sequenceRoot;
     char[] _validResidues = {'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'O','[',']'};
     protected HashMap<String, String> supportedEnzymes = new HashMap<String, String>();
-    protected SequestParams _params;
-
-
+    protected final SequestParams _params;
+    protected final SequestParams.Variant _variant;
+    private List<File> _databaseFiles;
 
     public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot)
     {
-        this.sequestInputParams = sequestInputParams;
-        this.sequenceRoot = sequenceRoot;
+        this(sequestInputParams, sequenceRoot, SequestParams.Variant.sequest, null);
     }
 
-    public abstract String initXmlValues();
+    public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot, SequestParams.Variant variant, List<File> databaseFiles)
+    {
+        _variant = variant;
+        _params = new SequestParams(variant);
 
+        this.sequestInputParams = sequestInputParams;
+        this.sequenceRoot = sequenceRoot;
+        _databaseFiles = databaseFiles;
+
+        supportedEnzymes.put("[KR]|{P}", "trypsin 1 1 KR P");
+        supportedEnzymes.put("[KR]|[X]", "stricttrypsin 1 1 KR -");
+        supportedEnzymes.put("[R]|{P}", "argc 1 1 R P");
+        supportedEnzymes.put("[X]|[D]", "aspn 1 0 D -");
+        supportedEnzymes.put("[FMWY]|{P}", "chymotrypsin 1 1 FMWY P");
+        supportedEnzymes.put("[R]|[X]", "clostripain 1 1 R -");
+        supportedEnzymes.put("[M]|{P}", "cnbr 1 1 M P");
+        supportedEnzymes.put("[AGILV]|{P}", "elastase 1 1 AGILV P");
+        supportedEnzymes.put("[D]|{P}", "formicacid 1 1 D P");
+        supportedEnzymes.put("[K]|{P}", "trypsin_k 1 1 K P");
+        supportedEnzymes.put("[ED]|{P}", "gluc 1 1 ED P");
+        supportedEnzymes.put("[E]|{P}", "gluc_bicarb 1 1 E P");
+        supportedEnzymes.put("[W]|[X]", "iodosobenzoate 1 1 W -");
+        supportedEnzymes.put("[K]|[X]", "lysc 1 1 K P");
+        supportedEnzymes.put("[K]|[X]", "lysc-p 1 1 K -");
+        supportedEnzymes.put("[X]|[K]", "lysn 1 0 K -");
+        supportedEnzymes.put("[X]|[KASR]", "lysn_promisc 1 0 KASR -");
+        supportedEnzymes.put("[X]|[X]", "nonspecific 0 0 - -");
+        supportedEnzymes.put("[FL]|[X]", "pepsina 1 1 FL -");
+        supportedEnzymes.put("[P]|[X]", "protein_endopeptidase 1 1 P -");
+        supportedEnzymes.put("[E]|[X]", "staph_protease 1 1 E -");
+        supportedEnzymes.put("[KMR]|{P}", "trypsin/cnbr 1 1 KMR P");
+        supportedEnzymes.put("[DEKR]|{P}", "trypsin_gluc 1 1 DEKR P");
+    }
+
+    public void initXmlValues() throws SequestParamsException
+    {
+        List<String> errors = new ArrayList<String>();
+        errors.addAll(initDatabases());
+        errors.addAll(initPeptideMassTolerance());
+        errors.addAll(initMassUnits());
+        errors.addAll(initMassRange());
+        errors.addAll(initIonScoring());
+        errors.addAll(initEnzymeInfo());
+        errors.addAll(initDynamicMods());
+        errors.addAll(initMassType());
+        errors.addAll(initStaticMods());
+        errors.addAll(initPassThroughs());
+
+        if (!errors.isEmpty())
+        {
+            throw new SequestParamsException(errors);
+        }
+    }
 
     public String getPropertyValue(String property)
     {
@@ -71,60 +125,52 @@ public abstract class SequestParamsBuilder
         return _validResidues;
     }
 
-    String initDatabases()
+    List<String> initDatabases()
     {
-        String parserError = "";
-        ArrayList<String> databases = new ArrayList<String>();
-        String value = sequestInputParams.get("pipeline, database");
-        if (value == null || value.equals(""))
+        List<File> databaseFiles = _databaseFiles;
+        if (databaseFiles == null)
         {
-            parserError = "pipeline, database; No value entered for database.\n";
-            return parserError;
-        }
-        StringTokenizer st = new StringTokenizer(value, ",");
-        if (st.countTokens() > 2)
-        {
-            parserError = "The max number of databases for one sequest search is two.\n";
-            return parserError;
-        }
-        while (st.hasMoreTokens())
-        {
-            databases.add(st.nextToken().trim());
+            databaseFiles = new ArrayList<File>();
+            String value = sequestInputParams.get("pipeline, database");
+            if (value == null || value.equals(""))
+            {
+                return Collections.singletonList("pipeline, database; No value entered for database.");
+            }
+            StringTokenizer st = new StringTokenizer(value, ",");
+            while (st.hasMoreTokens())
+            {
+                databaseFiles.add(MS2PipelineManager.getSequenceDBFile(sequenceRoot, st.nextToken().trim()));
+            }
         }
 
-        Param database1 = _params.getParam("first_database_name");
-        File databaseFile = MS2PipelineManager.getSequenceDBFile(sequenceRoot, databases.get(0));
-        if (!databaseFile.exists())
+        if (databaseFiles.size() != 1 && databaseFiles.size() != 2)
         {
-            parserError = "pipeline, database; The database does not exist on the local server (" + databases.get(0) + ").\n";
-            return parserError;
+            return Collections.singletonList("Sequest search support one or two FASTA files, not " + databaseFiles.size());
         }
 
+        Param database1 = _params.getFASTAParam();
+        File databaseFile = databaseFiles.get(0);
         database1.setValue(databaseFile.getAbsolutePath());
 
-        if (databases.size() > 1)
+        if (databaseFiles.size() > 1)
         {
             Param database2 = _params.getParam("second_database_name");
             //check for duplicate database entries
-            if (!database1.getValue().equals(databases.get(1)))
+            if (!databaseFile.equals(databaseFiles.get(1)))
             {
-                databaseFile = MS2PipelineManager.getSequenceDBFile(sequenceRoot, databases.get(1));
                 if (!databaseFile.exists())
                 {
-                    parserError = "pipeline, database; The database does not exist(" + databases.get(1) + ").\n";
-                    return parserError;
+                    return Collections.singletonList("pipeline, database; The database does not exist(" + databaseFiles.get(1) + ")");
                 }
-                database2.setValue(databases.get(1));
-                //database2.setValue(databaseFile.getAbsolutePath());
+                database2.setValue(databaseFiles.get(1).getAbsolutePath());
             }
         }
-        return parserError;
+        return Collections.emptyList();
     }
 
 
-    String initPeptideMassTolerance()
+    List<String> initPeptideMassTolerance()
     {
-        String parserError = "";
         String plusValueString =
             sequestInputParams.get("spectrum, parent monoisotopic mass error plus");
 
@@ -133,18 +179,16 @@ public abstract class SequestParamsBuilder
 
         if (plusValueString == null && minusValueString == null)
         {
-            return parserError;
+            return Collections.emptyList();
         }
         if (plusValueString == null || minusValueString == null || !plusValueString.equals(minusValueString))
         {
-            parserError = "Sequest does not support asymmetric parent error ranges (minus=" +
-                minusValueString + " plus=" + plusValueString + ").\n";
-            return parserError;
+            return Collections.singletonList("Sequest does not support asymmetric parent error ranges (minus=" +
+                minusValueString + " plus=" + plusValueString + ").");
         }
         if (plusValueString.equals("") && minusValueString.equals(""))
         {
-            parserError = "No values were entered for spectrum, parent monoisotopic mass error minus/plus.\n";
-            return parserError;
+            return Collections.singletonList("No values were entered for spectrum, parent monoisotopic mass error minus/plus.");
         }
         try
         {
@@ -152,30 +196,27 @@ public abstract class SequestParamsBuilder
         }
         catch (NumberFormatException e)
         {
-            parserError = "Invalid value for value for  spectrum, parent monoisotopic mass error minus/plus (" + plusValueString + ").\n";
-            return parserError;
+            return Collections.singletonList("Invalid value for value for  spectrum, parent monoisotopic mass error minus/plus (" + plusValueString + ").");
         }
         if (Float.parseFloat(plusValueString) < 0)
         {
-            parserError = "Negative values not permitted for parent monoisotopic mass error(" + plusValueString + ").\n";
-            return parserError;
+            return Collections.singletonList("Negative values not permitted for parent monoisotopic mass error(" + plusValueString + ").");
         }
         Param pepTol = _params.getParam("peptide_mass_tolerance");
         pepTol.setValue(plusValueString);
-        return parserError;
 
+        return Collections.emptyList();
     }
-    /*The first 3 parameters of that line are integers (0 or 1) that represents whether or not neutral losses (NH3 and H2))
+
+    /** The first 3 parameters of that line are integers (0 or 1) that represents whether or not neutral losses (NH3 and H2))
     for a-ions, b-ions and y-ions are considered (0=no, 1=yes) in the correlation analysis. The last 9 parameters are
     floating point values representing a, b, c, d, v, w, x, y, and z ions respectively. The values entered for these
     paramters should range from 0.0 (don't use the ion series) to 1.0. The value entered represents the weighting that
     each ion series has (relative to the others). So an ion series with 0.5 contains half the weighting or relevance of
     an ion series with a 1.0 parameter. */
-
-    String initIonScoring()
+    List<String> initIonScoring()
     {
         Param ions = _params.getParam("ion_series");
-        StringBuilder parserError = new StringBuilder();
 
         StringBuilder neutralLossA = new StringBuilder();
         StringBuilder neutralLossB = new StringBuilder();
@@ -209,21 +250,22 @@ public abstract class SequestParamsBuilder
             ionZ.append(st.nextToken());
         }
 
-        parserError.append(setIonSeriesParam("scoring, a ions", ionA));
-        parserError.append(setIonSeriesParam("scoring, b ions", ionB));
-        parserError.append(setIonSeriesParam("scoring, c ions", ionC));
-        parserError.append(setIonSeriesParam("scoring, x ions", ionX));
-        parserError.append(setIonSeriesParam("scoring, y ions", ionY));
-        parserError.append(setIonSeriesParam("scoring, z ions", ionZ));
-        parserError.append(setIonSeriesParam("sequest, d ions", ionD));
-        parserError.append(setIonSeriesParam("sequest, v ions", ionV));
-        parserError.append(setIonSeriesParam("sequest, w ions", ionW));
-        parserError.append(setIonSeriesParam("sequest, a neutral loss", neutralLossA));
-        parserError.append(setIonSeriesParam("sequest, b neutral loss", neutralLossB));
-        parserError.append(setIonSeriesParam("sequest, y neutral loss", neutralLossY));
-        if (!parserError.toString().equals(""))
+        List<String> errors = new ArrayList<String>();
+        setIonSeriesParam("scoring, a ions", ionA, errors);
+        setIonSeriesParam("scoring, b ions", ionB, errors);
+        setIonSeriesParam("scoring, c ions", ionC, errors);
+        setIonSeriesParam("scoring, x ions", ionX, errors);
+        setIonSeriesParam("scoring, y ions", ionY, errors);
+        setIonSeriesParam("scoring, z ions", ionZ, errors);
+        setIonSeriesParam("sequest, d ions", ionD, errors);
+        setIonSeriesParam("sequest, v ions", ionV, errors);
+        setIonSeriesParam("sequest, w ions", ionW, errors);
+        setIonSeriesParam("sequest, a neutral loss", neutralLossA, errors);
+        setIonSeriesParam("sequest, b neutral loss", neutralLossB, errors);
+        setIonSeriesParam("sequest, y neutral loss", neutralLossY, errors);
+        if (!errors.isEmpty())
         {
-            return parserError.toString();
+            return errors;
         }
 
         StringBuilder sb = new StringBuilder().
@@ -242,19 +284,18 @@ public abstract class SequestParamsBuilder
 
         Param pepTol = _params.getParam("ion_series");
         pepTol.setValue(sb.toString());
-        return parserError.toString();
+        return Collections.emptyList();
     }
 
 
 
-    protected String initEnzymeInfo()
+    protected List<String> initEnzymeInfo()
     {
-        String parserError = "";
-        String inputXmlEnzyme = sequestInputParams.get("protein, cleavage site");
-        if (inputXmlEnzyme == null) return parserError;
+        String inputXmlEnzyme = sequestInputParams.get(org.labkey.ms2.pipeline.client.ParamParser.ENZYME);
+        if (inputXmlEnzyme == null) return Collections.emptyList();
         if (inputXmlEnzyme.equals(""))
         {
-            return "protein, cleavage site did not contain a value.";
+            return Collections.singletonList(org.labkey.ms2.pipeline.client.ParamParser.ENZYME + " did not contain a value.");
         }
         String enzyme = removeWhiteSpace(inputXmlEnzyme);
         String[] enzymeSignatures = enzyme.split(",");
@@ -267,22 +308,38 @@ public abstract class SequestParamsBuilder
             }
             catch(SequestParamsException e)
             {
-                return "protein, cleavage site parse error:" + e.getMessage();
+                return Collections.singletonList(org.labkey.ms2.pipeline.client.ParamParser.ENZYME + " parse error:" + e.getMessage());
             }
         }
         try
         {
-            String supportedEnzyme =  getSupportedEnzyme(enzyme);
-            if(supportedEnzyme.equals("")) return inputXmlEnzyme + " is not a pipeline supported enzyme.";
+            String supportedEnzyme = getSupportedEnzyme(enzyme);
+            if(supportedEnzyme.equals("")) return Collections.singletonList(inputXmlEnzyme + " is not a pipeline supported enzyme.");
         }
         catch(SequestParamsException e)
         {
-            return e.getMessage();
+            return Collections.singletonList(e.getMessage());
+        }
+        return Collections.emptyList();
+    }
+
+    protected String getSupportedEnzyme(String enzyme) throws SequestParamsException
+    {
+        Set<String> enzymeSigs = supportedEnzymes.keySet();
+        enzyme = removeWhiteSpace(enzyme);
+        enzyme = combineEnzymes(enzyme.split(","));
+        for(String supportedEnzyme:enzymeSigs)
+        {
+            if(sameEnzyme(enzyme,supportedEnzyme))
+            {
+                String paramsString = supportedEnzymes.get(supportedEnzyme);
+                _params.getParam("enzyme_info").setValue(paramsString);
+                StringTokenizer st = new StringTokenizer(paramsString);
+                return st.nextToken();
+            }
         }
         return "";
     }
-
-    abstract protected String getSupportedEnzyme(String enzyme) throws SequestParamsException;
 
     protected boolean sameEnzyme(String enzyme1, String enzyme2) throws SequestParamsException
     {
@@ -431,7 +488,7 @@ public abstract class SequestParamsBuilder
     }
     
 
-    String initDynamicMods()
+    List<String> initDynamicMods()
     {
         ArrayList<Character> defaultMods = new ArrayList<Character>();
         ArrayList<ResidueMod> workList = new ArrayList<ResidueMod>();
@@ -443,23 +500,22 @@ public abstract class SequestParamsBuilder
         defaultMods.add('T');
         defaultMods.add('Y');
 
-        String parserError = "";
-        String mods = sequestInputParams.get("residue, potential modification mass");
-        if (mods == null || mods.equals("")) return parserError;
+        String mods = sequestInputParams.get(org.labkey.ms2.pipeline.client.ParamParser.DYNAMIC_MOD);
+        if (mods == null || mods.equals("")) return Collections.emptyList();
         mods = removeWhiteSpace(mods);
         ArrayList<Character> residues = new ArrayList<Character>();
         ArrayList<String> masses = new ArrayList<String>();
 
-        parserError = parseMods(mods, residues, masses);
-        if (parserError != null && !parserError.equals("")) return parserError;
+        List<String> parserError = parseMods(mods, residues, masses);
+        if (!parserError.isEmpty()) return parserError;
 
         for (int i = 0; i < masses.size(); i++)
         {
             char res = residues.get(i);
             if(res == '['||res == ']')
             {
-                parserError =initDynamicTermMods(res, masses.get(i));
-                if (parserError != null && !parserError.equals("")) return parserError;
+                parserError = initDynamicTermMods(res, masses.get(i));
+                if (parserError != null && !parserError.isEmpty()) return parserError;
             }
             else
             {
@@ -468,7 +524,7 @@ public abstract class SequestParamsBuilder
 
             }
         }
-        if(workList.size() > 6) return "Sequest will only accept a max of 6 variable modifications.";
+        if(workList.size() > 6) Collections.singletonList("Sequest will only accept a max of 6 variable modifications.");
         StringBuilder sb = new StringBuilder();
         for (ResidueMod mod :workList)
         {
@@ -492,43 +548,39 @@ public abstract class SequestParamsBuilder
     }
 
 
-    String initStaticMods()
+    List<String> initStaticMods()
     {
-        String parserError;
-        String mods = sequestInputParams.get("residue, modification mass");
+        String mods = sequestInputParams.get(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD);
 
         ArrayList<Character> residues = new ArrayList<Character>();
         ArrayList<String> masses = new ArrayList<String>();
 
-        parserError = parseMods(mods, residues, masses);
-        if (parserError != null && !parserError.equals("")) return parserError;
-        Param modProp;
+        List<String> parserError = parseMods(mods, residues, masses);
+        if (!parserError.isEmpty()) return parserError;
         for (int i = 0; i < masses.size(); i++)
         {
+            Param modProp;
             if(residues.get(i) == '[')
             {
                 modProp = _params.startsWith("add_Nterm_peptide");
-                modProp.setValue(masses.get(i));
             }
             else if(residues.get(i) == ']')
             {
                 modProp = _params.startsWith("add_Cterm_peptide");
-                modProp.setValue(masses.get(i));
             }
             else
             {
                 modProp = _params.startsWith("add_" + residues.get(i) + "_");
-                modProp.setValue(masses.get(i));
             }
+            modProp.setValue(masses.get(i));
         }
         return parserError;
     }
 
-    private String parseMods(String mods, ArrayList<Character> residues, ArrayList<String> masses)
+    private List<String> parseMods(String mods, ArrayList<Character> residues, ArrayList<String> masses)
     {
-        String parserError = "";
         Float massF;
-        if (mods == null || mods.equals("")) return parserError;
+        if (mods == null || mods.equals("")) return Collections.emptyList();
 
         StringTokenizer st = new StringTokenizer(mods, ",");
         while (st.hasMoreTokens())
@@ -537,14 +589,12 @@ public abstract class SequestParamsBuilder
             token = removeWhiteSpace(token);
             if (token.charAt(token.length() - 2) != '@' && token.length() > 3)
             {
-                parserError = "modification mass contained an invalid value(" + mods + ").\n";
-                return parserError;
+                return Collections.singletonList("modification mass contained an invalid value(" + mods + ").");
             }
             Character residue = token.charAt(token.length() - 1);
             if (!isValidResidue(residue))
             {
-                parserError = "modification mass contained an invalid residue(" + residue + ").\n";
-                return parserError;
+                return Collections.singletonList("modification mass contained an invalid residue(" + residue + ").");
             }
             residues.add(residue);
             String mass = token.substring(0, token.length() - 2);
@@ -556,18 +606,16 @@ public abstract class SequestParamsBuilder
             }
             catch (NumberFormatException e)
             {
-                parserError = "modification mass contained an invalid mass value (" + mass + ")\n";
-                return parserError;
+                return Collections.singletonList("modification mass contained an invalid mass value (" + mass + ")");
             }
             masses.add(massF.toString());
         }
-        return parserError;
+        return Collections.emptyList();
     }
 
 
-    String initDynamicTermMods(char term, String mass)
+    List<String> initDynamicTermMods(char term, String mass)
     {
-        String parserError = "";
         Param termProp = _params.getParam("term_diff_search_options");
         String defaultTermMod = termProp.getValue();
         StringTokenizer st = new StringTokenizer(defaultTermMod);
@@ -576,27 +624,25 @@ public abstract class SequestParamsBuilder
 
         if (mass == null|| mass.length() == 0)
         {
-            return "The mass value for term_diff_search_options is empty.";
+            return Collections.singletonList("The mass value for term_diff_search_options is empty.");
         }
         if(term == '[') defaultNTerm = mass;
         else if(term == ']') defaultCTerm = mass;
         termProp.setValue(defaultCTerm + " " + defaultNTerm);
-        return parserError;
+        return Collections.emptyList();
     }
 
-    String initMassType()
+    List<String> initMassType()
     {
-        String parserError = "";
         String massType = sequestInputParams.get("spectrum, fragment mass type");
         String sequestValue;
         if (massType == null)
         {
-            return parserError;
+            return Collections.emptyList();
         }
         if (massType.equals(""))
         {
-            parserError = "spectrum, fragment mass type contains no value.\n";
-            return parserError;
+            return Collections.singletonList("spectrum, fragment mass type contains no value.");
         }
         if (massType.equalsIgnoreCase("average"))
         {
@@ -608,87 +654,72 @@ public abstract class SequestParamsBuilder
         }
         else
         {
-            parserError = "spectrum, fragment mass type contains an invalid value(" + massType + ").\n";
-            return parserError;
+            return Collections.singletonList("spectrum, fragment mass type contains an invalid value(" + massType + ").");
         }
         _params.getParam("mass_type_fragment").setValue(sequestValue);
-        return parserError;
+        return Collections.emptyList();
     }
 
-    String initMassUnits()
+    List<String> initMassUnits()
     {
-        String parserError = "";
         String pepMassUnit = sequestInputParams.get("spectrum, parent mass error units");
         if(pepMassUnit == null || pepMassUnit.equals(""))
         {
             //Check depricated param
             pepMassUnit = sequestInputParams.get("spectrum, parent monoisotopic mass error units");
-            if(pepMassUnit == null || pepMassUnit.equals("")) return parserError;
+            if(pepMassUnit == null || pepMassUnit.equals(""))
+                return Collections.emptyList();
         }
         if(pepMassUnit.equalsIgnoreCase("daltons"))
             _params.getParam("peptide_mass_units").setValue("0");
         else if(pepMassUnit.equalsIgnoreCase("ppm"))
             _params.getParam("peptide_mass_units").setValue("2");
         else
-            parserError = "spectrum, parent monoisotopic mass error units contained an invalid value for Sequest: (" +
-                 pepMassUnit + ").\n";
-        return parserError;
+            return Collections.singletonList("spectrum, parent monoisotopic mass error units contained an invalid value for Sequest: (" +
+                 pepMassUnit + ").");
+        return Collections.emptyList();
     }
 
 
-   String initMassRange()
+   List<String> initMassRange()
    {
-       StringBuilder parserError = new StringBuilder();
-       String rangeMin = sequestInputParams.get("spectrum, minimum parent m+h");
-       String rangeMax = sequestInputParams.get("sequest, maximum parent m+h");
-       String defaultMin;
-       String defaultMax;
-       Param sequestProp = _params.getParam("digest_mass_range");
-       String defaultValue = sequestProp.getValue();
-       StringTokenizer st = new StringTokenizer(defaultValue);
-       defaultMin = st.nextToken();
-       defaultMax = st.nextToken();
-       if(rangeMin == null || rangeMin.equals(""))
+       if (_variant == SequestParams.Variant.makedb)
        {
-            rangeMin = defaultMin;
-       }
-       else
-       {
-           try
+           String rangeMin = sequestInputParams.get(AbstractMS2SearchTask.MINIMUM_PARENT_M_H);
+           String rangeMax = sequestInputParams.get(AbstractMS2SearchTask.MAXIMUM_PARENT_M_H);
+
+           if (rangeMin != null)
            {
-                Double.parseDouble(rangeMin);
+               try
+               {
+                    Double.parseDouble(rangeMin);
+               }
+               catch( NumberFormatException e)
+               {
+                   return Collections.singletonList(AbstractMS2SearchTask.MINIMUM_PARENT_M_H + " is an invalid value: (" + rangeMin + ").");
+               }
+               _params.getParam("min_peptide_mass").setValue(rangeMin);
            }
-           catch( NumberFormatException e)
+
+           if (rangeMax != null)
            {
-               parserError.append("spectrum, minimum parent m+h is an invalid value: (" +
-               rangeMin + ").");
-               return parserError.toString();
-           }
-       }
-       if(rangeMax == null || rangeMax.equals(""))
-       {
-            rangeMax = defaultMax;
-       }
-       else
-       {
-           try
-           {
-                Double.parseDouble(rangeMax);
-           }
-           catch( NumberFormatException e)
-           {
-                parserError.append("spectrum, maximum parent m+h is an invalid value: (" +
-                 rangeMax + ").");
-               return parserError.toString();
+               try
+               {
+                    Double.parseDouble(rangeMax);
+               }
+               catch( NumberFormatException e)
+               {
+                   return Collections.singletonList(AbstractMS2SearchTask.MAXIMUM_PARENT_M_H + " is an invalid value: (" + rangeMax + ").");
+               }
+               _params.getParam("max_peptide_mass").setValue(rangeMax);
            }
        }
-       sequestProp.setValue(rangeMin + " " + rangeMax);
-       return parserError.toString();
+       return Collections.emptyList();
    }
 
-    String initPassThroughs()
+    List<String> initPassThroughs()
     {
-        StringBuilder parserError = new StringBuilder();
+        List<String> parserError = new ArrayList<String>();
         Collection<SequestParam> passThroughs = _params.getPassThroughs();
         for (SequestParam passThrough : passThroughs)
         {
@@ -704,10 +735,10 @@ public abstract class SequestParamsBuilder
             if(errorString.length() > 0 )
             {
                 passThrough.setValue(defaultValue);
-                parserError.append(errorString);
+                parserError.add(errorString);
             }
         }
-        return parserError.toString();
+        return parserError;
     }
 
 
@@ -727,20 +758,18 @@ public abstract class SequestParamsBuilder
         return sb.toString();
     }
 
-    private String setIonSeriesParam(String xmlLabel, StringBuilder labelValue)
+    private void setIonSeriesParam(String xmlLabel, StringBuilder labelValue, List<String> errors)
     {
-
-        String parserError = "";
         String value;
         String iPValue = sequestInputParams.get(xmlLabel);
         if (iPValue == null)
         {
-            return parserError;
+            return;
         }
         if (iPValue.equals(""))
         {
-            parserError = xmlLabel + " did not contain a value.\n";
-            return parserError;
+            errors.add(xmlLabel + " did not contain a value.");
+            return;
         }
         if (iPValue.equalsIgnoreCase("yes"))
         {
@@ -756,9 +785,8 @@ public abstract class SequestParamsBuilder
         }
         else
         {
-            parserError = xmlLabel + " contained an invalid value(" + iPValue + ").\n";
+            errors.add(xmlLabel + " contained an invalid value(" + iPValue + ").");
         }
-        return parserError;
     }
 
     public boolean isValidResidue(char residue)
@@ -953,11 +981,9 @@ public abstract class SequestParamsBuilder
         {
             ip = PipelineJobService.get().createParamParser();
             String projectRoot = AppProps.getInstance().getProjectRoot();
-            if (projectRoot == null || projectRoot.equals(""))
-                projectRoot = "C:/CPAS";
             root = new File(new File(projectRoot), "/sampledata/xarfiles/ms2pipe/databases");
             dbPath = root.getCanonicalPath();
-            spb = new SequestParamsV2Builder(ip.getInputParameters(), root);
+            spb = new SequestParamsBuilder(ip.getInputParameters(), root);
         }
 
         @After
@@ -967,10 +993,15 @@ public abstract class SequestParamsBuilder
             spb = null;
         }
 
+        public void fail(List<String> messages)
+        {
+            fail(StringUtils.join(messages, '\n'));
+        }
+
         public void parseParams(String xml)
         {
             ip.parse(xml);
-            spb = new SequestParamsV2Builder(ip.getInputParameters(), root);
+            spb = new SequestParamsBuilder(ip.getInputParameters(), root);
         }
 
         @Test
@@ -982,11 +1013,10 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
 
-            String parserError = spb.initDatabases();
-            if (!parserError.equals("")) fail(parserError);
-            Param sp = spb.getProperties().getParam("first_database_name");
+            List<String> parserError = spb.initDatabases();
+            if (!parserError.isEmpty()) fail(parserError);
+            Param sp = spb.getProperties().getFASTAParam();
             assertEquals(new File(dbPath + File.separator + value).getCanonicalPath(), new File(sp.getValue()).getCanonicalPath());
-
         }
 
         @Test
@@ -998,9 +1028,9 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
 
-            String parserError = spb.initDatabases();
-            if (parserError.equals("")) fail("Expected error.");
-            assertEquals("pipeline, database; No value entered for database.\n", parserError);
+            List<String> parserError = spb.initDatabases();
+            if (parserError.isEmpty()) fail("Expected error.");
+            assertEquals("pipeline, database; No value entered for database.", parserError.get(0));
         }
 
         @Test
@@ -1010,9 +1040,9 @@ public abstract class SequestParamsBuilder
                 "<bioml>" +
                 "</bioml>");
 
-            String parserError = spb.initDatabases();
-            if (parserError.equals("")) fail("Expected error.");
-            assertEquals("pipeline, database; No value entered for database.\n", parserError);
+            List<String> parserError = spb.initDatabases();
+            if (parserError.isEmpty()) fail("Expected error.");
+            assertEquals("pipeline, database; No value entered for database.", parserError.get(0));
         }
 
         @Test
@@ -1024,9 +1054,9 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
 
-            String parserError = spb.initDatabases();
-            if (parserError.equals("")) fail("Expected error.");
-            assertEquals("pipeline, database; The database does not exist on the local server (" + value + ").\n", parserError);
+            List<String> parserError = spb.initDatabases();
+            if (parserError.isEmpty()) fail("Expected error.");
+            assertEquals("pipeline, database; The database does not exist on the local server (" + value + ").", parserError.get(0));
 
             value = "Bovine_mini.fasta, garbage";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1035,8 +1065,8 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initDatabases();
-            if (parserError.equals("")) fail("Expected error.");
-            assertEquals("pipeline, database; The database does not exist(garbage).\n", parserError);
+            if (parserError.isEmpty()) fail("Expected error.");
+            assertEquals("pipeline, database; The database does not exist(garbage).", parserError.get(0));
 
             value = "garbage, Bovine_mini.fasta";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1045,8 +1075,8 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initDatabases();
-            if (parserError.equals("")) fail("Expected error.");
-            assertEquals("pipeline, database; The database does not exist on the local server (garbage).\n", parserError);
+            if (parserError.isEmpty()) fail("Expected error.");
+            assertEquals("pipeline, database; The database does not exist on the local server (garbage).", parserError.get(0));
         }
 
         @Test
@@ -1059,8 +1089,8 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\">" + expected + "</note>" +
                 "</bioml>");
 
-            String parserError = spb.initPeptideMassTolerance();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initPeptideMassTolerance();
+            if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().getParam("peptide_mass_tolerance");
             float actual = Float.parseFloat(sp.getValue());
             assertEquals("peptide_mass_tolerance", expected, actual, 0.00);
@@ -1076,11 +1106,11 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\">4.0</note>" +
                 "</bioml>");
 
-            String parserError = spb.initPeptideMassTolerance();
-            if (parserError.equals("")) fail("No error message.");
+            List<String> parserError = spb.initPeptideMassTolerance();
+            if (parserError.isEmpty()) fail("No error message.");
             String actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("Sequest does not support asymmetric parent error ranges (minus=4.0 plus=).\n", parserError);
+            assertEquals("Sequest does not support asymmetric parent error ranges (minus=4.0 plus=).", parserError.get(0));
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1088,10 +1118,10 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\"></note>" +
                 "</bioml>");
             parserError = spb.initPeptideMassTolerance();
-            if (parserError.equals("")) fail("No error message.");
+            if (parserError.isEmpty()) fail("No error message.");
             actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("Sequest does not support asymmetric parent error ranges (minus= plus=4.0).\n", parserError);
+            assertEquals("Sequest does not support asymmetric parent error ranges (minus= plus=4.0).", parserError.get(0));
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1099,10 +1129,10 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\"></note>" +
                 "</bioml>");
             parserError = spb.initPeptideMassTolerance();
-            if (parserError.equals("")) fail("No error message.");
+            if (parserError.isEmpty()) fail("No error message.");
             actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("No values were entered for spectrum, parent monoisotopic mass error minus/plus.\n", parserError);
+            assertEquals("No values were entered for spectrum, parent monoisotopic mass error minus/plus.", parserError.get(0));
         }
 
         @Test
@@ -1116,11 +1146,11 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\">" + expected + "</note>" +
                 "</bioml>");
 
-            String parserError = spb.initPeptideMassTolerance();
+            List<String> parserError = spb.initPeptideMassTolerance();
             Param sp = spb.getProperties().getParam("peptide_mass_tolerance");
             String actual = sp.getValue();
             assertEquals("parameter value changed", defaultValue, actual);
-            assertEquals("Negative values not permitted for parent monoisotopic mass error(" + expected + ").\n", parserError);
+            assertEquals("Negative values not permitted for parent monoisotopic mass error(" + expected + ").", parserError.get(0));
         }
 
         @Test
@@ -1134,11 +1164,11 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\">" + expected + "</note>" +
                 "</bioml>");
 
-            String parserError = spb.initPeptideMassTolerance();
+            List<String> parserError = spb.initPeptideMassTolerance();
             Param sp = spb.getProperties().getParam("peptide_mass_tolerance");
             String actual = sp.getValue();
             assertEquals("parameter value changed", defaultValue, actual);
-            assertEquals("Invalid value for value for  spectrum, parent monoisotopic mass error minus/plus (garbage).\n", parserError);
+            assertEquals("Invalid value for value for  spectrum, parent monoisotopic mass error minus/plus (garbage).", parserError.get(0));
         }
 
 
@@ -1151,21 +1181,21 @@ public abstract class SequestParamsBuilder
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error plus\">5.0</note>" +
                 "</bioml>");
-            String parserError = spb.initPeptideMassTolerance();
-            if (parserError.equals("")) fail("No error message.");
+            List<String> parserError = spb.initPeptideMassTolerance();
+            if (parserError.isEmpty()) fail("No error message.");
             String actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("Sequest does not support asymmetric parent error ranges (minus=null plus=5.0).\n", parserError);
+            assertEquals("Sequest does not support asymmetric parent error ranges (minus=null plus=5.0).\n", parserError.get(0));
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\">5.0</note>" +
                 "</bioml>");
             parserError = spb.initPeptideMassTolerance();
-            if (parserError.equals("")) fail("No error message.");
+            if (parserError.isEmpty()) fail("No error message.");
             actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("Sequest does not support asymmetric parent error ranges (minus=5.0 plus=null).\n", parserError);
+            assertEquals("Sequest does not support asymmetric parent error ranges (minus=5.0 plus=null).\n", parserError.get(0));
         }
 
         @Test
@@ -1176,8 +1206,8 @@ public abstract class SequestParamsBuilder
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "</bioml>");
-            String parserError = spb.initPeptideMassTolerance();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initPeptideMassTolerance();
+            if (!parserError.isEmpty()) fail(parserError);
             String actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
         }
@@ -1191,8 +1221,8 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"spectrum, fragment mass type\">" + expected + "</note>" +
                 "</bioml>");
 
-            String parserError = spb.initMassType();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initMassType();
+            if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().getParam("mass_type_fragment");
             String actual = sp.getValue();
             assertEquals("mass_type_fragment", "0", actual);
@@ -1204,7 +1234,7 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initMassType();
-            if (!parserError.equals("")) fail(parserError);
+            if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().getParam("mass_type_fragment");
             actual = sp.getValue();
             assertEquals("mass_type_fragment", "1", actual);
@@ -1219,12 +1249,12 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"spectrum, fragment mass type\"></note>" +
                 "</bioml>");
 
-            String parserError = spb.initMassType();
-            if (parserError.equals("")) fail("No error message.");
+            List<String> parserError = spb.initMassType();
+            if (parserError.isEmpty()) fail("No error message.");
             Param sp = spb.getProperties().getParam("mass_type_fragment");
             String actual = sp.getValue();
             assertEquals("mass_type_fragment", expected, actual);
-            assertEquals("mass_type_fragment", "spectrum, fragment mass type contains no value.\n", parserError);
+            assertEquals("mass_type_fragment", "spectrum, fragment mass type contains no value.", parserError.get(0));
         }
 
         @Test
@@ -1235,8 +1265,8 @@ public abstract class SequestParamsBuilder
                 "<bioml>" +
                 "</bioml>");
 
-            String parserError = spb.initMassType();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initMassType();
+            if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().getParam("mass_type_fragment");
             String actual = sp.getValue();
             assertEquals("mass_type_fragment", expected, actual);
@@ -1251,12 +1281,12 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"spectrum, fragment mass type\">garbage</note>" +
                 "</bioml>");
 
-            String parserError = spb.initMassType();
-            if (parserError.equals("")) fail("No error message.");
+            List<String> parserError = spb.initMassType();
+            if (parserError.isEmpty()) fail("No error message.");
             Param sp = spb.getProperties().getParam("mass_type_fragment");
             String actual = sp.getValue();
             assertEquals("mass_type_fragment", expected, actual);
-            assertEquals("mass_type_fragment", "spectrum, fragment mass type contains an invalid value(garbage).\n", parserError);
+            assertEquals("mass_type_fragment", "spectrum, fragment mass type contains an invalid value(garbage).", parserError.get(0));
         }
 
         @Test
@@ -1279,8 +1309,8 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"scoring, z ions\">no</note>" +
                 "</bioml>");
 
-            String parserError = spb.initIonScoring();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initIonScoring();
+            if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().getParam("ion_series");
             String actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
@@ -1303,7 +1333,7 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initIonScoring();
-            if (!parserError.equals("")) fail(parserError);
+            if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().getParam("ion_series");
             actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
@@ -1329,12 +1359,12 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"scoring, z ions\">no</note>" +
                 "</bioml>");
 
-            String parserError = spb.initIonScoring();
-            if (parserError.equals("")) fail("Expected error");
+            List<String> parserError = spb.initIonScoring();
+            if (parserError.isEmpty()) fail("Expected error");
             Param sp = spb.getProperties().getParam("ion_series");
             String actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "sequest, y neutral loss did not contain a value.\n", parserError);
+            assertEquals("ion_series", "sequest, y neutral loss did not contain a value.", parserError.get(0));
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1354,11 +1384,11 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initIonScoring();
-            if (parserError.equals("")) fail("Expected error");
+            if (parserError.isEmpty()) fail("Expected error");
             sp = spb.getProperties().getParam("ion_series");
             actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "scoring, c ions did not contain a value.\n", parserError);
+            assertEquals("ion_series", "scoring, c ions did not contain a value.", parserError.get(0));
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1378,11 +1408,11 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initIonScoring();
-            if (parserError.equals("")) fail("Expected error");
+            if (parserError.isEmpty()) fail("Expected error");
             sp = spb.getProperties().getParam("ion_series");
             actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "sequest, d ions did not contain a value.\n", parserError);
+            assertEquals("ion_series", "sequest, d ions did not contain a value.", parserError.get(0));
         }
 
         @Test
@@ -1402,13 +1432,11 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"scoring, z ions\">no</note>" +
                 "</bioml>");
 
-            String parserError = spb.initIonScoring();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initIonScoring();
+            if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().getParam("ion_series");
             String actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-
-
         }
 
         @Test
@@ -1419,8 +1447,8 @@ public abstract class SequestParamsBuilder
                 "<bioml>" +
                 "</bioml>");
 
-            String parserError = spb.initIonScoring();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initIonScoring();
+            if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().getParam("ion_series");
             String actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
@@ -1446,12 +1474,12 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"scoring, z ions\">no</note>" +
                 "</bioml>");
 
-            String parserError = spb.initIonScoring();
-            if (parserError.equals("")) fail("Expected error");
+            List<String> parserError = spb.initIonScoring();
+            if (parserError.isEmpty()) fail("Expected error");
             Param sp = spb.getProperties().getParam("ion_series");
             String actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "sequest, y neutral loss contained an invalid value(garbage).\n", parserError);
+            assertEquals("ion_series", "sequest, y neutral loss contained an invalid value(garbage).", parserError.get(0));
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1471,11 +1499,11 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initIonScoring();
-            if (parserError.equals("")) fail("Expected error");
+            if (parserError.isEmpty()) fail("Expected error");
             sp = spb.getProperties().getParam("ion_series");
             actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "scoring, c ions contained an invalid value(garbage).\n", parserError);
+            assertEquals("ion_series", "scoring, c ions contained an invalid value(garbage).", parserError.get(0));
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1495,11 +1523,11 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initIonScoring();
-            if (parserError.equals("")) fail("Expected error");
+            if (parserError.isEmpty()) fail("Expected error");
             sp = spb.getProperties().getParam("ion_series");
             actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "sequest, d ions contained an invalid value(garbage).\n", parserError);
+            assertEquals("ion_series", "sequest, d ions contained an invalid value(garbage).", parserError.get(0));
         }
 
 
@@ -1513,8 +1541,8 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"protein, cleavage site\">[X]|[X]</note>" +
                 "</bioml>");
 
-            String parserError = spb.initEnzymeInfo();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initEnzymeInfo();
+            if (!parserError.isEmpty()) fail(parserError);
 
             Param sp = spb.getProperties().getParam("enzyme_info");
             String actual = sp.getValue();
@@ -1527,7 +1555,7 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initEnzymeInfo();
-            if (!parserError.equals("")) fail(parserError);
+            if (!parserError.isEmpty()) fail(parserError);
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
@@ -1540,65 +1568,12 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initEnzymeInfo();
-            if (!parserError.equals("")) fail(parserError);
+            if (!parserError.isEmpty()) fail(parserError);
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
         }
-
-//        public void testInitEnzymeInfoUnsupported()
-//        {
-//            String expected1 = "1";
-//            String expected2 = "Unknown([QND]|[X]) 1 1 QND -";
-//            parseParams("<?xml version=\"1.0\"?>" +
-//                "<bioml>" +
-//                "<note type=\"input\" label=\"protein, cleavage site\">[QND]|[X]</note>" +
-//                "</bioml>");
-//
-//            String parserError = spb.initEnzymeInfo();
-//            if (!parserError.equals("")) fail(parserError);
-//
-//            Param sp = spb.getProperties().getParam("enzyme_info");
-//            String actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
-//
-//            expected1 = "1";
-//            expected2 = "Unknown([PGY]|{W}) 1 1 PGY W";
-//            parseParams("<?xml version=\"1.0\"?>" +
-//                "<bioml>" +
-//                "<note type=\"input\" label=\"protein, cleavage site\">[PGY]|{W}</note>" +
-//                "</bioml>");
-//
-//            parserError = spb.initEnzymeInfo();
-//            if (!parserError.equals("")) fail(parserError);
-//
-//            sp = spb.getProperties().getParam("enzyme_info");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
-//
-//            expected1 = "1";
-//            expected2 = "Unknown([X]|[W]) 1 0 W -";
-//            parseParams("<?xml version=\"1.0\"?>" +
-//                "<bioml>" +
-//                "<note type=\"input\" label=\"protein, cleavage site\">[X]|[W]</note>" +
-//                "</bioml>");
-//
-//            parserError = spb.initEnzymeInfo();
-//            if (!parserError.equals("")) fail(parserError);
-////            sp = spb.getProperties().getParam("enzyme_number");
-////            actual = sp.getValue();
-////            assertEquals("enzyme_number", expected1, actual);
-////
-////            sp = spb.getProperties().getParam("enzyme1");
-////            actual = sp.getValue();
-////            assertEquals("enzyme_description", expected2, actual);
-//
-//            sp = spb.getProperties().getParam("enzyme_info");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
-//
-//        }
 
         @Test
         public void testInitEnzymeInfoDefault()
@@ -1609,8 +1584,8 @@ public abstract class SequestParamsBuilder
                 "<bioml>" +
                 "</bioml>");
 
-           String parserError = spb.initEnzymeInfo();
-           if (!parserError.equals("")) fail(parserError);
+           List<String> parserError = spb.initEnzymeInfo();
+           if (!parserError.isEmpty()) fail(parserError);
 //            Param sp = spb.getProperties().getParam("enzyme_number");
 //            String actual = sp.getValue();
 //            assertEquals("enzyme_number", expected1, actual);
@@ -1633,13 +1608,13 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"protein, cleavage site\"></note>" +
                 "</bioml>");
 
-            String parserError = spb.initEnzymeInfo();
-            if (parserError.equals("")) fail("Expected error message");
+            List<String> parserError = spb.initEnzymeInfo();
+            if (parserError.isEmpty()) fail("Expected error message");
 
             Param sp = spb.getProperties().getParam("enzyme_info");
             String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("enzyme_description", "protein, cleavage site did not contain a value.", parserError);
+            assertEquals("enzyme_description", "protein, cleavage site did not contain a value.", parserError.get(0));
         }
 
         @Test
@@ -1651,14 +1626,14 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"protein, cleavage site\">foo</note>" +
                 "</bioml>");
 
-            String parserError = spb.initEnzymeInfo();
-            if (parserError.equals("")) fail("Expected error message");
+            List<String> parserError = spb.initEnzymeInfo();
+            if (parserError.isEmpty()) fail("Expected error message");
 
 
             Param sp = spb.getProperties().getParam("enzyme_info");
             String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("enzyme_description", "Invalid enzyme definition:foo", parserError);
+            assertEquals("enzyme_description", "Invalid enzyme definition:foo", parserError.get(0));
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1666,12 +1641,12 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initEnzymeInfo();
-            if (parserError.equals("")) fail("Expected error message");
+            if (parserError.isEmpty()) fail("Expected error message");
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("[CV]|{P},[KR]|{P} is not a pipeline supported enzyme.", parserError);
+            assertEquals("[CV]|{P},[KR]|{P} is not a pipeline supported enzyme.", parserError.get(0));
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1683,7 +1658,7 @@ public abstract class SequestParamsBuilder
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("{P}|[KR] is not a pipeline supported enzyme.", parserError);
+            assertEquals("{P}|[KR] is not a pipeline supported enzyme.", parserError.get(0));
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1691,12 +1666,12 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initEnzymeInfo();
-            if (parserError.equals("")) fail("Expected error message");
+            if (parserError.isEmpty()) fail("Expected error message");
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("[a]|[X] is not a pipeline supported enzyme.", parserError);
+            assertEquals("[a]|[X] is not a pipeline supported enzyme.", parserError.get(0));
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1704,12 +1679,12 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initEnzymeInfo();
-            if (parserError.equals("")) fail("Expected error message");
+            if (parserError.isEmpty()) fail("Expected error message");
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("[X]|[a] is not a pipeline supported enzyme.", parserError);
+            assertEquals("[X]|[a] is not a pipeline supported enzyme.", parserError.get(0));
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1717,12 +1692,12 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initEnzymeInfo();
-            if (parserError.equals("")) fail("Expected error message");
+            if (parserError.isEmpty()) fail("Expected error message");
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("Invalid enzyme definition:[X]|P", parserError);
+            assertEquals("Invalid enzyme definition:[X]|P", parserError.get(0));
         }
 
         @Test
@@ -1734,8 +1709,8 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"residue, potential modification mass\">+16@M</note>" +
                 "</bioml>");
 
-            String parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initDynamicMods();
+            if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().getParam("diff_search_options");
             String actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
@@ -1747,7 +1722,7 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().getParam("diff_search_options");
             actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
@@ -1759,7 +1734,7 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().getParam("diff_search_options");
             actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
@@ -1772,7 +1747,7 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().getParam("diff_search_options");
             actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
@@ -1787,8 +1762,8 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"residue, potential modification mass\"></note>" +
                 "</bioml>");
 
-            String parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initDynamicMods();
+            if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().getParam("diff_search_options");
             String actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
@@ -1802,8 +1777,8 @@ public abstract class SequestParamsBuilder
                 "<bioml>" +
                 "</bioml>");
 
-            String parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initDynamicMods();
+            if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().getParam("diff_search_options");
             String actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
@@ -1818,12 +1793,12 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"residue, potential modification mass\">16@J</note>" +
                 "</bioml>");
 
-            String parserError = spb.initDynamicMods();
-            if (parserError.equals("")) fail("Error expected.");
+            List<String> parserError = spb.initDynamicMods();
+            if (parserError.isEmpty()) fail("Error expected.");
             Param sp = spb.getProperties().getParam("diff_search_options");
             String actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
-            assertEquals("diff_search_options", "modification mass contained an invalid residue(J).\n", parserError);
+            assertEquals("diff_search_options", "modification mass contained an invalid residue(J).", parserError.get(0));
 
             expected1 = "0.000000 C 0.000000 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1832,11 +1807,11 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initDynamicMods();
-            if (parserError.equals("")) fail("Error expected.");
+            if (parserError.isEmpty()) fail("Error expected.");
             sp = spb.getProperties().getParam("diff_search_options");
             actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
-            assertEquals("diff_search_options", "modification mass contained an invalid value(G@18).\n", parserError);
+            assertEquals("diff_search_options", "modification mass contained an invalid value(G@18).", parserError.get(0));
 
         }
 
@@ -1851,8 +1826,8 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"residue, potential modification mass\">+42.0@[</note>" +
                 "</bioml>");
 
-            String parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initDynamicMods();
+            if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().getParam("term_diff_search_options");
             String actual = sp.getValue();
             assertEquals("term_diff_search_options", expected1, actual);
@@ -1865,7 +1840,7 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().getParam("term_diff_search_options");
             actual = sp.getValue();
             assertEquals("term_diff_search_options", expected1, actual);
@@ -1878,7 +1853,7 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().getParam("term_diff_search_options");
             actual = sp.getValue();
             assertEquals("term_diff_search_options", expected1, actual);
@@ -1896,8 +1871,8 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"residue, potential modification mass\">+0.0@[</note>" +
                 "</bioml>");
 
-            String parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initDynamicMods();
+            if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().getParam("term_diff_search_options");
             String actual = sp.getValue();
             assertEquals("term_diff_search_options", expected1, actual);
@@ -1910,7 +1885,7 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().getParam("term_diff_search_options");
             actual = sp.getValue();
             assertEquals("term_diff_search_options", expected1, actual);
@@ -1924,8 +1899,8 @@ public abstract class SequestParamsBuilder
                 "<bioml>" +
                 "</bioml>");
 
-            String parserError = spb.initDynamicMods();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initDynamicMods();
+            if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().getParam("term_diff_search_options");
             String actual = sp.getValue();
             assertEquals("term_diff_search_options", expected1, actual);
@@ -1944,8 +1919,8 @@ public abstract class SequestParamsBuilder
                     "</bioml>");
 
 
-                String parserError = spb.initStaticMods();
-                if (!parserError.equals("")) fail(parserError);
+                List<String> parserError = spb.initStaticMods();
+                if (!parserError.isEmpty()) fail(parserError);
                 Param sp;
                 if(residue == '[')
                 {
@@ -1960,7 +1935,7 @@ public abstract class SequestParamsBuilder
                     sp = spb.getProperties().startsWith("add_" + residue + "_");   
                 }
                 String actual = sp.getValue();
-                assertEquals("residue, modification mass", expected1, actual);
+                assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
             }
 
             for (char residue : validResidues)
@@ -1972,8 +1947,8 @@ public abstract class SequestParamsBuilder
                     "</bioml>");
 
 
-                String parserError = spb.initStaticMods();
-                if (!parserError.equals("")) fail(parserError);
+                List<String> parserError = spb.initStaticMods();
+                if (!parserError.isEmpty()) fail(parserError);
                 Param sp;
                 if(residue == '[')
                 {
@@ -1988,7 +1963,7 @@ public abstract class SequestParamsBuilder
                     sp = spb.getProperties().startsWith("add_" + residue + "_");
                 }
                 String actual = sp.getValue();
-                assertEquals("residue, modification mass", expected1, actual);
+                assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
             }
 
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1997,18 +1972,18 @@ public abstract class SequestParamsBuilder
                 "</bioml>");
 
             String expected1 = "16.0";
-            String parserError = spb.initStaticMods();
-            if (!parserError.equals("")) fail(parserError);
+            List<String> parserError = spb.initStaticMods();
+            if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().startsWith("add_M_");
             String actual = sp.getValue();
-            assertEquals("residue, modification mass", expected1, actual);
+            assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
 
             expected1 = "227.0";
             parserError = spb.initStaticMods();
-            if (!parserError.equals("")) fail(parserError);
+            if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().startsWith("add_C_");
             actual = sp.getValue();
-            assertEquals("residue, modification mass", expected1, actual);
+            assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
         }
 
 
@@ -2025,8 +2000,8 @@ public abstract class SequestParamsBuilder
                     "</bioml>");
 
 
-                String parserError = spb.initStaticMods();
-                if (!parserError.equals("")) fail(parserError);
+                List<String> parserError = spb.initStaticMods();
+                if (!parserError.isEmpty()) fail(parserError);
                 Param sp;
                 if(residue == '[')
                 {
@@ -2041,7 +2016,7 @@ public abstract class SequestParamsBuilder
                     sp = spb.getProperties().startsWith("add_" + residue + "_");
                 }
                 String actual = sp.getValue();
-                assertEquals("residue, modification mass", expected1, actual);
+                assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
             }
         }
 
@@ -2056,8 +2031,8 @@ public abstract class SequestParamsBuilder
                     "<bioml>" +
                     "</bioml>");
 
-                String parserError = spb.initStaticMods();
-                if (!parserError.equals("")) fail(parserError);
+                List<String> parserError = spb.initStaticMods();
+                if (!parserError.isEmpty()) fail(parserError);
                 Param sp;
                 if(residue == '[')
                 {
@@ -2072,7 +2047,7 @@ public abstract class SequestParamsBuilder
                     sp = spb.getProperties().startsWith("add_" + residue + "_");
                 }
                 String actual = sp.getValue();
-                assertEquals("residue, modification mass", expected1, actual);
+                assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
             }
         }
 
@@ -2085,9 +2060,9 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"residue, modification mass\">" + value + "</note>" +
                 "</bioml>");
 
-            String parserError = spb.initStaticMods();
-            if (parserError.equals("")) fail("Expected error.");
-            assertEquals("modification mass contained an invalid value(" + value + ").\n", parserError);
+            List<String> parserError = spb.initStaticMods();
+            if (parserError.isEmpty()) fail("Expected error.");
+            assertEquals("modification mass contained an invalid value(" + value + ").", parserError.get(0));
         }
 
         @Test
@@ -2332,10 +2307,7 @@ public abstract class SequestParamsBuilder
                 {
                     writer.close();
                 }
-                catch (IOException eio)
-                {
-                    throw new SequestParamsException(eio);
-                }
+                catch (IOException eio) {}
             }
         }
     }

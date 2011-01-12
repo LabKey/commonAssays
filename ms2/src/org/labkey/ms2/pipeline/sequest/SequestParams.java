@@ -16,6 +16,9 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
+import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
+import org.labkey.ms2.pipeline.client.ParamParser;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -24,21 +27,36 @@ import java.util.Collection;
  * Date: Sep 12, 2006
  * Time: 11:30:14 AM
  */
-public abstract class SequestParams extends Params
+public class SequestParams extends Params
 {
+    private final Variant _variant;
 
-    public SequestParams()
+    public enum Variant
     {
+        sequest("[SEQUEST]", "first_database_name"),
+        makedb("[MAKEDB]", "database_name");
+
+        private final String _header;
+        private final String _fastaDatabase;
+
+        private Variant(String header, String fastaDatabase)
+        {
+            _header = header;
+            _fastaDatabase = fastaDatabase;
+        }
+    }
+
+    public SequestParams(Variant variant)
+    {
+        _variant = variant;
         initProperties();
     }
 
     void initProperties()
     {
-
-
         _params.add(new SequestParam(
             10,                            //sortOrder
-            "[SEQUEST]",                   //The value of the property
+            _variant._header,              //The value of the property
             "sequest header",              // the sequest.params property name
             "",                            // the sequest.params comment
             ConverterFactory.getSequestHeaderConverter(),  //converts the instance to a sequest.params line
@@ -49,7 +67,7 @@ public abstract class SequestParams extends Params
         _params.add(new SequestParam(
             20,
             "",
-            "first_database_name",
+            _variant._fastaDatabase,
             "",
             ConverterFactory.getSequestBasicConverter(),
             null,
@@ -209,7 +227,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels("residue, potential modification mass"));
+        ).setInputXmlLabels(ParamParser.DYNAMIC_MOD));
 
         _params.add(new SequestParam(
             160,                                                       //sortOrder
@@ -219,7 +237,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
             null,
             false
-         ).setInputXmlLabels("residue, potential modification mass"));
+         ).setInputXmlLabels(ParamParser.DYNAMIC_MOD));
         //No xtandem element created for this property.
         _params.add(new SequestParam(
             170,                                                       //sortOrder
@@ -239,7 +257,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             ParamsValidatorFactory.getBooleanParamsValidator(),
             true
-        ).setInputXmlLabels("sequest, mass_type_parent"));
+        ).setInputXmlLabels(SequestSearchTask.MASS_TYPE_PARENT));
 
         _params.add(new SequestParam(
             190,                                                       //sortOrder
@@ -289,7 +307,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             ParamsValidatorFactory.getPositiveIntegerParamsValidator(),
             true
-        ).setInputXmlLabels("scoring, maximum missed cleavage sites"));
+        ).setInputXmlLabels(AbstractMS2SearchTask.MAXIMUM_MISSED_CLEAVAGE_SITES));
 
         //not used in xtandem or Bioworks Browser. will leave at default setting.
         _params.add(new SequestParam(
@@ -365,13 +383,38 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             false
         ).setInputXmlLabels());
 
-//        _params.add(new SequestParam(
-//                        300,                                                       //sortOrder
-//                        "500.0 3500.0",                                            //The value of the property
-//                        "digest_mass_range",                                // the sequest.params property name
-//                        "",       // the sequest.params comment
-//                        ConverterFactory.getSequestBasicConverter()                      //converts the instance to a sequest.params line
-//        ).setInputXmlLabels( ).setInputXmlLabels("spectrum, minimum parent m+h","sequest, maximum parent m+h"));
+        if (_variant == Variant.makedb)
+        {
+            _params.add(new SequestParam(
+                300,                                               //sortOrder
+                "350.0",                          //The value of the property
+                "min_peptide_mass",                     // the sequest.params property name
+                "",       // the sequest.params comment
+                ConverterFactory.getSequestBasicConverter(),      //converts the instance to a sequest.params line
+                null,
+                false
+            ).setInputXmlLabels(AbstractMS2SearchTask.MINIMUM_PARENT_M_H));
+
+            _params.add(new SequestParam(
+                301,                                               //sortOrder
+                "5000.0",                          //The value of the property
+                "max_peptide_mass",                     // the sequest.params property name
+                "",       // the sequest.params comment
+                ConverterFactory.getSequestBasicConverter(),      //converts the instance to a sequest.params line
+                null,
+                false
+            ).setInputXmlLabels(AbstractMS2SearchTask.MAXIMUM_PARENT_M_H));
+
+            _params.add(new SequestParam(
+                305,                                               //sortOrder
+                "[STATIC MODIFICATIONS]",                          //The value of the property
+                "static modifications header",                     // the sequest.params property name
+                "",       // the sequest.params comment
+                ConverterFactory.getSequestHeaderConverter(),      //converts the instance to a sequest.params line
+                null,
+                false
+            ).setInputXmlLabels());
+        }
 
         _params.add(new SequestParam(
             310,                                                       //sortOrder
@@ -381,7 +424,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             320,                                                       //sortOrder
@@ -401,7 +444,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             340,                                                       //sortOrder
@@ -421,7 +464,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             360,                                                       //sortOrder
@@ -431,7 +474,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             370,                                                       //sortOrder
@@ -441,7 +484,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             380,                                                       //sortOrder
@@ -451,7 +494,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             390,                                                       //sortOrder
@@ -461,7 +504,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             400,                                                       //sortOrder
@@ -471,7 +514,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             410,                                                       //sortOrder
@@ -481,7 +524,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             420,                                                       //sortOrder
@@ -491,7 +534,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             430,                                                       //sortOrder
@@ -501,7 +544,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             440,                                                       //sortOrder
@@ -511,7 +554,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             450,                                                       //sortOrder
@@ -521,7 +564,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             460,                                                       //sortOrder
@@ -531,7 +574,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             470,                                                       //sortOrder
@@ -541,7 +584,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             480,                                                       //sortOrder
@@ -551,7 +594,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             485,                                                       //sortOrder
@@ -561,7 +604,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             490,                                                       //sortOrder
@@ -571,7 +614,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             500,                                                       //sortOrder
@@ -581,7 +624,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             510,                                                       //sortOrder
@@ -591,7 +634,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             520,                                                       //sortOrder
@@ -601,7 +644,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             530,                                                       //sortOrder
@@ -611,7 +654,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             540,                                                       //sortOrder
@@ -621,7 +664,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             550,                                                       //sortOrder
@@ -631,7 +674,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             560,                                                       //sortOrder
@@ -641,7 +684,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
         _params.add(new SequestParam(
             570,                                                       //sortOrder
@@ -651,8 +694,17 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
+        ).setInputXmlLabels().setInputXmlLabels(ParamParser.STATIC_MOD));
 
+        _params.add(new SequestParam(
+                  130,                                                       //sortOrder
+                  "trypsin 1 1 KR P",                                                      //The value of the property
+                  "enzyme_info",                                           // the sequest.params property name
+                  "",                                                       // the input.xml label
+                   ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
+                   null,
+                   false
+      ).setInputXmlLabels(ParamParser.ENZYME));
     }
 
     public Collection<SequestParam> getPassThroughs()
@@ -664,5 +716,10 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             if (castProp.isPassThrough()) passThroughs.add(castProp);
         }
         return passThroughs;
+    }
+
+    public Param getFASTAParam()
+    {
+        return getParam(_variant._fastaDatabase);
     }
 }

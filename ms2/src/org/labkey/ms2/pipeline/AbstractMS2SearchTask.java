@@ -28,6 +28,11 @@ public abstract class AbstractMS2SearchTask<FactoryType extends AbstractMS2Searc
     public static final String SPECTRA_INPUT_ROLE = "Spectra";
     public static final String FASTA_INPUT_ROLE = "FASTA";
 
+    public static final String MINIMUM_PARENT_M_H = "spectrum, minimum parent m+h";
+    public static final String MAXIMUM_PARENT_M_H = "spectrum, maximum parent m+h";
+    public static final String MAXIMUM_MISSED_CLEAVAGE_SITES = "scoring, maximum missed cleavage sites";
+
+
     public AbstractMS2SearchTask(FactoryType factory, PipelineJob job)
     {
         super(factory, job);

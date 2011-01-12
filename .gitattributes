@@ -1106,9 +1106,6 @@ ms2/src/org/labkey/ms2/pipeline/sequest/SequestParam.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestParams.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestParamsBuilder.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestParamsException.java -text
-ms2/src/org/labkey/ms2/pipeline/sequest/SequestParamsV1.java -text
-ms2/src/org/labkey/ms2/pipeline/sequest/SequestParamsV2.java -text
-ms2/src/org/labkey/ms2/pipeline/sequest/SequestParamsV2Builder.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestRun.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestSearchProtocol.java -text
