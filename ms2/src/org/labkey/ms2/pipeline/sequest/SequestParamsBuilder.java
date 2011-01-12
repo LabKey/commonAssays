@@ -150,6 +150,10 @@ public class SequestParamsBuilder
 
         Param database1 = _params.getFASTAParam();
         File databaseFile = databaseFiles.get(0);
+        if (!databaseFile.exists())
+        {
+            return Collections.singletonList("pipeline, database; The database does not exist(" + databaseFile + ")");
+        }
         database1.setValue(databaseFile.getAbsolutePath());
 
         if (databaseFiles.size() > 1)
@@ -158,11 +162,12 @@ public class SequestParamsBuilder
             //check for duplicate database entries
             if (!databaseFile.equals(databaseFiles.get(1)))
             {
+                databaseFile = databaseFiles.get(1);
                 if (!databaseFile.exists())
                 {
-                    return Collections.singletonList("pipeline, database; The database does not exist(" + databaseFiles.get(1) + ")");
+                    return Collections.singletonList("pipeline, database; The database does not exist(" + databaseFile + ")");
                 }
-                database2.setValue(databaseFiles.get(1).getAbsolutePath());
+                database2.setValue(databaseFile.getAbsolutePath());
             }
         }
         return Collections.emptyList();
@@ -1056,7 +1061,8 @@ public class SequestParamsBuilder
 
             List<String> parserError = spb.initDatabases();
             if (parserError.isEmpty()) fail("Expected error.");
-            assertEquals("pipeline, database; The database does not exist on the local server (" + value + ").", parserError.get(0));
+            assertTrue(parserError.get(0).contains("pipeline, database; The database does not exist"));
+            assertTrue(parserError.get(0).contains("garbage"));
 
             value = "Bovine_mini.fasta, garbage";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1066,7 +1072,8 @@ public class SequestParamsBuilder
 
             parserError = spb.initDatabases();
             if (parserError.isEmpty()) fail("Expected error.");
-            assertEquals("pipeline, database; The database does not exist(garbage).", parserError.get(0));
+            assertTrue(parserError.get(0).contains("pipeline, database; The database does not exist"));
+            assertTrue(parserError.get(0).contains("garbage"));
 
             value = "garbage, Bovine_mini.fasta";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1076,7 +1083,8 @@ public class SequestParamsBuilder
 
             parserError = spb.initDatabases();
             if (parserError.isEmpty()) fail("Expected error.");
-            assertEquals("pipeline, database; The database does not exist on the local server (garbage).", parserError.get(0));
+            assertTrue(parserError.get(0).contains("pipeline, database; The database does not exist"));
+            assertTrue(parserError.get(0).contains("garbage"));
         }
 
         @Test
@@ -1185,7 +1193,7 @@ public class SequestParamsBuilder
             if (parserError.isEmpty()) fail("No error message.");
             String actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("Sequest does not support asymmetric parent error ranges (minus=null plus=5.0).\n", parserError.get(0));
+            assertEquals("Sequest does not support asymmetric parent error ranges (minus=null plus=5.0).", parserError.get(0));
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1195,7 +1203,7 @@ public class SequestParamsBuilder
             if (parserError.isEmpty()) fail("No error message.");
             actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("Sequest does not support asymmetric parent error ranges (minus=5.0 plus=null).\n", parserError.get(0));
+            assertEquals("Sequest does not support asymmetric parent error ranges (minus=5.0 plus=null).", parserError.get(0));
         }
 
         @Test
