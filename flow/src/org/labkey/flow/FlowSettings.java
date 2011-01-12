@@ -16,12 +16,10 @@
 
 package org.labkey.flow;
 
-import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.PropertyManager;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.util.Map;
 

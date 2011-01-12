@@ -15,10 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.ParamParser;
-
 import java.io.File;
-import java.util.Map;
 
 /**
  * Interface for support required from the PipelineJob to run a search task,

@@ -16,21 +16,33 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang.StringUtils;
-import org.labkey.api.pipeline.*;
+import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
+import org.labkey.api.pipeline.AbstractTaskFactory;
+import org.labkey.api.pipeline.AbstractTaskFactorySettings;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineJobException;
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.RecordedAction;
+import org.labkey.api.pipeline.RecordedActionSet;
+import org.labkey.api.pipeline.ToolExecutionException;
+import org.labkey.api.pipeline.WorkDirectory;
+import org.labkey.api.pipeline.WorkDirectoryTask;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.ProtXMLFileType;
-import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <code>TPPTask</code> PipelineJob task to run the TPP (xinteract) for further

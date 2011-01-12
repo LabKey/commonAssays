@@ -15,17 +15,21 @@
  */
 package org.labkey.ms2.compare;
 
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.reports.ReportService;
 import org.labkey.api.reports.report.view.DefaultReportUIProvider;
 import org.labkey.api.reports.report.view.RReportBean;
 import org.labkey.api.reports.report.view.ReportUtil;
-import org.labkey.api.reports.ReportService;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.query.QuerySettings;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
-import org.labkey.ms2.query.MS2Schema;
 
-import java.util.*;/*
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/*
  * User: Karl Lum
  * Date: May 21, 2008
  * Time: 11:53:28 AM

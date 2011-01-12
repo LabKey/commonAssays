@@ -33,7 +33,6 @@ import org.labkey.api.view.DataView;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Run;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

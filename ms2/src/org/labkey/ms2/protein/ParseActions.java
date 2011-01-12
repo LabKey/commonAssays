@@ -16,11 +16,8 @@
 
 package org.labkey.ms2.protein;
 
-import java.util.*;
-
-import org.xml.sax.*;
-
-import java.sql.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 
 public abstract class ParseActions
 {

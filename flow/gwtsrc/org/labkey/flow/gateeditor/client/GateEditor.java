@@ -18,15 +18,17 @@ package org.labkey.flow.gateeditor.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.RootPanel;
 import org.labkey.api.gwt.client.util.ErrorDialogAsyncCallback;
 import org.labkey.api.gwt.client.util.PropertyUtil;
 import org.labkey.api.gwt.client.util.ServiceUtil;
-import org.labkey.flow.gateeditor.client.model.*;
-import org.labkey.flow.gateeditor.client.ui.GateEditorPanel;
+import org.labkey.flow.gateeditor.client.model.GWTEditingMode;
+import org.labkey.flow.gateeditor.client.model.GWTScript;
+import org.labkey.flow.gateeditor.client.model.GWTWell;
+import org.labkey.flow.gateeditor.client.model.GWTWorkspace;
+import org.labkey.flow.gateeditor.client.model.GWTWorkspaceOptions;
 import org.labkey.flow.gateeditor.client.ui.GateEditorListener;
+import org.labkey.flow.gateeditor.client.ui.GateEditorPanel;
 
 
 public class GateEditor implements EntryPoint

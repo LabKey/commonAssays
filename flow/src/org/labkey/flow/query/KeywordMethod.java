@@ -16,15 +16,16 @@
 
 package org.labkey.flow.query;
 
-import org.labkey.api.data.*;
-import org.labkey.api.query.AbstractMethodInfo;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.snapshot.AbstractTableMethodInfo;
-
-import java.sql.Types;
 
 public class KeywordMethod extends AbstractTableMethodInfo
 {
     ColumnInfo _objectIdColumn;
+
     public KeywordMethod(ColumnInfo objectIdColumn)
     {
         super(JdbcType.VARCHAR);

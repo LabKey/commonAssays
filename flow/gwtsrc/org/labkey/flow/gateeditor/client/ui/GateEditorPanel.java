@@ -16,11 +16,10 @@
 
 package org.labkey.flow.gateeditor.client.ui;
 
+import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.DockPanel;
 import org.labkey.flow.gateeditor.client.GateEditor;
-import org.labkey.flow.gateeditor.client.model.GWTEditingMode;
 import org.labkey.flow.gateeditor.client.ui.graph.GraphWindow;
 
 public class GateEditorPanel extends GateComponent

@@ -16,8 +16,6 @@
 
 package org.labkey.flow.gateeditor.client.ui;
 
-import org.labkey.flow.gateeditor.client.model.*;
-
 public class GateEditorListener
 {
     public void onScriptChanged()

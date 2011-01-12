@@ -17,12 +17,10 @@
 package org.labkey.ms2.peptideview;
 
 import org.labkey.api.util.StringExpression;
-import org.labkey.api.util.PageFlowUtil;
 
-import java.util.Map;
-import java.util.Set;
-import java.io.Writer;
 import java.io.IOException;
+import java.io.Writer;
+import java.util.Map;
 
 /**
  * User: arauch

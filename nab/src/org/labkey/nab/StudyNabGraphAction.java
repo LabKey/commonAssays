@@ -5,7 +5,6 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.NavTree;
 import org.springframework.validation.BindException;

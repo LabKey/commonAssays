@@ -16,12 +16,14 @@
 
 package org.labkey.microarray.designer.client;
 
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 import org.labkey.api.gwt.client.assay.AssayDesignerMainPanel;
 import org.labkey.api.gwt.client.assay.model.GWTProtocol;
-import org.labkey.api.gwt.client.ui.*;
-import org.labkey.api.gwt.client.model.GWTDomain;
-import org.labkey.api.gwt.client.model.GWTPropertyDescriptor;
-import com.google.gwt.user.client.ui.*;
+import org.labkey.api.gwt.client.ui.BoundTextAreaBox;
+import org.labkey.api.gwt.client.ui.BoundTextBox;
+import org.labkey.api.gwt.client.ui.WidgetUpdatable;
 
 /**
  * User: jeckels

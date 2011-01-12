@@ -16,10 +16,8 @@
 package org.labkey.ms2.pipeline.tandem;
 
 import org.labkey.api.pipeline.ParamParser;
-import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
-
-import java.io.File;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
 /**
  * XTandemSearchProtocolFactory class

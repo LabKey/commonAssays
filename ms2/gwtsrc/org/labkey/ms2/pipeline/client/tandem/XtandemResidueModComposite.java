@@ -16,15 +16,14 @@
 
 package org.labkey.ms2.pipeline.client.tandem;
 
-import org.labkey.ms2.pipeline.client.ResidueModComposite;
-import org.labkey.ms2.pipeline.client.Search;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.SimplePanel;
+import org.labkey.ms2.pipeline.client.ResidueModComposite;
+import org.labkey.ms2.pipeline.client.Search;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
 
 /**
  * User: billnelson@uky.edu

@@ -17,26 +17,19 @@
 package org.labkey.flow.analysis.web;
 
 import org.jfree.chart.ChartRenderingInfo;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.ui.RectangleEdge;
+import org.labkey.flow.analysis.model.Gate;
+import org.labkey.flow.analysis.model.Subset;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.util.BitSet;
 import java.text.DecimalFormat;
-
-import org.labkey.flow.analysis.model.DataFrame;
-import org.labkey.flow.analysis.model.FCS;
-import org.labkey.flow.analysis.model.Subset;
-import org.labkey.flow.analysis.model.Gate;
-import org.labkey.flow.analysis.chart.FlowLogarithmicAxis;
-import org.labkey.flow.analysis.chart.DensityPlot;
 
 public class PlotInfo
 {

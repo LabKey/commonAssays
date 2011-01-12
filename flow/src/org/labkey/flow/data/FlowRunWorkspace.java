@@ -16,12 +16,15 @@
 
 package org.labkey.flow.data;
 
-import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.model.Analysis;
+import org.labkey.flow.analysis.model.FCSKeywordData;
+import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.analysis.model.Population;
+import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.script.FlowAnalyzer;
 
 import java.util.Map;
-import java.util.EnumSet;
 
 public class FlowRunWorkspace extends FlowJoWorkspace
 {
