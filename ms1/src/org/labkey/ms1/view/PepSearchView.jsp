@@ -25,7 +25,7 @@
     JspView<PepSearchModel> me = (JspView<PepSearchModel>) HttpView.currentView();
     PepSearchModel model = me.getModelBean();
 %>
-<% if(model.hasErrorMsg()) { %>
+<% if (model.hasErrorMsg()) { %>
 <p class="error"><%=model.getErrorMsg()%></p>
 <% } %>
 <form action="<%=model.getResultsUri()%>" method="get">

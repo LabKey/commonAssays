@@ -79,7 +79,7 @@
     }
     out.print(ctx.modificationHref);
 %>
-        <% if(null != ctx.pepSearchHref && ctx.pepSearchHref.length() > 0) { %>
+        <% if (null != ctx.pepSearchHref && ctx.pepSearchHref.length() > 0) { %>
         <%=PageFlowUtil.generateButton("Find Features", ctx.pepSearchHref, "", "target=\"pepSearch\"")%>
         <% } %>
 

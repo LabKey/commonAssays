@@ -29,7 +29,7 @@
 
     ActionURL urlDownload = urlProvider(ExperimentUrls.class).getShowFileURL(me.getViewContext().getContainer());
 %>
-<% if(null != dataFile && null != expData) { %>
+<% if (null != dataFile && null != expData) { %>
 <table>
     <tr>
         <td>Data File:</td>

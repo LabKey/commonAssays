@@ -31,11 +31,11 @@
         <td><b><%=h(sware.getName())%></b>
         <%
         String version = sware.getVersion();
-        if(null != version && version.length() > 0)
+        if (null != version && version.length() > 0)
             out.print(" version " + h(version));
 
         String author = sware.getAuthor();
-        if(null != author && author.length() > 0)
+        if (null != author && author.length() > 0)
             out.print(" (" + h(author) + ")");
 %>
         </td>

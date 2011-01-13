@@ -30,10 +30,10 @@
     {
         var txtTimeSource = document.getElementById("txtTimeSource");
         var lblTime = document.getElementById("lblTime");
-        if(null == lblTime || null == txtTimeSource)
+        if (null == lblTime || null == txtTimeSource)
             return;
 
-        if(units == "<%=MS1Controller.SimilarSearchForm.TimeOffsetUnits.scans.name()%>")
+        if (units == "<%=MS1Controller.SimilarSearchForm.TimeOffsetUnits.scans.name()%>")
         {
             lblTime.innerHTML = "<%=model.getTimeUnitsLabel(MS1Controller.SimilarSearchForm.TimeOffsetUnits.scans)%>";
             txtTimeSource.value = "<%=h(model.getFeatureScan())%>";
@@ -46,7 +46,7 @@
     }
 </script>
 <form action="<%=model.getResultsUri()%>" method="get">
-    <% if(model.getFeatureId() != null) { %>
+    <% if (model.getFeatureId() != null) { %>
     <input type="hidden" name="<%=MS1Controller.SimilarSearchForm.ParamNames.featureId.name()%>"
            value="<%=h(model.getFeatureId())%>"/>
     <% } %>

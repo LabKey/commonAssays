@@ -69,7 +69,7 @@ if (null != bean.quantAlgorithm)
             <%=PageFlowUtil.generateButton("Show Protein Prophet Details", "showProteinProphetDetails.view?run=" + run.getRun(), "", "target=\"proteinProphetSummary\"")%><%
         }
 
-        if(run.getNegativeHitCount() > run.getPeptideCount() / 3)
+        if (run.getNegativeHitCount() > run.getPeptideCount() / 3)
         { %>
             <%=generateButton("Discriminate", "discriminateScore.view?run=" + run.getRun())%><%
         } %>

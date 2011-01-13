@@ -115,7 +115,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
 
         QuerySettings settings = assaySchema.getSettings(form.getViewContext(), QueryView.DATAREGIONNAME_DEFAULT, tableName);
         //show all rows by default
-       if(null == form.getMaxRows()
+       if (null == form.getMaxRows()
             && null == getViewContext().getRequest().getParameter(QueryView.DATAREGIONNAME_DEFAULT + "." + QueryParam.maxRows))
         {
             settings.setShowRows(ShowRows.ALL);

@@ -172,7 +172,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
                 {
                     return true;
                 }
-                else if(elementName.equals("index"))
+                else if (elementName.equals("index"))
                 {
                     return false;
                 }
