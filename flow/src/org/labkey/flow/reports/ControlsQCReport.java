@@ -23,11 +23,16 @@ import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.reports.report.RReport;
-import org.labkey.api.reports.report.RReportDescriptor;
 import org.labkey.api.reports.report.ReportDescriptor;
+import org.labkey.api.reports.report.ScriptReportDescriptor;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.VBox;
+import org.labkey.api.view.ViewContext;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.query.FlowSchema;
@@ -130,7 +135,7 @@ public class ControlsQCReport extends FlowReport
                     for (Map.Entry<String,Object> e : props.entrySet())
                     {
                         String key = e.getKey();
-                        if (RReportDescriptor.Prop.script.name().equals(key))
+                        if (ScriptReportDescriptor.Prop.script.name().equals(key))
                             continue;
                         String value = null == e.getValue() ? null : String.valueOf(e.getValue());
                         reportProlog.append(comma);
