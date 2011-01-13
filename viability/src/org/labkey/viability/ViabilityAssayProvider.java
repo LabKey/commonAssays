@@ -207,11 +207,11 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return new HtmlView("Currently the only supported file type is the Guava comma separated values (.csv) file format.");
     }
 
-    public TableInfo createDataTable(AssaySchema schema, ExpProtocol protocol)
+    public ContainerFilterable createDataTable(AssaySchema schema, ExpProtocol protocol)
     {
         ViabilityAssaySchema viabilitySchema = new ViabilityAssaySchema(schema.getUser(), schema.getContainer(), protocol);
         viabilitySchema.setTargetStudy(schema.getTargetStudy());
-        AbstractTableInfo table = viabilitySchema.createResultsTable();
+        ContainerFilterable table = viabilitySchema.createResultsTable();
         // UNDONE: add copy to study columns when copy to study is implemented
         //addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
         return table;
@@ -354,12 +354,12 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     @Override
     public boolean canCopyToStudy()
     {
-        return false;
+        return true;
     }
 
     public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
-        throw new UnsupportedOperationException("NYI");
+        return AbstractTsvAssayProvider.copyToStudy(this, viewContext, protocol, study, dataKeys, errors);
     }
 
     @Override

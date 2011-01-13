@@ -126,7 +126,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         return new HtmlView("The Elispot data file is the output file from the plate reader that has been selected.");
     }
 
-    public TableInfo createDataTable(AssaySchema schema, ExpProtocol protocol)
+    public ElispotRunDataTable createDataTable(AssaySchema schema, ExpProtocol protocol)
     {
         ElispotRunDataTable table = new ElispotRunDataTable(schema, protocol);
         addCopiedToStudyColumns(table, protocol, schema.getUser(), true);

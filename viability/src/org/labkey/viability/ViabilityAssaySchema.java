@@ -92,7 +92,7 @@ public class ViabilityAssaySchema extends AssaySchema
         return null;
     }
 
-    public AbstractTableInfo createResultsTable()
+    public FilteredTable createResultsTable()
     {
         return new ResultsTable();
     }

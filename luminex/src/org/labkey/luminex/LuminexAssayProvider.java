@@ -17,6 +17,7 @@
 package org.labkey.luminex;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
@@ -113,7 +114,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return cols;        
     }
 
-    public TableInfo createDataTable(AssaySchema schema, ExpProtocol protocol)
+    public ContainerFilterable createDataTable(AssaySchema schema, ExpProtocol protocol)
     {
         LuminexSchema luminexSchema = new LuminexSchema(schema.getUser(), schema.getContainer(), protocol);
         luminexSchema.setTargetStudy(schema.getTargetStudy());
