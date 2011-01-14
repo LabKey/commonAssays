@@ -106,7 +106,7 @@ public class FeaturesRReport extends CustomRReport
         }
 
         //if pepSeq is there, it's a peptide search view
-        if(null != url.getParameter(MS1Controller.PepSearchForm.ParamNames.pepSeq.name()))
+        if (null != url.getParameter(MS1Controller.PepSearchForm.ParamNames.pepSeq.name()))
         {
             forSearch = true;
             MS1Controller.PepSearchForm form = new MS1Controller.PepSearchForm();
@@ -130,7 +130,7 @@ public class FeaturesRReport extends CustomRReport
     protected boolean hasRequiredParams(ViewContext context)
     {
         //just needs to have at least one of the possible params
-        for(String name : getForwardParams())
+        for (String name : getForwardParams())
         {
             if(null != context.getActionURL().getParameter(name))
                 return true;
