@@ -111,7 +111,11 @@ public class FlowPipelineProvider extends PipelineProvider
         try
         {
             for (FlowRun run : FlowRun.getRunsForContainer(context.getContainer(), FlowProtocolStep.keywords))
-                usedRelativePaths.add(pr.relativePath(run.getExperimentRun().getFilePathRoot()));
+            {
+                File r = run.getExperimentRun().getFilePathRoot();
+                if (null != r)
+                    usedRelativePaths.add(pr.relativePath(r));
+            }
         }
         catch (SQLException e)
         {
