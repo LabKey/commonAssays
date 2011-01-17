@@ -62,7 +62,7 @@ public class NabSchema extends AssaySchema
 
     public NabSchema(User user, Container container)
     {
-        super(SCHEMA_NAME, user, container, ExperimentService.get().getSchema());
+        super(SCHEMA_NAME, user, container, ExperimentService.get().getSchema(), null);
     }
 
     public Set<String> getTableNames()

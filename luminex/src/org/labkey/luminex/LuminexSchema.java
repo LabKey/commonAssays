@@ -37,13 +37,11 @@ public class LuminexSchema extends AssaySchema
 {
     private static final String ANALYTE_TABLE_NAME = "Analyte";
     private static final String DATA_ROW_TABLE_NAME = "DataRow";
-    private final ExpProtocol _protocol;
 
     public LuminexSchema(User user, Container container, ExpProtocol protocol)
     {
-        super("Luminex", user, container, getSchema());
+        super("Luminex", user, container, getSchema(), protocol);
         assert protocol != null;
-        _protocol = protocol;
     }
 
     public Set<String> getTableNames()
@@ -54,14 +52,14 @@ public class LuminexSchema extends AssaySchema
 
     private String prefixTableName(String table)
     {
-        return _protocol.getName() + " " + table;
+        return getProtocol().getName() + " " + table;
     }
 
 
     public TableInfo createTable(String name)
     {
         String lname = name.toLowerCase();
-        String protocolPrefix = _protocol.getName().toLowerCase() + " ";
+        String protocolPrefix = getProtocol().getName().toLowerCase() + " ";
         if (lname.startsWith(protocolPrefix))
         {
             name = name.substring(protocolPrefix.length());
@@ -103,7 +101,7 @@ public class LuminexSchema extends AssaySchema
 
         //ColumnInfo colProperty = new ExprColumn(result, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
         ColumnInfo colProperty = result.wrapColumn("Properties", result.getRealTable().getColumn("LSID"));
-        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
         for(DomainProperty pd : analyteDomain.getProperties())
         {
@@ -133,13 +131,13 @@ public class LuminexSchema extends AssaySchema
         protocol.setHidden(true);
 
         ColumnInfo runCol = ret.addColumn(ExpDataTable.Column.Run);
-        if (_protocol != null)
+        if (getProtocol() != null)
         {
             runCol.setFk(new LookupForeignKey("RowId")
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return AssayService.get().createRunTable(_protocol, AssayService.get().getProvider(_protocol), _user, _container);
+                    return AssayService.get().createRunTable(getProtocol(), AssayService.get().getProvider(getProtocol()), _user, _container);
                 }
             });
         }
@@ -156,10 +154,10 @@ public class LuminexSchema extends AssaySchema
     {
         SQLFragment filter = new SQLFragment("DataId IN (SELECT d.RowId FROM " + ExperimentService.get().getTinfoData() + " d, " + ExperimentService.get().getTinfoExperimentRun() + " r WHERE d.RunId = r.RowId AND d.Container = ?");
         filter.add(getContainer().getId());
-        if (_protocol != null)
+        if (getProtocol() != null)
         {
             filter.append(" AND r.ProtocolLSID = ?");
-            filter.add(_protocol.getLSID());
+            filter.add(getProtocol().getLSID());
         }
         filter.append(")");
         result.addCondition(filter);
@@ -185,8 +183,4 @@ public class LuminexSchema extends AssaySchema
         return getSchema().getTable(DATA_ROW_TABLE_NAME);
     }
 
-    public ExpProtocol getProtocol()
-    {
-        return _protocol;
-    }
 }

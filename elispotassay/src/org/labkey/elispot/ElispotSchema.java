@@ -35,7 +35,6 @@ import java.util.Set;
 public class ElispotSchema extends AssaySchema
 {
     private static final String DATA_ROW_TABLE_NAME = "DataRow";
-    private final ExpProtocol _protocol;
 
     public ElispotSchema(User user, Container container)
     {
@@ -44,8 +43,7 @@ public class ElispotSchema extends AssaySchema
 
     public ElispotSchema(User user, Container container, ExpProtocol protocol)
     {
-        super("Elispot", user, container, ExperimentService.get().getSchema());
-        _protocol = protocol;
+        super("Elispot", user, container, ExperimentService.get().getSchema(), protocol);
     }
 
     public Set<String> getTableNames()
@@ -88,7 +86,7 @@ public class ElispotSchema extends AssaySchema
                 ExprColumn.STR_TABLE_ALIAS + ".lsid)";
 
         ColumnInfo colProperty = new ExprColumn(result, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
-        PropertyDescriptor[] pds = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
+        PropertyDescriptor[] pds = AbstractAssayProvider.getDomainByPrefix(getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
         Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
         FieldKey keyProp = new FieldKey(null, "Property");
         for(PropertyDescriptor pd : pds)
@@ -123,13 +121,13 @@ public class ElispotSchema extends AssaySchema
         protocol.setHidden(true);
 
         ColumnInfo runCol = ret.addColumn(ExpDataTable.Column.Run);
-        if (_protocol != null)
+        if (getProtocol() != null)
         {
             runCol.setFk(new LookupForeignKey("RowId")
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return AssayService.get().createRunTable(null, _protocol, AssayService.get().getProvider(_protocol), _user, _container);
+                    return AssayService.get().createRunTable(null, getProtocol(), AssayService.get().getProvider(getProtocol()), _user, _container);
                 }
             });
         }

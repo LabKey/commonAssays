@@ -48,13 +48,10 @@ public class ViabilityAssaySchema extends AssaySchema
         Results, ResultSpecimens
     }
 
-    private final ExpProtocol _protocol;
-
     public ViabilityAssaySchema(User user, Container container, ExpProtocol protocol)
     {
-        super(AssaySchema.NAME, user, container, getSchema());
+        super(AssaySchema.NAME, user, container, getSchema(), protocol);
         assert protocol != null;
-        _protocol = protocol;
     }
 
     public static DbSchema getSchema()
@@ -74,13 +71,13 @@ public class ViabilityAssaySchema extends AssaySchema
 
     private String prefixTableName(UserTables table)
     {
-        return _protocol.getName() + " " + table.name();
+        return getProtocol().getName() + " " + table.name();
     }
 
     public TableInfo createTable(String name)
     {
         String lname = name.toLowerCase();
-        String protocolPrefix = _protocol.getName().toLowerCase() + " ";
+        String protocolPrefix = getProtocol().getName().toLowerCase() + " ";
         if (lname.startsWith(protocolPrefix))
         {
             name = name.substring(protocolPrefix.length());
@@ -168,7 +165,7 @@ public class ViabilityAssaySchema extends AssaySchema
         {
             super(ViabilitySchema.getTableInfoResults());
 
-            _resultsDomain = _provider.getResultsDomain(_protocol);
+            _resultsDomain = _provider.getResultsDomain(getProtocol());
             DomainProperty[] resultDomainProperties = _resultsDomain.getProperties();
             Map<String, DomainProperty> propertyMap = new LinkedHashMap<String, DomainProperty>(resultDomainProperties.length);
             for (DomainProperty property : resultDomainProperties)
@@ -280,7 +277,7 @@ public class ViabilityAssaySchema extends AssaySchema
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    ExpRunTable expRunTable = AssayService.get().createRunTable(_protocol, _provider, ViabilityAssaySchema.this.getUser(), ViabilityAssaySchema.this.getContainer());
+                    ExpRunTable expRunTable = AssayService.get().createRunTable(getProtocol(), _provider, ViabilityAssaySchema.this.getUser(), ViabilityAssaySchema.this.getContainer());
                     expRunTable.setContainerFilter(ContainerFilter.EVERYTHING);
                     return expRunTable;
                 }
@@ -300,7 +297,7 @@ public class ViabilityAssaySchema extends AssaySchema
             addColumn(specimenMatches);
 
             SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
-            protocolIDFilter.add(_protocol.getRowId());
+            protocolIDFilter.add(getProtocol().getRowId());
             addCondition(protocolIDFilter,"ProtocolID");
         }
 
@@ -493,7 +490,7 @@ public class ViabilityAssaySchema extends AssaySchema
             ColumnInfo specimenID = addVisible(wrapColumn(getRealTable().getColumn("SpecimenID")));
             specimenID.setLabel("Specimen");
             specimenID.setKeyField(true);
-            SpecimenForeignKey fk = new SpecimenForeignKey(ViabilityAssaySchema.this, _provider, _protocol, new ViabilityAssayProvider.ResultsSpecimensAssayTableMetadata());
+            SpecimenForeignKey fk = new SpecimenForeignKey(ViabilityAssaySchema.this, _provider, getProtocol(), new ViabilityAssayProvider.ResultsSpecimensAssayTableMetadata());
             specimenID.setFk(fk);
 
             ColumnInfo indexCol = addVisible(wrapColumn(getRealTable().getColumn("SpecimenIndex")));
@@ -510,7 +507,7 @@ public class ViabilityAssaySchema extends AssaySchema
                         "SELECT result.RowId FROM " +
                             ViabilitySchema.getTableInfoResults() + " result " +
                         "WHERE result.ProtocolID = ? ");
-            filter.add(_protocol.getRowId());
+            filter.add(getProtocol().getRowId());
 
             Collection<String> ids = containerFilter.getIds(getContainer());
             if (ids != null)
