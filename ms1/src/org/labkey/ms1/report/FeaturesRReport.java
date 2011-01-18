@@ -120,7 +120,7 @@ public class FeaturesRReport extends CustomRReport
             }
 
             filters.add(new ContainerFeaturesFilter(context.getContainer(), form.isSubfolders(), context.getUser()));
-            if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
+            if (null != form.getPepSeq() && form.getPepSeq().length() > 0)
                 filters.add(new PeptideFilter(form.getPepSeq(), form.isExact()));
         }
 
@@ -132,7 +132,7 @@ public class FeaturesRReport extends CustomRReport
         //just needs to have at least one of the possible params
         for (String name : getForwardParams())
         {
-            if(null != context.getActionURL().getParameter(name))
+            if (null != context.getActionURL().getParameter(name))
                 return true;
         }
         return false;
