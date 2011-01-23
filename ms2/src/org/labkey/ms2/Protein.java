@@ -20,6 +20,8 @@ import org.apache.log4j.Logger;
 
 import java.util.*;
 
+import static org.labkey.api.util.PageFlowUtil.helpPopup;
+
 public class Protein
 {
     private static Logger _log = Logger.getLogger(Protein.class);
@@ -38,6 +40,22 @@ public class Protein
     private List<Range> _coverageRanges;
     private boolean _computeCoverage = true;
     private boolean _showEntireFragmentInCoverage = false;
+
+    private boolean _forCoverageMapExport = false;
+
+    private String PEPTIDE_START_TD="<td class=\"%s\" colspan=%d > %s </td>";
+    private String PEPTIDE_START_TD_EXPORT ="<td class=\"%s\" colspan=%d  bgcolor=\"#6699ff\" align=\"center\" > %s </td>";
+    private String PEPTIDE_START_CLASS =" peptide-marker ";
+    private String PEPTIDE_CONTINUE_CLASS =" peptide-marker-continue ";
+    private String COLUMN_DIVIDER_CLASS=" tenth-col ";
+    private String PEPTIDE_MIDDLE_TD ="";
+    private String PEPTIDE_NONE_TD="<td %s />";
+    private String PEPTIDE_NONE_CLASS= "";
+    private String SEQUENCE_CELL_TD="<td %s >%s</td>";
+    private String SEQUENCE_CELL_CLASS="";
+    private String TABLE_TAG="<div><table id=\"peptideMap\" class=\"protein-coverage-map\"  >";
+    private String TABLE_TAG_EXPORT="<div><table id=\"peptideMap\" border=\"1\"  >";
+    private int DEFAULT_WRAP_COLUMNS = 100;
 
     public Protein()
     {
@@ -129,7 +147,7 @@ public class Protein
     }
 
 
-    static final String startTag = "<font class=\"labkey-message\"><u>";
+    static final String startTag = "<font color=\"green\" ><u>";
     static final String endTag = "</u></font>";
 
     public StringBuffer getFormattedSequence()
@@ -155,19 +173,325 @@ public class Protein
         formatted.deleteCharAt(formatted.length() - 1);  // Get rid of extra space at end
         return formatted;
     }
+    /*
+        Formats and returns an html table showing where peptides matched a specific portion of a protein.
+        done in 3 passes. first pass builds up an array of SequencePos objects, one for each AA of the protein
+        sequence.  Second paas loops through the range objectds which are the peptide evidence for the
+        protein, marking each SequencePos object in the coverage region.  third pass loops through all SequencePos
+        objects and accumlates their html output.
+     */
+    public StringBuffer getCoverageMap(int run, String showRunViewUrl)
+    {
+        if(_showEntireFragmentInCoverage)
+            return new StringBuffer();
 
+        int wrapCols = DEFAULT_WRAP_COLUMNS;
+        if (_forCoverageMapExport)
+            wrapCols = 16384;  //Excel's max number of columns
+
+        List<SequencePos> seqStacks = new ArrayList<SequencePos>();
+
+        // build an arraylist of sequence objects and initialize them with the AA for their position.
+        for (int i=0; i<_sequence.length(); i++)
+        {
+            SequencePos pos = new SequencePos(_sequence.charAt(i), i);
+            seqStacks.add(pos);
+        }
+
+        List<Range> ranges= getUncoalescedPeptideRanges(run);
+
+        // now add the information on on covering peptides.
+        Integer  overallMaxLevels=0;
+        for (Range range : ranges)
+        {
+            int maxLevelsInRange=0;
+
+            // find out how many levels of peptides have alraady been marked to each sequence position in the range
+            for (int j=range.start; j< (range.start + range.length ); j++)
+                maxLevelsInRange = Math.max(maxLevelsInRange, seqStacks.get(j).getLevels());
+
+            // Need to pass wrapping information to the SequencePos object because it affects the ntml  to be generated.
+            for (int j=range.start; j< (range.start + range.length ); j++)
+            {
+                int nextRowStart = (int) Math.ceil(j/ wrapCols) * wrapCols;
+                int curRowStart = (int) Math.floor(j/ wrapCols) * wrapCols;
+                if (curRowStart==nextRowStart)
+                    nextRowStart += wrapCols;
+
+                // add a peptide marker at the array position beyond the current max marker level within the range
+                seqStacks.get(j).addPeptide(range, maxLevelsInRange, j, curRowStart, nextRowStart, showRunViewUrl);
+            }
+            // keep track of the deepest marker level across the entire sequence regardless of wrapping
+            overallMaxLevels = Math.max( overallMaxLevels, maxLevelsInRange + 1);
+        }
+
+        StringBuffer sb = new StringBuffer(seqStacks.size() *  overallMaxLevels * 5);
+        StringBuffer address;
+        StringBuffer seqs;
+
+        sb.append(_forCoverageMapExport?TABLE_TAG_EXPORT:TABLE_TAG);
+        int colst=0;
+        int lastCol;
+        // now go back and asj each positsion to render their html fo the table
+        // add in the tr's as needed
+        // 4 types of rows for every wrapCols-long seciton of the protein
+        //      1 address row giving the 0-based ordinal for every 10th position
+        //      1 sequence row shoing the protein AA at each position
+        //      0 or more peptide marker rows showing coverage bars
+        //      1 spacer row
+
+        while (colst<seqStacks.size())
+        {
+            seqs = new StringBuffer(6* wrapCols);
+            address = new StringBuffer(6* wrapCols);
+
+            lastCol=Math.min(colst + wrapCols -1, seqStacks.size()-1 );
+            address.append("<tr class=\"address-row\" >");
+            seqs.append("<tr class=\"sequence-row\" ");
+            seqs.append(">");
+
+            // loop through each wrapping level
+            for (int j=colst; j<= lastCol; j++)
+            {
+                // generate the address row (not done b SequencePos object)
+                if ((j % 10) == 0 )
+                {
+                    int colspan = Math.min(lastCol-j+1, 10);
+                    String td = String.format("<td colspan=%d align=\"left\" >%d</td>", colspan, j);
+                    address.append(td);
+                }
+                // accumulate the sequence row showing protein AA (generated by the SeuqeencePos object)
+                seqs.append(seqStacks.get(j).renderCell(0, j));
+            }
+            address.append("</tr>");
+            sb.append(address);
+            seqs.append("</tr>");
+            sb.append(seqs);
+
+            // accumulate the marker row html (generated by the SequencePos objects)
+            for (int i=1; i<  overallMaxLevels; i++)
+            {
+                sb.append("<tr>");
+                for (int j=colst; j<=lastCol; j++)
+                    sb.append(seqStacks.get(j).renderCell(i, j));
+
+                sb.append("</tr>");
+            }
+
+            // generate the spacer row
+            sb.append("<tr class=\"spacer-row\" ><td class=\"spacer-row\" colspan=");
+            sb.append(lastCol-colst +1);
+            sb.append(" > </td></tr>");
+            colst = lastCol + 1;
+
+        }   //  genrate the 4 types of rows again for each wrapping level
+        sb.append("</table></div>");
+
+        return sb;
+    }
+
+    public void setForCoverageMapExport(boolean forCoverageMapExport)
+    {
+        _forCoverageMapExport = forCoverageMapExport;
+    }
+
+    /*
+        new innder class used to build the proteinCoverageMap.  Reprsents a single AA in the protein sequence
+        and any peptides that overlap that sequence position.  When a peptide is added, the necesssary html for
+        all the table cells that show that peptide is generated. The html for a non-covered AA in the protein
+        is generated only at reder time.
+     */
+    private class SequencePos {
+        char _c;
+        Integer _levels =0;
+        HashMap<Integer, String> tdMap =new HashMap<Integer, String>();
+
+        public SequencePos(char c, int curIdx) {
+            _c=c;
+            tdMap.put(0, getTD(SEQUENCE_CELL_TD, SEQUENCE_CELL_CLASS, curIdx, String.valueOf(c) , null)) ;
+            _levels=1;
+        }
+
+        String getTD(String template, String cssClass, int curIdx, String tdValue , Integer colSpan)
+        {
+            // add column divider class to put vertical border lines every 10th column
+            if ((curIdx+1) % 10 == 0)
+            {
+                if (cssClass.length()==0)
+                    cssClass = "class=\"" + COLUMN_DIVIDER_CLASS + "\" ";
+                else
+                    cssClass +=  COLUMN_DIVIDER_CLASS;
+            }
+            String td;
+            if (null!=colSpan)
+                td = String.format(template, cssClass, colSpan, tdValue );
+            else
+                td = String.format(template, cssClass, tdValue );
+            return td;
+        }
+
+        int getLevels() {
+            return _levels;
+        }
+
+        void addPeptide(Range range, Integer newLevel, int curIdx, int curRowStart, int nextRowStart, String showRunViewUrl) {
+            String td;
+            String label;
+            int colsCurrentRow=range.length;
+            int colsNextRow=0;
+            int colsPreviousRow=0;
+            if (range.start < curRowStart)  // continuation of a marker from the previous row
+            {
+                colsPreviousRow = curRowStart - range.start;
+                colsCurrentRow = colsCurrentRow - colsPreviousRow;
+            }
+            if (range.start + range.length >= nextRowStart)
+            {
+                colsNextRow = range.start + range.length - nextRowStart;
+                colsCurrentRow = colsCurrentRow - colsNextRow;
+            }
+            String trimmedPeptide=null;
+            String onClickScript=null;
+            Double mass = null;
+            String details = null;
+            String continuationLeft="";
+            String continuationRight="";
+
+            if (!_forCoverageMapExport)
+            {
+                trimmedPeptide= _sequence.substring(range.start,(range.start + range.length));
+                onClickScript="window.open('" +  showRunViewUrl + "&MS2Peptides.TrimmedPeptide~eq=" + trimmedPeptide
+                        +"', 'showMatchingPeptides');";
+            }
+
+            if (colsPreviousRow >= colsCurrentRow)
+                label=" &gt;";  // continuation of peptide bar labeled on previous row
+            else
+            {
+                if (colsCurrentRow >= colsNextRow)
+                {
+                    PeptideCounts counts = range.getCounts();
+                    String linkText = String.format("%d ", counts.countScans );
+                    if (colsPreviousRow>0)
+                        continuationLeft= " &lt;&lt; ";
+                    if (colsNextRow>0)
+                        continuationRight=" &gt;&gt; ";
+
+                    if(!_forCoverageMapExport)
+                    {
+                        mass = getSequenceMass(_sequence.substring(range.start,(range.start + range.length)));
+                        details = String.format("Mass: %.2f  \nTotal Scans: %d ", mass, counts.countScans);
+                    }
+
+                    for (String modStr : counts.getCountModifications().keySet())
+                    {
+                        String varmod = String.format("%d(%s)", counts.getCountModifications().get(modStr), modStr );
+                        linkText += " / " + varmod;
+                        if (!_forCoverageMapExport)
+                            details += "\n "+ varmod;
+                    }
+                    label = linkText;
+                    if (!_forCoverageMapExport)
+                    {
+                        details += String.format("\nUnmodified: %d",counts.getCountUnmodifiedPeptides());
+                        String popup = helpPopup("Peptide Details", details, false, linkText, 200, onClickScript );
+                        label=popup;
+                    }
+                    label = continuationLeft + label + continuationRight;
+                }
+                else
+                    label= "&lt;";  // will  write the label on the next row
+            }
+            String cssClass =PEPTIDE_START_CLASS;
+
+            if ((range.start==curIdx) || (curRowStart==curIdx))
+                td=String.format((_forCoverageMapExport ? PEPTIDE_START_TD_EXPORT: PEPTIDE_START_TD), cssClass, colsCurrentRow, label );
+            else
+                td= PEPTIDE_MIDDLE_TD;
+
+            tdMap.put(newLevel,td);
+            _levels = newLevel + 1;
+        }
+
+        String renderCell(Integer level, int curIdx)
+        {
+            String tdout= tdMap.get(level);
+            if (null == tdout)
+                tdout=getTD(PEPTIDE_NONE_TD, PEPTIDE_NONE_CLASS, curIdx, null, null);
+            return tdout;
+        }
+    }
 
     public void setPeptides(String[] peptides)
     {
         _peptides = peptides;
         _computeCoverage = true;
     }
+    /*
+        new class to hold counts of scans matching a single peptide sequence, as well as counts of
+        peptides found with modificiations
+     */
+    private class PeptideCounts {
+        int countScans;
+        int countUnmodifiedPeptides;
+        Map<String , Integer> countModifications;
 
+        public int getCountScans()
+        {
+            return countScans;
+        }
+
+        public int getCountUnmodifiedPeptides()
+        {
+            return countUnmodifiedPeptides;
+        }
+
+        public Map<String, Integer> getCountModifications()
+        {
+            return countModifications;
+        }
+
+        public PeptideCounts() {
+            countModifications =new HashMap<String, Integer>();
+            countScans=0;
+            countUnmodifiedPeptides=0;
+        }
+        public void addPeptide(String peptide, MS2Modification[] mods ){
+            countScans++;
+            boolean unmodified = true;
+            if (null!=mods)
+            {
+                for (MS2Modification mod : mods)
+                {
+                    if (!mod.getVariable())
+                        continue;
+                    String marker= mod.getAminoAcid() + mod.getSymbol();
+                    if (peptide.indexOf(marker)>=0)
+                    {
+                        Integer curCount = countModifications.get(marker);
+                        if (null == curCount )
+                        {
+                            countModifications.put(marker, 0);
+                            curCount = countModifications.get(marker);
+                        }
+                        curCount++;
+                        countModifications.put(marker, curCount);
+                        unmodified = false;
+                    }
+                }
+            }
+            if (unmodified)
+                countUnmodifiedPeptides++;
+        }
+
+    }
 
     public void setShowEntireFragmentInCoverage(boolean showEntireFragmentInCoverage)
     {
+        if (_showEntireFragmentInCoverage != showEntireFragmentInCoverage)
+            _computeCoverage = true;
         _showEntireFragmentInCoverage = showEntireFragmentInCoverage;
-        _computeCoverage = true;
+
     }
 
 
@@ -186,7 +510,6 @@ public class Protein
 
         return total;
     }
-
 
     public double getMassPercent()
     {
@@ -228,68 +551,9 @@ public class Protein
             _coverageRanges = new ArrayList<Range>(0);
             return _coverageRanges;
         }
-
-        // Get rid of variable modification chars and '.', leaving first & last AA (or '-') IF PRESENT
-        // and peptide AAs.  Store stripped peptides in a Set to generate a list of unique peptides
-        Set<String> unique = new HashSet<String>(_peptides.length);
-
-        for (String peptide : _peptides)
-            unique.add(MS2Peptide.stripPeptideAZDash(peptide));
-
-        List<Range> ranges = new ArrayList<Range>(unique.size());
-
-        for (String peptide : unique)
-        {
-            if (peptide.charAt(0) == '-')
-            {
-                if (peptide.charAt(peptide.length() - 1) == '-')  // Rare case where peptide is an entire protein sequence
-                {
-                    if (_sequence.equals(peptide.substring(1, peptide.length() - 1)))
-                        ranges.add(new Range(0, peptide.length() - 2));
-                    else
-                        _log.error(peptide + " doesn't match sequence");
-                }
-                else
-                {
-                    if (_sequence.startsWith(peptide.substring(1)))
-                        ranges.add(new Range(0, peptide.length() - 2));
-                    else
-                        _log.error("Can't find " + peptide + " at start of sequence");
-                }
-            }
-            else if (peptide.charAt(peptide.length() - 1) == '-')
-            {
-                if (_sequence.endsWith(peptide.substring(0, peptide.length() - 1)))
-                    ranges.add(new Range(_sequence.length() - (peptide.length() - 2), peptide.length() - 2));
-                else
-                    _log.error("Can't find " + peptide + " at end of sequence");
-            }
-            else
-            {
-                int start = _sequence.indexOf(peptide);
-
-                if (start <= -1)
-                {
-                    _log.error("Can't find " + peptide + " in middle of sequence");
-                    continue;
-                }
-
-                while (start > -1)
-                {
-                    if (_showEntireFragmentInCoverage)
-                        ranges.add(new Range(start, peptide.length()));             // Used when searching all proteins for a particular sequence (when prev/next AAs are not specified)
-                    else
-                        ranges.add(new Range(start + 1, peptide.length() - 2));     // Used when calculating coverage of peptides having specific prev/next AAs
-
-                    start = _sequence.indexOf(peptide, start + 1);
-                }
-            }
-        }
-
-        // Sort ranges based on starting point
-        Collections.sort(ranges);
-
+        List<Range> ranges = getUncoalescedPeptideRanges(0);
         // Coalesce ranges
+        // Code below is only used by the old-style collapsed sequence and is unchanged
         _coverageRanges = new ArrayList<Range>(ranges.size());
         int start = -1;
         int end = -1;
@@ -314,6 +578,118 @@ public class Protein
         _computeCoverage = false;
         return _coverageRanges;
     }
+    /*
+        method extracted from getCoverageRanges.  There are 3 different versions of the peptide.
+        the UniqueMap holds "stripped" peptides -- they still have the prev and next AA, including a "-" if
+         at the end of a protein.  The stripped peptide is used to determine uniqueness, and then this
+        method matches the stripped peptide to the protein and keeps only the matching tirmmed peptide
+        (no previous and next AAs) in a range object.  the range object was modified to hold the counts
+        needed by the ProteinCoverageMap
+
+        TODO:
+        unlike the old-style getCoverageRanges, the uncolaesced ranges are not cached in a class-level variable;
+        would need to keep separate by run
+     */
+    private List<Range> getUncoalescedPeptideRanges(int run)
+    {
+        List<Range> uncoalescedPeptideRanges = new ArrayList<Range>(0);
+
+        if ("".equals(_sequence) || _peptides == null)     // Optimize case where sequence isn't available (FASTA not loaded)
+            return uncoalescedPeptideRanges;
+
+        Map<String,PeptideCounts> uniqueMap = getUniquePeptides(run);
+
+        List<Range> ranges = new ArrayList<Range>(uniqueMap.size());
+
+        for (String peptide : uniqueMap.keySet())
+        {
+
+            if (peptide.charAt(0) == '-')
+            {
+                if (peptide.charAt(peptide.length() - 1) == '-')  // Rare case where peptide is an entire protein sequence
+                {
+                    if (_sequence.equals(peptide.substring(1, peptide.length() - 1)))
+                        ranges.add(new Range(0, peptide.length() - 2, uniqueMap.get(peptide)));
+                    else
+                        _log.error(peptide + " doesn't match sequence");
+                }
+                else
+                {
+                    if (_sequence.startsWith(peptide.substring(1)))
+                        ranges.add(new Range(0, peptide.length() - 2, uniqueMap.get(peptide)));
+                    else
+                        _log.error("Can't find " + peptide + " at start of sequence");
+                }
+            }
+            else if (peptide.charAt(peptide.length() - 1) == '-')
+            {
+                if (_sequence.endsWith(peptide.substring(0, peptide.length() - 1)))
+                    ranges.add(new Range(_sequence.length() - (peptide.length() - 2), peptide.length() - 2, uniqueMap.get(peptide)));
+                else
+                    _log.error("Can't find " + peptide + " at end of sequence");
+            }
+            else
+            {
+                int start = _sequence.indexOf(peptide);
+
+                if (start <= -1)
+                {
+                    _log.error("Can't find " + peptide + " in middle of sequence");
+                    continue;
+                }
+
+                while (start > -1)
+                {
+                    if (_showEntireFragmentInCoverage)
+                        ranges.add(new Range(start, peptide.length(), uniqueMap.get(peptide)));             // Used when searching all proteins for a particular sequence (when prev/next AAs are not specified)
+                    else
+                        ranges.add(new Range(start + 1, peptide.length() - 2, uniqueMap.get(peptide)));     // Used when calculating coverage of peptides having specific prev/next AAs
+
+                    start = _sequence.indexOf(peptide, start + 1);
+                }
+            }
+        }
+
+        // Sort ranges based on starting point
+        Collections.sort(ranges);
+
+        uncoalescedPeptideRanges =ranges;
+        return ranges;
+    }
+
+    /*
+         Method extracted from getCoverageRanges.
+         Get rid of variable modification chars and '.', leaving first & last AA (or '-') IF PRESENT
+         and peptide AAs.  Store stripped peptides in a Set to generate a list of unique peptides.
+
+        Changed to a map to keep track of number of duplicates and counts of modification status
+        the keyset of the map becomes the set of unique peptides.
+ */
+public Map<String, PeptideCounts> getUniquePeptides(int run)
+{
+    Map<String,PeptideCounts> uniquePeptides = new HashMap<String,PeptideCounts>();
+    if (null==_peptides || _peptides.length <= 0)
+        return uniquePeptides;
+    // if called from old-style getCoverageRanges, the run value is 0 and we don't care about modifications
+    MS2Modification[] mods = new MS2Modification[0];
+    if (run > 0)
+        mods = MS2Manager.getModifications(run);
+
+
+    for (String peptide : _peptides)
+    {
+        String strippedPeptide = MS2Peptide.stripPeptideAZDash(peptide);
+        PeptideCounts cnt;
+        cnt = uniquePeptides.get(strippedPeptide);
+        if (null==cnt)
+        {
+            uniquePeptides.put(strippedPeptide,new PeptideCounts());
+            cnt = uniquePeptides.get(strippedPeptide);
+        }
+        cnt.addPeptide(peptide, mods);
+    }
+    return uniquePeptides;
+}
 
 
     public static Range findPeptide(String peptide, String sequence)
@@ -358,6 +734,7 @@ public class Protein
     {
         public int start;
         public int length;
+        private PeptideCounts pepcounts;
 
         Range(int start, int length)
         {
@@ -365,11 +742,22 @@ public class Protein
             this.length = length;
         }
 
+        Range(int start, int length, PeptideCounts counts)
+        {
+            this.start = start;
+            this.length = length;
+            this.pepcounts = counts;
+        }
         public int compareTo(Object o)
         {
             if (start < ((Range) o).start) return -1;
             if (start > ((Range) o).start) return 1;
             return 0;
+        }
+
+        public PeptideCounts getCounts()
+        {
+            return pepcounts;
         }
     }
 }

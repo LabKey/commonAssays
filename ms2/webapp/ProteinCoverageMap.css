@@ -1,0 +1,90 @@
+ .protein-coverage-map, .protein-coverage-map table  {
+    border-collapse: collapse;
+    padding: 0;
+    font-family: Lucida console;
+    font-size: 10pt;
+     width: 1150px;
+}
+
+.sequence-row, .sequence-row tr  {
+    font-size: 10pt;
+}
+.sequence-row td  {
+    border-top: 1px solid #000000;
+}
+
+.tenth-col, .tenth-col td {
+    border-right: 1px solid #000000;
+}
+
+.address-row td {
+    border-right: 1px solid #000000;
+    border-left: 1px solid #000000;
+    border-top: 1px solid #000000;
+    height: 10px;
+    font-size: 6pt;
+    text-align: left;
+}
+
+.spacer-row tr, .spacer-row td {
+    height: 20px;
+    background-color: #F0F0F0;
+}
+
+.peptide-marker, .peptide-marker td {
+    text-align: center;
+    border: 1px solid #000000;
+    background-color: #ccccff;
+    font-size: 8pt;
+}
+.peptide-marker-continue, .peptide-marker-continue td {
+        background-color: #6699ff;
+     text-align: center;
+     border: 1px solid #000000;
+     font-size: 8pt;
+}
+ .protein-coverage-map, .protein-coverage-map table  {
+    border-collapse: collapse;
+    padding: 0;
+    font-family: Lucida console;
+    font-size: 10pt;
+     width: 1150px;
+}
+
+.sequence-row, .sequence-row tr  {
+    font-size: 10pt;
+}
+.sequence-row td  {
+    border-top: 1px solid #000000;
+}
+
+.tenth-col, .tenth-col td {
+    border-right: 1px solid #000000;
+}
+
+.address-row td {
+    border-right: 1px solid #000000;
+    border-left: 1px solid #000000;
+    border-top: 1px solid #000000;
+    height: 10px;
+    font-size: 6pt;
+    text-align: left;
+}
+
+.spacer-row tr, .spacer-row td {
+    height: 20px;
+    background-color: #F0F0F0;
+}
+
+.peptide-marker, .peptide-marker td {
+    text-align: center;
+    border: 1px solid #000000;
+    background-color: #ccccff;
+    font-size: 8pt;
+}
+.peptide-marker-continue, .peptide-marker-continue td {
+        background-color: #6699ff;
+     text-align: center;
+     border: 1px solid #000000;
+     font-size: 8pt;
+}

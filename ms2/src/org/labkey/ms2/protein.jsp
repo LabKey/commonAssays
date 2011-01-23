@@ -26,7 +26,7 @@
     Format intFormat = Formats.commaf0;
     Format percentFormat = Formats.percent;
 %>
-<table class="labkey-data-region" width=100%>
+<table class="labkey-data-region" width=1150px>
     <col width=15%><col width=85%>
     <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
     <tr><td>Sequence Mass:</td><td><%=h(intFormat.format(bean.protein.getMass()))%></td></tr><%

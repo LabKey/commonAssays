@@ -856,9 +856,11 @@ public class MS2Controller extends SpringActionController
     {
         public Map<String, String> fixed;
         public Map<String, String> var;
+        public MS2Run ms2Run;
 
         public ModificationBean(MS2Run run)
         {
+            ms2Run = run;
             fixed = new TreeMap<String, String>();
             var = new TreeMap<String, String>();
 
@@ -4068,6 +4070,8 @@ public class MS2Controller extends SpringActionController
     {
         public Protein protein;
         public boolean showPeptides;
+        public int run;
+        public String showRunUrl;
     }
 
 
@@ -4096,10 +4100,20 @@ public class MS2Controller extends SpringActionController
                 bean.showPeptides = showPeptides;
                 JspView proteinSummary = new JspView<ProteinViewBean>("/org/labkey/ms2/protein.jsp", bean);
                 proteinSummary.setTitle(getProteinTitle(proteins[i], true));
+                proteinSummary.enableExpandCollapse("ProteinSummaryAndSequence", false);
                 addView(proteinSummary);
-
+                if (showPeptides)
+                {
+                    bean.run = run.getRun();
+                    JspView proteinCoverageMapView = new JspView<ProteinViewBean>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
+                    proteinCoverageMapView.enableExpandCollapse("ProteinCoverageMap", false);
+                    proteinCoverageMapView.setTitle("Protein Sequence Coverage");
+                    addView(proteinCoverageMapView);
+                }
                 // Add annotations
-                addView(new AnnotView(proteins[i]));
+                AnnotView annotations = new AnnotView(proteins[i]);
+                annotations.enableExpandCollapse("ProteinAnnotationsView", true);
+                addView(annotations);
             }
 
             if (showPeptides)
@@ -4119,8 +4133,86 @@ public class MS2Controller extends SpringActionController
             }
         }
     }
+    /*
+    Exports a simple HTML document that excel can open and transform into something that looks like the html veresion of the
+     protein coverage map.  Can't use CSS tags.
+     */
+    @RequiresPermissionClass(ReadPermission.class)
+    public class ExportProteinCoverageMapAction extends SimpleViewAction<DetailsForm>
+    {
+
+        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
+        {
+            MS2Run ms2Run;
+            Protein protein;
+            protein = ProteinManager.getProtein(form.getSeqIdInt());
+            if (protein == null)
+                throw new NotFoundException("Could not find protein with SeqId " + form.getSeqIdInt());
+            ms2Run = validateRun(form.run);
+            if (ms2Run == null)
+                 throw new NotFoundException("Could not find run with Id " + form.getRun());
+
+            AbstractMS2RunView peptideView = new StandardProteinPeptideView(getViewContext(), ms2Run);
+            String[] peptides = peptideView.getPeptideStringsForGrouping(form);
+
+            protein.setPeptides(peptides);
+            protein.setShowEntireFragmentInCoverage(false);
+
+            HttpServletResponse resp = getViewContext().getResponse();
+            resp.reset();
+            resp.setContentType("text/html");
+            String filename = FileUtil.makeFileNameWithTimestamp(protein.getBestName(), "htm");
+            resp.setHeader("Content-disposition", "attachment; filename=\"" + filename +"\"");
+
+            protein.setForCoverageMapExport(true);
+            PrintWriter pw = resp.getWriter();
+            pw.write("<html><body>");
+            pw.write("<p> Protein: &nbsp; " + protein.getBestName() + "<br/> ");
+            pw.write("Run: &nbsp; " + (null!=ms2Run.getDescription()?  ms2Run.getDescription() : ms2Run.getRun()) +  "<br/> ");
+            String peptideFilterString = ProteinManager.getPeptideFilter(getViewContext().getActionURL(),
+                    ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, ms2Run).getFilterText();
+             pw.write("Peptide Filter: &nbsp; " + peptideFilterString + "</p> ");
+
+            pw.write(protein.getCoverageMap(ms2Run.getRun(), null).toString());
+            pw.write("</body></html>");
+            resp.flushBuffer();
+
+            return null;
+        }
 
 
+    public NavTree appendNavTrail(NavTree root)
+    {
+        return null;
+    }
+}    /*
+        Displays a peptide grid filtered on a trimmed peptide.  target of the onclick event of a peptide coverage bar
+         in a protein coverage map
+    */
+    @RequiresPermissionClass(ReadPermission.class)
+    public class showPeptidePopupAction extends SimpleViewAction<DetailsForm>
+    {
+
+        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
+        {
+            MS2Run ms2Run;
+            ms2Run = validateRun(form.run);
+            MS2Run[] runs = new MS2Run[1];
+            runs[0]=ms2Run;
+            QueryPeptideMS2RunView peptideView = new QueryPeptideMS2RunView(getViewContext(),runs);
+            WebPartView gv = peptideView.createGridView(form);
+            VBox vBox = new VBox();
+            vBox.setFrame(WebPartView.FrameType.DIALOG);           
+            vBox.addView(gv);
+            return vBox;
+        }
+
+
+    public NavTree appendNavTrail(NavTree root)
+    {
+        return null;
+    }
+}
     @RequiresPermissionClass(ReadPermission.class)
     public class PieSliceSectionAction extends SimpleViewAction
     {

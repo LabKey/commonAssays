@@ -1193,6 +1193,7 @@ ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_protein_recommendedName_ful
 ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_protein_recommendedName_shortName.java -text
 ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_sequence.java -text
 ms2/src/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp -text
+ms2/src/org/labkey/ms2/proteinCoverageMap.jsp -text
 ms2/src/org/labkey/ms2/query/AbstractProteinProphetCrosstabView.java -text
 ms2/src/org/labkey/ms2/query/AbstractRunCompareView.java -text
 ms2/src/org/labkey/ms2/query/ComparePeptideTableInfo.java -text
@@ -1265,6 +1266,7 @@ ms2/src/org/labkey/ms2/testMascot.jsp -text
 ms2/src/org/labkey/ms2/writer/BasePepXmlWriter.java -text
 ms2/webapp/MS2/externalData/ProtSprotOrgMap.txt -text
 ms2/webapp/MS2/images/runIcon.gif -text
+ms2/webapp/ProteinCoverageMap.css -text
 ms2/webapp/WEB-INF/ms2/ms2Context.xml -text
 ms2/webapp/_images/gray.gif -text
 ms2/webapp/_images/red.gif -text
