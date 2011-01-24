@@ -96,9 +96,9 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return new HtmlView("The MAGE-ML data file is an XML file that contains the results of the microarray run.");
     }
 
-    public AssayResultTable createDataTable(AssaySchema schema, ExpProtocol protocol)
+    public AssayResultTable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
     {
-        AssayResultTable result = new AssayResultTable(schema, protocol, this);
+        AssayResultTable result = new AssayResultTable(schema, protocol, this, includeCopiedToStudyColumns);
         if (getDomainByPrefix(protocol, ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().length > 0)
         {
             List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());

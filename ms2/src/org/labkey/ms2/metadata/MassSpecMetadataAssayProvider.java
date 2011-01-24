@@ -347,7 +347,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         return getDomainByPrefix(protocol, FRACTION_DOMAIN_PREFIX);
     }
 
-    public ExpDataTable createDataTable(final AssaySchema schema, final ExpProtocol protocol)
+    public ExpDataTable createDataTable(final AssaySchema schema, final ExpProtocol protocol, boolean includeCopiedToStudyColumns)
     {
         final ExpDataTable result = new ExpSchema(schema.getUser(), schema.getContainer()).getDatasTable();
         SQLFragment runConditionSQL = new SQLFragment("RunId IN (SELECT RowId FROM " +
@@ -404,7 +404,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
             filter.addInClause(getTableMetadata().getResultRowIdFieldKey().toString(), dataKeys.keySet());
 
             AssaySchema schema = AssayService.get().createSchema(viewContext.getUser(), protocol.getContainer());
-            ExpDataTable tableInfo = createDataTable(schema, protocol);
+            ExpDataTable tableInfo = createDataTable(schema, protocol, true);
             tableInfo.setContainerFilter(new ContainerFilter.CurrentAndSubfolders(viewContext.getUser()));
 
             List<FieldKey> fieldKeys = new ArrayList<FieldKey>();

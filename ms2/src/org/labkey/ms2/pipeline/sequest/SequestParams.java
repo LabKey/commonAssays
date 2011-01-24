@@ -387,7 +387,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
         {
             _params.add(new SequestParam(
                 300,                                               //sortOrder
-                "350.0",                          //The value of the property
+                "600.0",                          //The value of the property
                 "min_peptide_mass",                     // the sequest.params property name
                 "",       // the sequest.params comment
                 ConverterFactory.getSequestBasicConverter(),      //converts the instance to a sequest.params line
@@ -397,7 +397,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
 
             _params.add(new SequestParam(
                 301,                                               //sortOrder
-                "5000.0",                          //The value of the property
+                "4200.0",                          //The value of the property
                 "max_peptide_mass",                     // the sequest.params property name
                 "",       // the sequest.params comment
                 ConverterFactory.getSequestBasicConverter(),      //converts the instance to a sequest.params line

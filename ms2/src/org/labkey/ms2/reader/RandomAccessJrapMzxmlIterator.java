@@ -63,8 +63,6 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
     }
 
 
-    static final int BUFFER_SIZE = 128 * 1024;
-
     public boolean hasNext()
     {
         if (null == _parser)

@@ -60,7 +60,7 @@ public class ElispotSchema extends AssaySchema
             {
                 if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
                 {
-                    return provider.createDataTable(AssayService.get().createSchema(getUser(), getContainer()), protocol);
+                    return provider.createDataTable(AssayService.get().createSchema(getUser(), getContainer()), protocol, true);
                 }
             }
         }

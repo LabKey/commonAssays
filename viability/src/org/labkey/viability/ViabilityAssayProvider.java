@@ -207,7 +207,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return new HtmlView("Currently the only supported file type is the Guava comma separated values (.csv) file format.");
     }
 
-    public ContainerFilterable createDataTable(AssaySchema schema, ExpProtocol protocol)
+    public ContainerFilterable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
     {
         ViabilityAssaySchema viabilitySchema = new ViabilityAssaySchema(schema.getUser(), schema.getContainer(), protocol);
         viabilitySchema.setTargetStudy(schema.getTargetStudy());

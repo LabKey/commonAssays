@@ -693,7 +693,7 @@ public class SequestParamsBuilder
            String rangeMin = sequestInputParams.get(AbstractMS2SearchTask.MINIMUM_PARENT_M_H);
            String rangeMax = sequestInputParams.get(AbstractMS2SearchTask.MAXIMUM_PARENT_M_H);
 
-           if (rangeMin != null)
+           if (StringUtils.trimToNull(rangeMin) != null)
            {
                try
                {
@@ -706,7 +706,7 @@ public class SequestParamsBuilder
                _params.getParam("min_peptide_mass").setValue(rangeMin);
            }
 
-           if (rangeMax != null)
+           if (StringUtils.trimToNull(rangeMax) != null)
            {
                try
                {

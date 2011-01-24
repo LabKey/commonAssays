@@ -16,11 +16,11 @@
 
 package org.labkey.luminex;
 
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -33,6 +33,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
@@ -107,19 +108,22 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public List<PropertyDescriptor> getRunTableColumns(ExpProtocol protocol)
+    public ExpRunTable createRunTable(AssaySchema schema, ExpProtocol protocol)
     {
-        List<PropertyDescriptor> cols = super.getRunTableColumns(protocol);
-        Collections.addAll(cols, getPropertyDescriptors(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN)));
-        return cols;        
+        ExpRunTable result = super.createRunTable(schema, protocol);
+        result.addColumns(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN), null);
+        return result;
     }
 
-    public ContainerFilterable createDataTable(AssaySchema schema, ExpProtocol protocol)
+    public ContainerFilterable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
     {
         LuminexSchema luminexSchema = new LuminexSchema(schema.getUser(), schema.getContainer(), protocol);
         luminexSchema.setTargetStudy(schema.getTargetStudy());
         FilteredTable table = luminexSchema.createDataRowTable();
-        addCopiedToStudyColumns(table, protocol, schema.getUser(), true);
+        if (includeCopiedToStudyColumns)
+        {
+            addCopiedToStudyColumns(table, protocol, schema.getUser(), true);
+        }
         return table;
     }
 
