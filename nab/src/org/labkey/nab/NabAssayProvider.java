@@ -255,95 +255,6 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         return table;
     }
 
-    protected PropertyType getDataRowIdType()
-    {
-        return PropertyType.INTEGER;
-    }
-
-    public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
-    {
-        try
-        {
-            TimepointType studyType = AssayPublishService.get().getTimepointType(study);
-
-            Set<PropertyDescriptor> typeSet = new LinkedHashSet<PropertyDescriptor>();
-
-            typeSet.add(createPublishPropertyDescriptor(study, getTableMetadata().getResultRowIdFieldKey().toString(), getDataRowIdType()));
-            typeSet.add(createPublishPropertyDescriptor(study, "SourceLSID", getDataRowIdType()));
-
-            Domain sampleDomain = getSampleWellGroupDomain(protocol);
-            DomainProperty[] samplePDs = sampleDomain.getProperties();
-
-            PropertyDescriptor[] dataPDs = NabSchema.getExistingDataProperties(protocol);
-            CopyToStudyContext context = new CopyToStudyContext(protocol, viewContext.getUser());
-
-            SimpleFilter filter = new SimpleFilter();
-            filter.addInClause(getTableMetadata().getResultRowIdFieldKey().toString(), dataKeys.keySet());
-
-            OntologyObject[] dataRows = Table.select(OntologyManager.getTinfoObject(), Table.ALL_COLUMNS, filter,
-                    new Sort(getTableMetadata().getResultRowIdFieldKey().toString()), OntologyObject.class);
-
-            List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>(dataRows.length);
-            Container sourceContainer = null;
-
-            // little hack here: since the property descriptors created by the 'addProperty' calls below are not in the database,
-            // they have no RowId, and such are never equal to each other.  Since the loop below is run once for each row of data,
-            // this will produce a types set that contains rowCount*columnCount property descriptors unless we prevent additions
-            // to the map after the first row.  This is done by nulling out the 'tempTypes' object after the first iteration:
-            Set<PropertyDescriptor> tempTypes = typeSet;
-            for (OntologyObject row : dataRows)
-            {
-                Map<String, Object> dataMap = new HashMap<String, Object>();
-                Map<String, Object> rowProperties = OntologyManager.getProperties(row.getContainer(), row.getObjectURI());
-                String materialLsid = null;
-                for (PropertyDescriptor pd : dataPDs)
-                {
-                    Object value = rowProperties.get(pd.getPropertyURI());
-                    if (!SinglePlateNabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY.equals(pd.getName()))
-                        addProperty(pd, value, dataMap, tempTypes);
-                    else
-                        materialLsid = (String) value;
-                }
-
-                ExpMaterial material = ExperimentService.get().getExpMaterial(materialLsid);
-                if (material != null)
-                {
-                    for (DomainProperty pd : samplePDs)
-                    {
-                        if (!PARTICIPANTID_PROPERTY_NAME.equals(pd.getName()) &&
-                                !VISITID_PROPERTY_NAME.equals(pd.getName()) &&
-                                !DATE_PROPERTY_NAME.equals(pd.getName()))
-                        {
-                            addProperty(pd.getPropertyDescriptor(), material.getProperty(pd), dataMap, tempTypes);
-                        }
-                    }
-                }
-
-                ExpRun run = context.getRun(row);
-                sourceContainer = run.getContainer();
-
-                AssayPublishKey publishKey = dataKeys.get(row.getObjectId());
-                dataMap.put("ParticipantID", publishKey.getParticipantId());
-                dataMap.put("SequenceNum", publishKey.getVisitId());
-                if (TimepointType.DATE == studyType)
-                {
-                    dataMap.put("Date", publishKey.getDate());
-                }
-                dataMap.put("SourceLSID", run.getLSID());
-                dataMap.put(getTableMetadata().getResultRowIdFieldKey().toString(), publishKey.getDataId());
-                addStandardRunPublishProperties(study, tempTypes, dataMap, run, context);
-                dataMaps.add(dataMap);
-                tempTypes = null;
-            }
-            return AssayPublishService.get().publishAssayData(viewContext.getUser(), sourceContainer, study, protocol.getName(), protocol,
-                    dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getTableMetadata().getResultRowIdFieldKey().toString(), errors);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-    }
-
     public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, NabUploadWizardAction.class);
@@ -363,15 +274,14 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     {
         public NabResultsQueryView(ExpProtocol protocol, ViewContext context, AssayProvider provider)
         {
-            super(protocol, context, getDefaultSettings(protocol, context, provider));
+            super(protocol, context, getDefaultSettings(protocol, context));
         }
 
-        private static QuerySettings getDefaultSettings(ExpProtocol protocol, ViewContext context, AssayProvider provider)
+        private static QuerySettings getDefaultSettings(ExpProtocol protocol, ViewContext context)
         {
             UserSchema schema = AssayService.get().createSchema(context.getUser(), context.getContainer());
             String name = AssayService.get().getResultsTableName(protocol);
-            QuerySettings settings = schema.getSettings(context, name, name);
-            return settings;
+            return schema.getSettings(context, name, name);
         }
 
         private void addGraphSubItems(NavTree parent, Domain domain, String dataRegionName, Set<String> excluded)

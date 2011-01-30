@@ -26,7 +26,6 @@ import org.labkey.api.security.permissions.*;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.ActionURL;
 import org.springframework.validation.BindException;
@@ -134,13 +133,13 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
     {
         if (form.getReRun() != null)
             form.getReRun().delete(getViewContext().getUser());
-        if (form.isMultiRunUpload())
-            return super.afterRunCreation(form, run, errors);
-        else
-        {
-            HttpView.throwRedirect(new ActionURL(NabAssayController.DetailsAction.class,
-                    run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true"));
-            return null;
-        }
+        return super.afterRunCreation(form, run, errors);
+    }
+
+    @Override
+    protected ActionURL getUploadWizardCompleteURL(NabRunUploadForm form, ExpRun run)
+    {
+        return new ActionURL(NabAssayController.DetailsAction.class,
+                    run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true");
     }
 }

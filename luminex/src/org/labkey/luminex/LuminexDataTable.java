@@ -15,10 +15,14 @@
  */
 package org.labkey.luminex;
 
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.*;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.study.assay.AssayService;
 
@@ -36,7 +40,11 @@ public class LuminexDataTable extends FilteredTable
     public LuminexDataTable(LuminexSchema schema)
     {
         super(LuminexSchema.getTableInfoDataRow(), schema.getContainer());
-        setDescription("Contains all the Luminex data rows for the " + schema.getProtocol().getName() + " assay definition");
+
+        ExpProtocol protocol = schema.getProtocol();
+        LuminexAssayProvider provider = (LuminexAssayProvider)AssayService.get().getProvider(protocol);
+
+        setDescription("Contains all the Luminex data rows for the " + protocol.getName() + " assay definition");
         _schema = schema;
 
         addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
@@ -100,6 +108,20 @@ public class LuminexDataTable extends FilteredTable
         defaultCols.add(FieldKey.fromParts("ConcInRange"));
         defaultCols.add(FieldKey.fromParts("Dilution"));
         defaultCols.add(FieldKey.fromParts("BeadCount"));
+
+        for (DomainProperty prop : provider.getRunDomain(protocol).getProperties())
+        {
+            defaultCols.add(new FieldKey(provider.getTableMetadata().getRunFieldKeyFromResults(), prop.getName()));
+        }
+        for (DomainProperty prop : AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN).getProperties())
+        {
+            defaultCols.add(new FieldKey(provider.getTableMetadata().getRunFieldKeyFromResults(), prop.getName()));
+        }
+        for (DomainProperty prop : provider.getBatchDomain(protocol).getProperties())
+        {
+            defaultCols.add(new FieldKey(new FieldKey(provider.getTableMetadata().getRunFieldKeyFromResults(), "Batch"), prop.getName()));
+        }
+
         setDefaultVisibleColumns(defaultCols);
 
         getColumn("Analyte").setFk(new LookupForeignKey("RowId")

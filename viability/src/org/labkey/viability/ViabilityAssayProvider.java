@@ -323,43 +323,9 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return result;
     }
 
-    public DomainProperty[] getResultDomainUserProperties(ExpProtocol protocol)
-    {
-        return getResultDomainUserProperties(getResultsDomain(protocol));
-    }
-
-    public static boolean isResultDomainUserProperty(DomainProperty property)
-    {
-        return RESULT_DOMAIN_PROPERTIES.containsKey(property.getName());
-    }
-
-    public static DomainProperty[] getResultDomainUserProperties(Domain resultsDomain)
-    {
-        DomainProperty[] allProperties = resultsDomain.getProperties();
-        List<DomainProperty> filtered = new ArrayList<DomainProperty>(allProperties.length);
-        for (DomainProperty property : allProperties)
-        {
-            if (isResultDomainUserProperty(property))
-                continue;
-            filtered.add(property);
-        }
-        return filtered.toArray(new DomainProperty[filtered.size()]);
-    }
-
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
         return Collections.emptyList();
-    }
-
-    @Override
-    public boolean canCopyToStudy()
-    {
-        return true;
-    }
-
-    public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
-    {
-        return AbstractTsvAssayProvider.copyToStudy(this, viewContext, protocol, study, dataKeys, errors);
     }
 
     @Override

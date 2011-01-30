@@ -298,7 +298,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     LuminexSchema.getSchema().getScope().commitTransaction();
                     getCompletedUploadAttemptIDs().add(form.getUploadAttemptID());
                     form.resetUploadAttemptID();
-                    return runUploadComplete(form, errors);
+                    return afterRunCreation(form, run, errors);
                 }
                 else
                 {
@@ -319,9 +319,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 LuminexSchema.getSchema().getScope().closeConnection();
             }
 
-            if (errors.hasErrors())
-                return getAnalytesView(form.getAnalyteNames(), form, true, errors);
-            return runUploadComplete(form, errors);
+            return getAnalytesView(form.getAnalyteNames(), form, true, errors);
         }
 
         public String getName()

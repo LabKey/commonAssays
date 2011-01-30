@@ -133,11 +133,6 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return result;
     }
 
-    public boolean canCopyToStudy()
-    {
-        return true;
-    }
-
     @Override
     protected FileFilter getRelatedOutputDataFileFilter(final File primaryFile, final String baseName)
     {

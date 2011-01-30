@@ -19,7 +19,6 @@ package org.labkey.elispot;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.OntologyObject;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.list.ListDefinition;
@@ -33,7 +32,6 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
-import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.ResultsQueryView;
@@ -47,7 +45,6 @@ import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
 import org.labkey.elispot.query.ElispotRunDataTable;
 
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -216,94 +213,6 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         reader.setProperty(nameProperty, name);
         reader.setProperty(fileTypeProperty, fileType);
         reader.save(user);
-    }
-
-    public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
-    {
-        try
-        {
-            TimepointType studyType = AssayPublishService.get().getTimepointType(study);
-
-            CopyToStudyContext context = new CopyToStudyContext(protocol, viewContext.getUser());
-
-            PropertyDescriptor[] samplePDs = getPropertyDescriptors(getSampleWellGroupDomain(protocol));
-            PropertyDescriptor[] dataPDs = ElispotSchema.getExistingDataProperties(protocol);
-
-            SimpleFilter filter = new SimpleFilter();
-            filter.addInClause(getTableMetadata().getResultRowIdFieldKey().toString(), dataKeys.keySet());
-
-            // get the selected rows from the copy to study wizard
-            OntologyObject[] dataRows = Table.select(OntologyManager.getTinfoObject(), Table.ALL_COLUMNS, filter,
-                    new Sort(getTableMetadata().getResultRowIdFieldKey().toString()), OntologyObject.class);
-
-            List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>(dataRows.length);
-            Set<PropertyDescriptor> typeSet = new LinkedHashSet<PropertyDescriptor>();
-            typeSet.add(createPublishPropertyDescriptor(study, getTableMetadata().getResultRowIdFieldKey().toString(), PropertyType.INTEGER));
-            typeSet.add(createPublishPropertyDescriptor(study, "SourceLSID", PropertyType.INTEGER));
-
-            Container sourceContainer = null;
-
-            // little hack here: since the property descriptors created by the 'addProperty' calls below are not in the database,
-            // they have no RowId, and such are never equal to each other.  Since the loop below is run once for each row of data,
-            // this will produce a types set that contains rowCount*columnCount property descriptors unless we prevent additions
-            // to the map after the first row.  This is done by nulling out the 'tempTypes' object after the first iteration:
-            Set<PropertyDescriptor> tempTypes = typeSet;
-            for (OntologyObject row : dataRows)
-            {
-                Map<String, Object> dataMap = new HashMap<String, Object>();
-                Map<String, Object> rowProperties = OntologyManager.getProperties(row.getContainer(), row.getObjectURI());
-
-                // add the data (or antigen group) properties
-                String materialLsid = null;
-                for (PropertyDescriptor pd : dataPDs)
-                {
-                    Object value = rowProperties.get(pd.getPropertyURI());
-                    if (!ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY.equals(pd.getName()))
-                        addProperty(pd, value, dataMap, tempTypes);
-                    else
-                        materialLsid = (String) value;
-                }
-
-                // add the specimen group properties
-                ExpMaterial material = ExperimentService.get().getExpMaterial(materialLsid);
-                if (material != null)
-                {
-                    for (PropertyDescriptor pd : samplePDs)
-                    {
-                        if (!PARTICIPANTID_PROPERTY_NAME.equals(pd.getName()) &&
-                                !VISITID_PROPERTY_NAME.equals(pd.getName()) &&
-                                !DATE_PROPERTY_NAME.equals(pd.getName()))
-                        {
-                            addProperty(pd, material.getProperty(pd), dataMap, tempTypes);
-                        }
-                    }
-                }
-
-                ExpRun run = context.getRun(row);
-                sourceContainer = run.getContainer();
-
-                AssayPublishKey publishKey = dataKeys.get(row.getObjectId());
-                dataMap.put("ParticipantID", publishKey.getParticipantId());
-                dataMap.put("SequenceNum", publishKey.getVisitId());
-                if (TimepointType.DATE == studyType)
-                {
-                    dataMap.put("Date", publishKey.getDate());
-                }
-                dataMap.put("SourceLSID", run.getLSID());
-                dataMap.put(getTableMetadata().getResultRowIdFieldKey().toString(), publishKey.getDataId());
-
-                addStandardRunPublishProperties(study, tempTypes, dataMap, run, context);
-
-                dataMaps.add(dataMap);
-                tempTypes = null;
-            }
-            return AssayPublishService.get().publishAssayData(viewContext.getUser(), sourceContainer, study, protocol.getName(), protocol,
-                    dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getTableMetadata().getResultRowIdFieldKey().toString(), errors);
-        }
-        catch (SQLException se)
-        {
-            throw new RuntimeSQLException(se);
-        }
     }
 
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()

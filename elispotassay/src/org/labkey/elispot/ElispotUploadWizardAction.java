@@ -348,6 +348,11 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     }
                 }
                 ExperimentService.get().getSchema().getScope().commitTransaction();
+
+                if (!errors.hasErrors())
+                {
+                    return afterRunCreation(form, run, errors);
+                }
             }
             catch (ValidationException ve)
             {
@@ -363,9 +368,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 ExperimentService.get().getSchema().getScope().closeConnection();
             }
             
-            if (errors.hasErrors())
-                return getAntigenView(form, true, errors);
-            return runUploadComplete(form, errors);
+            return getAntigenView(form, true, errors);
         }
 
         public String getName()

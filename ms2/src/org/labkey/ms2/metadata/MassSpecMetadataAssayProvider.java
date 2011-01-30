@@ -20,8 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -34,7 +32,6 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
-import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.GUID;
@@ -43,7 +40,6 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
@@ -52,8 +48,6 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.*;
 
 /**
@@ -139,7 +133,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         ExpRunTable result = super.createRunTable(schema, protocol);
         SQLFragment searchCountSQL = new SQLFragment();
         searchCountSQL.append(getSearchRunSQL(schema.getContainer(), result.getContainerFilter(), ExprColumn.STR_TABLE_ALIAS + ".RowId", "COUNT(DISTINCT(er.RowId))"));
-        ExprColumn searchCountCol = new ExprColumn(result, SEARCH_COUNT_COLUMN, searchCountSQL, Types.INTEGER);
+        ExprColumn searchCountCol = new ExprColumn(result, SEARCH_COUNT_COLUMN, searchCountSQL, JdbcType.INTEGER);
         searchCountCol.setLabel("MS2 Search Count");
         result.addColumn(searchCountCol);
 
@@ -394,108 +388,6 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
                         fractionProperty.getName());
     }
 
-    public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
-    {
-        try
-        {
-            TimepointType studyType = AssayPublishService.get().getTimepointType(study);
-
-            SimpleFilter filter = new SimpleFilter();
-            filter.addInClause(getTableMetadata().getResultRowIdFieldKey().toString(), dataKeys.keySet());
-
-            AssaySchema schema = AssayService.get().createSchema(viewContext.getUser(), protocol.getContainer());
-            ExpDataTable tableInfo = createDataTable(schema, protocol, true);
-            tableInfo.setContainerFilter(new ContainerFilter.CurrentAndSubfolders(viewContext.getUser()));
-
-            List<FieldKey> fieldKeys = new ArrayList<FieldKey>();
-            DomainProperty[] fractionProperties = getFractionDomain(protocol).getProperties();
-            for (DomainProperty prop : fractionProperties)
-            {
-                fieldKeys.add(getDataFractionPropertyFieldKey(prop));
-            }
-            fieldKeys.add(getTableMetadata().getRunRowIdFieldKeyFromResults());
-            fieldKeys.add(FieldKey.fromParts("DataFileUrl"));
-            fieldKeys.add(getTableMetadata().getResultRowIdFieldKey());
-            Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(tableInfo, fieldKeys);
-
-            ColumnInfo dataRowIdCol = columns.get(getTableMetadata().getResultRowIdFieldKey());
-
-            SQLFragment selectSQL = Table.getSelectSQL(tableInfo, columns.values(), filter, new Sort(getTableMetadata().getResultRowIdFieldKey().toString()));
-            Table.TableResultSet rs = Table.executeQuery(schema.getDbSchema(), selectSQL);
-
-            List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>();
-
-            CopyToStudyContext context = new CopyToStudyContext(protocol, viewContext.getUser());
-
-            Set<PropertyDescriptor> typeList = new LinkedHashSet<PropertyDescriptor>();
-            typeList.add(createPublishPropertyDescriptor(study, getTableMetadata().getResultRowIdFieldKey().toString(), PropertyType.INTEGER));
-            typeList.add(createPublishPropertyDescriptor(study, "SourceLSID", PropertyType.INTEGER));
-
-            Container sourceContainer = null;
-
-            // little hack here: since the property descriptors created by the 'addProperty' calls below are not in the database,
-            // they have no RowId, and such are never equal to each other.  Since the loop below is run once for each row of data,
-            // this will produce a types set that contains rowCount*columnCount property descriptors unless we prevent additions
-            // to the map after the first row.  This is done by nulling out the 'tempTypes' object after the first iteration:
-            Set<PropertyDescriptor> tempTypes = typeList;
-            while (rs.next())
-            {
-                Map<String, Object> dataMap = new HashMap<String, Object>();
-
-                ExpData data = context.getData(((Number)dataRowIdCol.getValue(rs)).intValue());
-
-                PropertyDescriptor namePD = addProperty(study, "Name", data.getName(), dataMap, tempTypes);
-                setStandardPropertyAttributes(tableInfo.getColumn("Name"), namePD);
-                PropertyDescriptor urlPD = addProperty(study, "DataFileUrl", data.getDataFileUrl(), dataMap, tempTypes);
-                setStandardPropertyAttributes(tableInfo.getColumn("DataFileUrl"), urlPD);
-
-                for (DomainProperty prop : fractionProperties)
-                {
-                    PropertyDescriptor pd = prop.getPropertyDescriptor();
-                    // We should skip properties that are set by the resolver: participantID,
-                    // and either date or visit, depending on the type of study
-                    boolean skipProperty = PARTICIPANTID_PROPERTY_NAME.equals(prop.getName());
-
-                    if (TimepointType.DATE == studyType)
-                            skipProperty = skipProperty || DATE_PROPERTY_NAME.equals(prop.getName());
-                    else // it's visit-based
-                        skipProperty = skipProperty || VISITID_PROPERTY_NAME.equals(prop.getName());
-
-                    ColumnInfo col = columns.get(getDataFractionPropertyFieldKey(prop));
-                    if (!skipProperty && col != null)
-                    {
-                        // We won't find the fraction properties if we haven't done any fraction searches yet
-                        addProperty(pd, col.getValue(rs), dataMap, tempTypes);
-                    }
-                }
-
-                ExpRun run = context.getRun(data);
-                sourceContainer = run.getContainer();
-
-                AssayPublishKey publishKey = dataKeys.get(data.getRowId());
-                dataMap.put("ParticipantID", publishKey.getParticipantId());
-                dataMap.put("SequenceNum", publishKey.getVisitId());
-                if (TimepointType.DATE == studyType)
-                {
-                    dataMap.put("Date", publishKey.getDate());
-                }
-                dataMap.put("SourceLSID", run.getLSID());
-                dataMap.put(getTableMetadata().getResultRowIdFieldKey().toString(), publishKey.getDataId());
-
-                addStandardRunPublishProperties(study, tempTypes, dataMap, run, context);
-
-                dataMaps.add(dataMap);
-                tempTypes = null;
-            }
-            return AssayPublishService.get().publishAssayData(viewContext.getUser(), sourceContainer, study, protocol.getName(), protocol,
-                    dataMaps, new ArrayList<PropertyDescriptor>(typeList), getTableMetadata().getResultRowIdFieldKey().toString(), errors);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-    }
-
     public String getDescription()
     {
         return "Describes metadata for mass spec data files, including mzXML";
@@ -511,12 +403,6 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         return null;
     }
 
-    @Override
-    public boolean canCopyToStudy()
-    {
-        return true;
-    }
-    
     public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, MassSpecMetadataUploadAction.class);

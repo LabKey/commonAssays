@@ -16,7 +16,6 @@
 
 package org.labkey.luminex;
 
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.data.SimpleFilter;
@@ -60,6 +59,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 {
     public static final String ASSAY_DOMAIN_ANALYTE = ExpProtocol.ASSAY_DOMAIN_PREFIX + "Analyte";
     public static final String ASSAY_DOMAIN_EXCEL_RUN = ExpProtocol.ASSAY_DOMAIN_PREFIX + "ExcelRun";
+    public static final String LUMINEX_DATA_ROW_LSID_PREFIX = "LuminexDataRow";
 
     public LuminexAssayProvider()
     {
@@ -83,7 +83,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     protected void registerLsidHandler()
     {
         super.registerLsidHandler();
-        LsidManager.get().registerHandler("LuminexDataRow", new LsidManager.ExpObjectLsidHandler()
+        LsidManager.get().registerHandler(LUMINEX_DATA_ROW_LSID_PREFIX, new LsidManager.ExpObjectLsidHandler()
         {
             public ExpData getObject(Lsid lsid)
             {
@@ -263,138 +263,85 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return ExperimentService.get().getExpData(dataRow.getDataId());
     }
 
+    /** Helper for caching objects during a copy to study */
+    private static class CopyToStudyContext
+    {
+        private Map<Integer, ExpRun> _runsByDataId = new HashMap<Integer, ExpRun>();
+        private Map<Integer, ExpData> _data = new HashMap<Integer, ExpData>();
+
+        public ExpData getData(int dataId)
+        {
+            ExpData result = _data.get(dataId);
+            if (result == null)
+            {
+                result = ExperimentService.get().getExpData(dataId);
+                _data.put(dataId, result);
+            }
+            return result;
+        }
+
+        public ExpRun getRun(ExpData data)
+        {
+            ExpRun result = _runsByDataId.get(data.getRowId());
+            if (result == null)
+            {
+                result = data.getRun();
+                _runsByDataId.put(data.getRowId(), result);
+            }
+            return result;
+        }
+    }
+
+    /** Overridden because Luminex uses individual data rows as the SourceLSID instead of the run's */
     public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {
             SimpleFilter filter = new SimpleFilter();
-            filter.addInClause("RowId", dataKeys.keySet());
+            String rowIdPropertyName = getTableMetadata().getResultRowIdFieldKey().toString();
+            filter.addInClause(rowIdPropertyName, dataKeys.keySet());
             LuminexDataRow[] luminexDataRows = Table.select(LuminexSchema.getTableInfoDataRow(), Table.ALL_COLUMNS, filter, null, LuminexDataRow.class);
 
             List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>(luminexDataRows.length);
 
-            Map<Integer, Pair<Analyte, Map<String, ObjectProperty>>> analytes = new HashMap<Integer, Pair<Analyte, Map<String, ObjectProperty>>>();
-
-            PropertyDescriptor[] excelRunPDs = getPropertyDescriptors(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN));
-            CopyToStudyContext context = new CopyToStudyContext(protocol, viewContext.getUser(), excelRunPDs);
+            CopyToStudyContext context = new CopyToStudyContext();
 
             TimepointType timepointType = AssayPublishService.get().getTimepointType(study);
 
             Container sourceContainer = null;
 
-            List<PropertyDescriptor> types = new ArrayList<PropertyDescriptor>();
-            // little hack here: since the property descriptors created by the 'addProperty' calls below are not in the database,
-            // they have no RowId, and such are never equal to each other.  Since the loop below is run once for each row of data,
-            // this will produce a types set that contains rowCount*columnCount property descriptors unless we prevent additions
-            // to the map after the first row.  This is done by nulling out the 'tempTypes' object after the first iteration:
-            List<PropertyDescriptor> tempTypes = types;
             for (LuminexDataRow luminexDataRow : luminexDataRows)
             {
                 Map<String, Object> dataMap = new HashMap<String, Object>();
-                addProperty(study, "RowId", luminexDataRow.getRowId(), dataMap, tempTypes);
-                addProperty(study, "ConcInRangeString", luminexDataRow.getConcInRangeString(), dataMap, tempTypes);
-                addProperty(study, "ConcInRange", luminexDataRow.getConcInRange(), dataMap, tempTypes);
-                addProperty(study, "ConcInRangeOORIndicator", luminexDataRow.getConcInRangeOORIndicator(), dataMap, tempTypes);
-                addProperty(study, "ExpConc", luminexDataRow.getExpConc(), dataMap, tempTypes);
-                addProperty(study, "FI", luminexDataRow.getFi(), dataMap, tempTypes);
-                addProperty(study, "FIString", luminexDataRow.getFiString(), dataMap, tempTypes);
-                addProperty(study, "FIOORIndicator", luminexDataRow.getFiOORIndicator(), dataMap, tempTypes);
-                addProperty(study, "FIBackground", luminexDataRow.getFiBackground(), dataMap, tempTypes);
-                addProperty(study, "FIBackgroundString", luminexDataRow.getFiBackgroundString(), dataMap, tempTypes);
-                addProperty(study, "FIBackgroundOORIndicator", luminexDataRow.getFiBackgroundOORIndicator(), dataMap, tempTypes);
-                addProperty(study, "ObsConcString", luminexDataRow.getObsConcString(), dataMap, tempTypes);
-                addProperty(study, "ObsConc", luminexDataRow.getObsConc(), dataMap, tempTypes);
-                addProperty(study, "ObsConcOORIndicator", luminexDataRow.getObsConcOORIndicator(), dataMap, tempTypes);
-                addProperty(study, "ObsOverExp", luminexDataRow.getObsOverExp(), dataMap, tempTypes);
-                addProperty(study, "StdDev", luminexDataRow.getStdDev(), dataMap, tempTypes);
-                addProperty(study, "StdDevString", luminexDataRow.getStdDevString(), dataMap, tempTypes);
-                addProperty(study, "StdDevOORIndicator", luminexDataRow.getStdDevOORIndicator(), dataMap, tempTypes);
-                addProperty(study, "Type", luminexDataRow.getType(), dataMap, tempTypes);
-                addProperty(study, "Well", luminexDataRow.getWell(), dataMap, tempTypes);
-                addProperty(study, "Dilution", luminexDataRow.getDilution(), dataMap, tempTypes);
-                addProperty(study, "DataRowGroup", luminexDataRow.getDataRowGroup(), dataMap, tempTypes);
-                addProperty(study, "Ratio", luminexDataRow.getRatio(), dataMap, tempTypes);
-                addProperty(study, "SamplingErrors", luminexDataRow.getSamplingErrors(), dataMap, tempTypes);
-                addProperty(study, "Outlier", luminexDataRow.getOutlier(), dataMap, tempTypes);
-                addProperty(study, "Description", luminexDataRow.getDescription(), dataMap, tempTypes);
-                addProperty(study, "ExtraSpecimenInfo", luminexDataRow.getExtraSpecimenInfo(), dataMap, tempTypes);
-                addProperty(study, "SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, tempTypes);
 
-                ExpRun run = copyRunProperties(viewContext.getUser(), study, tempTypes, luminexDataRow, dataMap, context);
+                ExpData data = context.getData(luminexDataRow.getDataId());
+                ExpRun run = context.getRun(data);
                 sourceContainer = run.getContainer();
-                copyAnalyteProperties(study, analytes, tempTypes, luminexDataRow, dataMap, sourceContainer, protocol);
 
-                AssayPublishKey dataKey = dataKeys.get(luminexDataRow.getRowId());
-                addProperty(sourceContainer, AssayPublishService.PARTICIPANTID_PROPERTY_NAME, dataKey.getParticipantId(), dataMap, tempTypes);
+                AssayPublishKey publishKey = dataKeys.get(luminexDataRow.getRowId());
+
+                dataMap.put(AssayPublishService.PARTICIPANTID_PROPERTY_NAME, publishKey.getParticipantId());
                 if (timepointType == TimepointType.VISIT)
                 {
-                    addProperty(sourceContainer, AssayPublishService.SEQUENCENUM_PROPERTY_NAME, (double)dataKey.getVisitId(), dataMap, tempTypes);
-                    addProperty(sourceContainer, AssayPublishService.DATE_PROPERTY_NAME, luminexDataRow.getDate(), dataMap, tempTypes);
+                    dataMap.put(AssayPublishService.SEQUENCENUM_PROPERTY_NAME, publishKey.getVisitId());
+                    dataMap.put(AssayPublishService.DATE_PROPERTY_NAME, luminexDataRow.getDate());
                 }
                 else
                 {
-                    addProperty(sourceContainer, AssayPublishService.SEQUENCENUM_PROPERTY_NAME, luminexDataRow.getVisitID(), dataMap, tempTypes);
-                    addProperty(sourceContainer, AssayPublishService.DATE_PROPERTY_NAME, dataKey.getDate(), dataMap, tempTypes);
+                    dataMap.put(AssayPublishService.SEQUENCENUM_PROPERTY_NAME, luminexDataRow.getVisitID());
+                    dataMap.put(AssayPublishService.DATE_PROPERTY_NAME, publishKey.getDate());
                 }
+                dataMap.put(AssayPublishService.SOURCE_LSID_PROPERTY_NAME, new Lsid(LUMINEX_DATA_ROW_LSID_PREFIX, Integer.toString(luminexDataRow.getRowId())).toString());
+                dataMap.put(rowIdPropertyName, luminexDataRow.getRowId());
+                dataMap.put(AssayPublishService.TARGET_STUDY_PROPERTY_NAME, study);
 
                 dataMaps.add(dataMap);
-                tempTypes = null;
             }
-            return AssayPublishService.get().publishAssayData(viewContext.getUser(), sourceContainer, study, protocol.getName(), protocol, dataMaps, types, getTableMetadata().getResultRowIdFieldKey().toString(), errors);
+            return AssayPublishService.get().publishAssayData(viewContext.getUser(), sourceContainer, study, protocol.getName(), protocol, dataMaps, rowIdPropertyName, errors);
         }
         catch (SQLException e)
         {
             throw new RuntimeException(e);
-        }
-    }
-
-    private ExpRun copyRunProperties(User user, Container study, List<PropertyDescriptor> tempTypes, LuminexDataRow luminexDataRow, Map<String, Object> dataMap, CopyToStudyContext context) throws SQLException
-    {
-        ExpData data = context.getData(luminexDataRow.getDataId());
-        ExpRun run = context.getRun(data);
-        addStandardRunPublishProperties(study, tempTypes, dataMap, run, context);
-        return run;
-    }
-
-    private void copyAnalyteProperties(Container study, Map<Integer, Pair<Analyte, Map<String, ObjectProperty>>> analytes, List<PropertyDescriptor> tempTypes, LuminexDataRow luminexDataRow, Map<String, Object> dataMap, Container container, ExpProtocol protocol)
-        throws SQLException
-    {
-        // Look up the analyte info so we can copy it
-        Pair<Analyte, Map<String, ObjectProperty>> analyteInfo = analytes.get(luminexDataRow.getAnalyteId());
-        Analyte analyte;
-        Map<String, ObjectProperty> analyteProps;
-        // Check if we've already seen it and put in our cache
-        if (analyteInfo == null)
-        {
-            analyte = Table.selectObject(LuminexSchema.getTableInfoAnalytes(), luminexDataRow.getAnalyteId(), Analyte.class);
-            analyteProps = OntologyManager.getPropertyObjects(container, analyte.getLsid());
-            analytes.put(analyte.getRowId(), new Pair<Analyte, Map<String, ObjectProperty>>(analyte, analyteProps));
-        }
-        else
-        {
-            analyte = analyteInfo.first;
-            analyteProps = analyteInfo.second;
-        }
-
-        // Handle the hard-coded properties
-        addProperty(study, "Analyte Name", analyte.getName(), dataMap, tempTypes);
-        addProperty(study, "Analyte FitProb", analyte.getFitProb(), dataMap, tempTypes);
-        addProperty(study, "Analyte RegressionType", analyte.getRegressionType(), dataMap, tempTypes);
-        addProperty(study, "Analyte ResVar", analyte.getResVar(), dataMap, tempTypes);
-        addProperty(study, "Analyte StdCurve", analyte.getStdCurve(), dataMap, tempTypes);
-        addProperty(study, "Analyte MinStandardRecovery", analyte.getMinStandardRecovery(), dataMap, tempTypes);
-        addProperty(study, "Analyte MaxStandardRecovery", analyte.getMaxStandardRecovery(), dataMap, tempTypes);
-
-        // Handle the configurable properties
-        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(protocol, ASSAY_DOMAIN_ANALYTE);
-        for (DomainProperty dp : analyteDomain.getProperties())
-        {
-            PropertyDescriptor pd = dp.getPropertyDescriptor();
-            ObjectProperty prop = analyteProps.get(pd.getPropertyURI());
-            PropertyDescriptor publishPD = pd.clone();
-            publishPD.setName("Analyte" + pd.getName());
-            publishPD.setLabel("Analyte " + pd.getLabel());
-            addProperty(publishPD, prop, dataMap, tempTypes);
         }
     }
 
