@@ -25,7 +25,9 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -46,6 +48,7 @@ import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
+import org.labkey.api.view.Stats;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
@@ -54,7 +57,9 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.ServletException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -341,8 +346,102 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
                             if (!results.isEmpty())
                             {
+                                // include the antigen wellgroup name
+                                ObjectProperty op = ElispotDataHandler.getResultObjectProperty(form.getContainer(),
+                                        form.getProtocol(), dataRowLsid.toString(),
+                                        ElispotDataHandler.ANTIGEN_WELLGROUP_PROPERTY_NAME,
+                                        group.getName(), PropertyType.STRING);
+                                results.add(op);
+
                                 OntologyManager.ensureObject(form.getContainer(), dataRowLsid.toString(),  data[0].getLSID());
                                 OntologyManager.insertProperties(form.getContainer(), dataRowLsid.toString(), results.toArray(new ObjectProperty[results.size()]));
+                            }
+                        }
+                    }
+
+                    // calculate antigen statistics on a per sample basis
+                    Map<String, ExpMaterial> materialMap = new HashMap<String, ExpMaterial>();
+
+                    for (ExpMaterial material : run.getMaterialInputs().keySet())
+                        materialMap.put(material.getName(), material);
+
+                    // get the URI for the spot count
+                    String spotCountURI = new Lsid(ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX,
+                            form.getProtocol().getName(),
+                            ElispotDataHandler.SFU_PROPERTY_NAME).toString();
+                    DomainProperty antigenNameProp = antigenDomain.getPropertyByName(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME);
+
+                    for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
+                    {
+                        ExpMaterial material = materialMap.get(group.getName());
+
+                        if (material != null)
+                        {
+                            List<ObjectProperty> antigenResults = new ArrayList<ObjectProperty>();
+                            Lsid rowLsid = ElispotDataHandler.getAntigenRowLsid(data[0].getLSID(), material.getName());
+
+                            for (WellGroup antigenGroup : group.getOverlappingGroups(WellGroup.Type.ANTIGEN))
+                            {
+                                List<Position> positions = antigenGroup.getPositions();
+                                double[] statsData = new double[positions.size()];
+                                int i = 0;
+
+                                for (Position pos : positions)
+                                {
+                                    if (group.contains(pos))
+                                    {
+                                        Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data[0].getLSID(), pos);
+                                        Map<String, ObjectProperty> props = OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString());
+
+                                        if (props.containsKey(spotCountURI))
+                                        {
+                                            ObjectProperty o = props.get(spotCountURI);
+
+                                            double value = o.getFloatValue();
+
+                                            if (isValid(value))
+                                                statsData[i++] = value;
+                                        }
+                                    }
+                                }
+                                statsData = Arrays.copyOf(statsData, i);
+                                Stats.DoubleStats stats = new Stats.DoubleStats(statsData);
+
+                                String key = getInputName(antigenNameProp, antigenGroup.getName());
+                                if (postedPropMap.containsKey(key))
+                                {
+                                    // for each antigen group, create two columns for mean and median values
+                                    String antigenName = postedPropMap.get(key);
+
+                                    ObjectProperty mean = ElispotDataHandler.getAntigenResultObjectProperty(form.getContainer(),
+                                            form.getProtocol(),
+                                            rowLsid.toString(),
+                                            antigenName + "_Mean",
+                                            stats.getMean(),
+                                            PropertyType.DOUBLE, "0.0");
+                                    ObjectProperty median = ElispotDataHandler.getAntigenResultObjectProperty(form.getContainer(),
+                                            form.getProtocol(),
+                                            rowLsid.toString(),
+                                            antigenName + "_Median",
+                                            stats.getMedian(),
+                                            PropertyType.DOUBLE, "0.0");
+
+                                    antigenResults.add(mean);
+                                    antigenResults.add(median);
+                                }
+                            }
+
+                            if (!antigenResults.isEmpty())
+                            {
+                                ObjectProperty sample = ElispotDataHandler.getAntigenResultObjectProperty(form.getContainer(),
+                                        form.getProtocol(),
+                                        rowLsid.toString(),
+                                        ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY,
+                                        material.getLSID(), PropertyType.STRING, null);
+                                antigenResults.add(sample);
+
+                                OntologyManager.ensureObject(form.getContainer(), rowLsid.toString(),  data[0].getLSID());
+                                OntologyManager.insertProperties(form.getContainer(), rowLsid.toString(), antigenResults.toArray(new ObjectProperty[antigenResults.size()]));
                             }
                         }
                     }
@@ -369,6 +468,12 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             }
             
             return getAntigenView(form, true, errors);
+        }
+
+        private boolean isValid(double value)
+        {
+            // negative sfu values are error codes
+            return value >= 0;
         }
 
         public String getName()

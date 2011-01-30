@@ -26,124 +26,57 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.elispot.query.ElispotRunAntigenTable;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class ElispotSchema extends AssaySchema
 {
     private static final String DATA_ROW_TABLE_NAME = "DataRow";
-
-    public ElispotSchema(User user, Container container)
-    {
-        this(user, container, null);
-    }
+    public static final String ANTIGEN_STATS_TABLE_NAME = "AntigenStats";
 
     public ElispotSchema(User user, Container container, ExpProtocol protocol)
     {
-        super("Elispot", user, container, ExperimentService.get().getSchema(), protocol);
+        super("Assay", user, container, ExperimentService.get().getSchema(), protocol);
+    }
+
+    public static String getAssayTableName(ExpProtocol protocol, String table)
+    {
+        return protocol.getName() + " " + table;
     }
 
     public Set<String> getTableNames()
     {
-        return new HashSet<String>(Arrays.asList(DATA_ROW_TABLE_NAME));
+        return Collections.singleton(getAssayTableName(getProtocol(), ANTIGEN_STATS_TABLE_NAME));
     }
 
     public TableInfo createTable(String name)
     {
-        for (ExpProtocol protocol : AssayService.get().getAssayProtocols(getContainer()))
+        String lname = name.toLowerCase();
+        String protocolPrefix = getProtocol().getName().toLowerCase() + " ";
+        if (lname.startsWith(protocolPrefix))
         {
-            AssayProvider provider = AssayService.get().getProvider(protocol);
-            if (provider != null && provider instanceof ElispotAssayProvider)
+            name = name.substring(protocolPrefix.length());
+            if (ANTIGEN_STATS_TABLE_NAME.equalsIgnoreCase(name))
             {
-                if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
-                {
-                    return provider.createDataTable(AssayService.get().createSchema(getUser(), getContainer()), protocol, true);
-                }
+                return new ElispotRunAntigenTable(AssayService.get().createSchema(getUser(), getContainer()), getProtocol());
             }
         }
         return null;
     }
-
-/*
-    public FilteredTable createDataRowTable(String alias, QuerySchema schema)
-    {
-        final FilteredTable result = new FilteredTable(getTableInfoDataRow());
-
-
-        result.addColumn(result.wrapColumn("Antigen", result.getRealTable().getColumn("Antigen")));
-        result.addColumn(result.wrapColumn("SFU", result.getRealTable().getColumn("SFU")));
-        //result.addColumn(result.wrapColumn(result.getRealTable().getColumn("CellWell")));
-
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
-
-        ColumnInfo lsidColumn = result.addColumn(result.wrapColumn(result.getRealTable().getColumn("LSID")));
-        lsidColumn.setHidden(true);
-
-        String sqlObjectId = "(SELECT objectid FROM " + OntologyManager.getTinfoObject() + " o WHERE o.objecturi = " +
-                ExprColumn.STR_TABLE_ALIAS + ".lsid)";
-
-        ColumnInfo colProperty = new ExprColumn(result, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
-        PropertyDescriptor[] pds = AbstractAssayProvider.getDomainByPrefix(getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
-        FieldKey keyProp = new FieldKey(null, "Property");
-        for(PropertyDescriptor pd : pds)
-        {
-            map.put(pd.getName(), pd);
-            defaultCols.add(new FieldKey(keyProp, pd.getName()));
-        }
-        colProperty.setFk(new PropertyForeignKey(map, this));
-        colProperty.setIsUnselectable(true);
-        result.addColumn(colProperty);
-
-        defaultCols.add(FieldKey.fromParts("Antigen"));
-        defaultCols.add(FieldKey.fromParts("SFU"));
-        //defaultCols.add(FieldKey.fromParts("CellWell"));
-
-        result.setDefaultVisibleColumns(defaultCols);
-        result.setAlias(alias);
-
-        return result;
-    }
-
-    public ExpDataTable createDataTable(String alias)
-    {
-        ExpDataTable ret = ExperimentService.get().createDataTable(alias);
-        ret.setContainer(getContainer());
-        ret.addColumn(ExpDataTable.Column.RowId);
-        ret.addColumn(ExpDataTable.Column.Name);
-        ret.addColumn(ExpDataTable.Column.Flag);
-        ret.addColumn(ExpDataTable.Column.Created);
-        ret.setTitleColumn("Name");
-        ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
-        protocol.setHidden(true);
-
-        ColumnInfo runCol = ret.addColumn(ExpDataTable.Column.Run);
-        if (getProtocol() != null)
-        {
-            runCol.setFk(new LookupForeignKey("RowId")
-            {
-                public TableInfo getLookupTableInfo()
-                {
-                    return AssayService.get().createRunTable(null, getProtocol(), AssayService.get().getProvider(getProtocol()), _user, _container);
-                }
-            });
-        }
-
-        return ret;
-    }
-*/
 
     public static DbSchema getSchema()
     {
         return DbSchema.get("elispot");
     }
 
-    public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException
+    public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol, String propertyPrefix) throws SQLException
     {
-        String propPrefix = new Lsid(ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX, protocol.getName(), "").toString();
+        String propPrefix = new Lsid(propertyPrefix, protocol.getName(), "").toString();
         SimpleFilter propertyFilter = new SimpleFilter();
         propertyFilter.addCondition("PropertyURI", propPrefix, CompareType.STARTS_WITH);
 

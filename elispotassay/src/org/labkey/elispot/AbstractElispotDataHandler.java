@@ -45,11 +45,14 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     public static final String ELISPOT_DATA_LSID_PREFIX = "ElispotAssayData";
     public static final String ELISPOT_DATA_ROW_LSID_PREFIX = "ElispotAssayDataRow";
     public static final String ELISPOT_PROPERTY_LSID_PREFIX = "ElispotProperty";
+    public static final String ELISPOT_ANTIGEN_PROPERTY_LSID_PREFIX = "ElispotAntigenProperty";
     public static final String ELISPOT_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
+    public static final String ELISPOT_ANTIGEN_ROW_LSID_PREFIX = "ElispotAssayAntigenRow";
 
     public static final String SFU_PROPERTY_NAME = "SpotCount";
     public static final String WELLGROUP_PROPERTY_NAME = "WellgroupName";
     public static final String WELLGROUP_LOCATION_PROPERTY = "WellgroupLocation";
+    public static final String ANTIGEN_WELLGROUP_PROPERTY_NAME = "AntigenWellgroupName";
 
     public static final String DATA_ROW_LSID_PROPERTY = "Data Row LSID";
 
@@ -117,6 +120,17 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         return dataRowLsid;
     }
 
+    public static Lsid getAntigenRowLsid(String dataLsid, String sampleName)
+    {
+        assert (sampleName != null);
+
+        Lsid dataRowLsid = new Lsid(dataLsid);
+        dataRowLsid.setNamespacePrefix(ELISPOT_ANTIGEN_ROW_LSID_PREFIX);
+        dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + sampleName);
+
+        return dataRowLsid;
+    }
+
     protected ObjectProperty getObjectProperty(Container container, ExpProtocol protocol, String objectURI, String propertyName, Object value)
     {
         PropertyType type = PropertyType.STRING;
@@ -140,6 +154,15 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
                                                    String propertyName, Object value, PropertyType type, String format)
     {
         Lsid propertyURI = new Lsid(ELISPOT_PROPERTY_LSID_PREFIX, protocol.getName(), propertyName);
+        ObjectProperty prop = new ObjectProperty(objectURI, container, propertyURI.toString(), value, type, propertyName);
+        prop.setFormat(format);
+        return prop;
+    }
+
+    public static ObjectProperty getAntigenResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
+                                                   String propertyName, Object value, PropertyType type, String format)
+    {
+        Lsid propertyURI = new Lsid(ELISPOT_ANTIGEN_PROPERTY_LSID_PREFIX, protocol.getName(), propertyName);
         ObjectProperty prop = new ObjectProperty(objectURI, container, propertyURI.toString(), value, type, propertyName);
         prop.setFormat(format);
         return prop;

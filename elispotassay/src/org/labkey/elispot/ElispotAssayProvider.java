@@ -256,7 +256,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     public RunListDetailsQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
     {
         return new RunListDetailsQueryView(protocol, context,
-                ElispotController.RunDetailsAction.class, "rowId", ExpRunTable.Column.RowId.toString());
+                ElispotController.RunDetailRedirectAction.class, "rowId", ExpRunTable.Column.RowId.toString());
     }
 
     public String getDescription()
@@ -268,6 +268,12 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
     public DataExchangeHandler getDataExchangeHandler()
     {
         return new ElispotDataExchangeHandler();
+    }
+
+    @Override
+    public AssaySchema getProviderSchema(User user, Container container, ExpProtocol protocol)
+    {
+        return new ElispotSchema(user, container, protocol);
     }
 
     public PipelineProvider getPipelineProvider()

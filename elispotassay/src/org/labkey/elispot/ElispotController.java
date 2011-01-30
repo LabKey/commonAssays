@@ -17,32 +17,46 @@
 package org.labkey.elispot;
 
 import org.apache.commons.lang.StringUtils;
+import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.DataRegion;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.api.*;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.permissions.*;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.VBox;
+import org.labkey.api.view.WebPartView;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ElispotController extends SpringActionController
 {
@@ -92,7 +106,28 @@ public class ElispotController extends SpringActionController
             bean.setTemplate(template);
             bean.setWellInfoMap(wellInfoMap);
 
-            return new JspView<PlateSummaryBean>("/org/labkey/elispot/view/plateSummary.jsp", bean);
+            VBox view = new VBox();
+
+            JspView plateView = new JspView<PlateSummaryBean>("/org/labkey/elispot/view/plateSummary.jsp", bean);
+
+            String tableName = ElispotSchema.getAssayTableName(_protocol, ElispotSchema.ANTIGEN_STATS_TABLE_NAME);
+
+            // create the query view for antigen information
+            QuerySettings settings = new QuerySettings(getViewContext(), tableName, tableName);
+            settings.setAllowChooseQuery(false);
+            settings.setAllowChooseView(true);
+
+            QueryView queryView = new QueryView(new ElispotSchema(getViewContext().getUser(), getViewContext().getContainer(), _protocol), settings, errors);
+            queryView.setShadeAlternatingRows(true);
+            queryView.setShowBorders(true);
+            queryView.setShowDetailsColumn(false);
+            queryView.setFrame(WebPartView.FrameType.NONE);
+            queryView.setAllowableContainerFilterTypes();
+            queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
+
+            view.addView(queryView);
+            view.addView(plateView);
+            return view;
         }
 
         private Map<Position, WellInfo> createWellInfoMap(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
@@ -159,6 +194,26 @@ public class ElispotController extends SpringActionController
             ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(_run.getContainer(), _protocol, _run.getRowId());
             return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
                     " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _run.getRowId() + " Details");
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class RunDetailRedirectAction extends SimpleRedirectAction<DetailsForm>
+    {
+        public ActionURL getRedirectURL(DetailsForm form) throws Exception
+        {
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            if (run == null)
+                HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
+
+            AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
+            ActionURL url = new ActionURL(RunDetailsAction.class, getContainer());
+            String tableName = ElispotSchema.getAssayTableName(run.getProtocol(), ElispotSchema.ANTIGEN_STATS_TABLE_NAME);
+
+            url.addParameter("rowId", form.getRowId());
+            url.addFilter(tableName, provider.getTableMetadata().getRunRowIdFieldKeyFromResults(), CompareType.EQUAL, form.getRowId());
+
+            return url;
         }
     }
 

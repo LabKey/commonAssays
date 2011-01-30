@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2008-2009 LabKey Corporation
+ * Copyright (c) 2010 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.labkey.elispot.query;
 
 import org.labkey.api.exp.PropertyDescriptor;
@@ -24,25 +23,25 @@ import org.labkey.elispot.ElispotDataHandler;
 import org.labkey.elispot.ElispotSchema;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Karl Lum
- * Date: Jan 21, 2008
+ * User: klum
+ * Date: Jan 27, 2011
+ * Time: 1:45:11 PM
+ * To change this template use File | Settings | File Templates.
  */
-public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
+public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
 {
-    public ElispotRunDataTable(final AssaySchema schema, final ExpProtocol protocol)
+    public ElispotRunAntigenTable(final AssaySchema schema, final ExpProtocol protocol)
     {
         super(schema, protocol);
-        setDescription("Contains one row per sample for the \"" + protocol.getName() + "\" ELISpot assay design.");
+        setDescription("Contains one row per well for the \"" + protocol.getName() + "\" ELISpot assay design.");
     }
 
     public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException
     {
-        return ElispotSchema.getExistingDataProperties(protocol, ElispotDataHandler.ELISPOT_PROPERTY_LSID_PREFIX);
+        return ElispotSchema.getExistingDataProperties(protocol, ElispotDataHandler.ELISPOT_ANTIGEN_PROPERTY_LSID_PREFIX);
     }
 
     public String getInputMaterialPropertyName()
@@ -52,6 +51,6 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 
     public String getDataRowLsidPrefix()
     {
-        return ElispotDataHandler.ELISPOT_DATA_ROW_LSID_PREFIX;
+        return ElispotDataHandler.ELISPOT_ANTIGEN_ROW_LSID_PREFIX;  
     }
 }

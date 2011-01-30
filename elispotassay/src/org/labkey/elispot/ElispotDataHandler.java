@@ -42,14 +42,6 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
 {
     public static final AssayDataType ELISPOT_DATA_TYPE = new AssayDataType("ElispotAssayData", new FileType(Arrays.asList(".txt", ".xls"), ".txt"));
 
-    public static final String ELISPOT_DATA_LSID_PREFIX = "ElispotAssayData";
-    public static final String ELISPOT_DATA_ROW_LSID_PREFIX = "ElispotAssayDataRow";
-    public static final String ELISPOT_PROPERTY_LSID_PREFIX = "ElispotProperty";
-    public static final String ELISPOT_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
-
-    public static final String SFU_PROPERTY_NAME = "SpotCount";
-    public static final String WELLGROUP_PROPERTY_NAME = "WellgroupName";
-
     class ElispotFileParser implements ElispotDataFileParser
     {
         private ExpData _data;
@@ -89,18 +81,18 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
 
                     for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
                     {
-                        for (Position pos : group.getPositions())
+                        ExpMaterial material = materialMap.get(group.getName());
+                        if (material != null)
                         {
-                            Well well = plate.getWell(pos.getRow(), pos.getColumn());
-                            ExpMaterial material = materialMap.get(group.getName());
-                            if (material != null)
+                            for (Position pos : group.getPositions())
                             {
+                                Well well = plate.getWell(pos.getRow(), pos.getColumn());
                                 Map<String, Object> row = new LinkedHashMap<String, Object>();
 
                                 Lsid dataRowLsid = getDataRowLsid(_data.getLSID(), pos);
 
                                 row.put(DATA_ROW_LSID_PROPERTY, dataRowLsid.toString());
-                                row.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID().toString());
+                                row.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
                                 row.put(SFU_PROPERTY_NAME, well.getValue());
                                 row.put(WELLGROUP_PROPERTY_NAME, group.getName());
                                 row.put(WELLGROUP_LOCATION_PROPERTY, pos.toString());
