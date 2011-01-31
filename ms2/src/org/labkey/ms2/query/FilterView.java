@@ -55,7 +55,7 @@ public class FilterView extends QueryView
         return getSchema().getSettings(
                 context,
                 peptides ? MS2Controller.PEPTIDES_FILTER : MS2Controller.PROTEIN_GROUPS_FILTER,
-                peptides ? MS2Schema.HiddenTableType.PeptidesFilter.toString() : MS2Schema.HiddenTableType.ProteinGroupsFilter.toString());
+                peptides ? MS2Schema.TableType.Peptides.toString() : MS2Schema.HiddenTableType.ProteinGroupsFilter.toString());
     }
 
     public void renderCustomizeViewLink(Writer out, String viewName) throws IOException
@@ -68,7 +68,7 @@ public class FilterView extends QueryView
 
     public void renderViewList(HttpServletRequest request, Writer out, String viewName) throws IOException
     {
-        Map<String, CustomView> customViews = getQueryDef().getCustomViews(getUser(), request);
+        Map<String, CustomView> customViews =   getQueryDef().getCustomViews(getUser(), request);
         Map<String, String> options = new LinkedHashMap<String, String>();
         options.put("", "<default>");
         for (CustomView view : customViews.values())

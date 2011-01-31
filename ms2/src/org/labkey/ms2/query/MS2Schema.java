@@ -236,7 +236,14 @@ public class MS2Schema extends UserSchema
             {
                 return ms2Schema.createNormalizedProteinProphetComparisonTable(null, null);
             }
-        };
+        },
+        PeptideCrosstab
+        {
+            public TableInfo createTable(MS2Schema ms2Schema)
+            {
+                return ms2Schema.createPeptideCrosstabTable(null, null);
+            }
+        } ;
 
         public abstract TableInfo createTable(MS2Schema ms2Schema);
 
@@ -751,7 +758,7 @@ public class MS2Schema extends UserSchema
 
     protected SQLFragment getPeptideSelectSQL(HttpServletRequest request, String viewName, Collection<FieldKey> fieldKeys)
     {
-        QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, MS2Schema.HiddenTableType.PeptidesFilter.toString());
+        QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, MS2Schema.TableType.Peptides.toString());
         SimpleFilter filter = new SimpleFilter();
         CustomView view = queryDef.getCustomView(getUser(), request, viewName);
         if (view != null)
@@ -1063,7 +1070,7 @@ public class MS2Schema extends UserSchema
             result = new CrosstabTableInfo(settings, members);
         }
         else
-        {
+        {                                                                                         
             result = new CrosstabTableInfo(settings);
         }
         if (form != null)
@@ -1078,4 +1085,139 @@ public class MS2Schema extends UserSchema
         result.setDefaultVisibleColumns(defaultCols);
         return result;
     }
+
+    public CrosstabTableInfo createPeptideCrosstabTable(MS2Controller.PeptideFilteringComparisonForm form, ViewContext context)
+    {
+        FilteredTable baseTable = createPeptidesTableForQueryCrosstab(form, context);
+
+        CrosstabSettings settings = new CrosstabSettings(baseTable);
+        SimpleFilter filter = new SimpleFilter();
+        List<Integer> runIds = new ArrayList<Integer>();
+        if (_runs != null)
+        {
+            for (MS2Run run : _runs)
+            {
+                runIds.add(run.getRun());
+            }
+        }
+        filter.addClause(new SimpleFilter.InClause("Run", runIds, false));
+        settings.setSourceTableFilter(filter);
+        // add link from peptide to peptide details ?
+        CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts("Peptide"));
+        CrosstabDimension rowDimTrimmed = settings.getRowAxis().addDimension(FieldKey.fromParts("TrimmedPeptide"));
+        CrosstabDimension searchEngineProteinMeasure = settings.getRowAxis().addDimension(FieldKey.fromParts("seqId"));
+
+        CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts( "Run"));
+        ActionURL showRunUrl = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
+        colDim.setUrl(showRunUrl.getLocalURIString() + "&run=" + CrosstabMember.VALUE_TOKEN);
+
+        CrosstabMeasure scansMeasure = settings.addMeasure(FieldKey.fromParts("RowId"), CrosstabMeasure.AggregateFunction.COUNT, "Total");
+        CrosstabMeasure avgPepProphMeasure = settings.addMeasure(FieldKey.fromParts("PeptideProphet"), CrosstabMeasure.AggregateFunction.AVG, "Avg PepProphet");
+        settings.addMeasure(FieldKey.fromParts("Charge"), CrosstabMeasure.AggregateFunction.MIN, "Min Charge");
+        settings.addMeasure(FieldKey.fromParts("Charge"), CrosstabMeasure.AggregateFunction.MAX, "Max Charge");
+        settings.addMeasure(FieldKey.fromParts("Charge"), CrosstabMeasure.AggregateFunction.COUNT, "Charge States");
+
+        settings.addMeasure(FieldKey.fromParts("PeptideProphet"), CrosstabMeasure.AggregateFunction.MAX, "Max PepProphet");
+        settings.addMeasure(FieldKey.fromParts("XCorr"), CrosstabMeasure.AggregateFunction.AVG, "Avg XCorr");
+        settings.addMeasure(FieldKey.fromParts("XCorr"), CrosstabMeasure.AggregateFunction.MAX, "Max XCorr");
+        settings.addMeasure(FieldKey.fromParts("DeltaCn"), CrosstabMeasure.AggregateFunction.AVG, "Avg DeltaCn");
+        settings.addMeasure(FieldKey.fromParts("DeltaCn"), CrosstabMeasure.AggregateFunction.MAX, "Max DeltaCn");
+        settings.addMeasure(FieldKey.fromParts("PeptideProphetErrorRate"), CrosstabMeasure.AggregateFunction.AVG, "Avg PepProph Error");
+        settings.addMeasure(FieldKey.fromParts("PeptideProphetErrorRate"), CrosstabMeasure.AggregateFunction.MAX, "Max PepProph Error");
+        settings.addMeasure(FieldKey.fromParts("LightArea"), CrosstabMeasure.AggregateFunction.SUM, "Total light area");
+        settings.addMeasure(FieldKey.fromParts("HeavyArea"), CrosstabMeasure.AggregateFunction.SUM, "Total heavy area");
+        settings.addMeasure(FieldKey.fromParts("DecimalRatio"), CrosstabMeasure.AggregateFunction.AVG, "Avg decimal ratio");
+        settings.addMeasure(FieldKey.fromParts("DecimalRatio"), CrosstabMeasure.AggregateFunction.MAX, "Max decimal ratio");
+        settings.addMeasure(FieldKey.fromParts("DecimalRatio"), CrosstabMeasure.AggregateFunction.MIN, "Min decimal ratio");
+
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("run", CrosstabMember.VALUE_NAME);
+        parameters.put("MS2Peptides.Peptide~eq", FieldKey.fromParts("peptide"));
+        scansMeasure.setUrl(new DetailsURL(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()), parameters));
+        scansMeasure.getSourceColumn().setDisplayColumnFactory(new DisplayColumnFactory(){
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    DisplayColumn dc = new DataColumn(colInfo);
+                    dc.setLinkTarget("pep");
+                    return dc;
+                }
+            });
+
+        settings.setInstanceCountCaption("Run Count");
+        settings.getRowAxis().setCaption("Peptides identified");
+        settings.getColumnAxis().setCaption("Runs");
+
+        CrosstabTableInfo result;
+
+        if(null != _runs)
+        {
+            ArrayList<CrosstabMember> members = new ArrayList<CrosstabMember>();
+            //build up the list of column members
+            for (MS2Run run : _runs)
+            {
+                members.add(new CrosstabMember(Integer.valueOf(run.getRun()), colDim, run.getDescription()));
+            }
+            result = new CrosstabTableInfo(settings, members);
+        }
+        else
+        {
+            result = new CrosstabTableInfo(settings);
+        }
+
+        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        defaultCols.add(FieldKey.fromParts(rowDim.getName()));
+        defaultCols.add(FieldKey.fromParts(CrosstabTableInfo.COL_INSTANCE_COUNT));
+        defaultCols.add(FieldKey.fromParts(scansMeasure.getName()));
+        defaultCols.add(FieldKey.fromParts(avgPepProphMeasure.getName()));        
+        result.setDefaultVisibleColumns(defaultCols);
+        return result;
+    }
+
+    protected FilteredTable createPeptidesTableForQueryCrosstab(final MS2Controller.PeptideFilteringComparisonForm form, final ViewContext context)
+    {
+        FilteredTable baseTable = new FilteredTable(MS2Manager.getTableInfoPeptides());
+        baseTable.wrapAllColumns(true);
+        //apply PeptideFilteringComparisonForm
+        SQLFragment whereSQL;
+        SimpleFilter filt;
+
+        if (form != null && form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
+        {
+            baseTable.addCondition(new SimpleFilter("PeptideProphet", form.getPeptideProphetProbability(), CompareType.GTE));
+        }
+        else if (form != null && form.isCustomViewPeptideFilter())
+        {
+            whereSQL = new SQLFragment( "( RowId IN ( ");
+            whereSQL.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"))));
+            whereSQL.append(") ) ");
+            baseTable.addCondition(whereSQL, "RowId");
+        }
+
+        baseTable.getColumn("SeqId").setLabel("Search Engine Protein");
+        baseTable.getColumn("SeqId").setFk(new LookupForeignKey("SeqId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                SequencesTableInfo result = createSequencesTable();
+                // This is a horrible hack to try to deal with https://www.labkey.org/issues/home/Developer/issues/details.view?issueId=5237
+                // Performance on a SQLServer installation with a large number of runs and sequences is much better with
+                // this condition because it causes the query plan to flip to something that does a much more efficient
+                // join with the sequences tables. However, adding it significantly degrades performance on my admittedly
+                // small (though not tiny) Postgres dev database
+                if (_runs != null && MS2Manager.getSchema().getSqlDialect().isSqlServer())
+                {
+                    SQLFragment sql = new SQLFragment();
+                    sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
+                    sql.append(MS2Manager.getTableInfoRuns() + " WHERE Run IN ");
+                    appendRunInClause(sql);
+                    sql.append(")))");
+
+                    result.addCondition(sql, "SeqId");
+                }
+                return result;
+            }
+        });
+        return baseTable;
+    }
+
 }

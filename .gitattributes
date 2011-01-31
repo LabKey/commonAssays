@@ -979,6 +979,7 @@ ms2/src/org/labkey/ms2/compare/ProteinProphetCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/RunColumn.java -text
 ms2/src/org/labkey/ms2/compare/SpectraCountQueryView.java -text
 ms2/src/org/labkey/ms2/compare/SpectraCountRReport.java -text
+ms2/src/org/labkey/ms2/compare/comparePeptideQueryOptions.jsp -text
 ms2/src/org/labkey/ms2/compare/comparePeptidesOptions.jsp -text
 ms2/src/org/labkey/ms2/compare/compareProteinProphetOptions.jsp -text
 ms2/src/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp -text
@@ -1195,7 +1196,7 @@ ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_protein_recommendedName_sho
 ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_sequence.java -text
 ms2/src/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp -text
 ms2/src/org/labkey/ms2/proteinCoverageMap.jsp -text
-ms2/src/org/labkey/ms2/query/AbstractProteinProphetCrosstabView.java -text
+ms2/src/org/labkey/ms2/query/AbstractQueryCrosstabView.java -text
 ms2/src/org/labkey/ms2/query/AbstractRunCompareView.java -text
 ms2/src/org/labkey/ms2/query/ComparePeptideTableInfo.java -text
 ms2/src/org/labkey/ms2/query/CompareProteinProphetTableInfo.java -text
@@ -1206,6 +1207,7 @@ ms2/src/org/labkey/ms2/query/NormalizedProteinProphetCrosstabView.java -text
 ms2/src/org/labkey/ms2/query/OrganismTableInfo.java -text
 ms2/src/org/labkey/ms2/query/PeptideAggregrationDisplayColumn.java -text
 ms2/src/org/labkey/ms2/query/PeptideCountCoverageColumn.java -text
+ms2/src/org/labkey/ms2/query/PeptideCrosstabView.java -text
 ms2/src/org/labkey/ms2/query/PeptideFilter.java -text
 ms2/src/org/labkey/ms2/query/PeptidesTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinGroupTableInfo.java -text

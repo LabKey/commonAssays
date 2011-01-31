@@ -28,26 +28,26 @@ import org.labkey.ms2.MS2Controller;
  * User: jeckels
  * Date: Feb 1, 2008
  */
-public class ProteinProphetCrosstabView extends AbstractQueryCrosstabView
+public class PeptideCrosstabView extends AbstractQueryCrosstabView
 {
-    public ProteinProphetCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url)
+    public PeptideCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url)
     {
-        super(schema, form, url, MS2Schema.HiddenTableType.ProteinProphetCrosstab);
+        super(schema, form, url, MS2Schema.HiddenTableType.PeptideCrosstab);
     }
 
     protected TableInfo createTable()
     {
-        return _schema.createProteinProphetCrosstabTable(_form, getViewContext());
+        return _schema.createPeptideCrosstabTable(_form, getViewContext());
     }
 
     @Override
     protected Sort getBaseSort()
     {
-        return new Sort(CrosstabTableInfo.getDefaultSortString() + ",SeqId/BestName");
+        return new Sort(CrosstabTableInfo.getDefaultSortString() + ",Peptide");
     }
 
     protected FieldKey getComparisonColumn()
     {
-        return FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "MIN_ProteinGroupId", "Group");
-    }
+        return FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "COUNT_RowId");
+     }
 }

@@ -30,7 +30,7 @@ import java.sql.SQLException;
  * User: jeckels
  * Date: Feb 1, 2008
  */
-public class NormalizedProteinProphetCrosstabView extends AbstractProteinProphetCrosstabView
+public class NormalizedProteinProphetCrosstabView extends AbstractQueryCrosstabView
 {
     public NormalizedProteinProphetCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url) throws SQLException
     {

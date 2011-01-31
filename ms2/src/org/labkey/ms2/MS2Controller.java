@@ -257,6 +257,13 @@ public class MS2Controller extends SpringActionController
         }
         compareMenu.addMenuItem("ProteinProphet", view.createVerifySelectedScript(proteinProphetQueryURL, "runs", false));
 
+        ActionURL peptideQueryURL = new ActionURL(MS2Controller.ComparePeptideQuerySetupAction.class, container);
+        if (experimentRunIds)
+        {
+            peptideQueryURL.addParameter("experimentRunIds", "true");
+        }
+        compareMenu.addMenuItem("Peptide", view.createVerifySelectedScript(peptideQueryURL, "runs", false));
+
         ActionURL searchEngineURL = new ActionURL(MS2Controller.CompareSearchEngineProteinSetupAction.class, container);
         if (experimentRunIds)
         {
@@ -269,7 +276,7 @@ public class MS2Controller extends SpringActionController
         {
             peptidesURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Peptide", view.createVerifySelectedScript(peptidesURL, "runs", false));
+        compareMenu.addMenuItem("Peptide (Legacy)", view.createVerifySelectedScript(peptidesURL, "runs", false));
 
         ActionURL proteinProphetURL = new ActionURL(MS2Controller.CompareProteinProphetSetupAction.class, container);
         String selectionKey = view.getDataRegion().getSelectionKey();
@@ -747,7 +754,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
-            long peptideId = form.getPeptideIdLong();
+           long peptideId = form.getPeptideIdLong();
             MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
 
             if (peptide == null)
@@ -1328,7 +1335,7 @@ public class MS2Controller extends SpringActionController
     {
         public ComparePeptidesSetupAction()
         {
-            super("/org/labkey/ms2/compare/comparePeptidesOptions.jsp", "Compare Peptides Setup");
+            super("/org/labkey/ms2/compare/comparePeptidesOptions.jsp", "Compare Peptides (Legacy) Setup");
         }
     }
 
@@ -1402,6 +1409,45 @@ public class MS2Controller extends SpringActionController
             return root.addChild("Compare ProteinProphet Options");
         }
     }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class ComparePeptideQuerySetupAction extends AbstractRunListCreationAction<PeptideFilteringComparisonForm>
+    {
+        public ComparePeptideQuerySetupAction()
+        {
+            super(PeptideFilteringComparisonForm.class, false);
+        }
+
+        protected PeptideFilteringComparisonForm getCommand(HttpServletRequest request) throws Exception
+        {
+            PeptideFilteringComparisonForm form = super.getCommand(request);
+            Map<String, String> prefs = getPreferences(ComparePeptideQuerySetupAction.class);
+            form.setPeptideFilterType(prefs.get(PeptideFilteringFormElements.peptideFilterType.name()) == null ? ProphetFilterType.none.toString() : prefs.get(PeptideFilteringFormElements.peptideFilterType.name()));
+            form.setDefaultPeptideCustomView(prefs.get(PEPTIDES_FILTER_VIEW_NAME));
+            if (prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name()) != null)
+            {
+                try
+                {
+                    form.setPeptideProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
+                }
+                catch (NumberFormatException e) {}
+            }
+            return form;
+        }
+
+        public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
+        {
+            CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<PeptideFilteringComparisonForm>(new ActionURL(ComparePeptideQueryAction.class, getContainer()), runListId, form);
+
+            return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/comparePeptideQueryOptions.jsp", bean);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Compare Peptides Options");
+        }
+    }
+
 
     public enum PeptideFilteringFormElements
     {
@@ -1645,7 +1691,7 @@ public class MS2Controller extends SpringActionController
             VBox result = new VBox(gwtView);
             if (!_form.isNormalizeProteinGroups())
             {
-                result.addView(new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein columns under the <em>Protein</em> node in the tree, or expand <em>Protein Group</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>"));
+                result.addView(new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. </p></div>"));
             }
             else
             {
@@ -1715,6 +1761,95 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    @RequiresPermissionClass(ReadPermission.class)
+    public class ComparePeptideQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, ComparisonCrosstabView>
+    {
+        private PeptideFilteringComparisonForm _form;
+
+        public ComparePeptideQueryAction()
+        {
+            super(PeptideFilteringComparisonForm.class);
+        }
+
+        public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
+        {
+            _form = form;
+            return super.getView(form, errors);
+        }
+
+        protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
+        {
+            ComparisonCrosstabView view = createInitializedQueryView(form, errors, false, null);
+
+            Map<String, String> prefs = getPreferences(ComparePeptideQuerySetupAction.class);
+            prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
+            prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getPeptideCustomViewName(getViewContext()));
+            prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
+
+            if (!getUser().isGuest())
+            {
+                // Non-guests are stored in the database, guests get it stored in their session
+                PropertyManager.saveProperties(prefs);
+            }
+
+            Map<String, String> props = new HashMap<String, String>();
+   /*
+            //CONSIDER:  can we support charge state filters?
+            ActionURL nextURL = getViewContext().getActionURL();
+            Map<String, String> dynamicViewMap = getViewMap(true,true);
+            if (dynamicViewMap.keySet().contains(form.getPeptideCustomViewName(getViewContext())))
+            {
+                 nextURL.setRawQuery(nextURL.getRawQuery() + '&' + dynamicViewMap.get(form.getPeptideCustomViewName(getViewContext())));
+            }
+              props.put("originalURL", nextURL.toString());
+    */
+
+            props.put("originalURL", getViewContext().getActionURL().toString());
+            props.put(PEPTIDES_FILTER_VIEW_NAME, getViewContext().getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME));
+            props.put("comparisonName", "PeptideCrosstab");
+            GWTView gwtView = new GWTView(org.labkey.ms2.client.MS2VennDiagramView.class, props);
+            gwtView.setTitle("Comparison Overview");
+            gwtView.setFrame(WebPartView.FrameType.PORTAL);
+            gwtView.enableExpandCollapse("PeptideQueryCompare", true);
+
+            VBox result = new VBox(gwtView);
+            view.setTitle("Comparison Details");
+            view.setFrame(WebPartView.FrameType.PORTAL);
+
+            result.addView(view);
+            return result;
+        }
+
+        protected ComparisonCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
+        {
+            MS2Schema schema = new MS2Schema(getUser(), getContainer());
+            List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
+            schema.setRuns(runs);
+            return new PeptideCrosstabView(schema, form, getViewContext().getActionURL());
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            if (_form != null)
+            {
+                ActionURL setupURL = new ActionURL(ComparePeptideQuerySetupAction.class, getContainer());
+                setupURL.addParameter(PeptideFilteringFormElements.peptideFilterType, _form.getPeptideFilterType());
+                if (_form.getPeptideProphetProbability() != null)
+                {
+                    setupURL.addParameter(PeptideFilteringFormElements.peptideProphetProbability, _form.getPeptideProphetProbability().toString());
+                }
+
+                setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList() == null ? -1 : _form.getRunList());
+                setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getPeptideCustomViewName(getViewContext()));
+                root.addChild("MS2 Dashboard");
+                root.addChild("Setup Compare Peptides", setupURL);
+                StringBuilder title = new StringBuilder("Compare Peptides: ");
+                _form.appendPeptideFilterDescription(title, getViewContext());
+                return root.addChild(title.toString());
+            }
+            return root.addChild("Compare Peptides");
+        }
+    }
 
     // extraFormHtml gets inserted between the view dropdown and the button.
     private HttpView pickView(ActionURL nextURL, String viewInstructions, HttpView embeddedView, int runListId)

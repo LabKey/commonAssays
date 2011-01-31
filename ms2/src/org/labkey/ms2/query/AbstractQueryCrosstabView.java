@@ -41,12 +41,12 @@ import java.util.Map;
  * User: jeckels
  * Date: Sep 14, 2010
  */
-public abstract class AbstractProteinProphetCrosstabView extends ComparisonCrosstabView
+public abstract class AbstractQueryCrosstabView extends ComparisonCrosstabView
 {
     protected final MS2Schema _schema;
     protected final MS2Controller.PeptideFilteringComparisonForm _form;
 
-    public AbstractProteinProphetCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url, MS2Schema.HiddenTableType tableType)
+    public AbstractQueryCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url, MS2Schema.HiddenTableType tableType)
     {
         super(schema);
         _schema = schema;

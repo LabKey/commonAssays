@@ -76,7 +76,11 @@ public class MS2VennDiagramView extends VennDiagramView implements EntryPoint
         }
         else if ("ProteinProphetCrosstab".equalsIgnoreCase(comparisonGroup))
         {
-            getService().getProteinProphetCrosstabComparison(originalURL, callbackHandler);
+            getService().getQueryCrosstabComparison(originalURL, comparisonGroup, callbackHandler);
+        }
+        else if ("PeptideCrosstab".equalsIgnoreCase(comparisonGroup))
+        {
+            getService().getQueryCrosstabComparison(originalURL, comparisonGroup, callbackHandler);
         }
         else
         {

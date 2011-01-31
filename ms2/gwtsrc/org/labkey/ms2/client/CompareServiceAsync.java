@@ -30,5 +30,5 @@ public interface CompareServiceAsync
 
     void getPeptideComparison(String originalURL, AsyncCallback<GWTComparisonResult> async);
 
-    void getProteinProphetCrosstabComparison(String originalURL, AsyncCallback<GWTComparisonResult> async);
+    void getQueryCrosstabComparison(String originalURL, String comparisonGroup, AsyncCallback<GWTComparisonResult> async);
 }

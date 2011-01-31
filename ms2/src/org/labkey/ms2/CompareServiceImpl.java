@@ -29,6 +29,7 @@ import org.labkey.ms2.query.CompareProteinsView;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.NormalizedProteinProphetCrosstabView;
 import org.labkey.ms2.query.ProteinProphetCrosstabView;
+import org.labkey.ms2.query.PeptideCrosstabView;
 
 import java.util.List;
 
@@ -64,7 +65,8 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         }
     }
 
-    public GWTComparisonResult getProteinProphetCrosstabComparison(String originalURL)
+    // This method supports venn diagrams for both proteins and peptides
+    public GWTComparisonResult getQueryCrosstabComparison(String originalURL, String comparisonGroup)
     {
         try
         {
@@ -82,10 +84,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
             }
             form.setRunList(listId);
             form.setPeptideProphetProbability(getProbability(url, MS2Controller.PeptideFilteringFormElements.peptideProphetProbability));
-            form.setProteinProphetProbability(getProbability(url, MS2Controller.PeptideFilteringFormElements.proteinProphetProbability));
             form.setPeptideFilterType(url.getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType));
-            form.setProteinGroupFilterType(url.getParameter(MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType));
-            form.setNormalizeProteinGroups(Boolean.parseBoolean(url.getParameter(MS2Controller.NORMALIZE_PROTEIN_GROUPS_NAME)));
 
             ViewContext queryContext = new ViewContext(_context);
             queryContext.setActionURL(url);
@@ -94,9 +93,19 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
 
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             schema.setRuns(runs);
-
-            ComparisonCrosstabView view = form.isNormalizeProteinGroups() ? new NormalizedProteinProphetCrosstabView(schema, form, url) :
+            ComparisonCrosstabView view;
+            if (comparisonGroup.equalsIgnoreCase("ProteinProphetCrosstab"))
+            {
+                form.setProteinProphetProbability(getProbability(url, MS2Controller.PeptideFilteringFormElements.proteinProphetProbability));
+                form.setProteinGroupFilterType(url.getParameter(MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType));
+                form.setNormalizeProteinGroups(Boolean.parseBoolean(url.getParameter(MS2Controller.NORMALIZE_PROTEIN_GROUPS_NAME)));
+                view = form.isNormalizeProteinGroups() ? new NormalizedProteinProphetCrosstabView(schema, form, url) :
                     new ProteinProphetCrosstabView(schema, form, url);
+            }
+            else
+            {
+               view = new PeptideCrosstabView(schema, form, url);
+            }
 
             return view.createComparisonResult();
         }
@@ -106,6 +115,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
             throw UnexpectedException.wrap(e);
         }
     }
+
 
     private Float getProbability(ActionURL url, MS2Controller.PeptideFilteringFormElements type)
     {
