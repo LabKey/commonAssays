@@ -31,13 +31,13 @@
         exportUrl.deleteParameter("seqId");
     exportUrl.addParameter("seqId", bean.protein.getSeqId());
 
-    String exportLink = "<a href=\"" + exportUrl.getURIString() + "\" target=\"_blank\" class=\"labkey-text-link\" >Export To Excel</a>";
+    String exportLink = "<a href=\"" + exportUrl.toString() + "\" target=\"_blank\" class=\"labkey-text-link\" >Export</a>";
     ActionURL showPeptidesPopupUrl = getViewContext().cloneActionURL();
     showPeptidesPopupUrl.setAction(MS2Controller.showPeptidePopupAction.class);
     if (null!=showPeptidesPopupUrl.getParameter("MS2Peptides.viewName"))
             showPeptidesPopupUrl.deleteParameter("MS2Peptides.viewName");
      showPeptidesPopupUrl.addParameter("MS2Peptides.viewName", "Standard");
-    bean.showRunUrl = showPeptidesPopupUrl.getURIString();
+    bean.showRunUrl = showPeptidesPopupUrl.toString();
   %>
 <link rel="stylesheet" type="text/css" href="ProteinCoverageMap.css" />
 <script type="text/javascript">

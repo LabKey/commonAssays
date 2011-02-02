@@ -44,7 +44,7 @@ public class Protein
     private boolean _forCoverageMapExport = false;
 
     private String PEPTIDE_START_TD="<td class=\"%s\" colspan=%d > %s </td>";
-    private String PEPTIDE_START_TD_EXPORT ="<td class=\"%s\" colspan=%d  bgcolor=\"#6699ff\" align=\"center\" > %s </td>";
+    private String PEPTIDE_START_TD_EXPORT ="<td class=\"%s\" colspan=%d  bgcolor=\"#99ccff\" align=\"center\" > %s </td>";
     private String PEPTIDE_START_CLASS =" peptide-marker ";
     private String PEPTIDE_CONTINUE_CLASS =" peptide-marker-continue ";
     private String COLUMN_DIVIDER_CLASS=" tenth-col ";
@@ -360,7 +360,7 @@ public class Protein
             if (!_forCoverageMapExport)
             {
                 trimmedPeptide= _sequence.substring(range.start,(range.start + range.length));
-                onClickScript="window.open('" +  showRunViewUrl + "&MS2Peptides.TrimmedPeptide~eq=" + trimmedPeptide
+                onClickScript="window.open('" +  showRunViewUrl + "&MS2Peptides.TrimmedPeptide~eq=" +  trimmedPeptide
                         +"', 'showMatchingPeptides');";
             }
 

@@ -1133,7 +1133,7 @@ public class MS2Schema extends UserSchema
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("run", CrosstabMember.VALUE_NAME);
         parameters.put("MS2Peptides.Peptide~eq", FieldKey.fromParts("peptide"));
-        scansMeasure.setUrl(new DetailsURL(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()), parameters));
+        scansMeasure.setUrl(new DetailsURL(new ActionURL(MS2Controller.showPeptidePopupAction.class, getContainer()), parameters));
         scansMeasure.getSourceColumn().setDisplayColumnFactory(new DisplayColumnFactory(){
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
