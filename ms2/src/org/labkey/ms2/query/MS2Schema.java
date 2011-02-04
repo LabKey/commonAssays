@@ -26,11 +26,12 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.util.StringExpression;
+import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2Fraction;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.ProteinGroupProteins;
@@ -38,9 +39,9 @@ import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.*;
 
 /**
@@ -59,8 +60,6 @@ public class MS2Schema extends UserSchema
     public static final String XTANDEM_PROTOCOL_OBJECT_PREFIX = "MS2.XTandem";
     public static final String IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX = "MS2.ImportedSearch";
     public static final String SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX = "MS2.PreSearch.";
-
-    private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("PeptideId");
 
     private ProteinGroupProteins _proteinGroupProteins = new ProteinGroupProteins();
     private List<MS2Run> _runs;
@@ -381,8 +380,8 @@ public class MS2Schema extends UserSchema
                     uniqueSQL.append(MS2Manager.getTableInfoPeptideMemberships() + " pm WHERE pd.RowId = pm.PeptideId AND pm.ProteinGroupId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId) END)");
                 }
 
-                result.addColumn(new ExprColumn(result, "TotalFilteredPeptides", totalSQL, Types.BIGINT));
-                result.addColumn(new ExprColumn(result, "UniqueFilteredPeptides", uniqueSQL, Types.BIGINT));
+                result.addColumn(new ExprColumn(result, "TotalFilteredPeptides", totalSQL, JdbcType.BIGINT));
+                result.addColumn(new ExprColumn(result, "UniqueFilteredPeptides", uniqueSQL, JdbcType.BIGINT));
 
                 return result;
             }
@@ -427,25 +426,25 @@ public class MS2Schema extends UserSchema
         {
             if (form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
             {
-                SQLFragment sql = new SQLFragment("ProteinGroupID IN (SELECT pm.ProteinGroupID FROM ");
-                sql.append(MS2Manager.getTableInfoPeptideMemberships() + " pm ");
-                sql.append(", " + MS2Manager.getTableInfoPeptidesData() + " pd, ");
-                sql.append(MS2Manager.getTableInfoFractions() + " f ");
-                sql.append("WHERE f.Fraction = pd.Fraction AND f.Run IN ");
-                appendRunInClause(sql);
-                sql.append(" AND pd.RowId = pm.PeptideId AND pd.peptideprophet >= ");
-                sql.append(form.getPeptideProphetProbability());
-                sql.append(")");
-                result.addCondition(sql, "ProteinGroupId");
+//                SQLFragment sql = new SQLFragment("ProteinGroupID IN (SELECT pm.ProteinGroupID FROM ");
+//                sql.append(MS2Manager.getTableInfoPeptideMemberships() + " pm ");
+//                sql.append(", " + MS2Manager.getTableInfoPeptidesData() + " pd, ");
+//                sql.append(MS2Manager.getTableInfoFractions() + " f ");
+//                sql.append("WHERE f.Fraction = pd.Fraction AND f.Run IN ");
+//                appendRunInClause(sql);
+//                sql.append(" AND pd.RowId = pm.PeptideId AND pd.peptideprophet >= ");
+//                sql.append(form.getPeptideProphetProbability());
+//                sql.append(")");
+//                result.addCondition(sql, "ProteinGroupId");
             }
             else if (form.isCustomViewPeptideFilter())
             {
-                SQLFragment sql = new SQLFragment("ProteinGroupID IN (SELECT pm.ProteinGroupID FROM ");
-                sql.append(MS2Manager.getTableInfoPeptideMemberships() + " pm ");
-                sql.append(" WHERE pm.PeptideId IN (");
-                sql.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Collections.singletonList(FieldKey.fromParts("RowId"))));
-                sql.append("))");
-                result.addCondition(sql, "ProteinGroupId");
+//                SQLFragment sql = new SQLFragment("ProteinGroupID IN (SELECT pm.ProteinGroupID FROM ");
+//                sql.append(MS2Manager.getTableInfoPeptideMemberships() + " pm ");
+//                sql.append(" WHERE pm.PeptideId IN (");
+//                sql.append(getPeptideSelectSQL(context.getRequest(), form.getPeptideCustomViewName(context), Collections.singletonList(FieldKey.fromParts("RowId"))));
+//                sql.append("))");
+//                result.addCondition(sql, "ProteinGroupId");
             }
 
             if (form.isProteinProphetFilter() && form.getProteinProphetProbability() != null)
@@ -465,6 +464,16 @@ public class MS2Schema extends UserSchema
                 result.addCondition(sql, "ProteinGroupId");
             }
         }
+
+        ColumnInfo peptideMembershipsColumn = result.wrapColumn("PeptideMemberships", result.getRealTable().getColumn("ProteinGroupId"));
+        peptideMembershipsColumn.setFk(new LookupForeignKey("ProteinGroupId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return createPeptideMembershipsTable();
+            }
+        });
+        result.addColumn(peptideMembershipsColumn);
 
         return result;
     }
@@ -507,16 +516,9 @@ public class MS2Schema extends UserSchema
 
     protected TableInfo createPeptideMembershipsTable()
     {
-        TableInfo info = MS2Manager.getTableInfoPeptideMemberships();
-        FilteredTable result = new FilteredTable(info);
-        for (ColumnInfo col : info.getColumns())
-        {
-            ColumnInfo newColumn = result.addWrapColumn(col);
-            if (HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES.contains(newColumn.getName()))
-            {
-                newColumn.setHidden(true);
-            }
-        }
+        FilteredTable result = new FilteredTable(MS2Manager.getTableInfoPeptideMemberships());
+        result.wrapAllColumns(false);
+
         LookupForeignKey fk = new LookupForeignKey("RowId")
         {
             public TableInfo getLookupTableInfo()
@@ -530,6 +532,16 @@ public class MS2Schema extends UserSchema
         };
         fk.setPrefixColumnCaption(false);
         result.getColumn("ProteinGroupId").setFk(fk);
+
+        result.getColumn("PeptideId").setHidden(true);
+        result.getColumn("PeptideId").setFk(new LookupForeignKey("RowId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return createPeptidesTable(ContainerFilter.EVERYTHING);
+            }
+        });
+
         return result;
     }
 
@@ -541,7 +553,7 @@ public class MS2Schema extends UserSchema
 
         SQLFragment fractionNameSQL = new SQLFragment(dialect.getSubstringFunction(ExprColumn.STR_TABLE_ALIAS + ".FileName", "1", dialect.getStringIndexOfFunction("'.'", ExprColumn.STR_TABLE_ALIAS + ".FileName") + "- 1"));
 
-        ColumnInfo fractionName = new ExprColumn(result, "FractionName", fractionNameSQL, Types.VARCHAR);
+        ColumnInfo fractionName = new ExprColumn(result, "FractionName", fractionNameSQL, JdbcType.VARCHAR);
         fractionName.setLabel("Name");
         fractionName.setWidth("200");
         result.addColumn(fractionName);
@@ -550,7 +562,7 @@ public class MS2Schema extends UserSchema
         ExprColumn dataColumn = new ExprColumn(result, "Data",
                 new SQLFragment("(SELECT MIN(d.RowId) FROM " + ExperimentService.get().getTinfoData() + " d, " +
                         MS2Manager.getTableInfoRuns() + " r WHERE d.Container = r.Container AND r.Run = " +
-                        ExprColumn.STR_TABLE_ALIAS + ".Run AND d.DataFileURL = " + ExprColumn.STR_TABLE_ALIAS + ".mzxmlURL)"), Types.INTEGER);
+                        ExprColumn.STR_TABLE_ALIAS + ".Run AND d.DataFileURL = " + ExprColumn.STR_TABLE_ALIAS + ".mzxmlURL)"), JdbcType.INTEGER);
         dataColumn.setFk(new ExpSchema(getUser(), getContainer()).getDataIdForeignKey());
         result.addColumn(dataColumn);
 
@@ -592,7 +604,7 @@ public class MS2Schema extends UserSchema
                 "\nFROM " + MS2Manager.getTableInfoRuns() + " ms2Runs " +
                 "\nWHERE ms2Runs.ExperimentRunLSID = " + ExprColumn.STR_TABLE_ALIAS + ".LSID AND ms2Runs.Deleted = ?)");
         sql.add(Boolean.FALSE);
-        ColumnInfo ms2DetailsColumn = new ExprColumn(result, "MS2Details", sql, Types.INTEGER);
+        ColumnInfo ms2DetailsColumn = new ExprColumn(result, "MS2Details", sql, JdbcType.INTEGER);
         ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
         ms2DetailsColumn.setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
@@ -758,7 +770,7 @@ public class MS2Schema extends UserSchema
 
     protected SQLFragment getPeptideSelectSQL(HttpServletRequest request, String viewName, Collection<FieldKey> fieldKeys)
     {
-        QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, MS2Schema.TableType.Peptides.toString());
+        QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, HiddenTableType.PeptidesFilter.toString());
         SimpleFilter filter = new SimpleFilter();
         CustomView view = queryDef.getCustomView(getUser(), request, viewName);
         if (view != null)
@@ -830,8 +842,20 @@ public class MS2Schema extends UserSchema
 
         FilteredTable baseTable = new FilteredTable(rawTable);
         baseTable.wrapAllColumns(true);
+        ColumnInfo peptideMembershipsColumn = baseTable.wrapColumn("PeptideMemberships", rawTable.getColumn("ProteinGroupId"));
+        peptideMembershipsColumn.setFk(new LookupForeignKey("ProteinGroupId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return createPeptideMembershipsTable();
+            }
+        });
+        baseTable.addColumn(peptideMembershipsColumn);
 
-        ExprColumn normalizedProteinCountCol = new ExprColumn(baseTable, "ProteinCount", new SQLFragment("(SELECT COUNT (DISTINCT SeqId) FROM " + name + " n,  " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId and n.NormalizedId = " + ExprColumn.STR_TABLE_ALIAS + ".NormalizedId)"), Types.INTEGER);
+        SimpleFilter filter = new SimpleFilter();
+        addPeptideFilters(form, context, baseTable, filter);
+
+        ExprColumn normalizedProteinCountCol = new ExprColumn(baseTable, "ProteinCount", new SQLFragment("(SELECT COUNT (DISTINCT SeqId) FROM " + name + " n,  " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId and n.NormalizedId = " + ExprColumn.STR_TABLE_ALIAS + ".NormalizedId)"), JdbcType.INTEGER);
         baseTable.addColumn(normalizedProteinCountCol);
 
         ColumnInfo proteinsCol = baseTable.wrapColumn("Proteins", rawTable.getColumn("NormalizedId"));
@@ -895,16 +919,29 @@ public class MS2Schema extends UserSchema
         CrosstabMeasure groupCountMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.COUNT, "Run Protein Group Count");
 //        CrosstabMeasure groupsMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.GROUP_CONCAT, "Run Protein Groups");
 
-        settings.setInstanceCountCaption("Found In Runs");
         settings.getRowAxis().setCaption("Normalized Protein Group");
-        settings.getColumnAxis().setCaption("Runs");
+
+        CrosstabDimension colDim;
+        if (form != null && form.getPivotTypeEnum() == MS2Controller.PivotType.fraction)
+        {
+            settings.setInstanceCountCaption("Num Fractions");
+            settings.getColumnAxis().setCaption("Fractions");
+            colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("PeptideMemberships", "PeptideId", "Fraction"));
+            colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "fraction=" + CrosstabMember.VALUE_TOKEN + "&MS2Peptides.Fraction~eq=" + CrosstabMember.VALUE_TOKEN);
+        }
+        else
+        {
+            settings.setInstanceCountCaption("Found In Runs");
+            settings.getColumnAxis().setCaption("Runs");
+            colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
+            colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);
+        }
 
         settings.getRowAxis().addDimension(normalizedIdCol.getFieldKey());
         settings.getRowAxis().addDimension(normalizedProteinCountCol.getFieldKey());
         settings.getRowAxis().addDimension(proteinsCol.getFieldKey());
 
-        CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
-        colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);
+        settings.setSourceTableFilter(filter);
 
         if(null != _runs)
         {
@@ -912,7 +949,17 @@ public class MS2Schema extends UserSchema
             //build up the list of column members
             for (MS2Run run : _runs)
             {
-                members.add(new CrosstabMember(Integer.valueOf(run.getRun()), colDim, run.getDescription()));
+                if (form != null && form.getPivotTypeEnum() == MS2Controller.PivotType.fraction)
+                {
+                    for (MS2Fraction fraction : run.getFractions())
+                    {
+                        members.add(new CrosstabMember(fraction.getFraction(), colDim, fraction.getFileName()));
+                    }
+                }
+                else
+                {
+                    members.add(new CrosstabMember(run.getRun(), colDim, run.getDescription()));
+                }
             }
             result = new CrosstabTableInfo(settings, members);
         }
@@ -926,8 +973,9 @@ public class MS2Schema extends UserSchema
         }
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts(CrosstabTableInfo.COL_INSTANCE_COUNT));
-        defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, firstProteinGroupMeasure), "Group"));
         defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, groupCountMeasure)));
+        defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, firstProteinGroupMeasure), "Group"));
+        defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.getColumnName(null, firstProteinGroupMeasure), "GroupProbability"));
         defaultCols.add(FieldKey.fromParts(proteinsCol.getName(), "BestName"));
         result.setDefaultVisibleColumns(defaultCols);
         return result;
@@ -1033,13 +1081,15 @@ public class MS2Schema extends UserSchema
                 runIds.add(run.getRun());
             }
         }
+        addPeptideFilters(form, context, baseTable, filter);
         filter.addClause(new SimpleFilter.InClause("ProteinGroupId/ProteinProphetFileId/Run", runIds, false));
         settings.setSourceTableFilter(filter);
 
         CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts("SeqId"));
         ActionURL showProteinURL = new ActionURL(MS2Controller.ShowProteinAction.class, getContainer());
         rowDim.setUrl(showProteinURL.getLocalURIString() + "&seqId=${SeqId}");
-        rowDim.getSourceColumn().setDisplayColumnFactory(new DisplayColumnFactory(){
+        rowDim.getSourceColumn().setDisplayColumnFactory(new DisplayColumnFactory()
+        {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 DisplayColumn dc = new DataColumn(colInfo);
@@ -1048,14 +1098,25 @@ public class MS2Schema extends UserSchema
             }
         });
 
-        CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
-        colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);
-
         CrosstabMeasure proteinGroupMeasure = settings.addMeasure(FieldKey.fromParts("ProteinGroupId"), CrosstabMeasure.AggregateFunction.MIN, "Protein Group");
 
-        settings.setInstanceCountCaption("Num Runs");
         settings.getRowAxis().setCaption("Protein Information");
-        settings.getColumnAxis().setCaption("Runs");
+
+        CrosstabDimension colDim;
+        if (form != null && form.getPivotTypeEnum() == MS2Controller.PivotType.fraction)
+        {
+            settings.setInstanceCountCaption("Num Fractions");
+            settings.getColumnAxis().setCaption("Fractions");
+            colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("PeptideMemberships", "PeptideId", "Fraction"));
+            colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "fraction=" + CrosstabMember.VALUE_TOKEN + "&MS2Peptides.Fraction~eq=" + CrosstabMember.VALUE_TOKEN);
+        }
+        else
+        {
+            settings.setInstanceCountCaption("Num Runs");
+            settings.getColumnAxis().setCaption("Runs");
+            colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
+            colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);
+        }
 
         CrosstabTableInfo result;
 
@@ -1065,7 +1126,17 @@ public class MS2Schema extends UserSchema
             //build up the list of column members
             for (MS2Run run : _runs)
             {
-                members.add(new CrosstabMember(Integer.valueOf(run.getRun()), colDim, run.getDescription()));
+                if (form != null && form.getPivotTypeEnum() == MS2Controller.PivotType.fraction)
+                {
+                    for (MS2Fraction fraction : run.getFractions())
+                    {
+                        members.add(new CrosstabMember(fraction.getFraction(), colDim, fraction.getFileName()));
+                    }
+                }
+                else
+                {
+                    members.add(new CrosstabMember(run.getRun(), colDim, run.getDescription()));
+                }
             }
             result = new CrosstabTableInfo(settings, members);
         }
@@ -1084,6 +1155,43 @@ public class MS2Schema extends UserSchema
         defaultCols.add(FieldKey.fromParts(proteinGroupMeasure.getName(), "GroupProbability"));
         result.setDefaultVisibleColumns(defaultCols);
         return result;
+    }
+
+    private void addPeptideFilters(MS2Controller.PeptideFilteringComparisonForm form, ViewContext context, FilteredTable baseTable, SimpleFilter filter)
+    {
+        if (form != null)
+        {
+            if (form.isPeptideProphetFilter())
+            {
+                filter.addClause(new CompareType.CompareClause("PeptideMemberships/PeptideId/PeptideProphet", CompareType.GTE, form.getPeptideProphetProbability()));
+            }
+            else if (form.isCustomViewPeptideFilter())
+            {
+                String viewName = form.getPeptideCustomViewName(context);
+                CustomView view = QueryService.get().getCustomView(context.getUser(), context.getContainer(), MS2Schema.SCHEMA_NAME, HiddenTableType.PeptidesFilter.toString(), viewName);
+                try
+                {
+                    CustomViewInfo.FilterAndSort filterAndSort = CustomViewInfo.FilterAndSort.fromString(view.getFilterAndSort());
+                    FieldKey baseFieldKey = FieldKey.fromParts("PeptideMemberships", "PeptideId");
+                    for (FilterInfo filterInfo : filterAndSort.getFilter())
+                    {
+                        FieldKey fieldKey = FieldKey.fromParts(baseFieldKey, filterInfo.getField());
+                        Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(baseTable, Collections.singleton(fieldKey));
+                        ColumnInfo col = columns.get(fieldKey);
+                        Object value = filterInfo.getValue();
+                        if (col != null)
+                        {
+                            value = CompareType.convertParamValue(col, value);
+                        }
+                        filter.addClause(new CompareType.CompareClause(fieldKey.toString(), filterInfo.getOp(), value));
+                    }
+                }
+                catch (URISyntaxException e)
+                {
+                    throw new UnexpectedException(e);
+                }
+            }
+        }
     }
 
     public CrosstabTableInfo createPeptideCrosstabTable(MS2Controller.PeptideFilteringComparisonForm form, ViewContext context)

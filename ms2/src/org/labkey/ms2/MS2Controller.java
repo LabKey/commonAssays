@@ -19,6 +19,7 @@ import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.action.*;
 import org.labkey.api.admin.AdminUrls;
@@ -116,6 +117,19 @@ public class MS2Controller extends SpringActionController
         AdminConsole.addLink(SettingsLinkType.Management, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl());
     }
 
+
+    private MS2Run validateRun(RunForm form) throws ServletException
+    {
+        if (form.run == 0)
+        {
+            MS2Fraction fraction = MS2Manager.getFraction(form.getFraction());
+            if (fraction != null)
+            {
+                form.run = fraction.getRun();
+            }
+        }
+        return validateRun(form.run);
+    }
 
     private MS2Run validateRun(int runId) throws ServletException
     {
@@ -362,7 +376,7 @@ public class MS2Controller extends SpringActionController
             if (errors.hasErrors())
                 return new SimpleErrorView(errors);
 
-            MS2Run run = validateRun(form.run);
+            MS2Run run = validateRun(form);
 
             ActionURL currentURL = getViewContext().getActionURL();
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
@@ -405,16 +419,13 @@ public class MS2Controller extends SpringActionController
             }
 
             WebPartView grid = peptideView.createGridView(form);
-            List<DisplayColumn> displayColumns;
             String dataRegionName;
             if (grid instanceof QueryView)
             {
-                displayColumns = ((QueryView)grid).getDisplayColumns();
                 dataRegionName = ((QueryView)grid).getDataRegionName();
             }
             else
             {
-                displayColumns = ((GridView)grid).getDataRegion().getDisplayColumns();
                 dataRegionName = ((GridView)grid).getDataRegion().getName();
             }
 
@@ -657,9 +668,8 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class RenameForm extends ReturnUrlForm
+    public static class RenameForm extends RunForm
     {
-        private int run;
         private String description;
 
         public String getDescription()
@@ -670,16 +680,6 @@ public class MS2Controller extends SpringActionController
         public void setDescription(String description)
         {
             this.description = description;
-        }
-
-        public int getRun()
-        {
-            return run;
-        }
-
-        public void setRun(int run)
-        {
-            this.run = run;
         }
     }
 
@@ -705,7 +705,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(RenameForm form, boolean reshow, BindException errors) throws Exception
         {
-            _run = validateRun(form.getRun());
+            _run = validateRun(form);
             _returnURL = form.getReturnURLHelper(getShowRunURL(getContainer(), form.getRun()));
 
             String description = form.getDescription();
@@ -724,7 +724,7 @@ public class MS2Controller extends SpringActionController
 
         public boolean handlePost(RenameForm form, BindException errors) throws Exception
         {
-            _run = validateRun(form.getRun());
+            _run = validateRun(form);
             MS2Manager.renameRun(form.getRun(), form.getDescription());
             return true;
         }
@@ -841,7 +841,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
-            MS2Run run = validateRun(form.run);
+            MS2Run run = validateRun(form);
 
             getPageConfig().setTemplate(PageConfig.Template.Print);
             getPageConfig().setTitle("Modifications");
@@ -1015,23 +1015,7 @@ public class MS2Controller extends SpringActionController
             String queryString = (String) ctx.get("queryString");
             queryURL.setRawQuery(queryString);
 
-            String runString = queryURL.getParameter("run");
-            if (runString == null)
-            {
-                return HttpView.throwNotFound("No run specified");
-            }
-
-            int runId;
-            try
-            {
-                runId = Integer.parseInt(runString);
-            }
-            catch (NumberFormatException e)
-            {
-                return HttpView.throwNotFound("Invalid run specified: " +runString);
-            }
-
-            _run = validateRun(runId);
+            _run = validateRun(form);
 
             _goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
 
@@ -1092,7 +1076,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
-            MS2Run run = validateRun(form.getRun());
+            MS2Run run = validateRun(form);
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
             getPageConfig().setTemplate(PageConfig.Template.None);
@@ -1165,7 +1149,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ManageViewsForm form, boolean reshow, BindException errors) throws Exception
         {
-            _run = validateRun(form.getRun());
+            _run = validateRun(form);
 
             _returnURL = form.getReturnActionURL();
 
@@ -1377,6 +1361,10 @@ public class MS2Controller extends SpringActionController
             form.setDefaultPeptideCustomView(prefs.get(PEPTIDES_FILTER_VIEW_NAME));
             form.setDefaultProteinGroupCustomView(prefs.get(PROTEIN_GROUPS_FILTER_VIEW_NAME));
             form.setNormalizeProteinGroups(Boolean.parseBoolean(prefs.get(NORMALIZE_PROTEIN_GROUPS_NAME)));
+            if (prefs.get(PIVOT_TYPE_NAME) != null)
+            {
+                form.setPivotType(prefs.get(PIVOT_TYPE_NAME));
+            }
             if (prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name()) != null)
             {
                 try
@@ -1406,6 +1394,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
+            setHelpTopic("compareProteinProphet");
             return root.addChild("Compare ProteinProphet Options");
         }
     }
@@ -1451,7 +1440,19 @@ public class MS2Controller extends SpringActionController
 
     public enum PeptideFilteringFormElements
     {
-        peptideFilterType, peptideProphetProbability, proteinGroupFilterType, proteinProphetProbability, orCriteriaForEachRun, runList, spectraConfig
+        peptideFilterType,
+        peptideProphetProbability,
+        proteinGroupFilterType,
+        proteinProphetProbability,
+        orCriteriaForEachRun,
+        runList,
+        spectraConfig,
+        pivotType
+    }
+
+    public enum PivotType
+    {
+        run, fraction
     }
 
     public enum ProphetFilterType
@@ -1469,6 +1470,7 @@ public class MS2Controller extends SpringActionController
         private String _defaultPeptideCustomView;
         private String _defaultProteinGroupCustomView;
         private boolean _normalizeProteinGroups;
+        private String _pivotType = PivotType.run.toString();
 
         public String getPeptideFilterType()
         {
@@ -1641,6 +1643,26 @@ public class MS2Controller extends SpringActionController
         {
             _normalizeProteinGroups = normalizeProteinGroups;
         }
+
+        @NotNull
+        public PivotType getPivotTypeEnum()
+        {
+            if (_pivotType == null)
+            {
+                return PivotType.run;
+            }
+            return PivotType.valueOf(_pivotType);
+        }
+
+        public String getPivotType()
+        {
+            return _pivotType;
+        }
+
+        public void setPivotType(String pivotType)
+        {
+            _pivotType = pivotType;
+        }
     }
 
     @RequiresPermissionClass(ReadPermission.class)
@@ -1661,7 +1683,7 @@ public class MS2Controller extends SpringActionController
 
         protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
-            ComparisonCrosstabView view = createInitializedQueryView(form, errors, false, null);
+            ComparisonCrosstabView gridView = createInitializedQueryView(form, errors, false, null);
 
             Map<String, String> prefs = getPreferences(CompareProteinProphetQuerySetupAction.class);
             prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
@@ -1669,6 +1691,7 @@ public class MS2Controller extends SpringActionController
             prefs.put(PeptideFilteringFormElements.orCriteriaForEachRun.name(), Boolean.toString(form.isOrCriteriaForEachRun()));
             prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getPeptideCustomViewName(getViewContext()));
             prefs.put(PROTEIN_GROUPS_FILTER_VIEW_NAME, form.getProteinGroupCustomViewName(getViewContext()));
+            prefs.put(PIVOT_TYPE_NAME, form.getPivotTypeEnum().toString());
             prefs.put(NORMALIZE_PROTEIN_GROUPS_NAME, Boolean.toString(form.isNormalizeProteinGroups()));
             prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
             prefs.put(PeptideFilteringFormElements.proteinProphetProbability.name(), form.getProteinProphetProbability() == null ? null : form.getProteinProphetProbability().toString());
@@ -1688,18 +1711,10 @@ public class MS2Controller extends SpringActionController
             gwtView.setFrame(WebPartView.FrameType.PORTAL);
             gwtView.enableExpandCollapse("ProteinProphetQueryCompare", true);
 
-            VBox result = new VBox(gwtView);
-            if (!_form.isNormalizeProteinGroups())
-            {
-                result.addView(new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. </p></div>"));
-            }
-            else
-            {
-                view.setTitle("Comparison Details");
-                view.setFrame(WebPartView.FrameType.PORTAL);
-            }
-            result.addView(view);
-            return result;
+            gridView.setTitle("Comparison Details");
+            gridView.setFrame(WebPartView.FrameType.PORTAL);
+
+            return new VBox(gwtView, gridView);
         }
 
         protected ComparisonCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
@@ -1736,27 +1751,11 @@ public class MS2Controller extends SpringActionController
                 setupURL.addParameter(PeptideFilteringFormElements.orCriteriaForEachRun, _form.isOrCriteriaForEachRun());
                 setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getPeptideCustomViewName(getViewContext()));
                 setupURL.addParameter(NORMALIZE_PROTEIN_GROUPS_NAME, _form.isNormalizeProteinGroups());
+                setupURL.addParameter(PIVOT_TYPE_NAME, _form.getPivotTypeEnum().toString());
                 root.addChild("MS2 Dashboard");
                 root.addChild("Setup Compare ProteinProphet", setupURL);
-                StringBuilder title = new StringBuilder("Compare ProteinProphet: ");
-                _form.appendPeptideFilterDescription(title, getViewContext());
-                title.append(", ");
-                _form.appendProteinGroupFilterDescription(title, getViewContext());
-                title.append(", ");
-                if (_form.isOrCriteriaForEachRun())
-                {
-                    title.append("Show in all runs");
-                }
-                else
-                {
-                    title.append("Show only in runs that meet criteria");
-                }
-                if (_form.isNormalizeProteinGroups())
-                {
-                    title.append(", Normalized protein groups");
-                }
-                return root.addChild(title.toString());
             }
+            setHelpTopic("compareProteinProphet");
             return root.addChild("Compare ProteinProphet");
         }
     }
@@ -2106,6 +2105,7 @@ public class MS2Controller extends SpringActionController
     public static final String PROTEIN_GROUPS_FILTER = "ProteinGroupsFilter";
     public static final String PROTEIN_GROUPS_FILTER_VIEW_NAME = PROTEIN_GROUPS_FILTER + "." + QueryParam.viewName.toString();
     public static final String NORMALIZE_PROTEIN_GROUPS_NAME = "normalizeProteinGroups";
+    public static final String PIVOT_TYPE_NAME = "pivotType";
 
     @RequiresPermissionClass(ReadPermission.class)
     public abstract class AbstractRunListCreationAction<FormType extends RunListForm> extends SimpleViewAction<FormType>
@@ -2728,7 +2728,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
 
             ViewContext ctx = getViewContext();
             List<String> proteins = ctx.getList(DataRegion.SELECT_CHECKBOX_NAME);
@@ -2743,7 +2743,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
             exportProteinGroups(response, form, null);
         }
     }
@@ -2751,7 +2751,7 @@ public class MS2Controller extends SpringActionController
 
     private void exportProteinGroups(HttpServletResponse response, ExportForm form, List<String> proteins) throws Exception
     {
-        MS2Run run = validateRun(form.getRun());
+        MS2Run run = validateRun(form);
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         String where = null;
@@ -2819,7 +2819,7 @@ public class MS2Controller extends SpringActionController
 
     private void exportProteins(ExportForm form, HttpServletResponse response, String extraWhere, List<String> proteins) throws Exception
     {
-        MS2Run run = validateRun(form.getRun());
+        MS2Run run = validateRun(form);
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         if ("Excel".equals(form.getExportFormat()))
@@ -2846,7 +2846,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
 
             exportProteins(form, response, null, null);
         }
@@ -2858,7 +2858,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
 
             ViewContext ctx = getViewContext();
             List<String> proteins = ctx.getList(DataRegion.SELECT_CHECKBOX_NAME);
@@ -3213,7 +3213,7 @@ public class MS2Controller extends SpringActionController
 
     private void exportPeptides(ExportForm form, HttpServletResponse response, boolean selected) throws Exception
     {
-        MS2Run run = validateRun(form.run);
+        MS2Run run = validateRun(form);
 
         ActionURL currentURL = getViewContext().getActionURL();
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
@@ -3311,7 +3311,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
 
@@ -3329,7 +3329,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
             if (form.charge < 1 || form.charge > 3)
@@ -3346,7 +3346,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
 
             PeptideProphetGraphs.renderObservedVsPPScore(response, getContainer(), form.run, form.charge, form.cumulative);
         }
@@ -3358,7 +3358,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
 
@@ -3399,7 +3399,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
-            MS2Run run = validateRun(form.run);
+            MS2Run run = validateRun(form);
 
             String title = "Peptide Prophet Details";
             setTitle(title);
@@ -3439,7 +3439,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(RunForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
 
             ProteinProphetFile summary = MS2Manager.getProteinProphetFileByRun(form.run);
 
@@ -3453,7 +3453,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
-            MS2Run run = validateRun(form.run);
+            MS2Run run = validateRun(form);
 
             String title = "Protein Prophet Details";
             setTitle(title);
@@ -3687,7 +3687,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ColumnForm form, boolean reshow, BindException errors) throws Exception
         {
-            _run = validateRun(form.run);
+            _run = validateRun(form);
             _returnURL = form.getReturnActionURL();
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), _run);
@@ -3793,7 +3793,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ColumnForm form, boolean reshow, BindException errors) throws Exception
         {
-            _run = validateRun(form.run);
+            _run = validateRun(form);
 
             _returnURL = form.getReturnActionURL();
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), _run);
@@ -3922,7 +3922,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(MS2ViewForm form, boolean reshow, BindException errors) throws Exception
         {
-            _run = validateRun(form.getRun());
+            _run = validateRun(form);
 
             _returnURL = getViewContext().cloneActionURL().setAction(ShowRunAction.class);
             JspView<SaveViewBean> saveView = new JspView<SaveViewBean>("/org/labkey/ms2/saveView.jsp", new SaveViewBean());
@@ -3975,11 +3975,10 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class MS2ViewForm extends ReturnUrlForm
+    public static class MS2ViewForm extends RunForm
     {
         private String viewParams;
         private String name;
-        private int run;
         private boolean shared;
 
         public void setName(String name)
@@ -4000,16 +3999,6 @@ public class MS2Controller extends SpringActionController
         public String getViewParams()
         {
             return this.viewParams;
-        }
-
-        public void setRun(int run)
-        {
-            this.run = run;
-        }
-
-        public int getRun()
-        {
-            return run;
         }
 
         public boolean isShared()
@@ -4100,7 +4089,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
-            MS2Run run = validateRun(form.run);
+            MS2Run run = validateRun(form);
 
             long peptideId = form.getPeptideIdLong();
 
@@ -4147,7 +4136,7 @@ public class MS2Controller extends SpringActionController
                     {
                         form.run = file.getRun();
 
-                        MS2Run run = validateRun(form.run);
+                        MS2Run run = validateRun(form);
 
                         ActionURL url = getViewContext().cloneActionURL();
                         url.deleteParameter("proteinGroupId");
@@ -4161,7 +4150,7 @@ public class MS2Controller extends SpringActionController
                 }
             }
 
-            MS2Run run1 = validateRun(form.run);
+            MS2Run run1 = validateRun(form);
 
             ProteinProphetFile proteinProphet = run1.getProteinProphetFile();
             if (proteinProphet == null)
@@ -4283,7 +4272,7 @@ public class MS2Controller extends SpringActionController
             protein = ProteinManager.getProtein(form.getSeqIdInt());
             if (protein == null)
                 throw new NotFoundException("Could not find protein with SeqId " + form.getSeqIdInt());
-            ms2Run = validateRun(form.run);
+            ms2Run = validateRun(form);
             if (ms2Run == null)
                  throw new NotFoundException("Could not find run with Id " + form.getRun());
 
@@ -4331,7 +4320,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             MS2Run ms2Run;
-            ms2Run = validateRun(form.run);
+            ms2Run = validateRun(form);
             MS2Run[] runs = new MS2Run[1];
             runs[0]=ms2Run;
             QueryPeptideMS2RunView peptideView = new QueryPeptideMS2RunView(getViewContext(),runs);
@@ -4397,7 +4386,6 @@ public class MS2Controller extends SpringActionController
         private static AnnotViewBean getBean(Protein protein) throws Exception
         {
             int seqId = protein.getSeqId();
-            String[] empty = new String[0];
 
             MultiMap<String, String> identifiers = ProteinManager.getIdentifiersFromId(seqId);
 
@@ -4561,7 +4549,7 @@ public class MS2Controller extends SpringActionController
 
     protected void showElutionGraph(HttpServletResponse response, DetailsForm form, boolean showLight, boolean showHeavy) throws Exception
     {
-        validateRun(form.run);
+        validateRun(form);
 
         MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
 
@@ -4723,11 +4711,6 @@ public class MS2Controller extends SpringActionController
         {
             return null;
         }
-    }
-
-    private static String trimSafe(String s)
-    {
-        return (s == null ? "" : s.trim());
     }
 
     public static class TestMascotForm
@@ -5209,7 +5192,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class RunForm
+    public static class RunForm extends ReturnUrlForm
     {
         public enum PARAMS
         {
@@ -5217,6 +5200,7 @@ public class MS2Controller extends SpringActionController
         }
 
         int run = 0;
+        int fraction = 0;
         int tryptic;
         boolean expanded = false;
         boolean exportAsWebPage;
@@ -5224,8 +5208,6 @@ public class MS2Controller extends SpringActionController
         String columns;
         String proteinColumns;
         String proteinGroupingId;
-        ReturnURLString returnUrl;
-        ArrayList<String> errors = new ArrayList<String>();
 
         public void setExpanded(boolean expanded)
         {
@@ -5245,6 +5227,16 @@ public class MS2Controller extends SpringActionController
         public int getRun()
         {
             return run;
+        }
+
+        public int getFraction()
+        {
+            return fraction;
+        }
+
+        public void setFraction(int fraction)
+        {
+            this.fraction = fraction;
         }
 
         public void setTryptic(int tryptic)
@@ -5309,16 +5301,18 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getReturnActionURL()
         {
-            if (null != returnUrl)
+            ActionURL result = null;
+            try
             {
-                try
+                result = super.getReturnActionURL();
+                if (result != null)
                 {
-                    return new ActionURL(returnUrl);
+                    return result;
                 }
-                catch (Exception e)
-                {
-                    // Bad URL -- fall through
-                }
+            }
+            catch (Exception e)
+            {
+                // Bad URL -- fall through
             }
 
             // Bad or missing returnUrl -- go to showRun or showList
@@ -5328,16 +5322,6 @@ public class MS2Controller extends SpringActionController
                 return getShowRunURL(c, run);
             else
                 return getShowListURL(c);
-        }
-
-        public ReturnURLString getReturnUrl()
-        {
-            return returnUrl;
-        }
-
-        public void setReturnUrl(ReturnURLString returnUrl)
-        {
-            this.returnUrl = returnUrl;
         }
     }
 
@@ -5564,22 +5548,6 @@ public class MS2Controller extends SpringActionController
     {
         ActionURL url = getAddFileRunStatusURL();
         url.addParameter("error", message);
-        return url;
-    }
-
-
-    private ActionURL getAddFileRunStatusPathURL(String path)
-    {
-        ActionURL url = getAddFileRunStatusURL();
-        url.addParameter("path", path);
-        return url;
-    }
-
-
-    private ActionURL getAddFileRunStatusRunURL(int run)
-    {
-        ActionURL url = getAddFileRunStatusURL();
-        url.addParameter("run", run);
         return url;
     }
 
@@ -5834,7 +5802,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            MS2Run run = validateRun(form.getRun());
+            MS2Run run = validateRun(form);
 
             try
             {
@@ -5883,7 +5851,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
 
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
 
@@ -6157,7 +6125,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ElutionProfileForm form, boolean reshow, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
 
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
             PeptideQuantitation quant = peptide.getQuantitation();
@@ -6168,7 +6136,7 @@ public class MS2Controller extends SpringActionController
 
         public boolean handlePost(ElutionProfileForm form, BindException errors) throws Exception
         {
-            validateRun(form.run);
+            validateRun(form);
 
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
             if (peptide == null)

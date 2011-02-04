@@ -1269,6 +1269,7 @@ ms2/src/org/labkey/ms2/testMascot.jsp -text
 ms2/src/org/labkey/ms2/writer/BasePepXmlWriter.java -text
 ms2/webapp/MS2/externalData/ProtSprotOrgMap.txt -text
 ms2/webapp/MS2/images/runIcon.gif -text
+ms2/webapp/MS2/inlineViewDesigner.js -text
 ms2/webapp/ProteinCoverageMap.css -text
 ms2/webapp/WEB-INF/ms2/ms2Context.xml -text
 ms2/webapp/_images/gray.gif -text

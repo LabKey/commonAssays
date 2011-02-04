@@ -234,7 +234,7 @@ public class FlowManager
             ResultSet rs = null;
             try
             {
-                rs = Table.executeQuery(getSchema(), "SELECT RowId, Name FROM flow.Attribute", null, 0, false);
+                rs = Table.executeQuery(getSchema(), "SELECT RowId, Name FROM flow.Attribute", null, Table.ALL_ROWS, false);
                 while (rs.next())
                 {
                     int rowid = rs.getInt(1);

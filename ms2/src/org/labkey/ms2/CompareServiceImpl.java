@@ -85,6 +85,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
             form.setRunList(listId);
             form.setPeptideProphetProbability(getProbability(url, MS2Controller.PeptideFilteringFormElements.peptideProphetProbability));
             form.setPeptideFilterType(url.getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType));
+            form.setPivotType(url.getParameter(MS2Controller.PeptideFilteringFormElements.pivotType));
 
             ViewContext queryContext = new ViewContext(_context);
             queryContext.setActionURL(url);
@@ -129,10 +130,5 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
             catch (NumberFormatException e) {} // Just ignore if illegal value
         }
         return null;
-    }
-
-    public GWTComparisonResult getPeptideComparison(String originalURL)
-    {
-        throw new UnsupportedOperationException();
     }
 }

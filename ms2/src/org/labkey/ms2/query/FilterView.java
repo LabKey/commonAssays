@@ -17,7 +17,6 @@
 package org.labkey.ms2.query;
 
 import org.labkey.api.query.*;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.apache.commons.lang.ObjectUtils;
@@ -27,6 +26,7 @@ import java.io.Writer;
 import java.io.IOException;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.TreeMap;
 
 /**
  * User: jeckels
@@ -34,19 +34,15 @@ import java.util.LinkedHashMap;
  */
 public class FilterView extends QueryView
 {
-    private static final String PEPTIDE_FILTER_LINK_ID = "peptideFilterLink";
-    private static final String PROTEIN_GROUP_FILTER_LINK_ID = "proteinGroupFilterLink";
     public static final String PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON = "customViewRadioButton";
     public static final String PROTEIN_GROUPS_CUSTOM_VIEW_RADIO_BUTTON = "customViewProteinGroupRadioButton";
 
-    private final String _linkID;
     private final String _radioButtonID;
 
     public FilterView(ViewContext context, boolean peptides)
     {
         super(new MS2Schema(context.getUser(), context.getContainer()));
         setSettings(createSettings(context, peptides));
-        _linkID = peptides ? PEPTIDE_FILTER_LINK_ID : PROTEIN_GROUP_FILTER_LINK_ID;
         _radioButtonID = peptides ? PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON : PROTEIN_GROUPS_CUSTOM_VIEW_RADIO_BUTTON;
     }
 
@@ -55,20 +51,15 @@ public class FilterView extends QueryView
         return getSchema().getSettings(
                 context,
                 peptides ? MS2Controller.PEPTIDES_FILTER : MS2Controller.PROTEIN_GROUPS_FILTER,
-                peptides ? MS2Schema.TableType.Peptides.toString() : MS2Schema.HiddenTableType.ProteinGroupsFilter.toString());
+                peptides ? MS2Schema.HiddenTableType.PeptidesFilter.toString() : MS2Schema.HiddenTableType.ProteinGroupsFilter.toString());
     }
 
-    public void renderCustomizeViewLink(Writer out, String viewName) throws IOException
+    public String renderViewList(HttpServletRequest request, Writer out, String viewName) throws IOException
     {
-        ActionURL url = urlFor(QueryAction.chooseColumns);
-        url.addParameter(QueryParam.viewName, viewName);
-        url.addParameter(QueryParam.defaultTab, "filter");
-        out.write(textLink("edit view", url, _linkID));
-    }
-
-    public void renderViewList(HttpServletRequest request, Writer out, String viewName) throws IOException
-    {
-        Map<String, CustomView> customViews =   getQueryDef().getCustomViews(getUser(), request);
+        Map<String, CustomView> customViews = new TreeMap<String, CustomView>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, CustomView> savedViews = getQueryDef().getCustomViews(getUser(), request);
+        savedViews.remove(null);
+        customViews.putAll(savedViews);
         Map<String, String> options = new LinkedHashMap<String, String>();
         options.put("", "<default>");
         for (CustomView view : customViews.values())
@@ -89,18 +80,10 @@ public class FilterView extends QueryView
             currentMissing = true;
         }
         if (count <= 1)
-            return;
-        out.write("Custom view:");
-        out.write("<select name=\"" + h(param(QueryParam.viewName)) + "\"");
-        ActionURL url = urlFor(QueryAction.chooseColumns);
-        url.deleteParameter(QueryParam.viewName.toString());
-        url.addParameter(QueryParam.defaultTab, "filter");
-        url.addParameter(QueryParam.viewName, "");
-        out.write(" onchange=\"document.getElementById('");
-        out.write(_linkID);
-        out.write("').href='");
-        out.write(url.toString());
-        out.write("' + this.value; document.getElementById('" + _radioButtonID + "').checked=true;\"");
+            return null;
+        String id = h(param(QueryParam.viewName));
+        out.write("<select id=\"" + id + "\" name=\"" + id + "\"");
+        out.write("onchange=\"document.getElementById('" + _radioButtonID + "').checked=true;\"");
         out.write(">");
         if (currentMissing)
         {
@@ -122,5 +105,6 @@ public class FilterView extends QueryView
             out.write("</option>");
         }
         out.write("</select>");
+        return id;
     }
 }

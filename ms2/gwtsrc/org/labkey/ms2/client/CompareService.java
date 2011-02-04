@@ -27,7 +27,5 @@ public interface CompareService extends RemoteService
 {
     public GWTComparisonResult getProteinProphetComparison(String originalURL);
 
-    public GWTComparisonResult getPeptideComparison(String originalURL);
-
     public GWTComparisonResult getQueryCrosstabComparison(String originalURL, String comparisonGroup);
 }

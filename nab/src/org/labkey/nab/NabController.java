@@ -689,12 +689,9 @@ public class NabController extends SpringActionController
 
     private ModelAndView addHeaderView(HttpView view, ActionURL printLink, Plate dataFilePlate) throws Exception
     {
-        ActionURL customizeLink = null;
-        if (view instanceof PlateQueryView)
-            customizeLink = ((PlateQueryView) view).getCustomizeURL();
         JspView<HeaderBean> headerView = new JspView<HeaderBean>("/org/labkey/nab/header.jsp",
                 new HeaderBean(getViewContext(), printLink,
-                        dataFilePlate != null ? OldNabManager.get().getDataFileDownloadLink(dataFilePlate) : null, customizeLink));
+                        dataFilePlate != null ? OldNabManager.get().getDataFileDownloadLink(dataFilePlate) : null));
         return new VBox(headerView, view);
     }
 
@@ -703,14 +700,12 @@ public class NabController extends SpringActionController
     {
         private ActionURL _printURL;
         private ActionURL _datafileURL;
-        private ActionURL _customizeURL;
         private boolean _writer;
 
-        public HeaderBean(ViewContext context, ActionURL printLink, ActionURL dataFileLink, ActionURL customizeLink)
+        public HeaderBean(ViewContext context, ActionURL printLink, ActionURL dataFileLink)
         {
             _printURL = printLink;
             _datafileURL = dataFileLink;
-            _customizeURL = customizeLink;
             _writer = context.getContainer().hasPermission(context.getUser(), InsertPermission.class);
         }
 
@@ -732,11 +727,6 @@ public class NabController extends SpringActionController
         public boolean showNewRunLink()
         {
             return _writer;
-        }
-
-        public ActionURL getCustomizeURL()
-        {
-            return _customizeURL;
         }
     }
 

@@ -66,11 +66,7 @@ public class MS2VennDiagramView extends VennDiagramView implements EntryPoint
     
     protected void requestComparison(String originalURL, String comparisonGroup, AsyncCallback<GWTComparisonResult> callbackHandler)
     {
-        if ("Peptides".equalsIgnoreCase(comparisonGroup))
-        {
-            getService().getPeptideComparison(originalURL, callbackHandler);
-        }
-        else if ("Proteins".equalsIgnoreCase(comparisonGroup))
+        if ("Proteins".equalsIgnoreCase(comparisonGroup))
         {
             getService().getProteinProphetComparison(originalURL, callbackHandler);
         }

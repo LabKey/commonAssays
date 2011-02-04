@@ -21,6 +21,7 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.ms2.search.ProteinSearchBean" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
@@ -33,6 +34,9 @@
     String viewName = bean.getPeptideCustomViewName(ctx);
     String separator = bean.isHorizontal() ? "<td>&nbsp;</td>" : "</tr><tr>";
 %>
+
+<script type="text/javascript" src="<%= org.labkey.api.settings.AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
+
 <form action="<%= url %>" method="get">
     <table>
         <tr>
@@ -65,13 +69,13 @@
                 <td valign="center" height="100%">
                     <span style="padding-right: 10px">Peptide filter: <input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" value="none" <%= bean.getForm().isNoPeptideFilter() ? "checked=\"true\"" : "" %> />None<%= helpPopup("Peptide Filter: None", "Do not filter the protein results based on peptide criteria.") %></span>
                     <span style="padding-right: 10px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="peptideProphetRadioButton" value="peptideProphet" <%= bean.getForm().isPeptideProphetFilter() ? "checked=\"true\"" : "" %>/>Pep prob &ge; <input onfocus="document.getElementById('peptideProphetRadioButton').checked=true;" type="text" size="1" name="<%= MS2Controller.PeptideFilteringFormElements.peptideProphetProbability %>" value="<%= bean.getForm().getPeptideProphetProbability() == null ? "" : bean.getForm().getPeptideProphetProbability() %>" /><%= helpPopup("Peptide Filter: PeptideProphet", "Only show protein groups where at least one peptide has a PeptideProphet probability above some threshold.") %></span>
-                    <span style="padding-right: 10px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="customViewRadioButton" value="customView" <%= bean.getForm().isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/><%
-                        bean.getPeptideView(ctx).renderViewList(request, out, viewName);
-                        %><%= helpPopup("Peptide Filter: Custom", "Only show protein groups where at least one peptide meets a custom filter.") %>
-                        <%
-                        bean.getPeptideView(ctx).renderCustomizeViewLink(out, viewName);
-                        %>
+                    <span style="padding-right: 10px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="customViewRadioButton" value="customView" <%= bean.getForm().isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>
+                        Custom filter:
+                        <% String peptideViewSelectId = bean.getPeptideView(ctx).renderViewList(request, out, viewName); %>
+                        <%= PageFlowUtil.textLink("Create or Edit View", (String)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;", "editPeptidesViewLink") %>
                     </span>
+                    <br/>
+                    <span id="peptidesCustomizeView"></span>
                 </td>
             </tr>
         </table>

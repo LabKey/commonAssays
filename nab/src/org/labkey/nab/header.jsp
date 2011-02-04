@@ -49,14 +49,6 @@
     {
 %>
 <%=textLink("Download Datafile", bean.getDatafileURL())%>
-<%
-    }
-    if (bean.getCustomizeURL() != null)
-    {
-%>
-<%=textLink("Customize View", bean.getCustomizeURL())%>
-<%
-    }
-%>
+<% } %>
 <br>
 <labkey:errors/>

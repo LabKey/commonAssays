@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.query;
 
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.ColumnInfo;
@@ -30,7 +31,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.sql.Types;
 
 /**
  * User: jeckels
@@ -85,7 +85,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
                 sql.append("Run");
                 sql.append(run.getRun());
                 sql.append("ProteinGroupId");
-                ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, Types.INTEGER);
+                ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, JdbcType.INTEGER);
                 proteinGroupIdColumn.setLabel(run.getDescription());
                 proteinGroupIdColumn.setIsUnselectable(true);
                 runColumns.add(proteinGroupIdColumn);
@@ -107,7 +107,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
 
         if (runColumns.isEmpty())
         {
-            ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run", new SQLFragment("<ILLEGAL STATE>"), Types.INTEGER);
+            ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run", new SQLFragment("<ILLEGAL STATE>"), JdbcType.INTEGER);
             proteinGroupIdColumn.setIsUnselectable(true);
             proteinGroupIdColumn.setFk(new LookupForeignKey("RowId")
             {
@@ -131,7 +131,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
             runCountSQL.append("CASE WHEN " + runCol.getAlias() + "$.RowId IS NULL THEN 0 ELSE 1 END ");
         }
         runCountSQL.append(")");
-        ExprColumn runCount = new ExprColumn(this, "RunCount", runCountSQL, Types.INTEGER, runColumns.toArray(new ColumnInfo[runColumns.size()]));
+        ExprColumn runCount = new ExprColumn(this, "RunCount", runCountSQL, JdbcType.INTEGER, runColumns.toArray(new ColumnInfo[runColumns.size()]));
         addColumn(runCount);
 
         SQLFragment patternSQL = new SQLFragment("(");
@@ -151,7 +151,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
             }
         }
         patternSQL.append(")");
-        ExprColumn patternColumn = new ExprColumn(this, "Pattern", patternSQL, Types.INTEGER, runColumns.toArray(new ColumnInfo[runColumns.size()]));
+        ExprColumn patternColumn = new ExprColumn(this, "Pattern", patternSQL, JdbcType.INTEGER, runColumns.toArray(new ColumnInfo[runColumns.size()]));
         addColumn(patternColumn);
 
         defaultCols.add(FieldKey.fromParts("RunCount"));
