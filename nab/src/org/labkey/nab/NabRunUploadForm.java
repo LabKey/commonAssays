@@ -16,6 +16,7 @@
 
 package org.labkey.nab;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.exp.*;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayFileWriter;
@@ -168,13 +169,13 @@ public class NabRunUploadForm extends PlateUploadForm<NabAssayProvider> implemen
             return super.getDefaultValues(domain);
     }
 
-    @Override
+    @Override @NotNull
     public Map<String, File> getUploadedData() throws ExperimentException
     {
         // we don't want to re-populate the upload form with the re-run file if this is a reshow due to error during
         // a re-upload process:
         Map<String, File> currentUpload = super.getUploadedData();
-        if (currentUpload == null || currentUpload.isEmpty())
+        if (currentUpload.isEmpty())
         {
             ExpRun reRun = getReRun();
             if (reRun != null)

@@ -205,7 +205,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
             deriveFractions(form);
             Pair<ExpRun, ExpExperiment> result = null;
             // Then upload a bunch of runs
-            while (!form.getSelectedDataCollector().getFileQueue(form).isEmpty())
+            while (!PipelineDataCollector.getFileQueue(form).isEmpty())
             {
                 result = super.saveExperimentRun(context, batch);
                 batch = result.getValue();

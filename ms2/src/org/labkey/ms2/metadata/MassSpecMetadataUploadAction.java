@@ -66,7 +66,7 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
         {
             Container c = form.getContainer();
 
-            List<Map<String,File>> allFiles = form.getSelectedDataCollector().getFileQueue(form);
+            List<Map<String,File>> allFiles = PipelineDataCollector.getFileQueue(form);
 
             for (Map<String, File> fileSet : allFiles)
             {
@@ -122,7 +122,7 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
 
         // Show the batch step if we have batch properties or might be a fractions search
         return super.showBatchStep(form, batchDomain) ||
-            form.getSelectedDataCollector().getFileQueue(form).size() > 1;
+            PipelineDataCollector.getFileQueue(form).size() > 1;
     }
 
     @Override

@@ -16,6 +16,7 @@
 
 package org.labkey.viability;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.UploadWizardAction;
@@ -256,13 +257,13 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
         return ret;
     }
 
-    @Override
+    @Override @NotNull
     public Map<String, File> getUploadedData() throws ExperimentException
     {
         // We don't want to re-populate the upload form with the re-run file if this is a reshow due to error during
         // a re-upload process:
         Map<String, File> currentUpload = super.getUploadedData();
-        if (currentUpload == null || currentUpload.isEmpty())
+        if (currentUpload.isEmpty())
         {
             ExpRun reRun = getReRun();
             if (reRun != null)
