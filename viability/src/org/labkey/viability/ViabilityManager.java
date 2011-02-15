@@ -174,8 +174,12 @@ public class ViabilityManager
 
     private static void insertSpecimens(User user, ViabilityResult result) throws SQLException
     {
-//        assert result.getSpecimenIDs() != null && result.getSpecimenIDs().size() > 0;
-        List<String> specimens = result.getSpecimenIDs();
+        insertSpecimens(user, result.getRowID(), result.getSpecimenIDs());
+    }
+
+    private static void insertSpecimens(User user, int resultId, List<String> specimens) throws SQLException
+    {
+//        assert specimens != null && specimens.size() > 0;
         Collections.sort(specimens);
         for (int index = 0; index < specimens.size(); index++)
         {
@@ -184,7 +188,7 @@ public class ViabilityManager
                 continue;
             
             Map<String, Object> resultSpecimen = new HashMap<String, Object>();
-            resultSpecimen.put("ResultID", result.getRowID());
+            resultSpecimen.put("ResultID", resultId);
             resultSpecimen.put("SpecimenID", specimens.get(index));
             resultSpecimen.put("SpecimenIndex", index);
 
