@@ -58,6 +58,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         _mascotUserPassword = appProps.getMascotUserPassword();
 
         header("Mascot search for " + getBaseName());
+        writeInputFilesToLog();
     }
 
     public MascotPipelineJob(MascotPipelineJob job, File fileFraction)

@@ -37,7 +37,7 @@ public class MS2SearchForm extends MS2PipelineForm
 
     public void setSequenceDB(String sequenceDB)
     {
-        this.sequenceDB = (sequenceDB == null ? new String() : sequenceDB);
+        this.sequenceDB = (sequenceDB == null ? "" : sequenceDB);
     }
 
     public String getConfigureXml()

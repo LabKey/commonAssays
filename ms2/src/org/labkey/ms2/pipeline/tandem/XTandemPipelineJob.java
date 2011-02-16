@@ -53,6 +53,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
         super(protocol, XTandemCPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
         header("X! Tandem search for " + getBaseName());
+        writeInputFilesToLog();
     }
 
     public XTandemPipelineJob(XTandemPipelineJob job, File fileFraction)

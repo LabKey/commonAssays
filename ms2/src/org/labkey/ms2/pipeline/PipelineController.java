@@ -212,7 +212,6 @@ public class PipelineController extends SpringActionController
     }
 
 
-
     @RequiresPermissionClass(InsertPermission.class)
     public class SearchAction extends FormViewAction<MS2SearchForm>
     {
@@ -391,7 +390,7 @@ public class PipelineController extends SpringActionController
                 {
                     throw new NotFoundException("No files specified");
                 }
-                List<File> mzXMLFiles = form.getValidatedFiles(getContainer());
+                List<File> mzXMLFiles = form.getValidatedFiles(getContainer(), true);
 
                 _protocol.getFactory().ensureDefaultParameters(_root);
 
@@ -406,7 +405,27 @@ public class PipelineController extends SpringActionController
                 AbstractMS2SearchPipelineJob job =
                         _protocol.createPipelineJob(getViewBackgroundInfo(), _root, mzXMLFiles, fileParameters);
 
-                PipelineService.get().queueJob(job);
+                boolean allFilesReady = true;
+
+                for (File mzXMLFile : mzXMLFiles)
+                {
+                    if (!NetworkDrive.exists(mzXMLFile))
+                    {
+                        allFilesReady = false;
+                        break;
+                    }
+                }
+
+                if (allFilesReady)
+                {
+                    PipelineService.get().queueJob(job);
+                }
+                else
+                {
+                    PipelineJobService.get().getStatusWriter().setStatus(job, PipelineJob.WAITING_FOR_FILES, null, true);
+                    PipelineJobService.get().getJobStore().storeJob(job);
+                    job.getLogger().info("Job created, but not yet submitted because not all files are available");
+                }
             }
             catch (IllegalArgumentException e)
             {
@@ -701,35 +720,20 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static class SequenceDBForm
-    {
-        private MultipartFile sequenceDBFile;
-
-        public MultipartFile getSequenceDBFile()
-        {
-            return sequenceDBFile;
-        }
-
-        public void setSequenceDBFile(MultipartFile sequenceDBFile)
-        {
-            this.sequenceDBFile = sequenceDBFile;
-        }
-    }
-
     @RequiresPermissionClass(AdminPermission.class)
-    public class AddSequenceDBAction extends FormViewAction<SequenceDBForm>
+    public class AddSequenceDBAction extends FormViewAction<Object>
     {
-        public void validateCommand(SequenceDBForm form, Errors errors)
+        public void validateCommand(Object form, Errors errors)
         {
         }
 
-        public ModelAndView getView(SequenceDBForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(Object form, boolean reshow, BindException errors) throws Exception
         {
             setHelpTopic(getHelpTopic("MS2-Pipeline/addSequenceDB"));
-            return new JspView<SequenceDBForm>(PipelineController.class, "addSequenceDB.jsp", form, errors);
+            return new JspView<Object>(PipelineController.class, "addSequenceDB.jsp", form, errors);
         }
 
-        public boolean handlePost(SequenceDBForm form, BindException errors) throws Exception
+        public boolean handlePost(Object form, BindException errors) throws Exception
         {
             Map<String, MultipartFile> fileMap = getFileMap();
             MultipartFile ff = fileMap.get("sequenceDBFile");
@@ -782,7 +786,7 @@ public class PipelineController extends SpringActionController
             return true;
         }
 
-        public ActionURL getSuccessURL(SequenceDBForm form)
+        public ActionURL getSuccessURL(Object form)
         {
             return urlProjectStart(getContainer());
         }

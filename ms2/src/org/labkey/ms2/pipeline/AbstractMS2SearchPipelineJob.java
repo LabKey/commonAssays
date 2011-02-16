@@ -106,6 +106,14 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         _fractions = job._fractions;
     }
 
+    protected void writeInputFilesToLog()
+    {
+        for (File file : getInputFiles())
+        {
+            info(file.getName());
+        }
+    }
+
     public File findInputFile(String name)
     {
         for (File fileInput : getInputFiles())

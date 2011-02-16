@@ -47,6 +47,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
         super(protocol, SequestLocalPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
         header("Sequest search for " + getBaseName());
+        writeInputFilesToLog();
     }
 
     public SequestPipelineJob(SequestPipelineJob job, File fileFraction)

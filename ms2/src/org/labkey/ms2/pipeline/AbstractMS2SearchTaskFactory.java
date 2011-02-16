@@ -78,6 +78,6 @@ abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractM
                 return f;
             }
         }
-        throw new PipelineJobException("Could not find a file in '" + dataDirectory + "' that matches input types: " + getInputTypes());
+        throw new PipelineJobException("Could not find a '" + baseName + "' file in '" + dataDirectory + "' that matches input types: " + getInputTypes());
     }
 }
