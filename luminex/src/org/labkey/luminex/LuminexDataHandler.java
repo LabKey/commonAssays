@@ -619,11 +619,11 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 case BEYOND_RANGE:
                     if (dataRow.getFi() != null)
                     {
-                        if (minStandardFI != null && dataRow.getFi().doubleValue() < minStandardFI.doubleValue())
+                        if (minStandardFI != null && dataRow.getFi().doubleValue() < minStandardFI.doubleValue() && minStandardObsConc != null)
                         {
                             obsConc = dataRow.getDilution().doubleValue() * minStandardObsConc.doubleValue();
                         }
-                        else if (maxStandardFI != null && dataRow.getFi().doubleValue() > maxStandardFI.doubleValue())
+                        else if (maxStandardFI != null && dataRow.getFi().doubleValue() > maxStandardFI.doubleValue() && maxStandardObsConc != null)
                         {
                             obsConc = dataRow.getDilution().doubleValue() * maxStandardObsConc.doubleValue();
                         }
