@@ -20,11 +20,13 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.study.assay.AssayUploadXarContext;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
@@ -41,6 +43,7 @@ import java.util.*;
 public class ElispotDataHandler extends AbstractElispotDataHandler implements TransformDataHandler
 {
     public static final AssayDataType ELISPOT_DATA_TYPE = new AssayDataType("ElispotAssayData", new FileType(Arrays.asList(".txt", ".xls"), ".txt"));
+    public static final DataType ELISPOT_TRANSFORMED_DATA_TYPE = new DataType("ElispotTransformedData"); // a marker data type
 
     class ElispotFileParser implements ElispotDataFileParser
     {
@@ -67,11 +70,17 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             ElispotAssayProvider provider = (ElispotAssayProvider)AssayService.get().getProvider(protocol);
             PlateTemplate template = provider.getPlateTemplate(container, protocol);
 
-            for (ObjectProperty property : run.getObjectProperties().values())
+            Map<String, DomainProperty> runProperties = new HashMap<String, DomainProperty>();
+            for (DomainProperty column : provider.getRunDomain(protocol).getProperties())
+                runProperties.put(column.getName(), column);
+
+            if (runProperties.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
             {
-                if (ElispotAssayProvider.READER_PROPERTY_NAME.equals(property.getName()))
+                DomainProperty readerProp = runProperties.get(ElispotAssayProvider.READER_PROPERTY_NAME);
+                if (_context instanceof AssayUploadXarContext)
                 {
-                    ElispotPlateReaderService.I reader = ElispotPlateReaderService.getPlateReaderFromName(property.getStringValue(), _info.getContainer());
+                    Map<DomainProperty, String> runPropValues = ((AssayUploadXarContext)_context).getContext().getRunProperties();
+                    ElispotPlateReaderService.I reader = ElispotPlateReaderService.getPlateReaderFromName(runPropValues.get(readerProp), _info.getContainer());
                     Plate plate = initializePlate(_dataFile, template, reader);
 
                     List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
@@ -89,13 +98,12 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                 Well well = plate.getWell(pos.getRow(), pos.getColumn());
                                 Map<String, Object> row = new LinkedHashMap<String, Object>();
 
-                                Lsid dataRowLsid = getDataRowLsid(_data.getLSID(), pos);
-
-                                row.put(DATA_ROW_LSID_PROPERTY, dataRowLsid.toString());
                                 row.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
                                 row.put(SFU_PROPERTY_NAME, well.getValue());
                                 row.put(WELLGROUP_PROPERTY_NAME, group.getName());
                                 row.put(WELLGROUP_LOCATION_PROPERTY, pos.toString());
+                                row.put(WELL_ROW_PROPERTY, pos.getRow());
+                                row.put(WELL_COLUMN_PROPERTY, pos.getColumn());
 
                                 results.add(row);
                             }
@@ -123,7 +131,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
 
         Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
-        datas.put(ELISPOT_DATA_TYPE, parser.getResults());
+        datas.put(ELISPOT_TRANSFORMED_DATA_TYPE, parser.getResults());
 
         return datas;
     }

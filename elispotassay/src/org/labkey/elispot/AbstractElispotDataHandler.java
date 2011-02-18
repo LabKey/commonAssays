@@ -52,9 +52,9 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     public static final String SFU_PROPERTY_NAME = "SpotCount";
     public static final String WELLGROUP_PROPERTY_NAME = "WellgroupName";
     public static final String WELLGROUP_LOCATION_PROPERTY = "WellgroupLocation";
+    public static final String WELL_ROW_PROPERTY = "WellRow";
+    public static final String WELL_COLUMN_PROPERTY = "WellColumn";
     public static final String ANTIGEN_WELLGROUP_PROPERTY_NAME = "AntigenWellgroupName";
-
-    public static final String DATA_ROW_LSID_PROPERTY = "Data Row LSID";
 
     public interface ElispotDataFileParser
     {
@@ -77,19 +77,26 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         try {
             Container container = data.getContainer();
 
+            ExpData[] runData = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
+            assert(runData.length == 1);
+
             for (Map<String, Object> row : inputData)
             {
-                if (!row.containsKey(DATA_ROW_LSID_PROPERTY))
-                    throw new ExperimentException("The row must contain a value for the data row LSID : " + DATA_ROW_LSID_PROPERTY);
+                if (!row.containsKey(WELL_ROW_PROPERTY) || !row.containsKey(WELL_COLUMN_PROPERTY))
+                    throw new ExperimentException("The row must contain values for well row and column locations : " + WELL_ROW_PROPERTY + ", " + WELL_COLUMN_PROPERTY);
 
-                String dataRowLsid = row.get(DATA_ROW_LSID_PROPERTY).toString();
+                int rowPos = (Integer)row.get(WELL_ROW_PROPERTY);
+                int colPos = (Integer)row.get(WELL_COLUMN_PROPERTY);
+                String dataRowLsid = ElispotDataHandler.getDataRowLsid(runData[0].getLSID(), rowPos, colPos).toString();
 
                 OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
                 List<ObjectProperty> results = new ArrayList<ObjectProperty>();
 
                 for (Map.Entry<String, Object> prop : row.entrySet())
                 {
-                    if (prop.getKey().equals(DATA_ROW_LSID_PROPERTY))
+                    if (prop.getKey().equals(WELL_ROW_PROPERTY))
+                        continue;
+                    if (prop.getKey().equals(WELL_COLUMN_PROPERTY))
                         continue;
                     results.add(getObjectProperty(container, protocol, dataRowLsid, prop.getKey(), prop.getValue()));
                 }

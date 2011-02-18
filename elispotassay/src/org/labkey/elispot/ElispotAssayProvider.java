@@ -168,7 +168,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider
         Pair<Domain, Map<DomainProperty, Object>> result =  super.createRunDomain(c, user);
         Domain runDomain = result.getKey();
 
-        addProperty(runDomain, "Protocol", "Protocol", PropertyType.STRING);
+        addProperty(runDomain, "ProtocolName", "ProtocolName", PropertyType.STRING);
         addProperty(runDomain, "LabID", "Lab ID", PropertyType.STRING);
         addProperty(runDomain, "PlateID", "Plate ID", PropertyType.STRING);
         addProperty(runDomain, "TemplateID", "Template ID", PropertyType.STRING);

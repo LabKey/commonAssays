@@ -16,6 +16,7 @@
 
 package org.labkey.elispot;
 
+import org.apache.commons.lang.StringUtils;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
@@ -291,6 +292,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 if (data.length != 1)
                     throw new ExperimentException("Elispot should only upload a single file per run.");
 
+                String dataLsid = data[0].getLSID();
                 PlateTemplate template = provider.getPlateTemplate(form.getContainer(), form.getProtocol());
                 Plate plate = null;
 
@@ -325,7 +327,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                         for (Position pos : group.getPositions())
                         {
                             results.clear();
-                            Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data[0].getLSID(), pos);
+                            Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(dataLsid, pos);
 
                             for (DomainProperty dp : antigenProps)
                             {
@@ -353,7 +355,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                                         group.getName(), PropertyType.STRING);
                                 results.add(op);
 
-                                OntologyManager.ensureObject(form.getContainer(), dataRowLsid.toString(),  data[0].getLSID());
+                                OntologyManager.ensureObject(form.getContainer(), dataRowLsid.toString(),  dataLsid);
                                 OntologyManager.insertProperties(form.getContainer(), dataRowLsid.toString(), results.toArray(new ObjectProperty[results.size()]));
                             }
                         }
@@ -378,7 +380,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                         if (material != null)
                         {
                             List<ObjectProperty> antigenResults = new ArrayList<ObjectProperty>();
-                            Lsid rowLsid = ElispotDataHandler.getAntigenRowLsid(data[0].getLSID(), material.getName());
+                            Lsid rowLsid = ElispotDataHandler.getAntigenRowLsid(dataLsid, material.getName());
 
                             for (WellGroup antigenGroup : group.getOverlappingGroups(WellGroup.Type.ANTIGEN))
                             {
@@ -390,7 +392,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                                 {
                                     if (group.contains(pos))
                                     {
-                                        Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data[0].getLSID(), pos);
+                                        Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(dataLsid, pos);
                                         Map<String, ObjectProperty> props = OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString());
 
                                         if (props.containsKey(spotCountURI))
@@ -413,21 +415,30 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                                     // for each antigen group, create two columns for mean and median values
                                     String antigenName = postedPropMap.get(key);
 
-                                    ObjectProperty mean = ElispotDataHandler.getAntigenResultObjectProperty(form.getContainer(),
-                                            form.getProtocol(),
-                                            rowLsid.toString(),
-                                            antigenName + "_Mean",
-                                            stats.getMean(),
-                                            PropertyType.DOUBLE, "0.0");
-                                    ObjectProperty median = ElispotDataHandler.getAntigenResultObjectProperty(form.getContainer(),
-                                            form.getProtocol(),
-                                            rowLsid.toString(),
-                                            antigenName + "_Median",
-                                            stats.getMedian(),
-                                            PropertyType.DOUBLE, "0.0");
+                                    if (StringUtils.isEmpty(antigenName))
+                                        antigenName = antigenGroup.getName();
 
-                                    antigenResults.add(mean);
-                                    antigenResults.add(median);
+                                    if (!Double.isNaN(stats.getMean()))
+                                    {
+                                        ObjectProperty mean = ElispotDataHandler.getAntigenResultObjectProperty(form.getContainer(),
+                                                form.getProtocol(),
+                                                rowLsid.toString(),
+                                                antigenName + "_Mean",
+                                                stats.getMean(),
+                                                PropertyType.DOUBLE, "0.0");
+                                        antigenResults.add(mean);
+                                    }
+
+                                    if (!Double.isNaN(stats.getMedian()))
+                                    {
+                                        ObjectProperty median = ElispotDataHandler.getAntigenResultObjectProperty(form.getContainer(),
+                                                form.getProtocol(),
+                                                rowLsid.toString(),
+                                                antigenName + "_Median",
+                                                stats.getMedian(),
+                                                PropertyType.DOUBLE, "0.0");
+                                        antigenResults.add(median);
+                                    }
                                 }
                             }
 
@@ -440,7 +451,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                                         material.getLSID(), PropertyType.STRING, null);
                                 antigenResults.add(sample);
 
-                                OntologyManager.ensureObject(form.getContainer(), rowLsid.toString(),  data[0].getLSID());
+                                OntologyManager.ensureObject(form.getContainer(), rowLsid.toString(),  dataLsid);
                                 OntologyManager.insertProperties(form.getContainer(), rowLsid.toString(), antigenResults.toArray(new ObjectProperty[antigenResults.size()]));
                             }
                         }
