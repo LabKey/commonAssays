@@ -406,7 +406,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
             File viabilityFiles = new File(projectRoot, "sampledata/viability");
             assertTrue("Expected to find viability test files: " + viabilityFiles.getAbsolutePath(), viabilityFiles.exists());
 
-            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(viabilityFiles, "122810.EP5.csv"));
+            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(viabilityFiles, "122810.EP5.CSV"));
 
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 16 rows", 16, rows.size());
