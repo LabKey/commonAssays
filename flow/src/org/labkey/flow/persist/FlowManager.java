@@ -718,7 +718,7 @@ public class FlowManager
             List<Aggregate> aggregates = Collections.singletonList(new Aggregate("FCSFileCount", Aggregate.Type.SUM));
             List<ColumnInfo> columns = Collections.singletonList(table.getColumn("FCSFileCount"));
 */
-            Map<String, Aggregate.Result> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, filter, false);
+            Map<String, Aggregate.Result> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter, false);
             Aggregate.Result result = agg.get(aggregates.get(0).getColumnName());
             if (result != null)
                 return ((Long)result.getValue()).intValue();
@@ -742,7 +742,7 @@ public class FlowManager
             List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
             SimpleFilter filter = new SimpleFilter("Sample/Name", null, hasSamples ? CompareType.NONBLANK : CompareType.ISBLANK);
 
-            Map<String, Aggregate.Result> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, filter, false);
+            Map<String, Aggregate.Result> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter, false);
             Aggregate.Result result = agg.get(aggregates.get(0).getColumnName());
             if (result != null)
                 return ((Long)result.getValue()).intValue();
@@ -766,7 +766,7 @@ public class FlowManager
         {
             List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.Type.COUNT));
             List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
-            Map<String, Aggregate.Result> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, filter, false);
+            Map<String, Aggregate.Result> agg = Table.selectAggregatesForDisplay(table, aggregates, columns, null, filter, false);
             Aggregate.Result result = agg.get("RowId");
             if (result != null)
                 return ((Long)result.getValue()).intValue();

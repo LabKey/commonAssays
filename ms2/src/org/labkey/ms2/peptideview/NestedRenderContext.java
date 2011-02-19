@@ -130,7 +130,8 @@ public class NestedRenderContext extends RenderContext
     }
 
     @Override
-    public Map<String, Aggregate.Result> getAggregates(List<DisplayColumn> displayColumns, TableInfo tinfo, String dataRegionName, List<Aggregate> aggregatesIn, boolean async) throws SQLException, IOException
+    public Map<String, Aggregate.Result> getAggregates(List<DisplayColumn> displayColumns, TableInfo tinfo, String dataRegionName, List<Aggregate> aggregatesIn,
+            Map<String,Object> parameters,  boolean async) throws SQLException, IOException
     {
         if (aggregatesIn == null || aggregatesIn.isEmpty())
             return Collections.emptyMap();
@@ -140,7 +141,7 @@ public class NestedRenderContext extends RenderContext
         if (_nestingOption == null)
         {
             // If we're not a nested query, don't do anything special
-            return super.getAggregates(displayColumns, tinfo, dataRegionName, aggregatesIn, async);
+            return super.getAggregates(displayColumns, tinfo, dataRegionName, aggregatesIn, parameters, async);
         }
 
         // We want to do the aggregate query on the grouped data, since ultimately we want
@@ -167,10 +168,10 @@ public class NestedRenderContext extends RenderContext
         {
             if (async)
             {
-                return Table.selectAggregatesForDisplayAsync(aggTableInfo, aggregatesIn, Collections.<ColumnInfo>emptyList(), new SimpleFilter(), getCache(), getViewContext().getResponse());
+                return Table.selectAggregatesForDisplayAsync(aggTableInfo, aggregatesIn, Collections.<ColumnInfo>emptyList(), null, new SimpleFilter(), getCache(), getViewContext().getResponse());
             }
 
-            return Table.selectAggregatesForDisplay(aggTableInfo, aggregatesIn, Collections.<ColumnInfo>emptyList(), new SimpleFilter(), getCache());
+            return Table.selectAggregatesForDisplay(aggTableInfo, aggregatesIn, Collections.<ColumnInfo>emptyList(), null, new SimpleFilter(), getCache());
         }
 
         return Collections.emptyMap();
