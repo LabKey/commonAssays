@@ -165,7 +165,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
                             public boolean accept(File pathname)
                             {
                                 String name = pathname.getName();
-                                return name.startsWith(baseName) && name.endsWith("ms.png");
+                                return name.startsWith(baseName) && name.endsWith(".png");
                             }
                         });
                         if (relatedFiles != null)

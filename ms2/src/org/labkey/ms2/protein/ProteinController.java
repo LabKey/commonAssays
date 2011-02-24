@@ -114,7 +114,7 @@ public class ProteinController extends SpringActionController
             };
 
             queryView.setShowExportButtons(true);
-            queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+            queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
 
             ActionURL url;
 

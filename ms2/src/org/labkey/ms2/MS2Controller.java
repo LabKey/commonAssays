@@ -2925,6 +2925,7 @@ public class MS2Controller extends SpringActionController
             // Disable R and other reporting until there's an implementation that respects the search criteria
             proteinsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
+            proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
             SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
             Integer[] seqIds = getSeqIds(form);
             if (seqIds.length <= 500)
@@ -2969,6 +2970,7 @@ public class MS2Controller extends SpringActionController
                 }
 
             };
+            groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
             // Disable R and other reporting until there's an implementation that respects the search criteria
             groupsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
@@ -4426,7 +4428,7 @@ public class MS2Controller extends SpringActionController
             if (null != IPIds && !IPIds.isEmpty())
             {
                 Set<String> IPIset = new HashSet<String>();
-    
+
                 for (String idWithoutVersion : IPIds)
                 {
                     int dotIndex = idWithoutVersion.indexOf(".");
@@ -6259,21 +6261,17 @@ public class MS2Controller extends SpringActionController
 
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
-            // just grab any root, it doesn't matter
-            for (PipeRoot root : PipelineService.get().getAllPipelineRoots().values())
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            if (root == null || !root.isValid())
             {
-                if (root.isValid())
-                {
-                    ViewBackgroundInfo info = getViewBackgroundInfo();
-                    _container = root.getContainer();
-                    info.setContainer(_container);
-                    PipelineJob job = new MSPictureUpgradeJob(info, root);
-                    PipelineService.get().getPipelineQueue().addJob(job);
-
-                    return true;
-                }
+                throw new NotFoundException("No pipeline root found for " + getContainer());
             }
-            return false;
+
+            ViewBackgroundInfo info = getViewBackgroundInfo();
+            PipelineJob job = new MSPictureUpgradeJob(info, root);
+            PipelineService.get().getPipelineQueue().addJob(job);
+
+            return true;
         }
 
         public ActionURL getSuccessURL(Object o)

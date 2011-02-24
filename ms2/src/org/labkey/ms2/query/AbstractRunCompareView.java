@@ -87,7 +87,7 @@ public abstract class AbstractRunCompareView extends QueryView
 
             _forExport = forExport;
 
-            setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+            setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
         }
         // ExcelWebQueries won't be part of the same HTTP session so we won't have access to the run list anymore
         setAllowExportExternalQuery(false);

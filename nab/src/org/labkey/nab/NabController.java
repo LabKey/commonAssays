@@ -660,7 +660,7 @@ public class NabController extends SpringActionController
             buttons.add(deleteButton);
             duplicateDataFileView.setButtons(buttons);
             duplicateDataFileView.addHiddenFormField("runId", "" + assay.getRunRowId());
-            duplicateDataFileView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+            duplicateDataFileView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
             return duplicateDataFileView;
         }
 

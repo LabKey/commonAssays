@@ -21,6 +21,8 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.view.ActionURL;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import java.util.Collections;
@@ -125,7 +127,16 @@ public abstract class QueryNestingOption
         dataRegion.setButtonBar(ButtonBar.BUTTON_BAR_EMPTY);
         dataRegion.setExpanded(expanded);
         dataRegion.setRecordSelectorValueColumns(_groupIdColumn.getColumnInfo().getAlias());
-        DataRegion nestedRgn = new DataRegion();
+        DataRegion nestedRgn = new DataRegion()
+        {
+            @Override
+            protected void renderHeaderScript(RenderContext ctx, Writer out, String headerMessage) throws IOException
+            {
+                // Issue 11405: customized grid does not work MS2 query based views.
+                // Nested DataRegions don't need to re-render the "new LABKEY.DataRegion(...)" script.
+            }
+        };
+
         nestedRgn.setName(dataRegionName);
         ButtonBar bar = new ButtonBar();
         bar.setVisible(false);
