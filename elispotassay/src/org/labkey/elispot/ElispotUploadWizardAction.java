@@ -60,9 +60,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -141,6 +143,9 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData());
             collector.addHiddenFormFields(view, form);
 
+            ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(form.getProvider(), form);
+            resolverType.addHiddenFormFields(form, view);
+            
             ButtonBar bbar = new ButtonBar();
             addFinishButtons(form, view, bbar);
             addResetButton(form, view, bbar);
@@ -380,6 +385,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                         if (material != null)
                         {
                             List<ObjectProperty> antigenResults = new ArrayList<ObjectProperty>();
+                            Set<String> antigenNames = new HashSet<String>();
                             Lsid rowLsid = ElispotDataHandler.getAntigenRowLsid(dataLsid, material.getName());
 
                             for (WellGroup antigenGroup : group.getOverlappingGroups(WellGroup.Type.ANTIGEN))
@@ -413,31 +419,39 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                                 if (postedPropMap.containsKey(key))
                                 {
                                     // for each antigen group, create two columns for mean and median values
-                                    String antigenName = postedPropMap.get(key);
+                                    String antigenName = StringUtils.defaultString(postedPropMap.get(key), "");
+                                    String groupName = antigenGroup.getName();
 
                                     if (StringUtils.isEmpty(antigenName))
-                                        antigenName = antigenGroup.getName();
+                                        antigenName = groupName;
 
-                                    if (!Double.isNaN(stats.getMean()))
-                                    {
-                                        ObjectProperty mean = ElispotDataHandler.getAntigenResultObjectProperty(form.getContainer(),
-                                                form.getProtocol(),
-                                                rowLsid.toString(),
-                                                antigenName + "_Mean",
-                                                stats.getMean(),
-                                                PropertyType.DOUBLE, "0.0");
-                                        antigenResults.add(mean);
-                                    }
+                                    if (antigenNames.contains(antigenName))
+                                        antigenName = antigenName + "_" + groupName;
 
-                                    if (!Double.isNaN(stats.getMedian()))
+                                    if (!antigenNames.contains(antigenName))
                                     {
-                                        ObjectProperty median = ElispotDataHandler.getAntigenResultObjectProperty(form.getContainer(),
-                                                form.getProtocol(),
-                                                rowLsid.toString(),
-                                                antigenName + "_Median",
-                                                stats.getMedian(),
-                                                PropertyType.DOUBLE, "0.0");
-                                        antigenResults.add(median);
+                                        antigenNames.add(antigenName);
+                                        if (!Double.isNaN(stats.getMean()))
+                                        {
+                                            ObjectProperty mean = ElispotDataHandler.getAntigenResultObjectProperty(form.getContainer(),
+                                                    form.getProtocol(),
+                                                    rowLsid.toString(),
+                                                    antigenName + "_Mean",
+                                                    stats.getMean(),
+                                                    PropertyType.DOUBLE, "0.0");
+                                            antigenResults.add(mean);
+                                        }
+
+                                        if (!Double.isNaN(stats.getMedian()))
+                                        {
+                                            ObjectProperty median = ElispotDataHandler.getAntigenResultObjectProperty(form.getContainer(),
+                                                    form.getProtocol(),
+                                                    rowLsid.toString(),
+                                                    antigenName + "_Median",
+                                                    stats.getMedian(),
+                                                    PropertyType.DOUBLE, "0.0");
+                                            antigenResults.add(median);
+                                        }
                                     }
                                 }
                             }
