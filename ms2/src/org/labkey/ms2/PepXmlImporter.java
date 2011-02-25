@@ -37,6 +37,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class PepXmlImporter extends MS2Importer
@@ -557,7 +558,7 @@ public class PepXmlImporter extends MS2Importer
                             XPressHandler.XPressResult xpressQuant = (XPressHandler.XPressResult)quant;
                             if (xpressQuant.getRatio() != null)
                             {
-                                _quantStmt.setString(index++, xpressQuant.getRatio());
+                                _quantStmt.setString(index++, fixupStringRatio(xpressQuant.getRatio()));
                             }
                             else
                             {
@@ -565,7 +566,7 @@ public class PepXmlImporter extends MS2Importer
                             }
                             if (xpressQuant.getHeavy2lightRatio() != null)
                             {
-                                _quantStmt.setString(index++, xpressQuant.getHeavy2lightRatio());
+                                _quantStmt.setString(index++, fixupStringRatio(xpressQuant.getHeavy2lightRatio()));
                             }
                             else
                             {
@@ -593,6 +594,32 @@ public class PepXmlImporter extends MS2Importer
                 }
             }
         }
+    }
+
+    /**
+     * Limit the total length of the ratio to 20 characters or less to fit within our database field -
+     * sometimes we get numbers with lots and lots of decimal places. Truncate at five decimals.
+     * Also, replace very large numbers (>9999) with INF.
+     */
+    private String fixupStringRatio(String ratio)
+    {
+        String[] numbers = ratio.split(":");
+        if (numbers.length == 2)
+        {
+            try
+            {
+                double number1 = Double.parseDouble(numbers[0]);
+                double number2 = Double.parseDouble(numbers[1]);
+
+                DecimalFormat format = new DecimalFormat("0.#####");
+                String result = number1 > 9999.0 ? "INF" : format.format(number1);
+                result += ":";
+                result += number2 > 9999.0 ? "INF" : format.format(number2);
+                return result;
+            }
+            catch (NumberFormatException e) {}
+        }
+        return ratio;
     }
 
     public static boolean isFractionsFile(File pepXmlFile)

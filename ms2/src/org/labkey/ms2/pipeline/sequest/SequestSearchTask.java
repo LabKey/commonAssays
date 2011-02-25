@@ -60,6 +60,8 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     public static final FileType INDEX_FILE_TYPE = new FileType(".hdr");
     public static final FileType SEQUEST_LOG_FILE_TYPE = new FileType(".sequest.log");
 
+    private static final Object INDEX_LOCK = new Object(); 
+
     // useful for creating an output filename that honors config preference for gzipped output
     public static File getNativeOutputFile(File dirAnalysis, String baseName,
                                            FileType.gzSupportLevel gzSupport)
@@ -250,50 +252,53 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         File indexFileBase = getIndexFileWithoutExtension();
         File indexFile = new File(indexFileBase.getParentFile(), indexFileBase.getName() + INDEX_FILE_TYPE.getDefaultSuffix());
 
-        if (!indexFile.exists())
+        synchronized (INDEX_LOCK)
         {
-            assert getJob().getSequenceFiles().length == 1 : "Only one FASTA is supported when using indices";
-
-            getJob().setStatus("CREATING FASTA INDEX");
-            getJob().info("Creating a FASTA index for " + getJob().getSequenceFiles()[0] + " as " + indexFileBase);
-
-            // Create a makedb.params to control the index creation
-            File fileWorkParams = _wd.newFile(MAKE_DB_PARAMS);
-            SequestParamsBuilder builder = new SequestParamsBuilder(getJob().getParameters(), getJob().getSequenceRootDirectory(), SequestParams.Variant.makedb, null);
-            builder.initXmlValues();
-            builder.writeFile(fileWorkParams);
-
-            // Invoke makedb
-            List<String> args = new ArrayList<String>();
-            File makeDBExecutable = new File(_factory.getSequestInstallDir(), "makedb");
-            args.add(makeDBExecutable.getAbsolutePath());
-            args.add("-O" + indexFileBase);
-            args.add("-P" + fileWorkParams.getAbsolutePath());
-            ProcessBuilder pb = new ProcessBuilder(args);
-
-            // In order to find sort.exe, use the Sequest directory as the working directory
-            File dir = makeDBExecutable.getParentFile();
-            getJob().runSubProcess(pb, dir);
-
-            RecordedAction action = new RecordedAction(MAKEDB_ACTION_NAME);
-            action.addInput(getJob().getSequenceFiles()[0], "FASTA");
-            action.addInput(fileWorkParams, "MakeDB Params");
-            action.addOutput(indexFile, "FASTA Index", false);
-            action.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(args, " "));
-
-            actions.add(action);
-
-            try
+            if (!indexFile.exists())
             {
-                _wd.outputFile(fileWorkParams);
-            }
-            catch (IOException e)
-            {
-                throw new PipelineJobException(e);
-            }
+                assert getJob().getSequenceFiles().length == 1 : "Only one FASTA is supported when using indices";
 
-            // Set the status back to the search
-            getJob().setStatus("SEARCH RUNNING");
+                getJob().setStatus("CREATING FASTA INDEX");
+                getJob().info("Creating a FASTA index for " + getJob().getSequenceFiles()[0] + " as " + indexFileBase);
+
+                // Create a makedb.params to control the index creation
+                File fileWorkParams = _wd.newFile(MAKE_DB_PARAMS);
+                SequestParamsBuilder builder = new SequestParamsBuilder(getJob().getParameters(), getJob().getSequenceRootDirectory(), SequestParams.Variant.makedb, null);
+                builder.initXmlValues();
+                builder.writeFile(fileWorkParams);
+
+                // Invoke makedb
+                List<String> args = new ArrayList<String>();
+                File makeDBExecutable = new File(_factory.getSequestInstallDir(), "makedb");
+                args.add(makeDBExecutable.getAbsolutePath());
+                args.add("-O" + indexFileBase);
+                args.add("-P" + fileWorkParams.getAbsolutePath());
+                ProcessBuilder pb = new ProcessBuilder(args);
+
+                // In order to find sort.exe, use the Sequest directory as the working directory
+                File dir = makeDBExecutable.getParentFile();
+                getJob().runSubProcess(pb, dir);
+
+                RecordedAction action = new RecordedAction(MAKEDB_ACTION_NAME);
+                action.addInput(getJob().getSequenceFiles()[0], "FASTA");
+                action.addInput(fileWorkParams, "MakeDB Params");
+                action.addOutput(indexFile, "FASTA Index", false);
+                action.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(args, " "));
+
+                actions.add(action);
+
+                try
+                {
+                    _wd.outputFile(fileWorkParams);
+                }
+                catch (IOException e)
+                {
+                    throw new PipelineJobException(e);
+                }
+
+                // Set the status back to the search
+                getJob().setStatus("SEARCH RUNNING");
+            }
         }
 
         return Collections.singletonList(indexFile);
