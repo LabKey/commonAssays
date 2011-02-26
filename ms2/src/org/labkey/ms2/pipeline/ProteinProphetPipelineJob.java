@@ -65,7 +65,7 @@ public class ProteinProphetPipelineJob extends PipelineJob
         boolean completeStatus = false;
         try
         {
-            ProteinProphetImporter importer = new ProteinProphetImporter(_file, null, new XarContext(getDescription(), getContainer(), getUser()));
+            ProteinProphetImporter importer = new ProteinProphetImporter(_file, null, new XarContext(null, getContainer(), getUser()));
             MS2Run run = importer.importFile(getInfo(), getLogger());
             MS2Manager.ensureWrapped(run, getUser());
             setStatus(PipelineJob.COMPLETE_STATUS);
