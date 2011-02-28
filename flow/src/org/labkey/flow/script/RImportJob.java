@@ -214,7 +214,7 @@ public class RImportJob extends FlowExperimentJob
         List<AttachmentFile> attachments = new LinkedList<AttachmentFile>();
         for (File runImage : runImages)
             attachments.add(new FileAttachmentFile(runImage));
-        att.addAttachments(getUser(), flowRun, attachments);
+        att.addAttachments(flowRun, attachments, getUser());
 
         return flowRun;
     }
