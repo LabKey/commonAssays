@@ -110,7 +110,7 @@ public class GateEditorForm extends ViewForm
         {
             return GWTEditingMode.compensation;
         }
-        return null;
+        return GWTEditingMode.run;
     }
 
     public FlowObject getFlowObject()
