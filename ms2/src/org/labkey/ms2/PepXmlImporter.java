@@ -95,7 +95,17 @@ public class PepXmlImporter extends MS2Importer
                     runUpdated = true;
                 }
 
-                progress.getCumulativeTimer().setCurrentTask(Tasks.ImportPeptides, "for fraction " + (++fractionCount) + ", analysis of file " + fraction.getSpectrumPath());
+                fractionCount++;
+                String description = "";
+                if (fractionCount > 1)
+                {
+                    description += " of fraction " + fractionCount + " ";
+                }
+                if (fraction.getSpectrumPath() != null)
+                {
+                    description += " from file " + fraction.getSpectrumPath();
+                }
+                progress.getCumulativeTimer().setCurrentTask(Tasks.ImportPeptides, description);
                 progress.setPeptideMode();
                 writeFractionInfo(fraction);
 

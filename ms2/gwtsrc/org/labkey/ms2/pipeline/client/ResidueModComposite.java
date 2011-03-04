@@ -65,8 +65,12 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
     public void init()
     {
         modStaticListBox.setVisibleItemCount(3);
+        modStaticListBox.setWidth("250px");
         modDynamicListBox.setVisibleItemCount(3);
+        modDynamicListBox.setWidth("250px");
+        staticListBox.setWidth("250px");
         staticListBox.setVisibleItemCount(3);
+        dynamicListBox.setWidth("250px");
         dynamicListBox.setVisibleItemCount(3);
         staticPanel.add(staticListBox);
         staticPanel.add(deleteStaticButton);
