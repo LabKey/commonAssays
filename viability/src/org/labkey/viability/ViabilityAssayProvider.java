@@ -193,7 +193,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     public String getDescription()
     {
-        return "Imports Guava cell count and viability data.";
+        return "Imports Guava ViaCount and ExpressPlus cell count and viability data.";
     }
 
     @Override
