@@ -21,7 +21,10 @@ import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
@@ -36,9 +39,14 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.DeletePermission;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
+import org.labkey.api.study.actions.AssayHeaderView;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
@@ -50,12 +58,15 @@ import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
+import org.springframework.beans.PropertyValue;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ElispotController extends SpringActionController
@@ -125,6 +136,7 @@ public class ElispotController extends SpringActionController
             queryView.setAllowableContainerFilterTypes();
             queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
 
+            view.addView(new ElispotDetailsHeaderView(_protocol, provider, null));
             view.addView(queryView);
             view.addView(plateView);
             return view;
@@ -194,6 +206,24 @@ public class ElispotController extends SpringActionController
             ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(_run.getContainer(), _protocol, _run.getRowId());
             return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
                     " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _run.getRowId() + " Details");
+        }
+    }
+
+    private class ElispotDetailsHeaderView extends AssayHeaderView
+    {
+        public ElispotDetailsHeaderView(ExpProtocol protocol, AssayProvider provider, ContainerFilter containerFilter)
+        {
+            super(protocol, provider, true, true, containerFilter);
+        }
+
+        @Override
+        public List<NavTree> getLinks()
+        {
+            List<NavTree> links = new ArrayList<NavTree>();
+
+            links.add(new NavTree("view runs", PageFlowUtil.addLastFilterParameter(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getViewContext().getContainer(), _protocol, _containerFilter))));
+
+            return links;
         }
     }
 
