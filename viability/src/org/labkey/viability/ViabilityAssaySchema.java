@@ -38,7 +38,6 @@ import org.labkey.api.view.HttpView;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.Types;
 import java.util.*;
 
 public class ViabilityAssaySchema extends AssaySchema
@@ -203,7 +202,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 }
                 else if (ViabilityAssayProvider.VIABILITY_PROPERTY_NAME.equals(dp.getName()))
                 {
-                    col = new ExprColumn(this, "Viability", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".TotalCells > 0 THEN CAST(" + ExprColumn.STR_TABLE_ALIAS + ".ViableCells AS FLOAT) / " + ExprColumn.STR_TABLE_ALIAS + ".TotalCells ELSE 0.0 END)"), Types.DOUBLE);
+                    col = new ExprColumn(this, "Viability", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".TotalCells > 0 THEN CAST(" + ExprColumn.STR_TABLE_ALIAS + ".ViableCells AS FLOAT) / " + ExprColumn.STR_TABLE_ALIAS + ".TotalCells ELSE 0.0 END)"), JdbcType.DOUBLE);
                     copyProperties(col, propertyMap.get(ViabilityAssayProvider.VIABILITY_PROPERTY_NAME));
                     addVisible(col);
                 }
@@ -213,13 +212,13 @@ public class ViabilityAssaySchema extends AssaySchema
                             new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + "$z.OriginalCells IS NULL OR " +
                                     ExprColumn.STR_TABLE_ALIAS + "$z.OriginalCells = 0 THEN NULL " +
                                     "ELSE " + ExprColumn.STR_TABLE_ALIAS + ".ViableCells / " + ExprColumn.STR_TABLE_ALIAS + "$z.OriginalCells END)"),
-                            Types.DOUBLE);
+                            JdbcType.DOUBLE);
                     copyProperties(col, _resultsDomain.getPropertyByName(ViabilityAssayProvider.RECOVERY_PROPERTY_NAME));
                     addColumn(col);
                 }
                 else if (ViabilityAssayProvider.ORIGINAL_CELLS_PROPERTY_NAME.equals(dp.getName()))
                 {
-                    col = new SpecimenAggregateColumn(this, "OriginalCells", Types.DOUBLE);
+                    col = new SpecimenAggregateColumn(this, "OriginalCells", JdbcType.DOUBLE);
                     copyProperties(col, propertyMap.get(ViabilityAssayProvider.ORIGINAL_CELLS_PROPERTY_NAME));
                     addVisible(col);
                 }
@@ -248,7 +247,7 @@ public class ViabilityAssaySchema extends AssaySchema
                     {
                         throw new UnsupportedOperationException("SqlDialect not supported: " + getDbSchema().getSqlDialect().getClass().getSimpleName());
                     }
-                    col = new ExprColumn(this, "SpecimenIDs", specimenIDs, Types.VARCHAR);
+                    col = new ExprColumn(this, "SpecimenIDs", specimenIDs, JdbcType.VARCHAR);
                     copyProperties(col, propertyMap.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME));
                     col.setDisplayColumnFactory(new MissingSpecimenPopupFactory());
                     addVisible(col);
@@ -272,7 +271,7 @@ public class ViabilityAssaySchema extends AssaySchema
             }
 
             SQLFragment runSql = new SQLFragment("(SELECT d.RunID FROM exp.data d WHERE d.RowID = " + ExprColumn.STR_TABLE_ALIAS + ".DataID)");
-            ExprColumn runColumn = new ExprColumn(this, "Run", runSql, Types.INTEGER);
+            ExprColumn runColumn = new ExprColumn(this, "Run", runSql, JdbcType.INTEGER);
             runColumn.setFk(new LookupForeignKey("RowID")
             {
                 public TableInfo getLookupTableInfo()
@@ -285,14 +284,14 @@ public class ViabilityAssaySchema extends AssaySchema
             addColumn(runColumn);
 
             ExprColumn specimenCount = new ExprColumn(this, "SpecimenCount",
-                    new SQLFragment("(SELECT COUNT(RS.specimenid) FROM viability.resultspecimens RS WHERE " + ExprColumn.STR_TABLE_ALIAS + ".RowID = RS.ResultID)"), Types.INTEGER);
+                    new SQLFragment("(SELECT COUNT(RS.specimenid) FROM viability.resultspecimens RS WHERE " + ExprColumn.STR_TABLE_ALIAS + ".RowID = RS.ResultID)"), JdbcType.INTEGER);
             addVisible(specimenCount);
 
-            ExprColumn specimenMatchCount = new SpecimenAggregateColumn(this, "SpecimenMatchCount", Types.INTEGER);
+            ExprColumn specimenMatchCount = new SpecimenAggregateColumn(this, "SpecimenMatchCount", JdbcType.INTEGER);
             specimenMatchCount.setHidden(true);
             addColumn(specimenMatchCount);
 
-            ExprColumn specimenMatches = new SpecimenAggregateColumn(this, "SpecimenMatches", Types.VARCHAR);
+            ExprColumn specimenMatches = new SpecimenAggregateColumn(this, "SpecimenMatches", JdbcType.VARCHAR);
             specimenMatches.setHidden(true);
             addColumn(specimenMatches);
 
@@ -335,12 +334,12 @@ public class ViabilityAssaySchema extends AssaySchema
 
         public class SpecimenAggregateColumn extends ExprColumn
         {
-            public SpecimenAggregateColumn(TableInfo parent, String name, SQLFragment frag, int type, ColumnInfo... dependentColumns)
+            public SpecimenAggregateColumn(TableInfo parent, String name, SQLFragment frag, JdbcType type, ColumnInfo... dependentColumns)
             {
                 super(parent, name, frag, type, dependentColumns);
             }
 
-            public SpecimenAggregateColumn(TableInfo parent, String name, int type, ColumnInfo... dependentColumns)
+            public SpecimenAggregateColumn(TableInfo parent, String name, JdbcType type, ColumnInfo... dependentColumns)
             {
                 super(parent, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + "$z." + name), type, dependentColumns);
             }
@@ -441,7 +440,7 @@ public class ViabilityAssaySchema extends AssaySchema
                             String[] ids = id != null ? id.split(",") : new String[0];
                             String[] matches = match != null ? match.split(",") : new String[0];
 
-                            HashSet s = new LinkedHashSet(Arrays.asList(ids));
+                            HashSet<String> s = new LinkedHashSet<String>(Arrays.asList(ids));
                             s.removeAll(Arrays.asList(matches));
 
                             popupText += "<p>" + PageFlowUtil.filter(StringUtils.join(s, ", ")) + "</p>";

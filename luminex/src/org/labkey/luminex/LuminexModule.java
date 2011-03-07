@@ -16,7 +16,6 @@
 
 package org.labkey.luminex;
 
-import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
@@ -32,8 +31,6 @@ import java.util.Set;
 
 public class LuminexModule extends DefaultModule
 {
-    private static final Logger _log = Logger.getLogger(LuminexModule.class);
-
     public String getName()
     {
         return "Luminex";
@@ -41,7 +38,7 @@ public class LuminexModule extends DefaultModule
 
     public double getVersion()
     {
-        return 10.30;
+        return 10.31;
     }
 
     protected void init()

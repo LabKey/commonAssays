@@ -64,7 +64,7 @@ public class FeatureExtractorTask extends WorkDirectoryTask<FeatureExtractorTask
     {
         _factory.validate();
 
-        RecordedAction action = new RecordedAction("Feature extraction");
+        RecordedAction action = new RecordedAction(ACTION_NAME);
 
         try
         {
@@ -114,17 +114,19 @@ public class FeatureExtractorTask extends WorkDirectoryTask<FeatureExtractorTask
                 });
                 for (File shpFile : shpFiles)
                 {
+                    // Delete existing file if present
+                    FileUtils.deleteQuietly(new File(archiveDir, shpFile.getName()));
                     FileUtils.moveFileToDirectory(shpFile, archiveDir, false);
                 }
             }
 
             _wd.acceptFilesAsOutputs(Collections.<String, TaskPath>emptyMap(), action);
+            return new RecordedActionSet(action);
         }
         catch (IOException e)
         {
             throw new PipelineJobException(e);
         }
-        return new RecordedActionSet();
     }
 
     public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings, Factory>
