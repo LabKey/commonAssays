@@ -122,11 +122,15 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         renderRowStart(rowIndex, out, ctx);
 
         RenderContext nestedCtx = new RenderContext(ctx.getViewContext());
-        nestedCtx.setResultSet(nestedRS, _nestedFieldMap);
         if (_nestedFieldMap == null)
         {
+            nestedCtx.setResults(new ResultsImpl(nestedRS));
             // Stash this so we don't have to calculate it for every group
             _nestedFieldMap = nestedCtx.getFieldMap();
+        }
+        else
+        {
+            nestedCtx.setResults(new ResultsImpl(nestedRS, _nestedFieldMap));
         }
         nestedCtx.setMode(DataRegion.MODE_GRID);
 
