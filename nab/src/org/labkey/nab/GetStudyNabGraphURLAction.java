@@ -18,6 +18,7 @@ package org.labkey.nab;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiVersion;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -39,12 +40,12 @@ public class GetStudyNabGraphURLAction extends ApiAction<NabAssayController.Grap
     @Override
     public ApiResponse execute(NabAssayController.GraphSelectedForm form, BindException errors) throws Exception
     {
-        Collection<Integer> readableIds = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(),
+        Map<Integer, ExpProtocol> readableIds = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(),
                 getViewContext().getUser(), form.getId());
 
         StringBuilder objectIdParam = new StringBuilder();
         String sep = "";
-        for (Integer id : readableIds)
+        for (Integer id : readableIds.keySet())
         {
             objectIdParam.append(sep).append(id);
             sep = ",";
@@ -59,7 +60,7 @@ public class GetStudyNabGraphURLAction extends ApiAction<NabAssayController.Grap
 
         final Map<String, Object> returnValue = new HashMap<String, Object>();
         returnValue.put("url", url.getLocalURIString());
-        returnValue.put("objectIds", readableIds);
+        returnValue.put("objectIds", readableIds.keySet());
 
         return new ApiResponse()
         {

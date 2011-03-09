@@ -37,11 +37,7 @@ import org.labkey.api.study.assay.AssayService;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: brittp
@@ -81,7 +77,7 @@ public class NabManager extends AbstractNabManager
         return null;
     }
 
-    public Collection<Integer> getReadableStudyObjectIds(Container studyContainer, User user, int[] objectIds)
+    public Map<Integer, ExpProtocol> getReadableStudyObjectIds(Container studyContainer, User user, int[] objectIds)
     {
         if (objectIds == null || objectIds.length == 0)
             throw new IllegalArgumentException("getReadableStudyObjectIds must be passed a non-empty list of object ids.");
@@ -92,19 +88,19 @@ public class NabManager extends AbstractNabManager
 
         List<? extends DataSet> dataSets = study.getDataSets();
         if (dataSets == null || dataSets.isEmpty())
-            return Collections.emptySet();
+            return Collections.emptyMap();
 
         // Gather a list of readable study dataset TableInfos associated with NAb protocols (these are created when NAb data
         // is copied to a study).  We use an ArrayList, rather than a set or other dup-removing structure, because there
         // can only be one dataset/tableinfo per protocol.
-        List<TableInfo> dataTables = new ArrayList<TableInfo>();
+        Map<TableInfo, ExpProtocol> dataTables = new HashMap<TableInfo, ExpProtocol>();
         for (DataSet dataset : dataSets)
         {
             if (dataset.getProtocolId() != null && dataset.canRead(user))
             {
                 ExpProtocol protocol = ExperimentService.get().getExpProtocol(dataset.getProtocolId().intValue());
                 if (protocol != null && AssayService.get().getProvider(protocol) instanceof NabAssayProvider)
-                    dataTables.add(dataset.getTableInfo(user));
+                    dataTables.put(dataset.getTableInfo(user), protocol);
             }
         }
 
@@ -113,11 +109,13 @@ public class NabManager extends AbstractNabManager
             allObjectIds.add(objectId);
         SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause("ObjectId", allObjectIds));
 
-        Collection<Integer> readableObjectIds = new HashSet<Integer>();
+        Map<Integer, ExpProtocol> readableObjectIds = new HashMap<Integer, ExpProtocol>();
 
         // For each readable study data table, find any NAb runs that match the requested objectIds, and add them to the run list:
-        for (TableInfo dataTable : dataTables)
+        for (Map.Entry<TableInfo, ExpProtocol> entry : dataTables.entrySet())
         {
+            TableInfo dataTable = entry.getKey();
+            ExpProtocol protocol = entry.getValue();
             ResultSet rs = null;
             try
             {
@@ -126,7 +124,7 @@ public class NabManager extends AbstractNabManager
                 while (rs.next())
                 {
                     int objectId = rs.getInt("ObjectId");
-                    readableObjectIds.add(objectId);
+                    readableObjectIds.put(objectId, protocol);
                 }
             }
             catch (SQLException e)

@@ -18,6 +18,7 @@ package org.labkey.nab;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiVersion;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.RequiresPermissionClass;
@@ -88,12 +89,12 @@ public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetSt
 
     protected Collection<ExpRun> getRuns(GetStudyNabRunsForm form, BindException errors)
     {
-        Collection<Integer> readableObjectIds = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(),
+        Map<Integer, ExpProtocol> readableObjectIds = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(),
                 getViewContext().getUser(), form.getObjectIds());
 
         Collection<ExpRun> runs = new ArrayList<ExpRun>();
 
-        for (Integer objectId : readableObjectIds)
+        for (Integer objectId : readableObjectIds.keySet())
         {
             // Note that we intentionally do NOT filter or check container.  If the user has access to the NAb
             // data copied to the study (verified above), they can get the raw data via the APIs.  This is

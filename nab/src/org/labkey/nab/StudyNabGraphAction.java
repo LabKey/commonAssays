@@ -2,10 +2,10 @@ package org.labkey.nab;
 
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NavTree;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -50,10 +50,24 @@ public class StudyNabGraphAction extends SimpleViewAction<NabAssayController.Gra
     @Override
     public ModelAndView getView(NabAssayController.GraphSelectedForm graphForm, BindException errors) throws Exception
     {
-        Collection<Integer> ids = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(), getViewContext().getUser(), graphForm.getId());
-        ExpProtocol protocol = ExperimentService.get().getExpProtocol(graphForm.getProtocolId());
-        NabAssayProvider provider = (NabAssayProvider) AssayService.get().getProvider(protocol);
-        Map<DilutionSummary, NabAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getViewContext().getUser(), graphForm.getFitTypeEnum(), toArray(ids));
+        Map<Integer, ExpProtocol> ids = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(), getViewContext().getUser(), graphForm.getId());
+        if (ids.values().isEmpty())
+            return HttpView.throwNotFound("No IDs available for charting.");
+        // We don't care which protocol we get- we just need any valid protocol to get to the provider (which should be
+        // the same for all IDs)
+        NabAssayProvider provider = null;
+        for (ExpProtocol protocol : ids.values())
+        {
+            if (provider == null)
+                provider = (NabAssayProvider) AssayService.get().getProvider(protocol);
+            else
+            {
+                NabAssayProvider currentProvider = (NabAssayProvider) AssayService.get().getProvider(protocol);
+                if (!provider.getName().equals(currentProvider.getName()))
+                    throw new IllegalStateException("Cannot graph data from different providers on the same chart");
+            }
+        }
+        Map<DilutionSummary, NabAssayRun> summaries = provider.getDataHandler().getDilutionSummaries(getViewContext().getUser(), graphForm.getFitTypeEnum(), toArray(ids.keySet()));
         Set<Integer> cutoffSet = new HashSet<Integer>();
         for (DilutionSummary summary : summaries.keySet())
         {
