@@ -453,7 +453,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                     Table.insert(user, LuminexSchema.getTableInfoDataRow(), dataRow);
                 }
             }
-            
+
             if (inputMaterials.isEmpty())
             {
                 throw new ExperimentException("Could not find any input samples in the data");
