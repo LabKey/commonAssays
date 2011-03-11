@@ -93,7 +93,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
         DataRegion peptideGrid = getNestedPeptideGrid(run, columnNames, true);
         proteinRgn.setNestedRegion(peptideGrid);
-        GroupedResultSet peptideResultSet = createPeptideResultSet(columnNames, run, _maxGroupingRows, _offset, null);
+        GroupedResultSet peptideResultSet = createPeptideResultSet(columnNames, run, _maxGroupingRows, null);
         proteinRgn.setGroupedResultSet(peptideResultSet);
 
         ActionURL proteinUrl = _url.clone();
@@ -115,7 +115,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return proteinRgn;
     }
 
-    public GroupedResultSet createPeptideResultSet(String columnNames, MS2Run run, int maxRows, long offset, String extraWhere) throws SQLException
+    public GroupedResultSet createPeptideResultSet(String columnNames, MS2Run run, int maxRows, String extraWhere) throws SQLException
     {
         String sqlColumnNames = getPeptideSQLColumnNames(columnNames, run);
         return ProteinManager.getPeptideRS(_url, run, extraWhere, maxRows, sqlColumnNames);
@@ -235,7 +235,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         String peptideColumns = getPeptideColumnNames(columns);
         DataRegion peptideRegion = getNestedPeptideGrid(_runs[0], peptideColumns, true);
         String extraWhere = MS2Manager.getTableInfoPeptides() + ".Protein= '" + proteinGroupingId + "'";
-        final GroupedResultSet groupedResultSet = createPeptideResultSet(peptideColumns, _runs[0], _maxGroupingRows, _offset, extraWhere);
+        final GroupedResultSet groupedResultSet = createPeptideResultSet(peptideColumns, _runs[0], _maxGroupingRows, extraWhere);
         GridView view = new GridView(peptideRegion, (BindException)null)
         {
             @Override

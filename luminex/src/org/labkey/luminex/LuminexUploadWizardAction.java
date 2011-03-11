@@ -16,6 +16,7 @@
 
 package org.labkey.luminex;
 
+import org.labkey.api.action.LabkeyError;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentException;
@@ -104,7 +105,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         }
                         catch (ExperimentException e)
                         {
-                            errors.addError(new ObjectError("main", null, null, e.toString()));
+                            errors.addError(new LabkeyError(e));
                         }
                         domains.put(defaultValueKey,  defaultValues);
                     }

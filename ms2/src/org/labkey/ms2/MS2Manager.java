@@ -261,6 +261,7 @@ public class MS2Manager
         if (runs.length == 1)
         {
             return runs[0];
+            
         }
         throw new IllegalStateException("There is more than one non-deleted MS2Run for " + path + "/" + fileName);
     }

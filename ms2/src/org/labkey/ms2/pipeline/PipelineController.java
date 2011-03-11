@@ -245,6 +245,10 @@ public class PipelineController extends SpringActionController
 
             _dirSeqRoot = MS2PipelineManager.getSequenceDatabaseRoot(_root.getContainer());
 
+            if (form.getPath() == null)
+            {
+                throw new NotFoundException("No path specified");
+            }
             _dirData = _root.resolvePath(form.getPath());
             if (_dirData == null || !NetworkDrive.exists(_dirData))
                 throw new NotFoundException("Path does not exist " + form.getPath());
@@ -308,7 +312,7 @@ public class PipelineController extends SpringActionController
                 }
                 catch (IOException eio)
                 {
-                    errors.reject(ERROR_MSG, "Failed to load requested protocol.");
+                    errors.reject(ERROR_MSG, "Failed to load requested protocol '" + protocolName + "', it may not exist");
                 }
             }
             boolean success = errors == null || !errors.hasErrors();
