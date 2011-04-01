@@ -50,6 +50,7 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
         <%= PageFlowUtil.textLink("Create or Edit View", (String)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.ProteinGroupsFilter + "', 'proteinGroupsCustomizeView', " + PageFlowUtil.jsString(proteinGroupViewSelectId) + "); return false;", "editProteinGroupsViewLink") %>
 
         <br/>
+        <br/>
         <span id="proteinGroupsCustomizeView"></span>
     </div>
     <p style="width:100%" class="labkey-title-area-line"></p>
@@ -61,6 +62,7 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
         <% String peptideViewSelectId = bean.getPeptideView().renderViewList(request, out, peptideViewName); %>
         <%= PageFlowUtil.textLink("Create or Edit View", (String)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;", "editPeptidesViewLink") %>
 
+        <br/>
         <br/>
         <span id="peptidesCustomizeView"></span>
     </div>

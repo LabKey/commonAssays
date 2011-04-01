@@ -90,7 +90,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         if (url.endsWith(EXT_DATA))
             return new ActionURL(RunController.ShowRunAction.class, container).addParameter("runId", data.getRunId());
         if (url.endsWith((EXT_SCRIPT)))
-            return new ActionURL(AnalysisScriptController.BeginAction.class, container).addParameter("scriptId", data.getRunId());
+            return new ActionURL(AnalysisScriptController.BeginAction.class, container).addParameter("scriptId", data.getRowId());
         
         return null;
         //http://localhost:8080/labkey/flow-run/DRT/Flow%20Verify%20Project/FlowTest/showRun.view?runId=15

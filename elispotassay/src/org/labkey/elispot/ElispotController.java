@@ -36,6 +36,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
@@ -100,6 +101,7 @@ public class ElispotController extends SpringActionController
     {
         private ExpProtocol _protocol;
         private ExpRun _run;
+        private boolean _hasRunFilter;
 
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
@@ -108,6 +110,8 @@ public class ElispotController extends SpringActionController
                 HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
 
             _protocol = _run.getProtocol();
+            _hasRunFilter = hasRunFilter(_protocol, getViewContext().getActionURL());
+
             ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(_protocol);
             PlateTemplate template = provider.getPlateTemplate(getContainer(), _protocol);
 
@@ -116,6 +120,7 @@ public class ElispotController extends SpringActionController
             PlateSummaryBean bean = new PlateSummaryBean();
             bean.setTemplate(template);
             bean.setWellInfoMap(wellInfoMap);
+            bean.setRun(form.getRowId());
 
             VBox view = new VBox();
 
@@ -136,10 +141,42 @@ public class ElispotController extends SpringActionController
             queryView.setAllowableContainerFilterTypes();
             queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
 
-            view.addView(new ElispotDetailsHeaderView(_protocol, provider, null));
+            ElispotDetailsHeaderView header = new ElispotDetailsHeaderView(_protocol, provider, null);
+            ActionURL url = new ActionURL(RunDetailsAction.class, getContainer()).addParameter("rowId", form.getRowId());
+
+            if (_hasRunFilter)
+            {
+                header.getLinks().add(new NavTree("details for all runs", url));
+            }
+            else
+            {
+                addRunFilter(_protocol, url, form.getRowId());
+                header.getLinks().add(new NavTree("details for run " + form.getRowId(), url));
+            }
+            view.addView(header);
             view.addView(queryView);
             view.addView(plateView);
             return view;
+        }
+
+        private boolean hasRunFilter(ExpProtocol protocol, ActionURL url)
+        {
+            String tableName = ElispotSchema.getAssayTableName(_protocol, ElispotSchema.ANTIGEN_STATS_TABLE_NAME);
+            SimpleFilter urlFilter = new SimpleFilter(getViewContext().getActionURL(), tableName);
+            List<SimpleFilter.FilterClause> clauses = urlFilter.getClauses();
+
+            if (!clauses.isEmpty())
+            {
+                AssayProvider provider = AssayService.get().getProvider(protocol);
+                FieldKey column = provider.getTableMetadata().getRunRowIdFieldKeyFromResults();
+
+                for (SimpleFilter.FilterClause clause : clauses)
+                {
+                    if (clause.getColumnNames().contains(column.toString()))
+                        return true;
+                }
+            }
+            return false;
         }
 
         private Map<Position, WellInfo> createWellInfoMap(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
@@ -201,29 +238,45 @@ public class ElispotController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
+            String title;
+
+            if (_hasRunFilter)
+                title = "Run " + _run.getRowId() + " Details";
+            else
+                title = "Details for All Runs";
+
             ActionURL assayListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(_run.getContainer());
             ActionURL runListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(_run.getContainer(), _protocol);
             ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(_run.getContainer(), _protocol, _run.getRowId());
             return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
-                    " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _run.getRowId() + " Details");
+                    " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild(title);
         }
+    }
+
+    private void addRunFilter(ExpProtocol protocol, ActionURL url, int rowId)
+    {
+        AssayProvider provider = AssayService.get().getProvider(protocol);
+
+        String name = ElispotSchema.getAssayTableName(protocol, ElispotSchema.ANTIGEN_STATS_TABLE_NAME);
+        url.addFilter(name, provider.getTableMetadata().getRunRowIdFieldKeyFromResults(), CompareType.EQUAL, rowId);
     }
 
     private class ElispotDetailsHeaderView extends AssayHeaderView
     {
+        List<NavTree> _links = new ArrayList<NavTree>();
+
         public ElispotDetailsHeaderView(ExpProtocol protocol, AssayProvider provider, ContainerFilter containerFilter)
         {
             super(protocol, provider, true, true, containerFilter);
+
+            _links.add(new NavTree("view runs", PageFlowUtil.addLastFilterParameter(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getViewContext().getContainer(), _protocol, _containerFilter))));
         }
+
 
         @Override
         public List<NavTree> getLinks()
         {
-            List<NavTree> links = new ArrayList<NavTree>();
-
-            links.add(new NavTree("view runs", PageFlowUtil.addLastFilterParameter(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getViewContext().getContainer(), _protocol, _containerFilter))));
-
-            return links;
+            return _links;
         }
     }
 
@@ -236,12 +289,9 @@ public class ElispotController extends SpringActionController
             if (run == null)
                 HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
 
-            AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
             ActionURL url = new ActionURL(RunDetailsAction.class, getContainer());
-            String tableName = ElispotSchema.getAssayTableName(run.getProtocol(), ElispotSchema.ANTIGEN_STATS_TABLE_NAME);
-
             url.addParameter("rowId", form.getRowId());
-            url.addFilter(tableName, provider.getTableMetadata().getRunRowIdFieldKeyFromResults(), CompareType.EQUAL, form.getRowId());
+            addRunFilter(run.getProtocol(), url, form.getRowId());
 
             return url;
         }
@@ -331,6 +381,7 @@ public class ElispotController extends SpringActionController
         private Map<String, PropertyDescriptor> _samplePropertyMap;
         private Map<String, ExpMaterial> _inputMaterialMap;
         private Map<Position, WellInfo> _wellInfoMap;
+        private int _run;
 
         public PlateTemplate getTemplate()
         {
@@ -380,6 +431,16 @@ public class ElispotController extends SpringActionController
         public void setWellInfoMap(Map<Position, WellInfo> wellInfoMap)
         {
             _wellInfoMap = wellInfoMap;
+        }
+
+        public int getRun()
+        {
+            return _run;
+        }
+
+        public void setRun(int run)
+        {
+            _run = run;
         }
     }
 }

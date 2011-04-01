@@ -67,7 +67,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             try
             {
                 _parse();
-                splitPoolID();
+                postProcess();
             }
             catch (IOException e)
             {
@@ -84,7 +84,13 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
 
         protected abstract void _parse() throws IOException, ExperimentException;
 
-        protected void splitPoolID() throws ExperimentException
+        protected boolean shouldSplitPoolID()
+        {
+            return true;
+        }
+
+        // NOTE: Remove this postprocessing when 12017 is implemented.
+        protected void postProcess() throws ExperimentException
         {
             if (_resultData == null)
                 return;
@@ -101,47 +107,51 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
                 Object visitID = row.get(AbstractAssayProvider.VISITID_PROPERTY_NAME);
                 if (participantID == null && visitID == null)
                 {
-                    int sep = poolID.lastIndexOf('-');
-                    if (sep == -1)
-                        sep = poolID.lastIndexOf('V');
-                    if (sep == -1)
-                        sep = poolID.lastIndexOf('v');
+                    row = new HashMap<String, Object>(row);
 
-                    boolean modified = false;
+                    // At a minimum, set the ParticipantID to the PoolID
                     String ptid = poolID;
-                    String visit = null;
-                    if (sep > 0)
-                    {
-                        ptid = poolID.substring(0, sep).trim();
-                        int dot = ptid.lastIndexOf('.');
-                        if (dot > 0)
-                            ptid = ptid.substring(0, dot).trim();
-                        visit = poolID.substring(sep+1).trim();
-                    }
+                    row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, ptid);
 
-                    if (ptid != null && ptid.length() > 0)
+                    // Try to split the PoolID into ParticipantID and VisitID
+                    if (shouldSplitPoolID())
                     {
-                        row = new HashMap<String, Object>(row);
-                        row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, ptid);
-                        modified = true;
-                    }
+                        int sep = poolID.lastIndexOf('-');
+                        if (sep == -1)
+                            sep = poolID.lastIndexOf('V');
+                        if (sep == -1)
+                            sep = poolID.lastIndexOf('v');
 
-                    if (visit != null && visit.length() > 0)
-                    {
-                        try
+                        String visit = null;
+                        if (sep > 0)
                         {
-                            Double visitNum = Double.parseDouble(visit);
-                            row.put(AbstractAssayProvider.VISITID_PROPERTY_NAME, visitNum);
-                            modified = true;
+                            ptid = poolID.substring(0, sep).trim();
+                            int dot = ptid.lastIndexOf('.');
+                            if (dot > 0)
+                                ptid = ptid.substring(0, dot).trim();
+                            visit = poolID.substring(sep+1).trim();
                         }
-                        catch (NumberFormatException nfe)
+
+                        if (ptid != null && ptid.length() > 0)
                         {
-                            // ignore
+                            row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, ptid);
+                        }
+
+                        if (visit != null && visit.length() > 0)
+                        {
+                            try
+                            {
+                                Double visitNum = Double.parseDouble(visit);
+                                row.put(AbstractAssayProvider.VISITID_PROPERTY_NAME, visitNum);
+                            }
+                            catch (NumberFormatException nfe)
+                            {
+                                // ignore
+                            }
                         }
                     }
 
-                    if (modified)
-                        it.set(row);
+                    it.set(row);
                 }
             }
 

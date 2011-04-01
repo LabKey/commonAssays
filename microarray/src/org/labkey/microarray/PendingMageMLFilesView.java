@@ -50,7 +50,6 @@ public class PendingMageMLFilesView extends QueryView
         setShadeAlternatingRows(true);
         setShowBorders(true);
         setShowExportButtons(false);
-        setShowRecordSelectors(true);
         setShowDetailsColumn(false);
         setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
     }

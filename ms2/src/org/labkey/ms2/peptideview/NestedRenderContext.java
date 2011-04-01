@@ -24,7 +24,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,8 +103,8 @@ public class NestedRenderContext extends RenderContext
             fromSQL.append(" ) FilterOnly ");
 
             Collection<ColumnInfo> cols = Collections.singletonList(groupColumn);
-            SQLFragment withoutSort = QueryService.get().getSelectSQL(tinfo, cols, new SimpleFilter(), new Sort(), Table.ALL_ROWS, 0);
-            SQLFragment withSort = QueryService.get().getSelectSQL(tinfo, cols, new SimpleFilter(), groupingSort, Table.ALL_ROWS, 0);
+            SQLFragment withoutSort = QueryService.get().getSelectSQL(tinfo, cols, new SimpleFilter(), new Sort(), Table.ALL_ROWS, 0, false);
+            SQLFragment withSort = QueryService.get().getSelectSQL(tinfo, cols, new SimpleFilter(), groupingSort, Table.ALL_ROWS, 0, false);
 
             // Figure out what the ORDER BY is
             String sortSQL = withSort.getSQL().substring(withSort.getSQL().toUpperCase().lastIndexOf("ORDER BY"));
@@ -198,7 +197,7 @@ public class NestedRenderContext extends RenderContext
 
         // We need to stick the GROUP BY before the ORDER BY. QueryService won't help us generate
         // the GROUP BY, so get the query with and without the ORDER BY
-        SQLFragment withoutSort = QueryService.get().getSelectSQL(tinfo, cols, filter, new Sort(), Table.ALL_ROWS, 0);
+        SQLFragment withoutSort = QueryService.get().getSelectSQL(tinfo, cols, filter, new Sort(), Table.ALL_ROWS, 0, false);
 
         sql.append(withoutSort);
 

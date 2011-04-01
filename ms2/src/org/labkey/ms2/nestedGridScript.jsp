@@ -75,7 +75,7 @@ function toggleNestedGrid(url, elementName)
             req.onreadystatechange = callbackObject;
             req.send(null);
         }
-        return;
+        return false;
     }
 
     if (rowElement.style.display == "none")

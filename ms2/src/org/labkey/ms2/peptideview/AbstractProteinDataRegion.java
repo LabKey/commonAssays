@@ -17,6 +17,7 @@
 package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.*;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.ms2.MS2Controller;
@@ -78,10 +79,9 @@ public abstract class AbstractProteinDataRegion extends DataRegion
     protected void renderExtraRecordSelectorContent(RenderContext ctx, Writer out) throws IOException
     {
         String value = getUniqueColumnValue(ctx);
-        out.write("<a href=\"javascript:toggleNestedGrid('");
-        out.write(_groupURL);
-        out.write(value);
-        out.write("', '");
+        out.write("<a onclick=\"return toggleNestedGrid(");
+        out.write(PageFlowUtil.jsString(PageFlowUtil.filter(_groupURL + value)));
+        out.write(", '");
         out.write(value);
         out.write("');\"><img valign=\"middle\" id=\"");
         out.write(getName());

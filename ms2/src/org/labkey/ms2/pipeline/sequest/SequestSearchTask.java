@@ -347,68 +347,83 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             ProcessBuilder sequestPB = new ProcessBuilder(sequestArgs);
             File sequestLogFileWork = SEQUEST_LOG_FILE_TYPE.getFile(_wd.getDir(), getJob().getBaseName());
             _wd.newFile(sequestLogFileWork.getName());
-            getJob().runSubProcess(sequestPB, dirOutputDta, sequestLogFileWork, 200);
-
-            // Convert to pepXML using out2xml
-            List<String> out2XMLArgs = new ArrayList<String>();
-            String out2XMLPath = PipelineJobService.get().getExecutablePath("out2xml", "tpp", tppVersion, getJob().getLogger());
-            out2XMLArgs.add(out2XMLPath);
-            String enzyme =
-                new SequestParamsBuilder(params, null).getSupportedEnzyme(params.get(org.labkey.ms2.pipeline.client.ParamParser.ENZYME));
-            Out2XmlParams out2XmlParams = new Out2XmlParams();
-            out2XMLArgs.add(dirOutputDta.getName());
-            out2XMLArgs.add("1");
-            out2XMLArgs.add("-all");
-            out2XmlParams.getParam("-E").setValue(enzyme);
-            out2XMLArgs.addAll(convertParams(out2XmlParams.getParams(), params));
-            ProcessBuilder out2XMLPB = new ProcessBuilder(out2XMLArgs);
-            out2XMLPB.environment().put("WEBSERVER_ROOT", StringUtils.trimToEmpty(new File(out2XMLPath).getParent()));
-            getJob().runSubProcess(out2XMLPB, _wd.getDir());
-
-            File pepXmlFile = TPPTask.getPepXMLFile(_wd.getDir(), getJob().getBaseName());
-            if (!pepXmlFile.exists())
-                throw new IOException("Failed running out2xml or Sequest - could not find expected file: " + pepXmlFile);
-
-            if (!FileUtil.deleteDir(dirOutputDta))
-                throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());
-
-            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
-                    getJob().getBaseName(),
-                    getJob().getGZPreference());
-
-            if (!usesIndex())
-            {
-                if (!pepXmlFile.renameTo(fileWorkPepXMLRaw))
-                {
-                    throw new PipelineJobException("Failed to rename " + pepXmlFile + " to " + fileWorkPepXMLRaw);
-                }
-            }
-            else
-            {
-                rewritePepXML(fileWorkPepXMLRaw, pepXmlFile, sequenceFiles);
-            }
-
-            // TODO: TGZ file is only required to get spectra loaded into CPAS.  Fix to use mzXML instead.
-            WorkDirectory.CopyingResource lock = null;
+            boolean copySequestLogFile = true;
             try
             {
-                lock = _wd.ensureCopyingLock();
-                RecordedAction sequestAction = new RecordedAction(SEQUEST_ACTION_NAME);
-                sequestAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(sequestArgs, " "));
-                sequestAction.addOutput(_wd.outputFile(fileWorkParams), "SequestParams", true);
-                sequestAction.addOutput(_wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
-                sequestAction.addOutput(_wd.outputFile(sequestLogFileWork), "SequestLog", false);
-                for (File file : sequenceFiles)
-                {
-                    sequestAction.addInput(file, FASTA_INPUT_ROLE);
-                }
-                sequestAction.addInput(dirOutputDta, SPECTRA_INPUT_ROLE);
+                getJob().runSubProcess(sequestPB, dirOutputDta, sequestLogFileWork, 200);
 
-                actions.add(sequestAction);
+                // Convert to pepXML using out2xml
+                List<String> out2XMLArgs = new ArrayList<String>();
+                String out2XMLPath = PipelineJobService.get().getExecutablePath("out2xml", "tpp", tppVersion, getJob().getLogger());
+                out2XMLArgs.add(out2XMLPath);
+                String enzyme =
+                    new SequestParamsBuilder(params, null).getSupportedEnzyme(params.get(org.labkey.ms2.pipeline.client.ParamParser.ENZYME));
+                Out2XmlParams out2XmlParams = new Out2XmlParams();
+                out2XMLArgs.add(dirOutputDta.getName());
+                out2XMLArgs.add("1");
+                out2XMLArgs.add("-all");
+                out2XmlParams.getParam("-E").setValue(enzyme);
+                out2XMLArgs.addAll(convertParams(out2XmlParams.getParams(), params));
+                ProcessBuilder out2XMLPB = new ProcessBuilder(out2XMLArgs);
+                out2XMLPB.environment().put("WEBSERVER_ROOT", StringUtils.trimToEmpty(new File(out2XMLPath).getParent()));
+                getJob().runSubProcess(out2XMLPB, _wd.getDir());
+
+                File pepXmlFile = TPPTask.getPepXMLFile(_wd.getDir(), getJob().getBaseName());
+                if (!pepXmlFile.exists())
+                    throw new IOException("Failed running out2xml or Sequest - could not find expected file: " + pepXmlFile);
+
+                if (!FileUtil.deleteDir(dirOutputDta))
+                    throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());
+
+                File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
+                        getJob().getBaseName(),
+                        getJob().getGZPreference());
+
+                if (!usesIndex())
+                {
+                    if (!pepXmlFile.renameTo(fileWorkPepXMLRaw))
+                    {
+                        throw new PipelineJobException("Failed to rename " + pepXmlFile + " to " + fileWorkPepXMLRaw);
+                    }
+                }
+                else
+                {
+                    rewritePepXML(fileWorkPepXMLRaw, pepXmlFile, sequenceFiles);
+                }
+                // All tools have completed successfully, we won't need to copy the log file separately
+                copySequestLogFile = false;
+
+                // TODO: TGZ file is only required to get spectra loaded into CPAS.  Fix to use mzXML instead.
+                WorkDirectory.CopyingResource lock = null;
+                try
+                {
+                    lock = _wd.ensureCopyingLock();
+                    RecordedAction sequestAction = new RecordedAction(SEQUEST_ACTION_NAME);
+                    sequestAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(sequestArgs, " "));
+                    sequestAction.addOutput(_wd.outputFile(fileWorkParams), "SequestParams", true);
+                    sequestAction.addOutput(_wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
+                    sequestAction.addOutput(_wd.outputFile(sequestLogFileWork), "SequestLog", false);
+                    for (File file : sequenceFiles)
+                    {
+                        sequestAction.addInput(file, FASTA_INPUT_ROLE);
+                    }
+                    sequestAction.addInput(dirOutputDta, SPECTRA_INPUT_ROLE);
+
+                    actions.add(sequestAction);
+                }
+                finally
+                {
+                    if (lock != null) { lock.release(); }
+                }
             }
             finally
             {
-                if (lock != null) { lock.release(); }
+                if (copySequestLogFile)
+                {
+                    // Something went wrong. Usually we don't bother copying files back after an error, but the user
+                    // will likely need the Sequest log file to try to make sense of things.
+                    _wd.outputFile(sequestLogFileWork);
+                }
             }
 
             return new RecordedActionSet(actions);

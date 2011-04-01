@@ -369,7 +369,7 @@ public class ViabilityAssaySchema extends AssaySchema
 
                 Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(rs, fields);
 
-                SQLFragment sub = QueryService.get().getSelectSQL(rs, columnMap.values(), filter, null, 0, 0);
+                SQLFragment sub = QueryService.get().getSelectSQL(rs, columnMap.values(), filter, null, 0, 0, false);
                 SQLFragment groupFrag = new SQLFragment();
                 groupFrag.append("SELECT\n");
                 groupFrag.append("  " + columnMap.get(resultId).getAlias() + " as VolumeResultID,\n");

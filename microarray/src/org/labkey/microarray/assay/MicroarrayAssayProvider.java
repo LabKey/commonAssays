@@ -147,13 +147,54 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         };
     }
 
+    @Override
+    protected void addInputDatas(AssayRunUploadContext context, Map<ExpData, String> inputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
+    {
+        super.addInputDatas(context, inputDatas, resolverType);
+
+        try
+        {
+            File mageMLFile = getMageMLFile(context);
+            // Look up two directories for a TIFF file that matches the naming convention
+            if (mageMLFile.getParentFile() != null && mageMLFile.getParentFile().getParentFile() != null
+                    && mageMLFile.getParentFile().getParentFile().getParentFile() != null)
+            {
+                File dir = mageMLFile.getParentFile().getParentFile().getParentFile();
+                File[] files = dir.listFiles(new PipelineProvider.FileTypesEntryFilter(MicroarrayModule.TIFF_INPUT_TYPE.getFileType()));
+                if (files != null)
+                {
+                    for (File file : files)
+                    {
+                        // MageML files are named with <TIFF_FILE_BASE_NAME>_<PROTOCOL_NAME>.mageML (or other file extension)
+                        if (mageMLFile.getName().startsWith(MicroarrayModule.TIFF_INPUT_TYPE.getFileType().getBaseName(file) + "_"))
+                        {
+                            // Found a match, add it as an input to this run
+                            ExpData tiffData = createData(context.getContainer(), file, file.getName(), MicroarrayModule.TIFF_INPUT_TYPE);
+                            inputDatas.put(tiffData, MicroarrayModule.TIFF_INPUT_TYPE.getRole());
+                        }
+                    }
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            throw new ExperimentException(e);
+        }
+    }
+
+    private File getMageMLFile(AssayRunUploadContext context)
+            throws IOException, ExperimentException
+    {
+        Map<String, File> files = context.getUploadedData();
+        assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
+        return files.get(AssayDataCollector.PRIMARY_FILE);
+    }
+
     protected void addOutputDatas(AssayRunUploadContext context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
         try
         {
-            Map<String, File> files = context.getUploadedData();
-            assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
-            final File mageMLFile = files.get(AssayDataCollector.PRIMARY_FILE);
+            File mageMLFile = getMageMLFile(context);
             ExpData mageData = createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE);
 
             outputDatas.put(mageData, MicroarrayModule.MAGE_ML_INPUT_TYPE.getRole());

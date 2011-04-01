@@ -184,7 +184,7 @@
 <%--
     <tr class="labkey-wp-header"><th colspan=50 align=center>Plate Summary Information</th></tr>
 --%>
-    <tr><td class="labkey-announcement-title" colspan="2"><span>Plate Summary Information</span></td></tr>
+    <tr><td class="labkey-announcement-title" colspan="2"><span>Plate Summary Information Run: <%=bean.getRun()%></span></td></tr>
     <tr><td class="labkey-title-area-line" colspan="2"></td></tr>
     <tr><td>
         <table>

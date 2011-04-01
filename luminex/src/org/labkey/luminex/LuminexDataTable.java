@@ -17,6 +17,7 @@ package org.labkey.luminex;
 
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.FieldKey;
@@ -53,7 +54,9 @@ public class LuminexDataTable extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createDataTable();
+                ExpDataTable result = _schema.createDataTable();
+                result.setContainerFilter(getContainerFilter());
+                return result;
             }
         });
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);

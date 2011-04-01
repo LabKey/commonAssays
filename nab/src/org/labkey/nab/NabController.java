@@ -790,7 +790,10 @@ public class NabController extends SpringActionController
         pointRenderer.setShapesFilled(true);
         for (DilutionSummary summary : dilutionSummaries)
         {
-            XYSeries pointSeries = new XYSeries(summary.getSampleId());
+            String sampleId = summary.getSampleId();
+            if (sampleId == null)
+                sampleId = "[no sample id]";
+            XYSeries pointSeries = new XYSeries(sampleId);
             for (WellData well : summary.getWellData())
             {
                 double percentage = 100 * summary.getPercent(well);
@@ -808,7 +811,7 @@ public class NabController extends SpringActionController
             else
                 currentColor = (Color) plot.getRenderer(0).getSeriesPaint(pointDatasetCount - 1);
 
-            XYSeries curvedSeries = new XYSeries(summary.getSampleId());
+            XYSeries curvedSeries = new XYSeries(sampleId);
             DilutionCurve.DoublePoint[] curve = summary.getCurve();
             for (DilutionCurve.DoublePoint point : curve)
                 curvedSeries.add(point.getX(), point.getY());

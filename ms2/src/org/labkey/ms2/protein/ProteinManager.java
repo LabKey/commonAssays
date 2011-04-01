@@ -26,6 +26,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.DomainNotFoundException;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Path;
@@ -524,6 +525,11 @@ public class ProteinManager
             return Arrays.asList(_columnName);
         }
 
+        @Override
+        public String getLabKeySQLWhereClause(Map<FieldKey, ? extends ColumnInfo> columnMap)
+        {
+            throw new UnsupportedOperationException();
+        }
 
         public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
@@ -574,6 +580,12 @@ public class ProteinManager
         public TrypticFilter(int termini)
         {
             _termini = termini;
+        }
+
+        @Override
+        public String getLabKeySQLWhereClause(Map<FieldKey, ? extends ColumnInfo> columnMap)
+        {
+            throw new UnsupportedOperationException();
         }
 
         public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)

@@ -82,9 +82,17 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
 
     public static class Parser extends ViabilityAssayDataHandler.Parser
     {
+        private boolean shouldSplitPoolID = true;
+
         public Parser(Domain runDomain, Domain resultsDomain, File dataFile)
         {
             super(runDomain, resultsDomain, dataFile);
+        }
+
+        @Override
+        protected boolean shouldSplitPoolID()
+        {
+            return shouldSplitPoolID;
         }
 
         protected void _parse() throws IOException, ExperimentException
@@ -170,9 +178,15 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
 
                 ColumnDescriptor[] columns = null;
                 if (softwareName.equals("ViaCount"))
+                {
                     columns = createViaCountColumns(groupHeaders, headers);
+                }
                 else if (softwareName.equals("ExpressPlus"))
+                {
+                    // FIXME: The Letvin lab never uses visit based studies and have participant ids that contain '-' characters.
+                    shouldSplitPoolID = false;
                     columns = createExpressPlusColumns(groupHeaders, headers);
+                }
 
                 TabLoader tl = new TabLoader(reader, false);
                 tl.setColumns(columns);
@@ -422,6 +436,12 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
             assertEquals(1.9911600176133864E7, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
             assertEquals(10.0, row.get("OriginalVolume"));
 
+            // Last row
+            row = rows.get(rows.size()-1);
+            assertEquals(16, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
+            // NOTE: no splitting of PoolD into participant-visit
+            assertEquals("C-04", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals("C-04", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
         }
     }
 }

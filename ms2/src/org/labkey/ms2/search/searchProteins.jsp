@@ -75,6 +75,7 @@
                         <%= PageFlowUtil.textLink("Create or Edit View", (String)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;", "editPeptidesViewLink") %>
                     </span>
                     <br/>
+                    <br/>
                     <span id="peptidesCustomizeView"></span>
                 </td>
             </tr>

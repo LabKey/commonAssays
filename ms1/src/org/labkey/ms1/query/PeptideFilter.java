@@ -19,6 +19,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.dialect.SqlDialect;
+import org.labkey.api.query.FieldKey;
 
 import java.util.Arrays;
 import java.util.List;
@@ -101,6 +102,12 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
             sql.append(genSeqPredicate(_sequences[idx], null));
         }
         return new SQLFragment(sql.toString());
+    }
+
+    @Override
+    public String getLabKeySQLWhereClause(Map<FieldKey, ? extends ColumnInfo> columnMap)
+    {
+        throw new UnsupportedOperationException();
     }
 
     public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect)

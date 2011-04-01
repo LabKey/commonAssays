@@ -334,7 +334,7 @@ public class ProtocolFileBuilder
     {
         return "<FEProject Operator=\"FeatureExtractionQueue\" ResultsDirectory=\"" + resultsDir + "\" " +
 		"ResultsLocationSameAsImage=\"False\" OutputMAGE=\"True\" MAGEOutPkgType=\"Full\" " +
-		"OutputMAGECompressed=\"False\" OutputJPEG=\"True\" OutputText=\"False\" TextOutPkgType=\"Full\" " +
+		"OutputMAGECompressed=\"False\" OutputJPEG=\"True\" OutputText=\"True\" TextOutPkgType=\"Full\" " +
 		"OutputVisualResults=\"True\" OutputGRID=\"True\" OutputArrayQCReport=\"True\" " +
 		"FTPSendTiffFile=\"False\" OverWritePreviousResults=\"True\" UseGridFileIfAvailable=\"False\" " +
 		"UseProjDefProtocolFirst=\"False\">";

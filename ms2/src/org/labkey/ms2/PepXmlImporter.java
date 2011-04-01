@@ -20,6 +20,8 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.*;
 import org.labkey.ms2.reader.PepXmlLoader.FractionIterator;
@@ -274,8 +276,7 @@ public class PepXmlImporter extends MS2Importer
             }
             fraction.setSpectrumPath(mzXMLFile.getAbsolutePath());
         }
-        if (! NetworkDrive.exists(new File(_path + "/" + _gzFileName)) &&
-                baseName != null)
+        if (! NetworkDrive.exists(new File(_path + "/" + _gzFileName)) && baseName != null)
         {
             // Try using the base_name from the input file
             int i = baseName.lastIndexOf("/");
@@ -373,6 +374,7 @@ public class PepXmlImporter extends MS2Importer
                 return f.toString();
             }
             File mzXMLFile = new File(mzXmlFileName);
+            // Check two directories up from the pepXML file, where the pipeline normally reads the mzXML file.
             if (dir.getParentFile() != null && dir.getParentFile().getParentFile() != null)
             {
                 f = new File(dir.getParentFile().getParentFile(), mzXMLFile.getName());
@@ -380,6 +382,19 @@ public class PepXmlImporter extends MS2Importer
                 {
                     return f.toString();
                 }
+
+				// Check if it's under an alternate pipeline root instead
+				PipeRoot root = PipelineService.get().findPipelineRoot(_container);
+				// We wouldn't get this far if we didn't have a pipeline root
+				@SuppressWarnings({"ConstantConditions"}) String relativePath = root.relativePath(f);
+				if (relativePath != null)
+				{
+					f = root.resolvePath(relativePath);
+				}
+				if (NetworkDrive.exists(f) && f.isFile())
+				{
+					return f.toString();
+				}
             }
             f = new File(dir, mzXMLFile.getName());
             if (NetworkDrive.exists(f) && f.isFile())

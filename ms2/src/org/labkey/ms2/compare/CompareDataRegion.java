@@ -71,12 +71,13 @@ public class CompareDataRegion extends DataRegion
     }
 
     @Override
-    protected void renderGridHeaderColumns(RenderContext ctx, Writer out, List<DisplayColumn> renderers) throws SQLException, IOException
+    protected void renderGridHeaderColumns(RenderContext ctx, Writer out, boolean showRecordSelectors, List<DisplayColumn> renderers)
+            throws IOException, SQLException
     {
         // Add an extra row and render the multi-column captions
         out.write("<tr>");
 
-        if (_showRecordSelectors)
+        if (showRecordSelectors)
             out.write("<td></td>");
 
         boolean shade = false;
@@ -127,6 +128,6 @@ public class CompareDataRegion extends DataRegion
         }
         out.write("</tr>\n");
 
-        super.renderGridHeaderColumns(ctx, out, renderers);
+        super.renderGridHeaderColumns(ctx, out, showRecordSelectors, renderers);
     }
 }

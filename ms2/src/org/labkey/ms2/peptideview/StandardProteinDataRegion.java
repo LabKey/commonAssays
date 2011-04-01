@@ -43,7 +43,7 @@ public class StandardProteinDataRegion extends AbstractProteinDataRegion
     }
 
     @Override
-    protected void renderTableRow(RenderContext ctx, Writer out, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
+    protected void renderTableRow(RenderContext ctx, Writer out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
     {
         Protein protein = new Protein();
 
@@ -76,7 +76,7 @@ public class StandardProteinDataRegion extends AbstractProteinDataRegion
                 ctx.put("AACoverage", -1.0);
             }
 
-            super.renderTableRow(ctx, out, renderers, rowIndex);
+            super.renderTableRow(ctx, out, showRecordSelectors, renderers, rowIndex);
 
             renderNestedGrid(out, ctx, nestedRS, rowIndex);
         }

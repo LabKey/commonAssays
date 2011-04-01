@@ -76,16 +76,4 @@ public class LuminexModule extends DefaultModule
     {
         return PageFlowUtil.set(LuminexSchema.getSchema());
     }
-
-    @Override
-    public void afterUpdate(ModuleContext moduleContext)
-    {
-        super.afterUpdate(moduleContext);
-
-        // Need to upgrade the protocolid for any luminex assay data that's been copied to a study
-        if (!moduleContext.isNewInstall() && moduleContext.getInstalledVersion() < 8.31)
-        {
-            LuminexProtocolUpgrader.upgrade();
-        }
-    }
 }
