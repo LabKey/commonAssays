@@ -80,7 +80,6 @@ public abstract class BaseFlowController extends SpringActionController
 
         ActionURL forward = job.getStatusHref().clone();
         putParam(forward, FlowParam.redirect, 1);
-        forward.setFragment("end");
         return forward;
     }
 

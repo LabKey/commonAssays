@@ -78,7 +78,7 @@ public class JobStatusView extends HttpView
         out.write(PageFlowUtil.filter(_status));
         out.write("</p>");
         out.write("<table><tr><td>");
-        out.write("<div style=\"height:300px;width:500px;overflow:auto;\"><code>");
+        out.write("<div id=\"statusFile\" style=\"height:300px;width:700px;overflow:auto;\"><code>");
         String log = PageFlowUtil.getFileContentsAsString(new File(_psf.getFilePath()));
         for (int ich = 0; ich < log.length(); ich ++)
         {
@@ -96,7 +96,7 @@ public class JobStatusView extends HttpView
                     out.write(c);
             }
         }
-        out.write("<a name=\"end\">&nbsp;</a>");
+        out.write("<a id=\"end\">&nbsp;</a>");
         out.write("</code></div></td>");
         if (_job != null && _job instanceof ScriptJob)
         {
@@ -135,5 +135,9 @@ public class JobStatusView extends HttpView
             cancelURL.addParameter("statusFile", _psf.getFilePath());
             out.write("<br>" + PageFlowUtil.generateButton("Cancel Job", cancelURL));
         }
+        out.write("<script type='text/javascript'>\n");
+        out.write("Ext.onReady(function () { Ext.get(\"end\").scrollIntoView(Ext.get(\"statusFile\")); });\n");
+        //out.write("setTimeout(function () { var sf = document.getElementById(\"statusFile\"); sf.scrollTop = sf.scrollHeight; }, 1);");
+        out.write("</script>\n");
     }
 }
