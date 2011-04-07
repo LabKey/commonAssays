@@ -296,6 +296,8 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         return assay;
     }
 
+   protected abstract boolean isDilutionDownOrRight();
+
     protected void applyDilution(List<WellData> wells, ExpMaterial sampleInput, Map<String, DomainProperty> sampleProperties, boolean reverseDirection)
     {
         boolean first = true;
@@ -303,8 +305,15 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
         Double factor = (Double) sampleInput.getProperty(sampleProperties.get(NabAssayProvider.SAMPLE_DILUTION_FACTOR_PROPERTY_NAME));
         String methodString = (String) sampleInput.getProperty(sampleProperties.get(NabAssayProvider.SAMPLE_METHOD_PROPERTY_NAME));
         SampleInfo.Method method = SampleInfo.Method.valueOf(methodString);
-        int firstGroup = reverseDirection ? 0 : wells.size() - 1;
-        int incrementor = reverseDirection ? 1 : -1;
+        // Single plate NAb run specimens get more dilute as you move up or left on the plate, while
+        // high-throughput layouts get more dilute as you move down through the plates:
+        boolean diluteDown = isDilutionDownOrRight();
+        // The plate template may override the data handler's default dilution direction on a per-well group basis:
+        if (reverseDirection)
+            diluteDown = !diluteDown;
+        // If we're diluting up, we start at the end of our list.  If down, we start at the beginning.
+        int firstGroup = diluteDown ? 0 : wells.size() - 1;
+        int incrementor = diluteDown ? 1 : -1;
         for (int wellIndex = firstGroup; wellIndex >= 0 && wellIndex < wells.size(); wellIndex = wellIndex + incrementor)
         {
             WellData well = wells.get(wellIndex);

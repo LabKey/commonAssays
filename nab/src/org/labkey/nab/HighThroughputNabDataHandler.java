@@ -195,6 +195,12 @@ public class HighThroughputNabDataHandler extends NabDataHandler
     }
 
     @Override
+    protected boolean isDilutionDownOrRight()
+    {
+        return true;
+    }
+
+    @Override
     protected void prepareWellGroups(List<WellGroup> groups, ExpMaterial sampleInput, Map<String, DomainProperty> properties)
     {
         List<WellData> wells = new ArrayList<WellData>();

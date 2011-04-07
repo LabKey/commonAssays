@@ -73,6 +73,12 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
+    protected boolean isDilutionDownOrRight()
+    {
+        return false;
+    }
+
+    @Override
     protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(NabAssayProvider provider, List<Plate> plates, Collection<ExpMaterial> sampleInputs)
     {
         Plate plate = plates.get(0);

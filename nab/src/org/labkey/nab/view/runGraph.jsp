@@ -36,7 +36,7 @@
     int sampleCount = bean.getSampleResults().size();
     if (sampleCount > maxSamplesPerGraph)
     {
-        graphAction.addParameter("width", 300);
+        graphAction.addParameter("width", 275);
         graphAction.addParameter("height", 300);
     }
     int graphCount = 0;

@@ -24,6 +24,7 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ActionURL;
@@ -622,8 +623,13 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      */
     public ActionURL getContentURL(Container container, ExpData data)
     {
+        ExpRun run = data.getRun();
+        if (run == null)
+        {
+            return null;
+        }
         ActionURL url = new ActionURL(MS1Controller.ShowFeaturesAction.class, container);
-        url.addParameter("runId", Integer.toString(data.getRun().getRowId()));
+        url.addParameter("runId", Integer.toString(run.getRowId()));
         return url;
     }
 
