@@ -22,16 +22,16 @@ import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.security.User;
-import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.elispot.query.ElispotRunAntigenTable;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 public class ElispotSchema extends AssaySchema
@@ -80,8 +80,25 @@ public class ElispotSchema extends AssaySchema
         SimpleFilter propertyFilter = new SimpleFilter();
         propertyFilter.addCondition("PropertyURI", propPrefix, CompareType.STARTS_WITH);
 
-        return Table.select(OntologyManager.getTinfoPropertyDescriptor(), Table.ALL_COLUMNS,
+        PropertyDescriptor[] result = Table.select(OntologyManager.getTinfoPropertyDescriptor(), Table.ALL_COLUMNS,
                 propertyFilter, null, PropertyDescriptor.class);
+
+        // Merge measure/dimension properties from well group domain into ElispotProperties domain
+        // This needs to be removed and instead base the properties on a single PropertyDescriptor/DomainProperty
+        Domain domain = PropertyService.get().getDomain(protocol.getContainer(), new Lsid(ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, "Folder-" + protocol.getContainer().getRowId(), protocol.getName()).toString());
+        if (domain != null)
+        {
+            for (PropertyDescriptor dataProperty : result)
+            {
+                DomainProperty domainProp = domain.getPropertyByName(dataProperty.getName());
+                if (domainProp != null)
+                {
+                    dataProperty.setMeasure(domainProp.isMeasure());
+                    dataProperty.setDimension(domainProp.isDimension());
+                }
+            }
+        }
+        return result;
     }
 
 }

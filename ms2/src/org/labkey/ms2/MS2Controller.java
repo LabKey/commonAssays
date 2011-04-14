@@ -1015,6 +1015,15 @@ public class MS2Controller extends SpringActionController
             String queryString = (String) ctx.get("queryString");
             queryURL.setRawQuery(queryString);
 
+            // Shove the run id into the form bean. Since it's on directly on the URL it won't be bound directly
+            if (queryURL.getParameter("run") != null)
+            {
+                try
+                {
+                    form.run = Integer.parseInt(queryURL.getParameter("run"));
+                }
+                catch (NumberFormatException e) {}
+            }
             _run = validateRun(form);
 
             _goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
