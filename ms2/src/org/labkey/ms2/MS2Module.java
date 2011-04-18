@@ -351,13 +351,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         ));
     }
 
-    @Override
-    public UpgradeCode getUpgradeCode()
-    {
-        return new MS2UpgradeCode();
-    }
-
-
     public void enumerateDocuments(@NotNull SearchService.IndexTask task, @NotNull Container c, Date modifiedSince)
     {
         if (c == ContainerManager.getSharedContainer())

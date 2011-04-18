@@ -490,11 +490,6 @@ public class MS2Manager
         throw new IllegalStateException("Expected a zero or one matching ProteinProphetFiles");
     }
 
-    public static MS2Run[] getUnwrappedRuns()
-    {
-        return getRuns("deleted = ? AND statusid = " + MS2Importer.STATUS_SUCCESS + " AND path IS NOT NULL AND (experimentrunlsid IS NULL OR experimentrunlsid NOT IN (SELECT lsid FROM " + ExperimentService.get().getTinfoExperimentRun() + " WHERE container = runs.container))", false);
-    }
-
     private static MS2Run[] getRuns(String whereClause, Object... params)
     {
         ResultSet rs = null;
