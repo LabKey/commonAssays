@@ -25,6 +25,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.data.*;
+import org.labkey.flow.persist.InputRole;
 
 import java.io.File;
 import java.sql.SQLException;

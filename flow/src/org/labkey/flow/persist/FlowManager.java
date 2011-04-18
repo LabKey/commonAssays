@@ -831,7 +831,7 @@ public class FlowManager
 
     /**
      * this is a bit of a hack
-     * script job and FlowJoWorkspace.createExperimentRun() do not update these new fields
+     * script job and WorkspaceJob.createExperimentRun() do not update these new fields
      */
     public void updateFlowObjectCols(Container c)
     {

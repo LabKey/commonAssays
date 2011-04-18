@@ -23,12 +23,14 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.data.*;
-import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
 
 import java.io.*;
@@ -133,7 +135,7 @@ public class RImportJob extends FlowExperimentJob
                 attrs.setGraph(graphSpec, b);
             }
 
-            attrs.prepareForSave(getContainer());
+            AttributeSetHelper.prepareForSave(attrs, getContainer());
         }
 
         return results;
@@ -190,7 +192,7 @@ public class RImportJob extends FlowExperimentJob
 
                 addStatus("Saving FCSAnalysis " + iAnalysis + "/" + analysisMap.size() + ":" + fcsAnalysis.getName());
                 fcsAnalysis.save(getUser());
-                results.doSave(getUser(), fcsAnalysis);
+                AttributeSetHelper.doSave(results, getUser(), fcsAnalysis);
             }
         }
 

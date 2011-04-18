@@ -32,9 +32,12 @@ import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.FCSRef;
+import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowDataHandler;
+import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowSchema;
 
@@ -56,7 +59,7 @@ public class AnalysisHandler extends BaseHandler
         super(job, FlowProtocolStep.analysis);
         _analysis = analysis;
         _settings = ScriptSettings.fromSettingsDef(settings);
-        _groupAnalysis = FlowAnalyzer.makeAnalysis(settings, _analysis);
+        _groupAnalysis = ScriptAnalyzer.makeAnalysis(settings, _analysis);
     }
 
     synchronized public DataBaseType addWell(ExperimentRunType runElement, FlowFCSFile src, FlowCompensationMatrix flowComp, String scriptLSID) throws SQLException
@@ -148,7 +151,7 @@ public class AnalysisHandler extends BaseHandler
                         dbtScript.setName(script.getName());
 
                         ScriptDef scriptDef = doc.getScript();
-                        wellAnalysis = FlowAnalyzer.makeAnalysis(scriptDef.getSettings(), scriptDef.getAnalysis());
+                        wellAnalysis = ScriptAnalyzer.makeAnalysis(scriptDef.getSettings(), scriptDef.getAnalysis());
                     }
                     else
                     {
@@ -209,7 +212,7 @@ public class AnalysisHandler extends BaseHandler
         {
             if (!_getScriptFromWells)
                 return null;
-            AttributeSet attrSet = AttributeSet.fromData(_well.getData(), true);
+            AttributeSet attrSet = AttributeSetHelper.fromData(_well.getData(), true);
             if (attrSet.getStatistics().isEmpty() && attrSet.getGraphNames().isEmpty())
             {
                 return null;

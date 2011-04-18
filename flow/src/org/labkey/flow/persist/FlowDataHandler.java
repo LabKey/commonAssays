@@ -65,7 +65,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
             FlowDataObject obj = FlowDataObject.fromData(data);
             if (obj != null)
             {
-                AttributeSet attrs = AttributeSet.fromData(data);
+                AttributeSet attrs = AttributeSetHelper.fromData(data);
                 PipelineService service = PipelineService.get();
 
                 attrs.relativizeURI(service.findPipelineRoot(data.getContainer()).getUri());
@@ -110,7 +110,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         {
             if (dataFile.getName().endsWith("." + EXT_DATA))
             {
-                if (AttributeSet.fromData(data) == null)
+                if (AttributeSetHelper.fromData(data) == null)
                 {
                     FlowdataDocument doc = FlowdataDocument.Factory.parse(dataFile);
                     FlowData flowdata = doc.getFlowdata();
@@ -125,7 +125,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
                         }
                     }
                     AttributeSet attrSet = new AttributeSet(doc.getFlowdata(), uriFile);
-                    attrSet.save(info.getUser(), data);
+                    AttributeSetHelper.save(attrSet, info.getUser(), data);
                 }
             }
             else if (dataFile.getName().endsWith("." + EXT_SCRIPT))

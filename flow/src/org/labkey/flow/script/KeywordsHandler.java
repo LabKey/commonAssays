@@ -22,10 +22,11 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.util.URIUtil;
 import org.labkey.flow.analysis.model.FCSKeywordData;
+import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.data.*;
-import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowDataHandler;
+import org.labkey.flow.persist.InputRole;
 
 import java.io.File;
 import java.util.ArrayList;

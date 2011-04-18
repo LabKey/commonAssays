@@ -19,9 +19,9 @@ package org.labkey.flow.analysis.chart;
 import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.data.Range;
-import org.labkey.flow.gateeditor.client.util.LogAxisFunction;
-import org.labkey.flow.gateeditor.client.util.SimpleLogAxisFunction;
-import org.labkey.flow.gateeditor.client.util.RangeFunction;
+import org.labkey.flow.analysis.util.LogAxisFunction;
+import org.labkey.flow.analysis.util.RangeFunction;
+import org.labkey.flow.analysis.util.SimpleLogAxisFunction;
 
 import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;

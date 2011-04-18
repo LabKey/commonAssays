@@ -16,8 +16,6 @@
 
 package org.labkey.flow.persist;
 
-import org.labkey.flow.data.InputRole;
-
 public enum ObjectType
 {
     fcsKeywords(1, InputRole.FCSFile),

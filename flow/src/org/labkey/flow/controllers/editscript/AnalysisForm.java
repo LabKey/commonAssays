@@ -18,12 +18,11 @@ package org.labkey.flow.controllers.editscript;
 
 import org.apache.commons.lang.StringUtils;
 import org.fhcrc.cpas.flow.script.xml.*;
+import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
-import org.labkey.flow.script.FlowAnalyzer;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -58,13 +57,13 @@ public class AnalysisForm extends EditScriptForm
         List<StatisticSpec> stats = new ArrayList();
         for (StatisticDef stat : analysis.getStatisticArray())
         {
-            stats.add(FlowAnalyzer.makeStatisticSpec(stat));
+            stats.add(ScriptAnalyzer.makeStatisticSpec(stat));
         }
         statistics = StringUtils.join(stats.iterator(), "\n");
         List<GraphSpec> graphs = new ArrayList();
         for (GraphDef graph : analysis.getGraphArray())
         {
-            graphs.add(FlowAnalyzer.makeGraphSpec(graph));
+            graphs.add(ScriptAnalyzer.makeGraphSpec(graph));
         }
         this.graphs = StringUtils.join(graphs.iterator(), "\n");
     }

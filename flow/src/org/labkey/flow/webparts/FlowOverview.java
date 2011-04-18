@@ -30,6 +30,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Overview;
 import org.labkey.flow.FlowModule;
+import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
@@ -40,7 +41,6 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowPipelineProvider;
 

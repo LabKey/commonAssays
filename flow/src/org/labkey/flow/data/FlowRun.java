@@ -29,6 +29,7 @@ import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowAnalyzer;

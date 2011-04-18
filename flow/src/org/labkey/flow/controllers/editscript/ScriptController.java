@@ -64,6 +64,7 @@ import org.labkey.flow.analysis.model.RegionGate;
 import org.labkey.flow.analysis.model.ScriptComponent;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.PlotInfo;
+import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.BaseFlowController;
@@ -75,7 +76,6 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowRunWorkspace;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
-import org.labkey.flow.script.FlowAnalyzer;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -453,69 +453,7 @@ public class ScriptController extends BaseFlowController
             FlowJoWorkspace workspace = form.workspaceObject;
             String groupName = form.groupName;
             String sampleId= form.sampleId;
-            Analysis analysis = null;
-            if (groupName != null)
-            {
-                analysis = workspace.getGroupAnalyses().get(groupName);
-                if (analysis == null)
-                {
-                    errors.reject(ERROR_MSG, "No group analysis with the name '" + groupName + "' could be found.");
-                    return null;
-                }
-            }
-            else if (sampleId != null)
-            {
-                FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleId);
-                if (sample == null)
-                {
-                    errors.reject(ERROR_MSG, "Cannot find sample '" + sampleId);
-                    return null;
-                }
-                analysis = workspace.getSampleAnalysis(sample);
-                if (analysis == null)
-                {
-                    errors.reject(ERROR_MSG, "Cannot find analysis for sample " + sampleId);
-                    return null;
-                }
-            }
-            else
-            {
-                for (Analysis analysisTry : workspace.getGroupAnalyses().values())
-                {
-                    if (analysisTry.getPopulations().size() > 0)
-                    {
-                        if (analysis != null)
-                        {
-                            errors.reject(ERROR_MSG, "There is more than one group analysis in this workspace.  Please specify which one to use.");
-                            return null;
-                        }
-                        analysis = analysisTry;
-                    }
-                }
-                if (analysis == null)
-                {
-                    for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples())
-                    {
-                        Analysis analysisTry = workspace.getSampleAnalysis(sample);
-                        if (analysisTry == null)
-                            continue;
-                        if (analysisTry.getPopulations().size() > 0)
-                        {
-                            if (analysis != null)
-                            {
-                                errors.reject(ERROR_MSG, "There is more than one sample analysis in this workspace.  Please specify which one to use.");
-                                return null;
-                            }
-                            analysis = analysisTry;
-                        }
-                    }
-                }
-            }
-            if (analysis == null)
-            {
-                errors.reject(ERROR_MSG, "No analyses were found in this workspace.");
-                return null;
-            }
+
             FlowScript analysisScript = getScript();
             ScriptDocument doc = analysisScript.getAnalysisScriptDocument();
             AnalysisDef analysisElement = doc.getScript().getAnalysis();
@@ -524,7 +462,15 @@ public class ScriptController extends BaseFlowController
                 analysisElement = doc.getScript().addNewAnalysis();
             }
 
-            FlowAnalyzer.makeAnalysisDef(doc.getScript(), analysis, form.ff_statisticSet);
+            try
+            {
+                ScriptAnalyzer.makeAnalysisDef(doc.getScript(), workspace, groupName, sampleId, form.ff_statisticSet);
+            }
+            catch (Exception e)
+            {
+                errors.reject(ERROR_MSG, e.getMessage());
+                return null;
+            }
             if (!safeSetAnalysisScript(analysisScript, doc.toString(), errors))
                 return null;
             return analysisScript.urlShow();
@@ -698,7 +644,7 @@ public class ScriptController extends BaseFlowController
             if (!updateSettingsFilter(form, doc))
                 return null;
 
-            FlowAnalyzer.makeCompensationCalculationDef(doc, calc);
+            ScriptAnalyzer.makeCompensationCalculationDef(doc, calc);
             if (!safeSetAnalysisScript(form.analysisScript, doc.toString(), errors))
                 return null;
             return form.urlFor(EditCompensationCalculationAction.class);
@@ -958,11 +904,11 @@ public class ScriptController extends BaseFlowController
         {
             if (popset instanceof CompensationCalculation)
             {
-                FlowAnalyzer.makeCompensationCalculationDef(doc, (CompensationCalculation) popset);
+                ScriptAnalyzer.makeCompensationCalculationDef(doc, (CompensationCalculation) popset);
             }
             else
             {
-                FlowAnalyzer.makeAnalysisDef(doc.getScript(), (Analysis) popset, null);
+                ScriptAnalyzer.makeAnalysisDef(doc.getScript(), (Analysis) popset, null);
             }
             return safeSetAnalysisScript(analysisScript, doc.toString(), errors);
         }

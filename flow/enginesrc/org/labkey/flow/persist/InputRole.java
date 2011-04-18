@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.flow.data;
+package org.labkey.flow.persist;
 
 public enum InputRole
 {

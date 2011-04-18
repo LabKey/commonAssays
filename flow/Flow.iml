@@ -23,6 +23,7 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="API" />
+    <orderEntry type="module" module-name="FlowEngine" />
     <orderEntry type="module" module-name="FlowGWT" />
   </component>
 </module>

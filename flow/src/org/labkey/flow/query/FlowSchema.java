@@ -65,6 +65,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.compensation.CompensationController;
@@ -77,9 +78,8 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.ICSMetadata;
-import org.labkey.flow.data.InputRole;
+import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.view.FlowQueryView;
 import org.springframework.validation.BindException;
 

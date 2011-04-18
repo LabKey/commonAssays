@@ -3,12 +3,9 @@
   <component name="FacetManager">
     <facet type="gwt" name="GWT">
       <configuration>
-        <setting name="additionalCompilerParameters" value="" />
         <setting name="compilerMaxHeapSize" value="128" />
-        <setting name="compilerOutputPath" value="" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
         <setting name="gwtSdkUrl" value="file://$GWT_HOME$" />
-        <setting name="runGwtCompilerOnMake" value="false" />
         <packaging>
           <module name="org.labkey.flow.gateeditor.GateEditor" path="/org.labkey.flow.gateeditor.GateEditor" />
         </packaging>
@@ -24,6 +21,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="InternalGWT" />
+    <orderEntry type="module" module-name="FlowEngine" />
   </component>
 </module>
 

@@ -26,6 +26,7 @@ import org.fhcrc.cpas.flow.script.xml.SettingsDef;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowDataHandler;
+import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
 import org.fhcrc.cpas.exp.xml.ExperimentRunType;
 import org.fhcrc.cpas.exp.xml.ProtocolApplicationBaseType;
@@ -50,7 +51,7 @@ public class CompensationCalculationHandler extends BaseHandler
     {
         _job.addStatus("Calculating compensation matrix for " + run.getName());
         List<FCSRef> uris = FlowAnalyzer.getFCSRefs(run);
-        CompensationCalculation calc = FlowAnalyzer.makeCompensationCalculation(_settings, _compensationCalculationElement);
+        CompensationCalculation calc = ScriptAnalyzer.makeCompensationCalculation(_settings, _compensationCalculationElement);
         List<CompensationResult> results = new ArrayList<CompensationResult>();
         CompensationMatrix matrix = FCSAnalyzer.get().calculateCompensationMatrix(uris, calc, results);
         ProtocolApplicationBaseType appComp = addProtocolApplication(runElement);

@@ -31,12 +31,14 @@ import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.model.ScriptComponent;
+import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -288,9 +290,9 @@ public class FlowScript extends FlowDataObject
         ScriptDef script = getAnalysisScriptDocument().getScript();
         if (step == FlowProtocolStep.calculateCompensation)
         {
-            return FlowAnalyzer.makeCompensationCalculation(script.getSettings(), script.getCompensationCalculation());
+            return ScriptAnalyzer.makeCompensationCalculation(script.getSettings(), script.getCompensationCalculation());
         }
-        return FlowAnalyzer.makeAnalysis(script.getSettings(), script.getAnalysis());
+        return ScriptAnalyzer.makeAnalysis(script.getSettings(), script.getAnalysis());
     }
 
     public ActionURL urlFor(Class<? extends Controller> actionClass, FlowProtocolStep step)

@@ -42,7 +42,7 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.InputRole;
+import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.data.LogType;
 import org.labkey.flow.data.SampleKey;
 import org.labkey.flow.persist.FlowManager;

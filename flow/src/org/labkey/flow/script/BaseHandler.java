@@ -22,6 +22,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.InputRole;
 
 import java.io.File;
 import java.sql.SQLException;

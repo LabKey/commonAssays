@@ -34,6 +34,7 @@
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.flow.analysis.web.ScriptAnalyzer" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -144,7 +145,7 @@
     Collection<SubsetSpec> subsets = Collections.EMPTY_LIST;
     if (script != null)
     {
-        subsets = FlowAnalyzer.getSubsets(script.getAnalysisScript(), step, false);
+        subsets = ScriptAnalyzer.getSubsets(script.getAnalysisScript(), step == FlowProtocolStep.analysis, step == FlowProtocolStep.calculateCompensation, false);
     }
     Map<String, String> parameters = FlowAnalyzer.getParameters(well, matrix == null ? null : matrix.getCompensationMatrix());
 %>

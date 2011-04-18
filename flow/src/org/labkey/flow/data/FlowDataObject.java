@@ -20,13 +20,13 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.data.*;
 import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.AttrObject;
 import org.apache.commons.lang.ObjectUtils;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.TreeSet;
 import java.util.HashMap;
 
 abstract public class FlowDataObject extends FlowObject<ExpData>
@@ -193,6 +193,6 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
 
     public AttributeSet getAttributeSet()
     {
-        return AttributeSet.fromData(getData());
+        return AttributeSetHelper.fromData(getData());
     }
 }

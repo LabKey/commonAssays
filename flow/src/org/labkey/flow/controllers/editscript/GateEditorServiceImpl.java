@@ -34,12 +34,14 @@ import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.PlotInfo;
+import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.data.*;
 import org.labkey.flow.gateeditor.client.GWTGraphException;
 import org.labkey.flow.gateeditor.client.GateEditorService;
 import org.labkey.flow.gateeditor.client.model.*;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.script.FlowAnalyzer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -268,12 +270,12 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             FlowProtocolStep step;
             if (editingMode.equals(GWTEditingMode.compensation))
             {
-                scriptComponent = FlowAnalyzer.makeCompensationCalculation(scriptDef.getSettings(), scriptDef.getCompensationCalculation());
+                scriptComponent = ScriptAnalyzer.makeCompensationCalculation(scriptDef.getSettings(), scriptDef.getCompensationCalculation());
                 step = FlowProtocolStep.calculateCompensation;
             }
             else
             {
-                scriptComponent = FlowAnalyzer.makeAnalysis(scriptDef.getSettings(), scriptDef.getAnalysis());
+                scriptComponent = ScriptAnalyzer.makeAnalysis(scriptDef.getSettings(), scriptDef.getAnalysis());
                 step = FlowProtocolStep.analysis;
             }
             Map<Integer, String> wellOptions = run.getWells(FlowProtocol.getForContainer(getContainer()), scriptComponent, step);
@@ -440,11 +442,11 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             ScriptComponent group;
             if (step == FlowProtocolStep.calculateCompensation)
             {
-                group = FlowAnalyzer.makeCompensationCalculation(scriptDef.getSettings(), scriptDef.getCompensationCalculation());
+                group = ScriptAnalyzer.makeCompensationCalculation(scriptDef.getSettings(), scriptDef.getCompensationCalculation());
             }
             else
             {
-                group = FlowAnalyzer.makeAnalysis(scriptDef.getSettings(), scriptDef.getAnalysis());
+                group = ScriptAnalyzer.makeAnalysis(scriptDef.getSettings(), scriptDef.getAnalysis());
             }
             FlowWell well = FlowWell.fromWellId(graphOptions.well.getWellId());
             FlowCompensationMatrix comp = null;

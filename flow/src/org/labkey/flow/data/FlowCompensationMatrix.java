@@ -22,6 +22,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.web.StatisticSpec;
@@ -84,7 +85,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
             }
             data.setDataFileURI(new File(FlowSettings.getWorkingDirectory(), "compensation." + FlowDataHandler.EXT_DATA).toURI());
             data.save(user);
-            attrs.doSave(user, data);
+            AttributeSetHelper.doSave(attrs, user, data);
             flowComp = (FlowCompensationMatrix) FlowDataObject.fromData(data);
             if (fTrans)
             {

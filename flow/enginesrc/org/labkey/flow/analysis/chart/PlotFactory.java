@@ -25,7 +25,7 @@ import org.jfree.data.Range;
 import org.jfree.data.xy.XYDataset;
 import org.labkey.api.view.Stats;
 import org.labkey.flow.analysis.model.*;
-import org.labkey.flow.gateeditor.client.util.RangeFunction;
+import org.labkey.flow.analysis.util.RangeFunction;
 
 import java.awt.*;
 

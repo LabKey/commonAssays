@@ -28,10 +28,11 @@ import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.view.*;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowDataType;
-import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.query.FlowSchema;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -115,7 +116,7 @@ public class CompensationController extends BaseFlowController
             try
             {
                 AttributeSet attrs = new AttributeSet(comp);
-                attrs.prepareForSave(getContainer());
+                AttributeSetHelper.prepareForSave(attrs, getContainer());
                 if (!svc.isTransactionActive())
                 {
                     svc.beginTransaction();

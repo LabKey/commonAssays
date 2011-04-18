@@ -21,19 +21,8 @@ import org.apache.log4j.Logger;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.util.SymbolTable;
-import org.fhcrc.cpas.flow.script.xml.ScriptDef;
-import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
-import org.labkey.api.data.Container;
-import org.labkey.api.exp.api.*;
-import org.labkey.api.security.User;
-import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.SubsetSpec;
-import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AttributeSet;
-import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.script.FlowAnalyzer;
-import org.labkey.flow.script.FlowJob;
 import org.w3c.dom.*;
 import org.w3c.dom.ls.LSParserFilter;
 import org.w3c.dom.traversal.NodeFilter;
@@ -43,7 +32,6 @@ import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
-import java.net.URI;
 import java.util.*;
 
 
@@ -474,7 +462,6 @@ abstract public class FlowJoWorkspace implements Serializable
             }
         }
     }
-    
 
     static public FlowJoWorkspace readWorkspace(InputStream stream) throws Exception
     {
@@ -1125,242 +1112,4 @@ abstract public class FlowJoWorkspace implements Serializable
         return new PolygonGate(polygonGate.getXAxis(), polygonGate.getYAxis(), polygon);
     }
 
-    public FlowRun createExperimentRun(FlowJob job, User user, Container container, FlowExperiment experiment, String workspaceName, File workspaceFile, File runFilePathRoot, boolean failOnError) throws Exception
-    {
-        // Fake file URI set on the FCSFile/FCSAnalsyis ExpData to ensure it's recognized by the FlowDataHandler.
-        URI dataFileURI = new File(workspaceFile.getParent(), "attributes.flowdata.xml").toURI();
-        
-        ExperimentService.Interface svc = ExperimentService.get();
-        Map<SampleInfo, AttributeSet> keywordsMap = new LinkedHashMap();
-        Map<CompensationMatrix, AttributeSet> compMatrixMap = new LinkedHashMap();
-        Map<SampleInfo, AttributeSet> analysisMap = new LinkedHashMap();
-        Map<Analysis, ScriptDocument> scriptDocs = new HashMap();
-        Map<Analysis, FlowScript> scripts = new HashMap();
-
-        List<SampleInfo> samples = getSamples();
-        int iSample = 0;
-        for (FlowJoWorkspace.SampleInfo sample : samples)
-        {
-            if (job.checkInterrupted())
-                return null;
-
-            iSample++;
-            String description = "sample " + iSample + "/" + samples.size() + ":" + sample.getLabel();
-            job.addStatus("Preparing " + description);
-
-            AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);
-            URI uri = null;
-            File file = null;
-            if (runFilePathRoot != null)
-            {
-                file = new File(runFilePathRoot, sample.getLabel());
-                uri = file.toURI();
-                // Don't set FCSFile uri unless the file actually exists on disk.
-                // We assume the FCS file exists in graph editor if the URI is set.
-                if (file.exists())
-                    attrs.setURI(uri);
-            }
-            attrs.setKeywords(sample.getKeywords());
-            attrs.prepareForSave(container);
-            keywordsMap.put(sample, attrs);
-
-            CompensationMatrix comp = sample.getCompensationMatrix();
-
-            AttributeSet results = getSampleAnalysisResults(sample);
-            if (results != null)
-            {
-                Analysis analysis = getSampleAnalysis(sample);
-                if (analysis != null)
-                {
-                    ScriptDocument scriptDoc = ScriptDocument.Factory.newInstance();
-                    ScriptDef scriptDef = scriptDoc.addNewScript();
-                    FlowAnalyzer.makeAnalysisDef(scriptDef, analysis, EnumSet.of(StatisticSet.workspace, StatisticSet.count, StatisticSet.frequencyOfParent));
-                    scriptDocs.put(analysis, scriptDoc);
-
-                    if (file != null)
-                    {
-                        if (file.exists())
-                        {
-                            job.addStatus("Generating graphs for " + description);
-                            List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(
-                                    uri, comp, analysis, analysis.getGraphs());
-                            for (FCSAnalyzer.GraphResult graphResult : graphResults)
-                            {
-                                if (graphResult.exception == null)
-                                {
-                                    results.setGraph(graphResult.spec, graphResult.bytes);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            String msg = "Can't generate graphs for sample. FCS File doesn't exist for " + description;
-                            if (failOnError)
-                            {
-                                job.addError(null, null, msg);
-                            }
-                            else
-                            {
-                                job.warn(msg);
-                            }
-                        }
-                    }
-                }
-
-                results.prepareForSave(container);
-                analysisMap.put(sample, results);
-            }
-
-            if (comp != null)
-            {
-                AttributeSet compAttrs = new AttributeSet(comp);
-                compAttrs.prepareForSave(container);
-                compMatrixMap.put(comp, compAttrs);
-            }
-        }
-
-        if (job.checkInterrupted())
-            return null;
-
-        FlowManager.vacuum();
-
-        boolean transaction = false;
-        try
-        {
-            job.addStatus("Begin transaction for workspace " + workspaceName);
-
-            svc.beginTransaction();
-            transaction = true;
-            ExpRun run = svc.createExperimentRun(container, workspaceName);
-            FlowProtocol flowProtocol = FlowProtocol.ensureForContainer(user, container);
-            ExpProtocol protocol = flowProtocol.getProtocol();
-            run.setProtocol(protocol);
-            if (runFilePathRoot != null)
-            {
-                run.setFilePathRoot(runFilePathRoot);
-            }
-            run.save(user);
-
-            ExpData workspaceData = svc.createData(container, new DataType("Flow-Workspace"));
-            workspaceData.setDataFileURI(workspaceFile.toURI());
-            workspaceData.setName(workspaceName);
-            workspaceData.save(user);
-
-            ExpProtocolApplication startingInputs = run.addProtocolApplication(user, null, ExpProtocol.ApplicationType.ExperimentRun, null);
-            startingInputs.addDataInput(user, workspaceData, InputRole.Workspace.toString());
-            Map<FlowJoWorkspace.SampleInfo, FlowFCSFile> fcsFiles = new HashMap();
-            iSample = 0;
-            for (FlowJoWorkspace.SampleInfo sample : samples)
-            {
-                if (job.checkInterrupted())
-                    return null;
-
-                iSample++;
-                ExpProtocolApplication paSample = run.addProtocolApplication(user, FlowProtocolStep.keywords.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, null);
-                paSample.addDataInput(user, workspaceData, InputRole.Workspace.toString());
-                ExpData fcsFile = svc.createData(container, FlowDataType.FCSFile);
-                fcsFile.setName(sample.getLabel());
-                fcsFile.setDataFileURI(dataFileURI);
-
-                fcsFile.setSourceApplication(paSample);
-                job.addStatus("Saving FCSFile " + iSample + "/" + samples.size() + ":" + sample.getLabel());
-                fcsFile.save(user);
-                fcsFiles.put(sample, new FlowFCSFile(fcsFile));
-                AttributeSet attrs = keywordsMap.get(sample);
-                attrs.doSave(user, fcsFile);
-            }
-
-            int iComp = 0;
-            Map<CompensationMatrix, FlowCompensationMatrix> flowCompMatrices = new HashMap();
-            for (Map.Entry<CompensationMatrix, AttributeSet> entry : compMatrixMap.entrySet())
-            {
-                if (job.checkInterrupted())
-                    return null;
-
-                iComp++;
-                CompensationMatrix compMatrix = entry.getKey();
-                AttributeSet compAttrs = entry.getValue();
-                FlowCompensationMatrix flowComp = FlowCompensationMatrix.create(user, container, null, compAttrs);
-                ExpProtocolApplication paComp = run.addProtocolApplication(user, FlowProtocolStep.calculateCompensation.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, null);
-                paComp.addDataInput(user, workspaceData, InputRole.Workspace.toString());
-                flowComp.getData().setSourceApplication(paComp);
-                flowComp.getData().setName(compMatrix.getName() + " " + workspaceName);
-                job.addStatus("Saving CompMatrix " + iComp + "/" + compMatrixMap.size() + ":" + flowComp.getName());
-                flowComp.getData().save(user);
-                flowCompMatrices.put(compMatrix, flowComp);
-            }
-
-            int iAnalysis = 0;
-            for (Map.Entry<FlowJoWorkspace.SampleInfo, FlowFCSFile> entry : fcsFiles.entrySet())
-            {
-                if (job.checkInterrupted())
-                    return null;
-
-                AttributeSet results = analysisMap.get(entry.getKey());
-                if (results != null)
-                {
-                    iAnalysis++;
-                    ExpProtocolApplication paAnalysis = run.addProtocolApplication(user,
-                            FlowProtocolStep.analysis.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, null);
-                    FlowFCSFile fcsFile = entry.getValue();
-                    results.setURI(fcsFile.getFCSURI());
-                    paAnalysis.addDataInput(user, fcsFile.getData(), InputRole.FCSFile.toString());
-                    ExpData fcsAnalysis = svc.createData(container, FlowDataType.FCSAnalysis);
-                    fcsAnalysis.setName(flowProtocol.getFCSAnalysisName(fcsFile));
-                    fcsAnalysis.setSourceApplication(paAnalysis);
-                    fcsAnalysis.setDataFileURI(dataFileURI);
-                    job.addStatus("Saving FCSAnalysis " + iAnalysis + "/" + analysisMap.size() + ":" + fcsAnalysis.getName());
-                    fcsAnalysis.save(user);
-                    results.doSave(user, fcsAnalysis);
-                    Analysis analysis = getSampleAnalysis(entry.getKey());
-                    if (analysis != null)
-                    {
-                        FlowScript script = scripts.get(analysis);
-                        FlowWell well = new FlowFCSAnalysis(fcsAnalysis);
-                        if (script == null)
-                        {
-                            ScriptDocument scriptDoc = scriptDocs.get(analysis);
-                            well = FlowScript.createScriptForWell(user, well, "workspaceScript" + (scripts.size() + 1), scriptDoc, workspaceData, InputRole.Workspace);
-                            scripts.put(analysis, well.getScript());
-                        }
-                        else
-                        {
-                            well.getProtocolApplication().addDataInput(user, script.getData(), InputRole.AnalysisScript.toString());
-                        }
-                    }
-                    CompensationMatrix comp = entry.getKey().getCompensationMatrix();
-                    if (comp != null)
-                    {
-                        FlowCompensationMatrix flowComp = flowCompMatrices.get(comp);
-                        paAnalysis.addDataInput(user, flowComp.getData(), InputRole.CompensationMatrix.toString());
-                    }
-                }
-            }
-
-            if (job.checkInterrupted())
-                return null;
-
-            if (experiment != null)
-            {
-                experiment.getExperiment().addRuns(user, run);
-            }
-            
-            FlowManager.get().updateFlowObjectCols(container);
-
-            svc.commitTransaction();
-            transaction = false;
-            job.addStatus("Transaction completed successfully for workspace " + workspaceName);
-
-            return new FlowRun(run);
-        }
-        finally
-        {
-            if (transaction)
-            {
-                svc.rollbackTransaction();
-                job.addStatus("Transaction failed to complete for workspace " + workspaceName);
-            }
-            FlowManager.analyze();
-        }
-    }
 }
