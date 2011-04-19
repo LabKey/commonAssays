@@ -105,6 +105,7 @@ public class ViabilityAssaySchema extends AssaySchema
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
         ret.addColumn(ExpDataTable.Column.Created);
+        ret.addColumn(ExpDataTable.Column.SourceProtocolApplication).setHidden(true);
         ret.setTitleColumn("Name");
         ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
         protocol.setHidden(true);
