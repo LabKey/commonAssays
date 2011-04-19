@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.query;
 
+import org.labkey.api.data.JdbcType;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.api.data.SQLFragment;
@@ -66,7 +67,7 @@ public class ComparePeptideTableInfo extends VirtualTable
                 sql.append("Run");
                 sql.append(run.getRun());
                 sql.append("PeptideId");
-                ExprColumn peptideIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, Types.INTEGER);
+                ExprColumn peptideIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, JdbcType.INTEGER);
                 peptideIdColumn.setLabel(run.getDescription());
                 peptideIdColumn.setIsUnselectable(true);
                 runColumns.add(peptideIdColumn);
@@ -86,9 +87,9 @@ public class ComparePeptideTableInfo extends VirtualTable
             }
         }
 
-        addColumn(new ExprColumn(this, "PeptideSequence", new SQLFragment("InnerPeptide"), Types.VARCHAR));
+        addColumn(new ExprColumn(this, "PeptideSequence", new SQLFragment("InnerPeptide"), JdbcType.VARCHAR));
 
-        ExprColumn peptideIdColumn = new ExprColumn(this, "Run", new SQLFragment("<ILLEGAL STATE>"), Types.INTEGER);
+        ExprColumn peptideIdColumn = new ExprColumn(this, "Run", new SQLFragment("<ILLEGAL STATE>"), JdbcType.INTEGER);
         peptideIdColumn.setIsUnselectable(true);
         defaultCols.add(FieldKey.fromParts("Run", "PeptideProphet"));
         peptideIdColumn.setFk(new LookupForeignKey("RowId")
@@ -109,7 +110,7 @@ public class ComparePeptideTableInfo extends VirtualTable
             runCountSQL.append("CASE WHEN " + runCol.getAlias() + "$.RowId IS NULL THEN 0 ELSE 1 END ");
         }
         runCountSQL.append(")");
-        ExprColumn runCount = new ExprColumn(this, "RunCount", runCountSQL, Types.INTEGER, runColumns.toArray(new ColumnInfo[runColumns.size()]));
+        ExprColumn runCount = new ExprColumn(this, "RunCount", runCountSQL, JdbcType.INTEGER, runColumns.toArray(new ColumnInfo[runColumns.size()]));
         addColumn(runCount);
 
         SQLFragment patternSQL = new SQLFragment("(");
@@ -129,7 +130,7 @@ public class ComparePeptideTableInfo extends VirtualTable
             }
         }
         patternSQL.append(")");
-        ExprColumn patternColumn = new ExprColumn(this, "Pattern", patternSQL, Types.INTEGER, runColumns.toArray(new ColumnInfo[runColumns.size()]));
+        ExprColumn patternColumn = new ExprColumn(this, "Pattern", patternSQL, JdbcType.INTEGER, runColumns.toArray(new ColumnInfo[runColumns.size()]));
         addColumn(patternColumn);
 
         defaultCols.add(FieldKey.fromParts("RunCount"));

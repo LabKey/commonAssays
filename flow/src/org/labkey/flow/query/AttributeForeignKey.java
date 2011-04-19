@@ -64,7 +64,7 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
             return null;
         int attrId = FlowManager.get().getAttributeId(attrName.toString());
         SQLFragment sql = sqlValue(parent, attrName, attrId);
-        ExprColumn ret = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(), displayField), sql, 0, parent);
+        ExprColumn ret = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(), displayField), sql, JdbcType.NULL, parent);
         initColumn(attrName, ret);
         return ret;
     }

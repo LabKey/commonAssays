@@ -26,6 +26,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.FilterInfo;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -464,7 +465,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addObjectIdColumn(String name)
         {
             ColumnInfo underlyingColumn = _flowObject.getColumn("rowid");
-            ExprColumn ret = new ExprColumn(this, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".objectid"), underlyingColumn.getSqlTypeInt());
+            ExprColumn ret = new ExprColumn(this, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".objectid"), underlyingColumn.getJdbcType());
             ret.copyAttributesFrom(underlyingColumn);
             addColumn(ret);
             return ret;
@@ -478,7 +479,7 @@ public class FlowSchema extends UserSchema
 
         ColumnInfo addExpColumn(ColumnInfo underlyingColumn)
         {
-            ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
+            ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getJdbcType());
             ret.copyAttributesFrom(underlyingColumn);
             ret.setHidden(underlyingColumn.isHidden());
             if (underlyingColumn.getFk() instanceof RowIdForeignKey)
@@ -736,7 +737,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addObjectIdColumn(String name)
         {
             ColumnInfo underlyingColumn = _flowObject.getColumn("rowid");
-            ExprColumn ret = new ExprColumn(this, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".objectid"), underlyingColumn.getSqlTypeInt());
+            ExprColumn ret = new ExprColumn(this, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".objectid"), underlyingColumn.getJdbcType());
             ret.copyAttributesFrom(underlyingColumn);
             addColumn(ret);
             return ret;
@@ -745,7 +746,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addHasURIColumn(String name)
         {
             ColumnInfo underlyingColumn = _flowObject.getColumn("uri");
-            ExprColumn ret = new ExprColumn(this, name, new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN true ELSE false END)"), java.sql.Types.BOOLEAN);
+            ExprColumn ret = new ExprColumn(this, name, new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN true ELSE false END)"), JdbcType.BOOLEAN);
 //            ret.copyAttributesFrom(underlyingColumn);
             addColumn(ret);
             return ret;
@@ -753,7 +754,7 @@ public class FlowSchema extends UserSchema
 
         ColumnInfo addExpColumn(ColumnInfo underlyingColumn)
         {
-            ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
+            ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getJdbcType());
             ret.copyAttributesFrom(underlyingColumn);
             ret.setHidden(underlyingColumn.isHidden());
             if (underlyingColumn.getFk() instanceof RowIdForeignKey)
@@ -1173,7 +1174,7 @@ public class FlowSchema extends UserSchema
         String bTRUE = _dbSchema.getSqlDialect().getBooleanTRUE();
         String bFALSE = _dbSchema.getSqlDialect().getBooleanFALSE();
 
-        ExprColumn colHasFile = new ExprColumn(ret, "HasFile", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN " + bTRUE +" ELSE " + bFALSE + " END)"), java.sql.Types.BOOLEAN);
+        ExprColumn colHasFile = new ExprColumn(ret, "HasFile", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN " + bTRUE +" ELSE " + bFALSE + " END)"), JdbcType.BOOLEAN);
         ret.addColumn(colHasFile);
         colHasFile.setHidden(true);
 
@@ -1234,7 +1235,7 @@ public class FlowSchema extends UserSchema
     {
         FlowDataTable ret = createDataTable(alias, type);
 
-        ColumnInfo colAnalysisScript = new ExprColumn(ret, "AnalysisScript", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".scriptid"), Types.INTEGER);
+        ColumnInfo colAnalysisScript = new ExprColumn(ret, "AnalysisScript", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".scriptid"), JdbcType.INTEGER);
         ret.addColumn(colAnalysisScript);
         colAnalysisScript.setFk(new LookupForeignKey(new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()),
                 FlowParam.scriptId.toString(), "RowId", "Name"){
@@ -1244,7 +1245,7 @@ public class FlowSchema extends UserSchema
             }
         });
 
-        ColumnInfo colCompensationMatrix = new ExprColumn(ret, "CompensationMatrix", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".compid"), Types.INTEGER);
+        ColumnInfo colCompensationMatrix = new ExprColumn(ret, "CompensationMatrix", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".compid"), JdbcType.INTEGER);
         ret.addColumn(colCompensationMatrix);
         colCompensationMatrix.setFk(new LookupForeignKey(new ActionURL(CompensationController.ShowCompensationAction.class, getContainer()), FlowParam.compId.toString(),
                 "RowId", "Name"){
@@ -1269,7 +1270,7 @@ public class FlowSchema extends UserSchema
 
         ColumnInfo colGraph = ret.addGraphColumn("Graph");
 
-        ColumnInfo colFCSFile = new ExprColumn(ret, "FCSFile", new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".fcsid"), Types.INTEGER);
+        ColumnInfo colFCSFile = new ExprColumn(ret, "FCSFile", new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".fcsid"), JdbcType.INTEGER);
         ret.addColumn(colFCSFile);
         colFCSFile.setFk(new LookupForeignKey(new ActionURL(WellController.ShowWellAction.class, getContainer()),
                 FlowParam.wellId.toString(),
@@ -1378,7 +1379,7 @@ public class FlowSchema extends UserSchema
     {
         SQLFragment sql = new SQLFragment("(SELECT COUNT(exp.data.rowid) FROM exp.data WHERE (SELECT flow.object.typeid FROM flow.object WHERE flow.object.dataid = exp.data.rowid) = "
                 + type.getTypeId() + " AND exp.data.runid = " + ExprColumn.STR_TABLE_ALIAS + ".RowId)");
-        ExprColumn ret = new ExprColumn(runTable, name, sql, Types.INTEGER);
+        ExprColumn ret = new ExprColumn(runTable, name, sql, JdbcType.INTEGER);
         ret.setHidden(true);
         runTable.addColumn(ret);
         return ret;

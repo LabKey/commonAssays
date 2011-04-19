@@ -101,7 +101,7 @@ public class SequencesTableInfo extends FilteredTable
                         sql.append("))");
                         sql.add(annotationSet.getCustomAnnotationSetId());
                         ExprColumn ret = new ExprColumn(parent.getParentTable(), displayField,
-                            sql, Types.INTEGER, parent);
+                            sql, JdbcType.INTEGER, parent);
                         ret.setLabel(annotationSet.getName());
                         ret.setFk(new LookupForeignKey("CustomAnnotationId")
                         {
@@ -127,7 +127,7 @@ public class SequencesTableInfo extends FilteredTable
         for (CustomAnnotationType type : CustomAnnotationType.values())
         {
             SQLFragment sql = new SQLFragment(type.getFirstSelectForSeqId());
-            ExprColumn firstIdentColumn = new ExprColumn(this, "First" + type.toString(), sql, Types.VARCHAR);
+            ExprColumn firstIdentColumn = new ExprColumn(this, "First" + type.toString(), sql, JdbcType.VARCHAR);
             firstIdentColumn.setLabel("First " + type.getDescription());
             addColumn(firstIdentColumn);
         }

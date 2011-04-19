@@ -101,7 +101,7 @@ public class FeaturesTableInfo extends VirtualTable
         if(includePepFk)
         {
             ColumnInfo ciPepId = addColumn(new ExprColumn(this, COLUMN_PEPTIDE_INFO,
-                    new SQLFragment(COLUMN_PEPTIDE_INFO), java.sql.Types.INTEGER));
+                    new SQLFragment(COLUMN_PEPTIDE_INFO), JdbcType.INTEGER));
 
             //tell query that this new column is an FK to the peptides data table
             ciPepId.setFk(new LookupForeignKey("RowId", "Peptide")
@@ -299,7 +299,7 @@ public class FeaturesTableInfo extends VirtualTable
     public ColumnInfo wrapColumn(String alias, ColumnInfo underlyingColumn)
     {
         assert underlyingColumn.getParentTable() == getSourceTable();
-        ExprColumn ret = new ExprColumn(this, alias, underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
+        ExprColumn ret = new ExprColumn(this, alias, underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getJdbcType());
         ret.copyAttributesFrom(underlyingColumn);
         ret.copyURLFrom(underlyingColumn, null, Collections.singletonMap(underlyingColumn.getFieldKey(), ret.getFieldKey()));
         ret.setLabel(ColumnInfo.labelFromName(alias));

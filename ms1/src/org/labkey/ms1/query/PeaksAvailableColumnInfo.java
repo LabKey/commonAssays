@@ -47,7 +47,7 @@ public class PeaksAvailableColumnInfo extends ExprColumn implements DisplayColum
                 "(SELECT RunId FROM exp.Data AS d\n" +
                 "INNER JOIN ms1.Files AS f ON (d.RowId=f.ExpDataFileId)\n" +
                 "WHERE f.FileId=" + ExprColumn.STR_TABLE_ALIAS + ".FileId))"),
-                java.sql.Types.INTEGER, parent.getColumn("FeatureId"));
+                JdbcType.INTEGER, parent.getColumn("FeatureId"));
 
         commonInit();
     }
@@ -63,7 +63,7 @@ public class PeaksAvailableColumnInfo extends ExprColumn implements DisplayColum
     {
         super(parent, COLUMN_NAME,
                 new SQLFragment(peaksAvailable ? "(1)" : "(0)"),
-                java.sql.Types.INTEGER);
+                JdbcType.INTEGER);
 
         commonInit();
     }

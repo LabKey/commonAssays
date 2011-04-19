@@ -101,14 +101,14 @@ public class PeptidesTableInfo extends FilteredTable
         addMassColumns(dialect);
 
         SQLFragment mzSQL = new SQLFragment("CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".Charge = 0.0 THEN 0.0 ELSE (" + ExprColumn.STR_TABLE_ALIAS + ".Mass + " + ExprColumn.STR_TABLE_ALIAS + ".DeltaMass + (" + ExprColumn.STR_TABLE_ALIAS + ".Charge - 1.0) * 1.007276) / " + ExprColumn.STR_TABLE_ALIAS + ".Charge END");
-        ColumnInfo mz = new ExprColumn(this, "MZ", mzSQL, Types.REAL);
+        ColumnInfo mz = new ExprColumn(this, "MZ", mzSQL, JdbcType.REAL);
         mz.setFormat("0.0000");
         mz.setWidth("55");
         mz.setLabel("ObsMZ");
         addColumn(mz);
 
         SQLFragment strippedPeptideSQL = new SQLFragment("LTRIM(RTRIM(" + dialect.concatenate(ExprColumn.STR_TABLE_ALIAS + ".PrevAA", ExprColumn.STR_TABLE_ALIAS + ".TrimmedPeptide", ExprColumn.STR_TABLE_ALIAS + ".NextAA") + "))");
-        ColumnInfo strippedPeptide = new ExprColumn(this, "StrippedPeptide", strippedPeptideSQL, Types.VARCHAR);
+        ColumnInfo strippedPeptide = new ExprColumn(this, "StrippedPeptide", strippedPeptideSQL, JdbcType.VARCHAR);
         strippedPeptide.setWidth("320");
         addColumn(strippedPeptide);
 
@@ -204,7 +204,7 @@ public class PeptidesTableInfo extends FilteredTable
         trypticSQL.append(" " + dialect.getCharClassLikeOperator() + " '%[KR][^P]' OR ");
         trypticSQL.append(strippedPeptideSQL);
         trypticSQL.append(" " + dialect.getCharClassLikeOperator() + " '%-') THEN 1 ELSE 0 END))");
-        ExprColumn trypricEndsColumn = new ExprColumn(this, "TrypticEnds", trypticSQL, Types.INTEGER);
+        ExprColumn trypricEndsColumn = new ExprColumn(this, "TrypticEnds", trypticSQL, JdbcType.INTEGER);
         addColumn(trypricEndsColumn);
 
         if (!MS2Manager.getSqlDialect().isSqlServer() || !DbScope.getLabkeyScope().getDatabaseProductVersion().startsWith("08."))
@@ -219,7 +219,7 @@ public class PeptidesTableInfo extends FilteredTable
             spectrumSQL.append(".fraction AND sd.Scan = ");
             spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
             spectrumSQL.append(".Scan)");
-            ExprColumn spectrumColumn = new ExprColumn(this, "Spectrum", spectrumSQL, Types.BLOB);
+            ExprColumn spectrumColumn = new ExprColumn(this, "Spectrum", spectrumSQL, JdbcType.LONGVARBINARY);
             spectrumColumn.setHidden(true);
             addColumn(spectrumColumn);
         }
@@ -284,7 +284,7 @@ public class PeptidesTableInfo extends FilteredTable
                 "INNER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction AND pd.scan=fe.MS2Scan AND pd.Charge=fe.MS2Charge)\n" +
                 "WHERE pd.RowId=" + ExprColumn.STR_TABLE_ALIAS + ".RowId)");
 
-        ColumnInfo ciFeatureId = addColumn(new ExprColumn(this, "MS1 Feature", sqlFeatureJoin, java.sql.Types.INTEGER, getColumn("RowId")));
+        ColumnInfo ciFeatureId = addColumn(new ExprColumn(this, "MS1 Feature", sqlFeatureJoin, JdbcType.INTEGER, getColumn("RowId")));
 
         //tell query that this new column is an FK to the features table info
         ciFeatureId.setFk(new LookupForeignKey("FeatureId")
@@ -305,7 +305,7 @@ public class PeptidesTableInfo extends FilteredTable
             {
                 SequencesTableInfo sequenceTable = new SequencesTableInfo(ProteinManager.getTableInfoSequences().getName(), _schema);
                 SQLFragment fastaNameSQL = new SQLFragment(getName() + ".Protein");
-                ExprColumn fastaNameColumn = new ExprColumn(PeptidesTableInfo.this, "Database Sequence Name", fastaNameSQL, Types.VARCHAR);
+                ExprColumn fastaNameColumn = new ExprColumn(PeptidesTableInfo.this, "Database Sequence Name", fastaNameSQL, JdbcType.VARCHAR);
                 sequenceTable.addColumn(fastaNameColumn);
 
                 fastaNameColumn.setDisplayColumnFactory(new ProteinDisplayColumnFactory(showProteinURLString));
@@ -383,7 +383,7 @@ public class PeptidesTableInfo extends FilteredTable
             }
             sql.append(" ELSE NULL END");
 
-            ColumnInfo newCol = addColumn(new ExprColumn(this, entry.getKey(), sql, Types.DOUBLE));
+            ColumnInfo newCol = addColumn(new ExprColumn(this, entry.getKey(), sql, JdbcType.DOUBLE));
             newCol.setFormat(realScoreCol.getFormat());
             newCol.setWidth(realScoreCol.getWidth());
         }
@@ -392,14 +392,14 @@ public class PeptidesTableInfo extends FilteredTable
     private void addMassColumns(SqlDialect dialect)
     {
         SQLFragment precursorMassSQL = new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".mass + " + ExprColumn.STR_TABLE_ALIAS + ".deltamass");
-        ColumnInfo precursorMass = new ExprColumn(this, "PrecursorMass", precursorMassSQL, Types.REAL);
+        ColumnInfo precursorMass = new ExprColumn(this, "PrecursorMass", precursorMassSQL, JdbcType.REAL);
         precursorMass.setFormat("0.0000");
         precursorMass.setWidth("65");
         precursorMass.setLabel("ObsMH+");
         addColumn(precursorMass);
 
         SQLFragment fractionalDeltaMassSQL = new SQLFragment("ABS(" + ExprColumn.STR_TABLE_ALIAS + ".deltamass - " + dialect.getRoundFunction(ExprColumn.STR_TABLE_ALIAS + ".deltamass") + ")");
-        ColumnInfo fractionalDeltaMass = new ExprColumn(this, "FractionalDeltaMass", fractionalDeltaMassSQL, Types.REAL);
+        ColumnInfo fractionalDeltaMass = new ExprColumn(this, "FractionalDeltaMass", fractionalDeltaMassSQL, JdbcType.REAL);
         fractionalDeltaMass.setFormat("0.0000");
         fractionalDeltaMass.setWidth("55");
         fractionalDeltaMass.setLabel("fdMass");
@@ -409,7 +409,7 @@ public class PeptidesTableInfo extends FilteredTable
             "            WHEN " + ExprColumn.STR_TABLE_ALIAS + ".mass = 0.0 THEN 0.0\n" +
             "            ELSE abs(1000000.0 * abs(" + ExprColumn.STR_TABLE_ALIAS + ".deltamass - " + dialect.getRoundFunction(ExprColumn.STR_TABLE_ALIAS + ".deltamass") + ") / (" + ExprColumn.STR_TABLE_ALIAS + ".mass + ((" + ExprColumn.STR_TABLE_ALIAS + ".charge - 1.0) * 1.007276)))\n" +
             "        END");
-        ColumnInfo fractionalDeltaMassPPM = new ExprColumn(this, "FractionalDeltaMassPPM", fractionalSQL, Types.REAL);
+        ColumnInfo fractionalDeltaMassPPM = new ExprColumn(this, "FractionalDeltaMassPPM", fractionalSQL, JdbcType.REAL);
         fractionalDeltaMassPPM.setFormat("0.0");
         fractionalDeltaMassPPM.setWidth("80");
         fractionalDeltaMassPPM.setLabel("fdMassPPM");
@@ -419,7 +419,7 @@ public class PeptidesTableInfo extends FilteredTable
             "            WHEN " + ExprColumn.STR_TABLE_ALIAS + ".mass = 0.0 THEN 0.0\n" +
             "            ELSE abs(1000000.0 * " + ExprColumn.STR_TABLE_ALIAS + ".deltamass / (" + ExprColumn.STR_TABLE_ALIAS + ".mass + ((" + ExprColumn.STR_TABLE_ALIAS + ".charge - 1.0) * 1.007276)))\n" +
             "        END");
-        ColumnInfo deltaMassPPM = new ExprColumn(this, "DeltaMassPPM", deltaSQL, Types.REAL);
+        ColumnInfo deltaMassPPM = new ExprColumn(this, "DeltaMassPPM", deltaSQL, JdbcType.REAL);
         deltaMassPPM.setFormat("0.0");
         deltaMassPPM.setWidth("75");
         deltaMassPPM.setLabel("dMassPPM");

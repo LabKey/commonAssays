@@ -256,7 +256,7 @@ public class MS1Schema extends UserSchema
         if(rowIdCol != null)
         {
             ColumnInfo featuresLinkCol = result.addColumn(new ExprColumn(result, "Features Link",
-                    new SQLFragment(rowIdCol.getValueSql(ExprColumn.STR_TABLE_ALIAS)), rowIdCol.getSqlTypeInt(), rowIdCol));
+                    new SQLFragment(rowIdCol.getValueSql(ExprColumn.STR_TABLE_ALIAS)), rowIdCol.getJdbcType(), rowIdCol));
             featuresLinkCol.setDescription("Link to the msInspect features found in each run");
             featuresLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
             {

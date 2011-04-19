@@ -45,7 +45,7 @@ public class CustomAnnotationSetsTable extends VirtualTable
 
         if (annotationSets.isEmpty())
         {
-            ExprColumn noneAvailableColumn = new ExprColumn(this, "NoneAvailable", sqlFragment, Types.INTEGER);
+            ExprColumn noneAvailableColumn = new ExprColumn(this, "NoneAvailable", sqlFragment, JdbcType.INTEGER);
             noneAvailableColumn.setIsUnselectable(true);
             addColumn(noneAvailableColumn);
         }
@@ -53,7 +53,7 @@ public class CustomAnnotationSetsTable extends VirtualTable
         {
             for (final CustomAnnotationSet annotationSet : annotationSets.values())
             {
-                ExprColumn setColumn = new ExprColumn(parentTable, annotationSet.getName(), sqlFragment, Types.INTEGER);
+                ExprColumn setColumn = new ExprColumn(parentTable, annotationSet.getName(), sqlFragment, JdbcType.INTEGER);
                 addColumn(setColumn);
                 setColumn.setFk(new LookupForeignKey("CustomAnnotationSetId", "CustomAnnotationSetId")
                 {

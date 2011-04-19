@@ -114,7 +114,7 @@ public class ProteinGroupTableInfo extends FilteredTable
             firstProteinSQL.insert(0, "(");
             firstProteinSQL.append(")");
 
-            ExprColumn firstProteinColumn = new ExprColumn(this, "FirstProtein", firstProteinSQL, Types.INTEGER);
+            ExprColumn firstProteinColumn = new ExprColumn(this, "FirstProtein", firstProteinSQL, JdbcType.INTEGER);
             firstProteinColumn.setFk(new LookupForeignKey("SeqId")
             {
                 public TableInfo getLookupTableInfo()
@@ -131,7 +131,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         proteinCountSQL.append(" WHERE ProteinGroupId = ");
         proteinCountSQL.append(ExprColumn.STR_TABLE_ALIAS);
         proteinCountSQL.append(".RowId)");
-        ExprColumn proteinCountColumn = new ExprColumn(this, "ProteinCount", proteinCountSQL, Types.INTEGER);
+        ExprColumn proteinCountColumn = new ExprColumn(this, "ProteinCount", proteinCountSQL, JdbcType.INTEGER);
         addColumn(proteinCountColumn);
 
         List<FieldKey> defaultColumns = new ArrayList<FieldKey>();
@@ -216,7 +216,7 @@ public class ProteinGroupTableInfo extends FilteredTable
                     public TableInfo getLookupTableInfo()
                     {
                         SequencesTableInfo result = new SequencesTableInfo(null, _schema);
-                        ExprColumn col = new ExprColumn(result, "DatabaseSequenceName", new SQLFragment("#PLACEHOLDER#"), Types.VARCHAR)
+                        ExprColumn col = new ExprColumn(result, "DatabaseSequenceName", new SQLFragment("#PLACEHOLDER#"), JdbcType.VARCHAR)
                         {
                             @Override
                             public SQLFragment getValueSql(String tableAlias)

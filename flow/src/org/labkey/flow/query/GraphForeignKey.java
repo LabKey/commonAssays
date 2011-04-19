@@ -25,7 +25,6 @@ import org.labkey.flow.view.GraphColumn;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 
-import java.sql.Types;
 import java.util.Collection;
 
 public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
@@ -68,8 +67,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
                     return null;
                 SQLFragment sqlExpr = new SQLFragment();
                 sqlExpr.appendStringLiteral(spec.toString());
-                ColumnInfo ret = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(),"$"), sqlExpr, Types.VARCHAR);
-                return ret;
+                return new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(),"$"), sqlExpr, JdbcType.VARCHAR);
             }
 
             public TableInfo getLookupTableInfo()

@@ -87,21 +87,21 @@ public class SpectraCountTableInfo extends VirtualTable
 
         public void addColumn(SpectraCountTableInfo table)
         {
-            if (_max) { table.addColumn(new ExprColumn(table, "Max" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Max" + _key.getName()), Types.FLOAT)); }
-            if (_min) { table.addColumn(new ExprColumn(table, "Min" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Min" + _key.getName()), Types.FLOAT)); }
+            if (_max) { table.addColumn(new ExprColumn(table, "Max" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Max" + _key.getName()), JdbcType.REAL)); }
+            if (_min) { table.addColumn(new ExprColumn(table, "Min" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Min" + _key.getName()), JdbcType.REAL)); }
             if (_avg)
             {
-                ExprColumn col = new ExprColumn(table, "Avg" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Avg" + _key.getName()), Types.FLOAT);
+                ExprColumn col = new ExprColumn(table, "Avg" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Avg" + _key.getName()), JdbcType.REAL);
                 col.setFormat("#.#####");
                 table.addColumn(col);
             }
             if (_stdDev)
             {
-                ExprColumn col = new ExprColumn(table, "StdDev" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".StdDev" + _key.getName()), Types.FLOAT);
+                ExprColumn col = new ExprColumn(table, "StdDev" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".StdDev" + _key.getName()), JdbcType.REAL);
                 col.setFormat("#.#####");
                 table.addColumn(col);
             }
-            if (_sum) { table.addColumn(new ExprColumn(table, "Sum" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Sum" + _key.getName()), Types.FLOAT)); }
+            if (_sum) { table.addColumn(new ExprColumn(table, "Sum" + _key.getName(), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Sum" + _key.getName()), JdbcType.REAL)); }
         }
 
         public FieldKey getKey()
@@ -129,7 +129,7 @@ public class SpectraCountTableInfo extends VirtualTable
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
 
-        ExprColumn runColumn = new ExprColumn(this, "Run", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Run"), Types.INTEGER);
+        ExprColumn runColumn = new ExprColumn(this, "Run", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Run"), JdbcType.INTEGER);
         runColumn.setFk(new LookupForeignKey(new ActionURL(MS2Controller.ShowRunAction.class, _ms2Schema.getContainer()), "run", "MS2Details", "Name")
         {
             public TableInfo getLookupTableInfo()
@@ -144,20 +144,20 @@ public class SpectraCountTableInfo extends VirtualTable
 
         if (_config.isGroupedByPeptide())
         {
-            addColumn(new ExprColumn(this, "Peptide", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Peptide"), Types.VARCHAR));
+            addColumn(new ExprColumn(this, "Peptide", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Peptide"), JdbcType.VARCHAR));
             defaultCols.add(FieldKey.fromParts("Peptide"));
-            addColumn(new ExprColumn(this, "TrimmedPeptide", new SQLFragment("TrimmedPeptide"), Types.VARCHAR));
+            addColumn(new ExprColumn(this, "TrimmedPeptide", new SQLFragment("TrimmedPeptide"), JdbcType.VARCHAR));
         }
 
         if (_config.isGroupedByCharge())
         {
-            addColumn(new ExprColumn(this, "Charge", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Charge"), Types.INTEGER));
+            addColumn(new ExprColumn(this, "Charge", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Charge"), JdbcType.INTEGER));
             defaultCols.add(FieldKey.fromParts("Charge"));
         }
 
         if (_config.isGroupedByProtein())
         {
-            ExprColumn col = new ExprColumn(this, "Protein", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".SequenceId"), Types.INTEGER);
+            ExprColumn col = new ExprColumn(this, "Protein", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".SequenceId"), JdbcType.INTEGER);
             col.setFk(new LookupForeignKey(new ActionURL(MS2Controller.ShowProteinAction.class, ContainerManager.getRoot()), "seqId", "SeqId", "BestName")
             {
                 public TableInfo getLookupTableInfo()
@@ -168,26 +168,26 @@ public class SpectraCountTableInfo extends VirtualTable
             addColumn(col);
             defaultCols.add(FieldKey.fromParts(col.getName()));
 
-            addColumn(new ExprColumn(this, "FastaName", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FastaName"), Types.VARCHAR));
+            addColumn(new ExprColumn(this, "FastaName", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FastaName"), JdbcType.VARCHAR));
         }
 
         if (!_config.isGroupedByCharge())
         {
-            addColumn(new ExprColumn(this, "ChargeStatesObsv", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".ChargeStatesObsv"), Types.INTEGER));
+            addColumn(new ExprColumn(this, "ChargeStatesObsv", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".ChargeStatesObsv"), JdbcType.INTEGER));
             defaultCols.add(FieldKey.fromParts("ChargeStatesObsv"));
         }
 
-        addColumn(new ExprColumn(this, "TotalPeptideCount", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".TotalPeptideCount"), Types.INTEGER));
+        addColumn(new ExprColumn(this, "TotalPeptideCount", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".TotalPeptideCount"), JdbcType.INTEGER));
         defaultCols.add(FieldKey.fromParts("TotalPeptideCount"));
 
         if (_config.isUsingProteinProphet())
         {
-            addColumn(new ExprColumn(this, "GroupProbability", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".GroupProbability"), Types.FLOAT));
-            addColumn(new ExprColumn(this, "ProtErrorRate", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".ProtErrorRate"), Types.FLOAT));
-            addColumn(new ExprColumn(this, "ProteinProphetUniquePeptides", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".UniquePeptidesCount"), Types.INTEGER));
-            addColumn(new ExprColumn(this, "ProteinProphetTotalPeptides", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".TotalNumberPeptides"), Types.INTEGER));
-            addColumn(new ExprColumn(this, "PctSpectrumIds", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".PctSpectrumIds"), Types.FLOAT));
-            addColumn(new ExprColumn(this, "PercentCoverage", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".PercentCoverage"), Types.INTEGER));
+            addColumn(new ExprColumn(this, "GroupProbability", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".GroupProbability"), JdbcType.REAL));
+            addColumn(new ExprColumn(this, "ProtErrorRate", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".ProtErrorRate"), JdbcType.REAL));
+            addColumn(new ExprColumn(this, "ProteinProphetUniquePeptides", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".UniquePeptidesCount"), JdbcType.INTEGER));
+            addColumn(new ExprColumn(this, "ProteinProphetTotalPeptides", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".TotalNumberPeptides"), JdbcType.INTEGER));
+            addColumn(new ExprColumn(this, "PctSpectrumIds", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".PctSpectrumIds"), JdbcType.REAL));
+            addColumn(new ExprColumn(this, "PercentCoverage", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".PercentCoverage"), JdbcType.INTEGER));
         }
 
         for (PeptideAggregate aggregate : _aggregates)

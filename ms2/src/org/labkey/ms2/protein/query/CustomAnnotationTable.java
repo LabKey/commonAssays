@@ -18,6 +18,7 @@ package org.labkey.ms2.protein.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.OntologyManager;
@@ -96,7 +97,7 @@ public class CustomAnnotationTable extends FilteredTable
     private void addProteinDetailsColumn()
     {
         SQLFragment sql = new SQLFragment(getName() + ".SeqId");
-        ColumnInfo col = new ExprColumn(this, "Protein", sql, Types.INTEGER);
+        ColumnInfo col = new ExprColumn(this, "Protein", sql, JdbcType.INTEGER);
         col.setFk(new LookupForeignKey("SeqId")
         {
             public TableInfo getLookupTableInfo()
@@ -110,7 +111,7 @@ public class CustomAnnotationTable extends FilteredTable
     public ColumnInfo createPropertyColumn(String name)
     {
         String sql = ExprColumn.STR_TABLE_ALIAS + ".objecturi";
-        ColumnInfo ret = new ExprColumn(this, name, new SQLFragment(sql), Types.VARCHAR);
+        ColumnInfo ret = new ExprColumn(this, name, new SQLFragment(sql), JdbcType.VARCHAR);
         ret.setIsUnselectable(true);
         return ret;
     }

@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.query;
 
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.data.SQLFragment;
@@ -39,7 +40,7 @@ public class OrganismTableInfo extends FilteredTable
         sql.append("CASE WHEN CommonName IS NULL THEN ");
         sql.append(getSqlDialect().concatenate("Genus", "' '", "Species"));
         sql.append(" ELSE CommonName END");
-        ExprColumn descriptionColumn = new ExprColumn(this, "Description", sql, Types.VARCHAR);
+        ExprColumn descriptionColumn = new ExprColumn(this, "Description", sql, JdbcType.VARCHAR);
         addColumn(descriptionColumn);
 
         removeColumn(getColumn("IdentId"));
