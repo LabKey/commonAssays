@@ -81,6 +81,11 @@ public class GeneDataPipelineProvider extends PipelineProvider
     @Override
     public List<PipelineActionConfig> getDefaultActionConfig()
     {
+        if (getGeneDataBaseURL() == null || getGeneDataFileRoot() == null)
+        {
+            return Collections.emptyList();
+        }
+
         String actionId = createActionId();
         return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, BUTTON_NAME, true));
     }
