@@ -56,6 +56,17 @@ public class MacWorkspace extends FlowJoWorkspace
         }
     }
 
+    protected void readGroups(Element elDoc)
+    {
+        for (Element elGroups : getElementsByTagName(elDoc, "Groups"))
+        {
+            for (Element elGroup : getElementsByTagName(elGroups, "Group"))
+            {
+                readGroup(elGroup);
+            }
+        }
+    }
+
     public MacWorkspace(Element elDoc) throws Exception
     {
         readCompensationMatrices(elDoc);
@@ -63,6 +74,7 @@ public class MacWorkspace extends FlowJoWorkspace
         readCalibrationTables(elDoc);
         readSamples(elDoc);
         readSampleAnalyses(elDoc);
+        readGroups(elDoc);
         readGroupAnalyses(elDoc);
     }
 
@@ -404,6 +416,13 @@ public class MacWorkspace extends FlowJoWorkspace
         Analysis ret = readAnalysis(elGroupAnalysis, null);
         ret.setName(elGroupAnalysis.getAttribute("name"));
         _groupAnalyses.put(ret.getName(), ret);
+
+        // Group name attribute only appears on the GroupAnalysis node in old workspace format.
+        String groupID = elGroupAnalysis.getAttribute("groupID");
+        GroupInfo groupInfo = _groupInfos.get(groupID);
+        if (groupInfo != null && groupInfo.getGroupName() == null)
+            groupInfo.setGroupName(ret.getName());
+
         return ret;
     }
 
@@ -477,6 +496,24 @@ public class MacWorkspace extends FlowJoWorkspace
         }
         readParameterInfo(elSample);
         _sampleInfos.put(ret._sampleId, ret);
+        return ret;
+    }
+
+    protected GroupInfo readGroup(Element elGroup)
+    {
+        GroupInfo ret = new GroupInfo();
+        ret._groupId = elGroup.getAttribute("id");
+        for (Element elSampleList : getElementsByTagName(elGroup, "SampleList"))
+        {
+            for (Element elSample : getElementsByTagName(elSampleList, "SampleID"))
+            {
+                String sampleID = StringUtils.trimToNull(elSample.getTextContent());
+                if (sampleID != null)
+                    ret._sampleIds.add(sampleID);
+            }
+        }
+
+        _groupInfos.put(ret._groupId, ret);
         return ret;
     }
 }

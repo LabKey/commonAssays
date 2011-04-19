@@ -377,7 +377,7 @@ public class ScriptAnalyzer
         {
             FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleId);
             if (sample == null)
-                throw new RuntimeException("Cannot find sample '" + sampleId);
+                throw new RuntimeException("Cannot find sample '" + sampleId + "'");
 
             analysis = workspace.getSampleAnalysis(sample);
             if (analysis == null)

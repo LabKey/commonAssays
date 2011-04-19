@@ -54,6 +54,38 @@ public class FJ8Workspace extends MacWorkspace
         return ret;
     }
 
+    protected void readGroups(Element elDoc)
+    {
+        for (Element elGroups : getElementsByTagName(elDoc, "Groups"))
+        {
+            for (Element elGroupNode : getElementsByTagName(elGroups, "GroupNode"))
+            {
+                for (Element elGroup : getElementsByTagName(elGroupNode, "Group"))
+                {
+                    readGroup(elGroup);
+                }
+            }
+        }
+    }
+
+    protected GroupInfo readGroup(Element elGroup)
+    {
+        GroupInfo ret = new GroupInfo();
+        ret._groupId = elGroup.getAttribute("groupID");
+        for (Element elSampleList : getElementsByTagName(elGroup, "SampleRefs"))
+        {
+            for (Element elSample : getElementsByTagName(elSampleList, "SampleRef"))
+            {
+                String sampleID = elSample.getAttribute("sampleID");
+                if (sampleID != null)
+                    ret._sampleIds.add(sampleID);
+            }
+        }
+
+        _groupInfos.put(ret._groupId, ret);
+        return ret;
+    }
+    
     protected void readSampleAnalyses(Element elDoc)
     {
         for (Element elSampleList : getElementsByTagName(elDoc, "SampleList"))

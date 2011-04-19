@@ -37,10 +37,13 @@ import java.util.*;
 
 abstract public class FlowJoWorkspace implements Serializable
 {
-    protected Map<String, Analysis> _groupAnalyses = new HashMap<String, Analysis>();
-    protected Map<String, Analysis> _sampleAnalyses = new HashMap<String, Analysis>();
-    protected Map<String, AttributeSet> _sampleAnalysisResults = new HashMap<String, AttributeSet>();
-    protected Map<String, SampleInfo> _sampleInfos = new HashMap<String, SampleInfo>();
+    // group name -> analysis
+    protected Map<String, Analysis> _groupAnalyses = new LinkedHashMap<String, Analysis>();
+    // sample id -> analysis
+    protected Map<String, Analysis> _sampleAnalyses = new LinkedHashMap<String, Analysis>();
+    protected Map<String, AttributeSet> _sampleAnalysisResults = new LinkedHashMap<String, AttributeSet>();
+    protected Map<String, GroupInfo> _groupInfos = new LinkedHashMap<String, GroupInfo>();
+    protected Map<String, SampleInfo> _sampleInfos = new LinkedHashMap<String, SampleInfo>();
     protected Map<String, ParameterInfo> _parameters = new LinkedHashMap<String, ParameterInfo>();
     protected List<CalibrationTable> _calibrationTables = new ArrayList<CalibrationTable>();
     protected ScriptSettings _settings = new ScriptSettings();
@@ -112,6 +115,38 @@ abstract public class FlowJoWorkspace implements Serializable
                 return null;
             }
             return _compensationMatrices.get(id - 1);
+        }
+    }
+
+    public class GroupInfo implements Serializable
+    {
+        String _groupId;
+        String _groupName;
+        List<String> _sampleIds = new ArrayList<String>();
+
+        public List<String> getSampleIds()
+        {
+            return _sampleIds;
+        }
+
+        public String getGroupId()
+        {
+            return _groupId;
+        }
+
+        public void setGroupId(String groupId)
+        {
+            _groupId = groupId;
+        }
+
+        public String getGroupName()
+        {
+            return _groupName;
+        }
+
+        public void setGroupName(String groupName)
+        {
+            _groupName = groupName;
         }
     }
 
@@ -232,6 +267,8 @@ abstract public class FlowJoWorkspace implements Serializable
         "SampleAnalyses",
         "SampleList",
         "SampleNode",
+        "SampleRef",
+        "SampleRefs",
         "Samples",
         "Script",
         "Statistic",
@@ -317,6 +354,7 @@ abstract public class FlowJoWorkspace implements Serializable
         "SampleNode",
         "SampleRef",
         "SampleRefs",
+        "Samples",
         "SampleSortCriteria",
         "SciBook",
         "StainChannelList",
@@ -649,6 +687,19 @@ abstract public class FlowJoWorkspace implements Serializable
         return ret;
     }
 
+    public List<GroupInfo> getGroups()
+    {
+        return new ArrayList<GroupInfo>(_groupInfos.values());
+    }
+
+    public GroupInfo getGroup(String groupId)
+    {
+        return _groupInfos.get(groupId);
+    }
+    public Analysis getGroupAnalysis(GroupInfo group)
+    {
+        return _groupAnalyses.get(group._groupId);
+    }
     public Map<String, Analysis> getGroupAnalyses()
     {
         return _groupAnalyses;

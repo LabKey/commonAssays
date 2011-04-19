@@ -16,8 +16,10 @@
 
 package org.labkey.flow;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.xmlbeans.XmlOptions;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
@@ -26,8 +28,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -54,25 +60,84 @@ public class Main
         }
     }
 
-    private static void executeConvertWorkspace(File outDir, File workspaceFile, Set<String> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    private static void executeListSamples(File workspaceFile, Set<String> groupNames)
     {
         FlowJoWorkspace workspace = readWorkspace(workspaceFile);
+
+        // Hash the group and sample Analysis to see if they are equivalent
+        Map<Analysis, String> analysisToGroup = new HashMap<Analysis, String>();
+        Map<String, Analysis> groupAnalyses = workspace.getGroupAnalyses();
+        for (String groupName : groupAnalyses.keySet())
+        {
+            Analysis analysis = groupAnalyses.get(groupName);
+            if (analysisToGroup.containsKey(analysis))
+                System.out.printf("warning: group analyses '%s' and '%s' are identical.", groupName, analysisToGroup.get(analysis));
+            analysisToGroup.put(analysis, groupName);
+        }
+
+        Map<Analysis, List<String>> analysisToSamples = new HashMap<Analysis, List<String>>();
+        for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples())
+        {
+            Analysis analysis = workspace.getSampleAnalysis(sample);
+            List<String> samples = analysisToSamples.get(analysis);
+            if (samples == null)
+                analysisToSamples.put(analysis, samples = new ArrayList<String>());
+
+            samples.add(sample.getLabel());
+        }
+
+        for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
+        {
+            if (groupNames.isEmpty() || groupNames.contains(group.getGroupName()))
+            {
+                System.out.printf("Group: %s\n", group.getGroupName());
+
+                if (group.getSampleIds().size() == 0)
+                {
+                    System.out.println("  no samples in group");
+                }
+                else
+                {
+                    System.out.print("  ");
+                    String sep = "";
+                    for (String sampleId : group.getSampleIds())
+                    {
+                        FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleId);
+                        System.out.print(sep);
+                        System.out.print(sample.getLabel());
+                        sep = ", ";
+                    }
+                    System.out.println();
+                }
+                System.out.println("");
+
+                // Remove the group analysis from the sample analysis map
+                Analysis analysis = groupAnalyses.get(group.getGroupName());
+                analysisToSamples.remove(analysis);
+            }
+        }
+
+        // Any remaining analyses must be different from the original group analyses
+        if (!analysisToSamples.isEmpty())
+        {
+            System.out.println("Samples with modified analysis:");
+            for (Map.Entry<Analysis, List<String>> entry : analysisToSamples.entrySet())
+            {
+                Analysis analysis = entry.getKey();
+                List<String> samples = entry.getValue();
+                System.out.printf("  %s: %s\n", analysis.getName(), StringUtils.join(samples, ", "));
+            }
+        }
+    }
+
+    private static void writeAnalysis(File outDir, String name, FlowJoWorkspace workspace, String groupName, String sampleId, Set<StatisticSet> stats)
+    {
         ScriptDocument doc = ScriptDocument.Factory.newInstance();
         doc.addNewScript();
-
-        String groupName = null;
-        if (groupNames.size() > 0)
-            groupName = groupNames.iterator().next();
-
-        String sampleId = null;
-        if (sampleIds.size() > 0)
-            sampleId = sampleIds.iterator().next();
-
         ScriptAnalyzer.makeAnalysisDef(doc.getScript(), workspace, groupName, sampleId, stats);
 
         try
         {
-            String name = "labkey-" + workspaceFile.getName();
             XmlOptions options = new XmlOptions();
             options.setSavePrettyPrint();
             doc.save(new File(outDir, name), options);
@@ -80,6 +145,31 @@ public class Main
         catch (IOException ioe)
         {
             System.err.println("Error: " + ioe.getMessage());
+        }
+    }
+
+    private static void executeConvertWorkspace(File outDir, File workspaceFile, Set<String> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    {
+        FlowJoWorkspace workspace = readWorkspace(workspaceFile);
+
+        boolean writeAll = groupNames.isEmpty() && sampleIds.isEmpty();
+        if (writeAll || !groupNames.isEmpty())
+        {
+            Map<String, Analysis> groupAnalyses = workspace.getGroupAnalyses();
+            for (String groupName : groupAnalyses.keySet())
+            {
+                if (writeAll || groupNames.contains(groupName))
+                    writeAnalysis(outDir, "group-" + groupName + ".xml", workspace, groupName, null, stats);
+            }
+        }
+
+        if (writeAll || !sampleIds.isEmpty())
+        {
+            for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+            {
+                if (writeAll || sampleIds.contains(sampleInfo.getSampleId()) || sampleIds.contains(sampleInfo.getLabel()))
+                    writeAnalysis(outDir, "sample-" + sampleInfo.getLabel() + ".xml", workspace, null, sampleInfo.getSampleId(), stats);
+            }
         }
     }
 
@@ -107,13 +197,14 @@ public class Main
         usage.append("  -o  -- output directory. Defaults to current directory.\n");
         usage.append("  -f  -- directory containing FCS files.\n");
         usage.append("  -w  -- either a FlowJo workspace xml or a LabKey workspace xml file\n");
-        usage.append("  -g  -- group name(s) from FlowJo workspace. May appear more than once.\n");
-        usage.append("  -s  -- sample name(s) from FlowJo workspace. May appear more than once.\n");
-        usage.append("  -S  -- statistic name(s). See available stats from list below. May appear more than once.\n");
+        usage.append("  -g  -- group name from FlowJo workspace. May appear more than once.\n");
+        usage.append("  -s  -- sample id or name from FlowJo workspace. May appear more than once.\n");
+        usage.append("  -S  -- statistic name. See available stats from list below. May appear more than once.\n");
         usage.append("\n");
         usage.append("Command is one of:\n");
-        usage.append("  convert-workspace  -- converts a FlowJo workspace xml into a LabKey xml file\n");
         usage.append("  analysis           -- generate analysis results\n");
+        usage.append("  convert-workspace  -- converts a FlowJo workspace xml into a LabKey script file\n");
+        usage.append("  list-samples       -- lists the groups and samples in the FlowJo workspace xml file\n");
         usage.append("\n");
         usage.append("Currently supported statistics:\n");
         for (StatisticSet stat : StatisticSet.values())
@@ -131,7 +222,7 @@ public class Main
         String commandArg = null;
         Set<String> groupArgs = new LinkedHashSet<String>();
         Set<String> sampleArgs = new LinkedHashSet<String>();
-        Set<StatisticSet> statArgs = EnumSet.of(StatisticSet.workspace, StatisticSet.count, StatisticSet.frequencyOfParent);
+        Set<StatisticSet> statArgs = EnumSet.noneOf(StatisticSet.class);
 
         for (int i = 0; i < args.length; i++)
         {
@@ -206,7 +297,7 @@ public class Main
                     return;
                 }
             }
-            else if ("convert-workspace".equals(arg) || "analysis".equals(arg))
+            else if ("analysis".equals(arg) || "convert-workspace".equals(arg) || "list-samples".equals(arg))
             {
                 commandArg = arg;
                 break;
@@ -247,10 +338,15 @@ public class Main
             }
         }
 
-        if ("convert-workspace".equals(commandArg))
-            executeConvertWorkspace(outDir, workspaceFile, groupArgs, sampleArgs, statArgs);
-        else if ("analysis".equals(commandArg))
+        if (statArgs.isEmpty())
+            statArgs = EnumSet.of(StatisticSet.workspace);
+
+        if ("analysis".equals(commandArg))
             executeAnalysis(outDir, workspaceFile, fcsDir);
+        else if ("convert-workspace".equals(commandArg))
+            executeConvertWorkspace(outDir, workspaceFile, groupArgs, sampleArgs, statArgs);
+        else if ("list-samples".equals(commandArg))
+            executeListSamples(workspaceFile, groupArgs);
         else
         {
             usage("Unknown command: " + commandArg);
