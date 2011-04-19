@@ -320,12 +320,18 @@ public class ReportsController extends BaseFlowController
         try
         {
             if (null == form.getReportId())
-                HttpView.throwNotFound();
+            {
+                throw new NotFoundException();
+            }
             Report r = form.getReportId().getReport();
             if (null == r || !(r instanceof FlowReport))
-                HttpView.throwNotFound();
+            {
+                throw new NotFoundException();
+            }
             if (!r.getDescriptor().getContainerId().equals(context.getContainer().getId()))
-                HttpView.throwNotFound();
+            {
+                throw new NotFoundException();
+            }
             return (FlowReport)r;
         }
         catch (SQLException x)

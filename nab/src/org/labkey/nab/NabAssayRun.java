@@ -34,8 +34,9 @@ import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.view.HttpView;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -131,7 +132,9 @@ public abstract class NabAssayRun extends Luc5Assay
         {
             rs = Table.selectForDisplay(runTable, new ArrayList<ColumnInfo>(selectCols.values()), null, filter, null, 1, 0);
             if (!rs.next())
-                HttpView.throwNotFound("Run " + _run.getRowId() + " was not found.");
+            {
+                throw new NotFoundException("Run " + _run.getRowId() + " was not found.");
+            }
 
             for (Map.Entry<FieldKey, ColumnInfo> entry : selectCols.entrySet())
             {

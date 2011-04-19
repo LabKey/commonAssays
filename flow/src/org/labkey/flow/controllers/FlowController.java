@@ -44,6 +44,8 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.FlowPreference;
@@ -91,11 +93,10 @@ public class FlowController extends BaseFlowController
             {
                 ActionURL startUrl = PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());
                 startUrl.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
-                HttpView.throwRedirect(startUrl);
+                throw new RedirectException(startUrl);
             }
 
-            HttpView v = new OverviewWebPart(getViewContext());
-            return v;
+            return new OverviewWebPart(getViewContext());
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -135,24 +136,25 @@ public class FlowController extends BaseFlowController
             query = settings.getQueryName();
             if (null == query)
             {
-                HttpView.throwNotFound("Query name required.");
-                return null;
+                throw new NotFoundException("Query name required.");
             }
             FlowSchema schema = new FlowSchema(getViewContext());
             QueryDefinition queryDef = settings.getQueryDef(schema);
 
             if (queryDef == null)
             {
-                HttpView.throwNotFound("Query definition '" + settings.getQueryName() + "' in flow schema not found");
+                throw new NotFoundException("Query definition '" + settings.getQueryName() + "' in flow schema not found");
             }
             try
             {
                 if (schema.getTable(settings.getQueryName(), false) == null)
-                    HttpView.throwNotFound("Query name '" + settings.getQueryName() + "' in flow schema not found");
+                {
+                    throw new NotFoundException("Query name '" + settings.getQueryName() + "' in flow schema not found");
+                }
             }
             catch (QueryParseException qpe)
             {
-                HttpView.throwNotFound(qpe.getMessage());
+                throw new NotFoundException(qpe.getMessage());
             }
 
             experiment = schema.getExperiment();
@@ -162,11 +164,11 @@ public class FlowController extends BaseFlowController
             QueryView view = schema.createView(getViewContext(), settings);
             if (view.getQueryDef() == null)
             {
-                HttpView.throwNotFound("Query definition '" + settings.getQueryName() + "' in flow schema not found");
+                throw new NotFoundException("Query definition '" + settings.getQueryName() + "' in flow schema not found");
             }
             if (view.getTable() == null)
             {
-                HttpView.throwNotFound("Query table '" + settings.getQueryName() + "' in flow schema not found");
+                throw new NotFoundException("Query table '" + settings.getQueryName() + "' in flow schema not found");
             }
             return view;
         }
@@ -223,7 +225,7 @@ public class FlowController extends BaseFlowController
                         String redirect = psf.getDataUrl();
                         if (redirect != null)
                         {
-                            HttpView.throwRedirect(new ActionURL(psf.getDataUrl()));
+                            throw new RedirectException(new ActionURL(psf.getDataUrl()));
                         }
                     }
                 }
@@ -399,10 +401,12 @@ public class FlowController extends BaseFlowController
         private void checkPerms() throws UnauthorizedException
         {
             if (getContainer().getParent() == null || getContainer().getParent().isRoot())
-                HttpView.throwUnauthorized();
+            {
+                throw new UnauthorizedException();
+            }
             if (!getContainer().getParent().hasPermission(getUser(), AdminPermission.class))
             {
-                HttpView.throwUnauthorized();
+                throw new UnauthorizedException();
             }
         }
 

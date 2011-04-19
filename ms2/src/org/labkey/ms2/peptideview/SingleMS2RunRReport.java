@@ -17,12 +17,13 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.reports.report.CustomRReport;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Controller;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * User: jeckels
@@ -55,12 +56,11 @@ public class SingleMS2RunRReport extends CustomRReport
         }
         catch (NumberFormatException e)
         {
-            HttpView.throwNotFound("No such run: " + runString);
-            return null;
+            throw new NotFoundException("No such run: " + runString);
         }
         if (run == null || !run.getContainer().equals(context.getContainer()))
         {
-            HttpView.throwNotFound("No such run: " + runString);
+            throw new NotFoundException("No such run: " + runString);
         }
 
         String groupingString = url.getParameter(MS2Controller.RunForm.PARAMS.grouping);
@@ -73,8 +73,7 @@ public class SingleMS2RunRReport extends CustomRReport
             return ((AbstractQueryMS2RunView)view).createGridView(expanded, null, null, false);
         }
 
-        HttpView.throwNotFound("Unsupported grouping type: " + groupingString);
-        return null;
+        throw new NotFoundException("Unsupported grouping type: " + groupingString);
     }
 
 

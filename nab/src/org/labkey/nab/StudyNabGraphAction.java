@@ -5,8 +5,8 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -52,7 +52,7 @@ public class StudyNabGraphAction extends SimpleViewAction<NabAssayController.Gra
     {
         Map<Integer, ExpProtocol> ids = NabManager.get().getReadableStudyObjectIds(getViewContext().getContainer(), getViewContext().getUser(), graphForm.getId());
         if (ids.values().isEmpty())
-            return HttpView.throwNotFound("No IDs available for charting.");
+            throw new NotFoundException("No IDs available for charting.");
         // We don't care which protocol we get- we just need any valid protocol to get to the provider (which should be
         // the same for all IDs)
         NabAssayProvider provider = null;

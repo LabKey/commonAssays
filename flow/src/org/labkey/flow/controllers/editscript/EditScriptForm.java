@@ -22,7 +22,7 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.HString;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewForm;
 import org.labkey.flow.FlowPreference;
@@ -35,6 +35,7 @@ import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.*;
 import org.labkey.flow.query.FlowPropertySet;
 import org.labkey.flow.query.FlowSchema;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
 import java.io.FileNotFoundException;
@@ -66,7 +67,9 @@ public class EditScriptForm extends ViewForm
         {
             HString scriptIdStr = new HString(getRequest().getParameter("scriptId"));
             if (scriptIdStr == null)
-                HttpView.throwNotFound("scriptId required");
+            {
+                throw new NotFoundException("scriptId required");
+            }
             int scriptId = 0;
             try
             {
@@ -74,11 +77,13 @@ public class EditScriptForm extends ViewForm
             }
             catch (NumberFormatException nfe)
             {
-                HttpView.throwNotFound("scriptId must be an integer");
+                throw new NotFoundException("scriptId must be an integer");
             }
             analysisScript = FlowScript.fromScriptId(scriptId);
             if (analysisScript == null || analysisScript.getExpObject() == null)
-                HttpView.throwNotFound("scriptId not found: " + scriptIdStr);
+            {
+                throw new NotFoundException("scriptId not found: " + scriptIdStr);
+            }
             _runCount = analysisScript.getRunCount();
             step = FlowProtocolStep.fromRequest(getRequest());
             _run = FlowRun.fromURL(getViewContext().getActionURL(), getRequest());

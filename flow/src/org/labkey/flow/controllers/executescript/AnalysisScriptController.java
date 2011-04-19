@@ -808,7 +808,7 @@ public class AnalysisScriptController extends BaseFlowController
             boolean createKeywordRun = keywordRun == null && runFilePathRoot != null;
             WorkspaceJob job = new WorkspaceJob(info, experiment,
                     workspaceData, runFilePathRoot, createKeywordRun, false, getPipeRoot());
-            HttpView.throwRedirect(executeScript(job));
+            throw new RedirectException(executeScript(job));
         }
 
         public ActionURL getSuccessURL(ImportAnalysisForm form)
@@ -951,8 +951,7 @@ public class AnalysisScriptController extends BaseFlowController
 
             FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
             RScriptJob job = new RScriptJob(info, root, _experiment, protocol, _keywordRun, form.getRunName());
-            HttpView.throwRedirect(executeScript(job));
-            return true;
+            throw new RedirectException(executeScript(job));
         }
 
         @Override
@@ -1038,8 +1037,7 @@ public class AnalysisScriptController extends BaseFlowController
 
             FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
             RImportJob job = new RImportJob(info, root, experiment, protocol, _keywordRun, _summaryStats, runName);
-            HttpView.throwRedirect(executeScript(job));
-            return null;
+            throw new RedirectException(executeScript(job));
         }
 
         @Override

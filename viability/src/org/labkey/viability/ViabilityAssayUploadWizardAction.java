@@ -23,9 +23,9 @@ import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.GUID;
 import org.labkey.api.view.InsertView;
+import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.HtmlView;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
@@ -304,7 +304,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         {
             if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
             {
-                HttpView.throwRedirect(getViewContext().getActionURL());
+                throw new RedirectException(getViewContext().getActionURL());
             }
 
             if (!form.isResetDefaultValues() && validatePost(form, errors))

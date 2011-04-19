@@ -30,6 +30,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.BaseFlowController;
@@ -93,7 +94,9 @@ public class RunController extends BaseFlowController
         {
             run = form.getRun();
             if (run == null)
-                HttpView.throwNotFound("Run not found: " + PageFlowUtil.filter(form.getRunId()));
+            {
+                throw new NotFoundException("Run not found: " + PageFlowUtil.filter(form.getRunId()));
+            }
             return new JspView<RunForm>(RunController.class, "showRun.jsp", form, errors);
         }
 
@@ -340,7 +343,9 @@ public class RunController extends BaseFlowController
         {
             final FlowRun run = form.getRun();
             if (null == run)
-                HttpView.throwNotFound();
+            {
+                throw new NotFoundException();
+            }
 
             getPageConfig().setTemplate(PageConfig.Template.None);
 

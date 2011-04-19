@@ -31,13 +31,13 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.ResultSet;
@@ -84,7 +84,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             return null;
         if (!ret.getContainer().hasPermission(user, ReadPermission.class))
         {
-            HttpView.throwUnauthorized();
+            throw new UnauthorizedException();
         }
         return ret;
     }

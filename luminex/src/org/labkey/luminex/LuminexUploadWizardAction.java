@@ -34,10 +34,9 @@ import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.view.InsertView;
+import org.labkey.api.view.RedirectException;
 import org.springframework.validation.BindException;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
@@ -243,7 +242,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
                 if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
                 {
-                    HttpView.throwRedirect(PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), _protocol, LuminexUploadWizardAction.class));
+                    throw new RedirectException(PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), _protocol, LuminexUploadWizardAction.class));
                 }
 
                 if (!form.isResetDefaultValues() && errors.getErrorCount() == 0)

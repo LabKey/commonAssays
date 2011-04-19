@@ -29,13 +29,14 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
-import org.labkey.api.view.HttpView;
+import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.RunListCache;
 import org.labkey.ms2.RunListException;
 import org.labkey.ms2.compare.CompareDataRegion;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -79,7 +80,7 @@ public abstract class AbstractRunCompareView extends QueryView
                 Container c = run.getContainer();
                 if (c == null || !c.hasPermission(getUser(), ReadPermission.class))
                 {
-                    HttpView.throwUnauthorized();
+                    throw new UnauthorizedException();
                 }
             }
 

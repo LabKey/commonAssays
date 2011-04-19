@@ -188,7 +188,9 @@ public class CompensationController extends BaseFlowController
         {
             FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
             if (null == comp)
-                HttpView.throwNotFound();
+            {
+                throw new NotFoundException();
+            }
             return FormPage.getView(CompensationController.class, form, "delete.jsp");
         }
 
@@ -197,8 +199,7 @@ public class CompensationController extends BaseFlowController
             FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
             if (null == comp)
             {
-                HttpView.throwNotFound();
-                return false;
+                throw new NotFoundException();
             }
 
             boolean hasErrors = false;

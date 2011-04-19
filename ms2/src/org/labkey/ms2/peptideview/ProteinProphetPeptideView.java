@@ -16,11 +16,11 @@
 
 package org.labkey.ms2.peptideview;
 
+import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.*;
 import org.labkey.ms2.protein.ProteinManager;
@@ -233,7 +233,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         String groupIdString = url.getParameter("proteinGroupId");
         if (groupIdString == null)
         {
-            HttpView.throwNotFound("No protein group id specified");
+            throw new NotFoundException("No protein group id specified");
         }
         int groupId = 0;
         try
@@ -242,7 +242,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         }
         catch (NumberFormatException e)
         {
-            HttpView.throwNotFound("Invalid protein group id specified - " + groupIdString);
+            throw new NotFoundException("Invalid protein group id specified - " + groupIdString);
         }
         String extraWhere = MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId = " + groupId;
         ResultSet rs = null;

@@ -26,6 +26,7 @@ import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.labkey.api.util.Pair;
 import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.util.List;
@@ -186,7 +187,9 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         }
 
         if (null == groupId)
-            HttpView.throwNotFound("Invalid proteinGroupingId parameter");
+        {
+            throw new NotFoundException("Invalid proteinGroupingId parameter");
+        }
 
         filter.addCondition(peptideView._selectedNestingOption.getRowIdColumnName(), groupId.intValue());
         result.getRenderContext().setBaseFilter(filter);

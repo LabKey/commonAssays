@@ -26,6 +26,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
@@ -73,7 +74,9 @@ public class LogController extends BaseFlowController
             _page = (Page)getFlowPage("showLog.jsp");
             _page.log = getLog();
             if (_page.log == null)
-                HttpView.throwNotFound();
+            {
+                throw new NotFoundException();
+            }
             return new JspView(_page);
         }
 

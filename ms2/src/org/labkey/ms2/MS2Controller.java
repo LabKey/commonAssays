@@ -400,7 +400,7 @@ public class MS2Controller extends SpringActionController
 
                 if (params != null && params.trim().length() > 0)
                 {
-                    HttpView.throwRedirect(currentURL + "&" + params);
+                    throw new RedirectException(currentURL + "&" + params);
                 }
             }
             else if (!getUser().isGuest())
@@ -758,7 +758,7 @@ public class MS2Controller extends SpringActionController
             MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
 
             if (peptide == null)
-                return HttpView.throwNotFound("Could not find peptide with RowId " + peptideId);
+                throw new NotFoundException("Could not find peptide with RowId " + peptideId);
 
             int runId = peptide.getRun();
 
@@ -1921,8 +1921,7 @@ public class MS2Controller extends SpringActionController
             }
             catch (RunListException e)
             {
-                HttpView.throwNotFound(e.getMessage());
-                return null;
+                throw new NotFoundException(e.getMessage());
             }
             List<ExpRun> expRuns = new ArrayList<ExpRun>();
             Container sourceContainer = null;
@@ -1954,7 +1953,7 @@ public class MS2Controller extends SpringActionController
                 }
                 catch (IOException e)
                 {
-                    HttpView.throwNotFound("Failed to initialize move. Check that the pipeline root is configured correctly. " + e);
+                    throw new NotFoundException("Failed to initialize move. Check that the pipeline root is configured correctly. " + e);
                 }
             }
 
@@ -2138,7 +2137,7 @@ public class MS2Controller extends SpringActionController
                     runListId = RunListCache.cacheSelectedRuns(_requiresSameType, form, getViewContext());
                     ActionURL redirectURL = currentURL.clone();
                     redirectURL.addParameter("runList", Integer.toString(runListId));
-                    HttpView.throwRedirect(redirectURL);
+                    throw new RedirectException(redirectURL);
                 }
                 else
                 {
@@ -2262,7 +2261,7 @@ public class MS2Controller extends SpringActionController
             _config = SpectraCountConfiguration.findByTableName(form.getSpectraConfig());
             if (_config == null)
             {
-                HttpView.throwNotFound("Could not find spectra count config: " + form.getSpectraConfig());
+                throw new NotFoundException("Could not find spectra count config: " + form.getSpectraConfig());
             }
 
             Map<String, String> prefs = getPreferences(SpectraCountSetupAction.class);
@@ -2333,7 +2332,7 @@ public class MS2Controller extends SpringActionController
             Container c = run.getContainer();
             if (c == null || !c.hasPermission(getUser(), ReadPermission.class))
             {
-                return HttpView.throwUnauthorized();
+                throw new UnauthorizedException();
             }
         }
 
@@ -3026,7 +3025,7 @@ public class MS2Controller extends SpringActionController
                 ActionURL url = getViewContext().cloneActionURL();
                 url.deleteParameter("minimumProbability");
                 url.deleteParameter("maximumErrorRate");
-                HttpView.throwRedirect(url + "&" + filter.toQueryString("ProteinSearchResults"));
+                throw new RedirectException(url + "&" + filter.toQueryString("ProteinSearchResults"));
             }
 
             QueryView proteinsView = createInitializedQueryView(form, errors, false, POTENTIAL_PROTEIN_DATA_REGION);
@@ -4049,7 +4048,7 @@ public class MS2Controller extends SpringActionController
                 }
                 else
                 {
-                    return HttpView.throwNotFound("Peptide not found");
+                    throw new NotFoundException("Peptide not found");
                 }
             }
             else
@@ -4061,7 +4060,7 @@ public class MS2Controller extends SpringActionController
             ActionURL currentURL = getViewContext().getActionURL();
 
             if (0 == seqId)
-                return HttpView.throwNotFound("Protein sequence not found");
+                throw new NotFoundException("Protein sequence not found");
 
             _protein = ProteinManager.getProtein(seqId);
             if (_protein == null)
@@ -4105,12 +4104,12 @@ public class MS2Controller extends SpringActionController
             long peptideId = form.getPeptideIdLong();
 
             if (peptideId == 0)
-                return HttpView.throwNotFound("No peptide specified");
+                throw new NotFoundException("No peptide specified");
 
             MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
 
             if (null == peptide)
-                return HttpView.throwNotFound("Could not locate peptide with this ID: " + peptideId);
+                throw new NotFoundException("Could not locate peptide with this ID: " + peptideId);
 
             setTitle("Proteins Containing " + peptide);
             getPageConfig().setTemplate(PageConfig.Template.Print);
@@ -4166,12 +4165,12 @@ public class MS2Controller extends SpringActionController
             ProteinProphetFile proteinProphet = run1.getProteinProphetFile();
             if (proteinProphet == null)
             {
-                return HttpView.throwNotFound();
+                throw new NotFoundException();
             }
             ProteinGroupWithQuantitation group = proteinProphet.lookupGroup(form.getGroupNumber(), form.getIndistinguishableCollectionId());
             if (group == null)
             {
-                return HttpView.throwNotFound();
+                throw new NotFoundException();
             }
             Protein[] proteins = group.lookupProteins();
 
@@ -4608,7 +4607,7 @@ public class MS2Controller extends SpringActionController
         }
         else
         {
-            HttpView.throwNotFound("Could not find peptide with id " + form.getPeptideIdLong());
+            throw new NotFoundException("Could not find peptide with id " + form.getPeptideIdLong());
         }
     }
 
@@ -4996,7 +4995,9 @@ public class MS2Controller extends SpringActionController
             if ("Show Runs".equals(getViewContext().getActionURL().getParameter("list")))
             {
                 if (c == null)
-                    HttpView.throwNotFound();
+                {
+                    throw new NotFoundException();
+                }
                 else
                     return getShowListURL(c);
             }
@@ -5031,7 +5032,9 @@ public class MS2Controller extends SpringActionController
                     }
 
                     if (run == -1)
-                        HttpView.throwNotFound();
+                    {
+                        throw new NotFoundException();
+                    }
 
                     url = getShowListURL(c);
                     url.addParameter(MS2Manager.getDataRegionNameExperimentRuns() + ".Run~eq", Integer.toString(run));
@@ -5533,7 +5536,7 @@ public class MS2Controller extends SpringActionController
             AnnotationInsertion[] insertions = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?", new Object[] { form.getInsertId() }, AnnotationInsertion.class);
             if (insertions.length == 0)
             {
-                return HttpView.throwNotFound();
+                throw new NotFoundException();
             }
             assert insertions.length == 1;
             _insertion = insertions[0];

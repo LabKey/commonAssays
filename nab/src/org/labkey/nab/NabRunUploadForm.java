@@ -25,10 +25,10 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.api.*;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.study.actions.PlateUploadForm;
 import org.labkey.api.view.NotFoundException;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -74,7 +74,9 @@ public class NabRunUploadForm extends PlateUploadForm<NabAssayProvider> implemen
         {
             _reRun = ExperimentService.get().getExpRun(_reRunId);
             if (_reRun == null)
-                HttpView.throwNotFound("NAb run " + _reRunId + " could not be found.");
+            {
+                throw new NotFoundException("NAb run " + _reRunId + " could not be found.");
+            }
         }
         return _reRun;
     }

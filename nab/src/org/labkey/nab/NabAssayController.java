@@ -538,13 +538,19 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
             if (form.getRowId() < 0)
-                HttpView.throwNotFound("No run specified");
+            {
+                throw new NotFoundException("No run specified");
+            }
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             if (run == null)
-                HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
+            {
+                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
+            }
             File file = getDataHandler(run).getDataFile(run);
             if (file == null)
-                HttpView.throwNotFound("Data file for run " + run.getName() + " was not found.  Deleted from the file system?");
+            {
+                throw new NotFoundException("Data file for run " + run.getName() + " was not found.  Deleted from the file system?");
+            }
             PageFlowUtil.streamFile(getViewContext().getResponse(), file, true);
             return null;
         }
@@ -645,7 +651,7 @@ public class NabAssayController extends SpringActionController
             }
             catch (SinglePlateNabDataHandler.MissingDataFileException e)
             {
-                HttpView.throwNotFound(e.getMessage());
+                throw new NotFoundException(e.getMessage());
             }
         }
         return assay;
@@ -666,15 +672,14 @@ public class NabAssayController extends SpringActionController
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             if (run == null)
             {
-                HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
-                return null;
+                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
             }
             if (!run.getContainer().equals(getContainer()))
             {
                 // Need to redirect
                 ActionURL newURL = getViewContext().getActionURL().clone();
                 newURL.setContainer(run.getContainer());
-                HttpView.throwRedirect(newURL);
+                throw new RedirectException(newURL);
             }
 
             // 8128 : NAb should show only print details view if user doesn't have permission to container
@@ -682,7 +687,9 @@ public class NabAssayController extends SpringActionController
             // at this point.  However, if the user can view the dataset but not the container,
             // lots of links will be broken. The workaround for now is to redirect to a print view.
             if (!isPrint() && !getContainer().hasPermission(getUser(), ReadPermission.class))
-                HttpView.throwRedirect(getViewContext().getActionURL().clone().addParameter("_print", true));
+            {
+                throw new RedirectException(getViewContext().getActionURL().clone().addParameter("_print", true));
+            }
 
             NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum());
             _protocol = run.getProtocol();
@@ -891,7 +898,9 @@ public class NabAssayController extends SpringActionController
         {
             _protocol = ExperimentService.get().getExpProtocol(form.getProtocolId());
             if (_protocol == null)
-                HttpView.throwNotFound();
+            {
+                throw new NotFoundException();
+            }
             int[] objectIds;
             if (form.getId() != null)
                 objectIds = form.getId();
@@ -899,7 +908,9 @@ public class NabAssayController extends SpringActionController
             {
                 Set<String> objectIdStrings = DataRegionSelection.getSelected(getViewContext(), false);
                 if (objectIdStrings == null || objectIdStrings.size() == 0)
-                    HttpView.throwNotFound("No samples specified.");
+                {
+                    throw new NotFoundException("No samples specified.");
+                }
                 objectIds = new int[objectIdStrings.size()];
                 int idx = 0;
                 for (String objectIdString : objectIdStrings)
@@ -963,7 +974,9 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(DeleteRunForm deleteRunForm, BindException errors) throws Exception
         {
             if (deleteRunForm.getRowId() == 0)
-                HttpView.throwNotFound("No run specified");
+            {
+                throw new NotFoundException("No run specified");
+            }
             ExpRun run = ExperimentService.get().getExpRun(deleteRunForm.getRowId());
             if (run == null)
                 throw new NotFoundException("Run " + deleteRunForm.getRowId() + " does not exist.");
@@ -972,7 +985,9 @@ public class NabAssayController extends SpringActionController
             {
                 file = getDataHandler(run).getDataFile(run);
                 if (file == null)
-                    HttpView.throwNotFound("Data file for run " + run.getName() + " was not found.  Deleted from the file system?");
+                {
+                    throw new NotFoundException("Data file for run " + run.getName() + " was not found.  Deleted from the file system?");
+                }
             }
 
             run.delete(getUser());
@@ -981,11 +996,9 @@ public class NabAssayController extends SpringActionController
             {
                 ActionURL reuploadURL = new ActionURL(NabUploadWizardAction.class, getContainer());
                 reuploadURL.addParameter("dataFile", file.getPath());
-                HttpView.throwRedirect(reuploadURL);
+                throw new RedirectException(reuploadURL);
             }
-            else
-                HttpView.throwRedirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), run.getProtocol()));
-            return null;
+            throw new RedirectException(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), run.getProtocol()));
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1046,13 +1059,13 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(GraphForm form, BindException errors) throws Exception
         {
             if (form.getRowId() == -1)
-                return HttpView.throwNotFound("Run ID not specified.");
+                throw new NotFoundException("Run ID not specified.");
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             if (run == null)
-                return HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
+                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
             NabAssayRun assay = getNabAssayRun(run, form.getFitTypeEnum());
             if (assay == null)
-                return HttpView.throwNotFound("Could not load NAb results for run " + form.getRowId() + ".");
+                throw new NotFoundException("Could not load NAb results for run " + form.getRowId() + ".");
 
             NabGraph.Config config = new NabGraph.Config();
             config.setCutoffs(assay.getCutoffs());
@@ -1176,21 +1189,24 @@ public class NabAssayController extends SpringActionController
             ViewContext context = getViewContext();
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(sampleSpreadsheetForm.getProtocol());
             if (protocol == null)
-                HttpView.throwNotFound("Protocol " + sampleSpreadsheetForm.getProtocol() + " does not exist.");
+            {
+                throw new NotFoundException("Protocol " + sampleSpreadsheetForm.getProtocol() + " does not exist.");
+            }
 
             AssayProvider provider = AssayService.get().getProvider(protocol);
             if (provider == null || !(provider instanceof NabAssayProvider))
             {
-                HttpView.throwNotFound("Protocol " + sampleSpreadsheetForm.getProtocol() + " is not a NAb protocol: " +
-                        (protocol != null ? protocol.getName() : "null"));
-                // Return to eliminate IntelliJ warnings.
-                return;
+                String message = "Protocol " + sampleSpreadsheetForm.getProtocol() + " is not a NAb protocol: " +
+                        (protocol != null ? protocol.getName() : "null");
+                throw new NotFoundException(message);
             }
             NabAssayProvider nabProvider = ((NabAssayProvider) provider);
             Domain sampleDomain = nabProvider.getSampleWellGroupDomain(protocol);
             PlateTemplate template = nabProvider.getPlateTemplate(context.getContainer(), protocol);
             if (template == null)
-                HttpView.throwNotFound("The plate template for this assay design could not be found.  It may have been deleted by an administrator.");
+            {
+                throw new NotFoundException("The plate template for this assay design could not be found.  It may have been deleted by an administrator.");
+            }
             List<WellGroupTemplate> sampleGroups = new ArrayList<WellGroupTemplate>();
             for (WellGroupTemplate group : template.getWellGroups())
             {

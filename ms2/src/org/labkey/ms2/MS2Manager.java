@@ -52,6 +52,7 @@ import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import javax.xml.stream.XMLStreamException;
@@ -1951,7 +1952,9 @@ public class MS2Manager
             if (!c.hasPermission(user, ReadPermission.class))
             {
                 if (user.isGuest())
-                    HttpView.throwUnauthorized();
+                {
+                    throw new UnauthorizedException();
+                }
 
                 errors.add("Run " + run.getRun() + ": Not authorized");
             }

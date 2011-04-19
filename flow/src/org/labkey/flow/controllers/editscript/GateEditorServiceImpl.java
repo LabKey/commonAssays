@@ -26,7 +26,7 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.analysis.chart.FlowLogarithmicAxis;
@@ -43,6 +43,7 @@ import org.labkey.flow.gateeditor.client.model.*;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.script.FlowAnalyzer;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.awt.*;
@@ -328,7 +329,9 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
                 {
                     script = run.getScript();
                     if (null == script)
-                        HttpView.throwNotFound();
+                    {
+                        throw new NotFoundException();
+                    }
                     if (!canUpdate(run))
                     {
                         ret.setReadOnly(true);
@@ -338,7 +341,9 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
                 {
                     script = FlowScript.fromScriptId(workspaceOptions.scriptId);
                     if (null == script)
-                        HttpView.throwNotFound();
+                    {
+                        throw new NotFoundException();
+                    }
                     if (!canUpdate(script))
                     {
                         ret.setReadOnly(true);

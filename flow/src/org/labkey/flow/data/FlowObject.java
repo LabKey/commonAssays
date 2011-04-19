@@ -31,8 +31,9 @@ import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.flow.controllers.FlowParam;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
@@ -128,7 +129,9 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     public void checkContainer(ActionURL url) throws ServletException
     {
         if (!getContainer().getParsedPath().equals(url.getParsedPath()))
-            HttpView.throwNotFound("Wrong container");
+        {
+            throw new NotFoundException("Wrong container");
+        }
     }
 
 

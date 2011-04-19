@@ -131,10 +131,14 @@ public class NabController extends SpringActionController
         public ModelAndView getView(BeginForm form, BindException errors) throws Exception
         {
             if (!getUser().isGuest() && !getContainer().hasPermission(getUser(), InsertPermission.class))
-                HttpView.throwRedirect(getRunsURL());
+            {
+                throw new RedirectException(getRunsURL());
+            }
 
             if (!getContainer().hasPermission(getUser(), InsertPermission.class))
-                HttpView.throwUnauthorized();
+            {
+                throw new UnauthorizedException();
+            }
 
             UploadAssayForm assayForm;
 
@@ -588,7 +592,9 @@ public class NabController extends SpringActionController
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
             if (form.getRowId() < 0)
-                HttpView.throwRedirect(getBeginURL());
+            {
+                throw new RedirectException(getBeginURL());
+            }
 
             OldNabAssayRun assay = getCachedAssay(form.getRowId());
 
@@ -904,12 +910,16 @@ public class NabController extends SpringActionController
         public void export(AttachmentForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             if (form.getEntityId() == null || form.getName() == null)
-                HttpView.throwNotFound("Page not found: EntityId and name are required URL parameters- incomplete URL?");
+            {
+                throw new NotFoundException("Page not found: EntityId and name are required URL parameters- incomplete URL?");
+            }
 
             Plate plate = PlateService.get().getPlate(getContainer(), form.getEntityId());
 
             if (plate == null)
-                HttpView.throwNotFound("Page not found: The specified plate does not exist.  It may have been deleted from the database.");
+            {
+                throw new NotFoundException("Page not found: The specified plate does not exist.  It may have been deleted from the database.");
+            }
 
             AttachmentService.get().download(response, plate, form.getName());
         }
@@ -1496,7 +1506,9 @@ public class NabController extends SpringActionController
         {
             Container targetContainer = ContainerManager.getForId(form.getTargetContainerId());
             if (!targetContainer.hasPermission(getUser(), InsertPermission.class))
-                HttpView.throwUnauthorized();
+            {
+                throw new UnauthorizedException();
+            }
 
             List<WellGroup> sampleList = new ArrayList<WellGroup>();
             if (form.isPlateIds())
@@ -1562,7 +1574,9 @@ public class NabController extends SpringActionController
         {
             Container targetContainer = ContainerManager.getForId(form.getTargetContainerId());
             if (!targetContainer.hasPermission(getUser(), InsertPermission.class))
-                HttpView.throwUnauthorized();
+            {
+                throw new UnauthorizedException();
+            }
 
             boolean dateBased = AssayPublishService.get().getTimepointType(targetContainer) != TimepointType.VISIT;
             Set<String> includedSamples = new HashSet<String>();

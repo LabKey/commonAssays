@@ -21,7 +21,6 @@ import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.SimpleFilter;
@@ -40,14 +39,10 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermissionClass;
-import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.DeletePermission;
-import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.actions.AssayHeaderView;
-import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
@@ -57,9 +52,9 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
-import org.springframework.beans.PropertyValue;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -107,7 +102,9 @@ public class ElispotController extends SpringActionController
         {
             _run = ExperimentService.get().getExpRun(form.getRowId());
             if (_run == null || !_run.getContainer().equals(getContainer()))
-                HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
+            {
+                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
+            }
 
             _protocol = _run.getProtocol();
             _hasRunFilter = hasRunFilter(_protocol, getViewContext().getActionURL());
@@ -287,7 +284,9 @@ public class ElispotController extends SpringActionController
         {
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             if (run == null)
-                HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
+            {
+                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
+            }
 
             ActionURL url = new ActionURL(RunDetailsAction.class, getContainer());
             url.addParameter("rowId", form.getRowId());

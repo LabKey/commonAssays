@@ -31,6 +31,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.PeptidesTableInfo;
 import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * User: jeckels
@@ -229,7 +230,9 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         }
 
         if (null == groupId)
-            HttpView.throwNotFound("Invalid proteinGroupingId parameter");
+        {
+            throw new NotFoundException("Invalid proteinGroupingId parameter");
+        }
 
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);

@@ -98,7 +98,9 @@ public class WellController extends BaseFlowController
         Page ret = (Page) getFlowPage(name);
         FlowWell well = getWell();
         if (well == null)
-            HttpView.throwNotFound("well not found");
+        {
+            throw new NotFoundException("well not found");
+        }
         ret.setWell(well);
         return ret;
     }
@@ -221,7 +223,9 @@ public class WellController extends BaseFlowController
         {
             well = form.getWell();
             if (null == well)
-                HttpView.throwNotFound();
+            {
+                throw new NotFoundException();
+            }
 
             URI fileURI = well.getFCSURI();
             if (fileURI == null)
@@ -338,7 +342,9 @@ public class WellController extends BaseFlowController
         {
             FlowWell well = getWell();
             if (null == well)
-                HttpView.throwNotFound();
+            {
+                throw new NotFoundException();
+            }
 
             try
             {

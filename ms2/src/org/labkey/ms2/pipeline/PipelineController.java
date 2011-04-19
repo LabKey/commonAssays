@@ -241,7 +241,7 @@ public class PipelineController extends SpringActionController
         {
             _root = PipelineService.get().findPipelineRoot(getContainer());
             if (_root == null || !_root.isValid())
-                return HttpView.throwNotFound();
+                throw new NotFoundException();
 
             _dirSeqRoot = MS2PipelineManager.getSequenceDatabaseRoot(_root.getContainer());
 
@@ -670,7 +670,7 @@ public class PipelineController extends SpringActionController
         {
             _root = PipelineService.get().getPipelineRootSetting(getContainer());
             if (_root == null)
-                return HttpView.throwNotFound("A pipeline root is not set on this folder.");
+                throw new NotFoundException("A pipeline root is not set on this folder.");
 
             _provider = (AbstractMS2SearchPipelineProvider)
                     PipelineService.get().getPipelineProvider(getProviderName());
