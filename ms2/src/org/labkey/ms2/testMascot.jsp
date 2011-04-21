@@ -99,7 +99,7 @@ If you're unfamiliar with your organization's Mascot services configuration you 
 <li>User account is the userid for logging in to your Mascot server.  It is mandatory if Mascot security is enabled.</li>
 <li>Password is the pass pharse to authenticate you to your Mascot server.  It is mandatory if Mascot security is enabled.</li>
 <li>HTTP Proxy URL is typically of the form http://proxyservername.domain.org:8080/ to make HTTP requests on your behalf if necessary.</li>
-<li><a href="<%=(new HelpTopic("configMascot" )).getHelpTopicLink()%>">More information...</a>
+<li><a href="<%=(new HelpTopic("configMascot" )).getHelpTopicLink()%>" target="_new">More information...</a>
 </ul>
 <%
 }
