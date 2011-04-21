@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LabKey Corporation
+ * Copyright (c) 2011 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* ms2-0.00-8.20.sql */
-
-/* ms2-0.00-2.30.sql */
-
-/* ms2-0.00-2.00.sql */
 
 /* ms2-0.00-1.00.sql */
 
@@ -859,16 +853,6 @@ ALTER TABLE ms2.MS2Runs ADD
     SpectrumCount INT NOT NULL DEFAULT 0
 GO
 
--- Update counts for existing runs
-UPDATE ms2.MS2Runs SET PeptideCount = PepCount FROM
-    (SELECT Run, COUNT(*) AS PepCount FROM ms2.MS2PeptidesData pd INNER JOIN ms2.MS2Fractions f ON pd.Fraction = f.Fraction GROUP BY Run) x
-WHERE ms2.MS2Runs.Run = x.Run
-
-UPDATE ms2.MS2Runs SET SpectrumCount = SpecCount FROM
-    (SELECT Run, COUNT(*) AS SpecCount FROM ms2.MS2SpectraData sd INNER JOIN ms2.MS2Fractions f ON sd.Fraction = f.Fraction GROUP BY Run) x
-WHERE ms2.MS2Runs.Run = x.Run
-GO
-
 -- Relax contraints on quantitation result columns; q3 does not generate string representations of ratios.
 ALTER TABLE ms2.Quantitation ALTER COLUMN Ratio VARCHAR(20) NULL
 ALTER TABLE ms2.Quantitation ALTER COLUMN Heavy2lightRatio VARCHAR(20) NULL
@@ -955,9 +939,6 @@ ALTER TABLE ms2.MS2PeptidesData
 GO
 
 /* ms2-1.60-1.70.sql */
-
-UPDATE ms2.ms2proteingroups SET pctspectrumids = pctspectrumids / 100, percentcoverage = percentcoverage / 100
-GO
 
 -- Index to speed up deletes from MS2PeptidesData.  Use old names here to allow running this on 1.6 installations.
 IF NOT EXISTS (SELECT * FROM dbo.sysindexes WHERE name = 'IX_MS2PeptideMemberships_PeptideId' AND id = object_id('ms2.MS2PeptideMemberships'))
@@ -1289,8 +1270,6 @@ GO
 
 /* ms2-2.30-8.10.sql */
 
-/* ms2-2.30-2.31.sql */
-
 EXEC core.fn_dropifexists 'PeptidesData', 'ms2', 'INDEX','IX_MS2PeptidesData_TrimmedPeptide'
 GO
 
@@ -1304,8 +1283,6 @@ GO
 CREATE INDEX IX_MS2PeptidesData_Peptide ON
     ms2.PeptidesData(Peptide)
 GO
-
-/* ms2-2.31-2.32.sql */
 
 CREATE INDEX IX_Annotations_IdentId ON prot.annotations(AnnotIdent)
 GO
@@ -1322,12 +1299,8 @@ GO
 DELETE FROM prot.identifiers WHERE (identifier = '' OR identifier IS NULL) AND identtypeid IN (SELECT identtypeid FROM prot.identtypes WHERE name = 'GeneName')
 GO
 
-/* ms2-2.32-2.33.sql */
-
 DELETE FROM prot.FastaFiles WHERE FastaId = 0
 GO
-
-/* ms2-2.33-2.34.sql */
 
 -- Clean up blank BestName entries from protein annotation loads in old versions
 
@@ -1340,27 +1313,19 @@ GO
 UPDATE prot.sequences SET bestname = 'UNKNOWN' WHERE bestname IS NULL OR bestname = ''
 GO
 
-/* ms2-2.34-2.35.sql */
-
 -- Increase column size to accomodate long synonyms in recent GO files
 ALTER TABLE prot.GoTermSynonym ALTER COLUMN TermSynonym VARCHAR(500)
 GO
 
 /* ms2-8.10-8.20.sql */
 
-/* ms2-8.10-8.11.sql */
-
 CREATE INDEX IX_Fractions_MzXMLURL ON ms2.fractions(mzxmlurl)
 GO
 
 /* ms2-8.30-9.10.sql */
 
-/* ms2-8.30-8.31.sql */
-
 UPDATE exp.DataInput SET Role = 'Spectra' WHERE Role = 'mzXML'
 GO
-
-/* ms2-8.32-8.33.sql */
 
 DROP INDEX prot.organisms.ix_protorganisms_genus
 GO
@@ -1371,15 +1336,7 @@ GO
 DROP INDEX prot.identifiers.IX_ProtIdentifiers1
 GO
 
-/* ms2-8.33-8.34.sql */
-
 ALTER TABLE prot.customannotationset DROP CONSTRAINT fk_customannotationset_createdby
 GO
 ALTER TABLE prot.customannotationset DROP CONSTRAINT fk_customannotationset_modifiedby
-GO
-
-/* ms2-8.34-8.35.sql */
-
--- Delete modification rows with bogus amino acids to avoid problems when wrapping associated runs
-DELETE FROM ms2.Modifications WHERE AminoAcid < 'A' OR AminoAcid > 'Z'
 GO

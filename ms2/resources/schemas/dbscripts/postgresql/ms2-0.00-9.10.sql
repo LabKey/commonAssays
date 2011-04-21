@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LabKey Corporation
+ * Copyright (c) 2011 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* ms2-0.00-8.20.sql */
-
-/* ms2-0.00-2.30.sql */
-
-/* ms2-0.00-2.00.sql */
 
 /* ms2-0.00-1.00.sql */
 
@@ -775,15 +769,6 @@ ALTER TABLE ms2.MS2Runs
     ADD COLUMN PeptideCount INT NOT NULL DEFAULT 0,
     ADD COLUMN SpectrumCount INT NOT NULL DEFAULT 0;
 
--- Update counts for existing runs
-UPDATE ms2.MS2Runs SET PeptideCount = PepCount FROM
-    (SELECT Run, COUNT(*) AS PepCount FROM ms2.MS2PeptidesData pd INNER JOIN ms2.MS2Fractions f ON pd.Fraction = f.Fraction GROUP BY Run) x
-WHERE MS2Runs.Run = x.Run;
-
-UPDATE ms2.MS2Runs SET SpectrumCount = SpecCount FROM
-    (SELECT Run, COUNT(*) AS SpecCount FROM ms2.MS2SpectraData sd INNER JOIN ms2.MS2Fractions f ON sd.Fraction = f.Fraction GROUP BY Run) x
-WHERE MS2Runs.Run = x.Run;
-
 -- Relax contraints on quantitation result columns; q3 does not generate string representations of ratios.
 ALTER TABLE ms2.Quantitation ALTER COLUMN Ratio DROP NOT NULL;
 ALTER TABLE ms2.Quantitation ALTER COLUMN Heavy2lightRatio DROP NOT NULL;
@@ -860,8 +845,6 @@ ALTER TABLE ms2.MS2PeptidesData
     ADD COLUMN RetentionTime REAL NULL;
 
 /* ms2-1.60-1.70.sql */
-
-UPDATE ms2.ms2proteingroups SET pctspectrumids = pctspectrumids / 100, percentcoverage = percentcoverage / 100;
 
 -- Index to speed up deletes from MS2PeptidesData
 CREATE INDEX IX_MS2PeptideMemberships_PeptideId ON ms2.MS2PeptideMemberships(PeptideId);
@@ -1142,8 +1125,6 @@ CREATE UNIQUE INDEX UQ_MS2PeptidesData_FractionScanCharge ON ms2.PeptidesData (F
 
 /* ms2-2.30-8.10.sql */
 
-/* ms2-2.30-2.31.sql */
-
 SELECT core.fn_dropifexists('PeptidesData', 'ms2', 'INDEX','IX_MS2PeptidesData_TrimmedPeptide');
 
 CREATE INDEX IX_MS2PeptidesData_TrimmedPeptide ON ms2.PeptidesData(TrimmedPeptide);
@@ -1151,8 +1132,6 @@ CREATE INDEX IX_MS2PeptidesData_TrimmedPeptide ON ms2.PeptidesData(TrimmedPeptid
 SELECT core.fn_dropifexists('PeptidesData', 'ms2', 'INDEX','IX_MS2PeptidesData_Peptide');
 
 CREATE INDEX IX_MS2PeptidesData_Peptide ON ms2.PeptidesData(Peptide);
-
-/* ms2-2.31-2.32.sql */
 
 CREATE INDEX IX_Annotations_IdentId ON prot.annotations(AnnotIdent);
 
@@ -1164,11 +1143,7 @@ DELETE FROM prot.identifiers WHERE UPPER(identifier) = 'UPTR' AND identtypeid IN
 
 DELETE FROM prot.identifiers WHERE (identifier = '' OR identifier IS NULL) AND identtypeid IN (SELECT identtypeid FROM prot.identtypes WHERE name = 'GeneName');
 
-/* ms2-2.32-2.33.sql */
-
 DELETE FROM prot.FastaFiles WHERE FastaId = 0;
-
-/* ms2-2.33-2.34.sql */
 
 -- Clean up blank BestName entries from protein annotation loads in old versions
 
@@ -1178,36 +1153,21 @@ UPDATE prot.sequences SET bestname = (SELECT MIN(identifier) FROM prot.identifie
 
 UPDATE prot.sequences SET bestname = 'UNKNOWN' WHERE bestname IS NULL OR bestname = '';
 
-/* ms2-2.34-2.35.sql */
-
 -- Increase column size to accomodate long synonyms in recent GO files
 ALTER TABLE prot.GoTermSynonym ALTER COLUMN TermSynonym TYPE VARCHAR(500);
 
 /* ms2-8.10-8.20.sql */
 
-/* ms2-8.10-8.11.sql */
-
 CREATE INDEX IX_Fractions_MzXMLURL ON ms2.fractions(mzxmlurl);
 
 /* ms2-8.30-9.10.sql */
 
-/* ms2-8.30-8.31.sql */
-
 UPDATE exp.DataInput SET Role = 'Spectra' WHERE Role = 'mzXML';
-
-/* ms2-8.32-8.33.sql */
 
 DROP INDEX prot.ix_protorganisms_genus;
 DROP INDEX prot.ix_protorganisms_species;
 
 DROP INDEX prot.ix_protidentifiers_identtypeid_identifier_identid_seqid;
 
-/* ms2-8.33-8.34.sql */
-
 ALTER TABLE prot.customannotationset DROP CONSTRAINT fk_customannotationset_createdby;
 ALTER TABLE prot.customannotationset DROP CONSTRAINT fk_customannotationset_modifiedby;
-
-/* ms2-8.34-8.35.sql */
-
--- Delete modification rows with bogus amino acids to avoid problems when wrapping associated runs
-DELETE FROM ms2.Modifications WHERE AminoAcid < 'A' OR AminoAcid > 'Z';

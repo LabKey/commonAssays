@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 LabKey Corporation
+ * Copyright (c) 2011 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,6 @@
 
 /* microarray-0.00-8.10.sql */
 
-/* microarray-0.00-0.01.sql */
-
 -- Tables used for Microarray module
 EXEC sp_addapprole 'microarray', 'password'
-GO
-
-/* microarray-8.30-9.10.sql */
-
-/* microarray-8.30-8.31.sql */
-
--- Add a single, empty data row for any microarray runs that don't already have one  
-INSERT INTO exp.object (container, objecturi, ownerobjectid)
-SELECT o.container, o.objecturi + '.DataRow-0', o.objectid FROM exp.object o
-WHERE o.objecturi like '%MicroarrayAssayData.Folder-%' AND o.objecturi NOT LIKE '%MicroarrayAssayData.Folder-%DataRow-%'
-AND o.objectid NOT IN (SELECT x.ownerobjectid FROM exp.object x WHERE x.objecturi LIKE '%MicroarrayAssayData.Folder-%DataRow-%')
 GO

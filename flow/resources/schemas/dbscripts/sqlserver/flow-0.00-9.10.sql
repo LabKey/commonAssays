@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2010 LabKey Corporation
+ * Copyright (c) 2011 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,16 @@
 
 EXEC sp_addAppRole 'flow', 'password';
 
-CREATE TABLE flow.Attribute(
+CREATE TABLE flow.Attribute
+(
     RowId int IDENTITY(1,1) NOT NULL,
     Name NVARCHAR(256) COLLATE Latin1_General_BIN NOT NULL,
     CONSTRAINT PK_Attribute PRIMARY KEY (RowId),
     CONSTRAINT UQ_Attribute UNIQUE(Name)
 );
 
-CREATE TABLE flow.Object(
+CREATE TABLE flow.Object
+(
     RowId int IDENTITY(1,1) NOT NULL,
     Container entityid NOT NULL,
     DataId INT,
@@ -40,7 +42,8 @@ CREATE TABLE flow.Object(
 CREATE INDEX flow_object_typeid ON flow.object (container, typeid)
 
 
-CREATE TABLE flow.Keyword(
+CREATE TABLE flow.Keyword
+(
     RowId int IDENTITY(1,1) NOT NULL,
     ObjectId INT NOT NULL,
     KeywordId INT NOT NULL,
@@ -51,7 +54,8 @@ CREATE TABLE flow.Keyword(
     CONSTRAINT FK_Keyword_Attribute FOREIGN KEY (KeywordId) REFERENCES flow.Attribute(RowId)
 );
 
-CREATE TABLE flow.Statistic(
+CREATE TABLE flow.Statistic
+(
     RowId int IDENTITY(1,1) NOT NULL,
     ObjectId INT NOT NULL,
     StatisticId INT NOT NULL,
@@ -62,7 +66,8 @@ CREATE TABLE flow.Statistic(
     CONSTRAINT FK_Statistic_Attribute FOREIGN KEY (StatisticId) REFERENCES flow.Attribute(RowId)
 );
 
-CREATE TABLE flow.Graph(
+CREATE TABLE flow.Graph
+(
     RowId int IDENTITY(1,1) NOT NULL,
     ObjectId INT NOT NULL,
     GraphId INT NOT NULL,
@@ -73,7 +78,8 @@ CREATE TABLE flow.Graph(
     CONSTRAINT FK_Graph_Attribute FOREIGN KEY (GraphId) REFERENCES flow.Attribute(RowId)
 );
 
-CREATE TABLE flow.Script(
+CREATE TABLE flow.Script
+(
     RowId int IDENTITY(1,1) NOT NULL,
     ObjectId INT NOT NULL,
     Text NTEXT,
@@ -84,18 +90,18 @@ CREATE TABLE flow.Script(
 
 /* flow-8.30-9.10.sql */
 
-/* flow-8.30-8.31.sql */
-
 ALTER TABLE flow.keyword DROP CONSTRAINT PK_Keyword
 ALTER TABLE flow.keyword DROP CONSTRAINT UQ_Keyword
 ALTER TABLE flow.keyword DROP COLUMN rowid
-go
+GO
+
 ALTER TABLE flow.keyword ADD CONSTRAINT PK_Keyword PRIMARY KEY CLUSTERED (ObjectId, KeywordId)
-go
+GO
 
 ALTER TABLE flow.statistic DROP CONSTRAINT PK_Statistic
 ALTER TABLE flow.statistic DROP CONSTRAINT UQ_Statistic
 ALTER TABLE flow.statistic DROP COLUMN rowid
-go
+GO
+
 ALTER TABLE flow.statistic ADD CONSTRAINT PK_Statistic PRIMARY KEY CLUSTERED (ObjectId, StatisticId)
-go
+GO
