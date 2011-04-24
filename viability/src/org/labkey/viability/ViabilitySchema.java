@@ -17,8 +17,8 @@
 package org.labkey.viability;
 
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.dialect.SqlDialect;
 
 /**
  * User: kevink
@@ -32,12 +32,10 @@ public class ViabilitySchema
     }
 
     public static final String SCHEMA_NAME = "viability";
-    private static ViabilitySchema _instance = null;
+    private static final ViabilitySchema _instance = new ViabilitySchema();
 
     public static ViabilitySchema get()
     {
-        if (null == _instance)
-            _instance = new ViabilitySchema();
         return _instance;
     }
 
