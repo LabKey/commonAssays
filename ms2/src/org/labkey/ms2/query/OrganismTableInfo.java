@@ -17,12 +17,10 @@
 package org.labkey.ms2.query;
 
 import org.labkey.api.data.JdbcType;
-import org.labkey.api.query.FilteredTable;
-import org.labkey.api.query.ExprColumn;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FilteredTable;
 import org.labkey.ms2.protein.ProteinManager;
-
-import java.sql.Types;
 
 /**
  * User: jeckels

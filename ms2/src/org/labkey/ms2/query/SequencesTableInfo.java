@@ -16,8 +16,20 @@
 
 package org.labkey.ms2.query;
 
-import org.labkey.api.data.*;
-import org.labkey.api.query.*;
+import org.labkey.api.data.AbstractForeignKey;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.util.StringExpressionFactory;
@@ -30,8 +42,11 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.query.CustomAnnotationSetsTable;
 import org.labkey.ms2.protein.query.CustomAnnotationTable;
 
-import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * User: jeckels

@@ -16,20 +16,27 @@
 
 package org.labkey.ms2.query;
 
-import org.labkey.api.data.*;
-import org.labkey.api.query.*;
+import org.jetbrains.annotations.NotNull;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.VirtualTable;
+import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.exp.query.ExpRunTable;
-import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.ProteinManager;
-import org.jetbrains.annotations.NotNull;
 
-import java.sql.Types;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: jeckels

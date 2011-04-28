@@ -17,24 +17,44 @@
 package org.labkey.ms2.query;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.*;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringExpressionFactory;
-import org.labkey.ms2.*;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.api.view.ActionURL;
+import org.labkey.ms2.DeltaScanColumn;
+import org.labkey.ms2.HydrophobicityColumn;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
+import org.labkey.ms2.protein.ProteinManager;
 
-import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jeckels

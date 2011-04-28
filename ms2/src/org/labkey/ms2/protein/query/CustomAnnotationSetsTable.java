@@ -16,14 +16,17 @@
 
 package org.labkey.ms2.protein.query;
 
-import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.VirtualTable;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QuerySchema;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.CustomAnnotationSet;
+import org.labkey.ms2.protein.ProteinManager;
 
-import java.sql.Types;
 import java.util.Map;
 
 /**

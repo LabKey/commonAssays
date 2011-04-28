@@ -24,8 +24,6 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.snapshot.AbstractTableMethodInfo;
 import org.labkey.flow.data.ICSMetadata;
 
-import java.sql.Types;
-
 public class BackgroundMethod extends AbstractTableMethodInfo
 {
     FlowSchema _schema;

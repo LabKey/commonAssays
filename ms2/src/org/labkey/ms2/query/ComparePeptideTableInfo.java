@@ -16,23 +16,22 @@
 
 package org.labkey.ms2.query;
 
-import org.labkey.api.data.JdbcType;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.api.data.SQLFragment;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.VirtualTable;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
-import org.jetbrains.annotations.NotNull;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.sql.Types;
+import java.util.List;
 
 /**
  * User: jeckels

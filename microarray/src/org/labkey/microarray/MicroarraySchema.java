@@ -16,12 +16,24 @@
 
 package org.labkey.microarray;
 
-import org.labkey.api.data.*;
-import org.labkey.api.exp.query.ExpRunTable;
-import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.IconDisplayColumn;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
-import org.labkey.api.query.*;
+import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AppProps;
@@ -30,7 +42,6 @@ import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

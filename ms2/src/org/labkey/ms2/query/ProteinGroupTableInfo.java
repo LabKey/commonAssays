@@ -17,7 +17,17 @@
 package org.labkey.ms2.query;
 
 import org.labkey.api.collections.CaseInsensitiveHashSet;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
@@ -25,11 +35,19 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
-import org.labkey.ms2.*;
+import org.labkey.ms2.GroupNumberDisplayColumn;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.ProteinListDisplayColumn;
 import org.labkey.ms2.protein.ProteinManager;
 
-import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * User: jeckels
