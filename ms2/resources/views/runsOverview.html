@@ -74,7 +74,7 @@ function getRunFiltersContent()
         queryName: "MS2SearchRuns",
         successCallback: function(data) { allRuns = data; setQueryOptions(); },
         containerFilter: "AllFolders",
-        columns: "Folder, Name, CreatedBy/DisplayName, Input/FASTA/Name, MS2Details/SearchEngine"
+        columns: "Folder, Folder/EntityId, Name, CreatedBy/DisplayName, Input/FASTA/Name, MS2Details/SearchEngine"
     });
 }
 
@@ -100,14 +100,14 @@ function setQueryOptions()
         for (var i = 0; i < allRuns.rows.length; i++)
         {
             var run = allRuns.rows[i];
-            var found = false;
+            var found = false;  // found the run container
             for (var j = 0; j < validContainers.length; j++)
             {
-                if (validContainers[j].id == run.Folder)
+                if (validContainers[j].id == run["Folder/EntityId"])
                 {
                     validContainers[j].runCount++;
-                    validFASTA = check(run, "Input/FASTA/Name", validFASTA, run.Folder);
-                    validEngine = check(run, "MS2Details/SearchEngine", validEngine, run.Folder);
+                    validFASTA = check(run, "Input/FASTA/Name", validFASTA, run["Folder/EntityId"]);
+                    validEngine = check(run, "MS2Details/SearchEngine", validEngine, run["Folder/EntityId"]);
 
                     found = true;
                     break;
@@ -115,10 +115,10 @@ function setQueryOptions()
             }
             if (!found)
             {
-                allContainers[run.Folder].runCount = 1;
-                validContainers.push(allContainers[run.Folder]);
-                validFASTA = check(run, "Input/FASTA/Name", validFASTA, run.Folder);
-                validEngine = check(run, "MS2Details/SearchEngine", validEngine, run.Folder);
+                allContainers[run["Folder/EntityId"]].runCount = 1;
+                validContainers.push(allContainers[run["Folder/EntityId"]]);
+                validFASTA = check(run, "Input/FASTA/Name", validFASTA, run["Folder/EntityId"]);
+                validEngine = check(run, "MS2Details/SearchEngine", validEngine, run["Folder/EntityId"]);
             }
         }
 
