@@ -18,7 +18,6 @@ package org.labkey.luminex;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilterable;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
@@ -36,7 +35,6 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
-import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
@@ -46,9 +44,7 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.view.ViewContext;
 
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -263,86 +259,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return ExperimentService.get().getExpData(dataRow.getDataId());
     }
 
-    /** Helper for caching objects during a copy to study */
-    private static class CopyToStudyContext
+    protected String getSourceLSID(String runLSID, int dataId)
     {
-        private Map<Integer, ExpRun> _runsByDataId = new HashMap<Integer, ExpRun>();
-        private Map<Integer, ExpData> _data = new HashMap<Integer, ExpData>();
-
-        public ExpData getData(int dataId)
-        {
-            ExpData result = _data.get(dataId);
-            if (result == null)
-            {
-                result = ExperimentService.get().getExpData(dataId);
-                _data.put(dataId, result);
-            }
-            return result;
-        }
-
-        public ExpRun getRun(ExpData data)
-        {
-            ExpRun result = _runsByDataId.get(data.getRowId());
-            if (result == null)
-            {
-                result = data.getRun();
-                _runsByDataId.put(data.getRowId(), result);
-            }
-            return result;
-        }
-    }
-
-    /** Overridden because Luminex uses individual data rows as the SourceLSID instead of the run's */
-    public ActionURL copyToStudy(ViewContext viewContext, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
-    {
-        try
-        {
-            SimpleFilter filter = new SimpleFilter();
-            String rowIdPropertyName = getTableMetadata().getResultRowIdFieldKey().toString();
-            filter.addInClause(rowIdPropertyName, dataKeys.keySet());
-            LuminexDataRow[] luminexDataRows = Table.select(LuminexSchema.getTableInfoDataRow(), Table.ALL_COLUMNS, filter, null, LuminexDataRow.class);
-
-            List<Map<String, Object>> dataMaps = new ArrayList<Map<String, Object>>(luminexDataRows.length);
-
-            CopyToStudyContext context = new CopyToStudyContext();
-
-            TimepointType timepointType = AssayPublishService.get().getTimepointType(study);
-
-            Container sourceContainer = null;
-
-            for (LuminexDataRow luminexDataRow : luminexDataRows)
-            {
-                Map<String, Object> dataMap = new HashMap<String, Object>();
-
-                ExpData data = context.getData(luminexDataRow.getDataId());
-                ExpRun run = context.getRun(data);
-                sourceContainer = run.getContainer();
-
-                AssayPublishKey publishKey = dataKeys.get(luminexDataRow.getRowId());
-
-                dataMap.put(AssayPublishService.PARTICIPANTID_PROPERTY_NAME, publishKey.getParticipantId());
-                if (timepointType == TimepointType.VISIT)
-                {
-                    dataMap.put(AssayPublishService.SEQUENCENUM_PROPERTY_NAME, publishKey.getVisitId());
-                    dataMap.put(AssayPublishService.DATE_PROPERTY_NAME, luminexDataRow.getDate());
-                }
-                else
-                {
-                    dataMap.put(AssayPublishService.SEQUENCENUM_PROPERTY_NAME, luminexDataRow.getVisitID());
-                    dataMap.put(AssayPublishService.DATE_PROPERTY_NAME, publishKey.getDate());
-                }
-                dataMap.put(AssayPublishService.SOURCE_LSID_PROPERTY_NAME, new Lsid(LUMINEX_DATA_ROW_LSID_PREFIX, Integer.toString(luminexDataRow.getRowId())).toString());
-                dataMap.put(rowIdPropertyName, luminexDataRow.getRowId());
-                dataMap.put(AssayPublishService.TARGET_STUDY_PROPERTY_NAME, study);
-
-                dataMaps.add(dataMap);
-            }
-            return AssayPublishService.get().publishAssayData(viewContext.getUser(), sourceContainer, study, protocol.getName(), protocol, dataMaps, rowIdPropertyName, errors);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeException(e);
-        }
+        return new Lsid(LUMINEX_DATA_ROW_LSID_PREFIX, Integer.toString(dataId)).toString();
     }
 
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
