@@ -142,10 +142,9 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.setSelectedProtocol("");
             results.setProtocolDescription("");
             results.setProtocolXml("");
-            PipelineService.get().rememberLastProtocolSetting(provider.getProtocolFactory(), getContainer(),
-                getUser(),"");
+            PipelineService.get().rememberLastProtocolSetting(provider.getProtocolFactory(), getContainer(), getUser(), "");
             getMzXml(path, fileNames, searchEngine, false);
-            _log.error("Could not find " + protocolName + ".");
+            _log.error("Could not load " + protocolName + ".", e);
         }
         if (protocol != null)
         {

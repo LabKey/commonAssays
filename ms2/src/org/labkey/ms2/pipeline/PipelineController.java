@@ -312,7 +312,7 @@ public class PipelineController extends SpringActionController
                 }
                 catch (IOException eio)
                 {
-                    errors.reject(ERROR_MSG, "Failed to load requested protocol '" + protocolName + "', it may not exist");
+                    errors.reject(ERROR_MSG, "Failed to load requested protocol '" + protocolName + "', it may not exist. " + (eio.getMessage() == null ? "" : eio.getMessage()));
                 }
             }
             boolean success = errors == null || !errors.hasErrors();
