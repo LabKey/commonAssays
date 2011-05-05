@@ -45,6 +45,11 @@ public class FlowContainerListener implements ContainerManager.ContainerListener
         FlowManager.get().deleteContainer(c);
     }
 
+    @Override
+    public void containerMoved(Container c, Container oldParent, User user)
+    {        
+    }
+
     public void propertyChange(PropertyChangeEvent evt)
     {
     }

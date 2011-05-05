@@ -32,6 +32,11 @@ public class ViabilityContainerListener implements ContainerListener
     {
     }
 
+    @Override
+    public void containerMoved(Container c, Container oldParent, User user)
+    {        
+    }
+
     public void propertyChange(PropertyChangeEvent evt)
     {
     }
