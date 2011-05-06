@@ -23,9 +23,17 @@ import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
+import org.w3c.dom.Document;
 
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -58,6 +66,27 @@ public class Main
         {
             if (is != null) try { is.close(); } catch (IOException ioe) { }
         }
+    }
+
+    private static File uniqueFile(File dir, String name)
+    {
+        File file = new File(dir, name);
+        if (file.exists())
+        {
+            String base = name;
+            String ext = "";
+            int dot = name.lastIndexOf(".");
+            if (dot > -1)
+            {
+                base = name.substring(0, dot);
+                ext = name.substring(dot);
+            }
+
+            for (int i = 1; file.exists(); i++)
+                file = new File(dir, base + i + ext);
+        }
+
+        return file;
     }
 
     private static void executeListSamples(File workspaceFile, Set<String> groupNames)
@@ -173,6 +202,34 @@ public class Main
         }
     }
 
+    private static void executeTrimWorkspace(File outDir, File workspaceFile)
+    {
+        File outFile = uniqueFile(outDir, workspaceFile.getName());
+
+        InputStream is = null;
+        try
+        {
+            is = new FileInputStream(workspaceFile);
+            Document doc = FlowJoWorkspace.parseXml(is);
+
+            Source source = new DOMSource(doc);
+            Transformer t = TransformerFactory.newInstance().newTransformer();
+            t.setOutputProperty(OutputKeys.INDENT, "yes");
+            t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+            StreamResult result = new StreamResult(new FileOutputStream(outFile));
+            t.transform(source, result);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+        finally
+        {
+            if (is != null) try { is.close(); } catch (IOException ioe) { }
+        }
+    }
+
     private static void executeAnalysis(File outDir, File workspaceFile, File fcsDir)
     {
 
@@ -204,6 +261,7 @@ public class Main
         usage.append("Command is one of:\n");
         usage.append("  analysis           -- generate analysis results\n");
         usage.append("  convert-workspace  -- converts a FlowJo workspace xml into a LabKey script file\n");
+        usage.append("  trim-workspace     -- trims FlowJo workspace down to only required xml elements\n");
         usage.append("  list-samples       -- lists the groups and samples in the FlowJo workspace xml file\n");
         usage.append("\n");
         usage.append("Currently supported statistics:\n");
@@ -297,10 +355,15 @@ public class Main
                     return;
                 }
             }
-            else if ("analysis".equals(arg) || "convert-workspace".equals(arg) || "list-samples".equals(arg))
+            else if ("analysis".equals(arg) || "convert-workspace".equals(arg) || "trim-workspace".equals(arg) || "list-samples".equals(arg))
             {
                 commandArg = arg;
                 break;
+            }
+            else
+            {
+                usage("Unknown argument '" + arg + "'");
+                return;
             }
         }
 
@@ -345,6 +408,8 @@ public class Main
             executeAnalysis(outDir, workspaceFile, fcsDir);
         else if ("convert-workspace".equals(commandArg))
             executeConvertWorkspace(outDir, workspaceFile, groupArgs, sampleArgs, statArgs);
+        else if ("trim-workspace".equals(commandArg))
+            executeTrimWorkspace(outDir, workspaceFile);
         else if ("list-samples".equals(commandArg))
             executeListSamples(workspaceFile, groupArgs);
         else

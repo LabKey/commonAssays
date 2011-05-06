@@ -501,11 +501,17 @@ abstract public class FlowJoWorkspace implements Serializable
         }
     }
 
-    static public FlowJoWorkspace readWorkspace(InputStream stream) throws Exception
+    /** For debugging. */
+    static public Document parseXml(InputStream stream) throws Exception
     {
         DOMParser p = FJDOMParser.create();
         p.parse(new InputSource(stream));
-        Document doc = p.getDocument();
+        return p.getDocument();
+    }
+
+    static public FlowJoWorkspace readWorkspace(InputStream stream) throws Exception
+    {
+        Document doc = parseXml(stream);
         Element elDoc = doc.getDocumentElement();
 //        System.err.println("DOCUMENT SIZE: " + debugComputeSize(elDoc));
         if ("1.4".equals(elDoc.getAttribute("version")))
@@ -518,7 +524,6 @@ abstract public class FlowJoWorkspace implements Serializable
         }
         return new MacWorkspace(elDoc);
     }
-
 
     static long debugComputeSize(Object doc)
     {
