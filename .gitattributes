@@ -507,6 +507,7 @@ flow/webapp/Flow/util.js -text
 luminex/module.properties -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-8.20.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-10.30-11.10.sql -text
+luminex/resources/schemas/dbscripts/postgresql/luminex-11.10-11.11.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-9.10-9.20.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-9.30-10.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-2.20.sql -text
@@ -530,6 +531,7 @@ luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-9.12-9.13.sql -t
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-9.30-9.31.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-0.00-8.20.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-10.30-11.10.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/luminex-11.10-11.11.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-9.10-9.20.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-9.30-10.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-2.20.sql -text
@@ -564,6 +566,7 @@ luminex/src/org/labkey/luminex/LuminexDataHandler.java -text
 luminex/src/org/labkey/luminex/LuminexDataRow.java -text
 luminex/src/org/labkey/luminex/LuminexDataTable.java -text
 luminex/src/org/labkey/luminex/LuminexExcelDataHandler.java -text
+luminex/src/org/labkey/luminex/LuminexImportHelper.java -text
 luminex/src/org/labkey/luminex/LuminexModule.java -text
 luminex/src/org/labkey/luminex/LuminexRunUploadForm.java -text
 luminex/src/org/labkey/luminex/LuminexSchema.java -text

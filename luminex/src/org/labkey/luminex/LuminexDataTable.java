@@ -15,35 +15,43 @@
  */
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.NotNull;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.*;
+import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.study.assay.AssayService;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * User: jeckels
  * Date: May 22, 2009
  */
-public class LuminexDataTable extends FilteredTable
+public class LuminexDataTable extends FilteredTable implements UpdateableTableInfo
 {
     private final LuminexSchema _schema;
+    private LuminexAssayProvider _provider;
 
     public LuminexDataTable(LuminexSchema schema)
     {
         super(LuminexSchema.getTableInfoDataRow(), schema.getContainer());
 
         ExpProtocol protocol = schema.getProtocol();
-        LuminexAssayProvider provider = (LuminexAssayProvider)AssayService.get().getProvider(protocol);
+        _provider = (LuminexAssayProvider)AssayService.get().getProvider(protocol);
 
         setDescription("Contains all the Luminex data rows for the " + protocol.getName() + " assay definition");
         _schema = schema;
@@ -59,8 +67,11 @@ public class LuminexDataTable extends FilteredTable
                 return result;
             }
         });
-        addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
-        getColumn("RowId").setKeyField(true);
+        ColumnInfo rowIdColumn = addColumn(wrapColumn(getRealTable().getColumn("RowId")));
+        rowIdColumn.setHidden(true);
+        rowIdColumn.setKeyField(true);
+        addColumn(wrapColumn(getRealTable().getColumn("LSID"))).setHidden(true);
+        addColumn(wrapColumn("Protocol", getRealTable().getColumn("ProtocolId"))).setHidden(true);
         addColumn(wrapColumn(getRealTable().getColumn("Type")));
         addColumn(wrapColumn(getRealTable().getColumn("Well")));
         addColumn(wrapColumn(getRealTable().getColumn("Outlier")));
@@ -90,10 +101,6 @@ public class LuminexDataTable extends FilteredTable
         containerColumn.setHidden(true);
         containerColumn.setFk(new ContainerForeignKey());
 
-        addColumn(wrapColumn("ParticipantID", getRealTable().getColumn("PTID")));
-        addColumn(wrapColumn(getRealTable().getColumn("VisitID")));
-        addColumn(wrapColumn(getRealTable().getColumn("Date")));
-
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("Analyte"));
         defaultCols.add(FieldKey.fromParts("Type"));
@@ -111,18 +118,30 @@ public class LuminexDataTable extends FilteredTable
         defaultCols.add(FieldKey.fromParts("ConcInRange"));
         defaultCols.add(FieldKey.fromParts("Dilution"));
         defaultCols.add(FieldKey.fromParts("BeadCount"));
-
-        for (DomainProperty prop : provider.getRunDomain(protocol).getProperties())
+        
+        Domain domain = getDomain();
+        for (ColumnInfo propertyCol : domain.getColumns(this, getColumn("LSID"), schema.getUser()))
         {
-            defaultCols.add(new FieldKey(provider.getTableMetadata().getRunFieldKeyFromResults(), prop.getName()));
+            addColumn(propertyCol);
+            defaultCols.add(propertyCol.getFieldKey());
+        }
+
+        addColumn(wrapColumn("ParticipantID", getRealTable().getColumn("PTID")));
+        addColumn(wrapColumn(getRealTable().getColumn("VisitID")));
+        addColumn(wrapColumn(getRealTable().getColumn("Date")));
+
+
+        for (DomainProperty prop : _provider.getRunDomain(protocol).getProperties())
+        {
+            defaultCols.add(new FieldKey(_provider.getTableMetadata().getRunFieldKeyFromResults(), prop.getName()));
         }
         for (DomainProperty prop : AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN).getProperties())
         {
-            defaultCols.add(new FieldKey(provider.getTableMetadata().getRunFieldKeyFromResults(), prop.getName()));
+            defaultCols.add(new FieldKey(_provider.getTableMetadata().getRunFieldKeyFromResults(), prop.getName()));
         }
-        for (DomainProperty prop : provider.getBatchDomain(protocol).getProperties())
+        for (DomainProperty prop : _provider.getBatchDomain(protocol).getProperties())
         {
-            defaultCols.add(new FieldKey(new FieldKey(provider.getTableMetadata().getRunFieldKeyFromResults(), "Batch"), prop.getName()));
+            defaultCols.add(new FieldKey(new FieldKey(_provider.getTableMetadata().getRunFieldKeyFromResults(), "Batch"), prop.getName()));
         }
 
         setDefaultVisibleColumns(defaultCols);
@@ -142,5 +161,89 @@ public class LuminexDataTable extends FilteredTable
         SQLFragment containerFilter = new SQLFragment("Container = ?");
         containerFilter.add(_schema.getContainer().getId());
         addCondition(containerFilter, "Container");
+    }
+
+    @Override
+    @NotNull
+    public Domain getDomain()
+    {
+        return _provider.getResultsDomain(_schema.getProtocol());
+    }
+
+    @Override
+    public boolean insertSupported()
+    {
+        return true;
+    }
+
+    @Override
+    public boolean updateSupported()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean deleteSupported()
+    {
+        return false;
+    }
+
+    @Override
+    public TableInfo getSchemaTableInfo()
+    {
+        return LuminexSchema.getTableInfoDataRow();
+    }
+
+    @Override
+    public ObjectUriType getObjectUriType()
+    {
+        return ObjectUriType.schemaColumn;
+    }
+
+    @Override
+    public String getObjectURIColumnName()
+    {
+        return "LSID";
+    }
+
+    @Override
+    public String getObjectIdColumnName()
+    {
+        return null;
+    }
+
+    @Override
+    public CaseInsensitiveHashMap<String> remapSchemaColumns()
+    {
+        CaseInsensitiveHashMap<String> result = new CaseInsensitiveHashMap<String>();
+        result.put("PTID", "ParticipantID");
+        result.put("DataId", "Data");
+        result.put("AnalyteId", "Analyte");
+        result.put("ProtocolId", "Protocol");
+        return result;
+    }
+
+    @Override
+    public CaseInsensitiveHashSet skipProperties()
+    {
+        return new CaseInsensitiveHashSet();
+    }
+
+    @Override
+    public Parameter.ParameterMap insertStatement(Connection conn, User user) throws SQLException
+    {
+        return Table.insertStatement(conn, user, this);
+    }
+
+    @Override
+    public Parameter.ParameterMap updateStatement(Connection conn, User user, Set<String> columns) throws SQLException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Parameter.ParameterMap deleteStatement(Connection conn) throws SQLException
+    {
+        throw new UnsupportedOperationException();
     }
 }

@@ -31,6 +31,7 @@ import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.util.GUID;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
@@ -94,23 +95,6 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
 
         Map<String, Object> excelProps = Collections.emptyMap();
         importData(data, run, user, null, sheets, excelProps);
-    }
-
-    protected Map<String, Object> serializeDataRow(Analyte analyte, LuminexDataRow dataRow)
-    {
-        Map<String, Object> row = new HashMap<String, Object>();
-
-        ObjectFactory<Analyte> af = ObjectFactory.Registry.getFactory(Analyte.class);
-        if (null == af)
-            throw new IllegalArgumentException("Could not find a matching object factory.");
-        row.putAll(af.toMap(analyte, null));
-
-        ObjectFactory<LuminexDataRow> f = ObjectFactory.Registry.getFactory(LuminexDataRow.class);
-        if (null == f)
-            throw new IllegalArgumentException("Could not find a matching object factory.");
-        row.putAll(f.toMap(dataRow, null));
-
-        return row;
     }
 
     protected LuminexDataFileParser getDataFileParser(ExpProtocol protocol, File dataFile)
@@ -334,7 +318,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
         private LuminexDataRow createDataRow(Sheet sheet, List<String> colNames, int row)
         {
             LuminexDataRow dataRow = new LuminexDataRow();
-            //dataRow.setDataId(data.getRowId());
+            dataRow.setLsid(new Lsid(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX, GUID.makeGUID()).toString());
             for (int col = 0; col < sheet.getColumns(); col++)
             {
                 String columnName = colNames.get(col);

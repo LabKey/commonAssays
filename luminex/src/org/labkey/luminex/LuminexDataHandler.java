@@ -16,13 +16,12 @@
 
 package org.labkey.luminex;
 
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.WorkbookSettings;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.log4j.Logger;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.*;
@@ -38,7 +37,6 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
@@ -359,31 +357,21 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public static List<String> getAnalyteNames(File dataFile) throws ExperimentException
+    protected Map<String, Object> serializeDataRow(Analyte analyte, LuminexDataRow dataRow)
     {
-        List<String> analytes = new ArrayList<String>();
-        try {
-            FileInputStream fIn = new FileInputStream(dataFile);
-            WorkbookSettings settings = new WorkbookSettings();
-            settings.setGCDisabled(true);
-            Workbook workbook = Workbook.getWorkbook(fIn, settings);
+        Map<String, Object> row = new CaseInsensitiveHashMap<Object>();
 
-            for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
-            {
-                Sheet sheet = workbook.getSheet(sheetIndex);
+        ObjectFactory<Analyte> af = ObjectFactory.Registry.getFactory(Analyte.class);
+        if (null == af)
+            throw new IllegalArgumentException("Could not find a matching object factory.");
+        row.putAll(af.toMap(analyte, null));
 
-                if (sheet.getRows() == 0 || sheet.getColumns() == 0 || "Row #".equals(sheet.getCell(0, 0).getContents()))
-                {
-                    continue;
-                }
-                analytes.add(sheet.getName());
-            }
-            return analytes;
-        }
-        catch (Exception e)
-        {
-            throw new ExperimentException(e);
-        }
+        ObjectFactory<LuminexDataRow> f = ObjectFactory.Registry.getFactory(LuminexDataRow.class);
+        if (null == f)
+            throw new IllegalArgumentException("Could not find a matching object factory.");
+        row.putAll(f.toMap(dataRow, null));
+
+        return row;
     }
 
     /**
@@ -400,7 +388,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         {
             ExpProtocol protocol = expRun.getProtocol();
             ParticipantVisitResolver resolver = null;
-            AssayProvider provider = AssayService.get().getProvider(protocol);
+            LuminexAssayProvider provider = (LuminexAssayProvider)AssayService.get().getProvider(protocol);
             Map<String, ObjectProperty> mergedProperties = new HashMap<String, ObjectProperty>();
             Set<ExpMaterial> inputMaterials = new LinkedHashSet<ExpMaterial>();
             mergedProperties.putAll(expRun.getObjectProperties());
@@ -414,12 +402,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 if (AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(objectProperty.getName()))
                 {
                     ParticipantVisitResolverType resolverType = AbstractAssayProvider.findType(objectProperty.getStringValue(), provider.getParticipantVisitResolverTypes());
-                    Container targetStudy = null;
-                    if (provider instanceof LuminexAssayProvider)
-                    {
-                        LuminexAssayProvider luminexProvider = (LuminexAssayProvider) provider;
-                        targetStudy = luminexProvider.getTargetStudy(expRun);
-                    }
+                    Container targetStudy = provider.getTargetStudy(expRun);
                     try
                     {
                         resolver = resolverType.createResolver(expRun, targetStudy, user);
@@ -430,6 +413,8 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                     }
                 }
             }
+
+            List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
 
             for (Map.Entry<Analyte, List<LuminexDataRow>> sheet : inputData.entrySet())
             {
@@ -446,13 +431,17 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 for (LuminexDataRow dataRow : dataRows)
                 {
                     handleParticipantResolver(dataRow, resolver, inputMaterials);
-                    dataRow.setProtocolID(protocol.getRowId());
+                    dataRow.setProtocol(protocol.getRowId());
                     dataRow.setContainer(container);
-                    dataRow.setAnalyteId(analyte.getRowId());
-                    dataRow.setDataId(data.getRowId());
-                    Table.insert(user, LuminexSchema.getTableInfoDataRow(), dataRow);
+                    dataRow.setAnalyte(analyte.getRowId());
+                    dataRow.setData(data.getRowId());
+                    rows.add(serializeDataRow(analyte, dataRow));
                 }
             }
+
+            LuminexDataTable tableInfo = provider.createDataTable(AssayService.get().createSchema(user, container), protocol, false);
+            LuminexImportHelper helper = new LuminexImportHelper();
+            OntologyManager.insertTabDelimited(tableInfo, container, user, helper, rows, Logger.getLogger(LuminexDataHandler.class));
 
             if (inputMaterials.isEmpty())
             {
@@ -712,7 +701,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 }
             }
 
-            dataRow.setPtid(match.getParticipantID());
+            dataRow.setParticipantID(match.getParticipantID());
             dataRow.setVisitID(match.getVisitID());
             dataRow.setDate(match.getDate());
             dataRow.setSpecimenID(specimenID);
@@ -778,6 +767,10 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
             {
                 Object[] ids = new Object[]{expData.getRowId()};
 
+                Table.execute(LuminexSchema.getSchema(),
+                    "DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " + LuminexSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() + " o WHERE o.ObjectURI = dr.LSID AND dr.DataId = ?)", ids);
+                Table.execute(LuminexSchema.getSchema(),
+                    "DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT LSID FROM " + LuminexSchema.getTableInfoDataRow() + " WHERE DataId = ?)", ids);
                 Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoDataRow() + " WHERE DataId = ?", ids);
                 Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoAnalytes() + " WHERE DataId = ?", ids);
             }

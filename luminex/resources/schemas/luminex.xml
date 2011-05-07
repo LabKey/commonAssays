@@ -35,7 +35,12 @@
 
     <ns:table tableName="DataRow" tableDbType="TABLE">
         <ns:columns>
-            <ns:column columnName="RowId"/>
+            <ns:column columnName="RowId">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+            <ns:column columnName="LSID">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
             <ns:column columnName="DataId"/>
             <ns:column columnName="AnalyteId"/>
             <ns:column columnName="Type"/>

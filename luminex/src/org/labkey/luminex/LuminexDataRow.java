@@ -26,15 +26,16 @@ import java.util.Date;
  */
 public class LuminexDataRow
 {
-    private int _analyteId;
+    private int _analyte;
     private int _rowId;
 
+    private String _lsid;
     private String _type;
     private String _well;
     private int _outlier;
     private String _description;
     private String _specimenID;
-    private String _ptid;
+    private String _participantID;
     private Double _visitID;
     private Date _date;
     private String _fiString;
@@ -54,7 +55,7 @@ public class LuminexDataRow
     private String _concInRangeString;
     private Double _concInRange;
     private String _concInRangeOORIndicator;
-    private int _dataId;
+    private int _data;
     private Double _dilution;
     private String _dataRowGroup;
     private String _ratio;
@@ -64,20 +65,20 @@ public class LuminexDataRow
 
     /** Unfortunate to have these denormalized values here, but required for acceptable query performance */
     private Container _container;
-    private int _protocolID;
+    private int _protocol;
 
     public LuminexDataRow()
     {
     }
 
-    public int getAnalyteId()
+    public int getAnalyte()
     {
-        return _analyteId;
+        return _analyte;
     }
 
-    public void setAnalyteId(int analyteId)
+    public void setAnalyte(int analyte)
     {
-        _analyteId = analyteId;
+        _analyte = analyte;
     }
 
     public String getType()
@@ -230,14 +231,14 @@ public class LuminexDataRow
         _concInRangeOORIndicator = concInRangeOORIndicator;
     }
 
-    public void setDataId(int dataId)
+    public void setData(int data)
     {
-        _dataId = dataId;
+        _data = data;
     }
 
-    public int getDataId()
+    public int getData()
     {
-        return _dataId;
+        return _data;
     }
 
     public int getRowId()
@@ -350,14 +351,14 @@ public class LuminexDataRow
         _samplingErrors = samplingErrors;
     }
 
-    public String getPtid()
+    public String getParticipantID()
     {
-        return _ptid;
+        return _participantID;
     }
 
-    public void setPtid(String ptid)
+    public void setParticipantID(String participantID)
     {
-        _ptid = ptid;
+        _participantID = participantID;
     }
 
     public Double getVisitID()
@@ -410,14 +411,14 @@ public class LuminexDataRow
         _container = container;
     }
 
-    public int getProtocolID()
+    public int getProtocol()
     {
-        return _protocolID;
+        return _protocol;
     }
 
-    public void setProtocolID(int protocolID)
+    public void setProtocol(int protocol)
     {
-        _protocolID = protocolID;
+        _protocol = protocol;
     }
 
     public Integer getBeadCount()
@@ -428,5 +429,15 @@ public class LuminexDataRow
     public void setBeadCount(Integer beadCount)
     {
         _beadCount = beadCount;
+    }
+
+    public String getLsid()
+    {
+        return _lsid;
+    }
+
+    public void setLsid(String lsid)
+    {
+        _lsid = lsid;
     }
 }

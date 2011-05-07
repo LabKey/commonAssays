@@ -16,8 +16,8 @@
 
 package org.labkey.luminex;
 
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
@@ -33,18 +33,20 @@ import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.pipeline.PipelineProvider;
 
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -54,6 +56,7 @@ import java.util.*;
 public class LuminexAssayProvider extends AbstractAssayProvider
 {
     public static final String ASSAY_DOMAIN_ANALYTE = ExpProtocol.ASSAY_DOMAIN_PREFIX + "Analyte";
+    public static final String ASSAY_DOMAIN_CUSTOM_DATA = ExpProtocol.ASSAY_DOMAIN_PREFIX + "LuminexData";
     public static final String ASSAY_DOMAIN_EXCEL_RUN = ExpProtocol.ASSAY_DOMAIN_PREFIX + "ExcelRun";
     public static final String LUMINEX_DATA_ROW_LSID_PREFIX = "LuminexDataRow";
 
@@ -111,23 +114,24 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return result;
     }
 
-    public ContainerFilterable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
+    @Override
+    public Domain getResultsDomain(ExpProtocol protocol)
+    {
+        return getDomainByPrefix(protocol, ASSAY_DOMAIN_CUSTOM_DATA);
+    }
+
+    public LuminexDataTable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
     {
         LuminexSchema luminexSchema = new LuminexSchema(schema.getUser(), schema.getContainer(), protocol);
         luminexSchema.setTargetStudy(schema.getTargetStudy());
-        FilteredTable table = luminexSchema.createDataRowTable();
+        LuminexDataTable table = luminexSchema.createDataRowTable();
+
         if (includeCopiedToStudyColumns)
         {
             addCopiedToStudyColumns(table, protocol, schema.getUser(), true);
         }
         return table;
     }
-
-    public Domain getResultsDomain(ExpProtocol protocol)
-    {
-        return null;
-    }
-
 
     @Override
     protected Pair<Domain, Map<DomainProperty, Object>> createBatchDomain(Container c, User user)
@@ -218,7 +222,17 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         addProperty(excelRunDomain, "RP1Target", "RP1 Target", PropertyType.STRING);
         result.add(new Pair<Domain, Map<DomainProperty, Object>>(excelRunDomain, Collections.<DomainProperty, Object>emptyMap()));
 
+        Domain resultDomain = createResultsDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_CUSTOM_DATA + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":" + ASSAY_NAME_SUBSTITUTION, "Data Fields");
+        result.add(new Pair<Domain, Map<DomainProperty, Object>>(resultDomain, Collections.<DomainProperty, Object>emptyMap()));
+
         return result;
+    }
+
+    private Domain createResultsDomain(Container c, String domainURI, String name)
+    {
+        Domain resultDomain = PropertyService.get().createDomain(c, domainURI, name);
+        resultDomain.setDescription("Additional result/data properties populated by the assay's associated transformation script, if any.");
+        return resultDomain;
     }
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
@@ -256,7 +270,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         {
             return null;
         }
-        return ExperimentService.get().getExpData(dataRow.getDataId());
+        return ExperimentService.get().getExpData(dataRow.getData());
     }
 
     protected String getSourceLSID(String runLSID, int dataId)
@@ -290,6 +304,11 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             result.add("Max Standard Recovery");
         }
 
+        if (isDomainType(domain, protocol, ASSAY_DOMAIN_CUSTOM_DATA))
+        {
+            result.addAll(LuminexSchema.getTableInfoDataRow().getColumnNameSet());
+        }
+
         return result;
     }
 
@@ -310,4 +329,30 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 this, "Import Luminex");
     }
 
+    @Override
+    public void upgradeAssayDefinitions(User user, ExpProtocol protocol, double targetVersion) throws SQLException
+    {
+        if (targetVersion == LuminexModule.LuminexUpgradeCode.ADD_RESULTS_DOMAIN_UPGRADE)
+        {
+            // 11.11 is when we started supporting custom results/data fields for Luminex
+            // Add the domain to any existing assay designs
+            String domainURI = new Lsid(ASSAY_DOMAIN_CUSTOM_DATA, "Folder-" + protocol.getContainer().getRowId(), protocol.getName()).toString();
+            Domain domain = createResultsDomain(protocol.getContainer(), domainURI, protocol.getName() + " Data Fields");
+            try
+            {
+                domain.save(user);
+
+                ObjectProperty prop = new ObjectProperty(protocol.getLSID(), protocol.getContainer(), domainURI, domainURI);
+                OntologyManager.insertProperties(protocol.getContainer(), protocol.getLSID(), prop);
+            }
+            catch (ChangePropertyDescriptorException e)
+            {
+                throw new UnexpectedException(e);
+            }
+            catch (ValidationException e)
+            {
+                throw new UnexpectedException(e);
+            }
+        }
+    }
 }

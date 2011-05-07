@@ -149,7 +149,7 @@ public class LuminexSchema extends AssaySchema
         return ret;
     }
 
-    public FilteredTable createDataRowTable()
+    public LuminexDataTable createDataRowTable()
     {
         return new LuminexDataTable(this);
     }

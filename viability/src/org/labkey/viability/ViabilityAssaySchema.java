@@ -257,7 +257,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 {
                     // Add the user's property column
                     PropertyDescriptor pd = dp.getPropertyDescriptor();
-                    col = new PropertyColumn(pd, objectIdCol, _container.getId(), _user);
+                    col = new PropertyColumn(pd, objectIdCol, _container, _user);
                     ((PropertyColumn)col).setParentIsObjectId(true);
                     copyProperties(col, dp);
                     if (!dp.isHidden())
