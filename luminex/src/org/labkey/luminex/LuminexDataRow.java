@@ -16,9 +16,12 @@
 
 package org.labkey.luminex;
 
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ObjectFactory;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -28,6 +31,8 @@ public class LuminexDataRow
 {
     private int _analyte;
     private int _rowId;
+
+    private Map<String, Object> _extraProperties = new CaseInsensitiveHashMap<Object>();
 
     private String _lsid;
     private String _type;
@@ -439,5 +444,28 @@ public class LuminexDataRow
     public void setLsid(String lsid)
     {
         _lsid = lsid;
+    }
+
+    /** Remember any extra properties from the transform script so they can be included when generating map version of this row */
+    public void setExtraProperties(Map<String, Object> properties)
+    {
+        _extraProperties = properties;
+    }
+
+    public Map<String, Object> toMap(Analyte analyte)
+    {
+        Map<String, Object> row = new CaseInsensitiveHashMap<Object>(_extraProperties);
+
+        ObjectFactory<Analyte> af = ObjectFactory.Registry.getFactory(Analyte.class);
+        if (null == af)
+            throw new IllegalArgumentException("Could not find a matching object factory.");
+        row.putAll(af.toMap(analyte, null));
+
+        ObjectFactory<LuminexDataRow> f = ObjectFactory.Registry.getFactory(LuminexDataRow.class);
+        if (null == f)
+            throw new IllegalArgumentException("Could not find a matching object factory.");
+        row.putAll(f.toMap(this, null));
+
+        return row;
     }
 }

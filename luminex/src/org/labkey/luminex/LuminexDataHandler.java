@@ -19,9 +19,7 @@ package org.labkey.luminex;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.*;
@@ -96,6 +94,10 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         }
         catch (SQLException e)
         {
+            if (log == null)
+            {
+                log = Logger.getLogger(LuminexDataHandler.class);
+            }
             log.error("Failed to load from data file " + data.getFile().getAbsolutePath(), e);
             throw new ExperimentException("Failed to load from data file " + data.getFile().getAbsolutePath() + "(" + e.toString() + ")", e);
         }
@@ -357,23 +359,6 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    protected Map<String, Object> serializeDataRow(Analyte analyte, LuminexDataRow dataRow)
-    {
-        Map<String, Object> row = new CaseInsensitiveHashMap<Object>();
-
-        ObjectFactory<Analyte> af = ObjectFactory.Registry.getFactory(Analyte.class);
-        if (null == af)
-            throw new IllegalArgumentException("Could not find a matching object factory.");
-        row.putAll(af.toMap(analyte, null));
-
-        ObjectFactory<LuminexDataRow> f = ObjectFactory.Registry.getFactory(LuminexDataRow.class);
-        if (null == f)
-            throw new IllegalArgumentException("Could not find a matching object factory.");
-        row.putAll(f.toMap(dataRow, null));
-
-        return row;
-    }
-
     /**
      * Handles persisting of uploaded run data into the database
      */
@@ -435,7 +420,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                     dataRow.setContainer(container);
                     dataRow.setAnalyte(analyte.getRowId());
                     dataRow.setData(data.getRowId());
-                    rows.add(serializeDataRow(analyte, dataRow));
+                    rows.add(dataRow.toMap(analyte));
                 }
             }
 

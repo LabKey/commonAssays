@@ -63,7 +63,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
         {
             for (LuminexDataRow dataRow : entry.getValue())
             {
-                dataRows.add(serializeDataRow(entry.getKey(), dataRow));
+                dataRows.add(dataRow.toMap(entry.getKey()));
             }
         }
         datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, dataRows);
@@ -74,17 +74,18 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
     {
         ObjectFactory<Analyte> analyteFactory = ObjectFactory.Registry.getFactory(Analyte.class);
         if (null == analyteFactory)
-            throw new ExperimentException("Cound not find a matching object factory.");
+            throw new ExperimentException("Could not find a matching object factory for " + Analyte.class);
 
         ObjectFactory<LuminexDataRow> rowFactory = ObjectFactory.Registry.getFactory(LuminexDataRow.class);
         if (null == rowFactory)
-            throw new ExperimentException("Cound not find a matching object factory.");
+            throw new ExperimentException("Could not find a matching object factory for " + LuminexDataRow.class);
 
         Map<Analyte, List<LuminexDataRow>> sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
         for (Map<String, Object> row : dataMap)
         {
             Analyte analyte = analyteFactory.fromMap(row);
             LuminexDataRow dataRow = rowFactory.fromMap(row);
+            dataRow.setExtraProperties(row);
 
             if (!sheets.containsKey(analyte))
             {
