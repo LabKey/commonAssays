@@ -16,18 +16,18 @@
 
 package org.labkey.elispot.plate;
 
-import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.exp.ExperimentException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.reader.ExcelFactory;
+import org.labkey.api.study.PlateTemplate;
 
 import java.io.File;
 import java.io.IOException;
-
-import jxl.WorkbookSettings;
-import jxl.Workbook;
-import jxl.Sheet;
-import jxl.Cell;
-import jxl.read.biff.BiffException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -46,37 +46,35 @@ public class ExcelPlateReader implements ElispotPlateReaderService.I
     public double[][] loadFile(PlateTemplate template, File dataFile) throws ExperimentException
     {
         String fileName = dataFile.getName().toLowerCase();
-        if (!fileName.endsWith(".xls"))
+        if (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx"))
             throw new ExperimentException("Unable to load data file: Invalid Format");
 
-        WorkbookSettings settings = new WorkbookSettings();
-        settings.setGCDisabled(true);
         Workbook workbook = null;
         try
         {
-            workbook = Workbook.getWorkbook(dataFile, settings);
+            workbook = ExcelFactory.create(dataFile);
         }
         catch (IOException e)
         {
             throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: " + e.getMessage(), e);
         }
-        catch (BiffException e)
+        catch (InvalidFormatException e)
         {
             throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: " + e.getMessage(), e);
         }
         double[][] cellValues = new double[template.getRows()][template.getColumns()];
 
-        Sheet plateSheet = workbook.getSheet(0);
+        Sheet plateSheet = workbook.getSheetAt(0);
 
         int startRow = -1;
         int startCol = -1;
 
-        for (int row = 0; row < plateSheet.getRows(); row++)
+        for (Row row : plateSheet)
         {
-            startCol = getStartColumn(plateSheet.getRow(row));
+            startCol = getStartColumn(row);
             if (startCol != -1)
             {
-                startRow = getStartRow(plateSheet, row);
+                startRow = getStartRow(plateSheet, row.getRowNum());
                 break;
             }
         }
@@ -86,69 +84,76 @@ public class ExcelPlateReader implements ElispotPlateReaderService.I
             throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: unable to locate spot counts");
         }
 
-        if (template.getRows() + startRow > plateSheet.getRows() || template.getColumns() + startCol > plateSheet.getColumns())
+        if (template.getRows() + startRow > plateSheet.getLastRowNum() || template.getColumns() + startCol > plateSheet.getRow(startRow).getLastCellNum())
         {
             throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: expected " +
                     (template.getRows() + startRow) + " rows and " + (template.getColumns() + startCol) + " columns, but found "+
-                    plateSheet.getRows() + " rows and " + plateSheet.getColumns() + " columns.");
+                    plateSheet.getLastRowNum() + " rows and " + plateSheet.getRow(startRow).getLastCellNum() + " columns.");
         }
 
         for (int row = 0; row < template.getRows(); row++)
         {
             for (int col = 0; col < template.getColumns(); col++)
             {
-                Cell cell = plateSheet.getCell(col + startCol, row + startRow);
-                String cellContents = cell.getContents();
-                try
-                {
-                    cellValues[row][col] = Double.parseDouble(cellContents);
-                }
-                catch (NumberFormatException e)
-                {
-                    throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: could not parse '" +
-                            cellContents + "' as a number.", e);
-                }
+                Row plateRow = plateSheet.getRow(row + startRow);
+                Cell cell = plateRow.getCell(col + startCol);
+                cellValues[row][col] = cell.getNumericCellValue();
             }
         }
         return cellValues;
     }
 
-    private static int getStartColumn(Cell[] row)
+    private static int getStartColumn(Row row)
     {
-        int col = 0;
-        while (col < row.length)
+        for (Cell cell : row)
         {
-            if (StringUtils.equals(row[col].getContents(), "1"))
+            if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC && cell.getNumericCellValue() == 1)
             {
                 for (int i=1; i < 12; i++)
                 {
-                    if (!StringUtils.equals(row[col+i].getContents(), String.valueOf(1 + i)))
+                    Cell c = row.getCell(cell.getColumnIndex() + i);
+                    if (c != null)
+                    {
+                        if (c.getCellType() != Cell.CELL_TYPE_NUMERIC || c.getNumericCellValue() != (i + 1))
+                            return -1;
+                    }
+                    else
                         return -1;
                 }
-                return col;
+                return cell.getColumnIndex();
             }
-            col++;
         }
         return -1;
     }
 
     private static int getStartRow(Sheet sheet, int row)
     {
-        while (row < sheet.getRows())
+        while (row < sheet.getLastRowNum())
         {
-            for (Cell cell : sheet.getRow(row))
+            Row sheetRow = sheet.getRow(row);
+            if (sheetRow != null)
             {
-                if (StringUtils.equalsIgnoreCase(cell.getContents(), "A"))
+                for (Cell cell : sheetRow)
                 {
-                    int col = cell.getColumn();
-                    char start = 'B';
-                    for (int i=1; i < 8; i++)
+                    if (cell.getCellType() == Cell.CELL_TYPE_STRING && StringUtils.equalsIgnoreCase(cell.getStringCellValue(), "A"))
                     {
-                        String val = String.valueOf(start++);
-                        if (!StringUtils.equalsIgnoreCase(sheet.getRow(row+i)[col].getContents(), val))
-                            return -1;
+                        int col = cell.getColumnIndex();
+                        char start = 'B';
+                        for (int i=1; i < 8; i++)
+                        {
+                            String val = String.valueOf(start++);
+                            Row r = sheet.getRow(row+i);
+                            if (r != null)
+                            {
+                                Cell c = r.getCell(col);
+                                if (c == null || c.getCellType() != Cell.CELL_TYPE_STRING || !StringUtils.equalsIgnoreCase(c.getStringCellValue(), val))
+                                    return -1;
+                            }
+                            else
+                                return -1;
+                        }
+                        return row;
                     }
-                    return row;
                 }
             }
             row++;

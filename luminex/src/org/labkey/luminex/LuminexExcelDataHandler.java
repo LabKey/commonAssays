@@ -16,10 +16,11 @@
 
 package org.labkey.luminex;
 
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.read.biff.BiffException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.exp.*;
@@ -28,6 +29,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
@@ -49,7 +51,7 @@ import java.util.*;
 public class LuminexExcelDataHandler extends LuminexDataHandler implements TransformDataHandler
 {
     public static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
-    public static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType("LuminexDataFile", new FileType(".xls"));
+    public static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType("LuminexDataFile", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
@@ -135,12 +137,8 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
         {
             if (_fileParsed) return;
 
-            FileInputStream fIn = null;
             try {
-                fIn = new FileInputStream(dataFile);
-                WorkbookSettings settings = new WorkbookSettings();
-                settings.setGCDisabled(true);
-                Workbook workbook = Workbook.getWorkbook(fIn, settings);
+                Workbook workbook = ExcelFactory.create(dataFile);
 
                 Container container = _protocol.getContainer();
                 String analyteDomainURI = AbstractAssayProvider.getDomainURIForPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
@@ -150,14 +148,14 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
 
                 for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
                 {
-                    Sheet sheet = workbook.getSheet(sheetIndex);
+                    Sheet sheet = workbook.getSheetAt(sheetIndex);
 
-                    if (sheet.getRows() == 0 || sheet.getColumns() == 0 || "Row #".equals(sheet.getCell(0, 0).getContents()))
+                    if (sheet.getPhysicalNumberOfRows() == 0 || "Row #".equals(ExcelFactory.getCellContentsAt(sheet, 0, 0)))
                     {
                         continue;
                     }
 
-                    Analyte analyte = new Analyte(sheet.getName(), 0);
+                    Analyte analyte = new Analyte(sheet.getSheetName(), 0);
 
                     Map<String, Object> analyteProps = new HashMap<String, Object>();
 
@@ -167,11 +165,13 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                     row++;
 
                     List<String> colNames = new ArrayList<String>();
-                    if (row < sheet.getRows())
+                    if (row < sheet.getLastRowNum())
                     {
-                        for (int col = 0; col < sheet.getColumns(); col++)
+                        Row r = sheet.getRow(row);
+                        if (r != null)
                         {
-                            colNames.add(sheet.getCell(col, row).getContents());
+                            for (Cell cell : r)
+                                colNames.add(ExcelFactory.getCellStringValue(cell));
                         }
                         row++;
                     }
@@ -179,14 +179,14 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                     List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
                     _sheets.put(analyte, dataRows);
 
-                    if (row < sheet.getRows())
+                    if (row < sheet.getLastRowNum())
                     {
                         do
                         {
                             LuminexDataRow dataRow = createDataRow(sheet, colNames, row);
                             dataRows.add(dataRow);
                         }
-                        while (++row < sheet.getRows() && !"".equals(sheet.getCell(0, row).getContents()));
+                        while (++row < sheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(sheet, 0, row)));
 
                         // Skip over the blank line
                         row++;
@@ -200,16 +200,9 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
             {
                 throw new ExperimentException("Failed to read from data file " + dataFile.getAbsolutePath(), e);
             }
-            catch (BiffException e)
+            catch (InvalidFormatException e)
             {
                 throw new XarFormatException("Failed to parse Excel file " + dataFile.getAbsolutePath(), e);
-            }
-            finally
-            {
-                if (fIn != null)
-                {
-                    try { fIn.close(); } catch (IOException e) {}
-                }
             }
         }
 
@@ -227,7 +220,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
 
         private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, Domain analyteDomain, Map<String, Object> analyteProps, Domain excelRunDomain, Map<String, Object> excelRunProps)
         {
-            if (row >= analyteSheet.getRows())
+            if (row >= analyteSheet.getLastRowNum())
             {
                 return row;
             }
@@ -237,7 +230,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
 
             do
             {
-                String cellContents = analyteSheet.getCell(0, row).getContents();
+                String cellContents = ExcelFactory.getCellContentsAt(analyteSheet, 0, row);
                 int index = cellContents.indexOf(":");
                 if (index != -1)
                 {
@@ -303,7 +296,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                     }
                 }
             }
-            while (++row < analyteSheet.getRows() && !"".equals(analyteSheet.getCell(0, row).getContents()));
+            while (++row < analyteSheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(analyteSheet, 0, row)));
             return row;
         }
 
@@ -316,96 +309,101 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
             }
         }
 
-        private LuminexDataRow createDataRow(Sheet sheet, List<String> colNames, int row)
+        private LuminexDataRow createDataRow(Sheet sheet, List<String> colNames, int rowIdx)
         {
             LuminexDataRow dataRow = new LuminexDataRow();
             dataRow.setLsid(new Lsid(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX, GUID.makeGUID()).toString());
-            for (int col = 0; col < sheet.getColumns(); col++)
+            Row row = sheet.getRow(rowIdx);
+            if (row != null)
             {
-                String columnName = colNames.get(col);
+                for (int col=0; col < row.getLastCellNum(); col++)
+                {
+                    Cell cell = row.getCell(col);
+                    String columnName = colNames.get(col);
 
-                String value = sheet.getCell(col, row).getContents().trim();
-                if ("FI".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setFiString(value);
-                    dataRow.setFi(LuminexExcelDataHandler.determineOutOfRange(value).getValue(value));
-                }
-                else if ("FI - Bkgd".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setFiBackgroundString(value);
-                    dataRow.setFiBackground(LuminexExcelDataHandler.determineOutOfRange(value).getValue(value));
-                }
-                else if ("Type".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setType(value);
-                }
-                else if ("Well".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setWell(value);
-                }
-                else if ("Outlier".equalsIgnoreCase(columnName))
-                {
-                    int outlier = 0;
-                    if (value != null && !"".equals(value.trim()))
+                    String value = ExcelFactory.getCellStringValue(cell).trim();
+                    if ("FI".equalsIgnoreCase(columnName))
                     {
-                        outlier = Integer.parseInt(value.trim());
+                        dataRow.setFiString(value);
+                        dataRow.setFi(LuminexExcelDataHandler.determineOutOfRange(value).getValue(value));
                     }
-                    dataRow.setOutlier(outlier);
-                }
-                else if ("Description".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setDescription(value);
-                }
-                else if ("Std Dev".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setStdDevString(value);
-                    dataRow.setStdDev(LuminexExcelDataHandler.determineOutOfRange(value).getValue(value));
-                }
-                else if ("Exp Conc".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setExpConc(parseDouble(value));
-                }
-                else if ("Obs Conc".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setObsConcString(value);
-                    dataRow.setObsConc(LuminexExcelDataHandler.determineOutOfRange(value).getValue(value));
-                }
-                else if ("(Obs/Exp) * 100".equalsIgnoreCase(columnName))
-                {
-                    if (!value.equals("***"))
+                    else if ("FI - Bkgd".equalsIgnoreCase(columnName))
                     {
-                        dataRow.setObsOverExp(parseDouble(value));
+                        dataRow.setFiBackgroundString(value);
+                        dataRow.setFiBackground(LuminexExcelDataHandler.determineOutOfRange(value).getValue(value));
                     }
-                }
-                else if ("Conc in Range".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setConcInRangeString(value);
-                    dataRow.setConcInRange(LuminexExcelDataHandler.determineOutOfRange(value).getValue(value));
-                }
-                else if ("Ratio".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setRatio(value);
-                }
-                else if ("Bead Count".equalsIgnoreCase(columnName) || "BeadCount".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setBeadCount(parseInteger(value));
-                }
-                else if ("Dilution".equalsIgnoreCase(columnName))
-                {
-                    String dilutionValue = value;
-                    if (dilutionValue != null && dilutionValue.startsWith("1:"))
+                    else if ("Type".equalsIgnoreCase(columnName))
                     {
-                        dilutionValue = dilutionValue.substring("1:".length());
+                        dataRow.setType(value);
                     }
-                    dataRow.setDilution(parseDouble(dilutionValue));
-                }
-                else if ("Group".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setDataRowGroup(value);
-                }
-                else if ("Sampling Errors".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setSamplingErrors(value);
+                    else if ("Well".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setWell(value);
+                    }
+                    else if ("Outlier".equalsIgnoreCase(columnName))
+                    {
+                        double outlier = 0;
+                        if (value != null && !"".equals(value.trim()))
+                        {
+                            outlier = cell.getNumericCellValue();
+                        }
+                        dataRow.setOutlier((int)outlier);
+                    }
+                    else if ("Description".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setDescription(value);
+                    }
+                    else if ("Std Dev".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setStdDevString(value);
+                        dataRow.setStdDev(LuminexExcelDataHandler.determineOutOfRange(value).getValue(value));
+                    }
+                    else if ("Exp Conc".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setExpConc(parseDouble(value));
+                    }
+                    else if ("Obs Conc".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setObsConcString(value);
+                        dataRow.setObsConc(LuminexExcelDataHandler.determineOutOfRange(value).getValue(value));
+                    }
+                    else if ("(Obs/Exp) * 100".equalsIgnoreCase(columnName))
+                    {
+                        if (!value.equals("***"))
+                        {
+                            dataRow.setObsOverExp(parseDouble(value));
+                        }
+                    }
+                    else if ("Conc in Range".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setConcInRangeString(value);
+                        dataRow.setConcInRange(LuminexExcelDataHandler.determineOutOfRange(value).getValue(value));
+                    }
+                    else if ("Ratio".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setRatio(value);
+                    }
+                    else if ("Bead Count".equalsIgnoreCase(columnName) || "BeadCount".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setBeadCount(parseInteger(value));
+                    }
+                    else if ("Dilution".equalsIgnoreCase(columnName))
+                    {
+                        String dilutionValue = value;
+                        if (dilutionValue != null && dilutionValue.startsWith("1:"))
+                        {
+                            dilutionValue = dilutionValue.substring("1:".length());
+                        }
+                        dataRow.setDilution(parseDouble(dilutionValue));
+                    }
+                    else if ("Group".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setDataRowGroup(value);
+                    }
+                    else if ("Sampling Errors".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setSamplingErrors(value);
+                    }
                 }
             }
             return dataRow;

@@ -16,19 +16,31 @@
 
 package org.labkey.nab;
 
-import jxl.Cell;
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.read.biff.BiffException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.api.*;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.security.User;
-import org.labkey.api.study.*;
+import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.study.Plate;
+import org.labkey.api.study.PlateService;
+import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.WellData;
+import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.util.FileType;
@@ -37,7 +49,12 @@ import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: brittp
@@ -48,7 +65,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 {
     public static final DataType NAB_TRANSFORMED_DATA_TYPE = new DataType("AssayRunNabTransformedData"); // a marker data type
 
-    public static final AssayDataType NAB_DATA_TYPE = new AssayDataType("AssayRunNabData", new FileType(".xls"));
+    public static final AssayDataType NAB_DATA_TYPE = new AssayDataType("AssayRunNabData", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
     private static final int START_ROW = 6; //0 based, row 7 inthe workshet
     private static final int START_COL = 0;
 
@@ -106,18 +123,17 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
     private double[][] getCellValues(File dataFile, PlateTemplate nabTemplate) throws ExperimentException
     {
-        WorkbookSettings settings = new WorkbookSettings();
-        settings.setGCDisabled(true);
         Workbook workbook = null;
+
         try
         {
-            workbook = Workbook.getWorkbook(dataFile, settings);
+            workbook = ExcelFactory.create(dataFile);
         }
         catch (IOException e)
         {
             throwParseError(dataFile, null, e);
         }
-        catch (BiffException e)
+        catch (InvalidFormatException e)
         {
             throwParseError(dataFile, null, e);
         }
@@ -129,7 +145,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         // search the workbook for a region that contains 96 cells of data labeled with A-H rows and 1-12 cols:
         for (int sheet = 0; sheet < workbook.getNumberOfSheets() && dataLocation == null; sheet++)
         {
-            plateSheet = workbook.getSheet(sheet);
+            plateSheet = workbook.getSheetAt(sheet);
             dataLocation = getPlateDataLocation(plateSheet, nabTemplate.getRows(), nabTemplate.getColumns());
         }
 
@@ -141,9 +157,9 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             // within the second worksheet:
             startRow = START_ROW;
             startColumn = START_COL;
-            if (workbook.getSheets().length < 2)
+            if (workbook.getNumberOfSheets() < 2)
                 throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: no plate data was found.");
-            plateSheet = workbook.getSheet(1);
+            plateSheet = workbook.getSheetAt(1);
         }
         else
         {
@@ -151,27 +167,27 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             startColumn = dataLocation.getValue().intValue();
         }
 
-        if (nabTemplate.getRows() + startRow > plateSheet.getRows() || nabTemplate.getColumns() + startColumn > plateSheet.getColumns())
+        if (nabTemplate.getRows() + startRow > plateSheet.getLastRowNum() || nabTemplate.getColumns() + startColumn > plateSheet.getRow(startRow).getLastCellNum())
         {
             throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: expected " +
-                    (nabTemplate.getRows() + startRow) + " rows and " + (nabTemplate.getColumns() + startColumn) + " colums, but found "+
-                    plateSheet.getRows() + " rows and " + plateSheet.getColumns() + " colums.");
+                    (nabTemplate.getRows() + startRow) + " rows and " + (nabTemplate.getColumns() + startColumn) + " columns, but found "+
+                    plateSheet.getLastRowNum() + " rows and " + plateSheet.getRow(startRow).getLastCellNum() + " columns.");
         }
 
         for (int row = 0; row < nabTemplate.getRows(); row++)
         {
             for (int col = 0; col < nabTemplate.getColumns(); col++)
             {
-                Cell cell = plateSheet.getCell(col + startColumn, row + startRow);
-                String cellContents = cell.getContents();
+                Row currentRow = plateSheet.getRow(row + startRow);
+                Cell cell = currentRow.getCell(col + startColumn);
                 try
                 {
-                    cellValues[row][col] = Double.parseDouble(cellContents);
+                    cellValues[row][col] = cell.getNumericCellValue();
                 }
                 catch (NumberFormatException e)
                 {
                     throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: could not parse '" +
-                            cellContents + "' as a number.", e);
+                            cell.getStringCellValue() + "' as a number.", e);
                 }
             }
         }
@@ -194,15 +210,19 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
     private Pair<Integer, Integer> getPlateDataLocation(Sheet plateSheet, int plateHeight, int plateWidth)
     {
-        for (int row = 0; row < plateSheet.getRows() - plateHeight; row++)
+        for (int row = 0; row < plateSheet.getLastRowNum() - plateHeight; row++)
         {
-            for (int col = 0; col < plateSheet.getColumns() - plateWidth; col++)
+            Row currentRow = plateSheet.getRow(row);
+            if (currentRow != null)
             {
-                if (isPlateMatrix(plateSheet, row, col, plateHeight, plateWidth))
+                for (int col = 0; col < currentRow.getLastCellNum() - plateWidth; col++)
                 {
-                    // add one to row and col, since (row,col) is the index of the data grid
-                    // where the first row is column labels and the first column is row labels.
-                    return new Pair<Integer, Integer>(row + 1, col + 1);
+                    if (isPlateMatrix(plateSheet, row, col, plateHeight, plateWidth))
+                    {
+                        // add one to row and col, since (row,col) is the index of the data grid
+                        // where the first row is column labels and the first column is row labels.
+                        return new Pair<Integer, Integer>(row + 1, col + 1);
+                    }
                 }
             }
         }
@@ -211,32 +231,41 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
     private boolean isPlateMatrix(Sheet plateSheet, int startRow, int startCol, int plateHeight, int plateWidth)
     {
-        Cell[] row = plateSheet.getRow(startRow);
+        Row row = plateSheet.getRow(startRow);
         // make sure that there are plate_width + 1 cells to the right of startCol:
-        if (startCol + plateWidth + 1 > row.length)
+        if (startCol + plateWidth + 1 > row.getLastCellNum())
             return false;
 
-        Cell[] column = plateSheet.getColumn(startCol);
         // make sure that there are plate_width + 1 cells to the right of startCol:
-        if (startRow + plateHeight + 1 > column.length)
+        if (startRow + plateHeight + 1 > plateSheet.getLastRowNum())
             return false;
 
         // check for 1-12 in the row:
         for (int colIndex = startCol + 1; colIndex < startCol + plateWidth + 1; colIndex++)
         {
-            Cell current = row[colIndex];
-            String indexString = String.valueOf(colIndex - startCol);
-            if (!StringUtils.equals(current.getContents(), indexString))
-                return false;
+            Cell current = row.getCell(colIndex);
+            if (current != null)
+            {
+                String indexString = String.valueOf(colIndex - startCol);
+                if (!StringUtils.equals(current.getStringCellValue(), indexString))
+                    return false;
+            }
         }
 
         char start = 'A';
         for (int rowIndex = startRow + 1; rowIndex < startRow + plateHeight + 1; rowIndex++)
         {
-            Cell current = column[rowIndex];
-            String indexString = String.valueOf(start++);
-            if (!StringUtils.equals(current.getContents(), indexString))
-                return false;
+            Row currentRow = plateSheet.getRow(rowIndex);
+            if (currentRow != null)
+            {
+                Cell current = currentRow.getCell(startCol);
+                if (current != null)
+                {
+                    String indexString = String.valueOf(start++);
+                    if (!StringUtils.equals(current.getStringCellValue(), indexString))
+                        return false;
+                }
+            }
         }
         return true;
     }
