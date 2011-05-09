@@ -420,6 +420,7 @@ public class MS2Controller extends SpringActionController
 
             WebPartView grid = peptideView.createGridView(form);
             String dataRegionName;
+
             if (grid instanceof QueryView)
             {
                 dataRegionName = ((QueryView)grid).getDataRegionName();
