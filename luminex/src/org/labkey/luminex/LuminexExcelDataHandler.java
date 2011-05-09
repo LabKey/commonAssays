@@ -40,7 +40,6 @@ import org.labkey.api.util.FileType;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -385,7 +384,8 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                     }
                     else if ("Bead Count".equalsIgnoreCase(columnName) || "BeadCount".equalsIgnoreCase(columnName))
                     {
-                        dataRow.setBeadCount(parseInteger(value));
+                        Double beadCount = parseDouble(value);
+                        dataRow.setBeadCount(beadCount == null ? null : beadCount.intValue());
                     }
                     else if ("Dilution".equalsIgnoreCase(columnName))
                     {
@@ -416,15 +416,6 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                 return null;
             }
             else return Double.parseDouble(value);
-        }
-
-        private Integer parseInteger(String value)
-        {
-            if (value == null || "".equals(value))
-            {
-                return null;
-            }
-            else return Integer.parseInt(value);
         }
     }
 }
