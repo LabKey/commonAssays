@@ -3,10 +3,11 @@
 #
 # Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 #
-# Transform script for Tomaras Lab Luminex Assay to calculate FI - Bkgd - Blank
+# Transform script for Tomaras Lab Luminex Assay to calculate FI - Bkgd - Blank.
 # This script subtracts the FI-Bkgd value for the blank bead from the FI-Bkgd value
 # for the other analytes within a given run data file. It also converts FI -Bkgd - Blank
-# values that are <= 0 to 1 (as per the lab's request). 
+# values that are <= 0 to 1 (as per the lab's request).
+#
 
 # set up a data frame to store the run properties
 run.props = data.frame(NA, NA, NA, NA);
@@ -40,14 +41,17 @@ run.output.file = run.props$val3[run.props$name == "runDataFile"];
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 
+# TODO: CHANGE TO CALCULATING WITHIN A GIVEN FILE ID (FOR MULTI PLATE RUNS)
+
+# initialize the FI - Bkgd - Blank variable
+run.data$fiBackgroundBlank = NA;
+
 # get the unique analyte values
 analytes = unique(run.data$name);
 
 # if there is a "Blank" bead, then continue. otherwise, there is no new variable to calculate
 if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
-	# initialize the FI - Bkgd - Blank variable
-	run.data$fiBackgroundBlank = NA;
-
+    # TODO: HOW TO HANDLE THE DESCRIPTIONS (I.E. SAMPLES) WITH > 1 DILUTION?
 	# loop through the unique description values and subtract the mean blank FI-Bkgrd from the fiBackground
 	descriptions = unique(run.data$description);
 	for(index in 1:length(descriptions)){
@@ -61,7 +65,7 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
 
 	# convert fiBackgroundBlank values that are less than or equal to 0 to a value of 1 (as per the lab's calculation)
 	run.data$fiBackgroundBlank[!is.na(run.data$fiBackgroundBlank) & run.data$fiBackgroundBlank <= 0] = 1;
-
-	# write the new set of run data out to an output file
-	write.table(run.data, file=run.output.file, sep="\t", na="", row.names=FALSE, quote=FALSE);
 }
+
+# write the new set of run data out to an output file
+write.table(run.data, file=run.output.file, sep="\t", na="", row.names=FALSE, quote=FALSE);

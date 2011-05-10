@@ -53,7 +53,7 @@ colnames(dat)[colnames(dat) == "name"] = "analyte";
 # change column name from expConc to expected_conc
 colnames(dat)[colnames(dat) == "expConc"] = "expected_conc";
 
-# TODO: FOR NOW, SET ASSAY_ID TO test
+# TODO: GET THE ASSAY_ID FROM THE RUN PROPERTIES
 dat$assay_id = "test";
 
 # TODO: FOR NOW, SET SAMPLE_ID TO WELL|DESCRIPTION
@@ -75,8 +75,10 @@ run.data$se = NA;
 # TODO: GENERATE ONE PDF PER STANDARD
 
 # call the rumi function to calculate new estimated log concentrations for the uknowns
-fits = rumi(dat, plot=FALSE, test.lod=TRUE);
+mypdf(file="StndCurvePlots", mfrow=c(2,2))
+fits = rumi(dat, plot.se.profile=TRUE, test.lod=TRUE);
 fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
+dev.off();
 
 # put the calculated values back into the run.data dataframe by matching well, description, and analyte
 for(index in 1:nrow(fits)){
@@ -94,5 +96,9 @@ for(index in 1:nrow(fits)){
 	run.data$se[runDataIndex] = se;
 }
 
+# TODO: WHAT TO DO WITH SE = INF?
+run.data$se[run.data$se == "Inf"] = NA;
+
+# write the new set of run data out to an output file
 write.table(run.data, file=run.output.file, sep="\t", na="", row.names=FALSE, quote=FALSE);
 
