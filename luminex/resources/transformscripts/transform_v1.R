@@ -3,14 +3,21 @@
 #
 # Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 #
-# Transform script for Tomaras Lab Luminex Assay to calculate new estimated concentration values
-# for unknown samples using the Rumi function (developed by Youyi at SCHARP). The Rumi function
-# takes a dataframe as input and uses the given Standard curve data to calculate est.log.conc an se
-# for the unknowns.
+# Transform script for Tomaras Lab Luminex Assay.
+#
+# First, the script subtracts the FI-Bkgd value for the blank bead from the FI-Bkgd value
+# for the other analytes within a given run data file. It also converts FI -Bkgd - Blank
+# values that are <= 0 to 1 (as per the lab's request).
+#
+# Second, the script calculates new estimated concentration values for unknown samples using the
+# Rumi function (developed by Youyi at SCHARP). The Rumi function takes a dataframe as input and
+# uses the given Standard curve data to calculate est.log.conc an se for the unknowns.
 #
 
 source("http://youtil.googlecode.com/files/youtil.R")
 source("http://www.labkey.org/download/rumi.R")
+
+######################## STEP 1: READ IN THE RUN PROPERTIES AND RUN DATA #######################
 
 # set up a data frame to store the run properties
 run.props = data.frame(NA, NA, NA, NA);
@@ -44,8 +51,45 @@ run.output.file = run.props$val3[run.props$name == "runDataFile"];
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 
+################################# STEP 2: BLANK BEAD SUBTRACTION ################################  
+
+# TODO: CHANGE TO CALCULATING WITHIN A GIVEN FILE ID (FOR MULTI PLATE RUNS)
+
+# initialize the FI - Bkgd - Blank variable
+run.data$fiBackgroundBlank = NA;
+
+# get the unique analyte values
+analytes = unique(run.data$name);
+
+# if there is a "Blank" bead, then continue. otherwise, there is no new variable to calculate
+if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
+    # store a boolean vector of blanks, nonBlanks, and unknowns
+    blanks = regexpr("^blank", run.data$name, ignore.case=TRUE) > -1;
+    nonBlanks = regexpr("^blank", run.data$name, ignore.case=TRUE) == -1;
+    unks = substr(run.data$type,0,1) == "X";
+
+	# loop through the unique description/dilution pairs and subtract the mean blank FI-Bkgrd from the fiBackground
+	descDilPairs = unique(data.frame(description=run.data$description, dilution=run.data$dilution));
+	for(index in 1:nrow(descDilPairs)){
+	    description = descDilPairs$description[index];
+	    dilution = descDilPairs$dilution[index];
+	    descDils = run.data$description == description & run.data$dilution == dilution;
+
+		# get the mean blank bead FI-Bkgrd values for the given description/dilution
+		blank.mean = mean(run.data$fiBackground[blanks & descDils]);
+
+		# calc the fiBackgroundBlank for all of the non-"Blank" analytes for this description
+		run.data$fiBackgroundBlank[unks & nonBlanks & descDils] = run.data$fiBackground[unks & nonBlanks & descDils] - blank.mean;
+	}
+
+	# convert fiBackgroundBlank values that are less than or equal to 0 to a value of 1 (as per the lab's calculation)
+	run.data$fiBackgroundBlank[!is.na(run.data$fiBackgroundBlank) & run.data$fiBackgroundBlank <= 0] = 1;
+}
+
+################################## STEP 3: CURVE FIT CALCULATION #################################
+
 # setup the dataframe needed for the call to rumi
-dat = subset(run.data, select=c("well", "description", "name", "expConc", "type", "fi", "fiBackground", "dilution"));
+dat = subset(run.data, select=c("well", "description", "name", "expConc", "type", "fi", "fiBackground", "fiBackgroundBlank", "dilution"));
 
 # change column name from "name" to "analyte"
 colnames(dat)[colnames(dat) == "name"] = "analyte";
@@ -68,10 +112,13 @@ dat$well_role[substr(dat$type,0,1) == "C"] = "QC";
 dat$well_role[substr(dat$type,0,1) == "B"] = "Blank";
 
 # TODO: WHAT VALUE SHOULD BE USED FOR STANDARDS? fi OR fiBackground
-# TODO: WHAT VALUE SHOULD BE USED FOR NON-STANDARDS? fi OR fiBackground
+# TODO: WHAT VALUE SHOULD BE USED FOR NON-STANDARDS? fi OR fiBackground OR fiBackgroundBlank
 colnames(dat)[colnames(dat) == "fi"] = "fiOrig";
 dat$fi[dat$well_role == "Standard"] = dat$fiOrig[dat$well_role == "Standard"];
-dat$fi[dat$well_role != "Standard"] = dat$fiBackground[dat$well_role != "Standard"];
+dat$fi[dat$well_role != "Standard"] = dat$fiBackgroundBlank[dat$well_role != "Standard"];
+
+# subset the dat object to just those records that have an FI
+dat = subset(dat, !is.na(fi));
 
 # initialize the columns to be calculated
 run.data$estLogConc = NA;
@@ -105,6 +152,7 @@ for(index in 1:nrow(fits)){
 # TODO: WHAT TO DO WITH SE = INF?
 run.data$se[run.data$se == "Inf"] = NA;
 
+#####################  STEP 4: WRITE THE RESULTS TO THE OUTPUT FILE LOCATION #####################
+
 # write the new set of run data out to an output file
 write.table(run.data, file=run.output.file, sep="\t", na="", row.names=FALSE, quote=FALSE);
-

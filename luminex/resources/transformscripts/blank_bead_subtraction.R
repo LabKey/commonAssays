@@ -51,16 +51,23 @@ analytes = unique(run.data$name);
 
 # if there is a "Blank" bead, then continue. otherwise, there is no new variable to calculate
 if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
-    # TODO: HOW TO HANDLE THE DESCRIPTIONS (I.E. SAMPLES) WITH > 1 DILUTION?
-	# loop through the unique description values and subtract the mean blank FI-Bkgrd from the fiBackground
-	descriptions = unique(run.data$description);
-	for(index in 1:length(descriptions)){
-		# get the mean blank bead FI-Bkgrd values for each unique desciption
-		blank.mean = mean(run.data$fiBackground[regexpr("^blank", run.data$name, ignore.case=TRUE) > -1 & run.data$description == descriptions[index]]);
+    # store a boolean vector of blanks, nonBlanks, and unknowns
+    blanks = regexpr("^blank", run.data$name, ignore.case=TRUE) > -1;
+    nonBlanks = regexpr("^blank", run.data$name, ignore.case=TRUE) == -1;
+    unks = substr(run.data$type,0,1) == "X";
+
+	# loop through the unique description/dilution pairs and subtract the mean blank FI-Bkgrd from the fiBackground
+	descDilPairs = unique(data.frame(description=run.data$description, dilution=run.data$dilution));
+	for(index in 1:nrow(descDilPairs)){
+	    description = descDilPairs$description[index];
+	    dilution = descDilPairs$dilution[index];
+	    descDils = run.data$description == description & run.data$dilution == dilution;
+
+		# get the mean blank bead FI-Bkgrd values for the given description/dilution
+		blank.mean = mean(run.data$fiBackground[blanks & descDils]);
 
 		# calc the fiBackgroundBlank for all of the non-"Blank" analytes for this description
-		nonBlankUnknownsForDescription = substr(run.data$type,0,1) == "X" & regexpr("^blank", run.data$name, ignore.case=TRUE) == -1 & run.data$description == descriptions[index];
-		run.data$fiBackgroundBlank[nonBlankUnknownsForDescription] = run.data$fiBackground[nonBlankUnknownsForDescription] - blank.mean;
+		run.data$fiBackgroundBlank[unks & nonBlanks & descDils] = run.data$fiBackground[unks & nonBlanks & descDils] - blank.mean;
 	}
 
 	# convert fiBackgroundBlank values that are less than or equal to 0 to a value of 1 (as per the lab's calculation)
