@@ -114,8 +114,11 @@ dat$well_role[substr(dat$type,0,1) == "B"] = "Blank";
 # TODO: WHAT VALUE SHOULD BE USED FOR STANDARDS? fi OR fiBackground
 # TODO: WHAT VALUE SHOULD BE USED FOR NON-STANDARDS? fi OR fiBackground OR fiBackgroundBlank
 colnames(dat)[colnames(dat) == "fi"] = "fiOrig";
-dat$fi[dat$well_role == "Standard"] = dat$fiOrig[dat$well_role == "Standard"];
-dat$fi[dat$well_role != "Standard"] = dat$fiBackgroundBlank[dat$well_role != "Standard"];
+standards = !is.na(dat$well_role) & dat$well_role == "Standard";
+if(any(standards))
+    dat$fi[standards] = dat$fiOrig[standards];
+if(any(!standards))
+    dat$fi[!standards] = dat$fiBackgroundBlank[!standards];
 
 # subset the dat object to just those records that have an FI
 dat = subset(dat, !is.na(fi));
