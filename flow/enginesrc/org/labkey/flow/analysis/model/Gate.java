@@ -32,20 +32,20 @@ import java.io.Serializable;
  */
 public abstract class Gate implements Serializable
 {
-    String _name;
+    PopulationName _name;
 
     public Gate()
     {
     }
 
-    public abstract BitSet apply(DataFrame data);
+    public abstract BitSet apply(PopulationSet populations, DataFrame data);
 
-    public String getName()
+    public PopulationName getName()
     {
         return _name;
     }
 
-    public void setName(String name)
+    public void setName(PopulationName name)
     {
         _name = name;
     }
@@ -80,6 +80,10 @@ public abstract class Gate implements Serializable
             {
                 ret.add(OrGate.readOr(elChild));
             }
+            else if ("subset".equals(elChild.getTagName()))
+            {
+                ret.add(SubsetRef.readRef(elChild));
+            }
             else if ("ellipse".equals(elChild.getTagName()))
             {
                 ret.add(EllipseGate.readEllipse(elChild));
@@ -93,7 +97,8 @@ public abstract class Gate implements Serializable
         List<Gate> gates = readGateList(element);
         if (gates.size() == 1)
         {
-            gates.get(0).setName(element.getAttribute("name"));
+            PopulationName name = PopulationName.fromString(element.getAttribute("name"));
+            gates.get(0).setName(name);
             return gates.get(0);
         }
         return null;

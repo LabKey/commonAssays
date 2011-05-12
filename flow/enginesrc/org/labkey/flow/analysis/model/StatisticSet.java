@@ -43,14 +43,14 @@ public enum StatisticSet
 {
     existing("Existing", null),
     workspace("Workspace", null),
-    count("Count", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Count, null)),
-    frequency("Frequency", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Frequency, null)),
-    frequencyOfParent("Frequency Of Parent", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Freq_Of_Parent, null)),
-    frequencyOfGrandparent("FrequencyOfGrandparent", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Freq_Of_Grandparent, null)),
-    medianAll("Median values of all parameters", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Median, "*")),
-    meanAll("Mean values of all parameters", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Mean, "*")),
-    stdDevAll("Standard deviation of all parameters", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Std_Dev, "*")),
-    cvAll("Coefficient of variation of all parameters", new StatisticSpec(new SubsetSpec(null, "*"), STAT.CV, "*"))
+    count("Count", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Count, null)),
+    frequency("Frequency", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Frequency, null)),
+    frequencyOfParent("Frequency Of Parent", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Freq_Of_Parent, null)),
+    frequencyOfGrandparent("FrequencyOfGrandparent", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Freq_Of_Grandparent, null)),
+    medianAll("Median values of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Median, "*")),
+    meanAll("Mean values of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Mean, "*")),
+    stdDevAll("Standard deviation of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Std_Dev, "*")),
+    cvAll("Coefficient of variation of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.CV, "*"))
     ;
 
     final StatisticSpec _spec;

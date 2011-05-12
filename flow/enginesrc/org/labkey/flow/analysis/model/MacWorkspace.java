@@ -19,6 +19,7 @@ package org.labkey.flow.analysis.model;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.ObjectType;
@@ -130,7 +131,8 @@ public class MacWorkspace extends FlowJoWorkspace
     {
         AttributeSet results = new AttributeSet(ObjectType.fcsAnalysis, null);
         Analysis ret = readAnalysis(elSampleAnalysis, results);
-        ret.setName(elSampleAnalysis.getAttribute("name"));
+        PopulationName name = PopulationName.fromString(elSampleAnalysis.getAttribute("name"));
+        ret.setName(name);
         String sampleId = elSampleAnalysis.getAttribute("sampleID");
         _sampleAnalyses.put(sampleId, ret);
         if (results.getStatistics().size() > 0)
@@ -184,62 +186,72 @@ public class MacWorkspace extends FlowJoWorkspace
         return ret;
     }
 
-    protected String toBooleanExpression(Element elPopulation)
+    protected SubsetExpression replaceExpressionSubsets(final SubsetExpression expr, final Map<SubsetSpec, SubsetSpec> specs)
+    {
+        expr.visit(new SubsetExpression.AbstractVisitor()
+        {
+            @Override
+            public void subset(SubsetExpression.SubsetTerm term)
+            {
+                SubsetSpec spec = term.getSpec();
+                if (!specs.containsKey(spec))
+                    throw new FlowException("Failed to replace '" + spec + "' in boolean expression using mapping: " + specs);
+                term.setSpec(specs.get(spec));
+            }
+        });
+        return expr;
+    }
+
+    protected SubsetSpec toBooleanExpression(SubsetSpec parentSubset, Element elPopulation)
     {
         List<Element> booleanGates = getElementsByTagName(elPopulation, "BooleanGate");
         if (booleanGates.size() != 1)
             return null;
         Element elBooleanGate = booleanGates.get(0);
-        List<String> gatePaths = new ArrayList<String>();
         String specification = elBooleanGate.getAttribute("specification");
         Element elGatePaths = getElementsByTagName(elBooleanGate, "GatePaths").get(0);
         Element elStringArray = getElementsByTagName(elGatePaths, "StringArray").get(0);
-        for (Element elString : getElementsByTagName(elStringArray, "String"))
+        List<Element> nlStrings = getElementsByTagName(elStringArray, "String");
+
+        int count = 0;
+        Map<SubsetSpec, SubsetSpec> mapping = new HashMap<SubsetSpec, SubsetSpec>();
+        for (Element elString : nlStrings)
         {
-            String string = cleanName(getTextValue(elString));
-            gatePaths.add(string);
-        }
-        StringTokenizer st = new StringTokenizer(specification, "&|", true);
-        List<String> gateCodes = new ArrayList<String>();
-        List<String> operators = new ArrayList<String>();
-        while(st.hasMoreTokens())
-        {
-            gateCodes.add(StringUtils.trim(st.nextToken()));
-            if (st.hasMoreTokens())
+            String str = getTextValue(elString);
+            SubsetSpec subset;
+            if (str.startsWith("/"))
             {
-                operators.add(st.nextToken());
+                // UNDONE: support relative populations up the hierarchy
+                if (str.startsWith("//"))
+                    throw new FlowException("Population '" + str + "' not allowed in boolean gate expression. Relative populations must be children of the parent population '" + parentSubset + "'");
+                subset = SubsetSpec.fromUnescapedString(str.substring(1));
             }
-        }
-        if (gateCodes.size() != gatePaths.size())
-        {
-            // Error ?
-            return null;
+            else
+            {
+                // UNDONE: support other absolute populations
+                subset = SubsetSpec.fromUnescapedString(str);
+                if (!subset.getParent().equals(parentSubset))
+                    throw new FlowException("Population '" + str + "' not allowed in boolean gate expression. Absolute populations must be children of the parent population '" + parentSubset + "'");
+            }
+            if (subset.isExpression())
+                throw new FlowException("Population '" + str + "' not allowed in boolean gate expression. Nested boolean expression aren't allowed.");
+
+            // UNDONE: support populations other than immediate children of the parentSubset
+            PopulationName name = subset.getPopulationName();
+            subset = new SubsetSpec(null, name);
+
+            SubsetSpec placeholder = new SubsetSpec(null, PopulationName.fromString("G" + count));
+            mapping.put(placeholder, subset);
+            count++;
         }
 
-        StringBuilder strExpr = new StringBuilder();
-        String strAnd = "";
+        specification = "(" + specification.replaceAll(" ", "") + ")";
+        SubsetExpression expr = SubsetExpression.expression(specification);
 
-
-        for (int i = 0; i < gatePaths.size(); i ++)
-        {
-            String gateName = gatePaths.get(i);
-            SubsetSpec gateSubset = SubsetSpec.fromString(gateName);
-            String lastSubset = gateSubset.getSubset();
-            String strGate = lastSubset;
-            if (gateCodes.get(i).startsWith("!"))
-            {
-                strGate = "!" + lastSubset;
-            }
-            strExpr.append(strAnd);
-            if (i < operators.size())
-            {
-                strAnd = operators.get(i);
-            }
-            strExpr.append(strGate);
-        }
-        return strExpr.toString();
+        replaceExpressionSubsets(expr, mapping);
+        return new SubsetSpec(parentSubset, expr);
     }
-
+    
     protected void readStats(SubsetSpec subset, Element elPopulation, AttributeSet results, Analysis analysis)
     {
         String strCount = elPopulation.getAttribute("count");
@@ -257,7 +269,7 @@ public class MacWorkspace extends FlowJoWorkspace
             String parameter = StringUtils.trimToNull(elStat.getAttribute("parameter"));
             if (parameter != null)
             {
-                parameter = cleanName(parameter);
+                parameter = ___cleanName(parameter);
             }
             String percentile = StringUtils.trimToNull(elStat.getAttribute("statisticVariable"));
             StatisticSpec spec;
@@ -289,8 +301,8 @@ public class MacWorkspace extends FlowJoWorkspace
 
     protected PolygonGate readPolygon(Element el)
     {
-        String xAxis = cleanName(el.getAttribute("xAxisName"));
-        String yAxis = cleanName(el.getAttribute("yAxisName"));
+        String xAxis = ___cleanName(el.getAttribute("xAxisName"));
+        String yAxis = ___cleanName(el.getAttribute("yAxisName"));
 
         List<Double> lstX = new ArrayList<Double>();
         List<Double> lstY = new ArrayList<Double>();
@@ -313,19 +325,29 @@ public class MacWorkspace extends FlowJoWorkspace
 
     protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, AttributeSet results)
     {
-        String booleanExpr = toBooleanExpression(elPopulation);
-        if (booleanExpr != null)
+        SubsetSpec booleanSubset = toBooleanExpression(parentSubset, elPopulation);
+        if (booleanSubset != null)
         {
-            SubsetSpec subset = new SubsetSpec(parentSubset, "(" + booleanExpr + ")");
-            analysis.addSubset(subset);
-            readStats(subset, elPopulation, results, analysis);
+            analysis.addSubset(booleanSubset);
+            readStats(booleanSubset, elPopulation, results, analysis);
             return null;
         }
 
         Population ret = new Population();
-        ret.setName(cleanName(elPopulation.getAttribute("name")));
-        SubsetSpec subset = new SubsetSpec(parentSubset, ret.getName());
+        PopulationName name = PopulationName.fromString(elPopulation.getAttribute("name"));
+        ret.setName(name);
+        SubsetSpec subset = new SubsetSpec(parentSubset, name);
         Set<String> gatedParams = new LinkedHashSet<String>();
+
+        /*
+        // UNDONE: read booleans as a Gate instead of as a SubsetSpec
+        for (Element elBooleanGate : getElementsByTagName(elPopulation, "BooleanGate"))
+        {
+            Gate gate = readBoolean(elBooleanGate);
+            ret.addGate(gate);
+            //analysis.addGraph(new GraphSpec(parentSubset, x, y));
+        }
+        */
 
         for (Element elPolygonGate : getElementsByTagName(elPopulation, "PolygonGate"))
         {
@@ -345,7 +367,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 }
                 else if ("Range".equals(el.getTagName()))
                 {
-                    String axis = cleanName(el.getAttribute("xAxisName"));
+                    String axis = ___cleanName(el.getAttribute("xAxisName"));
                     gatedParams.add(axis);
                     List<Double> lstValues = new ArrayList<Double>();
                     for (Element elPolygon : getElementsByTagName(el, "Polygon"))
@@ -397,7 +419,8 @@ public class MacWorkspace extends FlowJoWorkspace
         for (Element elPopulation : getElementsByTagName(elAnalysis, "Population"))
         {
             Population child = readPopulation(elPopulation, null, ret, results);
-            ret.addPopulation(child);
+            if (child != null)
+                ret.addPopulation(child);
 
         }
         if (results != null)
@@ -414,7 +437,8 @@ public class MacWorkspace extends FlowJoWorkspace
     protected Analysis readGroupAnalysis(Element elGroupAnalysis)
     {
         Analysis ret = readAnalysis(elGroupAnalysis, null);
-        ret.setName(elGroupAnalysis.getAttribute("name"));
+        PopulationName name = PopulationName.fromString(elGroupAnalysis.getAttribute("name"));
+        ret.setName(name);
         _groupAnalyses.put(ret.getName(), ret);
 
         // Group name attribute only appears on the GroupAnalysis node in old workspace format.
@@ -452,7 +476,7 @@ public class MacWorkspace extends FlowJoWorkspace
     {
         for (Element elParameter : getElementsByTagName(el, "Parameter"))
         {
-            String name = elParameter.getAttribute("name");
+            String name = ___cleanName(elParameter.getAttribute("name"));
             if (!_parameters.containsKey(name))
             {
                 ParameterInfo pi = new ParameterInfo();

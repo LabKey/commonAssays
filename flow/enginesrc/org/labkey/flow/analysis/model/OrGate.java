@@ -22,12 +22,12 @@ import java.util.BitSet;
 
 public class OrGate extends GateList
 {
-    public BitSet apply(DataFrame data)
+    public BitSet apply(PopulationSet populations, DataFrame data)
     {
         BitSet bits = null;
         for (Gate gate : _gates)
         {
-            BitSet next = gate.apply(data);
+            BitSet next = gate.apply(populations, data);
             if (bits == null)
                 bits = next;
             else

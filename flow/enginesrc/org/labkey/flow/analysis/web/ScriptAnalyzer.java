@@ -43,9 +43,12 @@ import org.labkey.flow.analysis.model.Gate;
 import org.labkey.flow.analysis.model.GateList;
 import org.labkey.flow.analysis.model.IntervalGate;
 import org.labkey.flow.analysis.model.NotGate;
+import org.labkey.flow.analysis.model.OrGate;
 import org.labkey.flow.analysis.model.Polygon;
 import org.labkey.flow.analysis.model.PolygonGate;
 import org.labkey.flow.analysis.model.Population;
+import org.labkey.flow.analysis.model.PopulationName;
+import org.labkey.flow.analysis.model.SubsetRef;
 import org.labkey.flow.analysis.model.SampleCriteria;
 import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.analysis.model.StatisticSet;
@@ -108,8 +111,10 @@ public class ScriptAnalyzer
 
     public static Population makePopulation(Map<String, Gate> gates, PopulationDef populationElement)
     {
+        assert !SubsetSpec.___isExpression(populationElement.getName());
         Population ret = new Population();
-        ret.setName(populationElement.getName());
+        PopulationName name = PopulationName.fromString(populationElement.getName());
+        ret.setName(name);
         GateDef gateElement = populationElement.getGate();
         if (gateElement != null)
         {
@@ -133,12 +138,12 @@ public class ScriptAnalyzer
 
     static public StatisticSpec makeStatisticSpec(StatisticDef statElement)
     {
-        return new StatisticSpec(SubsetSpec.fromString(statElement.getSubset()), StatisticSpec.STAT.valueOf(statElement.getName()), statElement.getParameter());
+        return new StatisticSpec(SubsetSpec.fromEscapedString(statElement.getSubset()), StatisticSpec.STAT.valueOf(statElement.getName()), statElement.getParameter());
     }
 
     static public GraphSpec makeGraphSpec(GraphDef graphElement)
     {
-        SubsetSpec subset = SubsetSpec.fromString(graphElement.getSubset());
+        SubsetSpec subset = SubsetSpec.fromEscapedString(graphElement.getSubset());
         if (graphElement.getYAxis() != null)
             return new GraphSpec(subset, graphElement.getXAxis(), graphElement.getYAxis());
         else
@@ -158,7 +163,7 @@ public class ScriptAnalyzer
         }
         for (SubsetDef subset : analysisElement.getSubsetArray())
         {
-            ret.addSubset(SubsetSpec.fromString(subset.getSubset()));
+            ret.addSubset(SubsetSpec.fromEscapedString(subset.getSubset()));
         }
         for (StatisticDef statElement : analysisElement.getStatisticArray())
         {
@@ -201,7 +206,7 @@ public class ScriptAnalyzer
         SubsetSpec subset = null;
         if (subsetDef.getSubset() != null)
         {
-            subset = SubsetSpec.fromString(subsetDef.getSubset());
+            subset = SubsetSpec.fromEscapedString(subsetDef.getSubset());
         }
         return new CompensationCalculation.ChannelSubset(criteria, subset);
     }
@@ -270,6 +275,12 @@ public class ScriptAnalyzer
         }
     }
 
+    static public void fillPopulationRefGate(SubsetDef subsetDef, SubsetRef populationRefGate)
+    {
+        assert !populationRefGate.getRef().isExpression();
+        subsetDef.setSubset(populationRefGate.getRef().toString());
+    }
+
     static public void fillGateList(GateListDef gateListDef, GateList gateList)
     {
         for (Gate gate : gateList.getGates())
@@ -294,6 +305,14 @@ public class ScriptAnalyzer
             {
                 fillGateList(gateListDef.addNewAnd(), (AndGate) gate);
             }
+            else if (gate instanceof OrGate)
+            {
+                fillGateList(gateListDef.addNewAnd(), (OrGate) gate);
+            }
+            else if (gate instanceof SubsetRef)
+            {
+                fillPopulationRefGate(gateListDef.addNewSubset(), (SubsetRef)gate);
+            }
         }
     }
 
@@ -317,20 +336,29 @@ public class ScriptAnalyzer
             EllipseDef ellipseDef = gateDef.addNewEllipse();
             fillEllipseGate(ellipseDef, ellipseGate);
         }
+        else if (gate instanceof NotGate)
+        {
+            fillGate(gateDef.addNewNot(), ((NotGate) gate).getGate());
+        }
         else if (gate instanceof AndGate)
         {
             fillGateList(gateDef.addNewAnd(), (AndGate) gate);
         }
-        else if (gate instanceof NotGate)
+        else if (gate instanceof OrGate)
         {
-            fillGate(gateDef.addNewNot(), ((NotGate) gate).getGate());
+            fillGateList(gateDef.addNewOr(), (OrGate) gate);
+        }
+        else if (gate instanceof SubsetRef)
+        {
+            fillPopulationRefGate(gateDef.addNewSubset(), ((SubsetRef)gate));
         }
 
     }
 
     static public void fillPopulation(PopulationDef populationDef, Population population)
     {
-        populationDef.setName(population.getName());
+        // Save population name in escaped format
+        populationDef.setName(population.getName().getName());
         for (Gate gate : population.getGates())
         {
             GateDef gateDef = populationDef.addNewGate();
@@ -379,7 +407,7 @@ public class ScriptAnalyzer
         }
     }
 
-    static public void makeAnalysisDef(ScriptDef script, FlowJoWorkspace workspace, String groupName, String sampleId, Set<StatisticSet> statisticSets)
+    static public void makeAnalysisDef(ScriptDef script, FlowJoWorkspace workspace, PopulationName groupName, String sampleId, Set<StatisticSet> statisticSets)
     {
         Analysis analysis = null;
         if (groupName != null)
@@ -528,7 +556,9 @@ public class ScriptAnalyzer
 
     public static void addSubsets(Collection<SubsetSpec> list, SubsetSpec parent, PopulationDef pop)
     {
-        SubsetSpec cur = new SubsetSpec(parent, pop.getName());
+        assert !SubsetSpec.___isExpression(pop.getName());
+        PopulationName name = PopulationName.fromString(pop.getName());
+        SubsetSpec cur = new SubsetSpec(parent, name);
         list.add(cur);
         for (PopulationDef childPop : pop.getPopulationArray())
         {
@@ -560,7 +590,7 @@ public class ScriptAnalyzer
                     {
                         for (SubsetDef subsetDef : scriptElement.getAnalysis().getSubsetArray())
                         {
-                            ret.add(SubsetSpec.fromString(subsetDef.getSubset()));
+                            ret.add(SubsetSpec.fromEscapedString(subsetDef.getSubset()));
                         }
                     }
                     pops = scriptElement.getAnalysis().getPopulationArray();

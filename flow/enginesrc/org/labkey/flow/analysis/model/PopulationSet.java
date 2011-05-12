@@ -28,14 +28,14 @@ import java.io.Serializable;
 public class PopulationSet implements Serializable, Cloneable
 {
     List<Population> _populations = new ArrayList<Population>();
-    String _name;
+    PopulationName _name;
 
-    public String getName()
+    public PopulationName getName()
     {
         return _name;
     }
 
-    public void setName(String name)
+    public void setName(PopulationName name)
     {
         _name = name;
     }
@@ -45,8 +45,11 @@ public class PopulationSet implements Serializable, Cloneable
         return _populations;
     }
 
-    public Population getPopulation(String name)
+    public Population getPopulation(PopulationName name)
     {
+        if (name == null)
+            return null;
+        
         for (Population pop : _populations)
         {
             if (pop._name.equals(name))
@@ -57,6 +60,7 @@ public class PopulationSet implements Serializable, Cloneable
 
     public void addPopulation(Population population)
     {
+        assert population != null;
         _populations.add(population);
     }
 

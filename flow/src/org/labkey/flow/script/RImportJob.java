@@ -90,7 +90,7 @@ public class RImportJob extends FlowExperimentJob
             }
 
             String statPopulation = (String)row.get(ResultColumn.population.name());
-            SubsetSpec subset = SubsetSpec.fromString(statPopulation);
+            SubsetSpec subset = SubsetSpec.fromUnescapedString(statPopulation);
 
             Integer count = (Integer)row.get(ResultColumn.count.name());
             StatisticSpec countStat = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
@@ -113,14 +113,14 @@ public class RImportJob extends FlowExperimentJob
                     String xaxis = parts[0];
                     String yaxis = parts[1];
                     String graphPopulation = parts[2];
-                    SubsetSpec subsetSpec = SubsetSpec.fromString(graphPopulation);
+                    SubsetSpec subsetSpec = SubsetSpec.fromUnescapedString(graphPopulation);
                     graphSpec = new GraphSpec(subsetSpec, xaxis, yaxis);
                 }
                 else if (parts.length == 2)
                 {
                     String xaxis = parts[0];
                     String graphPopulation = parts[1];
-                    SubsetSpec subsetSpec = SubsetSpec.fromString(graphPopulation);
+                    SubsetSpec subsetSpec = SubsetSpec.fromUnescapedString(graphPopulation);
                     graphSpec = new GraphSpec(subsetSpec, xaxis);
                 }
                 else

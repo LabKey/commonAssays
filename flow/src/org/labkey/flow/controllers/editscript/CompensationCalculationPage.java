@@ -23,6 +23,7 @@ import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.AutoCompensationScript;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.Population;
+import org.labkey.flow.analysis.model.SubsetPart;
 import org.labkey.flow.analysis.web.SubsetSpec;
 
 import java.util.*;
@@ -310,14 +311,14 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
             return true;
         if (subsetUser == null || subsetWorkspace == null)
             return false;
-        String[] userSubsets = subsetUser.getSubsets();
-        String[] workspaceSubsets = subsetWorkspace.getSubsets();
+        SubsetPart[] userSubsets = subsetUser.getSubsets();
+        SubsetPart[] workspaceSubsets = subsetWorkspace.getSubsets();
         if (userSubsets.length != workspaceSubsets.length)
             return false;
         String strChannel = this.form.parameters[index];
         for (int i = 0; i < userSubsets.length; i ++)
         {
-            if (!subsetNameMatches(userSubsets[i], workspaceSubsets[i], sign, strChannel))
+            if (!subsetNameMatches(userSubsets[i].toString(), workspaceSubsets[i].toString(), sign, strChannel))
                 return false;
         }
         return true;
@@ -340,14 +341,14 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
                 subsets = valueSubsets;
             }
         }
-        
-        SubsetSpec current = SubsetSpec.fromString(getSubset(sign, index));
+
+        SubsetSpec current = SubsetSpec.fromEscapedString(getSubset(sign, index));
 
         ret.append("<select name=\"" + sign + "Subset[" + index + "]\">");
         ret.append(option("", "Ungated", ""));
         for (String subset : subsets)
         {
-            SubsetSpec workspaceSubset = SubsetSpec.fromString(subset);
+            SubsetSpec workspaceSubset = SubsetSpec.fromEscapedString(subset);
             boolean selected = subsetMatches(current, workspaceSubset, sign, index);
             ret.append("\n<option value=\"" + h(subset) + "\"");
             if (selected)
@@ -360,7 +361,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         return ret.toString();
     }
 
-    public String[] getGroupAnalysisNames()
+    public String[] getGroupAnalysisDisplayNames()
     {
         if (form.workspace == null)
             return new String[0];
@@ -369,7 +370,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         {
             if (analysis.getPopulations().size() > 0)
             {
-                ret.add(analysis.getName());
+                ret.add(analysis.getName().getRawName());
             }
         }
         return ret.toArray(new String[0]);

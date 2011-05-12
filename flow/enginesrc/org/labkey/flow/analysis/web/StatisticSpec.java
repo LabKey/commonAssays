@@ -75,6 +75,7 @@ public class StatisticSpec implements Serializable, Comparable
         _parameter = parameter;
     }
 
+    // UNDONE: need parser
     public StatisticSpec(String stat)
     {
         String str = stat;
@@ -100,7 +101,7 @@ public class StatisticSpec implements Serializable, Comparable
         }
         else
         {
-            _subset = SubsetSpec.fromString(str.substring(0, ichColon));
+            _subset = SubsetSpec.fromEscapedString(str.substring(0, ichColon));
             str = str.substring(ichColon + 1);
         }
         try
@@ -129,20 +130,21 @@ public class StatisticSpec implements Serializable, Comparable
     }
 
 	private transient String _toString = null;
-	
+
+    // print in escaped form
     public String toString()
     {
 		if (null == _toString)
-			_toString = toString(_statistic.toString());
+			_toString = toString(_statistic.toString(), true);
 		return _toString;
     }
 
-    private String toString(String strStat)
+    private String toString(String strStat, boolean escaped)
     {
         StringBuilder ret = new StringBuilder();
         if (_subset != null)
         {
-            ret.append(_subset.toString());
+            ret.append(_subset.toString(escaped));
             ret.append(":");
         }
         ret.append(strStat);
@@ -155,7 +157,7 @@ public class StatisticSpec implements Serializable, Comparable
 
     public String toShortString()
     {
-        return toString(_statistic.getShortName());
+        return toString(_statistic.getShortName(), false);
     }
 
 

@@ -60,9 +60,9 @@ public class NotGate extends Gate
         _gate.getPolygons(list, xAxis, yAxis);
     }
 
-    public BitSet apply(DataFrame data)
+    public BitSet apply(PopulationSet populations, DataFrame data)
     {
-        BitSet bits = _gate.apply(data);
+        BitSet bits = _gate.apply(populations, data);
         bits.flip(0, data.getRowCount());
         return bits;
     }

@@ -43,7 +43,7 @@ import javax.imageio.ImageIO;
 
 public class FCSAnalyzer
 {
-    static public final SubsetSpec compSubset = new SubsetSpec(null, "comp");
+    static public final SubsetSpec compSubset = new SubsetSpec(null, PopulationName.fromString("comp"));
     static private FCSAnalyzer instance;
     static private Logger _log = Logger.getLogger(FCSAnalyzer.class);
     static private int GRAPH_HEIGHT = 300;
@@ -99,9 +99,10 @@ public class FCSAnalyzer
     public PopulationSet findSubGroup(PopulationSet group, SubsetSpec subset)
     {
         if (subset == null) return group;
-        for (String name : subset.getSubsets())
+        for (SubsetPart name : subset.getSubsets())
         {
-            group = group.getPopulation(name);
+            assert name instanceof PopulationName : "Unexpected boolean expression: " + name;
+            group = group.getPopulation((PopulationName)name);
         }
         return group;
     }
@@ -297,21 +298,28 @@ public class FCSAnalyzer
 
     public Subset getSubset(Map<SubsetSpec, Subset> subsetMap, PopulationSet group, SubsetSpec subsetSpecification)
     {
+        return getSubset(subsetMap, group, group, subsetSpecification);
+    }
+
+    private Subset getSubset(Map<SubsetSpec, Subset> subsetMap, PopulationSet populations, PopulationSet group, SubsetSpec subsetSpecification)
+    {
         Subset ret = subsetMap.get(subsetSpecification);
         if (ret != null) return ret;
-        Subset parentSubset = getSubset(subsetMap, group, subsetSpecification.getParent());
+        Subset parentSubset = getSubset(subsetMap, populations, group, subsetSpecification.getParent());
         if (subsetSpecification.isExpression())
         {
             PopulationSet parentPop = findSubGroup(group, subsetSpecification.getParent());
-            SubsetExpression expr = SubsetExpression.fromString(subsetSpecification.getSubset());
+            SubsetExpression expr = subsetSpecification.getExpression();
             BitSet bits = expr.apply(parentSubset, parentPop);
-            ret = parentSubset.apply(subsetSpecification.getSubset(), bits);
+            String name = subsetSpecification.getSubset().toString();
+            ret = parentSubset.apply(name, bits);
         }
         else
         {
             Population pop = (Population) findSubGroup(group, subsetSpecification);
             if (pop == null) throw new FlowException("Could not find subset " + subsetSpecification);
-            ret = parentSubset.apply(pop.getName(), pop.getGates().toArray(new Gate[0]));
+            String name = pop.getName().toString();
+            ret = parentSubset.apply(populations, name, pop.getGates().toArray(new Gate[0]));
         }
         subsetMap.put(subsetSpecification, ret);
         return ret;

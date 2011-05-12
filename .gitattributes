@@ -172,6 +172,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/PCWorkspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Polygon.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/PolygonGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Population.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/PopulationName.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/PopulationSet.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/RegionGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/SampleCriteria.java -text
@@ -181,6 +182,8 @@ flow/enginesrc/org/labkey/flow/analysis/model/ScriptSettings.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/StatisticSet.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/StatsTable.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Subset.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/SubsetPart.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/SubsetRef.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/ValueConstraint.java -text
 flow/enginesrc/org/labkey/flow/analysis/util/LogAxisFunction.java -text
 flow/enginesrc/org/labkey/flow/analysis/util/RangeFunction.java -text
@@ -198,7 +201,7 @@ flow/enginesrc/org/labkey/flow/analysis/web/PlotInfo.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/ScriptAnalyzer.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/StatisticSpec.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/SubsetExpression.java -text
-flow/enginesrc/org/labkey/flow/analysis/web/SubsetExpressionParser.java -text
+flow/enginesrc/org/labkey/flow/analysis/web/SubsetParser.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/SubsetSpec.java -text
 flow/enginesrc/org/labkey/flow/persist/AttributeSet.java -text
 flow/enginesrc/org/labkey/flow/persist/InputRole.java -text

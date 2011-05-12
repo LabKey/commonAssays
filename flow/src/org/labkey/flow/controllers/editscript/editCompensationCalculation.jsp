@@ -214,7 +214,7 @@ var keywordValueSubsetListMap = KV;
     </table>
 
 <%
-String[] analysisNames = this.getGroupAnalysisNames();
+String[] analysisNames = this.getGroupAnalysisDisplayNames();
 if (analysisNames.length > 0)
 {
 %>

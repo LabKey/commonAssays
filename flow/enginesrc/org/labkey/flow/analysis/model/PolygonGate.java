@@ -39,7 +39,7 @@ public class PolygonGate extends RegionGate
         _poly = poly;
     }
 
-    public BitSet apply(DataFrame data)
+    public BitSet apply(PopulationSet populations, DataFrame data)
     {
         BitSet ret = new BitSet(data.getRowCount());
         NumberArray xValues = data.getColumn(_strX);

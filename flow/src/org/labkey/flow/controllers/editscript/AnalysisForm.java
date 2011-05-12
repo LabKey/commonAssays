@@ -51,7 +51,7 @@ public class AnalysisForm extends EditScriptForm
         List<SubsetSpec> subsets = new ArrayList();
         for (SubsetDef subset : analysis.getSubsetArray())
         {
-            subsets.add(SubsetSpec.fromString(subset.getSubset()));
+            subsets.add(SubsetSpec.fromEscapedString(subset.getSubset()));
         }
         this.subsets = StringUtils.join(subsets.iterator(), "\n");
         List<StatisticSpec> stats = new ArrayList();

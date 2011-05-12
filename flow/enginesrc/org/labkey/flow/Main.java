@@ -21,6 +21,7 @@ import org.apache.xmlbeans.XmlOptions;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.w3c.dom.Document;
@@ -89,14 +90,14 @@ public class Main
         return file;
     }
 
-    private static void executeListSamples(File workspaceFile, Set<String> groupNames)
+    private static void executeListSamples(File workspaceFile, Set<PopulationName> groupNames)
     {
         FlowJoWorkspace workspace = readWorkspace(workspaceFile);
 
         // Hash the group and sample Analysis to see if they are equivalent
-        Map<Analysis, String> analysisToGroup = new HashMap<Analysis, String>();
-        Map<String, Analysis> groupAnalyses = workspace.getGroupAnalyses();
-        for (String groupName : groupAnalyses.keySet())
+        Map<Analysis, PopulationName> analysisToGroup = new HashMap<Analysis, PopulationName>();
+        Map<PopulationName, Analysis> groupAnalyses = workspace.getGroupAnalyses();
+        for (PopulationName groupName : groupAnalyses.keySet())
         {
             Analysis analysis = groupAnalyses.get(groupName);
             if (analysisToGroup.containsKey(analysis))
@@ -159,7 +160,7 @@ public class Main
         }
     }
 
-    private static void writeAnalysis(File outDir, String name, FlowJoWorkspace workspace, String groupName, String sampleId, Set<StatisticSet> stats)
+    private static void writeAnalysis(File outDir, String name, FlowJoWorkspace workspace, PopulationName groupName, String sampleId, Set<StatisticSet> stats)
     {
         ScriptDocument doc = ScriptDocument.Factory.newInstance();
         doc.addNewScript();
@@ -177,15 +178,15 @@ public class Main
         }
     }
 
-    private static void executeConvertWorkspace(File outDir, File workspaceFile, Set<String> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    private static void executeConvertWorkspace(File outDir, File workspaceFile, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
         FlowJoWorkspace workspace = readWorkspace(workspaceFile);
 
         boolean writeAll = groupNames.isEmpty() && sampleIds.isEmpty();
         if (writeAll || !groupNames.isEmpty())
         {
-            Map<String, Analysis> groupAnalyses = workspace.getGroupAnalyses();
-            for (String groupName : groupAnalyses.keySet())
+            Map<PopulationName, Analysis> groupAnalyses = workspace.getGroupAnalyses();
+            for (PopulationName groupName : groupAnalyses.keySet())
             {
                 if (writeAll || groupNames.contains(groupName))
                     writeAnalysis(outDir, "group-" + groupName + ".xml", workspace, groupName, null, stats);
@@ -278,7 +279,7 @@ public class Main
         String fcsArg = null;
         String outArg = null;
         String commandArg = null;
-        Set<String> groupArgs = new LinkedHashSet<String>();
+        Set<PopulationName> groupArgs = new LinkedHashSet<PopulationName>();
         Set<String> sampleArgs = new LinkedHashSet<String>();
         Set<StatisticSet> statArgs = EnumSet.noneOf(StatisticSet.class);
 
@@ -318,7 +319,10 @@ public class Main
             else if ("-g".equals(arg) || "--group".equals(arg))
             {
                 if (++i < args.length)
-                    groupArgs.add(args[i]);
+                {
+                    PopulationName name = PopulationName.fromString(args[i]);
+                    groupArgs.add(name);
+                }
                 else
                 {
                     usage("--group requires argument");

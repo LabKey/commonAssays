@@ -59,6 +59,7 @@ import org.labkey.flow.analysis.model.IntervalGate;
 import org.labkey.flow.analysis.model.Polygon;
 import org.labkey.flow.analysis.model.PolygonGate;
 import org.labkey.flow.analysis.model.Population;
+import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.model.RegionGate;
 import org.labkey.flow.analysis.model.ScriptComponent;
@@ -292,7 +293,7 @@ public class ScriptController extends BaseFlowController
                     String strSubset = StringUtils.trimToNull(stSubsets.nextToken());
                     if (strSubset != null)
                     {
-                        subsets.add(SubsetSpec.fromString(strSubset));
+                        subsets.add(SubsetSpec.fromEscapedString(strSubset));
                     }
                 }
                 ScriptDocument doc = form.analysisScript.getAnalysisScriptDocument();
@@ -379,11 +380,11 @@ public class ScriptController extends BaseFlowController
 
     static abstract public class UploadAnalysisPage extends Page<UploadAnalysisForm>
     {
-        public String[] getGroupAnalysisNames()
+        public PopulationName[] getGroupAnalysisNames()
         {
             if (form.workspaceObject == null)
-                return new String[0];
-            List<String> ret = new ArrayList<String>();
+                return new PopulationName[0];
+            List<PopulationName> ret = new ArrayList<PopulationName>();
             for (Analysis analysis : form.workspaceObject.getGroupAnalyses().values())
             {
                 if (analysis.getPopulations().size() > 0)
@@ -391,7 +392,7 @@ public class ScriptController extends BaseFlowController
                     ret.add(analysis.getName());
                 }
             }
-            return ret.toArray(new String[ret.size()]);
+            return ret.toArray(new PopulationName[ret.size()]);
         }
 
         public Map<String, String> getSampleAnalysisNames()
@@ -451,7 +452,7 @@ public class ScriptController extends BaseFlowController
                 return null;
             }
             FlowJoWorkspace workspace = form.workspaceObject;
-            String groupName = form.groupName;
+            PopulationName groupName = PopulationName.fromString(form.groupName);
             String sampleId= form.sampleId;
 
             FlowScript analysisScript = getScript();
@@ -630,7 +631,10 @@ public class ScriptController extends BaseFlowController
                 dataMap.put(parameter, cd);
             }
             List<String> errorslist = new ArrayList<String>();
-            CompensationCalculation calc = workspace.makeCompensationCalculation(dataMap, form.selectGroupName, errorslist);
+            PopulationName groupName = null;
+            if (StringUtils.isNotEmpty(form.selectGroupName))
+                groupName = PopulationName.fromString(form.selectGroupName);
+            CompensationCalculation calc = workspace.makeCompensationCalculation(dataMap, groupName, errorslist);
             if (errorslist.size() > 0)
             {
                 for (String error : errorslist)
@@ -685,7 +689,7 @@ public class ScriptController extends BaseFlowController
             BufferedImage image = info.getImage();
             Gate gate = gateFromPoints(form.xAxis, form.yAxis, form.ptX, form.ptY, form.open);
             image = addSelection(image, info, gate, !form.open, true, form.xAxis, form.yAxis);
-            SubsetSpec subset = SubsetSpec.fromString(form.subset);
+            SubsetSpec subset = SubsetSpec.fromEscapedString(form.subset);
             SubsetSpec parent = subset.getParent();
             PopulationSet popset;
             if (parent != null)
@@ -806,7 +810,8 @@ public class ScriptController extends BaseFlowController
             }
             if (primaryGate)
             {
-                String strFreq = info.getFrequency(gate);
+                // UNDONE: need PopulationSet for SubsetRef Gate
+                String strFreq = info.getFrequency(null, gate);
                 g.drawString(strFreq, 0, image.getHeight() - g.getFontMetrics().getDescent());
             }
             g.dispose();
@@ -857,14 +862,6 @@ public class ScriptController extends BaseFlowController
             return root;
         }
 
-        String checkValidPopulationName(String name)
-        {
-            if (StringUtils.indexOfAny(name, "/<'") >= 0)
-            {
-                return "Population names cannot contain the characters / ' \" or <";
-            }
-            return null;
-        }
 
         private boolean renamePopulations(Population pop, PopulationSet newParent, SubsetSpec subsetParent, Map<SubsetSpec, String> newNames, BindException errors)
         {
@@ -877,17 +874,12 @@ public class ScriptController extends BaseFlowController
                 return fSuccess;
             }
             Population newPop = new Population();
-            String nameError = checkValidPopulationName(newName);
-            if (nameError != null)
-            {
-                errors.reject(ERROR_MSG, nameError);
-                fSuccess = false;
-            }
-            newPop.setName(newName);
+            PopulationName name = PopulationName.fromString(newName);
+            newPop.setName(name);
             newPop.getGates().addAll(pop.getGates());
-            if (newParent.getPopulation(newName) != null)
+            if (newParent.getPopulation(name) != null)
             {
-                errors.reject(ERROR_MSG, "There are two populations called '" + new SubsetSpec(subsetParent, newName) + "'");
+                errors.reject(ERROR_MSG, "There are two populations called '" + new SubsetSpec(subsetParent, name) + "'");
                 fSuccess = false;
             }
 

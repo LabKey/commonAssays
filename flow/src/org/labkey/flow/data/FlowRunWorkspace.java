@@ -20,6 +20,7 @@ import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.FCSKeywordData;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.Population;
+import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.script.FlowAnalyzer;
@@ -44,7 +45,7 @@ public class FlowRunWorkspace extends FlowJoWorkspace
                 analysis.addPopulation(pop);
             }
         }
-        _groupAnalyses.put("analysis", analysis);
+        _groupAnalyses.put(PopulationName.fromString("analysis"), analysis);
         for (FlowFCSFile well : run.getFCSFiles())
         {
             String key = Integer.toString(well.getWellId());

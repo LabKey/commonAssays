@@ -143,7 +143,10 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
     protected GWTPopulation makePopulation(SubsetSpec parent, PopulationDef population)
     {
         GWTPopulation ret = new GWTPopulation();
-        SubsetSpec current = new SubsetSpec(parent, population.getName());
+        // UNDONE: support boolean expressions?
+        assert !SubsetSpec.___isExpression(population.getName());
+        PopulationName name = PopulationName.fromString(population.getName());
+        SubsetSpec current = new SubsetSpec(parent, name);
         ret.setName(population.getName());
         ret.setFullName(current.toString());
         ret.setGate(makeGate(population.getGate()));
@@ -430,7 +433,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             if (null != ret)
                 return ret;
             
-            SubsetSpec subsetSpec = SubsetSpec.fromString(graphOptions.subset);
+            SubsetSpec subsetSpec = SubsetSpec.fromEscapedString(graphOptions.subset);
             SubsetSpec parentSubsetSpec = subsetSpec == null ? null : subsetSpec.getParent();
             GraphSpec graphSpec;
             if (StringUtils.isEmpty(graphOptions.yAxis))
@@ -540,6 +543,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         for (int i = 0; i < populationArray.length; i ++)
         {
             PopulationDef popdef = populationArray[i];
+            // popdef.getName() is escaped PopulationName
             GWTPopulation population = popset.getPopulation(popdef.getName());
             if (population == null)
             {
@@ -562,6 +566,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
 
     private void updatePopulationDef(PopulationDef populationDef, GWTPopulation population)
     {
+        // UNDONE: check the population name is in escaped format
         populationDef.setName(population.getName());
         setGate(populationDef, population.getGate());
         populationDef.setPopulationArray(updatePopulationDefs(populationDef.getPopulationArray(), population));

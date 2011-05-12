@@ -22,6 +22,7 @@ import java.util.BitSet;
  */
 public class Subset
 {
+    /** A full name path from the root. */
     String _name;
     FCSHeader _fcs;
     DataFrame _data;
@@ -46,9 +47,9 @@ public class Subset
         return new Subset(_parent, _name, _fcs, data);
     }
 
-    public Subset apply(Gate gate)
+    public Subset apply(PopulationSet populations, Gate gate)
     {
-        return apply(gate._name, new Gate[]{gate});
+        return apply(populations, gate._name.getName(), new Gate[]{gate});
     }
 
     public Subset apply(String name, BitSet bits)
@@ -63,14 +64,14 @@ public class Subset
         return new Subset(this, newName, _fcs, data);
     }
 
-    public Subset apply(String name, Gate[] gates)
+    public Subset apply(PopulationSet populations, String name, Gate[] gates)
     {
         if (gates.length == 0)
             return new Subset(this, name, _fcs, _data);
-        BitSet bits = gates[0].apply(_data);
+        BitSet bits = gates[0].apply(populations, _data);
         for (int i = 1; i < gates.length; i ++)
         {
-            bits.or(gates[i].apply(_data));
+            bits.or(gates[i].apply(populations, _data));
         }
         return apply(name, bits);
     }

@@ -20,33 +20,112 @@ import org.labkey.flow.analysis.model.*;
 
 import java.util.BitSet;
 
-abstract public class SubsetExpression
+abstract public class SubsetExpression implements SubsetPart
 {
     /**
-     * Expr -> (SubsetExpr)
-     * SubsetExpr -> SubsetExpr + SubsetTerm | SubsetTerm
-     * SubsetTerm -> SubsetTerm * SubsetFactor | SubsetFactor
-     * SubsetFactor ->
+     * Parses a string into a SubsetSpec.
+     * 
+     * @param subsetAndExpression The subset and expression (eg., "X/Y/(A&B)" or "(A&B)")
+     * @return
      */
-
-    static public SubsetExpression fromString(String expression)
+    static public SubsetSpec subset(String subsetAndExpression)
     {
-        SubsetExpressionParser parser = new SubsetExpressionParser(expression);
-        return parser.parse();
+        SubsetParser parser = new SubsetParser(subsetAndExpression);
+        return parser.parseFullSubset();
     }
 
+    /**
+     * Parses a string into a SubsetExpression.
+     *
+     * @param expression The expression portion of a subset (eg., "(A&B)")
+     * @return
+     */
+    static public SubsetExpression expression(String expression)
+    {
+        SubsetParser parser = new SubsetParser(expression);
+        return parser.parseFullExpression();
+    }
+
+    // Grouped flag is used for display purposes only
+    protected boolean _grouped = false;
+
+    SubsetExpression setGrouped(boolean grouped) { _grouped = grouped; return this; }
+
+    @Override
+    public String toString()
+    {
+        return toString(true);
+    }
+
+    public String toString(boolean escaped)
+    {
+        if (_grouped)
+            return "(" + _toString(escaped) + ")";
+        return _toString(escaped);
+    }
+
+    abstract protected String _toString(boolean escaped);
+
     abstract public BitSet apply(Subset subset, PopulationSet populationSet);
+
+    abstract public void visit(Visitor v);
+
+    public interface Visitor
+    {
+        void and(SubsetExpression.AndTerm term);
+        void or(SubsetExpression.OrTerm term);
+        void not(SubsetExpression.NotTerm term);
+        void subset(SubsetExpression.SubsetTerm term);
+    }
+
+    public abstract static class AbstractVisitor implements Visitor
+    {
+        public void and(AndTerm term) { }
+        public void or(OrTerm term) { }
+        public void not(NotTerm term) { }
+        public void subset(SubsetTerm term) { }
+    }
 
     abstract static public class BinaryTerm extends SubsetExpression
     {
         protected SubsetExpression _left;
         protected SubsetExpression _right;
-        public BinaryTerm(SubsetExpression left, SubsetExpression right)
+        BinaryTerm(SubsetExpression left, SubsetExpression right)
         {
             _left = left;
             _right = right;
         }
+
+        @Override
+        public void visit(Visitor v)
+        {
+            _left.visit(v);
+            _right.visit(v);
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            BinaryTerm that = (BinaryTerm) o;
+
+            if (_left != null ? !_left.equals(that._left) : that._left != null) return false;
+            if (_right != null ? !_right.equals(that._right) : that._right != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode()
+        {
+            int result = _left != null ? _left.hashCode() : 0;
+            result = 31 * result + (_right != null ? _right.hashCode() : 0);
+            return result;
+        }
     }
+
     static public class OrTerm extends BinaryTerm
     {
         public OrTerm(SubsetExpression left, SubsetExpression right)
@@ -61,7 +140,21 @@ abstract public class SubsetExpression
             left.or(right);
             return left;
         }
+
+        @Override
+        public void visit(Visitor v)
+        {
+            v.or(this);
+            super.visit(v);
+        }
+
+        @Override
+        protected String _toString(boolean escaped)
+        {
+            return _left.toString(escaped) + "|" + _right.toString(escaped);
+        }
     }
+    
     static public class AndTerm extends BinaryTerm
     {
         public AndTerm(SubsetExpression left, SubsetExpression right)
@@ -75,7 +168,21 @@ abstract public class SubsetExpression
             left.and(right);
             return left;
         }
+
+        @Override
+        public void visit(Visitor v)
+        {
+            v.and(this);
+            super.visit(v);
+        }
+
+        @Override
+        protected String _toString(boolean escaped)
+        {
+            return _left.toString(escaped) + "&" + _right.toString(escaped);
+        }
     }
+
     static public class NotTerm extends SubsetExpression
     {
         SubsetExpression _term;
@@ -89,7 +196,40 @@ abstract public class SubsetExpression
             set.flip(0, subset.getDataFrame().getRowCount());
             return set;
         }
+
+        @Override
+        public void visit(Visitor v)
+        {
+            v.not(this);
+            _term.visit(v);
+        }
+
+        @Override
+        protected String _toString(boolean escaped)
+        {
+            return "!" + _term.toString(escaped);
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            NotTerm notTerm = (NotTerm) o;
+
+            if (_term != null ? !_term.equals(notTerm._term) : notTerm._term != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return _term != null ? _term.hashCode() : 0;
+        }
     }
+
     static public class SubsetTerm extends SubsetExpression
     {
         SubsetSpec _spec;
@@ -98,36 +238,146 @@ abstract public class SubsetExpression
             _spec = spec;
         }
 
+        public SubsetSpec getSpec()
+        {
+            return _spec;
+        }
+
+        public void setSpec(SubsetSpec spec)
+        {
+            _spec = spec;
+        }
+
+        @Override
+        public void visit(Visitor v)
+        {
+            v.subset(this);
+        }
+
         public BitSet apply(Subset subset, PopulationSet populationSet)
         {
-            String[] terms = _spec.getSubsets();
+            SubsetPart[] terms = _spec.getSubsets();
             BitSet ret = new BitSet();
             ret.flip(0, subset.getDataFrame().getRowCount());
             for (int i = 0; i < terms.length; i ++)
             {
-                String term = terms[i];
-                if (SubsetSpec.isExpression(term))
+                Object term = terms[i];
+                // UNDONE: allow populations below boolean expressions
+                if (term instanceof SubsetExpression)
                 {
                     assert i == terms.length - 1;
-                    SubsetExpression expr = SubsetExpression.fromString(term);
+                    SubsetExpression expr = (SubsetExpression)term;
                     BitSet bits = expr.apply(subset, populationSet);
                     ret.and(bits);
                     return ret;
                 }
-                Population pop = populationSet.getPopulation(term);
+                else if (term instanceof PopulationName)
+                {
+                    Population pop = populationSet.getPopulation((PopulationName)term);
 
-                if (pop == null)
-                {
-                    throw new FlowException("Could not find subset '" + _spec + "'");
+                    if (pop == null)
+                    {
+                        throw new FlowException("Could not find subset '" + _spec + "'");
+                    }
+                    for (Gate gate : pop.getGates())
+                    {
+                        BitSet bits = gate.apply(null, subset.getDataFrame());
+                        ret.and(bits);
+                    }
+                    populationSet = pop;
                 }
-                for (Gate gate : pop.getGates())
+                else
                 {
-                    BitSet bits = gate.apply(subset.getDataFrame());
-                    ret.and(bits);
+                    throw new FlowException("Unexpected subset term: " + term);
                 }
-                populationSet = pop;
             }
             return ret;
         }
+
+        @Override
+        protected String _toString(boolean escaped)
+        {
+            return _spec.toString(escaped);
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            SubsetTerm that = (SubsetTerm) o;
+
+            if (_spec != null ? !_spec.equals(that._spec) : that._spec != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return _spec != null ? _spec.hashCode() : 0;
+        }
+
     }
+
+    // For testing
+    static SubsetExpression And(SubsetExpression left, SubsetExpression right)
+    {
+        return new SubsetExpression.AndTerm(left, right);
+    }
+
+    // For testing
+    static SubsetExpression Or(SubsetExpression left, SubsetExpression right)
+    {
+        return new SubsetExpression.OrTerm(left, right);
+    }
+
+    // For testing
+    static SubsetExpression Not(SubsetExpression term)
+    {
+        return new SubsetExpression.NotTerm(term);
+    }
+
+    // For testing
+    static SubsetExpression Group(SubsetExpression term)
+    {
+        return term.setGrouped(true);
+    }
+
+    static SubsetSpec Parents(String... names)
+    {
+        SubsetSpec spec = null;
+        for (String name : names)
+            spec = new SubsetSpec(spec, PopulationName.fromString(name));
+        return spec;
+    }
+
+    // For testing
+    static SubsetExpression Subset(String name, String... names)
+    {
+        SubsetSpec spec = null;
+        if (name != null)
+            spec = new SubsetSpec(spec, PopulationName.fromString(name));
+
+        for (String n : names)
+            spec = new SubsetSpec(spec, PopulationName.fromString(n));
+        return new SubsetExpression.SubsetTerm(spec);
+    }
+
+    // For testing
+    static SubsetExpression Subset(String name, Object... parts)
+    {
+        SubsetSpec spec = null;
+        if (name != null)
+            spec = new SubsetSpec(spec, PopulationName.fromString(name));
+
+        for (Object part : parts)
+            if (part instanceof String)
+                spec = new SubsetSpec(spec, PopulationName.fromString((String)part));
+            else if (part instanceof SubsetExpression)
+                spec = new SubsetSpec(spec, (SubsetExpression)part);
+        return new SubsetExpression.SubsetTerm(spec);
+    }
+
 }

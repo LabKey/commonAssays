@@ -40,7 +40,7 @@ public class IntervalGate extends RegionGate
     }
 
 
-    public BitSet apply(DataFrame data)
+    public BitSet apply(PopulationSet populations, DataFrame data)
     {
         BitSet ret = new BitSet(data.getRowCount());
         NumberArray values = data.getColumn(_axis);

@@ -22,6 +22,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.labkey.flow.analysis.model.PopulationName;
+import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -57,7 +59,7 @@ public class FlowPropertySet
         {
             if (spec != null)
             {
-                String name = spec.getSubset();
+                String name = spec.getSubset().toString();
                 if (ret.containsKey(name))
                 {
                     SubsetSpec spec2 = ret.get(name);
@@ -72,26 +74,32 @@ public class FlowPropertySet
         return ret;
     }
 
-    protected String simplifySubsetExpr(String expr)
+    protected SubsetExpression simplifySubsetExpr(SubsetExpression subsetExpression)
     {
+        // UNDONE: operate on the expression nodes instead of the string
+        //if (subsetExpression instanceof SubsetExpression.SubsetTerm &&
+        //        !((SubsetExpression.SubsetTerm)subsetExpression).getSpec().isExpression())
+        //    return subsetExpression;
+        
+        String expr = subsetExpression.toString();
         if (expr.indexOf("|") >= 0)
-            return expr;
+            return subsetExpression;
         if (!expr.startsWith("(") || !expr.endsWith(")"))
-            return expr;
+            return subsetExpression;
         expr = expr.substring(1, expr.length() - 1);
         String[] names = StringUtils.split(expr, "&");
         StringBuilder ret = new StringBuilder();
         for (String name : names)
         {
             if (!name.endsWith("+"))
-                return expr;
+                return SubsetExpression.expression(expr);
             if (name.startsWith("!"))
             {
                 name = name.substring(1, name.length() - 1) + "-";
             }
             ret.append(name);
         }
-        return ret.toString();
+        return SubsetExpression.expression(ret.toString());
     }
 
     public SubsetSpec simplifySubset(SubsetSpec subset)
@@ -99,20 +107,35 @@ public class FlowPropertySet
         initStatisticsAndGraphs();
         if (subset == null)
             return null;
-        String name = simplifySubsetExpr(subset.getSubset());
+        PopulationName name = null;
+        SubsetExpression expr = null;
+        if (subset.isExpression())
+            expr = simplifySubsetExpr(subset.getExpression());
+        else
+            name = subset.getPopulationName();
 
-        SubsetSpec commonAncestor = _subsetNameAncestorMap.get(subset.getSubset());
+        SubsetSpec commonAncestor = _subsetNameAncestorMap.get(subset.getSubset().toString());
         if (commonAncestor == null)
-            return new SubsetSpec(subset.getParent(), name);
+            if (expr != null)
+                return new SubsetSpec(subset.getParent(), expr);
+            else
+                return new SubsetSpec(subset.getParent(), name);
 
         if (commonAncestor.equals(subset))
         {
-            return new SubsetSpec(null, name);
+            if (expr != null)
+                return new SubsetSpec(null, expr);
+            else
+                return new SubsetSpec(null, name);
         }
         try
         {
-            SubsetSpec ret = SubsetSpec.fromString(subset.toString().substring(commonAncestor.toString().length() + 1));
-            return new SubsetSpec(ret.getParent(), simplifySubsetExpr(ret.getSubset()));
+            // UNDONE: use expression tree instead of reparsing string
+            SubsetSpec ret = SubsetSpec.fromEscapedString(subset.toString().substring(commonAncestor.toString().length() + 1));
+            if (ret.isExpression())
+                return new SubsetSpec(ret.getParent(), simplifySubsetExpr(ret.getExpression()));
+            else
+                return new SubsetSpec(ret.getParent(), ret.getPopulationName());
         }
         catch (Exception e)
         {

@@ -93,7 +93,7 @@ public class PCWorkspace extends FlowJoWorkspace
         for (Element elAxis : getElementsByTagName(elPolygonGate, "Axis"))
         {
             String axis = elAxis.getAttribute("dimension");
-            String axisName = elAxis.getAttribute("name");
+            String axisName = ___cleanName(elAxis.getAttribute("name"));
             if ("x".equals(axis))
             {
                 xAxis = axisName;
@@ -121,7 +121,8 @@ public class PCWorkspace extends FlowJoWorkspace
     protected Population readPopulation(Element elPopulation)
     {
         Population ret = new Population();
-        ret.setName(elPopulation.getAttribute("name"));
+        PopulationName name = PopulationName.fromString(elPopulation.getAttribute("name"));
+        ret.setName(name);
         for (Element elPolygonGate : getElementsByTagName(elPopulation, "PolygonGate"))
         {
             boolean invert = "1".equals(elPolygonGate.getAttribute("negated")) || "0".equals(elPolygonGate.getAttribute("eventsInside"));
@@ -149,7 +150,7 @@ public class PCWorkspace extends FlowJoWorkspace
         for (Element elRangeGate : getElementsByTagName(elRectangleGate, "RangeGate"))
         {
             Element elAxis = getElementByTagName(elRangeGate, "Axis");
-            String axisName = elAxis.getAttribute("name");
+            String axisName = ___cleanName(elAxis.getAttribute("name"));
             axes.add(axisName);
             lstMin.add(parseParamValue(axisName, elRangeGate, "min"));
             lstMax.add(parseParamValue(axisName, elRangeGate, "max"));
@@ -170,7 +171,8 @@ public class PCWorkspace extends FlowJoWorkspace
     protected Analysis readSampleAnalysis(Element elSampleNode)
     {
         Analysis ret = new Analysis();
-        ret.setName(elSampleNode.getAttribute("name"));
+        PopulationName name = PopulationName.fromString(elSampleNode.getAttribute("name"));
+        ret.setName(name);
         _sampleAnalyses.put(elSampleNode.getAttribute("sampleID"), ret);
 
         for (Element elSubpopulations : getElementsByTagName(elSampleNode, "Subpopulations"))
@@ -193,7 +195,8 @@ public class PCWorkspace extends FlowJoWorkspace
         for (Element elGroup: getElementsByTagName(elGroups, "GroupNode"))
         {
             Analysis analysis = new Analysis();
-            analysis.setName(elGroup.getAttribute("name"));
+            PopulationName name = PopulationName.fromString(elGroup.getAttribute("name"));
+            analysis.setName(name);
             for (Element elSubpopulations : getElementsByTagName(elGroup, "Subpopulations"))
             {
                 readSubpopulations(analysis, elSubpopulations);

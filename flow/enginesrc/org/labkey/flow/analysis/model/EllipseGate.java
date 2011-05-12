@@ -70,7 +70,7 @@ public class EllipseGate extends RegionGate
     }
 
 
-    public BitSet apply(DataFrame data)
+    public BitSet apply(PopulationSet populations, DataFrame data)
     {
         // quick compute bounding rect (could even draw it in closer with a bit more math)
         double r = distance/2;

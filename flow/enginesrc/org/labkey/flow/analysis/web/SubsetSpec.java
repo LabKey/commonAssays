@@ -17,9 +17,14 @@
 package org.labkey.flow.analysis.web;
 
 import org.labkey.flow.analysis.model.FlowException;
+import org.labkey.flow.analysis.model.PopulationName;
+import org.labkey.flow.analysis.model.SubsetPart;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 
 public class SubsetSpec implements Serializable
 {
@@ -32,62 +37,91 @@ public class SubsetSpec implements Serializable
     }
 
     final SubsetSpec _parent;
-    final String _subset;
+    final PopulationName _subset;
+    final SubsetExpression _expr;
 
-    public SubsetSpec(SubsetSpec parent, String subset)
+    public SubsetSpec(SubsetSpec parent, PopulationName subset)
     {
         _parent = parent;
         _subset = subset;
-        if (_parent != null && isExpression(_parent.getSubset()))
+        _expr = null;
+        if (_parent != null && _parent.isExpression())
         {
             throw new SubsetFormatException(toString(), "Subset expressions must be last");
         }
     }
 
-    static public SubsetSpec fromString(String strSubset) throws SubsetFormatException
+    public SubsetSpec(SubsetSpec parent, SubsetExpression expr)
+    {
+        _parent = parent;
+        _subset = null;
+        _expr = expr;
+        if (_parent != null && _parent.isExpression())
+        {
+            throw new SubsetFormatException(toString(), "Subset expressions must be last");
+        }
+    }
+
+    public SubsetSpec createChild(PopulationName subset)
+    {
+        return new SubsetSpec(this, subset);
+    }
+
+    public SubsetSpec createChild(SubsetExpression expr)
+    {
+        return new SubsetSpec(this, expr);
+    }
+
+    /**
+     * Creates a new SubsetSpec from raw strings.  The final string may be a boolean expression.
+     *
+     * @param rawStrings
+     * @return
+     */
+    static public SubsetSpec fromParts(String[] rawStrings)
+    {
+        if (rawStrings == null || rawStrings.length == 0)
+            return null;
+
+        SubsetSpec spec = null;
+        for (int i = 0; i < rawStrings.length; i++)
+        {
+            String str = rawStrings[i];
+            if (i == rawStrings.length -1 && ___isExpression(str))
+                spec = new SubsetSpec(spec, SubsetExpression.expression(str));
+            else
+                spec = new SubsetSpec(spec, PopulationName.fromString(str));
+        }
+
+        return spec;
+    }
+
+    /**
+     * Parses a SubsetSpec from an unesacped string and assumes there are no '/' characters in population names.
+     * @param rawString
+     * @return
+     */
+    static public SubsetSpec fromUnescapedString(String rawString)
+    {
+        String[] parts = rawString.split("/");
+        return fromParts(parts);
+    }
+
+    /**
+     * Parses a SubsetSpec from an escaped string.  Any special characters (e.g., "(" or "/") have been escaped
+     * in each population by surrounding the population name with "{}".
+     *
+     * @param strSubset
+     * @return
+     * @see {@link org.labkey.flow.analysis.model.PopulationName#fromString(String)}.
+     */
+    static public SubsetSpec fromEscapedString(String strSubset)
     {
         if (strSubset == null || strSubset.length() == 0)
         {
             return null;
         }
-        int ichSlash;
-        if (strSubset.endsWith(")"))
-        {
-            int cRParen = 1;
-            int ich;
-            for (ich = strSubset.length() - 2; ich >= 0 && cRParen != 0; ich --)
-            {
-                switch (strSubset.charAt(ich))
-                {
-                    case ')':
-                        cRParen ++;
-                        break;
-                    case '(':
-                        cRParen --;
-                        break;
-                }
-            }
-            if (cRParen > 0)
-                throw new SubsetFormatException(strSubset, "Too many ')'");
-            if (ich < 0)
-            {
-                return new SubsetSpec(null, strSubset);
-            }
-            if (strSubset.charAt(ich) != '/')
-            {
-                throw new SubsetFormatException(strSubset, "Expected '/' at character " + ich);
-            }
-            ichSlash = ich;
-        }
-        else
-        {
-            ichSlash = strSubset.lastIndexOf("/");
-        }
-        if (ichSlash < 0)
-        {
-            return new SubsetSpec(null, strSubset);
-        }
-        return new SubsetSpec(SubsetSpec.fromString(strSubset.substring(0, ichSlash)), strSubset.substring(ichSlash + 1));
+        return SubsetExpression.subset(strSubset);
     }
 
     public SubsetSpec getParent()
@@ -95,25 +129,36 @@ public class SubsetSpec implements Serializable
         return _parent;
     }
 
-    public String[] getSubsets()
+    /** Returns an array containing PopulationName and SubsetExpression. */
+    public SubsetPart[] getSubsets()
     {
         if (_parent == null)
-            return new String[]{_subset};
-        String[] parents = _parent.getSubsets();
-        String[] ret = new String[parents.length + 1];
+            return new SubsetPart[]{_subset};
+        SubsetPart[] parents = _parent.getSubsets();
+        SubsetPart[] ret = new SubsetPart[parents.length + 1];
         System.arraycopy(parents, 0, ret, 0, parents.length);
-        ret[parents.length] = _subset;
+        ret[parents.length] = _subset != null ? _subset : _expr;
         return ret;
     }
 
-    public String getSubset()
+    public SubsetPart getSubset()
+    {
+        return _subset != null ? _subset : _expr;
+    }
+
+    public PopulationName getPopulationName()
     {
         return _subset;
     }
 
+    public SubsetExpression getExpression()
+    {
+        return _expr;
+    }
+
     public int hashCode()
     {
-        int ret = _subset.hashCode();
+        int ret = _subset != null ? _subset.hashCode() : _expr.hashCode();
         if (_parent != null)
         {
             ret ^= _parent.hashCode();
@@ -137,16 +182,57 @@ public class SubsetSpec implements Serializable
                 return false;
         }
 
-        return _subset.equals(other._subset);
+        if (_subset == null && other._subset != null)
+            return false;
+        if (_subset != null && !_subset.equals(other._subset))
+            return false;
+
+        if (_expr == null && other._expr != null)
+            return false;
+        if (_expr != null && !_expr.equals(other._expr))
+            return false;
+
+        return true;
     }
 
 	private transient String _toString = null;
-	
+    private transient String _toEscapedString = null;
+
+    public String toString(boolean escaped)
+    {
+        if (escaped)
+        {
+            if (_toEscapedString == null)
+                _toEscapedString = _toString(true);
+            return _toEscapedString;
+        }
+        else
+        {
+            if (_toString == null)
+                _toString = _toString(false);
+            return _toString;
+        }
+    }
+
+    private String _toString(boolean escaped)
+    {
+        StringBuilder sb = new StringBuilder();
+        if (_parent != null)
+            sb.append(_parent.toString(escaped)).append("/");
+
+        assert (_subset == null && _expr != null) ||  (_subset != null && _expr == null);
+        if (_subset != null)
+            sb.append(_subset.toString(escaped));
+        else
+            sb.append("(").append(_expr.toString(escaped)).append(")");
+
+        return sb.toString();
+    }
+
+    // print in escaped form
     public String toString()
     {
-		if (_toString == null)
-			_toString = (_parent == null) ? _subset : _parent.toString() + "/" + _subset;
-		return _toString;
+        return toString(true);
     }
 
     public SubsetSpec removeRoot()
@@ -202,14 +288,15 @@ public class SubsetSpec implements Serializable
         return 1 + _parent.getDepth();
     }
 
-    static public boolean isExpression(String str)
+    // UNDONE: remove this
+    static public boolean ___isExpression(String str)
     {
         return str.startsWith("(") && str.endsWith(")");
     }
 
     public boolean isExpression()
     {
-        return isExpression(_subset);
+        return _expr != null;
     }
 
     public boolean hasAncestor(SubsetSpec spec)

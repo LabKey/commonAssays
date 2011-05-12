@@ -21,6 +21,10 @@ import org.apache.log4j.Logger;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.util.SymbolTable;
+import org.junit.Assert;
+import org.junit.Test;
+import org.labkey.api.settings.AppProps;
+import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
 import org.w3c.dom.*;
@@ -38,7 +42,7 @@ import java.util.*;
 abstract public class FlowJoWorkspace implements Serializable
 {
     // group name -> analysis
-    protected Map<String, Analysis> _groupAnalyses = new LinkedHashMap<String, Analysis>();
+    protected Map<PopulationName, Analysis> _groupAnalyses = new LinkedHashMap<PopulationName, Analysis>();
     // sample id -> analysis
     protected Map<String, Analysis> _sampleAnalyses = new LinkedHashMap<String, Analysis>();
     protected Map<String, AttributeSet> _sampleAnalysisResults = new LinkedHashMap<String, AttributeSet>();
@@ -121,7 +125,7 @@ abstract public class FlowJoWorkspace implements Serializable
     public class GroupInfo implements Serializable
     {
         String _groupId;
-        String _groupName;
+        PopulationName _groupName;
         List<String> _sampleIds = new ArrayList<String>();
 
         public List<String> getSampleIds()
@@ -139,12 +143,12 @@ abstract public class FlowJoWorkspace implements Serializable
             _groupId = groupId;
         }
 
-        public String getGroupName()
+        public PopulationName getGroupName()
         {
             return _groupName;
         }
 
-        public void setGroupName(String groupName)
+        public void setGroupName(PopulationName groupName)
         {
             _groupName = groupName;
         }
@@ -658,18 +662,18 @@ abstract public class FlowJoWorkspace implements Serializable
         return Double.valueOf(elParameter.getAttribute("highValue")).doubleValue() * findMultiplier(elParameter);
     }
 
-    static public String cleanName(String name)
+    static public String ___cleanName(String name)
     {
         name = StringUtils.replace(name, "<", CompensationMatrix.PREFIX);
         name = StringUtils.replace(name, ">", CompensationMatrix.SUFFIX);
         name = StringUtils.replaceChars(name, ',', ';');
-        name = StringUtils.replaceChars(name, (char) 209, '-');
+        name = StringUtils.replaceChars(name, (char) 209, '-'); // crazy mac em-dash
         return name;
     }
 
-    static public String cleanPopName(String name)
+    static public String ___cleanPopName(String name)
     {
-        name = cleanName(name);
+        name = ___cleanName(name);
         name = StringUtils.replaceChars(name, '/', '_');
         return name;
     }
@@ -703,9 +707,9 @@ abstract public class FlowJoWorkspace implements Serializable
     }
     public Analysis getGroupAnalysis(GroupInfo group)
     {
-        return _groupAnalyses.get(group._groupId);
+        return _groupAnalyses.get(group.getGroupName());
     }
-    public Map<String, Analysis> getGroupAnalyses()
+    public Map<PopulationName, Analysis> getGroupAnalyses()
     {
         return _groupAnalyses;
     }
@@ -775,14 +779,18 @@ abstract public class FlowJoWorkspace implements Serializable
     {
         if (subset == null || analysis == null)
             return null;
-        String rootSubset = cleanPopName(name);
-        SubsetSpec ret = SubsetSpec.fromString(rootSubset + "/" + subset);
+        assert !SubsetSpec.___isExpression(name);
+        assert !SubsetSpec.___isExpression(subset);
+        PopulationName rootName = PopulationName.fromString(name);
+        // UNDONE: I'm pretty sure this could be a subset "A/B" so creating a PopulationName here won't work.
+        PopulationName subsetName = PopulationName.fromString(subset);
+        SubsetSpec ret = new SubsetSpec(null, rootName).createChild(subsetName);
 
-        Population pop = calc.getPopulation(rootSubset);
+        Population pop = calc.getPopulation(rootName);
         if (pop == null)
         {
             pop = new Population();
-            pop.setName(rootSubset);
+            pop.setName(rootName);
             for (Population child : analysis.getPopulations())
             {
                 pop.addPopulation(child);
@@ -790,7 +798,7 @@ abstract public class FlowJoWorkspace implements Serializable
             calc.addPopulation(pop);
         }
 
-        if (!"Ungated".equals(subset) && findPopulation(pop, SubsetSpec.fromString(subset)) == null)
+        if (!"Ungated".equals(subset) && pop.getPopulation(subsetName) == null)
         {
             String analysisName = analysis.getName() == null ? "" : " '" + analysis.getName() + "'";
             errors.add("Channel '" + name + "' subset '" + subset + "' not found in analysis" + analysisName);
@@ -887,16 +895,6 @@ abstract public class FlowJoWorkspace implements Serializable
         }
     }
 
-    private String compose(String prefix, String suffix)
-    {
-        if (prefix.endsWith("+") && suffix.startsWith("+") ||
-            prefix.endsWith("-") && suffix.startsWith("-"))
-        {
-            return prefix + suffix.substring(1);
-        }
-        return prefix + suffix;
-    }
-
     /**
      * Initially, each channel has a unique gating tree with a root population with a name like "FITC+", or something.
      * This walks through one of these trees, and figures out if the gates within them (e.g. "FITC+/L") is the same
@@ -912,8 +910,11 @@ abstract public class FlowJoWorkspace implements Serializable
         SubsetSpec newSubset;
         if (!isUniversal(subsetTry, lstPopulationMap))
         {
-            String root = oldParent.getRoot().toString();
-            newSubset = new SubsetSpec(newParent, compose(root, population.getName()));
+            SubsetSpec root = oldParent.getRoot();
+            assert !root.isExpression();
+            assert root.getParent() == null;
+            assert root.getPopulationName() != null;
+            newSubset = new SubsetSpec(newParent, root.getPopulationName().compose(population.getName()));
             subsetMap.put(oldSubset, newSubset);
             for (Population child : population.getPopulations())
             {
@@ -932,11 +933,14 @@ abstract public class FlowJoWorkspace implements Serializable
     private Population findPopulation(PopulationSet calc, SubsetSpec spec)
     {
         PopulationSet cur = calc;
-        for (String name : spec.getSubsets())
+        for (SubsetPart term : spec.getSubsets())
         {
             if (cur == null)
                 return null;
-            cur = cur.getPopulation(name);
+            if (term instanceof PopulationName)
+                cur = cur.getPopulation((PopulationName)term);
+            else if (term instanceof SubsetExpression)
+                assert false;
         }
         return (Population) cur;
     }
@@ -982,7 +986,10 @@ abstract public class FlowJoWorkspace implements Serializable
                 newParent = findPopulation(ret, newParentSubset);
             }
             Population newPop = new Population();
-            newPop.setName(cleanName(newSubset.getSubset()));
+            assert !newSubset.isExpression();
+            assert newSubset.getPopulationName() != null;
+            PopulationName name = newSubset.getPopulationName();
+            newPop.setName(name);
             newPop.getGates().addAll(oldPop.getGates());
             assert newParent.getPopulation(newPop.getName()) == null;
             newParent.addPopulation(newPop);
@@ -1000,14 +1007,14 @@ abstract public class FlowJoWorkspace implements Serializable
         return ret;
     }
 
-    public CompensationCalculation makeCompensationCalculation(Map<String, CompensationChannelData> channelDataMap, String groupName, List<String> errors)
+    public CompensationCalculation makeCompensationCalculation(Map<String, CompensationChannelData> channelDataMap, PopulationName groupName, List<String> errors)
     {
         CompensationCalculation ret = new CompensationCalculation();
         ret.setSettings(_settings);
         boolean isUniversalNegative = isUniversalNegative(channelDataMap);
 
         Analysis analysis = null;
-        if (StringUtils.isNotEmpty(groupName))
+        if (groupName != null)
         {
             analysis = getGroupAnalyses().get(groupName);
             if (analysis == null)
@@ -1168,4 +1175,53 @@ abstract public class FlowJoWorkspace implements Serializable
         return new PolygonGate(polygonGate.getXAxis(), polygonGate.getYAxis(), polygon);
     }
 
+
+    public static class LoadTests extends Assert
+    {
+        private File projectRoot()
+        {
+            AppProps props = AppProps.getInstance();
+            String projectRootPath =  props.getProjectRoot();
+            if (projectRootPath == null)
+                projectRootPath = System.getProperty("user.dir") + "/..";
+            return new File(projectRootPath);
+        }
+
+        private FlowJoWorkspace loadWorkspace(String path) throws Exception
+        {
+            File file = new File(projectRoot(), path);
+            return FlowJoWorkspace.readWorkspace(new FileInputStream(file));
+        }
+
+        @Test
+        public void loadOldMac() throws Exception
+        {
+            loadWorkspace("sampledata/flow/8color/workspace.xml");
+        }
+
+        @Test
+        public void loadPC_5_7_2() throws Exception
+        {
+            loadWorkspace("sampledata/flow/versions/v5.7.2.xml");
+        }
+
+        @Test
+        public void loadPC_7_2_5() throws Exception
+        {
+            loadWorkspace("sampledata/flow/versions/v7.2.5.wsp");
+        }
+
+        @Test
+        public void loadPV1() throws Exception
+        {
+            loadWorkspace("sampledata/flow/flowjoquery/Workspaces/PV1-public.xml");
+        }
+
+        @Test
+        public void loadSubsets() throws Exception
+        {
+            loadWorkspace("sampledata/flow/flowjoquery/Workspaces/subset-parsing.xml");
+        }
+
+    }
 }

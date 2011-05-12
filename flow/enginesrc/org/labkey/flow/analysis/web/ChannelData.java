@@ -23,7 +23,7 @@ import java.util.List;
 
 class ChannelData
 {
-    static private SubsetSpec compSubset = SubsetSpec.fromString("comp");
+    static private SubsetSpec compSubset = SubsetSpec.fromEscapedString("comp");
 
     // Returns the SSC-H field, or whatever field is appropriate for histogram data
     /*public DataFrame.Field findHistogramField(DataFrame data)

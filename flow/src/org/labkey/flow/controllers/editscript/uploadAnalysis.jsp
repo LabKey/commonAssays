@@ -19,6 +19,7 @@
 <%@ page import="org.labkey.flow.analysis.model.StatisticSet" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.flow.analysis.model.PopulationName" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.UploadAnalysisPage" %>
 <%!
@@ -42,16 +43,16 @@
     { %>
     <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form.workspaceObject)%>">
     <%
-        String[] analysisNames = this.getGroupAnalysisNames();
+        PopulationName[] analysisNames = this.getGroupAnalysisNames();
         if (analysisNames.length > 0)
         {
     %>
     <p>Which group do you want to use?<br>
         <select name="groupName">
             <option value=""></option>
-            <% for (String group : analysisNames)
+            <% for (PopulationName group : analysisNames)
             { %>
-            <option value="<%=h(group)%>"><%=h(group)%></option>
+            <option value="<%=h(group.getName())%>"><%=h(group.getRawName())%></option>
             <% } %>
         </select>
     </p>

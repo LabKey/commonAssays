@@ -43,7 +43,7 @@ public class EditGateTreeForm extends EditScriptForm
             subsets = new SubsetSpec[entries.length];
             for (int i = 0; i < entries.length; i ++)
             {
-                populationNames[i] = entries[i].getValue().getName();
+                populationNames[i] = entries[i].getValue().getName().getRawName();
                 subsets[i] = entries[i].getKey();
             }
         }

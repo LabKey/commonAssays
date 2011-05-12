@@ -21,6 +21,7 @@ import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.ui.RectangleEdge;
 import org.labkey.flow.analysis.model.Gate;
+import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.model.Subset;
 
 import javax.imageio.ImageIO;
@@ -110,9 +111,9 @@ public class PlotInfo
         return _rangeY;
     }
 
-    public String getFrequency(Gate gate)
+    public String getFrequency(PopulationSet populations, Gate gate)
     {
-        Subset newSubset = _subset.apply(gate);
+        Subset newSubset = _subset.apply(populations, gate);
         int rowCount = newSubset.getDataFrame().getRowCount();
         double fraction = ((double) rowCount) / ((double) _subset.getDataFrame().getRowCount());
         DecimalFormat fmt = new DecimalFormat("0.#");

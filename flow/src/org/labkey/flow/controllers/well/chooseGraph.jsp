@@ -200,7 +200,7 @@
         {
             params = new String[]{form.getXaxis()};
         }
-        GraphSpec graphspec = new GraphSpec(SubsetSpec.fromString(form.getSubset()), params);
+        GraphSpec graphspec = new GraphSpec(SubsetSpec.fromEscapedString(form.getSubset()), params);
         ActionURL urlGenerateGraph = new ActionURL(WellController.GenerateGraphAction.class, getContainer());
         well.addParams(urlGenerateGraph);
         if (script != null)

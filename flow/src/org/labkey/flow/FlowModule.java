@@ -37,6 +37,9 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.flow.analysis.model.FCSHeader;
+import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.analysis.model.PopulationName;
+import org.labkey.flow.analysis.web.SubsetParser;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.ReportsController;
 import org.labkey.flow.controllers.compensation.CompensationController;
@@ -64,6 +67,7 @@ import org.labkey.flow.webparts.OverviewWebPart;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 public class FlowModule extends DefaultModule
@@ -168,6 +172,15 @@ public class FlowModule extends DefaultModule
         return PageFlowUtil.set(FlowManager.get().getSchema());
     }
 
+    @Override
+    public Set<Class> getJUnitTests()
+    {
+        return new HashSet<Class>(Arrays.asList(
+                PopulationName.NameTests.class,
+                SubsetParser.TestLexer.class,
+                SubsetParser.TestParser.class,
+                FlowJoWorkspace.LoadTests.class));
+    }
 
     public static String getShortProductName()
     {

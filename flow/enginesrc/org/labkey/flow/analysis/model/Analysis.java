@@ -106,7 +106,7 @@ public class Analysis extends ScriptComponent
         for (StatisticSpec spec : _statistics)
         {
             Collection<SubsetSpec> subsets;
-            if (spec.getSubset() != null && spec.getSubset().getParent() == null && spec.getSubset().getSubset().equals("*"))
+            if (spec.getSubset() != null && spec.getSubset().getParent() == null && PopulationName.ALL.equals(spec.getSubset().getSubset()))
             {
                 subsets = allSubsets;
             }

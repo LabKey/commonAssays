@@ -38,7 +38,7 @@ public class GraphSpec implements Serializable, Comparable
             throw new IllegalArgumentException("missing '('");
         if (!str.endsWith(")"))
             throw new IllegalArgumentException("must end with ')");
-        _subset = SubsetSpec.fromString(str.substring(0, ichParen));
+        _subset = SubsetSpec.fromEscapedString(str.substring(0, ichParen));
         String strParameters = str.substring(ichParen + 1, str.length() - 1);
         StringTokenizer st = new StringTokenizer(strParameters, ":");
         ArrayList<String> parameters = new ArrayList();
