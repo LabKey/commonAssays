@@ -18,12 +18,18 @@ package org.labkey.luminex;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.list.ListDefinition;
 import org.labkey.api.exp.list.ListItem;
 import org.labkey.api.exp.list.ListService;
@@ -31,10 +37,12 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
@@ -46,6 +54,8 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.pipeline.PipelineProvider;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -107,10 +117,65 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ExpRunTable createRunTable(AssaySchema schema, ExpProtocol protocol)
+    public ExpRunTable createRunTable(final AssaySchema schema, final ExpProtocol protocol)
     {
         ExpRunTable result = super.createRunTable(schema, protocol);
         result.addColumns(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN), null);
+
+        final Set<FieldKey> pdfColumns = new HashSet<FieldKey>();
+        TableInfo outputTable = result.getColumn(ExpRunTable.Column.Output).getFk().getLookupTableInfo();
+        // Check for data outputs that are PDFs
+        for (ColumnInfo columnInfo : outputTable.getColumns())
+        {
+            if (columnInfo.getName().toLowerCase().endsWith("pdf"))
+            {
+                pdfColumns.add(FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.RowId.toString()));
+            }
+        }
+
+        // If we found any PDF outputs, render them as a direct download link since they should be plots of standard curves
+        if (!pdfColumns.isEmpty())
+        {
+            ColumnInfo columnInfo = result.addColumn("Curves", ExpRunTable.Column.Name);
+            List<FieldKey> visibleColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+            visibleColumns.add(Math.min(visibleColumns.size(), 3), columnInfo.getFieldKey());
+            result.setDefaultVisibleColumns(visibleColumns);
+
+            DisplayColumnFactory factory = new DisplayColumnFactory()
+            {
+                @Override
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    return new DataColumn(colInfo)
+                    {
+                        @Override
+                        public void addQueryFieldKeys(Set<FieldKey> keys)
+                        {
+                            keys.addAll(pdfColumns);
+                        }
+
+                        @Override
+                        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                        {
+                            for (FieldKey pdfColumn : pdfColumns)
+                            {
+                                Number rowId = (Number)ctx.get(pdfColumn);
+                                if (rowId != null)
+                                {
+                                    ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(schema.getContainer());
+                                    url.addParameter("rowId", rowId.toString());
+                                    out.write("<a href=\"" + url + "\">");
+                                    out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
+                                    out.write("</a>");
+                                }
+                            }
+                        }
+                    };
+                }
+            };
+            columnInfo.setDisplayColumnFactory(factory);
+        }
+
         return result;
     }
 
@@ -317,7 +382,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return "Imports data in the multi-sheet BioPlex Excel file format.";
     }
 
-    public DataExchangeHandler getDataExchangeHandler()
+    public DataExchangeHandler createDataExchangeHandler()
     {
         return new LuminexDataExchangeHandler();        
     }

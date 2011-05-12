@@ -428,7 +428,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public DataExchangeHandler getDataExchangeHandler()
+    public DataExchangeHandler createDataExchangeHandler()
     {
         return new NabDataExchangeHandler();
     }
