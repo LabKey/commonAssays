@@ -82,28 +82,30 @@ run.data$se = NA;
 
 # call the rumi function to calculate new estimated log concentrations for the uknowns
 mypdf(file="StndCurvePlots", mfrow=c(2,2))
-fits = rumi(dat, plot.se.profile=TRUE, test.lod=TRUE);
+fits = rumi(dat, plot.se.profile=TRUE, test.lod=TRUE, verbose=TRUE);
 fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
 dev.off();
 
 # put the calculated values back into the run.data dataframe by matching well, description, and analyte
-for(index in 1:nrow(fits)){
-	w = fits$well[index];
-	a = fits$analyte[index];
-	d = fits$description[index];
-	elc = fits$"est.log.conc"[index];
-	ec = fits$"est.conc"[index];
-	se = fits$"se"[index];
+if(nrow(fits) > 0){
+    for(index in 1:nrow(fits)){
+        w = fits$well[index];
+        a = fits$analyte[index];
+        d = fits$description[index];
+        elc = fits$"est.log.conc"[index];
+        ec = fits$"est.conc"[index];
+        se = fits$"se"[index];
 
-	runDataIndex = run.data$well == w & run.data$name == a & run.data$description == d;
+        runDataIndex = run.data$well == w & run.data$name == a & run.data$description == d;
 
-	run.data$estLogConc[runDataIndex] = elc;
-	run.data$estConc[runDataIndex] = ec;
-	run.data$se[runDataIndex] = se;
+        run.data$estLogConc[runDataIndex] = elc;
+        run.data$estConc[runDataIndex] = ec;
+        run.data$se[runDataIndex] = se;
+    }
+
+    # TODO: WHAT TO DO WITH SE = INF?
+    run.data$se[run.data$se == "Inf"] = NA;
 }
-
-# TODO: WHAT TO DO WITH SE = INF?
-run.data$se[run.data$se == "Inf"] = NA;
 
 # write the new set of run data out to an output file
 write.table(run.data, file=run.output.file, sep="\t", na="", row.names=FALSE, quote=FALSE);
