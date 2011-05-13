@@ -40,7 +40,6 @@ import org.labkey.ms2.pipeline.tandem.XTandemSearchProtocolFactory;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -533,7 +532,7 @@ public class PipelineController extends SpringActionController
 
             if (success)
             {
-                MS2PipelineManager.setSequenceDatabaseRoot(getUser(), getContainer(), root, form.isAllowUpload());
+                MS2PipelineManager.setSequenceDatabaseRoot(getUser(), getContainer(), root);
             }
 
             return success;
@@ -556,8 +555,6 @@ public class PipelineController extends SpringActionController
             {
                 if (!NetworkDrive.exists(fileRoot))
                     errors.reject(ERROR_MSG, "FASTA root \"" + fileRoot + "\" does not exist.");
-                boolean allowUpload = MS2PipelineManager.allowSequenceDatabaseUploads(getUser(), getContainer());
-                page.setAllowUpload(allowUpload);
                 page.setLocalPathRoot(fileRoot.toString());
             }
 
@@ -724,97 +721,9 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(AdminPermission.class)
-    public class AddSequenceDBAction extends FormViewAction<Object>
-    {
-        public void validateCommand(Object form, Errors errors)
-        {
-        }
-
-        public ModelAndView getView(Object form, boolean reshow, BindException errors) throws Exception
-        {
-            setHelpTopic(getHelpTopic("MS2-Pipeline/addSequenceDB"));
-            return new JspView<Object>(PipelineController.class, "addSequenceDB.jsp", form, errors);
-        }
-
-        public boolean handlePost(Object form, BindException errors) throws Exception
-        {
-            Map<String, MultipartFile> fileMap = getFileMap();
-            MultipartFile ff = fileMap.get("sequenceDBFile");
-
-            String name = (ff == null ? "" : ff.getOriginalFilename());
-            if (ff == null || ff.getSize() == 0)
-            {
-                errors.addError(new LabkeyError("Please specify a FASTA file."));
-                return false;
-            }
-            else if (name.indexOf(File.separatorChar) != -1 || name.indexOf('/') != -1)
-            {
-                errors.reject(ERROR_MSG, "Invalid sequence database name '" + name + "'.");
-                return false;
-            }
-            else
-            {
-                BufferedReader reader = null;
-                try
-                {
-                    reader = new BufferedReader(new InputStreamReader(ff.getInputStream()));
-
-                    MS2PipelineManager.addSequenceDB(getContainer(), name, reader);
-                }
-                catch (IllegalArgumentException e)
-                {
-                    errors.reject(ERROR_MSG, e.getMessage());
-                    return false;
-                }
-                catch (IOException e)
-                {
-                    errors.reject(ERROR_MSG, e.getMessage());
-                    return false;
-                }
-                finally
-                {
-                    if (reader != null)
-                    {
-                        try
-                        {
-                            reader.close();
-                        }
-                        catch (IOException eio)
-                        {
-                        }
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        public ActionURL getSuccessURL(Object form)
-        {
-            return urlProjectStart(getContainer());
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Add Sequence Database");
-        }
-    }
-
     public static class SequenceDBRootForm extends ViewForm
     {
         private String _localPathRoot;
-        private boolean _allowUpload;
-
-        public boolean isAllowUpload()
-        {
-            return _allowUpload;
-        }
-
-        public void setAllowUpload(boolean allowUpload)
-        {
-            _allowUpload = allowUpload;
-        }
 
         public void setLocalPathRoot(String localPathRoot)
         {

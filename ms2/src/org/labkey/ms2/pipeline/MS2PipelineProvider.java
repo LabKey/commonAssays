@@ -71,14 +71,6 @@ public class MS2PipelineProvider extends PipelineProvider
                     .append("<a href=\"").append(buttonURL.getLocalURIString()).append("\">Set FASTA root</a>")
                     .append(" - Specify the location on the web server where FASTA sequence files will be located.</td></tr>");
 
-            if (MS2PipelineManager.allowSequenceDatabaseUploads(context.getUser(), context.getContainer()))
-            {
-                buttonURL = new ActionURL(PipelineController.AddSequenceDBAction.class, context.getContainer());
-                html.append("<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;")
-                        .append("<a href=\"").append(buttonURL.getLocalURIString()).append("\">Add FASTA file</a>")
-                        .append(" - Add a FASTA sequence file to the current FASTA root location.</td></tr>");
-            }
-
             html.append("</table>");
             out.write(html.toString());
         }

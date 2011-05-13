@@ -26,17 +26,6 @@ import org.labkey.api.jsp.FormPage;
 public abstract class ConfigureSequenceDB extends FormPage<PipelineController.SequenceDBRootForm>
 {
     private String _localPathRoot;
-    private boolean _allowUpload;
-
-    public boolean isAllowUpload()
-    {
-        return _allowUpload;
-    }
-
-    public void setAllowUpload(boolean allowUpload)
-    {
-        _allowUpload = allowUpload;
-    }
 
     public String getLocalPathRoot()
     {

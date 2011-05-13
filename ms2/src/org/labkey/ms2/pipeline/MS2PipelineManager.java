@@ -20,7 +20,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.cmd.ConvertTaskId;
 import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
 
@@ -44,7 +43,6 @@ public class MS2PipelineManager
     private static Logger _log = Logger.getLogger(MS2PipelineProvider.class);
     private static final String DEFAULT_FASTA_DIR = "databases";
 
-    private static final String ALLOW_SEQUENCE_DB_UPLOAD_KEY = "allowSequenceDbUpload";
     public static final String SEQUENCE_DB_ROOT_TYPE = "SEQUENCE_DATABASE";
 
     public static final TaskId MZXML_CONVERTER_TASK_ID = new TaskId(ConvertTaskId.class, "mzxmlConverter");
@@ -144,57 +142,6 @@ public class MS2PipelineManager
         return m;
     }
 
-    public static void addSequenceDB(Container container, String name, BufferedReader reader) throws IOException, SQLException
-    {
-        File sequenceRoot = getSequenceDatabaseRoot(container);
-        if (sequenceRoot == null)
-        {
-            throw new IllegalArgumentException("Sequence root directory is not set.");
-        }
-        File fileDB = getSequenceDBFile(sequenceRoot, name);
-        if (fileDB.exists())
-        {
-            throw new IllegalArgumentException("The sequence database '" + name +
-                    "' already exists. Please choose another name.");
-        }
-
-        File dirDB = fileDB.getParentFile();
-        if (!dirDB.exists())
-            dirDB.mkdirs();
-
-        BufferedWriter writer = null;
-        try
-        {
-            String line;
-            writer = new BufferedWriter(new FileWriter(fileDB));
-            while ((line = reader.readLine()) != null)
-            {
-                /* @todo: check FASTA file format, and throw exception, if bad. */
-                writer.write(line, 0, line.length());
-                writer.write("\n", 0, 1);
-            }
-        }
-        catch (IOException eio)
-        {
-            _log.error("Error writing sequence database.", eio);
-            throw eio;
-        }
-        finally
-        {
-            if (writer != null)
-            {
-                try
-                {
-                    writer.close();
-                }
-                catch (IOException eio)
-                {
-                    _log.error("Error writing sequence database.", eio);
-                }
-            }
-        }
-    }
-
     public static File getSequenceDBFile(File fileRoot, String name)
     {
         if (fileRoot == null)
@@ -232,7 +179,7 @@ public class MS2PipelineManager
         return dbRoot.getRootPath();
     }
 
-    public static void setSequenceDatabaseRoot(User user, Container container, URI rootSeq, boolean allowUpload) throws SQLException
+    public static void setSequenceDatabaseRoot(User user, Container container, URI rootSeq) throws SQLException
     {
         PipelineService service = PipelineService.get();
 
@@ -242,23 +189,11 @@ public class MS2PipelineManager
              rootSeq = null;
 
         service.setPipelineRoot(user, container, SEQUENCE_DB_ROOT_TYPE, null, false, rootSeq);
-        if (root != null)
-            service.setPipelineProperty(container, ALLOW_SEQUENCE_DB_UPLOAD_KEY, allowUpload ? "true" : "false");
-        else
-            service.setPipelineProperty(container, ALLOW_SEQUENCE_DB_UPLOAD_KEY, null);
     }
 
     private static File getSequenceDatabaseRoot(PipeRoot root)
     {
         return root.resolvePath(DEFAULT_FASTA_DIR);
-    }
-
-    public static boolean allowSequenceDatabaseUploads(User user, Container container) throws SQLException
-    {
-        if (!container.hasPermission(user, InsertPermission.class))
-            return false;
-        Object obj = PipelineService.get().getPipelineProperty(container, ALLOW_SEQUENCE_DB_UPLOAD_KEY);
-        return Boolean.parseBoolean((String) obj);
     }
 
     public static File getLocalMascotFile(String sequenceRoot, String db, String release)

@@ -1087,7 +1087,6 @@ ms2/src/org/labkey/ms2/pipeline/SearchFormUtil.java -text
 ms2/src/org/labkey/ms2/pipeline/SearchServiceImpl.java -text
 ms2/src/org/labkey/ms2/pipeline/TPPTask.java -text
 ms2/src/org/labkey/ms2/pipeline/UnknownMS2Run.java -text
-ms2/src/org/labkey/ms2/pipeline/addSequenceDB.jsp -text
 ms2/src/org/labkey/ms2/pipeline/attachMSPictureFiles.jsp -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometRun.java -text

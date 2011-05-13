@@ -31,9 +31,6 @@
             <td><input type="text" name="localPathRoot" size="40" value="<%= h(getLocalPathRoot()) %>"></td>
         </tr>
         <tr>
-            <td><input type="checkbox" name="allowUpload" <%= isAllowUpload() ? "checked" : "" %>> Allow Upload</td>
-        </tr>
-        <tr>
             <td><%= generateSubmitButton("Save")%> <%=generateButton("Cancel", urlProvider(PipelineUrls.class).urlSetup(getContainer())) %></td>
         </tr>
     </table>
