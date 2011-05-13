@@ -44,22 +44,13 @@ run.output.file = run.props$val3[run.props$name == "runDataFile"];
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 
+# initialize the columns to be calculated
+run.data$estLogConc = NA;
+run.data$estConc = NA;
+run.data$se = NA;
+
 # setup the dataframe needed for the call to rumi
-dat = subset(run.data, select=c("well", "description", "name", "expConc", "type", "fi", "fiBackground", "dilution"));
-
-# change column name from "name" to "analyte"
-colnames(dat)[colnames(dat) == "name"] = "analyte";
-
-# change column name from expConc to expected_conc
-colnames(dat)[colnames(dat) == "expConc"] = "expected_conc";
-
-# get the assayId from the run properties
-dat$assay_id = NA;
-if(any(run.props$name == "assayId"))
-      dat$assay_id = run.props$val1[run.props$name == "assayId"];
-
-# TODO: WHAT TO USE FOR SAMPLE_ID? FOR NOW, SET SAMPLE_ID TO WELL|DESCRIPTION
-dat$sample_id=paste(dat$well, dat$description, sep="|");
+dat = subset(run.data, select=c("well", "description", "name", "expConc", "type", "fi", "fiBackground", "fiBackgroundBlank", "dilution"));
 
 # convert the type to a well_role
 dat$well_role[substr(dat$type,0,1) == "S"] = "Standard";
@@ -67,44 +58,75 @@ dat$well_role[substr(dat$type,0,1) == "X"] = "Sample";
 dat$well_role[substr(dat$type,0,1) == "C"] = "QC";
 dat$well_role[substr(dat$type,0,1) == "B"] = "Blank";
 
-# TODO: WHAT VALUE SHOULD BE USED FOR STANDARDS? fi OR fiBackground
-# TODO: WHAT VALUE SHOULD BE USED FOR NON-STANDARDS? fi OR fiBackground
-colnames(dat)[colnames(dat) == "fi"] = "fiOrig";
-dat$fi[dat$well_role == "Standard"] = dat$fiOrig[dat$well_role == "Standard"];
-dat$fi[dat$well_role != "Standard"] = dat$fiBackground[dat$well_role != "Standard"];
+# get a booelan vector of the records that are of type standard
+standards = !is.na(dat$well_role) & dat$well_role == "Standard";
 
-# initialize the columns to be calculated
-run.data$estLogConc = NA;
-run.data$estConc = NA;
-run.data$se = NA;
+if(any(standards)){
+    # change column name from "name" to "analyte"
+    colnames(dat)[colnames(dat) == "name"] = "analyte";
 
-# TODO: CHANGE TO GENERATE ONE PDF PER STANDARD
+    # change column name from expConc to expected_conc
+    colnames(dat)[colnames(dat) == "expConc"] = "expected_conc";
 
-# call the rumi function to calculate new estimated log concentrations for the uknowns
-mypdf(file="StndCurvePlots", mfrow=c(2,2))
-fits = rumi(dat, plot.se.profile=TRUE, test.lod=TRUE, verbose=TRUE);
-fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
-dev.off();
+    # get the assayId from the run properties
+    dat$assay_id = NA;
+    if(any(run.props$name == "assayId"))
+          dat$assay_id = run.props$val1[run.props$name == "assayId"];
 
-# put the calculated values back into the run.data dataframe by matching well, description, and analyte
-if(nrow(fits) > 0){
-    for(index in 1:nrow(fits)){
-        w = fits$well[index];
-        a = fits$analyte[index];
-        d = fits$description[index];
-        elc = fits$"est.log.conc"[index];
-        ec = fits$"est.conc"[index];
-        se = fits$"se"[index];
+    # TODO: WHAT TO USE FOR SAMPLE_ID? FOR NOW, SET SAMPLE_ID TO WELL|DESCRIPTION
+    dat$sample_id=paste(dat$well, dat$description, sep="|");
 
-        runDataIndex = run.data$well == w & run.data$name == a & run.data$description == d;
+    # designate which value to use for the FI to be passed to the rumi function
+    # TODO: WHAT VALUE SHOULD BE USED FOR STANDARDS? fi OR fiBackground
+    colnames(dat)[colnames(dat) == "fi"] = "fiOrig";
+    dat$fi[standards] = dat$fiOrig[standards];
+    # choose the FI column based on the run property provided by the user, default to the original FI value
+    if(any(!standards)){
+        fiCol = "FI";
+        if(any(run.props$name == "UnkCurveFitInput"))
+            fiCol = run.props$val1[run.props$name == "UnkCurveFitInput"];
 
-        run.data$estLogConc[runDataIndex] = elc;
-        run.data$estConc[runDataIndex] = ec;
-        run.data$se[runDataIndex] = se;
+        if(fiCol == "FI-Bkgd")
+            dat$fi[!standards] = dat$fiBackground[!standards]
+        else if(fiCol == "FI-Bkgd-Blank")
+            dat$fi[!standards] = dat$fiBackgroundBlank[!standards]
+        else
+            dat$fi[!standards] = dat$fiOrig[!standards];
     }
 
-    # TODO: WHAT TO DO WITH SE = INF?
-    run.data$se[run.data$se == "Inf"] = NA;
+    # subset the dat object to just those records that have an FI
+    dat = subset(dat, !is.na(fi));
+
+    print(data.frame(dat$analyte, dat$type, dat$expected_conc, dat$fiOrig, dat$fiBackground, dat$fiBackgroundBlank, dat$fi))
+
+    # TODO: CHANGE TO GENERATE ONE PDF PER STANDARD (WITH TITLE = STANDARD DESC)
+
+    # call the rumi function to calculate new estimated log concentrations for the uknowns
+    mypdf(file="StndCurvePlots", mfrow=c(2,2))
+    fits = rumi(dat, plot.se.profile=TRUE, test.lod=TRUE, verbose=TRUE);
+    fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
+    dev.off();
+
+    # put the calculated values back into the run.data dataframe by matching well, description, and analyte
+    if(nrow(fits) > 0){
+        for(index in 1:nrow(fits)){
+            w = fits$well[index];
+            a = fits$analyte[index];
+            d = fits$description[index];
+            elc = fits$"est.log.conc"[index];
+            ec = fits$"est.conc"[index];
+            se = fits$"se"[index];
+
+            runDataIndex = run.data$well == w & run.data$name == a & run.data$description == d;
+
+            run.data$estLogConc[runDataIndex] = elc;
+            run.data$estConc[runDataIndex] = ec;
+            run.data$se[runDataIndex] = se;
+        }
+
+        # TODO: WHAT TO DO WITH SE = INF?
+        run.data$se[run.data$se == "Inf"] = NA;
+    }
 }
 
 # write the new set of run data out to an output file
