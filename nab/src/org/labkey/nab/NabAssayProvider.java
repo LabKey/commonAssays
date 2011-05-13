@@ -16,35 +16,71 @@
 
 package org.labkey.nab;
 
-import org.labkey.api.data.*;
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.api.*;
+import org.jetbrains.annotations.NotNull;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SimpleDisplayColumn;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.LsidManager;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.OntologyObject;
+import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.assay.*;
+import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.study.assay.AssayDataLinkDisplayColumn;
+import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.study.assay.AssayPipelineProvider;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayTableMetadata;
+import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.RunListDetailsQueryView;
+import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
-import org.labkey.api.view.*;
-import org.labkey.api.qc.DataExchangeHandler;
-import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.ViewContext;
 import org.labkey.nab.query.NabRunDataTable;
 import org.labkey.nab.query.NabSchema;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: brittp
@@ -350,7 +386,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                         ActionURL url = new ActionURL(NabAssayController.DetailsAction.class, ctx.getContainer()).addParameter("rowId", "" + runId);
                         Map<String, String> title = new HashMap<String, String>();
                         title.put("title", "View run details");
-                        out.write(PageFlowUtil.textLink("run details", url.getLocalURIString(), "", "", title));
+                        out.write(PageFlowUtil.textLink("run details", url, "", "", title));
                     }
                 }
 

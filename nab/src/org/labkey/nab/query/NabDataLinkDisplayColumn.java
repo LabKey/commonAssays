@@ -42,7 +42,7 @@ public class NabDataLinkDisplayColumn extends SimpleDisplayColumn
             ActionURL url = new ActionURL(NabAssayController.DetailsAction.class, ctx.getContainer()).addParameter("rowId", "" + runId);
             Map<String, String> title = new HashMap<String, String>();
             title.put("title", "View run details");
-            out.write(PageFlowUtil.textLink("details", url.getLocalURIString(), "", "", title)); 
+            out.write(PageFlowUtil.textLink("details", url, "", "", title)); 
         }
     }
 }

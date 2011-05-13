@@ -18,9 +18,8 @@ package org.labkey.flow.data;
 
 import org.apache.commons.lang.StringUtils;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SampleKey
 {
@@ -28,7 +27,7 @@ public class SampleKey
 
     public SampleKey()
     {
-        _values = new ArrayList();
+        _values = new ArrayList<Object>();
     }
 
     public void addValue(Object value)
