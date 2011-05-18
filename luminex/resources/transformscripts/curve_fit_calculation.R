@@ -9,8 +9,8 @@
 # for the unknowns.
 #
 
-source("http://youtil.googlecode.com/files/youtil.R")
-source("http://www.labkey.org/download/rumi.R")
+source("http://youtil.googlecode.com/files/youtil.R");
+source("http://www.labkey.org/download/rumi.R");
 
 # set up a data frame to store the run properties
 run.props = data.frame(NA, NA, NA, NA);
@@ -96,8 +96,6 @@ if(any(standards)){
 
     # subset the dat object to just those records that have an FI
     dat = subset(dat, !is.na(fi));
-
-    print(data.frame(dat$analyte, dat$type, dat$expected_conc, dat$fiOrig, dat$fiBackground, dat$fiBackgroundBlank, dat$fi))
 
     # TODO: CHANGE TO GENERATE ONE PDF PER STANDARD (WITH TITLE = STANDARD DESC)
 

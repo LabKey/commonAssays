@@ -14,8 +14,8 @@
 # uses the given Standard curve data to calculate est.log.conc an se for the unknowns.
 #
 
-source("http://youtil.googlecode.com/files/youtil.R")
-source("http://www.labkey.org/download/rumi.R")
+source("http://youtil.googlecode.com/files/youtil.R");
+source("http://www.labkey.org/download/rumi.R");
 
 ######################## STEP 1: READ IN THE RUN PROPERTIES AND RUN DATA #######################
 
@@ -140,8 +140,6 @@ if(any(standards)){
 
     # subset the dat object to just those records that have an FI
     dat = subset(dat, !is.na(fi));
-
-    print(data.frame(dat$analyte, dat$type, dat$expected_conc, dat$fiOrig, dat$fiBackground, dat$fiBackgroundBlank, dat$fi))
 
     # TODO: CHANGE TO GENERATE ONE PDF PER STANDARD (WITH TITLE = STANDARD DESC)
 
