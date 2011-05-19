@@ -18,23 +18,30 @@ package org.labkey.luminex;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerForeignKey;
+import org.labkey.api.data.OORDisplayColumnFactory;
+import org.labkey.api.data.Parameter;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.UpdateableTableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.data.*;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.SpecimenForeignKey;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -232,7 +239,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
     @Override
     public Parameter.ParameterMap insertStatement(Connection conn, User user) throws SQLException
     {
-        return Table.insertStatement(conn, user, this);
+        return Table.insertStatement(conn, this, getContainer(), user, true);
     }
 
     @Override
