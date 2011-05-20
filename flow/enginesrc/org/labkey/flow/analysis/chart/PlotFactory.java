@@ -23,11 +23,13 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYDotRenderer;
 import org.jfree.data.Range;
 import org.jfree.data.xy.XYDataset;
+import org.labkey.api.arrays.DoubleArray;
 import org.labkey.api.view.Stats;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.util.RangeFunction;
 
 import java.awt.*;
+import java.util.Arrays;
 
 /**
  */
@@ -181,11 +183,35 @@ public class PlotFactory
         plot.setDomainCrosshairLockedOnData(false);
         plot.setRangeCrosshairLockedOnData(false);
 
-        // When calculating the Z value range, exclude values on the axes
-        Range rangeZValues = cds.getZValueRange(new Range(xValues[1], xValues[xValues.length - 2]),
-                new Range(yValues[1], yValues[yValues.length - 2]));
-        plot.getColorBar().setMaximumValue(rangeZValues.getUpperBound());
+        // Ignore the top 2% of values when determining the color of an x,y coordinate.
+        double maxValue = computePercentile(cds, xValues, yValues, 0.98);
+        plot.getColorBar().setMaximumValue(maxValue);
         return plot;
+    }
+
+    private static double computePercentile(DensityDataset cds, double[] xValues, double[] yValues, double percentile)
+    {
+        // When calculating the range, exclude z-values on the axes.
+        DoubleArray da = new DoubleArray();
+        for (int x = 1; x < xValues.length-1; x++)
+        {
+            for (int y = 1; y < yValues.length-1; y++)
+            {
+                int index = (x * yValues.length) + y;
+                double d = cds.getZValue(0, index);
+                if (d > 0)
+                    da.add(d);
+            }
+        }
+        if (da.size() == 0)
+            return 0;
+
+        // Find the n-th percentile of the z-values
+        double[] z = da.toArray(null);
+        Arrays.sort(z);
+        int scaled = (int)Math.ceil(z.length * percentile);
+        int index = Math.max(Math.min(scaled, z.length - 1), 0);
+        return z[index];
     }
     
     static public XYPlot createScatterPlot(Subset subset, String domainAxis, String rangeAxis)

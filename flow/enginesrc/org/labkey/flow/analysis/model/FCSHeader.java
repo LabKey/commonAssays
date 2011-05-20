@@ -161,9 +161,6 @@ public class FCSHeader
 
     protected DataFrame createDataFrame(float[][] data)
     {
-        // by default we use either linear, or a modified log
-        // to be compatible with flowjo we use simple log for non-compensated integer data
-        // we're just going to assume the fcs data is non-compensated
         boolean datatypeI = "I".equals(getKeyword("$DATATYPE"));
         boolean facsCalibur = "FACSCalibur".equals(getKeyword("$CYT"));
 
@@ -173,6 +170,7 @@ public class FCSHeader
         {
             String key = "$P" + (i + 1);
             String name = getKeyword(key + "N");
+            int bits = Integer.parseInt(getKeyword(key + "B"));
             double range = Double.parseDouble(getKeyword(key + "R"));
             String E = getKeyword(key + "E");
             double decade = Double.parseDouble(E.substring(0, E.indexOf(',')));
@@ -180,15 +178,26 @@ public class FCSHeader
             DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
             f.setDescription(getKeyword(key + "S"));
             f.setScalingFunction(ScalingFunction.makeFunction(decade, scale, range));
-            if (datatypeI && facsCalibur && 0 != decade)
-                f.setSimpleLogAxis(true);
+
+            // By default we use either linear, or a modified log but in some cases we use simple log for FlowJo compatibility.
+            if (0 != decade)
+            {
+                // Use simple log if the range is <4096 and bits is 32.
+                // This is a legacy behavior of FlowJo due to an internal representation of bins
+                if (range < 4096 && (bits == 16 || bits == 32))
+                    f.setSimpleLogAxis(true);
+
+                // Use simple log for non-compensated integer data.
+                // We're just going to assume the fcs data is non-compensated.
+                if (datatypeI && facsCalibur)
+                    f.setSimpleLogAxis(true);
+            }
             if (datatypeI)
                 f.setDither(true);
             fields[i] = f;
         }
         return new DataFrame(fields, data);
     }
-
 
     public DataFrame createEmptyDataFrame()
     {
