@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang.StringUtils;
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
 import org.labkey.api.pipeline.PipelineJob;
@@ -84,6 +85,9 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
     private static final FileType FT_INTERMEDIATE_PROT_XSL = new FileType(".pep-prot.xsl");
     private static final FileType FT_INTERMEDIATE_PROT_SHTML = new FileType(".pep-prot.shtml");
 
+    /** Our desired extension for the final output */
+    private static final FileType FT_LIBRA_QUANTITATION = new FileType(".libra.tsv");
+
     private static final String PEPTIDE_PROPHET_ACTION_NAME = "PeptideProphet";
     private static final String PROTEIN_PROPHET_ACTION_NAME = "ProteinProphet";
     private static final String PEPTIDE_QUANITATION_ACTION_NAME = "Peptide Quantitation";
@@ -91,6 +95,17 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
     public static final String PEP_XML_INPUT_ROLE = "PepXML";
     public static final String PROT_XML_INPUT_ROLE = "ProtXML";
+    public static final String LIBRA_CONFIG_INPUT_ROLE = "LibraConfig";
+    public static final String LIBRA_OUTPUT_ROLE = "LibraOutput";
+
+    // All of the supported quantitation engines
+    public static final String XPRESS_ALGORITHM_NAME = "xpress";
+    public static final String Q3_ALGORITHM_NAME = "q3";
+    public static final String LIBRA_ALGORITHM_NAME = "libra";
+
+    private static final String PIPELINE_QUANT_PREFIX = "pipeline quantitation, ";
+    private static final String LIBRA_CONFIG_NAME_PARAM = PIPELINE_QUANT_PREFIX + "libra config name";
+    private static final String LIBRA_NORMALIZATION_CHANNEL_PARAM = PIPELINE_QUANT_PREFIX + "libra normalization channel";
 
     public static String getTPPVersion(PipelineJob job)
     {
@@ -258,6 +273,10 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
             List<RecordedAction> actions = new ArrayList<RecordedAction>();
 
+            String quantitationAlgorithm = getQuantitionAlgorithm(params);
+            // Non-null if we're doing Libra quantitation
+            @Nullable File libraConfigFile = getLibraConfigFile(params, quantitationAlgorithm);
+
             // First step takes all the pepXMLs as inputs and either runs PeptideProphet (non-join) or rolls them up (join)
             RecordedAction pepXMLAction = new RecordedAction(PEPTIDE_PROPHET_ACTION_NAME);
             actions.add(pepXMLAction);
@@ -306,13 +325,16 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
             if (dirMzXml != null)
             {
-                quantParams = getQuantitationCmd(params, _wd.getRelativePath(dirMzXml));
+                quantParams = getQuantitationCmd(params, _wd.getRelativePath(dirMzXml), libraConfigFile);
                 if (quantParams != null)
                 {
                     peptideQuantAction = new RecordedAction(PEPTIDE_QUANITATION_ACTION_NAME);
-                    String algorithm = getQuantitionAlgorithm(params);
-                    peptideQuantAction.setDescription(algorithm + " " + peptideQuantAction.getName());
-                    peptideQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), algorithm);
+                    peptideQuantAction.setDescription(quantitationAlgorithm + " " + peptideQuantAction.getName());
+                    peptideQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), quantitationAlgorithm);
+                    if (libraConfigFile != null)
+                    {
+                        peptideQuantAction.addInput(libraConfigFile, LIBRA_CONFIG_INPUT_ROLE);
+                    }
                     actions.add(peptideQuantAction);
                 }
             }
@@ -383,9 +405,12 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 if (getJobSupport().isProphetEnabled())
                 {
                     proteinQuantAction = new RecordedAction(PROTEIN_QUANITATION_ACTION_NAME);
-                    String algorithm = getQuantitionAlgorithm(params);
-                    proteinQuantAction.setDescription(algorithm + " " + proteinQuantAction.getName());
-                    proteinQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), algorithm);
+                    proteinQuantAction.setDescription(quantitationAlgorithm + " " + proteinQuantAction.getName());
+                    proteinQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), quantitationAlgorithm);
+                    if (libraConfigFile != null)
+                    {
+                        proteinQuantAction.addInput(libraConfigFile, LIBRA_CONFIG_INPUT_ROLE);
+                    }
                 }
             }
 
@@ -525,6 +550,14 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                     // Add this here so that it's the last step in the TPP sequence
                     actions.add(proteinQuantAction);
                 }
+
+                if (libraConfigFile != null)
+                {
+                    // Rename from the static name quantitation.tsv to <BASE_NAME>.libra.tsv
+                    File libraOutputWork = new File(_wd.getDir(), "quantitation.tsv");
+                    File libraOutput = _wd.outputFile(libraOutputWork, FT_LIBRA_QUANTITATION.getName(_wd.getDir(), getJobSupport().getBaseName()));
+                    proteinQuantAction.addOutput(libraOutput, LIBRA_OUTPUT_ROLE, false);
+                }
             }
             finally
             {
@@ -562,6 +595,29 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         }
     }
 
+    /** @return Libra config file, in its original location, or null if we're not using Libra */
+    private @Nullable File getLibraConfigFile(Map<String, String> params, String quantitationAlgorithm)
+            throws PipelineJobException, IOException
+    {
+        File result = null;
+        if (LIBRA_ALGORITHM_NAME.equalsIgnoreCase(quantitationAlgorithm))
+        {
+            String libraConfigName = params.get(LIBRA_CONFIG_NAME_PARAM);
+            if (libraConfigName == null)
+            {
+                throw new PipelineJobException("Name of Libra configuration must be specified using \"" + LIBRA_CONFIG_NAME_PARAM + "\"");
+            }
+            LibraProtocolFactory factory = new LibraProtocolFactory();
+            result = factory.getProtocolFile(getJob().getPipeRoot(), libraConfigName);
+            if (!NetworkDrive.exists(result))
+            {
+                throw new PipelineJobException("Libra config file does not exist: " + result);
+            }
+            _wd.inputFile(result, true);
+        }
+        return result;
+    }
+
     private boolean isSpectraProcessor(Map<String, String> params)
     {
         // Spectrum file(s) required to do quantitation.
@@ -570,19 +626,33 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
     
     private String getQuantitionAlgorithm(Map<String, String> params)
     {
-        String paramAlgorithm = params.get("pipeline quantitation, algorithm");
+        String paramAlgorithm = params.get(PIPELINE_QUANT_PREFIX + "algorithm");
         if (paramAlgorithm == null)
             return null;
-        if (!"q3".equalsIgnoreCase(paramAlgorithm) && !"xpress".equalsIgnoreCase(paramAlgorithm))
+        if (!Q3_ALGORITHM_NAME.equalsIgnoreCase(paramAlgorithm) &&
+            !XPRESS_ALGORITHM_NAME.equalsIgnoreCase(paramAlgorithm) &&
+            !LIBRA_ALGORITHM_NAME.equalsIgnoreCase(paramAlgorithm))
+        {
             return null;    // CONSIDER: error message.
+        }
         return paramAlgorithm;
     }
 
-    private String[] getQuantitationCmd(Map<String, String> params, String pathMzXml) throws FileNotFoundException
+    private String[] getQuantitationCmd(Map<String, String> params, String pathMzXml, File libraConfigFile) throws FileNotFoundException, PipelineJobException
     {
         String paramAlgorithm = getQuantitionAlgorithm(params);
         if (paramAlgorithm == null)
             return null;
+
+        if (LIBRA_ALGORITHM_NAME.equalsIgnoreCase(paramAlgorithm))
+        {
+            String normalizationChannelString = params.get(LIBRA_NORMALIZATION_CHANNEL_PARAM);
+            if (normalizationChannelString == null)
+            {
+                throw new PipelineJobException("Libra normalization channel must be specified using \"" + LIBRA_NORMALIZATION_CHANNEL_PARAM + "\"");
+            }
+            return new String[] { "-L" + libraConfigFile.getName() + "-" + normalizationChannelString};
+        }
 
         List<String> quantOpts = new ArrayList<String>();
 
@@ -630,7 +700,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
         quantOpts.add("-d\"" + pathMzXml + "\"");
 
-        if ("xpress".equals(paramAlgorithm))
+        if (XPRESS_ALGORITHM_NAME.equals(paramAlgorithm))
             return new String[] { "-X" + StringUtils.join(quantOpts.iterator(), ' ') };
 
         String paramMinPP = params.get("pipeline quantitation, min peptide prophet");

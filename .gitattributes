@@ -1072,6 +1072,7 @@ ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.jsp -text
 ms2/src/org/labkey/ms2/pipeline/FastaCheckTask.java -text
 ms2/src/org/labkey/ms2/pipeline/FileStatus.java -text
+ms2/src/org/labkey/ms2/pipeline/LibraProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2ImportPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineForm.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineJobSupport.java -text
