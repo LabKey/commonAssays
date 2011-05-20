@@ -14,8 +14,8 @@
 # uses the given Standard curve data to calculate est.log.conc an se for the unknowns.
 #
 
-source("http://youtil.googlecode.com/files/youtil.R");
-source("http://www.labkey.org/download/rumi.R");
+source("${srcDirectory}/youtil.R");
+source("${srcDirectory}/rumi.R");
 
 ######################## STEP 1: READ IN THE RUN PROPERTIES AND RUN DATA #######################
 
