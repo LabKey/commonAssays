@@ -76,8 +76,6 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
         exportRuns.setRequiresSelection(true);
         exportRuns.setDisplayPermission(ReadPermission.class);
         bar.add(exportRuns);
-
-        bar.add(createButton(context, MS2Controller.ShowHierarchyAction.class, "Show Hierarchy", ActionButton.Action.LINK));
     }
 
     public Priority getPriority(ExpProtocol protocol)

@@ -329,11 +329,6 @@ public class MS2Controller extends SpringActionController
         exportRuns.setDisplayPermission(ReadPermission.class);
         bb.add(exportRuns);
 
-        ActionButton showHierarchy = new ActionButton(ShowHierarchyAction.class, "Show Hierarchy");
-        showHierarchy.setActionType(ActionButton.Action.LINK);
-        showHierarchy.setDisplayPermission(ReadPermission.class);
-        bb.add(showHierarchy);
-
         ActionButton moveRuns = new ActionButton(SelectMoveLocationAction.class, "Move");
         moveRuns.setRequiresSelection(true);
         moveRuns.setActionType(ActionButton.Action.GET);
@@ -4493,70 +4488,6 @@ public class MS2Controller extends SpringActionController
         public String[] goCategories;
         public String[] IPI;
     }
-
-
-    @RequiresPermissionClass(ReadPermission.class)
-    public class ShowHierarchyAction extends SimpleViewAction
-    {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
-        {
-            ActionURL currentURL = getViewContext().cloneActionURL();
-            MS2RunHierarchyTree ht = new MS2RunHierarchyTree(currentURL.getExtraPath(), getUser(), currentURL);
-            String formName = "hierarchy";
-
-            StringBuilder html = new StringBuilder();
-            html.append("<script type=\"text/javascript\">\n");
-            html.append("LABKEY.requiresScript('DataRegion.js');\n");
-            html.append("</script>");
-            html.append("<form method=post name=\"").append(formName).append("\" action=''>");
-
-            html.append("<table class=\"labkey-data-region\">");
-            ht.render(html);
-            html.append("</table>");
-            html.append("<input type='hidden' name='").append(DataRegionSelection.DATA_REGION_SELECTION_KEY).append("' value='").append(PageFlowUtil.filter(ht.getSelectionKey())).append("'>");
-
-            renderHierarchyButtonBar(html, ht.getSelectionKey(), formName);
-            html.append("</form>");
-
-            return new HtmlView(html.toString());
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return appendRootNavTrail(root, "Hierarchy", getPageConfig(), "ms2RunsList");
-        }
-    }
-
-
-    private void renderHierarchyButtonBar(StringBuilder html, String selectionKey, String formName) throws IOException
-    {
-        ButtonBar bb = new ButtonBar();
-
-        bb.add(ActionButton.BUTTON_SELECT_ALL);
-        bb.add(ActionButton.BUTTON_CLEAR_ALL);
-
-        // Hack up a DataRegion/DataView so we can create the compare menu
-        QuerySettings settings = new QuerySettings(getViewContext(), formName);
-        settings.setSelectionKey(selectionKey);
-
-        DataRegion rgn = new DataRegion();
-        rgn.setSettings(settings);
-        GridView view = new GridView(rgn, (BindException)null);
-
-        bb.add(createCompareMenu(getContainer(), view, false));
-
-        ActionButton exportRuns = new ActionButton(PickExportRunsView.class, "MS2 Export");
-        exportRuns.setScript("return verifySelected(this.form, \"pickExportRunsView.view\", \"post\", \"runs\")");
-        exportRuns.setActionType(ActionButton.Action.GET);
-        exportRuns.setDisplayPermission(ReadPermission.class);
-        bb.add(exportRuns);
-
-        StringWriter s = new StringWriter();
-
-        bb.render(new RenderContext(getViewContext()), s);
-        html.append(s);
-    }
-
 
     protected void showElutionGraph(HttpServletResponse response, DetailsForm form, boolean showLight, boolean showHeavy) throws Exception
     {
