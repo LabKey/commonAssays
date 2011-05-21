@@ -362,11 +362,9 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         @Override
         protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
-            boolean transaction = ExperimentService.get().isTransactionActive();
             try
             {
-                 if (!transaction)
-                    ExperimentService.get().beginTransaction();
+                ExperimentService.get().ensureTransaction();
 
                 ExpRun run = saveExperimentRun(form);
 
@@ -394,8 +392,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                     experiment = createExperiment(form);
                 experiment.addRuns(form.getUser(), run);
 
-                if (!transaction)
-                    ExperimentService.get().commitTransaction();
+                ExperimentService.get().commitTransaction();
 
                 return afterRunCreation(form, run, errors);
             }
@@ -418,8 +415,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             }
             finally
             {
-                if (!transaction)
-                    ExperimentService.get().closeTransaction();
+                ExperimentService.get().closeTransaction();
             }
         }
 

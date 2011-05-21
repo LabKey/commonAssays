@@ -229,7 +229,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         {
             try
             {
-                LuminexSchema.getSchema().getScope().beginTransaction();
+                LuminexSchema.getSchema().getScope().ensureTransaction();
                 if (!form.isResetDefaultValues())
                 {
                     for (String analyte : form.getAnalyteNames())

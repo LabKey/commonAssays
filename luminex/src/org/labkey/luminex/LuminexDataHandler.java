@@ -364,13 +364,9 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
      */
     private void _importData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, Map<Analyte, List<LuminexDataRow>> inputData, Map<String, Object> excelRunProps) throws SQLException, ExperimentException
     {
-        boolean ownTransaction = !ExperimentService.get().isTransactionActive();
-        if (ownTransaction)
-        {
-            ExperimentService.get().beginTransaction();
-        }
         try
         {
+            ExperimentService.get().ensureTransaction();
             ExpProtocol protocol = expRun.getProtocol();
             ParticipantVisitResolver resolver = null;
             LuminexAssayProvider provider = (LuminexAssayProvider)AssayService.get().getProvider(protocol);
@@ -461,11 +457,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 }
             }, excelRunColumns, excelRunPropsList, true);
 
-            if (ownTransaction)
-            {
-                ExperimentService.get().commitTransaction();
-                ownTransaction = false;
-            }
+            ExperimentService.get().commitTransaction();
         }
         catch (ValidationException ve)
         {
@@ -473,10 +465,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         }
         finally
         {
-            if (ownTransaction)
-            {
-                ExperimentService.get().rollbackTransaction();
-            }
+            ExperimentService.get().closeTransaction();
         }
     }
 

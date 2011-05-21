@@ -279,7 +279,7 @@ public class ProteinController extends SpringActionController
             }
 
             DbScope scope = ProteinManager.getSchema().getScope();
-            Connection connection = scope.beginTransaction();
+            Connection connection = scope.ensureTransaction();
             try
             {
                 CustomAnnotationSet annotationSet = new CustomAnnotationSet();

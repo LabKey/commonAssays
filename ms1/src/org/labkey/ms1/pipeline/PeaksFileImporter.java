@@ -74,14 +74,9 @@ public class PeaksFileImporter extends DefaultHandler
         }
     }
 
-    protected void rollbackTransaction()
+    protected void closeConnection()
     {
-        DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().rollbackTransaction();
-    }
-
-    protected boolean isTransactionActive()
-    {
-        return DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().isTransactionActive();
+        DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().closeConnection();
     }
 
     public void startDocument() throws SAXException
@@ -105,13 +100,11 @@ public class PeaksFileImporter extends DefaultHandler
             map.put("Imported", Boolean.TRUE);
             Table.update(_user, MS1Manager.get().getTable(MS1Manager.TABLE_FILES), map, _idFile);
 
-            if(isTransactionActive())
-                commitTransaction();
+            commitTransaction();
         }
         catch(SQLException e)
         {
-            if(isTransactionActive())
-                rollbackTransaction();
+            closeConnection();
             throw new SAXException(MS1Manager.get().getAllErrors(e));
         }
 
@@ -144,8 +137,7 @@ public class PeaksFileImporter extends DefaultHandler
         }
         catch(SQLException e)
         {
-            if(isTransactionActive())
-                rollbackTransaction();
+            closeConnection();
             throw new SAXException(MS1Manager.get().getAllErrors(e));
         }
     }

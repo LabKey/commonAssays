@@ -228,7 +228,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         //NOTE: I'm using the highly-efficient technique of prepared statements and batch execution here,
         //but that also means I'm not using the Table layer and benefiting from its functionality.
         // This may need to change in the future.
-        Connection cn = null;
+        Connection cn;
         PreparedStatement pstmt = null;
 
         //get the ms1 schema and scope
@@ -238,8 +238,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         try
         {
             //begin a transaction
-            scope.beginTransaction();
-            cn = schema.getScope().getConnection();
+            cn = scope.ensureTransaction();
             long startMs = System.currentTimeMillis();
 
             //insert the feature files row
@@ -314,24 +313,21 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         catch(ConversionException ex)
         {
             log.error("Error while converting data in row " + (numRows + 1) + " : " + ex);
-            scope.rollbackTransaction();
             throw new ExperimentException(ex);
         }
         catch(IOException ex)
         {
-            scope.rollbackTransaction();
             throw new ExperimentException(ex);
         }
         catch(SQLException ex)
         {
-            scope.rollbackTransaction();
             throw new ExperimentException(MS1Manager.get().getAllErrors(ex));
         }
         finally
         {
             //final cleanup
             try{if(null != pstmt) pstmt.close();}catch(SQLException ignore){}
-            if(null != cn) scope.releaseConnection(cn);
+            scope.closeConnection();
         } //finally
 
     } //importFile()

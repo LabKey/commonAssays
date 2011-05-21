@@ -203,7 +203,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
         }
         else
         {
-            ExperimentService.get().beginTransaction();
+            ExperimentService.get().ensureTransaction();
             try
             {
                 for (Map.Entry<File, String> entry : filesToAdd.entrySet())

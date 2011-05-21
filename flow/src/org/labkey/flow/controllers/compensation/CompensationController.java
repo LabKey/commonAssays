@@ -112,29 +112,17 @@ public class CompensationController extends BaseFlowController
                 addError(errors, "Error parsing file:" + e);
                 return false;
             }
-            boolean fTrans = false;
             try
             {
                 AttributeSet attrs = new AttributeSet(comp);
                 AttributeSetHelper.prepareForSave(attrs, getContainer());
-                if (!svc.isTransactionActive())
-                {
-                    svc.beginTransaction();
-                    fTrans = true;
-                }
+                svc.ensureTransaction();
                 _flowComp = FlowCompensationMatrix.create(getUser(), getContainer(), form.ff_compensationMatrixName, attrs);
-                if (fTrans)
-                {
-                    svc.commitTransaction();
-                    fTrans = false;
-                }
+                svc.commitTransaction();
             }
             finally
             {
-                if (fTrans)
-                {
-                    svc.rollbackTransaction();
-                }
+                svc.closeTransaction();
             }
             return true;
         }

@@ -318,7 +318,7 @@ public class MS2Manager
     {
         try
         {
-            ExperimentService.get().getSchema().getScope().beginTransaction();
+            ExperimentService.get().getSchema().getScope().ensureTransaction();
 
             Container container = run.getContainer();
             final File pepXMLFile = new File(run.getPath(), run.getFileName());

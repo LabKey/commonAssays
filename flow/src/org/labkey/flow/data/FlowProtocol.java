@@ -290,14 +290,10 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         ColumnInfo colSampleId = columns.get(fieldSampleRowId);
         int ret = 0;
         ResultSet rs = Table.select(fcsFilesTable, new ArrayList<ColumnInfo>(columns.values()), null, null);
-        boolean fTransaction = false;
         try
         {
-            if (!svc.isTransactionActive())
-            {
-                svc.beginTransaction();
-                fTransaction = true;
-            }
+            svc.ensureTransaction();
+
             while (rs.next())
             {
                 int fcsFileId = ((Number) colRowId.getValue(rs)).intValue();
@@ -349,16 +345,12 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     ret ++;
                 }
             }
-            if (fTransaction)
-            {
-                svc.commitTransaction();
-            }
+            svc.commitTransaction();
         }
         finally
         {
             rs.close();
-            if (fTransaction)
-                svc.closeTransaction();
+            svc.closeTransaction();
         }
         return ret;
     }
@@ -487,15 +479,11 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         ColumnInfo colRowId = table.getColumn(ExpDataTable.Column.RowId);
         columns.put(new FieldKey(null, "RowId"), colRowId);
         columns.putAll(QueryService.get().getColumns(table, Arrays.asList(fs.getFieldKeys())));
-        boolean fTrans = false;
         ResultSet rs = Table.select(table, new ArrayList<ColumnInfo>(columns.values()), null, null);
         try
         {
-            if (!expService.isTransactionActive())
-            {
-                expService.beginTransaction();
-                fTrans = true;
-            }
+            expService.ensureTransaction();
+
             while (rs.next())
             {
                 int rowid = ((Number) colRowId.getValue(rs)).intValue();
@@ -511,19 +499,12 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     }
                 }
             }
-            if (fTrans)
-            {
-                expService.commitTransaction();
-                fTrans = false;
-            }
+            expService.commitTransaction();
         }
         finally
         {
             FlowManager.get().flowObjectModified();
-            if (fTrans)
-            {
-                expService.rollbackTransaction();
-            }
+            expService.closeTransaction();
         }
         rs.close();
     }

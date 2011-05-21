@@ -230,24 +230,23 @@ public class RImportJob extends FlowExperimentJob
 
         Map<String, AttributeSet> analysisMap = loadAnalysis();
 
-        boolean transaction = false;
+        boolean success = false;
         try
         {
-            svc.beginTransaction();
-            transaction = true;
+            svc.ensureTransaction();
 
             FlowRun run = createRun(svc, analysisMap);
 
             svc.commitTransaction();
-            transaction = false;
+            success = true;
 
             addStatus("Import completed");
         }
         catch (Exception e)
         {
-            if (transaction)
+            svc.closeTransaction();
+            if (!success)
             {
-                svc.rollbackTransaction();
                 error("Import failed to complete", e);
                 addError(null, null, e.toString());
             }

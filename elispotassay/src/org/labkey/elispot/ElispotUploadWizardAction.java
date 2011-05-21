@@ -292,7 +292,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedAntigenProperties.entrySet())
                     form.saveDefaultValues(entry.getValue(), entry.getKey());
 
-                ExperimentService.get().getSchema().getScope().beginTransaction();
+                ExperimentService.get().getSchema().getScope().ensureTransaction();
                 ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
                 if (data.length != 1)
                     throw new ExperimentException("Elispot should only upload a single file per run.");

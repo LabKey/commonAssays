@@ -427,15 +427,11 @@ public class FlowManager
 
     private void deleteAttributes(SQLFragment sqlObjectIds) throws SQLException
     {
-        boolean transaction = false;
         DbScope scope = getSchema().getScope();
         try
         {
-            if (!scope.isTransactionActive())
-            {
-                scope.beginTransaction();
-                transaction = true;
-            }
+            scope.ensureTransaction();
+
             Integer[] objids = Table.executeArray(getSchema(), sqlObjectIds, Integer.class);
             deleteAttributes(objids);
             /* This can be very slow with postgres! so we'll try selecting the objectids
@@ -444,18 +440,11 @@ public class FlowManager
             Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN (" + sqlObjectIds.getSQL() + ")", sqlObjectIds.getParamsArray());
             Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN (" + sqlObjectIds.getSQL() + ")", sqlObjectIds.getParamsArray());
             */
-            if (transaction)
-            {
-                scope.commitTransaction();
-                transaction = false;
-            }
+            scope.commitTransaction();
         }
         finally
         {
-            if (transaction)
-            {
-                scope.rollbackTransaction();
-            }
+            scope.closeConnection();
         }
     }
 
@@ -471,31 +460,21 @@ public class FlowManager
     private void deleteObjectIds(Integer[] oids, Set<Container> containers) throws SQLException
     {
         DbScope scope = getSchema().getScope();
-        boolean fTrans = false;
         try
         {
-            if (!scope.isTransactionActive())
-            {
-                scope.beginTransaction();
-                fTrans = true;
-            }
+            scope.ensureTransaction();
+
             deleteAttributes(oids);
             SQLFragment sqlf = new SQLFragment("DELETE FROM flow.Object WHERE RowId IN (" );
             sqlf.append(StringUtils.join(oids,','));
             sqlf.append(")");
             Table.execute(getSchema(), sqlf);
-            if (fTrans)
-            {
-                scope.commitTransaction();
-                fTrans = false;
-            }
+            scope.commitTransaction();
         }
         finally
         {
-            if (fTrans)
-            {
-                getSchema().getScope().rollbackTransaction();
-            }
+            getSchema().getScope().closeConnection();
+
             for (Container container : containers)
             {
                 AttributeCache.invalidateCache(container);
@@ -508,28 +487,18 @@ public class FlowManager
     private void deleteObjectIds(SQLFragment sqlOIDs, Set<Container> containers) throws SQLException
     {
         DbScope scope = getSchema().getScope();
-        boolean fTrans = false;
         try
         {
-            if (!scope.isTransactionActive())
-            {
-                scope.beginTransaction();
-                fTrans = true;
-            }
+            scope.ensureTransaction();
+
             deleteAttributes(sqlOIDs);
             Table.execute(getSchema(), "DELETE FROM flow.Object WHERE RowId IN (" + sqlOIDs.getSQL() + ")", sqlOIDs.getParamsArray());
-            if (fTrans)
-            {
-                scope.commitTransaction();
-                fTrans = false;
-            }
+            scope.commitTransaction();
         }
         finally
         {
-            if (fTrans)
-            {
-                getSchema().getScope().rollbackTransaction();
-            }
+            getSchema().getScope().closeConnection();
+
             for (Container container : containers)
             {
                 AttributeCache.invalidateCache(container);
@@ -584,31 +553,20 @@ public class FlowManager
         }
         int keywordId = ensureAttributeId(keyword);
         DbSchema schema = getSchema();
-        boolean fTrans = false;
         try
         {
-            if (!schema.getScope().isTransactionActive())
-            {
-                schema.getScope().beginTransaction();
-                fTrans = true;
-            }
+            schema.getScope().ensureTransaction();
+
             Table.execute(schema, sqlDeleteKeyword, new Object[] { obj.getRowId(), keywordId });
             if (value != null)
             {
                 Table.execute(schema, sqlInsertKeyword, new Object[] { obj.getRowId(), keywordId, value} );
             }
-            if (fTrans)
-            {
-                schema.getScope().commitTransaction();
-                fTrans = false;
-            }
+            schema.getScope().commitTransaction();
         }
         finally
         {
-            if (fTrans)
-            {
-                schema.getScope().commitTransaction();
-            }
+            schema.getScope().closeConnection();
             AttributeCache.invalidateCache(data.getContainer());
         }
 
@@ -837,12 +795,9 @@ public class FlowManager
     {
         DbSchema s = getSchema();
         TableInfo o = getTinfoObject();
-        boolean beginTrans = !s.getScope().isTransactionActive();
-
         try
         {
-            if (beginTrans)
-                s.getScope().beginTransaction();
+            s.getScope().ensureTransaction();
 
             if (o.getColumn("container") != null)
             {
@@ -870,8 +825,7 @@ public class FlowManager
                         "    WHERE D.rowid = flow.object.dataid AND INPUT.typeid IN (5,7))) " +
                         "WHERE dataid IN (select rowid from exp.data where exp.data.container = ?) AND typeid=3 AND (compid IS NULL OR fcsid IS NULL OR scriptid IS NULL)", new Object[] {c.getId()});
             }
-            if (beginTrans)
-                s.getScope().commitTransaction();
+            s.getScope().commitTransaction();
         }
         catch (SQLException sqlx)
         {
@@ -880,8 +834,7 @@ public class FlowManager
         finally
         {
             flowObjectModified();
-            if (beginTrans)
-                s.getScope().closeConnection();
+            s.getScope().closeConnection();
         }
     }
 

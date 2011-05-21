@@ -666,7 +666,6 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
 
     public GWTWell save(GWTWell well, GWTScript script)
     {
-        boolean transaction = false;
         FlowWell flowWell = FlowWell.fromWellId(well.getWellId());
         if (!canUpdate(flowWell.getRun()))
         {
@@ -674,11 +673,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         }
         try
         {
-            if (!ExperimentService.get().isTransactionActive())
-            {
-                ExperimentService.get().beginTransaction();
-                transaction = true;
-            }
+            ExperimentService.get().ensureTransaction();
             FlowScript scriptOld = flowWell.getScript();
             if (scriptOld != null)
             {
@@ -707,11 +702,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
                 flowWell = FlowScript.createScriptForWell(getUser(), flowWell, script.getName() + "_modified", doc, flowWell.getRun().getScript().getData(), InputRole.AnalysisScript);
             }
             FlowManager.get().deleteAttributes(flowWell.getExpObject());
-            if (transaction)
-            {
-                ExperimentService.get().commitTransaction();
-                transaction = false;
-            }
+            ExperimentService.get().commitTransaction();
             return makeRunModeWell(flowWell, flowWell.getRun().getScript());
         }
         catch (Exception e)
@@ -721,10 +712,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         }
         finally
         {
-            if (transaction)
-            {
-                ExperimentService.get().rollbackTransaction();
-            }
+            ExperimentService.get().closeTransaction();
         }
     }
 

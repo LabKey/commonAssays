@@ -70,7 +70,7 @@ public class XMLProteinLoader extends DefaultAnnotationLoader implements Annotat
 
         try
         {
-            Connection conn = ProteinManager.getSchema().getScope().beginTransaction();
+            Connection conn = ProteinManager.getSchema().getScope().ensureTransaction();
             XMLProteinHandler handler = new XMLProteinHandler(conn, this);
             handler.parse(fName);
             conn.setAutoCommit(false);

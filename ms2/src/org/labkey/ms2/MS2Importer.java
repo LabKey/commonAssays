@@ -132,14 +132,11 @@ public abstract class MS2Importer
 
     protected RunInfo prepareRun(boolean restart) throws SQLException
     {
-        boolean startTransaction = !MS2Manager.getSchema().getScope().isTransactionActive();
         try
         {
             boolean alreadyImported = false;
-            if (startTransaction)
-            {
-                MS2Manager.getSchema().getScope().beginTransaction();
-            }
+            MS2Manager.getSchema().getScope().ensureTransaction();
+            
             synchronized (_schemaLock)
             {
                 // Don't import if we've already imported this file (undeleted run exists matching this file name)
@@ -162,18 +159,12 @@ public abstract class MS2Importer
                 }
             }
 
-            if (startTransaction)
-            {
-                MS2Manager.getSchema().getScope().commitTransaction();
-            }
+            MS2Manager.getSchema().getScope().commitTransaction();
             return new RunInfo(_runId, alreadyImported);
         }
         finally
         {
-            if (startTransaction)
-            {
-                MS2Manager.getSchema().getScope().closeConnection();
-            }
+            MS2Manager.getSchema().getScope().closeConnection();
         }
     }
 

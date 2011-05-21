@@ -122,14 +122,10 @@ public class AttributeSetHelper
     public static void doSave(AttributeSet attrs, User user, ExpData data) throws SQLException
     {
         FlowManager mgr = FlowManager.get();
-        boolean fTransaction = false;
         try
         {
-            if (!mgr.getSchema().getScope().isTransactionActive())
-            {
-                mgr.getSchema().getScope().beginTransaction();
-                fTransaction = true;
-            }
+            mgr.getSchema().getScope().ensureTransaction();
+            
             AttrObject obj = mgr.createAttrObject(data, attrs.getType(), attrs.getURI());
             Map<String, String> keywords = attrs.getKeywords();
             if (!keywords.isEmpty())
@@ -166,16 +162,11 @@ public class AttributeSetHelper
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }
-            if (fTransaction)
-            {
-                mgr.getSchema().getScope().commitTransaction();
-                fTransaction = false;
-            }
+            mgr.getSchema().getScope().commitTransaction();
         }
         finally
         {
-            if (fTransaction)
-                mgr.getSchema().getScope().rollbackTransaction();
+            mgr.getSchema().getScope().closeConnection();
             AttributeCache.invalidateCache(data.getContainer());
         }
 

@@ -313,13 +313,12 @@ public class WorkspaceJob extends FlowJob
 
         FlowManager.vacuum();
 
-        boolean transaction = false;
+        boolean success = false;
         try
         {
             job.addStatus("Begin transaction for workspace " + workspaceName);
 
-            svc.beginTransaction();
-            transaction = true;
+            svc.ensureTransaction();
             ExpRun run = svc.createExperimentRun(container, workspaceName);
             FlowProtocol flowProtocol = FlowProtocol.ensureForContainer(user, container);
             ExpProtocol protocol = flowProtocol.getProtocol();
@@ -437,16 +436,16 @@ public class WorkspaceJob extends FlowJob
             FlowManager.get().updateFlowObjectCols(container);
 
             svc.commitTransaction();
-            transaction = false;
+            success = true;
             job.addStatus("Transaction completed successfully for workspace " + workspaceName);
 
             return new FlowRun(run);
         }
         finally
         {
-            if (transaction)
+            svc.closeTransaction();
+            if (!success)
             {
-                svc.rollbackTransaction();
                 job.addStatus("Transaction failed to complete for workspace " + workspaceName);
             }
             FlowManager.analyze();

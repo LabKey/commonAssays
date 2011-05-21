@@ -313,7 +313,7 @@ public class MS1Manager
 
             //execute this much
             _log.info("Purging peak families for file " + String.valueOf(fileId) + "...");
-            scope.beginTransaction();
+            scope.ensureTransaction();
             Table.execute(getSchema(), sql.toString(), null);
             scope.commitTransaction();
             _log.info("Finished purging peak families for file " + String.valueOf(fileId) + ".");
@@ -326,7 +326,7 @@ public class MS1Manager
             sql.append(")");
 
             _log.info("Purging peaks for file " + String.valueOf(fileId) + "...");
-            scope.beginTransaction();
+            scope.ensureTransaction();
             Table.execute(getSchema(), sql.toString(), null);
             scope.commitTransaction();
             _log.info("Finished purging peaks for file " + String.valueOf(fileId) + ".");
@@ -363,16 +363,14 @@ public class MS1Manager
             sql.append(";");
 
             _log.info("Purging scans and related file data for file " + String.valueOf(fileId) + "...");
-            scope.beginTransaction();
+            scope.ensureTransaction();
             Table.execute(getSchema(), sql.toString(), null);
             scope.commitTransaction();
             _log.info("Finished purging scans and related file data for file " + String.valueOf(fileId) + ".");
         }
-        catch(SQLException e)
+        finally
         {
-            if(scope.isTransactionActive())
-                scope.rollbackTransaction();
-            throw e;
+            scope.closeConnection();
         }
     } //deletePeakData
 
@@ -396,7 +394,7 @@ public class MS1Manager
 
             int scanId = 0;
             long numScans = 0;
-            scope.beginTransaction();
+            scope.ensureTransaction();
 
             while(rs.next())
             {
@@ -409,25 +407,19 @@ public class MS1Manager
                 if(numScans % 10 == 0)
                 {
                     scope.commitTransaction();
-                    scope.beginTransaction();
+                    scope.ensureTransaction();
                 }
             }
 
             //final commit if necessary
-            if(scope.isTransactionActive())
-                scope.commitTransaction();
+            scope.commitTransaction();
 
             _log.info("Finished purging peaks for file " + String.valueOf(fileId) + ".");
-        }
-        catch(SQLException e)
-        {
-            if(scope.isTransactionActive())
-                scope.rollbackTransaction();
-            throw e;
         }
         finally
         {
             ResultSetUtil.close(rs);
+            scope.closeConnection();
         }
     }
 

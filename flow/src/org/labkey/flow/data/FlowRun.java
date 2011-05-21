@@ -514,14 +514,10 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 
     public void moveToWorkspace(User user) throws Exception
     {
-        boolean transaction = false;
         try
         {
-            if (!ExperimentService.get().isTransactionActive())
-            {
-                ExperimentService.get().beginTransaction();
-                transaction = true;
-            }
+            ExperimentService.get().ensureTransaction();
+
             ExpRun run = getExperimentRun();
             ExpExperiment[] experiments = run.getExperiments();
             for (ExpExperiment experiment : experiments)
@@ -530,18 +526,11 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
             }
             FlowExperiment workspace = FlowExperiment.ensureWorkspace(user, getContainer());
             workspace.getExperiment().addRuns(user, run);
-            if (transaction)
-            {
-                ExperimentService.get().commitTransaction();
-                transaction = false;
-            }
+            ExperimentService.get().commitTransaction();
         }
         finally
         {
-            if (transaction)
-            { 
-                ExperimentService.get().rollbackTransaction();
-            }
+            ExperimentService.get().closeTransaction();
             FlowManager.get().flowObjectModified();
         }
     }

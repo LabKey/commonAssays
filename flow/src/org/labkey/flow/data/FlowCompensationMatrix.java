@@ -63,17 +63,13 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
 
     static public FlowCompensationMatrix create(User user, Container container, String name, AttributeSet attrs) throws Exception
     {
-        boolean fTrans = false;
         ExperimentService.Interface svc = ExperimentService.get();
 
         FlowCompensationMatrix flowComp;
         try
         {
-            if (!svc.isTransactionActive())
-            {
-                svc.beginTransaction();
-                fTrans = true;
-            }
+            svc.ensureTransaction();
+
             ExpData data;
             if (name == null)
             {
@@ -87,19 +83,12 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
             data.save(user);
             AttributeSetHelper.doSave(attrs, user, data);
             flowComp = (FlowCompensationMatrix) FlowDataObject.fromData(data);
-            if (fTrans)
-            {
-                svc.commitTransaction();
-                fTrans = false;
-            }
+            svc.commitTransaction();
             return flowComp;
         }
         finally
         {
-            if (fTrans)
-            {
-                svc.rollbackTransaction();
-            }
+            svc.closeTransaction();
         }
 
     }

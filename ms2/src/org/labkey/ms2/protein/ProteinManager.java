@@ -370,19 +370,13 @@ public class ProteinManager
             throw new RuntimeException(e);
         }
 
-        boolean existingTransaction = getSchema().getScope().isTransactionActive();
         try
         {
-            if (!existingTransaction)
-            {
-                getSchema().getScope().beginTransaction();
-            }
+            getSchema().getScope().ensureTransaction();
+
             Table.execute(getSchema(), "DELETE FROM " + getTableInfoCustomAnnotation() + " WHERE CustomAnnotationSetId = ?", new Object[] {set.getCustomAnnotationSetId()});
             Table.delete(getTableInfoCustomAnnotationSet(), set.getCustomAnnotationSetId());
-            if (!existingTransaction)
-            {
-                getSchema().getScope().commitTransaction();
-            }
+            getSchema().getScope().commitTransaction();
         }
         catch (SQLException e)
         {
@@ -390,10 +384,7 @@ public class ProteinManager
         }
         finally
         {
-            if (!existingTransaction)
-            {
-                getSchema().getScope().closeConnection();
-            }
+            getSchema().getScope().closeConnection();
         }
     }
 
@@ -465,7 +456,7 @@ public class ProteinManager
 
         try
         {
-            MS2Manager.getSchema().getScope().beginTransaction();
+            MS2Manager.getSchema().getScope().ensureTransaction();
 
             SQLFragment updatePeptidesSQL = new SQLFragment();
             updatePeptidesSQL.append("UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET SeqId = map.NewSeqId");
