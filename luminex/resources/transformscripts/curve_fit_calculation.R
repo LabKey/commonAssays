@@ -9,8 +9,8 @@
 # for the unknowns.
 #
 
-source("http://youtil.googlecode.com/files/youtil.R");
-source("http://www.labkey.org/download/rumi.R");
+source("${srcDirectory}/youtil.R");
+source("${srcDirectory}/rumi.R");
 
 # set up a data frame to store the run properties
 run.props = data.frame(NA, NA, NA, NA);
