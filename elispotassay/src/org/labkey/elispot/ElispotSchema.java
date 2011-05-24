@@ -69,11 +69,6 @@ public class ElispotSchema extends AssaySchema
         return null;
     }
 
-    public static DbSchema getSchema()
-    {
-        return DbSchema.get("elispot");
-    }
-
     public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol, String propertyPrefix) throws SQLException
     {
         String propPrefix = new Lsid(propertyPrefix, protocol.getName(), "").toString();

@@ -30,6 +30,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
+import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
@@ -78,7 +79,9 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         rowIdColumn.setHidden(true);
         rowIdColumn.setKeyField(true);
         addColumn(wrapColumn(getRealTable().getColumn("LSID"))).setHidden(true);
-        addColumn(wrapColumn("Protocol", getRealTable().getColumn("ProtocolId"))).setHidden(true);
+        ColumnInfo protocolColumn = addColumn(wrapColumn("Protocol", getRealTable().getColumn("ProtocolId")));
+        protocolColumn.setFk(new ExpSchema(_schema.getUser(), _schema.getContainer()).getProtocolForeignKey("RowId"));
+        protocolColumn.setHidden(true);
         addColumn(wrapColumn(getRealTable().getColumn("Type")));
         addColumn(wrapColumn(getRealTable().getColumn("Well")));
         addColumn(wrapColumn(getRealTable().getColumn("Outlier")));

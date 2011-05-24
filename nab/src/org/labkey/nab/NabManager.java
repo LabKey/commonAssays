@@ -96,9 +96,9 @@ public class NabManager extends AbstractNabManager
         Map<TableInfo, ExpProtocol> dataTables = new HashMap<TableInfo, ExpProtocol>();
         for (DataSet dataset : dataSets)
         {
-            if (dataset.getProtocolId() != null && dataset.canRead(user))
+            if (dataset.isAssayData() && dataset.canRead(user))
             {
-                ExpProtocol protocol = ExperimentService.get().getExpProtocol(dataset.getProtocolId().intValue());
+                ExpProtocol protocol = dataset.getAssayProtocol();
                 if (protocol != null && AssayService.get().getProvider(protocol) instanceof NabAssayProvider)
                     dataTables.put(dataset.getTableInfo(user), protocol);
             }
