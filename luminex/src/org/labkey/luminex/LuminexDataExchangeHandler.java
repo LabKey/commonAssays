@@ -16,12 +16,15 @@
 
 package org.labkey.luminex;
 
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.qc.TsvDataExchangeHandler;
+import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -53,5 +56,20 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
         }
         addSampleProperties(ANALYTE_DATA_PROP_NAME, analytes);
         return super.createValidationRunInfo(context, run, scriptDir);
+    }
+
+    public Map<DomainProperty, String> getRunProperties(AssayRunUploadContext context) throws ExperimentException
+    {
+        Map<DomainProperty, String> result = super.getRunProperties(context);
+        try
+        {
+            LuminexDataHandler.LuminexDataFileParser parser = new LuminexExcelDataHandler.LuminexExcelParser(context.getProtocol(), context.getUploadedData().get(AssayDataCollector.PRIMARY_FILE));
+            result.putAll(parser.getExcelRunProps());
+            return result;
+        }
+        catch (IOException e)
+        {
+            throw new ExperimentException(e);
+        }
     }
 }

@@ -30,10 +30,10 @@ import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
 import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.security.User;
 import org.labkey.microarray.MicroarrayModule;
 import org.apache.log4j.Logger;
 
@@ -67,9 +67,9 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
         return false;
     }
 
-    public void importTransformDataMap(ExpData data, User user, ExpRun run, ExpProtocol protocol, AssayProvider provider, List<Map<String, Object>> dataMap) throws ExperimentException
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
     {
-        importRows(data, user, run, protocol, provider, dataMap);
+        importRows(data, context.getUser(), run, context.getProtocol(), context.getProvider(), dataMap);
     }
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException

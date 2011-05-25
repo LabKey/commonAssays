@@ -29,7 +29,6 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
@@ -42,7 +41,7 @@ import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AssayDataType;
-import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -270,9 +269,9 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         return true;
     }
 
-    public void importTransformDataMap(ExpData data, User user, ExpRun run, ExpProtocol protocol, AssayProvider provider, List<Map<String, Object>> dataMap) throws ExperimentException
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
     {
-        importRows(data, run, protocol, dataMap);
+        importRows(data, run, context.getProtocol(), dataMap);
     }
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException

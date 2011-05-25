@@ -23,12 +23,11 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.study.*;
+import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayUploadXarContext;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 
@@ -121,9 +120,9 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         return new ElispotFileParser(data, dataFile, info, log, context);
     }
 
-    public void importTransformDataMap(ExpData data, User user, ExpRun run, ExpProtocol protocol, AssayProvider provider, List<Map<String, Object>> dataMap) throws ExperimentException
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
     {
-        importData(data, run, protocol, dataMap);
+        importData(data, run, context.getProtocol(), dataMap);
     }
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException

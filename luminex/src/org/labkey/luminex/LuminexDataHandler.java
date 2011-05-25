@@ -25,6 +25,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
@@ -49,7 +50,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
     public interface LuminexDataFileParser
     {
         Map<Analyte, List<LuminexDataRow>> getSheets() throws ExperimentException;
-        Map<String, Object> getExcelRunProps() throws ExperimentException;
+        Map<DomainProperty, String> getExcelRunProps() throws ExperimentException;
     }
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
@@ -69,7 +70,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         importData(data, expRun, info.getUser(), log, parser.getSheets(), parser.getExcelRunProps());
     }
 
-    public void importData(ExpData data, ExpRun run, User user, Logger log, Map<Analyte, List<LuminexDataRow>> inputData, Map<String, Object> excelRunProps) throws ExperimentException
+    public void importData(ExpData data, ExpRun run, User user, Logger log, Map<Analyte, List<LuminexDataRow>> inputData, Map<DomainProperty, String> excelRunProps) throws ExperimentException
     {
         try
         {
@@ -362,7 +363,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
     /**
      * Handles persisting of uploaded run data into the database
      */
-    private void _importData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, Map<Analyte, List<LuminexDataRow>> inputData, Map<String, Object> excelRunProps) throws SQLException, ExperimentException
+    private void _importData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, Map<Analyte, List<LuminexDataRow>> inputData, Map<DomainProperty, String> excelRunProps) throws SQLException, ExperimentException
     {
         try
         {
@@ -440,7 +441,12 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
             }
 
             List<Map<String, Object>> excelRunPropsList = new ArrayList<Map<String, Object>>();
-            excelRunPropsList.add(excelRunProps);
+            Map<String, Object> excelRunPropsByProperyId = new HashMap<String, Object>();
+            for (Map.Entry<DomainProperty, String> entry : excelRunProps.entrySet())
+            {
+                excelRunPropsByProperyId.put(entry.getKey().getPropertyURI(), entry.getValue());
+            }
+            excelRunPropsList.add(excelRunPropsByProperyId);
             OntologyManager.insertTabDelimited(container, user, objectId, new OntologyManager.ImportHelper()
             {
                 public String beforeImportObject(Map<String, Object> map) throws SQLException

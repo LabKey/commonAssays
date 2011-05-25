@@ -31,11 +31,11 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.util.GUID;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
 import org.apache.log4j.Logger;
 
@@ -71,7 +71,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
         return datas;
     }
 
-    public void importTransformDataMap(ExpData data, User user, ExpRun run, ExpProtocol protocol, AssayProvider provider, List<Map<String, Object>> dataMap) throws ExperimentException
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
     {
         ObjectFactory<Analyte> analyteFactory = ObjectFactory.Registry.getFactory(Analyte.class);
         if (null == analyteFactory)
@@ -95,8 +95,17 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
             sheets.get(analyte).add(dataRow);
         }
 
-        Map<String, Object> excelProps = Collections.emptyMap();
-        importData(data, run, user, null, sheets, excelProps);
+        try
+        {
+            LuminexDataFileParser parser = getDataFileParser(context.getProtocol(), context.getUploadedData().get(AssayDataCollector.PRIMARY_FILE));
+            Map<DomainProperty, String> excelProps = parser.getExcelRunProps();
+            excelProps.putAll(context.getTransformResult().getRunProperties());
+            importData(data, run, context.getUser(), null, sheets, excelProps);
+        }
+        catch (IOException e)
+        {
+            throw new ExperimentException(e);
+        }
     }
 
     protected LuminexDataFileParser getDataFileParser(ExpProtocol protocol, File dataFile)
@@ -123,7 +132,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
         private File _dataFile;
         private ExpProtocol _protocol;
         private Map<Analyte, List<LuminexDataRow>> _sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
-        private Map<String, Object> _excelRunProps = new HashMap<String, Object>();
+        private Map<DomainProperty, String> _excelRunProps = new HashMap<DomainProperty, String>();
         private boolean _fileParsed;
 
         public LuminexExcelParser(ExpProtocol protocol, File dataFile)
@@ -140,9 +149,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                 Workbook workbook = ExcelFactory.create(dataFile);
 
                 Container container = _protocol.getContainer();
-                String analyteDomainURI = AbstractAssayProvider.getDomainURIForPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
                 String excelRunDomainURI = AbstractAssayProvider.getDomainURIForPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
-                Domain analyteDomain = PropertyService.get().getDomain(container, analyteDomainURI);
                 Domain excelRunDomain = PropertyService.get().getDomain(container, excelRunDomainURI);
 
                 for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
@@ -156,9 +163,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
 
                     Analyte analyte = new Analyte(sheet.getSheetName(), 0);
 
-                    Map<String, Object> analyteProps = new HashMap<String, Object>();
-
-                    int row = handleHeaderOrFooterRow(sheet, 0, analyte, analyteDomain, analyteProps, excelRunDomain, _excelRunProps);
+                    int row = handleHeaderOrFooterRow(sheet, 0, analyte, excelRunDomain);
 
                     // Skip over the blank line
                     row++;
@@ -190,8 +195,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                         // Skip over the blank line
                         row++;
                     }
-                    row = handleHeaderOrFooterRow(sheet, row, analyte, analyteDomain, analyteProps, excelRunDomain, _excelRunProps);
-                    //analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + rowId + "." + analyte.getName()).toString());
+                    row = handleHeaderOrFooterRow(sheet, row, analyte, excelRunDomain);
                 }
                 _fileParsed = true;
             }
@@ -211,20 +215,19 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
             return _sheets;
         }
 
-        public Map<String, Object> getExcelRunProps() throws ExperimentException
+        public Map<DomainProperty, String> getExcelRunProps() throws ExperimentException
         {
             parseFile(_dataFile);
             return _excelRunProps;
         }
 
-        private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, Domain analyteDomain, Map<String, Object> analyteProps, Domain excelRunDomain, Map<String, Object> excelRunProps)
+        private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, Domain excelRunDomain)
         {
             if (row >= analyteSheet.getLastRowNum())
             {
                 return row;
             }
 
-            Map<String, DomainProperty> analyteMap = analyteDomain.createImportMap(true);
             Map<String, DomainProperty> excelMap = excelRunDomain.createImportMap(true);
 
             do
@@ -245,8 +248,11 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                         analyte.setStdCurve(value);
                     }
 
-                    storePropertyValue(propName, value, analyteMap, analyteProps);
-                    storePropertyValue(propName, value, excelMap, excelRunProps);
+                    DomainProperty pd = excelMap.get(propName);
+                    if (pd != null)
+                    {
+                        _excelRunProps.put(pd, value);
+                    }
                 }
 
                 String recoveryPrefix = "conc in range = unknown sample concentrations within range where standards recovery is ";
@@ -297,15 +303,6 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
             }
             while (++row < analyteSheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(analyteSheet, 0, row)));
             return row;
-        }
-
-        private void storePropertyValue(String propName, String value, Map<String, DomainProperty> columns, Map<String, Object> props)
-        {
-            DomainProperty pd = columns.get(propName);
-            if (pd != null)
-            {
-                props.put(pd.getPropertyURI(), value);
-            }
         }
 
         private LuminexDataRow createDataRow(Sheet sheet, List<String> colNames, int rowIdx)
