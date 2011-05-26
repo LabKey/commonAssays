@@ -32,10 +32,10 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayService;
@@ -242,7 +242,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
     }
 
     @Override
-    public int persistRows(DataIterator data, ValidationException errors)
+    public int persistRows(DataIterator data, BatchValidationException errors)
     {
         Table.TableLoaderPump pump = new Table.TableLoaderPump(data, this, errors);
         pump.run();
