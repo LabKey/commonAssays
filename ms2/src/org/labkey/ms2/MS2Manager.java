@@ -1407,7 +1407,10 @@ public class MS2Manager
         if (null == fraction)
         {
             fraction = Table.selectObject(getTableInfoFractions(), fractionId, MS2Fraction.class);
-            _addFractionToCache(fractionId, fraction);
+            if (fraction != null)
+            {
+                _addFractionToCache(fractionId, fraction);
+            }
         }
 
         return fraction;
