@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.*;
 import org.labkey.api.security.User;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.util.Formats;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.ViewContext;
@@ -498,11 +499,21 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     protected List<String> getRunSummaryHeaders(MS2Run run)
     {
-        MS2Controller.ModificationBean mods = new MS2Controller.ModificationBean(run);
+        Map<String, String> fixedMods = new TreeMap<String, String>();
+        Map<String, String> variableMods = new TreeMap<String, String>();
+
+        for (MS2Modification mod : run.getModifications())
+        {
+            if (mod.getVariable())
+                variableMods.put(mod.getAminoAcid() + mod.getSymbol(), Formats.f3.format(mod.getMassDiff()));
+            else
+                fixedMods.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
+        }
+
         List<String> modHeaders = new ArrayList<String>(10);
 
-        formatModifications("Fixed", mods.fixed, modHeaders);
-        formatModifications("Variable", mods.var, modHeaders);
+        formatModifications("Fixed", fixedMods, modHeaders);
+        formatModifications("Variable", variableMods, modHeaders);
 
         List<String> runHeaders = new ArrayList<String>(3);
         runHeaders.add("Search Enzyme: " + naForNull(run.getSearchEnzyme()) + "\tFile Name: " + naForNull(run.getFileName()));
