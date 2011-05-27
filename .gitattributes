@@ -1026,7 +1026,6 @@ ms2/src/org/labkey/ms2/metadata/MassSpecMetadataDataCollector.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataUploadAction.java -text
 ms2/src/org/labkey/ms2/metadata/MsFractionPropertyHelper.java -text
 ms2/src/org/labkey/ms2/metadata/fractionsInput.jsp -text
-ms2/src/org/labkey/ms2/modifications.jsp -text
 ms2/src/org/labkey/ms2/ms2Admin.jsp -text
 ms2/src/org/labkey/ms2/nestedGridScript.jsp -text
 ms2/src/org/labkey/ms2/peptideChart.jsp -text
@@ -1288,6 +1287,7 @@ ms2/src/org/labkey/ms2/search/ProteinSearchWebPart.java -text
 ms2/src/org/labkey/ms2/search/searchProteins.jsp -text
 ms2/src/org/labkey/ms2/showPeptide.jsp -text
 ms2/src/org/labkey/ms2/showPeptideProphetDetails.jsp -text
+ms2/src/org/labkey/ms2/showPeptideQuantitation.jsp -text
 ms2/src/org/labkey/ms2/showProteinGroup.jsp -text
 ms2/src/org/labkey/ms2/showSensitivityDetails.jsp -text
 ms2/src/org/labkey/ms2/stats.jsp -text

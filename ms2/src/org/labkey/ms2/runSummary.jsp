@@ -21,6 +21,7 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.MS2Run" %>
+<%@ page import="java.util.Collections" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<MS2Controller.RunSummaryBean> me = ((JspView<MS2Controller.RunSummaryBean>)HttpView.currentView());
@@ -56,22 +57,22 @@ if (null != bean.quantAlgorithm)
 
         if (null != run.getParamsFileName() && null != run.getPath())
         { %>
-            <%=PageFlowUtil.generateButton("Show " + run.getParamsFileName(), "showParamsFile.view?run=" + run.getRun(), "", "target=\"paramFile\"")%><%
+            <%=PageFlowUtil.textLink("Show " + run.getParamsFileName(), "showParamsFile.view?run=" + run.getRun(), null, "paramFileLink", java.util.Collections.singletonMap("target", "paramFile"))%><%
         }
 
         if (run.getHasPeptideProphet())
         { %>
-            <%=PageFlowUtil.generateButton("Show Peptide Prophet Details", "showPeptideProphetDetails.view?run=" + run.getRun(), "", "target=\"peptideProphetSummary\"")%><%
+            <%=PageFlowUtil.textLink("Show Peptide Prophet Details", "showPeptideProphetDetails.view?run=" + run.getRun(), null, "peptideProphetDetailsLink", java.util.Collections.singletonMap("target", "peptideProphetSummary"))%><%
         }
 
         if (run.hasProteinProphet())
         { %>
-            <%=PageFlowUtil.generateButton("Show Protein Prophet Details", "showProteinProphetDetails.view?run=" + run.getRun(), "", "target=\"proteinProphetSummary\"")%><%
+            <%=PageFlowUtil.textLink("Show Protein Prophet Details", "showProteinProphetDetails.view?run=" + run.getRun(), null, "proteinProphetDetailsLink", java.util.Collections.singletonMap("target", "proteinProphetSummary"))%><%
         }
 
         if (run.getNegativeHitCount() > run.getPeptideCount() / 3)
         { %>
-            <%=generateButton("Discriminate", "discriminateScore.view?run=" + run.getRun())%><%
+            <%=textLink("Discriminate", "discriminateScore.view?run=" + run.getRun())%><%
         } %>
         </div>
     </td></tr>

@@ -648,19 +648,44 @@ public class MS2Controller extends SpringActionController
 
     private String modificationHref(MS2Run run)
     {
-        // Need to make the pop-up window wider on SSL connections since Firefox insists on displaying the full server name
-        // in the status bar and spreads out the content unnecessarily.
-        int width = ("https".equals(getViewContext().getActionURL().getScheme()) ? 175 : 100);
+        Map<String, String> fixed = new TreeMap<String, String>();
+        Map<String, String> var = new TreeMap<String, String>();
 
-        String onClick = "window.open('showModifications.view?run=" +
-                run.getRun() +
-                "','modifications','height=300,width=" +
-                width +
-                ",status=yes,toolbar=no,menubar=no,location=no,resizable=yes');return false;";
+        for (MS2Modification mod : run.getModifications())
+        {
+            if (mod.getVariable())
+                var.put(mod.getAminoAcid() + mod.getSymbol(), Formats.f3.format(mod.getMassDiff()));
+            else
+                fixed.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
+        }
 
-        String href = "showModifications.view?run=" + run.getRun();
+        StringBuilder onClick = new StringBuilder("showHelpDiv(this, 'Modifications', '");
 
-        return PageFlowUtil.generateButton("Show Modifications", href, onClick, "target=\"modifications\"");
+        if (0 == (var.size() + fixed.size()))
+            onClick.append("<tr><td colspan=2><b>None</b></td></tr>");
+
+        if (0 != fixed.size())
+        {
+            onClick.append("<tr><td colspan=2><b>Fixed</b></td></tr>");
+
+            for (String key : fixed.keySet())
+                onClick.append("<tr><td>" + key + "</td><td align=right>" + fixed.get(key) + "</td></tr>");
+        }
+
+        if (0 != var.size())
+        {
+            if (0 != fixed.size())
+                onClick.append("<tr><td colspan=2>&nbsp;</td></tr>");
+
+            onClick.append("<tr><td colspan=2><b>Variable</b></td></tr>");
+
+            for (String key : var.keySet())
+                onClick.append("<tr><td>" + key + "</td><td align=right>" + var.get(key) + "</td></tr>");
+        }
+
+        onClick.append("'); return false;");
+
+        return PageFlowUtil.textLink("Show Modifications", (ActionURL)null, onClick.toString(), "modificationsLink");
     }
 
 
@@ -815,7 +840,36 @@ public class MS2Controller extends SpringActionController
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
             ShowPeptideContext ctx = new ShowPeptideContext(form, run, peptide, currentURL, previousURL, nextURL, showGzURL, modificationHref(run), getContainer(), getUser());
-            return new JspView<ShowPeptideContext>("/org/labkey/ms2/showPeptide.jsp", ctx);
+            JspView<ShowPeptideContext> peptideView = new JspView<ShowPeptideContext>("/org/labkey/ms2/showPeptide.jsp", ctx);
+            peptideView.setTitle("Peptide Details: " + peptide.getPeptide());
+            peptideView.setFrame(WebPartView.FrameType.PORTAL);
+            VBox result = new VBox(peptideView);
+            PeptideQuantitation quant = peptide.getQuantitation();
+            if (quant != null)
+            {
+                JspView<ShowPeptideContext> quantView = new JspView<ShowPeptideContext>("/org/labkey/ms2/showPeptideQuantitation.jsp", ctx);
+                quantView.setTitle("Quantitation (performed on " + peptide.getCharge() + "+)");
+                getContainer().hasPermission(getUser(), UpdatePermission.class);
+                {
+                    ActionURL editUrl = getViewContext().getActionURL().clone();
+                    editUrl.setAction(MS2Controller.EditElutionGraphAction.class);
+                    ActionURL toggleUrl = getViewContext().getActionURL().clone();
+                    toggleUrl.setAction(MS2Controller.ToggleValidQuantitationAction.class);
+
+                    NavTree navTree = new NavTree();
+                    if (quant.findScanFile() != null && !"q3".equals(run.getQuantAnalysisType()))
+                    {
+                        navTree.addChild("Edit Elution Profile", editUrl);
+                    }
+                    navTree.addChild((quant.includeInProteinCalc() ? "Invalidate" : "Revalidate") + " Quantitation Results", toggleUrl);
+                    quantView.setNavMenu(navTree);
+                    quantView.setIsWebPart(false);
+                }
+
+                quantView.setFrame(WebPartView.FrameType.PORTAL);
+                result.addView(quantView);
+            }
+            return result;
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -829,52 +883,6 @@ public class MS2Controller extends SpringActionController
     {
         AbstractMS2RunView view = getPeptideView(currentURL.getParameter("grouping"), run);
         return view.getPeptideIndex(currentURL);
-    }
-
-
-    @RequiresPermissionClass(ReadPermission.class)
-    public class ShowModificationsAction extends SimpleViewAction<RunForm>
-    {
-        public ModelAndView getView(RunForm form, BindException errors) throws Exception
-        {
-            MS2Run run = validateRun(form);
-
-            getPageConfig().setTemplate(PageConfig.Template.Print);
-            getPageConfig().setTitle("Modifications");
-            getPageConfig().setMinimumWidth(100);
-
-            JspView view = new JspView<ModificationBean>("/org/labkey/ms2/modifications.jsp", new ModificationBean(run));
-            view.setFrame(WebPartView.FrameType.NONE);
-            return view;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return null;
-        }
-    }
-
-
-    public static class ModificationBean
-    {
-        public Map<String, String> fixed;
-        public Map<String, String> var;
-        public MS2Run ms2Run;
-
-        public ModificationBean(MS2Run run)
-        {
-            ms2Run = run;
-            fixed = new TreeMap<String, String>();
-            var = new TreeMap<String, String>();
-
-            for (MS2Modification mod : run.getModifications())
-            {
-                if (mod.getVariable())
-                    var.put(mod.getAminoAcid() + mod.getSymbol(), Formats.f3.format(mod.getMassDiff()));
-                else
-                    fixed.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
-            }
-        }
     }
 
 
@@ -3413,7 +3421,10 @@ public class MS2Controller extends SpringActionController
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
 
-            return new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showPeptideProphetDetails.jsp", new PeptideProphetDetailsBean(run, summary, "showPeptideProphetSensitivityPlot.view", title));
+            JspView<PeptideProphetDetailsBean> result = new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showPeptideProphetDetails.jsp", new PeptideProphetDetailsBean(run, summary, "showPeptideProphetSensitivityPlot.view", title));
+            result.setFrame(WebPartView.FrameType.PORTAL);
+            result.setTitle("PeptideProphet Details: " + run.getDescription());
+            return result;
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -3466,7 +3477,10 @@ public class MS2Controller extends SpringActionController
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
             ProteinProphetFile summary = MS2Manager.getProteinProphetFileByRun(form.run);
-            return new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showSensitivityDetails.jsp", new PeptideProphetDetailsBean(run, summary, "showProteinProphetSensitivityPlot.view", title));
+            JspView<PeptideProphetDetailsBean> result = new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showSensitivityDetails.jsp", new PeptideProphetDetailsBean(run, summary, "showProteinProphetSensitivityPlot.view", title));
+            result.setFrame(WebPartView.FrameType.PORTAL);
+            result.setTitle(title  + run.getDescription());
+            return result;
         }
 
         public NavTree appendNavTrail(NavTree root)

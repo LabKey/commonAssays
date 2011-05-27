@@ -33,11 +33,9 @@
     float[] error = bean.summary.getError();
 %>
 <table>
-<tr><td colspan="2"><span class="navPageHeader"><%=h(bean.title)%></span></td></tr>
-<tr><td colspan="2">&nbsp;</td></tr>
 <tr>
     <td><img src="<%=h(sensitivityURL)%>" alt="Sensitivity Plot"></td>
-    <td><table class="labkey-data-region">
+    <td><table class="labkey-data-region" border="1">
         <tr><td><b>Minimum probability</b></td><td><b>Sensitivity</b></td><td><b>Error rate</b></td></tr>
 <%
     for (int i = 0; i < sensitivity.length; i++)
