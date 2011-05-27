@@ -146,7 +146,7 @@ public class EditICSMetadataForm extends ProtocolForm
         return filters;
     }
 
-    public Map<FieldKey, String> getKeywordAndSampleFieldMap() throws ServletException
+    public Map<FieldKey, String> getKeywordAndSampleFieldMap()
     {
         LinkedHashMap<FieldKey, String> ret = new LinkedHashMap<FieldKey, String>();
         FlowSchema schema = new FlowSchema(getUser(), getContainer());
@@ -159,25 +159,11 @@ public class EditICSMetadataForm extends ProtocolForm
         ColumnInfo colKeyword = tableFCSFiles.getColumn("Keyword");
         TableInfo tableKeywords = colKeyword.getFk().getLookupTableInfo();
 
-        Pattern skipKeyword = Pattern.compile("^(" +
-                "\\$BEGINANALYSIS|\\$BEGINDATA|\\$BEGINSTEXT|" +
-                "\\$ENDANALYSIS|\\$ENDDATA|\\$ENDSTEXT|" +
-                "\\$BYTEORD|\\$DATATYPE|\\$MODE|\\$NEXTDATA|" +
-                "\\$P\\d+.|\\$PAR|\\$TOT|" +
-                "\\$ABRT|\\$BTIM|\\$ETIM|" +
-                "\\$CSMODE|\\$CSVBITS|" +
-                "\\$CSV\\d+FLAG|" +
-                "\\$GATING|\\$LOST|" +
-                "\\$PK\\d+.|" +
-                "\\$G\\d+.|\\$R\\d.|" +
-                "\\$TIMESTEP|" +
-                "WINDOW EXTENSION)$", Pattern.CASE_INSENSITIVE);
         for (ColumnInfo column : tableKeywords.getColumns())
         {
-            String name = column.getName();
-            if (skipKeyword.matcher(name).matches())
+            if (column.isHidden())
                 continue;
-            ret.put(new FieldKey(keyword, name), "Keyword " + column.getLabel());
+            ret.put(new FieldKey(keyword, column.getName()), "Keyword " + column.getLabel());
         }
 
         FieldKey sampleProperty = FieldKey.fromParts("FCSFile", "Sample", "Property");

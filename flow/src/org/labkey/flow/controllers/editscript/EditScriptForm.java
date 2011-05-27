@@ -289,7 +289,7 @@ public class EditScriptForm extends ViewForm
             if (run != null)
                 schema.setRun(run);
             FlowPropertySet fps = new FlowPropertySet(schema.createFCSFileTable("foo"));
-            keywords.addAll(fps.getKeywordProperties().keySet());
+            keywords.addAll(fps.getVisibleKeywords());
         }
         catch (Throwable t)
         {

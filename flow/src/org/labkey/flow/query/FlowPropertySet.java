@@ -27,6 +27,7 @@ import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.util.KeywordUtil;
 
 import java.util.*;
 
@@ -181,5 +182,10 @@ public class FlowPropertySet
             _keywords = AttributeCache.KEYWORDS.getAttrValues(_container, _colDataId); 
         }
         return _keywords;
+    }
+
+    public Collection<String> getVisibleKeywords()
+    {
+        return KeywordUtil.filterHidden(getKeywordProperties().keySet());
     }
 }

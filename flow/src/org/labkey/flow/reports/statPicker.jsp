@@ -23,6 +23,10 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="org.labkey.flow.data.FlowProtocol" %>
+<%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>
+<%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.exp.property.DomainProperty" %>
 <%
     ViewContext context = HttpView.currentContext();
     FlowPropertySet fps = new FlowPropertySet(context.getContainer());
@@ -49,6 +53,19 @@
         comma = ",\n";
     }
     jsonStats.append("]");
+
+    List<String> sampleSetProperties = new ArrayList<String>();
+    FlowProtocol protocol = FlowProtocol.ensureForContainer(context.getUser(), context.getContainer());
+    if (protocol != null)
+    {
+        ExpSampleSet sampleSet = protocol.getSampleSet();
+        if (sampleSet != null)
+        {
+            for (DomainProperty dp : sampleSet.getPropertiesForType())
+                sampleSetProperties.add(dp.getName());
+        }
+    }
+
 %>
 <script type="text/javascript">
 Ext.QuickTips.init();
@@ -174,7 +191,7 @@ var StatisticField = Ext.extend(Ext.form.TriggerField,
 var FlowPropertySet = {};
 FlowPropertySet.keywords = [<%
     comma = "";
-    for (String s : fps.getKeywordProperties().keySet())
+    for (String s : fps.getVisibleKeywords())
     {
         %><%=comma%><%=PageFlowUtil.jsString(s)%><%
         comma=",";
@@ -182,6 +199,16 @@ FlowPropertySet.keywords = [<%
 %>];
 FlowPropertySet.statistics = <%=jsonStats%>;
 FlowPropertySet.statsTreeData = statisticsTree(FlowPropertySet.statistics);
+
+var SampleSet = {};
+SampleSet.properties = [<%
+    comma = "";
+    for (String s : sampleSetProperties)
+    {
+        %><%=comma%><%=PageFlowUtil.jsString(s)%><%
+        comma=",";
+    }
+%>];
 
 Ext.reg('statisticField', StatisticField);
 

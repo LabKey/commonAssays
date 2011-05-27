@@ -76,14 +76,24 @@ abstract public class FlowReport extends AbstractReport
         if (override)
             return;
         updateFromPropertyValues(pvs, ReportDescriptor.Prop.reportName);
+        updateFromPropertyValues(pvs, ReportDescriptor.Prop.reportDescription);
     }
 
-    
+
     @Override
     public ActionURL getRunReportURL(ViewContext context)
     {
         Container c = ContainerManager.getForId(getDescriptor().getContainerId());
         ActionURL url = new ActionURL(ReportsController.ExecuteAction.class, c);
+        url.addParameter("reportId", getReportId().toString());
+        return url;
+    }
+
+    @Override
+    public ActionURL getEditReportURL(ViewContext context)
+    {
+        Container c = ContainerManager.getForId(getDescriptor().getContainerId());
+        ActionURL url = new ActionURL(ReportsController.UpdateAction.class, c);
         url.addParameter("reportId", getReportId().toString());
         return url;
     }

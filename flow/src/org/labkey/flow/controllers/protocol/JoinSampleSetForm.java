@@ -66,7 +66,7 @@ public class JoinSampleSetForm extends ProtocolForm
         ff_samplePropertyURI = propertyURIs;
     }
 
-    public Map<String, String> getAvailableSampleKeyFields() throws ServletException
+    public Map<String, String> getAvailableSampleKeyFields()
     {
         LinkedHashMap<String,String> ret = new LinkedHashMap<String, String>();
         ret.put("", "");
@@ -95,6 +95,8 @@ public class JoinSampleSetForm extends ProtocolForm
         TableInfo tableKeywords = colKeyword.getFk().getLookupTableInfo();
         for (ColumnInfo column : tableKeywords.getColumns())
         {
+            if (column.isHidden())
+                continue;
             ret.put(new FieldKey(keyword, column.getName()), column.getLabel());
         }
         return ret;

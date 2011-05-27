@@ -19,6 +19,7 @@ package org.labkey.flow.query;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.ExprColumn;
+import org.labkey.flow.util.KeywordUtil;
 
 import java.util.Collection;
 import java.util.regex.Pattern;
@@ -46,7 +47,7 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
     {
         column.setSqlTypeName("VARCHAR");
         column.setLabel(attrName);
-        if (isHidden(attrName))
+        if (KeywordUtil.isHidden(attrName))
         {
             column.setHidden(true);
         }
@@ -64,27 +65,4 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
         return ret;
     }
 
-    static private Pattern[] patHidden = new Pattern[] {
-            Pattern.compile("\\$.*"),
-            Pattern.compile("P[0-9]+DISPLAY"),
-            Pattern.compile("P[0-9]+BS"),
-            Pattern.compile("P[0-9]+MS"),
-            Pattern.compile("SPILL"),
-            Pattern.compile("LASER[0-9]+DELAY"),
-            Pattern.compile("LASER[0-9]+ASF"),
-            Pattern.compile("LASER[0-9]+NAME"),
-            Pattern.compile("FJ_\\$.*")
-    };
-
-    static public boolean isHidden(String keyword)
-    {
-        for (Pattern pat : patHidden)
-        {
-            if (pat.matcher(keyword).matches())
-            {
-                return true;
-            }
-        }
-        return false;
-    }
 }

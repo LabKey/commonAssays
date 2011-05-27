@@ -56,9 +56,11 @@ import java.util.Map;
  */
 public class ControlsQCReport extends FlowReport
 {
+    public static String TYPE = "Flow.QCControlReport";
+
     public String getType()
     {
-        return "Flow.QCControlReport";
+        return TYPE;
     }
 
 
@@ -280,7 +282,7 @@ public class ControlsQCReport extends FlowReport
         rs = filterDateRange((CachedRowSetImpl)rs, "datetime", startDate, endDate);
         return rs;
     }
-    
+
 
     boolean validateParameters()
     {

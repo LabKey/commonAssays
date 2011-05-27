@@ -27,6 +27,8 @@
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.ReportsController" %>
 <%@ page import="java.util.TreeMap" %>
+<%@ page import="org.labkey.flow.reports.ControlsQCReport" %>
+<%@ page import="org.labkey.flow.reports.PositivityFlowReport" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext context = getViewContext();
@@ -34,7 +36,6 @@
     Container c = context.getContainer();
 
     boolean canEdit = c.hasPermission(user, UpdatePermission.class);
-    ActionURL editURL = new ActionURL(ReportsController.UpdateAction.class, c);
     ActionURL copyURL = new ActionURL(ReportsController.CopyAction.class, c);
 
     ReportService.I svc = ReportService.get();
@@ -55,15 +56,19 @@
             continue;
         ReportDescriptor d = r.getDescriptor();
         String id = d.getReportId().toString();
-        editURL.replaceParameter("reportId", id);
+        ActionURL editURL = r.getEditReportURL(context);
         copyURL.replaceParameter("reportId", id);
+        String description = d.getReportDescription();
         %><tr>
-        <td><a href="<%=h(r.getRunReportURL(context))%>"><%=h(d.getReportName())%></a></td><%
+        <td><a href="<%=h(r.getRunReportURL(context))%>"><%=h(d.getReportName())%></a></td>
+        <td><%=h(description)%></td><%
         if (canEdit){
         %><td><%=generateButton("edit", editURL)%></td>
         <td><form id="form<%=h(id)%>" method=POST action="<%=h(copyURL.getLocalURIString())%>"><%=generateSubmitButton("copy")%></form></td>
         <%}%>
         </tr><%
     }
-    %><tr><td><%=textLink("create qc report", new ActionURL(ReportsController.UpdateAction.class, c))%></td></tr>
+    %>
+    <tr><td><%=textLink("create qc report", new ActionURL(ReportsController.UpdateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, ControlsQCReport.TYPE))%></td></tr>
+    <tr><td><%=textLink("create positivity report", new ActionURL(ReportsController.UpdateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, PositivityFlowReport.TYPE))%></td></tr>
     </table>

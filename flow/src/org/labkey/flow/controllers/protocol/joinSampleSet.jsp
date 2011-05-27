@@ -47,7 +47,7 @@
                     <%=PageFlowUtil.strSelect("ff_samplePropertyURI", sampleKeyFields, form.ff_samplePropertyURI[i]) %>
                 </td>
                     <td>
-                        <%=org.labkey.api.util.PageFlowUtil.strSelect("ff_dataField", dataKeyFields, form.ff_dataField[i])%>
+                        <%=PageFlowUtil.strSelect("ff_dataField", dataKeyFields, form.ff_dataField[i])%>
                     </td>
                 </tr>
                 <% } %>

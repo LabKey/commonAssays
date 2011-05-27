@@ -39,6 +39,7 @@ var report =
 {
     reportId:<%=PageFlowUtil.jsString(reportId)%>,
     name:<%=PageFlowUtil.jsString(d.getReportName())%>,
+    description:<%=PageFlowUtil.jsString(d.getReportDescription())%>,
     statistic:<%=PageFlowUtil.jsString(d.getProperty("statistic"))%>,
     filter :
     [<%
@@ -127,6 +128,7 @@ Ext.onReady(function() {
         defaultType: 'textfield',
         items:[
             {fieldLabel:'Name', name:'reportName', value:report.name, allowBlank:false},
+            {fieldLabel:'Description', name:'reportDescription', value:report.description, allowBlank:true},
             {fieldLabel:'Statistic', name:'statistic', xtype:'statisticField', value:report.statistic, allowBlank:false},
 
             spacer,
@@ -144,13 +146,13 @@ Ext.onReady(function() {
             spacer,
 
             {xtype:'hidden', name:'filter[2].type', value:'sample'},
-            {fieldLabel:'Sample Property', name:'filter[2].property', value:sample[0].property},
+            {fieldLabel:'Sample Property', name:'filter[2].property', xtype:'combo', store:SampleSet.properties, value:sample[0].property},
             {fieldLabel:'Value', name:'filter[2].value', value:sample[0].value},
 
             spacer,
 
             {xtype:'hidden', name:'filter[3].type', value:'sample'},
-            {fieldLabel:'Sample Property', name:'filter[3].property', value:sample[1].property},
+            {fieldLabel:'Sample Property', name:'filter[3].property', xtype:'combo', store:SampleSet.properties, value:sample[1].property},
             {fieldLabel:'Value', name:'filter[3].value', value:sample[1].value},
 
             spacer,

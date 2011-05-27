@@ -48,7 +48,7 @@ public class ProtocolForm extends ViewForm
         ExpDataTable table = schema.createFCSFileTable(null);
         FlowPropertySet fps = new FlowPropertySet(table);
         FieldKey keyKeyword = FieldKey.fromParts("Keyword");
-        for (String keyword : fps.getKeywordProperties().keySet())
+        for (String keyword : fps.getVisibleKeywords())
         {
             options.put(new FieldKey(keyKeyword, keyword), keyword);
         }
