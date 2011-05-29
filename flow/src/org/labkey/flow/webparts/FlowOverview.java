@@ -86,6 +86,7 @@ public class FlowOverview extends Overview
         _compensationRunCount = FlowManager.get().getRunCount(getContainer(), ObjectType.compensationControl);
         _scripts = FlowScript.getAnalysisScripts(getContainer());
         _protocol = FlowProtocol.getForContainer(getContainer());
+
         for (FlowScript script : _scripts)
         {
             if (script.requiresCompensationMatrix(FlowProtocolStep.analysis))
@@ -103,6 +104,7 @@ public class FlowOverview extends Overview
                     _compensationSeparateStep = true;
                 }
             }
+
             if (script.hasStep(FlowProtocolStep.calculateCompensation))
             {
                 if (_scriptCompensation == null)
@@ -114,6 +116,7 @@ public class FlowOverview extends Overview
                     _compensationSeparateStep = true;
                 }
             }
+
             // this loop is very expensive, break if there is nothing more to learn...
             if (_requiresCompensation && null != _scriptAnalysis && _compensationSeparateStep && null != _scriptCompensation)
                 break;
@@ -123,6 +126,7 @@ public class FlowOverview extends Overview
         addStep(getAnalysisScriptStep());
         addStep(getCompensationMatrixStep());
         addStep(getAnalyzeStep());
+
         if (_canUpdate)
         {
             addStep(getSamplesStep());
@@ -135,6 +139,7 @@ public class FlowOverview extends Overview
                 addAction(action);
             }
         }
+
         if (_hasPipelineRoot && _canCreateFolder && _protocol != null)
         {
             Action action = new Action("Create new folder", new ActionURL(FlowController.NewFolderAction.class, getContainer()));

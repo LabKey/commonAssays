@@ -36,9 +36,8 @@ import java.util.List;
 
 public class ScriptOverview extends Overview
 {
-    FlowScript _script;
-    int _runCount;
-    boolean _canEdit;
+    private final FlowScript _script;
+    private final boolean _canEdit;
 
     protected int countChildPopulations(PopulationSet popset)
     {
@@ -53,19 +52,20 @@ public class ScriptOverview extends Overview
     public ScriptOverview(User user, Container container, FlowScript script)
     {
         super(user, container);
+
         _script = script;
-        _runCount = _script.getRunCount();
-        _canEdit = _runCount == 0 && hasPermission(UpdatePermission.class);
+        int runCount = _script.getRunCount();
+        _canEdit = runCount == 0 && hasPermission(UpdatePermission.class);
 
         ActionURL runsUrl = _script.getRunsUrl();
 
-        if (_runCount == 0)
+        if (runCount == 0)
         {
             setStatusHTML("This script has not yet been used to analyze data.");
         }
         else
         {
-            setStatusHTML("This script has been used <a href=\"" + PageFlowUtil.filter(runsUrl) + "\">" + _runCount + " times</a>.  For this reason, it cannot be edited.");
+            setStatusHTML("This script has been used <a href=\"" + PageFlowUtil.filter(runsUrl) + "\">" + runCount + " times</a>.  For this reason, it cannot be edited.");
         }
 
         addStep(getCompensationCalculationStep());
@@ -75,9 +75,9 @@ public class ScriptOverview extends Overview
         if (hasPermission(UpdatePermission.class) && (hasStep(FlowProtocolStep.analysis) || hasStep(FlowProtocolStep.calculateCompensation)))
         {
             Action action = new Action("Make a copy of this analysis script", _script.urlFor(ScriptController.CopyAction.class));
-            if (_runCount != 0)
+            if (runCount != 0)
             {
-                action.setDescriptionHTML("This script cannot be edited anymore because it has been used <a href=\"" + PageFlowUtil.filter(runsUrl) + "\">" + _runCount + " times</a>.");
+                action.setDescriptionHTML("This script cannot be edited anymore because it has been used <a href=\"" + PageFlowUtil.filter(runsUrl) + "\">" + runCount + " times</a>.");
             }
             addAction(action);
         }
