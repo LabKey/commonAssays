@@ -51,7 +51,7 @@ if (null != bean.quantAlgorithm)
 
         if (bean.writePermissions)
         { %>
-            <%=generateButton("Rename", MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%><%
+            <%=textLink("Rename", MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%><%
         } %>
             <%=bean.modHref%><%
 

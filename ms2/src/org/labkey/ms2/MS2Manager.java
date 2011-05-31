@@ -646,7 +646,7 @@ public class MS2Manager
             return null;
         }
 
-        MS2Run[] runs = getRuns("Run = ?", runIdInt);
+        MS2Run[] runs = getRuns("Run = ? AND deleted = ?", runIdInt, false);
 
         if (runs != null && runs.length == 1)
         {
