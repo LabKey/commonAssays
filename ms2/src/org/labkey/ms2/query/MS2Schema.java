@@ -724,7 +724,7 @@ public class MS2Schema extends UserSchema
             }
         });
     }
-    
+
     public List<MS2Run> getRuns()
     {
         return _runs;
@@ -732,7 +732,9 @@ public class MS2Schema extends UserSchema
 
     protected SQLFragment getPeptideSelectSQL(SimpleFilter filter, Collection<FieldKey> fieldKeys)
     {
-        return getSelectSQL(createPeptidesTable(ContainerFilter.EVERYTHING), filter, fieldKeys);
+        FilteredTable tiFiltered = (FilteredTable) getTable(HiddenTableType.PeptidesFilter.name(), true);
+        tiFiltered.setContainerFilter(ContainerFilter.EVERYTHING);
+        return getSelectSQL(tiFiltered, filter, fieldKeys);
     }
 
     protected SQLFragment getSelectSQL(TableInfo tableInfo, SimpleFilter filter, Collection<FieldKey> fieldKeys)
@@ -1073,6 +1075,9 @@ public class MS2Schema extends UserSchema
 
         CrosstabSettings settings = new CrosstabSettings(baseTable);
         SimpleFilter filter = new SimpleFilter();
+
+        //todo: can we support column ordering that matches the MS2 Runs grid on the dashboard?
+        
         List<Integer> runIds = new ArrayList<Integer>();
         if (_runs != null)
         {
@@ -1141,7 +1146,7 @@ public class MS2Schema extends UserSchema
             result = new CrosstabTableInfo(settings, members);
         }
         else
-        {                                                                                         
+        {
             result = new CrosstabTableInfo(settings);
         }
         if (form != null)
@@ -1216,8 +1221,30 @@ public class MS2Schema extends UserSchema
         CrosstabDimension searchEngineProteinMeasure = settings.getRowAxis().addDimension(FieldKey.fromParts("seqId"));
 
         CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts( "Run"));
-        ActionURL showRunUrl = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
-        colDim.setUrl(showRunUrl.getLocalURIString() + "&run=" + CrosstabMember.VALUE_TOKEN);
+        ActionURL linkUrlOnRunColuumn;
+        // if matching on a single target protein, go straight to the Protein Details page in "all peptides" mode
+        if ((form != null) && (form.getTargetSeqId()!=null))
+        {
+            linkUrlOnRunColuumn =new ActionURL(MS2Controller.ShowProteinAction.class,getContainer());
+            linkUrlOnRunColuumn.addParameter("seqId", form.getTargetSeqId());
+            linkUrlOnRunColuumn.addParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "1");
+            linkUrlOnRunColuumn.addParameter("protein", form.getTargetProtein());
+            if (form.isCustomViewPeptideFilter()  && form.getPeptideCustomViewName(context) != null)
+            {
+                linkUrlOnRunColuumn.addParameter(MS2Manager.getDataRegionNamePeptides() + ".viewName", form.getPeptideCustomViewName(context));
+            }
+            else if (form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
+            {
+                linkUrlOnRunColuumn.addParameter(MS2Manager.getDataRegionNamePeptides() + ".peptideProphet~gte", String.valueOf(form.getPeptideProphetProbability()));
+            }
+
+        }
+        else
+        {
+            // in all oather cases do the uusual thing of linking to the MS2 show run page
+            linkUrlOnRunColuumn = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
+        }
+        colDim.setUrl(linkUrlOnRunColuumn.getLocalURIString() + "&run=" + CrosstabMember.VALUE_TOKEN);
 
         CrosstabMeasure scansMeasure = settings.addMeasure(FieldKey.fromParts("RowId"), CrosstabMeasure.AggregateFunction.COUNT, "Total");
         CrosstabMeasure avgPepProphMeasure = settings.addMeasure(FieldKey.fromParts("PeptideProphet"), CrosstabMeasure.AggregateFunction.AVG, "Avg PepProphet");
@@ -1241,7 +1268,7 @@ public class MS2Schema extends UserSchema
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("run", CrosstabMember.VALUE_NAME);
         parameters.put("MS2Peptides.Peptide~eq", FieldKey.fromParts("peptide"));
-        scansMeasure.setUrl(new DetailsURL(new ActionURL(MS2Controller.showPeptidePopupAction.class, getContainer()), parameters));
+        scansMeasure.setUrl(new DetailsURL(new ActionURL(MS2Controller.ShowPeptidePopupAction.class, getContainer()), parameters));
         scansMeasure.getSourceColumn().setDisplayColumnFactory(new DisplayColumnFactory(){
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
@@ -1263,7 +1290,7 @@ public class MS2Schema extends UserSchema
             //build up the list of column members
             for (MS2Run run : _runs)
             {
-                members.add(new CrosstabMember(Integer.valueOf(run.getRun()), colDim, run.getDescription()));
+                members.add(new CrosstabMember(run.getRun(), colDim, run.getDescription()));
             }
             result = new CrosstabTableInfo(settings, members);
         }
@@ -1276,7 +1303,7 @@ public class MS2Schema extends UserSchema
         defaultCols.add(FieldKey.fromParts(rowDim.getName()));
         defaultCols.add(FieldKey.fromParts(CrosstabTableInfo.COL_INSTANCE_COUNT));
         defaultCols.add(FieldKey.fromParts(scansMeasure.getName()));
-        defaultCols.add(FieldKey.fromParts(avgPepProphMeasure.getName()));        
+        defaultCols.add(FieldKey.fromParts(avgPepProphMeasure.getName()));
         result.setDefaultVisibleColumns(defaultCols);
         return result;
     }
@@ -1287,7 +1314,7 @@ public class MS2Schema extends UserSchema
         baseTable.wrapAllColumns(true);
         //apply PeptideFilteringComparisonForm
         SQLFragment whereSQL;
-        SimpleFilter filt;
+        SimpleFilter.FilterClause filt;
 
         if (form != null && form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
         {
@@ -1301,30 +1328,46 @@ public class MS2Schema extends UserSchema
             baseTable.addCondition(whereSQL, "RowId");
         }
 
-        baseTable.getColumn("SeqId").setLabel("Search Engine Protein");
-        baseTable.getColumn("SeqId").setFk(new LookupForeignKey("SeqId")
+        if (form != null && form.getTargetSeqId() != null)
         {
-            public TableInfo getLookupTableInfo()
+            try
             {
-                SequencesTableInfo result = createSequencesTable();
-                // This is a horrible hack to try to deal with https://www.labkey.org/issues/home/Developer/issues/details.view?issueId=5237
-                // Performance on a SQLServer installation with a large number of runs and sequences is much better with
-                // this condition because it causes the query plan to flip to something that does a much more efficient
-                // join with the sequences tables. However, adding it significantly degrades performance on my admittedly
-                // small (though not tiny) Postgres dev database
-                if (_runs != null && MS2Manager.getSchema().getSqlDialect().isSqlServer())
-                {
-                    SQLFragment sql = new SQLFragment();
-                    sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
-                    sql.append(MS2Manager.getTableInfoRuns() + " WHERE Run IN ");
-                    appendRunInClause(sql);
-                    sql.append(")))");
-
-                    result.addCondition(sql, "SeqId");
-                }
-                return result;
+                filt = new ProteinManager.SequenceFilter(form.getTargetSeqId());
+                baseTable.addCondition(filt.toSQLFragment(null, this.getDbSchema().getSqlDialect()));
             }
-        });
+            catch (SQLException e)
+            {
+                // log?
+            }
+        }
+        else
+        {
+            baseTable.getColumn("SeqId").setLabel("Search Engine Protein");
+            baseTable.getColumn("SeqId").setFk(new LookupForeignKey("SeqId")
+            {
+                public TableInfo getLookupTableInfo()
+                {
+                    SequencesTableInfo result = createSequencesTable();
+                    // This is a horrible hack to try to deal with https://www.labkey.org/issues/home/Developer/issues/details.view?issueId=5237
+                    // Performance on a SQLServer installation with a large number of runs and sequences is much better with
+                    // this condition because it causes the query plan to flip to something that does a much more efficient
+                    // join with the sequences tables. However, adding it significantly degrades performance on my admittedly
+                    // small (though not tiny) Postgres dev database
+                    if (_runs != null && MS2Manager.getSchema().getSqlDialect().isSqlServer())
+                    {
+                        SQLFragment sql = new SQLFragment();
+                        sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
+                        sql.append(MS2Manager.getTableInfoRuns() + " WHERE Run IN ");
+                        appendRunInClause(sql);
+                        sql.append(")))");
+
+                        result.addCondition(sql, "SeqId");
+                    }
+                    return result;
+                }
+            });
+        }
+
         return baseTable;
     }
 

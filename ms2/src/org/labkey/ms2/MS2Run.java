@@ -84,7 +84,7 @@ public abstract class MS2Run implements Serializable
     protected void initModifications()
     {
         if (null == modifications)
-            modifications = MS2Manager.getModifications(run);
+            modifications = MS2Manager.getModifications(this);
 
         varModifications = new HashMap<String, Double>(10);
         massTable = aaMassTable.clone();

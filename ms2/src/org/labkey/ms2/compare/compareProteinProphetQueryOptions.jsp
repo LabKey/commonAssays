@@ -88,5 +88,5 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
     }
 
     %>
-    <p><labkey:button text="Go"/></p>
+    <p><labkey:button text="Compare"/></p>
 </form>

@@ -513,7 +513,7 @@ public class ProteinManager
 
         public List<String> getColumnNames()
         {
-            return Arrays.asList(_columnName);
+            return Arrays.asList(_columnName, "Charge");
         }
 
         @Override
@@ -760,14 +760,120 @@ public class ProteinManager
 
         if ((mask & PROTEIN_FILTER) != 0)
         {
+            String groupNumber = currentUrl.getParameter("groupNumber");
+            String indistId = currentUrl.getParameter("indistinguishableCollectionId");
+            if (null != groupNumber)
+            {
+                filter.addClause(new ProteinGroupFilter(Integer.parseInt(groupNumber), null == indistId ? 0 : Integer.parseInt(indistId)));
+                return filter;
+            }
+
             String seqId = currentUrl.getParameter("seqId");
-
             if (null != seqId)
+            {
+                // if "all peptides" flag is set, add a filter to match peptides to the seqid on the url
+                // rather than just filtering for search engine protein.
+                if (null != currentUrl.getParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM))
+                {
+                        try
+                        {
+                            filter.addClause(new SequenceFilter(Integer.parseInt(seqId)));
+                        }
+                        catch (SQLException e)
+                        {
+                            // ignore
+                        }
+                }
+            else
                 filter.addCondition("SeqId", Integer.parseInt(seqId));
+            }
         }
-
         return filter;
     }
+
+    public static class SequenceFilter extends SimpleFilter.FilterClause
+     {
+        int _seqid;
+        String _sequence;
+        String _bestName;
+
+        public SequenceFilter(int seqid) throws SQLException
+        {
+            _seqid = seqid;
+            Protein prot = getProtein(seqid);
+            _sequence = prot.getSequence();
+            _bestName = prot.getBestName();
+        }
+
+        @Override
+        public String getLabKeySQLWhereClause(Map<FieldKey, ? extends ColumnInfo> columnMap)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)
+        {
+            SQLFragment sqlf = new SQLFragment();
+            String literal = "'" + _sequence + "' \n ";
+
+            sqlf.append(dialect.getStringIndexOfFunction("TrimmedPeptide", literal));
+            sqlf.append( " > 0 ");
+            return sqlf;
+        }
+
+        public List<String> getColumnNames()
+        {
+            return Arrays.asList("TrimmedPeptide");
+        }
+
+         @Override
+         protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
+         {
+             sb.append("Matches sequence of ");
+             sb.append(_bestName);
+         }
+     }
+
+    public static class ProteinGroupFilter extends SimpleFilter.FilterClause
+    {
+        int _groupNum;
+        int _indistinguishableProteinId;
+
+        public ProteinGroupFilter(int groupNum, int indistId)
+        {
+            _groupNum = groupNum;
+            _indistinguishableProteinId = indistId;
+        }
+
+        @Override
+        public String getLabKeySQLWhereClause(Map<FieldKey, ? extends ColumnInfo> columnMap)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)
+        {
+            SQLFragment sqlf = new SQLFragment();
+            sqlf.append(" RowId IN (SELECT pm.PeptideId FROM " + MS2Manager.getTableInfoPeptideMemberships() + " pm ");
+            sqlf.append(" INNER JOIN " + MS2Manager.getTableInfoProteinGroups() + " pg  ON (pm.ProteinGroupId = pg.RowId) \n");
+            sqlf.append(" WHERE pg.GroupNumber = " + _groupNum + "  and pg.IndistinguishableCollectionId = " + _indistinguishableProteinId + " ) ");
+            return sqlf;
+        }
+        public List<String> getColumnNames()
+        {
+            return Arrays.asList("RowId");
+        }
+         @Override
+         protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
+         {
+             sb.append("Peptide member of ProteinGroup " + _groupNum);
+             if (_indistinguishableProteinId > 0)
+             {
+                 sb.append("-");
+                 sb.append(_indistinguishableProteinId);
+             }
+         }
+     }
 
     public static void addRunCondition(SimpleFilter filter, String runTableName, MS2Run... runs)
     {

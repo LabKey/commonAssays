@@ -20,30 +20,48 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="java.text.Format" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.util.Pair" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
-    Format intFormat = Formats.commaf0;
-    Format percentFormat = Formats.percent;
+        MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
+        Format intFormat = Formats.commaf0;
+        Format percentFormat = Formats.percent;
 %>
-<table class="labkey-data-region" width=1150px>
-    <col width=15%><col width=85%>
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr><td>Sequence Mass:</td><td><%=h(intFormat.format(bean.protein.getMass()))%></td></tr><%
-
+<table>
+    <% if (bean.run != null) { %>
+        <tr><td class="labkey-form-label">Run</td><td><%= h(bean.run.getDescription()) %></td></tr>
+    <% } %>
+    <tr><td class="labkey-form-label">Sequence Mass</td><td><%=h(intFormat.format(bean.protein.getMass()))%></td><td>&nbsp;</td></tr><%
     if (bean.showPeptides)
     { %>
-    <tr><td>AA Coverage:</td><td><%=h(percentFormat.format(bean.protein.getAAPercent()))%> (<%=intFormat.format(bean.protein.getAACoverage())%> / <%=intFormat.format(bean.protein.getSequence().length())%>)</td></tr>
-    <tr><td>Mass Coverage:</td><td><%=h(percentFormat.format(bean.protein.getMassPercent()))%> (<%=intFormat.format(bean.protein.getMassCoverage())%> / <%=intFormat.format(bean.protein.getMass())%>)</td></tr><%
-    } %>
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr><td colspan=2><big><tt><%=bean.protein.getFormattedSequence()%></tt></big></td></tr>
-</table>
-
-<script language="javascript 1.1" type="text/javascript">
-    function grabFocus()
-    {
-        self.focus();
+        <tr><td class="labkey-form-label">AA Coverage</td><td><%=h(percentFormat.format(bean.protein.getAAPercent()))%> (<%=intFormat.format(bean.protein.getAACoverage())%> / <%=intFormat.format(bean.protein.getSequence().length())%>)</td></tr>
+        <tr><td class="labkey-form-label">Mass Coverage</td><td><%=h(percentFormat.format(bean.protein.getMassPercent()))%> (<%=intFormat.format(bean.protein.getMassCoverage())%> / <%=intFormat.format(bean.protein.getMass())%>)</td></tr><%
     }
-    window.onload = grabFocus;
-</script>
+
+    if (bean.enableAllPeptidesFeature)
+    {
+        ActionURL urlProteinDetailsPage = getViewContext().cloneActionURL();
+        urlProteinDetailsPage.deleteParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM); %>
+        <tr>
+            <td class="labkey-form-label">Peptides</td>
+            <td>
+                <form action="<%= urlProteinDetailsPage %>" method="GET">
+                    <% for (org.labkey.api.util.Pair<String, String> param : urlProteinDetailsPage.getParameters()) { %>
+                        <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
+                    <% } %>
+                    <select name="<%= MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM %>" onchange="this.form.submit();">
+                        <option value="0">Show only peptides assigned by search engine</option>
+                        <option value="1" <%= "1".equals(getViewContext().getActionURL().getParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM)) ? "selected" : "" %>>Show all peptides with sequence matches</option>
+                    </select>
+                </form>
+            </td>
+        </tr><%
+    } %>
+
+    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <% if (bean.run == null) { %>
+        <tr><td colspan=2><big><tt><%= bean.protein.getFormattedSequence() %></tt></big></td></tr>
+    <% } %>
+</table>

@@ -15,29 +15,24 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.Formats" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="java.text.Format" %>
-<%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
-    ActionURL exportUrl = getViewContext().cloneActionURL();
-    exportUrl.setAction(MS2Controller.ExportProteinCoverageMapAction.class);
-    if (null!=exportUrl.getParameter("seqId"))
-        exportUrl.deleteParameter("seqId");
-    exportUrl.addParameter("seqId", bean.protein.getSeqId());
+        MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
 
-    String exportLink = "<a href=\"" + exportUrl.toString() + "\" target=\"_blank\" class=\"labkey-text-link\" >Export</a>";
-    ActionURL showPeptidesPopupUrl = getViewContext().cloneActionURL();
-    showPeptidesPopupUrl.setAction(MS2Controller.showPeptidePopupAction.class);
-    if (null!=showPeptidesPopupUrl.getParameter("MS2Peptides.viewName"))
-            showPeptidesPopupUrl.deleteParameter("MS2Peptides.viewName");
-     showPeptidesPopupUrl.addParameter("MS2Peptides.viewName", "Standard");
-    bean.showRunUrl = showPeptidesPopupUrl.toString();
+        if (bean.showPeptides)
+        {
+            ActionURL showPeptidesPopupUrl = getViewContext().cloneActionURL();
+            showPeptidesPopupUrl.setAction(MS2Controller.ShowPeptidePopupAction.class);
+            if (null!=showPeptidesPopupUrl.getParameter("MS2Peptides.viewName"))
+                showPeptidesPopupUrl.deleteParameter("MS2Peptides.viewName");
+            showPeptidesPopupUrl.addParameter("MS2Peptides.viewName", "Standard");
+            bean.showRunUrl = showPeptidesPopupUrl.toString();
+        }
   %>
 <link rel="stylesheet" type="text/css" href="ProteinCoverageMap.css" />
 <script type="text/javascript">
@@ -51,19 +46,21 @@ LABKEY.requiresScript("util.js");
 </script>
 
 <div>
-    <p>
-    <%=exportLink%>
-    </p>
-     <%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl) %>
-</div>
-
-
-
-<script language="javascript 1.1" type="text/javascript">
-    function grabFocus()
-    {
-        self.focus();
+    <%
+    if (bean.showPeptides)
+    { %>
+        <p><%
+            ActionURL exportUrl = getViewContext().cloneActionURL();
+            exportUrl.setAction(MS2Controller.ExportProteinCoverageMapAction.class);
+            if (null==exportUrl.getParameter("seqId"))
+                exportUrl.addParameter("seqId", bean.protein.getSeqId());
+        %><%= org.labkey.api.util.PageFlowUtil.generateButton("Export", exportUrl)%></p>
+        <p><%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl) %></p><%
     }
-    window.onload = grabFocus;
-</script>
+    else
+    {   %>
+         <p><%=bean.protein.getFormattedSequence()%></p><%
+    }
+         %>
 
+</div>

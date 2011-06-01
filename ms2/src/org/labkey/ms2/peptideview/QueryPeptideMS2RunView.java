@@ -31,7 +31,6 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.PeptidesTableInfo;
 import org.springframework.validation.BindException;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * User: jeckels
@@ -39,7 +38,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 {
-    public QueryPeptideMS2RunView(ViewContext viewContext, MS2Run[] runs)
+    public QueryPeptideMS2RunView(ViewContext viewContext, MS2Run... runs)
     {
         super(viewContext, "Peptides", runs);
     }
@@ -85,6 +84,21 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         QuerySettings settings = createQuerySettings(schema);
 
         PeptideQueryView peptideView = new PeptideQueryView(schema, settings, expanded, allowNesting);
+
+        peptideView.setTitle("Peptides");
+        return peptideView;
+    }
+
+    public AbstractMS2QueryView createGridView(SimpleFilter baseFilter) throws RedirectException, SQLException
+    {
+        MS2Schema schema = new MS2Schema(getUser(), getContainer());
+        schema.setRuns(_runs);
+
+        QuerySettings settings = createQuerySettings(schema);
+        settings.setContainerFilterName(ContainerFilter.Type.CurrentAndSubfolders.name());
+
+        settings.setBaseFilter(baseFilter);
+        PeptideQueryView peptideView = new PeptideQueryView(schema, settings, false, false);
 
         peptideView.setTitle("Peptides");
         return peptideView;

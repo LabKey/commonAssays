@@ -37,5 +37,5 @@
     <%=bean.select%><br/>
     <br/><br/>
     <% out.flush(); bean.extraOptionsView.render(request, response); %><br/>
-    <%=PageFlowUtil.generateSubmitButton("Go", "", "name=\"submit\"")%>
+    <%=PageFlowUtil.generateSubmitButton("Compare", "", "name=\"submit\"")%>
 </form>

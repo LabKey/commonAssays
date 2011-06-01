@@ -1095,9 +1095,9 @@ public class MS2Manager
         }
     }
 
-    public static MS2Modification[] getModifications(int run)
+    public static MS2Modification[] getModifications(MS2Run run)
     {
-        SimpleFilter filter = new SimpleFilter("run", new Integer(run));
+        SimpleFilter filter = new SimpleFilter("run", run.getRun());
 
         try
         {
