@@ -41,7 +41,6 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * Created by IntelliJ IDEA.
  * User: klum
  * Date: May 14, 2009
  */
@@ -189,11 +188,11 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                     Double otherValue = getter.getValue(dataRow);
                     if (otherValue != null)
                     {
-                        if (otherValue.doubleValue() < thisValue)
+                        if (otherValue < thisValue)
                         {
                             lowerCount++;
                         }
-                        else if (otherValue.doubleValue() > thisValue)
+                        else if (otherValue > thisValue)
                         {
                             higherCount++;
                         }
@@ -223,7 +222,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 if ("<".equals(oorIndicator))
                 {
                     Double standardValue = OUT_OF_RANGE_BELOW.getValue(value, dataRows, getter, analyte);
-                    if (standardValue != null && standardValue.doubleValue() > thisValue)
+                    if (standardValue != null && standardValue > thisValue)
                     {
                         return standardValue;
                     }
@@ -235,7 +234,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 else if (">".equals(oorIndicator))
                 {
                     Double standardValue = OUT_OF_RANGE_ABOVE.getValue(value, dataRows, getter, analyte);
-                    if (standardValue != null && standardValue.doubleValue() < thisValue)
+                    if (standardValue != null && standardValue < thisValue)
                     {
                         return standardValue;
                     }
@@ -299,16 +298,16 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 Double rowValue = getter.getValue(dataRow);
                 if ((type.startsWith("s") || type.startsWith("es")) && dataRow.getObsOverExp() != null && rowValue != null)
                 {
-                    double obsOverExp = dataRow.getObsOverExp().doubleValue();
+                    double obsOverExp = dataRow.getObsOverExp();
                     if (obsOverExp >= analyte.getMinStandardRecovery() && obsOverExp <= analyte.getMaxStandardRecovery())
                     {
                         if (min)
                         {
-                            result = Math.min(result, rowValue.doubleValue());
+                            result = Math.min(result, rowValue);
                         }
                         else
                         {
-                            result = Math.max(result, rowValue.doubleValue());
+                            result = Math.max(result, rowValue);
                         }
                     }
                 }
@@ -563,7 +562,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 case OUT_OF_RANGE_ABOVE:
                     if (dataRow.getDilution() != null && maxStandardObsConc != null)
                     {
-                        obsConc = dataRow.getDilution().doubleValue() * maxStandardObsConc.doubleValue();
+                        obsConc = dataRow.getDilution() * maxStandardObsConc;
                     }
                     else
                     {
@@ -573,7 +572,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 case OUT_OF_RANGE_BELOW:
                     if (dataRow.getDilution() != null && minStandardObsConc != null)
                     {
-                        obsConc = dataRow.getDilution().doubleValue() * minStandardObsConc.doubleValue();
+                        obsConc = dataRow.getDilution() * minStandardObsConc;
                     }
                     else
                     {
@@ -588,13 +587,13 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 case BEYOND_RANGE:
                     if (dataRow.getFi() != null)
                     {
-                        if (minStandardFI != null && dataRow.getFi().doubleValue() < minStandardFI.doubleValue() && minStandardObsConc != null)
+                        if (minStandardFI != null && dataRow.getFi() < minStandardFI && minStandardObsConc != null)
                         {
-                            obsConc = dataRow.getDilution().doubleValue() * minStandardObsConc.doubleValue();
+                            obsConc = dataRow.getDilution() * minStandardObsConc;
                         }
-                        else if (maxStandardFI != null && dataRow.getFi().doubleValue() > maxStandardFI.doubleValue() && maxStandardObsConc != null)
+                        else if (maxStandardFI != null && dataRow.getFi() > maxStandardFI && maxStandardObsConc != null)
                         {
-                            obsConc = dataRow.getDilution().doubleValue() * maxStandardObsConc.doubleValue();
+                            obsConc = dataRow.getDilution() * maxStandardObsConc;
                         }
                         else
                         {

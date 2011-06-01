@@ -24,7 +24,7 @@ import java.sql.SQLException;
 
 /**
  * System maintenance tasks for purging deleted data files
- * Created by IntelliJ IDEA.
+ *
  * User: Dave
  * Date: Nov 1, 2007
  * Time: 10:15:38 AM
@@ -43,9 +43,9 @@ public class PurgeTask implements SystemMaintenance.MaintenanceTask
             Integer fileId = mgr.getNextPurgeFile();
             while(null != fileId)
             {
-                _log.info("Purging MS1 file id " + fileId.intValue() + "...");
-                mgr.purgeFile(fileId.intValue());
-                _log.info("MS1 file id " + fileId.intValue() + " successfully purged.");
+                _log.info("Purging MS1 file id " + fileId + "...");
+                mgr.purgeFile(fileId);
+                _log.info("MS1 file id " + fileId + " successfully purged.");
                 
                 fileId = mgr.getNextPurgeFile();
             }
