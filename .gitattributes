@@ -1358,6 +1358,7 @@ nab/src/org/labkey/nab/view/runProperties.jsp -text
 nab/src/org/labkey/nab/view/sampleDilutions.jsp -text
 nab/src/org/labkey/nab/view/sampleProperties.jsp -text
 portal/module.properties -text
+portal/src/org/labkey/portal/PortalJUnitTest.java -text
 portal/src/org/labkey/portal/PortalModule.java -text
 portal/src/org/labkey/portal/customizeErrors.jsp -text
 viability/Viability.iml -text
