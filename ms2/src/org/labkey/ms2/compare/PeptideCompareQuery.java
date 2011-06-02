@@ -16,8 +16,10 @@
 
 package org.labkey.ms2.compare;
 
+import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.Pair;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.ProteinManager;
@@ -40,9 +42,9 @@ public class PeptideCompareQuery extends CompareQuery
 {
     public static final String COMPARISON_DESCRIPTION = "Compare Peptides";
 
-    public PeptideCompareQuery(ActionURL currentUrl, List<MS2Run> runs)
+    public PeptideCompareQuery(ActionURL currentUrl, List<MS2Run> runs, User user)
     {
-        super(currentUrl, "Peptide", runs);
+        super(currentUrl, "Peptide", runs, user);
         
         StringBuilder header = new StringBuilder(HEADER_PREFIX);
         header.append("number of times each peptide appears in each run.");
@@ -93,14 +95,14 @@ public class PeptideCompareQuery extends CompareQuery
 
     protected void addWhereClauses(SimpleFilter filter)
     {
-        SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(_currentUrl, _runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
+        SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(_currentUrl, _runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, _user);
         peptideFilter = ProteinManager.reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
         filter.addAllClauses(peptideFilter);
     }
 
     protected String setupComparisonColumnLink(ActionURL linkURL, String columnName, String runPrefix)
     {
-        linkURL.setAction("showRun");
+        linkURL.setAction(MS2Controller.ShowRunAction.class);
         linkURL.deleteParameter("view");  // Always link to Peptide view (the default)
         return MS2Manager.getDataRegionNamePeptides() + ".Peptide~eq=${Peptide}";
     }
@@ -110,7 +112,7 @@ public class PeptideCompareQuery extends CompareQuery
         return ti.getColumn("Peptide");
     }
 
-    public List<Pair<String, String>> getSQLSummaries()
+    public List<Pair<String, String>> getSQLSummaries(User user)
     {
         List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
         SimpleFilter peptideFilter = new SimpleFilter();

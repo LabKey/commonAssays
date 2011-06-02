@@ -53,7 +53,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
     {
         DataRegion rgn = getPeptideGridForDisplay(requestedPeptideColumnNames);
         GridView peptideView = new GridView(rgn, (BindException)null);
-        peptideView.setFilter(ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.EXTRA_FILTER, getSingleRun()));
+        peptideView.setFilter(ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.EXTRA_FILTER, getUser(), getSingleRun()));
         peptideView.setSort(ProteinManager.getPeptideBaseSort());
         peptideView.setTitle("Peptides");
         return peptideView;
@@ -150,7 +150,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
 
     private SimpleFilter createFilter(List<String> selectedRows)
     {
-        SimpleFilter filter = ProteinManager.getPeptideFilter(_url, Arrays.asList(_runs), ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
+        SimpleFilter filter = ProteinManager.getPeptideFilter(_url, Arrays.asList(_runs), ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser());
 
         if (selectedRows != null)
         {
@@ -216,7 +216,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         fragment.append("SELECT DISTINCT SeqId FROM ");
         fragment.append(MS2Manager.getTableInfoPeptides());
         fragment.append(" ");
-        SimpleFilter filter = ProteinManager.getPeptideFilter(queryUrl, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run);
+        SimpleFilter filter = ProteinManager.getPeptideFilter(queryUrl, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run);
         fragment.append(filter.getWhereSQL(ProteinManager.getSqlDialect()));
         fragment.addAll(filter.getWhereParams(MS2Manager.getTableInfoPeptides()));
         return fragment;
@@ -225,7 +225,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
     public HashMap<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
         HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
-        map.put("Peptide filter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
+        map.put("Peptide filter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run));
         return map;
     }
 

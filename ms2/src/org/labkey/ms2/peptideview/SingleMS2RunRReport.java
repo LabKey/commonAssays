@@ -23,7 +23,6 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Controller;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * User: jeckels

@@ -16,8 +16,10 @@
 
 package org.labkey.ms2.compare;
 
+import org.labkey.api.security.User;
 import org.labkey.ms2.GroupNumberDisplayColumn;
 import org.labkey.api.data.*;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
@@ -40,9 +42,9 @@ public class ProteinProphetCompareQuery extends CompareQuery
 {
     public static final String COMPARISON_DESCRIPTION = "Compare ProteinProphet (Legacy) Proteins";
 
-    protected ProteinProphetCompareQuery(ActionURL currentUrl, List<MS2Run> runs)
+    protected ProteinProphetCompareQuery(ActionURL currentUrl, List<MS2Run> runs, User user)
     {
-        super(currentUrl, "SeqId", runs);
+        super(currentUrl, "SeqId", runs, user);
 
         boolean groupProbability = "1".equals(currentUrl.getParameter("groupProbability"));
         boolean light2HeavyRatioMean = "1".equals(currentUrl.getParameter("light2HeavyRatioMean"));
@@ -138,7 +140,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
 
     protected String setupComparisonColumnLink(ActionURL linkURL, String columnName, String runPrefix)
     {
-        linkURL.setAction("showRun");
+        linkURL.setAction(MS2Controller.ShowRunAction.class);
         linkURL.replaceParameter("expanded", "1");
         linkURL.replaceParameter("grouping", "proteinprophet");
         String paramName = MS2Manager.getDataRegionNameProteinGroups() + ".GroupNumber";
@@ -180,13 +182,13 @@ public class ProteinProphetCompareQuery extends CompareQuery
     {
         ColumnInfo result = ti.getColumn("Protein");
         ActionURL linkURL = _currentUrl.clone();
-        linkURL.setAction("showProtein");
+        linkURL.setAction(MS2Controller.ShowProteinAction.class);
         linkURL.replaceParameter("seqId", "${SeqId}");
         result.setURL(StringExpressionFactory.createURL(linkURL));
         return result;
     }
 
-    public List<Pair<String, String>> getSQLSummaries()
+    public List<Pair<String, String>> getSQLSummaries(User user)
     {
         List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
         result.add(new Pair<String, String>("Protein Group Filter", new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteinGroups()).getFilterText()));

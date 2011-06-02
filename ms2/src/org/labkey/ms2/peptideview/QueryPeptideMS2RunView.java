@@ -185,7 +185,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
                 String columnName = _selectedNestingOption == null ? "RowId" : _selectedNestingOption.getRowIdColumnName();
                 filter.addClause(new SimpleFilter.InClause(columnName, _selectedRows));
             }
-            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, _runs));
+            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), _runs));
             result.getRenderContext().setBaseFilter(filter);
             return result;
         }
@@ -250,7 +250,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);
-        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getSingleRun()));
+        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), getSingleRun()));
         filter.addCondition(view._selectedNestingOption.getRowIdColumnName(), groupId.intValue());
         result.getRenderContext().setBaseFilter(filter);
 

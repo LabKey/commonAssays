@@ -393,7 +393,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     private SimpleFilter getPeptideFilter(ActionURL url)
     {
-        return ProteinManager.getPeptideFilter(url, ProteinManager.ALL_FILTERS, _runs[0]);
+        return ProteinManager.getPeptideFilter(url, ProteinManager.ALL_FILTERS, getUser(), _runs[0]);
     }
 
 
@@ -488,7 +488,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
     protected void addPeptideFilterText(List<String> headers, MS2Run run, ActionURL currentUrl)
     {
         headers.add("");
-        headers.add("Peptide Filter: " + ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run).getFilterText());
+        headers.add("Peptide Filter: " + ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run).getFilterText());
         headers.add("Peptide Sort: " + new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText());
     }
 

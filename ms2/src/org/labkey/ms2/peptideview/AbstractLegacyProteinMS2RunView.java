@@ -183,16 +183,6 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
 
     public abstract AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException;
     
-    public void writeExcel(HttpServletResponse response, MS2Run run, boolean expanded, String columns, String where, List<String> headers, String proteinColumns) throws SQLException
-    {
-        AbstractProteinExcelWriter ewProtein = getExcelProteinGridWriter(proteinColumns);
-        ewProtein.setSheetName(run.getDescription());
-        ewProtein.setFooter(run.getDescription() + " Proteins");
-        ewProtein.setHeaders(headers);
-        setUpExcelProteinGrid(ewProtein, expanded, columns, run, where);
-        ewProtein.write(response);
-    }
-
     protected List<String> getExportFormats()
     {
         List<String> result = new ArrayList<String>();

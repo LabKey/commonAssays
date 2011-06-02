@@ -1227,7 +1227,7 @@ public class MS2Schema extends UserSchema
         {
             linkUrlOnRunColuumn =new ActionURL(MS2Controller.ShowProteinAction.class,getContainer());
             linkUrlOnRunColuumn.addParameter("seqId", form.getTargetSeqId());
-            linkUrlOnRunColuumn.addParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "1");
+            linkUrlOnRunColuumn.addParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "true");
             linkUrlOnRunColuumn.addParameter("protein", form.getTargetProtein());
             if (form.isCustomViewPeptideFilter()  && form.getPeptideCustomViewName(context) != null)
             {

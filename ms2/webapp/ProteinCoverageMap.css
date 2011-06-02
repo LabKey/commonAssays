@@ -6,8 +6,8 @@
 
 .sequence-row, .sequence-row tr  {
     font-size: 10pt;
-
 }
+
 .sequence-row td  {
     border-top: 1px solid #000000;
     padding-top: 0;
@@ -18,21 +18,32 @@
 }
 
 .tenth-col, .tenth-col td {
-    border-right: 1px solid #000000;
+    border-right: 1px dotted gray;
 }
 
 .address-row td {
     border-right: 1px solid #000000;
     border-left: 1px solid #000000;
     border-top: 1px solid #000000;
+    background: #e3e3e3;
     height: 10px;
     font-size: 6pt;
     text-align: left;
 }
 
-.spacer-row tr, .spacer-row td {
-    height: 20px;
-    background-color: #F0F0F0;
+ .protein-coverage-map tr
+ {
+     border-left: 1px solid black;
+     border-right: 1px solid black;
+ }
+
+.protein-coverage-map .spacer-row tr, .spacer-row td {
+    height: 10px;
+    border-top: 1px solid #000000;
+}
+
+.first-peptide-row tr, .first-peptide-row td {
+    height: 1em;
 }
 
 .peptide-marker, .peptide-marker td {

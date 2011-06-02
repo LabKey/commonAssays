@@ -16,8 +16,10 @@
 
 package org.labkey.ms2.compare;
 
+import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.Pair;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.api.data.SimpleFilter;
@@ -38,9 +40,9 @@ public class ProteinCompareQuery extends CompareQuery
 {
     public static final String COMPARISON_DESCRIPTION = "Compare Search Engine Proteins";
 
-    public ProteinCompareQuery(ActionURL currentUrl, List<MS2Run> runs)
+    public ProteinCompareQuery(ActionURL currentUrl, List<MS2Run> runs, User user)
     {
-        super(currentUrl, "SeqId", runs);
+        super(currentUrl, "SeqId", runs, user);
 
         boolean total = "1".equals(currentUrl.getParameter("total"));
         boolean unique = "1".equals(currentUrl.getParameter("unique"));
@@ -143,7 +145,7 @@ public class ProteinCompareQuery extends CompareQuery
 
     protected void addWhereClauses(SimpleFilter filter)
     {
-        SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(_currentUrl, _runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
+        SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(_currentUrl, _runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, _user);
         peptideFilter = ProteinManager.reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
         filter.addAllClauses(peptideFilter);
     }
@@ -161,7 +163,7 @@ public class ProteinCompareQuery extends CompareQuery
 
     protected String setupComparisonColumnLink(ActionURL linkURL, String columnName, String runPrefix)
     {
-        linkURL.setAction("showProtein");   // Could target the "prot" window instead of using the main window
+        linkURL.setAction(MS2Controller.ShowProteinAction.class);   // Could target the "prot" window instead of using the main window
         return "protein=${Protein}&seqId=${SeqId}";
     }
 
@@ -175,7 +177,7 @@ public class ProteinCompareQuery extends CompareQuery
         return ti.getColumn("Protein");
     }
 
-    public List<Pair<String, String>> getSQLSummaries()
+    public List<Pair<String, String>> getSQLSummaries(User user)
     {
         List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
         SimpleFilter peptideFilter = new SimpleFilter();

@@ -18,6 +18,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
+import org.labkey.api.security.User;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.ProteinManager;
@@ -38,9 +39,9 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
     private AbstractMS2RunView _peptideView;
     private String _extraWhere;
 
-    public ProteinResultSetSpectrumIterator(List<MS2Run> runs, ActionURL currentUrl, AbstractMS2RunView peptideView, String extraWhere)
+    public ProteinResultSetSpectrumIterator(List<MS2Run> runs, ActionURL currentUrl, AbstractMS2RunView peptideView, String extraWhere, User user)
     {
-        _rs = new ProteinSpectrumResultSet(runs);
+        _rs = new ProteinSpectrumResultSet(runs, user);
         _currentUrl = currentUrl;
         _peptideView = peptideView;
         _extraWhere = extraWhere;
@@ -48,8 +49,11 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
 
     public class ProteinSpectrumResultSet extends MS2ResultSet
     {
-        ProteinSpectrumResultSet(List<MS2Run> runs)
+        private final User _user;
+
+        ProteinSpectrumResultSet(List<MS2Run> runs, User user)
         {
+            _user = user;
             _iter = runs.iterator();
         }
 
@@ -60,12 +64,12 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
 
             if (_peptideView instanceof StandardProteinPeptideView)
             {
-                sql = ProteinManager.getPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, "Scan, Charge, Fraction, PrecursorMass, MZ, Spectrum");
+                sql = ProteinManager.getPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, "Scan, Charge, Fraction, PrecursorMass, MZ, Spectrum", _user);
                 joinSql = sql.getSQL().replaceFirst("RIGHT OUTER JOIN", "LEFT OUTER JOIN (SELECT Run AS fRun, Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + ") spec ON Run=fRun AND Scan = fScan\nRIGHT OUTER JOIN");
             }
             else
             {
-                sql = ProteinManager.getProteinProphetPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, "Scan, Charge, Fraction, PrecursorMass, MZ, Spectrum");
+                sql = ProteinManager.getProteinProphetPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, "Scan, Charge, Fraction, PrecursorMass, MZ, Spectrum", _user);
                 joinSql = sql.getSQL().replaceFirst("WHERE", "LEFT OUTER JOIN (SELECT s.Run AS fRun, s.Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + " s) spec ON " + MS2Manager.getTableInfoSimplePeptides() + ".Run=fRun AND Scan = fScan WHERE ");
             }
 

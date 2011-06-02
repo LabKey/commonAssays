@@ -19,6 +19,7 @@ package org.labkey.ms2.compare;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.*;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.util.Pair;
@@ -50,26 +51,28 @@ public abstract class CompareQuery extends SQLFragment
     protected int _runCount;
     private int _indent = 0;
     private String _header;
+    protected final User _user;
     protected static final String HEADER_PREFIX = "Numbers below represent ";
 
-    public static CompareQuery getCompareQuery(String compareColumn /* TODO: Get this from url? */, ActionURL currentUrl, List<MS2Run> runs)
+    public static CompareQuery getCompareQuery(String compareColumn /* TODO: Get this from url? */, ActionURL currentUrl, List<MS2Run> runs, User user)
     {
         if ("Peptide".equalsIgnoreCase(compareColumn))
-            return new PeptideCompareQuery(currentUrl, runs);
+            return new PeptideCompareQuery(currentUrl, runs, user);
         else if ("Protein".equalsIgnoreCase(compareColumn))
-            return new ProteinCompareQuery(currentUrl, runs);
+            return new ProteinCompareQuery(currentUrl, runs, user);
         else if ("ProteinProphet".equalsIgnoreCase(compareColumn))
-            return new ProteinProphetCompareQuery(currentUrl, runs);
+            return new ProteinProphetCompareQuery(currentUrl, runs, user);
         else
             return null;
     }
 
-    protected CompareQuery(ActionURL currentUrl, String compareColumn, List<MS2Run> runs)
+    protected CompareQuery(ActionURL currentUrl, String compareColumn, List<MS2Run> runs, User user)
     {
         _currentUrl = currentUrl;
         _compareColumn = compareColumn;
         _runs = runs;
         _runCount = _runs.size();
+        _user= user;
     }
 
     public abstract String getComparisonDescription();
@@ -399,7 +402,7 @@ public abstract class CompareQuery extends SQLFragment
 
     protected abstract ColumnInfo getComparisonCommonColumn(TableInfo ti);
 
-    public abstract List<Pair<String, String>> getSQLSummaries();
+    public abstract List<Pair<String, String>> getSQLSummaries(User user);
 
     public void checkForErrors(BindException errors) throws SQLException
     {

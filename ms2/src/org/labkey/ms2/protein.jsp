@@ -23,6 +23,7 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.util.Pair" %>
+<%@ page import="org.labkey.ms2.protein.ProteinManager" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
         MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
@@ -45,23 +46,18 @@
         ActionURL urlProteinDetailsPage = getViewContext().cloneActionURL();
         urlProteinDetailsPage.deleteParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM); %>
         <tr>
-            <td class="labkey-form-label">Peptides</td>
+            <td class="labkey-form-label">Peptides<%= PageFlowUtil.helpPopup("Peptides", "<p><strong>Show only peptides assigned by search engine</strong><br/>The page displays only the set of peptides that the search engine has chosen as matching the subject protein, based on engine-specific scoring.</p><p><strong>Show all peptides with sequence matches</strong><br/>The coverage map and peptide grid show all the filtered trimmed peptides from the run that match a sequence within the subject protein, regardless of whether the protein was chosen by the search engine as matching that specific peptide.</p>", true) %></td>
             <td>
                 <form action="<%= urlProteinDetailsPage %>" method="GET">
                     <% for (org.labkey.api.util.Pair<String, String> param : urlProteinDetailsPage.getParameters()) { %>
                         <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
                     <% } %>
                     <select name="<%= MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM %>" onchange="this.form.submit();">
-                        <option value="0">Show only peptides assigned by search engine</option>
-                        <option value="1" <%= "1".equals(getViewContext().getActionURL().getParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM)) ? "selected" : "" %>>Show all peptides with sequence matches</option>
+                        <option value="false">Show only peptides assigned by search engine</option>
+                        <option value="true" <%= org.labkey.ms2.protein.ProteinManager.showAllPeptides(getViewContext().getActionURL(), getViewContext().getUser()) ? "selected" : "" %>>Show all peptides with sequence matches</option>
                     </select>
                 </form>
             </td>
         </tr><%
     } %>
-
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <% if (bean.run == null) { %>
-        <tr><td colspan=2><big><tt><%= bean.protein.getFormattedSequence() %></tt></big></td></tr>
-    <% } %>
 </table>

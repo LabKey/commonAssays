@@ -26,7 +26,6 @@ import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.labkey.api.util.Pair;
 import org.springframework.validation.BindException;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.util.List;
@@ -119,7 +118,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             result.getRenderContext().setBaseSort(sort);
             Filter customViewFilter = result.getRenderContext().getBaseFilter();
             SimpleFilter filter = new SimpleFilter(customViewFilter);
-            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, _runs));
+            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), _runs));
             if (_selectedRows != null)
             {
                 String columnName = _selectedNestingOption == null ? "RowId" : _selectedNestingOption.getRowIdColumnName();
@@ -174,7 +173,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
 
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);
-        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getSingleRun()));
+        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), getSingleRun()));
 
         Integer groupId = null;
 
