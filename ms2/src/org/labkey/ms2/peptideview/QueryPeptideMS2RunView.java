@@ -133,13 +133,16 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             ProteinProphetQueryNestingOption proteinProphetNesting = new ProteinProphetQueryNestingOption(_allowNesting);
             StandardProteinQueryNestingOption standardProteinNesting = new StandardProteinQueryNestingOption(_allowNesting);
 
-            if (proteinProphetNesting.isNested(originalColumns))
+            if (_allowNesting)
             {
-                _selectedNestingOption = proteinProphetNesting;
-            }
-            else if (standardProteinNesting.isNested(originalColumns))
-            {
-                _selectedNestingOption = standardProteinNesting;
+                if (proteinProphetNesting.isNested(originalColumns))
+                {
+                    _selectedNestingOption = proteinProphetNesting;
+                }
+                else if (standardProteinNesting.isNested(originalColumns))
+                {
+                    _selectedNestingOption = standardProteinNesting;
+                }
             }
 
             DataRegion rgn;

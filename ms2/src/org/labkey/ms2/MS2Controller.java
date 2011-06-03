@@ -679,8 +679,14 @@ public class MS2Controller extends SpringActionController
         {
             onClick.append("<tr><td colspan=2><b>Fixed</b></td></tr>");
 
-            for (String key : fixed.keySet())
-                onClick.append("<tr><td>" + key + "</td><td align=right>" + fixed.get(key) + "</td></tr>");
+            for (Map.Entry<String, String> entry : fixed.entrySet())
+            {
+                onClick.append("<tr><td>");
+                onClick.append(entry.getKey());
+                onClick.append("</td><td align=right>");
+                onClick.append(entry.getValue());
+                onClick.append("</td></tr>");
+            }
         }
 
         if (0 != var.size())
@@ -690,8 +696,14 @@ public class MS2Controller extends SpringActionController
 
             onClick.append("<tr><td colspan=2><b>Variable</b></td></tr>");
 
-            for (String key : var.keySet())
-                onClick.append("<tr><td>" + key + "</td><td align=right>" + var.get(key) + "</td></tr>");
+            for (Map.Entry<String, String> entry : var.entrySet())
+            {
+                onClick.append("<tr><td>");
+                onClick.append(entry.getKey());
+                onClick.append("</td><td align=right>");
+                onClick.append(entry.getValue());
+                onClick.append("</td></tr>");
+            }
         }
 
         onClick.append("'); return false;");
@@ -809,7 +821,7 @@ public class MS2Controller extends SpringActionController
             //often do not want the prev/next buttons to be enabled.
             if (rowIndex >= 0)
             {
-                peptideIndex = getPeptideIndex(currentURL, run, getViewContext().getUser());
+                peptideIndex = getPeptideIndex(currentURL, run);
                 rowIndex = MS2Manager.verifyRowIndex(peptideIndex, rowIndex, peptideId);
                 sqlRowIndex = rowIndex + 1;  // Different rowIndex may be returned -- make sure sqlRowIndex matches
             }
@@ -890,7 +902,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private long[] getPeptideIndex(ActionURL currentURL, MS2Run run, User user) throws SQLException, ServletException
+    private long[] getPeptideIndex(ActionURL currentURL, MS2Run run) throws SQLException, ServletException
     {
         AbstractMS2RunView view = getPeptideView(currentURL.getParameter("grouping"), run);
         return view.getPeptideIndex(currentURL);
@@ -904,7 +916,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public class LoadGoAction extends FormViewAction
+    public class LoadGoAction extends FormViewAction<Object>
     {
         private String _message = null;
 
@@ -1706,25 +1718,6 @@ public class MS2Controller extends SpringActionController
             }
         }
 
-        public void appendProteinGroupFilterDescription(StringBuilder title, ViewContext context)
-        {
-            if (isProteinProphetFilter() && getProteinProphetProbability() != null)
-            {
-                title.append("ProteinProphet >= ");
-                title.append(getProteinProphetProbability());
-            }
-            else if (isCustomViewProteinGroupFilter())
-            {
-                title.append("\"");
-                title.append(getProteinGroupCustomViewName(context) == null ? "<default>" : getProteinGroupCustomViewName(context));
-                title.append("\" protein group filter");
-            }
-            else
-            {
-                title.append("No protein group filter");
-            }
-        }
-
         public boolean isNormalizeProteinGroups()
         {
             return _normalizeProteinGroups;
@@ -1982,7 +1975,7 @@ public class MS2Controller extends SpringActionController
             prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
             prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getPeptideCustomViewName(getViewContext()));
             prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
-            prefs.put(PeptideFilteringFormElements.targetProtein.name(), form.getTargetProtein() == null ? null : form.getTargetProtein().toString());
+            prefs.put(PeptideFilteringFormElements.targetProtein.name(), form.getTargetProtein() == null ? null : form.getTargetProtein());
 
             if (!getUser().isGuest())
             {
@@ -4320,7 +4313,7 @@ public class MS2Controller extends SpringActionController
 
             Protein[] proteins = ProteinManager.getProteinsContainingPeptide(run.getFastaId(), peptide);
             ActionURL currentURL = getViewContext().cloneActionURL();
-//           AbstractMS2RunView peptideView = new StandardProteinPeptideView(getViewContext(), run);          // not used int called function
+
             ProteinsView view = new ProteinsView(currentURL, run, form, proteins, new String[]{peptide.getTrimmedPeptide()}, null);
             HttpView summary = new HtmlView("<table><tr><td><span class=\"navPageHeader\">All protein sequences in FASTA file " + run.getFastaFileName() + " that contain the peptide " + peptide + "</span></td></tr></table>");
             return new VBox(summary, view);
@@ -4413,7 +4406,7 @@ public class MS2Controller extends SpringActionController
 
     private static class ProteinsView extends VBox
     {
-        private ProteinsView(ActionURL currentURL, MS2Run run, DetailsForm form, Protein[] proteins, String[] peptides, AbstractQueryMS2RunView peptideView) throws Exception
+        private ProteinsView(ActionURL currentURL, MS2Run run, DetailsForm form, Protein[] proteins, String[] peptides, QueryPeptideMS2RunView peptideView) throws Exception
         {
             // Limit to 100 proteins
             int proteinCount = Math.min(100, proteins.length);
@@ -4436,7 +4429,7 @@ public class MS2Controller extends SpringActionController
             if (showPeptides)
             {
                 allPeptidesQueryFilter = getAllPeptidesFilter(getViewContext(), targetURL, run);
-                gridView = ((QueryPeptideMS2RunView)peptideView).createGridView(allPeptidesQueryFilter);
+                gridView = peptideView.createGridView(allPeptidesQueryFilter);
                 peptides = Table.executeArray(gridView.getTable(), "Peptide", allPeptidesQueryFilter, new Sort("Peptide"), String.class);
             }
 
@@ -4453,9 +4446,9 @@ public class MS2Controller extends SpringActionController
                 addView(proteinSummary);
                 //TODO:  do something sensible for a single seqid and no run.
                 JspView<ProteinViewBean> sequenceView;
+                bean.run = run;
                 if (showPeptides && !form.isSimpleSequenceView())
                 {
-                    bean.run = run;
                     sequenceView = new JspView<ProteinViewBean>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
                 }
                 else
@@ -4637,7 +4630,7 @@ public class MS2Controller extends SpringActionController
         private AnnotView(Protein protein) throws Exception
         {
             super("/org/labkey/ms2/protAnnots.jsp", getBean(protein));
-            setTitle("Annotations for " + protein.getBestName());
+            setTitle("Annotations");
         }
 
         private static AnnotViewBean getBean(Protein protein) throws Exception

@@ -150,7 +150,7 @@ public class Protein
     static final String startTag = "<font color=\"green\" ><u>";
     static final String endTag = "</u></font>";
 
-    public StringBuffer getFormattedSequence()
+    public StringBuffer getFormattedSequence(MS2Run run)
     {
         StringBuffer formatted = new StringBuffer(_sequence);
 
@@ -158,7 +158,7 @@ public class Protein
             formatted.insert(i, ' ');
 
         formatted.append(' ');                           // Append a space to ensure that insert always works, even at the very end
-        List<Range> ranges = getCoverageRanges();
+        List<Range> ranges = getCoverageRanges(run);
         int offset = 0;
 
         for (Range range : ranges)
@@ -429,7 +429,7 @@ public class Protein
         }
     }
 
-    public void setPeptides(String[] peptides)
+    public void setPeptides(String... peptides)
     {
         _peptides = peptides;
         _computeCoverage = true;
@@ -515,14 +515,19 @@ public class Protein
     }
 
 
-    public double getAAPercent()
+    public double getAAPercent(MS2Run run)
     {
-        return (double) getAACoverage() / _sequence.length();
+        return (double) getAACoverage(run) / _sequence.length();
     }
 
-    public int getAACoverage()
+    public double getAAPercent()
     {
-        List<Range> ranges = getCoverageRanges();
+        return getAAPercent(null);
+    }
+
+    public int getAACoverage(MS2Run run)
+    {
+        List<Range> ranges = getCoverageRanges(run);
         int total = 0;
 
         for (Range range : ranges)
@@ -531,15 +536,15 @@ public class Protein
         return total;
     }
 
-    public double getMassPercent()
+    public double getMassPercent(MS2Run run)
     {
-        return getMassCoverage() / getMass();
+        return getMassCoverage(run) / getMass();
     }
 
 
-    public double getMassCoverage()
+    public double getMassCoverage(MS2Run run)
     {
-        List<Range> ranges = getCoverageRanges();
+        List<Range> ranges = getCoverageRanges(run);
         double total = 0;
 
         for (Range range : ranges)
@@ -560,7 +565,7 @@ public class Protein
     }
 
 
-    private List<Range> getCoverageRanges()
+    private List<Range> getCoverageRanges(MS2Run run)
     {
         if (!_computeCoverage)
             return _coverageRanges;
@@ -571,7 +576,7 @@ public class Protein
             _coverageRanges = new ArrayList<Range>(0);
             return _coverageRanges;
         }
-        List<Range> ranges = getUncoalescedPeptideRanges(null);
+        List<Range> ranges = getUncoalescedPeptideRanges(run);
         // Coalesce ranges
         // Code below is only used by the old-style collapsed sequence and is unchanged
         _coverageRanges = new ArrayList<Range>(ranges.size());

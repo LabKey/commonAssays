@@ -22,17 +22,20 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>) HttpView.currentView()).getModelBean();
-    ActionURL toggleURL = HttpView.currentContext().getActionURL().clone();
-    toggleURL.replaceParameter("simpleSequenceView", "false");
-%>
-<table class="labkey-tab-strip">
-    <tr>
-        <td class="labkey-tab-space"><img width="5" src="/labkey/_.gif"></td>
-        <td class="labkey-tab" style="margin-bottom: 0;"><a href="<%= toggleURL %>">Detail View</a></td>
-        <td class="labkey-tab-space"><img width="5" src="/labkey/_.gif"></td>
-        <td class="labkey-tab-selected" style="margin-bottom: 0;"><a href="#">Summary View</a></td>
-        <td class="labkey-tab-space" width="100%"></td>
-        <td class="labkey-tab-space"><img width="5" src="/labkey/_.gif"></td>
-    </tr>
-</table>
-<big><tt><%= bean.protein.getFormattedSequence() %></tt></big>
+    if (bean.showPeptides)
+    {
+        ActionURL toggleURL = HttpView.currentContext().getActionURL().clone();
+        toggleURL.replaceParameter("simpleSequenceView", "false");
+    %>
+    <table class="labkey-tab-strip">
+        <tr>
+            <td class="labkey-tab-space"><img width="5" src="/labkey/_.gif"></td>
+            <td class="labkey-tab" style="margin-bottom: 0;"><a href="<%= toggleURL %>">Detail View</a></td>
+            <td class="labkey-tab-space"><img width="5" src="/labkey/_.gif"></td>
+            <td class="labkey-tab-selected" style="margin-bottom: 0;"><a href="#">Summary View</a></td>
+            <td class="labkey-tab-space" width="100%"></td>
+            <td class="labkey-tab-space"><img width="5" src="/labkey/_.gif"></td>
+        </tr>
+    </table>
+<% } %>
+<big><tt><%= bean.protein.getFormattedSequence(bean.run) %></tt></big>

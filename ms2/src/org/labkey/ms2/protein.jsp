@@ -37,8 +37,8 @@
     <tr><td class="labkey-form-label">Sequence Mass</td><td><%=h(intFormat.format(bean.protein.getMass()))%></td><td>&nbsp;</td></tr><%
     if (bean.showPeptides)
     { %>
-        <tr><td class="labkey-form-label">AA Coverage</td><td><%=h(percentFormat.format(bean.protein.getAAPercent()))%> (<%=intFormat.format(bean.protein.getAACoverage())%> / <%=intFormat.format(bean.protein.getSequence().length())%>)</td></tr>
-        <tr><td class="labkey-form-label">Mass Coverage</td><td><%=h(percentFormat.format(bean.protein.getMassPercent()))%> (<%=intFormat.format(bean.protein.getMassCoverage())%> / <%=intFormat.format(bean.protein.getMass())%>)</td></tr><%
+        <tr><td class="labkey-form-label">AA Coverage</td><td><%=h(percentFormat.format(bean.protein.getAAPercent(bean.run)))%> (<%=intFormat.format(bean.protein.getAACoverage(bean.run))%> / <%=intFormat.format(bean.protein.getSequence().length())%>)</td></tr>
+        <tr><td class="labkey-form-label">Mass Coverage</td><td><%=h(percentFormat.format(bean.protein.getMassPercent(bean.run)))%> (<%=intFormat.format(bean.protein.getMassCoverage(bean.run))%> / <%=intFormat.format(bean.protein.getMass())%>)</td></tr><%
     }
 
     if (bean.enableAllPeptidesFeature)
