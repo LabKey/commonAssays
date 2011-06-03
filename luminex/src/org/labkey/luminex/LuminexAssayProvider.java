@@ -76,6 +76,8 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             null,
             FieldKey.fromParts("Data", "Run"),
             FieldKey.fromParts("RowId")));
+
+        setMaxFileInputs(10);
     }
 
     public String getName()

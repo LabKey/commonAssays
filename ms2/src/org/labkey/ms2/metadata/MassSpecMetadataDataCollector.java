@@ -26,6 +26,8 @@ import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
 
 import java.io.File;
 import java.util.Collection;
@@ -69,7 +71,7 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
         return super.getAdditionalFileSetCount(context);
     }
 
-    public String getHTML(MassSpecMetadataAssayForm form) throws ExperimentException
+    public HttpView getView(MassSpecMetadataAssayForm form) throws ExperimentException
     {
         StringBuilder sb = new StringBuilder(super.getHTML(form));
 
@@ -126,7 +128,7 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
         ActionURL showSamplesURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowSampleSetURL(ExperimentService.get().ensureActiveSampleSet(c));
         sb.append(PageFlowUtil.textLink("edit samples", showSamplesURL));
 
-        return sb.toString();
+        return new HtmlView(sb.toString());
     }
 
     /** @return the total number of files for this set, and the number that have already been annotated */
