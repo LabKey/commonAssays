@@ -248,7 +248,7 @@ public class MS1Manager
     public void deleteFeaturesData(ExpData expData) throws SQLException
     {
         Table.execute(getSchema(), "UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=?",
-                    new Object[]{true,expData.getRowId(),FILETYPE_FEATURES});
+                true,expData.getRowId(),FILETYPE_FEATURES);
     }
 
     public void purgeFeaturesData(int fileId) throws SQLException
@@ -277,19 +277,18 @@ public class MS1Manager
         sql.append(fileId);
         sql.append(";");
 
-        Table.execute(getSchema(), sql.toString(), null);
+        Table.execute(getSchema(), sql.toString());
     }
 
     public void moveFileData(int oldExpDataFileID, int newExpDataFileID) throws SQLException
     {
-        Integer[] ids = {newExpDataFileID, oldExpDataFileID};
-        Table.execute(getSchema(), "UPDATE " + SCHEMA_NAME + "." + TABLE_FILES + " SET ExpDataFileID=? WHERE ExpDataFileID=?", ids);
+        Table.execute(getSchema(), "UPDATE " + SCHEMA_NAME + "." + TABLE_FILES + " SET ExpDataFileID=? WHERE ExpDataFileID=?", newExpDataFileID, oldExpDataFileID);
     }
 
     public void deletePeakData(int expDataFileId) throws SQLException
     {
-        Table.execute(getSchema(), "UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=?", 
-                        new Object[]{true, expDataFileId, FILETYPE_PEAKS});
+        Table.execute(getSchema(), "UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=?",
+                true, expDataFileId, FILETYPE_PEAKS);
     }
 
     public void purgePeakData(int fileId) throws SQLException
@@ -314,7 +313,7 @@ public class MS1Manager
             //execute this much
             _log.info("Purging peak families for file " + String.valueOf(fileId) + "...");
             scope.ensureTransaction();
-            Table.execute(getSchema(), sql.toString(), null);
+            Table.execute(getSchema(), sql.toString());
             scope.commitTransaction();
             _log.info("Finished purging peak families for file " + String.valueOf(fileId) + ".");
 
@@ -327,7 +326,7 @@ public class MS1Manager
 
             _log.info("Purging peaks for file " + String.valueOf(fileId) + "...");
             scope.ensureTransaction();
-            Table.execute(getSchema(), sql.toString(), null);
+            Table.execute(getSchema(), sql.toString());
             scope.commitTransaction();
             _log.info("Finished purging peaks for file " + String.valueOf(fileId) + ".");
 
@@ -364,7 +363,7 @@ public class MS1Manager
 
             _log.info("Purging scans and related file data for file " + String.valueOf(fileId) + "...");
             scope.ensureTransaction();
-            Table.execute(getSchema(), sql.toString(), null);
+            Table.execute(getSchema(), sql.toString());
             scope.commitTransaction();
             _log.info("Finished purging scans and related file data for file " + String.valueOf(fileId) + ".");
         }
@@ -427,7 +426,7 @@ public class MS1Manager
     {
         _log.info("Purging peaks for scan " + String.valueOf(scanId) + "...");
         String sql = "DELETE FROM ms1.Peaks WHERE ScanId=" + String.valueOf(scanId);
-        Table.execute(getSchema(), sql, null);
+        Table.execute(getSchema(), sql);
         _log.info("Finished purging peaks for scan " + String.valueOf(scanId) + ".");
     }
 
@@ -508,7 +507,7 @@ public class MS1Manager
     public void deleteFailedImports(int expDataFileId, int fileType) throws SQLException
     {
         Table.execute(getSchema(), "UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=? AND Imported=?",
-                        new Object[]{true,expDataFileId,fileType,false});
+                true,expDataFileId,fileType,false);
     }
 
     /**

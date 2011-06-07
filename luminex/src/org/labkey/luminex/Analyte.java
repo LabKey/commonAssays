@@ -37,10 +37,9 @@ public class Analyte
     {
     }
 
-    public Analyte(String name, int dataId)
+    public Analyte(String name)
     {
         _name = name;
-        _dataId = dataId;
     }
 
     public int getDataId()

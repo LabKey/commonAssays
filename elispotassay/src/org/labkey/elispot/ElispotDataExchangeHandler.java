@@ -16,6 +16,7 @@
 
 package org.labkey.elispot;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
@@ -58,7 +59,7 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
     }
 
     @Override
-    public void createSampleData(ExpProtocol protocol, ViewContext viewContext, File scriptDir) throws Exception
+    public void createSampleData(@NotNull ExpProtocol protocol, ViewContext viewContext, File scriptDir) throws Exception
     {
         AssayProvider provider = AssayService.get().getProvider(protocol);
         if (provider instanceof ElispotAssayProvider)

@@ -140,7 +140,7 @@ public abstract class GoLoader
         Map<String, GoLoadBean> map = getGoLoadMap();
 
         clearGoLoaded();
-        Table.execute(schema, schema.getSqlDialect().execute(schema, "drop_go_indexes", ""), null);
+        Table.execute(schema, schema.getSqlDialect().execute(schema, "drop_go_indexes", ""));
 
         logStatus("Starting to load GO annotation files");
         logStatus("");
@@ -159,7 +159,7 @@ public abstract class GoLoader
             te = _tis.getNextEntry();
         }
 
-        Table.execute(schema, schema.getSqlDialect().execute(schema, "create_go_indexes", ""), null);
+        Table.execute(schema, schema.getSqlDialect().execute(schema, "create_go_indexes", ""));
 
         logStatus("Successfully loaded all GO annotation files");
     }

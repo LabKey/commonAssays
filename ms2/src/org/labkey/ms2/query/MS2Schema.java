@@ -1032,10 +1032,10 @@ public class MS2Schema extends UserSchema
                 }
                 insertSQL.append(") ) AS x");
 
-                Table.execute(connection, insertSQL.getSQL(), new Object[0]);
+                Table.execute(connection, insertSQL.getSQL());
 
                 // Use the protein group's RowId as the normalized group id
-                Table.execute(connection, "UPDATE " + tempTableName + " SET NormalizedId = ProteinGroupId", new Object[0]);
+                Table.execute(connection, "UPDATE " + tempTableName + " SET NormalizedId = ProteinGroupId");
 
                 // Figure out the minimum group id that contains a protein (SeqId) that's also in this group
                 String updateSubQuery = "SELECT MIN(MinNormalizedId) AS NewNormalizedId, GroupId FROM \n" +
@@ -1052,7 +1052,7 @@ public class MS2Schema extends UserSchema
                 do
                 {
                     // Set the normalized group id to be the minimum id from all the groups that share the same proteins
-                    rowsUpdated = Table.execute(connection, updateSQL, new Object[0]);
+                    rowsUpdated = Table.execute(connection, updateSQL);
                 }
                 // Keep going while any value changed. When we're done, we've found the transitive closure and any
                 // groups that share proteins (including transitively) are lumped into the same normalized group

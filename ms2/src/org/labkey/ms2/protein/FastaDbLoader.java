@@ -161,7 +161,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                 {
                     parse();
 
-                    Table.execute(ProteinManager.getSchema(), "UPDATE " + ProteinManager.getTableInfoFastaFiles() + " SET Loaded=? WHERE FastaId=?", new Object[]{new Date(), associatedFastaId});
+                    Table.execute(ProteinManager.getSchema(), "UPDATE " + ProteinManager.getTableInfoFastaFiles() + " SET Loaded=? WHERE FastaId=?", new Date(), associatedFastaId);
                 }
                 finally
                 {
@@ -718,7 +718,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         {
             Table.execute(ProteinManager.getSchema(), "UPDATE " + ProteinManager.getTableInfoFastaFiles() +
                     " SET ScoringAnalysis = ?" +
-                    " WHERE FastaId = ?", new Object[] { true, associatedFastaId });
+                    " WHERE FastaId = ?", true, associatedFastaId);
         }
 
         finalizeAnnotLoad();

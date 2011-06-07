@@ -166,7 +166,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                         continue;
                     }
 
-                    Analyte analyte = new Analyte(sheet.getSheetName(), 0);
+                    Analyte analyte = new Analyte(sheet.getSheetName());
 
                     int row = handleHeaderOrFooterRow(sheet, 0, analyte, excelRunDomain);
 
@@ -208,7 +208,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                         // Skip over the blank line
                         row++;
                     }
-                    row = handleHeaderOrFooterRow(sheet, row, analyte, excelRunDomain);
+                    handleHeaderOrFooterRow(sheet, row, analyte, excelRunDomain);
 
                     // Check if we've accumulated enough instances to consider it to be a titration
                     for (Map.Entry<String, Integer> entry : potentialTitrationCounts.entrySet())

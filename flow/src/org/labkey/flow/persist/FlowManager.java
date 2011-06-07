@@ -284,7 +284,7 @@ public class FlowManager
         Table.execute(getSchema(), "INSERT INTO " + statkey + " (container, id) " +
                 "SELECT ? AS container, ? as id " +
                 "WHERE NOT EXISTS (SELECT id FROM " + statkey + " WHERE container=? and id=?)",
-                new Object[] {c.getId(), id, c.getId(), id});
+                c.getId(), id, c.getId(), id);
         return id;
     }
 
@@ -296,7 +296,7 @@ public class FlowManager
         Table.execute(getSchema(), "INSERT INTO " + statkey + " (container, id) " +
                 "SELECT ? AS container, ? as id " +
                 "WHERE NOT EXISTS (SELECT id FROM " + statkey + " WHERE container=? and id=?)",
-                new Object[] {c.getId(), id, c.getId(), id});
+                c.getId(), id, c.getId(), id);
         return id;
     }
 
@@ -308,7 +308,7 @@ public class FlowManager
         Table.execute(getSchema(), "INSERT INTO " + statkey + " (container, id) " +
                 "SELECT ? AS container, ? as id " +
                 "WHERE NOT EXISTS (SELECT id FROM " + statkey + " WHERE container=? and id=?)",
-                new Object[] {c.getId(), id, c.getId(), id});
+                c.getId(), id, c.getId(), id);
         return id;
     }
 
@@ -417,10 +417,10 @@ public class FlowManager
                 to = oids.length;
 
             String list = join(oids, from, to);
-            Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN (" + list + ")", null);
-            Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN (" + list + ")", null);
-            Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN (" + list + ")", null);
-            Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN (" + list + ")", null);
+            Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN (" + list + ")");
+            Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN (" + list + ")");
+            Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN (" + list + ")");
+            Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN (" + list + ")");
         }
     }
 
@@ -557,10 +557,10 @@ public class FlowManager
         {
             schema.getScope().ensureTransaction();
 
-            Table.execute(schema, sqlDeleteKeyword, new Object[] { obj.getRowId(), keywordId });
+            Table.execute(schema, sqlDeleteKeyword, obj.getRowId(), keywordId);
             if (value != null)
             {
-                Table.execute(schema, sqlInsertKeyword, new Object[] { obj.getRowId(), keywordId, value} );
+                Table.execute(schema, sqlInsertKeyword, obj.getRowId(), keywordId, value);
             }
             schema.getScope().commitTransaction();
         }
@@ -778,7 +778,7 @@ public class FlowManager
         {
             SQLFragment sqlOIDs = new SQLFragment("SELECT flow.object.rowid FROM flow.object INNER JOIN exp.data ON flow.object.dataid = exp.data.rowid AND exp.data.container = ?", container.getId());
             deleteObjectIds(sqlOIDs, Collections.singleton(container));
-            Table.execute(getSchema(), "DELETE FROM " + getTinfoStatisticAttr() + " WHERE container=?", new Object[] {container});
+            Table.execute(getSchema(), "DELETE FROM " + getTinfoStatisticAttr() + " WHERE container=?", container);
         }
         catch (SQLException x)
         {
@@ -804,7 +804,7 @@ public class FlowManager
                 Table.execute(s,
                         "UPDATE flow.object "+
                         "SET container = ? " +
-                        "WHERE container IS NULL AND dataid IN (select rowid from exp.data WHERE exp.data.container = ?)", new Object[] {c.getId(), c.getId()});
+                        "WHERE container IS NULL AND dataid IN (select rowid from exp.data WHERE exp.data.container = ?)", c.getId(), c.getId());
             }
 
             if (o.getColumn("compid") != null)
@@ -823,7 +823,7 @@ public class FlowManager
                         "    (SELECT MIN(DI.dataid) "+
                         "    FROM flow.object INPUT INNER JOIN exp.datainput DI ON INPUT.dataid=DI.dataid INNER JOIN exp.data D ON D.sourceapplicationid=DI.targetapplicationid "+
                         "    WHERE D.rowid = flow.object.dataid AND INPUT.typeid IN (5,7))) " +
-                        "WHERE dataid IN (select rowid from exp.data where exp.data.container = ?) AND typeid=3 AND (compid IS NULL OR fcsid IS NULL OR scriptid IS NULL)", new Object[] {c.getId()});
+                        "WHERE dataid IN (select rowid from exp.data where exp.data.container = ?) AND typeid=3 AND (compid IS NULL OR fcsid IS NULL OR scriptid IS NULL)", c.getId());
             }
             s.getScope().commitTransaction();
         }
@@ -872,7 +872,7 @@ public class FlowManager
         {
             try
             {
-                Table.execute(FlowManager.get().getSchema(), "VACUUM exp.data; VACUUM flow.object; VACUUM flow.keyword; VACUUM flow.statistic;", null);
+                Table.execute(FlowManager.get().getSchema(), "VACUUM exp.data; VACUUM flow.object; VACUUM flow.keyword; VACUUM flow.statistic;");
             }
             catch (SQLException x)
             {
@@ -887,7 +887,7 @@ public class FlowManager
         {
             try
             {
-                Table.execute(FlowManager.get().getSchema(), "ANALYZE exp.data; ANALYZE flow.object; ANALYZE flow.keyword; ANALYZE flow.statistic;", null);
+                Table.execute(FlowManager.get().getSchema(), "ANALYZE exp.data; ANALYZE flow.object; ANALYZE flow.keyword; ANALYZE flow.statistic;");
             }
             catch (SQLException x)
             {

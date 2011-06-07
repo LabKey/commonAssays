@@ -377,7 +377,7 @@ public class ProteinManager
         {
             getSchema().getScope().ensureTransaction();
 
-            Table.execute(getSchema(), "DELETE FROM " + getTableInfoCustomAnnotation() + " WHERE CustomAnnotationSetId = ?", new Object[] {set.getCustomAnnotationSetId()});
+            Table.execute(getSchema(), "DELETE FROM " + getTableInfoCustomAnnotation() + " WHERE CustomAnnotationSetId = ?", set.getCustomAnnotationSetId());
             Table.delete(getTableInfoCustomAnnotationSet(), set.getCustomAnnotationSetId());
             getSchema().getScope().commitTransaction();
         }
@@ -491,7 +491,7 @@ public class ProteinManager
 
             Table.execute(MS2Manager.getSchema(), updateProteinsSQL);
 
-            Table.execute(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", new Object[] { newFastaId, oldFastaId } );
+            Table.execute(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", newFastaId, oldFastaId);
             MS2Manager.getSchema().getScope().commitTransaction();
         }
         finally
@@ -1326,10 +1326,10 @@ public class ProteinManager
     /** Deletes all ProteinSequences, and the FastaFile record as well */
     public static void deleteFastaFile(int fastaId) throws SQLException
     {
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoFastaSequences() + " WHERE FastaId = ?", new Object[]{fastaId});
-        Table.execute(getSchema(), "UPDATE " + getTableInfoFastaFiles() + " SET Loaded=NULL WHERE FastaId = ?", new Object[]{fastaId});
+        Table.execute(getSchema(), "DELETE FROM " + getTableInfoFastaSequences() + " WHERE FastaId = ?", fastaId);
+        Table.execute(getSchema(), "UPDATE " + getTableInfoFastaFiles() + " SET Loaded=NULL WHERE FastaId = ?", fastaId);
 
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoFastaFiles() + " WHERE FastaId = ?", new Object[]{fastaId});
+        Table.execute(getSchema(), "DELETE FROM " + getTableInfoFastaFiles() + " WHERE FastaId = ?", fastaId);
     }
 
 

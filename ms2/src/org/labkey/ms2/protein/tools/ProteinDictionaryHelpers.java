@@ -61,7 +61,7 @@ public class ProteinDictionaryHelpers
             DbScope scope = ProteinManager.getSchema().getScope();
             try
             {
-                Table.execute(ProteinManager.getSchema(), "DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap(), null);
+                Table.execute(ProteinManager.getSchema(), "DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap());
 
                 TabLoader t = new TabLoader(new InputStreamReader(getSProtOrgMap()), false);
                 conn = scope.getConnection();

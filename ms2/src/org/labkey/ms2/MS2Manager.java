@@ -761,7 +761,7 @@ public class MS2Manager
         try
         {
             Table.execute(getSchema(), "UPDATE " + getTableInfoRuns() + " SET Description=? WHERE Run = ?",
-                    new Object[]{newDescription, new Integer(runId)});
+                    newDescription, runId);
         }
         catch (SQLException e)
         {
@@ -1039,7 +1039,7 @@ public class MS2Manager
     public static void purgeRun(int run) throws SQLException
     {
         clearRun(run);
-        Table.execute(getSchema(), "DELETE FROM " + getTableInfoRuns() + " WHERE Run = ?", new Object[] {run});
+        Table.execute(getSchema(), "DELETE FROM " + getTableInfoRuns() + " WHERE Run = ?", run);
     }
 
 

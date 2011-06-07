@@ -1519,13 +1519,12 @@ public class FlowSchema extends UserSchema
                 "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n" +
                 "    LEFT OUTER JOIN exp.RunList ON exp.RunList.ExperimentRunid = exp.Data.RunId\n" +
                 "WHERE flow.Object.container = ? and TypeId = ?",
-               new Object[] {c.getId(), typeid}
-            );
+                    c.getId(), typeid);
             String create =
 //                    "CREATE INDEX ix_" + shortName + " ON " + name + " (TypeId,ExperimentId);\n" +
                     "CREATE UNIQUE INDEX ix_" + shortName + "_rowid ON " + name + " (RowId);\n" +
                     "CREATE UNIQUE INDEX ix_" + shortName + "_objectid ON " + name + " (ObjectId);\n";
-            Table.execute(flow, create, null);
+            Table.execute(flow, create);
             long end = System.currentTimeMillis();
             return name;
         }
@@ -1644,7 +1643,7 @@ public class FlowSchema extends UserSchema
             String create =
                     "CREATE INDEX ix_" + shortName + "_fg ON " + name + " (fg);\n" +
                     "CREATE INDEX ix_" + shortName + "_bg ON " + name + " (bg);\n";
-            Table.execute(flow, create, null);
+            Table.execute(flow, create);
 
             long end = System.currentTimeMillis();
             return name;
