@@ -21,6 +21,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.exp.*;
@@ -31,7 +32,6 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.util.GUID;
@@ -52,6 +52,8 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
     public static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
     public static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType("LuminexDataFile", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
 
+    public static final int MINIMUM_TITRATION_COUNT = 5;
+
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         ExpProtocol protocol = data.getRun().getProtocol();
@@ -60,11 +62,16 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
         Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
         List<Map<String, Object>> dataRows = new ArrayList<Map<String, Object>>();
 
+        Set<String> titrations = parser.getTitrations();
+
         for (Map.Entry<Analyte, List<LuminexDataRow>> entry : parser.getSheets().entrySet())
         {
             for (LuminexDataRow dataRow : entry.getValue())
             {
-                dataRows.add(dataRow.toMap(entry.getKey()));
+                Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
+                dataMap.remove("titrationId");
+                dataMap.put("titration", titrations.contains(dataRow.getDescription()));
+                dataRows.add(dataMap);
             }
         }
         datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, dataRows);
@@ -85,6 +92,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
         for (Map<String, Object> row : dataMap)
         {
             Analyte analyte = analyteFactory.fromMap(row);
+            row.remove("titration");
             LuminexDataRow dataRow = rowFactory.fromMap(row);
             dataRow.setExtraProperties(row);
 
@@ -95,17 +103,12 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
             sheets.get(analyte).add(dataRow);
         }
 
-        try
-        {
-            LuminexDataFileParser parser = getDataFileParser(context.getProtocol(), context.getUploadedData().get(AssayDataCollector.PRIMARY_FILE));
-            Map<DomainProperty, String> excelProps = parser.getExcelRunProps();
-            excelProps.putAll(context.getTransformResult().getRunProperties());
-            importData(data, run, context.getUser(), null, sheets, excelProps);
-        }
-        catch (IOException e)
-        {
-            throw new ExperimentException(e);
-        }
+        LuminexRunUploadForm form = (LuminexRunUploadForm)context;
+
+        LuminexDataFileParser parser = form.getParser();
+        Map<DomainProperty, String> excelProps = parser.getExcelRunProps();
+        excelProps.putAll(context.getTransformResult().getRunProperties());
+        importData(data, run, context.getUser(), null, sheets, excelProps, parser.getTitrations());
     }
 
     protected LuminexDataFileParser getDataFileParser(ExpProtocol protocol, File dataFile)
@@ -133,6 +136,7 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
         private ExpProtocol _protocol;
         private Map<Analyte, List<LuminexDataRow>> _sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
         private Map<DomainProperty, String> _excelRunProps = new HashMap<DomainProperty, String>();
+        private Set<String> _titrations = new TreeSet<String>();
         private boolean _fileParsed;
 
         public LuminexExcelParser(ExpProtocol protocol, File dataFile)
@@ -141,12 +145,13 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
             _dataFile = dataFile;
         }
 
-        private void parseFile(File dataFile) throws ExperimentException
+        private void parseFile() throws ExperimentException
         {
             if (_fileParsed) return;
 
-            try {
-                Workbook workbook = ExcelFactory.create(dataFile);
+            try
+            {
+                Workbook workbook = ExcelFactory.create(_dataFile);
 
                 Container container = _protocol.getContainer();
                 String excelRunDomainURI = AbstractAssayProvider.getDomainURIForPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
@@ -183,11 +188,19 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                     List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
                     _sheets.put(analyte, dataRows);
 
+                    Map<String, Integer> potentialTitrationCounts = new CaseInsensitiveHashMap<Integer>();
+
                     if (row < sheet.getLastRowNum())
                     {
                         do
                         {
                             LuminexDataRow dataRow = createDataRow(sheet, colNames, row);
+
+                            if (isPotentialTitration(dataRow))
+                            {
+                                Integer count = potentialTitrationCounts.get(dataRow.getDescription());
+                                potentialTitrationCounts.put(dataRow.getDescription(), count == null ? 1 : count.intValue() + 1);
+                            }
                             dataRows.add(dataRow);
                         }
                         while (++row < sheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(sheet, 0, row)));
@@ -196,28 +209,51 @@ public class LuminexExcelDataHandler extends LuminexDataHandler implements Trans
                         row++;
                     }
                     row = handleHeaderOrFooterRow(sheet, row, analyte, excelRunDomain);
+
+                    // Check if we've accumulated enough instances to consider it to be a titration
+                    for (Map.Entry<String, Integer> entry : potentialTitrationCounts.entrySet())
+                    {
+                        if (entry.getValue().intValue() >= MINIMUM_TITRATION_COUNT)
+                        {
+                            _titrations.add(entry.getKey());
+                        }
+                    }
                 }
                 _fileParsed = true;
             }
             catch (IOException e)
             {
-                throw new ExperimentException("Failed to read from data file " + dataFile.getAbsolutePath(), e);
+                throw new ExperimentException("Failed to read from data file " + _dataFile.getAbsolutePath(), e);
             }
             catch (InvalidFormatException e)
             {
-                throw new XarFormatException("Failed to parse Excel file " + dataFile.getAbsolutePath(), e);
+                throw new XarFormatException("Failed to parse Excel file " + _dataFile.getAbsolutePath(), e);
             }
+        }
+
+        /** A well might contain a titration value if it's marked as a standard or if there's an expected concentration */
+        private boolean isPotentialTitration(LuminexDataRow dataRow)
+        {
+            return (dataRow.getType() != null && dataRow.getType().toUpperCase().startsWith("S")) ||
+                dataRow.getExpConc() != null;
+        }
+
+        @Override
+        public Set<String> getTitrations() throws ExperimentException
+        {
+            parseFile();
+            return _titrations;
         }
 
         public Map<Analyte, List<LuminexDataRow>> getSheets() throws ExperimentException
         {
-            parseFile(_dataFile);
+            parseFile();
             return _sheets;
         }
 
         public Map<DomainProperty, String> getExcelRunProps() throws ExperimentException
         {
-            parseFile(_dataFile);
+            parseFile();
             return _excelRunProps;
         }
 

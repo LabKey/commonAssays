@@ -18,7 +18,9 @@ package org.labkey.luminex;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.Table;
@@ -50,6 +52,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
     {
         Map<Analyte, List<LuminexDataRow>> getSheets() throws ExperimentException;
         Map<DomainProperty, String> getExcelRunProps() throws ExperimentException;
+        Set<String> getTitrations() throws ExperimentException;
     }
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
@@ -66,10 +69,10 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
         }
 
         LuminexDataFileParser parser = getDataFileParser(expRun.getProtocol(), dataFile);
-        importData(data, expRun, info.getUser(), log, parser.getSheets(), parser.getExcelRunProps());
+        importData(data, expRun, info.getUser(), log, parser.getSheets(), parser.getExcelRunProps(), parser.getTitrations());
     }
 
-    public void importData(ExpData data, ExpRun run, User user, Logger log, Map<Analyte, List<LuminexDataRow>> inputData, Map<DomainProperty, String> excelRunProps) throws ExperimentException
+    public void importData(ExpData data, ExpRun run, User user, Logger log, Map<Analyte, List<LuminexDataRow>> inputData, Map<DomainProperty, String> excelRunProps, Set<String> titrations) throws ExperimentException
     {
         try
         {
@@ -90,7 +93,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
             }
 
             PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), run.getContainer());
-            _importData(excelRunColumns, run, run.getContainer(), data, user, inputData, excelRunProps);
+            _importData(excelRunColumns, run, run.getContainer(), data, user, inputData, excelRunProps, titrations);
         }
         catch (SQLException e)
         {
@@ -362,7 +365,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
     /**
      * Handles persisting of uploaded run data into the database
      */
-    private void _importData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, Map<Analyte, List<LuminexDataRow>> inputData, Map<DomainProperty, String> excelRunProps) throws SQLException, ExperimentException
+    private void _importData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, Map<Analyte, List<LuminexDataRow>> inputData, Map<DomainProperty, String> excelRunProps, Set<String> titrationNames) throws SQLException, ExperimentException
     {
         try
         {
@@ -395,6 +398,20 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                 }
             }
 
+            // Name -> Titration
+            Map<String, Titration> titrations = new CaseInsensitiveHashMap<Titration>();
+
+            // Insert the titrations first
+            for (String name : titrationNames)
+            {
+                Titration titration = new Titration();
+                titration.setName(name == null || name.trim().isEmpty() ? "Standard" : name);
+                titration.setRunId(expRun.getRowId());
+
+                titration = Table.insert(user, LuminexSchema.getTableInfoTitration(), titration);
+                titrations.put(name, titration);
+            }
+
             List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
 
             for (Map.Entry<Analyte, List<LuminexDataRow>> sheet : inputData.entrySet())
@@ -406,6 +423,15 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
 
                 analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
 
+                // TODO - stop assuming that all analytes use all titrations  
+                for (Titration titration : titrations.values())
+                {
+                    Map<String, Object> analyteTitration = new HashMap<String, Object>();
+                    analyteTitration.put("analyteId", analyte.getRowId());
+                    analyteTitration.put("titrationId", titration.getRowId());
+                    Table.insert(user, LuminexSchema.getTableInfoAnalyteTitration(), analyteTitration);
+                }
+
                 List<LuminexDataRow> dataRows = sheet.getValue();
                 performOOR(dataRows, analyte);
 
@@ -414,6 +440,11 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
                     handleParticipantResolver(dataRow, resolver, inputMaterials);
                     dataRow.setProtocol(protocol.getRowId());
                     dataRow.setContainer(container);
+                    Titration titration = titrations.get(dataRow.getDescription());
+                    if (titration != null)
+                    {
+                        dataRow.setTitration(titration.getRowId());
+                    }
                     dataRow.setAnalyte(analyte.getRowId());
                     dataRow.setData(data.getRowId());
                     rows.add(dataRow.toMap(analyte));
@@ -740,36 +771,72 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
 
     public void beforeDeleteData(List<ExpData> data) throws ExperimentException
     {
-        try
+        List<Integer> ids = new ArrayList<Integer>();
+        for (ExpData expData : data)
         {
-            for (ExpData expData : data)
-            {
-                Object[] ids = new Object[]{expData.getRowId()};
+            ids.add(expData.getRowId());
 
-                Table.execute(LuminexSchema.getSchema(),
-                    "DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " + LuminexSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() + " o WHERE o.ObjectURI = dr.LSID AND dr.DataId = ?)", ids);
-                Table.execute(LuminexSchema.getSchema(),
-                    "DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT LSID FROM " + LuminexSchema.getTableInfoDataRow() + " WHERE DataId = ?)", ids);
-                Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoDataRow() + " WHERE DataId = ?", ids);
-                Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoAnalytes() + " WHERE DataId = ?", ids);
+            if (ids.size() > 200)
+            {
+                deleteDatas(ids);
+                ids.clear();
             }
         }
-        catch (SQLException e)
+        if (!ids.isEmpty())
         {
-            throw new ExperimentException(e);
+            deleteDatas(ids);
         }
     }
 
-    public void deleteData(ExpData data, Container container, User user)
+    private void deleteDatas(List<Integer> ids)
     {
         try
         {
-            OntologyManager.deleteOntologyObjects(container, data.getLSID());
+            Object[] params = ids.toArray(new Integer[ids.size()]);
+            String idSQL = StringUtils.repeat("?", ", ", ids.size());
+            // Clean up data row properties
+            Table.execute(LuminexSchema.getSchema(),
+                    "DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
+                    LuminexSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
+                    " o WHERE o.ObjectURI = dr.LSID AND dr.DataId IN (" + idSQL + "))", params);
+            Table.execute(LuminexSchema.getSchema(),
+                    "DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT LSID FROM " +
+                    LuminexSchema.getTableInfoDataRow() + " WHERE DataId IN (" + idSQL + "))", params);
+
+            // Clean up analyte properties
+            Table.execute(LuminexSchema.getSchema(),
+                    "DELETE FROM " + OntologyManager.getTinfoObjectProperty() + " WHERE ObjectId IN (SELECT o.ObjectID FROM " +
+                    LuminexSchema.getTableInfoDataRow() + " dr, " + OntologyManager.getTinfoObject() +
+                    " o, " + LuminexSchema.getTableInfoAnalytes() + " a WHERE a.RowId = dr.AnalyteId AND o.ObjectURI = " +
+                    "a.LSID AND dr.DataId IN (" + idSQL + "))", params);
+            Table.execute(LuminexSchema.getSchema(),
+                    "DELETE FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectURI IN (SELECT a.LSID FROM " +
+                    LuminexSchema.getTableInfoDataRow() + " dr, " + LuminexSchema.getTableInfoAnalytes() +
+                    " a WHERE dr.AnalyteId = a.RowId AND dr.DataId IN (" + idSQL + "))", params);
+
+            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoDataRow() +
+                    " WHERE DataId IN (" + idSQL + ")", params);
+
+            // Clean up analytes and titrations 
+            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoAnalyteTitration() +
+                    " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexSchema.getTableInfoAnalytes() +
+                    " WHERE DataId IN (" + idSQL + "))", params);
+            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoAnalytes() +
+                    " WHERE DataId IN (" + idSQL + ")", params);
+            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoTitration() +
+                    " WHERE RunId IN (SELECT pa.RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
+                    " pa, " + ExperimentService.get().getTinfoData() +
+                    " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId IN (" + idSQL + "))", params);
         }
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
         }
+    }
+
+    public void deleteData(ExpData data, Container container, User user)
+    {
+        deleteDatas(Collections.singletonList(data.getRowId()));
     }
 
     public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException

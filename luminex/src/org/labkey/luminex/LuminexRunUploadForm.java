@@ -29,6 +29,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.study.assay.AssayDataCollector;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -40,6 +41,7 @@ import java.sql.SQLException;
 public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvider>
 {
     private String[] _analyteNames;
+    private LuminexDataHandler.LuminexDataFileParser _parser;
 
     public String[] getAnalyteNames()
     {
@@ -113,5 +115,22 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         {
             return super.getDefaultValues(domain, disambiguationId);
         }
+    }
+
+    public LuminexDataHandler.LuminexDataFileParser getParser() throws ExperimentException
+    {
+        if (_parser == null)
+        {
+            _parser = new LuminexExcelDataHandler.LuminexExcelParser(getProtocol(), getUploadedData().get(AssayDataCollector.PRIMARY_FILE));            
+        }
+        return _parser;
+    }
+
+    public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException
+    {
+        // TODO - Make this look at what the user POSTED to figure out which analytes have been mapped to which titrations
+
+        // For now, say that all analytes use all of the titrations identified in the data file
+        return getParser().getTitrations();
     }
 }

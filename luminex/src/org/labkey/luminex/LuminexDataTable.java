@@ -110,6 +110,15 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         addColumn(wrapColumn(getRealTable().getColumn("Ratio")));
         addColumn(wrapColumn(getRealTable().getColumn("SamplingErrors")));
         addColumn(wrapColumn(getRealTable().getColumn("BeadCount")));
+        ColumnInfo titrationColumn = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
+        titrationColumn.setFk(new LookupForeignKey("RowId")
+        {
+            @Override
+            public TableInfo getLookupTableInfo()
+            {
+                return _schema.createTitrationTable(true);
+            }
+        });
         ColumnInfo containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));
         containerColumn.setHidden(true);
         containerColumn.setFk(new ContainerForeignKey());
@@ -131,7 +140,8 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         defaultCols.add(FieldKey.fromParts("ConcInRange"));
         defaultCols.add(FieldKey.fromParts("Dilution"));
         defaultCols.add(FieldKey.fromParts("BeadCount"));
-        
+        defaultCols.add(FieldKey.fromParts("Titration"));
+
         Domain domain = getDomain();
         for (ColumnInfo propertyCol : domain.getColumns(this, getColumn("LSID"), schema.getUser()))
         {

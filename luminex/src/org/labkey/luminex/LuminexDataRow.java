@@ -67,6 +67,7 @@ public class LuminexDataRow
     private String _samplingErrors;
     private String _extraSpecimenInfo;
     private Integer _beadCount;
+    private Integer _titration;
 
     /** Unfortunate to have these denormalized values here, but required for acceptable query performance */
     private Container _container;
@@ -444,6 +445,16 @@ public class LuminexDataRow
     public void setLsid(String lsid)
     {
         _lsid = lsid;
+    }
+
+    public Integer getTitration()
+    {
+        return _titration;
+    }
+
+    public void setTitration(Integer titration)
+    {
+        _titration = titration;
     }
 
     /** Remember any extra properties from the transform script so they can be included when generating map version of this row */

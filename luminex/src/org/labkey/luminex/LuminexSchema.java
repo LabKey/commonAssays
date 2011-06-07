@@ -17,7 +17,6 @@
 package org.labkey.luminex;
 
 import org.labkey.api.data.*;
-import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
@@ -31,12 +30,15 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.util.*;
 
 public class LuminexSchema extends AssaySchema
 {
     private static final String ANALYTE_TABLE_NAME = "Analyte";
+    private static final String TITRATION_TABLE_NAME = "Titration";
+    private static final String ANALYTE_TITRATION_TABLE_NAME = "AnalyteTitration";
     private static final String DATA_ROW_TABLE_NAME = "DataRow";
 
     public LuminexSchema(User user, Container container, ExpProtocol protocol)
@@ -48,7 +50,7 @@ public class LuminexSchema extends AssaySchema
     public Set<String> getTableNames()
     {
         // return only additional tables not exposed in the assay schema.
-        return Collections.singleton(prefixTableName(ANALYTE_TABLE_NAME));
+        return PageFlowUtil.set(prefixTableName(ANALYTE_TABLE_NAME), prefixTableName(TITRATION_TABLE_NAME));
     }
 
     private String prefixTableName(String table)
@@ -68,12 +70,10 @@ public class LuminexSchema extends AssaySchema
             {
                 return createAnalyteTable(true);
             }
-            /*
-            else if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
+            if (TITRATION_TABLE_NAME.equalsIgnoreCase(name))
             {
-                return createDataRowTable();
+                return createTitrationTable(true);
             }
-            */
         }
         return null;
     }
@@ -94,13 +94,39 @@ public class LuminexSchema extends AssaySchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ResVar")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RegressionType")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("StdCurve")));
+        ColumnInfo titrationColumn = result.addColumn(result.wrapColumn("Titrations", result.getRealTable().getColumn("RowId")));
+        titrationColumn.setFk(new MultiValuedForeignKey(new LookupForeignKey("Analyte")
+        {
+            @Override
+            public TableInfo getLookupTableInfo()
+            {
+                FilteredTable result = new FilteredTable(getTableInfoAnalyteTitration());
+                ColumnInfo titrationColumn = result.addColumn(result.wrapColumn("Titration", result.getRealTable().getColumn("TitrationId")));
+                titrationColumn.setFk(new LookupForeignKey("RowId")
+                {
+                    @Override
+                    public TableInfo getLookupTableInfo()
+                    {
+                        return createTitrationTable(false);
+                    }
+                });
+                ColumnInfo analyteColumn = result.addColumn(result.wrapColumn("Analyte", result.getRealTable().getColumn("AnalyteId")));
+                analyteColumn.setFk(new LookupForeignKey("RowId")
+                {
+                    @Override
+                    public TableInfo getLookupTableInfo()
+                    {
+                        return createAnalyteTable(false);
+                    }
+                });
+                return result;
+            }
+        }, "Titration"));
+        titrationColumn.setHidden(false);
+
         ColumnInfo lsidColumn = result.addColumn(result.wrapColumn(result.getRealTable().getColumn("LSID")));
         lsidColumn.setHidden(true);
 
-        //String sqlObjectId = "(SELECT objectid FROM " + OntologyManager.getTinfoObject() + " o WHERE o.objecturi = " +
-        //        ExprColumn.STR_TABLE_ALIAS + ".lsid)";
-
-        //ColumnInfo colProperty = new ExprColumn(result, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
         ColumnInfo colProperty = result.wrapColumn("Properties", result.getRealTable().getColumn("LSID"));
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
@@ -114,7 +140,40 @@ public class LuminexSchema extends AssaySchema
 
         if (filterTable)
         {
-            addDataFilter(result);
+            SQLFragment sql = new SQLFragment("DataId");
+            sql.append(createDataFilterInClause());
+            result.addCondition(sql);
+        }
+        result.setTitleColumn("Name");
+        return result;
+    }
+
+    public TableInfo createTitrationTable(boolean filter)
+    {
+        FilteredTable result = new FilteredTable(getTableInfoTitration());
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RowId"))).setHidden(true);
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Name")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Standard")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("QCControl")));
+        ColumnInfo runColumn = result.addColumn(result.wrapColumn("Run", result.getRealTable().getColumn("RunId")));
+        runColumn.setFk(new LookupForeignKey("RowId")
+        {
+            @Override
+            public TableInfo getLookupTableInfo()
+            {
+                return QueryService.get().getUserSchema(getUser(), getContainer(), NAME).getTable(getRunsTableName(getProtocol()));
+            }
+        });
+        if (filter)
+        {
+            SQLFragment sql = new SQLFragment("RunId IN (SELECT pa.RunId FROM ");
+            sql.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
+            sql.append(", ");
+            sql.append(ExperimentService.get().getTinfoData(), "d");
+            sql.append(" WHERE pa.RowId = d.SourceApplicationId AND d.RowId ");
+            sql.append(createDataFilterInClause());
+            sql.append(")");
+            result.addCondition(sql);
         }
         result.setTitleColumn("Name");
         return result;
@@ -154,27 +213,26 @@ public class LuminexSchema extends AssaySchema
         return new LuminexDataTable(this);
     }
 
-    protected void addDataFilter(FilteredTable result)
+    protected SQLFragment createDataFilterInClause()
     {
-        SQLFragment filter = new SQLFragment("DataId IN (SELECT d.RowId FROM " + ExperimentService.get().getTinfoData() + " d, " + ExperimentService.get().getTinfoExperimentRun() + " r WHERE d.RunId = r.RowId AND d.Container = ?");
+        SQLFragment filter = new SQLFragment(" IN (SELECT d.RowId FROM ");
+        filter.append(ExperimentService.get().getTinfoData(), "d");
+        filter.append(", ");
+        filter.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+        filter.append(" WHERE d.RunId = r.RowId AND d.Container = ?");
         filter.add(getContainer().getId());
         if (getProtocol() != null)
         {
             filter.append(" AND r.ProtocolLSID = ?");
             filter.add(getProtocol().getLSID());
         }
-        filter.append(")");
-        result.addCondition(filter);
+        filter.append(") ");
+        return filter;
     }
 
     public static DbSchema getSchema()
     {
         return DbSchema.get("luminex");
-    }
-
-    public static SqlDialect getSqlDialect()
-    {
-        return getSchema().getSqlDialect();
     }
 
     public static TableInfo getTableInfoAnalytes()
@@ -187,4 +245,13 @@ public class LuminexSchema extends AssaySchema
         return getSchema().getTable(DATA_ROW_TABLE_NAME);
     }
 
+    public static TableInfo getTableInfoTitration()
+    {
+        return getSchema().getTable(TITRATION_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoAnalyteTitration()
+    {
+        return getSchema().getTable(ANALYTE_TITRATION_TABLE_NAME);
+    }
 }
