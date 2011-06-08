@@ -41,7 +41,7 @@ import java.sql.SQLException;
 public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvider>
 {
     private String[] _analyteNames;
-    private LuminexDataHandler.LuminexDataFileParser _parser;
+    private LuminexExcelParser _parser;
 
     public String[] getAnalyteNames()
     {
@@ -117,11 +117,11 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         }
     }
 
-    public LuminexDataHandler.LuminexDataFileParser getParser() throws ExperimentException
+    public LuminexExcelParser getParser() throws ExperimentException
     {
         if (_parser == null)
         {
-            _parser = new LuminexExcelDataHandler.LuminexExcelParser(getProtocol(), getUploadedData().get(AssayDataCollector.PRIMARY_FILE));            
+            _parser = new LuminexExcelParser(getProtocol(), getUploadedData().get(AssayDataCollector.PRIMARY_FILE));
         }
         return _parser;
     }

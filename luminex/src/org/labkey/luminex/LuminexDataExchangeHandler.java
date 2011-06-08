@@ -65,7 +65,6 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
             titrations.add(Collections.<String, Object>singletonMap("Name", titration));
         }
         addSampleProperties(TITRATION_DATA_PROP_NAME, titrations);
-
         return super.createValidationRunInfo(context, run, scriptDir);
     }
 

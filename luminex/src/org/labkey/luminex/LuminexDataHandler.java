@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.*;
@@ -29,10 +30,12 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.ParticipantVisit;
 import org.labkey.api.study.assay.*;
+import org.labkey.api.util.FileType;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -46,14 +49,12 @@ import java.util.*;
  * User: klum
  * Date: May 14, 2009
  */
-public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
+public class LuminexDataHandler extends AbstractExperimentDataHandler implements TransformDataHandler
 {
-    public interface LuminexDataFileParser
-    {
-        Map<Analyte, List<LuminexDataRow>> getSheets() throws ExperimentException;
-        Map<DomainProperty, String> getExcelRunProps() throws ExperimentException;
-        Set<String> getTitrations() throws ExperimentException;
-    }
+    public static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
+    public static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType("LuminexDataFile", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
+
+    public static final int MINIMUM_TITRATION_COUNT = 5;
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
@@ -68,7 +69,7 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
             throw new ExperimentException("Could not load Luminex file " + dataFile.getAbsolutePath() + " because it is not owned by an experiment run");
         }
 
-        LuminexDataFileParser parser = getDataFileParser(expRun.getProtocol(), dataFile);
+        LuminexExcelParser parser = new LuminexExcelParser(expRun.getProtocol(), dataFile);
         importData(data, expRun, info.getUser(), log, parser.getSheets(), parser.getExcelRunProps(), parser.getTitrations());
     }
 
@@ -105,8 +106,6 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
             throw new ExperimentException("Failed to load from data file " + data.getFile().getAbsolutePath() + "(" + e.toString() + ")", e);
         }
     }
-
-    protected abstract LuminexDataFileParser getDataFileParser(ExpProtocol protocol, File dataFile);
 
     private static Double parseDouble(String value)
     {
@@ -842,5 +841,76 @@ public abstract class LuminexDataHandler extends AbstractExperimentDataHandler
     public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
         throw new UnsupportedOperationException();
+    }
+
+    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    {
+        ExpProtocol protocol = data.getRun().getProtocol();
+        LuminexExcelParser parser = new LuminexExcelParser(protocol, dataFile);
+
+        Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
+        List<Map<String, Object>> dataRows = new ArrayList<Map<String, Object>>();
+
+        Set<String> titrations = parser.getTitrations();
+
+        for (Map.Entry<Analyte, List<LuminexDataRow>> entry : parser.getSheets().entrySet())
+        {
+            for (LuminexDataRow dataRow : entry.getValue())
+            {
+                Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
+                dataMap.remove("titrationId");
+                dataMap.put("titration", titrations.contains(dataRow.getDescription()));
+                dataRows.add(dataMap);
+            }
+        }
+        datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, dataRows);
+        return datas;
+    }
+
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
+    {
+        ObjectFactory<Analyte> analyteFactory = ObjectFactory.Registry.getFactory(Analyte.class);
+        if (null == analyteFactory)
+            throw new ExperimentException("Could not find a matching object factory for " + Analyte.class);
+
+        ObjectFactory<LuminexDataRow> rowFactory = ObjectFactory.Registry.getFactory(LuminexDataRow.class);
+        if (null == rowFactory)
+            throw new ExperimentException("Could not find a matching object factory for " + LuminexDataRow.class);
+
+        Map<Analyte, List<LuminexDataRow>> sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
+        for (Map<String, Object> row : dataMap)
+        {
+            Analyte analyte = analyteFactory.fromMap(row);
+            row.remove("titration");
+            LuminexDataRow dataRow = rowFactory.fromMap(row);
+            dataRow.setExtraProperties(row);
+
+            if (!sheets.containsKey(analyte))
+            {
+                sheets.put(analyte, new ArrayList<LuminexDataRow>());
+            }
+            sheets.get(analyte).add(dataRow);
+        }
+
+        LuminexRunUploadForm form = (LuminexRunUploadForm)context;
+
+        LuminexExcelParser parser = form.getParser();
+        Map<DomainProperty, String> excelProps = parser.getExcelRunProps();
+        excelProps.putAll(context.getTransformResult().getRunProperties());
+        importData(data, run, context.getUser(), null, sheets, excelProps, parser.getTitrations());
+    }
+
+    public Priority getPriority(ExpData data)
+    {
+        Lsid lsid = new Lsid(data.getLSID());
+        if (LUMINEX_DATA_TYPE.matches(lsid))
+        {
+            return Priority.HIGH;
+        }
+        if (LUMINEX_TRANSFORMED_DATA_TYPE.matches(lsid))
+        {
+            return Priority.HIGH;
+        }
+        return null;
     }
 }

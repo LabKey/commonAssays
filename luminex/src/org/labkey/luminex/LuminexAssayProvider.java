@@ -72,7 +72,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public LuminexAssayProvider()
     {
-        super("LuminexAssayProtocol", "LuminexAssayRun", LuminexExcelDataHandler.LUMINEX_DATA_TYPE, new AssayTableMetadata(
+        super("LuminexAssayProtocol", "LuminexAssayRun", LuminexDataHandler.LUMINEX_DATA_TYPE, new AssayTableMetadata(
             null,
             FieldKey.fromParts("Data", "Run"),
             FieldKey.fromParts("RowId")));

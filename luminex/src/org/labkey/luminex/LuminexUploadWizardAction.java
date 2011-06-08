@@ -168,7 +168,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
         assert form.getUploadedData().containsKey(AssayDataCollector.PRIMARY_FILE);
         File dataFile = form.getUploadedData().get(AssayDataCollector.PRIMARY_FILE);
-        LuminexExcelDataHandler.LuminexExcelParser parser = new LuminexExcelDataHandler.LuminexExcelParser(form.getProtocol(), dataFile);
+        LuminexExcelParser parser = new LuminexExcelParser(form.getProtocol(), dataFile);
         for (Analyte analyte : parser.getSheets().keySet())
         {
             names.add(analyte.getName());
@@ -256,7 +256,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         // data transform occurred, need to find the transformed output that was persisted
                         for (ExpData data : outputs)
                         {
-                            if (LuminexExcelDataHandler.LUMINEX_TRANSFORMED_DATA_TYPE.matches(new Lsid(data.getLSID())))
+                            if (LuminexDataHandler.LUMINEX_TRANSFORMED_DATA_TYPE.matches(new Lsid(data.getLSID())))
                             {
                                 dataId = data.getRowId();
                                 break;
