@@ -230,21 +230,42 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     // Default behavior doesn't work for ProteinProphet groupings -- need to add in GroupId by joining to PeptideMemberships table
     protected Long[] generatePeptideIndex(ActionURL url) throws SQLException
     {
+        String extraWhere = null;
         String groupIdString = url.getParameter("proteinGroupId");
-        if (groupIdString == null)
+        if (groupIdString != null)
         {
-            throw new NotFoundException("No protein group id specified");
+            try
+            {
+                extraWhere = MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId = " + Integer.parseInt(groupIdString);
+            }
+            catch (NumberFormatException e)
+            {
+                throw new NotFoundException("Invalid protein group id specified - " + groupIdString);
+            }
         }
-        int groupId = 0;
-        try
+        else
         {
-            groupId = Integer.parseInt(groupIdString);
+            String run = url.getParameter("run");
+            String groupNumber = url.getParameter("groupNumber");
+            String indistinguishableCollectionId = url.getParameter("indistinguishableCollectionId");
+            if (run != null && groupNumber != null && indistinguishableCollectionId != null)
+            {
+                try
+                {
+                    extraWhere = MS2Manager.getTableInfoSimplePeptides() + ".Run = " + Integer.parseInt(run) + " AND " +
+                            MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".GroupNumber = " + Integer.parseInt(groupNumber) + " AND " +
+                            MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".IndistinguishableCollectionId = " + Integer.parseInt(indistinguishableCollectionId);
+                }
+                catch (NumberFormatException e)
+                {
+                    throw new NotFoundException("Invalid run/groupNumber/indistinguishableCollectionId specified - " + run + "/" + groupNumber + "/" + indistinguishableCollectionId);
+                }
+            }
         }
-        catch (NumberFormatException e)
+        if (extraWhere == null)
         {
-            throw new NotFoundException("Invalid protein group id specified - " + groupIdString);
+            throw new NotFoundException("No protein group specified");
         }
-        String extraWhere = MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId = " + groupId;
         ResultSet rs = null;
         try
         {
