@@ -37,6 +37,8 @@ import java.io.IOException;
 public class PositivityFlowReport extends FilterFlowReport
 {
     public static final String TYPE = "Flow.PositivityReport";
+    private SubsetSpec _subset;
+    private SubsetSpec _parentSubset;
 
     @Override
     public String getType()
@@ -66,6 +68,37 @@ public class PositivityFlowReport extends FilterFlowReport
         return new JspView<PositivityFlowReport>(PositivityFlowReport.class, "editPositivityReport.jsp", this);
     }
 
+    SubsetSpec getSubset()
+    {
+        if (_subset == null)
+        {
+            ReportDescriptor d = getDescriptor();
+            String subset = StringUtils.trimToNull(d.getProperty("subset"));
+            if (subset == null)
+                throw new IllegalArgumentException("subset required");
+
+            _subset = SubsetSpec.fromUnescapedString(subset);
+            _parentSubset = _subset.getParent();
+        }
+        return _subset;
+    }
+
+    SubsetSpec getSubsetParent()
+    {
+        if (_parentSubset == null)
+            getSubset();
+        return _parentSubset;
+    }
+
+    @Override
+    void addScriptProlog(ViewContext context, StringBuffer sb)
+    {
+        super.addScriptProlog(context, sb);
+        sb.append("report.parameters$subsetDisplay=\"").append(getSubset().getSubset()).append("\"\n");
+        sb.append("report.parameters$subsetParent=\"").append(getSubsetParent()).append("\"\n");
+        sb.append("report.parameters$subsetParentDisplay=\"").append(getSubsetParent()).append("\"\n");
+    }
+
     @Override
     protected void addSelectList(ViewContext context, String tableName, StringBuilder query)
     {
@@ -73,16 +106,11 @@ public class PositivityFlowReport extends FilterFlowReport
         if (metadata == null)
             throw new NotFoundException("ICS metadata required");
 
-        ReportDescriptor d = getDescriptor();
-        String subset = StringUtils.trimToNull(d.getProperty("subset"));
-        if (subset == null)
-            throw new IllegalArgumentException("subset required");
-
-        SubsetSpec spec = SubsetSpec.fromUnescapedString(subset);
-        SubsetSpec parentSpec = spec.getParent();
+        SubsetSpec subset = getSubset();
+        SubsetSpec subsetParent = getSubsetParent();
 
         String stat = subset + ":Count";
-        String parentStat = parentSpec == null ? "Count" : parentSpec.toString() + ":Count";
+        String parentStat = subsetParent == null ? "Count" : subsetParent.toString() + ":Count";
 
         for (FieldKey fieldKey : getMatchColumns(metadata))
         {

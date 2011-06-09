@@ -82,7 +82,7 @@ public abstract class FilterFlowReport extends FlowReport
 
                     StringBuffer reportProlog = new StringBuffer(labkeyProlog);
                     reportProlog.append("report.parameters <- list(");
-                    ReportDescriptor d = getDescriptor();
+                    ReportDescriptor d = FilterFlowReport.this.getDescriptor();
                     Map<String, Object> props = d.getProperties();
                     String comma = "";
                     for (Map.Entry<String, Object> e : props.entrySet())
@@ -96,7 +96,7 @@ public abstract class FilterFlowReport extends FlowReport
                         comma = ",";
                     }
                     reportProlog.append(")\n");
-                    addICSMetadataProlog(context, reportProlog);
+                    addScriptProlog(context, reportProlog);
                     return reportProlog.toString();
                 }
             };
@@ -133,7 +133,7 @@ public abstract class FilterFlowReport extends FlowReport
         return fieldKeys;
     }
 
-    void addICSMetadataProlog(ViewContext context, StringBuffer sb)
+    void addScriptProlog(ViewContext context, StringBuffer sb)
     {
         ICSMetadata metadata = getMetadata(context.getContainer());
         if (metadata == null)

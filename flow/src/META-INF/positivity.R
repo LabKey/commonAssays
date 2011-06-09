@@ -14,6 +14,7 @@
 #  limitations under the License.
 ##
 
+# Original positivity script by Alan DeCamp <decamp@scharp.org>
 
 # Define constants
 NSUB_MIN = 5000
@@ -43,20 +44,36 @@ positivity <- function (data, grouping_columns)
 
     # compute adjusted p-values
     data = by(data, subset(data, select=grouping_columns), function(ss) {
-      ss$adjp = p.adjust(ss$raw_p, method="holm")
+      ss$adj_p = p.adjust(ss$raw_p, method="holm")
       return(ss)
     })
     dat = do.call(rbind, data)
 
     # define response call
-    dat$response = as.numeric(dat$adjp <= ALPHA)
+    dat$response = as.numeric(dat$adj_p <= ALPHA)
 
     return(dat)
 }
 
 # UNDONE: check labkey.data has statistic, background statistic, parent statistic, background parent statistic
 
-PRINT <- positivity(labkey.data, flow.metadata.matchColumns)
+result <- positivity(labkey.data, flow.metadata.matchColumns)
+
+PRINT <- data.frame(
+    date = as.Date(result$datetime),
+    run = result$run,
+    run.href = result$run_href,
+    well = result$well,
+    well.href = result$well_href
+)
+
+PRINT[report.parameters$subsetDisplay] = result$stat
+PRINT[paste("BG ", report.parameters$subsetDisplay)] = result$stat_bg
+PRINT[report.parameters$subsetParentDisplay] = result$parent
+PRINT[paste("BG ", report.parameters$subsetParentDisplay)] = result$parent_bg
+PRINT$response = result$response
+PRINT$raw_p = result$raw_p
+PRINT$adj_p = result$adj_p
 
 write.table(PRINT, file = "${tsvout:tsvfile}", sep = "\t", qmethod = "double", col.names=NA)
 
