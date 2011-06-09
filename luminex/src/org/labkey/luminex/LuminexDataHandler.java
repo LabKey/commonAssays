@@ -24,6 +24,7 @@ import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
@@ -69,7 +70,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             throw new ExperimentException("Could not load Luminex file " + dataFile.getAbsolutePath() + " because it is not owned by an experiment run");
         }
 
-        LuminexExcelParser parser = new LuminexExcelParser(expRun.getProtocol(), dataFile);
+        LuminexExcelParser parser = new LuminexExcelParser(expRun.getProtocol(), Collections.singleton(dataFile));
         importData(data, expRun, info.getUser(), log, parser.getSheets(), parser.getExcelRunProps(), parser.getTitrations());
     }
 
@@ -403,11 +404,25 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             // Insert the titrations first
             for (String name : titrationNames)
             {
-                Titration titration = new Titration();
-                titration.setName(name == null || name.trim().isEmpty() ? "Standard" : name);
-                titration.setRunId(expRun.getRowId());
+                name = name == null || name.trim().isEmpty() ? "Standard" : name;
+                SimpleFilter filter = new SimpleFilter("Name", name);
+                filter.addCondition("RunId", expRun.getRowId());
+                Titration[] exitingTitrations = Table.select(LuminexSchema.getTableInfoTitration(), Table.ALL_COLUMNS, filter, null, Titration.class);
+                assert exitingTitrations.length <= 1;
 
-                titration = Table.insert(user, LuminexSchema.getTableInfoTitration(), titration);
+                Titration titration;
+                if (exitingTitrations.length > 0)
+                {
+                    titration = exitingTitrations[0];
+                }
+                else
+                {
+                    titration = new Titration();
+                    titration.setName(name);
+                    titration.setRunId(expRun.getRowId());
+
+                    titration = Table.insert(user, LuminexSchema.getTableInfoTitration(), titration);
+                }
                 titrations.put(name, titration);
             }
 
@@ -846,7 +861,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         ExpProtocol protocol = data.getRun().getProtocol();
-        LuminexExcelParser parser = new LuminexExcelParser(protocol, dataFile);
+        LuminexExcelParser parser = new LuminexExcelParser(protocol, Collections.singleton(dataFile));
 
         Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
         List<Map<String, Object>> dataRows = new ArrayList<Map<String, Object>>();
@@ -858,8 +873,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             for (LuminexDataRow dataRow : entry.getValue())
             {
                 Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
-                dataMap.remove("titrationId");
                 dataMap.put("titration", titrations.contains(dataRow.getDescription()));
+                dataMap.remove("data");
+                dataMap.put("dataFile", dataFile.getName());
                 dataRows.add(dataMap);
             }
         }

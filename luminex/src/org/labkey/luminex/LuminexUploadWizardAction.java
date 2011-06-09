@@ -166,10 +166,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     {
         List<String> names = new ArrayList<String>();
 
-        assert form.getUploadedData().containsKey(AssayDataCollector.PRIMARY_FILE);
-        File dataFile = form.getUploadedData().get(AssayDataCollector.PRIMARY_FILE);
-        LuminexExcelParser parser = new LuminexExcelParser(form.getProtocol(), dataFile);
-        for (Analyte analyte : parser.getSheets().keySet())
+        for (Analyte analyte : form.getParser().getSheets().keySet())
         {
             names.add(analyte.getName());
         }

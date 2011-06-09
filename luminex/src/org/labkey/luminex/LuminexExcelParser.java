@@ -21,6 +21,7 @@ import org.labkey.api.util.GUID;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,103 +35,106 @@ import java.util.TreeSet;
 */
 public class LuminexExcelParser
 {
-    private File _dataFile;
+    private Collection<File> _dataFiles;
     private ExpProtocol _protocol;
     private Map<Analyte, List<LuminexDataRow>> _sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
     private Map<DomainProperty, String> _excelRunProps = new HashMap<DomainProperty, String>();
     private Set<String> _titrations = new TreeSet<String>();
-    private boolean _fileParsed;
+    private boolean _parsed;
 
-    public LuminexExcelParser(ExpProtocol protocol, File dataFile)
+    public LuminexExcelParser(ExpProtocol protocol, Collection<File> dataFiles)
     {
         _protocol = protocol;
-        _dataFile = dataFile;
+        _dataFiles = dataFiles;
     }
 
     private void parseFile() throws ExperimentException
     {
-        if (_fileParsed) return;
+        if (_parsed) return;
 
-        try
+        for (File dataFile : _dataFiles)
         {
-            Workbook workbook = ExcelFactory.create(_dataFile);
-
-            Container container = _protocol.getContainer();
-            String excelRunDomainURI = AbstractAssayProvider.getDomainURIForPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
-            Domain excelRunDomain = PropertyService.get().getDomain(container, excelRunDomainURI);
-
-            for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
+            try
             {
-                Sheet sheet = workbook.getSheetAt(sheetIndex);
+                Workbook workbook = ExcelFactory.create(dataFile);
 
-                if (sheet.getPhysicalNumberOfRows() == 0 || "Row #".equals(ExcelFactory.getCellContentsAt(sheet, 0, 0)))
+                Container container = _protocol.getContainer();
+                String excelRunDomainURI = AbstractAssayProvider.getDomainURIForPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
+                Domain excelRunDomain = PropertyService.get().getDomain(container, excelRunDomainURI);
+
+                for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
                 {
-                    continue;
-                }
+                    Sheet sheet = workbook.getSheetAt(sheetIndex);
 
-                Analyte analyte = new Analyte(sheet.getSheetName());
-
-                int row = handleHeaderOrFooterRow(sheet, 0, analyte, excelRunDomain);
-
-                // Skip over the blank line
-                row++;
-
-                List<String> colNames = new ArrayList<String>();
-                if (row < sheet.getLastRowNum())
-                {
-                    Row r = sheet.getRow(row);
-                    if (r != null)
+                    if (sheet.getPhysicalNumberOfRows() == 0 || "Row #".equals(ExcelFactory.getCellContentsAt(sheet, 0, 0)))
                     {
-                        for (Cell cell : r)
-                            colNames.add(ExcelFactory.getCellStringValue(cell));
+                        continue;
                     }
-                    row++;
-                }
 
-                List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
-                _sheets.put(analyte, dataRows);
+                    Analyte analyte = new Analyte(sheet.getSheetName());
 
-                Map<String, Integer> potentialTitrationCounts = new CaseInsensitiveHashMap<Integer>();
-
-                if (row < sheet.getLastRowNum())
-                {
-                    do
-                    {
-                        LuminexDataRow dataRow = createDataRow(sheet, colNames, row);
-
-                        if (isPotentialTitration(dataRow))
-                        {
-                            Integer count = potentialTitrationCounts.get(dataRow.getDescription());
-                            potentialTitrationCounts.put(dataRow.getDescription(), count == null ? 1 : count.intValue() + 1);
-                        }
-                        dataRows.add(dataRow);
-                    }
-                    while (++row < sheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(sheet, 0, row)));
+                    int row = handleHeaderOrFooterRow(sheet, 0, analyte, excelRunDomain);
 
                     // Skip over the blank line
                     row++;
-                }
-                handleHeaderOrFooterRow(sheet, row, analyte, excelRunDomain);
 
-                // Check if we've accumulated enough instances to consider it to be a titration
-                for (Map.Entry<String, Integer> entry : potentialTitrationCounts.entrySet())
-                {
-                    if (entry.getValue().intValue() >= LuminexDataHandler.MINIMUM_TITRATION_COUNT)
+                    List<String> colNames = new ArrayList<String>();
+                    if (row < sheet.getLastRowNum())
                     {
-                        _titrations.add(entry.getKey());
+                        Row r = sheet.getRow(row);
+                        if (r != null)
+                        {
+                            for (Cell cell : r)
+                                colNames.add(ExcelFactory.getCellStringValue(cell));
+                        }
+                        row++;
+                    }
+
+                    List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
+                    _sheets.put(analyte, dataRows);
+
+                    Map<String, Integer> potentialTitrationCounts = new CaseInsensitiveHashMap<Integer>();
+
+                    if (row < sheet.getLastRowNum())
+                    {
+                        do
+                        {
+                            LuminexDataRow dataRow = createDataRow(sheet, colNames, row);
+
+                            if (isPotentialTitration(dataRow))
+                            {
+                                Integer count = potentialTitrationCounts.get(dataRow.getDescription());
+                                potentialTitrationCounts.put(dataRow.getDescription(), count == null ? 1 : count.intValue() + 1);
+                            }
+                            dataRows.add(dataRow);
+                        }
+                        while (++row < sheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(sheet, 0, row)));
+
+                        // Skip over the blank line
+                        row++;
+                    }
+                    handleHeaderOrFooterRow(sheet, row, analyte, excelRunDomain);
+
+                    // Check if we've accumulated enough instances to consider it to be a titration
+                    for (Map.Entry<String, Integer> entry : potentialTitrationCounts.entrySet())
+                    {
+                        if (entry.getValue().intValue() >= LuminexDataHandler.MINIMUM_TITRATION_COUNT)
+                        {
+                            _titrations.add(entry.getKey());
+                        }
                     }
                 }
             }
-            _fileParsed = true;
+            catch (IOException e)
+            {
+                throw new ExperimentException("Failed to read from data file " + dataFile.getName(), e);
+            }
+            catch (InvalidFormatException e)
+            {
+                throw new XarFormatException("Failed to parse Excel file " + dataFile.getName(), e);
+            }
         }
-        catch (IOException e)
-        {
-            throw new ExperimentException("Failed to read from data file " + _dataFile.getAbsolutePath(), e);
-        }
-        catch (InvalidFormatException e)
-        {
-            throw new XarFormatException("Failed to parse Excel file " + _dataFile.getAbsolutePath(), e);
-        }
+        _parsed = true;
     }
 
     /** A well might contain a titration value if it's marked as a standard or if there's an expected concentration */

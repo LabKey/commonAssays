@@ -121,7 +121,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
     {
         if (_parser == null)
         {
-            _parser = new LuminexExcelParser(getProtocol(), getUploadedData().get(AssayDataCollector.PRIMARY_FILE));
+            _parser = new LuminexExcelParser(getProtocol(), getUploadedData().values());
         }
         return _parser;
     }
