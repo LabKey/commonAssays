@@ -185,7 +185,7 @@ D <- data.frame(
     date=as.Date(labkey.data$datetime),
     run=labkey.data$run,
     run.href=labkey.data$run_href,
-    well=rep("details",length), #well=labkey.data$well,
+    well=labkey.data$well,
     well.href=labkey.data$well_href,
     value=labkey.data$value
     )

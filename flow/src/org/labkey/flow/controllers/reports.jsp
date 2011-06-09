@@ -29,11 +29,16 @@
 <%@ page import="java.util.TreeMap" %>
 <%@ page import="org.labkey.flow.reports.ControlsQCReport" %>
 <%@ page import="org.labkey.flow.reports.PositivityFlowReport" %>
+<%@ page import="org.labkey.flow.data.FlowProtocol" %>
+<%@ page import="org.labkey.flow.data.ICSMetadata" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext context = getViewContext();
     User user = context.getUser();
     Container c = context.getContainer();
+    FlowProtocol protocol = FlowProtocol.getForContainer(c);
+    ICSMetadata metadata = protocol.getICSMetadata();
+    boolean hasMetadata = metadata != null && !metadata.isEmpty();
 
     boolean canEdit = c.hasPermission(user, UpdatePermission.class);
     ActionURL copyURL = new ActionURL(ReportsController.CopyAction.class, c);
@@ -69,6 +74,8 @@
         </tr><%
     }
     %>
-    <tr><td><%=textLink("create qc report", new ActionURL(ReportsController.UpdateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, ControlsQCReport.TYPE))%></td></tr>
-    <tr><td><%=textLink("create positivity report", new ActionURL(ReportsController.UpdateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, PositivityFlowReport.TYPE))%></td></tr>
+    <tr><td><%=textLink("create qc report", new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, ControlsQCReport.TYPE))%></td></tr>
+    <% if (hasMetadata) { %>
+    <tr><td><%=textLink("create positivity report", new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, PositivityFlowReport.TYPE))%></td></tr>
+    <% } %>
     </table>

@@ -24,6 +24,7 @@ import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.reports.report.ReportIdentifier;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.DeletePermission;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.*;
@@ -90,95 +91,44 @@ public class ReportsController extends BaseFlowController
     }
 
 
-    private static class FormView extends HttpView
+    public static class CreateReportForm
     {
-        IdForm _form;
-        Class _post;
-        
-        FormView(Class post, IdForm form, HttpView body)
-        {
-            _form = form;
-            _post = post;
-            setBody(body);
-        }
-        
-        @Override
-        protected void renderInternal(Object model, PrintWriter out) throws Exception
-        {
-            ActionURL url = new ActionURL(_post, getViewContext().getContainer());
-            if (null != _form && null != _form.getReportId())
-                url.addParameter("reportId", _form.getReportId().toString());
+        private String _reportType;
 
-//            out.print("<form method=POST action='");
-//            out.print(url.getEncodedLocalURIString());
-//            out.print("'><input type=submit><br>");
-//            out.print("<input name='name' value=''><br>");
-            include(getBody(),out);
-//            out.print("</form>");
+        public String getReportType()
+        {
+            return _reportType;
+        }
+
+        public void setReportType(String reportType)
+        {
+            _reportType = reportType;
         }
     }
-    
 
-/*
-    @RequiresPermissionClass(InsertPermission.class)
-    public static class CreateAction extends FlowExtAction<IdForm>
-    {
-        public ModelAndView getView(IdForm form, BindException errors) throws Exception
-        {
-            FlowReport r = new ControlsQCReport();
-            return new FormView(CreateAction.class, form, r.getConfigureForm());
-        }
-
-        public ActionURL getSuccessURL(IdForm form)
-        {
-            return form.url(ExecuteAction.class);
-        }
-
-        public void validateCommand(IdForm target, Errors errors)
-        {
-
-        }
-
-        public ApiResponse execute(IdForm form, BindException errors) throws Exception
-        {
-            FlowReport r = new ControlsQCReport();
-            r.updateProperties(getPropertyValues(), errors, false);
-            int id = ReportService.get().saveReport(getViewContext(), r.getDescriptor().getReportName(), r);
-            form.setReportId(new DbReportIdentifier(id));
-            ApiSimpleResponse ret = new ApiSimpleResponse(r.getDescriptor().getProperties());
-            ret.put("reportId", form.getReportId().toString());
-            return ret;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            new BeginAction(getViewContext()).appendNavTrail(root);
-            root.addChild("Create new report");
-            return root;
-        }
-    }
-*/
-
-    @RequiresPermissionClass(UpdatePermission.class)
-    public static class UpdateAction extends FormApiAction<IdForm>
+    private abstract static class CreateOrUpdateAction<FORM> extends FormApiAction<FORM>
     {
         FlowReport r;
 
-        public ModelAndView getView(IdForm form, BindException errors) throws Exception
+        public abstract void initReport(FORM form) throws Exception;
+
+        @Override
+        protected String getCommandClassMethodName()
         {
-            if (null == form.getReportId())
-                r = new ControlsQCReport();
-            else
-                r = getReport(getViewContext(), form);
-            return new FormView(UpdateAction.class, form, r.getConfigureForm());
+            return "initReport";
         }
 
-        public ApiResponse execute(IdForm form, BindException errors) throws Exception
+        @Override
+        public ModelAndView getView(FORM form, BindException errors) throws Exception
         {
-            if (null == form.getReportId())
-                r = new ControlsQCReport();
-            else
-                r = getReport(getViewContext(), form);
+            initReport(form);
+            return r.getConfigureForm(getViewContext());
+        }
+
+        @Override
+        public ApiResponse execute(FORM form, BindException errors) throws Exception
+        {
+            initReport(form);
             r.updateProperties(getPropertyValues(), errors, false);
 
             int id = ReportService.get().saveReport(getViewContext(), null, r);
@@ -190,18 +140,42 @@ public class ReportsController extends BaseFlowController
             ret.put("success",Boolean.TRUE);
             return ret;
         }
+    }
+
+    @RequiresPermissionClass(InsertPermission.class)
+    public static class CreateAction extends CreateOrUpdateAction<CreateReportForm>
+    {
+        @Override
+        public void initReport(CreateReportForm form)
+        {
+            r = createReport(form.getReportType());
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            new BeginAction(getViewContext()).appendNavTrail(root);
+            root.addChild("Create new report");
+            return root;
+        }
+    }
+    
+    @RequiresPermissionClass(UpdatePermission.class)
+    public static class UpdateAction extends CreateOrUpdateAction<IdForm>
+    {
+        @Override
+        public void initReport(IdForm form) throws Exception
+        {
+            r = getReport(getViewContext(), form);
+        }
 
         public NavTree appendNavTrail(NavTree root)
         {
             new BeginAction(getViewContext()).appendNavTrail(root);
-            if (r.getReportId() == null)
-                root.addChild("Create new report");
-            else
-                root.addChild("Edit report: " + r.getDescriptor().getReportName());
+            root.addChild("Edit report: " + r.getDescriptor().getReportName());
             return root;
         }
     }
-
 
     @RequiresPermissionClass(UpdatePermission.class)
     public static class CopyAction extends FormHandlerAction<IdForm>
@@ -210,7 +184,6 @@ public class ReportsController extends BaseFlowController
 
         public void validateCommand(IdForm target, Errors errors)
         {
-
         }
 
         public boolean handlePost(IdForm form, BindException errors) throws Exception
@@ -314,7 +287,6 @@ public class ReportsController extends BaseFlowController
         }
     }
 
-
     public static FlowReport getReport(ViewContext context, IdForm form) throws Exception
     {
         try
@@ -340,6 +312,18 @@ public class ReportsController extends BaseFlowController
         }
     }
 
+
+    public static FlowReport createReport(String reportType)
+    {
+        Report report = ReportService.get().createReportInstance(reportType);
+        if (report == null)
+            throw new IllegalArgumentException("report type not registered");
+
+        if (!(report instanceof FlowReport))
+            throw new IllegalArgumentException("expected flow report type");
+
+        return (FlowReport)report;
+    }
 
 
     public static class SelectReportView extends JspView<IdForm>

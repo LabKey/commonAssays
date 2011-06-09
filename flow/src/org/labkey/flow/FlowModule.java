@@ -58,6 +58,7 @@ import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.reports.ControlsQCReport;
+import org.labkey.flow.reports.PositivityFlowReport;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.webparts.AnalysesWebPart;
 import org.labkey.flow.webparts.AnalysisScriptsWebPart;
@@ -120,6 +121,8 @@ public class FlowModule extends DefaultModule
         ContainerManager.addContainerListener(new FlowContainerListener());
 
         ReportService.get().registerReport(new ControlsQCReport());
+        ReportService.get().registerReport(new PositivityFlowReport());
+
         ServiceRegistry.get().registerService(FlowService.class, new FlowServiceImpl());
     }
 
@@ -129,8 +132,7 @@ public class FlowModule extends DefaultModule
                 AnalysesWebPart.FACTORY,
                 AnalysisScriptsWebPart.FACTORY,
                 FlowSummaryWebPart.FACTORY,
-                new DefaultWebPartFactory("Flow Reports", ReportsController.BeginView.class),
-                new DefaultWebPartFactory("Flow R Demo", AnalysisScriptController.DemoView.class)
+                new DefaultWebPartFactory("Flow Reports", ReportsController.BeginView.class)
                 );
     }
 

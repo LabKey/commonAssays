@@ -27,6 +27,7 @@
 <%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.api.exp.property.DomainProperty" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
 <%
     ViewContext context = HttpView.currentContext();
     FlowPropertySet fps = new FlowPropertySet(context.getContainer());
@@ -54,6 +55,8 @@
     }
     jsonStats.append("]");
 
+    StringBuilder jsonSamples = new StringBuilder();
+    jsonSamples.append("[");
     List<String> sampleSetProperties = new ArrayList<String>();
     FlowProtocol protocol = FlowProtocol.ensureForContainer(context.getUser(), context.getContainer());
     if (protocol != null)
@@ -66,6 +69,29 @@
         }
     }
 
+    StringBuilder stats = new StringBuilder();
+    stats.append("[");
+    comma = "";
+    for (StatisticSpec.STAT stat : StatisticSpec.STAT.values())
+    {
+        if (stat == StatisticSpec.STAT.Spill)
+            continue;
+        stats.append(comma);
+        stats.append("[\"").append(stat.getShortName()).append("\", \"").append(stat.getLongName()).append("\"]");
+
+        comma = ",\n";
+    }
+    stats.append("]");
+
+    StringBuilder ops = new StringBuilder();
+    ops.append("[");
+    comma = "";
+    for (CompareType ct : new CompareType[] { CompareType.EQUAL, CompareType.NEQ_OR_NULL, CompareType.ISBLANK, CompareType.NONBLANK, CompareType.GT, CompareType.LT, CompareType.GTE, CompareType.LTE, CompareType.CONTAINS, CompareType.STARTS_WITH, CompareType.DOES_NOT_CONTAIN, CompareType.DOES_NOT_START_WITH, CompareType.IN })
+    {
+        ops.append(comma);
+        ops.append("[\"").append(ct.getPreferredUrlKey()).append("\", \"").append(ct.getDisplayValue()).append("\"]");
+    }
+    ops.append("]");
 %>
 <script type="text/javascript">
 Ext.QuickTips.init();
@@ -117,8 +143,89 @@ function statisticsTree(statistics)
     return treeData;
 }
 
-var StatisticField = Ext.extend(Ext.form.TriggerField,
+var StatCombo = Ext.extend(Ext.form.ComboBox,
 {
+    constructor : function (config)
+    {
+        config.mode = 'local';
+        config.store = <%=stats%>
+
+        StatCombo.superclass.constructor.call(this, config);
+    },
+
+    filterStats : function (stats)
+    {
+        if (stats && stats.length > 0)
+        {
+            if (stats.length == 1)
+            {
+                this.getStore().filter("field1", stats[0]);
+                this.setValue(stats[0]);
+            }
+            else
+            {
+                var options = [];
+                for (var i=0 ; i<stats.length ; i++)
+                    options.push({ property: "field1", value: stats[i] });
+                var filterFn = this.createOrFilter(options);
+                this.getStore().filterBy(filterFn);
+            }
+        }
+        else
+        {
+            this.clearValue();
+            this.getStore().clearFilter();
+        }
+    },
+
+    createFilterFns : function (options)
+    {
+        var filters = [];
+        for (var i = 0; i < options.length; i++)
+        {
+            var option = options[i],
+                    func   = options.fn,
+                    scope  = options.scope || this;
+
+            if (!Ext.isFunction(func)) {
+                func = this.getStore().createFilterFn(option.property, option.value, option.anyMatch, option.caseSensitive, option.exactMatch);
+            }
+
+            filters.push({fn: func, scope: scope});
+        }
+
+        return filters;
+    },
+
+    createOrFilter : function (options)
+    {
+        var filters = this.createFilterFns(options);
+        return function (record) {
+            for (var j = 0; j < filters.length; j++)
+            {
+                var filter = filters[j],
+                    fn     = filter.fn,
+                    scope  = filter.scope;
+
+                var isMatch = fn.call(scope, record);
+                if (isMatch)
+                    return true;
+            }
+
+            return false;
+        };
+    }
+});
+
+var SubsetField = Ext.extend(Ext.form.TriggerField,
+{
+    initComponent : function ()
+    {
+        this.width = 400;
+        this.addEvents('selectionchange');
+        SubsetField.superclass.initComponent.call(this);
+    },
+
     onTriggerClick : function()
     {
         if (this.disabled)
@@ -133,8 +240,8 @@ var StatisticField = Ext.extend(Ext.form.TriggerField,
                 useArrows:true,
                 autoScroll:false,
                 containerScroll:true,
-//                width:800, height:400,
-//                autoHeight:true,
+                //width:800, height:400,
+                //autoHeight:true,
                 animate:true,
                 enableDD:false
             });
@@ -143,27 +250,11 @@ var StatisticField = Ext.extend(Ext.form.TriggerField,
                 root.appendChild(FlowPropertySet.statsTreeData[i]);
             tree.setRootNode(root);
             var sm = tree.getSelectionModel();
-            sm.on("selectionchange", function(sm,curr,prev){
+            this.relayEvents(sm, ["selectionchange"]);
+            sm.on("selectionchange", function (sm, curr, prev) {
                 var subset = curr.attributes.subset;
-                var stats = curr.attributes.stats;
-                if (!stats || !stats.length) return;
-                var items = [];
-                for (var i=0 ; i<stats.length ; i++)
-                    items.push({text:stats[i]});
-                var statMenu = new Ext.menu.Menu({
-                    width:240,
-                    cls:'extContainer',
-                    items: items
-                });
-                statMenu.on("itemclick",function(mi,e){
-                    var stat = mi.text=="%P"?"Freq_Of_Parent":mi.text;
-                    statMenu.destroy();
-                    this.pickValue(subset + ":" + stat);
-                }, this);
-                statMenu.show(curr.getUI().getTextEl());    
-                //this.pickValue(curr.attributes.subset);
+                this.pickValue(subset);
             }, this);
-
             this.popup = new Ext.Window({
                 autoScroll:true,
                 closeAction:'hide',
@@ -185,8 +276,60 @@ var StatisticField = Ext.extend(Ext.form.TriggerField,
     }
 
 });
+Ext.reg('subsetField', SubsetField);
 
+// Composite of SubsetField and Stat ComboBox
+var StatisticField = Ext.extend(Ext.form.CompositeField,
+{
+    constructor : function (config)
+    {
+        this.subsetField = new SubsetField();
+        this.subsetField.on("selectionchange", this.subsetChanged, this);
+        this.statCombo = new Ext.form.ComboBox({disabled: true, store: []});
+        this.items = [ this.subsetField, this.statCombo ];
 
+        StatisticField.superclass.constructor.call(this, config);
+    },
+
+    subsetChanged : function (selectionModel, curr, prev)
+    {
+        var stats = curr.attributes.stats;
+        if (stats && stats.length > 0)
+        {
+            this.statCombo.getStore().removeAll();
+            this.statCombo.getStore().loadData(stats);
+            this.statCombo.enable();
+            this.statCombo.focus();
+        }
+        else
+        {
+            this.statCombo.getStore().removeAll();
+            this.statCombo.disable();
+        }
+    },
+
+    setValue : function (value)
+    {
+        if (value && value.length > 0)
+        {
+            var idxColon = value.lastIndexOf(":");
+            var population = value.substring(0, idxColon);
+            var stat = value.substring(idxColon+1);
+
+            this.subsetField.setValue(population);
+            this.statCombo.setValue(stat);
+        }
+    },
+
+    getValue : function ()
+    {
+        var subset = this.subsetField.getValue();
+        var stat = this.statCombo.getValue();
+        return subset + ":" + stat;
+    }
+
+});
+Ext.reg('statisticField', StatisticField);
 
 var FlowPropertySet = {};
 FlowPropertySet.keywords = [<%
@@ -210,6 +353,5 @@ SampleSet.properties = [<%
     }
 %>];
 
-Ext.reg('statisticField', StatisticField);
 
 </script>

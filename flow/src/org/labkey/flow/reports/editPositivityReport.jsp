@@ -1,6 +1,6 @@
 <%
 /*
- * Copyright (c) 2009-2011 LabKey Corporation
+ * Copyright (c) 2011 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page import="org.labkey.flow.reports.FilterFlowReport" %>
+<%@ page import="org.labkey.flow.reports.PositivityFlowReport" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    FilterFlowReport report = (FilterFlowReport) HttpView.currentModel();
+    PositivityFlowReport report = (PositivityFlowReport) HttpView.currentModel();
     ReportDescriptor d = report.getDescriptor();
     String reportId = d.getReportId() == null ? null : d.getReportId().toString();
 %>
 <style>
-    .x-form-item { margin:2px;} 
+    .x-form-item { margin:2px;}
 </style>
 <div id="form"></div>
 <script type="text/javascript">
@@ -39,7 +40,7 @@ var report =
     reportId:<%=PageFlowUtil.jsString(reportId)%>,
     name:<%=PageFlowUtil.jsString(d.getReportName())%>,
     description:<%=PageFlowUtil.jsString(d.getReportDescription())%>,
-    statistic:<%=PageFlowUtil.jsString(d.getProperty("statistic"))%>,
+    subset:<%=PageFlowUtil.jsString(d.getProperty("subset"))%>,
     filter :
     [<%
     String comma = "";
@@ -47,10 +48,10 @@ var report =
     {
         FilterFlowReport.Filter f = new FilterFlowReport.Filter(d,i);
         %><%=comma%>{
-            property:<%=q(f.property)%>,
-            value:<%=q(f.value)%>,
-            type:<%=q(f.type)%>,
-            op:<%=null==f.op?q("eq"):q(f.op)%>}<%
+             property:<%=q(f.property)%>,
+             value:<%=q(f.value)%>,
+             type:<%=q(f.type)%>,
+             op:<%=null==f.op?q("eq"):q(f.op)%>}<%
         comma =",";
     }
     %>]
@@ -82,10 +83,10 @@ function Form_onCancel()
 
 function Form_onDelete()
 {
-    if (report.reportId)
-        window.location = "delete.view?reportId=" + encodeURIComponent(report.reportId);
-    else
-        Form_onCancel();
+   if (report.reportId)
+       window.location = "delete.view?reportId=" + encodeURIComponent(report.reportId);
+   else
+       Form_onCancel();
 }
 
 Ext.onReady(function() {
@@ -95,7 +96,7 @@ Ext.onReady(function() {
     var sample = [];
     var startDate = null;
     var endDate = null;
-    
+
     for (i=0; i<report.filter.length;i++)
     {
         var f = report.filter[i];
@@ -118,7 +119,7 @@ Ext.onReady(function() {
     }
 
     var spacer = {xtype:'spacer', minHeight:5, html:'<hr width=20 size=1 color=gray>', style:{'margin-left':'75px'}};
-    
+
     form = new Ext.form.FormPanel({
         url:window.location,
         defaults:{msgTarget:'side', width:700},
@@ -127,7 +128,7 @@ Ext.onReady(function() {
         items:[
             {fieldLabel:'Name', name:'reportName', value:report.name, allowBlank:false},
             {fieldLabel:'Description', name:'reportDescription', value:report.description, allowBlank:true},
-            {fieldLabel:'Statistic', name:'statistic', xtype:'statisticField', value:report.statistic, allowBlank:false},
+            {fieldLabel:'Subset', name:'subset', xtype:'subsetField', value:report.subset, allowBlank:false},
 
             spacer,
 
@@ -180,3 +181,4 @@ Ext.onReady(function() {
     JspView<Object> statPicker = new JspView<Object>(FlowReport.class, "statPicker.jsp", null, null);
     statPicker.include(statPicker, out);
 %>
+

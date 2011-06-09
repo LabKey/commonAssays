@@ -26,11 +26,14 @@
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.ReportsController" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext context = getViewContext();
     User user = context.getUser();
     Container c = context.getContainer();
+
+    boolean canEdit = c.hasPermission(user, UpdatePermission.class);
 
     ReportIdentifier id = ((ReportsController.IdForm) HttpView.currentModel()).getReportId();
 
@@ -53,6 +56,11 @@
         %><option <%=selected?"selected":""%> value="<%=h(r.getRunReportURL(context))%>"><%=h(d.getReportName())%></option><%
     }
     %></select>
+
+    <% if (canEdit && id != null) { %>
+    <%=generateButton("Edit", id.getReport().getEditReportURL(context))%>
+    <% } %>
+    
 <script type="text/javascript">
     function Select_onChange(url)
     {
