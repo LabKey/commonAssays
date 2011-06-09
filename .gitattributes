@@ -585,6 +585,7 @@ luminex/src/org/labkey/luminex/LuminexRunUploadForm.java -text
 luminex/src/org/labkey/luminex/LuminexSchema.java -text
 luminex/src/org/labkey/luminex/LuminexUploadWizardAction.java -text
 luminex/src/org/labkey/luminex/Titration.java -text
+luminex/src/org/labkey/luminex/titrationWellRoles.jsp -text
 microarray/gwtsrc/org/labkey/microarray/designer/MicroarrayAssayDesigner.gwt.xml -text
 microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayAssayDesigner.java -text
 microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayDesignerMainPanel.java -text

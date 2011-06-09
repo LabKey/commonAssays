@@ -35,12 +35,16 @@ import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
+import org.labkey.api.view.JspView;
 import org.labkey.api.view.RedirectException;
+import org.labkey.api.view.VBox;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -76,7 +80,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     {
         try {
             String lsidColumn = "RowId";
+            VBox vbox = new VBox();
+
+            JspView<LuminexRunUploadForm> top = new JspView<LuminexRunUploadForm>("/org/labkey/luminex/titrationWellRoles.jsp", form);
+            top.setTitle("Define Titration Well Roles");
+            vbox.addView(top);
+
             InsertView view = createInsertView(LuminexSchema.getTableInfoAnalytes(), lsidColumn, new DomainProperty[0], form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
+            view.setTitle("Analyte Properties");
 
             for (String analyte : analyteNames)
                 view.getDataRegion().addHiddenFormField("analyteNames", analyte);
@@ -120,6 +131,46 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 view.getDataRegion().addGroup(new DisplayColumnGroup(cols, analyteDP.getName(), true));
             }
 
+            for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
+            {
+                //todo: get default value information from previous run uploads
+
+                List<DisplayColumn> cols = new ArrayList<DisplayColumn>();
+                for (final String analyte : analyteNames)
+                {
+                    DisplayColumn col = new SimpleDisplayColumn()
+                    {
+                        @Override
+                        public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
+                        {                                                      
+                            out.write("<input type='checkbox' value='1' name='_titration_" + analyte + "_" + titrationEntry.getKey() + "' />");
+                        }
+
+                        @Override
+                        public void renderInputCell(RenderContext ctx, Writer out, int span) throws IOException
+                        {
+                            out.write("<td colspan=" + span + " name='_inputcell_" + titrationEntry.getKey() + "' "
+                                    + (titrationEntry.getValue().isStandard() ? "" : "style='display:none;'") + ">");
+                            renderInputHtml(ctx, out, getInputValue(ctx));
+                            out.write("</td>");
+                        }
+
+                        @Override
+                        public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
+                        {
+                            out.write("<td class='labkey-form-label' id='_caption_" + titrationEntry.getKey() + "' "
+                                    + (titrationEntry.getValue().isStandard() ? "" : "style='display:none;'") + ">");
+                            renderTitle(ctx, out);
+                            out.write("</td>");
+                        }
+                    };
+
+                    col.setCaption("Use " + titrationEntry.getKey() + " Standard");
+                    cols.add(col);
+                }
+                view.getDataRegion().addGroup(new DisplayColumnGroup(cols, titrationEntry.getKey(), false));
+            }
+
             if (errorReshow)
                 view.setInitialValues(getViewContext().getRequest().getParameterMap());
 
@@ -149,7 +200,9 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
             view.getDataRegion().setButtonBar(bbar, DataRegion.MODE_INSERT);
 
-            return view;
+            vbox.addView(view);
+
+            return vbox;
         }
         catch (ExperimentException e)
         {

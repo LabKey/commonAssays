@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -39,7 +40,7 @@ public class LuminexExcelParser
     private ExpProtocol _protocol;
     private Map<Analyte, List<LuminexDataRow>> _sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
     private Map<DomainProperty, String> _excelRunProps = new HashMap<DomainProperty, String>();
-    private Set<String> _titrations = new TreeSet<String>();
+    private Map<String, Titration> _titrations = new TreeMap<String, Titration>();
     private boolean _parsed;
 
     public LuminexExcelParser(ExpProtocol protocol, Collection<File> dataFiles)
@@ -94,6 +95,7 @@ public class LuminexExcelParser
                     _sheets.put(analyte, dataRows);
 
                     Map<String, Integer> potentialTitrationCounts = new CaseInsensitiveHashMap<Integer>();
+                    Map<String, Titration> potentialTitrations = new CaseInsensitiveHashMap<Titration>();
 
                     if (row < sheet.getLastRowNum())
                     {
@@ -101,11 +103,24 @@ public class LuminexExcelParser
                         {
                             LuminexDataRow dataRow = createDataRow(sheet, colNames, row);
 
-                            if (isPotentialTitration(dataRow))
+                            Integer count = potentialTitrationCounts.get(dataRow.getDescription());
+                            potentialTitrationCounts.put(dataRow.getDescription(), count == null ? 1 : count.intValue() + 1);
+
+                            if (!potentialTitrations.containsKey(dataRow.getDescription()))
                             {
-                                Integer count = potentialTitrationCounts.get(dataRow.getDescription());
-                                potentialTitrationCounts.put(dataRow.getDescription(), count == null ? 1 : count.intValue() + 1);
+                                Titration newTitration = new Titration();
+                                newTitration.setName(dataRow.getDescription());
+                                if (dataRow.getType() != null)
+                                {
+                                    newTitration.setStandard(dataRow.getType().toUpperCase().startsWith("S"));
+                                    newTitration.setQcControl(dataRow.getType().toUpperCase().startsWith("C"));
+                                    newTitration.setUnknown(dataRow.getType().toUpperCase().startsWith("X"));
+
+                                }
+
+                                potentialTitrations.put(dataRow.getDescription(), newTitration);
                             }
+
                             dataRows.add(dataRow);
                         }
                         while (++row < sheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(sheet, 0, row)));
@@ -120,7 +135,7 @@ public class LuminexExcelParser
                     {
                         if (entry.getValue().intValue() >= LuminexDataHandler.MINIMUM_TITRATION_COUNT)
                         {
-                            _titrations.add(entry.getKey());
+                            _titrations.put(entry.getKey(), potentialTitrations.get(entry.getKey()));
                         }
                     }
                 }
@@ -144,11 +159,17 @@ public class LuminexExcelParser
             dataRow.getExpConc() != null;
     }
 
-    public Set<String> getTitrations() throws ExperimentException
+     public Set<String> getTitrations() throws ExperimentException
+     {
+         parseFile();
+        return _titrations.keySet();
+    }
+
+    public Map<String, Titration> getTitrationsWithTypes() throws ExperimentException
     {
         parseFile();
-        return _titrations;
-    }
+         return _titrations;
+     }
 
     public Map<Analyte, List<LuminexDataRow>> getSheets() throws ExperimentException
     {

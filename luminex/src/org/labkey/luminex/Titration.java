@@ -11,6 +11,7 @@ public class Titration
     private String _name;
     private boolean _standard;
     private boolean _qcControl;
+    private boolean _unknown;
 
     public int getRowId()
     {
@@ -60,5 +61,15 @@ public class Titration
     public void setQcControl(boolean qcControl)
     {
         _qcControl = qcControl;
+    }
+
+    public void setUnknown(boolean unknown)
+    {
+        _unknown = unknown;
+    }
+
+    public boolean isUnknown()
+    {
+        return _unknown;
     }
 }
