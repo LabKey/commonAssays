@@ -29,7 +29,6 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.study.assay.AssayDataCollector;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -128,9 +127,30 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
 
     public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException
     {
-        // TODO - Make this look at what the user POSTED to figure out which analytes have been mapped to which titrations
+        Set<String> result = new HashSet<String>();
+        for (String titration : getParser().getTitrations())
+        {
+            if (getViewContext().getRequest().getParameter(LuminexUploadWizardAction.getTitrationCheckboxName(titration, analyteName)) != null)
+            {
+                result.add(titration);
+            }
+        }
+        return result;
+    }
 
-        // For now, say that all analytes use all of the titrations identified in the data file
-        return getParser().getTitrations();
+    public List<Titration> getTitrations() throws ExperimentException
+    {
+        List<Titration> result = new ArrayList<Titration>();
+        for (String titrationName : getParser().getTitrations())
+        {
+            Titration titration = new Titration();
+            titration.setName(titrationName);
+            for (Titration.Type type : Titration.Type.values())
+            {
+                type.setEnabled(titration, getViewContext().getRequest().getParameter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(type, titration)) != null);
+            }
+            result.add(titration);
+        }
+        return result;
     }
 }

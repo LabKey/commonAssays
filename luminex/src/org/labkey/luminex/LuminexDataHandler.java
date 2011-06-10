@@ -70,11 +70,21 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             throw new ExperimentException("Could not load Luminex file " + dataFile.getAbsolutePath() + " because it is not owned by an experiment run");
         }
 
-        LuminexExcelParser parser = new LuminexExcelParser(expRun.getProtocol(), Collections.singleton(dataFile));
-        importData(data, expRun, info.getUser(), log, parser.getSheets(), parser.getExcelRunProps(), parser.getTitrations());
+        LuminexExcelParser parser;
+        LuminexRunUploadForm form = null;
+        if (context instanceof AssayUploadXarContext && ((AssayUploadXarContext)context).getContext() instanceof LuminexRunUploadForm)
+        {
+            form = (LuminexRunUploadForm)((AssayUploadXarContext)context).getContext();
+            parser = form.getParser();
+        }
+        else
+        {
+            parser = new LuminexExcelParser(expRun.getProtocol(), Collections.singleton(dataFile));
+        }
+        importData(data, expRun, info.getUser(), log, parser.getSheets(), parser, form);
     }
 
-    public void importData(ExpData data, ExpRun run, User user, Logger log, Map<Analyte, List<LuminexDataRow>> inputData, Map<DomainProperty, String> excelRunProps, Set<String> titrations) throws ExperimentException
+    public void importData(ExpData data, ExpRun run, User user, Logger log, Map<Analyte, List<LuminexDataRow>> sheets, LuminexExcelParser parser, LuminexRunUploadForm form) throws ExperimentException
     {
         try
         {
@@ -95,7 +105,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             }
 
             PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), run.getContainer());
-            _importData(excelRunColumns, run, run.getContainer(), data, user, inputData, excelRunProps, titrations);
+            insertData(excelRunColumns, run, run.getContainer(), data, user, sheets, parser, form);
         }
         catch (SQLException e)
         {
@@ -108,7 +118,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private static Double parseDouble(String value)
+    public static Double parseDouble(String value)
     {
         if (value == null || "".equals(value))
         {
@@ -117,179 +127,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         else return Double.parseDouble(value);
     }
 
-    public enum OORIndicator
-    {
-        IN_RANGE
-        {
-            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
-            {
-                return null;
-            }
-            public Double getValue(String value)
-            {
-                return parseDouble(value);
-            }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
-            {
-                return getValue(value);
-            }
-        },
-        NOT_AVAILABLE
-        {
-            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
-            {
-                return "***";
-            }
-            public Double getValue(String value)
-            {
-                return null;
-            }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
-            {
-                return null;
-            }
-        },
-        OUT_OF_RANGE_ABOVE
-        {
-            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
-            {
-                return ">>";
-            }
-            public Double getValue(String value)
-            {
-                return null;
-            }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
-            {
-                return getValidStandard(dataRows, getter, false, analyte);
-            }
-        },
-        OUT_OF_RANGE_BELOW
-        {
-            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
-            {
-                return "<<";
-            }
-            public Double getValue(String value)
-            {
-                return null;
-            }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
-            {
-                return getValidStandard(dataRows, getter, true, analyte);
-            }
-        },
-        BEYOND_RANGE
-        {
-            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
-            {
-                int lowerCount = 0;
-                int higherCount = 0;
-                double thisValue = Double.parseDouble(value.substring(1));
-                for (LuminexDataRow dataRow : dataRows)
-                {
-                    Double otherValue = getter.getValue(dataRow);
-                    if (otherValue != null)
-                    {
-                        if (otherValue < thisValue)
-                        {
-                            lowerCount++;
-                        }
-                        else if (otherValue > thisValue)
-                        {
-                            higherCount++;
-                        }
-                    }
-                }
-                if (lowerCount > higherCount)
-                {
-                    return ">";
-                }
-                else if (lowerCount < higherCount)
-                {
-                    return "<";
-                }
-                else
-                {
-                    return "?";
-                }
-            }
-            public Double getValue(String value)
-            {
-                return null;
-            }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
-            {
-                String oorIndicator = getOORIndicator(value, dataRows, getter);
-                double thisValue = Double.parseDouble(value.substring(1));
-                if ("<".equals(oorIndicator))
-                {
-                    Double standardValue = OUT_OF_RANGE_BELOW.getValue(value, dataRows, getter, analyte);
-                    if (standardValue != null && standardValue > thisValue)
-                    {
-                        return standardValue;
-                    }
-                    else
-                    {
-                        return thisValue;
-                    }
-                }
-                else if (">".equals(oorIndicator))
-                {
-                    Double standardValue = OUT_OF_RANGE_ABOVE.getValue(value, dataRows, getter, analyte);
-                    if (standardValue != null && standardValue < thisValue)
-                    {
-                        return standardValue;
-                    }
-                    else
-                    {
-                        return thisValue;
-                    }
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        },
-        ERROR
-        {
-            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
-            {
-                return "ParseError";
-            }
-            public Double getValue(String value)
-            {
-                return null;
-            }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
-            {
-                return null;
-            }
-        },
-        OUTLIER
-        {
-            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
-            {
-                return "---";
-            }
-            public Double getValue(String value)
-            {
-                return null;
-            }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
-            {
-                return null;
-            }
-        };
-
-
-        public abstract String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter);
-        public abstract Double getValue(String value);
-        public abstract Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte);
-    }
-
-    private static Double getValidStandard(List<LuminexDataRow> dataRows, Getter getter, boolean min, Analyte analyte)
+    public static Double getValidStandard(List<LuminexDataRow> dataRows, Getter getter, boolean min, Analyte analyte)
     {
         double startValue = min ? Double.MAX_VALUE : Double.MIN_VALUE;
         double result = startValue;
@@ -319,116 +157,71 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return result == startValue ? null : result;
     }
 
-    private interface Getter
+    public interface Getter
     {
         public Double getValue(LuminexDataRow dataRow);
     }
 
-    public static OORIndicator determineOutOfRange(String value)
+    public static LuminexOORIndicator determineOutOfRange(String value)
     {
         if (value == null || "".equals(value))
         {
-            return OORIndicator.IN_RANGE;
+            return LuminexOORIndicator.IN_RANGE;
         }
         if ("***".equals(value))
         {
-            return OORIndicator.NOT_AVAILABLE;
+            return LuminexOORIndicator.NOT_AVAILABLE;
         }
         if ("---".equals(value))
         {
-            return OORIndicator.OUTLIER;
+            return LuminexOORIndicator.OUTLIER;
         }
         if (value.startsWith("*"))
         {
-            return OORIndicator.BEYOND_RANGE;
+            return LuminexOORIndicator.BEYOND_RANGE;
         }
         if (value.toLowerCase().contains("oor") && value.contains(">"))
         {
-            return OORIndicator.OUT_OF_RANGE_ABOVE;
+            return LuminexOORIndicator.OUT_OF_RANGE_ABOVE;
         }
         if (value.toLowerCase().contains("oor") && value.contains("<"))
         {
-            return OORIndicator.OUT_OF_RANGE_BELOW;
+            return LuminexOORIndicator.OUT_OF_RANGE_BELOW;
         }
 
         try
         {
             parseDouble(value);
-            return OORIndicator.IN_RANGE;
+            return LuminexOORIndicator.IN_RANGE;
         }
         catch (NumberFormatException e)
         {
-            return OORIndicator.ERROR;
+            return LuminexOORIndicator.ERROR;
         }
     }
 
     /**
      * Handles persisting of uploaded run data into the database
      */
-    private void _importData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, Map<Analyte, List<LuminexDataRow>> inputData, Map<DomainProperty, String> excelRunProps, Set<String> titrationNames) throws SQLException, ExperimentException
+    private void insertData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, Map<Analyte, List<LuminexDataRow>> sheets, LuminexExcelParser parser, LuminexRunUploadForm form) throws SQLException, ExperimentException
     {
         try
         {
             ExperimentService.get().ensureTransaction();
-            ExpProtocol protocol = expRun.getProtocol();
-            ParticipantVisitResolver resolver = null;
-            LuminexAssayProvider provider = (LuminexAssayProvider)AssayService.get().getProvider(protocol);
-            Map<String, ObjectProperty> mergedProperties = new HashMap<String, ObjectProperty>();
+            ExpProtocol protocol = form.getProtocol(false);
+            String dataFileName = data.getFile().getName();
+            LuminexAssayProvider provider = form.getProvider();
             Set<ExpMaterial> inputMaterials = new LinkedHashSet<ExpMaterial>();
-            mergedProperties.putAll(expRun.getObjectProperties());
-            ExpExperiment batch = AssayService.get().findBatch(expRun);
-            if (batch != null)
-            {
-                mergedProperties.putAll(batch.getObjectProperties());
-            }
-            for (ObjectProperty objectProperty : mergedProperties.values())
-            {
-                if (AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(objectProperty.getName()))
-                {
-                    ParticipantVisitResolverType resolverType = AbstractAssayProvider.findType(objectProperty.getStringValue(), provider.getParticipantVisitResolverTypes());
-                    Container targetStudy = provider.getTargetStudy(expRun);
-                    try
-                    {
-                        resolver = resolverType.createResolver(expRun, targetStudy, user);
-                    }
-                    catch (IOException e)
-                    {
-                        throw new ExperimentException(e);
-                    }
-                }
-            }
+            ParticipantVisitResolver resolver = findParticipantVisitResolver(expRun, user, provider);
 
             // Name -> Titration
-            Map<String, Titration> titrations = new CaseInsensitiveHashMap<Titration>();
-
-            // Insert the titrations first
-            for (String name : titrationNames)
-            {
-                name = name == null || name.trim().isEmpty() ? "Standard" : name;
-                SimpleFilter filter = new SimpleFilter("Name", name);
-                filter.addCondition("RunId", expRun.getRowId());
-                Titration[] exitingTitrations = Table.select(LuminexSchema.getTableInfoTitration(), Table.ALL_COLUMNS, filter, null, Titration.class);
-                assert exitingTitrations.length <= 1;
-
-                Titration titration;
-                if (exitingTitrations.length > 0)
-                {
-                    titration = exitingTitrations[0];
-                }
-                else
-                {
-                    titration = new Titration();
-                    titration.setName(name);
-                    titration.setRunId(expRun.getRowId());
-
-                    titration = Table.insert(user, LuminexSchema.getTableInfoTitration(), titration);
-                }
-                titrations.put(name, titration);
-            }
+            Map<String, Titration> titrations = insertTitrations(expRun, user, form.getTitrations());
 
             List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
 
-            for (Map.Entry<Analyte, List<LuminexDataRow>> sheet : inputData.entrySet())
+            Set<ExpData> sourceFiles = new HashSet<ExpData>();
+
+            for (Map.Entry<Analyte, List<LuminexDataRow>> sheet : sheets.entrySet())
             {
                 Analyte analyte = sheet.getKey();
 
@@ -437,9 +230,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
 
-                // TODO - stop assuming that all analytes use all titrations  
-                for (Titration titration : titrations.values())
+                for (String titrationName : form.getTitrationsForAnalyte(analyte.getName()))
                 {
+                    Titration titration = titrations.get(titrationName);
                     Map<String, Object> analyteTitration = new HashMap<String, Object>();
                     analyteTitration.put("analyteId", analyte.getRowId());
                     analyteTitration.put("titrationId", titration.getRowId());
@@ -460,9 +253,30 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         dataRow.setTitration(titration.getRowId());
                     }
                     dataRow.setAnalyte(analyte.getRowId());
-                    dataRow.setData(data.getRowId());
+                    ExpData sourceDataForRow = data;
+
+                    // If we've run a transform script, wire up data rows to the original data file(s) instead of the
+                    // result TSV so that we can match up Excel run properties correctly
+                    if (!dataFileName.equalsIgnoreCase(dataRow.getDataFile()))
+                    {
+                        for (ExpData potentialSourceData : expRun.getDataOutputs())
+                        {
+                            if (potentialSourceData.getFile() != null && potentialSourceData.getFile().getName().equalsIgnoreCase(dataRow.getDataFile()))
+                            {
+                                sourceDataForRow = potentialSourceData;
+                                break;
+                            }
+                        }
+                    }
+                    sourceFiles.add(sourceDataForRow);
+                    dataRow.setData(sourceDataForRow.getRowId());
                     rows.add(dataRow.toMap(analyte));
                 }
+            }
+
+            for (ExpData sourceFile : sourceFiles)
+            {
+                insertExcelProperties(excelRunColumns, sourceFile, parser, user, protocol);
             }
 
             LuminexDataTable tableInfo = provider.createDataTable(AssayService.get().createSchema(user, container), protocol, false);
@@ -476,37 +290,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
             AbstractAssayProvider.addInputMaterials(expRun, user, inputMaterials);
 
-            // Clear out the values - this is necessary if this is a XAR import where the run properties would
-            // have been loaded as part of the ExperimentRun itself.
-            Integer objectId = OntologyManager.ensureObject(container, expRun.getLSID());
-            for (PropertyDescriptor excelRunColumn : excelRunColumns)
-            {
-                OntologyManager.deleteProperty(expRun.getLSID(), excelRunColumn.getPropertyURI(), container, protocol.getContainer());
-            }
-
-            List<Map<String, Object>> excelRunPropsList = new ArrayList<Map<String, Object>>();
-            Map<String, Object> excelRunPropsByProperyId = new HashMap<String, Object>();
-            for (Map.Entry<DomainProperty, String> entry : excelRunProps.entrySet())
-            {
-                excelRunPropsByProperyId.put(entry.getKey().getPropertyURI(), entry.getValue());
-            }
-            excelRunPropsList.add(excelRunPropsByProperyId);
-            OntologyManager.insertTabDelimited(container, user, objectId, new OntologyManager.ImportHelper()
-            {
-                public String beforeImportObject(Map<String, Object> map) throws SQLException
-                {
-                    return expRun.getLSID();
-                }
-
-                public void afterBatchInsert(int currentRow) throws SQLException
-                {
-                }
-
-                public void updateStatistics(int currentRow) throws SQLException
-                {
-                }
-            }, excelRunColumns, excelRunPropsList, true);
-
             ExperimentService.get().commitTransaction();
         }
         catch (ValidationException ve)
@@ -519,13 +302,106 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
+    private ParticipantVisitResolver findParticipantVisitResolver(ExpRun expRun, User user, LuminexAssayProvider provider)
+            throws ExperimentException
+    {
+        Map<String, ObjectProperty> mergedProperties = new HashMap<String, ObjectProperty>();
+        mergedProperties.putAll(expRun.getObjectProperties());
+        ExpExperiment batch = AssayService.get().findBatch(expRun);
+        if (batch != null)
+        {
+            mergedProperties.putAll(batch.getObjectProperties());
+        }
+        for (ObjectProperty objectProperty : mergedProperties.values())
+        {
+            if (AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(objectProperty.getName()))
+            {
+                ParticipantVisitResolverType resolverType = AbstractAssayProvider.findType(objectProperty.getStringValue(), provider.getParticipantVisitResolverTypes());
+                Container targetStudy = provider.getTargetStudy(expRun);
+                try
+                {
+                    return resolverType.createResolver(expRun, targetStudy, user);
+                }
+                catch (IOException e)
+                {
+                    throw new ExperimentException(e);
+                }
+            }
+        }
+        return null;
+    }
+
+    /** @return Name->Titration */
+    private Map<String, Titration> insertTitrations(ExpRun expRun, User user, List<Titration> titrations)
+            throws ExperimentException, SQLException
+    {
+        Map<String, Titration> result = new CaseInsensitiveHashMap<Titration>();
+
+        // Insert the titrations first
+        for (Titration titration : titrations)
+        {
+            SimpleFilter filter = new SimpleFilter("Name", titration.getName());
+            filter.addCondition("RunId", expRun.getRowId());
+            Titration[] exitingTitrations = Table.select(LuminexSchema.getTableInfoTitration(), Table.ALL_COLUMNS, filter, null, Titration.class);
+            assert exitingTitrations.length <= 1;
+
+            if (exitingTitrations.length > 0)
+            {
+                titration = exitingTitrations[0];
+            }
+            else
+            {
+                titration.setRunId(expRun.getRowId());
+
+                titration = Table.insert(user, LuminexSchema.getTableInfoTitration(), titration);
+            }
+            result.put(titration.getName(), titration);
+        }
+        return result;
+    }
+
+    private void insertExcelProperties(PropertyDescriptor[] excelRunColumns, final ExpData data, LuminexExcelParser parser, User user, ExpProtocol protocol) throws SQLException, ValidationException, ExperimentException
+    {
+        Container container = data.getContainer();
+        // Clear out the values - this is necessary if this is a XAR import where the run properties would
+        // have been loaded as part of the ExperimentRun itself.
+        Integer objectId = OntologyManager.ensureObject(container, data.getLSID());
+        for (PropertyDescriptor excelRunColumn : excelRunColumns)
+        {
+            OntologyManager.deleteProperty(data.getLSID(), excelRunColumn.getPropertyURI(), data.getContainer(), protocol.getContainer());
+        }
+
+        List<Map<String, Object>> excelRunPropsList = new ArrayList<Map<String, Object>>();
+        Map<String, Object> excelRunPropsByProperyId = new HashMap<String, Object>();
+        for (Map.Entry<DomainProperty, String> entry : parser.getExcelRunProps(data.getFile()).entrySet())
+        {
+            excelRunPropsByProperyId.put(entry.getKey().getPropertyURI(), entry.getValue());
+        }
+        excelRunPropsList.add(excelRunPropsByProperyId);
+        OntologyManager.insertTabDelimited(container, user, objectId, new OntologyManager.ImportHelper()
+        {
+            public String beforeImportObject(Map<String, Object> map) throws SQLException
+            {
+                return data.getLSID();
+            }
+
+            public void afterBatchInsert(int currentRow) throws SQLException
+            {
+            }
+
+            public void updateStatistics(int currentRow) throws SQLException
+            {
+            }
+        }, excelRunColumns, excelRunPropsList, true);
+    }
+
     protected void performOOR(List<LuminexDataRow> dataRows, Analyte analyte)
     {
         Getter fiGetter = new Getter()
         {
             public Double getValue(LuminexDataRow dataRow)
             {
-                if (determineOutOfRange(dataRow.getFiString()) == OORIndicator.IN_RANGE)
+                if (determineOutOfRange(dataRow.getFiString()) == LuminexOORIndicator.IN_RANGE)
                 {
                     return dataRow.getFi();
                 }
@@ -536,7 +412,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             public Double getValue(LuminexDataRow dataRow)
             {
-                if (determineOutOfRange(dataRow.getFiBackgroundString()) == OORIndicator.IN_RANGE)
+                if (determineOutOfRange(dataRow.getFiBackgroundString()) == LuminexOORIndicator.IN_RANGE)
                 {
                     return dataRow.getFiBackground();
                 }
@@ -547,7 +423,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             public Double getValue(LuminexDataRow dataRow)
             {
-                if (determineOutOfRange(dataRow.getStdDevString()) == OORIndicator.IN_RANGE)
+                if (determineOutOfRange(dataRow.getStdDevString()) == LuminexOORIndicator.IN_RANGE)
                 {
                     return dataRow.getStdDev();
                 }
@@ -558,7 +434,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             public Double getValue(LuminexDataRow dataRow)
             {
-                if (determineOutOfRange(dataRow.getObsConcString()) == OORIndicator.IN_RANGE)
+                if (determineOutOfRange(dataRow.getObsConcString()) == LuminexOORIndicator.IN_RANGE)
                 {
                     return dataRow.getObsConc();
                 }
@@ -569,7 +445,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             public Double getValue(LuminexDataRow dataRow)
             {
-                if (determineOutOfRange(dataRow.getConcInRangeString()) == OORIndicator.IN_RANGE)
+                if (determineOutOfRange(dataRow.getConcInRangeString()) == LuminexOORIndicator.IN_RANGE)
                 {
                     return dataRow.getConcInRange();
                 }
@@ -584,19 +460,19 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         for (LuminexDataRow dataRow : dataRows)
         {
-            OORIndicator fiOORType = determineOutOfRange(dataRow.getFiString());
+            LuminexOORIndicator fiOORType = determineOutOfRange(dataRow.getFiString());
             dataRow.setFiOORIndicator(fiOORType.getOORIndicator(dataRow.getFiString(), dataRows, fiGetter));
             dataRow.setFi(fiOORType.getValue(dataRow.getFiString(), dataRows, fiGetter, analyte));
 
-            OORIndicator fiBackgroundOORType = determineOutOfRange(dataRow.getFiBackgroundString());
+            LuminexOORIndicator fiBackgroundOORType = determineOutOfRange(dataRow.getFiBackgroundString());
             dataRow.setFiBackgroundOORIndicator(fiBackgroundOORType.getOORIndicator(dataRow.getFiBackgroundString(), dataRows, fiBackgroundGetter));
             dataRow.setFiBackground(fiBackgroundOORType.getValue(dataRow.getFiBackgroundString(), dataRows, fiBackgroundGetter, analyte));
 
-            OORIndicator stdDevOORType = determineOutOfRange(dataRow.getStdDevString());
+            LuminexOORIndicator stdDevOORType = determineOutOfRange(dataRow.getStdDevString());
             dataRow.setStdDevOORIndicator(stdDevOORType.getOORIndicator(dataRow.getStdDevString(), dataRows, stdDevGetter));
             dataRow.setStdDev(stdDevOORType.getValue(dataRow.getStdDevString(), dataRows, stdDevGetter, analyte));
 
-            OORIndicator obsConcOORType = determineOutOfRange(dataRow.getObsConcString());
+            LuminexOORIndicator obsConcOORType = determineOutOfRange(dataRow.getObsConcString());
             dataRow.setObsConcOORIndicator(obsConcOORType.getOORIndicator(dataRow.getObsConcString(), dataRows, obsConcGetter));
             Double obsConc;
             switch (obsConcOORType)
@@ -655,7 +531,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             }
             dataRow.setObsConc(obsConc);
 
-            OORIndicator concInRangeOORType = determineOutOfRange(dataRow.getConcInRangeString());
+            LuminexOORIndicator concInRangeOORType = determineOutOfRange(dataRow.getConcInRangeString());
             dataRow.setConcInRangeOORIndicator(concInRangeOORType.getOORIndicator(dataRow.getConcInRangeString(), dataRows, concInRangeGetter));
             dataRow.setConcInRange(concInRangeOORType.getValue(dataRow.getConcInRangeString(), dataRows, concInRangeGetter, analyte));
         }
@@ -875,7 +751,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
                 dataMap.put("titration", titrations.contains(dataRow.getDescription()));
                 dataMap.remove("data");
-                dataMap.put("dataFile", dataFile.getName());
                 dataRows.add(dataMap);
             }
         }
@@ -910,10 +785,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         LuminexRunUploadForm form = (LuminexRunUploadForm)context;
 
-        LuminexExcelParser parser = form.getParser();
-        Map<DomainProperty, String> excelProps = parser.getExcelRunProps();
-        excelProps.putAll(context.getTransformResult().getRunProperties());
-        importData(data, run, context.getUser(), null, sheets, excelProps, parser.getTitrations());
+        importData(data, run, context.getUser(), null, sheets, form.getParser(), form);
     }
 
     public Priority getPriority(ExpData data)

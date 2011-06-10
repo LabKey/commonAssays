@@ -8,7 +8,7 @@ public class Titration
 {
     private int _rowId;
     private int _runId;
-    private String _name;
+    private String _name = "Standard";
     private boolean _standard;
     private boolean _qcControl;
     private boolean _unknown;
@@ -40,6 +40,8 @@ public class Titration
 
     public void setName(String name)
     {
+        name = name == null || name.trim().isEmpty() ? "Standard" : name;
+        
         _name = name;
     }
 
@@ -71,5 +73,51 @@ public class Titration
     public boolean isUnknown()
     {
         return _unknown;
+    }
+
+    public enum Type
+    {
+        standard
+        {
+            @Override
+            public boolean isEnabled(Titration titration)
+            {
+                return titration.isStandard();
+            }
+            @Override
+            public void setEnabled(Titration titration, boolean enabled)
+            {
+                titration.setStandard(enabled);
+            }
+        },
+        qccontrol
+        {
+            @Override
+            public boolean isEnabled(Titration titration)
+            {
+                return titration.isQcControl();
+            }
+            @Override
+            public void setEnabled(Titration titration, boolean enabled)
+            {
+                titration.setQcControl(enabled);
+            }
+        },
+        unknown
+        {
+            @Override
+            public boolean isEnabled(Titration titration)
+            {
+                return titration.isUnknown();
+            }
+            @Override
+            public void setEnabled(Titration titration, boolean enabled)
+            {
+                titration.setUnknown(enabled);
+            }
+        };
+
+        public abstract boolean isEnabled(Titration titration);
+        public abstract void setEnabled(Titration titration, boolean enabled);
     }
 }

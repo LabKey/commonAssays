@@ -73,6 +73,9 @@ public class LuminexDataRow
     private Container _container;
     private int _protocol;
 
+    // Extra properties that aren't stored directly in the database
+    private String _dataFile;
+
     public LuminexDataRow()
     {
     }
@@ -455,6 +458,16 @@ public class LuminexDataRow
     public void setTitration(Integer titration)
     {
         _titration = titration;
+    }
+
+    public String getDataFile()
+    {
+        return _dataFile;
+    }
+
+    public void setDataFile(String dataFile)
+    {
+        _dataFile = dataFile;
     }
 
     /** Remember any extra properties from the transform script so they can be included when generating map version of this row */

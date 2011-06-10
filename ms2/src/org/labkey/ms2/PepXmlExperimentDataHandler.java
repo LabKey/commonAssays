@@ -137,7 +137,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
 
     public ActionURL getContentURL(Container container, ExpData data)
     {
-        File dataFile = data.getDataFile();
+        File dataFile = data.getFile();
         MS2Run run = getMS2Run(dataFile, container);
         if (run == null)
         {

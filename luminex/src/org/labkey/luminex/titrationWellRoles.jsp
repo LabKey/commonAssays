@@ -20,6 +20,7 @@
 <%@ page import="org.labkey.luminex.LuminexRunUploadForm" %>
 <%@ page import="org.labkey.luminex.Titration" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.luminex.LuminexUploadWizardAction" %>
 
 <%
     JspView<LuminexRunUploadForm> me = (JspView<LuminexRunUploadForm>) HttpView.currentView();
@@ -42,17 +43,17 @@
         <tr>
             <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
             <td>
-                <input type='checkbox' name='_role_standard_<%= titrationEntry.getValue().getName() %>'
+                <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) %>'
                        value='1' onChange='showHideAnalytePropertyColumn("<%= titrationEntry.getValue().getName() %>", this.checked);' 
                        <%= titrationEntry.getValue().isStandard() ? "CHECKED" : "" %> />
             </td>
             <td>
-                <input type='checkbox' name='_role_qccontrol_<%= titrationEntry.getValue().getName() %>'
+                <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue()) %>'
                        value='1' <%= titrationEntry.getValue().isQcControl() ? "CHECKED" : "" %> />
             </td>
             <td>
-                <input type='checkbox' name='_role_unknown_<%= titrationEntry.getValue().getName() %>'
-                       value='1' <%= titrationEntry.getValue().isUnknown() ? "CHECKED" : "" %> />                
+                <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue()) %>'
+                       value='1' <%= titrationEntry.getValue().isUnknown() ? "CHECKED" : "" %> />
             </td>
         </tr>
     <%

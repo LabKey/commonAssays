@@ -28,7 +28,6 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.study.actions.PlateUploadForm;
 import org.labkey.api.view.NotFoundException;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -186,7 +185,7 @@ public class NabRunUploadForm extends PlateUploadForm<NabAssayProvider> implemen
                 File dataFile = null;
                 for (ExpData data : outputs)
                 {
-                    File possibleFile = data.getDataFile();
+                    File possibleFile = data.getFile();
                     String dataLsid = data.getLSID();
                     if (possibleFile != null && dataLsid != null && getProvider().getDataType().matches(new Lsid(dataLsid)))
                     {

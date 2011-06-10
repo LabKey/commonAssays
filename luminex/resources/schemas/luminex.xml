@@ -41,6 +41,7 @@
             <column columnName="Name" />
             <column columnName="Standard" />
             <column columnName="QCControl" />
+            <column columnName="unknown" />
         </columns>
     </table>
 

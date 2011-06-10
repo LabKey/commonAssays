@@ -17,7 +17,6 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang.StringUtils;
-import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.qc.TsvDataExchangeHandler;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.exp.api.ExpRun;
@@ -60,20 +59,16 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
         addSampleProperties(ANALYTE_DATA_PROP_NAME, analytes);
 
         List<Map<String, Object>> titrations = new ArrayList<Map<String, Object>>();
-        for (String titration : form.getParser().getTitrations())
+        for (Titration titration : form.getTitrations())
         {
-            titrations.add(Collections.<String, Object>singletonMap("Name", titration));
+            Map<String, Object> titrationRow = new HashMap<String, Object>();
+            titrationRow.put("Name", titration.getName());
+            titrationRow.put("QCControl", titration.isQcControl());
+            titrationRow.put("Standard", titration.isStandard());
+            titrationRow.put("Unknown", titration.isUnknown());
+            titrations.add(titrationRow);
         }
         addSampleProperties(TITRATION_DATA_PROP_NAME, titrations);
         return super.createValidationRunInfo(context, run, scriptDir);
-    }
-
-    public Map<DomainProperty, String> getRunProperties(AssayRunUploadContext context) throws ExperimentException
-    {
-        LuminexRunUploadForm form = (LuminexRunUploadForm)context;
-
-        Map<DomainProperty, String> result = super.getRunProperties(context);
-        result.putAll(form.getParser().getExcelRunProps());
-        return result;
     }
 }

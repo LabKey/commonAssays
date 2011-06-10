@@ -39,7 +39,7 @@ public class LuminexExcelParser
     private Collection<File> _dataFiles;
     private ExpProtocol _protocol;
     private Map<Analyte, List<LuminexDataRow>> _sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
-    private Map<DomainProperty, String> _excelRunProps = new HashMap<DomainProperty, String>();
+    private Map<File, Map<DomainProperty, String>> _excelRunProps = new HashMap<File, Map<DomainProperty, String>>();
     private Map<String, Titration> _titrations = new TreeMap<String, Titration>();
     private boolean _parsed;
 
@@ -74,7 +74,7 @@ public class LuminexExcelParser
 
                     Analyte analyte = new Analyte(sheet.getSheetName());
 
-                    int row = handleHeaderOrFooterRow(sheet, 0, analyte, excelRunDomain);
+                    int row = handleHeaderOrFooterRow(sheet, 0, analyte, excelRunDomain, dataFile);
 
                     // Skip over the blank line
                     row++;
@@ -101,7 +101,7 @@ public class LuminexExcelParser
                     {
                         do
                         {
-                            LuminexDataRow dataRow = createDataRow(sheet, colNames, row);
+                            LuminexDataRow dataRow = createDataRow(sheet, colNames, row, dataFile);
 
                             Integer count = potentialTitrationCounts.get(dataRow.getDescription());
                             potentialTitrationCounts.put(dataRow.getDescription(), count == null ? 1 : count.intValue() + 1);
@@ -128,7 +128,7 @@ public class LuminexExcelParser
                         // Skip over the blank line
                         row++;
                     }
-                    handleHeaderOrFooterRow(sheet, row, analyte, excelRunDomain);
+                    handleHeaderOrFooterRow(sheet, row, analyte, excelRunDomain, dataFile);
 
                     // Check if we've accumulated enough instances to consider it to be a titration
                     for (Map.Entry<String, Integer> entry : potentialTitrationCounts.entrySet())
@@ -177,20 +177,26 @@ public class LuminexExcelParser
         return _sheets;
     }
 
-    public Map<DomainProperty, String> getExcelRunProps() throws ExperimentException
+    public Map<DomainProperty, String> getExcelRunProps(File file) throws ExperimentException
     {
         parseFile();
-        return _excelRunProps;
+        return _excelRunProps.get(file);
     }
 
-    private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, Domain excelRunDomain)
+    private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, Domain excelRunDomain, File dataFile)
     {
         if (row >= analyteSheet.getLastRowNum())
         {
             return row;
         }
 
-        Map<String, DomainProperty> excelMap = excelRunDomain.createImportMap(true);
+        Map<String, DomainProperty> excelProps = excelRunDomain.createImportMap(true);
+        Map<DomainProperty, String> excelValues = _excelRunProps.get(dataFile);
+        if (excelValues == null)
+        {
+            excelValues = new HashMap<DomainProperty, String>();
+            _excelRunProps.put(dataFile, excelValues);
+        }
 
         do
         {
@@ -210,10 +216,10 @@ public class LuminexExcelParser
                     analyte.setStdCurve(value);
                 }
 
-                DomainProperty pd = excelMap.get(propName);
+                DomainProperty pd = excelProps.get(propName);
                 if (pd != null)
                 {
-                    _excelRunProps.put(pd, value);
+                    excelValues.put(pd, value);
                 }
             }
 
@@ -267,10 +273,11 @@ public class LuminexExcelParser
         return row;
     }
 
-    private LuminexDataRow createDataRow(Sheet sheet, List<String> colNames, int rowIdx)
+    private LuminexDataRow createDataRow(Sheet sheet, List<String> colNames, int rowIdx, File dataFile)
     {
         LuminexDataRow dataRow = new LuminexDataRow();
         dataRow.setLsid(new Lsid(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX, GUID.makeGUID()).toString());
+        dataRow.setDataFile(dataFile.getName());
         Row row = sheet.getRow(rowIdx);
         if (row != null)
         {

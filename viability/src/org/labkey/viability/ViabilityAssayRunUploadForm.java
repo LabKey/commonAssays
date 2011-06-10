@@ -39,7 +39,6 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConversionException;
 import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.*;
 import java.io.File;
@@ -273,7 +272,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 List<ExpData> inputs = reRun.getDataOutputs();
                 if (inputs.size() > 0)
                 {
-                    File dataFile = inputs.get(0).getDataFile();
+                    File dataFile = inputs.get(0).getFile();
                     if (dataFile.exists())
                     {
                         AssayFileWriter writer = new AssayFileWriter();

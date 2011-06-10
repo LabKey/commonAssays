@@ -42,7 +42,6 @@ import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -143,7 +142,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         @Override
                         public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
                         {                                                      
-                            out.write("<input type='checkbox' value='1' name='_titration_" + analyte + "_" + titrationEntry.getKey() + "' />");
+                            out.write("<input type='checkbox' value='1' name='" + getTitrationCheckboxName(titrationEntry.getKey(), analyte) + "' />");
                         }
 
                         @Override
@@ -210,6 +209,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
     }
 
+    public static String getTitrationCheckboxName(String titration, String analyte)
+    {
+        return "titration_" + ColumnInfo.propNameFromName(analyte) + "_" + ColumnInfo.propNameFromName(titration);
+    }
+
     private String getAnalytePropertyName(String analyte, DomainProperty dp)
     {
         return "_analyte_" + ColumnInfo.propNameFromName(analyte) + "_" + ColumnInfo.propNameFromName(dp.getName());
@@ -247,6 +251,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     protected RunStepHandler getRunStepHandler()
     {
         return new LuminexRunStepHandler();
+    }
+
+    public static String getTitrationTypeCheckboxName(Titration.Type type, Titration titration)
+    {
+        return "_titrationRole_" + type + "_" + ColumnInfo.propNameFromName(titration.getName());
     }
 
     protected class LuminexRunStepHandler extends RunStepHandler

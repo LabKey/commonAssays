@@ -160,7 +160,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         }
         for (DomainProperty prop : AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN).getProperties())
         {
-            defaultCols.add(new FieldKey(_provider.getTableMetadata().getRunFieldKeyFromResults(), prop.getName()));
+            defaultCols.add(new FieldKey(dataColumn.getFieldKey(), prop.getName()));
         }
         for (DomainProperty prop : _provider.getBatchDomain(protocol).getProperties())
         {

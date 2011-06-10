@@ -40,6 +40,7 @@ public class LuminexSchema extends AssaySchema
     private static final String TITRATION_TABLE_NAME = "Titration";
     private static final String ANALYTE_TITRATION_TABLE_NAME = "AnalyteTitration";
     private static final String DATA_ROW_TABLE_NAME = "DataRow";
+    private static final String DATA_FILE_TABLE_NAME = "DataFile";
 
     public LuminexSchema(User user, Container container, ExpProtocol protocol)
     {
@@ -50,7 +51,7 @@ public class LuminexSchema extends AssaySchema
     public Set<String> getTableNames()
     {
         // return only additional tables not exposed in the assay schema.
-        return PageFlowUtil.set(prefixTableName(ANALYTE_TABLE_NAME), prefixTableName(TITRATION_TABLE_NAME));
+        return PageFlowUtil.set(prefixTableName(ANALYTE_TABLE_NAME), prefixTableName(TITRATION_TABLE_NAME), prefixTableName(DATA_FILE_TABLE_NAME));
     }
 
     private String prefixTableName(String table)
@@ -74,6 +75,14 @@ public class LuminexSchema extends AssaySchema
             {
                 return createTitrationTable(true);
             }
+            if (DATA_FILE_TABLE_NAME.equalsIgnoreCase(name))
+            {
+                ExpDataTable result = createDataTable();
+                SQLFragment filter = new SQLFragment("RowId");
+                filter.append(createDataFilterInClause());
+                result.addCondition(filter, "RowId");
+                return result;
+            }
         }
         return null;
     }
@@ -94,7 +103,7 @@ public class LuminexSchema extends AssaySchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ResVar")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RegressionType")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("StdCurve")));
-        ColumnInfo titrationColumn = result.addColumn(result.wrapColumn("Titrations", result.getRealTable().getColumn("RowId")));
+        ColumnInfo titrationColumn = result.addColumn(result.wrapColumn("Standard", result.getRealTable().getColumn("RowId")));
         titrationColumn.setFk(new MultiValuedForeignKey(new LookupForeignKey("Analyte")
         {
             @Override
@@ -155,6 +164,7 @@ public class LuminexSchema extends AssaySchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Name")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Standard")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("QCControl")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Unknown")));
         ColumnInfo runColumn = result.addColumn(result.wrapColumn("Run", result.getRealTable().getColumn("RunId")));
         runColumn.setFk(new LookupForeignKey("RowId")
         {
@@ -186,6 +196,7 @@ public class LuminexSchema extends AssaySchema
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
         ret.addColumn(ExpDataTable.Column.Created);
+        ret.addColumn(ExpDataTable.Column.LSID).setHidden(true);
         ret.addColumn(ExpDataTable.Column.SourceProtocolApplication).setHidden(true);
         ret.setTitleColumn("Name");
         ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
@@ -205,6 +216,16 @@ public class LuminexSchema extends AssaySchema
             });
         }
 
+        Domain domain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
+        ret.addColumns(domain, null);
+
+        List<FieldKey> visibleColumns = new ArrayList<FieldKey>(ret.getDefaultVisibleColumns());
+        for (DomainProperty domainProperty : domain.getProperties())
+        {
+            visibleColumns.add(FieldKey.fromParts(domainProperty.getName()));
+        }
+        ret.setDefaultVisibleColumns(visibleColumns);
+
         return ret;
     }
 
@@ -219,6 +240,7 @@ public class LuminexSchema extends AssaySchema
         filter.append(ExperimentService.get().getTinfoData(), "d");
         filter.append(", ");
         filter.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+        // TODO - make this respect container filters
         filter.append(" WHERE d.RunId = r.RowId AND d.Container = ?");
         filter.add(getContainer().getId());
         if (getProtocol() != null)

@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -306,7 +305,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     if (ElispotAssayProvider.READER_PROPERTY_NAME.equals(entry.getKey().getName()))
                     {
                         ElispotPlateReaderService.I reader = ElispotPlateReaderService.getPlateReaderFromName(entry.getValue(), form.getContainer());
-                        plate = ElispotDataHandler.initializePlate(data[0].getDataFile(), template, reader);
+                        plate = ElispotDataHandler.initializePlate(data[0].getFile(), template, reader);
                         break;
                     }
                 }

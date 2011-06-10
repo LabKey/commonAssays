@@ -61,7 +61,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
 
     public ActionURL getContentURL(Container container, ExpData data)
     {
-        File dataFile = data.getDataFile();
+        File dataFile = data.getFile();
         MS2Run run = null;
         try
         {
