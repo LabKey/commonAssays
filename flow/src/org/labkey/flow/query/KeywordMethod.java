@@ -17,6 +17,7 @@
 package org.labkey.flow.query;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
@@ -24,11 +25,13 @@ import org.labkey.api.query.snapshot.AbstractTableMethodInfo;
 
 public class KeywordMethod extends AbstractTableMethodInfo
 {
+    Container _container;
     ColumnInfo _objectIdColumn;
 
-    public KeywordMethod(ColumnInfo objectIdColumn)
+    public KeywordMethod(Container c, ColumnInfo objectIdColumn)
     {
         super(JdbcType.VARCHAR);
+        _container = c;
         _objectIdColumn = objectIdColumn;
     }
 
@@ -38,10 +41,12 @@ public class KeywordMethod extends AbstractTableMethodInfo
         {
             throw new IllegalArgumentException("The keyword method requires 1 argument");
         }
-        SQLFragment ret = new SQLFragment("(SELECT flow.keyword.value FROM flow.keyword" +
-                "\nINNER JOIN flow.attribute ON flow.keyword.keywordid = flow.attribute.rowid AND flow.attribute.name = ");
+        SQLFragment ret = new SQLFragment("(SELECT flow.keyword.value FROM flow.keyword");
+        ret.append("\nINNER JOIN flow.KeywordAttr ON flow.keyword.keywordid = flow.KeywordAttr.id AND flow.KeywordAttr.name = ");
         ret.append(arguments[0]);
         ret.append("\nWHERE flow.keyword.objectId = " + tableAlias + ".Keyword");
+        ret.append(" AND flow.KeywordAttr.container = ?");
+        ret.add(_container.getId());
 //        ret.append(_objectIdColumn.getValueSql(tableAlias));
         ret.append(")");
         return ret;

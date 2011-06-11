@@ -27,7 +27,9 @@
   </ns:table>
   <ns:table tableName="statisticattr" tableDbType="TABLE">
     <ns:columns>
+      <ns:column columnName="rowid"/>
       <ns:column columnName="container"/>
+      <ns:column columnName="name"/>
       <ns:column columnName="id"/>
     </ns:columns>
   </ns:table>
@@ -42,8 +44,11 @@
   </ns:table>
   <ns:table tableName="graphattr" tableDbType="TABLE">
     <ns:columns>
+      <ns:column columnName="rowid"/>
       <ns:column columnName="container"/>
-      <ns:column columnName="id"/>     </ns:columns>
+      <ns:column columnName="name"/>
+      <ns:column columnName="id"/>
+    </ns:columns>
   </ns:table>
 
   <ns:table tableName="keyword" tableDbType="TABLE">
@@ -55,15 +60,10 @@
   </ns:table>
   <ns:table tableName="keywordattr" tableDbType="TABLE">
     <ns:columns>
-      <ns:column columnName="container"/>
-      <ns:column columnName="id"/>
-    </ns:columns>
-  </ns:table>
-
-  <ns:table tableName="attribute" tableDbType="TABLE">
-    <ns:columns>
       <ns:column columnName="rowid"/>
+      <ns:column columnName="container"/>
       <ns:column columnName="name"/>
+      <ns:column columnName="id"/>
     </ns:columns>
   </ns:table>
 

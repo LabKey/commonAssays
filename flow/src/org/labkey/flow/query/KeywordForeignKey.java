@@ -17,20 +17,28 @@
 package org.labkey.flow.query;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.ExprColumn;
+import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.util.KeywordUtil;
 
 import java.util.Collection;
-import java.util.regex.Pattern;
 
 public class KeywordForeignKey extends AttributeForeignKey<String>
 {
     FlowPropertySet _fps;
-    public KeywordForeignKey(FlowPropertySet fps)
+
+    public KeywordForeignKey(Container c, FlowPropertySet fps)
     {
-        super();
+        super(c);
         _fps = fps;
+    }
+
+    @Override
+    protected AttributeType type()
+    {
+        return AttributeType.keyword;
     }
 
     protected String attributeFromString(String field)
@@ -62,6 +70,12 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
         ret.append(" AND flow.Keyword.KeywordId = ");
         ret.append(attrId);
         ret.append(")");
+
+        //SQLFragment ret = new SQLFragment("(SELECT CAST(flow.Keyword.Value AS VARCHAR(4000)) FROM flow.Keyword, flow.KeywordAttr WHERE flow.Keyword.ObjectId = ");
+        //ret.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
+        //ret.append(" AND flow.Keyword.KeywordId = flow.KeywordAttr.Id AND flow.KeywordAttr.Name = ?");
+        //ret.add(attrName);
+        //ret.append(")");
         return ret;
     }
 

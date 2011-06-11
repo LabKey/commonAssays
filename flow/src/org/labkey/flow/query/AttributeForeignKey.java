@@ -16,7 +16,9 @@
 
 package org.labkey.flow.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
+import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.query.ExprColumn;
@@ -31,8 +33,12 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
         return null;
     }
 
-    public AttributeForeignKey()
+    protected Container _container;
+
+    public AttributeForeignKey(@NotNull Container c)
     {
+        _container = c;
+        assert _container != null;
     }
 
     public TableInfo getLookupTableInfo()
@@ -62,13 +68,14 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
         T attrName = attributeFromString(displayField);
         if (attrName == null)
             return null;
-        int attrId = FlowManager.get().getAttributeId(attrName.toString());
+        int attrId = FlowManager.get().getAttributeId(_container, type(), attrName.toString());
         SQLFragment sql = sqlValue(parent, attrName, attrId);
         ExprColumn ret = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(), displayField), sql, JdbcType.NULL, parent);
         initColumn(attrName, ret);
         return ret;
     }
 
+    abstract protected AttributeType type();
     abstract protected Collection<T> getAttributes();
     abstract protected SQLFragment sqlValue(ColumnInfo objectIdColumn, T attrName, int attrId);
     abstract protected void initColumn(T attrName, ColumnInfo column);

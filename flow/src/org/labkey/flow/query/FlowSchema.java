@@ -208,6 +208,8 @@ public class FlowSchema extends UserSchema
                 return createStatisticsTable(type.toString());
             case Keywords:
                 return createKeywordsTable(type.toString());
+            case Graphs:
+                return createGraphsTable(type.toString());
         }
         return null;
     }
@@ -438,25 +440,25 @@ public class FlowSchema extends UserSchema
         ColumnInfo addStatisticColumn(String columnAlias)
         {
             ColumnInfo colStatistic = addObjectIdColumn(columnAlias);
-            colStatistic.setFk(new StatisticForeignKey(_fps, _type));
+            colStatistic.setFk(new StatisticForeignKey(getContainer(), _fps, _type));
             colStatistic.setIsUnselectable(true);
-            addMethod(columnAlias, new StatisticMethod(colStatistic));
+            addMethod(columnAlias, new StatisticMethod(getContainer(), colStatistic));
             return colStatistic;
         }
 
         ColumnInfo addKeywordColumn(String columnAlias)
         {
             ColumnInfo colKeyword = addObjectIdColumn(columnAlias);
-            colKeyword.setFk(new KeywordForeignKey(_fps));
+            colKeyword.setFk(new KeywordForeignKey(getContainer(), _fps));
             colKeyword.setIsUnselectable(true);
-            addMethod("Keyword", new KeywordMethod(colKeyword));
+            addMethod("Keyword", new KeywordMethod(getContainer(), colKeyword));
             return colKeyword;
         }
 
         ColumnInfo addGraphColumn(String columnAlias)
         {
             ColumnInfo colGraph = addObjectIdColumn(columnAlias);
-            colGraph.setFk(new GraphForeignKey(_fps));
+            colGraph.setFk(new GraphForeignKey(getContainer(), _fps));
             colGraph.setIsUnselectable(true);
             return colGraph;
         }
@@ -680,7 +682,6 @@ public class FlowSchema extends UserSchema
         ExpExperiment _experiment = null;
         ExpRun _run = null;
         boolean _runSpecified = false;
-        Container _c = null;
 
         FastFlowDataTable(String name, FlowDataType type)
         {
@@ -710,25 +711,25 @@ public class FlowSchema extends UserSchema
         ColumnInfo addStatisticColumn(String columnAlias)
         {
             ColumnInfo colStatistic = addObjectIdColumn(columnAlias);
-            colStatistic.setFk(new StatisticForeignKey(_fps, _type));
+            colStatistic.setFk(new StatisticForeignKey(getContainer(), _fps, _type));
             colStatistic.setIsUnselectable(true);
-            addMethod(columnAlias, new StatisticMethod(colStatistic));
+            addMethod(columnAlias, new StatisticMethod(getContainer(), colStatistic));
             return colStatistic;
         }
 
         ColumnInfo addKeywordColumn(String columnAlias)
         {
             ColumnInfo colKeyword = addObjectIdColumn(columnAlias);
-            colKeyword.setFk(new KeywordForeignKey(_fps));
+            colKeyword.setFk(new KeywordForeignKey(getContainer(), _fps));
             colKeyword.setIsUnselectable(true);
-            addMethod("Keyword", new KeywordMethod(colKeyword));
+            addMethod("Keyword", new KeywordMethod(getContainer(), colKeyword));
             return colKeyword;
         }
 
         ColumnInfo addGraphColumn(String columnAlias)
         {
             ColumnInfo colGraph = addObjectIdColumn(columnAlias);
-            colGraph.setFk(new GraphForeignKey(_fps));
+            colGraph.setFk(new GraphForeignKey(getContainer(), _fps));
             colGraph.setIsUnselectable(true);
             return colGraph;
         }
@@ -1386,25 +1387,27 @@ public class FlowSchema extends UserSchema
 
     private TableInfo createStatisticsTable(String alias)
     {
-        FilteredTable ret = new FilteredTable(FlowManager.get().getTinfoAttribute());
-        ret.setName(alias);
-        ret.addWrapColumn(ret.getRealTable().getColumn("Name"));
-        ExpDataTable fcsAnalysisTable = createFCSAnalysisTable("fcsAnalysis", FlowDataType.FCSAnalysis);
-//        FlowPropertySet fps = new FlowPropertySet(fcsAnalysisTable);
-        FlowPropertySet fps = new FlowPropertySet(getContainer());
-        filterTable(ret, fps.getStatistics());
-        return ret;
+        return createAttributeTable(alias, FlowManager.get().getTinfoStatisticAttr());
     }
 
     private TableInfo createKeywordsTable(String alias)
     {
-        FilteredTable ret = new FilteredTable(FlowManager.get().getTinfoAttribute());
+        return createAttributeTable(alias, FlowManager.get().getTinfoKeywordAttr());
+    }
+
+    private TableInfo createGraphsTable(String alias)
+    {
+        return createAttributeTable(alias, FlowManager.get().getTinfoGraphAttr());
+    }
+
+    private TableInfo createAttributeTable(String alias, TableInfo realTable)
+    {
+        FilteredTable ret = new FilteredTable(realTable, getContainer());
         ret.setName(alias);
+        ret.addWrapColumn(ret.getRealTable().getColumn("RowId")).setHidden(true);
+        ret.addWrapColumn(ret.getRealTable().getColumn("Container")).setHidden(true);
         ret.addWrapColumn(ret.getRealTable().getColumn("Name"));
-        ExpDataTable fcsFilesTable = createFCSFileTable("fcsFiles");
-//        FlowPropertySet fps = new FlowPropertySet(fcsFilesTable);
-        FlowPropertySet fps = new FlowPropertySet(getContainer());
-        filterTable(ret, fps.getKeywordProperties());
+        ret.addWrapColumn(ret.getRealTable().getColumn("Id")).setHidden(true);
         return ret;
     }
 

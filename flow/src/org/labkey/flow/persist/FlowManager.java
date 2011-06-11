@@ -27,10 +27,13 @@ import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.security.User;
+import org.labkey.api.util.Pair;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.util.Tuple3;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.query.AttributeCache;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
@@ -47,8 +50,8 @@ public class FlowManager
     private static final Logger _log = Logger.getLogger(FlowManager.class);
     private static final String SCHEMA_NAME = "flow";
 
-    private final HashMap<String, Integer> _attridCacheMap = new HashMap<String, Integer>(1000);
-    private final HashMap<Integer, String> _attrNameCacheMap = new HashMap<Integer, String>(1000);
+    private final HashMap<NameCacheKey, Integer> _attrIdCacheMap = new HashMap<NameCacheKey, Integer>(1000);
+    private final HashMap<IdCacheKey, String> _attrNameCacheMap = new HashMap<IdCacheKey, String>(1000);
 
     static public FlowManager get()
     {
@@ -80,11 +83,6 @@ public class FlowManager
         return getSchema().getTable("KeywordAttr");
     }
 
-    public TableInfo getTinfoAttribute()
-    {
-        return getSchema().getTable("Attribute");
-    }
-
     public TableInfo getTinfoObject()
     {
         return getSchema().getTable("Object");
@@ -110,24 +108,36 @@ public class FlowManager
         return getSchema().getTable("Script");
     }
 
-    public int getAttributeId(String attr)
+    private TableInfo attributeTable(AttributeType type)
     {
-        synchronized (_attridCacheMap)
+        switch (type)
+        {
+            case keyword:   return getTinfoKeywordAttr();
+            case statistic: return getTinfoStatisticAttr();
+            case graph:     return getTinfoGraphAttr();
+            default:        throw new RuntimeException();
+        }
+    }
+
+    public int getAttributeId(Container container, AttributeType type, String attr)
+    {
+        synchronized (_attrIdCacheMap)
         {
             quickFillCache();
-            
-            Integer ret = _attridCacheMap.get(attr);
+
+            NameCacheKey key = new NameCacheKey(container.getId(), type, attr);
+            Integer ret = _attrIdCacheMap.get(key);
             if (ret != null)
                 return ret.intValue();
 
             try
             {
-                Integer i = Table.executeSingleton(getSchema(), "SELECT RowId FROM flow.Attribute WHERE Name = ?", new Object[] {attr }, Integer.class);
+                Integer i = Table.executeSingleton(getSchema(), "SELECT RowId FROM " + attributeTable(type) + " WHERE Container = ? AND Name = ?", new Object[] {container, attr}, Integer.class);
                 // we're not caching misses because this is an unlimited cachemap
                 if (i==null)
                     return 0;
-                _attridCacheMap.put(attr, i);
-                _attrNameCacheMap.put(i, attr);
+                _attrIdCacheMap.put(key, i);
+                _attrNameCacheMap.put(new IdCacheKey(type, i), attr);
                 return i.intValue();
             }
             catch (SQLException e)
@@ -137,7 +147,7 @@ public class FlowManager
         }
     }
 
-    public Map.Entry<Integer, String>[] getAttributeNames(Integer[] ids)
+    public Map.Entry<Integer, String>[] getAttributeNames(AttributeType type, Integer[] ids)
     {
         Map.Entry<Integer, String>[] ret = new Map.Entry[ids.length];
         boolean hasNulls = false;
@@ -146,7 +156,7 @@ public class FlowManager
             Integer id = ids[i];
             if (id != null)
             {
-                ret[i] = getAttributeName(ids[i]);
+                ret[i] = getAttributeName(type, ids[i]);
             }
             if (ret[i] == null)
             {
@@ -168,24 +178,28 @@ public class FlowManager
     }
 
 
-    public Map.Entry<Integer, String> getAttributeName(int id)
+    public Map.Entry<Integer, String> getAttributeName(AttributeType type, int id)
     {
-        synchronized(_attridCacheMap)
+        synchronized(_attrIdCacheMap)
         {
             quickFillCache();
 
-            String name = _attrNameCacheMap.get(id);
+            IdCacheKey key = new IdCacheKey(type, id);
+            String name = _attrNameCacheMap.get(key);
             if (name == null)
             {
                 try
                 {
-                    name = Table.executeSingleton(getSchema(), "SELECT Name FROM flow.Attribute WHERE RowId = ?", new Object[] { id }, String.class);
-                    if (name == null)
+                    Map<String, Object> row = Table.executeSingleton(getSchema(), "SELECT Container, Name FROM " + attributeTable(type) + " WHERE RowId = ?", new Object[] { id }, Map.class);
+                    if (row == null)
                     {
                         return null;
                     }
-                    _attrNameCacheMap.put(id, name);
-                    _attridCacheMap.put(name, id);
+                    name = (String)row.get("Name");
+                    Container container = ContainerManager.getForId((String)row.get("Container"));
+
+                    _attrNameCacheMap.put(key, name);
+                    _attrIdCacheMap.put(new NameCacheKey(container.getId(), type, name), id);
                 }
                 catch (SQLException e)
                 {
@@ -194,6 +208,22 @@ public class FlowManager
             }
 
             return new FlowEntry(id, name);
+        }
+    }
+
+    private final class NameCacheKey extends Tuple3<String, AttributeType, String>
+    {
+        public NameCacheKey(String containerId, AttributeType type, String attrName)
+        {
+            super(containerId, type, attrName);
+        }
+    }
+
+    private final class IdCacheKey extends Pair<AttributeType, Integer>
+    {
+        public IdCacheKey(AttributeType type, Integer rowId)
+        {
+            super(type, rowId);
         }
     }
 
@@ -227,88 +257,113 @@ public class FlowManager
         }
     }
 
+    private void quickFillCache(AttributeType type)
+    {
+        ResultSet rs = null;
+        try
+        {
+            rs = Table.executeQuery(getSchema(), "SELECT RowId, Container, Name FROM " + attributeTable(type), null, Table.ALL_ROWS, false);
+            while (rs.next())
+            {
+                int rowid = rs.getInt(1);
+                String containerId = rs.getString(2);
+                String name = rs.getString(3);
+                _attrNameCacheMap.put(new IdCacheKey(type, rowid), name);
+                _attrIdCacheMap.put(new NameCacheKey(containerId, type, name), rowid);
+            }
+        }
+        catch (SQLException e)
+        {
+            _log.error("Unexpected error", e);
+            // fall through;
+        }
+        finally
+        {
+            ResultSetUtil.close(rs);
+        }
+    }
+
     private void quickFillCache()
     {
         if (_attrNameCacheMap.isEmpty())
         {
-            ResultSet rs = null;
-            try
-            {
-                rs = Table.executeQuery(getSchema(), "SELECT RowId, Name FROM flow.Attribute", null, Table.ALL_ROWS, false);
-                while (rs.next())
-                {
-                    int rowid = rs.getInt(1);
-                    String name = rs.getString(2);
-                    _attrNameCacheMap.put(rowid, name);
-                    _attridCacheMap.put(name, rowid);
-                }
-            }
-            catch (SQLException e)
-            {
-                _log.error("Unexpected error", e);
-                // fall through;
-            }
-            finally
-            {
-                ResultSetUtil.close(rs);
-            }
+            quickFillCache(AttributeType.keyword);
+            quickFillCache(AttributeType.statistic);
+            quickFillCache(AttributeType.graph);
         }
     }
 
 
-    private int ensureAttributeId(String attr) throws SQLException
+    /**
+     * Ensure the attribute exists.  If the id >= 0, the id points at the RowId of the preferred name for the attribute.
+     *
+     * @param container Container
+     * @param type attribute type
+     * @param attr attribute name
+     * @param id RowId of aliased attribute.
+     * @return The RowId of the rewly inserted or existing attribute.
+     * @throws SQLException
+     */
+    private int ensureAttributeId(Container container, AttributeType type, String attr, int id) throws SQLException
     {
         DbSchema schema = getSchema();
         if (schema.getScope().isTransactionActive())
         {
             throw new IllegalStateException("ensureAttributeId cannot be called within a transaction");
         }
-        synchronized(_attridCacheMap)
+        synchronized(_attrIdCacheMap)
         {
-            int ret = getAttributeId(attr);
+            int ret = getAttributeId(container, type, attr);
             if (ret != 0)
                 return ret;
             Map<String, Object> map = new HashMap<String, Object>();
+            map.put("Container", container.getId());
             map.put("Name", attr);
-            Table.insert(null, getTinfoAttribute(), map);
-            _attridCacheMap.remove(attr);
-            return getAttributeId(attr);
+            map.put("Id", id);
+
+            TableInfo table = attributeTable(type);
+            map = Table.insert(null, table, map);
+
+            // Set Id to RowId if we aren't inserting an alias
+            if (id <= 0)
+            {
+                map.put("Id", map.get("RowId"));
+                Table.update(null, table, map, map.get("RowId"));
+            }
+            _attrIdCacheMap.remove(new NameCacheKey(container.getId(), type, attr));
+            return getAttributeId(container, type, attr);
         }
+    }
+
+    private int ensureAttributeId(Container container, AttributeType type, String attr) throws SQLException
+    {
+        return ensureAttributeId(container, type, attr, -1);
     }
 
 
     public int ensureStatisticId(Container c, String attr) throws SQLException
     {
-        int id = ensureAttributeId(attr);
-        TableInfo statkey = getTinfoStatisticAttr();
-        Table.execute(getSchema(), "INSERT INTO " + statkey + " (container, id) " +
-                "SELECT ? AS container, ? as id " +
-                "WHERE NOT EXISTS (SELECT id FROM " + statkey + " WHERE container=? and id=?)",
-                c.getId(), id, c.getId(), id);
-        return id;
+        return ensureAttributeId(c, AttributeType.statistic, attr);
     }
 
 
     public int ensureKeywordId(Container c, String attr) throws SQLException
     {
-        int id = ensureAttributeId(attr);
-        TableInfo statkey = getTinfoKeywordAttr();
-        Table.execute(getSchema(), "INSERT INTO " + statkey + " (container, id) " +
-                "SELECT ? AS container, ? as id " +
-                "WHERE NOT EXISTS (SELECT id FROM " + statkey + " WHERE container=? and id=?)",
-                c.getId(), id, c.getId(), id);
-        return id;
+        return ensureAttributeId(c, AttributeType.keyword, attr);
     }
 
 
     public int ensureGraphId(Container c, String attr) throws SQLException
     {
-        int id = ensureAttributeId(attr);
-        TableInfo statkey = getTinfoGraphAttr();
-        Table.execute(getSchema(), "INSERT INTO " + statkey + " (container, id) " +
-                "SELECT ? AS container, ? as id " +
-                "WHERE NOT EXISTS (SELECT id FROM " + statkey + " WHERE container=? and id=?)",
-                c.getId(), id, c.getId(), id);
+        return ensureAttributeId(c, AttributeType.graph, attr);
+    }
+
+    private int ensureAttributeAliases(Container c, AttributeType type, String attr, String... aliases)
+            throws SQLException
+    {
+        int id = ensureAttributeId(c, type, attr);
+        for (String alias : aliases)
+            ensureAttributeId(c, type, alias, id);
         return id;
     }
 
@@ -417,6 +472,7 @@ public class FlowManager
                 to = oids.length;
 
             String list = join(oids, from, to);
+            // XXX: delete no longer referenced statattr afterwards?
             Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN (" + list + ")");
             Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN (" + list + ")");
             Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN (" + list + ")");
@@ -434,12 +490,6 @@ public class FlowManager
 
             Integer[] objids = Table.executeArray(getSchema(), sqlObjectIds, Integer.class);
             deleteAttributes(objids);
-            /* This can be very slow with postgres! so we'll try selecting the objectids
-            Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN (" + sqlObjectIds.getSQL() + ")", sqlObjectIds.getParamsArray());
-            Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN (" + sqlObjectIds.getSQL() + ")", sqlObjectIds.getParamsArray());
-            Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN (" + sqlObjectIds.getSQL() + ")", sqlObjectIds.getParamsArray());
-            Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN (" + sqlObjectIds.getSQL() + ")", sqlObjectIds.getParamsArray());
-            */
             scope.commitTransaction();
         }
         finally
@@ -530,8 +580,8 @@ public class FlowManager
 
     static private String sqlSelectKeyword = "SELECT flow.keyword.value FROM flow.object" +
                                             "\nINNER JOIN flow.keyword on flow.object.rowid = flow.keyword.objectid" +
-                                            "\nINNER JOIN flow.attribute ON flow.attribute.rowid = flow.keyword.keywordid" +
-                                            "\nWHERE flow.object.dataid = ? AND flow.attribute.name = ?";
+                                            "\nINNER JOIN flow.KeywordAttr ON flow.KeywordAttr.rowid = flow.keyword.keywordid" +
+                                            "\nWHERE flow.object.dataid = ? AND flow.KeywordAttr.name = ?";
     public String getKeyword(ExpData data, String keyword) throws SQLException
     {
         return Table.executeSingleton(getSchema(), sqlSelectKeyword, new Object[] { data.getRowId(), keyword }, String.class);
@@ -539,7 +589,7 @@ public class FlowManager
 
     static private String sqlDeleteKeyword = "DELETE FROM flow.keyword WHERE ObjectId = ? AND KeywordId = ?";
     static private String sqlInsertKeyword = "INSERT INTO flow.keyword (ObjectId, KeywordId, Value) VALUES (?, ?, ?)";
-    public void setKeyword(User user, ExpData data, String keyword, String value) throws SQLException
+    public void setKeyword(Container c, ExpData data, String keyword, String value) throws SQLException
     {
         String oldValue = getKeyword(data, keyword);
         if (ObjectUtils.equals(oldValue, value))
@@ -551,7 +601,7 @@ public class FlowManager
         {
             throw new IllegalArgumentException("Object not found.");
         }
-        int keywordId = ensureAttributeId(keyword);
+        int keywordId = ensureKeywordId(c, keyword);
         DbSchema schema = getSchema();
         try
         {
@@ -574,8 +624,8 @@ public class FlowManager
 
     static private String sqlSelectStat = "SELECT flow.statistic.value FROM flow.object" +
                                             "\nINNER JOIN flow.statistic on flow.object.rowid = flow.statistic.objectid" +
-                                            "\nINNER JOIN flow.attribute ON flow.attribute.rowid = flow.statistic.statisticid" +
-                                            "\nWHERE flow.object.dataid = ? AND flow.attribute.name = ?";
+                                            "\nINNER JOIN flow.StatisticAttr ON flow.StatisticAttr.rowid = flow.statistic.statisticid" +
+                                            "\nWHERE flow.object.dataid = ? AND flow.StatisticAttr.name = ?";
     public Double getStatistic(ExpData data, StatisticSpec stat) throws SQLException
     {
         return Table.executeSingleton(getSchema(), sqlSelectStat, new Object[] { data.getRowId(), stat.toString() }, Double.class);
@@ -583,8 +633,8 @@ public class FlowManager
 
     static private String sqlSelectGraph = "SELECT flow.graph.data FROM flow.object" +
                                             "\nINNER JOIN flow.graph on flow.object.rowid = flow.graph.objectid" +
-                                            "\nINNER JOIN flow.attribute ON flow.attribute.rowid = flow.graph.graphid" +
-                                            "\nWHERE flow.object.dataid = ? AND flow.attribute.name = ?";
+                                            "\nINNER JOIN flow.GraphAttr ON flow.GraphAttr.rowid = flow.graph.graphid" +
+                                            "\nWHERE flow.object.dataid = ? AND flow.GraphAttr.name = ?";
     public byte[] getGraphBytes(ExpData data, GraphSpec graph) throws SQLException
     {
         return Table.executeSingleton(getSchema(), sqlSelectGraph, new Object[] { data.getRowId(), graph.toString() }, byte[].class);
@@ -778,7 +828,9 @@ public class FlowManager
         {
             SQLFragment sqlOIDs = new SQLFragment("SELECT flow.object.rowid FROM flow.object INNER JOIN exp.data ON flow.object.dataid = exp.data.rowid AND exp.data.container = ?", container.getId());
             deleteObjectIds(sqlOIDs, Collections.singleton(container));
+            Table.execute(getSchema(), "DELETE FROM " + getTinfoKeywordAttr() + " WHERE container=?", container);
             Table.execute(getSchema(), "DELETE FROM " + getTinfoStatisticAttr() + " WHERE container=?", container);
+            Table.execute(getSchema(), "DELETE FROM " + getTinfoGraphAttr() + " WHERE container=?", container);
         }
         catch (SQLException x)
         {

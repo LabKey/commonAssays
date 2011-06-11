@@ -20,6 +20,7 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.*;
 import org.labkey.api.util.StringExpression;
+import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.view.GraphColumn;
 
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -31,10 +32,16 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
 {
     FlowPropertySet _fps;
 
-    public GraphForeignKey(FlowPropertySet fps)
+    public GraphForeignKey(Container c, FlowPropertySet fps)
     {
-        super();
+        super(c);
         _fps = fps;
+    }
+
+    @Override
+    protected AttributeType type()
+    {
+        return AttributeType.graph;
     }
 
     protected Collection<GraphSpec> getAttributes()
@@ -99,6 +106,15 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         sql.append("\nAND flow.Graph.ObjectId = ");
         sql.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         sql.append(")");
+
+        //SQLFragment sql = new SQLFragment("(SELECT CASE WHEN flow.Graph.RowId IS NOT NULL THEN ");
+        //sql.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
+        //sql.append(" END");
+        //sql.append("\nFROM flow.Graph WHERE flow.Graph.GraphId = flow.GraphAttr.Id AND flow.GraphAttr.Name = ?");
+        //sql.add(attrName);
+        //sql.append("\nAND flow.Graph.ObjectId = ");
+        //sql.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
+        //sql.append(")");
         return sql;
     }
 }

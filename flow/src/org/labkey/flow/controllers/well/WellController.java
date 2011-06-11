@@ -195,7 +195,7 @@ public class WellController extends BaseFlowController
                     String name = form.ff_keywordName[i];
                     if (StringUtils.isEmpty(name))
                         continue;
-                    well.setKeyword(getUser(), name, form.ff_keywordValue[i]);
+                    well.setKeyword(name, form.ff_keywordValue[i]);
                 }
             }
             FlowManager.get().flowObjectModified();
@@ -326,7 +326,10 @@ public class WellController extends BaseFlowController
             {
                 _log.error("Error generating graph", res.exception);
             }
-            streamBytes(getViewContext().getResponse(), res.bytes, "image/png", 0);
+            else
+            {
+                streamBytes(getViewContext().getResponse(), res.bytes, "image/png", 0);
+            }
             return null;
         }
 
@@ -455,7 +458,7 @@ public class WellController extends BaseFlowController
                 }
             }
 
-            SQLFragment sql = new SQLFragment("SELECT rowid FROM flow.attribute WHERE name=?", form.keyword);
+            SQLFragment sql = new SQLFragment("SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?", getContainer(), form.keyword);
             try
             {
                 keywordid = Table.executeSingleton(DbSchema.get("flow"), sql.getSQL(), sql.getParams().toArray(), Integer.class);
@@ -586,7 +589,7 @@ public class WellController extends BaseFlowController
             try
             {
                 rs = Table.executeQuery(DbSchema.get("flow"),
-                        "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.attribute WHERE name=?)", new Object[]{keyword});
+                        "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?)", new Object[]{context.getContainer(), keyword});
                 TreeSet<String> set = new TreeSet<String>();
                 while (rs.next())
                     set.add(rs.getString(1));

@@ -83,7 +83,7 @@ public class FlowModule extends DefaultModule
 
     public double getVersion()
     {
-        return 11.10;
+        return 11.11;
     }
 
     protected void init()

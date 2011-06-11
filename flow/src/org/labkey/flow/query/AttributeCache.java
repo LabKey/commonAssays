@@ -23,6 +23,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.util.Filter;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.persist.FlowManager;
 
 import java.sql.SQLException;
@@ -176,17 +177,18 @@ abstract public class AttributeCache<T>
 
 
 
-        if ("statisticid".equalsIgnoreCase(_attrIdColumn.getName()))
+        AttributeType type = type();
+        if (type == AttributeType.statistic)
         {
             sql.append("SELECT id AS attrId FROM " + FlowManager.get().getTinfoStatisticAttr() + " WHERE container=?");
             sql.add(container.getId());
         }
-        else if ("graphid".equalsIgnoreCase(_attrIdColumn.getName()))
+        else if (type == AttributeType.graph)
         {
             sql.append("SELECT id AS attrId FROM " + FlowManager.get().getTinfoGraphAttr() + " WHERE container=?");
             sql.add(container.getId());
         }
-        else if ("keywordid".equalsIgnoreCase(_attrIdColumn.getName()))
+        else if (type == AttributeType.keyword)
         {
             sql.append("SELECT id AS attrId FROM " + FlowManager.get().getTinfoKeywordAttr() + " WHERE container=?");
             sql.add(container.getId());
@@ -218,7 +220,7 @@ abstract public class AttributeCache<T>
         {
             long transactionCount = getTransactionCount();
             Integer[] ids = Table.executeArray(FlowManager.get().getSchema(), sql, Integer.class);
-            entries = FlowManager.get().getAttributeNames(ids);
+            entries = FlowManager.get().getAttributeNames(type, ids);
             storeInCache(transactionCount, key, entries);
             return mapFromEntries(entries);
         }
@@ -241,12 +243,17 @@ abstract public class AttributeCache<T>
 
     abstract protected T keyFromString(String str);
 
+    protected abstract AttributeType type();
+
     static public class KeywordCache extends AttributeCache<String>
     {
         private KeywordCache(TableInfo keywordTable)
         {
             super(keywordTable.getColumn("KeywordId"), keywordTable.getColumn("ObjectId"));
         }
+
+        @Override
+        protected AttributeType type() { return AttributeType.keyword; }
 
         protected String keyFromString(String str)
         {
@@ -261,6 +268,9 @@ abstract public class AttributeCache<T>
             super(statsTable.getColumn("StatisticId"), statsTable.getColumn("ObjectId"));
         }
 
+        @Override
+        protected AttributeType type() { return AttributeType.statistic; }
+
         protected StatisticSpec keyFromString(String str)
         {
             return new StatisticSpec(str);
@@ -273,6 +283,9 @@ abstract public class AttributeCache<T>
         {
             super(graphsTable.getColumn("GraphId"), graphsTable.getColumn("ObjectId"));
         }
+
+        @Override
+        protected AttributeType type() { return AttributeType.graph; }
 
         protected GraphSpec keyFromString(String str)
         {

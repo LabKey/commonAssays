@@ -17,10 +17,12 @@
 package org.labkey.flow.query;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataType;
 
 import java.util.Collection;
@@ -30,11 +32,17 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
     FlowPropertySet _fps;
     FlowDataType _type;
 
-    public StatisticForeignKey(FlowPropertySet fps, FlowDataType type)
+    public StatisticForeignKey(Container c, FlowPropertySet fps, FlowDataType type)
     {
-        super();
+        super(c);
         _fps = fps;
         _type = type;
+    }
+
+    @Override
+    protected AttributeType type()
+    {
+        return AttributeType.statistic;
     }
 
     protected Collection<StatisticSpec> getAttributes()
@@ -77,6 +85,13 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         ret.append(" AND flow.Statistic.StatisticId = ");
         ret.append(attrId);
         ret.append(")");
+
+        //SQLFragment ret = new SQLFragment("(SELECT flow.Statistic.Value FROM flow.Statistic, flow.StatisticAttr WHERE flow.Statistic.ObjectId = ");
+        //ret.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
+        //ret.append(" AND flow.Statistic.StatisticId = flow.StatisticAttr.Id AND flow.StatisticAttr.Name = ?");
+        //ret.add(attrName);
+        //ret.append(")");
+
         return ret;
     }
 }

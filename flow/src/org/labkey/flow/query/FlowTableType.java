@@ -41,6 +41,7 @@ public enum FlowTableType
     Analyses("When a flow runs are analyzed, the results are grouped in an analysis.", true),
     Statistics("The 'Statistics' table shows the names of all statistics.", true),
     Keywords("The 'Keywords' table show the names of all keywords.", true),
+    Graphs("The 'Graphs' table show the names of all graphs.", true),
     ;
     final String _description;
     final boolean _hidden;

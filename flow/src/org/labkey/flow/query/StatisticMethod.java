@@ -16,7 +16,9 @@
 
 package org.labkey.flow.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
@@ -25,10 +27,13 @@ import org.labkey.api.query.snapshot.AbstractTableMethodInfo;
 
 public class StatisticMethod extends AbstractTableMethodInfo
 {
+    Container _container;
     ColumnInfo _objectIdColumn;
-    public StatisticMethod(ColumnInfo objectIdColumn)
+
+    public StatisticMethod(@NotNull Container c, ColumnInfo objectIdColumn)
     {
         super(JdbcType.DOUBLE);
+        _container = c;
         _objectIdColumn = objectIdColumn;
     }
 
@@ -45,10 +50,12 @@ public class StatisticMethod extends AbstractTableMethodInfo
         {
             throw new IllegalArgumentException("The statistic method requires 1 argument");
         }
-        SQLFragment ret = new SQLFragment("(SELECT flow.statistic.value FROM flow.statistic" +
-                "\nINNER JOIN flow.attribute ON flow.statistic.statisticid = flow.attribute.rowid AND flow.attribute.name = ");
+        SQLFragment ret = new SQLFragment("(SELECT flow.statistic.value FROM flow.statistic");
+        ret.append("\nINNER JOIN flow.StatisticAttr ON flow.statistic.statisticid = flow.StatisticAttr.id AND flow.StatisticAttr.name = ");
         ret.append(arguments[0]);
-        ret.append("\nWHERE flow.statistic.objectId = " + tableAlias + ".Statistic");
+        ret.append("\nWHERE flow.statistic.objectId = ").append(tableAlias).append(".Statistic");
+        ret.append(" AND flow.StatisticAttr.container = ?");
+        ret.add(_container.getId());
 //        ret.append(_objectIdColumn.getValueSql(tableAlias));
         ret.append(")");
         return ret;

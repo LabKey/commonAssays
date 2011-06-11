@@ -21,6 +21,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.ICSMetadata;
 
@@ -36,10 +37,16 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
 
     public BackgroundForeignKey(FlowSchema schema, FlowPropertySet fps, FlowDataType type)
     {
-        super();
+        super(schema.getContainer());
         _schema = schema;
         _fps = fps;
         _type = type;
+    }
+
+    @Override
+    protected AttributeType type()
+    {
+        return AttributeType.statistic;
     }
 
     protected Collection<StatisticSpec> getAttributes()
@@ -89,11 +96,18 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
         String junctionTable = _schema.getBackgroundJunctionTableName(_schema.getContainer());
         if (null == junctionTable)
             return new SQLFragment("NULL");
-        
+
         SQLFragment ret = new SQLFragment(
                 "(SELECT AVG(flow.Statistic.Value)\n" +
                         "FROM flow.Statistic INNER JOIN " + junctionTable + " J ON flow.Statistic.ObjectId = J.bg\n" +
                         "WHERE J.fg = " + objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS).getSQL() + " AND flow.Statistic.StatisticId = " + attrId + ")");
+
+        //SQLFragment ret = new SQLFragment("(SELECT AVG(flow.Statistic.Value)\n");
+        //ret.append("FROM flow.Statistic INNER JOIN ").append(junctionTable).append(" J ON flow.Statistic.ObjectId = J.bg\n");
+        //ret.append("WHERE J.fg = ").append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS).getSQL());
+        //ret.append("AND flow.Statistic.StatisticId = flow.StatisticAttr.Id AND flow.StatisticAttr.Name = ?)");
+        //ret.add(attrName);
+
         return ret;
     }
 }
