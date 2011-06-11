@@ -27,7 +27,8 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.UpdateableTableInfo;
 import org.labkey.api.etl.DataIterator;
-import org.labkey.api.etl.TableLoaderPump;
+import org.labkey.api.etl.Pump;
+import org.labkey.api.etl.TableInsertDataIterator;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -255,15 +256,15 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
     @Override
     public int persistRows(DataIterator data, BatchValidationException errors)
     {
-        TableLoaderPump pump = new TableLoaderPump(data, this, errors);
-        pump.run();
-        return pump.getRowCount();
+        TableInsertDataIterator insert = TableInsertDataIterator.create(data, this, errors);
+        new Pump(insert, errors).run();
+        return insert.getExecuteCount();
     }
 
     @Override
     public Parameter.ParameterMap insertStatement(Connection conn, User user) throws SQLException
     {
-        return Table.insertStatement(conn, this, getContainer(), user, true);
+        return Table.insertStatement(conn, this, getContainer(), user, false, true);
     }
 
     @Override
