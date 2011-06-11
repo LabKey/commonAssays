@@ -112,6 +112,7 @@
             <column columnName="Container"/>
             <column columnName="ProtocolID"/>
             <column columnName="TitrationID"/>
+            <column columnName="WellRole"/>
         </columns>
     </table>
 

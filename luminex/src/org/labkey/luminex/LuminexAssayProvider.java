@@ -124,14 +124,17 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         ExpRunTable result = super.createRunTable(schema, protocol);
 //        result.addColumns(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN), null);
 
-        final Set<FieldKey> pdfColumns = new HashSet<FieldKey>();
+        /** RowId -> Name */
+        final Map<FieldKey, FieldKey> pdfColumns = new HashMap<FieldKey, FieldKey>();
         TableInfo outputTable = result.getColumn(ExpRunTable.Column.Output).getFk().getLookupTableInfo();
         // Check for data outputs that are PDFs
         for (ColumnInfo columnInfo : outputTable.getColumns())
         {
             if (columnInfo.getName().toLowerCase().endsWith("pdf"))
             {
-                pdfColumns.add(FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.RowId.toString()));
+                pdfColumns.put(
+                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.RowId.toString()),
+                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.Name.toString()));
             }
         }
 
@@ -153,23 +156,51 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                         @Override
                         public void addQueryFieldKeys(Set<FieldKey> keys)
                         {
-                            keys.addAll(pdfColumns);
+                            keys.addAll(pdfColumns.keySet());
+                            keys.addAll(pdfColumns.values());
                         }
 
                         @Override
                         public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                         {
-                            for (FieldKey pdfColumn : pdfColumns)
+                            Map<Integer, String> pdfs = new HashMap<Integer, String>();
+                            for (Map.Entry<FieldKey, FieldKey> entry : pdfColumns.entrySet())
                             {
-                                Number rowId = (Number)ctx.get(pdfColumn);
+                                Number rowId = (Number)ctx.get(entry.getKey());
                                 if (rowId != null)
                                 {
+                                    pdfs.put(rowId.intValue(), (String)ctx.get(entry.getValue()));
+                                }
+                            }
+
+                            if (pdfs.size() == 1)
+                            {
+                                for (Map.Entry<Integer, String> entry : pdfs.entrySet())
+                                {
                                     ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(schema.getContainer());
-                                    url.addParameter("rowId", rowId.toString());
+                                    url.addParameter("rowId", entry.getKey().toString());
                                     out.write("<a href=\"" + url + "\">");
                                     out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
                                     out.write("</a>");
                                 }
+                            }
+                            else if (pdfColumns.size() > 1)
+                            {
+                                StringBuilder sb = new StringBuilder();
+                                for (Map.Entry<Integer, String> entry : pdfs.entrySet())
+                                {
+                                    ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(schema.getContainer());
+                                    url.addParameter("rowId", entry.getKey().toString());
+                                    sb.append("<a href=\"");
+                                    sb.append(url);
+                                    sb.append("\">");
+                                    sb.append(PageFlowUtil.filter(entry.getValue()));
+                                    sb.append("</a><br/>");
+                                }
+
+                                out.write("<a onclick=\"return showHelpDiv(this, 'Standard Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");\">");
+                                out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
+                                out.write("</a>");
                             }
                         }
                     };

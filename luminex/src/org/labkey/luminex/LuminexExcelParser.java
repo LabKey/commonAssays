@@ -300,6 +300,26 @@ public class LuminexExcelParser
                 else if ("Type".equalsIgnoreCase(columnName))
                 {
                     dataRow.setType(value);
+                    if (value != null)
+                    {
+                        String upper = value.toUpperCase();
+                        if (upper.startsWith("S") || upper.startsWith("ES"))
+                        {
+                            dataRow.setWellRole("Standard");
+                        }
+                        if (upper.startsWith("C"))
+                        {
+                            dataRow.setWellRole("Control");
+                        }
+                        if (upper.startsWith("U"))
+                        {
+                            dataRow.setWellRole("Unknown");
+                        }
+                        if (upper.startsWith("B"))
+                        {
+                            dataRow.setWellRole("Background");
+                        }
+                    }
                 }
                 else if ("Well".equalsIgnoreCase(columnName))
                 {

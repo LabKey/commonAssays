@@ -86,6 +86,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         ColumnInfo protocolColumn = addColumn(wrapColumn("Protocol", getRealTable().getColumn("ProtocolId")));
         protocolColumn.setFk(new ExpSchema(_schema.getUser(), _schema.getContainer()).getProtocolForeignKey("RowId"));
         protocolColumn.setHidden(true);
+        addColumn(wrapColumn(getRealTable().getColumn("WellRole")));
         addColumn(wrapColumn(getRealTable().getColumn("Type")));
         addColumn(wrapColumn(getRealTable().getColumn("Well")));
         addColumn(wrapColumn(getRealTable().getColumn("Outlier")));
@@ -101,9 +102,9 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         addColumn(wrapColumn(getRealTable().getColumn("StdDevString")));
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("StdDev"), getRealTable().getColumn("StdDevOORIndicator"));
         addColumn(wrapColumn(getRealTable().getColumn("ObsConcString")));
-        OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("ObsConc"), getRealTable().getColumn("ObsConcOORIndicator"));
+        OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("ObsConc"), getRealTable().getColumn("ObsConcOORIndicator")).setLabel("Obs Conc BioPlex 5PL");
         addColumn(wrapColumn(getRealTable().getColumn("ExpConc")));
-        addColumn(wrapColumn(getRealTable().getColumn("ObsOverExp"))).setLabel("(Obs/Exp)*100");
+        addColumn(wrapColumn(getRealTable().getColumn("ObsOverExp"))).setLabel("(Obs/Exp)*100 BioPlex 5PL");
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("ConcInRange"), getRealTable().getColumn("ConcInRangeOORIndicator"));
         addColumn(wrapColumn(getRealTable().getColumn("ConcInRangeString")));
         addColumn(wrapColumn(getRealTable().getColumn("Dilution")));
@@ -126,6 +127,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("Analyte"));
+        defaultCols.add(FieldKey.fromParts("WellRole"));
         defaultCols.add(FieldKey.fromParts("Type"));
         defaultCols.add(FieldKey.fromParts("Well"));
         defaultCols.add(FieldKey.fromParts("Description"));

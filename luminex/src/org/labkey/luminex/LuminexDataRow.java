@@ -36,6 +36,7 @@ public class LuminexDataRow
 
     private String _lsid;
     private String _type;
+    private String _wellRole;
     private String _well;
     private int _outlier;
     private String _description;
@@ -468,6 +469,16 @@ public class LuminexDataRow
     public void setDataFile(String dataFile)
     {
         _dataFile = dataFile;
+    }
+
+    public String getWellRole()
+    {
+        return _wellRole;
+    }
+
+    public void setWellRole(String wellRole)
+    {
+        _wellRole = wellRole;
     }
 
     /** Remember any extra properties from the transform script so they can be included when generating map version of this row */

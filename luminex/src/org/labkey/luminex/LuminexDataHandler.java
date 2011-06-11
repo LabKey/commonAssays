@@ -251,6 +251,23 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     if (titration != null)
                     {
                         dataRow.setTitration(titration.getRowId());
+                        StringBuilder sb = new StringBuilder();
+                        if (titration.isStandard())
+                        {
+                            sb.append("Standard");
+                        }
+                        if (titration.isQcControl())
+                        {
+                            if (sb.length() > 0)
+                            {
+                                sb.append(", ");
+                            }
+                            sb.append("QC Control");
+                        }
+                        if (sb.length() > 0)
+                        {
+                            dataRow.setWellRole(sb.toString());
+                        }
                     }
                     dataRow.setAnalyte(analyte.getRowId());
                     ExpData sourceDataForRow = data;
