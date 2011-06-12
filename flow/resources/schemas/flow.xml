@@ -67,6 +67,13 @@
     </ns:columns>
   </ns:table>
 
+  <ns:table tableName="attribute" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="rowid"/>
+      <ns:column columnName="name"/>
+    </ns:columns>
+  </ns:table>
+
   <ns:table tableName="object" tableDbType="TABLE">
     <ns:columns>
       <ns:column columnName="rowid"/>

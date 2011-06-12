@@ -29,7 +29,7 @@ ALTER TABLE flow.KeywordAttr ADD CONSTRAINT PK_KeywordAttr PRIMARY KEY (RowId);
 UPDATE flow.KeywordAttr
     SET Name = Attribute.Name
     FROM flow.Attribute
-    WHERE Attribute.RowId = KeywordAttr.Id
+    WHERE Attribute.RowId = KeywordAttr.Id;
 
 ALTER TABLE flow.KeywordAttr ALTER COLUMN Name SET NOT NULL;
 ALTER TABLE flow.KeywordAttr ADD CONSTRAINT UQ_KeywordAttr UNIQUE (Container, Name);
@@ -45,8 +45,7 @@ SET KeywordId =
   (SELECT KeywordAttr.RowId FROM flow.KeywordAttr, flow.Object
    WHERE KeywordAttr.Id = Keyword.KeywordId
    AND KeywordAttr.Container = Object.Container
-   AND Object.RowId = Keyword.ObjectId)
-;
+   AND Object.RowId = Keyword.ObjectId);
 
 ALTER TABLE flow.Keyword ADD CONSTRAINT PK_Keyword UNIQUE (ObjectId, KeywordId);
 ALTER TABLE flow.Keyword ADD CONSTRAINT FK_Keyword_KeywordAttr FOREIGN KEY (KeywordId) REFERENCES flow.KeywordAttr (RowId);
@@ -72,7 +71,7 @@ ALTER TABLE flow.StatisticAttr ADD CONSTRAINT PK_StatisticAttr PRIMARY KEY (RowI
 UPDATE flow.StatisticAttr
     SET Name = Attribute.Name
     FROM flow.Attribute
-    WHERE Attribute.RowId = StatisticAttr.Id
+    WHERE Attribute.RowId = StatisticAttr.Id;
 
 ALTER TABLE flow.StatisticAttr ALTER COLUMN Name SET NOT NULL;
 ALTER TABLE flow.StatisticAttr ADD CONSTRAINT UQ_StatisticAttr UNIQUE (Container, Name);
@@ -88,8 +87,7 @@ SET StatisticId =
   (SELECT StatisticAttr.RowId FROM flow.StatisticAttr, flow.Object
    WHERE StatisticAttr.Id = Statistic.StatisticId
    AND StatisticAttr.Container = Object.Container
-   AND Object.RowId = Statistic.ObjectId)
-;
+   AND Object.RowId = Statistic.ObjectId);
 
 ALTER TABLE flow.Statistic ADD CONSTRAINT PK_Statistic UNIQUE (ObjectId, StatisticId);
 ALTER TABLE flow.Statistic ADD CONSTRAINT FK_Statistic_StatisticAttr FOREIGN KEY (StatisticId) REFERENCES flow.StatisticAttr (RowId);
@@ -115,7 +113,7 @@ ALTER TABLE flow.GraphAttr ADD CONSTRAINT PK_GraphAttr PRIMARY KEY (RowId);
 UPDATE flow.GraphAttr
     SET Name = Attribute.Name
     FROM flow.Attribute
-    WHERE Attribute.RowId = GraphAttr.Id
+    WHERE Attribute.RowId = GraphAttr.Id;
 
 ALTER TABLE flow.GraphAttr ALTER COLUMN Name SET NOT NULL;
 ALTER TABLE flow.GraphAttr ADD CONSTRAINT UQ_GraphAttr UNIQUE (Container, Name);
@@ -131,8 +129,7 @@ SET GraphId =
   (SELECT GraphAttr.RowId FROM flow.GraphAttr, flow.Object
    WHERE GraphAttr.Id = Graph.GraphId
    AND GraphAttr.Container = Object.Container
-   AND Object.RowId = Graph.ObjectId)
-;
+   AND Object.RowId = Graph.ObjectId);
 
 ALTER TABLE flow.Graph ADD CONSTRAINT PK_Graph UNIQUE (ObjectId, GraphId);
 ALTER TABLE flow.Graph ADD CONSTRAINT FK_Graph_GraphAttr FOREIGN KEY (GraphId) REFERENCES flow.GraphAttr (RowId);
