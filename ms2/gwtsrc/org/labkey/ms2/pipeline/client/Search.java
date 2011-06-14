@@ -85,7 +85,7 @@ public class Search implements EntryPoint
         spacer = new HTML("&nbsp;");
         spacer.setStylePrimaryName("labkey-message-strong");
 
-        returnURL = PropertyUtil.getServerProperty("returnURL");
+        returnURL = PropertyUtil.getReturnURL();
         searchEngine = PropertyUtil.getServerProperty("searchEngine");
         SearchFormCompositeFactory compositeFactory = new SearchFormCompositeFactory(searchEngine);
         sequenceDbComposite = compositeFactory.getSequenceDbComposite();

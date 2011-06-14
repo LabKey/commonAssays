@@ -462,7 +462,7 @@ public class PipelineController extends SpringActionController
             Map<String, String> props = new HashMap<String, String>();
             props.put("errors", getErrors(errors));
             props.put("saveProtocol", Boolean.toString(form.isSaveProtocol()));
-            props.put("returnURL", returnURL.getLocalURIString() );
+            props.put(ActionURL.Param.returnUrl.name(), returnURL.getLocalURIString() );
             props.put("helpTopic", helpTopic);
             props.put("file", StringUtils.join(form.getFile(), "/"));
             props.put("searchEngine", form.getSearchEngine());

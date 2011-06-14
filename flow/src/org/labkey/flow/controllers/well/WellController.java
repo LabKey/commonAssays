@@ -19,9 +19,7 @@ package org.labkey.flow.controllers.well;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.SimpleErrorView;
-import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.*;
 import org.labkey.api.data.*;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
@@ -544,13 +542,17 @@ public class WellController extends BaseFlowController
         }
     }
 
-    public static class UpdateKeywordsForm
+    public static class UpdateKeywordsForm extends ReturnUrlForm
     {
-        ReturnURLString returnURL = new ReturnURLString("begin.view");
         public String keyword = null;
         public String[] from = new String[0];
         public String[] to = new String[0];
         public String message;
+
+        UpdateKeywordsForm()
+        {
+            setReturnUrl(new ReturnURLString("begin.view"));
+        }
 
         public void setKeyword(String keyword)
         {
@@ -570,11 +572,6 @@ public class WellController extends BaseFlowController
         public void setTo(String[] to)
         {
             this.to = to;
-        }
-
-        public void setReturnURL(ReturnURLString url)
-        {
-            this.returnURL = url;
         }
 
         public TreeSet<String> getKeywords(ViewContext context)
