@@ -184,7 +184,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                                     out.write("</a>");
                                 }
                             }
-                            else if (pdfColumns.size() > 1)
+                            else if (pdfs.size() > 1)
                             {
                                 StringBuilder sb = new StringBuilder();
                                 for (Map.Entry<Integer, String> entry : pdfs.entrySet())
