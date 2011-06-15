@@ -131,6 +131,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
 
             // add a column to the analyte properties section for each of the titrations that might be used for a Standard
+            final int numTitrations = form.getParser().getTitrations().size();
             for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
             {
                 //todo: get default value information from previous run uploads
@@ -158,8 +159,10 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         @Override
                         public void renderInputCell(RenderContext ctx, Writer out, int span) throws IOException
                         {
+                            // show the input cell if this not the only titration and it is of type standard
+                            boolean showCell = titrationEntry.getValue().isStandard() && numTitrations > 1;  
                             out.write("<td colspan=" + span + " name='" + getTitrationColumnCellName(titrationEntry.getValue().getName()) + "' "
-                                + " style='display:" + (titrationEntry.getValue().isStandard() ? "table-cell" : "none") + "' >");
+                                + " style='display:" + (showCell ? "table-cell" : "none") + "' >");
                             renderInputHtml(ctx, out, getInputValue(ctx));
                             out.write("</td>");
                         }
@@ -167,8 +170,10 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         @Override
                         public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
                         {
+                            // show the input cell if this not the only titration and it is of type standard
+                            boolean showCell = titrationEntry.getValue().isStandard() && numTitrations > 1;
                             out.write("<td name='" + getTitrationColumnCellName(titrationEntry.getValue().getName()) + "' "
-                                + " class='labkey-form-label' style='display:" + (titrationEntry.getValue().isStandard() ? "table-cell" : "none") + "' >");
+                                + " class='labkey-form-label' style='display:" + (showCell ? "table-cell" : "none") + "' >");
                             renderTitle(ctx, out);
                             out.write("</td>");
                         }

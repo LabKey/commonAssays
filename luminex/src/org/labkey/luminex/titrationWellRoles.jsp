@@ -62,8 +62,7 @@
                 <td>
                     <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) %>'
                            value='1' onClick='showHideAnalytePropertyColumn("<%= LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName()) %>", this.checked);'
-                           <%= titrationEntry.getValue().isStandard() ? "CHECKED" : "" %>
-                           <%= titrationEntry.getValue().isQcControl() ? "DISABLED" : "" %> />
+                           <%= titrationEntry.getValue().isStandard() ? "CHECKED" : "" %> />
                 </td>
                 <td>
                     <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue()) %>'
