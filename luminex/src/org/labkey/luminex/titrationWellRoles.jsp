@@ -21,63 +21,109 @@
 <%@ page import="org.labkey.luminex.Titration" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.luminex.LuminexUploadWizardAction" %>
+<%@ page import="java.util.TreeMap" %>
 
 <%
     JspView<LuminexRunUploadForm> me = (JspView<LuminexRunUploadForm>) HttpView.currentView();
     LuminexRunUploadForm bean = me.getModelBean();
-    java.util.Map<String, Titration> titrationsWithTypes = bean.getParser().getTitrationsWithTypes();
-%>
+    Map<String, Titration> titrationsWithTypes = bean.getParser().getTitrationsWithTypes();
 
-<table>
-    <tr>
-        <td>&nbsp;</td>
-        <td class="labkey-form-label">Standard</td>
-        <td class="labkey-form-label">QC Control</td>
-        <td class="labkey-form-label">Titrated Unknown</td>
-    </tr>
-
-    <%
+    // separate the titrations into two groups unknowns and non-unknowns
+    Map<String, Titration> unknownTitrations = new TreeMap<String, Titration>();
+    Map<String, Titration> nonUnknownTitrations = new TreeMap<String, Titration>();
     for (Map.Entry<String, Titration> titrationEntry : titrationsWithTypes.entrySet())
     {
-    %>
-        <tr>
-            <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
-            <td>
-                <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) %>'
-                       value='1' onChange='showHideAnalytePropertyColumn("<%= titrationEntry.getValue().getName() %>", this.checked);' 
-                       <%= titrationEntry.getValue().isStandard() ? "CHECKED" : "" %> />
-            </td>
-            <td>
-                <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue()) %>'
-                       value='1' <%= titrationEntry.getValue().isQcControl() ? "CHECKED" : "" %> />
-            </td>
-            <td>
-                <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue()) %>'
-                       value='1' <%= titrationEntry.getValue().isUnknown() ? "CHECKED" : "" %> />
-            </td>
-        </tr>
-    <%
+        if (titrationEntry.getValue().isUnknown())
+        {
+            unknownTitrations.put(titrationEntry.getKey(), titrationEntry.getValue());
+        }
+        else
+        {
+            nonUnknownTitrations.put(titrationEntry.getKey(), titrationEntry.getValue());
+        }
     }
-    %>
-</table>
+
+    // show a table for the user to select which titrations are Standards and/or QC Controls
+    if (nonUnknownTitrations.size() > 0)
+    {
+%>
+        <table>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="labkey-form-label">Standard</td>
+                <td class="labkey-form-label">QC Control</td>
+            </tr>
+<%
+        for (Map.Entry<String, Titration> titrationEntry : nonUnknownTitrations.entrySet())
+        {
+%>
+            <tr>
+                <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
+                <td>
+                    <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) %>'
+                           value='1' onClick='showHideAnalytePropertyColumn("<%= LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName()) %>", this.checked);'
+                           <%= titrationEntry.getValue().isStandard() ? "CHECKED" : "" %>
+                           <%= titrationEntry.getValue().isQcControl() ? "DISABLED" : "" %> />
+                </td>
+                <td>
+                    <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue()) %>'
+                           value='1' <%= titrationEntry.getValue().isQcControl() ? "CHECKED" : "" %> />
+                </td>
+            </tr>
+<%
+        }
+%>
+        </table>
+<%
+    }
+
+    // show a table for the user to select which titrations are Titrated Unknowns
+    if (unknownTitrations.size() > 0)
+    {
+%>
+        <br/>
+        <table>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="labkey-form-label">Titrated Unknown</td>
+            </tr>
+<%
+        for (Map.Entry<String, Titration> titrationEntry : unknownTitrations.entrySet())
+        {
+%>
+            <tr>
+                <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
+                <td>
+                    <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue()) %>'
+                           value='1' <%= titrationEntry.getValue().isUnknown() ? "CHECKED" : "" %> />
+                </td>
+            </tr>
+<%
+        }
+%>
+        </table>
+<%
+    }
+%>
+
 
 <script type="text/javascript">
-    function showHideAnalytePropertyColumn(titrationName, isChecked)
+    function showHideAnalytePropertyColumn(titrationCellName, isChecked)
     {
-        // show/hide the column caption
-        var captionCell = document.getElementById("_caption_" + titrationName);
-        captionCell.style.display = (isChecked ? "" : "none");
-
-        // show/hide the individual input cells for the column
-        var inputCells = document.getElementsByName("_inputcell_" + titrationName);
-        for (var i = 0; i < inputCells.length; i++)
+        // show/hide the column associated with this titration
+        var elements = Ext.select('*[name=' + titrationCellName + ']').elements;
+        for (var i = 0; i < elements.length; i++)
         {
-            inputCells[i].style.display = (isChecked ? "" : "none");
-
-            // if hiding, also uncheck all input checkboxes
-            if (!isChecked)
+            if(isChecked)
             {
-                var cellInputs = inputCells[i].getElementsByTagName("input");
+                elements[i].style.display = "table-cell";
+            }
+            else
+            {
+                elements[i].style.display = "none";
+
+                // also need to make sure all input checkboxes are unchecked if hiding column cell
+                var cellInputs = elements[i].getElementsByTagName("input");
                 if (cellInputs.length == 1)
                 {
                     cellInputs[0].checked = false;

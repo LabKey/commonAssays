@@ -130,9 +130,16 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 view.getDataRegion().addGroup(new DisplayColumnGroup(cols, analyteDP.getName(), true));
             }
 
+            // add a column to the analyte properties section for each of the titrations that might be used for a Standard
             for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
             {
                 //todo: get default value information from previous run uploads
+
+                // skip over those titrations that are of type Unknown as they will not be used as standards
+                if (titrationEntry.getValue().isUnknown())
+                {
+                    continue;
+                }
 
                 List<DisplayColumn> cols = new ArrayList<DisplayColumn>();
                 for (final String analyte : analyteNames)
@@ -141,15 +148,18 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     {
                         @Override
                         public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
-                        {                                                      
-                            out.write("<input type='checkbox' value='1' name='" + getTitrationCheckboxName(titrationEntry.getKey(), analyte) + "' />");
+                        {
+                            // preselect the checkboxes for the standards in the file
+                            // todo: change to just select the first standard titration if > 1 exist
+                            out.write("<input type='checkbox' value='1' name='" + getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte) + "' "
+                                    + (titrationEntry.getValue().isStandard() ? "CHECKED" : "") + " />");
                         }
 
                         @Override
                         public void renderInputCell(RenderContext ctx, Writer out, int span) throws IOException
                         {
-                            out.write("<td colspan=" + span + " name='_inputcell_" + titrationEntry.getKey() + "' "
-                                    + (titrationEntry.getValue().isStandard() ? "" : "style='display:none;'") + ">");
+                            out.write("<td colspan=" + span + " name='" + getTitrationColumnCellName(titrationEntry.getValue().getName()) + "' "
+                                + " style='display:" + (titrationEntry.getValue().isStandard() ? "table-cell" : "none") + "' >");
                             renderInputHtml(ctx, out, getInputValue(ctx));
                             out.write("</td>");
                         }
@@ -157,8 +167,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         @Override
                         public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
                         {
-                            out.write("<td class='labkey-form-label' id='_caption_" + titrationEntry.getKey() + "' "
-                                    + (titrationEntry.getValue().isStandard() ? "" : "style='display:none;'") + ">");
+                            out.write("<td name='" + getTitrationColumnCellName(titrationEntry.getValue().getName()) + "' "
+                                + " class='labkey-form-label' style='display:" + (titrationEntry.getValue().isStandard() ? "table-cell" : "none") + "' >");
                             renderTitle(ctx, out);
                             out.write("</td>");
                         }
@@ -256,6 +266,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     public static String getTitrationTypeCheckboxName(Titration.Type type, Titration titration)
     {
         return "_titrationRole_" + type + "_" + ColumnInfo.propNameFromName(titration.getName());
+    }
+
+    public static String getTitrationColumnCellName(String titrationName)
+    {
+        return "_titrationcell_" + ColumnInfo.propNameFromName(titrationName);
     }
 
     protected class LuminexRunStepHandler extends RunStepHandler

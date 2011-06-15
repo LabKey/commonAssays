@@ -41,8 +41,6 @@ run.output.file = run.props$val3[run.props$name == "runDataFile"];
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 
-# TODO: CHANGE TO CALCULATING WITHIN A GIVEN FILE ID (FOR MULTI PLATE RUNS)
-
 # initialize the FI - Bkgd - Blank variable
 run.data$fiBackgroundBlank = NA;
 
@@ -56,18 +54,19 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
     nonBlanks = regexpr("^blank", run.data$name, ignore.case=TRUE) == -1;
     unks = substr(run.data$type,0,1) == "X";
 
-	# loop through the unique description/dilution pairs and subtract the mean blank FI-Bkgrd from the fiBackground
-	descDilPairs = unique(data.frame(description=run.data$description, dilution=run.data$dilution));
-	for(index in 1:nrow(descDilPairs)){
-	    description = descDilPairs$description[index];
-	    dilution = descDilPairs$dilution[index];
-	    descDils = run.data$description == description & run.data$dilution == dilution;
+	# loop through the unique dataFile/description/dilution pairs and subtract the mean blank FI-Bkgrd from the fiBackground
+	fileDescDilPairs = unique(data.frame(dataFile=run.data$dataFile, description=run.data$description, dilution=run.data$dilution));
+	for(index in 1:nrow(fileDescDilPairs)){
+	    dataFile = fileDescDilPairs$dataFile[index];
+	    description = fileDescDilPairs$description[index];
+	    dilution = fileDescDilPairs$dilution[index];
+	    fileDescDils = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution;
 
 		# get the mean blank bead FI-Bkgrd values for the given description/dilution
-		blank.mean = mean(run.data$fiBackground[blanks & descDils]);
+		blank.mean = mean(run.data$fiBackground[blanks & fileDescDils]);
 
 		# calc the fiBackgroundBlank for all of the non-"Blank" analytes for this description
-		run.data$fiBackgroundBlank[unks & nonBlanks & descDils] = run.data$fiBackground[unks & nonBlanks & descDils] - blank.mean;
+		run.data$fiBackgroundBlank[unks & nonBlanks & fileDescDils] = run.data$fiBackground[unks & nonBlanks & fileDescDils] - blank.mean;
 	}
 
 	# convert fiBackgroundBlank values that are less than or equal to 0 to a value of 1 (as per the lab's calculation)
