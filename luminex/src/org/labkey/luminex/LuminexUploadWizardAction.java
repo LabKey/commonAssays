@@ -23,6 +23,7 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
@@ -81,9 +82,13 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             String lsidColumn = "RowId";
             VBox vbox = new VBox();
 
-            JspView<LuminexRunUploadForm> top = new JspView<LuminexRunUploadForm>("/org/labkey/luminex/titrationWellRoles.jsp", form);
-            top.setTitle("Define Titration Well Roles");
-            vbox.addView(top);
+            // if there are titrations in the uploaded data, show the well role definition section
+            if (form.getParser().getTitrations().size() > 0)
+            {
+                JspView<LuminexRunUploadForm> top = new JspView<LuminexRunUploadForm>("/org/labkey/luminex/titrationWellRoles.jsp", form);
+                top.setTitle("Define Titration Well Roles");
+                vbox.addView(top);
+            }
 
             InsertView view = createInsertView(LuminexSchema.getTableInfoAnalytes(), lsidColumn, new DomainProperty[0], form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
             view.setTitle("Analyte Properties");
@@ -131,7 +136,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
 
             // add a column to the analyte properties section for each of the titrations that might be used for a Standard
-            final int numTitrations = form.getParser().getTitrations().size();
+            final int numStandardTitrations = form.getParser().getStandardTitrationCount();
             for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
             {
                 //todo: get default value information from previous run uploads
@@ -151,7 +156,6 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
                         {
                             // preselect the checkboxes for the standards in the file
-                            // todo: change to just select the first standard titration if > 1 exist
                             out.write("<input type='checkbox' value='1' name='" + getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte) + "' "
                                     + (titrationEntry.getValue().isStandard() ? "CHECKED" : "") + " />");
                         }
@@ -159,8 +163,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         @Override
                         public void renderInputCell(RenderContext ctx, Writer out, int span) throws IOException
                         {
-                            // show the input cell if this not the only titration and it is of type standard
-                            boolean showCell = titrationEntry.getValue().isStandard() && numTitrations > 1;  
+                            // show the input cell if this is one of multiple standard titrations
+                            boolean showCell = titrationEntry.getValue().isStandard() && numStandardTitrations > 1;
                             out.write("<td colspan=" + span + " name='" + getTitrationColumnCellName(titrationEntry.getValue().getName()) + "' "
                                 + " style='display:" + (showCell ? "table-cell" : "none") + "' >");
                             renderInputHtml(ctx, out, getInputValue(ctx));
@@ -170,8 +174,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         @Override
                         public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
                         {
-                            // show the input cell if this not the only titration and it is of type standard
-                            boolean showCell = titrationEntry.getValue().isStandard() && numTitrations > 1;
+                            // show the input cell if this is one of multiple standard titrations
+                            boolean showCell = titrationEntry.getValue().isStandard() && numStandardTitrations > 1;
                             out.write("<td name='" + getTitrationColumnCellName(titrationEntry.getValue().getName()) + "' "
                                 + " class='labkey-form-label' style='display:" + (showCell ? "table-cell" : "none") + "' >");
                             renderTitle(ctx, out);

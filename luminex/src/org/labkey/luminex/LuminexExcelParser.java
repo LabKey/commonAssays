@@ -171,6 +171,21 @@ public class LuminexExcelParser
          return _titrations;
      }
 
+    public int getStandardTitrationCount() throws ExperimentException
+    {
+        parseFile();
+
+        int count = 0;
+        for (Map.Entry<String, Titration> titrationEntry : getTitrationsWithTypes().entrySet())
+        {
+            if (titrationEntry.getValue().isStandard())
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
     public Map<Analyte, List<LuminexDataRow>> getSheets() throws ExperimentException
     {
         parseFile();
