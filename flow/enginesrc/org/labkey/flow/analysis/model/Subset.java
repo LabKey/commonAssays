@@ -49,7 +49,7 @@ public class Subset
 
     public Subset apply(PopulationSet populations, Gate gate)
     {
-        return apply(populations, gate._name.getName(), new Gate[]{gate});
+        return apply(populations, gate._name == null ? null : gate._name.getName(), new Gate[]{gate});
     }
 
     public Subset apply(String name, BitSet bits)

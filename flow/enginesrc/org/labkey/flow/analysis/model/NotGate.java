@@ -16,13 +16,14 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.labkey.flow.analysis.web.SubsetExpression;
 import org.w3c.dom.Element;
 
 import java.util.BitSet;
 import java.util.List;
 
 
-public class NotGate extends Gate
+public class NotGate extends Gate implements SubsetExpressionGate
 {
     Gate _gate;
 
@@ -77,5 +78,14 @@ public class NotGate extends Gate
         NotGate ret = new NotGate();
         ret._gate = Gate.readGate(el);
         return ret;
+    }
+
+    public SubsetExpression.NotTerm createTerm()
+    {
+        if (!(_gate instanceof SubsetExpressionGate))
+            throw new FlowException("can't create term from gate type: " + _gate);
+
+        return new SubsetExpression.NotTerm(
+                ((SubsetExpressionGate)_gate).createTerm());
     }
 }

@@ -24,6 +24,9 @@ import org.apache.xerces.util.SymbolTable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.settings.AppProps;
+import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
@@ -569,6 +572,56 @@ abstract public class FlowJoWorkspace implements Serializable
     {
     }
 
+    protected void postProcess()
+    {
+        createAliases();
+    }
+
+    private void createAliases()
+    {
+        Map<SubsetSpec, SubsetSpec> aliases = new HashMap<SubsetSpec, SubsetSpec>();
+
+        for (SampleInfo sampleInfo : getSamples())
+        {
+            Analysis analysis = getSampleAnalysis(sampleInfo);
+            if (analysis == null)
+                continue;
+
+            AttributeSet attrs = getSampleAnalysisResults(sampleInfo);
+            if (attrs == null)
+                continue;
+
+            for (StatisticSpec stat : attrs.getStatistics().keySet())
+            {
+                SubsetSpec alias;
+                if (aliases.containsKey(stat.getSubset()))
+                    alias = aliases.get(stat.getSubset());
+                else
+                {
+                    alias = FCSAnalyzer.get().getAlias(analysis, stat.getSubset());
+                    aliases.put(stat.getSubset(), alias);
+                }
+
+                if (alias != null)
+                    attrs.addStatisticAlias(stat, new StatisticSpec(alias, stat.getStatistic(), stat.getParameter()));
+            }
+
+            for (GraphSpec stat : attrs.getGraphs().keySet())
+            {
+                SubsetSpec alias;
+                if (aliases.containsKey(stat.getSubset()))
+                    alias = aliases.get(stat.getSubset());
+                else
+                {
+                    alias = FCSAnalyzer.get().getAlias(analysis, stat.getSubset());
+                    aliases.put(stat.getSubset(), alias);
+                }
+
+                if (alias != null)
+                    attrs.addGraphAlias(stat, new GraphSpec(alias, stat.getParameters()));
+            }
+        }
+    }
 
     public List<CompensationMatrix> getCompensationMatrices()
     {
@@ -1218,9 +1271,75 @@ abstract public class FlowJoWorkspace implements Serializable
         }
 
         @Test
+        public void loadMiniFCS() throws Exception
+        {
+            FlowJoWorkspace workspace = loadWorkspace("sampledata/flow/flowjoquery/miniFCS/mini-fcs.xml");
+            GroupInfo group = workspace.getGroup("3");
+            Analysis analysis = workspace.getGroupAnalysis(group);
+
+            SubsetSpec allCytSpec = SubsetSpec.fromUnescapedString("S/Lv/L/3+/4+/All Cyt");
+            assertEquals("S/Lv/L/3+/4+/(IFNg+|IL2+|IL4+|TNFa+)", FCSAnalyzer.get().getAlias(analysis, allCytSpec).toString());
+        }
+
+        @Test
         public void loadSubsets() throws Exception
         {
             loadWorkspace("sampledata/flow/flowjoquery/Workspaces/subset-parsing.xml");
+        }
+
+        @Test
+        public void loadBooleanSubPopulations() throws Exception
+        {
+            FlowJoWorkspace workspace = loadWorkspace("sampledata/flow/flowjoquery/Workspaces/boolean-sub-populations.xml");
+            SampleInfo sampleInfo = workspace.getSample("1");
+            assertEquals("118795.fcs", sampleInfo.getLabel());
+
+            Analysis analysis = workspace.getSampleAnalysis(sampleInfo);
+            assertEquals(3, analysis.getPopulations().size());
+
+            // And gate named "A&B"
+            Population AandB = analysis.getPopulation(PopulationName.fromString("A&B"));
+            assertEquals(1, AandB.getGates().size());
+            assertTrue(AandB.getGates().get(0) instanceof AndGate);
+
+            AndGate AandBgate = (AndGate)AandB.getGates().get(0);
+            assertEquals(SubsetSpec.fromParts("A"), ((SubsetRef)AandBgate.getGates().get(0)).getRef());
+            assertEquals(SubsetSpec.fromParts("B"), ((SubsetRef)AandBgate.getGates().get(1)).getRef());
+
+            // Or gate named "C|D"
+            Population CorD = AandB.getPopulation(PopulationName.fromString("C|D"));
+            assertEquals(1, CorD.getGates().size());
+            assertTrue(CorD.getGates().get(0) instanceof OrGate);
+
+            OrGate CorDgate = (OrGate)CorD.getGates().get(0);
+            assertEquals(SubsetSpec.fromParts("A&B", "C"), ((SubsetRef)CorDgate.getGates().get(0)).getRef());
+            assertEquals(SubsetSpec.fromParts("A&B", "D"), ((SubsetRef)CorDgate.getGates().get(1)).getRef());
+
+
+            // Check count stats of the boolean populations.
+            AttributeSet results = workspace.getSampleAnalysisResults(sampleInfo);
+            Map<StatisticSpec, Double> stats = results.getStatistics();
+            assertEquals(10000d, stats.get(new StatisticSpec(null, StatisticSpec.STAT.Count, null)));
+            assertEquals(2983d, stats.get(new StatisticSpec(SubsetSpec.fromParts("A&B"), StatisticSpec.STAT.Count, null)));
+            assertEquals(1256d, stats.get(new StatisticSpec(SubsetSpec.fromParts("A&B", "C|D"), StatisticSpec.STAT.Count, null)));
+
+
+            // Check for backwards-compatibility aliases
+            checkAlias(results, new StatisticSpec("{A&B}:Count"), new StatisticSpec("(A&B):Count"));
+            checkAlias(results, new StatisticSpec("{A&B}:Freq_Of_Parent"), new StatisticSpec("(A&B):Freq_Of_Parent"));
+            checkAlias(results, new StatisticSpec("{A&B}/C:Count"), new StatisticSpec("(A&B)/C:Count"));
+            checkAlias(results, new StatisticSpec("{A&B}/C:Freq_Of_Parent"), new StatisticSpec("(A&B)/C:Freq_Of_Parent"));
+            checkAlias(results, new StatisticSpec("{A&B}/D:Count"), new StatisticSpec("(A&B)/D:Count"));
+            checkAlias(results, new StatisticSpec("{A&B}/D:Freq_Of_Parent"), new StatisticSpec("(A&B)/D:Freq_Of_Parent"));
+            checkAlias(results, new StatisticSpec("{A&B}/{C|D}:Count"), new StatisticSpec("(A&B)/(C|D):Count"));
+            checkAlias(results, new StatisticSpec("{A&B}/{C|D}:Freq_Of_Parent"), new StatisticSpec("(A&B)/(C|D):Freq_Of_Parent"));
+        }
+
+        private void checkAlias(AttributeSet attrs, StatisticSpec spec, StatisticSpec expectedAlias)
+        {
+            Iterable<StatisticSpec> alises = attrs.getStatisticAliases(spec);
+            StatisticSpec actualAlias = alises.iterator().next();
+            assertEquals(expectedAlias.toString(), actualAlias.toString());
         }
 
     }

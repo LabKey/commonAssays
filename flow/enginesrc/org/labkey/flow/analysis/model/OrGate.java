@@ -16,12 +16,20 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.labkey.flow.analysis.web.SubsetExpression;
 import org.w3c.dom.Element;
 
 import java.util.BitSet;
 
-public class OrGate extends GateList
+public class OrGate extends GateList implements SubsetExpressionGate
 {
+    public OrGate() { }
+
+    public OrGate(Gate... gates)
+    {
+        super(gates);
+    }
+
     public BitSet apply(PopulationSet populations, DataFrame data)
     {
         BitSet bits = null;
@@ -41,5 +49,23 @@ public class OrGate extends GateList
         OrGate ret = new OrGate();
         ret._gates = Gate.readGateList(el);
         return ret;
+    }
+
+    public SubsetExpression.OrTerm createTerm()
+    {
+        if (_gates.size() > 2)
+            throw new IllegalStateException("too many gates");
+
+        Gate leftGate = _gates.get(0);
+        if (!(leftGate instanceof SubsetExpressionGate))
+            throw new FlowException("can't create term from gate type: " + leftGate);
+
+        Gate rightGate = _gates.get(1);
+        if (!(rightGate instanceof SubsetExpressionGate))
+            throw new FlowException("can't create term from gate type: " + rightGate);
+
+        return new SubsetExpression.OrTerm(
+                ((SubsetExpressionGate)leftGate).createTerm(),
+                ((SubsetExpressionGate)rightGate).createTerm());
     }
 }

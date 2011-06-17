@@ -23,7 +23,7 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.util.KeywordUtil;
 
-import java.util.Collection;
+import java.util.Map;
 
 public class KeywordForeignKey extends AttributeForeignKey<String>
 {
@@ -46,15 +46,20 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
         return field;
     }
 
-    protected Collection<String> getAttributes()
+    protected Map<String, Integer> getAttributes()
     {
-        return _fps.getKeywordProperties().keySet();
+        return _fps.getKeywordProperties();
     }
 
-    protected void initColumn(String attrName, ColumnInfo column)
+    protected void initColumn(String attrName, String preferredName, ColumnInfo column)
     {
         column.setSqlTypeName("VARCHAR");
         column.setLabel(attrName);
+        if (preferredName != null)
+        {
+            column.setDescription("Alias for '" + preferredName + "'");
+            column.setHidden(true);
+        }
         if (KeywordUtil.isHidden(attrName))
         {
             column.setHidden(true);

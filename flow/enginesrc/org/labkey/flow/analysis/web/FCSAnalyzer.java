@@ -52,11 +52,21 @@ public class FCSAnalyzer
     static public class Result<T>
     {
         public T spec;
+        public Collection<T> aliases;
         public Throwable exception;
 
         public Result(T spec)
         {
             this.spec = spec;
+        }
+
+        public void addAlias(T alias)
+        {
+            if (alias == null)
+                return;
+            if (aliases == null)
+                aliases = new ArrayList<T>(4);
+            aliases.add(alias);
         }
     }
 
@@ -162,6 +172,7 @@ public class FCSAnalyzer
     private GraphResult generateGraph(Map<SubsetSpec, Subset> subsetMap, PopulationSet group, GraphSpec graphSpecification) throws IOException
     {
         GraphResult ret = new GraphResult(graphSpecification);
+        // XXX: get alias
         try
         {
             Subset subset = getSubset(subsetMap, group, graphSpecification.getSubset());
@@ -229,20 +240,23 @@ public class FCSAnalyzer
 
     private List<StatResult> calculateStatistics(Map<SubsetSpec, Subset> subsetMap, ScriptComponent group, Collection<StatisticSpec> stats) throws IOException
     {
-        List<StatResult> ret = new ArrayList(stats.size());
-        Map<SubsetSpec, Map<String, Stats.DoubleStats>> subsetStatsMap = new HashMap();
+        List<StatResult> ret = new ArrayList<StatResult>(stats.size());
+        Map<SubsetSpec, Map<String, Stats.DoubleStats>> subsetStatsMap = new HashMap<SubsetSpec, Map<String, Stats.DoubleStats>>();
         for (StatisticSpec stat : stats)
         {
             StatResult result = new StatResult(stat);
             ret.add(result);
             StatisticSpec statisticSpecification = result.spec;
+            SubsetSpec alias = getAlias(group, statisticSpecification.getSubset());
+            if (alias != null)
+                result.addAlias(new StatisticSpec(alias, statisticSpecification.getStatistic(), statisticSpecification.getParameter()));
             try
             {
                 Subset subset = getSubset(subsetMap, group, statisticSpecification.getSubset());
                 Map<String, Stats.DoubleStats> statsMap = subsetStatsMap.get(statisticSpecification.getSubset());
                 if (statsMap == null)
                 {
-                    statsMap = new HashMap();
+                    statsMap = new HashMap<String, Stats.DoubleStats>();
                     subsetStatsMap.put(statisticSpecification.getSubset(), statsMap);
                 }
                 result.value = StatisticSpec.calculate(subset, statisticSpecification, statsMap);
@@ -323,6 +337,77 @@ public class FCSAnalyzer
         }
         subsetMap.put(subsetSpecification, ret);
         return ret;
+    }
+
+    /**
+     * For backwards compatibility, create a SubsetSpec from a gating hierarchy
+     * if it includes any boolean expressions.  If the gating hierachy doesn't
+     * include boolean gates or can't be converted, null is returned.
+     *
+     * @param populationSet
+     * @param subset
+     * @return
+     */
+    public SubsetSpec getAlias(PopulationSet populationSet, SubsetSpec subset)
+    {
+        if (subset == null) return null;
+
+        // Don't create alias for subset spec containing boolean expressions.
+        // These subsets are from analysis scripts prior to 11.2.
+        if (subset.isExpression()) return null;
+
+        SubsetSpec ret = null;
+        for (SubsetPart name : subset.getSubsets())
+        {
+            if (name instanceof PopulationName)
+            {
+                Population population = populationSet.getPopulation((PopulationName)name);
+                if (population == null)
+                    return null;
+
+                boolean found = false;
+                if (population.getGates() != null && population.getGates().size() == 1)
+                {
+                    Gate gate = population.getGates().get(0);
+                    SubsetExpression expr = expressionFromGate(gate);
+                    if (expr != null)
+                    {
+                        ret = new SubsetSpec(ret, expr);
+                        found = true;
+                    }
+                }
+
+                if (!found)
+                    ret = new SubsetSpec(ret, name);
+
+                populationSet = population;
+            }
+            else
+            {
+                _log.warn("Unexpected subset expression in subset: " + subset);
+                return null;
+            }
+        }
+
+        if (subset.equals(ret))
+            return null;
+
+        return ret;
+    }
+
+    private SubsetExpression expressionFromGate(Gate gate)
+    {
+        if (!(gate instanceof SubsetExpressionGate))
+            return null;
+
+        try
+        {
+            return ((SubsetExpressionGate)gate).createTerm();
+        }
+        catch (FlowException ex)
+        {
+            return null;
+        }
     }
 
     FCSKeywordData resolveRef(FCSRef ref) throws IOException

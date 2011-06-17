@@ -149,8 +149,8 @@ public class FlowPropertySet
     {
         if (_subsetNameAncestorMap != null)
             return;
-        _statistics = AttributeCache.STATS.getAttrValues(_container, _colDataId);
-        _graphs = AttributeCache.GRAPHS.getAttrValues(_container, _colDataId);
+        _statistics = AttributeCache.STATS.getAttrValues(_container, _colDataId, true);
+        _graphs = AttributeCache.GRAPHS.getAttrValues(_container, _colDataId, true);
         Set<SubsetSpec> subsets = new HashSet();
         for (StatisticSpec stat : _statistics.keySet())
         {
@@ -179,7 +179,7 @@ public class FlowPropertySet
     {
         if (_keywords == null)
         {
-            _keywords = AttributeCache.KEYWORDS.getAttrValues(_container, _colDataId); 
+            _keywords = AttributeCache.KEYWORDS.getAttrValues(_container, _colDataId, true);
         }
         return _keywords;
     }

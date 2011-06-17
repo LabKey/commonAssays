@@ -77,6 +77,7 @@ public class MacWorkspace extends FlowJoWorkspace
         readSampleAnalyses(elDoc);
         readGroups(elDoc);
         readGroupAnalyses(elDoc);
+        postProcess();
     }
 
 
@@ -154,20 +155,21 @@ public class MacWorkspace extends FlowJoWorkspace
             // Fill in the Freq Of Parents that can be determined from the existing stats
             for (Map.Entry<StatisticSpec, Double> entry : new HashMap<StatisticSpec, Double>(results.getStatistics()).entrySet())
             {
-                if (entry.getKey().getStatistic() != StatisticSpec.STAT.Count)
+                final StatisticSpec spec = entry.getKey();
+                if (spec.getStatistic() != StatisticSpec.STAT.Count)
                 {
                     continue;
                 }
-                if (entry.getKey().getSubset() == null)
+                if (spec.getSubset() == null)
                 {
                     continue;
                 }
-                StatisticSpec freqStat = new StatisticSpec(entry.getKey().getSubset(), StatisticSpec.STAT.Freq_Of_Parent, null);
+                StatisticSpec freqStat = new StatisticSpec(spec.getSubset(), StatisticSpec.STAT.Freq_Of_Parent, null);
                 if (results.getStatistics().containsKey(freqStat))
                 {
                     continue;
                 }
-                Double denominator = results.getStatistics().get(new StatisticSpec(entry.getKey().getSubset().getParent(), StatisticSpec.STAT.Count, null));
+                Double denominator = results.getStatistics().get(new StatisticSpec(spec.getSubset().getParent(), StatisticSpec.STAT.Count, null));
                 if (denominator == null)
                 {
                     continue;
@@ -186,28 +188,18 @@ public class MacWorkspace extends FlowJoWorkspace
         return ret;
     }
 
-    protected SubsetExpression replaceExpressionSubsets(final SubsetExpression expr, final Map<SubsetSpec, SubsetSpec> specs)
+    protected SubsetExpression remapExpression(final SubsetExpression expr, final Map<SubsetSpec, SubsetSpec> specs)
     {
-        expr.visit(new SubsetExpression.AbstractVisitor()
-        {
-            @Override
-            public void subset(SubsetExpression.SubsetTerm term)
-            {
-                SubsetSpec spec = term.getSpec();
-                if (!specs.containsKey(spec))
-                    throw new FlowException("Failed to replace '" + spec + "' in boolean expression using mapping: " + specs);
-                term.setSpec(specs.get(spec));
-            }
-        });
-        return expr;
+        return expr.reduce(new RemapExpressionTransform(specs));
     }
 
-    protected SubsetSpec toBooleanExpression(SubsetSpec parentSubset, Element elPopulation)
+    protected Gate createBooleanGate(final SubsetExpression expr)
     {
-        List<Element> booleanGates = getElementsByTagName(elPopulation, "BooleanGate");
-        if (booleanGates.size() != 1)
-            return null;
-        Element elBooleanGate = booleanGates.get(0);
+        return expr.reduce(new GateExpressionTransform());
+    }
+
+    protected Gate readBoolean(SubsetSpec parentSubset, Element elBooleanGate)
+    {
         String specification = elBooleanGate.getAttribute("specification");
         Element elGatePaths = getElementsByTagName(elBooleanGate, "GatePaths").get(0);
         Element elStringArray = getElementsByTagName(elGatePaths, "StringArray").get(0);
@@ -218,27 +210,29 @@ public class MacWorkspace extends FlowJoWorkspace
         for (Element elString : nlStrings)
         {
             String str = getTextValue(elString);
-            SubsetSpec subset;
+
+            // Absolute gates don't start with '/'.  Relative gates begin with one or more '/' characters.
+            SubsetSpec parent = null;
             if (str.startsWith("/"))
             {
-                // UNDONE: support relative populations up the hierarchy
-                if (str.startsWith("//"))
-                    throw new FlowException("Population '" + str + "' not allowed in boolean gate expression. Relative populations must be children of the parent population '" + parentSubset + "'");
-                subset = SubsetSpec.fromUnescapedString(str.substring(1));
+                str = str.substring(1);
+                parent = parentSubset;
+                while (str.startsWith("/"))
+                {
+                    str = str.substring(1);
+                    if (parent == null)
+                        throw new FlowException("Relative population '" + getTextValue(elString) + "' tried to escape from parent subset '" + parentSubset + "'");
+                    parent = parent.getParent();
+                }
             }
-            else
-            {
-                // UNDONE: support other absolute populations
-                subset = SubsetSpec.fromUnescapedString(str);
-                if (!subset.getParent().equals(parentSubset))
-                    throw new FlowException("Population '" + str + "' not allowed in boolean gate expression. Absolute populations must be children of the parent population '" + parentSubset + "'");
-            }
+
+            SubsetSpec subset = SubsetSpec.fromUnescapedString(str);
             if (subset.isExpression())
                 throw new FlowException("Population '" + str + "' not allowed in boolean gate expression. Nested boolean expression aren't allowed.");
 
-            // UNDONE: support populations other than immediate children of the parentSubset
-            PopulationName name = subset.getPopulationName();
-            subset = new SubsetSpec(null, name);
+            // Reroot the relative subset to create an absolute subset path
+            if (parent != null)
+                subset = parent.createChild(subset);
 
             SubsetSpec placeholder = new SubsetSpec(null, PopulationName.fromString("G" + count));
             mapping.put(placeholder, subset);
@@ -248,8 +242,9 @@ public class MacWorkspace extends FlowJoWorkspace
         specification = "(" + specification.replaceAll(" ", "") + ")";
         SubsetExpression expr = SubsetExpression.expression(specification);
 
-        replaceExpressionSubsets(expr, mapping);
-        return new SubsetSpec(parentSubset, expr);
+        expr = remapExpression(expr, mapping);
+        Gate gate = createBooleanGate(expr);
+        return gate;
     }
     
     protected void readStats(SubsetSpec subset, Element elPopulation, AttributeSet results, Analysis analysis)
@@ -325,6 +320,7 @@ public class MacWorkspace extends FlowJoWorkspace
 
     protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, AttributeSet results)
     {
+        /*
         SubsetSpec booleanSubset = toBooleanExpression(parentSubset, elPopulation);
         if (booleanSubset != null)
         {
@@ -332,6 +328,7 @@ public class MacWorkspace extends FlowJoWorkspace
             readStats(booleanSubset, elPopulation, results, analysis);
             return null;
         }
+        */
 
         Population ret = new Population();
         PopulationName name = PopulationName.fromString(elPopulation.getAttribute("name"));
@@ -339,15 +336,14 @@ public class MacWorkspace extends FlowJoWorkspace
         SubsetSpec subset = new SubsetSpec(parentSubset, name);
         Set<String> gatedParams = new LinkedHashSet<String>();
 
-        /*
-        // UNDONE: read booleans as a Gate instead of as a SubsetSpec
         for (Element elBooleanGate : getElementsByTagName(elPopulation, "BooleanGate"))
         {
-            Gate gate = readBoolean(elBooleanGate);
+            Gate gate = readBoolean(parentSubset, elBooleanGate);
             ret.addGate(gate);
+
+            // UNDONE: parse <Graph> element to get x & y axes
             //analysis.addGraph(new GraphSpec(parentSubset, x, y));
         }
-        */
 
         for (Element elPolygonGate : getElementsByTagName(elPopulation, "PolygonGate"))
         {

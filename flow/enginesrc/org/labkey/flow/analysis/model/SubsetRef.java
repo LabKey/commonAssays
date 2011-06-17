@@ -29,12 +29,17 @@ import java.util.List;
  *
  * A subset reference used in boolean gates.
  */
-public class SubsetRef extends Gate
+public class SubsetRef extends Gate implements SubsetExpressionGate
 {
     private SubsetSpec _ref;
 
     public SubsetRef()
     {
+    }
+
+    public SubsetRef(SubsetSpec ref)
+    {
+        _ref = ref;
     }
 
     public void setRef(SubsetSpec ref)
@@ -51,7 +56,7 @@ public class SubsetRef extends Gate
     @Override
     public BitSet apply(PopulationSet populations, DataFrame data)
     {
-        // UNDONE: we only support populations starting from the root
+        // NOTE: we only support populations starting from the root
         SubsetPart[] terms = _ref.getSubsets();
         BitSet ret = new BitSet();
         ret.flip(0, data.getRowCount());
@@ -73,7 +78,7 @@ public class SubsetRef extends Gate
                 }
                 for (Gate gate : pop.getGates())
                 {
-                    BitSet bits = gate.apply(null, data);
+                    BitSet bits = gate.apply(populations, data);
                     ret.and(bits);
                 }
                 curr = pop;
@@ -89,13 +94,13 @@ public class SubsetRef extends Gate
     @Override
     public void getPolygons(List<Polygon> list, String xAxis, String yAxis)
     {
-        throw new UnsupportedOperationException("NYI");
     }
 
     @Override
     public boolean requiresCompensationMatrix()
     {
-        throw new UnsupportedOperationException("NYI");
+        // XXX: Not sure if this is correct
+        return false;
     }
 
     public static SubsetRef readRef(Element el)
@@ -105,5 +110,14 @@ public class SubsetRef extends Gate
         SubsetSpec spec = SubsetSpec.fromEscapedString(ref);
         ret.setRef(spec);
         return ret;
+    }
+
+    @Override
+    public SubsetExpression createTerm()
+    {
+        // For backwards compatibility, use only the last part of the subset.
+        // We may want to use the full subset path some time in the future.
+        PopulationName name = _ref.getPopulationName();
+        return new SubsetExpression.SubsetTerm(new SubsetSpec(null, name));
     }
 }

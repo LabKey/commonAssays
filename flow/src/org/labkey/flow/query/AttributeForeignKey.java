@@ -24,7 +24,7 @@ import org.labkey.api.util.StringExpression;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 
-import java.util.Collection;
+import java.util.Map;
 
 abstract public class AttributeForeignKey<T> extends AbstractForeignKey
 {
@@ -51,10 +51,14 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
             }
         };
 
-        for (T attrName : getAttributes())
+        for (Map.Entry<T, Integer> attr : getAttributes().entrySet())
         {
-            ColumnInfo column = new ColumnInfo(new FieldKey(null,attrName.toString()), ret);
-            initColumn(attrName, column);
+            T attrName = attr.getKey();
+            Integer attrId = attr.getValue();
+
+            FlowManager.FlowEntry preferred = FlowManager.get().getAliased(type(), attrId);
+            ColumnInfo column = new ColumnInfo(new FieldKey(null, attrName.toString()), ret);
+            initColumn(attrName, preferred != null ? preferred._name : null, column);
             ret.addColumn(column);
         }
         return ret;
@@ -68,16 +72,20 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
         T attrName = attributeFromString(displayField);
         if (attrName == null)
             return null;
+
         int attrId = FlowManager.get().getAttributeId(_container, type(), attrName.toString());
-        SQLFragment sql = sqlValue(parent, attrName, attrId);
+        FlowManager.FlowEntry preferred = FlowManager.get().getAliased(type(), attrId);
+
+        SQLFragment sql = sqlValue(parent, attrName, preferred != null ? preferred._rowId : attrId);
         ExprColumn ret = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(), displayField), sql, JdbcType.NULL, parent);
-        initColumn(attrName, ret);
+        initColumn(attrName, preferred != null ? preferred._name : null, ret);
+
         return ret;
     }
 
     abstract protected AttributeType type();
-    abstract protected Collection<T> getAttributes();
+    abstract protected Map<T, Integer> getAttributes();
     abstract protected SQLFragment sqlValue(ColumnInfo objectIdColumn, T attrName, int attrId);
-    abstract protected void initColumn(T attrName, ColumnInfo column);
+    abstract protected void initColumn(T attrName, String preferredName, ColumnInfo column);
     abstract protected T attributeFromString(String field);
 }

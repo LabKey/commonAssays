@@ -1408,6 +1408,9 @@ public class FlowSchema extends UserSchema
         ret.addWrapColumn(ret.getRealTable().getColumn("Container")).setHidden(true);
         ret.addWrapColumn(ret.getRealTable().getColumn("Name"));
         ret.addWrapColumn(ret.getRealTable().getColumn("Id")).setHidden(true);
+
+        //ExprColumn preferredNameCol = new ExprColumn(ret.getRealTable(), "AliasOf", sql, JdbcType.BOOLEAN);
+        //ret.addColumn(aliasOfCol);
         return ret;
     }
 

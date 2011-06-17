@@ -25,9 +25,8 @@ import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.ICSMetadata;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
 {
@@ -49,13 +48,13 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
         return AttributeType.statistic;
     }
 
-    protected Collection<StatisticSpec> getAttributes()
+    protected Map<StatisticSpec, Integer> getAttributes()
     {
-        Set<StatisticSpec> all = _fps.getStatistics().keySet();
-        Set<StatisticSpec> pct = new TreeSet<StatisticSpec>();
-        for (StatisticSpec s : all)
+        Map<StatisticSpec, Integer> all = _fps.getStatistics();
+        Map<StatisticSpec, Integer> pct = new TreeMap<StatisticSpec, Integer>();
+        for (Map.Entry<StatisticSpec, Integer> entry : all.entrySet())
         {
-            pct.add(s);
+            pct.put(entry.getKey(), entry.getValue());
         }
         return pct;
     }
@@ -72,10 +71,15 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
         }
     }
 
-    protected void initColumn(StatisticSpec stat, ColumnInfo column)
+    protected void initColumn(StatisticSpec stat, String preferredName, ColumnInfo column)
     {
         SubsetSpec subset = _fps.simplifySubset(stat.getSubset());
         stat = new StatisticSpec(subset, stat.getStatistic(), stat.getParameter());
+        if (preferredName != null)
+        {
+            column.setDescription("Alias for '" + preferredName + "'");
+            column.setHidden(true);
+        }
         // Hide spill stats be default for all tables except CompensationMatrix.
         // Hide non-spill stats from the CompensationMatrix table.
         if (_type == FlowDataType.CompensationMatrix)

@@ -16,12 +16,20 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.labkey.flow.analysis.web.SubsetExpression;
 import org.w3c.dom.Element;
 
 import java.util.BitSet;
 
-public class AndGate extends GateList
+public class AndGate extends GateList implements SubsetExpressionGate
 {
+    public AndGate() { }
+
+    public AndGate(Gate... gates)
+    {
+        super(gates);
+    }
+
     public BitSet apply(PopulationSet populations, DataFrame data)
     {
         BitSet bits = null;
@@ -41,5 +49,23 @@ public class AndGate extends GateList
         AndGate ret = new AndGate();
         ret._gates = Gate.readGateList(el);
         return ret;
+    }
+
+    public SubsetExpression.AndTerm createTerm()
+    {
+        if (_gates.size() > 2)
+            throw new IllegalStateException("too many gates");
+
+        Gate leftGate = _gates.get(0);
+        if (!(leftGate instanceof SubsetExpressionGate))
+            throw new FlowException("can't create term from gate type: " + leftGate);
+
+        Gate rightGate = _gates.get(1);
+        if (!(rightGate instanceof SubsetExpressionGate))
+            throw new FlowException("can't create term from gate type: " + rightGate);
+
+        return new SubsetExpression.AndTerm(
+                ((SubsetExpressionGate)leftGate).createTerm(),
+                ((SubsetExpressionGate)rightGate).createTerm());
     }
 }

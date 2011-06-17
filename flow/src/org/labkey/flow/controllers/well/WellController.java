@@ -576,7 +576,7 @@ public class WellController extends BaseFlowController
 
         public TreeSet<String> getKeywords(ViewContext context)
         {
-            Map<String,Integer> map = AttributeCache.KEYWORDS.getAttrValues(context.getContainer(), null);
+            Map<String,Integer> map = AttributeCache.KEYWORDS.getAttrValues(context.getContainer(), null, true);
             return new TreeSet<String>(map.keySet());
         }
 

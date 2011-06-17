@@ -179,7 +179,7 @@ public class EditICSMetadataForm extends ProtocolForm
         // ADD statistics too.
         // this is to filter for minimum count in background control
         // e.g. Statistic."S/Lv/L/3+/4+:Count" > 5000
-        Map<StatisticSpec,Integer> stats = AttributeCache.STATS.getAttrValues(getContainer(), null);
+        Map<StatisticSpec,Integer> stats = AttributeCache.STATS.getAttrValues(getContainer(), null, true);
         FieldKey statisticProperty = FieldKey.fromParts("Statistic");
         for (StatisticSpec stat : stats.keySet())
         {

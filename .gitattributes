@@ -161,6 +161,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/FixedCalibrationTable.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FlowException.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/FlowJoWorkspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Gate.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/GateExpressionTransform.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/GateList.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/IdentityCalibrationTable.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/IntervalGate.java -text
@@ -175,6 +176,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/Population.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/PopulationName.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/PopulationSet.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/RegionGate.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/RemapExpressionTransform.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/SampleCriteria.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/ScalingFunction.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/ScriptComponent.java -text
@@ -182,6 +184,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/ScriptSettings.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/StatisticSet.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/StatsTable.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Subset.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/SubsetExpressionGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/SubsetPart.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/SubsetRef.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/ValueConstraint.java -text

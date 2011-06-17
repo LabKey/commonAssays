@@ -20,6 +20,7 @@ import org.apache.commons.collections15.iterators.ArrayIterator;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExpData;
@@ -50,8 +51,8 @@ public class FlowManager
     private static final Logger _log = Logger.getLogger(FlowManager.class);
     private static final String SCHEMA_NAME = "flow";
 
-    private final HashMap<NameCacheKey, Integer> _attrIdCacheMap = new HashMap<NameCacheKey, Integer>(1000);
-    private final HashMap<IdCacheKey, String> _attrNameCacheMap = new HashMap<IdCacheKey, String>(1000);
+    private final HashMap<NameCacheKey, FlowEntry> _attrIdCacheMap = new HashMap<NameCacheKey, FlowEntry>(1000);
+    private final HashMap<IdCacheKey, FlowEntry> _attrNameCacheMap = new HashMap<IdCacheKey, FlowEntry>(1000);
 
     static public FlowManager get()
     {
@@ -126,37 +127,46 @@ public class FlowManager
             quickFillCache();
 
             NameCacheKey key = new NameCacheKey(container.getId(), type, attr);
-            Integer ret = _attrIdCacheMap.get(key);
-            if (ret != null)
-                return ret.intValue();
+            FlowEntry a = _attrIdCacheMap.get(key);
+            if (a != null)
+                return a._rowId.intValue();
 
+            ResultSet rs = null;
             try
             {
-                Integer i = Table.executeSingleton(getSchema(), "SELECT RowId FROM " + attributeTable(type) + " WHERE Container = ? AND Name = ?", new Object[] {container, attr}, Integer.class);
+                rs = Table.executeQuery(getSchema(), "SELECT RowId, Id FROM " + attributeTable(type) + " WHERE Container = ? AND Name = ?", new Object[] {container, attr});
                 // we're not caching misses because this is an unlimited cachemap
-                if (i==null)
+                if (!rs.next())
                     return 0;
-                _attrIdCacheMap.put(key, i);
-                _attrNameCacheMap.put(new IdCacheKey(type, i), attr);
+
+                Integer i = rs.getInt("RowId");
+                Integer aliasId = rs.getInt("Id");
+                a = new FlowEntry(type, i, container, attr, aliasId);
+                _attrIdCacheMap.put(key, a);
+                _attrNameCacheMap.put(new IdCacheKey(type, i), a);
                 return i.intValue();
             }
             catch (SQLException e)
             {
                 throw UnexpectedException.wrap(e);
             }
+            finally
+            {
+                ResultSetUtil.close(rs);
+            }
         }
     }
 
-    public Map.Entry<Integer, String>[] getAttributeNames(AttributeType type, Integer[] ids)
+    public FlowEntry[] getAttributeEntry(AttributeType type, Integer[] ids)
     {
-        Map.Entry<Integer, String>[] ret = new Map.Entry[ids.length];
+        FlowEntry[] ret = new FlowEntry[ids.length];
         boolean hasNulls = false;
         for (int i = 0; i < ids.length; i ++)
         {
             Integer id = ids[i];
             if (id != null)
             {
-                ret[i] = getAttributeName(type, ids[i]);
+                ret[i] = getAttributeEntry(type, ids[i]);
             }
             if (ret[i] == null)
             {
@@ -166,40 +176,42 @@ public class FlowManager
         }
         if (!hasNulls)
             return ret;
-        ArrayList<Map.Entry<Integer, String>> lstRet = new ArrayList<Map.Entry<Integer, String>>();
-        for (Map.Entry<Integer, String> entry : ret)
+        ArrayList<FlowEntry> lstRet = new ArrayList<FlowEntry>();
+        for (FlowEntry entry : ret)
         {
             if (entry != null)
             {
                 lstRet.add(entry);
             }
         }
-        return lstRet.toArray(new Map.Entry[lstRet.size()]);
+        return lstRet.toArray(new FlowEntry[lstRet.size()]);
     }
 
 
-    public Map.Entry<Integer, String> getAttributeName(AttributeType type, int id)
+    public FlowEntry getAttributeEntry(AttributeType type, int id)
     {
         synchronized(_attrIdCacheMap)
         {
             quickFillCache();
 
             IdCacheKey key = new IdCacheKey(type, id);
-            String name = _attrNameCacheMap.get(key);
-            if (name == null)
+            FlowEntry entry = _attrNameCacheMap.get(key);
+            if (entry == null)
             {
                 try
                 {
-                    Map<String, Object> row = Table.executeSingleton(getSchema(), "SELECT Container, Name FROM " + attributeTable(type) + " WHERE RowId = ?", new Object[] { id }, Map.class);
+                    Map<String, Object> row = Table.executeSingleton(getSchema(), "SELECT Container, Name, Id FROM " + attributeTable(type) + " WHERE RowId = ?", new Object[] { id }, Map.class);
                     if (row == null)
                     {
                         return null;
                     }
-                    name = (String)row.get("Name");
+                    String name = (String)row.get("Name");
                     Container container = ContainerManager.getForId((String)row.get("Container"));
+                    Integer aliasId = (Integer)row.get("Id");
+                    entry = new FlowEntry(type, id, container, name, aliasId);
 
-                    _attrNameCacheMap.put(key, name);
-                    _attrIdCacheMap.put(new NameCacheKey(container.getId(), type, name), id);
+                    _attrNameCacheMap.put(key, entry);
+                    _attrIdCacheMap.put(new NameCacheKey(container.getId(), type, name), entry);
                 }
                 catch (SQLException e)
                 {
@@ -207,7 +219,7 @@ public class FlowManager
                 }
             }
 
-            return new FlowEntry(id, name);
+            return entry;
         }
     }
 
@@ -227,33 +239,26 @@ public class FlowManager
         }
     }
 
-    private static class FlowEntry implements Map.Entry<Integer, String>
+    public static class FlowEntry
     {
-        private final Integer _key;
-        private final String _value;
+        public final AttributeType _type;
+        public final Integer _rowId;
+        public final Container _container;
+        public final String _name;
+        public final Integer _aliasId;
 
-        private FlowEntry(Integer key, String value)
+        public FlowEntry(@NotNull AttributeType type, @NotNull Integer rowId, @NotNull Container container, @NotNull String name, @NotNull Integer aliasId)
         {
-            _key = key;
-            _value = value;
+            _type = type;
+            _rowId = rowId;
+            _container = container;
+            _name = name;
+            _aliasId = aliasId;
         }
 
-        @Override
-        public Integer getKey()
+        public boolean isAlias()
         {
-            return _key;
-        }
-
-        @Override
-        public String getValue()
-        {
-            return _value;
-        }
-
-        @Override
-        public String setValue(String value)
-        {
-            throw new IllegalStateException("Can't set value on a FlowEntry");
+            return !_rowId.equals(_aliasId);
         }
     }
 
@@ -262,14 +267,17 @@ public class FlowManager
         ResultSet rs = null;
         try
         {
-            rs = Table.executeQuery(getSchema(), "SELECT RowId, Container, Name FROM " + attributeTable(type), null, Table.ALL_ROWS, false);
+            rs = Table.executeQuery(getSchema(), "SELECT RowId, Container, Name, Id FROM " + attributeTable(type), null, Table.ALL_ROWS, false);
             while (rs.next())
             {
                 int rowid = rs.getInt(1);
                 String containerId = rs.getString(2);
+                Container container = ContainerManager.getForId(containerId);
                 String name = rs.getString(3);
-                _attrNameCacheMap.put(new IdCacheKey(type, rowid), name);
-                _attrIdCacheMap.put(new NameCacheKey(containerId, type, name), rowid);
+                Integer aliasId = rs.getInt(4);
+                FlowEntry entry = new FlowEntry(type, rowid, container, name, aliasId);
+                _attrNameCacheMap.put(new IdCacheKey(type, rowid), entry);
+                _attrIdCacheMap.put(new NameCacheKey(containerId, type, name), entry);
             }
         }
         catch (SQLException e)
@@ -358,13 +366,48 @@ public class FlowManager
         return ensureAttributeId(c, AttributeType.graph, attr);
     }
 
-    private int ensureAttributeAliases(Container c, AttributeType type, String attr, String... aliases)
+    public void ensureStatisticAliases(Container c, String attr, Iterable<? extends Object> aliases) throws SQLException
+    {
+        ensureAttributeAliases(c, AttributeType.statistic, attr, aliases);
+    }
+
+
+    public void ensureKeywordAliases(Container c, String attr, Iterable<? extends Object> aliases) throws SQLException
+    {
+        ensureAttributeAliases(c, AttributeType.keyword, attr, aliases);
+    }
+
+
+    public void ensureGraphAliases(Container c, String attr, Iterable<? extends Object> aliases) throws SQLException
+    {
+        ensureAttributeAliases(c, AttributeType.graph, attr, aliases);
+    }
+
+    private void ensureAttributeAliases(Container c, AttributeType type, String attr, Iterable<? extends Object> aliases)
             throws SQLException
     {
         int id = ensureAttributeId(c, type, attr);
-        for (String alias : aliases)
-            ensureAttributeId(c, type, alias, id);
-        return id;
+        for (Object alias : aliases)
+            ensureAttributeId(c, type, alias.toString(), id);
+    }
+
+    public boolean isAlias(AttributeType type, int attrId)
+    {
+        FlowEntry entry = getAttributeEntry(type, attrId);
+        if (entry == null)
+            return false;
+
+        return entry.isAlias();
+    }
+
+    /** Return the preferred name for the attrId or null if attrId is not an alias id. */
+    public FlowEntry getAliased(AttributeType type, int attrId)
+    {
+        FlowEntry entry = getAttributeEntry(type, attrId);
+        if (entry == null || !entry.isAlias())
+            return null;
+
+        return getAttributeEntry(type, entry._aliasId);
     }
 
 

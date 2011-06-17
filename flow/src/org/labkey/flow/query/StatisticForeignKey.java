@@ -25,7 +25,7 @@ import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataType;
 
-import java.util.Collection;
+import java.util.Map;
 
 public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
 {
@@ -45,9 +45,9 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         return AttributeType.statistic;
     }
 
-    protected Collection<StatisticSpec> getAttributes()
+    protected Map<StatisticSpec, Integer> getAttributes()
     {
-        return _fps.getStatistics().keySet();
+        return _fps.getStatistics();
     }
 
     protected StatisticSpec attributeFromString(String field)
@@ -62,11 +62,16 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         }
     }
 
-    protected void initColumn(StatisticSpec stat, ColumnInfo column)
+    protected void initColumn(StatisticSpec stat, String preferredName, ColumnInfo column)
     {
 
         SubsetSpec subset = _fps.simplifySubset(stat.getSubset());
         stat = new StatisticSpec(subset, stat.getStatistic(), stat.getParameter());
+        if (preferredName != null)
+        {
+            column.setDescription("Alias for '" + preferredName + "'");
+            column.setHidden(true);
+        }
         // Hide spill stats by default for all tables except CompensationMatrix.
         // Hide non-spill stats from the CompensationMatrix table.
         if (_type == FlowDataType.CompensationMatrix)

@@ -25,6 +25,7 @@ import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.persist.FlowManager.FlowEntry;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ import java.util.TreeMap;
 abstract public class AttributeCache<T>
 {
     private static final Logger _log = Logger.getLogger(AttributeCache.class);
-    private static final Cache<CacheKey, Map.Entry<Integer, String>[]> _cache = CacheManager.getCache(200, CacheManager.DAY, "Flow AttributeCache");
+    private static final Cache<CacheKey, FlowEntry[]> _cache = CacheManager.getCache(200, CacheManager.DAY, "Flow AttributeCache");
     private static long _transactionCount;
     private static Container _lastContainerInvalidated;
 
@@ -125,7 +126,7 @@ abstract public class AttributeCache<T>
         }
     }
 
-    private static void storeInCache(long transactionCount, CacheKey key, Map.Entry<Integer, String>[] value)
+    private static void storeInCache(long transactionCount, CacheKey key, FlowEntry[] value)
     {
         synchronized(_cache)
         {
@@ -141,7 +142,7 @@ abstract public class AttributeCache<T>
         }
     }
 
-    private Map.Entry<Integer, String>[] getFromCache(CacheKey key)
+    private FlowEntry[] getFromCache(CacheKey key)
     {
         synchronized(_cache)
         {
@@ -149,7 +150,7 @@ abstract public class AttributeCache<T>
         }
     }
 
-    public Map<T, Integer> getAttrValues(Container container, ColumnInfo colDataId)
+    private SQLFragment createCacheKeySql(Container container, ColumnInfo colDataid)
     {
         SQLFragment sql = new SQLFragment();
 
@@ -180,17 +181,17 @@ abstract public class AttributeCache<T>
         AttributeType type = type();
         if (type == AttributeType.statistic)
         {
-            sql.append("SELECT id AS attrId FROM " + FlowManager.get().getTinfoStatisticAttr() + " WHERE container=?");
+            sql.append("SELECT RowId AS attrId FROM " + FlowManager.get().getTinfoStatisticAttr() + " WHERE container=?");
             sql.add(container.getId());
         }
         else if (type == AttributeType.graph)
         {
-            sql.append("SELECT id AS attrId FROM " + FlowManager.get().getTinfoGraphAttr() + " WHERE container=?");
+            sql.append("SELECT RowId AS attrId FROM " + FlowManager.get().getTinfoGraphAttr() + " WHERE container=?");
             sql.add(container.getId());
         }
         else if (type == AttributeType.keyword)
         {
-            sql.append("SELECT id AS attrId FROM " + FlowManager.get().getTinfoKeywordAttr() + " WHERE container=?");
+            sql.append("SELECT RowId AS attrId FROM " + FlowManager.get().getTinfoKeywordAttr() + " WHERE container=?");
             sql.add(container.getId());
         }
         else
@@ -210,19 +211,25 @@ abstract public class AttributeCache<T>
 //        SQLFragment sql = new SQLFragment();
 //        sql.append("SELECT rowid\nFROM flow.attribute");
 
+        return sql;
+    }
+
+    public Map<T, Integer> getAttrValues(Container container, ColumnInfo colDataId, boolean includeAliases)
+    {
+        SQLFragment sql = createCacheKeySql(container, colDataId);
         CacheKey key = new CacheKey(container, sql.getSQL(), sql.getParams().toArray());
-        Map.Entry<Integer, String>[] entries = getFromCache(key);
+        FlowEntry[] entries = getFromCache(key);
         if (entries != null)
         {
-            return mapFromEntries(entries);
+            return mapFromEntries(entries, includeAliases);
         }
         try
         {
             long transactionCount = getTransactionCount();
             Integer[] ids = Table.executeArray(FlowManager.get().getSchema(), sql, Integer.class);
-            entries = FlowManager.get().getAttributeNames(type, ids);
+            entries = FlowManager.get().getAttributeEntry(type(), ids);
             storeInCache(transactionCount, key, entries);
-            return mapFromEntries(entries);
+            return mapFromEntries(entries, includeAliases);
         }
         catch (SQLException e)
         {
@@ -231,14 +238,15 @@ abstract public class AttributeCache<T>
         }
     }
 
-    private Map<T, Integer> mapFromEntries(Map.Entry<Integer, String>[] entries)
+    private Map<T, Integer> mapFromEntries(FlowEntry[] entries, boolean includeAliases)
     {
         TreeMap<T, Integer> ret = new TreeMap<T, Integer>();
-        for (Map.Entry<Integer, String> entry : entries)
+        for (FlowEntry entry : entries)
         {
-            ret.put(keyFromString(entry.getValue()), entry.getKey());
+            if (includeAliases || !entry.isAlias())
+                ret.put(keyFromString(entry._name), entry._rowId);
         }
-        return ret;
+        return Collections.unmodifiableMap(ret);
     }
 
     abstract protected T keyFromString(String str);

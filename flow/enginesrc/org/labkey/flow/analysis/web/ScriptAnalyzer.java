@@ -307,7 +307,7 @@ public class ScriptAnalyzer
             }
             else if (gate instanceof OrGate)
             {
-                fillGateList(gateListDef.addNewAnd(), (OrGate) gate);
+                fillGateList(gateListDef.addNewOr(), (OrGate) gate);
             }
             else if (gate instanceof SubsetRef)
             {

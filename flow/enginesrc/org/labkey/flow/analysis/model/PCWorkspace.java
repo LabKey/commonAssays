@@ -34,6 +34,7 @@ public class PCWorkspace extends FlowJoWorkspace
         {
             readGroups(elGroups);
         }
+        postProcess();
     }
 
     protected void readSample(Element elSample)

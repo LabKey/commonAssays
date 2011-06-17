@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005-2008 LabKey Corporation
+ * Copyright (c) 2005-2011 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,19 @@
 
 package org.labkey.flow.analysis.model;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
 abstract public class GateList extends Gate
 {
     protected List<Gate> _gates = new ArrayList();
+
+    protected GateList(Gate... gates)
+    {
+        _gates.addAll(Arrays.asList(gates));
+    }
+
     public List<Gate> getGates()
     {
         return _gates;
@@ -49,4 +56,5 @@ abstract public class GateList extends Gate
         }
         return false;
     }
+
 }

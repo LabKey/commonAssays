@@ -16,13 +16,19 @@
 
 package org.labkey.flow.analysis.model;
 
-import java.io.Serializable;
+import org.labkey.flow.analysis.web.SubsetExpression;
 
 /**
  * User: kevink
- * Date: May 11, 2011
+ * Date: 6/11/11
  */
-public interface SubsetPart extends Serializable
+public interface SubsetExpressionGate
 {
-    public String toString(boolean escaped);
+    /**
+     * Create a SubsetExpression from this Gate.  Only gates contributing to
+     * a boolean expression are supported.  This is used to create a backwards
+     * compatible SubsetExpression string from a boolean gate.
+     * @return
+     */
+    abstract public SubsetExpression createTerm();
 }

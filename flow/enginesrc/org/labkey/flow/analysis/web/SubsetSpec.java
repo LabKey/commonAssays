@@ -16,15 +16,13 @@
 
 package org.labkey.flow.analysis.web;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.SubsetPart;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 
 public class SubsetSpec implements Serializable
 {
@@ -37,39 +35,28 @@ public class SubsetSpec implements Serializable
     }
 
     final SubsetSpec _parent;
-    final PopulationName _subset;
-    final SubsetExpression _expr;
+    final SubsetPart _subset;
 
-    public SubsetSpec(SubsetSpec parent, PopulationName subset)
+    public SubsetSpec(SubsetSpec parent, @NotNull SubsetPart part)
     {
         _parent = parent;
-        _subset = subset;
-        _expr = null;
-        if (_parent != null && _parent.isExpression())
-        {
-            throw new SubsetFormatException(toString(), "Subset expressions must be last");
-        }
+        _subset = part;
+        // NOT SURE: Disable the following check to allow subset expression mid-subsetspec so we can generate aliases from boolean gates.
+        // NOT SURE: The alias isn't needed for backward compat so we could just ignore these aliases.
+        //if (_parent != null && _parent.isExpression())
+        //{
+        //    throw new SubsetFormatException(toString(), "Subset expressions must be last");
+        //}
     }
 
-    public SubsetSpec(SubsetSpec parent, SubsetExpression expr)
+    public SubsetSpec createChild(@NotNull SubsetPart part)
     {
-        _parent = parent;
-        _subset = null;
-        _expr = expr;
-        if (_parent != null && _parent.isExpression())
-        {
-            throw new SubsetFormatException(toString(), "Subset expressions must be last");
-        }
+        return new SubsetSpec(this, part);
     }
 
-    public SubsetSpec createChild(PopulationName subset)
+    public SubsetSpec createChild(@NotNull SubsetSpec spec)
     {
-        return new SubsetSpec(this, subset);
-    }
-
-    public SubsetSpec createChild(SubsetExpression expr)
-    {
-        return new SubsetSpec(this, expr);
+        return spec.addRoot(this);
     }
 
     /**
@@ -78,7 +65,7 @@ public class SubsetSpec implements Serializable
      * @param rawStrings
      * @return
      */
-    static public SubsetSpec fromParts(String[] rawStrings)
+    static public SubsetSpec fromParts(String... rawStrings)
     {
         if (rawStrings == null || rawStrings.length == 0)
             return null;
@@ -137,28 +124,32 @@ public class SubsetSpec implements Serializable
         SubsetPart[] parents = _parent.getSubsets();
         SubsetPart[] ret = new SubsetPart[parents.length + 1];
         System.arraycopy(parents, 0, ret, 0, parents.length);
-        ret[parents.length] = _subset != null ? _subset : _expr;
+        ret[parents.length] = _subset;
         return ret;
     }
 
     public SubsetPart getSubset()
     {
-        return _subset != null ? _subset : _expr;
+        return _subset;
     }
 
     public PopulationName getPopulationName()
     {
-        return _subset;
+        if (_subset instanceof PopulationName)
+            return (PopulationName) _subset;
+        return null;
     }
 
     public SubsetExpression getExpression()
     {
-        return _expr;
+        if (_subset instanceof SubsetExpression)
+            return (SubsetExpression) _subset;
+        return null;
     }
 
     public int hashCode()
     {
-        int ret = _subset != null ? _subset.hashCode() : _expr.hashCode();
+        int ret = _subset.hashCode();
         if (_parent != null)
         {
             ret ^= _parent.hashCode();
@@ -182,17 +173,7 @@ public class SubsetSpec implements Serializable
                 return false;
         }
 
-        if (_subset == null && other._subset != null)
-            return false;
-        if (_subset != null && !_subset.equals(other._subset))
-            return false;
-
-        if (_expr == null && other._expr != null)
-            return false;
-        if (_expr != null && !_expr.equals(other._expr))
-            return false;
-
-        return true;
+        return _subset.equals(other._subset);
     }
 
 	private transient String _toString = null;
@@ -220,11 +201,17 @@ public class SubsetSpec implements Serializable
         if (_parent != null)
             sb.append(_parent.toString(escaped)).append("/");
 
-        assert (_subset == null && _expr != null) ||  (_subset != null && _expr == null);
-        if (_subset != null)
-            sb.append(_subset.toString(escaped));
-        else
-            sb.append("(").append(_expr.toString(escaped)).append(")");
+        if (_subset instanceof PopulationName)
+        {
+            sb.append(((PopulationName)_subset).toString(escaped));
+        }
+        else if (_subset instanceof SubsetExpression)
+        {
+            String s = ((SubsetExpression)_subset).toString(_parent, escaped);
+            if (!s.startsWith("(") && !s.endsWith(")"))
+                s = "(" + s + ")";
+            sb.append(s);
+        }
 
         return sb.toString();
     }
@@ -296,7 +283,7 @@ public class SubsetSpec implements Serializable
 
     public boolean isExpression()
     {
-        return _expr != null;
+        return _subset instanceof SubsetExpression;
     }
 
     public boolean hasAncestor(SubsetSpec spec)

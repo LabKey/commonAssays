@@ -59,31 +59,28 @@ abstract public class SubsetExpression implements SubsetPart
 
     public String toString(boolean escaped)
     {
-        if (_grouped)
-            return "(" + _toString(escaped) + ")";
-        return _toString(escaped);
+        return toString(null, escaped);
     }
 
-    abstract protected String _toString(boolean escaped);
+    public String toString(SubsetSpec parent, boolean escaped)
+    {
+        if (_grouped)
+            return "(" + _toString(parent, escaped) + ")";
+        return _toString(parent, escaped);
+    }
+
+    abstract protected String _toString(SubsetSpec parent, boolean escaped);
 
     abstract public BitSet apply(Subset subset, PopulationSet populationSet);
 
-    abstract public void visit(Visitor v);
+    abstract public <U> U reduce(Transform<U> transformer);
 
-    public interface Visitor
+    public interface Transform<U>
     {
-        void and(SubsetExpression.AndTerm term);
-        void or(SubsetExpression.OrTerm term);
-        void not(SubsetExpression.NotTerm term);
-        void subset(SubsetExpression.SubsetTerm term);
-    }
-
-    public abstract static class AbstractVisitor implements Visitor
-    {
-        public void and(AndTerm term) { }
-        public void or(OrTerm term) { }
-        public void not(NotTerm term) { }
-        public void subset(SubsetTerm term) { }
+        U and(SubsetExpression.AndTerm term, U leftResult, U rightResult);
+        U or(SubsetExpression.OrTerm term, U leftResult, U rightResult);
+        U not(SubsetExpression.NotTerm term, U notResult);
+        U subset(SubsetExpression.SubsetTerm term);
     }
 
     abstract static public class BinaryTerm extends SubsetExpression
@@ -97,11 +94,12 @@ abstract public class SubsetExpression implements SubsetPart
         }
 
         @Override
-        public void visit(Visitor v)
+        public <U> U reduce(Transform<U> transformer)
         {
-            _left.visit(v);
-            _right.visit(v);
+            return _reduce(transformer, _left.reduce(transformer), _right.reduce(transformer));
         }
+
+        protected abstract <U> U _reduce(Transform<U> transformer, U left, U right);
 
         @Override
         public boolean equals(Object o)
@@ -142,16 +140,15 @@ abstract public class SubsetExpression implements SubsetPart
         }
 
         @Override
-        public void visit(Visitor v)
+        public <U> U _reduce(Transform<U> transformer, U left, U right)
         {
-            v.or(this);
-            super.visit(v);
+            return transformer.or(this, left, right);
         }
 
         @Override
-        protected String _toString(boolean escaped)
+        protected String _toString(SubsetSpec parent, boolean escaped)
         {
-            return _left.toString(escaped) + "|" + _right.toString(escaped);
+            return _left.toString(parent, escaped) + "|" + _right.toString(parent, escaped);
         }
     }
     
@@ -170,16 +167,15 @@ abstract public class SubsetExpression implements SubsetPart
         }
 
         @Override
-        public void visit(Visitor v)
+        public <U> U _reduce(Transform<U> transformer, U left, U right)
         {
-            v.and(this);
-            super.visit(v);
+            return transformer.and(this, left, right);
         }
 
         @Override
-        protected String _toString(boolean escaped)
+        protected String _toString(SubsetSpec parent, boolean escaped)
         {
-            return _left.toString(escaped) + "&" + _right.toString(escaped);
+            return _left.toString(parent, escaped) + "&" + _right.toString(parent, escaped);
         }
     }
 
@@ -198,16 +194,15 @@ abstract public class SubsetExpression implements SubsetPart
         }
 
         @Override
-        public void visit(Visitor v)
+        public <U> U reduce(Transform<U> transformer)
         {
-            v.not(this);
-            _term.visit(v);
+            return transformer.not(this, _term.reduce(transformer));
         }
 
         @Override
-        protected String _toString(boolean escaped)
+        protected String _toString(SubsetSpec parent, boolean escaped)
         {
-            return "!" + _term.toString(escaped);
+            return "!" + _term.toString(parent, escaped);
         }
 
         @Override
@@ -249,9 +244,9 @@ abstract public class SubsetExpression implements SubsetPart
         }
 
         @Override
-        public void visit(Visitor v)
+        public <U> U reduce(Transform<U> transformer)
         {
-            v.subset(this);
+            return transformer.subset(this);
         }
 
         public BitSet apply(Subset subset, PopulationSet populationSet)
@@ -295,8 +290,13 @@ abstract public class SubsetExpression implements SubsetPart
         }
 
         @Override
-        protected String _toString(boolean escaped)
+        protected String _toString(SubsetSpec parent, boolean escaped)
         {
+            // Emit just the last subset part if this spec matches the passed in parent.
+            // UNDONE: support relative paths other than just parent (e.g, using backslashes for parents like FlowJo xml)
+            if (parent != null && parent.equals(_spec.getParent()))
+                return _spec.getSubset().toString(escaped);
+
             return _spec.toString(escaped);
         }
 

@@ -113,9 +113,9 @@ public class FlowController extends BaseFlowController
         {
             public void run()
             {
-                AttributeCache.STATS.getAttrValues(c, null);
-                AttributeCache.GRAPHS.getAttrValues(c, null);
-                AttributeCache.KEYWORDS.getAttrValues(c, null);
+                AttributeCache.STATS.getAttrValues(c, null, false);
+                AttributeCache.GRAPHS.getAttrValues(c, null, false);
+                AttributeCache.KEYWORDS.getAttrValues(c, null, false);
             }
         };
         JobRunner.getDefault().execute(r);

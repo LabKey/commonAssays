@@ -26,7 +26,7 @@ import org.labkey.flow.view.GraphColumn;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 
-import java.util.Collection;
+import java.util.Map;
 
 public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
 {
@@ -44,9 +44,9 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         return AttributeType.graph;
     }
 
-    protected Collection<GraphSpec> getAttributes()
+    protected Map<GraphSpec, Integer> getAttributes()
     {
-        return _fps.getGraphProperties().keySet();
+        return _fps.getGraphProperties();
     }
 
     protected GraphSpec attributeFromString(String field)
@@ -61,12 +61,17 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         }
     }
 
-    protected void initColumn(final GraphSpec spec, ColumnInfo column)
+    protected void initColumn(final GraphSpec spec, String preferredName, ColumnInfo column)
     {
         column.setSqlTypeName("INTEGER");
         SubsetSpec subset = _fps.simplifySubset(spec.getSubset());
         GraphSpec captionSpec = new GraphSpec(subset, spec.getParameters());
         column.setLabel(captionSpec.toString());
+        if (preferredName != null)
+        {
+            column.setDescription("Alias for '" + preferredName + "'");
+            column.setHidden(true);
+        }
         column.setFk(new AbstractForeignKey() {
             public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
             {
