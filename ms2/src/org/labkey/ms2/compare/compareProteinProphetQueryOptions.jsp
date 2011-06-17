@@ -79,14 +79,7 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
     <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.orCriteriaForEachRun %>" value="false" <%= !form.isOrCriteriaForEachRun() ? " checked=\"true\"" : "" %> /> only show the protein if it meets the filter criteria in that run/fraction.</div>
     <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.orCriteriaForEachRun %>" value="true" <%= form.isOrCriteriaForEachRun() ? " checked=\"true\"" : "" %> /> show the protein if the run/fraction contains that protein and the protein meets the filter criteria in any of the compared runs/fractions.</div>
 
-    <%
-    if (MultiValuedForeignKey.isSupported(MS2Manager.getSqlDialect()))
-    {
-    %>
     <p style="width:100%" class="labkey-title-area-line"></p>
-    <div class="labkey-indented"><input type="checkbox" name="normalizeProteinGroups" <%= form.isNormalizeProteinGroups() ? " checked=\"true\"" : "" %> value="true" /> Normalize protein groups across runs</div><%
-    }
-
-    %>
+    <div class="labkey-indented"><input type="checkbox" name="normalizeProteinGroups" <%= form.isNormalizeProteinGroups() ? " checked=\"true\"" : "" %> value="true" /> Normalize protein groups across runs</div>
     <p><labkey:button text="Compare"/></p>
 </form>
