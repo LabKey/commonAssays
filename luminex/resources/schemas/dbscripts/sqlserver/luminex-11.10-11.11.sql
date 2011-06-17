@@ -24,7 +24,8 @@ WHERE
 	ps."set" = p."set" AND
 	ps.category = 'SiteConfig' AND
 	ps.objectid = c.entityid AND
-	c.name IS NULL AND c.parent IS NULL), 'localhost') + ':LuminexDataRow:' + RowId;
+	c.name IS NULL AND c.parent IS NULL), 'localhost') + ':LuminexDataRow:' + CAST(RowId AS NVARCHAR)
+GO
 
 ALTER TABLE luminex.datarow ALTER COLUMN LSID LSIDType NOT NULL
 GO
