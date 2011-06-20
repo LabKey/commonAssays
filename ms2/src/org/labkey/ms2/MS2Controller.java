@@ -4430,7 +4430,18 @@ public class MS2Controller extends SpringActionController
             {
                 allPeptidesQueryFilter = getAllPeptidesFilter(getViewContext(), targetURL, run);
                 gridView = peptideView.createGridView(allPeptidesQueryFilter);
-                peptides = Table.executeArray(gridView.getTable(), "Peptide", allPeptidesQueryFilter, new Sort("Peptide"), String.class);
+                try
+                {
+                    peptides = Table.executeArray(gridView.getTable(), "Peptide", allPeptidesQueryFilter, new Sort("Peptide"), String.class);
+                }
+                catch (RuntimeSQLException e)
+                {
+                    if (e.getSQLException() instanceof SQLGenerationException)
+                    {
+                        throw new NotFoundException("Invalid filter " + e.getSQLException().toString());
+                    }
+                    throw e;
+                }
             }
 
             for (int i = 0; i < proteinCount; i++)
