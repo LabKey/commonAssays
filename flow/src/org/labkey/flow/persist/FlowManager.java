@@ -264,17 +264,16 @@ public class FlowManager
 
     private void quickFillCache(AttributeType type)
     {
-        ResultSet rs = null;
         try
         {
-            rs = Table.executeQuery(getSchema(), "SELECT RowId, Container, Name, Id FROM " + attributeTable(type), null, Table.ALL_ROWS, false);
-            while (rs.next())
+            Map<String, Object>[] rows = Table.selectMaps(attributeTable(type), new HashSet<String>(Arrays.asList("RowId", "Container", "Name", "Id")), null, null);
+            for (Map<String, Object> row : rows)
             {
-                int rowid = rs.getInt(1);
-                String containerId = rs.getString(2);
+                Integer rowid = (Integer)row.get("RowId");
+                String containerId = (String)row.get("Container");
                 Container container = ContainerManager.getForId(containerId);
-                String name = rs.getString(3);
-                Integer aliasId = rs.getInt(4);
+                String name = (String)row.get("Name");
+                Integer aliasId = (Integer)row.get("Id");
                 FlowEntry entry = new FlowEntry(type, rowid, container, name, aliasId);
                 _attrNameCacheMap.put(new IdCacheKey(type, rowid), entry);
                 _attrIdCacheMap.put(new NameCacheKey(containerId, type, name), entry);
@@ -284,10 +283,6 @@ public class FlowManager
         {
             _log.error("Unexpected error", e);
             // fall through;
-        }
-        finally
-        {
-            ResultSetUtil.close(rs);
         }
     }
 
