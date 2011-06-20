@@ -58,7 +58,7 @@ public class SequestParamsBuilder
 
     public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot)
     {
-        this(sequestInputParams, sequenceRoot, SequestParams.Variant.sequest, null);
+        this(sequestInputParams, sequenceRoot, SequestParams.Variant.thermosequest, null);
     }
 
     public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot, SequestParams.Variant variant, List<File> databaseFiles)

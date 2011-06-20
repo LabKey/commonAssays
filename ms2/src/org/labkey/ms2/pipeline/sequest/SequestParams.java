@@ -33,7 +33,9 @@ public class SequestParams extends Params
 
     public enum Variant
     {
-        sequest("[SEQUEST]", "first_database_name"),
+        thermosequest("[SEQUEST]", "first_database_name"),
+        uwsequest("[SEQUEST]", "database_name"),
+        sequest("[SEQUEST]", "database_name"),
         makedb("[MAKEDB]", "database_name");
 
         private final String _header;

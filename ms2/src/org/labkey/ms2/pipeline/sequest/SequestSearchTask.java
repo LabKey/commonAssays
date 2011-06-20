@@ -327,7 +327,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             // Write out sequest.params file
             File fileWorkParams = _wd.newFile(SEQUEST_PARAMS);
 
-            SequestParamsBuilder builder = new SequestParamsBuilder(params, getJob().getSequenceRootDirectory(), SequestParams.Variant.sequest, sequenceFiles);
+            SequestParamsBuilder builder = new SequestParamsBuilder(params, getJob().getSequenceRootDirectory(), SequestParams.Variant.thermosequest, sequenceFiles);
             builder.initXmlValues();
             builder.writeFile(fileWorkParams);
 
@@ -350,7 +350,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             boolean copySequestLogFile = true;
             try
             {
-                getJob().runSubProcess(sequestPB, dirOutputDta, sequestLogFileWork, 200);
+                getJob().runSubProcess(sequestPB, dirOutputDta, sequestLogFileWork, 200, false);
 
                 // Convert to pepXML using out2xml
                 List<String> out2XMLArgs = new ArrayList<String>();
