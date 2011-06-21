@@ -141,8 +141,9 @@ if(any(standardRecs) & length(standards) > 0){
                 run.data$se[runDataIndex] = se;
             }
 
-            # TODO: WHAT TO DO WITH SE = INF?
-            run.data$se[run.data$se == "Inf"] = NA;
+            # convert Inf and -Inf to Java string representation for DB persistance
+            run.data$se[run.data$se == "Inf"] = "Infinity";
+            run.data$se[run.data$se == "-Inf"] = "-Infinity";
         }
     }
 }
