@@ -141,7 +141,7 @@ public class FlowManager
 
                 Integer i = rs.getInt("RowId");
                 Integer aliasId = rs.getInt("Id");
-                a = new FlowEntry(type, i, container, attr, aliasId);
+                a = new FlowEntry(type, i, container.getId(), attr, aliasId);
                 _attrIdCacheMap.put(key, a);
                 _attrNameCacheMap.put(new IdCacheKey(type, i), a);
                 return i.intValue();
@@ -206,12 +206,12 @@ public class FlowManager
                         return null;
                     }
                     String name = (String)row.get("Name");
-                    Container container = ContainerManager.getForId((String)row.get("Container"));
+                    String containerId = (String)row.get("Container");
                     Integer aliasId = (Integer)row.get("Id");
-                    entry = new FlowEntry(type, id, container, name, aliasId);
+                    entry = new FlowEntry(type, id, containerId, name, aliasId);
 
                     _attrNameCacheMap.put(key, entry);
-                    _attrIdCacheMap.put(new NameCacheKey(container.getId(), type, name), entry);
+                    _attrIdCacheMap.put(new NameCacheKey(containerId, type, name), entry);
                 }
                 catch (SQLException e)
                 {
@@ -243,15 +243,15 @@ public class FlowManager
     {
         public final AttributeType _type;
         public final Integer _rowId;
-        public final Container _container;
+        public final String _containerId;
         public final String _name;
         public final Integer _aliasId;
 
-        public FlowEntry(@NotNull AttributeType type, @NotNull Integer rowId, @NotNull Container container, @NotNull String name, @NotNull Integer aliasId)
+        public FlowEntry(@NotNull AttributeType type, @NotNull Integer rowId, @NotNull String containerId, @NotNull String name, @NotNull Integer aliasId)
         {
             _type = type;
             _rowId = rowId;
-            _container = container;
+            _containerId = containerId;
             _name = name;
             _aliasId = aliasId;
         }
@@ -271,10 +271,9 @@ public class FlowManager
             {
                 Integer rowid = (Integer)row.get("RowId");
                 String containerId = (String)row.get("Container");
-                Container container = ContainerManager.getForId(containerId);
                 String name = (String)row.get("Name");
                 Integer aliasId = (Integer)row.get("Id");
-                FlowEntry entry = new FlowEntry(type, rowid, container, name, aliasId);
+                FlowEntry entry = new FlowEntry(type, rowid, containerId, name, aliasId);
                 _attrNameCacheMap.put(new IdCacheKey(type, rowid), entry);
                 _attrIdCacheMap.put(new NameCacheKey(containerId, type, name), entry);
             }
