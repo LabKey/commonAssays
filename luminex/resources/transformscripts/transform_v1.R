@@ -14,6 +14,8 @@
 # uses the given Standard curve data to calculate est.log.conc an se for the unknowns.
 #
 
+# Author: Cory Nathe, LabKey
+
 source("${srcDirectory}/youtil.R");
 source("${srcDirectory}/rumi.R");
 

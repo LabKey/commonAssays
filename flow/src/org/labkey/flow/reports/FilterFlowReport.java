@@ -42,6 +42,7 @@ import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.ICSMetadata;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -228,6 +229,7 @@ public abstract class FilterFlowReport extends FlowReport
         int size = rs.getSize();
         ArrayList<Map<String, Object>> rows = new ArrayList<Map<String, Object>>(size);
         rs.beforeFirst();
+
         while (rs.next())
         {
             Date d = rs.getTimestamp(col);
@@ -235,15 +237,19 @@ public abstract class FilterFlowReport extends FlowReport
                 continue;
             rows.add(rs.getRowMap());
         }
+
         CachedRowSetImpl ret;
+
         if (rs.getSize() == rows.size())
             ret = rs;
         else
         {
-            ret = new CachedRowSetImpl(rs.getMetaData(), rows, true);
+            ret = new CachedRowSetImpl(rs.getMetaData(), false, rows, true);
             rs.close();
         }
+
         ret.beforeFirst();
+
         return ret;
     }
 

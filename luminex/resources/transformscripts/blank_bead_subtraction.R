@@ -9,6 +9,8 @@
 # values that are <= 0 to 1 (as per the lab's request).
 #
 
+# Author: Cory Nathe, LabKey
+
 # set up a data frame to store the run properties
 run.props = data.frame(NA, NA, NA, NA);
 colnames(run.props) = c("name", "val1", "val2", "val3");

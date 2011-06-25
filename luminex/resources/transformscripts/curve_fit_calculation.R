@@ -9,6 +9,8 @@
 # for the unknowns.
 #
 
+# Author: Cory Nathe, LabKey
+
 source("${srcDirectory}/youtil.R");
 source("${srcDirectory}/rumi.R");
 
