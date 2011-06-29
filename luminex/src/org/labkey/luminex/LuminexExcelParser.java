@@ -341,7 +341,7 @@ public class LuminexExcelParser
                         {
                             dataRow.setWellRole("Control");
                         }
-                        if (upper.startsWith("U"))
+                        if (upper.startsWith("U") || upper.startsWith("X"))
                         {
                             dataRow.setWellRole("Unknown");
                         }

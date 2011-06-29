@@ -19,6 +19,7 @@ package org.labkey.luminex;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
@@ -40,11 +41,15 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
+import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.UnexpectedException;
@@ -53,6 +58,8 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.view.ViewContext;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -453,5 +460,23 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 throw new UnexpectedException(e);
             }
         }
+    }
+
+    @Override
+    public ResultsQueryView createResultsQueryView(ViewContext context, ExpProtocol protocol)
+    {
+        UserSchema schema = QueryService.get().getUserSchema(context.getUser(), context.getContainer(), AssaySchema.NAME);
+        String name = AssayService.get().getResultsTableName(protocol);
+        QuerySettings settings = schema.getSettings(context, name, name);
+        return new ResultsQueryView(protocol, context, settings)
+        {
+            @Override
+            protected DataRegion createDataRegion()
+            {
+                ResultsDataRegion rgn = new LuminexResultsDataRegion(_provider);
+                initializeDataRegion(rgn);
+                return rgn;
+            }
+        };
     }
 }

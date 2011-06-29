@@ -52,6 +52,45 @@
         </columns>
     </table>
 
+    <table tableName="WellExclusion" tableDbType="TABLE">
+        <columns>
+            <column columnName="RowId" />
+            <column columnName="Description" />
+            <column columnName="Dilution" />
+            <column columnName="DataId" />
+            <column columnName="Comment" />
+            <column columnName="CreatedBy" />
+            <column columnName="Created" />
+            <column columnName="ModifiedBy" />
+            <column columnName="Modified" />
+        </columns>
+    </table>
+
+    <table tableName="WellExclusionAnalyte" tableDbType="TABLE">
+        <columns>
+            <column columnName="AnalyteId" />
+            <column columnName="WellExclusionId" />
+        </columns>
+    </table>
+
+    <table tableName="RunExclusion" tableDbType="TABLE">
+        <columns>
+            <column columnName="RunId" />
+            <column columnName="Comment" />
+            <column columnName="CreatedBy" />
+            <column columnName="Created" />
+            <column columnName="ModifiedBy" />
+            <column columnName="Modified" />
+        </columns>
+    </table>
+
+    <table tableName="RunExclusionAnalyte" tableDbType="TABLE">
+        <columns>
+            <column columnName="RunId" />
+            <column columnName="AnalyteId" />
+        </columns>
+    </table>
+
     <table tableName="DataRow" tableDbType="TABLE">
         <columns>
             <column columnName="RowId">

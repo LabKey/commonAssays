@@ -41,6 +41,10 @@ public class LuminexSchema extends AssaySchema
     private static final String ANALYTE_TITRATION_TABLE_NAME = "AnalyteTitration";
     private static final String DATA_ROW_TABLE_NAME = "DataRow";
     private static final String DATA_FILE_TABLE_NAME = "DataFile";
+    private static final String WELL_EXCLUSION_TABLE_NAME = "WellExclusion";
+    private static final String WELL_EXCLUSION_ANALYTE_TABLE_NAME = "WellExclusionAnalyte";
+    private static final String RUN_EXCLUSION_TABLE_NAME = "RunExclusion";
+    private static final String RUN_EXCLUSION_ANALYTE_TABLE_NAME = "RunExclusionAnalyte";
 
     public LuminexSchema(User user, Container container, ExpProtocol protocol)
     {
@@ -51,7 +55,13 @@ public class LuminexSchema extends AssaySchema
     public Set<String> getTableNames()
     {
         // return only additional tables not exposed in the assay schema.
-        return PageFlowUtil.set(prefixTableName(ANALYTE_TABLE_NAME), prefixTableName(TITRATION_TABLE_NAME), prefixTableName(DATA_FILE_TABLE_NAME));
+        return PageFlowUtil.set(
+                prefixTableName(ANALYTE_TABLE_NAME),
+                prefixTableName(TITRATION_TABLE_NAME),
+                prefixTableName(DATA_FILE_TABLE_NAME),
+                prefixTableName(WELL_EXCLUSION_TABLE_NAME),
+                prefixTableName(RUN_EXCLUSION_TABLE_NAME)
+        );
     }
 
     private String prefixTableName(String table)
@@ -83,8 +93,40 @@ public class LuminexSchema extends AssaySchema
                 result.addCondition(filter, "RowId");
                 return result;
             }
+            if (WELL_EXCLUSION_TABLE_NAME.equalsIgnoreCase(name))
+            {
+                FilteredTable result = createWellExclusionTable();
+                SQLFragment filter = new SQLFragment("DataId");
+                filter.append(createDataFilterInClause());
+                result.addCondition(filter, "DataId");
+                return result;
+            }
+            if (RUN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(name))
+            {
+                FilteredTable result = createRunExclusionTable();
+                SQLFragment filter = new SQLFragment("RunId");
+                filter.append(createDataFilterInClause());
+                result.addCondition(filter, "RunId");
+                return result;
+            }
         }
         return null;
+    }
+
+    private FilteredTable createWellExclusionTable()
+    {
+        FilteredTable result = new FilteredTable(getTableInfoAnalyteTitration());
+        result.wrapAllColumns(true);
+        
+        return result;
+    }
+
+    private FilteredTable createRunExclusionTable()
+    {
+        FilteredTable result = new FilteredTable(getTableInfoRunExclusion());
+        result.wrapAllColumns(true);
+
+        return result;
     }
 
     protected TableInfo createAnalyteTable(boolean filterTable)
@@ -252,6 +294,22 @@ public class LuminexSchema extends AssaySchema
         return filter;
     }
 
+    protected SQLFragment createRunFilterInClause()
+    {
+        SQLFragment filter = new SQLFragment(" IN (SELECT r.RowId FROM ");
+        filter.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+        // TODO - make this respect container filters
+        filter.append(" WHERE r.Container = ?");
+        filter.add(getContainer().getId());
+        if (getProtocol() != null)
+        {
+            filter.append(" AND r.ProtocolLSID = ?");
+            filter.add(getProtocol().getLSID());
+        }
+        filter.append(") ");
+        return filter;
+    }
+
     public static DbSchema getSchema()
     {
         return DbSchema.get("luminex");
@@ -275,5 +333,25 @@ public class LuminexSchema extends AssaySchema
     public static TableInfo getTableInfoAnalyteTitration()
     {
         return getSchema().getTable(ANALYTE_TITRATION_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoRunExclusion()
+    {
+        return getSchema().getTable(RUN_EXCLUSION_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoWellExclusion()
+    {
+        return getSchema().getTable(WELL_EXCLUSION_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoWellExclusionAnalyte()
+    {
+        return getSchema().getTable(WELL_EXCLUSION_ANALYTE_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoRunExclusionAnalyte()
+    {
+        return getSchema().getTable(RUN_EXCLUSION_ANALYTE_TABLE_NAME);
     }
 }

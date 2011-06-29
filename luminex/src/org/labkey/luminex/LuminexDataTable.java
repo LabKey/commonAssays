@@ -20,6 +20,7 @@ import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerForeignKey;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.OORDisplayColumnFactory;
 import org.labkey.api.data.Parameter;
 import org.labkey.api.data.SQLFragment;
@@ -30,11 +31,13 @@ import org.labkey.api.etl.DataIterator;
 import org.labkey.api.etl.Pump;
 import org.labkey.api.etl.TableInsertDataIterator;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
@@ -47,6 +50,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -57,6 +61,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
 {
     private final LuminexSchema _schema;
     private LuminexAssayProvider _provider;
+    public static final String FLAGGED_AS_EXCLUDED_COLUMN_NAME = "FlaggedAsExcluded";
 
     public LuminexDataTable(LuminexSchema schema)
     {
@@ -125,12 +130,50 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         containerColumn.setHidden(true);
         containerColumn.setFk(new ContainerForeignKey());
 
+        SQLFragment exclusionUnionSQL = new SQLFragment();
+        exclusionUnionSQL.append("SELECT we.Comment, we.Modified, we.ModifiedBy, we.Created, we.CreatedBy FROM ");
+        exclusionUnionSQL.append(LuminexSchema.getTableInfoWellExclusion(), "we");
+        exclusionUnionSQL.append(", ");
+        exclusionUnionSQL.append(LuminexSchema.getTableInfoWellExclusionAnalyte(), "wea");
+        exclusionUnionSQL.append(" WHERE we.RowId = wea.WellExclusionId AND ");
+        exclusionUnionSQL.append(" (we.Description = " + ExprColumn.STR_TABLE_ALIAS + ".Description OR (we.Description IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Description IS NULL)) AND ");
+        exclusionUnionSQL.append("(we.Dilution = " + ExprColumn.STR_TABLE_ALIAS + ".Dilution OR (we.Dilution IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Dilution IS NULL)) AND ");
+        exclusionUnionSQL.append("(we.DataId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId OR (we.DataId IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".DataId IS NULL)) AND ");
+        exclusionUnionSQL.append("(wea.AnalyteId IS NULL OR wea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
+        exclusionUnionSQL.append("UNION SELECT re.Comment, re.Modified, re.ModifiedBy, re.Created, re.CreatedBy FROM ");
+        exclusionUnionSQL.append(LuminexSchema.getTableInfoRunExclusion(), "re");
+        exclusionUnionSQL.append(", ");
+        exclusionUnionSQL.append(LuminexSchema.getTableInfoRunExclusionAnalyte(), "rea");
+        exclusionUnionSQL.append(", ");
+        exclusionUnionSQL.append(ExperimentService.get().getTinfoData(), "d");
+        exclusionUnionSQL.append(", ");
+        exclusionUnionSQL.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
+        exclusionUnionSQL.append(" WHERE re.RunId = rea.RunId AND re.RunId = pa.RunId AND pa.RowId = d.SourceApplicationId AND d.RowId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId AND ");
+        exclusionUnionSQL.append(" (rea.AnalyteId IS NULL OR rea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
+
+        SQLFragment excludedSQL = new SQLFragment("CASE WHEN (SELECT COUNT(*) FROM (");
+        excludedSQL.append(exclusionUnionSQL);
+        excludedSQL.append(") x) = 0 THEN ? ELSE ? END ");
+        excludedSQL.add(Boolean.FALSE);
+        excludedSQL.add(Boolean.TRUE);
+        ExprColumn exclusionColumn = new ExprColumn(this, FLAGGED_AS_EXCLUDED_COLUMN_NAME, excludedSQL, JdbcType.BOOLEAN);
+        exclusionColumn.setFormat("yes;no;");
+        addColumn(exclusionColumn);
+
+        SQLFragment exclusionCommentSQL = new SQLFragment("(SELECT MIN(Comment) FROM (");
+        exclusionCommentSQL.append(exclusionUnionSQL);
+        exclusionCommentSQL.append(") x)");
+        ExprColumn exclusionReasonColumn = new ExprColumn(this, "ExclusionComment", exclusionCommentSQL, JdbcType.VARCHAR);
+        addColumn(exclusionReasonColumn);
+
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("Analyte"));
         defaultCols.add(FieldKey.fromParts("WellRole"));
         defaultCols.add(FieldKey.fromParts("Type"));
         defaultCols.add(FieldKey.fromParts("Well"));
         defaultCols.add(FieldKey.fromParts("Description"));
+        defaultCols.add(exclusionColumn.getFieldKey());
+        defaultCols.add(exclusionReasonColumn.getFieldKey());
         defaultCols.add(FieldKey.fromParts("SpecimenID"));
         defaultCols.add(FieldKey.fromParts("ParticipantID"));
         defaultCols.add(FieldKey.fromParts("VisitID"));

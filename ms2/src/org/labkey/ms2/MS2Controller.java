@@ -904,8 +904,19 @@ public class MS2Controller extends SpringActionController
 
     private long[] getPeptideIndex(ActionURL currentURL, MS2Run run) throws SQLException, ServletException
     {
-        AbstractMS2RunView view = getPeptideView(currentURL.getParameter("grouping"), run);
-        return view.getPeptideIndex(currentURL);
+        try
+        {
+            AbstractMS2RunView view = getPeptideView(currentURL.getParameter("grouping"), run);
+            return view.getPeptideIndex(currentURL);
+        }
+        catch (RuntimeSQLException e)
+        {
+            if (e.getSQLException() instanceof SQLGenerationException)
+            {
+                throw new NotFoundException("Invalid filter " + e.getSQLException().toString());
+            }
+            throw e;
+        }
     }
 
 
@@ -4428,10 +4439,10 @@ public class MS2Controller extends SpringActionController
 
             if (showPeptides)
             {
-                allPeptidesQueryFilter = getAllPeptidesFilter(getViewContext(), targetURL, run);
-                gridView = peptideView.createGridView(allPeptidesQueryFilter);
                 try
                 {
+                    allPeptidesQueryFilter = getAllPeptidesFilter(getViewContext(), targetURL, run);
+                    gridView = peptideView.createGridView(allPeptidesQueryFilter);
                     peptides = Table.executeArray(gridView.getTable(), "Peptide", allPeptidesQueryFilter, new Sort("Peptide"), String.class);
                 }
                 catch (RuntimeSQLException e)
