@@ -20,6 +20,8 @@ import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerForeignKey;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.OORDisplayColumnFactory;
 import org.labkey.api.data.Parameter;
@@ -36,6 +38,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
@@ -50,7 +53,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -166,7 +168,19 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         ExprColumn exclusionReasonColumn = new ExprColumn(this, "ExclusionComment", exclusionCommentSQL, JdbcType.VARCHAR);
         addColumn(exclusionReasonColumn);
 
+        AliasedColumn exclusionUIColumn = new AliasedColumn("ExclusionToggle", exclusionColumn);
+        exclusionUIColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new ExclusionUIDisplayColumn(colInfo);
+            }
+        });
+        addColumn(exclusionUIColumn);
+
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        defaultCols.add(exclusionUIColumn.getFieldKey());
         defaultCols.add(FieldKey.fromParts("Analyte"));
         defaultCols.add(FieldKey.fromParts("WellRole"));
         defaultCols.add(FieldKey.fromParts("Type"));
@@ -215,13 +229,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
 
         setDefaultVisibleColumns(defaultCols);
 
-        getColumn("Analyte").setFk(new LookupForeignKey("RowId")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                return _schema.createAnalyteTable(false);
-            }
-        });
+        getColumn("Analyte").setFk(new LuminexSchema.AnalyteForeignKey(_schema));
 
         SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
         protocolIDFilter.add(_schema.getProtocol().getRowId());

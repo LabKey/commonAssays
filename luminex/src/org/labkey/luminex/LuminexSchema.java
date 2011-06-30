@@ -113,20 +113,14 @@ public class LuminexSchema extends AssaySchema
         return null;
     }
 
-    private FilteredTable createWellExclusionTable()
+    private WellExclusionTable createWellExclusionTable()
     {
-        FilteredTable result = new FilteredTable(getTableInfoAnalyteTitration());
-        result.wrapAllColumns(true);
-        
-        return result;
+        return new WellExclusionTable(this);
     }
 
-    private FilteredTable createRunExclusionTable()
+    private RunExclusionTable createRunExclusionTable()
     {
-        FilteredTable result = new FilteredTable(getTableInfoRunExclusion());
-        result.wrapAllColumns(true);
-
-        return result;
+        return new RunExclusionTable(this);
     }
 
     protected TableInfo createAnalyteTable(boolean filterTable)
@@ -353,5 +347,38 @@ public class LuminexSchema extends AssaySchema
     public static TableInfo getTableInfoRunExclusionAnalyte()
     {
         return getSchema().getTable(RUN_EXCLUSION_ANALYTE_TABLE_NAME);
+    }
+
+    public TableInfo createWellExclusionAnalyteTable()
+    {
+        FilteredTable result = new FilteredTable(getTableInfoWellExclusionAnalyte());
+        result.wrapAllColumns(true);
+        result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this));
+        return result;
+    }
+
+    public TableInfo createRunExclusionAnalyteTable()
+    {
+        FilteredTable result = new FilteredTable(getTableInfoRunExclusionAnalyte());
+        result.wrapAllColumns(true);
+        result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this));
+        return result;
+    }
+
+    public static class AnalyteForeignKey extends LookupForeignKey
+    {
+        private final LuminexSchema _schema;
+
+        public AnalyteForeignKey(LuminexSchema schema)
+        {
+            super("RowId");
+            _schema = schema;
+        }
+
+        @Override
+        public TableInfo getLookupTableInfo()
+        {
+            return _schema.createAnalyteTable(false);
+        }
     }
 }

@@ -724,7 +724,22 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoDataRow() +
                     " WHERE DataId IN (" + idSQL + ")", params);
 
-            // Clean up analytes and titrations 
+            // Clean up exclusions
+            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoWellExclusionAnalyte() +
+                    " WHERE WellExclusionId IN (SELECT RowId FROM " + LuminexSchema.getTableInfoWellExclusion() +
+                    " WHERE DataId IN (" + idSQL + "))", params);
+            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoWellExclusion() +
+                    " WHERE DataId IN (" + idSQL + ")", params);
+            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoRunExclusionAnalyte() +
+                    " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
+                    " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
+                    " WHERE RowId IN (" + idSQL + ")))", params);
+            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoRunExclusion() +
+                    " WHERE RunId IN (SELECT RunId FROM " + ExperimentService.get().getTinfoProtocolApplication() +
+                    " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
+                    " WHERE RowId IN (" + idSQL + ")))", params);
+
+            // Clean up analytes and titrations
             Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoAnalyteTitration() +
                     " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexSchema.getTableInfoAnalytes() +
                     " WHERE DataId IN (" + idSQL + "))", params);
