@@ -141,7 +141,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         exclusionUnionSQL.append(" (we.Description = " + ExprColumn.STR_TABLE_ALIAS + ".Description OR (we.Description IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Description IS NULL)) AND ");
         exclusionUnionSQL.append("(we.Dilution = " + ExprColumn.STR_TABLE_ALIAS + ".Dilution OR (we.Dilution IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Dilution IS NULL)) AND ");
         exclusionUnionSQL.append("(we.DataId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId OR (we.DataId IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".DataId IS NULL)) AND ");
-        exclusionUnionSQL.append("(wea.AnalyteId IS NULL OR wea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
+        exclusionUnionSQL.append("(wea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
         exclusionUnionSQL.append("UNION SELECT re.Comment, re.Modified, re.ModifiedBy, re.Created, re.CreatedBy FROM ");
         exclusionUnionSQL.append(LuminexSchema.getTableInfoRunExclusion(), "re");
         exclusionUnionSQL.append(", ");
@@ -151,7 +151,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         exclusionUnionSQL.append(", ");
         exclusionUnionSQL.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
         exclusionUnionSQL.append(" WHERE re.RunId = rea.RunId AND re.RunId = pa.RunId AND pa.RowId = d.SourceApplicationId AND d.RowId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId AND ");
-        exclusionUnionSQL.append(" (rea.AnalyteId IS NULL OR rea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
+        exclusionUnionSQL.append("(rea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
 
         SQLFragment excludedSQL = new SQLFragment("CASE WHEN (SELECT COUNT(*) FROM (");
         excludedSQL.append(exclusionUnionSQL);

@@ -18,6 +18,7 @@ package org.labkey.luminex;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
@@ -41,6 +42,7 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryParam;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
@@ -58,8 +60,8 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -478,5 +480,21 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 return rgn;
             }
         };
+    }
+
+    @Override
+    public List<NavTree> getHeaderLinks(ViewContext viewContext, ExpProtocol protocol, ContainerFilter containerFilter)
+    {
+        List<NavTree> result = super.getHeaderLinks(viewContext, protocol, containerFilter);
+
+        ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.ExcludedDataAction.class);
+        if (containerFilter != null && containerFilter != ContainerFilter.EVERYTHING)
+        {
+            url.addParameter(protocol.getName() + " WellExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
+            url.addParameter(protocol.getName() + " RunExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
+        }
+
+        result.add(new NavTree("view excluded data", PageFlowUtil.addLastFilterParameter(url)));
+        return result;
     }
 }

@@ -42,7 +42,7 @@ public class LuminexModule extends DefaultModule
 
     public double getVersion()
     {
-        return 11.15;
+        return 11.16;
     }
 
     protected void init()

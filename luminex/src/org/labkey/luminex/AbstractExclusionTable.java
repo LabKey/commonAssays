@@ -1,18 +1,20 @@
 package org.labkey.luminex;
 
 import org.apache.commons.beanutils.ConvertUtils;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.query.DefaultQueryUpdateService;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.InvalidKeyException;
-import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.query.UserIdForeignKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -21,10 +23,10 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.UpdatePermission;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jeckels
@@ -43,16 +45,13 @@ public abstract class AbstractExclusionTable extends FilteredTable
         assert getRealTable().getPkColumnNames().size() == 1;
         ColumnInfo analytesColumn = wrapColumn("Analytes", getRealTable().getColumn(getRealTable().getPkColumnNames().get(0)));
         analytesColumn.setKeyField(false);
-        analytesColumn.setFk(new MultiValuedForeignKey(new LookupForeignKey("WellExclusionId")
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                return _schema.createWellExclusionAnalyteTable();
-            }
-        }, "AnalyteId"));
         analytesColumn.setUserEditable(true);
         analytesColumn.setReadOnly(false);
+
+        UserIdForeignKey userIdForeignKey = new UserIdForeignKey();
+        getColumn("ModifiedBy").setFk(userIdForeignKey);
+        getColumn("CreatedBy").setFk(userIdForeignKey);
+
         addColumn(analytesColumn);
     }
 
@@ -65,6 +64,11 @@ public abstract class AbstractExclusionTable extends FilteredTable
         return _schema.getContainer().hasPermission(user, perm);
     }
 
+    /**
+     * These tables support a special field, "AnalyteId/RowId", which allows API operations based on the multi-value
+     * foreign key representation. If it's included in an INSERT or UPDATE, the server will set the mapped set of
+     * analyte accordingly.
+     */
     static abstract class ExclusionUpdateService extends DefaultQueryUpdateService
     {
         private final TableInfo _analyteMappingTable;
@@ -95,12 +99,15 @@ public abstract class AbstractExclusionTable extends FilteredTable
             }
         }
 
-        protected List<Integer> getAnalyteIds(Map<String, Object> rowMap)
+        /**
+         * @return null if the analyte ids weren't included
+         */
+        protected Set<Integer> getAnalyteIds(Map<String, Object> rowMap)
         {
-            List<Integer> result = new ArrayList<Integer>();
             Object ids = rowMap.get("AnalyteId/RowId");
             if (ids != null)
             {
+                Set<Integer> result = new HashSet<Integer>();
                 String[] idStrings = ids.toString().split(",");
                 for (String idString : idStrings)
                 {
@@ -124,6 +131,9 @@ public abstract class AbstractExclusionTable extends FilteredTable
             return super.deleteRow(user, container, oldRowMap);
         }
 
+        /**
+         * Clear out all of the existing analytes for this exclusion in the database
+         */
         private void deleteAnalytes(Map<String, Object> oldRowMap) throws SQLException
         {
             Integer rowId = getPKValue(oldRowMap);
@@ -140,10 +150,19 @@ public abstract class AbstractExclusionTable extends FilteredTable
         {
             checkPermissions(user, oldRow, UpdatePermission.class);
             checkPermissions(user, row, UpdatePermission.class);
-            deleteAnalytes(oldRow);
+
+            boolean analytesSpecified = getAnalyteIds(row) != null;
+            // Use the lazy approach of deleting all of the mapped analytes and later re-inserting all of the new ones
+            // We could diff them and only insert/delete the minimum set, but for the volume of expected usage this is
+            // just fine
+            if (analytesSpecified)
+            {
+                deleteAnalytes(oldRow);
+            }
+
             Map<String, Object> result = super.updateRow(user, container, row, oldRow);
 
-            if (getAnalyteIds(row) != null)
+            if (analytesSpecified)
             {
                 insertAnalytes(row);
             }
@@ -156,13 +175,15 @@ public abstract class AbstractExclusionTable extends FilteredTable
         {
             checkPermissions(user, rowMap, InsertPermission.class);
             Map<String, Object> result = super.insertRow(user, container, rowMap);
-            // Be sure that the RowId is set correctly
+
+            // Be sure that the RowId is now included in the map
             rowMap.putAll(result);
             insertAnalytes(rowMap);
 
             return result;
         }
 
+        /** Since we don't have a container column on these tables, check the permission on the data or run object as appropriate */
         protected abstract void checkPermissions(User user, Map<String, Object> rowMap, Class<? extends Permission> permission) throws QueryUpdateServiceException;
 
         protected void insertAnalytes(Map<String, Object> rowMap) throws SQLException, QueryUpdateServiceException
@@ -170,7 +191,7 @@ public abstract class AbstractExclusionTable extends FilteredTable
             Integer rowId = getPKValue(rowMap);
             assert rowId != null;
 
-            List<Integer> analyteIds = getAnalyteIds(rowMap);
+            Set<Integer> analyteIds = getAnalyteIds(rowMap);
             if (analyteIds != null)
             {
                 for (Integer analyteId : analyteIds)
@@ -190,6 +211,20 @@ public abstract class AbstractExclusionTable extends FilteredTable
             }
         }
 
-        protected abstract void validateAnalyte(Map<String, Object> rowMap, Analyte analyte) throws QueryUpdateServiceException;
+        /** @return the run associated with this exclusion */
+        protected abstract @NotNull ExpRun resolveRun(Map<String, Object> rowMap) throws QueryUpdateServiceException;
+
+        /** Make sure that the analyte is part of the same data/run object that this exclusion is attached to */
+        private void validateAnalyte(Map<String, Object> rowMap, Analyte analyte) throws QueryUpdateServiceException
+        {
+            for (ExpData data : resolveRun(rowMap).getAllDataUsedByRun())
+            {
+                if (data.getRowId() == analyte.getDataId())
+                {
+                    return;
+                }
+            }
+            throw new QueryUpdateServiceException("Attempting to reference analyte from another run");
+        }
     }
 }

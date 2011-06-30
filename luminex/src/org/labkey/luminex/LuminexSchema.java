@@ -69,6 +69,15 @@ public class LuminexSchema extends AssaySchema
         return getProtocol().getName() + " " + table;
     }
 
+    public static String getWellExclusionTableName(ExpProtocol protocol)
+    {
+        return getProviderTableName(protocol, WELL_EXCLUSION_TABLE_NAME);
+    }
+
+    public static String getRunExclusionTableName(ExpProtocol protocol)
+    {
+        return getProviderTableName(protocol, RUN_EXCLUSION_TABLE_NAME);
+    }
 
     public TableInfo createTable(String name)
     {
@@ -104,8 +113,13 @@ public class LuminexSchema extends AssaySchema
             if (RUN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(name))
             {
                 FilteredTable result = createRunExclusionTable();
-                SQLFragment filter = new SQLFragment("RunId");
+                SQLFragment filter = new SQLFragment("RunId IN (SELECT pa.RunId FROM ");
+                filter.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
+                filter.append(", ");
+                filter.append(ExperimentService.get().getTinfoData(), "d");
+                filter.append(" WHERE pa.RowId = d.SourceApplicationId AND d.RowId ");
                 filter.append(createDataFilterInClause());
+                filter.append(")");
                 result.addCondition(filter, "RunId");
                 return result;
             }
