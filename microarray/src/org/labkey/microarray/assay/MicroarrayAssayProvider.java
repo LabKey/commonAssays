@@ -32,6 +32,7 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.query.RunListQueryView;
@@ -219,6 +220,10 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     public ExpRunTable createRunTable(AssaySchema schema, ExpProtocol protocol)
     {
         ExpRunTable result = new MicroarraySchema(schema.getUser(), schema.getContainer()).createRunsTable();
+        if (isEditableRuns(protocol))
+        {
+            result.addAllowablePermission(UpdatePermission.class);
+        }
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Flag.name()));
         defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Links.name()));
@@ -352,5 +357,13 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     {
         return new AssayPipelineProvider(MicroarrayModule.class,
                 new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()), this, "Import MAGE-ML");
+    }
+
+    @Override
+    public boolean isEditableRuns(ExpProtocol protocol)
+    {
+        // Override to make default value true
+        Boolean b = getBooleanProperty(protocol, EDITABLE_RUNS_PROPERTY_SUFFIX);
+        return b == null || b.booleanValue();
     }
 }

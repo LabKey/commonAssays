@@ -47,7 +47,7 @@ public class NabModule extends DefaultModule
 
     public double getVersion()
     {
-        return 11.10;
+        return 11.11;
     }
 
     protected void init()
@@ -65,7 +65,7 @@ public class NabModule extends DefaultModule
 
     public boolean hasScripts()
     {
-        return false;
+        return true;
     }
 
     public void startup(ModuleContext moduleContext)

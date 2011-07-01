@@ -97,7 +97,6 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String SAMPLE_INITIAL_DILUTION_PROPERTY_CAPTION = "Initial Dilution";
     public static final String SAMPLE_DILUTION_FACTOR_PROPERTY_NAME = "Factor";
     public static final String SAMPLE_DILUTION_FACTOR_PROPERTY_CAPTION = "Dilution Factor";
-    public static final String ORIGINAL_DATAFILE_PROPERTY_NAME = "OriginalDataFile";
     public static final String SAMPLE_DESCRIPTION_PROPERTY_NAME = "SampleDescription";
     public static final String SAMPLE_DESCRIPTION_PROPERTY_CAPTION = "Sample Description";
     public static final String CURVE_FIT_METHOD_PROPERTY_NAME = "CurveFitMethod";
@@ -177,6 +176,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
                 cutoff.setRequired(true);
                 first = false;
             }
+            cutoff.setShownInUpdateView(false);
             cutoff.setFormat("0.0##");
         }
 
@@ -186,6 +186,7 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
         DomainProperty method = addProperty(runDomain, CURVE_FIT_METHOD_PROPERTY_NAME, CURVE_FIT_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
         method.setLookup(new Lookup(lookupContainer, NabSchema.SCHEMA_NAME, NabSchema.CURVE_FIT_METHOD_TABLE_NAME));
         method.setRequired(true);
+        method.setShownInUpdateView(false);
         return result;
     }
 

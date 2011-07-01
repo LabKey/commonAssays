@@ -131,7 +131,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     public ExpRunTable createRunTable(final AssaySchema schema, final ExpProtocol protocol)
     {
         ExpRunTable result = super.createRunTable(schema, protocol);
-//        result.addColumns(getDomainByPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN), null);
 
         /** RowId -> Name */
         final Map<FieldKey, FieldKey> pdfColumns = new HashMap<FieldKey, FieldKey>();
