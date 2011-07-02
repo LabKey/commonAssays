@@ -17,7 +17,7 @@ package org.labkey.flow.reports;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang.StringUtils;
-import org.labkey.api.data.CachedRowSetImpl;
+import org.labkey.api.data.CachedResultSet;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.FilterInfo;
@@ -42,7 +42,6 @@ import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.ICSMetadata;
-import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -86,6 +85,7 @@ public abstract class FilterFlowReport extends FlowReport
                     ReportDescriptor d = FilterFlowReport.this.getDescriptor();
                     Map<String, Object> props = d.getProperties();
                     String comma = "";
+
                     for (Map.Entry<String, Object> e : props.entrySet())
                     {
                         String key = e.getKey();
@@ -96,6 +96,7 @@ public abstract class FilterFlowReport extends FlowReport
                         reportProlog.append(toR(e.getKey())).append("=").append(toR(value));
                         comma = ",";
                     }
+
                     reportProlog.append(")\n");
                     addScriptProlog(context, reportProlog);
                     return reportProlog.toString();
@@ -105,6 +106,7 @@ public abstract class FilterFlowReport extends FlowReport
             String script = getScriptResource();
             _inner.setScriptSource(script);
         }
+
         return _inner;
     }
 
@@ -124,6 +126,7 @@ public abstract class FilterFlowReport extends FlowReport
     protected Collection<FieldKey> getMatchColumns(ICSMetadata metadata)
     {
         Collection<FieldKey> fieldKeys = new ArrayList<FieldKey>(metadata.getMatchColumns().size());
+
         for (FieldKey fieldKey : metadata.getMatchColumns())
         {
             // Use the 'Run' RowId instead of Run.  The 'Run' display name is already added to the select list.
@@ -131,6 +134,7 @@ public abstract class FilterFlowReport extends FlowReport
                 fieldKey = new FieldKey(fieldKey, "RowId");
             fieldKeys.add(fieldKey);
         }
+
         return fieldKeys;
     }
 
@@ -185,21 +189,27 @@ public abstract class FilterFlowReport extends FlowReport
         return ColumnInfo.propNameFromName(r).toLowerCase();
     }
 
-    protected void convertDateColumn(CachedRowSetImpl rs, String fromCol, String toCol) throws SQLException
+    protected void convertDateColumn(CachedResultSet rs, String fromCol, String toCol) throws SQLException
     {
         int from = rs.findColumn(fromCol);
         int to = rs.findColumn(toCol);
+
         while (rs.next())
         {
             Object o = rs.getObject(from);
+
             if (o != null)
             {
                 Date d = null;
+
                 if (o instanceof Date)
+                {
                     d = (Date) o;
+                }
                 else
                 {
                     String s = String.valueOf(o);
+
                     try
                     {
                         d = new Date(DateUtil.parseDateTime(s));
@@ -215,13 +225,15 @@ public abstract class FilterFlowReport extends FlowReport
                         }
                     }
                 }
+
                 rs._setObject(to, d);
             }
         }
+
         rs.beforeFirst();
     }
 
-    protected CachedRowSetImpl filterDateRange(CachedRowSetImpl rs, String dateColumn, Date start, Date end) throws SQLException
+    protected CachedResultSet filterDateRange(CachedResultSet rs, String dateColumn, Date start, Date end) throws SQLException
     {
         int col = rs.findColumn(dateColumn);
         if (null == start && null == end)
@@ -238,13 +250,13 @@ public abstract class FilterFlowReport extends FlowReport
             rows.add(rs.getRowMap());
         }
 
-        CachedRowSetImpl ret;
+        CachedResultSet ret;
 
         if (rs.getSize() == rows.size())
             ret = rs;
         else
         {
-            ret = new CachedRowSetImpl(rs.getMetaData(), false, rows, true);
+            ret = new CachedResultSet(rs.getMetaData(), false, rows, true);
             rs.close();
         }
 
@@ -319,8 +331,8 @@ public abstract class FilterFlowReport extends FlowReport
         _query = query.toString();
         QuerySchema flow = new FlowSchema(context);
         ResultSet rs = QueryService.get().select(flow, _query);
-        convertDateColumn((CachedRowSetImpl) rs, "Xdatetime", "datetime");
-        rs = filterDateRange((CachedRowSetImpl) rs, "datetime", startDate, endDate);
+        convertDateColumn((CachedResultSet) rs, "Xdatetime", "datetime");
+        rs = filterDateRange((CachedResultSet) rs, "datetime", startDate, endDate);
         return rs;
     }
 
