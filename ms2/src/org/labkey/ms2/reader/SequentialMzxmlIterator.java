@@ -36,35 +36,26 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
 {
     private static Logger _log = Logger.getLogger(SequentialMzxmlIterator.class);
 
-    private String _fileName;
+    private File _file;
     private InputStream _in;
     private SimpleXMLStreamReader _parser;
-    private int _scanCount = 0;
     private SimpleScan _currentScan;
     private static final int STREAM_BUFFER_SIZE = 128 * 1024;
 
-
-    public SequentialMzxmlIterator(String fileName, int msLevel) throws FileNotFoundException, XMLStreamException
+    public SequentialMzxmlIterator(File file, int msLevel) throws FileNotFoundException, XMLStreamException
     {
         super(msLevel);
-        _fileName = fileName;
-        File f = new File(_fileName);
-        if (!NetworkDrive.exists(f))
+        _file = file;
+        if (!NetworkDrive.exists(file))
         {
-            throw new FileNotFoundException(fileName);
+            throw new FileNotFoundException(file.toString());
         }
-        _in = new BufferedInputStream(PossiblyGZIPpedFileInputStreamFactory.getStream(f), STREAM_BUFFER_SIZE);
+        _in = new BufferedInputStream(PossiblyGZIPpedFileInputStreamFactory.getStream(file), STREAM_BUFFER_SIZE);
         _parser = new SimpleXMLStreamReader(_in);
         if (!_parser.skipToStart("msRun"))
         {
             throw new XMLStreamException("Did not find a starting msRun element");
         }
-        _scanCount = Integer.parseInt(_parser.getAttributeValue(null, "scanCount"));
-    }
-
-    public int getScanCount()
-    {
-        return _scanCount;
     }
 
     public void close()
@@ -111,7 +102,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
         int num = -1;
         String retentionTime = null;
         float[][] data = null;
-        while (msLevel != _msLevelFilter)
+        while (!((_msLevelFilter == NO_SCAN_FILTER && msLevel != -1) || msLevel == _msLevelFilter))
         {
             try
             {
@@ -119,7 +110,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
                     return false;
 
                 msLevel = Integer.parseInt(getAttributeValue("msLevel"));
-                if (msLevel != _msLevelFilter)
+                if (_msLevelFilter != NO_SCAN_FILTER && msLevel != _msLevelFilter)
                 {
                     continue;
                 }
@@ -148,12 +139,12 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
             }
             catch (XMLStreamException e)
             {
-                _log.error("Failed to parse file " + _fileName, e);
+                _log.error("Failed to parse file " + _file, e);
                 return false;
             }
         }
         assert data != null && num != -1 : "Did not find a valid scan";
-        _currentScan = new SequentialSimpleScan(num, retentionTime, data);
+        _currentScan = new SequentialSimpleScan(num, retentionTime, data, msLevel);
         return true;
     }
 
@@ -201,19 +192,26 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
     private class SequentialSimpleScan implements SimpleScan
     {
         private final int _scan;
+        private final int _msLevel;
         private final String _retentionTime;  // Store as a string... convert to double only if requested
         private final float[][] _data;
 
-        private SequentialSimpleScan(int scan, String retentionTime, float[][] data)
+        private SequentialSimpleScan(int scan, String retentionTime, float[][] data, int msLevel)
         {
             _scan = scan;
             _retentionTime = retentionTime;
             _data = data;
+            _msLevel = msLevel;
         }
 
         public int getScan()
         {
             return _scan;
+        }
+
+        public int getMSLevel()
+        {
+            return _msLevel;
         }
 
         public Double getRetentionTime()

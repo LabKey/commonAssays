@@ -45,20 +45,20 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
     int _currScan = 0;
     MzxmlSimpleScan _nextSimpleScan = null;
 
-    public RandomAccessJrapMzxmlIterator(String fileName, int msLevel)
+    public RandomAccessJrapMzxmlIterator(File file, int msLevel)
             throws IOException
     {
         super(msLevel);
-        if (!NetworkDrive.exists(new File(fileName)))
-            throw new FileNotFoundException(fileName);
-        _parser = new MSXMLParser(fileName);
+        if (!NetworkDrive.exists(file))
+            throw new FileNotFoundException(file.toString());
+        _parser = new MSXMLParser(file);
         _maxScan = _parser.getMaxScanNumber();
     }
 
-    public RandomAccessJrapMzxmlIterator(String fileName, int msLevel, int startingScan)
+    public RandomAccessJrapMzxmlIterator(File file, int msLevel, int startingScan)
             throws IOException
     {
-        this(fileName, msLevel);
+        this(file, msLevel);
         _currScan = startingScan - 1;
     }
 
@@ -73,7 +73,7 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
             while (++_currScan <= _maxScan)
             {
                 ScanHeader header = _parser.rapHeader(_currScan);
-                if (header != null && (_msLevelFilter == 0 || header.getMsLevel() == _msLevelFilter))
+                if (header != null && (_msLevelFilter == NO_SCAN_FILTER || header.getMsLevel() == _msLevelFilter))
                 {
                     _nextSimpleScan = new MzxmlSimpleScan(_currScan, header);
                     break;
@@ -99,14 +99,6 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
     {
         // apparently _parser does not need to be closed
         _nextSimpleScan = null;
-    }
-
-
-    protected static byte[] realloc(int size, byte[] buf)
-    {
-        if (null == buf || buf.length < size)
-            return new byte[size];
-        return buf;
     }
 
 
@@ -145,6 +137,11 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
             return ret.getHour() * 60 * 60 + ret.getMinute() * 60 + ret.getSecond() + ret.getFraction().doubleValue();
         }
 
+        public int getMSLevel()
+        {
+            return _scanHeader.getMsLevel();
+        }
+
         public float[][] getData() throws IOException
         {
             if (null == _scan)
@@ -167,14 +164,14 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
             massSpecDataFileType FT_MZXML = new massSpecDataFileType();
             String projectRoot = AppProps.getInstance().getProjectRoot();
             if (projectRoot == null || projectRoot.equals("")) projectRoot = "C:/Labkey";
-            String mzxml2Fname = projectRoot + "/sampledata/mzxml/test_nocompression.mzXML";
-            String mzxml3Fname = projectRoot + "/sampledata/mzxml/test_zlibcompression.mzXML";
-            assertTrue(FT_MZXML.isType(mzxml2Fname));
-            assertTrue(FT_MZXML.isType(mzxml3Fname));
+            File mzxml2File = new File(projectRoot + "/sampledata/mzxml/test_nocompression.mzXML");
+            File mzxml3File = new File(projectRoot + "/sampledata/mzxml/test_zlibcompression.mzXML");
+            assertTrue(FT_MZXML.isType(mzxml2File));
+            assertTrue(FT_MZXML.isType(mzxml3File));
             try
             {
-                RandomAccessMzxmlIterator mzxml2 = new RandomAccessJrapMzxmlIterator(mzxml2Fname, 1);
-                RandomAccessMzxmlIterator mzxml3 = new RandomAccessJrapMzxmlIterator(mzxml3Fname, 1);
+                RandomAccessMzxmlIterator mzxml2 = new RandomAccessJrapMzxmlIterator(mzxml2File, 1);
+                RandomAccessMzxmlIterator mzxml3 = new RandomAccessJrapMzxmlIterator(mzxml3File, 1);
                 compare_mzxml(this,mzxml2, mzxml3);
             }
             catch (IOException e)

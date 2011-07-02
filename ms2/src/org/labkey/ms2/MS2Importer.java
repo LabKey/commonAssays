@@ -16,6 +16,7 @@
 package org.labkey.ms2;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.Fraction;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
@@ -27,9 +28,12 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.collections.CsvSet;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.reader.AbstractMzxmlIterator;
+import org.labkey.ms2.reader.SimpleScan;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -332,15 +336,19 @@ public abstract class MS2Importer
     }
 
 
-    protected static int createFraction(User user, Container c, int runId, String path, File mzXmlFile) throws SQLException, IOException
+    protected int createFraction(User user, Container c, int runId, String path, File mzXmlFile) throws SQLException, IOException
     {
-        HashMap<String, Object> fractionMap = new HashMap<String, Object>();
-        fractionMap.put("Run", runId);
+        MS2Fraction fraction = new MS2Fraction();
+        fraction.setRun(runId);
 
         // Old Comet runs won't have an mzXmlFile
         if (null != mzXmlFile)
         {
-            fractionMap.put("MzXMLURL", FileUtil.getAbsoluteCaseSensitiveFile(mzXmlFile).toURI().toString());
+            _log.info("Starting to parse " + mzXmlFile + " to get scan counts");
+            loadScanCounts(mzXmlFile, fraction);
+            _log.info("Finished parsing " + mzXmlFile + " to get scan counts");
+
+            fraction.setMzXmlURL(FileUtil.getAbsoluteCaseSensitiveFile(mzXmlFile).toURI().toString());
             massSpecDataFileType msdft = new massSpecDataFileType();
             String pepXMLFileName  = msdft.getBaseName(mzXmlFile); // strip off .mzxml or .mzxml.gz
             PepXMLFileType ft = new PepXMLFileType();
@@ -350,12 +358,57 @@ public abstract class MS2Importer
             ExpData pepXMLData = ExperimentService.get().getExpDataByURL(pepXMLFile, c);
             if (pepXMLData != null)
             {
-                fractionMap.put("PepXmlDataLSID", pepXMLData.getLSID());
+                fraction.setPepXmlDataLSID(pepXMLData.getLSID());
             }
         }
 
-        Map returnMap = Table.insert(user, MS2Manager.getTableInfoFractions(), fractionMap);
-        return (Integer) returnMap.get("Fraction");
+        fraction = Table.insert(user, MS2Manager.getTableInfoFractions(), fraction);
+        return fraction.getFraction();
+    }
+
+    public static void loadScanCounts(File mzXmlFile, MS2Fraction fraction) throws IOException
+    {
+        if (NetworkDrive.exists(mzXmlFile))
+        {
+            AbstractMzxmlIterator iter = null;
+            try
+            {
+                int scanCount = 0;
+                int ms1ScanCount = 0;
+                int ms2ScanCount = 0;
+                int ms3ScanCount = 0;
+                int ms4ScanCount = 0;
+                iter = AbstractMzxmlIterator.createParser(mzXmlFile, AbstractMzxmlIterator.NO_SCAN_FILTER);
+                while (iter.hasNext())
+                {
+                    scanCount++;
+                    SimpleScan scan = iter.next();
+                    switch (scan.getMSLevel())
+                    {
+                        case 1: ms1ScanCount++; break;
+                        case 2: ms2ScanCount++; break;
+                        case 3: ms3ScanCount++; break;
+                        case 4: ms4ScanCount++; break;
+                    }
+                }
+                fraction.setScanCount(scanCount);
+                fraction.setMS1ScanCount(ms1ScanCount);
+                fraction.setMS2ScanCount(ms2ScanCount);
+                fraction.setMS3ScanCount(ms3ScanCount);
+                fraction.setMS4ScanCount(ms4ScanCount);
+            }
+            catch (XMLStreamException e)
+            {
+                throw new IOException(e);
+            }
+            finally
+            {
+                if (iter != null)
+                {
+                    iter.close();
+                }
+            }
+        }
     }
 
 
@@ -365,15 +418,13 @@ public abstract class MS2Importer
     {
         if (null != spectrumFile)
         {
-            HashMap<String, Object> fractionMap = new HashMap<String, Object>();
-
-            Map<String, Object> existingFraction = Table.selectObject(MS2Manager.getTableInfoFractions(), _fractionId, Map.class);
-            if (existingFraction != null && existingFraction.get("mzxmlurl") == null)
+            MS2Fraction existingFraction = Table.selectObject(MS2Manager.getTableInfoFractions(), _fractionId, MS2Fraction.class);
+            if (existingFraction != null && existingFraction.getMzXmlURL() == null)
             {
-                fractionMap.put("mzxmlurl", spectrumFile.toURI().toString());
+                existingFraction.setMzXmlURL(spectrumFile.toURI().toString());
+                existingFraction.setFileName(spectrumFile.getName());
+                Table.update(_user, MS2Manager.getTableInfoFractions(), existingFraction, _fractionId);
             }
-            fractionMap.put("FileName", spectrumFile.getName());
-            Table.update(_user, MS2Manager.getTableInfoFractions(), fractionMap, _fractionId);
         }
     }
 

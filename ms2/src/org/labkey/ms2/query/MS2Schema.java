@@ -158,6 +158,13 @@ public class MS2Schema extends UserSchema
                 return ms2Schema.createPeptidesTable(ContainerFilter.CURRENT);
             }
         },
+        Fractions
+        {
+            public TableInfo createTable(MS2Schema ms2Schema)
+            {
+                return ms2Schema.createFractionsTable();
+            }
+        },
         ProteinGroups
         {
             public TableInfo createTable(MS2Schema ms2Schema)
@@ -548,10 +555,41 @@ public class MS2Schema extends UserSchema
     protected TableInfo createFractionsTable()
     {
         SqlDialect dialect = MS2Manager.getSqlDialect();
-        FilteredTable result = new FilteredTable(MS2Manager.getTableInfoFractions());
+        FilteredTable result = new FilteredTable(MS2Manager.getTableInfoFractions())
+        {
+            @Override
+            protected void applyContainerFilter(ContainerFilter filter)
+            {
+                clearConditions("Container");
+                Collection<String> ids = filter.getIds(MS2Schema.this.getContainer());
+                if (ids != null)
+                {
+                    SQLFragment sql = new SQLFragment("Run IN (SELECT r.Run FROM ");
+                    sql.append(MS2Manager.getTableInfoRuns(), "r");
+                    sql.append(" WHERE r.Container IN (");
+                    String separator = "";
+                    for (String containerId : ids)
+                    {
+                        sql.append(separator);
+                        separator = ", ";
+                        sql.append("?");
+                        sql.add(containerId);
+                    }
+                    sql.append("))");
+                    addCondition(sql, "Container");
+                }
+            }
+        };
+        result.setContainerFilter(result.getContainerFilter());
         result.wrapAllColumns(true);
 
-        SQLFragment fractionNameSQL = new SQLFragment(dialect.getSubstringFunction(ExprColumn.STR_TABLE_ALIAS + ".FileName", "1", dialect.getStringIndexOfFunction("'.'", ExprColumn.STR_TABLE_ALIAS + ".FileName") + "- 1"));
+        SQLFragment notDeletedSQL = new SQLFragment("Run IN (SELECT r.Run FROM ");
+        notDeletedSQL.append(MS2Manager.getTableInfoRuns(), "r");
+        notDeletedSQL.append(" WHERE r.Deleted = ?)");
+        notDeletedSQL.add(false);
+        result.addCondition(notDeletedSQL, "Run");
+
+        SQLFragment fractionNameSQL = new SQLFragment("CASE WHEN " + dialect.getStringIndexOfFunction("'.'", ExprColumn.STR_TABLE_ALIAS + ".FileName") + " > 0 THEN " + dialect.getSubstringFunction(ExprColumn.STR_TABLE_ALIAS + ".FileName", "1", dialect.getStringIndexOfFunction("'.'", ExprColumn.STR_TABLE_ALIAS + ".FileName") + "- 1") + " ELSE " + ExprColumn.STR_TABLE_ALIAS + ".FileName END");
 
         ColumnInfo fractionName = new ExprColumn(result, "FractionName", fractionNameSQL, JdbcType.VARCHAR);
         fractionName.setLabel("Name");

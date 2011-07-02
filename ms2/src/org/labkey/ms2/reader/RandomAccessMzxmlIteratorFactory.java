@@ -18,6 +18,7 @@ package org.labkey.ms2.reader;
 
 import org.labkey.api.util.massSpecDataFileType;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -27,16 +28,16 @@ import java.io.IOException;
 
 public abstract class RandomAccessMzxmlIteratorFactory
 {
-    public static RandomAccessMzxmlIterator newIterator(String filename, int msLevel, int firstScan)
+    public static RandomAccessMzxmlIterator newIterator(File file, int msLevel, int firstScan)
             throws IOException
     {
         if (massSpecDataFileType.isMZmlAvailable())
         {
-            return new RandomAccessPwizMSDataIterator(filename, msLevel, firstScan);
+            return new RandomAccessPwizMSDataIterator(file, msLevel, firstScan);
         }
         else
         {
-            return new RandomAccessJrapMzxmlIterator(filename, msLevel, firstScan);
+            return new RandomAccessJrapMzxmlIterator(file, msLevel, firstScan);
         }
     }
 }

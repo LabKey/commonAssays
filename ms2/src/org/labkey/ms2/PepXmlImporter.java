@@ -288,8 +288,7 @@ public class PepXmlImporter extends MS2Importer
                 _gzFileName = newFilename;
         }
 
-        String mzXMLFileName = getMzXMLFileName(fraction);
-        File mzXMLFile = mzXMLFileName == null ? null : new File(mzXMLFileName);
+        File mzXMLFile = getMzXMLFile(fraction);
         _fractionId = createFraction(_user, _container, _runId, _path, mzXMLFile);
     }
 
@@ -322,9 +321,9 @@ public class PepXmlImporter extends MS2Importer
 
     protected void processSpectrumFile(PepXmlFraction fraction, HashSet<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes) throws SQLException
     {
-        String mzXmlFileName = getMzXMLFileName(fraction);
+        File mzXmlFile = getMzXMLFile(fraction);
         if ((_run.getType().equalsIgnoreCase("mascot")||_run.getType().equalsIgnoreCase("sequest"))   // TODO: Move this check (perhaps all the code) into the appropriate run classes
-                && null == mzXmlFileName)
+                && null == mzXmlFile)
         {
             // we attempt to load spectra from .mzXML rather than .pep.tgz
             // (that is, the faked-up .out and .dta files from Mascot2XML)
@@ -334,11 +333,11 @@ public class PepXmlImporter extends MS2Importer
             massSpecDataFileType FT_MZXML = new massSpecDataFileType();
             File path = new File(_path,"");
             File engineProtocolMzXMLFile = FT_MZXML.getFile(path, baseName);
-            mzXmlFileName = engineProtocolMzXMLFile.getName();
+            String mzXmlFileName = engineProtocolMzXMLFile.getName();
             File engineProtocolDir = engineProtocolMzXMLFile.getParentFile();
             File engineDir = engineProtocolDir.getParentFile();
             File mzXMLFile = new File(engineDir.getParent(), mzXmlFileName);
-            mzXmlFileName = mzXMLFile.getAbsolutePath();
+            mzXmlFile = mzXMLFile.getAbsoluteFile();
         }
         String gzFileName = _path + "/" + _gzFileName;
         File gzFile = _context.findFile(gzFileName);
@@ -347,21 +346,21 @@ public class PepXmlImporter extends MS2Importer
             gzFileName = gzFile.toString();
         }
         //sequest spectra are imported from the tgz but are deleted after they are imported.
-        if(_run.getType().equalsIgnoreCase("sequest") && mzXmlFileName != null)   // TODO: Move this check (perhaps all the code) into the appropriate run classes
+        if(_run.getType().equalsIgnoreCase("sequest") && mzXmlFile != null)   // TODO: Move this check (perhaps all the code) into the appropriate run classes
         {
-            if (NetworkDrive.exists(new File(mzXmlFileName)))
+            if (NetworkDrive.exists(mzXmlFile))
             {
                 gzFileName = "";
             }
         }
 
-        SpectrumImporter sl = new SpectrumImporter(gzFileName, "", mzXmlFileName, scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
+        SpectrumImporter sl = new SpectrumImporter(gzFileName, "", mzXmlFile, scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
         sl.upload();
         updateFractionSpectrumFileName(sl.getFile());
     }
 
 
-    protected String getMzXMLFileName(PepXmlFraction fraction)
+    protected File getMzXMLFile(PepXmlFraction fraction)
     {
         String mzXmlFileName = fraction.getSpectrumPath();
 
@@ -371,7 +370,7 @@ public class PepXmlImporter extends MS2Importer
             File f = _context.findFile(mzXmlFileName, dir);
             if (f != null)
             {
-                return f.toString();
+                return f;
             }
             File mzXMLFile = new File(mzXmlFileName);
             // Check two directories up from the pepXML file, where the pipeline normally reads the mzXML file.
@@ -380,7 +379,7 @@ public class PepXmlImporter extends MS2Importer
                 f = new File(dir.getParentFile().getParentFile(), mzXMLFile.getName());
                 if (NetworkDrive.exists(f) && f.isFile())
                 {
-                    return f.toString();
+                    return f;
                 }
 
 				// Check if it's under an alternate pipeline root instead
@@ -393,23 +392,23 @@ public class PepXmlImporter extends MS2Importer
 				}
 				if (NetworkDrive.exists(f) && f.isFile())
 				{
-					return f.toString();
+					return f;
 				}
             }
             f = new File(dir, mzXMLFile.getName());
             if (NetworkDrive.exists(f) && f.isFile())
             {
-                return f.toString();
+                return f;
             }
         }
 
-        return mzXmlFileName;
+        return mzXmlFileName == null ? null : new File(mzXmlFileName);
     }
 
 
     protected String getTableColumnNames()
     {
-        StringBuffer columnNames = new StringBuffer();
+        StringBuilder columnNames = new StringBuilder();
 
         for (int i = 0; i < _scoreColumnNames.size(); i++)
         {

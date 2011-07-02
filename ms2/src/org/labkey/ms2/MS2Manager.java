@@ -1207,7 +1207,7 @@ public class MS2Manager
 
         try
         {
-            iter = RandomAccessMzxmlIteratorFactory.newIterator(f.getAbsolutePath(), 2, scan);
+            iter = RandomAccessMzxmlIteratorFactory.newIterator(f, 2, scan);
             if (iter.hasNext())
             {
                 SimpleScan sscan = iter.next();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005-2008 LabKey Corporation
+ * Copyright (c) 2011 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.ms2.reader;
 
-import java.io.IOException;
-
-/**
- * User: mbellew
- * Date: Oct 6, 2005
- * Time: 9:02:07 AM
- */
-public interface SimpleScan
-{
-    int getScan();
-
-    int getMSLevel();
-
-    Double getRetentionTime();
-
-    float[][] getData() throws IOException;
-}
+ALTER TABLE ms2.Fractions ADD COLUMN ScanCount INT;
+ALTER TABLE ms2.Fractions ADD COLUMN MS1ScanCount INT;
+ALTER TABLE ms2.Fractions ADD COLUMN MS2ScanCount INT;
+ALTER TABLE ms2.Fractions ADD COLUMN MS3ScanCount INT;
+ALTER TABLE ms2.Fractions ADD COLUMN MS4ScanCount INT;

@@ -16,13 +16,21 @@
 
 package org.labkey.ms2.reader;
 
+import org.labkey.api.util.massSpecDataFileType;
+
+import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.IOException;
+
 /**
  * User: jeckels
  * Date: May 8, 2006
  */
 public abstract class AbstractMzxmlIterator implements SimpleScanIterator
 {
-    final int _msLevelFilter;            // 0==none
+    public static final int NO_SCAN_FILTER = 0;
+
+    final int _msLevelFilter;
 
     AbstractMzxmlIterator(int msLevelFilter)
     {
@@ -32,5 +40,17 @@ public abstract class AbstractMzxmlIterator implements SimpleScanIterator
     public void remove()
     {
         throw new UnsupportedOperationException();
+    }
+
+    public static AbstractMzxmlIterator createParser(File file, int scanLevelFilter) throws IOException, XMLStreamException
+    {
+        if (massSpecDataFileType.isMZmlAvailable())
+        {
+            return new RandomAccessPwizMSDataIterator(file, scanLevelFilter);
+        }
+        else
+        {
+            return new SequentialMzxmlIterator(file, scanLevelFilter);
+        }
     }
 }

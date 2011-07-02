@@ -22,8 +22,6 @@ import java.io.Serializable;
 
 public class MS2Fraction implements Serializable
 {
-    private static Logger _log = Logger.getLogger(MS2Fraction.class);
-
     protected int runId;
     protected int fractionId;
     protected String description;
@@ -33,6 +31,12 @@ public class MS2Fraction implements Serializable
     protected Float hydroR2;
     protected Float hydroSigma;
     private String _mzXmlURL;
+    private String _pepXmlDataLSID;
+    private Integer _scanCount;
+    private Integer _ms1ScanCount;
+    private Integer _ms2ScanCount;
+    private Integer _ms3ScanCount;
+    private Integer _ms4ScanCount;
 
     public MS2Fraction()
     {
@@ -160,5 +164,65 @@ public class MS2Fraction implements Serializable
     public void setMzXmlURL(String mzXmlURL)
     {
         _mzXmlURL = mzXmlURL;
+    }
+
+    public Integer getScanCount()
+    {
+        return _scanCount;
+    }
+
+    public void setScanCount(Integer scanCount)
+    {
+        _scanCount = scanCount;
+    }
+
+    public Integer getMS1ScanCount()
+    {
+        return _ms1ScanCount;
+    }
+
+    public void setMS1ScanCount(Integer ms1ScanCount)
+    {
+        _ms1ScanCount = ms1ScanCount;
+    }
+
+    public Integer getMS2ScanCount()
+    {
+        return _ms2ScanCount;
+    }
+
+    public void setMS2ScanCount(Integer ms2ScanCount)
+    {
+        _ms2ScanCount = ms2ScanCount;
+    }
+
+    public Integer getMS3ScanCount()
+    {
+        return _ms3ScanCount;
+    }
+
+    public void setMS3ScanCount(Integer ms3ScanCount)
+    {
+        _ms3ScanCount = ms3ScanCount;
+    }
+
+    public Integer getMS4ScanCount()
+    {
+        return _ms4ScanCount;
+    }
+
+    public void setMS4ScanCount(Integer ms4ScanCount)
+    {
+        _ms4ScanCount = ms4ScanCount;
+    }
+
+    public String getPepXmlDataLSID()
+    {
+        return _pepXmlDataLSID;
+    }
+
+    public void setPepXmlDataLSID(String pepXmlDataLSID)
+    {
+        _pepXmlDataLSID = pepXmlDataLSID;
     }
 }

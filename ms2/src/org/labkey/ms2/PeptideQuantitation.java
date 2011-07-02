@@ -320,7 +320,7 @@ public class PeptideQuantitation
         RandomAccessMzxmlIterator iterator = null;
         try
         {
-            iterator = RandomAccessMzxmlIteratorFactory.newIterator(mzXmlFile.getPath(), 1, minScan);
+            iterator = RandomAccessMzxmlIteratorFactory.newIterator(mzXmlFile, 1, minScan);
 
             while (iterator.hasNext())
             {

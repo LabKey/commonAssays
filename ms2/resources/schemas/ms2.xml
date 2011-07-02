@@ -35,6 +35,11 @@
       <ns:column columnName="HydroSigma"/>
       <ns:column columnName="PepXMLDataLSID"/>
       <ns:column columnName="MzXMLURL"/>
+      <ns:column columnName="ScanCount"/>
+      <ns:column columnName="MS1ScanCount"/>
+      <ns:column columnName="MS2ScanCount"/>
+      <ns:column columnName="MS3ScanCount"/>
+      <ns:column columnName="MS4ScanCount"/>
     </ns:columns>
     <ns:description>Contains a row for every fraction in a loaded MS2 search result.</ns:description>
     <ns:titleColumn>Fraction</ns:titleColumn>

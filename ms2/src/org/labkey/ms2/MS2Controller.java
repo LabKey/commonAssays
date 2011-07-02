@@ -59,6 +59,7 @@ import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.pipeline.ImportScanCountsUpgradeJob;
 import org.labkey.ms2.pipeline.MSPictureUpgradeJob;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
@@ -6503,6 +6504,46 @@ public class MS2Controller extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             return root.addChild("Attach mspicture Files to Existing MS2 Runs");
+        }
+    }
+
+    @RequiresSiteAdmin
+    public class ImportMSScanCountsUpgradeAction extends FormViewAction
+    {
+        private Container _container;
+
+        public void validateCommand(Object target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
+        {
+            return new JspView("/org/labkey/ms2/pipeline/importMSScanCounts.jsp");
+        }
+
+        public boolean handlePost(Object o, BindException errors) throws Exception
+        {
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            if (root == null || !root.isValid())
+            {
+                throw new NotFoundException("No pipeline root found for " + getContainer());
+            }
+
+            ViewBackgroundInfo info = getViewBackgroundInfo();
+            PipelineJob job = new ImportScanCountsUpgradeJob(info, root);
+            PipelineService.get().getPipelineQueue().addJob(job);
+
+            return true;
+        }
+
+        public ActionURL getSuccessURL(Object o)
+        {
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(_container);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Load MS scan counts");
         }
     }
 }

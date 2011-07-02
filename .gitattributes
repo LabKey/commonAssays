@@ -785,6 +785,7 @@ ms2/resources/queries/ms2/Peptides/ProteinProphet.qview.xml -text
 ms2/resources/queries/ms2/Peptides/SearchEngineProtein.qview.xml -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-9.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-10.20-10.30.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-11.10-11.11.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-drop.sql -text
@@ -867,6 +868,7 @@ ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-9.20-9.21.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-9.21-9.22.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-0.00-9.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-10.20-10.30.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/ms2-11.10-11.11.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-drop.sql -text
@@ -1101,6 +1103,7 @@ ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.jsp -text
 ms2/src/org/labkey/ms2/pipeline/FastaCheckTask.java -text
 ms2/src/org/labkey/ms2/pipeline/FileStatus.java -text
+ms2/src/org/labkey/ms2/pipeline/ImportScanCountsUpgradeJob.java -text
 ms2/src/org/labkey/ms2/pipeline/LibraProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2ImportPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineForm.java -text
@@ -1123,6 +1126,7 @@ ms2/src/org/labkey/ms2/pipeline/UnknownMS2Run.java -text
 ms2/src/org/labkey/ms2/pipeline/attachMSPictureFiles.jsp -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometRun.java -text
+ms2/src/org/labkey/ms2/pipeline/importMSScanCounts.jsp -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotClientImpl.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotDefaults.xml -text

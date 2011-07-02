@@ -59,17 +59,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
     public MSPictureUpgradeJob(ViewBackgroundInfo info, PipeRoot root) throws IOException
     {
         super(null, info, root);
-        init();
-    }
 
-    private void init() throws IOException
-    {
-        PipeRoot root = PipelineService.get().findPipelineRoot(getInfo().getContainer());
-        if (root == null)
-        {
-            throw new FileNotFoundException("Could not find pipeline root on disk for container " + getInfo().getContainer().getPath());
-        }
-        
         File logFile = File.createTempFile("attachMSPicture", ".log", root.ensureSystemDirectory());
         setLogFile(logFile);
     }

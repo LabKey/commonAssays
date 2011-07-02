@@ -41,15 +41,15 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
     int _currScan = 0;
     MzxmlSimpleScan _nextSimpleScan = null;
 
-    public RandomAccessPwizMSDataIterator(String fileName, int msLevelFilter)
+    public RandomAccessPwizMSDataIterator(File file, int msLevelFilter)
             throws IOException
     {
         super(msLevelFilter);
-        if (!NetworkDrive.exists(new File(fileName)))
-            throw new FileNotFoundException(fileName);
+        if (!NetworkDrive.exists(file))
+            throw new FileNotFoundException(file.toString());
         if (massSpecDataFileType.isMZmlAvailable())  // try loadlib
         {
-            _parser = new pwiz_RAMPAdapter(fileName);
+            _parser = new pwiz_RAMPAdapter(file.toString());
             _maxScan = _parser.scanCount();
         }
         else
@@ -58,15 +58,13 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
         }
     }
 
-    public RandomAccessPwizMSDataIterator(String fileName, int msLevel, int startingScan)
+    public RandomAccessPwizMSDataIterator(File file, int msLevel, int startingScan)
             throws IOException
     {
-        this(fileName, msLevel);
+        this(file, msLevel);
         _currScan = startingScan - 1;
     }
 
-
-    static final int BUFFER_SIZE = 128 * 1024;
 
     public boolean hasNext()
     {
@@ -81,7 +79,7 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
                 if (ind0 != _maxScan)
                 {
                     _nextSimpleScan = new MzxmlSimpleScan(ind0);
-                    if ((_msLevelFilter == 0 || _nextSimpleScan._scan.hdr.getMsLevel() == _msLevelFilter))
+                    if ((_msLevelFilter == NO_SCAN_FILTER || _nextSimpleScan._scan.hdr.getMsLevel() == _msLevelFilter))
                     {
                         break;
                     }
@@ -138,6 +136,11 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
             return _scan.hdr.getSeqNum();
         }
 
+        public int getMSLevel()
+        {
+            return _scan.hdr.getMsLevel();
+        }
+
         public Double getRetentionTime()
         {
             return _scan.hdr.getRetentionTime();
@@ -174,22 +177,22 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
             massSpecDataFileType FT_MZXML = new massSpecDataFileType();
             String projectRoot = AppProps.getInstance().getProjectRoot();
             if (projectRoot == null || projectRoot.equals("")) projectRoot = "C:/Labkey";
-            String mzxml2Fname = projectRoot + "/sampledata/mzxml/test_nocompression.mzXML";
-            String mzxml3Fname = projectRoot + "/sampledata/mzxml/test_zlibcompression.mzXML";
-            String mzxml4Fname = projectRoot + "/sampledata/mzxml/test_gzipcompression.mzXML.gz";
+            File mzxml2File = new File(projectRoot + "/sampledata/mzxml/test_nocompression.mzXML");
+            File mzxml3File = new File(projectRoot + "/sampledata/mzxml/test_zlibcompression.mzXML");
+            File mzxml4File = new File(projectRoot + "/sampledata/mzxml/test_gzipcompression.mzXML.gz");
             if (massSpecDataFileType.isMZmlAvailable())
             {
-                assertTrue(FT_MZXML.isType(mzxml2Fname));
-                assertTrue(FT_MZXML.isType(mzxml3Fname));
-                assertTrue(FT_MZXML.isType(mzxml4Fname));
-                compare_pwiz(mzxml2Fname,mzxml3Fname);
-                compare_pwiz(mzxml2Fname,mzxml4Fname);
+                assertTrue(FT_MZXML.isType(mzxml2File));
+                assertTrue(FT_MZXML.isType(mzxml3File));
+                assertTrue(FT_MZXML.isType(mzxml4File));
+                compare_pwiz(mzxml2File, mzxml3File);
+                compare_pwiz(mzxml2File, mzxml4File);
                 // and verify that JRAP matches for simple mzXML
                 try
                 {
                     // test mslevel filtering while we're at it
-                    RandomAccessMzxmlIterator mzxml2 = new RandomAccessPwizMSDataIterator(mzxml2Fname, 1);
-                    RandomAccessMzxmlIterator mzxml3 = new RandomAccessJrapMzxmlIterator(mzxml2Fname, 1);
+                    RandomAccessMzxmlIterator mzxml2 = new RandomAccessPwizMSDataIterator(mzxml2File, 1);
+                    RandomAccessMzxmlIterator mzxml3 = new RandomAccessJrapMzxmlIterator(mzxml2File, 1);
                     RandomAccessMzxmlIterator.compare_mzxml(this, mzxml2, mzxml3);
                 }
                 catch (IOException e)
@@ -199,12 +202,12 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
             }
         }
 
-        private void compare_pwiz(String mzxml2Fname,String mzxml3Fname)
+        private void compare_pwiz(File mzxml2File, File mzxml3File)
         {
             try
             {
-                RandomAccessMzxmlIterator mzxml2 = new RandomAccessPwizMSDataIterator(mzxml2Fname, 0);
-                RandomAccessMzxmlIterator mzxml3 = new RandomAccessPwizMSDataIterator(mzxml3Fname, 0);
+                RandomAccessMzxmlIterator mzxml2 = new RandomAccessPwizMSDataIterator(mzxml2File, 0);
+                RandomAccessMzxmlIterator mzxml3 = new RandomAccessPwizMSDataIterator(mzxml3File, 0);
                 RandomAccessMzxmlIterator.compare_mzxml(this,mzxml2, mzxml3);
             }
             catch (IOException e)

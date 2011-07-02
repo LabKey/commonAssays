@@ -201,6 +201,10 @@ public class TarIterator implements SimpleScanIterator
             return null;
         }
 
+        public int getMSLevel()
+        {
+            return 2;
+        }
 
         public float[][] getData() throws IOException
         {

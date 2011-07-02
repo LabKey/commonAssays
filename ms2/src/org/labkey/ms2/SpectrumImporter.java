@@ -20,7 +20,6 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.ms2.reader.*;
 
 import javax.xml.stream.XMLStreamException;
@@ -48,12 +47,12 @@ public class SpectrumImporter
     private Set _scans = null;
     private int _fractionId;
     private SimpleScanIterator _scanIterator;
-    private String _fileName = null;
-    private boolean _shouldImportRetentionTime;
+    private File _file = null;
     private boolean _shouldImportSpectra;
+    private boolean _shouldImportRetentionTime;
 
 
-    protected SpectrumImporter(String gzFileName, String dtaFileNamePrefix, String mzXmlFileName, Set scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean shouldImportSpectra, boolean shouldImportRetentionTime)
+    protected SpectrumImporter(String gzFileName, String dtaFileNamePrefix, File mzXmlFile, Set scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean shouldImportSpectra, boolean shouldImportRetentionTime)
     {
         _scans = scans;
         _progress = progress;
@@ -72,25 +71,21 @@ public class SpectrumImporter
 
             if (NetworkDrive.exists(gz))
             {
-                _fileName = gzFileName;
+                _file = gz;
                 _scanIterator = new TarIterator(gz, dtaFileNamePrefix);
             }
             else
             {
-                if (null == mzXmlFileName)
+                if (null == mzXmlFile)
                     _log.warn("Spectra were not imported: " + gzFileName + " could not be opened and no mzXML file name was specified.");
                 else
                 {
-                    _fileName = mzXmlFileName;
+                    _file = mzXmlFile;
                     // prefer ProteoWizard's RAMPAdapter interface
                     // (with JNI bindings via SWIG) as it's actively 
                     // maintained, handles mzML and mzXML, and gzipped
                     // files natively
-                    if (massSpecDataFileType.isMZmlAvailable()) {
-                        _scanIterator = new RandomAccessPwizMSDataIterator(mzXmlFileName, 2);
-                    } else {
-                        _scanIterator = new SequentialMzxmlIterator(mzXmlFileName, 2);
-                    }
+                    _scanIterator = AbstractMzxmlIterator.createParser(_file, 2);
                 }
             }
         }
@@ -103,7 +98,6 @@ public class SpectrumImporter
             throw new RuntimeException(x);
         }        
     }
-
 
     protected void upload()
     {
@@ -137,7 +131,7 @@ public class SpectrumImporter
     // Iterates the spectra and writes them to the ms2.SpectraData table using the same Fraction & Row as the peptide table
     private void importSpectra()
     {
-        _progress.getCumulativeTimer().setCurrentTask(MS2Importer.Tasks.ImportSpectra, "from " + _fileName);
+        _progress.getCumulativeTimer().setCurrentTask(MS2Importer.Tasks.ImportSpectra, "from " + _file);
 
         DbSchema schema = MS2Manager.getSchema();
         Connection conn = null;
@@ -299,11 +293,7 @@ public class SpectrumImporter
 
     public File getFile()
     {
-        if (_fileName == null)
-        {
-            return null;
-        }
-        return new File(_fileName);
+        return _file;
     }
 
 
