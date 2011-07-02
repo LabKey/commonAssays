@@ -48,6 +48,8 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.springframework.validation.Errors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -122,10 +124,11 @@ public class FlowQueryView extends QueryView
         return getViewContext().getUser();
     }
 
-    protected void renderView(Object model, PrintWriter out) throws Exception
+    protected void renderView(Object model, HttpServletRequest request, HttpServletResponse response) throws Exception
     {
         if (!isPrintView())
         {
+            PrintWriter out = response.getWriter();
             if (hasGraphs())
             {
                 if (showGraphs())
@@ -146,7 +149,7 @@ public class FlowQueryView extends QueryView
                 out.write("<br>");
             }
         }
-        super.renderView(model, out);
+        super.renderView(model, request, response);
     }
 
     public FlowQuerySettings getSettings()
