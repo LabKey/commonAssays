@@ -19,11 +19,16 @@ import org.labkey.api.gwt.client.util.StringUtils;
 import org.labkey.api.query.AliasManager;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.reports.report.ReportDescriptor;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.controllers.protocol.ProtocolController;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.ICSMetadata;
 import org.springframework.beans.PropertyValues;
 import org.springframework.validation.BindException;
@@ -61,10 +66,6 @@ public class PositivityFlowReport extends FilterFlowReport
     @Override
     public HttpView getConfigureForm(ViewContext context)
     {
-        ICSMetadata metadata = getMetadata(context.getContainer());
-        if (metadata == null)
-            throw new NotFoundException("ICS metadata required");
-
         return new JspView<PositivityFlowReport>(PositivityFlowReport.class, "editPositivityReport.jsp", this);
     }
 
@@ -103,7 +104,7 @@ public class PositivityFlowReport extends FilterFlowReport
     protected void addSelectList(ViewContext context, String tableName, StringBuilder query)
     {
         ICSMetadata metadata = getMetadata(context.getContainer());
-        if (metadata == null)
+        if (metadata == null || !metadata.isComplete())
             throw new NotFoundException("ICS metadata required");
 
         SubsetSpec subset = getSubset();
@@ -112,7 +113,7 @@ public class PositivityFlowReport extends FilterFlowReport
         String stat = subset + ":Count";
         String parentStat = subsetParent == null ? "Count" : subsetParent.toString() + ":Count";
 
-        for (FieldKey fieldKey : getMatchColumns(metadata))
+        for (FieldKey fieldKey : getMetadataColumns(metadata))
         {
             String alias = AliasManager.makeLegalName(fieldKey, null);
             query.append("  ").append(tableName).append(".").append(toSQL(fieldKey)).append(" AS ").append(alias).append(",\n");
@@ -122,6 +123,27 @@ public class PositivityFlowReport extends FilterFlowReport
         query.append("  ").append(tableName).append(".Background(").append(toSQL(stat)).append(") AS stat_bg,\n");
         query.append("  ").append(tableName).append(".Statistic(").append(toSQL(parentStat)).append(") AS parent,\n");
         query.append("  ").append(tableName).append(".Background(").append(toSQL(parentStat)).append(") AS parent_bg\n");
+    }
+
+    @Override
+    public HttpView renderReport(ViewContext context) throws Exception
+    {
+        ICSMetadata metadata = getMetadata(context.getContainer());
+        if (metadata == null || !metadata.isComplete())
+        {
+            FlowProtocol protocol = FlowProtocol.getForContainer(context.getContainer());
+            ActionURL currentURL = context.getActionURL();
+            ActionURL editICSMetadataURL = protocol.urlFor(ProtocolController.EditICSMetadataAction.class);
+            editICSMetadataURL.addParameter(ActionURL.Param.returnUrl, currentURL.toString());
+
+            return new HtmlView(
+                    "<p class='labkey-error'>Positivity report requires configuring flow experiment metadata for study and background information before running.</p>" +
+                    PageFlowUtil.textLink("Edit Metadata", editICSMetadataURL));
+        }
+        else
+        {
+            return super.renderReport(context);
+        }
     }
 
     @Override

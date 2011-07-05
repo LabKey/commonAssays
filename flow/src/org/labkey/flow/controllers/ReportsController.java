@@ -245,8 +245,14 @@ public class ReportsController extends BaseFlowController
         {
             r = getReport(getViewContext(), form);
             r.updateProperties(getPropertyValues(), errors, true);
-            ModelAndView Rview = r.renderReport(getViewContext());
-            return new VBox(new SelectReportView(form), Rview);
+
+            ModelAndView view;
+            if (errors.hasErrors())
+                view = new JspView<IdForm>("/org/labkey/flow/view/errors.jsp", form, errors);
+            else
+                view = r.renderReport(getViewContext());
+
+            return new VBox(new SelectReportView(form), view);
         }
 
         public NavTree appendNavTrail(NavTree root)

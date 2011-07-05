@@ -22,6 +22,7 @@
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%! void addCompare(Map<String, String> options, CompareType ct)
@@ -31,9 +32,13 @@
 <%
     EditICSMetadataForm form = (EditICSMetadataForm)__form;
 
-    Map<FieldKey, String> fieldOptions = new LinkedHashMap();
-    fieldOptions.put(null, "");
-    fieldOptions.putAll(form.getKeywordAndSampleFieldMap());
+    Map<FieldKey, String> keywordSampleOptions = new LinkedHashMap();
+    keywordSampleOptions.put(null, "");
+    keywordSampleOptions.putAll(form.getKeywordAndSampleFieldMap(false));
+
+    Map<FieldKey, String> keywordSampleStatsOptions = new LinkedHashMap();
+    keywordSampleStatsOptions.put(null, "");
+    keywordSampleStatsOptions.putAll(form.getKeywordAndSampleFieldMap(true));
 
     Map<String, String> opOptions = new LinkedHashMap();
     addCompare(opOptions, CompareType.EQUAL);
@@ -49,12 +54,49 @@
     addCompare(opOptions, CompareType.DOES_NOT_START_WITH);
     addCompare(opOptions, CompareType.STARTS_WITH);
     addCompare(opOptions, CompareType.IN);
+
+    org.labkey.api.view.ActionURL submitURL = form.getProtocol().urlFor(ProtocolController.EditICSMetadataAction.class);
+    if (form.getReturnActionURL() != null)
+        submitURL.addParameter(ActionURL.Param.returnUrl, form.getReturnActionURL().toString());
 %>
 <labkey:errors />
 <br>
-<form action="<%=form.getProtocol().urlFor(ProtocolController.EditICSMetadataAction.class)%>" method="POST">
+<form action="<%=submitURL%>" method="POST">
     <table class="labkey-wp">
-        <tr class="labkey-wp-header"><th align="left">Background and Foreground Match Columns:</th></tr>
+        <tr class="labkey-wp-header"><th align="left">Sample Columns</th></tr>
+        <tr><td>
+            The LabKey study module uses the pair of participant and visit/date to identify the sample and uses
+            this information to combine multiple assays together.
+            <br><br>
+            Select the columns that identify the sample using FCSFile keywords or sample properties.
+            The participant column is required, but only one of either the visit column or the date column is required.
+        </td></tr>
+    </table>
+    <br>
+    <table>
+        <tr>
+            <td>Participant column</td>
+            <td>
+                <select name="ff_participantColumn"><labkey:options value="<%=form.participantColumn%>" map="<%=keywordSampleOptions%>" /></select>
+            </td>
+        </tr>
+        <tr>
+            <td>Visit column</td>
+            <td>
+                <select name="ff_visitColumn"><labkey:options value="<%=form.visitColumn%>" map="<%=keywordSampleOptions%>" /></select>
+            </td>
+        </tr>
+        <tr>
+            <td>Date column</td>
+            <td>
+                <select name="ff_dateColumn"><labkey:options value="<%=form.dateColumn%>" map="<%=keywordSampleOptions%>" /></select>
+            </td>
+        </tr>
+    </table>
+
+    <br><br>
+    <table class="labkey-wp">
+        <tr class="labkey-wp-header"><th align="left">Background and Foreground Match Columns</th></tr>
         <tr><td>
             Select the columns that match between both the foreground and background wells.<br><br>
             For example, you usually want to match wells from the same FCSAnalysis Run and from
@@ -67,7 +109,7 @@
         <tr>
             <td><%=i == 0 ? "&nbsp;" : "and"%></td>
             <td>
-                <select name="matchColumn"><labkey:options value="<%=form.matchColumn[i]%>" map="<%=fieldOptions%>" /></select>
+                <select name="ff_matchColumn"><labkey:options value="<%=form.matchColumn[i]%>" map="<%=keywordSampleOptions%>" /></select>
             </td>
         </tr>
         <% } %>
@@ -75,7 +117,7 @@
 
     <br><br>
     <table class="labkey-wp">
-        <tr class="labkey-wp-header"><th align="left">Background Column and Value:</th></tr>
+        <tr class="labkey-wp-header"><th align="left">Background Column and Value</th></tr>
         <tr><td>
             Specify the column and value filter(s) which uniquely identify the background wells from
             the foreground wells.<br>If multiple wells match the background criteria, the
@@ -100,9 +142,9 @@
                 %>
                 <tr>
                     <td><%=i == 0 ? "&nbsp;" : "and"%></td>
-                    <td><select name="backgroundField"><labkey:options value="<%=filter == null ? null : filter.getField()%>" map="<%=fieldOptions%>" /></select></td>
-                    <td><select name="backgroundOp"><labkey:options value="<%=filter == null ? null : filter.getOp().getPreferredUrlKey()%>" map="<%=opOptions%>" /></select></td>
-                    <td><input name="backgroundValue" type="text" value="<%=h(filter == null ? null : filter.getValue())%>"></td>
+                    <td><select name="ff_backgroundFilterField"><labkey:options value="<%=filter == null ? null : filter.getField()%>" map="<%=keywordSampleStatsOptions%>" /></select></td>
+                    <td><select name="ff_backgroundFilterOp"><labkey:options value="<%=filter == null ? null : filter.getOp().getPreferredUrlKey()%>" map="<%=opOptions%>" /></select></td>
+                    <td><input name="ff_backgroundFilterValue" type="text" value="<%=h(filter == null ? null : filter.getValue())%>"></td>
                 </tr>
                 <%
             }

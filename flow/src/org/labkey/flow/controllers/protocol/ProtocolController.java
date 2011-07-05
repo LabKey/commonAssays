@@ -247,19 +247,28 @@ public class ProtocolController extends BaseFlowController
     @RequiresPermissionClass(UpdatePermission.class)
     public class EditICSMetadataAction extends ProtocolViewAction<EditICSMetadataForm>
     {
+        ICSMetadata metadata;
+
         public void validateCommand(EditICSMetadataForm target, Errors errors)
         {
         }
 
         public ModelAndView getView(EditICSMetadataForm form, boolean reshow, BindException errors) throws Exception
         {
-            form.init(getProtocol());
+            if (metadata == null)
+                metadata = getProtocol().getICSMetadata();
+
+            form.init(metadata);
             return FormPage.getView(ProtocolController.class, form, errors, "editICSMetadata.jsp");
         }
 
         public boolean handlePost(EditICSMetadataForm form, BindException errors) throws Exception
         {
-            ICSMetadata metadata = new ICSMetadata();
+            // Populate a new ICSMetadata from the form posted values.
+            metadata = new ICSMetadata();
+            metadata.setParticipantColumn(form.getParticipantColumn());
+            metadata.setVisitColumn(form.getVisitColumn());
+            metadata.setDateColumn(form.getDateColumn());
             metadata.setMatchColumns(form.getMatchColumns());
             metadata.setBackgroundFilter(form.getBackgroundFilters());
 
@@ -270,10 +279,8 @@ public class ProtocolController extends BaseFlowController
             }
             else
             {
-                if (metadata.getMatchColumns() == null || metadata.getMatchColumns().size() == 0)
-                    errors.reject(ERROR_MSG, "At least one match column is required");
-                if (metadata.getBackgroundFilter() == null || metadata.getBackgroundFilter().size() == 0)
-                    errors.reject(ERROR_MSG, "At least one background filter is required");
+                for (String error : metadata.getErrors())
+                    errors.reject(ERROR_MSG, error);
 
                 if (errors.hasErrors())
                     return false;
@@ -286,12 +293,15 @@ public class ProtocolController extends BaseFlowController
 
         public ActionURL getSuccessURL(EditICSMetadataForm form)
         {
-            return getProtocol().urlShow();
+            ActionURL url = form.getReturnActionURL();
+            if (url == null)
+                url = getProtocol().urlShow();
+            return url;
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit ICS Metadata");
+            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit Metadata");
         }
     }
 }

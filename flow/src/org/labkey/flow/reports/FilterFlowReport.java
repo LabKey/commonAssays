@@ -123,9 +123,25 @@ public abstract class FilterFlowReport extends FlowReport
         return metadata;
     }
 
+    protected Collection<FieldKey> getMetadataColumns(ICSMetadata metadata)
+    {
+        Collection<FieldKey> fieldKeys = new ArrayList<FieldKey>();
+        fieldKeys.add(metadata.getParticipantColumn());
+
+        if (metadata.getVisitColumn() != null)
+            fieldKeys.add(metadata.getVisitColumn());
+
+        if (metadata.getDateColumn() != null)
+            fieldKeys.add(metadata.getDateColumn());
+
+        fieldKeys.addAll(getMatchColumns(metadata));
+        return fieldKeys;
+    }
+
     protected Collection<FieldKey> getMatchColumns(ICSMetadata metadata)
     {
-        Collection<FieldKey> fieldKeys = new ArrayList<FieldKey>(metadata.getMatchColumns().size());
+        Collection<FieldKey> fieldKeys = new ArrayList<FieldKey>();
+
 
         for (FieldKey fieldKey : metadata.getMatchColumns())
         {
@@ -141,42 +157,57 @@ public abstract class FilterFlowReport extends FlowReport
     void addScriptProlog(ViewContext context, StringBuffer sb)
     {
         ICSMetadata metadata = getMetadata(context.getContainer());
-        if (metadata == null)
+        if (metadata == null || metadata.isEmpty())
             return;
 
-        String comma = "";
-        sb.append("flow.metadata.matchColumns <- c(");
-        for (FieldKey fieldKey : getMatchColumns(metadata))
+        if (metadata.hasStudyMeta())
         {
-            if (fieldKey != null)
-            {
-                String name = oldLegalName(fieldKey);
-                sb.append(comma).append("\"").append(name).append("\"");
-                comma = ", ";
-            }
-        }
-        sb.append(")\n");
+            if (metadata.getParticipantColumn() != null)
+                sb.append("flow.metadata.study.participantColumn <- \"").append(oldLegalName(metadata.getParticipantColumn())).append("\"\n");
 
-        comma = "";
-        sb.append("flow.metadata.background <- list(");
-        for (FilterInfo filter : metadata.getBackgroundFilter())
+            if (metadata.getVisitColumn() != null)
+                sb.append("flow.metadata.study.visitColumn <- \"").append(oldLegalName(metadata.getVisitColumn())).append("\"\n");
+
+            if (metadata.getDateColumn() != null)
+                sb.append("flow.metadata.study.dateColumn <- \"").append(oldLegalName(metadata.getDateColumn())).append("\"\n");
+        }
+
+        if (metadata.hasBackground())
         {
-            if (filter != null && filter.getField() != null && filter.getOp() != null)
+            String comma = "";
+            sb.append("flow.metadata.matchColumns <- c(");
+            for (FieldKey fieldKey : getMatchColumns(metadata))
             {
-                sb.append(comma);
-                sb.append("list(");
-
-                String name = oldLegalName(filter.getField());
-                sb.append("\"filter\"=\"").append(name).append("\"");
-                sb.append(", \"op\"=\"").append(filter.getOp()).append("\"");
-                if (filter.getValue() != null)
-                    sb.append(", \"value\"=\"").append(filter.getValue()).append("\"");
-
-                sb.append(")");
-                comma = ", ";
+                if (fieldKey != null)
+                {
+                    String name = oldLegalName(fieldKey);
+                    sb.append(comma).append("\"").append(name).append("\"");
+                    comma = ", ";
+                }
             }
+            sb.append(")\n");
+
+            comma = "";
+            sb.append("flow.metadata.background <- list(");
+            for (FilterInfo filter : metadata.getBackgroundFilter())
+            {
+                if (filter != null && filter.getField() != null && filter.getOp() != null)
+                {
+                    sb.append(comma);
+                    sb.append("list(");
+
+                    String name = oldLegalName(filter.getField());
+                    sb.append("\"filter\"=\"").append(name).append("\"");
+                    sb.append(", \"op\"=\"").append(filter.getOp()).append("\"");
+                    if (filter.getValue() != null)
+                        sb.append(", \"value\"=\"").append(filter.getValue()).append("\"");
+
+                    sb.append(")");
+                    comma = ", ";
+                }
+            }
+            sb.append(")\n");
         }
-        sb.append(")\n");
     }
 
     // UNDONE: Get the name of the column from the Results metadata to match ScriptEngineReport.outputColumnNames().
@@ -293,7 +324,7 @@ public abstract class FilterFlowReport extends FlowReport
         addSelectList(context, "A", query);
         query.append("FROM FCSAnalyses A");
         String and = "\nWHERE ";
-        for (ControlsQCReport.Filter f : filters)
+        for (FilterFlowReport.Filter f : filters)
         {
             if ("keyword".equals(f.type))
             {
@@ -345,7 +376,7 @@ public abstract class FilterFlowReport extends FlowReport
         HttpView plot = r.renderReport(context);
         return new VBox(
                 plot,
-                new HtmlView(PageFlowUtil.filter(_query, true))
+                new HtmlView("<div style='display:none'>" + PageFlowUtil.filter(_query, true) + "</div>")
         );
     }
 

@@ -39,7 +39,7 @@ public class ControlsQCReport extends FilterFlowReport
         return TYPE;
     }
 
-
+    @Override
     public String getTypeDescription()
     {
         return "Flow Controls Statistics over Time";
@@ -51,6 +51,7 @@ public class ControlsQCReport extends FilterFlowReport
         return getScriptResource("qc.R");
     }
 
+    @Override
     public HttpView getConfigureForm(ViewContext context)
     {
         return new JspView<ControlsQCReport>(ControlsQCReport.class, "editQCReport.jsp", this);
@@ -66,6 +67,7 @@ public class ControlsQCReport extends FilterFlowReport
         query.append("  ").append(toSQL(statistic)).append(" AS statistic\n");
     }
 
+    @Override
     public boolean updateProperties(PropertyValues pvs, BindException errors, boolean override)
     {
         super.updateBaseProperties(pvs, errors, override);

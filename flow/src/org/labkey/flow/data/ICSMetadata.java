@@ -33,6 +33,9 @@ import java.util.*;
  */
 public class ICSMetadata
 {
+    FieldKey participantColumn;
+    FieldKey visitColumn;
+    FieldKey dateColumn;
     List<FieldKey> matchColumns; // columns shared between background and stimulated wells
     List<FilterInfo> background;
 
@@ -41,18 +44,93 @@ public class ICSMetadata
 
     }
 
+    /** Returns true if study metadata and background metadata have not been completely set. */
     public boolean isEmpty()
     {
-        if (matchColumns != null && matchColumns.size() > 0)
+        return !hasStudyMeta() && !hasBackground();
+    }
+
+    /** Returns true if study metadata and background metadata have been completely set. */
+    public boolean isComplete()
+    {
+        return hasStudyMeta() && hasBackground();
+    }
+
+    /** Returns true if any the study metadata is complete. */
+    public boolean hasStudyMeta()
+    {
+        if (participantColumn == null)
             return false;
-        if (background != null && background.size() > 0)
+        if (visitColumn == null && dateColumn == null)
             return false;
         return true;
     }
 
+    /** Returns true if the background metadata is complete. */
+    public boolean hasBackground()
+    {
+        if (matchColumns == null || matchColumns.size() == 0)
+            return false;
+        if (background == null || background.size() == 0)
+            return false;
+        return true;
+    }
+
+    public List<String> getErrors()
+    {
+        List<String> errors = new ArrayList<String>();
+        if (hasStudyMeta())
+        {
+            if (getParticipantColumn() == null)
+                errors.add("Sample metadata requires Participant column");
+            if (getVisitColumn() == null && getDateColumn() == null)
+                errors.add("Sample metadata requires Visit or Date column");
+        }
+
+        if (hasBackground())
+        {
+            if (getMatchColumns() == null || getMatchColumns().size() == 0)
+                errors.add("Background metadata requires at least one match column");
+            if (getBackgroundFilter() == null || getBackgroundFilter().size() == 0)
+                errors.add("Background metadata requires at least one background filter");
+        }
+
+        return errors;
+    }
+
+    public FieldKey getParticipantColumn()
+    {
+        return participantColumn;
+    }
+
+    public void setParticipantColumn(FieldKey participantColumn)
+    {
+        this.participantColumn = participantColumn;
+    }
+
+    public FieldKey getVisitColumn()
+    {
+        return visitColumn;
+    }
+
+    public void setVisitColumn(FieldKey visitColumn)
+    {
+        this.visitColumn = visitColumn;
+    }
+
+    public FieldKey getDateColumn()
+    {
+        return dateColumn;
+    }
+
+    public void setDateColumn(FieldKey dateColumn)
+    {
+        dateColumn = dateColumn;
+    }
+
     public List<FieldKey> getMatchColumns()
     {
-        return matchColumns;
+        return Collections.unmodifiableList(matchColumns);
     }
 
     public void setMatchColumns(List<FieldKey> matchColumns)
@@ -62,7 +140,7 @@ public class ICSMetadata
 
     public List<FilterInfo> getBackgroundFilter()
     {
-        return background;
+        return Collections.unmodifiableList(background);
     }
 
     public void setBackgroundFilter(List<FilterInfo> filters)
@@ -82,35 +160,57 @@ public class ICSMetadata
 
     public String toXmlString()
     {
-        ICSMetadataDocument xDoc = ICSMetadataDocument.Factory.newInstance();
-        ICSMetadataType.Background xBackground = xDoc.addNewICSMetadata().addNewBackground();
+        if (isEmpty())
+            return null;
 
-        if (getMatchColumns() != null && getMatchColumns().size() > 0)
+        ICSMetadataDocument xDoc = ICSMetadataDocument.Factory.newInstance();
+        ICSMetadataType xMetadata = xDoc.addNewICSMetadata();
+
+        if (hasStudyMeta())
         {
-            List<String> matchColumns = new ArrayList<String>(getMatchColumns().size());
-            for (FieldKey fieldKey : getMatchColumns())
-            {
-                if (fieldKey != null)
-                    matchColumns.add(fieldKey.toString());
-            }
-            xBackground.addNewMatchColumns().setFieldArray(matchColumns.toArray(new String[matchColumns.size()]));
+            ICSMetadataType.Study xStudy = xMetadata.addNewStudy();
+
+            if (getParticipantColumn() != null)
+                xStudy.setParticipantColumn(getParticipantColumn().toString());
+
+            if (getVisitColumn() != null)
+                xStudy.setVisitColumn(getVisitColumn().toString());
+
+            if (getDateColumn() != null)
+                xStudy.setDateColumn(getDateColumn().toString());
         }
 
-        if (getBackgroundFilter() != null && getBackgroundFilter().size() > 0)
+        if (hasBackground())
         {
-            FiltersDef xBackgroundFilter = null;
-            for (FilterInfo filterInfo : getBackgroundFilter())
-            {
-                if (filterInfo != null && filterInfo.getField() != null && filterInfo.getOp() != null)
-                {
-                    if (xBackgroundFilter == null)
-                        xBackgroundFilter = xBackground.addNewBackgroundFilter();
-                    FilterDef xFilterDef = xBackgroundFilter.addNewFilter();
+            ICSMetadataType.Background xBackground = xMetadata.addNewBackground();
 
-                    xFilterDef.setField(filterInfo.getField().toString());
-                    xFilterDef.setOp(OpDef.Enum.forString(filterInfo.getOp().getPreferredUrlKey()));
-                    if (filterInfo.getValue() != null)
-                        xFilterDef.setValue(filterInfo.getValue());
+            if (getMatchColumns() != null && getMatchColumns().size() > 0)
+            {
+                List<String> matchColumns = new ArrayList<String>(getMatchColumns().size());
+                for (FieldKey fieldKey : getMatchColumns())
+                {
+                    if (fieldKey != null)
+                        matchColumns.add(fieldKey.toString());
+                }
+                xBackground.addNewMatchColumns().setFieldArray(matchColumns.toArray(new String[matchColumns.size()]));
+            }
+
+            if (getBackgroundFilter() != null && getBackgroundFilter().size() > 0)
+            {
+                FiltersDef xBackgroundFilter = null;
+                for (FilterInfo filterInfo : getBackgroundFilter())
+                {
+                    if (filterInfo != null && filterInfo.getField() != null && filterInfo.getOp() != null)
+                    {
+                        if (xBackgroundFilter == null)
+                            xBackgroundFilter = xBackground.addNewBackgroundFilter();
+                        FilterDef xFilterDef = xBackgroundFilter.addNewFilter();
+
+                        xFilterDef.setField(filterInfo.getField().toString());
+                        xFilterDef.setOp(OpDef.Enum.forString(filterInfo.getOp().getPreferredUrlKey()));
+                        if (filterInfo.getValue() != null)
+                            xFilterDef.setValue(filterInfo.getValue());
+                    }
                 }
             }
         }
@@ -120,6 +220,9 @@ public class ICSMetadata
 
     public static ICSMetadata fromXmlString(String value)
     {
+        if (value == null || value.length() == 0)
+            return null;
+
         ICSMetadata result = new ICSMetadata();
         ICSMetadataDocument xDoc;
         try
@@ -133,45 +236,62 @@ public class ICSMetadata
         }
 
         ICSMetadataType xMetadata = xDoc.getICSMetadata();
-        ICSMetadataType.Background xBackground = xMetadata.getBackground();
-
-        if (xBackground.getMatchColumns() != null)
+        if (xMetadata.isSetStudy())
         {
-            List<FieldKey> matchColumns = new LinkedList<FieldKey>();
-            for (Object field : xBackground.getMatchColumns().getFieldArray())
-            {
-                matchColumns.add(FieldKey.fromString((String)field));
-            }
-            result.setMatchColumns(matchColumns);
+            ICSMetadataType.Study xStudy = xMetadata.getStudy();
+
+            if (xStudy.getParticipantColumn() != null)
+                result.setParticipantColumn(FieldKey.fromString(xStudy.getParticipantColumn()));
+
+            if (xStudy.getVisitColumn() != null)
+                result.setVisitColumn(FieldKey.fromString(xStudy.getVisitColumn()));
+
+            if (xStudy.getDateColumn() != null)
+                result.setDateColumn(FieldKey.fromString(xStudy.getDateColumn()));
         }
 
-        List<FilterInfo> backgroundFilters = new ArrayList<FilterInfo>();
-
-        // 'backgroundColumn' element is deprecated
-        FilterDef xBackgroundColumn = xBackground.getBackgroundColumn();
-        if (xBackgroundColumn != null)
+        if (xMetadata.isSetBackground())
         {
-            FilterInfo filter = ScriptSettings.fromFilterDef(xBackgroundColumn);
-            backgroundFilters.add(filter);
-        }
+            ICSMetadataType.Background xBackground = xMetadata.getBackground();
 
-        FiltersDef xBackgroundFilter = xBackground.getBackgroundFilter();
-        if (xBackgroundFilter != null)
-        {
-            FilterDef[] xFilters = xBackgroundFilter.getFilterArray();
-            if (xFilters != null && xFilters.length > 0)
+            if (xBackground.getMatchColumns() != null)
             {
-                for (FilterDef xFilter : xFilters)
+                List<FieldKey> matchColumns = new LinkedList<FieldKey>();
+                for (Object field : xBackground.getMatchColumns().getFieldArray())
                 {
-                    if (xFilter == null)
-                        continue;
-                    FilterInfo filter = ScriptSettings.fromFilterDef(xFilter);
-                    backgroundFilters.add(filter);
+                    matchColumns.add(FieldKey.fromString((String)field));
+                }
+                result.setMatchColumns(matchColumns);
+            }
+
+            List<FilterInfo> backgroundFilters = new ArrayList<FilterInfo>();
+
+            // 'backgroundColumn' element is deprecated
+            FilterDef xBackgroundColumn = xBackground.getBackgroundColumn();
+            if (xBackgroundColumn != null)
+            {
+                FilterInfo filter = ScriptSettings.fromFilterDef(xBackgroundColumn);
+                backgroundFilters.add(filter);
+            }
+
+            FiltersDef xBackgroundFilter = xBackground.getBackgroundFilter();
+            if (xBackgroundFilter != null)
+            {
+                FilterDef[] xFilters = xBackgroundFilter.getFilterArray();
+                if (xFilters != null && xFilters.length > 0)
+                {
+                    for (FilterDef xFilter : xFilters)
+                    {
+                        if (xFilter == null)
+                            continue;
+                        FilterInfo filter = ScriptSettings.fromFilterDef(xFilter);
+                        backgroundFilters.add(filter);
+                    }
                 }
             }
-        }
 
-        result.setBackgroundFilter(backgroundFilters);
+            result.setBackgroundFilter(backgroundFilters);
+        }
 
         return result;
     }

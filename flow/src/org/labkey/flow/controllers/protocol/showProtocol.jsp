@@ -25,10 +25,10 @@
    FlowProtocol protocol = form.getProtocol();
 %>
 <p>
-    The Flow Protocol describes some things about the experiment.
+    The Flow Protocol describes sample information and metadata about the experiment.
 </p>
 <p><b>Samples</b><br>
-    The Flow Protocol describes how to match samples from a Sample Set with FCSFiles.<br>
+    Upload sample information and match samples with FCSFiles.<br>
     <% if (protocol.getSampleSet() == null) { %>
         No samples have been uploaded in this folder.<br>
         <labkey:link href="<%=protocol.urlUploadSamples(false)%>" text="Upload samples from a spreadsheet" /><br>
@@ -51,7 +51,8 @@
     You can choose to only analyze FCS files where the keywords match certain criteria.<br>
     <labkey:link href="<%=protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" text="Edit FCS Analysis Filter" />
 </p>
-<p><b>ICS Metadata</b><br>
-    Define columns used to subtract background from stimulated wells.<br>
+<p><b>Metadata</b><br>
+    Identify participant visit/date columns and
+    columns used to subtract background from stimulated wells.<br>
     <labkey:link href="<%=protocol.urlFor(ProtocolController.EditICSMetadataAction.class)%>" text="Edit ICS Metadata" />
 </p>

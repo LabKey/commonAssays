@@ -22,16 +22,13 @@ import org.labkey.api.data.CompareType;
 import org.labkey.api.data.FilterInfo;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.flow.analysis.web.StatisticSpec;
-import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.AttributeCache;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.data.FlowProtocol;
 
-import javax.servlet.ServletException;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * User: kevink
@@ -43,23 +40,38 @@ public class EditICSMetadataForm extends ProtocolForm
     public static final int BACKGROUND_COLUMNS_MAX = 5;
 
     // from form posted values
-    public String[] matchColumnFields;
-    public String[] backgroundFilterFields;
-    public String[] backgroundFilterOps;
-    public String[] backgroundFilterValues;
+    public String ff_participantColumn;
+    public String ff_visitColumn;
+    public String ff_dateColumn;
+    public String[] ff_matchColumn;
+    public String[] ff_backgroundFilterField;
+    public String[] ff_backgroundFilterOp;
+    public String[] ff_backgroundFilterValue;
 
     // from FlowProtocol's ICSMetadata
+    public FieldKey participantColumn;
+    public FieldKey visitColumn;
+    public FieldKey dateColumn;
     public FieldKey[] matchColumn;
     public FilterInfo[] backgroundFilter;
 
-    public void init(FlowProtocol protocol)
+    // populate the form fields from the saved ICSMetadata
+    public void init(ICSMetadata icsmetadata)
     {
         matchColumn = new FieldKey[MATCH_COLUMNS_MAX];
         backgroundFilter = new FilterInfo[BACKGROUND_COLUMNS_MAX];
 
-        ICSMetadata icsmetadata = protocol.getICSMetadata();
         if (icsmetadata != null)
         {
+            if (icsmetadata.getParticipantColumn() != null)
+                participantColumn = icsmetadata.getParticipantColumn();
+
+            if (icsmetadata.getVisitColumn() != null)
+                visitColumn = icsmetadata.getVisitColumn();
+
+            if (icsmetadata.getDateColumn() != null)
+                dateColumn = icsmetadata.getDateColumn();
+
             if (icsmetadata.getMatchColumns() != null)
             {
                 for (int i = 0; i < icsmetadata.getMatchColumns().size(); i++)
@@ -83,31 +95,64 @@ public class EditICSMetadataForm extends ProtocolForm
         }
     }
 
-    public void setMatchColumn(String[] fields)
+    public void setFf_participantColumn(String ff_participantColumn)
     {
-        matchColumnFields = fields;
+        this.ff_participantColumn = ff_participantColumn;
     }
 
-    public void setBackgroundField(String[] fields)
+    public void setFf_visitColumn(String ff_visitColumn)
     {
-        backgroundFilterFields = fields;
+        this.ff_visitColumn = ff_visitColumn;
     }
 
-    public void setBackgroundOp(String[] ops)
+    public void setFf_dateColumn(String ff_dateColumn)
     {
-        backgroundFilterOps = ops;
+        this.ff_dateColumn = ff_dateColumn;
     }
 
-    public void setBackgroundValue(String[] values)
+    public void setFf_matchColumn(String[] ff_matchColumn)
     {
-        backgroundFilterValues = values;
+        this.ff_matchColumn = ff_matchColumn;
+    }
+
+    public void setFf_backgroundFilterField(String[] ff_backgroundFilterField)
+    {
+        this.ff_backgroundFilterField = ff_backgroundFilterField;
+    }
+
+    public void setFf_backgroundFilterOp(String[] ff_backgroundFilterOp)
+    {
+        this.ff_backgroundFilterOp = ff_backgroundFilterOp;
+    }
+
+    public void setFf_backgroundFilterValue(String[] ff_backgroundFilterValue)
+    {
+        this.ff_backgroundFilterValue = ff_backgroundFilterValue;
+    }
+
+    /** Get participant FieldKey from form posted value. */
+    public FieldKey getParticipantColumn()
+    {
+        return ff_participantColumn == null ? null : FieldKey.fromString(ff_participantColumn);
+    }
+
+    /** Get timepoint FieldKey from form posted value. */
+    public FieldKey getVisitColumn()
+    {
+        return ff_visitColumn == null ? null : FieldKey.fromString(ff_visitColumn);
+    }
+
+    /** Get TimepoinType from form posted value. */
+    public FieldKey getDateColumn()
+    {
+        return ff_dateColumn == null ? null : FieldKey.fromString(ff_dateColumn);
     }
 
     /** Get match columns from form posted values. */
     public List<FieldKey> getMatchColumns()
     {
-        List<FieldKey> matchColumns = new ArrayList<FieldKey>(matchColumnFields.length);
-        for (String field : matchColumnFields)
+        List<FieldKey> matchColumns = new ArrayList<FieldKey>(ff_matchColumn.length);
+        for (String field : ff_matchColumn)
         {
             if (field != null)
                 matchColumns.add(FieldKey.fromString(field));
@@ -118,26 +163,26 @@ public class EditICSMetadataForm extends ProtocolForm
     /** Get background filters from form posted values. */
     public List<FilterInfo> getBackgroundFilters()
     {
-        List<FilterInfo> filters = new ArrayList<FilterInfo>(backgroundFilterFields.length);
-        if (backgroundFilterFields != null && backgroundFilterOps != null)
+        List<FilterInfo> filters = new ArrayList<FilterInfo>(ff_backgroundFilterField.length);
+        if (ff_backgroundFilterField != null && ff_backgroundFilterOp != null)
         {
-            for (int i = 0; i < backgroundFilterFields.length; i++)
+            for (int i = 0; i < ff_backgroundFilterField.length; i++)
             {
-                String field = backgroundFilterFields[i];
+                String field = ff_backgroundFilterField[i];
                 if (field == null)
                     continue;
                 
                 String op;
-                if (backgroundFilterOps.length < i || backgroundFilterOps[i] == null)
+                if (ff_backgroundFilterOp.length < i || ff_backgroundFilterOp[i] == null)
                     op = CompareType.NONBLANK.getPreferredUrlKey();
                 else
-                    op = backgroundFilterOps[i];
+                    op = ff_backgroundFilterOp[i];
 
                 String value;
-                if (backgroundFilterValues.length < i || backgroundFilterValues[i] == null)
+                if (ff_backgroundFilterValue.length < i || ff_backgroundFilterValue[i] == null)
                     value = null;
                 else
-                    value = backgroundFilterValues[i];
+                    value = ff_backgroundFilterValue[i];
 
                 FilterInfo filter = new FilterInfo(field, op, value);
                 filters.add(filter);
@@ -146,7 +191,7 @@ public class EditICSMetadataForm extends ProtocolForm
         return filters;
     }
 
-    public Map<FieldKey, String> getKeywordAndSampleFieldMap()
+    public Map<FieldKey, String> getKeywordAndSampleFieldMap(boolean includeStatistics)
     {
         LinkedHashMap<FieldKey, String> ret = new LinkedHashMap<FieldKey, String>();
         FlowSchema schema = new FlowSchema(getUser(), getContainer());
@@ -175,17 +220,19 @@ public class EditICSMetadataForm extends ProtocolForm
             }
         }
 
-
-        // ADD statistics too.
-        // this is to filter for minimum count in background control
-        // e.g. Statistic."S/Lv/L/3+/4+:Count" > 5000
-        Map<StatisticSpec,Integer> stats = AttributeCache.STATS.getAttrValues(getContainer(), null, true);
-        FieldKey statisticProperty = FieldKey.fromParts("Statistic");
-        for (StatisticSpec stat : stats.keySet())
+        if (includeStatistics)
         {
-            if (stat.getStatistic() != StatisticSpec.STAT.Count)
-                continue;
-            ret.put(new FieldKey(statisticProperty, stat.toString()), "Statistic " + stat.toString());
+            // ADD statistics too.
+            // this is to filter for minimum count in background control
+            // e.g. Statistic."S/Lv/L/3+/4+:Count" > 5000
+            Map<StatisticSpec,Integer> stats = AttributeCache.STATS.getAttrValues(getContainer(), null, true);
+            FieldKey statisticProperty = FieldKey.fromParts("Statistic");
+            for (StatisticSpec stat : stats.keySet())
+            {
+                if (stat.getStatistic() != StatisticSpec.STAT.Count)
+                    continue;
+                ret.put(new FieldKey(statisticProperty, stat.toString()), "Statistic " + stat.toString());
+            }
         }
 
         return ret;

@@ -28,10 +28,10 @@ positivity <- function (data, grouping_columns)
 
       if (!is.na(data$stat[i]) && !is.na(data$stat_bg[i]) && !is.na(data$parent[i]) && !is.na(data$parent_bg[i]))
       {
-        x.ant = data$stat[i]
-        N.ant = data$parent[i] - data$stat[i]
-        x.neg = data$stat_bg[i]
-        N.neg = data$parent_bg[i] - data$stat_bg[i]
+        x.ant = as.integer(data$stat[i])
+        N.ant = as.integer(data$parent[i] - data$stat[i])
+        x.neg = as.integer(data$stat_bg[i])
+        N.neg = as.integer(data$parent_bg[i] - data$stat_bg[i])
 
         m = matrix(c(x.ant,N.ant,x.neg,N.neg), nc=2, byrow=FALSE)
 
@@ -41,23 +41,36 @@ positivity <- function (data, grouping_columns)
       return(pval)
     })
 
-
     # compute adjusted p-values
     data = by(data, subset(data, select=grouping_columns), function(ss) {
-      ss$adj_p = p.adjust(ss$raw_p, method="holm")
+      #ss$adj_p = p.adjust(ss$raw_p, method="holm")
+      ss$adj_p = p.adjust(ss$raw_p, method="bonferroni")
       return(ss)
     })
-    dat = do.call(rbind, data)
+    data = do.call(rbind, data)
 
     # define response call
-    dat$response = as.numeric(dat$adj_p <= ALPHA)
+    data$response = as.numeric(data$adj_p <= ALPHA)
 
-    return(dat)
+    return(data)
 }
 
 # UNDONE: check labkey.data has statistic, background statistic, parent statistic, background parent statistic
 
-result <- positivity(labkey.data, flow.metadata.matchColumns)
+if (!exists("flow.metadata.study.participantColumn"))
+    stop("ICS study metadata must include participant column")
+
+if (!exists("flow.metadata.study.visitColumn") && !exists("flow.metadata.study.dateColumn"))
+    stop("ICS study metadata must include either visit or date column")
+
+if (exists("flow.metadata.study.visitColumn")) {
+    grouping_cols = c(flow.metadata.study.participantColumn, flow.metadata.study.visitColumn)
+} else {
+    grouping_cols = c(flow.metadata.study.participantColumn, flow.metadata.study.dateColumn)
+}
+
+
+result <- positivity(labkey.data, grouping_cols)
 
 PRINT <- data.frame(
     date = as.Date(result$datetime),
@@ -67,10 +80,17 @@ PRINT <- data.frame(
     well.href = result$well_href
 )
 
-PRINT[report.parameters$subsetDisplay] = result$stat
-PRINT[paste("BG ", report.parameters$subsetDisplay)] = result$stat_bg
+PRINT[flow.metadata.study.participantColumn] = result[flow.metadata.study.participantColumn]
+if (exists("flow.metadata.study.visitColumn")) {
+    PRINT[flow.metadata.study.visitColumn] = result[flow.metadata.study.visitColumn]
+} else {
+    PRINT[flow.metadata.study.dateColumn] = result[flow.metadata.study.dateColumn]
+}
+
 PRINT[report.parameters$subsetParentDisplay] = result$parent
-PRINT[paste("BG ", report.parameters$subsetParentDisplay)] = result$parent_bg
+PRINT[paste("BG", report.parameters$subsetParentDisplay)] = result$parent_bg
+PRINT[report.parameters$subsetDisplay] = result$stat
+PRINT[paste("BG", report.parameters$subsetDisplay)] = result$stat_bg
 PRINT$response = result$response
 PRINT$raw_p = result$raw_p
 PRINT$adj_p = result$adj_p
