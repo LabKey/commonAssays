@@ -69,7 +69,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
     {
         super(LuminexSchema.getTableInfoDataRow(), schema.getContainer());
 
-        ExpProtocol protocol = schema.getProtocol();
+        final ExpProtocol protocol = schema.getProtocol();
         _provider = (LuminexAssayProvider)AssayService.get().getProvider(protocol);
 
         setDescription("Contains all the Luminex data rows for the " + protocol.getName() + " assay definition");
@@ -174,7 +174,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
             @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                return new ExclusionUIDisplayColumn(colInfo);
+                return new ExclusionUIDisplayColumn(colInfo, protocol.getName());
             }
         });
         addColumn(exclusionUIColumn);

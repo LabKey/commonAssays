@@ -20,8 +20,10 @@ public class ExclusionUIDisplayColumn extends DataColumn
     private final FieldKey _dataFieldKey;
     private final FieldKey _runFieldKey;
     private final FieldKey _analyteFieldKey;
+    private final String _protocolName;
+    private boolean _exclusionJSIncluded = false;
 
-    public ExclusionUIDisplayColumn(ColumnInfo colInfo)
+    public ExclusionUIDisplayColumn(ColumnInfo colInfo, String protocolName)
     {
         super(colInfo);
         FieldKey parentFK = colInfo.getFieldKey().getParent();
@@ -31,6 +33,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         _dataFieldKey = new FieldKey(new FieldKey(parentFK, "Data"), "RowId");
         _runFieldKey = new FieldKey(new FieldKey(new FieldKey(parentFK, "Data"), "Run"), "RowId");
         _analyteFieldKey = new FieldKey(new FieldKey(parentFK, "Analyte"), "RowId");
+        _protocolName = protocolName;
     }
 
     @Override
@@ -53,7 +56,20 @@ public class ExclusionUIDisplayColumn extends DataColumn
         Integer runId = (Integer)ctx.get(_runFieldKey);
         Integer analyteId = (Integer)ctx.get(_analyteFieldKey);
 
-        out.write("<a onclick=\"alert('dilution: " + dilution + ", description: " + description + ", dataId: " + dataId + ", runId: " + runId + ", analyteId: " + analyteId + "');\">");
+        if (!_exclusionJSIncluded)
+        {
+            // add script block to include the necessary JS and CSS files for the exclusion popups
+            out.write("<script type='text/javascript'>"
+                    + "   LABKEY.requiresScript('AnalyteExclusionPanel.js');"
+                    + "   LABKEY.requiresScript('WellExclusionPanel.js');"
+                    + "   LABKEY.requiresCss('Exclusion.css');"
+                    + "</script>");
+
+            _exclusionJSIncluded = true;
+        }
+
+        // add onclick handler to call the well exclusion window creation function
+        out.write("<a onclick=\"wellExclusionWindow('" + _protocolName + "', " + runId + ", " + dataId + ", '" + description + "', " + dilution + ");\">");
 
         Boolean excluded = (Boolean)ctx.get(getColumnInfo().getFieldKey());
         if (excluded.booleanValue())

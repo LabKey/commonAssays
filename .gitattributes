@@ -605,6 +605,9 @@ luminex/src/org/labkey/luminex/RunExclusionTable.java -text
 luminex/src/org/labkey/luminex/Titration.java -text
 luminex/src/org/labkey/luminex/WellExclusionTable.java -text
 luminex/src/org/labkey/luminex/titrationWellRoles.jsp -text
+luminex/webapp/AnalyteExclusionPanel.js -text
+luminex/webapp/Exclusion.css -text
+luminex/webapp/WellExclusionPanel.js -text
 microarray/gwtsrc/org/labkey/microarray/designer/MicroarrayAssayDesigner.gwt.xml -text
 microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayAssayDesigner.java -text
 microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayDesignerMainPanel.java -text

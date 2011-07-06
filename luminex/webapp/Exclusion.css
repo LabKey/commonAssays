@@ -1,0 +1,11 @@
+.labkey-exclusion-td-label {
+    background: #eeeeee;
+    font-weight: bold;
+    border: solid #c0c0c0 1px;
+    width: 25%
+}
+
+.labkey-exclusion-td-cell {
+    background: #ffffff;
+    border: solid #c0c0c0 1px
+}
