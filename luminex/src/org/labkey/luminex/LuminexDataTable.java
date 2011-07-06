@@ -174,7 +174,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
             @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                return new ExclusionUIDisplayColumn(colInfo, protocol.getName());
+                return new ExclusionUIDisplayColumn(colInfo, protocol.getName(), _schema.getContainer(), _schema.getUser());
             }
         });
         addColumn(exclusionUIColumn);

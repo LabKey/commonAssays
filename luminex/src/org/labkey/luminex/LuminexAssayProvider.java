@@ -49,6 +49,7 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
@@ -487,13 +488,14 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 DataView result = super.createDataView();
                 String runId = context.getRequest().getParameter(result.getDataRegion().getName() + ".Data/Run/RowId~eq");
 
-                // if showing controls and user is viewing data results for a single run, add the Exlude Analytes button to button bar
+                // if showing controls and user is viewing data results for a single run, add the Exclude Analytes button to button bar
                 if (showControls() && runId != null)
                 {
                     ActionButton excludeAnalytes = new ActionButton("excludeAnalytes", "Exclude Analytes");
                     excludeAnalytes.setScript("LABKEY.requiresScript('AnalyteExclusionPanel.js');"
                             + "LABKEY.requiresCss('Exclusion.css');"
                             + "analyteExclusionWindow('" + protocol.getName() + "', " + runId + ");");
+                    excludeAnalytes.setDisplayPermission(UpdatePermission.class);
 
                     // todo: move the JS and CSS inclusion to the page level
 
