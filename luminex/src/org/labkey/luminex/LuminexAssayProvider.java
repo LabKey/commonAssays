@@ -16,6 +16,7 @@
 
 package org.labkey.luminex;
 
+import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -56,6 +57,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.qc.DataExchangeHandler;
@@ -464,7 +466,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ResultsQueryView createResultsQueryView(ViewContext context, ExpProtocol protocol)
+    public ResultsQueryView createResultsQueryView(final ViewContext context, final ExpProtocol protocol)
     {
         UserSchema schema = QueryService.get().getUserSchema(context.getUser(), context.getContainer(), AssaySchema.NAME);
         String name = AssayService.get().getResultsTableName(protocol);
@@ -477,6 +479,27 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 ResultsDataRegion rgn = new LuminexResultsDataRegion(_provider);
                 initializeDataRegion(rgn);
                 return rgn;
+            }
+
+            @Override
+            public DataView createDataView()
+            {
+                DataView result = super.createDataView();
+                String runId = context.getRequest().getParameter(result.getDataRegion().getName() + ".Data/Run/RowId~eq");
+
+                // if showing controls and user is viewing data results for a single run, add the Exlude Analytes button to button bar
+                if (showControls() && runId != null)
+                {
+                    ActionButton excludeAnalytes = new ActionButton("excludeAnalytes", "Exclude Analytes");
+                    excludeAnalytes.setScript("LABKEY.requiresScript('AnalyteExclusionPanel.js');"
+                            + "LABKEY.requiresCss('Exclusion.css');"
+                            + "analyteExclusionWindow('" + protocol.getName() + "', " + runId + ");");
+
+                    // todo: move the JS and CSS inclusion to the page level
+
+                    result.getDataRegion().getButtonBar(DataRegion.MODE_GRID).add(excludeAnalytes);
+                }
+                return result;
             }
         };
     }
