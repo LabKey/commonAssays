@@ -20,6 +20,7 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.GridView;
 
@@ -48,11 +49,12 @@ public class GraphView extends GridView
         }
 
         DataRegion oldRegion = ctx.getCurrentRegion();
+        ResultSet rs = null;
         try
         {
             DataRegion region = getDataRegion();
             ctx.setCurrentRegion(region);
-            ResultSet rs = region.getResultSet(ctx);
+            rs = region.getResultSet(ctx);
             List<DisplayColumn> dataColumns = new ArrayList();
             List<GraphColumn> graphColumns = new ArrayList();
 
@@ -102,6 +104,7 @@ public class GraphView extends GridView
         }
         finally
         {
+            ResultSetUtil.close(rs);
             ctx.setCurrentRegion(oldRegion);
         }
     }
