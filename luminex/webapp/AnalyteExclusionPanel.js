@@ -13,8 +13,8 @@ function analyteExclusionWindow(assayName, runId)
         cls: 'extContainer',
         title: 'Exclude Analytes from Analysis',
         layout:'fit',
-        width:425,
-        height:400,
+        width:440,
+        height:440,
         padding: 15,
         modal: true,
         closeAction:'close',
@@ -90,15 +90,23 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
     {
         // panel header information for replicate group
         this.add(new Ext.form.FormPanel({
-            style: 'padding-bottom: 20px; background: #ffffff',
+            style: 'padding-bottom: 10px; background: #ffffff',
             html: this.getExclusionPanelHeader(),
             border: false
+        }));
+
+        // text to describe how run exclusions are handled
+        this.add(new Ext.form.DisplayField({
+            hideLabel: true,
+            style: 'font-style: italic; font-size: 90%',
+            value: 'Analytes excluded for a replicate group will not be re-included by changes in assay level exclusions'
         }));
 
         // grid of avaialble/excluded analytes
         var selMod = new Ext.grid.CheckboxSelectionModel();
         var availableAnalytesGrid = new Ext.grid.GridPanel({
             id: 'availableanalytes',
+            style: 'padding-top: 10px;',
             title: 'Select the checkbox next to the analytes to be excluded',
             headerStyle: 'font-weight: normal; background-color: #ffffff',            
             store:  new LABKEY.ext.Store({
@@ -137,7 +145,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
             },
             sm: selMod,
             anchor: '100%',
-            height: 175,
+            height: 165,
             frame: false,
             loadMask: true
         });
@@ -154,7 +162,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
                     fieldLabel: 'Comment',
                     value: this.comment ? this.comment : null,
                     labelStyle: 'font-weight: bold',
-                    width: 385
+                    anchor: '100%'
                 })
             ],
             border: false
@@ -196,7 +204,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
 
     getExclusionPanelHeader: function()
     {
-        return "<table cellpadding='2px' cellspacing='0px' width='100%' style='border-collapse: collapse'>"
+        return "<table cellspacing='0' width='100%' style='border-collapse: collapse'>"
                     + "<tr><td class='labkey-exclusion-td-label'>Run ID:</td><td class='labkey-exclusion-td-cell'>" + this.runId + "</td></tr>"
                     + "<tr><td class='labkey-exclusion-td-label'>Assay ID:</td><td class='labkey-exclusion-td-cell'><div id='run_assay_id'>...</div></td></tr>"
                     + "</table>";

@@ -13,7 +13,7 @@ function wellExclusionWindow(assayName, runId, dataId, description, dilution)
         cls: 'extContainer',
         title: 'Exclude Replicate Group from Analysis',
         layout:'fit',
-        width:430,
+        width:440,
         height:555,
         padding: 15,
         modal: true,
@@ -52,7 +52,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             throw "You must specify a schemaName!";
         if (!config.queryName)
             throw "You must specify a queryName!";
-        if (!config.runId || !config.dataId || !config.description || !config.dilution)
+        if (!config.runId || !config.dataId || !config.dilution)
             throw "You must specify the following: runId, dataId, description, and dilution!";
 
         Ext.apply(config, {
@@ -108,7 +108,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
         this.add(new Ext.form.DisplayField({
             hideLabel: true,
             style: 'font-style: italic; font-size: 90%',
-            value: 'Analytes excluded at the Replicate Group level will not be re-included by changes in assay level exclusions'
+            value: 'Analytes excluded at the assay level will not be re-included by changes in replicate group exclusions'
         }));
 
         // radio group for selecting "exclude all" or "exclude selected"
@@ -214,7 +214,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             autoExpandColumn: 'Name',
             sm: selMod,
             anchor: '100%',
-            height: 175,
+            height: 165,
             frame: false,
             loadMask: true
         });
@@ -238,7 +238,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
                     fieldLabel: 'Comment',
                     value: this.comment ? this.comment : null,
                     labelStyle: 'font-weight: bold',
-                    width: 385
+                    anchor: '100%'
                 })
             ],
             border: false
@@ -263,20 +263,21 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
 
     queryForReplicateGroupWellsAndFileName: function()
     {
+        var sql = "SELECT DISTINCT x.Well, x.Data.Name AS Name "
+                + "FROM \"" + this.queryName + " Data\" AS x WHERE ";
+        sql += (this.description ? " x.Description = '" + this.description + "'" : " x.Description IS NULL ");
+        sql += " AND x.Dilution = " + this.dilution + " AND x.Data.RowId = " + this.dataId;
+
         // query to get the wells and data id (file name) for the given replicate group
         LABKEY.Query.executeSql({
             schemaName: 'assay',
-            sql: 'SELECT DISTINCT x.Well, x.Data.Name AS Name '
-                + 'FROM "' + this.queryName + ' Data" AS x '
-                + 'WHERE x.Description = \'' + this.description + '\''
-                + ' AND x.Dilution = ' + this.dilution
-                + ' AND x.Data.RowId = ' + this.dataId,
+            sql: sql,
             success: function(data){
                 var wells = "";
                 var filename = "";
                 for (var i = 0; i < data.rows.length; i++)
                 {
-                    wells += (wells.length > 0 ? "," : "") + data.rows[i].Well;
+                    wells += (wells.length > 0 ? ", " : "") + data.rows[i].Well;
                     filename = data.rows[i].Name;
                 }
                 Ext.get('replicate_group_wells').update(wells);
@@ -306,11 +307,11 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
 
     getExclusionPanelHeader: function()
     {
-        return "<table cellpadding='2px' cellspacing='0px' width='100%' style='border-collapse: collapse'>"
-                    + "<tr><td class='labkey-exclusion-td-label'>Sample:</td><td class='labkey-exclusion-td-cell'>" + this.description + "</td></tr>"
-                    + "<tr><td class='labkey-exclusion-td-label'>Dilution:</td><td class='labkey-exclusion-td-cell'>" + this.dilution + "</td></tr>"
-                    + "<tr><td class='labkey-exclusion-td-label'>Wells:</td><td class='labkey-exclusion-td-cell'><div id='replicate_group_wells'>...</div></td></tr>"
-                    + "<tr><td class='labkey-exclusion-td-label'>File Name:</td><td class='labkey-exclusion-td-cell'><div id='replicate_group_filename'>...</div></td></tr>"
+        return "<table cellspacing='0' width='100%' style='border-collapse: collapse'>"
+                    + "<tr><td class='labkey-exclusion-td-label'>File Name:</td><td class='labkey-exclusion-td-cell' colspan='3'><div id='replicate_group_filename'>...</div></td></tr>"
+                    + "<tr><td class='labkey-exclusion-td-label'>Sample:</td><td class='labkey-exclusion-td-cell' colspan='3'>" + (this.description ? this.description : "") + "</td></tr>"
+                    + "<tr><td class='labkey-exclusion-td-label'>Dilution:</td><td class='labkey-exclusion-td-cell'>" + this.dilution + "</td>"
+                    + "<td class='labkey-exclusion-td-label'>Wells:</td><td class='labkey-exclusion-td-cell'><div id='replicate_group_wells'>...</div></td></tr>"
                     + "</table>";
     },
 

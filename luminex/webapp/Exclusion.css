@@ -2,10 +2,12 @@
     background: #eeeeee;
     font-weight: bold;
     border: solid #c0c0c0 1px;
-    width: 25%
+    width: 25%;
+    padding: 3px !important;
 }
 
 .labkey-exclusion-td-cell {
     background: #ffffff;
-    border: solid #c0c0c0 1px
+    border: solid #c0c0c0 1px;
+    padding: 3px !important;
 }
