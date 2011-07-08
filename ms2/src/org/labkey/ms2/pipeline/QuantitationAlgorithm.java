@@ -101,6 +101,10 @@ public enum QuantitationAlgorithm
             {
                 throw new PipelineJobException("Name of Libra configuration must be specified using \"" + TPPTask.LIBRA_CONFIG_NAME_PARAM + "\"");
             }
+            if (libraConfigName.indexOf(' ') != -1)
+            {
+                throw new PipelineJobException("Libra configuration files containing a space are not supported");
+            }
             LibraProtocolFactory factory = new LibraProtocolFactory();
             File result = factory.getProtocolFile(root, libraConfigName);
             if (!NetworkDrive.exists(result))
