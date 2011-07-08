@@ -95,7 +95,7 @@ public class LuminexExcelParser
                     row++;
 
                     List<String> colNames = new ArrayList<String>();
-                    if (row < sheet.getLastRowNum())
+                    if (row <= sheet.getLastRowNum())
                     {
                         Row r = sheet.getRow(row);
                         if (r != null)
@@ -112,7 +112,7 @@ public class LuminexExcelParser
                     Map<String, Integer> potentialTitrationCounts = new CaseInsensitiveHashMap<Integer>();
                     Map<String, Titration> potentialTitrations = new CaseInsensitiveHashMap<Titration>();
 
-                    if (row < sheet.getLastRowNum())
+                    if (row <= sheet.getLastRowNum())
                     {
                         do
                         {
@@ -138,12 +138,15 @@ public class LuminexExcelParser
 
                             dataRows.add(dataRow);
                         }
-                        while (++row < sheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(sheet, 0, row)));
+                        while (++row <= sheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(sheet, 0, row)));
 
                         // Skip over the blank line
                         row++;
                     }
-                    handleHeaderOrFooterRow(sheet, row, analyte, excelRunDomain, dataFile);
+                    while (row <= sheet.getLastRowNum())
+                    {
+                        row = handleHeaderOrFooterRow(sheet, row, analyte, excelRunDomain, dataFile);
+                    }
 
                     // Check if we've accumulated enough instances to consider it to be a titration
                     for (Map.Entry<String, Integer> entry : potentialTitrationCounts.entrySet())
@@ -215,7 +218,7 @@ public class LuminexExcelParser
 
     private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, Domain excelRunDomain, File dataFile)
     {
-        if (row >= analyteSheet.getLastRowNum())
+        if (row > analyteSheet.getLastRowNum())
         {
             return row;
         }
@@ -299,7 +302,7 @@ public class LuminexExcelParser
                 }
             }
         }
-        while (++row < analyteSheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(analyteSheet, 0, row)));
+        while (++row <= analyteSheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(analyteSheet, 0, row)));
         return row;
     }
 
