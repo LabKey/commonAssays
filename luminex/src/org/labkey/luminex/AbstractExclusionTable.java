@@ -4,17 +4,17 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.query.DefaultQueryUpdateService;
 import org.labkey.api.query.DuplicateKeyException;
-import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
-import org.labkey.api.query.UserIdForeignKey;
+import org.labkey.api.query.UserIdQueryForeignKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -32,14 +32,11 @@ import java.util.Set;
  * User: jeckels
  * Date: Jun 29, 2011
  */
-public abstract class AbstractExclusionTable extends FilteredTable
+public abstract class AbstractExclusionTable extends AbstractLuminexTable
 {
-    private final LuminexSchema _schema;
-
-    public AbstractExclusionTable(TableInfo realTable, LuminexSchema schema)
+    protected AbstractExclusionTable(TableInfo realTable, LuminexSchema schema, boolean filter)
     {
-        super(realTable);
-        _schema = schema;
+        super(realTable, schema, filter);
         wrapAllColumns(true);
 
         assert getRealTable().getPkColumnNames().size() == 1;
@@ -48,7 +45,7 @@ public abstract class AbstractExclusionTable extends FilteredTable
         analytesColumn.setUserEditable(true);
         analytesColumn.setReadOnly(false);
 
-        UserIdForeignKey userIdForeignKey = new UserIdForeignKey();
+        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer());
         getColumn("ModifiedBy").setFk(userIdForeignKey);
         getColumn("CreatedBy").setFk(userIdForeignKey);
 

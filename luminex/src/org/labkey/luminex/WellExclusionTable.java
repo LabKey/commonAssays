@@ -1,7 +1,10 @@
 package org.labkey.luminex;
 
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.MultiValuedForeignKey;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocolApplication;
@@ -17,6 +20,7 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.view.UnauthorizedException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -26,9 +30,9 @@ import java.util.Map;
  */
 public class WellExclusionTable extends AbstractExclusionTable
 {
-    public WellExclusionTable(final LuminexSchema schema)
+    public WellExclusionTable(final LuminexSchema schema, boolean filter)
     {
-        super(LuminexSchema.getTableInfoWellExclusion(), schema);
+        super(LuminexSchema.getTableInfoWellExclusion(), schema, filter);
 
         getColumn("DataId").setLabel("Data File");
         getColumn("DataId").setFk(new ExpSchema(schema.getUser(), schema.getContainer()).getDataIdForeignKey());
@@ -45,6 +49,18 @@ public class WellExclusionTable extends AbstractExclusionTable
         List<FieldKey> defaultCols = new ArrayList<FieldKey>(getDefaultVisibleColumns());
         defaultCols.add(FieldKey.fromParts("DataId", "Run"));
         setDefaultVisibleColumns(defaultCols);
+    }
+
+    @Override
+    protected SQLFragment createContainerFilterSQL(Collection<String> ids)
+    {
+        SQLFragment sql = new SQLFragment("DataId IN (SELECT RowId FROM ");
+        sql.append(ExperimentService.get().getTinfoData(), "d");
+        sql.append(" WHERE Container IN (");
+        sql.append(StringUtils.repeat("?", ", ", ids.size()));
+        sql.append("))");
+        sql.addAll(ids);
+        return sql;
     }
 
     @Override
