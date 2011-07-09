@@ -1,7 +1,9 @@
 package org.labkey.luminex;
 
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.MultiValuedForeignKey;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -14,6 +16,7 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.UnauthorizedException;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -22,9 +25,9 @@ import java.util.Map;
  */
 public class RunExclusionTable extends AbstractExclusionTable
 {
-    public RunExclusionTable(final LuminexSchema schema)
+    public RunExclusionTable(final LuminexSchema schema, boolean filter)
     {
-        super(LuminexSchema.getTableInfoRunExclusion(), schema);
+        super(LuminexSchema.getTableInfoRunExclusion(), schema, filter);
 
         getColumn("RunId").setLabel("Run");
         getColumn("RunId").setFk(new LookupForeignKey("RowId")
@@ -45,6 +48,18 @@ public class RunExclusionTable extends AbstractExclusionTable
                 return schema.createRunExclusionAnalyteTable();
             }
         }, "AnalyteId"));
+    }
+
+    @Override
+    protected SQLFragment createContainerFilterSQL(Collection<String> ids)
+    {
+        SQLFragment sql = new SQLFragment("RunId IN (SELECT RowId FROM ");
+        sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+        sql.append(" WHERE Container IN (");
+        sql.append(StringUtils.repeat("?", ", ", ids.size()));
+        sql.append("))");
+        sql.addAll(ids);
+        return sql;
     }
 
     @Override
