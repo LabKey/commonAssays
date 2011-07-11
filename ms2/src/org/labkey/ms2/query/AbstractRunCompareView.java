@@ -16,7 +16,14 @@
 
 package org.labkey.ms2.query;
 
-import org.labkey.api.data.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TSVGridWriter;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -24,7 +31,11 @@ import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.gwt.client.model.GWTComparisonGroup;
 import org.labkey.api.gwt.client.model.GWTComparisonMember;
 import org.labkey.api.gwt.client.model.GWTComparisonResult;
-import org.labkey.api.query.*;
+import org.labkey.api.query.CustomView;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
@@ -36,12 +47,17 @@ import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.RunListCache;
 import org.labkey.ms2.RunListException;
 import org.labkey.ms2.compare.CompareDataRegion;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * User: jeckels
