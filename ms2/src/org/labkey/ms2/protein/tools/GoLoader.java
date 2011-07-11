@@ -180,7 +180,7 @@ public abstract class GoLoader
         try
         {
             logStatus("Clearing table " + bean.tinfo);
-            Table.execute(ProteinManager.getSchema(), "TRUNCATE TABLE " + bean.tinfo, null);
+            Table.execute(ProteinManager.getSchema(), "TRUNCATE TABLE " + bean.tinfo);
 
             logStatus("Starting to load " + filename);
             InputStreamReader isr = new InputStreamReader(is);
