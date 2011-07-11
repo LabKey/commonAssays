@@ -26,7 +26,10 @@
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.ReportsController" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="java.util.Collection" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
+<%@ page import="org.labkey.flow.reports.FlowReport" %>
+<%@ page import="org.labkey.flow.reports.FlowReportManager" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext context = getViewContext();
@@ -37,20 +40,10 @@
 
     ReportIdentifier id = ((ReportsController.IdForm) HttpView.currentModel()).getReportId();
 
-    ReportService.I svc = ReportService.get();
-    Report[] all = svc.getReports(user, c);
-    Map<String, Report> reports = new CaseInsensitiveTreeMap<Report>();
-    for (Report r : all)
-    {
-        if (!r.getType().startsWith("Flow."))
-            continue;
-        reports.put(r.getDescriptor().getReportName(), r);
-    }
+    Collection<FlowReport> reports = FlowReportManager.getFlowReports(c, user);
     %><select onchange="Select_onChange(this.value)"><%
-    for (Report r : reports.values())
+    for (FlowReport r : reports)
     {
-        if (!r.getType().startsWith("Flow."))
-            continue;
         ReportDescriptor d = r.getDescriptor();
         boolean selected = id != null && id.equals(d.getReportId());
         %><option <%=selected?"selected":""%> value="<%=h(r.getRunReportURL(context))%>"><%=h(d.getReportName())%></option><%

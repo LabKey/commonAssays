@@ -46,6 +46,8 @@ import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.data.LogType;
 import org.labkey.flow.data.SampleKey;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.reports.FlowReportJob;
+import org.labkey.flow.reports.FlowReportManager;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -60,7 +62,6 @@ import java.util.TreeMap;
 
 abstract public class ScriptJob extends FlowExperimentJob
 {
-
     private Map<SampleKey, ExpMaterial> _sampleMap;
 
     FlowScript _runAnalysisScript;
@@ -115,29 +116,14 @@ abstract public class ScriptJob extends FlowExperimentJob
             return _runHandler;
         }
 
-        public void setRunHandler(KeywordsHandler runHandler)
-        {
-            _runHandler = runHandler;
-        }
-
         public CompensationCalculationHandler getCompensationCalculationHandler()
         {
             return _compensationCalculationHandler;
         }
 
-        public void setCompensationCalculationHandler(CompensationCalculationHandler compensationCalculationHandler)
-        {
-            _compensationCalculationHandler = compensationCalculationHandler;
-        }
-
         public AnalysisHandler getAnalysisHandler()
         {
             return _analysisHandler;
-        }
-
-        public void setAnalysisHandler(AnalysisHandler analysisHandler)
-        {
-            _analysisHandler = analysisHandler;
         }
     }
 

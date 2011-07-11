@@ -31,6 +31,10 @@
 <%@ page import="org.labkey.flow.reports.PositivityFlowReport" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
 <%@ page import="org.labkey.flow.data.ICSMetadata" %>
+<%@ page import="java.util.List" %>
+<%@ page import="org.labkey.flow.reports.FlowReport" %>
+<%@ page import="org.labkey.flow.reports.FlowReportManager" %>
+<%@ page import="java.util.Collection" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext context = getViewContext();
@@ -40,22 +44,11 @@
     boolean canEdit = c.hasPermission(user, UpdatePermission.class);
     ActionURL copyURL = new ActionURL(ReportsController.CopyAction.class, c);
 
-    ReportService.I svc = ReportService.get();
-    Report[] all = svc.getReports(user, c);
-    TreeMap<String, Report> reports = new CaseInsensitiveTreeMap<Report>();
-
-    for (Report r : all)
-    {
-        if (!r.getType().startsWith("Flow."))
-            continue;
-        reports.put(r.getDescriptor().getReportName(), r);
-    }
-
+    Collection<FlowReport> reports = FlowReportManager.getFlowReports(c, user);
+    
     %><table><%
-    for (Report r : reports.values())
+    for (Report r : reports)
     {
-        if (!r.getType().startsWith("Flow."))
-            continue;
         ReportDescriptor d = r.getDescriptor();
         String id = d.getReportId().toString();
         ActionURL editURL = r.getEditReportURL(context);

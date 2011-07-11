@@ -17,6 +17,9 @@ package org.labkey.flow.controllers;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.action.*;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusUrls;
 import org.labkey.api.reports.Report;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.reports.report.DbReportIdentifier;
@@ -30,8 +33,10 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.*;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.flow.reports.FilterFlowReport;
 import org.labkey.flow.reports.FlowReport;
 import org.labkey.flow.reports.ControlsQCReport;
+import org.labkey.flow.reports.FlowReportJob;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -211,7 +216,14 @@ public class ReportsController extends BaseFlowController
         public ModelAndView getConfirmView(IdForm form, BindException errors) throws Exception
         {
             r = getReport(getViewContext(), form);
-            return new HtmlView("Delete report: " + PageFlowUtil.filter(r.getDescriptor().getReportName()) + "?");
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("Delete report: ").append(PageFlowUtil.filter(r.getDescriptor().getReportName())).append("?");
+
+            if (r.saveToDomain())
+                sb.append(" All saved report results will also be deleted.");
+
+            return new HtmlView(sb.toString());
         }
 
         public void validateCommand(IdForm idForm, Errors errors)
@@ -233,14 +245,11 @@ public class ReportsController extends BaseFlowController
     
 
     @RequiresPermissionClass(ReadPermission.class)
-    public static class ExecuteAction extends SimpleViewAction<IdForm>
+    public class ExecuteAction extends SimpleViewAction<IdForm>
     {
         FlowReport r;
-        
-        public void validateCommand(IdForm target, Errors errors)
-        {
-        }
 
+        @Override
         public ModelAndView getView(IdForm form, BindException errors) throws Exception
         {
             r = getReport(getViewContext(), form);
@@ -248,13 +257,28 @@ public class ReportsController extends BaseFlowController
 
             ModelAndView view;
             if (errors.hasErrors())
+            {
                 view = new JspView<IdForm>("/org/labkey/flow/view/errors.jsp", form, errors);
+            }
+            else if (r.saveToDomain())
+            {
+                // Run report in background, redirect to pipeline status page
+                ViewBackgroundInfo info = getViewBackgroundInfo();
+                PipeRoot pipeRoot = PipelineService.get().getPipelineRootSetting(getContainer());
+                FlowReportJob job = new FlowReportJob((FilterFlowReport)r, info, pipeRoot);
+                PipelineService.get().queueJob(job);
+                throw new RedirectException(PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer()));
+            }
             else
+            {
+                // Synchronous report
                 view = r.renderReport(getViewContext());
+            }
 
             return new VBox(new SelectReportView(form), view);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             new BeginAction(getViewContext()).appendNavTrail(root);

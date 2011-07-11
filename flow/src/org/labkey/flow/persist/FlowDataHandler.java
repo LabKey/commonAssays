@@ -87,7 +87,8 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         if (url == null)
             return null;
 
-        if (url.endsWith(EXT_DATA))
+        // NOTE: data.getRunId() may be null if the flow run was deleted but the exp.data was not.
+        if (url.endsWith(EXT_DATA) && data.getRunId() != null)
             return new ActionURL(RunController.ShowRunAction.class, container).addParameter("runId", data.getRunId());
         if (url.endsWith((EXT_SCRIPT)))
             return new ActionURL(AnalysisScriptController.BeginAction.class, container).addParameter("scriptId", data.getRowId());

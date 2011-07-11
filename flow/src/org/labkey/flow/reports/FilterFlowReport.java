@@ -141,8 +141,6 @@ public abstract class FilterFlowReport extends FlowReport
     protected Collection<FieldKey> getMatchColumns(ICSMetadata metadata)
     {
         Collection<FieldKey> fieldKeys = new ArrayList<FieldKey>();
-
-
         for (FieldKey fieldKey : metadata.getMatchColumns())
         {
             // Use the 'Run' RowId instead of Run.  The 'Run' display name is already added to the select list.
@@ -315,6 +313,8 @@ public abstract class FilterFlowReport extends FlowReport
         // UNDONE SQL ENCODING
         StringBuilder query = new StringBuilder();
         query.append("SELECT\n");
+        query.append("  A.RowId,\n");
+        query.append("  A.LSID,\n");
         query.append("  A.Run.Name AS run,\n");
         query.append("  ").append(toSQL(runURL)).append(" || CONVERT(A.Run, SQL_VARCHAR) AS \"run.href\",\n");
         query.append("  A.Name AS well,\n");

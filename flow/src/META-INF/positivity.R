@@ -1,6 +1,6 @@
 ##
-#  Copyright (c) 2011 LabKey Corporation
-# 
+#  Copyright (c) 2011 Fred Hutchinson Cancer Research Center
+#
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -72,28 +72,30 @@ if (exists("flow.metadata.study.visitColumn")) {
 
 result <- positivity(labkey.data, grouping_cols)
 
-PRINT <- data.frame(
-    date = as.Date(result$datetime),
-    run = result$run,
-    run.href = result$run_href,
-    well = result$well,
-    well.href = result$well_href
-)
+write.table(result, file = "${tsvout:FCSAnalyses}", sep = "\t", qmethod = "double", col.names=NA)
 
-PRINT[flow.metadata.study.participantColumn] = result[flow.metadata.study.participantColumn]
-if (exists("flow.metadata.study.visitColumn")) {
-    PRINT[flow.metadata.study.visitColumn] = result[flow.metadata.study.visitColumn]
-} else {
-    PRINT[flow.metadata.study.dateColumn] = result[flow.metadata.study.dateColumn]
-}
-
-PRINT[report.parameters$subsetParentDisplay] = result$parent
-PRINT[paste("BG", report.parameters$subsetParentDisplay)] = result$parent_bg
-PRINT[report.parameters$subsetDisplay] = result$stat
-PRINT[paste("BG", report.parameters$subsetDisplay)] = result$stat_bg
-PRINT$response = result$response
-PRINT$raw_p = result$raw_p
-PRINT$adj_p = result$adj_p
-
-write.table(PRINT, file = "${tsvout:tsvfile}", sep = "\t", qmethod = "double", col.names=NA)
+#PRINT <- data.frame(
+#    date = as.Date(result$datetime),
+#    run = result$run,
+#    run.href = result$run_href,
+#    well = result$well,
+#    well.href = result$well_href
+#)
+#
+#PRINT[flow.metadata.study.participantColumn] = result[flow.metadata.study.participantColumn]
+#if (exists("flow.metadata.study.visitColumn")) {
+#    PRINT[flow.metadata.study.visitColumn] = result[flow.metadata.study.visitColumn]
+#} else {
+#    PRINT[flow.metadata.study.dateColumn] = result[flow.metadata.study.dateColumn]
+#}
+#
+#PRINT[report.parameters$subsetParentDisplay] = result$parent
+#PRINT[paste("BG", report.parameters$subsetParentDisplay)] = result$parent_bg
+#PRINT[report.parameters$subsetDisplay] = result$stat
+#PRINT[paste("BG", report.parameters$subsetDisplay)] = result$stat_bg
+#PRINT$response = result$response
+#PRINT$raw_p = result$raw_p
+#PRINT$adj_p = result$adj_p
+#
+#write.table(PRINT, file = "{tsvout:tsvfile?FlowTableType=FCSAnalyses}", sep = "\t", qmethod = "double", col.names=NA)
 

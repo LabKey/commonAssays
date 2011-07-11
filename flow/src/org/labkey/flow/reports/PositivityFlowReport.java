@@ -15,6 +15,10 @@
  */
 package org.labkey.flow.reports;
 
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.PropertyType;
 import org.labkey.api.gwt.client.util.StringUtils;
 import org.labkey.api.query.AliasManager;
 import org.labkey.api.query.FieldKey;
@@ -34,6 +38,9 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.validation.BindException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * User: kevink
@@ -95,9 +102,9 @@ public class PositivityFlowReport extends FilterFlowReport
     void addScriptProlog(ViewContext context, StringBuffer sb)
     {
         super.addScriptProlog(context, sb);
-        sb.append("report.parameters$subsetDisplay=\"").append(getSubset().getSubset()).append("\"\n");
-        sb.append("report.parameters$subsetParent=\"").append(getSubsetParent()).append("\"\n");
-        sb.append("report.parameters$subsetParentDisplay=\"").append(getSubsetParent()).append("\"\n");
+        //sb.append("report.parameters$subsetDisplay=\"").append(getSubset().getSubset()).append("\"\n");
+        //sb.append("report.parameters$subsetParent=\"").append(getSubsetParent()).append("\"\n");
+        //sb.append("report.parameters$subsetParentDisplay=\"").append(getSubsetParent()).append("\"\n");
     }
 
     @Override
@@ -107,17 +114,17 @@ public class PositivityFlowReport extends FilterFlowReport
         if (metadata == null || !metadata.isComplete())
             throw new NotFoundException("ICS metadata required");
 
-        SubsetSpec subset = getSubset();
-        SubsetSpec subsetParent = getSubsetParent();
-
-        String stat = subset + ":Count";
-        String parentStat = subsetParent == null ? "Count" : subsetParent.toString() + ":Count";
-
         for (FieldKey fieldKey : getMetadataColumns(metadata))
         {
             String alias = AliasManager.makeLegalName(fieldKey, null);
             query.append("  ").append(tableName).append(".").append(toSQL(fieldKey)).append(" AS ").append(alias).append(",\n");
         }
+
+        SubsetSpec subset = getSubset();
+        SubsetSpec subsetParent = getSubsetParent();
+
+        String stat = subset + ":Count";
+        String parentStat = subsetParent == null ? "Count" : subsetParent.toString() + ":Count";
 
         query.append("  ").append(tableName).append(".Statistic(").append(toSQL(stat)).append(") AS stat,\n");
         query.append("  ").append(tableName).append(".Background(").append(toSQL(stat)).append(") AS stat_bg,\n");
@@ -156,4 +163,29 @@ public class PositivityFlowReport extends FilterFlowReport
         return true;
     }
 
+    @Override
+    public boolean saveToDomain()
+    {
+        return true;
+    }
+
+    @Override
+    public Collection<PropertyDescriptor> getDomainPrototypeProperties()
+    {
+        Collection<PropertyDescriptor> ret = new ArrayList<PropertyDescriptor>();
+
+        Container shared = ContainerManager.getSharedContainer();
+        PropertyDescriptor response = new PropertyDescriptor(null, PropertyType.INTEGER.getTypeUri(), "Response", shared);
+        ret.add(response);
+
+        PropertyDescriptor rawP = new PropertyDescriptor(null, PropertyType.DOUBLE.getTypeUri(), "Raw P", shared);
+        rawP.setImportAliasesSet(Collections.singleton("raw_p"));
+        ret.add(rawP);
+
+        PropertyDescriptor adjP = new PropertyDescriptor(null, PropertyType.DOUBLE.getTypeUri(), "Adjusted P", shared);
+        adjP.setImportAliasesSet(Collections.singleton("adj_p"));
+        ret.add(adjP);
+
+        return ret;
+    }
 }

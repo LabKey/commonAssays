@@ -50,6 +50,7 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryService;
@@ -61,6 +62,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.IdentifierString;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -81,6 +83,8 @@ import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
+import org.labkey.flow.reports.FlowReport;
+import org.labkey.flow.reports.FlowReportManager;
 import org.labkey.flow.view.FlowQueryView;
 import org.springframework.validation.BindException;
 
@@ -972,7 +976,35 @@ public class FlowSchema extends UserSchema
 
         public ColumnInfo addColumns(Domain domain, String legacyName)
         {
-            throw new UnsupportedOperationException();
+            ColumnInfo col = _expData.addColumns(domain, legacyName);
+            col.setHidden(false);
+            col.setParentTable(this);
+            return addColumn(col);
+        }
+
+        public ColumnInfo addReportColumns(FlowReport report, FlowTableType tableType)
+        {
+            Domain domain = report.getDomain(tableType);
+            if (domain == null)
+                return null;
+
+            // Keep expression in sync with FlowReportManager.getReportResultsLsid()
+            SQLFragment sql = getSqlDialect().concatenate(
+                new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".LSID"),
+                new SQLFragment(
+                        "'" +
+                        "-" + FlowReportManager.FLOW_REPORT_RESULT_OBJECT_LSID_PART +
+                        "-" + PageFlowUtil.encode(report.getReportId().toString()) +
+                        //"-" + tableType.toString() +
+                        "'"));
+            ExprColumn col = new ExprColumn(this, report.getDescriptor().getReportName(), sql, JdbcType.VARCHAR);
+
+            PropertyForeignKey fk = new PropertyForeignKey(domain, FlowSchema.this);
+            fk.setParentIsObjectId(false);
+            col.setFk(fk);
+            col.setUserEditable(false);
+            col.setIsUnselectable(true);
+            return addColumn(col);
         }
     }
 
@@ -1016,6 +1048,7 @@ public class FlowSchema extends UserSchema
         {
             ret.setRun(_run.getExpObject());
         }
+
         return ret;
     }
     
@@ -1226,6 +1259,12 @@ public class FlowSchema extends UserSchema
                     return detach().createFCSFileTable("FCSFile");
                 }
             });
+
+        for (FlowReport report : FlowReportManager.getFlowReports(getContainer(), getUser()))
+        {
+            ret.addReportColumns(report, FlowTableType.FCSAnalyses);
+        }
+
         ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph, colBackground));
         return ret;
     }
@@ -1280,6 +1319,11 @@ public class FlowSchema extends UserSchema
                     return detach().createFCSFileTable("FCSFile");
                 }
             });
+
+        for (FlowReport report : FlowReportManager.getFlowReports(getContainer(), getUser()))
+        {
+            ret.addReportColumns(report, FlowTableType.FCSAnalyses);
+        }
 
         ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph, colBackground));
         return ret;

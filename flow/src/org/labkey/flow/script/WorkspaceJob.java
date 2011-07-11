@@ -57,6 +57,8 @@ import org.labkey.flow.FlowSettings;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.reports.FlowReportJob;
+import org.labkey.flow.reports.FlowReportManager;
 
 import java.io.*;
 import java.net.URI;
@@ -170,10 +172,11 @@ public class WorkspaceJob extends FlowJob
         ObjectInputStream ois = null;
         try
         {
+            FlowProtocol protocol = FlowProtocol.ensureForContainer(getInfo().getUser(), getInfo().getContainer());
+
             // Create a new keyword run job for the selected FCS file directory
             if (_createKeywordRun)
             {
-                FlowProtocol protocol = FlowProtocol.ensureForContainer(getInfo().getUser(), getInfo().getContainer());
                 AddRunsJob addruns = new AddRunsJob(getInfo(), protocol, Collections.singletonList(_runFilePathRoot), PipelineService.get().findPipelineRoot(getContainer()));
                 addruns.setLogFile(getLogFile());
                 addruns.setLogLevel(getLogLevel());
@@ -193,10 +196,16 @@ public class WorkspaceJob extends FlowJob
             _run = createExperimentRun(this, getUser(), getContainer(), workspace,
                     _experiment, _workspaceName, _workspaceFile,
                     _runFilePathRoot, _failOnError);
+
             if (_run != null)
             {
-                setStatus(PipelineJob.COMPLETE_STATUS);
-                completeStatus = true;
+                runPostAnalysisJobs();
+
+                if (!hasErrors())
+                {
+                    setStatus(PipelineJob.COMPLETE_STATUS);
+                    completeStatus = true;
+                }
             }
         }
         catch (Exception ex)

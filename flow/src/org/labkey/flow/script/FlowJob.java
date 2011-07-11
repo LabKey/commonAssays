@@ -26,10 +26,13 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.reports.FlowReportJob;
+import org.labkey.flow.reports.FlowReportManager;
 
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 
 /**
  * User: kevink
@@ -41,7 +44,6 @@ public abstract class FlowJob extends PipelineJob
 
     private volatile Date _start;
     private volatile Date _end;
-    private volatile boolean _errors;
 
     private transient ActionURL _statusHref;
 
@@ -115,12 +117,11 @@ public abstract class FlowJob extends PipelineJob
 
     public boolean hasErrors()
     {
-        return _errors;
+        return getErrors() > 0;
     }
 
     public void addError(String lsid, String propertyURI, String message)
     {
-        _errors = true;
         error(message);
         setStatus(ERROR_STATUS);
     }
@@ -147,13 +148,13 @@ public abstract class FlowJob extends PipelineJob
             return "Pending";
         if (_end != null)
         {
-            if (_errors)
+            if (hasErrors())
             {
                 return "Errors";
             }
             return "Complete";
         }
-        if (_errors)
+        if (hasErrors())
         {
             return "Running (errors)";
         }
@@ -210,5 +211,25 @@ public abstract class FlowJob extends PipelineJob
         addError(null, null, e.toString());
     }
 
+    protected void runPostAnalysisJobs() throws Exception
+    {
+        // UNDONE: execute post analysis scripts after importing workspace
+//        if (checkInterrupted() || hasErrors())
+//            return;
+//
+//        List<FlowReportJob> jobs = FlowReportManager.createReportJobs(getInfo(), getPipeRoot());
+//        for (FlowReportJob job : jobs)
+//        {
+//            job.setLogFile(getLogFile());
+//            job.setLogLevel(getLogLevel());
+//            job.setSubmitted();
+//            job.run();
+//            if (job.getErrors() > 0)
+//                error("Error running post-analysis report job: " + job.getDescription());
+//
+//            if (checkInterrupted() || hasErrors())
+//                break;
+//        }
+    }
 
 }

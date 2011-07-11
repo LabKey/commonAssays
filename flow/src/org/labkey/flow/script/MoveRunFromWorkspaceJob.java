@@ -41,5 +41,9 @@ public class MoveRunFromWorkspaceJob extends ScriptJob
         {
             _run.getExperimentRun().delete(getUser());
         }
+        else
+        {
+            runPostAnalysisJobs();
+        }
     }
 }

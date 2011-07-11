@@ -16,13 +16,17 @@
  */
 %>
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
+<%@ page import="org.labkey.api.exp.OntologyManager" %>
 <%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
+<%@ page import="org.labkey.api.exp.property.Domain" %>
+<%@ page import="org.labkey.api.exp.property.DomainProperty" %>
 <%@ page import="org.labkey.api.jsp.JspLoader" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.security.SecurityPolicy" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
+<%@ page import="org.labkey.api.util.Tuple3" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.util.URIUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
@@ -34,6 +38,9 @@
 <%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.flow.data.*" %>
+<%@ page import="org.labkey.flow.query.FlowTableType" %>
+<%@ page import="org.labkey.flow.reports.FlowReport" %>
+<%@ page import="org.labkey.flow.reports.FlowReportManager" %>
 <%@ page import="org.labkey.flow.view.GraphView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
 <%@ page import="java.io.File" %>
@@ -357,23 +364,49 @@ if (matrix != null)
 {
     %><tr><td>Compensation Matrix:</td><td><a href="<%=h(matrix.urlShow())%>"><%=h(matrix.getName())%></a></td></tr><%
 }
+
 for (ExpMaterial sample : well.getSamples())
 {
     %><tr><td><%=h(sample.getSampleSet().getName())%></td>
         <td><a href="<%=h(sample.detailsURL())%>"><%=h(sample.getName())%></a></td>
     </tr><%
 }
+
+for (Tuple3<FlowReport, Domain, FlowTableType> pair : FlowReportManager.getReportDomains(getContainer(), getUser()))
+{
+    FlowReport report = pair.first;
+    Domain domain = pair.second;
+    FlowTableType tableType = pair.third;
+
+    String lsid = FlowReportManager.getReportResultsLsid(report, well);
+    Map<String, Object> properties = OntologyManager.getProperties(getContainer(), lsid);
+
+    %><tr><td>&nbsp;</td></tr><%
+    %><tr><td><%=report.getDescriptor().getReportName()%> Report</td><td>&nbsp;</td><%
+    for (DomainProperty dp : domain.getProperties())
+    {
+        String propertyURI = dp.getPropertyURI();
+        if (properties.containsKey(propertyURI))
+        {
+            Object value = properties.get(propertyURI);
+            %><tr><td>&nbsp;&nbsp;&nbsp;<%=dp.getName()%>:</td><td><%=String.valueOf(value)%></td></tr><%
+        }
+    }
+    %></tr><%
+}
 %></table>
-<div id="keywordsGrid" class="extContainer"></div>
 <%
     if (getContainer().hasPermission(getUser(), UpdatePermission.class))
     {
-%><%=generateButton("edit", well.urlFor(WellController.EditWellAction.class))%><br>
+%><br><%=generateButton("edit", well.urlFor(WellController.EditWellAction.class))%><br>
 <%
     }
+%>
 
-%><div id="statsTree" class="extContainer"></div><%
+<p id="keywordsGrid" class="extContainer"></p>
+<p id="statsTree" class="extContainer"></p>
 
+<%
 if (getGraphs().length > 0)
 {
     final String graphSize = FlowPreference.graphSize.getValue(request);

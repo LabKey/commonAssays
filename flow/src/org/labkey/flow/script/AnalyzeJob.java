@@ -58,6 +58,7 @@ public class AnalyzeJob extends ScriptJob
                 return;
             ensureCompensationMatrix(run);
             executeHandler(run, getAnalysisHandler());
+            runPostAnalysisJobs();
         }
     }
 
