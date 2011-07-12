@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.GUID;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.ms2.pipeline.*;
@@ -316,7 +317,10 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
             List<File> sequenceFiles = getFASTAOrIndexFiles(actions);
 
-            File dirOutputDta = new File(_wd.getDir(), getJob().getBaseName());
+            // Don't let the total path name get too long. The actual name doesn't matter much, but we need
+            // to avoid collisions so we can't just truncate the path after n characters
+            String dtaDirName = getJob().getBaseName().length() > 20 ? GUID.makeGUID() : getJob().getBaseName();
+            File dirOutputDta = new File(_wd.getDir(), dtaDirName);
             File fileMzXML = _factory.findInputFile(getJob().getDataDirectory(), getJob().getBaseName());
             String tppVersion = TPPTask.getTPPVersion(getJob());
 

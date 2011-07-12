@@ -92,6 +92,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
         this.add(new Ext.form.FormPanel({
             style: 'padding-bottom: 10px; background: #ffffff',
             html: this.getExclusionPanelHeader(),
+            timeout: Ext.Ajax.timeout,
             border: false
         }));
 
@@ -155,6 +156,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
         this.add(new Ext.form.FormPanel({
             height: 75,
             style: 'padding-top: 20px; background: #ffffff',
+            timeout: Ext.Ajax.timeout,
             labelAlign: 'top',
             items: [
                 new Ext.form.TextField({
