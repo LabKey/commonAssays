@@ -799,7 +799,7 @@ public class AnalysisScriptController extends BaseFlowController
 
             WorkspaceData workspaceData = form.getWorkspace();
             ViewBackgroundInfo info = getViewBackgroundInfo();
-            if (root == null)
+            if (getPipeRoot() == null)
             {
                 // root-less pipeline job for workapce uploaded via the browser
                 info.setURL(null);

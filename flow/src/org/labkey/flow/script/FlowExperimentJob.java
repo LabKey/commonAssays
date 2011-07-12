@@ -42,7 +42,6 @@ public abstract class FlowExperimentJob extends FlowJob
     String _experimentLSID;
     String _experimentName;
     RunData _runData;
-    FlowProtocol _protocol;
 
     public FlowExperimentJob(ViewBackgroundInfo info, PipeRoot root, String experimentLSID, FlowProtocol protocol, String experimentName, FlowProtocolStep step)
             throws Exception
@@ -193,11 +192,6 @@ public abstract class FlowExperimentJob extends FlowJob
             if (!fileTry.exists())
                 return fileTry;
         }
-    }
-
-    public FlowProtocol getProtocol()
-    {
-        return _protocol;
     }
 
     class RunData

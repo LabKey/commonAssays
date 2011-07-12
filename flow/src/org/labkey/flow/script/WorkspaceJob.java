@@ -22,6 +22,7 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
@@ -39,6 +40,7 @@ import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
+import org.labkey.flow.data.SampleKey;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.persist.AttributeSetHelper;
@@ -57,8 +59,6 @@ import org.labkey.flow.FlowSettings;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.reports.FlowReportJob;
-import org.labkey.flow.reports.FlowReportManager;
 
 import java.io.*;
 import java.net.URI;
@@ -103,6 +103,8 @@ public class WorkspaceJob extends FlowJob
         _containerFolder = getWorkingFolder(getContainer());
         _failOnError = failOnError;
         assert !_createKeywordRun || _runFilePathRoot != null;
+
+        _protocol = FlowProtocol.ensureForContainer(getInfo().getUser(), getInfo().getContainer());
 
         String name = workspaceData.getName();
         if (name == null && workspaceData.getPath() != null)
@@ -172,12 +174,10 @@ public class WorkspaceJob extends FlowJob
         ObjectInputStream ois = null;
         try
         {
-            FlowProtocol protocol = FlowProtocol.ensureForContainer(getInfo().getUser(), getInfo().getContainer());
-
             // Create a new keyword run job for the selected FCS file directory
             if (_createKeywordRun)
             {
-                AddRunsJob addruns = new AddRunsJob(getInfo(), protocol, Collections.singletonList(_runFilePathRoot), PipelineService.get().findPipelineRoot(getContainer()));
+                AddRunsJob addruns = new AddRunsJob(getInfo(), _protocol, Collections.singletonList(_runFilePathRoot), PipelineService.get().findPipelineRoot(getContainer()));
                 addruns.setLogFile(getLogFile());
                 addruns.setLogLevel(getLogLevel());
                 addruns.setSubmitted();
@@ -329,7 +329,7 @@ public class WorkspaceJob extends FlowJob
 
             svc.ensureTransaction();
             ExpRun run = svc.createExperimentRun(container, workspaceName);
-            FlowProtocol flowProtocol = FlowProtocol.ensureForContainer(user, container);
+            FlowProtocol flowProtocol = getProtocol();
             ExpProtocol protocol = flowProtocol.getProtocol();
             run.setProtocol(protocol);
             if (runFilePathRoot != null)
@@ -365,6 +365,15 @@ public class WorkspaceJob extends FlowJob
                 fcsFiles.put(sample, new FlowFCSFile(fcsFile));
                 AttributeSet attrs = keywordsMap.get(sample);
                 AttributeSetHelper.doSave(attrs, user, fcsFile);
+
+                // Attach the experiment sample to the fake FCSFile generated from the workspace.
+                // Note that we probably generate
+                SampleKey sampleKey = flowProtocol.makeSampleKey(run.getName(), fcsFile.getName(), attrs);
+                ExpMaterial expSample = getSampleMap().get(sampleKey);
+                if (expSample != null)
+                {
+                    paSample.addMaterialInput(user, expSample, null);
+                }
             }
 
             int iComp = 0;

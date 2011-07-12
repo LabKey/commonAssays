@@ -44,15 +44,11 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.data.LogType;
-import org.labkey.flow.data.SampleKey;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.reports.FlowReportJob;
-import org.labkey.flow.reports.FlowReportManager;
 
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -62,7 +58,6 @@ import java.util.TreeMap;
 
 abstract public class ScriptJob extends FlowExperimentJob
 {
-    private Map<SampleKey, ExpMaterial> _sampleMap;
 
     FlowScript _runAnalysisScript;
     FlowCompensationMatrix _compensationMatrix;
@@ -436,23 +431,6 @@ abstract public class ScriptJob extends FlowExperimentJob
     public boolean allowMultipleSimultaneousJobs()
     {
         return true;
-    }
-
-    public Map<SampleKey, ExpMaterial> getSampleMap()
-    {
-        if (_sampleMap == null)
-        {
-            try
-            {
-                _sampleMap = _protocol.getSampleMap(getUser());
-            }
-            catch (SQLException e)
-            {
-                _log.error("Error", e);
-                _sampleMap = Collections.EMPTY_MAP;
-            }
-        }
-        return _sampleMap;
     }
 
 }

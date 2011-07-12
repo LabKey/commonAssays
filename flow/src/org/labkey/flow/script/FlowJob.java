@@ -17,6 +17,7 @@
 package org.labkey.flow.script;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
@@ -25,14 +26,18 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.SampleKey;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.reports.FlowReportJob;
 import org.labkey.flow.reports.FlowReportManager;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: kevink
@@ -46,6 +51,9 @@ public abstract class FlowJob extends PipelineJob
     private volatile Date _end;
 
     private transient ActionURL _statusHref;
+
+    private transient Map<SampleKey, ExpMaterial> _sampleMap;
+    FlowProtocol _protocol;
 
     public FlowJob(String provider, ViewBackgroundInfo info, PipeRoot root)
             throws SQLException
@@ -213,23 +221,51 @@ public abstract class FlowJob extends PipelineJob
 
     protected void runPostAnalysisJobs() throws Exception
     {
-        // UNDONE: execute post analysis scripts after importing workspace
-//        if (checkInterrupted() || hasErrors())
-//            return;
-//
-//        List<FlowReportJob> jobs = FlowReportManager.createReportJobs(getInfo(), getPipeRoot());
-//        for (FlowReportJob job : jobs)
-//        {
-//            job.setLogFile(getLogFile());
-//            job.setLogLevel(getLogLevel());
-//            job.setSubmitted();
-//            job.run();
-//            if (job.getErrors() > 0)
-//                error("Error running post-analysis report job: " + job.getDescription());
-//
-//            if (checkInterrupted() || hasErrors())
-//                break;
-//        }
+        if (checkInterrupted() || hasErrors())
+            return;
+
+        // URL may not be set on root-less pipeline jobs (uploading a FlowJoWorkspace for analysis without a pipeline root set)
+        // See AnalysisScriptController.stepConfirm().
+        ViewBackgroundInfo info = getInfo();
+        if (info.getURL() == null)
+            info = new ViewBackgroundInfo(info.getContainer(), info.getUser(), new ActionURL(FlowController.BeginAction.class, info.getContainer()));
+
+        List<FlowReportJob> jobs = FlowReportManager.createReportJobs(info, getPipeRoot());
+        if (jobs.size() > 0)
+            info("Running post-analysis jobs...");
+        for (FlowReportJob job : jobs)
+        {
+            job.setLogFile(getLogFile());
+            job.setLogLevel(getLogLevel());
+            job.setSubmitted();
+            job.run();
+            if (job.getErrors() > 0)
+                error("Error running post-analysis report job: " + job.getDescription());
+
+            if (checkInterrupted() || hasErrors())
+                break;
+        }
     }
 
+    public FlowProtocol getProtocol()
+    {
+        return _protocol;
+    }
+
+    public Map<SampleKey, ExpMaterial> getSampleMap()
+    {
+        if (_sampleMap == null)
+        {
+            try
+            {
+                _sampleMap = getProtocol().getSampleMap(getUser());
+            }
+            catch (SQLException e)
+            {
+                _log.error("Error", e);
+                _sampleMap = Collections.EMPTY_MAP;
+            }
+        }
+        return _sampleMap;
+    }
 }

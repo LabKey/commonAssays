@@ -33,6 +33,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TempTableTracker;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpMaterialRunInput;
@@ -982,7 +983,7 @@ public class FlowSchema extends UserSchema
             return addColumn(col);
         }
 
-        public ColumnInfo addReportColumns(FlowReport report, FlowTableType tableType)
+        public ColumnInfo addReportColumns(final FlowReport report, FlowTableType tableType)
         {
             Domain domain = report.getDomain(tableType);
             if (domain == null)
@@ -999,7 +1000,17 @@ public class FlowSchema extends UserSchema
                         "'"));
             ExprColumn col = new ExprColumn(this, report.getDescriptor().getReportName(), sql, JdbcType.VARCHAR);
 
-            PropertyForeignKey fk = new PropertyForeignKey(domain, FlowSchema.this);
+            PropertyForeignKey fk = new PropertyForeignKey(domain, FlowSchema.this)
+            {
+                @Override
+                protected ColumnInfo constructColumnInfo(ColumnInfo parent, FieldKey name, PropertyDescriptor pd)
+                {
+                    ColumnInfo col = super.constructColumnInfo(parent, name, pd);
+                    // Include report name so if multiple reports are in the same grid, the 'duplicated' columns are distinct.
+                    col.setLabel(report.getDescriptor().getReportName() + " " + col.getLabel());
+                    return col;
+                }
+            };
             fk.setParentIsObjectId(false);
             col.setFk(fk);
             col.setUserEditable(false);
