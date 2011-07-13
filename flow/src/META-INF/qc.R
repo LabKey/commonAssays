@@ -193,7 +193,7 @@ D <- data.frame(
 
 if (length < 2)
 {
-    print("too few values to plot")
+    stop("too few values to plot")
 }
 if (length >= 2)
 {

@@ -26,7 +26,7 @@ positivity <- function (data, grouping_columns)
     data$raw_p = sapply(1:nrow(data), function(i) {
       pval = NA
 
-      if (!is.na(data$stat[i]) && !is.na(data$stat_bg[i]) && !is.na(data$parent[i]) && !is.na(data$parent_bg[i]))
+      if (is.numeric(data$stat[i]) && is.numeric(data$stat_bg[i]) && is.numeric(data$parent[i]) && is.numeric(data$parent_bg[i]))
       {
         x.ant = as.integer(data$stat[i])
         N.ant = as.integer(data$parent[i] - data$stat[i])
@@ -55,7 +55,11 @@ positivity <- function (data, grouping_columns)
     return(data)
 }
 
-# UNDONE: check labkey.data has statistic, background statistic, parent statistic, background parent statistic
+if (length(labkey.data$stat) == 0)
+    stop("labkey.data is empty");
+
+if (length(labkey.data$stat) == 0 || length(labkey.data$stat_bg) == 0 || length(labkey.data$parent) == 0 || length(labkey.data$parent_bg) == 0)
+    stop("labkey.data$stat, labkey.data$stat_bg, labkey.data$parent, labkey.data$paarent_bg are required");
 
 if (!exists("flow.metadata.study.participantColumn"))
     stop("ICS study metadata must include participant column")
@@ -68,7 +72,6 @@ if (exists("flow.metadata.study.visitColumn")) {
 } else {
     grouping_cols = c(flow.metadata.study.participantColumn, flow.metadata.study.dateColumn)
 }
-
 
 result <- positivity(labkey.data, grouping_cols)
 
