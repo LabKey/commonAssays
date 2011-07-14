@@ -25,6 +25,7 @@ public class Analyte
     private int _dataId;
     private String _lsid;
     private String _name;
+    private String _sheetName;
     private Double _fitProb;
     private Double _resVar;
     private String _regressionType;
@@ -40,6 +41,7 @@ public class Analyte
     public Analyte(String name)
     {
         _name = name;
+        _sheetName = name;
     }
 
     public int getDataId()
@@ -160,5 +162,14 @@ public class Analyte
             return _name.hashCode();
 
         return super.hashCode();
+    }
+
+    /**
+     * @return if fresh from the parser, the name of the sheet in the Excel file. May have been truncated from the full
+     * name, which is available by calling getName()
+     */
+    public String getSheetName()
+    {
+        return _sheetName;
     }
 }

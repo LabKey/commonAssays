@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
 * User: jeckels
@@ -57,6 +56,7 @@ public class LuminexExcelParser
     private Map<File, Map<DomainProperty, String>> _excelRunProps = new HashMap<File, Map<DomainProperty, String>>();
     private Map<String, Titration> _titrations = new TreeMap<String, Titration>();
     private boolean _parsed;
+    private boolean _imported;
 
     public LuminexExcelParser(ExpProtocol protocol, Collection<File> dataFiles)
     {
@@ -87,7 +87,26 @@ public class LuminexExcelParser
                         continue;
                     }
 
-                    Analyte analyte = new Analyte(sheet.getSheetName());
+                    String analyteName = sheet.getSheetName();
+                    Analyte analyte = null;
+                    List<LuminexDataRow> dataRows = null;
+                    // Might need to merge data rows for analytes across files
+                    for (Map.Entry<Analyte, List<LuminexDataRow>> entry : _sheets.entrySet())
+                    {
+                        // Need to check both the name of the sheet (which might have been truncated) and the full
+                        // name of all analytes already parsed to see if we have a match
+                        if (analyteName.equals(entry.getKey().getName()) || analyteName.equals(entry.getKey().getSheetName()))
+                        {
+                            analyte = entry.getKey();
+                            dataRows = entry.getValue();
+                        }
+                    }
+                    if (analyte == null)
+                    {
+                        analyte = new Analyte(analyteName);
+                        dataRows = new ArrayList<LuminexDataRow>();
+                        _sheets.put(analyte, dataRows);
+                    }
 
                     int row = handleHeaderOrFooterRow(sheet, 0, analyte, excelRunDomain, dataFile);
 
@@ -105,9 +124,6 @@ public class LuminexExcelParser
                         }
                         row++;
                     }
-
-                    List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
-                    _sheets.put(analyte, dataRows);
 
                     Map<String, Integer> potentialTitrationCounts = new CaseInsensitiveHashMap<Integer>();
                     Map<String, Titration> potentialTitrations = new CaseInsensitiveHashMap<Titration>();
@@ -247,6 +263,12 @@ public class LuminexExcelParser
                 else if ("Std. Curve".equalsIgnoreCase(propName))
                 {
                     analyte.setStdCurve(value);
+                }
+                else if ("Analyte".equalsIgnoreCase(propName))
+                {
+                    // Sheet names may have been truncated, so set the name based on the full value within the sheet
+                    assert analyte.getName().startsWith(value);
+                    analyte.setName(value);
                 }
 
                 DomainProperty pd = excelProps.get(propName);
@@ -435,5 +457,15 @@ public class LuminexExcelParser
             return null;
         }
         else return Double.parseDouble(value);
+    }
+
+    public boolean isImported()
+    {
+        return _imported;
+    }
+
+    public void setImported(boolean imported)
+    {
+        _imported = imported;
     }
 }

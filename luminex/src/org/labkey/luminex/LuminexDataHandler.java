@@ -81,7 +81,15 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             parser = new LuminexExcelParser(expRun.getProtocol(), Collections.singleton(dataFile));
         }
-        importData(data, expRun, info.getUser(), log, parser.getSheets(), parser, form);
+        // The parser has already collapsed the data from multiple files into a single set of data,
+        // so don't bother importing it twice if it came from separate files. This can happen if you aren't using a
+        // transform script, so the assay framework attempts to import each file individually. We don't want to reparse
+        // the Excel files, so we get a cached parser, which has the data for all of the files.
+        if (!parser.isImported())
+        {
+            importData(data, expRun, info.getUser(), log, parser.getSheets(), parser, form);
+            parser.setImported(true);
+        }
     }
 
     public void importData(ExpData data, ExpRun run, User user, Logger log, Map<Analyte, List<LuminexDataRow>> sheets, LuminexExcelParser parser, LuminexRunUploadForm form) throws ExperimentException
