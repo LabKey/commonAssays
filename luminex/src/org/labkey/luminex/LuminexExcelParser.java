@@ -180,17 +180,10 @@ public class LuminexExcelParser
             }
             catch (InvalidFormatException e)
             {
-                throw new XarFormatException("Failed to parse Excel file " + dataFile.getName(), e);
+                throw new XarFormatException("Failed to parse file as Excel: " + dataFile.getName(), e);
             }
         }
         _parsed = true;
-    }
-
-    /** A well might contain a titration value if it's marked as a standard or if there's an expected concentration */
-    private boolean isPotentialTitration(LuminexDataRow dataRow)
-    {
-        return (dataRow.getType() != null && dataRow.getType().toUpperCase().startsWith("S")) ||
-            dataRow.getExpConc() != null;
     }
 
      public Set<String> getTitrations() throws ExperimentException
@@ -328,7 +321,7 @@ public class LuminexExcelParser
         return row;
     }
 
-    private LuminexDataRow createDataRow(Sheet sheet, List<String> colNames, int rowIdx, File dataFile)
+    private LuminexDataRow createDataRow(Sheet sheet, List<String> colNames, int rowIdx, File dataFile) throws ExperimentException
     {
         LuminexDataRow dataRow = new LuminexDataRow();
         dataRow.setLsid(new Lsid(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX, GUID.makeGUID()).toString());
@@ -339,6 +332,10 @@ public class LuminexExcelParser
             for (int col=0; col < row.getLastCellNum(); col++)
             {
                 Cell cell = row.getCell(col);
+                if (colNames.size() <= col)
+                {
+                    throw new ExperimentException("Unable to find header for column index " + col + ". This is likely not a supported Luminex file format.");
+                }
                 String columnName = colNames.get(col);
 
                 String value = ExcelFactory.getCellStringValue(cell).trim();
