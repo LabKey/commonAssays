@@ -20,11 +20,11 @@ function wellExclusionWindow(assayName, runId, dataId, description, dilution)
         closeAction:'close',
         items: new LABKEY.WellExclusionPanel({
             schemaName: 'assay',
-            queryName: assayName ? assayName : null,
-            runId: runId ? runId : null,
-            dataId: dataId ? dataId : null,
-            description: description ? description : null,
-            dilution: dilution ? dilution : null,
+            queryName: assayName,
+            runId: runId,
+            dataId: dataId,
+            description: description,
+            dilution: dilution,
             listeners: {
                 scope: this,
                 'closeWindow': function(){
@@ -53,7 +53,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
         if (!config.queryName)
             throw "You must specify a queryName!";
         if (!config.runId || !config.dataId || !config.dilution)
-            throw "You must specify the following: runId, dataId, description, and dilution!";
+            throw "You must specify the following: runId, dataId, and dilution!";
 
         Ext.apply(config, {
             autoScroll: true,
@@ -265,7 +265,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
     {
         var sql = "SELECT DISTINCT x.Well, x.Data.Name AS Name "
                 + "FROM \"" + this.queryName + " Data\" AS x WHERE ";
-        sql += (this.description ? " x.Description = '" + this.description + "'" : " x.Description IS NULL ");
+        sql += (this.description != null ? " x.Description = '" + this.description + "'" : " x.Description IS NULL ");
         sql += " AND x.Dilution = " + this.dilution + " AND x.Data.RowId = " + this.dataId;
 
         // query to get the wells and data id (file name) for the given replicate group
@@ -309,7 +309,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
     {
         return "<table cellspacing='0' width='100%' style='border-collapse: collapse'>"
                     + "<tr><td class='labkey-exclusion-td-label'>File Name:</td><td class='labkey-exclusion-td-cell' colspan='3'><div id='replicate_group_filename'>...</div></td></tr>"
-                    + "<tr><td class='labkey-exclusion-td-label'>Sample:</td><td class='labkey-exclusion-td-cell' colspan='3'>" + (this.description ? this.description : "") + "</td></tr>"
+                    + "<tr><td class='labkey-exclusion-td-label'>Sample:</td><td class='labkey-exclusion-td-cell' colspan='3'>" + (this.description != null ? this.description : "") + "</td></tr>"
                     + "<tr><td class='labkey-exclusion-td-label'>Dilution:</td><td class='labkey-exclusion-td-cell'>" + this.dilution + "</td>"
                     + "<td class='labkey-exclusion-td-label'>Wells:</td><td class='labkey-exclusion-td-cell'><div id='replicate_group_wells'>...</div></td></tr>"
                     + "</table>";

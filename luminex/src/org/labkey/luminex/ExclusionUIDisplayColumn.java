@@ -77,7 +77,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
     {
         Number dilution = (Number)ctx.get(_dilutionFieldKey);
-        String description = (String)(ctx.get(_descriptionFieldKey) != null ? ctx.get(_descriptionFieldKey) : "");
+        String description = (String)ctx.get(_descriptionFieldKey);
         Integer dataId = (Integer)ctx.get(_dataFieldKey);
         Integer runId = (Integer)ctx.get(_runFieldKey);
 
@@ -97,7 +97,8 @@ public class ExclusionUIDisplayColumn extends DataColumn
         boolean canEdit = _container.hasPermission(_user, UpdatePermission.class);
         if (canEdit)
         {
-            out.write("<a onclick=\"wellExclusionWindow('" + _protocolName + "', " + runId + ", " + dataId + ", '" + description + "', " + dilution + ");\">");
+            out.write("<a onclick=\"wellExclusionWindow('" + _protocolName + "', " + runId + ", " + dataId + ", "
+                + (description == null ? null : "'" + description + "'") + ", " + dilution + ");\">");
         }
 
         Boolean excluded = (Boolean)ctx.get(getColumnInfo().getFieldKey());
