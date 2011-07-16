@@ -80,8 +80,10 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             columns: 'RowId,Comment,Analytes/RowId',
             success: function(data){
                 // if there are well exclusions for the replicate group, add the info to this
+                this.exclusionsExist = false;
                 if (data.rows.length == 1)
                 {
+                    this.exclusionsExist = true;
                     this.rowId = data.rows[0].RowId;
                     this.comment = data.rows[0].Comment;
                     this.analytes = data.rows[0]["Analytes/RowId"];
@@ -158,11 +160,29 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             })
         }));
 
-        // grid of avaialble/excluded analytes
+        // checkbox selection model for selecting which analytes to exclude
         var selMod = new Ext.grid.CheckboxSelectionModel();
+        selMod.on('selectionchange', function(sm){
+            // enable the save button when changes are made to the selection or is exclusions exist
+            if (sm.getCount() > 0 || this.exclusionsExist)
+                this.getFooterToolbar().findById('saveBtn').enable();
+
+            // disable the save button if no exclusions exist and no selection is made
+            if(sm.getCount() == 0 && !this.exclusionsExist)
+                this.getFooterToolbar().findById('saveBtn').disable();
+        }, this, {buffer: 250});
+
+        // set the title for the grid panel based on previous exclusions
+        var title = "Select the checkbox next to the analytes to be excluded";
+        if (this.exclusionsExist)
+        {
+            title += "<BR/><span style='color:red;font-style:italic;'>Uncheck all analytes to remove exclusions</span>";
+        }
+
+        // grid of avaialble/excluded analytes
         var availableAnalytesGrid = new Ext.grid.GridPanel({
             id: 'availableanalytes',
-            title: 'Select the checkbox next to the analytes to be excluded',
+            title: title,
             headerStyle: 'font-weight: normal; background-color: #ffffff',
             store:  new LABKEY.ext.Store({
                 sql: "SELECT DISTINCT x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
@@ -185,10 +205,12 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
                                 this.findById('excluderadiogroup').onSetValue('excludeselected', 2);
 
                                 // preselect any previously excluded analytes
+                                availableAnalytesGrid.getSelectionModel().suspendEvents(false);
                                 Ext.each(this.analytes, function(analyte){
                                     var index = store.find('RowId', analyte);
                                     availableAnalytesGrid.getSelectionModel().selectRow(index, true);
                                 });
+                                availableAnalytesGrid.getSelectionModel().resumeEvents();
                             }
                         }
                         else
@@ -199,7 +221,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
                 },
                 sortInfo: {
                     field: 'Name',
-                    direction: 'ASC' // or 'DESC' (case sensitive for local sorting)
+                    direction: 'ASC'
                 }
             }),
             colModel: new Ext.grid.ColumnModel({
@@ -238,14 +260,26 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
                     fieldLabel: 'Comment',
                     value: this.comment ? this.comment : null,
                     labelStyle: 'font-weight: bold',
-                    anchor: '100%'
+                    anchor: '100%',
+                    enableKeyEvents: true,
+                    listeners: {
+                        scope: this,
+                        'keydown': function(){
+                            // enable the save changes button when the comment is edited by the user, if exclusions exist
+                            if (this.exclusionsExist)
+                                this.getFooterToolbar().findById('saveBtn').enable();
+                        }
+                    }
                 })
             ],
             border: false
         }));
 
+        // add save and cancel buttons
         this.addButton({
-            text: 'OK',
+            id: 'saveBtn',
+            text: 'Save Changes',
+            disabled: true,
             handler: this.insertUpdateWellExclusions,
             scope: this
         });
@@ -307,6 +341,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
 
     getExclusionPanelHeader: function()
     {
+        // return an HTML table with the description and dilution and place holder divs for the file name and wells
         return "<table cellspacing='0' width='100%' style='border-collapse: collapse'>"
                     + "<tr><td class='labkey-exclusion-td-label'>File Name:</td><td class='labkey-exclusion-td-cell' colspan='3'><div id='replicate_group_filename'>...</div></td></tr>"
                     + "<tr><td class='labkey-exclusion-td-label'>Sample:</td><td class='labkey-exclusion-td-cell' colspan='3'>" + (this.description != null ? this.description : "") + "</td></tr>"
@@ -341,16 +376,31 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             scope: this
         };
 
-        // todo: verify with user if "Exlcude selected" radio and no rows selected
-
-        // insert, update, or delete to/from the WellExclusions table
+        // insert, update, or delete to/from the WellExclusions table with config information
         if (this.rowId)
         {
             config.rows[0].rowId = this.rowId;
             if (analytesForExclusionStr != "")
+            {
                 LABKEY.Query.updateRows(config);
+            }
             else
-                LABKEY.Query.deleteRows(config);
+            {
+                // ask the user if they are sure they want to remove the exclusions before deleting
+                Ext.Msg.show({
+                    title:'Warning',
+                    msg: 'Are you sure you want to remove all analyte exlusions for the selected replicate group?',
+                    buttons: Ext.Msg.YESNO,
+                    fn: function(btnId, text, opt){
+                        if (btnId == 'yes')
+                        {
+                            LABKEY.Query.deleteRows(config);
+                        }
+                    },
+                    icon: Ext.MessageBox.WARNING,
+                    scope: this
+                });
+            }
         }
         else
         {

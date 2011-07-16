@@ -14,14 +14,14 @@ function analyteExclusionWindow(assayName, runId)
         title: 'Exclude Analytes from Analysis',
         layout:'fit',
         width:440,
-        height:440,
+        height:460,
         padding: 15,
         modal: true,
         closeAction:'close',
         items: new LABKEY.AnalyteExclusionPanel({
             schemaName: 'assay',
-            queryName: assayName ? assayName : null,
-            runId: runId ? runId : null,
+            queryName: assayName,
+            runId: runId,
             listeners: {
                 scope: this,
                 'closeWindow': function(){
@@ -69,7 +69,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
             filterArray: [LABKEY.Filter.create('runId', this.runId)],
             columns: 'RunId,Comment,Analytes/RowId',
             success: function(data){
-                // if there are well exclusions for the replicate group, add the info to this
+                // if there are exclusions for this run, add the info to this
                 this.exclusionsExist = false;
                 if (data.rows.length == 1)
                 {
@@ -103,12 +103,30 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
             value: 'Analytes excluded for a replicate group will not be re-included by changes in assay level exclusions'
         }));
 
-        // grid of avaialble/excluded analytes
+        // checkbox selection model for selecting which analytes to exclude
         var selMod = new Ext.grid.CheckboxSelectionModel();
+        selMod.on('selectionchange', function(sm){
+            // enable the save button when changes are made to the selection or is exclusions exist
+            if (sm.getCount() > 0 || this.exclusionsExist)
+                this.getFooterToolbar().findById('saveBtn').enable();
+            
+            // disable the save button if no exclusions exist and no selection is made
+            if(sm.getCount() == 0 && !this.exclusionsExist)
+                this.getFooterToolbar().findById('saveBtn').disable();
+        }, this, {buffer: 250});
+
+        // set the title for the grid panel based on previous exclusions
+        var title = "Select the checkbox next to the analytes to be excluded";
+        if (this.exclusionsExist)
+        {
+            title += "<BR/><span style='color:red;font-style:italic;'>Uncheck all analytes to remove exclusions</span>";
+        }
+
+        // grid of avaialble/excluded analytes
         var availableAnalytesGrid = new Ext.grid.GridPanel({
             id: 'availableanalytes',
             style: 'padding-top: 10px;',
-            title: 'Select the checkbox next to the analytes to be excluded',
+            title: title,
             headerStyle: 'font-weight: normal; background-color: #ffffff',            
             store:  new LABKEY.ext.Store({
                 sql: "SELECT DISTINCT x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
@@ -122,16 +140,18 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
                         if (this.analytes)
                         {
                             // preselect any previously excluded analytes
+                            availableAnalytesGrid.getSelectionModel().suspendEvents(false);
                             Ext.each(this.analytes, function(analyte){
                                 var index = store.find('RowId', analyte);
                                 availableAnalytesGrid.getSelectionModel().selectRow(index, true);
                             });
+                            availableAnalytesGrid.getSelectionModel().resumeEvents();
                         }
                     }
                 },
                 sortInfo: {
                     field: 'Name',
-                    direction: 'ASC' // or 'DESC' (case sensitive for local sorting)
+                    direction: 'ASC'
                 }
             }),
             colModel: new Ext.grid.ColumnModel({
@@ -164,14 +184,26 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
                     fieldLabel: 'Comment',
                     value: this.comment ? this.comment : null,
                     labelStyle: 'font-weight: bold',
-                    anchor: '100%'
+                    anchor: '100%',
+                    enableKeyEvents: true,
+                    listeners: {
+                        scope: this,
+                        'keydown': function(){
+                            // enable the save changes button when the comment is edited by the user, if exclusions exist
+                            if (this.exclusionsExist)
+                                this.getFooterToolbar().findById('saveBtn').enable();
+                        }
+                    }
                 })
             ],
             border: false
         }));
 
+        // add save and cancel buttons
         this.addButton({
-            text: 'OK',
+            id: 'saveBtn',
+            text: 'Save Changes',
+            disabled: true,
             handler: this.insertUpdateAnalyteExclusions,
             scope: this
         });
@@ -188,7 +220,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
 
     queryForRunAssayId: function()
     {
-        // query to get the assay Id for the given run
+        // query to get the assay Id for the given run and put it into the panel header div
         LABKEY.Query.selectRows({
             schemaName: 'assay',
             queryName: this.queryName + ' Runs',
@@ -206,6 +238,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
 
     getExclusionPanelHeader: function()
     {
+        // return an HTML table with the run Id and a place holder div for the assay Id
         return "<table cellspacing='0' width='100%' style='border-collapse: collapse'>"
                     + "<tr><td class='labkey-exclusion-td-label'>Run ID:</td><td class='labkey-exclusion-td-cell'>" + this.runId + "</td></tr>"
                     + "<tr><td class='labkey-exclusion-td-label'>Assay ID:</td><td class='labkey-exclusion-td-cell'><div id='run_assay_id'>...</div></td></tr>"
@@ -236,15 +269,30 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
             scope: this
         };
 
-        // todo: verify with user if rows selected
-
-        // insert, update, or delete to/from the RunExclusion table
+        // insert, update, or delete to/from the RunExclusion table with config information
         if (this.exclusionsExist)
         {
             if (analytesForExclusionStr != "")
+            {
                 LABKEY.Query.updateRows(config);
+            }
             else
-                LABKEY.Query.deleteRows(config);
+            {
+                // ask the user if they are sure they want to remove the exclusions before deleting
+                Ext.Msg.show({
+                    title:'Warning',
+                    msg: 'Are you sure you want to remove all analyte exlusions for run Id ' + this.runId + '?',
+                    buttons: Ext.Msg.YESNO,
+                    fn: function(btnId, text, opt){
+                        if (btnId == 'yes')
+                        {
+                            LABKEY.Query.deleteRows(config);
+                        }
+                    },
+                    icon: Ext.MessageBox.WARNING,
+                    scope: this
+                });
+            }
         }
         else
         {
