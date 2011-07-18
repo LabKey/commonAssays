@@ -23,6 +23,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -38,6 +39,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
     private final FieldKey _descriptionFieldKey;
     private final FieldKey _dataFieldKey;
     private final FieldKey _runFieldKey;
+    private final FieldKey _wellIDKey;
     private final String _protocolName;
     private boolean _exclusionJSIncluded = false;
     private final Container _container;
@@ -55,6 +57,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         _dataFieldKey = new FieldKey(new FieldKey(parentFK, "Data"), "RowId");
         _runFieldKey = new FieldKey(new FieldKey(new FieldKey(parentFK, "Data"), "Run"), "RowId");
         _protocolName = protocolName;
+        _wellIDKey = new FieldKey(parentFK, "well");
     }
 
     @Override
@@ -80,6 +83,9 @@ public class ExclusionUIDisplayColumn extends DataColumn
         String description = (String)ctx.get(_descriptionFieldKey);
         Integer dataId = (Integer)ctx.get(_dataFieldKey);
         Integer runId = (Integer)ctx.get(_runFieldKey);
+        String wellID = PageFlowUtil.filter((String)ctx.get(_wellIDKey));
+
+        String id = "__changeExclusions__" + wellID;
 
         if (!_exclusionJSIncluded)
         {
@@ -104,7 +110,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         Boolean excluded = (Boolean)ctx.get(getColumnInfo().getFieldKey());
         if (excluded.booleanValue())
         {
-            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/excluded.png\" height=\"16\" width=\"16\" ");
+            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/excluded.png\" height=\"16\" width=\"16\" id=\""+id+"\"");
             if (canEdit)
             {
                 out.write("title=\"Click to remove or edit this exclusion\" alt=\"Click to remove or edit this exclusion\" ");
@@ -113,7 +119,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         }
         else
         {
-            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/included.png\" height=\"16\" width=\"16\" ");
+            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/included.png\" height=\"16\" width=\"16\"  id=\""+id+"\"");
             if (canEdit)
             {
                 out.write("title=\"Click to add an exclusion\" alt=\"Click to add an exclusion\" ");
