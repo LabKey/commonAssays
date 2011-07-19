@@ -207,6 +207,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData());
             collector.addHiddenFormFields(view, form);
 
+            // add hidden form fields (3 types) for the titration well role definition section (controlled by titrationWellRoles.jsp)
+            for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
+            {
+                view.getDataRegion().addHiddenFormField(getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()), titrationEntry.getValue().isStandard() ? "true" : "");
+                view.getDataRegion().addHiddenFormField(getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue()), titrationEntry.getValue().isQcControl() ? "true" : "");
+                view.getDataRegion().addHiddenFormField(getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue()), titrationEntry.getValue().isUnknown() ? "true" : "");
+            }
+
             ButtonBar bbar = new ButtonBar();
             addFinishButtons(form, view, bbar);
             addResetButton(form, view, bbar);

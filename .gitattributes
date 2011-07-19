@@ -581,7 +581,6 @@ luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-9.30-9.31.sql -te
 luminex/resources/schemas/luminex.xml -text
 luminex/resources/transformscripts/blank_bead_subtraction.R -text
 luminex/resources/transformscripts/curve_fit_calculation.R -text
-luminex/resources/transformscripts/rumi.R -text
 luminex/resources/transformscripts/transform_v1.R -text
 luminex/resources/transformscripts/youtil.R -text
 luminex/src/org/labkey/luminex/AbstractExclusionTable.java -text

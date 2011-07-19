@@ -37,6 +37,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.ParticipantVisit;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -815,6 +816,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             row.remove("titration");
             LuminexDataRow dataRow = rowFactory.fromMap(row);
             dataRow.setExtraProperties(row);
+
+            // since a transform script can generate new records for analytes with > 1 standard selected, set lsids for new records
+            if (dataRow.getLsid() == null)
+            {
+                dataRow.setLsid(new Lsid(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX, GUID.makeGUID()).toString());
+            }
 
             if (!sheets.containsKey(analyte))
             {

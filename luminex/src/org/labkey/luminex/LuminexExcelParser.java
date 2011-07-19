@@ -143,7 +143,7 @@ public class LuminexExcelParser
                                 newTitration.setName(dataRow.getDescription());
                                 if (dataRow.getType() != null)
                                 {
-                                    newTitration.setStandard(dataRow.getType().toUpperCase().startsWith("S"));
+                                    newTitration.setStandard(dataRow.getType().toUpperCase().startsWith("S") || dataRow.getType().toUpperCase().startsWith("ES"));
                                     newTitration.setQcControl(dataRow.getType().toUpperCase().startsWith("C"));
                                     newTitration.setUnknown(dataRow.getType().toUpperCase().startsWith("X"));
 

@@ -61,12 +61,12 @@
                 <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
                 <td>
                     <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) %>'
-                           value='1' onClick='showHideAnalytePropertyColumn("<%= LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName()) %>", this.checked);'
+                           value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn("<%= LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName()) %>", this.checked);'
                            <%= titrationEntry.getValue().isStandard() ? "CHECKED" : "" %> />
                 </td>
                 <td>
                     <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue()) %>'
-                           value='1' <%= titrationEntry.getValue().isQcControl() ? "CHECKED" : "" %> />
+                           value='1' onClick='titrationRoleChecked(this);' <%= titrationEntry.getValue().isQcControl() ? "CHECKED" : "" %> />
                 </td>
             </tr>
 <%
@@ -94,7 +94,7 @@
                 <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
                 <td>
                     <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue()) %>'
-                           value='1' <%= titrationEntry.getValue().isUnknown() ? "CHECKED" : "" %> />
+                           value='1' onClick='titrationRoleChecked(this);' <%= titrationEntry.getValue().isUnknown() ? "CHECKED" : "" %> />
                 </td>
             </tr>
 <%
@@ -107,6 +107,21 @@
 
 
 <script type="text/javascript">
+    // function to handle click of titration well role checkbox to set the corresponding hidden form element accordingly
+    function titrationRoleChecked(el)
+    {
+        // get the corresponding hidden form element
+        var els = document.getElementsByName(el.name);
+        for (var i = 0; i < els.length; i++)
+        {
+            if (els[i].type == "hidden")
+            {
+                // set the hidden element value to true if the input checkbox is selected
+                els[i].value = el.checked ? "true" : "";
+            }
+        }
+    }
+
     function showHideAnalytePropertyColumn(titrationCellName, isChecked)
     {
         // show/hide the column associated with this titration

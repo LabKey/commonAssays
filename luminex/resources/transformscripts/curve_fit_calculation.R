@@ -10,9 +10,12 @@
 #
 
 # Author: Cory Nathe, LabKey
+transformVersion = "1.0";
 
 source("${srcDirectory}/youtil.R");
-source("${srcDirectory}/rumi.R");
+# Ruminex package available from http://labs.fhcrc.org/fong/Ruminex/index.html
+library(Ruminex);
+ruminexVersion = installed.packages()["Ruminex","Version"];
 
 # set up a data frame to store the run properties
 run.props = data.frame(NA, NA, NA, NA);
@@ -46,6 +49,13 @@ run.output.file = run.props$val3[run.props$name == "runDataFile"];
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 
+# set the version number run properties for the transform script and the Ruminex function
+runprop.output.file = run.props$val1[run.props$name == "transformedRunPropertiesFile"];
+fileConn<-file(runprop.output.file);
+writeLines(c(paste("transformVersion",transformVersion,sep="\t"),
+    paste("ruminexVersion",ruminexVersion,sep="\t")), fileConn);
+close(fileConn);
+
 # read in the analyte informatin (to get the mapping from analyte to standard/titration)
 analyte.data.file = run.props$val1[run.props$name == "analyteData"];
 analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
@@ -54,7 +64,27 @@ analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
 run.data$standard = NA;
 for (index in 1:nrow(analyte.data))
 {
-    run.data$standard[as.character(run.data$name) == as.character(analyte.data$Name[index])] = as.character(analyte.data$titrations[index]);
+    # hold on to the run data for the given analyte
+    run.analyte.data = subset(run.data, as.character(name) == as.character(analyte.data$Name[index]));
+
+    # some analytes may have > 1 standard selected
+    stndSet = unlist(strsplit(as.character(analyte.data$titrations[index]), ","));
+    print(stndSet);
+
+    # if there are more than 1 standard for this analyte, duplicate run.data records for that analyte at set standard accordingly
+    for (stndIndex in 1:length(stndSet))
+    {
+        if (stndIndex == 1)
+        {
+            run.data$standard[as.character(run.data$name) == as.character(analyte.data$Name[index])] = stndSet[stndIndex];
+        } else
+        {
+            temp.data = run.analyte.data;
+            temp.data$standard = stndSet[stndIndex];
+            temp.data$lsid = NA; # lsid will be set by the server
+            run.data = rbind(run.data, temp.data);
+        }
+    }
 }
 
 # get the unique standards (not including NA or empty string)
@@ -69,10 +99,10 @@ run.data$se = NA;
 dat = subset(run.data, select=c("dataFile", "standard", "lsid", "well", "description", "name", "expConc", "type", "fi", "fiBackground", "dilution"));
 
 # convert the type to a well_role
-dat$well_role[substr(dat$type,0,1) == "S"] = "Standard";
-dat$well_role[substr(dat$type,0,1) == "X"] = "Sample";
-dat$well_role[substr(dat$type,0,1) == "C"] = "QC";
-dat$well_role[substr(dat$type,0,1) == "B"] = "Blank";
+dat$well_role[toupper(substr(dat$type,0,1)) == "S" | toupper(substr(dat$type,0,2)) == "ES"] = "Standard";
+dat$well_role[toupper(substr(dat$type,0,1)) == "X"] = "Sample";
+dat$well_role[toupper(substr(dat$type,0,1)) == "C"] = "QC";
+dat$well_role[toupper(substr(dat$type,0,1)) == "B"] = "Blank";
 
 # get a booelan vector of the records that are of type standard
 standardRecs = !is.na(dat$well_role) & dat$well_role == "Standard";
@@ -126,7 +156,7 @@ if(any(standardRecs) & length(standards) > 0){
         fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
         dev.off();
 
-        # put the calculated values back into the run.data dataframe by matching on analyte, description, and dilution
+        # put the calculated values back into the run.data dataframe by matching on analyte, description, dilution, and standard
         if(nrow(fits) > 0){
             for(index in 1:nrow(fits)){
                 a = fits$analyte[index];
@@ -137,7 +167,7 @@ if(any(standardRecs) & length(standards) > 0){
                 ec = fits$"est.conc"[index];
                 se = fits$"se"[index];
 
-                runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc;
+                runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$standard == stndVal;
                 run.data$estLogConc[runDataIndex] = elc;
                 run.data$estConc[runDataIndex] = ec;
                 run.data$se[runDataIndex] = se;

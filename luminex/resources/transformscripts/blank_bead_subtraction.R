@@ -10,6 +10,7 @@
 #
 
 # Author: Cory Nathe, LabKey
+transformVersion = "1.0";
 
 # set up a data frame to store the run properties
 run.props = data.frame(NA, NA, NA, NA);
@@ -43,6 +44,12 @@ run.output.file = run.props$val3[run.props$name == "runDataFile"];
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 
+# set the version number run properties for the transform script
+runprop.output.file = run.props$val1[run.props$name == "transformedRunPropertiesFile"];
+fileConn<-file(runprop.output.file);
+writeLines(paste("transformVersion",transformVersion,sep="\t"), fileConn);
+close(fileConn);
+
 # initialize the FI - Bkgd - Blank variable
 run.data$fiBackgroundBlank = NA;
 
@@ -54,7 +61,7 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
     # store a boolean vector of blanks, nonBlanks, and unknowns
     blanks = regexpr("^blank", run.data$name, ignore.case=TRUE) > -1;
     nonBlanks = regexpr("^blank", run.data$name, ignore.case=TRUE) == -1;
-    unks = substr(run.data$type,0,1) == "X";
+    unks = toupper(substr(run.data$type,0,1)) == "X";
 
 	# loop through the unique dataFile/description/dilution pairs and subtract the mean blank FI-Bkgrd from the fiBackground
 	fileDescDilPairs = unique(data.frame(dataFile=run.data$dataFile, description=run.data$description, dilution=run.data$dilution));
