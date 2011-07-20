@@ -151,7 +151,7 @@
 %>
 
 
-<form>
+<form id="chooseGraph">
     <input type="hidden" name="wellId" value="<%=form.getWellId()%>">
     <input type="hidden" name="scriptId" value="<%=form.getScriptId()%>">
     <input type="hidden" name="compId" value="<%=form.getCompId()%>">
