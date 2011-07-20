@@ -150,13 +150,11 @@ public class SubsetParser
         return new SubsetTerm(subset);
     }
 
-    //// expression: '(' or ')'
     // expression: '(' and ')'
     private final SubsetExpression parseExpression()
     {
         match(Tok.opLParen);
         SubsetExpression expr = parseAnd();
-        //SubsetExpression expr = parseOr();
         match(Tok.opRParen);
         return expr;
     }
@@ -181,28 +179,6 @@ public class SubsetParser
         match(Tok.opOr);
         SubsetExpression right = parseOr();
         return new OrTerm(left, right);
-    }
-
-    // or: and '|' or | and
-    private final SubsetExpression _parseOr()
-    {
-        SubsetExpression left = parseAnd();
-        if (!test(Tok.opOr))
-            return left;
-        match(Tok.opOr);
-        SubsetExpression right = parseOr();
-        return new OrTerm(left, right);
-    }
-
-    // and: not '&' and | not
-    private final SubsetExpression _parseAnd()
-    {
-        SubsetExpression left = parseNot();
-        if (!test(Tok.opAnd))
-            return left;
-        match(Tok.opAnd);
-        SubsetExpression right = parseAnd();
-        return new AndTerm(left, right);
     }
 
     // not: '!' atom | atom

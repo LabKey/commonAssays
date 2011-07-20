@@ -20,18 +20,30 @@
 NSUB_MIN = 5000
 ALPHA    = 0.00001
 
+# I'm not sure why is.numeric() is returning TRUE in my script.
+# We can check both is.numeric() and !is.na() to weed out NA and empty string.
+isNum <- function (x)
+{
+    return (!is.na(x) && is.numeric(x))
+}
+
 positivity <- function (data, grouping_columns)
 {
     # generate raw p-values
     data$raw_p = sapply(1:nrow(data), function(i) {
       pval = NA
 
-      if (is.numeric(data$stat[i]) && is.numeric(data$stat_bg[i]) && is.numeric(data$parent[i]) && is.numeric(data$parent_bg[i]))
+      stat      = data$stat[i]
+      stat_bg   = data$stat_bg[i]
+      parent    = data$parent[i]
+      parent_bg = data$parent_bg[i]
+
+      if (isNum(stat) && isNum(stat_bg) && isNum(parent) && isNum(parent_bg))
       {
-        x.ant = as.integer(data$stat[i])
-        N.ant = as.integer(data$parent[i] - data$stat[i])
-        x.neg = as.integer(data$stat_bg[i])
-        N.neg = as.integer(data$parent_bg[i] - data$stat_bg[i])
+        x.ant = as.integer(stat)
+        N.ant = as.integer(parent - stat)
+        x.neg = as.integer(stat_bg)
+        N.neg = as.integer(parent_bg - stat_bg)
 
         m = matrix(c(x.ant,N.ant,x.neg,N.neg), nc=2, byrow=FALSE)
 
@@ -77,28 +89,4 @@ result <- positivity(labkey.data, grouping_cols)
 
 write.table(result, file = "${tsvout:FCSAnalyses}", sep = "\t", qmethod = "double", col.names=NA)
 
-#PRINT <- data.frame(
-#    date = as.Date(result$datetime),
-#    run = result$run,
-#    run.href = result$run_href,
-#    well = result$well,
-#    well.href = result$well_href
-#)
-#
-#PRINT[flow.metadata.study.participantColumn] = result[flow.metadata.study.participantColumn]
-#if (exists("flow.metadata.study.visitColumn")) {
-#    PRINT[flow.metadata.study.visitColumn] = result[flow.metadata.study.visitColumn]
-#} else {
-#    PRINT[flow.metadata.study.dateColumn] = result[flow.metadata.study.dateColumn]
-#}
-#
-#PRINT[report.parameters$subsetParentDisplay] = result$parent
-#PRINT[paste("BG", report.parameters$subsetParentDisplay)] = result$parent_bg
-#PRINT[report.parameters$subsetDisplay] = result$stat
-#PRINT[paste("BG", report.parameters$subsetDisplay)] = result$stat_bg
-#PRINT$response = result$response
-#PRINT$raw_p = result$raw_p
-#PRINT$adj_p = result$adj_p
-#
-#write.table(PRINT, file = "{tsvout:tsvfile?FlowTableType=FCSAnalyses}", sep = "\t", qmethod = "double", col.names=NA)
 
