@@ -60,8 +60,8 @@ run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 
 runprop.output.file = run.props$val1[run.props$name == "transformedRunPropertiesFile"];
 fileConn<-file(runprop.output.file);
-writeLines(c(paste("transformVersion",transformVersion,sep="\t"),
-    paste("ruminexVersion",ruminexVersion,sep="\t")), fileConn);
+writeLines(c(paste("TransformVersion",transformVersion,sep="\t"),
+    paste("RuminexVersion",ruminexVersion,sep="\t")), fileConn);
 close(fileConn);
 
 ################################# STEP 2: BLANK BEAD SUBTRACTION ################################  
@@ -79,19 +79,37 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
     nonBlanks = regexpr("^blank", run.data$name, ignore.case=TRUE) == -1;
     unks = toupper(substr(run.data$type,0,1)) == "X";
 
-	# loop through the unique dataFile/description/dilution pairs and subtract the mean blank FI-Bkgrd from the fiBackground
-	fileDescDilPairs = unique(data.frame(dataFile=run.data$dataFile, description=run.data$description, dilution=run.data$dilution));
-	for(index in 1:nrow(fileDescDilPairs)){
-	    dataFile = fileDescDilPairs$dataFile[index];
-	    description = fileDescDilPairs$description[index];
-	    dilution = fileDescDilPairs$dilution[index];
-	    fileDescDils = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution;
+    # read the run property from user to determine if we are to only blank bead subtract from unks
+    unksOnly = TRUE;
+    if(any(run.props$name == "SubtBlankFromAll")){
+        if(run.props$val1[run.props$name == "SubtBlankFromAll"] == "1")
+                unksOnly = FALSE;
+    }
+
+	# loop through the unique dataFile/description/excpConc/dilution combos and subtract the mean blank fiBackground from the fiBackground
+	combos = unique(data.frame(dataFile=run.data$dataFile, description=run.data$description, dilution=run.data$dilution, expConc=run.data$expConc));
+	print(combos);
+	for(index in 1:nrow(combos)){
+	    dataFile = combos$dataFile[index];
+	    description = combos$description[index];
+	    dilution = combos$dilution[index];
+	    expConc = combos$expConc[index];
+
+        # only standards have expConc, the rest are NA
+	    combo = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution & run.data$expConc == expConc;
+	    if(is.na(expConc)){
+	        combo = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution & is.na(run.data$expConc);
+	    }
 
 		# get the mean blank bead FI-Bkgrd values for the given description/dilution
-		blank.mean = mean(run.data$fiBackground[blanks & fileDescDils]);
+		blank.mean = mean(run.data$fiBackground[blanks & combo]);
 
-		# calc the fiBackgroundBlank for all of the non-"Blank" analytes for this description
-		run.data$fiBackgroundBlank[unks & nonBlanks & fileDescDils] = run.data$fiBackground[unks & nonBlanks & fileDescDils] - blank.mean;
+		# calc the fiBackgroundBlank for all of the non-"Blank" analytes for this combo
+        if(unksOnly){
+		    run.data$fiBackgroundBlank[unks & nonBlanks & combo] = run.data$fiBackground[unks & nonBlanks & combo] - blank.mean;
+		} else{
+		    run.data$fiBackgroundBlank[nonBlanks & combo] = run.data$fiBackground[nonBlanks & combo] - blank.mean;
+		}
 	}
 
 	# convert fiBackgroundBlank values that are less than or equal to 0 to a value of 1 (as per the lab's calculation)
@@ -105,7 +123,7 @@ analyte.data.file = run.props$val1[run.props$name == "analyteData"];
 analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
 
 # get the analyte associated standard/titration information from the analyte data file and put it into the run.data object
-run.data$standard = NA;
+run.data$Standard = NA;
 for (index in 1:nrow(analyte.data))
 {
     # hold on to the run data for the given analyte
@@ -113,18 +131,17 @@ for (index in 1:nrow(analyte.data))
 
     # some analytes may have > 1 standard selected
     stndSet = unlist(strsplit(as.character(analyte.data$titrations[index]), ","));
-    print(stndSet);
 
     # if there are more than 1 standard for this analyte, duplicate run.data records for that analyte at set standard accordingly
     for (stndIndex in 1:length(stndSet))
     {
         if (stndIndex == 1)
         {
-            run.data$standard[as.character(run.data$name) == as.character(analyte.data$Name[index])] = stndSet[stndIndex];
+            run.data$Standard[as.character(run.data$name) == as.character(analyte.data$Name[index])] = stndSet[stndIndex];
         } else
         {
             temp.data = run.analyte.data;
-            temp.data$standard = stndSet[stndIndex];
+            temp.data$Standard = stndSet[stndIndex];
             temp.data$lsid = NA; # lsid will be set by the server
             run.data = rbind(run.data, temp.data);
         }
@@ -132,15 +149,19 @@ for (index in 1:nrow(analyte.data))
 }
 
 # get the unique standards (not including NA or empty string)
-standards = setdiff(unique(run.data$standard), c(NA, ""));
+standards = setdiff(unique(run.data$Standard), c(NA, ""));
 
 # initialize the columns to be calculated
-run.data$estLogConc = NA;
-run.data$estConc = NA;
-run.data$se = NA;
+run.data$EstLogConc_5pl = NA;
+run.data$EstConc_5pl = NA;
+run.data$SE_5pl = NA;
+
+run.data$EstLogConc_4pl = NA;
+run.data$EstConc_4pl = NA;
+run.data$SE_4pl = NA;
 
 # setup the dataframe needed for the call to rumi
-dat = subset(run.data, select=c("dataFile", "standard", "lsid", "well", "description", "name", "expConc", "type", "fi", "fiBackground", "fiBackgroundBlank", "dilution"));
+dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "type", "fi", "fiBackground", "fiBackgroundBlank", "dilution"));
 
 # convert the type to a well_role
 dat$well_role[toupper(substr(dat$type,0,1)) == "S" | toupper(substr(dat$type,0,2)) == "ES"] = "Standard";
@@ -167,10 +188,20 @@ if(any(standardRecs) & length(standards) > 0){
     dat$sample_id = paste(dat$description, "||", dat$dilution, sep="");
 
     # designate which value to use for the FI to be passed to the rumi function
-    # TODO: WHAT VALUE SHOULD BE USED FOR STANDARDS? fi OR fiBackground
     colnames(dat)[colnames(dat) == "fi"] = "fiOrig";
-    dat$fi[standardRecs] = dat$fiOrig[standardRecs];
-    # choose the FI column based on the run property provided by the user, default to the original FI value
+
+    # choose the FI column for standards based on the run property provided by the user, default to the original FI value
+    fiCol = "FI";
+    if(any(run.props$name == "StndCurveFitInput"))
+        fiCol = run.props$val1[run.props$name == "StndCurveFitInput"];
+    if(fiCol == "FI-Bkgd")
+        dat$fi[standardRecs] = dat$fiBackground[standardRecs]
+    else if(fiCol == "FI-Bkgd-Blank")
+        dat$fi[standardRecs] = dat$fiBackgroundBlank[standardRecs]
+    else
+        dat$fi[standardRecs] = dat$fiOrig[standardRecs];        
+
+    # choose the FI column for unknowns based on the run property provided by the user, default to the original FI value
     if(any(!standardRecs)){
         fiCol = "FI";
         if(any(run.props$name == "UnkCurveFitInput"))
@@ -194,11 +225,11 @@ if(any(standardRecs) & length(standards) > 0){
 
         # subset the data for those analytes set to use the given standard curve
         # note: also need to subset the standard records for only those where description matches the given standard
-        standard.dat = subset(dat, standard == stndVal & (well_role != "Standard" | (well_role == "Standard" & description == stndVal)));
+        standard.dat = subset(dat, Standard == stndVal & (well_role != "Standard" | (well_role == "Standard" & description == stndVal)));
 
-        # call the rumi function to calculate new estimated log concentrations for the uknowns
-        mypdf(file=stndVal, mfrow=c(2,2))
-        fits = rumi(standard.dat, plot.se.profile=TRUE, test.lod=TRUE, verbose=TRUE);
+        # call the rumi function to calculate new estimated log concentrations using 5PL for the uknowns
+        mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2))
+        fits = rumi(standard.dat, verbose=TRUE);
         fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
         dev.off();
 
@@ -213,15 +244,43 @@ if(any(standardRecs) & length(standards) > 0){
                 ec = fits$"est.conc"[index];
                 se = fits$"se"[index];
 
-                runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$standard == stndVal;
-                run.data$estLogConc[runDataIndex] = elc;
-                run.data$estConc[runDataIndex] = ec;
-                run.data$se[runDataIndex] = se;
+                runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal;
+                run.data$EstLogConc_5pl[runDataIndex] = elc;
+                run.data$EstConc_5pl[runDataIndex] = ec;
+                run.data$SE_5pl[runDataIndex] = se;
             }
 
             # convert Inf and -Inf to Java string representation for DB persistance
-            run.data$se[run.data$se == "Inf"] = "Infinity";
-            run.data$se[run.data$se == "-Inf"] = "-Infinity";
+            run.data$SE_5pl[run.data$SE_5pl == "Inf"] = "Infinity";
+            run.data$SE_5pl[run.data$SE_5pl == "-Inf"] = "-Infinity";
+        }
+
+        # call the rumi function to calculate new estimated log concentrations using 4PL for the uknowns
+        mypdf(file=paste(stndVal, "4PL", sep="_"), mfrow=c(2,2))
+        fits = rumi(standard.dat, fit.4pl=TRUE, verbose=TRUE);
+        fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
+        dev.off();
+
+        # put the calculated values back into the run.data dataframe by matching on analyte, description, dilution, and standard
+        if(nrow(fits) > 0){
+            for(index in 1:nrow(fits)){
+                a = fits$analyte[index];
+                dil = fits$dilution[index];
+                desc = fits$description[index];
+
+                elc = fits$"est.log.conc"[index];
+                ec = fits$"est.conc"[index];
+                se = fits$"se"[index];
+
+                runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal;
+                run.data$EstLogConc_4pl[runDataIndex] = elc;
+                run.data$EstConc_4pl[runDataIndex] = ec;
+                run.data$SE_4pl[runDataIndex] = se;
+            }
+
+            # convert Inf and -Inf to Java string representation for DB persistance
+            run.data$SE_4pl[run.data$SE_4pl == "Inf"] = "Infinity";
+            run.data$SE_4pl[run.data$SE_4pl == "-Inf"] = "-Infinity";
         }
     }
 }

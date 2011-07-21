@@ -47,7 +47,7 @@ run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 # set the version number run properties for the transform script
 runprop.output.file = run.props$val1[run.props$name == "transformedRunPropertiesFile"];
 fileConn<-file(runprop.output.file);
-writeLines(paste("transformVersion",transformVersion,sep="\t"), fileConn);
+writeLines(paste("TransformVersion",transformVersion,sep="\t"), fileConn);
 close(fileConn);
 
 # initialize the FI - Bkgd - Blank variable
@@ -63,19 +63,37 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
     nonBlanks = regexpr("^blank", run.data$name, ignore.case=TRUE) == -1;
     unks = toupper(substr(run.data$type,0,1)) == "X";
 
-	# loop through the unique dataFile/description/dilution pairs and subtract the mean blank FI-Bkgrd from the fiBackground
-	fileDescDilPairs = unique(data.frame(dataFile=run.data$dataFile, description=run.data$description, dilution=run.data$dilution));
-	for(index in 1:nrow(fileDescDilPairs)){
-	    dataFile = fileDescDilPairs$dataFile[index];
-	    description = fileDescDilPairs$description[index];
-	    dilution = fileDescDilPairs$dilution[index];
-	    fileDescDils = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution;
+    # read the run property from user to determine if we are to only blank bead subtract from unks
+    unksOnly = TRUE;
+    if(any(run.props$name == "SubtBlankFromAll")){
+        if(run.props$val1[run.props$name == "SubtBlankFromAll"] == "1")
+                unksOnly = FALSE;
+    }
+
+	# loop through the unique dataFile/description/excpConc/dilution combos and subtract the mean blank fiBackground from the fiBackground
+	combos = unique(data.frame(dataFile=run.data$dataFile, description=run.data$description, dilution=run.data$dilution, expConc=run.data$expConc));
+	print(combos);
+	for(index in 1:nrow(combos)){
+	    dataFile = combos$dataFile[index];
+	    description = combos$description[index];
+	    dilution = combos$dilution[index];
+	    expConc = combos$expConc[index];
+
+        # only standards have expConc, the rest are NA
+	    combo = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution & run.data$expConc == expConc;
+	    if(is.na(expConc)){
+	        combo = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution & is.na(run.data$expConc);
+	    }
 
 		# get the mean blank bead FI-Bkgrd values for the given description/dilution
-		blank.mean = mean(run.data$fiBackground[blanks & fileDescDils]);
+		blank.mean = mean(run.data$fiBackground[blanks & combo]);
 
-		# calc the fiBackgroundBlank for all of the non-"Blank" analytes for this description
-		run.data$fiBackgroundBlank[unks & nonBlanks & fileDescDils] = run.data$fiBackground[unks & nonBlanks & fileDescDils] - blank.mean;
+		# calc the fiBackgroundBlank for all of the non-"Blank" analytes for this combo
+        if(unksOnly){
+		    run.data$fiBackgroundBlank[unks & nonBlanks & combo] = run.data$fiBackground[unks & nonBlanks & combo] - blank.mean;
+		} else{
+		    run.data$fiBackgroundBlank[nonBlanks & combo] = run.data$fiBackground[nonBlanks & combo] - blank.mean;
+		}
 	}
 
 	# convert fiBackgroundBlank values that are less than or equal to 0 to a value of 1 (as per the lab's calculation)
