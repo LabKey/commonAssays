@@ -18,6 +18,7 @@ package org.labkey.flow.view;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.MenuButton;
 import org.labkey.api.data.TSVGridWriter;
@@ -109,15 +110,35 @@ public class FlowQueryView extends QueryView
     {
         DataView ret = super.createDataView();
 
-        if (hasGraphs() && showGraphs())
-        {
-            ret = new GraphView(ret);
-        }
-        ret.getDataRegion().setShowPaginationCount(false);
+//        if (hasGraphs() && showGraphs())
+//        {
+//            ret = new GraphView(ret);
+//        }
+//        ret.getDataRegion().setShowPaginationCount(false);
         return ret;
     }
 
-    private static Logger _log = Logger.getLogger(FlowQueryView.class);
+    @Override
+    protected DataRegion createDataRegion()
+    {
+        if (hasGraphs() && showGraphs())
+        {
+            DataRegion rgn = new GraphDataRegion();
+            configureDataRegion(rgn);
+            return rgn;
+        }
+        else
+        {
+            return super.createDataRegion();
+        }
+    }
+
+    @Override
+    protected void configureDataRegion(DataRegion rgn)
+    {
+        super.configureDataRegion(rgn);
+        rgn.setShowPaginationCount(false);
+    }
 
     protected User getUser()
     {
