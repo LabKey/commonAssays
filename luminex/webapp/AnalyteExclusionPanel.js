@@ -119,7 +119,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
         var title = "Select the checkbox next to the analytes to be excluded";
         if (this.exclusionsExist)
         {
-            title += "<BR/><span style='color:red;font-style:italic;'>Uncheck all analytes to remove exclusions</span>";
+            title += "<BR/><span style='color:red;font-style:italic;'>Uncheck analytes to remove exclusions</span>";
         }
 
         // grid of avaialble/excluded analytes
