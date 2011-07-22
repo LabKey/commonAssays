@@ -179,10 +179,11 @@ if(any(standardRecs) & length(standards) > 0){
     # change column name from expConc to expected_conc
     colnames(dat)[colnames(dat) == "expConc"] = "expected_conc";
 
-    # get the assayId from the run properties
-    dat$assay_id = NA;
+    # get the assayId from the run properties (or use the first dataFile value)
+    dat$assay_id = dat$dataFile[1];
     if(any(run.props$name == "assayId"))
-          dat$assay_id = run.props$val1[run.props$name == "assayId"];
+        if(run.props$val1[run.props$name == "assayId"] != "")
+            dat$assay_id = run.props$val1[run.props$name == "assayId"];
 
     # set the sample_id to be description||dilution concatination
     dat$sample_id = paste(dat$description, "||", dat$dilution, sep="");

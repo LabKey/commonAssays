@@ -56,6 +56,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             throw "You must specify the following: runId, dataId, and dilution!";
 
         Ext.apply(config, {
+            cls: 'extContainer',
             autoScroll: true,
             border: false,
             items: [],
@@ -182,6 +183,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
         // grid of avaialble/excluded analytes
         var availableAnalytesGrid = new Ext.grid.GridPanel({
             id: 'availableanalytes',
+            cls: 'extContainer',
             title: title,
             headerStyle: 'font-weight: normal; background-color: #ffffff',
             store:  new LABKEY.ext.Store({
@@ -237,8 +239,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             sm: selMod,
             anchor: '100%',
             height: 165,
-            frame: false,
-            loadMask: true
+            frame: false
         });
         this.add(availableAnalytesGrid);
 
