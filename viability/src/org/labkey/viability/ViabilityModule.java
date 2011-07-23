@@ -16,6 +16,7 @@
 
 package org.labkey.viability;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
@@ -76,18 +77,21 @@ public class ViabilityModule extends DefaultModule
     }
 
     @Override
+    @NotNull
     public Set<String> getSchemaNames()
     {
         return Collections.singleton(ViabilitySchema.SCHEMA_NAME);
     }
 
     @Override
+    @NotNull
     public Set<DbSchema> getSchemasToTest()
     {
         return Collections.singleton(ViabilitySchema.getSchema());
     }
 
     @Override
+    @NotNull
     public Set<Class> getJUnitTests()
     {
         return new HashSet<Class>(Arrays.asList(

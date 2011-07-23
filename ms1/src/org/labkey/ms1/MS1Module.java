@@ -16,6 +16,7 @@
 
 package org.labkey.ms1;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.ExperimentRunType;
@@ -174,6 +175,7 @@ public class MS1Module extends SpringModule
 
 
     @Override
+    @NotNull
     public Set<String> getSchemaNames()
     {
         return PageFlowUtil.set(MS1Manager.get().getSchemaName());
@@ -181,6 +183,7 @@ public class MS1Module extends SpringModule
 
 
     @Override
+    @NotNull
     public Set<DbSchema> getSchemasToTest()
     {
         return PageFlowUtil.set(MS1Manager.get().getSchema());

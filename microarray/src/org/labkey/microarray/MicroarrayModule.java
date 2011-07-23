@@ -16,6 +16,7 @@
 
 package org.labkey.microarray;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
@@ -148,11 +149,15 @@ public class MicroarrayModule extends SpringModule
         ServiceRegistry.get(SearchService.class).addDocumentParser(new MageMLDocumentParser());
     }
 
+    @Override
+    @NotNull
     public Set<String> getSchemaNames()
     {
         return Collections.singleton(CONTROLLER_NAME);
     }
 
+    @Override
+    @NotNull
     public Set<DbSchema> getSchemasToTest()
     {
         return PageFlowUtil.set(MicroarraySchema.getSchema());

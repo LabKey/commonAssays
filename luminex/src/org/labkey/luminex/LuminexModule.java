@@ -16,6 +16,7 @@
 
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.UpgradeCode;
@@ -71,11 +72,15 @@ public class LuminexModule extends DefaultModule
         ExperimentService.get().registerExperimentDataHandler(new LuminexDataHandler());
     }
 
+    @Override
+    @NotNull
     public Set<String> getSchemaNames()
     {
         return Collections.singleton("luminex");
     }
 
+    @Override
+    @NotNull
     public Set<DbSchema> getSchemasToTest()
     {
         return PageFlowUtil.set(LuminexSchema.getSchema());
