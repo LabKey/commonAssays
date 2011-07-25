@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -134,22 +135,25 @@ public class LuminexExcelParser
                         {
                             LuminexDataRow dataRow = createDataRow(sheet, colNames, row, dataFile);
 
-                            Integer count = potentialTitrationCounts.get(dataRow.getDescription());
-                            potentialTitrationCounts.put(dataRow.getDescription(), count == null ? 1 : count.intValue() + 1);
-
-                            if (!potentialTitrations.containsKey(dataRow.getDescription()))
+                            if (dataRow.getDescription() != null)
                             {
-                                Titration newTitration = new Titration();
-                                newTitration.setName(dataRow.getDescription());
-                                if (dataRow.getType() != null)
+                                Integer count = potentialTitrationCounts.get(dataRow.getDescription());
+                                potentialTitrationCounts.put(dataRow.getDescription(), count == null ? 1 : count.intValue() + 1);
+
+                                if (!potentialTitrations.containsKey(dataRow.getDescription()))
                                 {
-                                    newTitration.setStandard(dataRow.getType().toUpperCase().startsWith("S") || dataRow.getType().toUpperCase().startsWith("ES"));
-                                    newTitration.setQcControl(dataRow.getType().toUpperCase().startsWith("C"));
-                                    newTitration.setUnknown(dataRow.getType().toUpperCase().startsWith("X"));
+                                    Titration newTitration = new Titration();
+                                    newTitration.setName(dataRow.getDescription());
+                                    if (dataRow.getType() != null)
+                                    {
+                                        newTitration.setStandard(dataRow.getType().toUpperCase().startsWith("S") || dataRow.getType().toUpperCase().startsWith("ES"));
+                                        newTitration.setQcControl(dataRow.getType().toUpperCase().startsWith("C"));
+                                        newTitration.setUnknown(dataRow.getType().toUpperCase().startsWith("X"));
 
+                                    }
+
+                                    potentialTitrations.put(dataRow.getDescription(), newTitration);
                                 }
-
-                                potentialTitrations.put(dataRow.getDescription(), newTitration);
                             }
 
                             dataRows.add(dataRow);
@@ -182,6 +186,26 @@ public class LuminexExcelParser
             {
                 throw new XarFormatException("Failed to parse file as Excel: " + dataFile.getName(), e);
             }
+        }
+
+        boolean foundRealRow = false;
+        for (List<LuminexDataRow> rows : _sheets.values())
+        {
+            for (LuminexDataRow row : rows)
+            {
+                // Look for a row that was actually populated with at least some data
+                if (row.getBeadCount() != null || row.getWell() != null || row.getFi() != null || row.getType() != null)
+                {
+                    foundRealRow = true;
+                    break;
+                }
+            }
+        }
+
+        // Show an error if we didn't find any real Luminex data
+        if (!foundRealRow)
+        {
+            throw new ExperimentException("No data rows found. Most likely not a supported Luminex file.");
         }
         _parsed = true;
     }
@@ -260,7 +284,6 @@ public class LuminexExcelParser
                 else if ("Analyte".equalsIgnoreCase(propName))
                 {
                     // Sheet names may have been truncated, so set the name based on the full value within the sheet
-                    assert analyte.getName().startsWith(value);
                     analyte.setName(value);
                 }
 
@@ -341,17 +364,17 @@ public class LuminexExcelParser
                 String value = ExcelFactory.getCellStringValue(cell).trim();
                 if ("FI".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setFiString(value);
+                    dataRow.setFiString(StringUtils.trimToNull(value));
                     dataRow.setFi(LuminexDataHandler.determineOutOfRange(value).getValue(value));
                 }
                 else if ("FI - Bkgd".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setFiBackgroundString(value);
+                    dataRow.setFiBackgroundString(StringUtils.trimToNull(value));
                     dataRow.setFiBackground(LuminexDataHandler.determineOutOfRange(value).getValue(value));
                 }
                 else if ("Type".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setType(value);
+                    dataRow.setType(StringUtils.trimToNull(value));
                     if (value != null)
                     {
                         String upper = value.toUpperCase();
@@ -375,7 +398,7 @@ public class LuminexExcelParser
                 }
                 else if ("Well".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setWell(value);
+                    dataRow.setWell(StringUtils.trimToNull(value));
                 }
                 else if ("Outlier".equalsIgnoreCase(columnName))
                 {
@@ -388,20 +411,20 @@ public class LuminexExcelParser
                 }
                 else if ("Description".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setDescription(value);
+                    dataRow.setDescription(StringUtils.trimToNull(value));
                 }
                 else if ("Std Dev".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setStdDevString(value);
+                    dataRow.setStdDevString(StringUtils.trimToNull(value));
                     dataRow.setStdDev(LuminexDataHandler.determineOutOfRange(value).getValue(value));
                 }
                 else if ("Exp Conc".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setExpConc(parseDouble(value));
+                    dataRow.setExpConc(LuminexDataHandler.determineOutOfRange(value).getValue(value));
                 }
                 else if ("Obs Conc".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setObsConcString(value);
+                    dataRow.setObsConcString(StringUtils.trimToNull(value));
                     dataRow.setObsConc(LuminexDataHandler.determineOutOfRange(value).getValue(value));
                 }
                 else if ("(Obs/Exp) * 100".equalsIgnoreCase(columnName))
@@ -413,12 +436,12 @@ public class LuminexExcelParser
                 }
                 else if ("Conc in Range".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setConcInRangeString(value);
+                    dataRow.setConcInRangeString(StringUtils.trimToNull(value));
                     dataRow.setConcInRange(LuminexDataHandler.determineOutOfRange(value).getValue(value));
                 }
                 else if ("Ratio".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setRatio(value);
+                    dataRow.setRatio(StringUtils.trimToNull(value));
                 }
                 else if ("Bead Count".equalsIgnoreCase(columnName) || "BeadCount".equalsIgnoreCase(columnName))
                 {
@@ -436,11 +459,11 @@ public class LuminexExcelParser
                 }
                 else if ("Group".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setDataRowGroup(value);
+                    dataRow.setDataRowGroup(StringUtils.trimToNull(value));
                 }
                 else if ("Sampling Errors".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setSamplingErrors(value);
+                    dataRow.setSamplingErrors(StringUtils.trimToNull(value));
                 }
             }
         }

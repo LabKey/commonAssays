@@ -790,7 +790,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             for (LuminexDataRow dataRow : entry.getValue())
             {
                 Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
-                dataMap.put("titration", titrations.contains(dataRow.getDescription()));
+                dataMap.put("titration", dataRow.getDescription() != null && titrations.contains(dataRow.getDescription()));
                 dataMap.remove("data");
                 dataRows.add(dataMap);
             }

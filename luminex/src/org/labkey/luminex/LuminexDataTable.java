@@ -133,7 +133,9 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         containerColumn.setFk(new ContainerForeignKey());
 
         SQLFragment exclusionUnionSQL = new SQLFragment();
-        exclusionUnionSQL.append("SELECT we.Comment, we.Modified, we.ModifiedBy, we.Created, we.CreatedBy FROM ");
+        exclusionUnionSQL.append("SELECT ");
+        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'Excluded for replicate group: '"), new SQLFragment("we.Comment")));
+        exclusionUnionSQL.append(" AS Comment, we.Modified, we.ModifiedBy, we.Created, we.CreatedBy FROM ");
         exclusionUnionSQL.append(LuminexSchema.getTableInfoWellExclusion(), "we");
         exclusionUnionSQL.append(", ");
         exclusionUnionSQL.append(LuminexSchema.getTableInfoWellExclusionAnalyte(), "wea");
@@ -142,7 +144,9 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         exclusionUnionSQL.append("(we.Dilution = " + ExprColumn.STR_TABLE_ALIAS + ".Dilution OR (we.Dilution IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Dilution IS NULL)) AND ");
         exclusionUnionSQL.append("(we.DataId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId OR (we.DataId IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".DataId IS NULL)) AND ");
         exclusionUnionSQL.append("(wea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
-        exclusionUnionSQL.append("UNION SELECT re.Comment, re.Modified, re.ModifiedBy, re.Created, re.CreatedBy FROM ");
+        exclusionUnionSQL.append("UNION SELECT ");
+        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'Excluded for analyte: '"), new SQLFragment("re.Comment")));
+        exclusionUnionSQL.append(" AS Comment, re.Modified, re.ModifiedBy, re.Created, re.CreatedBy FROM ");
         exclusionUnionSQL.append(LuminexSchema.getTableInfoRunExclusion(), "re");
         exclusionUnionSQL.append(", ");
         exclusionUnionSQL.append(LuminexSchema.getTableInfoRunExclusionAnalyte(), "rea");
@@ -187,7 +191,6 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         defaultCols.add(FieldKey.fromParts("Well"));
         defaultCols.add(FieldKey.fromParts("Description"));
         defaultCols.add(exclusionColumn.getFieldKey());
-        defaultCols.add(exclusionReasonColumn.getFieldKey());
         defaultCols.add(FieldKey.fromParts("SpecimenID"));
         defaultCols.add(FieldKey.fromParts("ParticipantID"));
         defaultCols.add(FieldKey.fromParts("VisitID"));

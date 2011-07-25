@@ -283,7 +283,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                     String value=hashes.get("TIMESTAMP");
                     timestamp=Long.parseLong(value);
                 }
-                if (!smascotFileHash.equals(hash) ||
+                if (smascotFileHash == null || !smascotFileHash.equals(hash) ||
                     nmascotFileSize!=filesize || nmascotFileTimestamp!=timestamp)
                 {
                     getJob().info("Local database "+sequenceRelease+" is different (hash="+

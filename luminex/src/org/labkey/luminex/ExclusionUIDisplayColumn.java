@@ -40,6 +40,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
     private final FieldKey _dataFieldKey;
     private final FieldKey _runFieldKey;
     private final FieldKey _wellIDKey;
+    private final FieldKey _exclusionCommentKey;
     private final String _protocolName;
     private boolean _exclusionJSIncluded = false;
     private final Container _container;
@@ -54,6 +55,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
 
         _dilutionFieldKey = new FieldKey(parentFK, "Dilution");
         _descriptionFieldKey = new FieldKey(parentFK, "Description");
+        _exclusionCommentKey = new FieldKey(parentFK, "ExclusionComment");
         _dataFieldKey = new FieldKey(new FieldKey(parentFK, "Data"), "RowId");
         _runFieldKey = new FieldKey(new FieldKey(new FieldKey(parentFK, "Data"), "Run"), "RowId");
         _protocolName = protocolName;
@@ -66,6 +68,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         super.addQueryFieldKeys(keys);
         keys.add(_dilutionFieldKey);
         keys.add(_descriptionFieldKey);
+        keys.add(_exclusionCommentKey);
         keys.add(_dataFieldKey);
         keys.add(_runFieldKey);
     }
@@ -81,6 +84,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
     {
         Number dilution = (Number)ctx.get(_dilutionFieldKey);
         String description = (String)ctx.get(_descriptionFieldKey);
+        String exclusionComment = (String)ctx.get(_exclusionCommentKey);
         Integer dataId = (Integer)ctx.get(_dataFieldKey);
         Integer runId = (Integer)ctx.get(_runFieldKey);
         String wellID = PageFlowUtil.filter((String)ctx.get(_wellIDKey));
@@ -113,7 +117,8 @@ public class ExclusionUIDisplayColumn extends DataColumn
             out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/excluded.png\" height=\"16\" width=\"16\" id=\""+id+"\"");
             if (canEdit)
             {
-                out.write("title=\"Click to remove or edit this exclusion\" alt=\"Click to remove or edit this exclusion\" ");
+                String tooltip = PageFlowUtil.filter(exclusionComment);
+                out.write("title=\"" + tooltip + "\" alt=\"" + tooltip + "\" ");
             }
             out.write(" />");
         }
@@ -122,7 +127,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
             out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/included.png\" height=\"16\" width=\"16\"  id=\""+id+"\"");
             if (canEdit)
             {
-                out.write("title=\"Click to add an exclusion\" alt=\"Click to add an exclusion\" ");
+                out.write("title=\"Click to add a replicate group exclusion\" alt=\"Click to add a replicate group exclusion\" ");
             }
             out.write(" />");
         }

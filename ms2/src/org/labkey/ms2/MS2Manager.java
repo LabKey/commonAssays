@@ -564,7 +564,7 @@ public class MS2Manager
         {
             if (rs != null)
             {
-                try { rs.close(); } catch(SQLException e) { _log.error("Error closing ResultSet", e); }
+                try { rs.close(); } catch(SQLException ignored) {}
             }
         }
     }
