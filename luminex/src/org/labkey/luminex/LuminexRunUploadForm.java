@@ -57,8 +57,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         Map<DomainProperty, String> properties = new LinkedHashMap<DomainProperty, String>();
         for (DomainProperty dp : columns)
         {
-            String propName = UploadWizardAction.getInputName(dp);
-            String value = getRequest().getParameter("_analyte_" + ColumnInfo.propNameFromName(analyteName) + "_" + propName);
+            String value = getRequest().getParameter(LuminexUploadWizardAction.getAnalytePropertyName(analyteName, dp));
             if (dp.isRequired() && dp.getPropertyDescriptor().getPropertyType() == PropertyType.BOOLEAN &&
                     (value == null || value.length() == 0))
                 value = Boolean.FALSE.toString();

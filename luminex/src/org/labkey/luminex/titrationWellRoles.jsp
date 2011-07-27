@@ -22,6 +22,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.luminex.LuminexUploadWizardAction" %>
 <%@ page import="java.util.TreeMap" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 
 <%
     JspView<LuminexRunUploadForm> me = (JspView<LuminexRunUploadForm>) HttpView.currentView();
@@ -60,12 +61,12 @@
             <tr>
                 <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
                 <td>
-                    <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) %>'
-                           value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn("<%= LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName()) %>", this.checked);'
+                    <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>'
+                           value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn("<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName())) %>", this.checked);'
                            <%= titrationEntry.getValue().isStandard() ? "CHECKED" : "" %> />
                 </td>
                 <td>
-                    <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue()) %>'
+                    <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue())) %>'
                            value='1' onClick='titrationRoleChecked(this);' <%= titrationEntry.getValue().isQcControl() ? "CHECKED" : "" %> />
                 </td>
             </tr>
@@ -93,7 +94,7 @@
             <tr>
                 <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
                 <td>
-                    <input type='checkbox' name='<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue()) %>'
+                    <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue())) %>'
                            value='1' onClick='titrationRoleChecked(this);' <%= titrationEntry.getValue().isUnknown() ? "CHECKED" : "" %> />
                 </td>
             </tr>

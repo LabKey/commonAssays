@@ -70,6 +70,14 @@ public class FeatureExtractorTask extends WorkDirectoryTask<FeatureExtractorTask
         {
             File protocolFile = _wd.newFile("FeatureExtraction-" + DateUtil.formatDateTime(new Date(), "yyyy-MM-dd-HH-mm") + ".fep");
 
+            for (File file : getJob().getInputFiles())
+            {
+                if (!NetworkDrive.exists(file) || !file.isFile())
+                {
+                    throw new PipelineJobException("Could not find file: " + file);
+                }
+            }
+
             ProtocolFileBuilder builder = new ProtocolFileBuilder();
             builder.build(protocolFile, _factory, getJob().getInputFiles());
 

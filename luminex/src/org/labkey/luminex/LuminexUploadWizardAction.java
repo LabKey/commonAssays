@@ -23,7 +23,6 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
@@ -123,12 +122,27 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         }
                         domains.put(defaultValueKey,  defaultValues);
                     }
-                    String inputName = getAnalytePropertyName(analyte, analyteDP);
+                    final String inputName = getAnalytePropertyName(analyte, analyteDP);
                     if (defaultValues != null)
                         view.setInitialValue(inputName, defaultValues.get(analyteDP));
 
                     ColumnInfo info = analyteDP.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getViewContext().getUser());
                     info.setName(inputName);
+                    info.setDisplayColumnFactory(new DisplayColumnFactory()
+                    {
+                        @Override
+                        public DisplayColumn createRenderer(ColumnInfo colInfo)
+                        {
+                            return new DataColumn(colInfo)
+                            {
+                                @Override
+                                public String getFormFieldName(RenderContext ctx)
+                                {
+                                    return inputName;
+                                }
+                            };
+                        }
+                    });
                     cols.add(info.getRenderer());
 
                 }
@@ -156,7 +170,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
                         {
                             // preselect the checkboxes for the standards in the file
-                            out.write("<input type='checkbox' value='1' name='" + getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte) + "' "
+                            out.write("<input type='checkbox' value='1' name='" + PageFlowUtil.filter(getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte)) + "' "
                                     + (titrationEntry.getValue().isStandard() ? "CHECKED" : "") + " />");
                         }
 
@@ -165,7 +179,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         {
                             // show the input cell if this is one of multiple standard titrations
                             boolean showCell = titrationEntry.getValue().isStandard() && numStandardTitrations > 1;
-                            out.write("<td colspan=" + span + " name='" + getTitrationColumnCellName(titrationEntry.getValue().getName()) + "' "
+                            out.write("<td colspan=" + span + " name='" + PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName())) + "' "
                                 + " style='display:" + (showCell ? "table-cell" : "none") + "' >");
                             renderInputHtml(ctx, out, getInputValue(ctx));
                             out.write("</td>");
@@ -176,7 +190,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         {
                             // show the input cell if this is one of multiple standard titrations
                             boolean showCell = titrationEntry.getValue().isStandard() && numStandardTitrations > 1;
-                            out.write("<td name='" + getTitrationColumnCellName(titrationEntry.getValue().getName()) + "' "
+                            out.write("<td name='" + PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName())) + "' "
                                 + " class='labkey-form-label' style='display:" + (showCell ? "table-cell" : "none") + "' >");
                             renderTitle(ctx, out);
                             out.write("</td>");
@@ -238,12 +252,12 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     public static String getTitrationCheckboxName(String titration, String analyte)
     {
-        return "titration_" + ColumnInfo.propNameFromName(analyte) + "_" + ColumnInfo.propNameFromName(titration);
+        return "titration_" + analyte + "_" + titration;
     }
 
-    private String getAnalytePropertyName(String analyte, DomainProperty dp)
+    public static String getAnalytePropertyName(String analyte, DomainProperty dp)
     {
-        return "_analyte_" + ColumnInfo.propNameFromName(analyte) + "_" + ColumnInfo.propNameFromName(dp.getName());
+        return "_analyte_" + analyte + "_" + dp.getName();
     }
 
     private String[] getAnalyteNames(LuminexRunUploadForm form) throws ExperimentException
@@ -282,12 +296,12 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     public static String getTitrationTypeCheckboxName(Titration.Type type, Titration titration)
     {
-        return "_titrationRole_" + type + "_" + ColumnInfo.propNameFromName(titration.getName());
+        return "_titrationRole_" + type + "_" + titration.getName();
     }
 
     public static String getTitrationColumnCellName(String titrationName)
     {
-        return "_titrationcell_" + ColumnInfo.propNameFromName(titrationName);
+        return "_titrationcell_" + titrationName;
     }
 
     protected class LuminexRunStepHandler extends RunStepHandler
