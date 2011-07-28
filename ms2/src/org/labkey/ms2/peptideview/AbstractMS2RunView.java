@@ -109,7 +109,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         ButtonBar result = new ButtonBar();
 
         List<String> exportFormats = getExportFormats();
-        
+
         ActionURL exportUrl = _url.clone();
         exportUrl.setAction(exportAllAction);
         MenuButton exportAll = new MenuButton("Export All");

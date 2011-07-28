@@ -2962,7 +2962,7 @@ public class MS2Controller extends SpringActionController
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         String where = null;
-        if (proteins != null)
+        if (proteins != null && !proteins.isEmpty())
         {
             StringBuilder sb = new StringBuilder();
             sb.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());

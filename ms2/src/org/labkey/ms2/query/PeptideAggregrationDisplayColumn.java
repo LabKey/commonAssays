@@ -17,6 +17,7 @@
 package org.labkey.ms2.query;
 
 import org.labkey.api.data.*;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -70,7 +71,7 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
 
                 while (rs.next())
                 {
-                    if (rs.getObject(_groupingColumn.getAlias()).equals(groupingValue))
+                    if (PageFlowUtil.nullSafeEquals(rs.getObject(_groupingColumn.getAlias()), groupingValue))
                     {
                         peptides.add(rs.getString(_peptideColumn.getAlias()));
                     }

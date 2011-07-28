@@ -27,6 +27,7 @@ import org.labkey.api.pipeline.WorkDirectoryTask;
 import org.labkey.api.pipeline.cmd.TaskPath;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.file.FileAnalysisJobSupport;
+import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
@@ -62,7 +63,14 @@ public class FeatureExtractorTask extends WorkDirectoryTask<FeatureExtractorTask
     @Override
     public RecordedActionSet run() throws PipelineJobException
     {
-        _factory.validate();
+        try
+        {
+            _factory.validate();
+        }
+        catch (ConfigurationException e)
+        {
+            throw new PipelineJobException(e);
+        }
 
         RecordedAction action = new RecordedAction(ACTION_NAME);
 
@@ -258,7 +266,7 @@ public class FeatureExtractorTask extends WorkDirectoryTask<FeatureExtractorTask
             return _jdbcPassword;
         }
 
-        public void validate()
+        public void validate() throws ConfigurationException
         {
             List<String> missingProperties = new ArrayList<String>();
             if (_jdbcURL == null)
@@ -280,7 +288,7 @@ public class FeatureExtractorTask extends WorkDirectoryTask<FeatureExtractorTask
 
             if (!missingProperties.isEmpty())
             {
-                throw new IllegalArgumentException("Missing required properties on " + getClass().getName() + ": " + StringUtils.join(missingProperties, ","));
+                throw new ConfigurationException("Missing required properties on " + getClass().getName() + ": " + StringUtils.join(missingProperties, ","));
             }
         }
     }
