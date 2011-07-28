@@ -38,7 +38,11 @@ public class TitrationTable extends AbstractLuminexTable
         super(LuminexSchema.getTableInfoTitration(), schema, filter);
         _schema = schema;
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
-        addColumn(wrapColumn(getRealTable().getColumn("Name")));
+        ColumnInfo nameColumn = addColumn(wrapColumn(getRealTable().getColumn("Name")));
+        // Set to be nullable so when a dataset backed by this assay type is exported, it's not considered required
+        // to import correctly. This is important because not all Luminex rows will have a titration, and therefore
+        // they won't all have a titration name.
+        nameColumn.setNullable(true);
         addColumn(wrapColumn(getRealTable().getColumn("Standard")));
         addColumn(wrapColumn(getRealTable().getColumn("QCControl")));
         addColumn(wrapColumn(getRealTable().getColumn("Unknown")));
