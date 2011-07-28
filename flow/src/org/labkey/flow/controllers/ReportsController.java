@@ -30,19 +30,21 @@ import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.util.Pair;
+import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.*;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.reports.FilterFlowReport;
 import org.labkey.flow.reports.FlowReport;
-import org.labkey.flow.reports.ControlsQCReport;
 import org.labkey.flow.reports.FlowReportJob;
+import org.labkey.flow.reports.FlowReportManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 
-import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * User: matthewb
@@ -96,7 +98,7 @@ public class ReportsController extends BaseFlowController
     }
 
 
-    public static class CreateReportForm
+    public static class CreateReportForm extends ReturnUrlForm
     {
         private String _reportType;
 
@@ -111,7 +113,7 @@ public class ReportsController extends BaseFlowController
         }
     }
 
-    private abstract static class CreateOrUpdateAction<FORM> extends FormApiAction<FORM>
+    private abstract static class CreateOrUpdateAction<FORM extends ReturnUrlForm> extends FormApiAction<FORM>
     {
         FlowReport r;
 
@@ -127,14 +129,16 @@ public class ReportsController extends BaseFlowController
         public ModelAndView getView(FORM form, BindException errors) throws Exception
         {
             initReport(form);
-            return r.getConfigureForm(getViewContext());
+            return r.getConfigureForm(getViewContext(), form.getReturnActionURL());
         }
 
         @Override
         public ApiResponse execute(FORM form, BindException errors) throws Exception
         {
             initReport(form);
-            r.updateProperties(getPropertyValues(), errors, false);
+            r.updateProperties(getViewContext(), getPropertyValues(), errors, false);
+            if (errors.hasErrors())
+                return null;
 
             int id = ReportService.get().saveReport(getViewContext(), null, r);
             ReportIdentifier dbid = r.getReportId();
@@ -182,28 +186,79 @@ public class ReportsController extends BaseFlowController
         }
     }
 
+    public static class CopyForm extends IdForm
+    {
+        private String _reportName;
+
+        public String getReportName()
+        {
+            return _reportName;
+        }
+
+        public void setReportName(String reportName)
+        {
+            _reportName = reportName;
+        }
+    }
+
     @RequiresPermissionClass(UpdatePermission.class)
-    public static class CopyAction extends FormHandlerAction<IdForm>
+    public static class CopyAction extends FormViewAction<CopyForm>
     {
         FlowReport r;
 
-        public void validateCommand(IdForm target, Errors errors)
+        public void validateCommand(CopyForm form, Errors errors)
         {
+            if (form.getReportName() == null || form.getReportName().length() == 0)
+            {
+                errors.rejectValue("reportName", ERROR_MSG, "Report name must not be empty");
+                return;
+            }
+
+            Collection<FlowReport> reports = FlowReportManager.getFlowReports(getViewContext().getContainer(), getViewContext().getUser());
+            for (FlowReport report : reports)
+            {
+                if (form.getReportName().equalsIgnoreCase(report.getDescriptor().getReportName()))
+                {
+                    errors.rejectValue("reportName", ERROR_MSG, "There is already a report with the name '" + form.getReportName() + "' in the current folder.");
+                    return;
+                }
+            }
         }
 
-        public boolean handlePost(IdForm form, BindException errors) throws Exception
+        @Override
+        public ModelAndView getView(CopyForm form, boolean reshow, BindException errors) throws Exception
         {
             r = getReport(getViewContext(), form);
-            r.getDescriptor().setProperty(ReportDescriptor.Prop.reportId,null);
-            r.getDescriptor().setReportName("Copy of " + r.getDescriptor().getReportName());
+            if (form.getReportName() == null || form.getReportName().length() == 0)
+                form.setReportName("Copy of " + r.getDescriptor().getReportName());
+            getPageConfig().setFocusId("reportName");
+            return new JspView<Pair<CopyForm, FlowReport>>(ReportsController.class, "copyReport.jsp", Pair.of(form, r), errors);
+        }
+
+        public boolean handlePost(CopyForm form, BindException errors) throws Exception
+        {
+            r = getReport(getViewContext(), form);
+            r.getDescriptor().setProperty(ReportDescriptor.Prop.reportId, null);
+            r.getDescriptor().setReportName(form.getReportName());
             int id = ReportService.get().saveReport(getViewContext(), null, r);
             r.getDescriptor().setProperty(ReportDescriptor.Prop.reportId, new DbReportIdentifier(id).toString());
             return true;
         }
 
-        public ActionURL getSuccessURL(IdForm idForm)
+        public ActionURL getSuccessURL(CopyForm idForm)
         {
-            return new ActionURL(UpdateAction.class, getViewContext().getContainer()).addParameter("reportId",r.getReportId().toString());
+            ActionURL url = new ActionURL(UpdateAction.class, getViewContext().getContainer()).addParameter("reportId", r.getReportId().toString());
+            if (idForm.getReturnActionURL() != null)
+                url.addReturnURL(idForm.getReturnActionURL());
+            return url;
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            new BeginAction(getViewContext()).appendNavTrail(root);
+            root.addChild("Copy report: " + r.getDescriptor().getReportName());
+            return root;
         }
     }
 
@@ -211,6 +266,7 @@ public class ReportsController extends BaseFlowController
     @RequiresPermissionClass(DeletePermission.class)
     public static class DeleteAction extends ConfirmAction<IdForm>
     {
+        IdForm _form;
         FlowReport r;
 
         public ModelAndView getConfirmView(IdForm form, BindException errors) throws Exception
@@ -228,11 +284,18 @@ public class ReportsController extends BaseFlowController
 
         public void validateCommand(IdForm idForm, Errors errors)
         {
+            _form = idForm;
         }
 
-        public ActionURL getSuccessURL(IdForm idForm)
+        @Override
+        public URLHelper getCancelUrl()
         {
-            return new ActionURL(BeginAction.class,getViewContext().getContainer());
+            return _form.getReturnURLHelper(new ActionURL(BeginAction.class,getViewContext().getContainer()));
+        }
+
+        public ActionURL getSuccessURL(IdForm form)
+        {
+            return form.getReturnActionURL(new ActionURL(BeginAction.class, getViewContext().getContainer()));
         }
 
         public boolean handlePost(IdForm form, BindException errors) throws Exception
@@ -242,18 +305,32 @@ public class ReportsController extends BaseFlowController
             return true;
         }
     }
-    
+
+    public static class ExecuteForm extends IdForm
+    {
+        private boolean _confirm = false;
+
+        public boolean isConfirm()
+        {
+            return _confirm;
+        }
+
+        public void setConfirm(boolean confirm)
+        {
+            _confirm = confirm;
+        }
+    }
 
     @RequiresPermissionClass(ReadPermission.class)
-    public class ExecuteAction extends SimpleViewAction<IdForm>
+    public class ExecuteAction extends SimpleViewAction<ExecuteForm>
     {
         FlowReport r;
 
         @Override
-        public ModelAndView getView(IdForm form, BindException errors) throws Exception
+        public ModelAndView getView(ExecuteForm form, BindException errors) throws Exception
         {
             r = getReport(getViewContext(), form);
-            r.updateProperties(getPropertyValues(), errors, true);
+            r.updateProperties(getViewContext(), getPropertyValues(), errors, true);
 
             ModelAndView view;
             if (errors.hasErrors())
@@ -262,12 +339,20 @@ public class ReportsController extends BaseFlowController
             }
             else if (r.saveToDomain())
             {
-                // Run report in background, redirect to pipeline status page
-                ViewBackgroundInfo info = getViewBackgroundInfo();
-                PipeRoot pipeRoot = PipelineService.get().getPipelineRootSetting(getContainer());
-                FlowReportJob job = new FlowReportJob((FilterFlowReport)r, info, pipeRoot);
-                PipelineService.get().queueJob(job);
-                throw new RedirectException(PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer()));
+                if (form.isConfirm())
+                {
+                    // Run report in background, redirect to pipeline status page
+                    ViewBackgroundInfo info = getViewBackgroundInfo();
+                    PipeRoot pipeRoot = PipelineService.get().getPipelineRootSetting(getContainer());
+                    FlowReportJob job = new FlowReportJob((FilterFlowReport)r, info, pipeRoot);
+                    PipelineService.get().queueJob(job);
+                    throw new RedirectException(PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer()));
+                }
+                else
+                {
+                    // Prompt for confirmation
+                    view = new JspView<Pair<ExecuteForm, FlowReport>>(ReportsController.class, "confirmExecuteReport.jsp", Pair.of(form, r), errors);
+                }
             }
             else
             {
@@ -282,13 +367,13 @@ public class ReportsController extends BaseFlowController
         public NavTree appendNavTrail(NavTree root)
         {
             new BeginAction(getViewContext()).appendNavTrail(root);
-            root.addChild("View QC report: " + r.getDescriptor().getReportName());
+            root.addChild("View report: " + r.getDescriptor().getReportName());
             return root;
         }
     }
 
 
-    public static class IdForm implements HasViewContext
+    public static class IdForm extends ReturnUrlForm implements HasViewContext
     {
         private DbReportIdentifier _id;
 

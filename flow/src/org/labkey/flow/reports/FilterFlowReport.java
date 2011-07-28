@@ -19,10 +19,13 @@ import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.CachedResultSet;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.FilterInfo;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.ResultsImpl;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.AliasManager;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
@@ -31,6 +34,8 @@ import org.labkey.api.reports.report.RReport;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.reports.report.ScriptReportDescriptor;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
@@ -43,6 +48,7 @@ import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 
@@ -53,7 +59,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class FilterFlowReport extends FlowReport
 {
@@ -101,9 +111,21 @@ public abstract class FilterFlowReport extends FlowReport
                     addScriptProlog(context, reportProlog);
                     return reportProlog.toString();
                 }
+
+                @Override
+                public File getReportDir()
+                {
+                    // Workaround for Issue 12625: Create unique directory for the background report job
+                    File tempRoot = getTempRoot(getDescriptor());
+                    String name = FileUtil.makeLegalName(getDescriptor().getReportId().toString() + "_" + GUID.makeHash()).replaceAll(" ", "_");
+                    File file = new File(tempRoot, "Report_" + name);
+                    file.mkdirs();
+                    return file;
+                }
             };
 
             String script = getScriptResource();
+            _inner.getDescriptor().setProperties(getDescriptor().getProperties());
             _inner.setScriptSource(script);
         }
 
@@ -294,17 +316,22 @@ public abstract class FilterFlowReport extends FlowReport
         return ret;
     }
 
-    protected ResultSet generateResultSet(ViewContext context) throws Exception
+    protected List<Filter> getFilters()
     {
         ReportDescriptor d = getDescriptor();
-        ArrayList<ControlsQCReport.Filter> filters = new ArrayList<ControlsQCReport.Filter>();
+        List<Filter> filters = new ArrayList<Filter>(20);
         for (int i = 0; i < 20; i++)
         {
-            ControlsQCReport.Filter f = new ControlsQCReport.Filter(d, i);
+            Filter f = new Filter(d, i);
             if (f.isValid())
                 filters.add(f);
         }
 
+        return filters;
+    }
+
+    protected ResultSet generateResultSet(ViewContext context) throws Exception
+    {
         String wellURL = new ActionURL(WellController.ShowWellAction.class, context.getContainer()).addParameter("wellId", "").getLocalURIString();
         String runURL = new ActionURL(RunController.ShowRunAction.class, context.getContainer()).addParameter("runId", "").getLocalURIString();
         Date startDate = null;
@@ -324,13 +351,18 @@ public abstract class FilterFlowReport extends FlowReport
         addSelectList(context, "A", query);
         query.append("FROM FCSAnalyses A");
         String and = "\nWHERE ";
-        for (FilterFlowReport.Filter f : filters)
+
+        // UNDONE: use SimpleFilter instead of FilterFlowReport.Filter
+        Set<FieldKey> fieldKeys = new HashSet<FieldKey>();
+        SimpleFilter filter = new SimpleFilter();
+        List<Filter> filters = getFilters();
+        for (Filter f : filters)
         {
             if ("keyword".equals(f.type))
             {
                 if ("EXPORT TIME".equals(f.property))
                 {
-                    if ("gte".equals(f.op) && !StringUtils.isEmpty(f.value))
+                    if (CompareType.GTE.getPreferredUrlKey().equals(f.op) && !StringUtils.isEmpty(f.value))
                         try
                         {
                             startDate = new Date(DateUtil.parseDateTime(f.value));
@@ -338,7 +370,7 @@ public abstract class FilterFlowReport extends FlowReport
                         catch (ConversionException x)
                         {
                         }
-                    if ("lt".equals(f.op) && !StringUtils.isEmpty(f.value))
+                    if (CompareType.LT.getPreferredUrlKey().equals(f.op) && !StringUtils.isEmpty(f.value))
                         try
                         {
                             endDate = new Date(DateUtil.parseDateTime(f.value));
@@ -348,19 +380,45 @@ public abstract class FilterFlowReport extends FlowReport
                         }
                     continue;
                 }
-                query.append(and);
-                query.append("A.FCSFile.Keyword.\"" + f.property + "\" = " + toSQL(f.value));
-                and = " AND ";
+                FieldKey key = FieldKey.fromParts("FCSFile", "Keyword", f.property);
+                filter.addCondition("A/" + key.toString(), f.value, CompareType.EQUAL);
+                fieldKeys.add(key);
             }
             else if ("sample".equals(f.type))
             {
-                query.append(and);
-                query.append("A.FCSFile.Sample.Property.\"" + f.property + "\" = " + toSQL(f.value));
-                and = " AND\n";
+                FieldKey key = FieldKey.fromParts("FCSFile", "Sample", "Property", f.property);
+                filter.addCondition("A/" + key.toString(), f.value, CompareType.EQUAL);
+                fieldKeys.add(key);
+            }
+            else if ("statistic".equals(f.type) || "background".equals(f.type))
+            {
+                String table = f.type.equals("statistic") ? "Statistic" : "Background";
+                FieldKey key = FieldKey.fromParts(table, f.property);
+                filter.addCondition("A/" + key.toString(), f.value, CompareType.getByURLKey(f.op));
+                fieldKeys.add(key);
             }
         }
-        _query = query.toString();
+
         QuerySchema flow = new FlowSchema(context);
+        TableInfo fcsAnalysesTable = flow.getTable(FlowTableType.FCSAnalyses.toString());
+        Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(fcsAnalysesTable, fieldKeys);
+
+        // Add "A" prefix to column map FieldKeys
+        Map<FieldKey, ColumnInfo> prefixedColumnMap = new HashMap<FieldKey, ColumnInfo>(columnMap.size());
+        FieldKey A = new FieldKey(null, "A");
+        for (Map.Entry<FieldKey, ColumnInfo> entry : columnMap.entrySet())
+        {
+            prefixedColumnMap.put(FieldKey.fromParts(A, entry.getKey()), entry.getValue());
+        }
+
+        for (SimpleFilter.FilterClause clause : filter.getClauses())
+        {
+            query.append(and);
+            query.append(clause.getLabKeySQLWhereClause(prefixedColumnMap));
+            and = " AND\n";
+        }
+
+        _query = query.toString();
         ResultSet rs = QueryService.get().select(flow, _query);
         convertDateColumn((CachedResultSet) rs, "Xdatetime", "datetime");
         rs = filterDateRange((CachedResultSet) rs, "datetime", startDate, endDate);
@@ -447,7 +505,17 @@ public abstract class FilterFlowReport extends FlowReport
             property = _get(pvs, "filter[" + i + "].property");
             type = _get(pvs, "filter[" + i + "].type");
             value = _get(pvs, "filter[" + i + "].value");
-            op = _get(pvs, "filter[" + i + "].op");
+            String op = _get(pvs, "filter[" + i + "].op");
+
+            // HACK: The Ext.form.FormPanel uses form submit which takes form values directly from
+            // the <input> element value instead of using form.getForm().getFieldValues() to get
+            // the actual component value.  I would use .getFieldValues() and submit myself, but
+            // the 'compositefield' I'm using in the form layout doesn't work with .getFieldValues().
+            // After 11.2, we need to change the edit*Report.jsp pages to use better layout that
+            // doesn't require the busted 'compositefield' and use .getFieldValues() instead of basic form submit.
+            CompareType compareType = fromDisplayValue(op);
+            if (compareType != null)
+                this.op = compareType.getPreferredUrlKey();
         }
 
         public Filter(ReportDescriptor d, int i)
@@ -458,11 +526,52 @@ public abstract class FilterFlowReport extends FlowReport
             op = d.getProperty("filter[" + i + "].op");
         }
 
+        public Filter(String property, String type, String value, String op)
+        {
+            this.property = property;
+            this.type = type;
+            this.value = value;
+            this.op = op;
+        }
+
         boolean isValid()
         {
             return !StringUtils.isEmpty(property) &&
                     !StringUtils.isEmpty(value) &&
-                    ("keyword".equals(type) || "sample".equals(type));
+                    ("keyword".equals(type) || "sample".equals(type) || "statistic".equals(type));
+        }
+
+        private static CompareType fromDisplayValue(String displayValue)
+        {
+            if (displayValue == null || displayValue.length() == 0)
+                return null;
+
+            for (CompareType ct : CompareType.values())
+            {
+                if (displayValue.equals(ct.getDisplayValue()))
+                    return ct;
+            }
+
+            return null;
+        }
+
+        SimpleFilter toSimpleFilter()
+        {
+            CompareType compareType = CompareType.getByURLKey(op);
+            if (compareType == null)
+                return null;
+
+            String colName;
+            if (type.equals("keyword"))
+                colName = "FCSFile.Keyword.\"" + property + "\"";
+            else if (type.equals("sample"))
+                colName = "FCSFile.Sample.\"" + property + "\"";
+            else if (type.equals("statistic"))
+                colName = "Statistic.\"" + property + "\"";
+            else
+                throw new RuntimeException();
+
+            return new SimpleFilter(colName, value, compareType);
         }
     }
 }

@@ -322,6 +322,8 @@ flow/src/org/labkey/flow/controllers/compensation/begin.jsp -text
 flow/src/org/labkey/flow/controllers/compensation/delete.jsp -text
 flow/src/org/labkey/flow/controllers/compensation/showCompensation.jsp -text
 flow/src/org/labkey/flow/controllers/compensation/upload.jsp -text
+flow/src/org/labkey/flow/controllers/confirmExecuteReport.jsp -text
+flow/src/org/labkey/flow/controllers/copyReport.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/AnalysisForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/CompensationCalculationPage.java -text
 flow/src/org/labkey/flow/controllers/editscript/CopyProtocolForm.java -text

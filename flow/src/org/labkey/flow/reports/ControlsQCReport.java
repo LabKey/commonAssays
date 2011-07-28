@@ -16,9 +16,12 @@
 package org.labkey.flow.reports;
 
 import org.labkey.api.reports.report.ReportDescriptor;
+import org.labkey.api.util.Pair;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.writer.ContainerUser;
 import org.springframework.beans.PropertyValues;
 import org.springframework.validation.BindException;
 
@@ -52,9 +55,9 @@ public class ControlsQCReport extends FilterFlowReport
     }
 
     @Override
-    public HttpView getConfigureForm(ViewContext context)
+    public HttpView getConfigureForm(ViewContext context, ActionURL returnURL)
     {
-        return new JspView<ControlsQCReport>(ControlsQCReport.class, "editQCReport.jsp", this);
+        return new JspView<Pair<ControlsQCReport, ActionURL>>(ControlsQCReport.class, "editQCReport.jsp", Pair.of(this, returnURL));
     }
 
     @Override
@@ -68,9 +71,9 @@ public class ControlsQCReport extends FilterFlowReport
     }
 
     @Override
-    public boolean updateProperties(PropertyValues pvs, BindException errors, boolean override)
+    public boolean updateProperties(ContainerUser cu, PropertyValues pvs, BindException errors, boolean override)
     {
-        super.updateBaseProperties(pvs, errors, override);
+        super.updateBaseProperties(cu, pvs, errors, override);
         updateFromPropertyValues(pvs, "statistic");
         if (!override)
             updateFilterProperties(pvs);

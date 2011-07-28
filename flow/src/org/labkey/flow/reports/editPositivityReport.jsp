@@ -17,6 +17,7 @@
 %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.reports.report.ReportDescriptor" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
@@ -28,6 +29,7 @@
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.flow.data.ICSMetadata" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
+<%@ page import="org.labkey.flow.controllers.ReportsController" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -35,7 +37,9 @@
     ViewContext context = getViewContext();
     Container c = context.getContainer();
 
-    PositivityFlowReport report = (PositivityFlowReport) HttpView.currentModel();
+    Pair<PositivityFlowReport, ActionURL> bean = (Pair<PositivityFlowReport, ActionURL>) HttpView.currentModel();
+    PositivityFlowReport report = bean.first;
+    ActionURL returnURL = bean.second;
     ReportDescriptor d = report.getDescriptor();
     String reportId = d.getReportId() == null ? null : d.getReportId().toString();
 
@@ -56,6 +60,9 @@
   </p>
 <% } %>
 
+<div id="labkey-error" class="labkey-error">
+<labkey:errors/>
+</div>
 <style>
     .x-form-item { margin:2px;}
 </style>
@@ -93,7 +100,7 @@ function Form_onSave()
         success:function(form, action)
         {
             report.reportId = action.result.reportId;
-            window.location="execute.view?reportId=" + encodeURIComponent(report.reportId);
+            window.location = <%=returnURL == null ? "\"begin.view\"" : PageFlowUtil.jsString(returnURL.getLocalURIString())%>;
         },
         failure:function(form,action)
         {
@@ -105,16 +112,30 @@ function Form_onSave()
 
 function Form_onCancel()
 {
-   window.location = "begin.view";
+    window.location = <%=returnURL == null ? "\"begin.view\"" : PageFlowUtil.jsString(returnURL.getLocalURIString())%>;
 }
 
 
 function Form_onDelete()
 {
-   if (report.reportId)
-       window.location = "delete.view?reportId=" + encodeURIComponent(report.reportId);
+   <%
+   ActionURL url = null;
+   if (d.getReportId() != null)
+   {
+       url = new ActionURL(ReportsController.DeleteAction.class, c).addParameter("reportId", report.getReportId().toString());
+       if (returnURL != null)
+           url.addReturnURL(returnURL);
+   }
+   else if (returnURL != null)
+   {
+       url = returnURL;
+   }
    else
-       Form_onCancel();
+   {
+       url = new ActionURL(ReportsController.BeginAction.class, c);
+   }
+   %>
+   window.location = <%=PageFlowUtil.jsString(url.getLocalURIString())%>
 }
 
 Ext.onReady(function() {
@@ -122,6 +143,7 @@ Ext.onReady(function() {
     var i;
     var keyword = [];
     var sample = [];
+    var statistic = [];
     var startDate = null;
     var endDate = null;
 
@@ -139,16 +161,19 @@ Ext.onReady(function() {
         }
         else if (f.type == 'sample')
             sample.push(f);
+        else if (f.type == 'statistic')
+            statistic.push(f);
     }
     for (i=1;i<=2;i++)
     {
         if (keyword.length<i) keyword.push({property:null, value:null});
         if (sample.length<i) sample.push({property:null, value:null});
+        if (statistic.length<i) statistic.push({property:null, value:null});
     }
 
     var spacer = {xtype:'spacer', height:15};
 
-    form = new Ext.form.FormPanel({
+    form = new LABKEY.ext.FormPanel({
         url:window.location,
         defaults:{msgTarget:'side', width:600},
         border:false,
@@ -161,53 +186,69 @@ Ext.onReady(function() {
             {fieldLabel:'Subset', name:'subset', xtype:'subsetField', value:report.subset, allowBlank:false},
 
             spacer,
-            {
-                xtype:'fieldset',
-                title:'Filters',
-                items: [
-                    {xtype:'compositefield', fieldLabel: 'Keyword', items: [
-                        {xtype:'hidden', name:'filter[0].type', value:'keyword'},
-                        {xtype:'combo', name:'filter[0].property', store:FlowPropertySet.keywords, value:keyword[0].property},
-                        {xtype:'textfield', name:'filter[0].value', value:keyword[0].value}
-                    ]},
+            spacer,
 
-                    spacer,
+            {xtype:'compositefield', fieldLabel: 'Keyword', items: [
+                {xtype:'hidden', name:'filter[0].type', value:'keyword'},
+                {xtype:'combo', name:'filter[0].property', store:FlowPropertySet.keywords, value:keyword[0].property},
+                {xtype:'textfield', name:'filter[0].value', value:keyword[0].value}
+            ]},
 
-                    {xtype:'compositefield', fieldLabel: 'Keyword', items: [
-                        {xtype:'hidden', name:'filter[1].type', value:'keyword'},
-                        {xtype:'combo', name:'filter[1].property', store:FlowPropertySet.keywords, value:keyword[1].property},
-                        {xtype:'textfield', name:'filter[1].value', value:keyword[1].value},
-                    ]},
+            spacer,
 
-                    spacer,
+            {xtype:'compositefield', fieldLabel: 'Keyword', items: [
+                {xtype:'hidden', name:'filter[1].type', value:'keyword'},
+                {xtype:'combo', name:'filter[1].property', store:FlowPropertySet.keywords, value:keyword[1].property},
+                {xtype:'textfield', name:'filter[1].value', value:keyword[1].value},
+            ]},
 
-                    {xtype:'compositefield', fieldLabel: 'Sample Property', items: [
-                        {xtype:'hidden', name:'filter[2].type', value:'sample'},
-                        {xtype:'combo', name:'filter[2].property', store:SampleSet.properties, value:sample[0].property},
-                        {xtype:'textfield', name:'filter[2].value', value:sample[0].value},
-                    ]},
+            spacer,
 
-                    spacer,
+            {xtype:'compositefield', fieldLabel: 'Sample Property', items: [
+                {xtype:'hidden', name:'filter[2].type', value:'sample'},
+                {xtype:'combo', name:'filter[2].property', store:SampleSet.properties, value:sample[0].property},
+                {xtype:'textfield', name:'filter[2].value', value:sample[0].value},
+            ]},
 
-                    {xtype:'compositefield', fieldLabel: 'Sample Property', items: [
-                        {xtype:'hidden', name:'filter[3].type', value:'sample'},
-                        {xtype:'combo', name:'filter[3].property', store:SampleSet.properties, value:sample[1].property},
-                        {xtype:'textfield', name:'filter[3].value', value:sample[1].value},
-                    ]},
+            spacer,
 
-                    spacer,
+            {xtype:'compositefield', fieldLabel: 'Sample Property', items: [
+                {xtype:'hidden', name:'filter[3].type', value:'sample'},
+                {xtype:'combo', name:'filter[3].property', store:SampleSet.properties, value:sample[1].property},
+                {xtype:'textfield', name:'filter[3].value', value:sample[1].value},
+            ]},
 
-                    {xtype:'hidden', name:'filter[4].type', value:'keyword'},
-                    {xtype:'hidden', name:'filter[4].property', value:'EXPORT TIME'},
-                    {xtype:'hidden', name:'filter[4].op', value:'gte'},
-                    {xtype:'datefield', fieldLabel:'On or After', name:'filter[4].value', value:startDate},
+            spacer,
 
-                    {xtype:'hidden', name:'filter[5].type', value:'keyword'},
-                    {xtype:'hidden', name:'filter[5].property', value:'EXPORT TIME'},
-                    {xtype:'hidden', name:'filter[5].op', value:'lt'},
-                    {xtype:'datefield', fieldLabel:'Before', name:'filter[5].value', value:endDate}
-                ]
-            }
+            {xtype:'hidden', name:'filter[4].type', value:'statistic'},
+            {xtype:'statisticField', fieldLabel: 'Statistic', name:'filter[4].property', value:statistic[0].property},
+            {xtype:'compositefield', items: [
+                {xtype:'opCombo', id:'filter[4].op', name:'filter[4].op', value:statistic[0].op},
+                {xtype:'textfield', name:'filter[4].value', value:statistic[0].value},
+            ]},
+
+            spacer,
+
+            {xtype:'hidden', name:'filter[5].type', value:'statistic'},
+            {xtype:'statisticField', fieldLabel: 'Statistic', name:'filter[5].property', value:statistic[1].property},
+            {xtype:'compositefield', items: [
+                {xtype:'opCombo', name:'filter[5].op', value:statistic[1].op},
+                {xtype:'textfield', name:'filter[5].value', value:statistic[1].value},
+            ]},
+
+            spacer,
+            spacer,
+
+            {xtype:'hidden', name:'filter[6].type', value:'keyword'},
+            {xtype:'hidden', name:'filter[6].property', value:'EXPORT TIME'},
+            {xtype:'hidden', name:'filter[6].op', value:'gte'},
+            {xtype:'datefield', fieldLabel:'On or After', name:'filter[6].value', value:startDate},
+
+            {xtype:'hidden', name:'filter[7].type', value:'keyword'},
+            {xtype:'hidden', name:'filter[7].property', value:'EXPORT TIME'},
+            {xtype:'hidden', name:'filter[7].op', value:'lt'},
+            {xtype:'datefield', fieldLabel:'Before', name:'filter[7].value', value:endDate}
+
         ],
         buttons:[
             {text:'Save', handler:Form_onSave},

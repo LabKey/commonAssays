@@ -15,6 +15,8 @@
  */
 package org.labkey.flow.reports;
 
+import org.labkey.api.action.SpringActionController;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -24,12 +26,14 @@ import org.labkey.api.query.AliasManager;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.writer.ContainerUser;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.data.FlowProtocol;
@@ -41,6 +45,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * User: kevink
@@ -71,9 +76,9 @@ public class PositivityFlowReport extends FilterFlowReport
     }
 
     @Override
-    public HttpView getConfigureForm(ViewContext context)
+    public HttpView getConfigureForm(ViewContext context, ActionURL returnURL)
     {
-        return new JspView<PositivityFlowReport>(PositivityFlowReport.class, "editPositivityReport.jsp", this);
+        return new JspView<Pair<PositivityFlowReport, ActionURL>>(PositivityFlowReport.class, "editPositivityReport.jsp", Pair.of(this, returnURL));
     }
 
     SubsetSpec getSubset()
@@ -133,6 +138,19 @@ public class PositivityFlowReport extends FilterFlowReport
     }
 
     @Override
+    protected List<Filter> getFilters()
+    {
+        ICSMetadata metadata = getMetadata(getDescriptor().getResourceContainer());
+        if (metadata == null || !metadata.isComplete())
+            throw new NotFoundException("ICS metadata required");
+
+        // Filter out any wells with no background statistic
+        List<Filter> filters = super.getFilters();
+        filters.add(0, new Filter(getSubset() + ":Count", "background", null, CompareType.NONBLANK.getPreferredUrlKey()));
+        return filters;
+    }
+
+    @Override
     public HttpView renderReport(ViewContext context) throws Exception
     {
         ICSMetadata metadata = getMetadata(context.getContainer());
@@ -154,13 +172,24 @@ public class PositivityFlowReport extends FilterFlowReport
     }
 
     @Override
-    public boolean updateProperties(PropertyValues pvs, BindException errors, boolean override)
+    public boolean updateProperties(ContainerUser cu, PropertyValues pvs, BindException errors, boolean override)
     {
-        super.updateBaseProperties(pvs, errors, override);
-        updateFromPropertyValues(pvs, "subset");
-        if (!override)
-            updateFilterProperties(pvs);
-        return true;
+        Container container = cu.getContainer();
+        ICSMetadata metadata = getMetadata(container);
+        if (metadata == null || !metadata.isComplete())
+        {
+            errors.reject(SpringActionController.ERROR_MSG,
+                    "Positivity report requires configuring flow experiment metadata for study and background information before running.");
+            return false;
+        }
+        else
+        {
+            super.updateBaseProperties(cu, pvs, errors, override);
+            updateFromPropertyValues(pvs, "subset");
+            if (!override)
+                updateFilterProperties(pvs);
+            return true;
+        }
     }
 
     @Override

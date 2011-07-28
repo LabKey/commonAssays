@@ -40,8 +40,7 @@ public class FlowFolderType extends DefaultFolderType
                 FlowSummaryWebPart.FACTORY.createWebPart(),
                 OverviewWebPart.FACTORY.createWebPart(),
                 AnalysesWebPart.FACTORY.createWebPart(),
-                AnalysisScriptsWebPart.FACTORY.createWebPart(),
-                Portal.getPortalPart("Messages").createWebPart());
+                AnalysisScriptsWebPart.FACTORY.createWebPart());
         activeModules = getDefaultModuleSet(module, getModule("Pipeline"));
         defaultModule = module;
     }

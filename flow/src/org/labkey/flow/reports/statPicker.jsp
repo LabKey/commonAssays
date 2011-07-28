@@ -90,6 +90,7 @@
     {
         ops.append(comma);
         ops.append("[\"").append(ct.getPreferredUrlKey()).append("\", \"").append(ct.getDisplayValue()).append("\"]");
+        comma = ",\n";
     }
     ops.append("]");
 %>
@@ -98,6 +99,7 @@ Ext.QuickTips.init();
 
 function statisticsTree(statistics)
 {
+    var enc = Ext.util.Format.htmlEncode;
     var s, node, subset;
     var map = {};
     for (var i=0 ; i<statistics.length ; i++)
@@ -111,7 +113,7 @@ function statisticsTree(statistics)
                 text = text.substring(s.parent.length+1);
             if (0==text.indexOf("(") && text.length-1 == text.lastIndexOf(")"))
                 text = text.substring(1,text.length-2);
-            node = new Ext.tree.TreeNode(Ext.apply({},{text:text, qtipCfg:{text:s.subset}, expanded:true, uiProvider:Ext.tree.ColumnNodeUI, parentNode:null}, s));    // stash original object in data
+            node = new Ext.tree.TreeNode(Ext.apply({},{id:enc(s.subset), text:enc(text), qtipCfg:{text:enc(s.subset)}, expanded:true, uiProvider:Ext.tree.ColumnNodeUI, parentNode:null}, s));    // stash original object in data
             node.attributes.stats = [];
             map[s.subset] = node;
         }
@@ -233,46 +235,57 @@ var SubsetField = Ext.extend(Ext.form.TriggerField,
             return;
         }
         if (this.popup == null)
-        {
-            var tree = new Ext.tree.TreePanel({
-                cls:'extContainer',
-                rootVisible:false,
-                useArrows:true,
-                autoScroll:false,
-                containerScroll:true,
-                //width:800, height:400,
-                //autoHeight:true,
-                animate:true,
-                enableDD:false
-            });
-            var root = new Ext.tree.TreeNode({text:'-', expanded:true});
-            for (var i=0 ; i<FlowPropertySet.statsTreeData.length ; i++)
-                root.appendChild(FlowPropertySet.statsTreeData[i]);
-            tree.setRootNode(root);
-            var sm = tree.getSelectionModel();
-            this.relayEvents(sm, ["selectionchange"]);
-            sm.on("selectionchange", function (sm, curr, prev) {
-                var subset = curr.attributes.subset;
-                this.pickValue(subset);
-            }, this);
-            this.popup = new Ext.Window({
-                autoScroll:true,
-                closeAction:'hide',
-                closable:true,
-                constrain:true,
-                items:[tree],
-                title:'Statistic Picker',
-                width:800, height:400
-            });
-        }
+            this.createPopup();
         this.popup.show();
         this.popup.center();
+    },
+
+    createPopup : function ()
+    {
+        this.tree = new Ext.tree.TreePanel({
+            cls:'extContainer',
+            rootVisible:false,
+            useArrows:true,
+            autoScroll:false,
+            containerScroll:true,
+            //width:800, height:400,
+            //autoHeight:true,
+            animate:true,
+            enableDD:false
+        });
+        var root = new Ext.tree.TreeNode({text:'-', expanded:true});
+        for (var i=0 ; i<FlowPropertySet.statsTreeData.length ; i++)
+            root.appendChild(FlowPropertySet.statsTreeData[i]);
+        this.tree.setRootNode(root);
+        var sm = this.tree.getSelectionModel();
+        this.relayEvents(sm, ["selectionchange"]);
+        sm.on("selectionchange", function (sm, curr, prev) {
+            var subset = curr.attributes.subset;
+            this.pickValue(subset);
+        }, this);
+        this.popup = new Ext.Window({
+            autoScroll:true,
+            closeAction:'hide',
+            closable:true,
+            constrain:true,
+            items:[this.tree],
+            title:'Statistic Picker',
+            width:800, height:400
+        });
     },
 
     pickValue : function(value)
     {
         if (this.popup) this.popup.hide();
         this.setValue(value);
+    },
+
+    getSelectedNode : function ()
+    {
+        if (!this.tree)
+            return undefined;
+
+        return this.tree.getSelectionModel().getSelectedNode();
     }
 
 });
@@ -283,29 +296,45 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
 {
     constructor : function (config)
     {
-        this.subsetField = new SubsetField();
+        this.hiddenField = new Ext.form.Hidden({name: config.name});
+
+        this.subsetField = new SubsetField({name: config.name + "_subset"});
         this.subsetField.on("selectionchange", this.subsetChanged, this);
-        this.statCombo = new Ext.form.ComboBox({disabled: true, store: []});
-        this.items = [ this.subsetField, this.statCombo ];
+        this.subsetField.on("change", this.subsetChanged, this);
+        this.subsetField.on("blur", this.subsetChanged, this);
+
+        this.statCombo = new Ext.form.ComboBox({name: config.name + "_stat", store: []});
+        this.statCombo.on("selectionchange", this.statChanged, this);
+        this.statCombo.on("change", this.statChanged, this);
+        this.statCombo.on("blur", this.statChanged, this);
+
+        this.items = [ this.subsetField, this.statCombo, this.hiddenField ];
 
         StatisticField.superclass.constructor.call(this, config);
     },
 
-    subsetChanged : function (selectionModel, curr, prev)
+    subsetChanged : function ()
     {
-        var stats = curr.attributes.stats;
+        var node = this.subsetField.getSelectedNode();
+        var stats = node.attributes.stats;
         if (stats && stats.length > 0)
         {
             this.statCombo.getStore().removeAll();
             this.statCombo.getStore().loadData(stats);
-            this.statCombo.enable();
+            //this.statCombo.enable();
             this.statCombo.focus();
         }
         else
         {
             this.statCombo.getStore().removeAll();
-            this.statCombo.disable();
+            //this.statCombo.disable();
         }
+        this.updateHiddenValue();
+    },
+
+    statChanged : function ()
+    {
+        this.updateHiddenValue();
     },
 
     setValue : function (value)
@@ -317,19 +346,50 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
             var stat = value.substring(idxColon+1);
 
             this.subsetField.setValue(population);
+
+            var stats = [];
+            for (var i = 0; i < FlowPropertySet.statistics.length; i++)
+            {
+                var s = FlowPropertySet.statistics[i];
+                if (s.subset == population)
+                    stats.push(s.stat);
+            }
+            this.statCombo.getStore().loadData(stats);
             this.statCombo.setValue(stat);
+            //this.statCombo.setDisabled(!(stat && stat.length > 0));
         }
+        this.updateHiddenValue();
     },
 
     getValue : function ()
     {
+        return this.updateHiddenValue();
+    },
+
+    updateHiddenValue : function ()
+    {
         var subset = this.subsetField.getValue();
         var stat = this.statCombo.getValue();
-        return subset + ":" + stat;
+        var result = "";
+        if (subset && stat)
+            result = subset + ":" + stat;
+        this.hiddenField.setValue(result);
+        return result;
     }
 
 });
 Ext.reg('statisticField', StatisticField);
+
+var OpCombo = Ext.extend(Ext.form.ComboBox, {
+    constructor : function (config)
+     {
+        config.mode = 'local';
+        config.store = <%=ops%>
+
+        OpCombo.superclass.constructor.call(this, config);
+    }
+});
+Ext.reg('opCombo', OpCombo);
 
 var FlowPropertySet = {};
 FlowPropertySet.keywords = [<%
@@ -352,6 +412,5 @@ SampleSet.properties = [<%
         comma=",";
     }
 %>];
-
 
 </script>

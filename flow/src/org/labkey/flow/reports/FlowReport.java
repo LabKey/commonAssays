@@ -36,6 +36,7 @@ import org.labkey.flow.query.FlowTableType;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.validation.BindException;
+import static org.labkey.api.action.SpringActionController.ERROR_MSG;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,10 +79,36 @@ abstract public class FlowReport extends AbstractReport
     }
     
 
-    protected void updateBaseProperties(PropertyValues pvs, BindException errors, boolean override)
+    protected void updateBaseProperties(ContainerUser cu, PropertyValues pvs, BindException errors, boolean override)
     {
         if (override)
             return;
+
+        String reportName = null;
+        PropertyValue pv = pvs.getPropertyValue(ReportDescriptor.Prop.reportName.toString());
+        if (pv != null)
+            reportName = String.valueOf(pv.getValue());
+
+        if (reportName == null || reportName.length() == 0)
+        {
+            errors.rejectValue(ERROR_MSG, "Report name is requied");
+            return;
+        }
+
+        Collection<FlowReport> reports = FlowReportManager.getFlowReports(cu.getContainer(), cu.getUser());
+        for (FlowReport report : reports)
+        {
+            if (this.getReportId() != null && this.getReportId().equals(report.getReportId()))
+                continue;
+
+            // check for existing report of the same name
+            if (reportName.equals(report.getDescriptor().getReportName()))
+            {
+                errors.reject(ERROR_MSG, "Report with name already exists");
+                return;
+            }
+        }
+
         updateFromPropertyValues(pvs, ReportDescriptor.Prop.reportName);
         updateFromPropertyValues(pvs, ReportDescriptor.Prop.reportDescription);
     }
@@ -93,6 +120,7 @@ abstract public class FlowReport extends AbstractReport
         Container c = ContainerManager.getForId(getDescriptor().getContainerId());
         ActionURL url = new ActionURL(ReportsController.ExecuteAction.class, c);
         url.addParameter("reportId", getReportId().toString());
+        url.addParameter(ActionURL.Param.returnUrl, context.cloneActionURL().getLocalURIString());
         return url;
     }
 
@@ -102,6 +130,7 @@ abstract public class FlowReport extends AbstractReport
         Container c = ContainerManager.getForId(getDescriptor().getContainerId());
         ActionURL url = new ActionURL(ReportsController.UpdateAction.class, c);
         url.addParameter("reportId", getReportId().toString());
+        url.addParameter(ActionURL.Param.returnUrl, context.cloneActionURL().getLocalURIString());
         return url;
     }
 
@@ -122,9 +151,10 @@ abstract public class FlowReport extends AbstractReport
     }
 
 
-    public abstract HttpView getConfigureForm(ViewContext context);
+    public abstract HttpView getConfigureForm(ViewContext context, ActionURL returnURL);
+
     /** override=true means only set parameters overrideable via the URL on execute */
-    public abstract boolean updateProperties(PropertyValues pvs, BindException errors, boolean override);
+    public abstract boolean updateProperties(ContainerUser cu, PropertyValues pvs, BindException errors, boolean override);
 
     public boolean saveToDomain()
     {

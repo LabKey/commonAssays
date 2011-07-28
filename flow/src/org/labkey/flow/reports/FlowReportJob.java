@@ -81,7 +81,13 @@ public class FlowReportJob extends RReportJob
     @Override
     protected File inputFile(RReport report, ViewContext context) throws Exception
     {
-        return report.createInputDataFile(context);
+        File file = report.createInputDataFile(context);
+
+        // debug logging
+        debug("Executed query:");
+        debug(_report._query);
+
+        return file;
     }
 
     @Override
@@ -272,9 +278,9 @@ public class FlowReportJob extends RReportJob
         {
             ReportDescriptor d = _report.getDescriptor();
             if (d != null)
-                d.getReportName();
+                return d.getReportName();
         }
 
-        return null;
+        return "Unknown Flow Report";
     }
 }
