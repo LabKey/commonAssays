@@ -62,12 +62,11 @@
                 <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
                 <td>
                     <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>'
-                           value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn("<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName())) %>", this.checked);'
-                           <%= titrationEntry.getValue().isStandard() ? "CHECKED" : "" %> />
+                           value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn(this.name, "<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName())) %>", this.checked);' />
                 </td>
                 <td>
                     <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue())) %>'
-                           value='1' onClick='titrationRoleChecked(this);' <%= titrationEntry.getValue().isQcControl() ? "CHECKED" : "" %> />
+                           value='1' onClick='titrationRoleChecked(this);' />
                 </td>
             </tr>
 <%
@@ -95,7 +94,7 @@
                 <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
                 <td>
                     <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue())) %>'
-                           value='1' onClick='titrationRoleChecked(this);' <%= titrationEntry.getValue().isUnknown() ? "CHECKED" : "" %> />
+                           value='1' onClick='titrationRoleChecked(this);' />
                 </td>
             </tr>
 <%
@@ -111,25 +110,23 @@
     // function to handle click of titration well role checkbox to set the corresponding hidden form element accordingly
     function titrationRoleChecked(el)
     {
-        // get the corresponding hidden form element
-        var els = document.getElementsByName(el.name);
-        for (var i = 0; i < els.length; i++)
-        {
-            if (els[i].type == "hidden")
-            {
-                // set the hidden element value to true if the input checkbox is selected
-                els[i].value = el.checked ? "true" : "";
-            }
-        }
+        var hiddenEl = getHiddenFormElement(el.name);
+        if (hiddenEl != null)
+            hiddenEl.value = el.checked ? "true" : "";
     }
 
-    function showHideAnalytePropertyColumn(titrationCellName, isChecked)
+    function showHideAnalytePropertyColumn(titrationRoleName, titrationCellName, isChecked)
     {
+        // set the hidden helper showcol field value
+        var showcols = document.getElementsByName(titrationRoleName + "_showcol");
+        if (showcols.length == 1)
+            showcols[0].value = (isChecked ? "true" : "");
+
         // show/hide the column associated with this titration
         var elements = Ext.select('*[name=' + titrationCellName + ']').elements;
         for (var i = 0; i < elements.length; i++)
         {
-            if(isChecked)
+            if (isChecked)
             {
                 elements[i].style.display = "table-cell";
             }
@@ -145,5 +142,61 @@
                 }
             }
         }
+    }
+
+    function getHiddenFormElement(elName)
+    {
+        var els = document.getElementsByName(elName);
+        for (var i = 0; i < els.length; i++)
+        {
+            if (els[i].type == "hidden")
+            {
+                return els[i];
+            }
+        }
+        return null;
+    }
+
+    function getInputFormElement(elName)
+    {
+        var els = document.getElementsByName(elName);
+        for (var i = 0; i < els.length; i++)
+        {
+            if (els[i].type == "checkbox")
+            {
+                return els[i];
+            }
+        }
+        return null;
+    }
+
+    Ext.onReady(setInitialWellRoles);
+    function setInitialWellRoles()
+    {
+<%
+        for (Map.Entry<String, Titration> titrationEntry : titrationsWithTypes.entrySet())
+        {
+            for (Titration.Type t : Titration.Type.values())
+            {
+%>
+                var propertyName =  "<%= LuminexUploadWizardAction.getTitrationTypeCheckboxName(t, titrationEntry.getValue()) %>";
+                var hiddenEl = getHiddenFormElement(propertyName);
+                var inputEl = getInputFormElement(propertyName);
+                if (hiddenEl && inputEl)
+                {
+                    inputEl.checked = hiddenEl.value == "true";
+<%
+                    if (Titration.Type.standard == t)
+                    {
+%>
+                        showHideAnalytePropertyColumn(inputEl.name, "<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName())) %>", inputEl.checked);
+<%
+                    }
+%>
+                }
+<%
+            }
+        }
+%>
     }
 </script>

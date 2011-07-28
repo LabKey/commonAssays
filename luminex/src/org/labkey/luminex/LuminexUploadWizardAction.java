@@ -23,6 +23,7 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
@@ -75,7 +76,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
     }
 
-    private ModelAndView getAnalytesView(String[] analyteNames, LuminexRunUploadForm form, boolean errorReshow, BindException errors) throws ServletException
+    private ModelAndView getAnalytesView(String[] analyteNames, LuminexRunUploadForm form, final boolean errorReshow, BindException errors) throws ServletException
     {
         try {
             String lsidColumn = "RowId";
@@ -153,13 +154,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             final int numStandardTitrations = form.getParser().getStandardTitrationCount();
             for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
             {
-                //todo: get default value information from previous run uploads
-
                 // skip over those titrations that are of type Unknown as they will not be used as standards
                 if (titrationEntry.getValue().isUnknown())
                 {
                     continue;
                 }
+
+                final Map<String, String> defaultTitrationValues = PropertyManager.getProperties(getViewContext().getUser().getUserId(),
+                        getContainer().getId(), _protocol.getName() + ": " + titrationEntry.getValue().getName());
 
                 List<DisplayColumn> cols = new ArrayList<DisplayColumn>();
                 for (final String analyte : analyteNames)
@@ -169,29 +171,47 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         @Override
                         public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
                         {
-                            // preselect the checkboxes for the standards in the file
-                            out.write("<input type='checkbox' value='1' name='" + PageFlowUtil.filter(getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte)) + "' "
-                                    + (titrationEntry.getValue().isStandard() ? "CHECKED" : "") + " />");
+                            String propertyName = PageFlowUtil.filter(getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte));
+                            String defVal = defaultTitrationValues.get(propertyName);
+                            String checked = "";
+
+                            // if reshowing form on error, preselect based on request value
+                            if (errorReshow)
+                            {
+                                if (getViewContext().getRequest().getParameter(propertyName) != null)
+                                    checked = "CHECKED";
+                            }
+                            // if there is only one standard, then preselect the checkbox
+                            else if (numStandardTitrations == 1 && titrationEntry.getValue().isStandard())
+                            {
+                                checked = "CHECKED";
+                            }
+                            else if (numStandardTitrations > 1)
+                            {
+                                // if > 1 standard and default value exists, set checkbox based on default value
+                                if (defVal != null && defVal.toLowerCase().equals("true"))
+                                    checked = "CHECKED";
+                                // if no default value and titration is standard, then preselect the checkbox
+                                else if (defVal == null && titrationEntry.getValue().isStandard())
+                                    checked = "CHECKED";
+                            }
+
+                            out.write("<input type='checkbox' value='" + value + "' name='" + propertyName + "' " + checked + " />");
                         }
 
                         @Override
                         public void renderInputCell(RenderContext ctx, Writer out, int span) throws IOException
                         {
-                            // show the input cell if this is one of multiple standard titrations
-                            boolean showCell = titrationEntry.getValue().isStandard() && numStandardTitrations > 1;
-                            out.write("<td colspan=" + span + " name='" + PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName())) + "' "
-                                + " style='display:" + (showCell ? "table-cell" : "none") + "' >");
-                            renderInputHtml(ctx, out, getInputValue(ctx));
+                            out.write("<td colspan=" + span + " name='" + PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName())) + "' style='display:none' >");
+                            renderInputHtml(ctx, out, 1);
                             out.write("</td>");
                         }
 
                         @Override
                         public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
                         {
-                            // show the input cell if this is one of multiple standard titrations
-                            boolean showCell = titrationEntry.getValue().isStandard() && numStandardTitrations > 1;
                             out.write("<td name='" + PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName())) + "' "
-                                + " class='labkey-form-label' style='display:" + (showCell ? "table-cell" : "none") + "' >");
+                                + " class='labkey-form-label' style='display:none' >");
                             renderTitle(ctx, out);
                             out.write("</td>");
                         }
@@ -221,12 +241,35 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             PreviouslyUploadedDataCollector collector = new PreviouslyUploadedDataCollector(form.getUploadedData());
             collector.addHiddenFormFields(view, form);
 
-            // add hidden form fields (3 types) for the titration well role definition section (controlled by titrationWellRoles.jsp)
+            // add hidden form fields (3 types) for the titration well role definition section (controlled by titrationWellRoles.jsp after render)
+            Map<String, String> defaultWellRoleValues = PropertyManager.getProperties(getViewContext().getUser().getUserId(),
+                getContainer().getId(), _protocol.getName() + ": Well Role");
             for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
             {
-                view.getDataRegion().addHiddenFormField(getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()), titrationEntry.getValue().isStandard() ? "true" : "");
-                view.getDataRegion().addHiddenFormField(getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue()), titrationEntry.getValue().isQcControl() ? "true" : "");
-                view.getDataRegion().addHiddenFormField(getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue()), titrationEntry.getValue().isUnknown() ? "true" : "");
+                String propertyName;
+                String defVal;
+                String value;
+
+                if (!titrationEntry.getValue().isUnknown())
+                {
+                    propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
+                    defVal = defaultWellRoleValues.get(propertyName);
+                    value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isStandard()) ? "true" : "";
+                    view.getDataRegion().addHiddenFormField(propertyName, value);
+                    view.getDataRegion().addHiddenFormField(propertyName + "_showcol", ""); // field to help w/ when to store default values
+
+                    propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
+                    defVal = defaultWellRoleValues.get(propertyName);
+                    value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isQcControl()) ? "true" : "";
+                    view.getDataRegion().addHiddenFormField(propertyName, value);
+                }
+                else
+                {
+                    propertyName = getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
+                    defVal = defaultWellRoleValues.get(propertyName);
+                    value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isUnknown()) ? "true" : "";
+                    view.getDataRegion().addHiddenFormField(propertyName, value);
+                }
             }
 
             ButtonBar bbar = new ButtonBar();
@@ -259,6 +302,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     {
         return "_analyte_" + analyte + "_" + dp.getName();
     }
+
+    private boolean setInitialTitrationInput(boolean errorReshow, String propName, String defVal, boolean typeMatch)
+    {
+        // return true if 1. errorReshow and previously checked, 2. has a default value that was checked, or 3. titration type matches
+        return (errorReshow && getViewContext().getRequest().getParameter(propName).equals("true"))
+                || (!errorReshow && defVal != null && defVal.toLowerCase().equals("true"))
+                || (!errorReshow && defVal == null && typeMatch);
+    }    
 
     private String[] getAnalyteNames(LuminexRunUploadForm form) throws ExperimentException
     {
@@ -399,6 +450,50 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         OntologyManager.insertProperties(getContainer(), analyte.getLsid(), objProperties);
                         form.saveDefaultValues(properties, analyte.getName());
                     }
+
+                    // save the defalut values for the analyte standards/titrations information in 2 categories: well roles and titrations
+                    PropertyManager.PropertyMap defaultWellRoleValues = PropertyManager.getWritableProperties(
+                            getViewContext().getUser().getUserId(), getContainer().getId(), _protocol.getName() + ": Well Role", true);
+                    for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
+                    {
+                        String propertyName;
+                        Boolean value;
+
+                        // add the name/value pairs for the titration well role definition section
+                        if (!titrationEntry.getValue().isUnknown())
+                        {
+                            propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
+                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+
+                            propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
+                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+                        }
+                        else
+                        {
+                            propertyName = getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
+                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+                        }
+
+                        // add the name/value pairs for each of the analyte standards if the columns was shown in the UI
+                        propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) + "_showcol";
+                        if (!titrationEntry.getValue().isUnknown() && getViewContext().getRequest().getParameter(propertyName).equals("true"))
+                        {
+                            PropertyManager.PropertyMap defaultTitrationValues = PropertyManager.getWritableProperties(
+                                    getViewContext().getUser().getUserId(), getContainer().getId(),
+                                    _protocol.getName() + ": " + titrationEntry.getValue().getName(), true);
+                            for (Analyte analyte : getAnalytes(dataId))
+                            {
+                                propertyName = getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte.getName());
+                                value = getViewContext().getRequest().getParameter(propertyName) != null;
+                                defaultTitrationValues.put(propertyName, Boolean.toString(value));
+                            }
+                            PropertyManager.saveProperties(defaultTitrationValues);
+                        }
+                    }
+                    PropertyManager.saveProperties(defaultWellRoleValues);
 
                     LuminexSchema.getSchema().getScope().commitTransaction();
                     getCompletedUploadAttemptIDs().add(form.getUploadAttemptID());

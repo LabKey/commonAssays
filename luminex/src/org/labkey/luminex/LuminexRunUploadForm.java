@@ -146,8 +146,12 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
             titration.setName(titrationName);
             for (Titration.Type type : Titration.Type.values())
             {
-                String hiddenValue = getViewContext().getRequest().getParameter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(type, titration));
-                type.setEnabled(titration, hiddenValue.equals("true"));
+                String propertyName = LuminexUploadWizardAction.getTitrationTypeCheckboxName(type, titration);
+                if (getViewContext().getRequest().getParameter(propertyName) != null)
+                {
+                    String hiddenValue = getViewContext().getRequest().getParameter(propertyName);
+                    type.setEnabled(titration, hiddenValue.equals("true"));
+                }
             }
             result.add(titration);
         }
