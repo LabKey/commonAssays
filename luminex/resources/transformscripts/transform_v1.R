@@ -88,7 +88,6 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
 
 	# loop through the unique dataFile/description/excpConc/dilution combos and subtract the mean blank fiBackground from the fiBackground
 	combos = unique(data.frame(dataFile=run.data$dataFile, description=run.data$description, dilution=run.data$dilution, expConc=run.data$expConc));
-	print(combos);
 	for(index in 1:nrow(combos)){
 	    dataFile = combos$dataFile[index];
 	    description = combos$description[index];
