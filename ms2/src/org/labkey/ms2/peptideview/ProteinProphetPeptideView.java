@@ -140,23 +140,23 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 
     protected String createExtraWhere(List<String> selectedRows)
     {
-        String where = null;
-        if (selectedRows != null)
+        if (selectedRows == null)
+            return null;
+        if (selectedRows.isEmpty())
+            return "(0=1)";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+        sb.append(".RowId IN (");
+        String separator = "";
+        for (String protein : selectedRows)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
-            sb.append(".RowId IN (");
-            String separator = "";
-            for (String protein : selectedRows)
-            {
-                sb.append(separator);
-                separator = ", ";
-                sb.append(new Long(protein));
-            }
-            sb.append(")");
-            where = sb.toString();
+            sb.append(separator);
+            separator = ", ";
+            sb.append(new Long(protein));
         }
-        return where;
+        sb.append(")");
+        return sb.toString();
     }
 
     private ProteinProphetDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws SQLException
