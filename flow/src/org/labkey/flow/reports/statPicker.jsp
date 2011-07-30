@@ -97,6 +97,16 @@
 <script type="text/javascript">
 Ext.QuickTips.init();
 
+// Adds a 'subset' attribute used by the test framework
+var StatTreeNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
+    renderElements : function () {
+        StatTreeNodeUI.superclass.renderElements.apply(this, arguments);
+        var node = this.node;
+        var subset = node.attributes.subset;
+        this.elNode.setAttribute("subset", subset);
+    }
+});
+
 function statisticsTree(statistics)
 {
     var enc = Ext.util.Format.htmlEncode;
@@ -113,7 +123,7 @@ function statisticsTree(statistics)
                 text = text.substring(s.parent.length+1);
             if (0==text.indexOf("(") && text.length-1 == text.lastIndexOf(")"))
                 text = text.substring(1,text.length-2);
-            node = new Ext.tree.TreeNode(Ext.apply({},{id:enc(s.subset), text:enc(text), qtipCfg:{text:enc(s.subset)}, expanded:true, uiProvider:Ext.tree.ColumnNodeUI, parentNode:null}, s));    // stash original object in data
+            node = new Ext.tree.TreeNode(Ext.apply({},{text:enc(text), qtipCfg:{text:enc(s.subset)}, expanded:true, uiProvider:StatTreeNodeUI, parentNode:null}, s));    // stash original object in data
             node.attributes.stats = [];
             map[s.subset] = node;
         }

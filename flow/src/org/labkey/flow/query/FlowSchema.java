@@ -998,7 +998,9 @@ public class FlowSchema extends UserSchema
                         "-" + PageFlowUtil.encode(report.getReportId().toString()) +
                         //"-" + tableType.toString() +
                         "'"));
-            ExprColumn col = new ExprColumn(this, report.getDescriptor().getReportName(), sql, JdbcType.VARCHAR);
+            // Explicitly create the FieldKey so report names containing '/' aren't parsed by FieldKey.fromString()
+            FieldKey fieldKey = new FieldKey(null, report.getDescriptor().getReportName());
+            ExprColumn col = new ExprColumn(this, fieldKey, sql, JdbcType.VARCHAR);
 
             PropertyForeignKey fk = new PropertyForeignKey(domain, FlowSchema.this)
             {
