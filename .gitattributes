@@ -524,7 +524,6 @@ flow/webapp/Flow/util.js -text
 luminex/module.properties -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-8.20.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-10.30-11.10.sql -text
-luminex/resources/schemas/dbscripts/postgresql/luminex-11.10-11.11.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.10-11.19.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.11-11.12.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.12-11.13.sql -text
@@ -554,7 +553,6 @@ luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-9.12-9.13.sql -t
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-9.30-9.31.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-0.00-8.20.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-10.30-11.10.sql -text
-luminex/resources/schemas/dbscripts/sqlserver/luminex-11.10-11.11.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.10-11.19.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.11-11.12.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.12-11.13.sql -text
