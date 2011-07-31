@@ -185,14 +185,6 @@
                 if (hiddenEl && inputEl)
                 {
                     inputEl.checked = hiddenEl.value == "true";
-<%
-                    if (Titration.Type.standard == t)
-                    {
-%>
-                        showHideAnalytePropertyColumn(inputEl.name, "<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName())) %>", inputEl.checked);
-<%
-                    }
-%>
                 }
 <%
             }
