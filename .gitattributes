@@ -268,7 +268,6 @@ flow/gwtsrc/org/labkey/flow/gateeditor/client/util/LogAxisFunction.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/util/RangeFunction.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/util/SimpleLogAxisFunction.java -text
 flow/module.properties -text
-flow/resources/queries/Samples/FlowSamples.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-0.00-9.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-10.10-10.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-11.10-11.19.sql -text
