@@ -103,7 +103,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
 
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, GraphSpec attrName, int attrId)
     {
-        SQLFragment sql = new SQLFragment("(SELECT CASE WHEN flow.Graph.RowId IS NOT NULL THEN ");
+        SQLFragment sql = new SQLFragment("(SELECT CASE WHEN flow.Graph.ObjectId IS NOT NULL THEN ");
         sql.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         sql.append(" END");
         sql.append("\nFROM flow.Graph WHERE flow.Graph.GraphId = ");
@@ -112,7 +112,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         sql.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         sql.append(")");
 
-        //SQLFragment sql = new SQLFragment("(SELECT CASE WHEN flow.Graph.RowId IS NOT NULL THEN ");
+        //SQLFragment sql = new SQLFragment("(SELECT CASE WHEN flow.Graph.ObjectId IS NOT NULL THEN ");
         //sql.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         //sql.append(" END");
         //sql.append("\nFROM flow.Graph WHERE flow.Graph.GraphId = flow.GraphAttr.Id AND flow.GraphAttr.Name = ?");

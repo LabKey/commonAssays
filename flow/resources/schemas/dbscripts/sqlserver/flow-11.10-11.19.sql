@@ -50,7 +50,8 @@ SET KeywordId =
    AND Object.RowId = Keyword.ObjectId)
 GO
 
-ALTER TABLE flow.Keyword ADD CONSTRAINT PK_Keyword UNIQUE (ObjectId, KeywordId);
+-- Correct PK_Keyword will be added in flow-11.19-11.191 script
+--ALTER TABLE flow.Keyword ADD CONSTRAINT PK_Keyword UNIQUE (ObjectId, KeywordId);
 ALTER TABLE flow.Keyword ADD CONSTRAINT FK_Keyword_KeywordAttr FOREIGN KEY (KeywordId) REFERENCES flow.KeywordAttr (RowId);
 GO
 
@@ -96,7 +97,8 @@ SET StatisticId =
    AND Object.RowId = Statistic.ObjectId)
 GO
 
-ALTER TABLE flow.Statistic ADD CONSTRAINT PK_Statistic UNIQUE (ObjectId, StatisticId);
+-- Correct PK_Statistic will be added in flow-11.19-11.191 script
+--ALTER TABLE flow.Statistic ADD CONSTRAINT PK_Statistic UNIQUE (ObjectId, StatisticId);
 ALTER TABLE flow.Statistic ADD CONSTRAINT FK_Statistic_StatisticAttr FOREIGN KEY (StatisticId) REFERENCES flow.StatisticAttr (RowId);
 GO
 
@@ -130,6 +132,7 @@ GO
 
 -- Drop the PK_Graph for the next update and add it again afterwards.
 ALTER TABLE flow.Graph DROP CONSTRAINT PK_Graph;
+ALTER TABLE flow.Graph DROP CONSTRAINT UQ_Graph;
 ALTER TABLE flow.Graph DROP CONSTRAINT FK_Graph_Attribute;
 GO
 
@@ -142,7 +145,8 @@ SET GraphId =
    AND Object.RowId = Graph.ObjectId)
 GO
 
-ALTER TABLE flow.Graph ADD CONSTRAINT PK_Graph UNIQUE (ObjectId, GraphId);
+-- Correct PK_Graph will be added in flow-11.19-11.191 script
+--ALTER TABLE flow.Graph ADD CONSTRAINT PK_Graph UNIQUE (ObjectId, GraphId);
 ALTER TABLE flow.Graph ADD CONSTRAINT FK_Graph_GraphAttr FOREIGN KEY (GraphId) REFERENCES flow.GraphAttr (RowId);
 GO
 
