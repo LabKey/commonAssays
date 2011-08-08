@@ -71,17 +71,20 @@ for (index in 1:nrow(analyte.data))
     stndSet = unlist(strsplit(as.character(analyte.data$titrations[index]), ","));
 
     # if there are more than 1 standard for this analyte, duplicate run.data records for that analyte at set standard accordingly
-    for (stndIndex in 1:length(stndSet))
+    if (length(stndSet) > 0)
     {
-        if (stndIndex == 1)
+        for (stndIndex in 1:length(stndSet))
         {
-            run.data$Standard[as.character(run.data$name) == as.character(analyte.data$Name[index])] = stndSet[stndIndex];
-        } else
-        {
-            temp.data = run.analyte.data;
-            temp.data$Standard = stndSet[stndIndex];
-            temp.data$lsid = NA; # lsid will be set by the server
-            run.data = rbind(run.data, temp.data);
+            if (stndIndex == 1)
+            {
+                run.data$Standard[as.character(run.data$name) == as.character(analyte.data$Name[index])] = stndSet[stndIndex];
+            } else
+            {
+                temp.data = run.analyte.data;
+                temp.data$Standard = stndSet[stndIndex];
+                temp.data$lsid = NA; # lsid will be set by the server
+                run.data = rbind(run.data, temp.data);
+            }
         }
     }
 }
