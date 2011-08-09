@@ -132,9 +132,19 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         containerColumn.setHidden(true);
         containerColumn.setFk(new ContainerForeignKey());
 
+        SQLFragment repGroupCaseStatement = new SQLFragment();
+        repGroupCaseStatement.append("(CASE WHEN we.Comment IS NOT NULL THEN ");
+        repGroupCaseStatement.append(getSqlDialect().concatenate(new SQLFragment("': '"), new SQLFragment("we.Comment")));
+        repGroupCaseStatement.append(" ELSE '' END)");
+
+        SQLFragment analyteCaseStatement = new SQLFragment();
+        analyteCaseStatement.append("(CASE WHEN re.Comment IS NOT NULL THEN ");
+        analyteCaseStatement.append(getSqlDialect().concatenate(new SQLFragment("': '"), new SQLFragment("re.Comment")));
+        analyteCaseStatement.append(" ELSE '' END)");
+
         SQLFragment exclusionUnionSQL = new SQLFragment();
         exclusionUnionSQL.append("SELECT ");
-        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'Excluded for replicate group: '"), new SQLFragment("we.Comment")));
+        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'Excluded for replicate group'"), repGroupCaseStatement));
         exclusionUnionSQL.append(" AS Comment, we.Modified, we.ModifiedBy, we.Created, we.CreatedBy FROM ");
         exclusionUnionSQL.append(LuminexSchema.getTableInfoWellExclusion(), "we");
         exclusionUnionSQL.append(", ");
@@ -145,7 +155,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         exclusionUnionSQL.append("(we.DataId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId OR (we.DataId IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".DataId IS NULL)) AND ");
         exclusionUnionSQL.append("(wea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
         exclusionUnionSQL.append("UNION SELECT ");
-        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'Excluded for analyte: '"), new SQLFragment("re.Comment")));
+        exclusionUnionSQL.append(getSqlDialect().concatenate(new SQLFragment("'Excluded for analyte'"), analyteCaseStatement));
         exclusionUnionSQL.append(" AS Comment, re.Modified, re.ModifiedBy, re.Created, re.CreatedBy FROM ");
         exclusionUnionSQL.append(LuminexSchema.getTableInfoRunExclusion(), "re");
         exclusionUnionSQL.append(", ");
