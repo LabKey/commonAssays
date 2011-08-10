@@ -771,6 +771,13 @@ public class ProteinManager
                 return filter;
             }
 
+            String groupRowId = currentUrl.getParameter("proteinGroupId");
+            if (groupRowId != null)
+            {
+                filter.addCondition("ProteinProphetData/ProteinGroupId/RowId", Integer.parseInt(groupRowId));
+                return filter;
+            }
+
             String seqId = currentUrl.getParameter("seqId");
             if (null != seqId)
             {

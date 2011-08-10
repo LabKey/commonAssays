@@ -181,12 +181,6 @@ if(any(standardRecs) & length(standards) > 0){
     # change column name from expConc to expected_conc
     colnames(dat)[colnames(dat) == "expConc"] = "expected_conc";
 
-    # get the assayId from the run properties (or use the first dataFile value)
-    dat$assay_id = dat$dataFile[1];
-    if(any(run.props$name == "assayId"))
-        if(run.props$val1[run.props$name == "assayId"] != "")
-            dat$assay_id = run.props$val1[run.props$name == "assayId"];
-
     # set the sample_id to be description||dilution concatination
     dat$sample_id = paste(dat$description, "||", dat$dilution, sep="");
 
@@ -229,6 +223,9 @@ if(any(standardRecs) & length(standards) > 0){
         # subset the data for those analytes set to use the given standard curve
         # note: also need to subset the standard records for only those where description matches the given standard
         standard.dat = subset(dat, Standard == stndVal & (well_role != "Standard" | (well_role == "Standard" & description == stndVal)));
+
+        # set the assay_id (this value will be used in the PDF plot header)
+        standard.dat$assay_id = stndVal;
 
         # call the rumi function to calculate new estimated log concentrations using 5PL for the uknowns
         mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2))
