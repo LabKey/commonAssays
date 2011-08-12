@@ -369,8 +369,6 @@ flow/src/org/labkey/flow/controllers/executescript/demo.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysis.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/showScript.jsp -text
 flow/src/org/labkey/flow/controllers/flowAdmin.jsp -text
-flow/src/org/labkey/flow/controllers/log/LogController.java -text
-flow/src/org/labkey/flow/controllers/log/showLog.jsp -text
 flow/src/org/labkey/flow/controllers/newFolder.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/EditFCSAnalysisFilterForm.java -text
 flow/src/org/labkey/flow/controllers/protocol/EditFCSAnalysisNameForm.java -text
@@ -419,7 +417,6 @@ flow/src/org/labkey/flow/data/FlowDataType.java -text
 flow/src/org/labkey/flow/data/FlowExperiment.java -text
 flow/src/org/labkey/flow/data/FlowFCSAnalysis.java -text
 flow/src/org/labkey/flow/data/FlowFCSFile.java -text
-flow/src/org/labkey/flow/data/FlowLog.java -text
 flow/src/org/labkey/flow/data/FlowObject.java -text
 flow/src/org/labkey/flow/data/FlowProperty.java -text
 flow/src/org/labkey/flow/data/FlowProtocol.java -text
@@ -430,8 +427,6 @@ flow/src/org/labkey/flow/data/FlowRunWorkspace.java -text
 flow/src/org/labkey/flow/data/FlowScript.java -text
 flow/src/org/labkey/flow/data/FlowWell.java -text
 flow/src/org/labkey/flow/data/ICSMetadata.java -text
-flow/src/org/labkey/flow/data/LogField.java -text
-flow/src/org/labkey/flow/data/LogType.java -text
 flow/src/org/labkey/flow/data/SampleKey.java -text
 flow/src/org/labkey/flow/persist/AttrObject.java -text
 flow/src/org/labkey/flow/persist/AttributeSetHelper.java -text

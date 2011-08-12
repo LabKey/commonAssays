@@ -161,7 +161,6 @@ public class RScriptJob extends FlowExperimentJob
         catch (Exception e)
         {
             error("Import failed to complete", e);
-            addError(null, null, e.toString());
         }
 
         deleteAnalysisDirectory(workingDir);

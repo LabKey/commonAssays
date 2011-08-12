@@ -43,7 +43,6 @@ import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.persist.InputRole;
-import org.labkey.flow.data.LogType;
 import org.labkey.flow.persist.FlowManager;
 
 import java.io.File;
@@ -187,7 +186,7 @@ abstract public class ScriptJob extends FlowExperimentJob
         }
         catch (FlowException e)
         {
-            addError(null, null, e.getMessage());
+            error("Error", e);
         }
         finishExperimentRun(doc.getExperimentArchive(), runElement);
         importRuns(doc, new File(srcRun.getPath()), workingDirectory, handler._step);
@@ -274,17 +273,6 @@ abstract public class ScriptJob extends FlowExperimentJob
         appInput.setProtocolLSID(getProtocol().getLSID());
         appInput.setActionSequence(0);
         appInput.setCpasType(ExpProtocol.ApplicationType.ExperimentRun.toString());
-        for (Map.Entry<LogType, StringBuffer> logEntry : _runData._logs.entrySet())
-        {
-            StringBuffer buf = logEntry.getValue();
-            if (buf == null || buf.length() == 0)
-                continue;
-            DataBaseType logData = appInput.getOutputDataObjects().addNewData();
-            logData.setAbout(FlowDataObject.generateDataLSID(getContainer(), FlowDataType.Log));
-            logData.setName(logEntry.getKey().toString());
-            logData.addNewProperties();
-            // TODO: FlowLog.PROP_Text(getPdCacheMap(), logData.getProperties(), buf.toString());
-        }
 
         ExperimentArchiveType.StartingInputDefinitions defns = xar.getStartingInputDefinitions();
         InputOutputRefsType inputRefs = appInput.getInputRefs();
@@ -391,9 +379,8 @@ abstract public class ScriptJob extends FlowExperimentJob
             }
             catch (Throwable t)
             {
-                _log.error("Error loading XAR", t);
                 _log.debug("Xar file contents:\n" + xardoc.toString());
-                addError(null, null, "Error loading XAR: " + t.toString());
+                error("Error loading XAR", t);
                 throw UnexpectedException.wrap(t);
             }
         }

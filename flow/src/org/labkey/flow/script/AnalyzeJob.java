@@ -78,7 +78,7 @@ public class AnalyzeJob extends ScriptJob
             catch (Throwable t)
             {
                 _log.error("Exception", t);
-                addError(null, null, "Exception: " + t);
+                error("Exception: " + t);
             }
         }
 

@@ -35,12 +35,6 @@ abstract public class FlowDataType extends DataType
         _objType = objType;
     }
 
-    static final public FlowDataType Log = new FlowDataType("Log", "Log", null){
-        public FlowDataObject newInstance(ExpData data)
-        {
-            return null;
-        }
-    };
     static final public FlowDataType FCSFile = new FlowDataType("FCSFile", "FCS File", ObjectType.fcsKeywords)
     {
         public FlowDataObject newInstance(ExpData data)

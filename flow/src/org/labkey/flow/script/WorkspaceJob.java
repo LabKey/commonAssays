@@ -295,7 +295,7 @@ public class WorkspaceJob extends FlowJob
                             String msg = "Can't generate graphs for sample. FCS File doesn't exist for " + description;
                             if (failOnError)
                             {
-                                job.addError(null, null, msg);
+                                job.error(msg);
                             }
                             else
                             {

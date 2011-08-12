@@ -99,7 +99,17 @@ abstract public class BaseHandler
     {
         if (res.exception == null)
             return false;
-        _job.addError(lsid, res.spec.toString(), res.exception.toString());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Error generating ");
+        if (res instanceof FCSAnalyzer.StatResult)
+            sb.append("statistic ");
+        else if (res instanceof  FCSAnalyzer.GraphResult)
+            sb.append("graph ");
+        sb.append(res.spec.toString()).append(" ");
+        sb.append(lsid).append(": ").append(res.exception.toString());
+
+        _job.error(sb.toString(), res.exception);
         return true;
     }
 

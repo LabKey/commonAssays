@@ -128,9 +128,9 @@ public abstract class FlowJob extends PipelineJob
         return getErrors() > 0;
     }
 
-    public void addError(String lsid, String propertyURI, String message)
+    public void error(String message, Throwable t)
     {
-        error(message);
+        super.error(message, t);
         setStatus(ERROR_STATUS);
     }
 
@@ -211,12 +211,6 @@ public abstract class FlowJob extends PipelineJob
         ActionURL ret = new ActionURL(FlowController.CancelJobAction.class, getContainer());
         ret.addParameter(FlowParam.statusFile.toString(), getStatusFilePath());
         return ret;
-    }
-
-    public void handleException(Throwable e)
-    {
-        _log.error("Error", e);
-        addError(null, null, e.toString());
     }
 
     protected void runPostAnalysisJobs() throws Exception

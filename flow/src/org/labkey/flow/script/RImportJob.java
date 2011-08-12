@@ -248,7 +248,6 @@ public class RImportJob extends FlowExperimentJob
             if (!success)
             {
                 error("Import failed to complete", e);
-                addError(null, null, e.toString());
             }
             FlowManager.analyze();
         }

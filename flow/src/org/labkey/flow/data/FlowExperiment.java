@@ -188,7 +188,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return fromURL(url, null);
     }
 
-    static public FlowExperiment fromURL(ActionURL url, HttpServletRequest request) throws ServletException
+    static public FlowExperiment fromURL(ActionURL url, HttpServletRequest request)
     {
         int expid = getIntParam(url, request, FlowParam.experimentId);
         if (0 == expid)

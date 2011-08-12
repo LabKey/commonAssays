@@ -27,7 +27,6 @@
 <%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="org.labkey.flow.controllers.run.RunForm" %>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
-<%@ page import="org.labkey.flow.data.FlowLog" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.view.FlowQueryView" %>
@@ -55,17 +54,8 @@
     
     FlowQueryView view = new FlowQueryView(form);
     include(view, out);
-    
-    FlowLog[] logs = run.getLogs();
-    if (logs.length != 0)
-    {
-        %><p>Log Files: <%
-        for (FlowLog log : logs)
-        {
-            %><br><a href="<%=h(log.urlShow())%>"><%=h(log.getName())%></a><%
-        }
-        %></p><%
-     }
+
+    // UNDONE: link to audit log for keyword changes
 
     if (context.getContainer().hasPermission(context.getUser(), UpdatePermission.class) &&
         (run.getStep() == FlowProtocolStep.analysis || run.isInWorkspace()))

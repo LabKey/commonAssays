@@ -27,7 +27,6 @@ public enum FlowParam
     refresh,
     redirect,
     graph,
-    logId,
     experimentId,
     queryName,
     columnList,

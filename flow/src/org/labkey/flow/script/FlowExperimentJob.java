@@ -100,12 +100,12 @@ public abstract class FlowExperimentJob extends FlowJob
         return PageFlowUtil.getFileContentsAsString(getLogFile());
     }
 
-    public void addError(String lsid, String propertyURI, String message)
+    public void error(String message, Throwable t)
     {
-        super.addError(lsid, propertyURI, message);
+        super.error(message, t);
         if (_runData != null)
         {
-            _runData.logError(lsid, propertyURI, message);
+            _runData.logError(message);
         }
     }
 
@@ -201,26 +201,13 @@ public abstract class FlowExperimentJob extends FlowJob
             _run = run;
         }
         ExperimentRunType _run;
-        Map<LogType, StringBuffer> _logs = new EnumMap(LogType.class);
+        List<String> _errors = new ArrayList<String>();
         Map<String, ScriptJob.StartingInput> _runOutputs = new LinkedHashMap();
         Map<String, ScriptJob.StartingInput> _startingDataInputs = new HashMap();
         Map<String, ScriptJob.StartingInput> _startingMaterialInputs = new HashMap();
-        public void logError(String lsid, String propertyURI, String message)
+        public void logError(String message)
         {
-            StringBuffer buf = _logs.get(LogType.error);
-            if (buf == null)
-            {
-                buf = new StringBuffer();
-                _logs.put(LogType.error, buf);
-            }
-            EnumMap<LogField, Object> values = new EnumMap(LogField.class);
-            values.put(LogField.date, new Date());
-            values.put(LogField.type, LogType.error);
-            values.put(LogField.user, getUser());
-            values.put(LogField.objectURI, lsid);
-            values.put(LogField.propertyURI, propertyURI);
-            values.put(LogField.message, message);
-            FlowLog.append(buf, values);
+            _errors.add(message);
         }
         public String getLSID()
         {

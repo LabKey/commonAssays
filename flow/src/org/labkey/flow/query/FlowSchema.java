@@ -118,7 +118,7 @@ public class FlowSchema extends UserSchema
         this(user, container, FlowProtocol.getForContainer(container));
     }
 
-    public FlowSchema(ViewContext context) throws ServletException
+    public FlowSchema(ViewContext context)
     {
         this(context.getUser(), context.getContainer());
         setExperiment(FlowExperiment.fromURL(context.getActionURL(), context.getRequest()));
@@ -127,7 +127,7 @@ public class FlowSchema extends UserSchema
     }
 
     // FlowSchema.createView()
-    private FlowSchema(ViewContext context, FlowSchema from) throws ServletException
+    private FlowSchema(ViewContext context, FlowSchema from)
     {
         this(context.getUser(), context.getContainer(), from._protocol);
 
@@ -316,7 +316,7 @@ public class FlowSchema extends UserSchema
     }
 
     @Override
-    public QueryView createView(ViewContext context, QuerySettings settings, BindException errors) throws ServletException
+    public QueryView createView(ViewContext context, QuerySettings settings, BindException errors)
     {
         return new FlowQueryView(new FlowSchema(context, this), (FlowQuerySettings) settings, errors);
     }

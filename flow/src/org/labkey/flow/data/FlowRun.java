@@ -34,7 +34,6 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowAnalyzer;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.sql.ResultSet;
@@ -45,7 +44,7 @@ import java.io.File;
 public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 {
     private static final Logger _log = Logger.getLogger(FlowRun.class);
-    Integer ACTIONSEQUENCE_LOG = 0;
+
     static public FlowRun[] fromRuns(ExpRun[] runs)
     {
         FlowRun[] ret = new FlowRun[runs.length];
@@ -163,11 +162,6 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return getDatas(FlowDataType.FCSFile).toArray(new FlowFCSFile[0]);
     }
 
-    public FlowLog[] getLogs() throws SQLException
-    {
-        return getDatas(FlowDataType.Log).toArray(new FlowLog[0]);
-    }
-
     public FlowFCSFile findFCSFile(URI uri) throws Exception
     {
         FlowFCSFile[] wells = getFCSFiles();
@@ -197,33 +191,6 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return getExperimentRun().getRowId();
     }
 
-    public FlowLog getLog(LogType type) throws SQLException
-    {
-        List<FlowLog> logs = (List<FlowLog>) getDatas(FlowDataType.Log);
-        for (FlowLog log : logs)
-        {
-            if (type.toString().equals(log.getName()))
-            {
-                return log;
-            }
-        }
-        return createLog(null, type);
-    }
-
-    private FlowLog createLog(User user, LogType type) throws SQLException
-    {
-        /*ExperimentManager mgr = ExperimentManager.get();
-        ProtocolApplication[] apps = mgr.getProtocolApplicationForRun(getRunId());
-        for (ProtocolApplication app : apps)
-        {
-            if (app.getActionSequence() == ACTIONSEQUENCE_LOG)
-            {
-                return (FlowLog) FlowDataObject.createData(user, getContainerId(), app, FlowDataType.Log, type.toString());
-            }
-        }*/
-        return null;
-    }
-
     static public FlowRun fromRunId(int id)
     {
         if (id == 0)
@@ -243,12 +210,12 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return new FlowRun(run);
     }
 
-    static public FlowRun fromURL(ActionURL url) throws ServletException
+    static public FlowRun fromURL(ActionURL url)
     {
         return fromURL(url, null);
     }
 
-    static public FlowRun fromURL(ActionURL url, HttpServletRequest request) throws ServletException
+    static public FlowRun fromURL(ActionURL url, HttpServletRequest request)
     {
         int runid = getIntParam(url, request, FlowParam.runId);
         if (0 == runid)

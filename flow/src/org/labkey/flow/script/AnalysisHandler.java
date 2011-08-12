@@ -94,7 +94,7 @@ public class AnalysisHandler extends BaseHandler
         }
         if (comp == null && _groupAnalysis.requiresCompensationMatrix())
         {
-            _job.addError(null, null, "No compensation matrix found.");
+            _job.error("No compensation matrix found.");
             return;
         }
         FlowSchema schema = new FlowSchema(_job.getUser(), getContainer());
@@ -251,7 +251,7 @@ public class AnalysisHandler extends BaseHandler
             }
             catch (Throwable t)
             {
-                _job.handleException(t);
+                _job.error("Error", t);
             }
 
         }

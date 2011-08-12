@@ -626,6 +626,8 @@ public class FlowManager
 
     static private String sqlDeleteKeyword = "DELETE FROM flow.keyword WHERE ObjectId = ? AND KeywordId = ?";
     static private String sqlInsertKeyword = "INSERT INTO flow.keyword (ObjectId, KeywordId, Value) VALUES (?, ?, ?)";
+
+    // UNDONE: add audit log entries for keyword updates
     public void setKeyword(Container c, ExpData data, String keyword, String value) throws SQLException
     {
         String oldValue = getKeyword(data, keyword);

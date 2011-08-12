@@ -47,11 +47,6 @@ public class FlowWell extends FlowDataObject
         return null;
     }
 
-    public FlowLog getLog(LogType type) throws SQLException
-    {
-        return getRun().getLog(type);
-    }
-
     static public FlowWell fromURL(ActionURL url) throws Exception
     {
         return fromURL(url, null);

@@ -126,7 +126,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     }
 
 
-    public void checkContainer(ActionURL url) throws ServletException
+    public void checkContainer(ActionURL url) throws NotFoundException
     {
         if (!getContainer().getParsedPath().equals(url.getParsedPath()))
         {
@@ -210,28 +210,6 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
             return null;
         Map<String, Object> props = OntologyManager.getProperties(getContainer(), getLSID());
         return props.get(pd.getPropertyURI());
-    }
-
-    public FlowLog getLog(LogType type) throws SQLException
-    {
-        return null;
-    }
-
-    public void logPropertyChange(User user, String propertyURI, Object oldValue, Object newValue) throws SQLException
-    {
-        FlowLog log = getLog(LogType.changes);
-        if (log == null)
-        {
-            return;
-        }
-        EnumMap values = new EnumMap(LogField.class);
-        values.put(LogField.date, new Date());
-        values.put(LogField.user, user);
-        values.put(LogField.objectURI, getLSID());
-        values.put(LogField.propertyURI, propertyURI);
-        values.put(LogField.oldValue, oldValue);
-        values.put(LogField.newValue, newValue);
-        log.append(values);
     }
 
     public void setProperty(User user, PropertyDescriptor pd, Object value) throws SQLException
