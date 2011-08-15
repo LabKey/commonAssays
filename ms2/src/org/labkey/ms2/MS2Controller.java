@@ -672,40 +672,43 @@ public class MS2Controller extends SpringActionController
         }
 
         StringBuilder onClick = new StringBuilder("showHelpDiv(this, 'Modifications', '");
+        StringBuilder html = new StringBuilder();
 
         if (0 == (var.size() + fixed.size()))
-            onClick.append("<tr><td colspan=2><b>None</b></td></tr>");
+            html.append("<tr><td colspan=2><b>None</b></td></tr>");
 
         if (0 != fixed.size())
         {
-            onClick.append("<tr><td colspan=2><b>Fixed</b></td></tr>");
+            html.append("<tr><td colspan=2><b>Fixed</b></td></tr>");
 
             for (Map.Entry<String, String> entry : fixed.entrySet())
             {
-                onClick.append("<tr><td>");
-                onClick.append(entry.getKey());
-                onClick.append("</td><td align=right>");
-                onClick.append(entry.getValue());
-                onClick.append("</td></tr>");
+                html.append("<tr><td class=labkey-form-label>");
+                html.append(PageFlowUtil.filter(entry.getKey()));
+                html.append("</td><td align=right>");
+                html.append(PageFlowUtil.filter(entry.getValue()));
+                html.append("</td></tr>");
             }
         }
 
         if (0 != var.size())
         {
             if (0 != fixed.size())
-                onClick.append("<tr><td colspan=2>&nbsp;</td></tr>");
+                html.append("<tr><td colspan=2>&nbsp;</td></tr>");
 
-            onClick.append("<tr><td colspan=2><b>Variable</b></td></tr>");
+            html.append("<tr><td colspan=2><b>Variable</b></td></tr>");
 
             for (Map.Entry<String, String> entry : var.entrySet())
             {
-                onClick.append("<tr><td>");
-                onClick.append(entry.getKey());
-                onClick.append("</td><td align=right>");
-                onClick.append(entry.getValue());
-                onClick.append("</td></tr>");
+                html.append("<tr><td class=labkey-form-label>");
+                html.append(PageFlowUtil.filter(entry.getKey()));
+                html.append("</td><td align=right>");
+                html.append(PageFlowUtil.filter(entry.getValue()));
+                html.append("</td></tr>");
             }
         }
+
+        onClick.append(PageFlowUtil.filter(html.toString()).replace("'", "\\'"));
 
         onClick.append("'); return false;");
 

@@ -845,9 +845,8 @@ public class ProteinManager
         public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sqlf = new SQLFragment();
-            String literal = "'" + _sequence + "' \n ";
-
-            sqlf.append(dialect.getStringIndexOfFunction("TrimmedPeptide", literal));
+            sqlf.append(dialect.getStringIndexOfFunction("TrimmedPeptide", "?"));
+            sqlf.add(_sequence);
             sqlf.append( " > 0 ");
             return sqlf;
         }
