@@ -30,7 +30,7 @@ import java.sql.SQLException;
  */
 public class ProteinGroupWithQuantitation extends ProteinGroup
 {
-    private ProteinQuantitation _quantitation;
+    private IcatProteinQuantitation _quantitation;
 
     private Protein[] _proteins;
     private MS2Peptide[] _peptides;
@@ -87,11 +87,11 @@ public class ProteinGroupWithQuantitation extends ProteinGroup
         }
     }
 
-    private ProteinQuantitation ensureQuantitation()
+    private IcatProteinQuantitation ensureQuantitation()
     {
         if (_quantitation == null)
         {
-            _quantitation = new ProteinQuantitation();
+            _quantitation = new IcatProteinQuantitation();
             _quantitation.setProteinGroupId(getRowId());
         }
         return _quantitation;

@@ -18,8 +18,8 @@ package org.labkey.ms2.reader;
 
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
+import org.labkey.ms2.IcatProteinQuantitation;
 import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.ProteinQuantitation;
 import org.labkey.ms2.pipeline.sequest.SequestRun;
 
 import javax.xml.stream.XMLStreamException;
@@ -165,7 +165,8 @@ public class ProtXmlReader
 
         private List<Peptide> _peptides = new ArrayList<Peptide>();
         private List<String> _indistinguishableProteinNames = new ArrayList<String>();
-        private ProteinQuantitation _quantRatio;
+        private IcatProteinQuantitation _quantRatio;
+        private ITraqProteinQuantitation _iTraqQuantRatio;
         private MS2Run _run;
 
         public Protein()
@@ -266,12 +267,62 @@ public class ProtXmlReader
                     }
                     else if ("XPressRatio".equals(name) || "Q3Ratio".equals(name))
                     {
-                        _quantRatio = new ProteinQuantitation();
+                        _quantRatio = new IcatProteinQuantitation();
                         _quantRatio.setHeavy2lightRatioMean(Float.parseFloat(parser.getAttributeValue(null, "heavy2light_ratio_mean")));
                         _quantRatio.setHeavy2lightRatioStandardDev(Float.parseFloat(parser.getAttributeValue(null, "heavy2light_ratio_standard_dev")));
                         _quantRatio.setRatioMean(Float.parseFloat(parser.getAttributeValue(null, "ratio_mean")));
                         _quantRatio.setRatioStandardDev(Float.parseFloat(parser.getAttributeValue(null, "ratio_standard_dev")));
                         _quantRatio.setRatioNumberPeptides(Integer.parseInt(parser.getAttributeValue(null, "ratio_number_peptides")));
+                    }
+                    else if ("libra_result".equals(name))
+                    {
+                        int index = 1;
+                        _iTraqQuantRatio = new ITraqProteinQuantitation();
+                        while (!parser.isEndElement() || !"libra_result".equals(parser.getLocalName()))
+                        {
+                            parser.next();
+                            if (parser.isStartElement() && "intensity".equals(parser.getLocalName()))
+                            {
+                                switch (index)
+                                {
+                                    case 1:
+                                        _iTraqQuantRatio.setRatio1(Double.parseDouble(parser.getAttributeValue(null, "ratio")));
+                                        _iTraqQuantRatio.setError1(Double.parseDouble(parser.getAttributeValue(null, "error")));
+                                        break;
+                                    case 2:
+                                        _iTraqQuantRatio.setRatio2(Double.parseDouble(parser.getAttributeValue(null, "ratio")));
+                                        _iTraqQuantRatio.setError2(Double.parseDouble(parser.getAttributeValue(null, "error")));
+                                        break;
+                                    case 3:
+                                        _iTraqQuantRatio.setRatio3(Double.parseDouble(parser.getAttributeValue(null, "ratio")));
+                                        _iTraqQuantRatio.setError3(Double.parseDouble(parser.getAttributeValue(null, "error")));
+                                        break;
+                                    case 4:
+                                        _iTraqQuantRatio.setRatio4(Double.parseDouble(parser.getAttributeValue(null, "ratio")));
+                                        _iTraqQuantRatio.setError4(Double.parseDouble(parser.getAttributeValue(null, "error")));
+                                        break;
+                                    case 5:
+                                        _iTraqQuantRatio.setRatio5(Double.parseDouble(parser.getAttributeValue(null, "ratio")));
+                                        _iTraqQuantRatio.setError5(Double.parseDouble(parser.getAttributeValue(null, "error")));
+                                        break;
+                                    case 6:
+                                        _iTraqQuantRatio.setRatio6(Double.parseDouble(parser.getAttributeValue(null, "ratio")));
+                                        _iTraqQuantRatio.setError6(Double.parseDouble(parser.getAttributeValue(null, "error")));
+                                        break;
+                                    case 7:
+                                        _iTraqQuantRatio.setRatio7(Double.parseDouble(parser.getAttributeValue(null, "ratio")));
+                                        _iTraqQuantRatio.setError7(Double.parseDouble(parser.getAttributeValue(null, "error")));
+                                        break;
+                                    case 8:
+                                        _iTraqQuantRatio.setRatio8(Double.parseDouble(parser.getAttributeValue(null, "ratio")));
+                                        _iTraqQuantRatio.setError8(Double.parseDouble(parser.getAttributeValue(null, "error")));
+                                        break;
+                                    default:
+                                        throw new IllegalStateException("Invalid iTRAQ index: " + index);
+                                }
+                                index++;
+                            }
+                        }
                     }
                 }
             }
@@ -383,9 +434,14 @@ public class ProtXmlReader
             _uniquePeptidesCount = uniquePeptidesCount;
         }
 
-        public ProteinQuantitation getQuantitationRatio()
+        public IcatProteinQuantitation getQuantitationRatio()
         {
             return _quantRatio;
+        }
+
+        public ITraqProteinQuantitation getITraqQuantitationRatio()
+        {
+            return _iTraqQuantRatio;
         }
     }
 

@@ -152,19 +152,4 @@ public abstract class RelativeQuantAnalysisResult extends PepXmlAnalysisResultHa
         else
             this.decimalRatio = decimalRatio;
     }
-
-    /**
-     * Substitute sentinel values when heavyArea goes to zero (infinite or undetermined
-     * ratios not consistently reported by applications.
-     */
-    public float parseDecimalRatio(String decimalRatio, float lightArea, float heavyArea)
-    {
-        if (heavyArea == 0.f)
-            if (lightArea == 0.f)
-                return SENTINEL_NAN;
-            else
-                return SENTINEL_POSITIVE_INFINITY;
-        return Float.parseFloat(decimalRatio);
-    }
-
 }

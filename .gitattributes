@@ -793,6 +793,7 @@ ms2/resources/queries/ms2/Peptides/SearchEngineProtein.qview.xml -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-9.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-10.20-10.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-11.10-11.19.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-11.20-11.21.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-drop.sql -text
@@ -876,6 +877,7 @@ ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-9.21-9.22.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-0.00-9.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-10.20-10.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-11.10-11.19.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/ms2-11.20-11.21.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-drop.sql -text
@@ -974,6 +976,7 @@ ms2/resources/schemas/prot.xml -text
 ms2/resources/views/MS2[!!-~]Runs[!!-~]Browser.webpart.xml -text
 ms2/resources/views/runsOverview.html -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
+ms2/src/org/labkey/ms2/AbstractProteinQuantitation.java -text
 ms2/src/org/labkey/ms2/CompareServiceImpl.java -text
 ms2/src/org/labkey/ms2/CumulativeTimer.java -text
 ms2/src/org/labkey/ms2/DeltaScanColumn.java -text
@@ -988,6 +991,7 @@ ms2/src/org/labkey/ms2/GroupNumberDisplayColumn.java -text
 ms2/src/org/labkey/ms2/HideShowScoringColumn.java -text
 ms2/src/org/labkey/ms2/Hydrophobicity3.java -text
 ms2/src/org/labkey/ms2/HydrophobicityColumn.java -text
+ms2/src/org/labkey/ms2/IcatProteinQuantitation.java -text
 ms2/src/org/labkey/ms2/MS2Controller.java -text
 ms2/src/org/labkey/ms2/MS2FolderType.java -text
 ms2/src/org/labkey/ms2/MS2GZFileRenderer.java -text
@@ -1016,7 +1020,6 @@ ms2/src/org/labkey/ms2/ProteinName.java -text
 ms2/src/org/labkey/ms2/ProteinProphetExperimentDataHandler.java -text
 ms2/src/org/labkey/ms2/ProteinProphetFile.java -text
 ms2/src/org/labkey/ms2/ProteinProphetImporter.java -text
-ms2/src/org/labkey/ms2/ProteinQuantitation.java -text
 ms2/src/org/labkey/ms2/ProteinSummary.java -text
 ms2/src/org/labkey/ms2/RunListCache.java -text
 ms2/src/org/labkey/ms2/RunListException.java -text
@@ -1270,6 +1273,7 @@ ms2/src/org/labkey/ms2/query/ComparePeptideTableInfo.java -text
 ms2/src/org/labkey/ms2/query/CompareProteinProphetTableInfo.java -text
 ms2/src/org/labkey/ms2/query/CompareProteinsView.java -text
 ms2/src/org/labkey/ms2/query/FilterView.java -text
+ms2/src/org/labkey/ms2/query/ITraqProteinQuantitationTable.java -text
 ms2/src/org/labkey/ms2/query/MS2Schema.java -text
 ms2/src/org/labkey/ms2/query/NormalizedProteinProphetCrosstabView.java -text
 ms2/src/org/labkey/ms2/query/OrganismTableInfo.java -text
@@ -1291,6 +1295,9 @@ ms2/src/org/labkey/ms2/query/UniquePeptideCountCoverageColumn.java -text
 ms2/src/org/labkey/ms2/reader/AbstractMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/AbstractRandomAccessMzxmlParser.java -text
 ms2/src/org/labkey/ms2/reader/DatDocumentParser.java -text
+ms2/src/org/labkey/ms2/reader/ITraqProteinQuantitation.java -text
+ms2/src/org/labkey/ms2/reader/LibraQuantHandler.java -text
+ms2/src/org/labkey/ms2/reader/LibraQuantResult.java -text
 ms2/src/org/labkey/ms2/reader/MGFDocumentParser.java -text
 ms2/src/org/labkey/ms2/reader/MS2Loader.java -text
 ms2/src/org/labkey/ms2/reader/MS2ModificationList.java -text

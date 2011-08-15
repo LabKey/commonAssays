@@ -23,11 +23,11 @@ import org.labkey.ms2.MS2Manager;
  * User: jeckels
  * Date: Apr 17, 2007
  */
-public class ProteinQuantitationTable extends FilteredTable
+public class ITraqProteinQuantitationTable extends FilteredTable
 {
-    public ProteinQuantitationTable()
+    public ITraqProteinQuantitationTable()
     {
-        super(MS2Manager.getTableInfoProteinQuantitation());
+        super(MS2Manager.getTableInfoITraqProteinQuantitation());
         wrapAllColumns(true);
         getColumn("ProteinGroupId").setHidden(true);
     }

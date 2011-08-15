@@ -15,9 +15,6 @@
  */
 package org.labkey.ms2.reader;
 
-import org.labkey.ms2.reader.PeptideProphetHandler;
-import org.labkey.ms2.reader.XPressHandler;
-import org.labkey.ms2.reader.Q3Handler;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 
 import javax.xml.stream.XMLStreamException;
@@ -31,15 +28,14 @@ import java.util.HashMap;
  */
 public abstract class PepXmlAnalysisResultHandler
 {
-    private static Map<String, PepXmlAnalysisResultHandler> _handlers;
+    private static final Map<String, PepXmlAnalysisResultHandler> _handlers = new HashMap<String, PepXmlAnalysisResultHandler>();
 
     static
     {
-        _handlers = new HashMap<String, PepXmlAnalysisResultHandler>(10);
-
         register(new PeptideProphetHandler());
         register(new XPressHandler());
         register(new Q3Handler());
+        register(new LibraQuantHandler());
     }
 
     private static void register(PepXmlAnalysisResultHandler handler)
@@ -73,8 +69,6 @@ public abstract class PepXmlAnalysisResultHandler
 
     /**
      * Special handling for "inf" values
-     * @param floatString
-     * @return
      */
     protected Float parseFloatHandleInf(String floatString)
     {

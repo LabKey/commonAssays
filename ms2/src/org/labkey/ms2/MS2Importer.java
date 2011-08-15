@@ -43,6 +43,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,11 +64,12 @@ public abstract class MS2Importer
     protected User _user;
     protected Container _container;
     protected String _description, _fileName, _path;
-    protected Connection _conn = null;
-    protected PreparedStatement _stmt = null;
-    protected PreparedStatement _stmtWithReselect = null;
-    protected PreparedStatement _prophetStmt = null;
-    protected PreparedStatement _quantStmt = null;
+    protected Connection _conn;
+    protected PreparedStatement _stmt;
+    protected PreparedStatement _stmtWithReselect;
+    protected PreparedStatement _prophetStmt;
+    protected PreparedStatement _quantStmt;
+    protected PreparedStatement _iTraqQuantStmt;
     protected int _runId, _fractionId;
 
     // Use passed in logger for import status, information, and file format problems.  This should
@@ -248,47 +250,26 @@ public abstract class MS2Importer
 
     abstract protected String getType();
 
-    protected void close()
+    private void close(Statement stmt, String description)
     {
         try
         {
-            if (null != _stmt)
-                _stmt.close();
+            if (null != stmt)
+                stmt.close();
         }
         catch (SQLException e)
         {
-            logError("Error closing simple prepared statement", e);
+            logError("Error closing " + description + " prepared statement", e);
         }
+    }
 
-        try
-        {
-            if (null != _stmtWithReselect)
-                _stmtWithReselect.close();
-        }
-        catch (SQLException e)
-        {
-            logError("Error closing reselect prepared statement", e);
-        }
-
-        try
-        {
-            if (null != _quantStmt)
-                _quantStmt.close();
-        }
-        catch (SQLException e)
-        {
-            logError("Error closing quantitation prepared statement", e);
-        }
-
-        try
-        {
-            if (null != _prophetStmt)
-                _prophetStmt.close();
-        }
-        catch (SQLException e)
-        {
-            logError("Error closing PeptideProphet data prepared statement", e);
-        }
+    protected void close()
+    {
+        close(_stmt, "simple");
+        close(_stmtWithReselect, "reselect");
+        close(_quantStmt, "quantitation");
+        close(_iTraqQuantStmt, "iTraq quantitation");
+        close(_prophetStmt, "PeptideProphet data");
 
         if (null != _conn)
             MS2Manager.getSchema().getScope().releaseConnection(_conn);
@@ -554,6 +535,8 @@ public abstract class MS2Importer
         _prophetStmt = _conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoPeptideProphetData() + " (PeptideId,ProphetFVal,ProphetDeltaMass,ProphetNumTrypticTerm,ProphetNumMissedCleav) VALUES (?,?,?,?,?)");
 
         _quantStmt = _conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoQuantitation() + "(PeptideId, LightFirstScan, LightLastScan, LightMass, HeavyFirstScan, HeavyLastScan, HeavyMass, Ratio, Heavy2LightRatio, LightArea, HeavyArea, DecimalRatio, QuantId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+        _iTraqQuantStmt = _conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoITraqPeptideQuantitation() + "(PeptideId, TargetMass1, AbsoluteMass1, Normalized1, TargetMass2, AbsoluteMass2, Normalized2, TargetMass3, AbsoluteMass3, Normalized3, TargetMass4, AbsoluteMass4, Normalized4, TargetMass5, AbsoluteMass5, Normalized5, TargetMass6, AbsoluteMass6, Normalized6, TargetMass7, AbsoluteMass7, Normalized7, TargetMass8, AbsoluteMass8, Normalized8) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     }
 
 

@@ -204,6 +204,16 @@ public class MS2Manager
         return getSchema().getTable("ProteinQuantitation");
     }
 
+    public static TableInfo getTableInfoITraqPeptideQuantitation()
+    {
+        return getSchema().getTable("iTraqPeptideQuantitation");
+    }
+
+    public static TableInfo getTableInfoITraqProteinQuantitation()
+    {
+        return getSchema().getTable("iTraqProteinQuantitation");
+    }
+
     public static TableInfo getTableInfoFractions()
     {
         return getSchema().getTable("Fractions");
@@ -661,7 +671,7 @@ public class MS2Manager
 
     public static RelativeQuantAnalysisSummary getQuantSummaryForRun(int runId)
     {
-        SimpleFilter filter = new SimpleFilter("run", new Integer(runId));
+        SimpleFilter filter = new SimpleFilter("run", runId);
         RelativeQuantAnalysisSummary[] summaries;
         try
         {
@@ -967,9 +977,9 @@ public class MS2Manager
         try
         {
             SQLFragment sql = new SQLFragment("SELECT pg.* FROM ");
-            sql.append(getTableInfoProteinGroupsWithQuantitation());
-            sql.append(" pg WHERE pg.RowId IN (SELECT ProteinGroupId FROM ");
-            sql.append(getTableInfoPeptideMemberships());
+            sql.append(getTableInfoProteinGroupsWithQuantitation(), "pg");
+            sql.append(" WHERE pg.RowId IN (SELECT ProteinGroupId FROM ");
+            sql.append(getTableInfoPeptideMemberships(), "pm");
             sql.append(" WHERE PeptideId = ?)");
             sql.add(peptide.getRowId());
 
@@ -1056,6 +1066,7 @@ public class MS2Manager
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoSpectraData() + fractionWhere, params);
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoQuantSummaries() + runWhere, params);
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoQuantitation() + peptideFKWhere, params);
+        Table.execute(getSchema(), "DELETE FROM " + getTableInfoITraqPeptideQuantitation() + peptideFKWhere, params);
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoPeptideProphetData() + peptideFKWhere, params);
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoPeptidesData() + fractionWhere, params);
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoPeptideProphetSummaries() + runWhere, params);
@@ -1075,6 +1086,7 @@ public class MS2Manager
         String proteinGroupsWhere = " WHERE ProteinGroupId IN (SELECT RowId FROM " + getTableInfoProteinGroups() + proteinProphetFilesWhere + ")";
 
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoProteinQuantitation() + proteinGroupsWhere, params);
+        Table.execute(getSchema(), "DELETE FROM " + getTableInfoITraqProteinQuantitation() + proteinGroupsWhere, params);
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoPeptideMemberships() + proteinGroupsWhere, params);
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoProteinGroupMemberships() + proteinGroupsWhere, params);
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoProteinGroups() + proteinProphetFilesWhere, params);
@@ -1083,7 +1095,7 @@ public class MS2Manager
 
     public static MS2Fraction[] getFractions(int runId)
     {
-        SimpleFilter filter = new SimpleFilter("run", new Integer(runId));
+        SimpleFilter filter = new SimpleFilter("run", runId);
 
         try
         {
@@ -1124,8 +1136,7 @@ public class MS2Manager
 
     public static PeptideQuantitation getQuantitation(long peptideId)
     {
-        Object[] pk = new Object[]{new Long(peptideId)};
-        return Table.selectObject(getTableInfoQuantitation(), pk, PeptideQuantitation.class);
+        return Table.selectObject(getTableInfoQuantitation(), peptideId, PeptideQuantitation.class);
     }
 
     public static int verifyRowIndex(long[] index, int rowIndex, long peptideId)
@@ -1160,7 +1171,7 @@ public class MS2Manager
     {
         try
         {
-            byte[] spectrumBytes = Table.executeSingleton(getSchema(), "SELECT Spectrum FROM " + getTableInfoSpectraData() + " WHERE Fraction=? AND Scan=?", new Object[]{new Integer(fractionId), new Integer(scan)}, byte[].class);
+            byte[] spectrumBytes = Table.executeSingleton(getSchema(), "SELECT Spectrum FROM " + getTableInfoSpectraData() + " WHERE Fraction=? AND Scan=?", new Object[]{fractionId, scan}, byte[].class);
 
             if (null != spectrumBytes)
                 return SpectrumImporter.byteArrayToFloatArrays(spectrumBytes);
@@ -1317,7 +1328,7 @@ public class MS2Manager
         }
         finally
         {
-            if (rs != null) { try { rs.close(); } catch (SQLException e) {} }
+            if (rs != null) { try { rs.close(); } catch (SQLException ignored) {} }
         }
     }
 
@@ -1439,7 +1450,7 @@ public class MS2Manager
     {
         try
         {
-            Table.update(null, MS2Manager.getTableInfoFractions(), updateMap, new Integer(fraction.getFraction()));
+            Table.update(null, MS2Manager.getTableInfoFractions(), updateMap, fraction.getFraction());
             _removeFractionFromCache(fraction.getFraction());
         }
         catch (SQLException e)
@@ -1542,7 +1553,7 @@ public class MS2Manager
 
     public static XYSeriesCollection getROCData(int[] runIds, boolean[][] discriminateFlags,
                                                 double increment, double percentAACorrect, int limitFalsePs,
-                                                double[] marks, boolean markFdr, Container c)
+                                                double[] marks, boolean markFdr)
     {
         String negHitPrefix = NEGATIVE_HIT_PREFIX;
 
@@ -1648,7 +1659,7 @@ public class MS2Manager
     public static XYSeriesCollection getROCDataProt(int[] runIds, double increment,
                                                     boolean[][] discriminateFlags,
                                                     double percentAACorrect, int limitFalsePs,
-                                                    double[] marks, boolean markFdr, Container c)
+                                                    double[] marks, boolean markFdr)
     {
         String negHitPrefix = NEGATIVE_HIT_PREFIX;
 
@@ -1763,11 +1774,11 @@ public class MS2Manager
     }
 
     public static XYSeriesCollection getDiscriminateROCData(int runId,
-                                                         String[] expressions,
-                                                         double increment,
-                                                         int limitFalsePs,
-                                                         int[] marks,
-                                                         Container c)
+                                                            String[] expressions,
+                                                            double increment,
+                                                            int limitFalsePs,
+                                                            int[] marks
+    )
     {
         String negHitPrefix = NEGATIVE_HIT_PREFIX;
 
@@ -1793,7 +1804,7 @@ public class MS2Manager
                                             "FROM " + getTableInfoPeptides().getSelectName() + " " +
                                             "WHERE Run = ? " +
                                             "ORDER BY Expression DESC",
-                                            new Object[] { new Integer(runId) });
+                                            new Object[] {runId});
                 if (!rs.next())
                     return collection;
 
@@ -1853,8 +1864,8 @@ public class MS2Manager
                                                          double percentAACorrect,
                                                          final String expression,
                                                          double bucket,
-                                                         int scaleFactor,
-                                                         Container c)
+                                                         int scaleFactor
+    )
     {
         String negHitPrefix = NEGATIVE_HIT_PREFIX;
 
@@ -1877,7 +1888,7 @@ public class MS2Manager
                         "FROM " + getTableInfoPeptides().getSelectName() + " " +
                         "WHERE Run = ? " +
                         "ORDER BY Expression",
-                        new Object[] { new Integer(runId) });
+                        new Object[] {runId});
                 if (!rs.next())
                     return collection;
 

@@ -139,8 +139,8 @@ public class ScoringController extends SpringActionController
                             form.getPercentAACorrect(),
                             form.getLimit(),
                             form.getMarkNums(),
-                            form.isMarkFdr(),
-                            getContainer());
+                            form.isMarkFdr()
+                    );
 
             if (form.isSaveTsvs())
             {
@@ -193,8 +193,8 @@ public class ScoringController extends SpringActionController
                             form.getPercentAACorrect(),
                             form.getLimit(),
                             form.getMarkNums(),
-                            form.isMarkFdr(),
-                            getContainer());
+                            form.isMarkFdr()
+            );
         }
     }
 
@@ -459,8 +459,8 @@ public class ScoringController extends SpringActionController
                             form.getPercentAACorrect(),
                             form.getExpressions()[charge-1],
                             form.getBuckets()[charge-1],
-                            form.getScaleFactors()[charge-1],
-                            c);
+                            form.getScaleFactors()[charge-1]
+                    );
 
             JFreeChart chart = ChartFactory.createXYLineChart(form.getTitle(),
                     form.getExpressions()[charge-1],
@@ -507,8 +507,8 @@ public class ScoringController extends SpringActionController
                             form.getExpressions(),
                             0.2,
                             150,
-                            new int[] {0, 50},
-                            c);
+                            new int[] {0, 50}
+                    );
 
             JFreeChart chart = ChartFactory.createXYLineChart(form.getTitle(),
                     "False Positives",

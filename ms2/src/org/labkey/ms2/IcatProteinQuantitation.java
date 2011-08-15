@@ -19,24 +19,13 @@ package org.labkey.ms2;
 * User: jeckels
 * Date: Aug 20, 2010
 */
-public class ProteinQuantitation
+public class IcatProteinQuantitation extends AbstractProteinQuantitation
 {
-    private int _proteinGroupId;
     private float _ratioMean;
     private float _ratioStandardDev;
     private int _ratioNumberPeptides;
     private float _heavy2lightRatioMean;
     private float _heavy2lightRatioStandardDev;
-
-    public int getProteinGroupId()
-    {
-        return _proteinGroupId;
-    }
-
-    public void setProteinGroupId(int proteinGroupId)
-    {
-        _proteinGroupId = proteinGroupId;
-    }
 
     public float getRatioMean()
     {

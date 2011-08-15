@@ -17,7 +17,6 @@ package org.labkey.ms2.reader;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.reader.SimpleXMLStreamReader;
-import org.labkey.ms2.reader.RelativeQuantAnalysisResult;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -27,7 +26,7 @@ import javax.xml.stream.XMLStreamException;
  */
 public class Q3Handler extends PepXmlAnalysisResultHandler
 {
-    public static final String analysisType = "q3";
+    public static final String ANALYSIS_TYPE = "q3";
 
     static Logger _log = Logger.getLogger(PepXmlAnalysisResult.class);
 
@@ -50,14 +49,14 @@ public class Q3Handler extends PepXmlAnalysisResultHandler
 
     public String getAnalysisType()
     {
-        return analysisType;
+        return ANALYSIS_TYPE;
     }
 
     public static class Q3Result extends RelativeQuantAnalysisResult
     {
         public String getAnalysisType()
         {
-            return analysisType;
+            return ANALYSIS_TYPE;
         }
     }
 }

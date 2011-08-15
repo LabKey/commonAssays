@@ -150,6 +150,22 @@ public class PeptidesTableInfo extends FilteredTable
         quantitation.setKeyField(false);
         addColumn(quantitation);
 
+        ColumnInfo iTraqQuantitation = wrapColumn("iTRAQQuantitation", info.getColumn("RowId"));
+        iTraqQuantitation.setLabel("iTRAQ Quantitation");
+        iTraqQuantitation.setIsUnselectable(true);
+        iTraqQuantitation.setFk(new LookupForeignKey("PeptideId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                FilteredTable result = new FilteredTable(MS2Manager.getTableInfoITraqPeptideQuantitation());
+                result.wrapAllColumns(true);
+                result.getColumn("PeptideId").setHidden(true);
+                return result;
+            }
+        });
+        iTraqQuantitation.setKeyField(false);
+        addColumn(iTraqQuantitation);
+
         ColumnInfo proteinGroup = wrapColumn("ProteinProphetData", info.getColumn("RowId"));
         proteinGroup.setIsUnselectable(true);
         proteinGroup.setFk(new LookupForeignKey("PeptideId")

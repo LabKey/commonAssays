@@ -27,6 +27,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.fasta.Protein;
+import org.labkey.ms2.reader.ITraqProteinQuantitation;
 import org.labkey.ms2.reader.ProtXmlReader;
 import org.labkey.ms2.reader.ProteinGroup;
 import org.labkey.api.util.*;
@@ -415,7 +416,8 @@ public class ProteinProphetImporter
     private int insertProteinGroup(ProtXmlReader.Protein protein, PreparedStatement groupStmt, int groupNumber, float groupProbability, int collectionId, ProteinProphetFile file, ViewBackgroundInfo info)
         throws SQLException
     {
-        ProteinQuantitation xpressRatio = protein.getQuantitationRatio();
+        IcatProteinQuantitation icatRatio = protein.getQuantitationRatio();
+        ITraqProteinQuantitation itraqRatio = protein.getITraqQuantitationRatio();
 
         int groupIndex = 1;
         groupStmt.setInt(groupIndex++, groupNumber);
@@ -469,13 +471,19 @@ public class ProteinProphetImporter
         }
         finally
         {
-            if (rs != null) { try { rs.close(); } catch (SQLException e) {} }
+            if (rs != null) { try { rs.close(); } catch (SQLException ignored) {} }
         }
 
-        if (xpressRatio != null)
+        if (icatRatio != null)
         {
-            xpressRatio.setProteinGroupId(groupId);
-            Table.insert(info.getUser(), MS2Manager.getTableInfoProteinQuantitation(), xpressRatio);
+            icatRatio.setProteinGroupId(groupId);
+            Table.insert(info.getUser(), MS2Manager.getTableInfoProteinQuantitation(), icatRatio);
+        }
+        
+        if (itraqRatio != null)
+        {
+            itraqRatio.setProteinGroupId(groupId);
+            Table.insert(info.getUser(), MS2Manager.getTableInfoITraqProteinQuantitation(), itraqRatio);
         }
         return groupId;
     }

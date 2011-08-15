@@ -23,14 +23,14 @@
 <%
     MS2Controller.MS2AdminBean bean = ((JspView<MS2Controller.MS2AdminBean>)HttpView.currentView()).getModelBean();
 %>
-<table class="labkey-data-region">
-<tr><td>&nbsp;</td><td><b>MS2 Runs</b></td><td><b>MS2 Peptides</b></td><td><b>MS2 Spectra</b></td></tr>
-<tr><td>Successful:</td><td><a href="<%=h(bean.successfulURL)%>"><%=bean.stats.get("successfulRuns")%></a></td><td><%=bean.stats.get("successfulPeptides")%></td><td><%=bean.stats.get("successfulSpectra")%></td></tr>
-<tr><td>In-Process:</td><td><a href="<%=h(bean.inProcessURL)%>"><%=bean.stats.get("inProcessRuns")%></a></td><td><%=bean.stats.get("inProcessPeptides")%></td><td><%=bean.stats.get("inProcessSpectra")%></td></tr>
-<tr><td>Failed:</td><td><a href="<%=h(bean.failedURL)%>"><%=bean.stats.get("failedRuns")%></a></td><td><%=bean.stats.get("failedPeptides")%></td><td><%=bean.stats.get("failedSpectra")%></td></tr>
-<tr><td>&nbsp;</td></tr>
-<tr><td>Deleted:</td><td><a href="<%=h(bean.deletedURL)%>"><%=bean.stats.get("deletedRuns")%></a></td><td><%=bean.stats.get("deletedPeptides")%></td><td><%=bean.stats.get("deletedSpectra")%></td></tr>
-<tr><td>To Be Purged:</td><td><%=bean.stats.get("purgedRuns")%></td><td><%=bean.stats.get("purgedPeptides")%></td><td><%=bean.stats.get("purgedSpectra")%></td></tr>
+<table class="labkey-data-region labkey-show-borders" cellpadding="4" cellspacing="4">
+<tr><td>&nbsp;</td><td align="right"><strong>Runs</strong></td><td align="right"><strong>Peptides</strong></td><td align="right"><strong>Spectra</strong></td></tr>
+<tr class="labkey-row"><td class="labkey-form-label">Successful</td><td align="right"><a href="<%=h(bean.successfulURL)%>"><%=bean.stats.get("successfulRuns")%></a></td><td align="right"><%=bean.stats.get("successfulPeptides")%></td><td align="right"><%=bean.stats.get("successfulSpectra")%></td></tr>
+<tr class="labkey-row"><td class="labkey-form-label">In-Process</td><td align="right"><a href="<%=h(bean.inProcessURL)%>"><%=bean.stats.get("inProcessRuns")%></a></td><td align="right"><%=bean.stats.get("inProcessPeptides")%></td><td align="right"><%=bean.stats.get("inProcessSpectra")%></td></tr>
+<tr class="labkey-row"><td class="labkey-form-label">Failed</td><td align="right"><a href="<%=h(bean.failedURL)%>"><%=bean.stats.get("failedRuns")%></a></td><td align="right"><%=bean.stats.get("failedPeptides")%></td><td align="right"><%=bean.stats.get("failedSpectra")%></td></tr>
+<tr class="labkey-row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr class="labkey-row"><td class="labkey-form-label">Deleted</td><td align="right"><a href="<%=h(bean.deletedURL)%>"><%=bean.stats.get("deletedRuns")%></a></td><td align="right"><%=bean.stats.get("deletedPeptides")%></td><td align="right"><%=bean.stats.get("deletedSpectra")%></td></tr>
+<tr class="labkey-row"><td class="labkey-form-label">To Be Purged</td><td align="right"><%=bean.stats.get("purgedRuns")%></td><td align="right"><%=bean.stats.get("purgedPeptides")%></td><td align="right"><%=bean.stats.get("purgedSpectra")%></td></tr>
 </table><br>
 
 <%

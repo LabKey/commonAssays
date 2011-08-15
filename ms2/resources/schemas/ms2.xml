@@ -1971,6 +1971,85 @@
     </ns:columns>
     <ns:description>Contains a row for every protein with quantitation data in this folder.</ns:description>
   </ns:table>
+  <ns:table tableName="iTRAQProteinQuantitation" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="ProteinGroupId">
+          <ns:isHidden>true</ns:isHidden>
+      </ns:column>
+      <ns:column columnName="Ratio1">
+          <ns:columnTitle>Ratio 1</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Error1">
+          <ns:columnTitle>Error 1</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="Ratio2">
+          <ns:columnTitle>Ratio 2</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Error2">
+          <ns:columnTitle>Error 2</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="Ratio3">
+          <ns:columnTitle>Ratio 3</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Error3">
+          <ns:columnTitle>Error 3</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="Ratio4">
+          <ns:columnTitle>Ratio 4</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Error4">
+          <ns:columnTitle>Error 4</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="Ratio5">
+          <ns:columnTitle>Ratio 5</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Error5">
+          <ns:columnTitle>Error 5</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="Ratio6">
+          <ns:columnTitle>Ratio 6</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Error6">
+          <ns:columnTitle>Error 6</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="Ratio7">
+          <ns:columnTitle>Ratio 7</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Error7">
+          <ns:columnTitle>Error 7</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="Ratio8">
+          <ns:columnTitle>Ratio 8</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Error8">
+          <ns:columnTitle>Error 8</ns:columnTitle>
+          <ns:formatString>0.00</ns:formatString>
+      </ns:column>
+    </ns:columns>
+    <ns:description>Contains a row for every protein with quantitation data in this folder.</ns:description>
+  </ns:table>
   <ns:table tableName="Quantitation" tableDbType="TABLE">
     <ns:columns>
       <ns:column columnName="PeptideId"/>
@@ -1998,7 +2077,116 @@
       </ns:column>
       <ns:column columnName="Invalidated" />
     </ns:columns>
-    <ns:description>Contains a row for every peptide with quantitation data in this folder.</ns:description>
+    <ns:description>Contains a row for every peptide with XPRESS or Q3 quantitation data in this folder.</ns:description>
+  </ns:table>
+  <ns:table tableName="iTRAQPeptideQuantitation" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="PeptideId"/>
+      <ns:column columnName="TargetMass1">
+          <ns:columnTitle>Target Mass 1</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="AbsoluteMass1">
+          <ns:columnTitle>Absolute Mass 1</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Normalized1">
+          <ns:columnTitle>Normalized 1</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="TargetMass2">
+          <ns:columnTitle>Target Mass 2</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="AbsoluteMass2">
+          <ns:columnTitle>Absolute Mass 2</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Normalized2">
+          <ns:columnTitle>Normalized 2</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="TargetMass3">
+          <ns:columnTitle>Target Mass 3</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="AbsoluteMass3">
+          <ns:columnTitle>Absolute Mass 3</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Normalized3">
+          <ns:columnTitle>Normalized 3</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="TargetMass4">
+          <ns:columnTitle>Target Mass 4</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="AbsoluteMass4">
+          <ns:columnTitle>Absolute Mass 4</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Normalized4">
+          <ns:columnTitle>Normalized 4</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="TargetMass5">
+          <ns:columnTitle>Target Mass 5</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="AbsoluteMass5">
+          <ns:columnTitle>Absolute Mass 5</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Normalized5">
+          <ns:columnTitle>Normalized 5</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="TargetMass6">
+          <ns:columnTitle>Target Mass 6</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="AbsoluteMass6">
+          <ns:columnTitle>Absolute Mass 6</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Normalized6">
+          <ns:columnTitle>Normalized 6</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="TargetMass7">
+          <ns:columnTitle>Target Mass 7</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="AbsoluteMass7">
+          <ns:columnTitle>Absolute Mass 7</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Normalized7">
+          <ns:columnTitle>Normalized 7</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+
+      <ns:column columnName="TargetMass8">
+          <ns:columnTitle>Target Mass 8</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="AbsoluteMass8">
+          <ns:columnTitle>Absolute Mass 8</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+      <ns:column columnName="Normalized8">
+          <ns:columnTitle>Normalized 8</ns:columnTitle>
+          <ns:formatString>0.000</ns:formatString>
+      </ns:column>
+    </ns:columns>
+    <ns:description>Contains a row for every peptide with iTRAQ quantitation data in this folder.</ns:description>
   </ns:table>
   <ns:table tableName="QuantSummaries" tableDbType="TABLE">
     <ns:columns>

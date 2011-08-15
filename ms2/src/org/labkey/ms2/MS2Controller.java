@@ -3739,7 +3739,10 @@ public class MS2Controller extends SpringActionController
             bean.failedURL = showRunsURL(false, 2);
             bean.deletedURL = showRunsURL(true, null);
 
-            return new JspView<MS2AdminBean>("/org/labkey/ms2/ms2Admin.jsp", bean);
+            JspView<MS2AdminBean> result = new JspView<MS2AdminBean>("/org/labkey/ms2/ms2Admin.jsp", bean);
+            result.setFrame(WebPartView.FrameType.PORTAL);
+            result.setTitle("MS2 Data Overview");
+            return result;
         }
 
         public NavTree appendNavTrail(NavTree root)

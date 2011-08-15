@@ -99,6 +99,19 @@ public class ProteinGroupTableInfo extends FilteredTable
         quantitation.setKeyField(false);
         addColumn(quantitation);
 
+        ColumnInfo iTraqQuantitation = wrapColumn("iTRAQQuantitation", getRealTable().getColumn("RowId"));
+        iTraqQuantitation.setLabel("iTRAQ Quantitation");
+        iTraqQuantitation.setIsUnselectable(true);
+        iTraqQuantitation.setFk(new LookupForeignKey("ProteinGroupId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return new ITraqProteinQuantitationTable();
+            }
+        });
+        iTraqQuantitation.setKeyField(false);
+        addColumn(iTraqQuantitation);
+
         for (ColumnInfo col : getColumns())
         {
             if (HIDDEN_PROTEIN_GROUP_COLUMN_NAMES.contains(col.getName()))

@@ -515,8 +515,9 @@ public class PepXmlImporter extends MS2Importer
         PeptideProphetHandler.PeptideProphetResult pp = peptide.getPeptideProphetResult();
         boolean hasProphet = (_scoringAnalysis && pp != null && pp.isSummaryLoaded());
         boolean hasQuant = (null != _quantSummaries && _quantSummaries.size() > 0);
+        LibraQuantResult libraResult = (LibraQuantResult)peptide.getAnalysisResult(LibraQuantHandler.ANALYSIS_TYPE);
 
-        PreparedStatement stmt = (hasProphet || hasQuant ? _stmtWithReselect : _stmt);
+        PreparedStatement stmt = (hasProphet || hasQuant || libraResult != null ? _stmtWithReselect : _stmt);
 
         try
         {
@@ -552,6 +553,222 @@ public class PepXmlImporter extends MS2Importer
                 throw e;
             }
         }
+
+        if (libraResult != null)
+        {
+            if (peptideId == -1)
+            {
+                peptideId = getPeptideId(stmt);
+            }
+
+            libraResult.setPeptideId(peptideId);
+
+            _iTraqQuantStmt.setLong(1, peptideId);
+
+            if (libraResult.getTargetMass1() != null)
+            {
+                _iTraqQuantStmt.setDouble(2, libraResult.getTargetMass1());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(2, Types.DOUBLE);
+            }
+            if (libraResult.getAbsoluteMass1() != null)
+            {
+                _iTraqQuantStmt.setDouble(3, libraResult.getAbsoluteMass1());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(3, Types.DOUBLE);
+            }
+            if (libraResult.getNormalized1() != null)
+            {
+                _iTraqQuantStmt.setDouble(4, libraResult.getNormalized1());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(4, Types.DOUBLE);
+            }
+
+            if (libraResult.getTargetMass2() != null)
+            {
+                _iTraqQuantStmt.setDouble(5, libraResult.getTargetMass2());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(5, Types.DOUBLE);
+            }
+            if (libraResult.getAbsoluteMass2() != null)
+            {
+                _iTraqQuantStmt.setDouble(6, libraResult.getAbsoluteMass2());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(6, Types.DOUBLE);
+            }
+            if (libraResult.getNormalized2() != null)
+            {
+                _iTraqQuantStmt.setDouble(7, libraResult.getNormalized2());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(7, Types.DOUBLE);
+            }
+
+            if (libraResult.getTargetMass3() != null)
+            {
+                _iTraqQuantStmt.setDouble(8, libraResult.getTargetMass3());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(8, Types.DOUBLE);
+            }
+            if (libraResult.getAbsoluteMass3() != null)
+            {
+                _iTraqQuantStmt.setDouble(9, libraResult.getAbsoluteMass3());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(9, Types.DOUBLE);
+            }
+            if (libraResult.getNormalized3() != null)
+            {
+                _iTraqQuantStmt.setDouble(10, libraResult.getNormalized3());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(10, Types.DOUBLE);
+            }
+
+            if (libraResult.getTargetMass4() != null)
+            {
+                _iTraqQuantStmt.setDouble(11, libraResult.getTargetMass4());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(11, Types.DOUBLE);
+            }
+            if (libraResult.getAbsoluteMass4() != null)
+            {
+                _iTraqQuantStmt.setDouble(12, libraResult.getAbsoluteMass4());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(12, Types.DOUBLE);
+            }
+            if (libraResult.getNormalized4() != null)
+            {
+                _iTraqQuantStmt.setDouble(13, libraResult.getNormalized4());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(13, Types.DOUBLE);
+            }
+
+            if (libraResult.getTargetMass5() != null)
+            {
+                _iTraqQuantStmt.setDouble(14, libraResult.getTargetMass5());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(14, Types.DOUBLE);
+            }
+            if (libraResult.getAbsoluteMass5() != null)
+            {
+                _iTraqQuantStmt.setDouble(15, libraResult.getAbsoluteMass5());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(15, Types.DOUBLE);
+            }
+            if (libraResult.getNormalized5() != null)
+            {
+                _iTraqQuantStmt.setDouble(16, libraResult.getNormalized5());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(16, Types.DOUBLE);
+            }
+
+            if (libraResult.getTargetMass6() != null)
+            {
+                _iTraqQuantStmt.setDouble(17, libraResult.getTargetMass6());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(17, Types.DOUBLE);
+            }
+            if (libraResult.getAbsoluteMass6() != null)
+            {
+                _iTraqQuantStmt.setDouble(18, libraResult.getAbsoluteMass6());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(18, Types.DOUBLE);
+            }
+            if (libraResult.getNormalized6() != null)
+            {
+                _iTraqQuantStmt.setDouble(19, libraResult.getNormalized6());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(19, Types.DOUBLE);
+            }
+
+            if (libraResult.getTargetMass7() != null)
+            {
+                _iTraqQuantStmt.setDouble(20, libraResult.getTargetMass7());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(20, Types.DOUBLE);
+            }
+            if (libraResult.getAbsoluteMass7() != null)
+            {
+                _iTraqQuantStmt.setDouble(21, libraResult.getAbsoluteMass7());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(21, Types.DOUBLE);
+            }
+            if (libraResult.getNormalized7() != null)
+            {
+                _iTraqQuantStmt.setDouble(22, libraResult.getNormalized7());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(22, Types.DOUBLE);
+            }
+
+            if (libraResult.getTargetMass8() != null)
+            {
+                _iTraqQuantStmt.setDouble(23, libraResult.getTargetMass8());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(23, Types.DOUBLE);
+            }
+            if (libraResult.getAbsoluteMass8() != null)
+            {
+                _iTraqQuantStmt.setDouble(24, libraResult.getAbsoluteMass8());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(24, Types.DOUBLE);
+            }
+            if (libraResult.getNormalized8() != null)
+            {
+                _iTraqQuantStmt.setDouble(25, libraResult.getNormalized8());
+            }
+            else
+            {
+                _iTraqQuantStmt.setNull(25, Types.DOUBLE);
+            }
+
+
+            _iTraqQuantStmt.executeUpdate();
+        }
+
         if (hasQuant)
         {
             if (peptideId == -1)

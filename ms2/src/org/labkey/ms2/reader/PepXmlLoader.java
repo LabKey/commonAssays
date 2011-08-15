@@ -66,7 +66,7 @@ public class PepXmlLoader extends MS2Loader
                         _ppSummary = PeptideProphetSummary.load(_parser);
                     else if (XPressHandler.analysisType.equals(analysisType))
                         _quantSummaries.add(XPressAnalysisSummary.load(_parser));
-                    else if (Q3Handler.analysisType.equals(analysisType))
+                    else if (Q3Handler.ANALYSIS_TYPE.equals(analysisType))
                         _quantSummaries.add(Q3AnalysisSummary.load(_parser));
                 }
             }
@@ -918,7 +918,7 @@ public class PepXmlLoader extends MS2Loader
         public Q3Handler.Q3Result getQ3Result()
         {
             return (Q3Handler.Q3Result)
-                    getAnalysisResult(Q3Handler.analysisType);
+                    getAnalysisResult(Q3Handler.ANALYSIS_TYPE);
         }
 
         public ModifiedAminoAcid[] getModifiedAminoAcids()
