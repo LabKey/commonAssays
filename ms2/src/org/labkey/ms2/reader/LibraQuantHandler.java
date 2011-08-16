@@ -102,4 +102,23 @@ public class LibraQuantHandler extends PepXmlAnalysisResultHandler
     {
         return Double.parseDouble(parser.getAttributeValue(null, attributeName));
     }
+
+    public static RelativeQuantAnalysisSummary load(SimpleXMLStreamReader parser) throws XMLStreamException
+    {
+        // We must be on the analysis_summary start element when called.
+        String analysisTime = parser.getAttributeValue(null, "time");
+
+        RelativeQuantAnalysisSummary summary = new RelativeQuantAnalysisSummary();
+        summary.setAnalysisType(parser.getAttributeValue(null, "analysis"));
+
+        if (!parser.skipToStart("libra_summary"))
+            throw new XMLStreamException("Did not find required q3ratio_summary tag in analysis result");
+
+        summary.setMassTol(Q3AnalysisSummary.parseMassTol(parser.getAttributeValue(null, "mass_tolerance")));
+
+        if (null != analysisTime)
+            summary.setAnalysisTime(SimpleXMLEventRewriter.convertXMLTimeToDate(analysisTime));
+
+        return summary;
+    }
 }

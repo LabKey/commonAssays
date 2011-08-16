@@ -15,12 +15,17 @@
  */
 package org.labkey.ms2.reader;
 
+import org.labkey.ms2.PepXmlImporter;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * Models an analysis result for very minimal relative quantitation
  * of peptides. This is not intended to be instantiated; particular subclasses
  * must implement getAnalysisType();
  */
-public abstract class RelativeQuantAnalysisResult extends PepXmlAnalysisResultHandler.PepXmlAnalysisResult
+public abstract class RelativeQuantAnalysisResult extends AbstractQuantAnalysisResult
 {
     public static final float SENTINEL_NAN = -1.f;
     public static final float SENTINEL_POSITIVE_INFINITY = 999.f;
@@ -35,28 +40,6 @@ public abstract class RelativeQuantAnalysisResult extends PepXmlAnalysisResultHa
     private float lightArea;
     private float heavyArea;
     private float decimalRatio;
-    private long peptideId;
-    private int quantId;
-
-    public long getPeptideId()
-    {
-        return peptideId;
-    }
-
-    public void setPeptideId(long peptideId)
-    {
-        this.peptideId = peptideId;
-    }
-
-    public int getQuantId()
-    {
-        return quantId;
-    }
-
-    public void setQuantId(int quantId)
-    {
-        this.quantId = quantId;
-    }
 
     public int getLightFirstscan()
     {
@@ -152,4 +135,28 @@ public abstract class RelativeQuantAnalysisResult extends PepXmlAnalysisResultHa
         else
             this.decimalRatio = decimalRatio;
     }
+
+    @Override
+    public void insert(PepXmlImporter pepXmlImporter) throws SQLException
+    {
+        int index = 1;
+        pepXmlImporter._quantStmt.setLong(index++, getPeptideId());
+        pepXmlImporter._quantStmt.setInt(index++, getLightFirstscan());
+        pepXmlImporter._quantStmt.setInt(index++, getLightLastscan());
+        pepXmlImporter._quantStmt.setFloat(index++, getLightMass());
+        pepXmlImporter._quantStmt.setInt(index++, getHeavyFirstscan());
+        pepXmlImporter._quantStmt.setInt(index++, getHeavyLastscan());
+        pepXmlImporter._quantStmt.setFloat(index++, getHeavyMass());
+
+        index = setRatios(pepXmlImporter._quantStmt, index);
+
+        pepXmlImporter._quantStmt.setFloat(index++, getLightArea());
+        pepXmlImporter._quantStmt.setFloat(index++, getHeavyArea());
+        pepXmlImporter._quantStmt.setFloat(index++, getDecimalRatio());
+        pepXmlImporter._quantStmt.setInt(index++, getQuantId());
+
+        pepXmlImporter._quantStmt.executeUpdate();
+    }
+
+    protected abstract int setRatios(PreparedStatement stmt, int index) throws SQLException;
 }

@@ -68,6 +68,8 @@ public class PepXmlLoader extends MS2Loader
                         _quantSummaries.add(XPressAnalysisSummary.load(_parser));
                     else if (Q3Handler.ANALYSIS_TYPE.equals(analysisType))
                         _quantSummaries.add(Q3AnalysisSummary.load(_parser));
+                    else if (LibraQuantHandler.ANALYSIS_TYPE.equals(analysisType))
+                        _quantSummaries.add(LibraQuantHandler.load(_parser));
                 }
             }
         }

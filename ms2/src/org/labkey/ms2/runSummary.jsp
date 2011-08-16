@@ -31,19 +31,19 @@
 %>
 <table>
     <tr>
-    <td>Search Enzyme:</td><td><%=MS2Controller.defaultIfNull(run.getSearchEnzyme(), "n/a")%></td>
-    <td>File Name:</td><td><%=MS2Controller.defaultIfNull(run.getFileName(), "n/a")%></td>
+    <td class="labkey-form-label">Search Enzyme</td><td><%=MS2Controller.defaultIfNull(run.getSearchEnzyme(), "n/a")%></td>
+    <td class="labkey-form-label">File Name</td><td><%=MS2Controller.defaultIfNull(run.getFileName(), "n/a")%></td>
     </tr><tr>
-    <td>Search Engine:</td><td><%=MS2Controller.defaultIfNull(run.getSearchEngine(), "n/a")%></td>
-    <td>Path:</td><td><%=MS2Controller.defaultIfNull(run.getPath(), "n/a")%></td>
+    <td class="labkey-form-label">Search Engine</td><td><%=MS2Controller.defaultIfNull(run.getSearchEngine(), "n/a")%></td>
+    <td class="labkey-form-label">Path</td><td><%=MS2Controller.defaultIfNull(run.getPath(), "n/a")%></td>
     </tr><tr>
-    <td>Mass Spec Type:</td><td><%=MS2Controller.defaultIfNull(run.getMassSpecType(), "n/a")%></td>
-    <td>Fasta File:</td><td><%=MS2Controller.defaultIfNull(run.getFastaFileName(), "n/a")%></td>
+    <td class="labkey-form-label">Mass Spec Type</td><td><%=MS2Controller.defaultIfNull(run.getMassSpecType(), "n/a")%></td>
+    <td class="labkey-form-label">Fasta File</td><td><%=MS2Controller.defaultIfNull(run.getFastaFileName(), "n/a")%></td>
     </tr><%
 
 if (null != bean.quantAlgorithm)
 { %>
-    <tr><td>Quantitation:</td><td><%=h(bean.quantAlgorithm)%></td></tr><%
+    <tr><td class="labkey-form-label">Quantitation</td><td><%=h(bean.quantAlgorithm)%></td></tr><%
 } %>
     <tr><td colspan="4">
         <div>

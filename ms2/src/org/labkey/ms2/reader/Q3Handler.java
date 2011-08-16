@@ -19,6 +19,9 @@ import org.apache.log4j.Logger;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 
 import javax.xml.stream.XMLStreamException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * User: jeckels
@@ -57,6 +60,14 @@ public class Q3Handler extends PepXmlAnalysisResultHandler
         public String getAnalysisType()
         {
             return ANALYSIS_TYPE;
+        }
+
+        @Override
+        protected int setRatios(PreparedStatement stmt, int index) throws SQLException
+        {
+            stmt.setNull(index++, Types.VARCHAR);
+            stmt.setNull(index++, Types.VARCHAR);
+            return index;
         }
     }
 }

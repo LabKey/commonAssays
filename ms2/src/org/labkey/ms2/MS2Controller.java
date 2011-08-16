@@ -442,6 +442,8 @@ public class MS2Controller extends SpringActionController
             vBox.addView(scriptView);
 
             JspView<RunSummaryBean> runSummary = new JspView<RunSummaryBean>("/org/labkey/ms2/runSummary.jsp", new RunSummaryBean());
+            runSummary.setFrame(WebPartView.FrameType.PORTAL);
+            runSummary.setTitle("Run Overview");
             RunSummaryBean bean = runSummary.getModelBean();
             bean.run = run;
             bean.modHref = modificationHref(run);
@@ -449,13 +451,15 @@ public class MS2Controller extends SpringActionController
             bean.quantAlgorithm = MS2Manager.getQuantAnalysisAlgorithm(form.run);
             vBox.addView(runSummary);
 
-            vBox.addView(new FilterHeaderView(currentURL, form, run));
-
             List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
             SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getViewContext().getUser(), run);
             peptideView.addSQLSummaries(peptideFilter, sqlSummaries);
 
-            vBox.addView(new CurrentFilterView(null, sqlSummaries));
+            VBox filterBox = new VBox(new FilterHeaderView(currentURL, form, run), new CurrentFilterView(null, sqlSummaries));
+            filterBox.setFrame(WebPartView.FrameType.PORTAL);
+            filterBox.setTitle("View");
+
+            vBox.addView(filterBox);
 
             vBox.addView(grid);
             _run = run;
@@ -515,8 +519,6 @@ public class MS2Controller extends SpringActionController
             bean.charge2 = defaultIfNull(currentURL.getParameter(chargeFilterParamName + "2"), "0");
             bean.charge3 = defaultIfNull(currentURL.getParameter(chargeFilterParamName + "3"), "0");
             bean.tryptic = form.tryptic;
-
-            setTitle("View");
         }
 
 

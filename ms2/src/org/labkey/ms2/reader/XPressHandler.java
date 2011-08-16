@@ -18,6 +18,10 @@ package org.labkey.ms2.reader;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 
 import javax.xml.stream.XMLStreamException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.text.DecimalFormat;
 
 /**
  * User: arauch
@@ -82,6 +86,54 @@ public class XPressHandler extends PepXmlAnalysisResultHandler
         public String getAnalysisType()
         {
             return "xpress";
+        }
+
+        /**
+         * Limit the total length of the ratio to 20 characters or less to fit within our database field -
+         * sometimes we get numbers with lots and lots of decimal places. Truncate at five decimals.
+         * Also, replace very large numbers (>9999) with INF.
+         */
+        private String fixupStringRatio(String ratio)
+        {
+            String[] numbers = ratio.split(":");
+            if (numbers.length == 2)
+            {
+                try
+                {
+                    double number1 = Double.parseDouble(numbers[0]);
+                    double number2 = Double.parseDouble(numbers[1]);
+
+                    DecimalFormat format = new DecimalFormat("0.#####");
+                    String result = number1 > 9999.0 ? "INF" : format.format(number1);
+                    result += ":";
+                    result += number2 > 9999.0 ? "INF" : format.format(number2);
+                    return result;
+                }
+                catch (NumberFormatException ignored) {}
+            }
+            return ratio;
+        }
+
+        @Override
+        protected int setRatios(PreparedStatement stmt, int index) throws SQLException
+        {
+            if (getRatio() != null)
+            {
+                stmt.setString(index++, fixupStringRatio(getRatio()));
+            }
+            else
+            {
+                stmt.setNull(index++, Types.VARCHAR);
+            }
+            if (getHeavy2lightRatio() != null)
+            {
+                stmt.setString(index++, fixupStringRatio(getHeavy2lightRatio()));
+            }
+            else
+            {
+                stmt.setNull(index++, Types.VARCHAR);
+            }
+            return index;
         }
     }
 }

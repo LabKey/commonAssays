@@ -68,8 +68,8 @@ public abstract class MS2Importer
     protected PreparedStatement _stmt;
     protected PreparedStatement _stmtWithReselect;
     protected PreparedStatement _prophetStmt;
-    protected PreparedStatement _quantStmt;
-    protected PreparedStatement _iTraqQuantStmt;
+    public PreparedStatement _quantStmt;
+    public PreparedStatement _iTraqQuantStmt;
     protected int _runId, _fractionId;
 
     // Use passed in logger for import status, information, and file format problems.  This should

@@ -73,10 +73,7 @@ public class Q3AnalysisSummary extends RelativeQuantAnalysisSummary
         throw new UnsupportedOperationException("Can not change analysis type of an Q3 summary");
     }
 
-    /**
-     *
-     */
-    private static float parseMassTol(String massTol)
+    public static float parseMassTol(String massTol)
     {
         try
         {

@@ -1293,6 +1293,7 @@ ms2/src/org/labkey/ms2/query/SpectraCountConfiguration.java -text
 ms2/src/org/labkey/ms2/query/SpectraCountTableInfo.java -text
 ms2/src/org/labkey/ms2/query/UniquePeptideCountCoverageColumn.java -text
 ms2/src/org/labkey/ms2/reader/AbstractMzxmlIterator.java -text
+ms2/src/org/labkey/ms2/reader/AbstractQuantAnalysisResult.java -text
 ms2/src/org/labkey/ms2/reader/AbstractRandomAccessMzxmlParser.java -text
 ms2/src/org/labkey/ms2/reader/DatDocumentParser.java -text
 ms2/src/org/labkey/ms2/reader/ITraqProteinQuantitation.java -text
