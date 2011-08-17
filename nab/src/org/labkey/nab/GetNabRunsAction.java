@@ -139,16 +139,8 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
             settings.setContainerFilterName(containerFilterType.name());
         }
 
-        DataView dataView;
-        try
-        {
-            QueryView queryView = QueryView.create(getViewContext(), assaySchema, settings, errors);
-            dataView = queryView.createDataView();
-        }
-        catch (ServletException e)
-        {
-            throw new RuntimeException(e);
-        }
+        QueryView queryView = QueryView.create(getViewContext(), assaySchema, settings, errors);
+        DataView dataView = queryView.createDataView();
         ResultSet rs = null;
         List<Integer> rowIds = new ArrayList<Integer>();
         try
