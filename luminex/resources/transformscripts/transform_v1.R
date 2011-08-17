@@ -6,16 +6,19 @@
 # Transform script for Tomaras Lab Luminex Assay.
 #
 # First, the script subtracts the FI-Bkgd value for the blank bead from the FI-Bkgd value
-# for the other analytes within a given run data file. It also converts FI -Bkgd - Blank
+# for the other analytes within a given run data file. It also converts FI -Bkgd and FI -Bkgd - Blank
 # values that are <= 0 to 1 (as per the lab's request).
 #
-# Second, the script calculates new estimated concentration values for unknown samples using the
-# Rumi function (developed by Youyi at SCHARP). The Rumi function takes a dataframe as input and
-# uses the given Standard curve data to calculate est.log.conc an se for the unknowns.
+# Next, the script calculates curve fit parameters for each titration/analyte combination using both
+# 4PL and 5PL curve fits (from the fit.drc function in the Ruminex package (developed by Youyi at SCHARP).
+#
+# Finally, the script calculates new estimated concentration values for unknown samples using the
+# rumi function. The rumi function takes a dataframe as input and uses the given Standard curve data to
+# calculate est.log.conc an se for the unknowns.
 #
 
 # Author: Cory Nathe, LabKey
-transformVersion = "1.0";
+transformVersion = "2.0";
 
 source("${srcDirectory}/youtil.R");
 # Ruminex package available from http://labs.fhcrc.org/fong/Ruminex/index.html
@@ -115,9 +118,70 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
 	run.data$fiBackgroundBlank[!is.na(run.data$fiBackgroundBlank) & run.data$fiBackgroundBlank <= 0] = 1;
 }
 
-################################## STEP 3: CURVE FIT CALCULATION #################################
+################################## STEP 3: TITRATION CURVE FIT #################################
 
-# read in the analyte informatin (to get the mapping from analyte to standard/titration)
+# initialize the curve coefficient variables
+run.data$Slope_5pl = NA;
+run.data$Lower_5pl = NA;
+run.data$Upper_5pl = NA;
+run.data$Inflection_5pl = NA;
+run.data$Asymmetry_5pl = NA;
+run.data$Slope_4pl = NA;
+run.data$Lower_4pl = NA;
+run.data$Upper_4pl = NA;
+run.data$Inflection_4pl = NA;
+
+# read in the titration information
+titration.data.file = run.props$val1[run.props$name == "titrationData"];
+if (file.exists(titration.data.file))
+{
+    titration.data = read.delim(titration.data.file, header=TRUE, sep="\t");
+
+    # loop through the possible titrations and to see if it is a standard, qc control, or titrated unknown
+    for (tIndex in 1:nrow(titration.data))
+    {
+        if (titration.data[tIndex,]$Standard == "true" |
+            titration.data[tIndex,]$QCControl == "true" |
+            titration.data[tIndex,]$Unknown == "true")
+        {
+            # calculate the 4PL and 5PL curve fit params for each analyte
+            for (aIndex in 1:length(analytes))
+            {
+                titrationName = as.character(titration.data[tIndex,]$Name);
+                analyteName = as.character(analytes[aIndex]);
+                print(paste(titrationName, analyteName, sep="..."));
+
+                dat = subset(run.data, description == titrationName & name == analyteName);
+                runDataIndex = run.data$description == titrationName & run.data$name == analyteName;
+
+                # if no expected concentration for this titration, set expConc = starting conc / dilution
+                if (any(is.na(dat$expConc)))
+                {
+                    dat$expConc = min(dat$dilution) / dat$dilution;
+                }
+
+                # get curve fit params for 5PL
+                fit = fit.drc(log(fi) ~ expConc, data = dat, force.fit=FALSE, fit.4pl=FALSE);
+                run.data[runDataIndex,]$Slope_5pl = as.numeric(coef(fit))[1];
+                run.data[runDataIndex,]$Lower_5pl = as.numeric(coef(fit))[2];
+                run.data[runDataIndex,]$Upper_5pl = as.numeric(coef(fit))[3];
+                run.data[runDataIndex,]$Inflection_5pl = as.numeric(coef(fit))[4];
+                run.data[runDataIndex,]$Asymmetry_5pl = as.numeric(coef(fit))[5];
+
+                # get curve fit params for 4PL
+                fit = fit.drc(log(fi) ~ expConc, data = dat, force.fit=FALSE, fit.4pl=TRUE);
+                run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1];
+                run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2];
+                run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3];
+                run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4];
+            }
+        }
+    }
+}
+
+################################## STEP 4: CALCULATE EST CONC #################################
+
+# read in the analyte information (to get the mapping from analyte to standard/titration)
 analyte.data.file = run.props$val1[run.props$name == "analyteData"];
 analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
 
@@ -285,7 +349,7 @@ if(any(standardRecs) & length(standards) > 0){
     }
 }
 
-#####################  STEP 4: WRITE THE RESULTS TO THE OUTPUT FILE LOCATION #####################
+#####################  STEP 5: WRITE THE RESULTS TO THE OUTPUT FILE LOCATION #####################
 
 # write the new set of run data out to an output file
 write.table(run.data, file=run.output.file, sep="\t", na="", row.names=FALSE, quote=FALSE);

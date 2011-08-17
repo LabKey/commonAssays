@@ -10,7 +10,7 @@
 #
 
 # Author: Cory Nathe, LabKey
-transformVersion = "1.0";
+transformVersion = "2.0";
 
 # set up a data frame to store the run properties
 run.props = data.frame(NA, NA, NA, NA);

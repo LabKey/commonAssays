@@ -10,7 +10,7 @@
 #
 
 # Author: Cory Nathe, LabKey
-transformVersion = "1.0";
+transformVersion = "2.0";
 
 source("${srcDirectory}/youtil.R");
 # Ruminex package available from http://labs.fhcrc.org/fong/Ruminex/index.html
