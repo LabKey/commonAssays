@@ -69,8 +69,6 @@ run.data$Lower_4pl = NA;
 run.data$Upper_4pl = NA;
 run.data$Inflection_4pl = NA;
 
-print(Sys.time());
-
 # read in the titration information
 titration.data.file = run.props$val1[run.props$name == "titrationData"];
 if (file.exists(titration.data.file))
@@ -100,11 +98,9 @@ if (file.exists(titration.data.file))
                     dat$expConc = min(dat$dilution) / dat$dilution;
                 }
 
-print(Sys.time());
-
                 # get curve fit params for 5PL
                 fit = fit.drc(log(fi) ~ expConc, data = dat, force.fit=FALSE, fit.4pl=FALSE);
-print(Sys.time());
+
                 run.data[runDataIndex,]$Slope_5pl = as.numeric(coef(fit))[1];
                 run.data[runDataIndex,]$Lower_5pl = as.numeric(coef(fit))[2];
                 run.data[runDataIndex,]$Upper_5pl = as.numeric(coef(fit))[3];
@@ -117,7 +113,6 @@ print(Sys.time());
                 run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2];
                 run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3];
                 run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4];
-print(Sys.time());                
             }
         }
     }
