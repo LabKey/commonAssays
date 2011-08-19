@@ -23,7 +23,7 @@
 <%@ page import="org.labkey.nab.SampleInfo" %>
 <%@ page import="org.labkey.nab.Luc5Assay" %>
 <%@ page import="org.labkey.nab.DilutionSummary" %>
-<%@ page import="org.labkey.api.study.DilutionCurve" %>
+<%@ page import="org.labkey.api.assay.dilution.DilutionCurve" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();

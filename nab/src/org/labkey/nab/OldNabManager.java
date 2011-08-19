@@ -6,6 +6,7 @@ import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.read.biff.BiffException;
 import org.apache.log4j.Logger;
+import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.attachments.AttachmentFile;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.Container;
@@ -13,7 +14,6 @@ import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.security.User;
-import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;
@@ -378,7 +378,7 @@ public class OldNabManager extends AbstractNabManager
             group.setProperty(SampleProperty.Factor.name(), info.getFactor());
             group.setProperty(SampleProperty.Method.name(), info.getMethod().name());
 
-            List<WellData> wells = group.getWellData(true);
+            List<? extends WellData> wells = group.getWellData(true);
             boolean first = true;
             double dilution = info.getInitialDilution();
             for (int groupIndex = wells.size() - 1; groupIndex >= 0; groupIndex--)

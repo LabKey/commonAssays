@@ -1,5 +1,6 @@
 package org.labkey.nab;
 
+import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.DataType;
@@ -12,7 +13,6 @@ import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
-import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;

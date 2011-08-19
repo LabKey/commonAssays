@@ -1,7 +1,7 @@
 package org.labkey.nab;
 
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.Well;

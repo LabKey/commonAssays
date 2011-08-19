@@ -42,6 +42,7 @@ public class AnalyteTable extends AbstractLuminexTable
     public AnalyteTable(LuminexSchema schema, boolean filter)
     {
         super(LuminexSchema.getTableInfoAnalytes(), schema, filter);
+        setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.ANALYTE_TABLE_NAME));
         
         addColumn(wrapColumn(getRealTable().getColumn("Name")));
         addColumn(wrapColumn("Data", getRealTable().getColumn("DataId"))).setFk(new LookupForeignKey("RowId")

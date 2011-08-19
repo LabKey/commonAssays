@@ -2,7 +2,7 @@ package org.labkey.nab;
 
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
-import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.WellGroup;
 

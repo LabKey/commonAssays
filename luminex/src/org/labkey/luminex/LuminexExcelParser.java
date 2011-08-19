@@ -33,6 +33,7 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.util.GUID;
+import org.labkey.api.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -89,25 +90,9 @@ public class LuminexExcelParser
                     }
 
                     String analyteName = sheet.getSheetName();
-                    Analyte analyte = null;
-                    List<LuminexDataRow> dataRows = null;
-                    // Might need to merge data rows for analytes across files
-                    for (Map.Entry<Analyte, List<LuminexDataRow>> entry : _sheets.entrySet())
-                    {
-                        // Need to check both the name of the sheet (which might have been truncated) and the full
-                        // name of all analytes already parsed to see if we have a match
-                        if (analyteName.equals(entry.getKey().getName()) || analyteName.equals(entry.getKey().getSheetName()))
-                        {
-                            analyte = entry.getKey();
-                            dataRows = entry.getValue();
-                        }
-                    }
-                    if (analyte == null)
-                    {
-                        analyte = new Analyte(analyteName);
-                        dataRows = new ArrayList<LuminexDataRow>();
-                        _sheets.put(analyte, dataRows);
-                    }
+                    Map.Entry<Analyte, List<LuminexDataRow>> analyteEntry = ensureAnalyte(analyteName, _sheets);
+                    Analyte analyte = analyteEntry.getKey();
+                    List<LuminexDataRow> dataRows = analyteEntry.getValue();
 
                     int row = handleHeaderOrFooterRow(sheet, 0, analyte, excelRunDomain, dataFile);
 
@@ -210,7 +195,33 @@ public class LuminexExcelParser
         _parsed = true;
     }
 
-     public Set<String> getTitrations() throws ExperimentException
+    public static Map.Entry<Analyte, List<LuminexDataRow>> ensureAnalyte(String analyteName, Map<Analyte, List<LuminexDataRow>> sheets)
+    {
+        Analyte analyte = null;
+        List<LuminexDataRow> dataRows = null;
+
+        // Might need to merge data rows for analytes across files
+        for (Map.Entry<Analyte, List<LuminexDataRow>> entry : sheets.entrySet())
+        {
+            // Need to check both the name of the sheet (which might have been truncated) and the full
+            // name of all analytes already parsed to see if we have a match
+            if (analyteName.equals(entry.getKey().getName()) || analyteName.equals(entry.getKey().getSheetName()))
+            {
+                analyte = entry.getKey();
+                dataRows = entry.getValue();
+            }
+        }
+        if (analyte == null)
+        {
+            analyte = new Analyte(analyteName);
+            dataRows = new ArrayList<LuminexDataRow>();
+            sheets.put(analyte, dataRows);
+        }
+
+        return new Pair<Analyte, List<LuminexDataRow>>(analyte, dataRows);
+    }
+
+    public Set<String> getTitrations() throws ExperimentException
      {
          parseFile();
         return _titrations.keySet();

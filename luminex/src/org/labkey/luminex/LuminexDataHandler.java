@@ -20,6 +20,8 @@ import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.labkey.api.assay.dilution.DilutionCurve;
+import org.labkey.api.assay.dilution.ParameterCurveImpl;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ObjectFactory;
@@ -46,6 +48,8 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * User: klum
@@ -55,6 +59,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 {
     public static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
     public static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType("LuminexDataFile", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
+
+    private static final Logger LOGGER = Logger.getLogger(LuminexDataHandler.class);
 
     public static final int MINIMUM_TITRATION_COUNT = 5;
 
@@ -209,6 +215,18 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
+    private static final String NUMBER_REGEX = "-??[0-9]+(?:\\.[0-9]+)?";
+
+    // FI = 0.441049 + (30395.4 - 0.441049) / ((1 + (Conc / 5.04206)^-11.8884))^0.0999998
+    // Captures 6 groups. In the example above: 0.441049, 30395.4, 0.441049, 5.04206, -11.8884, and 0.0999998
+    private static final String CURVE_REGEX = "FI\\s*=\\s*" +  // 'FI = '
+            "(" + NUMBER_REGEX + ")\\s*\\+\\s*\\((" + NUMBER_REGEX + ")\\s*\\-\\s*(" + NUMBER_REGEX + ")\\)" + // '0.441049 + (30395.4 - 0.441049)'
+            "\\s*/\\s*\\(\\(1\\s*\\+\\s*\\(Conc\\s*/\\s*" + // ' / ((1 + (Conc / '
+            "(" + NUMBER_REGEX + ")\\)\\s*\\^\\s*(" + NUMBER_REGEX + ")\\s*\\)\\s*\\)\\s*" + // '^-11.8884))'
+            "\\^\\s*(" + NUMBER_REGEX + ")\\s*";
+
+    private static final Pattern CURVE_PATTERN = Pattern.compile(CURVE_REGEX);
+
     /**
      * Handles persisting of uploaded run data into the database
      */
@@ -246,6 +264,58 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     analyteTitration.put("analyteId", analyte.getRowId());
                     analyteTitration.put("titrationId", titration.getRowId());
                     Table.insert(user, LuminexSchema.getTableInfoAnalyteTitration(), analyteTitration);
+
+                    String stdCurve = analyte.getStdCurve();
+                    if (stdCurve != null)
+                    {
+                        Matcher matcher = CURVE_PATTERN.matcher(stdCurve);
+                        if (matcher.matches())
+                        {
+                            ParameterCurveImpl.FitParameters params = new ParameterCurveImpl.FitParameters();
+                            params.min = Double.parseDouble(matcher.group(1));
+                            params.slope = Double.parseDouble(matcher.group(2)) - Double.parseDouble(matcher.group(3));
+                            params.inflection = Double.parseDouble(matcher.group(4));
+                            params.max = Double.parseDouble(matcher.group(5));
+                            params.asymmetry = Double.parseDouble(matcher.group(6));
+
+                            try
+                            {
+                                List<LuminexWell> wells = new ArrayList<LuminexWell>();
+                                for (LuminexDataRow dataRow : sheet.getValue())
+                                {
+                                    if (PageFlowUtil.nullSafeEquals(dataRow.getDescription(), titration.getName()))
+                                    {
+                                        wells.add(new LuminexWell(dataRow));
+                                    }
+                                }
+                                LuminexWellGroup wellGroup = new LuminexWellGroup(wells);
+                                ParameterCurveImpl.FiveParameterCurve curveImpl = new ParameterCurveImpl.FiveParameterCurve(Collections.singletonList(wellGroup), false, params);
+
+                                double ec50 = curveImpl.getCutoffDilution(.5);
+                                double auc = curveImpl.calculateAUC(DilutionCurve.AUCType.NORMAL);
+                                double maxFI = wellGroup.getMax();
+
+                                CurveFit fit = new CurveFit();
+                                fit.setAnalyteId(analyte.getRowId());
+                                fit.setTitrationId(titration.getRowId());
+                                fit.setAUC(Double.isNaN(Double.NaN) ? 0 : auc);
+                                fit.setEC50(ec50 > 5000 ? 5000 : ec50);
+                                fit.setMaxFI(maxFI);
+                                fit.setCurveType(DilutionCurve.FitType.FIVE_PARAMETER.getLabel());
+
+                                Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
+                            }
+                            catch (DilutionCurve.FitFailedException e)
+                            {
+                                throw new ExperimentException(e);
+                            }
+                        }
+                        else
+                        {
+                            LOGGER.warn("Could not parse standard curve: " + stdCurve);
+                        }
+                    }
+
                 }
 
                 List<LuminexDataRow> dataRows = sheet.getValue();
@@ -748,6 +818,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     " WHERE RowId IN (SELECT SourceApplicationId FROM " + ExperimentService.get().getTinfoData() +
                     " WHERE RowId IN (" + idSQL + ")))", params);
 
+            // Clean up curve fits
+            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoCurveFit() +
+                    " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexSchema.getTableInfoAnalytes() +
+                    " WHERE DataId IN (" + idSQL + "))", params);
+
             // Clean up analytes and titrations
             Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoAnalyteTitration() +
                     " WHERE AnalyteId IN (SELECT RowId FROM " + LuminexSchema.getTableInfoAnalytes() +
@@ -823,11 +898,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 dataRow.setLsid(new Lsid(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX, GUID.makeGUID()).toString());
             }
 
-            if (!sheets.containsKey(analyte))
-            {
-                sheets.put(analyte, new ArrayList<LuminexDataRow>());
-            }
-            sheets.get(analyte).add(dataRow);
+            Map.Entry<Analyte, List<LuminexDataRow>> entry = LuminexExcelParser.ensureAnalyte(analyte.getName(), sheets);
+            entry.getValue().add(dataRow);
         }
 
         LuminexRunUploadForm form = (LuminexRunUploadForm)context;

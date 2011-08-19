@@ -16,6 +16,7 @@
 
 package org.labkey.nab.query;
 
+import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
@@ -25,7 +26,6 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
-import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;

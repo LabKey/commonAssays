@@ -45,6 +45,21 @@
         </columns>
     </table>
 
+    <table tableName="CurveFit" tableDbType="TABLE">
+        <description>Contains EC50 and other values per titration/analyte combination</description>
+        <columns>
+            <column columnName="RowId">
+                <isHidden>true</isHidden>
+            </column>
+            <column columnName="AnalyteId" />
+            <column columnName="TitrationId" />
+            <column columnName="MaxFI" />
+            <column columnName="EC50" />
+            <column columnName="AUC" />
+            <column columnName="CurveType" />
+        </columns>
+    </table>
+
     <table tableName="AnalyteTitration" tableDbType="TABLE">
         <columns>
             <column columnName="AnalyteId" />

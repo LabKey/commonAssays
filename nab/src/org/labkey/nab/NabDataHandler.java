@@ -25,7 +25,7 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
-import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.WellData;
@@ -298,7 +298,7 @@ public abstract class NabDataHandler extends AbstractExperimentDataHandler
 
    protected abstract boolean isDilutionDownOrRight();
 
-    protected void applyDilution(List<WellData> wells, ExpMaterial sampleInput, Map<String, DomainProperty> sampleProperties, boolean reverseDirection)
+    protected void applyDilution(List<? extends WellData> wells, ExpMaterial sampleInput, Map<String, DomainProperty> sampleProperties, boolean reverseDirection)
     {
         boolean first = true;
         Double dilution = (Double) sampleInput.getProperty(sampleProperties.get(NabAssayProvider.SAMPLE_INITIAL_DILUTION_PROPERTY_NAME));

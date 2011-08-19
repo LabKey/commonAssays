@@ -17,7 +17,6 @@
 package org.labkey.luminex;
 
 import org.labkey.api.data.*;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
@@ -36,15 +35,16 @@ import java.util.*;
 
 public class LuminexSchema extends AssaySchema
 {
-    private static final String ANALYTE_TABLE_NAME = "Analyte";
-    private static final String TITRATION_TABLE_NAME = "Titration";
-    private static final String ANALYTE_TITRATION_TABLE_NAME = "AnalyteTitration";
-    private static final String DATA_ROW_TABLE_NAME = "DataRow";
-    private static final String DATA_FILE_TABLE_NAME = "DataFile";
-    private static final String WELL_EXCLUSION_TABLE_NAME = "WellExclusion";
-    private static final String WELL_EXCLUSION_ANALYTE_TABLE_NAME = "WellExclusionAnalyte";
-    private static final String RUN_EXCLUSION_TABLE_NAME = "RunExclusion";
-    private static final String RUN_EXCLUSION_ANALYTE_TABLE_NAME = "RunExclusionAnalyte";
+    public static final String ANALYTE_TABLE_NAME = "Analyte";
+    public static final String CURVE_FIT_TABLE_NAME = "CurveFit";
+    public static final String TITRATION_TABLE_NAME = "Titration";
+    public static final String ANALYTE_TITRATION_TABLE_NAME = "AnalyteTitration";
+    public static final String DATA_ROW_TABLE_NAME = "DataRow";
+    public static final String DATA_FILE_TABLE_NAME = "DataFile";
+    public static final String WELL_EXCLUSION_TABLE_NAME = "WellExclusion";
+    public static final String WELL_EXCLUSION_ANALYTE_TABLE_NAME = "WellExclusionAnalyte";
+    public static final String RUN_EXCLUSION_TABLE_NAME = "RunExclusion";
+    public static final String RUN_EXCLUSION_ANALYTE_TABLE_NAME = "RunExclusionAnalyte";
 
     public LuminexSchema(User user, Container container, ExpProtocol protocol)
     {
@@ -60,7 +60,8 @@ public class LuminexSchema extends AssaySchema
                 prefixTableName(TITRATION_TABLE_NAME),
                 prefixTableName(DATA_FILE_TABLE_NAME),
                 prefixTableName(WELL_EXCLUSION_TABLE_NAME),
-                prefixTableName(RUN_EXCLUSION_TABLE_NAME)
+                prefixTableName(RUN_EXCLUSION_TABLE_NAME),
+                prefixTableName(CURVE_FIT_TABLE_NAME)
         );
     }
 
@@ -110,6 +111,17 @@ public class LuminexSchema extends AssaySchema
                 result.addCondition(filter, "DataId");
                 return result;
             }
+            if (CURVE_FIT_TABLE_NAME.equalsIgnoreCase(name))
+            {
+                CurveFitTable result = createCurveFitTable(true);
+                SQLFragment filter = new SQLFragment("AnalyteId IN (SELECT a.RowId FROM ");
+                filter.append(getTableInfoAnalytes(), "a");
+                filter.append(" WHERE a.DataId ");
+                filter.append(createDataFilterInClause());
+                filter.append(")");
+                result.addCondition(filter, "RunId");
+                return result;
+            }
             if (RUN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(name))
             {
                 FilteredTable result = createRunExclusionTable(true);
@@ -125,6 +137,11 @@ public class LuminexSchema extends AssaySchema
             }
         }
         return null;
+    }
+
+    private CurveFitTable createCurveFitTable(boolean filterTable)
+    {
+        return new CurveFitTable(this, filterTable);
     }
 
     private WellExclusionTable createWellExclusionTable(boolean filterTable)
@@ -229,22 +246,6 @@ public class LuminexSchema extends AssaySchema
         return filter;
     }
 
-    protected SQLFragment createRunFilterInClause()
-    {
-        SQLFragment filter = new SQLFragment(" IN (SELECT r.RowId FROM ");
-        filter.append(ExperimentService.get().getTinfoExperimentRun(), "r");
-        // TODO - make this respect container filters
-        filter.append(" WHERE r.Container = ?");
-        filter.add(getContainer().getId());
-        if (getProtocol() != null)
-        {
-            filter.append(" AND r.ProtocolLSID = ?");
-            filter.add(getProtocol().getLSID());
-        }
-        filter.append(") ");
-        return filter;
-    }
-
     public static DbSchema getSchema()
     {
         return DbSchema.get("luminex");
@@ -253,6 +254,11 @@ public class LuminexSchema extends AssaySchema
     public static TableInfo getTableInfoAnalytes()
     {
         return getSchema().getTable(ANALYTE_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoCurveFit()
+    {
+        return getSchema().getTable(CURVE_FIT_TABLE_NAME);
     }
 
     public static TableInfo getTableInfoDataRow()

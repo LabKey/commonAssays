@@ -23,6 +23,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
@@ -34,7 +35,6 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.security.User;
-import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;
@@ -202,7 +202,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         for (DomainProperty property : properties.values())
             group.setProperty(property.getName(), sampleInput.getProperty(property));
 
-        List<WellData> wells = group.getWellData(true);
+        List<? extends WellData> wells = group.getWellData(true);
         boolean reverseDirection = Boolean.parseBoolean((String) group.getProperty(NabManager.SampleProperty.ReverseDilutionDirection.name()));
         applyDilution(wells, sampleInput, properties, reverseDirection);
     }

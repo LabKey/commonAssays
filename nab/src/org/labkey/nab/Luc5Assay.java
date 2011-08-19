@@ -20,9 +20,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.study.*;
-import org.labkey.api.study.DilutionCurve;
-import org.labkey.api.exp.api.ExpMaterial;
 
 /**
  * User: migra

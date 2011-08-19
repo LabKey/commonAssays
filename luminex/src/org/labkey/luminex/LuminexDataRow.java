@@ -503,4 +503,9 @@ public class LuminexDataRow
 
         return row;
     }
+
+    /* package */ Map<String, Object> getExtraProperties()
+    {
+        return _extraProperties;
+    }
 }

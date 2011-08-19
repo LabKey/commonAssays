@@ -16,6 +16,7 @@
 
 package org.labkey.nab;
 
+import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.WellData;
@@ -23,7 +24,6 @@ import org.labkey.api.study.WellData;
 import java.io.Serializable;
 import java.util.*;
 
-import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 
 /**
