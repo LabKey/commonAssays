@@ -29,32 +29,28 @@
 <%@ page import="org.labkey.ms2.ShowPeptideContext" %>
 <%@ page import="java.util.Collections" %>
 <%@ page import="org.labkey.ms2.MS2Run" %>
+<%@ page import="org.labkey.ms2.reader.LibraQuantResult" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
     ShowPeptideContext ctx = me.getModelBean();
     MS2Peptide p = ctx.peptide;
+    LibraQuantResult libra = p.getLibraQuantResult();
     MS2Fraction fraction = MS2Manager.getFraction(p.getFraction());
     org.labkey.ms2.MS2Run run = ctx.run;
 %>
 <!--OUTER-->
-<table><tr>
+<table cellspacing="8px">
 
-<!--LEFT-->
-<td valign=top width="610">
-    <table>
+<!--FIRST ROW-->
+<tr><td colspan="2" valign=top width="850px">
+    <table width="100%">
     <tr><td>
 <%
         if (fraction.wasloadedFromGzFile())
         {
             out.println(" " + MS2GZFileRenderer.getFileNameInGZFile(fraction.getFileName(), p.getScan(), p.getCharge(), "dta") + "<br>");
         }
-
-        if (null != ctx.previousUrl) { %>
-            <%= textLink("Previous", ctx.previousUrl) %><%
-        }
-        if (null != ctx.nextUrl) { %>
-            <%= textLink("Next ", ctx.nextUrl) %><% }
 %>
 <%
     if (fraction.wasloadedFromGzFile() && null != ctx.showGzUrl)
@@ -69,45 +65,83 @@
     }
     out.print(ctx.modificationHref);
 %>
-        <% if (null != ctx.pepSearchHref && ctx.pepSearchHref.length() > 0) { %>
-            <%= textLink("Find MS1 Features", ctx.pepSearchHref, null, "findFeaturesLink", java.util.Collections.singletonMap("target", "pepSearch"))%>
-        <% } %>
-        <%= textLink("Blast", AppProps.getInstance().getBLASTServerBaseURL() + p.getTrimmedPeptide(), null, "blastLink", java.util.Collections.singletonMap("target", "cmt"))%><br>
 
     </td></tr>
 
     <tr>
         <td>
-            <table>
+            <table width="100%">
                 <tr>
-                    <td class="labkey-form-label">Scan</td><td><%=p.getScan()%></td>
-                    <td class="labkey-form-label">Charge</td><td><%=p.getCharge()%>+</td>
-                    <td class="labkey-form-label">PeptideProphet</td><td><%= Formats.f2.format(p.getPeptideProphet()) %></td>
+                    <td class="labkey-form-label" width="85px">Scan</td><td><%=p.getScan()%></td>
+                    <td class="labkey-form-label" width="110px">Delta Mass</td><td><%= Formats.signf4.format(p.getDeltaMass()) %></td>
+                    <td class="labkey-form-label" width="85px">Protein</td><td><%= h(p.getProtein()) %></td>
                 </tr>
                 <tr>
                     <td class="labkey-form-label">Mass</td><td><%= Formats.f4.format(p.getMass()) %></td>
-                    <td class="labkey-form-label">Delta Mass</td><td><%= Formats.signf4.format(p.getDeltaMass()) %></td>
-                    <td class="labkey-form-label">Ion Percent</td><td><%= Formats.percent.format(p.getIonPercent()) %></td>
+                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(1)) %></td><td><%= p.getDiffScore() == null ? "" : Formats.f3.format(p.getDiffScore()) %></td>
+                    <td class="labkey-form-label">Fraction</td><td><%= h(fraction.getFileName()) %></td>
                 </tr>
                 <tr>
                     <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(0)) %></td><td><%= p.getRawScore() == null ? "" : Formats.f3.format(p.getRawScore()) %></td>
-                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(1)) %></td><td><%= p.getDiffScore() == null ? "" : Formats.f3.format(p.getDiffScore()) %></td>
-                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(2)) %></td><td><%= p.getZScore() == null ? "" : Formats.f3.format(p.getZScore()) %></td>
+                    <td class="labkey-form-label">PeptideProphet</td><td><%= Formats.f2.format(p.getPeptideProphet()) %></td>
+                    <td class="labkey-form-label" rowspan="2">Run</td><td rowspan="2"><%= h(run.getDescription()) %></td>
                 </tr>
                 <tr>
                     <td class="labkey-form-label">Protein Hits</td><td><%= p.getProteinHits() %></td>
-                    <td class="labkey-form-label">Protein</td><td colspan="3"><%= h(p.getProtein()) %></td>
+                    <td class="labkey-form-label">Ion Percent</td><td><%= Formats.percent.format(p.getIonPercent()) %></td>
                 </tr>
                 <tr>
-                    <td class="labkey-form-label">Fraction</td><td colspan="5"><%= h(fraction.getFileName()) %></td>
+                    <td class="labkey-form-label">Charge</td><td><%=p.getCharge()%>+</td>
+                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(2)) %></td><td><%= p.getZScore() == null ? "" : Formats.f3.format(p.getZScore()) %></td>
                 </tr>
+
+<%
+            // display the Libra quantitation normalization values, if applicable
+            if (libra != null)
+            {
+%>
+                <tr><td colspan="6">&nbsp;</td></tr>
+                <tr><td colspan="6" style="font-size:110%;font-weight:bold;">iTRAQ Quantitation</td></tr>
                 <tr>
-                    <td class="labkey-form-label">Run</td><td colspan="5"><%= h(run.getDescription()) %></td>
+                <% if (libra.getNormalized1() != null) { %>
+                    <td class="labkey-form-label">Normalized 1</td><td><%= Formats.f3.format(libra.getNormalized1()) %></td>
+                <% } %>
+                <% if (libra.getNormalized4() != null) { %>
+                    <td class="labkey-form-label">Normalized 4</td><td><%= Formats.f3.format(libra.getNormalized4()) %></td>
+                    <% } %>
+                <% if (libra.getNormalized7() != null) { %>
+                    <td class="labkey-form-label">Normalized 7</td><td><%= Formats.f3.format(libra.getNormalized7()) %></td>
+                    <% } %>
+                </tr><tr>
+                <% if (libra.getNormalized2() != null) { %>
+                    <td class="labkey-form-label">Normalized 2</td><td><%= Formats.f3.format(libra.getNormalized2()) %></td>
+                <% } %>
+                <% if (libra.getNormalized5() != null) { %>
+                    <td class="labkey-form-label">Normalized 5</td><td><%= Formats.f3.format(libra.getNormalized5()) %></td>
+                <% } %>
+                <% if (libra.getNormalized8() != null) { %>
+                    <td class="labkey-form-label">Normalized 8</td><td><%= Formats.f3.format(libra.getNormalized8()) %></td>
+                <% } %>
+                </tr><tr>
+                <% if (libra.getNormalized3() != null) { %>
+                    <td class="labkey-form-label">Normalized 3</td><td><%= Formats.f3.format(libra.getNormalized3()) %></td>
+                <% } %>
+                <% if (libra.getNormalized6() != null) { %>
+                    <td class="labkey-form-label">Normalized 6</td><td><%= Formats.f3.format(libra.getNormalized6()) %></td>
+                <% } %>
                 </tr>
+<%
+            }
+%>                
             </table>
         </td>
     </tr>
+</table></td></tr>
+<!--FIRST ROW-->
 
+<!--SECOND ROW LEFT-->
+<tr><td valign=top width="610">
+    <table style="border: solid #EEEEEE 2px">
     <tr><td valign=top height="100%">
 <%
     ActionURL graphUrl = ctx.url.clone();
@@ -123,20 +157,22 @@
     graphUrl.replaceParameter("tolerance", String.valueOf(ctx.form.getTolerance()));
 %>
     <img src="<%=graphUrl.getEncodedLocalURIString()%>" height="350px" width="600px" alt="Spectrum Graph">
+    </td></tr>
+    <tr><td><center>
     <form method=get action="updateShowPeptide.post">
         X&nbsp;Start&nbsp;<input name="xStart" id="xStart" value="<%=ctx.actualXStart%>" size=8>
         X&nbsp;End&nbsp;<input name="xEnd" id="xEnd" value="<%=ctx.actualXEnd%>" size=8>
         <input name="queryString" type="hidden" value="<%=h(ctx.url.getRawQuery())%>">
         <%=generateSubmitButton("Scale Graph")%>
     </form>
-    </td></tr>
+    </center></td></tr>
     </table>
 </td>
-<!--LEFT-->
+<!--SECOND ROW LEFT-->
 
-<!--RIGHT (FRAGMENT)-->
-<td valign=top>
-<table width="230px">
+<!--SECOND ROW RIGHT (FRAGMENT)-->
+<td valign=top width="240px">
+<table width="230px" style="border: solid #EEEEEE 2px">
     <tr align=center bgcolor="#EEB422">
 <%
     // Render fragment table
@@ -219,6 +255,6 @@
 
 </table>
 </td>
-<!--RIGHT (FRAGMENT)-->
+<!--SECOND ROW RIGHT (FRAGMENT)-->
 
 </tr></table>

@@ -16,6 +16,7 @@
 package org.labkey.ms2.reader;
 
 import org.labkey.api.reader.SimpleXMLStreamReader;
+import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.reader.ProtXmlReader;
 
@@ -45,6 +46,7 @@ public class ProteinGroup
     private SimpleXMLStreamReader _parser;
     private MS2Run _run;
     private List<ProtXmlReader.Protein> _proteins = new ArrayList<ProtXmlReader.Protein>();
+    private ITraqProteinQuantitation _iTraqProteinQuantitation;
 
     public void setParser(SimpleXMLStreamReader parser, MS2Run run)
     {
@@ -201,5 +203,14 @@ public class ProteinGroup
     public void setErrorRate(Float errorRate)
     {
         _errorRate = errorRate;
+    }
+
+    public ITraqProteinQuantitation getITraqProteinQuantitation()
+    {
+        if (_iTraqProteinQuantitation == null)
+        {
+            _iTraqProteinQuantitation = MS2Manager.getITraqProteinQuantitation(getRowId());
+        }
+        return _iTraqProteinQuantitation;
     }
 }

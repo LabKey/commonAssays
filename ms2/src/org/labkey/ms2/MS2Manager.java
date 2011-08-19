@@ -72,6 +72,8 @@ import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
+import org.labkey.ms2.reader.ITraqProteinQuantitation;
+import org.labkey.ms2.reader.LibraQuantResult;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
 import org.labkey.ms2.reader.RandomAccessMzxmlIteratorFactory;
@@ -1137,6 +1139,16 @@ public class MS2Manager
     public static PeptideQuantitation getQuantitation(long peptideId)
     {
         return Table.selectObject(getTableInfoQuantitation(), peptideId, PeptideQuantitation.class);
+    }
+
+    public static LibraQuantResult getLibraQuantResult(long peptideId)
+    {
+        return Table.selectObject(getTableInfoITraqPeptideQuantitation(), peptideId, LibraQuantResult.class);
+    }
+
+    public static ITraqProteinQuantitation getITraqProteinQuantitation(int groupId)
+    {
+        return Table.selectObject(getTableInfoITraqProteinQuantitation(), groupId, ITraqProteinQuantitation.class);
     }
 
     public static int verifyRowIndex(long[] index, int rowIndex, long peptideId)

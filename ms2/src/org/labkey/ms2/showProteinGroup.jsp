@@ -21,8 +21,10 @@
 <%@ page import="org.labkey.ms2.Protein" %>
 <%@ page import="org.labkey.ms2.ProteinGroupWithQuantitation" %>
 <%@ page import="java.text.Format" %>
+<%@ page import="org.labkey.ms2.reader.ITraqProteinQuantitation" %>
 <%
     ProteinGroupWithQuantitation group = ((JspView<ProteinGroupWithQuantitation>)HttpView.currentView()).getModelBean();
+    ITraqProteinQuantitation libra = group.getITraqProteinQuantitation();
     Format floatFormat = Formats.f2;
 %>
 <table>
@@ -89,4 +91,43 @@
             <a href="#Peptides">Peptides</a>
         </td>
     </tr>
+
+<%
+// display the Libra quantitation ratio values, if applicable
+if (libra != null)
+{
+%>
+    <tr><td colspan="8">&nbsp;</td></tr>
+    <tr><td colspan="8" style="font-size:110%;font-weight:bold;">iTRAQ Quantitation</td></tr>
+    <tr>
+    <% if (libra.getRatio1() != null) { %>
+        <td class="labkey-form-label">Ratio 1</td><td><%= floatFormat.format(libra.getRatio1()) %></td><td />
+    <% } %>
+    <% if (libra.getRatio4() != null) { %>
+        <td class="labkey-form-label">Ratio 4</td><td><%= floatFormat.format(libra.getRatio4()) %></td><td />
+    <% } %>
+    <% if (libra.getRatio7() != null) { %>
+        <td class="labkey-form-label">Ratio 7</td><td><%= floatFormat.format(libra.getRatio7()) %></td>
+    <% } %>
+    </tr><tr>
+    <% if (libra.getRatio2() != null) { %>
+        <td class="labkey-form-label">Ratio 2</td><td><%= floatFormat.format(libra.getRatio2()) %></td><td />
+    <% } %>
+    <% if (libra.getRatio5() != null) { %>
+        <td class="labkey-form-label">Ratio 5</td><td><%= floatFormat.format(libra.getRatio5()) %></td><td />
+    <% } %>
+    <% if (libra.getRatio8() != null) { %>
+        <td class="labkey-form-label">Ratio 8</td><td><%= floatFormat.format(libra.getRatio8()) %></td>
+    <% } %>
+    </tr><tr>
+    <% if (libra.getRatio3() != null) { %>
+        <td class="labkey-form-label">Ratio 3</td><td><%= floatFormat.format(libra.getRatio3()) %></td><td />
+    <% } %>
+    <% if (libra.getRatio6() != null) { %>
+        <td class="labkey-form-label">Ratio 6</td><td><%= floatFormat.format(libra.getRatio6()) %></td>
+    <% } %>
+    </tr>
+<%
+}
+%>
 </table>

@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2;
 
+import com.extjs.gxt.ui.client.widget.Html;
 import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -866,13 +867,34 @@ public class MS2Controller extends SpringActionController
             }
 
             setTitle(peptide.toString());
-            getPageConfig().setTemplate(PageConfig.Template.Print);
+            //getPageConfig().setTemplate(PageConfig.Template.Print); // todo: how to choose a template that has the top frame but not the folders frame?
+
+            VBox result = new VBox();
+
+            String nextPrevStr = "";
+            if (null != previousURL) {
+                 nextPrevStr += PageFlowUtil.textLink("Previous", previousURL);
+            }
+            if (null != nextURL) {
+                 nextPrevStr += PageFlowUtil.textLink("Next", nextURL);
+            }
+            if (nextPrevStr.length() > 0) {
+                result.addView(new HtmlView(nextPrevStr));
+            }
 
             ShowPeptideContext ctx = new ShowPeptideContext(form, run, peptide, currentURL, previousURL, nextURL, showGzURL, modificationHref(run), getContainer(), getUser());
             JspView<ShowPeptideContext> peptideView = new JspView<ShowPeptideContext>("/org/labkey/ms2/showPeptide.jsp", ctx);
-            peptideView.setTitle("Peptide Details: " + peptide.getPeptide());
+            peptideView.setTitle("Peptide Details");
+
+            NavTree pepNavTree = new NavTree();
+            if (null != ctx.pepSearchHref && ctx.pepSearchHref.length() > 0)
+                pepNavTree.addChild("Find MS1 Features", ctx.pepSearchHref);
+            pepNavTree.addChild("Blast", AppProps.getInstance().getBLASTServerBaseURL() + peptide.getTrimmedPeptide());
+            peptideView.setNavMenu(pepNavTree);
+            peptideView.setIsWebPart(false);
+
             peptideView.setFrame(WebPartView.FrameType.PORTAL);
-            VBox result = new VBox(peptideView);
+            result.addView(peptideView);
             PeptideQuantitation quant = peptide.getQuantitation();
             if (quant != null)
             {
@@ -4391,16 +4413,15 @@ public class MS2Controller extends SpringActionController
             }
             Protein[] proteins = group.lookupProteins();
 
-            String title = "Protein Group Details";
-            setTitle(title);
-            getPageConfig().setTemplate(PageConfig.Template.Print);
+            setTitle(run1.getDescription());
+            // getPageConfig().setTemplate(PageConfig.Template.Print); // todo: how to choose a template that has the top frame but not the folders frame?
 
             // todo:  does the grid filter affect the list of proteins displayed?
             QueryPeptideMS2RunView peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), run1);
 
             VBox view = new ProteinsView(getViewContext().getActionURL(), run1, form, proteins, null, peptideQueryView);
             JspView summaryView = new JspView<ProteinGroupWithQuantitation>("/org/labkey/ms2/showProteinGroup.jsp", group);
-            summaryView.setTitle(title + " from " + run1.getDescription());
+            summaryView.setTitle("Protein Group Details");
             summaryView.setFrame(WebPartView.FrameType.PORTAL);
 
             return new VBox(summaryView, view);

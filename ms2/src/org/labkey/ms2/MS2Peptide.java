@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.ms2.protein.fasta.Peptide;
 import org.labkey.api.util.Pair;
+import org.labkey.ms2.reader.LibraQuantResult;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -70,6 +71,7 @@ public class MS2Peptide
     private String _trimmedPeptide;
 
     private PeptideQuantitation _quantitation;
+    private LibraQuantResult _libraQuantResult;
     private String _spectrumErrorMessage;
 
     public MS2Peptide()
@@ -604,5 +606,14 @@ public class MS2Peptide
             _quantitation = MS2Manager.getQuantitation(getRowId());
         }
         return _quantitation;
+    }
+
+    public LibraQuantResult getLibraQuantResult()
+    {
+        if (_libraQuantResult == null)
+        {
+            _libraQuantResult = MS2Manager.getLibraQuantResult(getRowId());
+        }
+        return _libraQuantResult;
     }
 }
