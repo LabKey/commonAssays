@@ -164,6 +164,7 @@ public class SearchFormUtil
             mod1Map.put("ICAT-D:2H(8) (C)", "8.0502@C");
             mod1Map.put("ICAT-C:13C(9) (C)", "9.0302@C");
             mod1Map.put("iTRAQ (N-term,K)", "144.102063@[,144.102063@K");
+            mod1Map.put("iTRAQ 8-plex (N-term,K)", "304.2@[,304.2@K");
             mod1Map.put("Label:13C(6) (L)", "6.020129@L");
             mod1Map.put("Label:13C(6)15N(2) (K)", "8.014199@K");
             mod1Map.put("Label:13C(6) (R)", "6.020129@R");
