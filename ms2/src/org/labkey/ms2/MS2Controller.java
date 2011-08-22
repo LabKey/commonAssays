@@ -867,7 +867,6 @@ public class MS2Controller extends SpringActionController
             }
 
             setTitle(peptide.toString());
-            //getPageConfig().setTemplate(PageConfig.Template.Print); // todo: how to choose a template that has the top frame but not the folders frame?
 
             VBox result = new VBox();
 
@@ -4414,7 +4413,6 @@ public class MS2Controller extends SpringActionController
             Protein[] proteins = group.lookupProteins();
 
             setTitle(run1.getDescription());
-            // getPageConfig().setTemplate(PageConfig.Template.Print); // todo: how to choose a template that has the top frame but not the folders frame?
 
             // todo:  does the grid filter affect the list of proteins displayed?
             QueryPeptideMS2RunView peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), run1);

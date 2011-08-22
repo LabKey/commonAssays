@@ -72,8 +72,8 @@
         <td>
             <table width="100%">
                 <tr>
-                    <td class="labkey-form-label" width="85px">Scan</td><td><%=p.getScan()%></td>
-                    <td class="labkey-form-label" width="110px">Delta Mass</td><td><%= Formats.signf4.format(p.getDeltaMass()) %></td>
+                    <td class="labkey-form-label" width="85px">Scan</td><td width="95px"><%=p.getScan()%></td>
+                    <td class="labkey-form-label" width="110px">Delta Mass</td><td width="95px"><%= Formats.signf4.format(p.getDeltaMass()) %></td>
                     <td class="labkey-form-label" width="85px">Protein</td><td><%= h(p.getProtein()) %></td>
                 </tr>
                 <tr>
@@ -94,46 +94,69 @@
                     <td class="labkey-form-label">Charge</td><td><%=p.getCharge()%>+</td>
                     <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(2)) %></td><td><%= p.getZScore() == null ? "" : Formats.f3.format(p.getZScore()) %></td>
                 </tr>
+            </table>
 
 <%
             // display the Libra quantitation normalization values, if applicable
             if (libra != null)
             {
 %>
-                <tr><td colspan="6">&nbsp;</td></tr>
+            <br/>
+            <table width="100%">
                 <tr><td colspan="6" style="font-size:110%;font-weight:bold;">iTRAQ Quantitation</td></tr>
-                <tr>
+
                 <% if (libra.getNormalized1() != null) { %>
-                    <td class="labkey-form-label">Normalized 1</td><td><%= Formats.f3.format(libra.getNormalized1()) %></td>
+                    <tr>
+                    <td class="labkey-form-label" width="85px">Normalized 1</td><td width="95px"><%= Formats.f3.format(libra.getNormalized1()) %></td>
+                    <td class="labkey-form-label" width="175px">Absolute Raw Intensity 1</td><td><%= Formats.f3.format(libra.getAbsoluteMass1()) %></td>
+                    </tr>
                 <% } %>
-                <% if (libra.getNormalized4() != null) { %>
-                    <td class="labkey-form-label">Normalized 4</td><td><%= Formats.f3.format(libra.getNormalized4()) %></td>
-                    <% } %>
-                <% if (libra.getNormalized7() != null) { %>
-                    <td class="labkey-form-label">Normalized 7</td><td><%= Formats.f3.format(libra.getNormalized7()) %></td>
-                    <% } %>
-                </tr><tr>
                 <% if (libra.getNormalized2() != null) { %>
+                    <tr>
                     <td class="labkey-form-label">Normalized 2</td><td><%= Formats.f3.format(libra.getNormalized2()) %></td>
+                    <td class="labkey-form-label">Absolute Raw Intensity 2</td><td><%= Formats.f3.format(libra.getAbsoluteMass2()) %></td>
+                    </tr>
+                <% } %>
+                <% if (libra.getNormalized3() != null) { %>
+                    <tr>
+                    <td class="labkey-form-label">Normalized 3</td><td><%= Formats.f3.format(libra.getNormalized3()) %></td>
+                    <td class="labkey-form-label">Absolute Raw Intensity 3</td><td><%= Formats.f3.format(libra.getAbsoluteMass3()) %></td>
+                    </tr>
+                    <% } %>
+                <% if (libra.getNormalized4() != null) { %>
+                    <tr>
+                    <td class="labkey-form-label">Normalized 4</td><td><%= Formats.f3.format(libra.getNormalized4()) %></td>
+                    <td class="labkey-form-label">Absolute Raw Intensity 4</td><td><%= Formats.f3.format(libra.getAbsoluteMass4()) %></td>
+                    </tr>
                 <% } %>
                 <% if (libra.getNormalized5() != null) { %>
+                    <tr>
                     <td class="labkey-form-label">Normalized 5</td><td><%= Formats.f3.format(libra.getNormalized5()) %></td>
-                <% } %>
-                <% if (libra.getNormalized8() != null) { %>
-                    <td class="labkey-form-label">Normalized 8</td><td><%= Formats.f3.format(libra.getNormalized8()) %></td>
-                <% } %>
-                </tr><tr>
-                <% if (libra.getNormalized3() != null) { %>
-                    <td class="labkey-form-label">Normalized 3</td><td><%= Formats.f3.format(libra.getNormalized3()) %></td>
+                    <td class="labkey-form-label">Absolute Raw Intensity 5</td><td><%= Formats.f3.format(libra.getAbsoluteMass5()) %></td>
+                    </tr>
                 <% } %>
                 <% if (libra.getNormalized6() != null) { %>
+                    <tr>
                     <td class="labkey-form-label">Normalized 6</td><td><%= Formats.f3.format(libra.getNormalized6()) %></td>
+                    <td class="labkey-form-label">Absolute Raw Intensity 6</td><td><%= Formats.f3.format(libra.getAbsoluteMass6()) %></td>
+                    </tr>
                 <% } %>
-                </tr>
+                <% if (libra.getNormalized7() != null) { %>
+                    <tr>
+                    <td class="labkey-form-label">Normalized 7</td><td><%= Formats.f3.format(libra.getNormalized7()) %></td>
+                    <td class="labkey-form-label">Absolute Raw Intensity 7</td><td><%= Formats.f3.format(libra.getAbsoluteMass7()) %></td>
+                    </tr>
+                <% } %>
+                <% if (libra.getNormalized8() != null) { %>
+                    <tr>
+                    <td class="labkey-form-label">Normalized 8</td><td><%= Formats.f3.format(libra.getNormalized8()) %></td>
+                    <td class="labkey-form-label">Absolute Raw Intensity 8</td><td><%= Formats.f3.format(libra.getAbsoluteMass8()) %></td>
+                    </tr>
+                <% } %>
+            </table>
 <%
             }
 %>                
-            </table>
         </td>
     </tr>
 </table></td></tr>
