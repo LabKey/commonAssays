@@ -30,19 +30,20 @@ import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.study.actions.AssayDetailRedirectAction;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -90,9 +91,7 @@ public class MicroarraySchema extends UserSchema
     public ExpRunTable createRunsTable()
     {
         ExpRunTable result = _expSchema.getRunsTable();
-        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getRunTextURL(getContainer(), -1);
-        url.replaceParameter("rowId", "${RowId}");
-        result.getColumn(ExpRunTable.Column.Name).setURL(StringExpressionFactory.createURL(url));
+        result.getColumn(ExpRunTable.Column.Name).setURL(new DetailsURL(new ActionURL(AssayDetailRedirectAction.class, _expSchema.getContainer()), Collections.singletonMap("runId", "rowId")));
 
         result.setProtocolPatterns("urn:lsid:%:" + MicroarrayAssayProvider.PROTOCOL_PREFIX + ".%");
 

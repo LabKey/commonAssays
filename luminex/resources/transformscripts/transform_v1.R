@@ -113,10 +113,11 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
 		    run.data$fiBackgroundBlank[nonBlanks & combo] = run.data$fiBackground[nonBlanks & combo] - blank.mean;
 		}
 	}
-
-	# convert fiBackgroundBlank values that are less than or equal to 0 to a value of 1 (as per the lab's calculation)
-	run.data$fiBackgroundBlank[!is.na(run.data$fiBackgroundBlank) & run.data$fiBackgroundBlank <= 0] = 1;
 }
+
+# convert fiBackground and fiBackgroundBlank values that are less than or equal to 0 to a value of 1 (as per the lab's calculation)
+run.data$fiBackground[!is.na(run.data$fiBackground) & run.data$fiBackground <= 0] = 1;
+run.data$fiBackgroundBlank[!is.na(run.data$fiBackgroundBlank) & run.data$fiBackgroundBlank <= 0] = 1;
 
 ################################## STEP 3: TITRATION CURVE FIT #################################
 

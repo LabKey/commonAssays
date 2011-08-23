@@ -19,11 +19,14 @@ package org.labkey.microarray.assay;
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.LsidManager;
 import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
@@ -95,6 +98,20 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
         return new HtmlView("The MAGE-ML data file is an XML file that contains the results of the microarray run.");
+    }
+
+    protected void registerLsidHandler()
+    {
+        // Since we don't usually load the actual data from microarray runs, send the user to the text
+        // view of the experiment run so that they can download the files directly to analyte locally
+        LsidManager.get().registerHandler(_runLSIDPrefix, new LsidManager.ExpRunLsidHandler()
+        {
+            @Override
+            protected ActionURL getDisplayURL(Container c, ExpProtocol protocol, ExpRun run)
+            {
+                return PageFlowUtil.urlProvider(ExperimentUrls.class).getRunTextURL(run);
+            }
+        });
     }
 
     public AssayResultTable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
