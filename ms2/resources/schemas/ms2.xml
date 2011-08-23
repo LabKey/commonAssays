@@ -2086,8 +2086,8 @@
           <ns:columnTitle>Target Mass 1</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
-      <ns:column columnName="AbsoluteMass1">
-          <ns:columnTitle>Absolute Mass 1</ns:columnTitle>
+      <ns:column columnName="AbsoluteIntensity1">
+          <ns:columnTitle>Absolute Intensity 1</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
       <ns:column columnName="Normalized1">
@@ -2099,8 +2099,8 @@
           <ns:columnTitle>Target Mass 2</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
-      <ns:column columnName="AbsoluteMass2">
-          <ns:columnTitle>Absolute Mass 2</ns:columnTitle>
+      <ns:column columnName="AbsoluteIntensity2">
+          <ns:columnTitle>Absolute Intensity 2</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
       <ns:column columnName="Normalized2">
@@ -2112,8 +2112,8 @@
           <ns:columnTitle>Target Mass 3</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
-      <ns:column columnName="AbsoluteMass3">
-          <ns:columnTitle>Absolute Mass 3</ns:columnTitle>
+      <ns:column columnName="AbsoluteIntensity3">
+          <ns:columnTitle>Absolute Intensity 3</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
       <ns:column columnName="Normalized3">
@@ -2125,8 +2125,8 @@
           <ns:columnTitle>Target Mass 4</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
-      <ns:column columnName="AbsoluteMass4">
-          <ns:columnTitle>Absolute Mass 4</ns:columnTitle>
+      <ns:column columnName="AbsoluteIntensity4">
+          <ns:columnTitle>Absolute Intensity 4</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
       <ns:column columnName="Normalized4">
@@ -2138,8 +2138,8 @@
           <ns:columnTitle>Target Mass 5</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
-      <ns:column columnName="AbsoluteMass5">
-          <ns:columnTitle>Absolute Mass 5</ns:columnTitle>
+      <ns:column columnName="AbsoluteIntensity5">
+          <ns:columnTitle>Absolute Intensity 5</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
       <ns:column columnName="Normalized5">
@@ -2151,8 +2151,8 @@
           <ns:columnTitle>Target Mass 6</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
-      <ns:column columnName="AbsoluteMass6">
-          <ns:columnTitle>Absolute Mass 6</ns:columnTitle>
+      <ns:column columnName="AbsoluteIntensity6">
+          <ns:columnTitle>Absolute Intensity 6</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
       <ns:column columnName="Normalized6">
@@ -2164,8 +2164,8 @@
           <ns:columnTitle>Target Mass 7</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
-      <ns:column columnName="AbsoluteMass7">
-          <ns:columnTitle>Absolute Mass 7</ns:columnTitle>
+      <ns:column columnName="AbsoluteIntensity7">
+          <ns:columnTitle>Absolute Intensity 7</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
       <ns:column columnName="Normalized7">
@@ -2177,8 +2177,8 @@
           <ns:columnTitle>Target Mass 8</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
-      <ns:column columnName="AbsoluteMass8">
-          <ns:columnTitle>Absolute Mass 8</ns:columnTitle>
+      <ns:column columnName="AbsoluteIntensity8">
+          <ns:columnTitle>Absolute Intensity 8</ns:columnTitle>
           <ns:formatString>0.000</ns:formatString>
       </ns:column>
       <ns:column columnName="Normalized8">

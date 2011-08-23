@@ -32,49 +32,49 @@ public class LibraQuantHandler extends PepXmlAnalysisResultHandler
                 if ("1".equals(channel))
                 {
                     result.setTargetMass1(getTargetMass(parser));
-                    result.setAbsoluteMass1(getAbsoluteMass(parser));
+                    result.setAbsoluteIntensity1(getAbsoluteMass(parser));
                     result.setNormalized1(getNormalized(parser));
                 }
                 if ("2".equals(channel))
                 {
                     result.setTargetMass2(getTargetMass(parser));
-                    result.setAbsoluteMass2(getAbsoluteMass(parser));
+                    result.setAbsoluteIntensity2(getAbsoluteMass(parser));
                     result.setNormalized2(getNormalized(parser));
                 }
                 if ("3".equals(channel))
                 {
                     result.setTargetMass3(getTargetMass(parser));
-                    result.setAbsoluteMass3(getAbsoluteMass(parser));
+                    result.setAbsoluteIntensity3(getAbsoluteMass(parser));
                     result.setNormalized3(getNormalized(parser));
                 }
                 if ("4".equals(channel))
                 {
                     result.setTargetMass4(getTargetMass(parser));
-                    result.setAbsoluteMass4(getAbsoluteMass(parser));
+                    result.setAbsoluteIntensity4(getAbsoluteMass(parser));
                     result.setNormalized4(getNormalized(parser));
                 }
                 if ("5".equals(channel))
                 {
                     result.setTargetMass5(getTargetMass(parser));
-                    result.setAbsoluteMass5(getAbsoluteMass(parser));
+                    result.setAbsoluteIntensity5(getAbsoluteMass(parser));
                     result.setNormalized5(getNormalized(parser));
                 }
                 if ("6".equals(channel))
                 {
                     result.setTargetMass6(getTargetMass(parser));
-                    result.setAbsoluteMass6(getAbsoluteMass(parser));
+                    result.setAbsoluteIntensity6(getAbsoluteMass(parser));
                     result.setNormalized6(getNormalized(parser));
                 }
                 if ("7".equals(channel))
                 {
                     result.setTargetMass7(getTargetMass(parser));
-                    result.setAbsoluteMass7(getAbsoluteMass(parser));
+                    result.setAbsoluteIntensity7(getAbsoluteMass(parser));
                     result.setNormalized7(getNormalized(parser));
                 }
                 if ("8".equals(channel))
                 {
                     result.setTargetMass8(getTargetMass(parser));
-                    result.setAbsoluteMass8(getAbsoluteMass(parser));
+                    result.setAbsoluteIntensity8(getAbsoluteMass(parser));
                     result.setNormalized8(getNormalized(parser));
                 }
             }

@@ -536,7 +536,7 @@ public abstract class MS2Importer
 
         _quantStmt = _conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoQuantitation() + "(PeptideId, LightFirstScan, LightLastScan, LightMass, HeavyFirstScan, HeavyLastScan, HeavyMass, Ratio, Heavy2LightRatio, LightArea, HeavyArea, DecimalRatio, QuantId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-        _iTraqQuantStmt = _conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoITraqPeptideQuantitation() + "(PeptideId, TargetMass1, AbsoluteMass1, Normalized1, TargetMass2, AbsoluteMass2, Normalized2, TargetMass3, AbsoluteMass3, Normalized3, TargetMass4, AbsoluteMass4, Normalized4, TargetMass5, AbsoluteMass5, Normalized5, TargetMass6, AbsoluteMass6, Normalized6, TargetMass7, AbsoluteMass7, Normalized7, TargetMass8, AbsoluteMass8, Normalized8) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        _iTraqQuantStmt = _conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoITraqPeptideQuantitation() + "(PeptideId, TargetMass1, AbsoluteIntensity1, Normalized1, TargetMass2, AbsoluteIntensity2, Normalized2, TargetMass3, AbsoluteIntensity3, Normalized3, TargetMass4, AbsoluteIntensity4, Normalized4, TargetMass5, AbsoluteIntensity5, Normalized5, TargetMass6, AbsoluteIntensity6, Normalized6, TargetMass7, AbsoluteIntensity7, Normalized7, TargetMass8, AbsoluteIntensity8, Normalized8) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     }
 
 

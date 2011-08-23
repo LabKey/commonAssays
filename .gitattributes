@@ -801,6 +801,7 @@ ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-9.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-10.20-10.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-11.10-11.19.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-11.20-11.21.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-11.21-11.22.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-drop.sql -text
@@ -885,6 +886,7 @@ ms2/resources/schemas/dbscripts/sqlserver/ms2-0.00-9.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-10.20-10.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-11.10-11.19.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-11.20-11.21.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/ms2-11.21-11.22.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-9.20-9.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-drop.sql -text

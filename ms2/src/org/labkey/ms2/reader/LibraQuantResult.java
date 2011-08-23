@@ -12,28 +12,28 @@ import java.sql.Types;
 public class LibraQuantResult extends AbstractQuantAnalysisResult
 {
     private Double _targetMass1;
-    private Double _absoluteMass1;
+    private Double _absoluteIntensity1;
     private Double _normalized1;
     private Double _targetMass2;
-    private Double _absoluteMass2;
+    private Double _absoluteIntensity2;
     private Double _normalized2;
     private Double _targetMass3;
-    private Double _absoluteMass3;
+    private Double _absoluteIntensity3;
     private Double _normalized3;
     private Double _targetMass4;
-    private Double _absoluteMass4;
+    private Double _absoluteIntensity4;
     private Double _normalized4;
     private Double _targetMass5;
-    private Double _absoluteMass5;
+    private Double _absoluteIntensity5;
     private Double _normalized5;
     private Double _targetMass6;
-    private Double _absoluteMass6;
+    private Double _absoluteIntensity6;
     private Double _normalized6;
     private Double _targetMass7;
-    private Double _absoluteMass7;
+    private Double _absoluteIntensity7;
     private Double _normalized7;
     private Double _targetMass8;
-    private Double _absoluteMass8;
+    private Double _absoluteIntensity8;
     private Double _normalized8;
 
     public Double getTargetMass1()
@@ -46,14 +46,14 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         _targetMass1 = targetMass1;
     }
 
-    public Double getAbsoluteMass1()
+    public Double getAbsoluteIntensity1()
     {
-        return _absoluteMass1;
+        return _absoluteIntensity1;
     }
 
-    public void setAbsoluteMass1(Double absoluteMass1)
+    public void setAbsoluteIntensity1(Double absoluteIntensity1)
     {
-        _absoluteMass1 = absoluteMass1;
+        _absoluteIntensity1 = absoluteIntensity1;
     }
 
     public Double getNormalized1()
@@ -76,14 +76,14 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         _targetMass2 = targetMass2;
     }
 
-    public Double getAbsoluteMass2()
+    public Double getAbsoluteIntensity2()
     {
-        return _absoluteMass2;
+        return _absoluteIntensity2;
     }
 
-    public void setAbsoluteMass2(Double absoluteMass2)
+    public void setAbsoluteIntensity2(Double absoluteIntensity2)
     {
-        _absoluteMass2 = absoluteMass2;
+        _absoluteIntensity2 = absoluteIntensity2;
     }
 
     public Double getNormalized2()
@@ -106,14 +106,14 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         _targetMass3 = targetMass3;
     }
 
-    public Double getAbsoluteMass3()
+    public Double getAbsoluteIntensity3()
     {
-        return _absoluteMass3;
+        return _absoluteIntensity3;
     }
 
-    public void setAbsoluteMass3(Double absoluteMass3)
+    public void setAbsoluteIntensity3(Double absoluteIntensity3)
     {
-        _absoluteMass3 = absoluteMass3;
+        _absoluteIntensity3 = absoluteIntensity3;
     }
 
     public Double getNormalized3()
@@ -136,14 +136,14 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         _targetMass4 = targetMass4;
     }
 
-    public Double getAbsoluteMass4()
+    public Double getAbsoluteIntensity4()
     {
-        return _absoluteMass4;
+        return _absoluteIntensity4;
     }
 
-    public void setAbsoluteMass4(Double absoluteMass4)
+    public void setAbsoluteIntensity4(Double absoluteIntensity4)
     {
-        _absoluteMass4 = absoluteMass4;
+        _absoluteIntensity4 = absoluteIntensity4;
     }
 
     public Double getNormalized4()
@@ -166,14 +166,14 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         _targetMass5 = targetMass5;
     }
 
-    public Double getAbsoluteMass5()
+    public Double getAbsoluteIntensity5()
     {
-        return _absoluteMass5;
+        return _absoluteIntensity5;
     }
 
-    public void setAbsoluteMass5(Double absoluteMass5)
+    public void setAbsoluteIntensity5(Double absoluteIntensity5)
     {
-        _absoluteMass5 = absoluteMass5;
+        _absoluteIntensity5 = absoluteIntensity5;
     }
 
     public Double getNormalized5()
@@ -196,14 +196,14 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         _targetMass6 = targetMass6;
     }
 
-    public Double getAbsoluteMass6()
+    public Double getAbsoluteIntensity6()
     {
-        return _absoluteMass6;
+        return _absoluteIntensity6;
     }
 
-    public void setAbsoluteMass6(Double absoluteMass6)
+    public void setAbsoluteIntensity6(Double absoluteIntensity6)
     {
-        _absoluteMass6 = absoluteMass6;
+        _absoluteIntensity6 = absoluteIntensity6;
     }
 
     public Double getNormalized6()
@@ -226,14 +226,14 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         _targetMass7 = targetMass7;
     }
 
-    public Double getAbsoluteMass7()
+    public Double getAbsoluteIntensity7()
     {
-        return _absoluteMass7;
+        return _absoluteIntensity7;
     }
 
-    public void setAbsoluteMass7(Double absoluteMass7)
+    public void setAbsoluteIntensity7(Double absoluteIntensity7)
     {
-        _absoluteMass7 = absoluteMass7;
+        _absoluteIntensity7 = absoluteIntensity7;
     }
 
     public Double getNormalized7()
@@ -256,14 +256,14 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         _targetMass8 = targetMass8;
     }
 
-    public Double getAbsoluteMass8()
+    public Double getAbsoluteIntensity8()
     {
-        return _absoluteMass8;
+        return _absoluteIntensity8;
     }
 
-    public void setAbsoluteMass8(Double absoluteMass8)
+    public void setAbsoluteIntensity8(Double absoluteIntensity8)
     {
-        _absoluteMass8 = absoluteMass8;
+        _absoluteIntensity8 = absoluteIntensity8;
     }
 
     public Double getNormalized8()
@@ -296,9 +296,9 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         {
             pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
-        if (getAbsoluteMass1() != null)
+        if (getAbsoluteIntensity1() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteMass1());
+            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity1());
         }
         else
         {
@@ -321,9 +321,9 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         {
             pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
-        if (getAbsoluteMass2() != null)
+        if (getAbsoluteIntensity2() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteMass2());
+            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity2());
         }
         else
         {
@@ -346,9 +346,9 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         {
             pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
-        if (getAbsoluteMass3() != null)
+        if (getAbsoluteIntensity3() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteMass3());
+            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity3());
         }
         else
         {
@@ -371,9 +371,9 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         {
             pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
-        if (getAbsoluteMass4() != null)
+        if (getAbsoluteIntensity4() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteMass4());
+            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity4());
         }
         else
         {
@@ -396,9 +396,9 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         {
             pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
-        if (getAbsoluteMass5() != null)
+        if (getAbsoluteIntensity5() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteMass5());
+            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity5());
         }
         else
         {
@@ -421,9 +421,9 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         {
             pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
-        if (getAbsoluteMass6() != null)
+        if (getAbsoluteIntensity6() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteMass6());
+            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity6());
         }
         else
         {
@@ -446,9 +446,9 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         {
             pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
-        if (getAbsoluteMass7() != null)
+        if (getAbsoluteIntensity7() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteMass7());
+            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity7());
         }
         else
         {
@@ -471,9 +471,9 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
         {
             pepXmlImporter._iTraqQuantStmt.setNull(index++, Types.DOUBLE);
         }
-        if (getAbsoluteMass8() != null)
+        if (getAbsoluteIntensity8() != null)
         {
-            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteMass8());
+            pepXmlImporter._iTraqQuantStmt.setDouble(index++, getAbsoluteIntensity8());
         }
         else
         {
