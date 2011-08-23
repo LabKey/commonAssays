@@ -87,32 +87,50 @@ if (file.exists(titration.data.file))
             {
                 titrationName = as.character(titration.data[tIndex,]$Name);
                 analyteName = as.character(analytes[aIndex]);
-                print(paste(titrationName, analyteName, sep="..."));
-
                 dat = subset(run.data, description == titrationName & name == analyteName);
-                runDataIndex = run.data$description == titrationName & run.data$name == analyteName;
 
-                # if no expected concentration for this titration, set expConc = starting conc / dilution
-                if (any(is.na(dat$expConc)))
+                if (nrow(dat) > 0)
                 {
-                    dat$expConc = min(dat$dilution) / dat$dilution;
+                    print(paste(titrationName, analyteName, sep="..."));
+                    runDataIndex = run.data$description == titrationName & run.data$name == analyteName;
+
+                    # choose the FI column for titrations based on the run property provided by the user, default to the original FI value
+                    fiCol = "FI";
+                    if(any(run.props$name == "StndCurveFitInput"))
+                        fiCol = run.props$val1[run.props$name == "StndCurveFitInput"];
+                    print(fiCol);
+                    if(fiCol == "FI-Bkgd")
+                        dat$fi = dat$fiBackground
+                    else if(fiCol == "FI-Bkgd-Blank")
+                        dat$fi = dat$fiBackgroundBlank;
+                        
+                    # if no expected concentration for this titration, set expConc = starting conc / dilution
+                    if (any(is.na(dat$expConc)))
+                    {
+                        dat$expConc = min(dat$dilution) / dat$dilution;
+                    }
+
+                    # get curve fit params for 5PL
+                    fit = fit.drc(log(fi) ~ expConc, data = dat, force.fit=FALSE, fit.4pl=FALSE);
+                    if (!is.null(fit))
+                    {
+                        run.data[runDataIndex,]$Slope_5pl = as.numeric(coef(fit))[1];
+                        run.data[runDataIndex,]$Lower_5pl = as.numeric(coef(fit))[2];
+                        run.data[runDataIndex,]$Upper_5pl = as.numeric(coef(fit))[3];
+                        run.data[runDataIndex,]$Inflection_5pl = as.numeric(coef(fit))[4];
+                        run.data[runDataIndex,]$Asymmetry_5pl = as.numeric(coef(fit))[5];
+                    }
+
+                    # get curve fit params for 4PL
+                    fit = fit.drc(log(fi) ~ expConc, data = dat, force.fit=FALSE, fit.4pl=TRUE);
+                    if (!is.null(fit))
+                    {
+                        run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1];
+                        run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2];
+                        run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3];
+                        run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4];
+                    }
                 }
-
-                # get curve fit params for 5PL
-                fit = fit.drc(log(fi) ~ expConc, data = dat, force.fit=FALSE, fit.4pl=FALSE);
-
-                run.data[runDataIndex,]$Slope_5pl = as.numeric(coef(fit))[1];
-                run.data[runDataIndex,]$Lower_5pl = as.numeric(coef(fit))[2];
-                run.data[runDataIndex,]$Upper_5pl = as.numeric(coef(fit))[3];
-                run.data[runDataIndex,]$Inflection_5pl = as.numeric(coef(fit))[4];
-                run.data[runDataIndex,]$Asymmetry_5pl = as.numeric(coef(fit))[5];
-
-                # get curve fit params for 4PL
-                fit = fit.drc(log(fi) ~ expConc, data = dat, force.fit=FALSE, fit.4pl=TRUE);
-                run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1];
-                run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2];
-                run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3];
-                run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4];
             }
         }
     }
