@@ -16,10 +16,12 @@
 
 package org.labkey.luminex;
 
+import junit.framework.Assert;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.junit.Test;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.ParameterCurveImpl;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -219,8 +221,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     // FI = 0.441049 + (30395.4 - 0.441049) / ((1 + (Conc / 5.04206)^-11.8884))^0.0999998
     // Captures 6 groups. In the example above: 0.441049, 30395.4, 0.441049, 5.04206, -11.8884, and 0.0999998
-    private static final String CURVE_REGEX = "FI\\s*=\\s*" +  // 'FI = '
-            "(" + NUMBER_REGEX + ")\\s*\\+\\s*\\((" + NUMBER_REGEX + ")\\s*\\-\\s*(" + NUMBER_REGEX + ")\\)" + // '0.441049 + (30395.4 - 0.441049)'
+    private static final String CURVE_REGEX = "\\s*FI\\s*=\\s*" +  // 'FI = '
+            "(" + NUMBER_REGEX + ")\\s*\\+\\s*\\((" + NUMBER_REGEX + ")\\s*[\\+\\-]\\s*(" + NUMBER_REGEX + ")\\)" + // '0.441049 + (30395.4 - 0.441049)'
             "\\s*/\\s*\\(\\(1\\s*\\+\\s*\\(Conc\\s*/\\s*" + // ' / ((1 + (Conc / '
             "(" + NUMBER_REGEX + ")\\)\\s*\\^\\s*(" + NUMBER_REGEX + ")\\s*\\)\\s*\\)\\s*" + // '^-11.8884))'
             "\\^\\s*(" + NUMBER_REGEX + ")\\s*";
@@ -265,57 +267,46 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     analyteTitration.put("titrationId", titration.getRowId());
                     Table.insert(user, LuminexSchema.getTableInfoAnalyteTitration(), analyteTitration);
 
-                    String stdCurve = analyte.getStdCurve();
-                    if (stdCurve != null)
+                    List<LuminexWell> wells = new ArrayList<LuminexWell>();
+                    LuminexDataRow firstDataRow = null;
+                    for (LuminexDataRow dataRow : sheet.getValue())
                     {
-                        Matcher matcher = CURVE_PATTERN.matcher(stdCurve);
-                        if (matcher.matches())
+                        if (PageFlowUtil.nullSafeEquals(dataRow.getDescription(), titration.getName()))
                         {
-                            ParameterCurveImpl.FitParameters params = new ParameterCurveImpl.FitParameters();
-                            params.min = Double.parseDouble(matcher.group(1));
-                            params.slope = Double.parseDouble(matcher.group(2)) - Double.parseDouble(matcher.group(3));
-                            params.inflection = Double.parseDouble(matcher.group(4));
-                            params.max = Double.parseDouble(matcher.group(5));
-                            params.asymmetry = Double.parseDouble(matcher.group(6));
-
-                            try
+                            wells.add(new LuminexWell(dataRow));
+                            if (firstDataRow == null)
                             {
-                                List<LuminexWell> wells = new ArrayList<LuminexWell>();
-                                for (LuminexDataRow dataRow : sheet.getValue())
-                                {
-                                    if (PageFlowUtil.nullSafeEquals(dataRow.getDescription(), titration.getName()))
-                                    {
-                                        wells.add(new LuminexWell(dataRow));
-                                    }
-                                }
-                                LuminexWellGroup wellGroup = new LuminexWellGroup(wells);
-                                ParameterCurveImpl.FiveParameterCurve curveImpl = new ParameterCurveImpl.FiveParameterCurve(Collections.singletonList(wellGroup), false, params);
-
-                                double ec50 = curveImpl.getCutoffDilution(.5);
-                                double auc = curveImpl.calculateAUC(DilutionCurve.AUCType.NORMAL);
-                                double maxFI = wellGroup.getMax();
-
-                                CurveFit fit = new CurveFit();
-                                fit.setAnalyteId(analyte.getRowId());
-                                fit.setTitrationId(titration.getRowId());
-                                fit.setAUC(Double.isNaN(Double.NaN) ? 0 : auc);
-                                fit.setEC50(ec50 > 5000 ? 5000 : ec50);
-                                fit.setMaxFI(maxFI);
-                                fit.setCurveType(DilutionCurve.FitType.FIVE_PARAMETER.getLabel());
-
-                                Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
+                                firstDataRow = dataRow;
                             }
-                            catch (DilutionCurve.FitFailedException e)
-                            {
-                                throw new ExperimentException(e);
-                            }
-                        }
-                        else
-                        {
-                            LOGGER.warn("Could not parse standard curve: " + stdCurve);
                         }
                     }
+                    LuminexWellGroup wellGroup = new LuminexWellGroup(wells);
 
+                    try
+                    {
+                        String stdCurve = analyte.getStdCurve();
+                        if (stdCurve != null)
+                        {
+                            ParameterCurveImpl.FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
+                            if (fitParams != null)
+                            {
+                                insertCurveFit(wellGroup, user, titration, analyte, fitParams, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex");
+                            }
+                            else
+                            {
+                                LOGGER.warn("Could not parse standard curve: " + stdCurve);
+                            }
+                        }
+                        if (firstDataRow != null)
+                        {
+                            importRumiCurveFit(DilutionCurve.FitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte);
+                            importRumiCurveFit(DilutionCurve.FitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte);
+                        }
+                    }
+                    catch (DilutionCurve.FitFailedException e)
+                    {
+                        throw new ExperimentException(e);
+                    }
                 }
 
                 List<LuminexDataRow> dataRows = sheet.getValue();
@@ -396,6 +387,97 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             ExperimentService.get().closeTransaction();
         }
+    }
+
+    private void importRumiCurveFit(DilutionCurve.FitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte) throws DilutionCurve.FitFailedException, SQLException
+    {
+        if (fitType != DilutionCurve.FitType.FIVE_PARAMETER && fitType != DilutionCurve.FitType.FOUR_PARAMETER)
+        {
+            throw new IllegalArgumentException("Unsupported fit type: " + fitType);
+        }
+        String suffix = fitType == DilutionCurve.FitType.FIVE_PARAMETER ? "_5pl" : "_4pl";
+        Number slope = (Number)dataRow.getExtraProperties().get("Slope" + suffix);
+        Number upper = (Number)dataRow.getExtraProperties().get("Upper" + suffix);
+        Number lower = (Number)dataRow.getExtraProperties().get("Lower" + suffix);
+        Number inflection = (Number)dataRow.getExtraProperties().get("Inflection" + suffix);
+        Number asymmetry = (Number)dataRow.getExtraProperties().get("Asymmtery" + suffix);
+
+        if (slope != null && upper != null && lower != null && inflection != null)
+        {
+            ParameterCurveImpl.FitParameters params = new ParameterCurveImpl.FitParameters();
+            params.min = lower.doubleValue();
+            params.slope = slope.doubleValue();
+            params.inflection = inflection.doubleValue();
+            params.max = upper.doubleValue();
+            params.asymmetry = asymmetry == null ? 1 : asymmetry.doubleValue();
+
+            insertCurveFit(wellGroup, user, titration, analyte, params, fitType, "Rumi");
+        }
+        
+    }
+
+    public static ParameterCurveImpl.FitParameters parseBioPlexStdCurve(String stdCurve)
+    {
+        Matcher matcher = CURVE_PATTERN.matcher(stdCurve);
+        if (matcher.matches())
+        {
+            ParameterCurveImpl.FitParameters params = new ParameterCurveImpl.FitParameters();
+            params.min = Double.parseDouble(matcher.group(1));
+            params.max = Double.parseDouble(matcher.group(2)) - Double.parseDouble(matcher.group(1));
+            params.inflection = Double.parseDouble(matcher.group(4));
+            params.slope = Double.parseDouble(matcher.group(5));
+            params.asymmetry = Double.parseDouble(matcher.group(6));
+
+            return params;
+        }
+        return null;
+    }
+
+    public static class TestCase extends Assert
+    {
+        @Test
+        public void testBioPlexCurveParsingNegativeMinimum()
+        {
+            ParameterCurveImpl.FitParameters params = parseBioPlexStdCurve("FI = -2.08995 + (29934.1 + 2.08995) / ((1 + (Conc / 2.49287)^-4.99651))^0.215266");
+            assertNotNull("Couldn't parse standard curve", params);
+            assertEquals(params.asymmetry, 0.215266);
+            assertEquals(params.min, -2.08995);
+            assertEquals(params.max, 29936.18995);
+            assertEquals(params.inflection, 2.49287);
+            assertEquals(params.slope, -4.99651);
+        }
+
+        @Test
+        public void testBioPlexCurveParsingPositiveMinimum()
+        {
+            ParameterCurveImpl.FitParameters params = parseBioPlexStdCurve("FI = 0.441049 + (30395.4 - 0.441049) / ((1 + (Conc / 5.04206)^-11.8884))^0.0999998");
+            assertNotNull("Couldn't parse standard curve", params);
+            assertEquals(0.0999998, params.asymmetry);
+            assertEquals(.441049, params.min);
+            assertEquals(30394.958951, params.max);
+            assertEquals(5.04206, params.inflection);
+            assertEquals(-11.8884, params.slope);
+        }
+    }
+
+    private void insertCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source)
+            throws DilutionCurve.FitFailedException, SQLException
+    {
+        ParameterCurveImpl.FiveParameterCurve curveImpl = new ParameterCurveImpl.FiveParameterCurve(Collections.singletonList(wellGroup), false, params);
+
+        double ec50 = curveImpl.getCutoffDilution(.5);
+        double auc = curveImpl.calculateAUC(DilutionCurve.AUCType.NORMAL);
+        double maxFI = wellGroup.getMax();
+
+        CurveFit fit = new CurveFit();
+        fit.setAnalyteId(analyte.getRowId());
+        fit.setTitrationId(titration.getRowId());
+        fit.setAUC(Double.isNaN(Double.NaN) ? 0 : auc);
+        fit.setEC50(Double.isInfinite(ec50) || ec50 > 5000 ? 5000 : ec50);
+        fit.setMaxFI(maxFI);
+        fit.setCurveType(source + " " + fitType.getLabel());
+
+        Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
     }
 
     private ParticipantVisitResolver findParticipantVisitResolver(ExpRun expRun, User user, LuminexAssayProvider provider)
@@ -898,7 +980,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 dataRow.setLsid(new Lsid(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX, GUID.makeGUID()).toString());
             }
 
-            Map.Entry<Analyte, List<LuminexDataRow>> entry = LuminexExcelParser.ensureAnalyte(analyte.getName(), sheets);
+            Map.Entry<Analyte, List<LuminexDataRow>> entry = LuminexExcelParser.ensureAnalyte(analyte, sheets);
             entry.getValue().add(dataRow);
         }
 

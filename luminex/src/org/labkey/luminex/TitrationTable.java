@@ -36,6 +36,7 @@ public class TitrationTable extends AbstractLuminexTable
     public TitrationTable(LuminexSchema schema, boolean filter)
     {
         super(LuminexSchema.getTableInfoTitration(), schema, filter);
+        setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.TITRATION_TABLE_NAME));
         _schema = schema;
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
         ColumnInfo nameColumn = addColumn(wrapColumn(getRealTable().getColumn("Name")));

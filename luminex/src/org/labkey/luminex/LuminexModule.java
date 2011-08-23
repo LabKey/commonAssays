@@ -43,7 +43,7 @@ public class LuminexModule extends DefaultModule
 
     public double getVersion()
     {
-        return 11.21;
+        return 11.22;
     }
 
     protected void init()
@@ -84,6 +84,13 @@ public class LuminexModule extends DefaultModule
     public Set<DbSchema> getSchemasToTest()
     {
         return PageFlowUtil.set(LuminexSchema.getSchema());
+    }
+
+    @NotNull
+    @Override
+    public Set<Class> getJUnitTests()
+    {
+        return Collections.<Class>singleton(LuminexDataHandler.TestCase.class);
     }
 
     @Override

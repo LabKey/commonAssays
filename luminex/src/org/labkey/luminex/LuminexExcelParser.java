@@ -90,7 +90,7 @@ public class LuminexExcelParser
                     }
 
                     String analyteName = sheet.getSheetName();
-                    Map.Entry<Analyte, List<LuminexDataRow>> analyteEntry = ensureAnalyte(analyteName, _sheets);
+                    Map.Entry<Analyte, List<LuminexDataRow>> analyteEntry = ensureAnalyte(new Analyte(analyteName), _sheets);
                     Analyte analyte = analyteEntry.getKey();
                     List<LuminexDataRow> dataRows = analyteEntry.getValue();
 
@@ -195,30 +195,30 @@ public class LuminexExcelParser
         _parsed = true;
     }
 
-    public static Map.Entry<Analyte, List<LuminexDataRow>> ensureAnalyte(String analyteName, Map<Analyte, List<LuminexDataRow>> sheets)
+    public static Map.Entry<Analyte, List<LuminexDataRow>> ensureAnalyte(Analyte analyte, Map<Analyte, List<LuminexDataRow>> sheets)
     {
-        Analyte analyte = null;
         List<LuminexDataRow> dataRows = null;
 
+        Analyte matchingAnalyte = null;
         // Might need to merge data rows for analytes across files
         for (Map.Entry<Analyte, List<LuminexDataRow>> entry : sheets.entrySet())
         {
             // Need to check both the name of the sheet (which might have been truncated) and the full
             // name of all analytes already parsed to see if we have a match
-            if (analyteName.equals(entry.getKey().getName()) || analyteName.equals(entry.getKey().getSheetName()))
+            if (analyte.getName().equals(entry.getKey().getName()) || analyte.getName().equals(entry.getKey().getSheetName()))
             {
-                analyte = entry.getKey();
+                matchingAnalyte = entry.getKey();
                 dataRows = entry.getValue();
             }
         }
-        if (analyte == null)
+        if (matchingAnalyte == null)
         {
-            analyte = new Analyte(analyteName);
+            matchingAnalyte = analyte;
             dataRows = new ArrayList<LuminexDataRow>();
-            sheets.put(analyte, dataRows);
+            sheets.put(matchingAnalyte, dataRows);
         }
 
-        return new Pair<Analyte, List<LuminexDataRow>>(analyte, dataRows);
+        return new Pair<Analyte, List<LuminexDataRow>>(matchingAnalyte, dataRows);
     }
 
     public Set<String> getTitrations() throws ExperimentException

@@ -19,6 +19,7 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.FilteredTable;
+import org.labkey.api.study.assay.AssaySchema;
 
 import java.util.Collection;
 
@@ -57,4 +58,10 @@ public abstract class AbstractLuminexTable extends FilteredTable
     }
 
     protected abstract SQLFragment createContainerFilterSQL(Collection<String> ids);
+
+    @Override
+    public String getPublicSchemaName()
+    {
+        return AssaySchema.NAME;
+    }
 }
