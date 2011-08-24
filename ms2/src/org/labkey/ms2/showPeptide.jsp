@@ -30,6 +30,12 @@
 <%@ page import="java.util.Collections" %>
 <%@ page import="org.labkey.ms2.MS2Run" %>
 <%@ page import="org.labkey.ms2.reader.LibraQuantResult" %>
+<%@ page import="org.labkey.ms2.MS2Modification" %>
+<%@ page import="org.labkey.api.util.Pair" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
@@ -161,7 +167,7 @@
     </tr>
 </table></td></tr>
 <!--FIRST ROW-->
-
+<% if (request.getParameter("oldSpectra") != null) { %>
 <!--SECOND ROW LEFT-->
 <tr><td valign=top width="610">
     <table style="border: solid #EEEEEE 2px">
@@ -277,7 +283,137 @@
 %>
 
 </table>
-</td>
+</td></tr>
 <!--SECOND ROW RIGHT (FRAGMENT)-->
+<%
+// End of old spectra viewer
+} %>
+</table>
 
-</tr></table>
+<%
+float[] mzs = p.getSpectrumMZ();
+float[] intensities = p.getSpectrumIntensity();
+if (mzs != null && intensities != null && mzs.length == intensities.length)
+{
+%>
+
+<!--[if IE]><script language="javascript" type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/excanvas.min.js"></script><![endif]-->
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+
+<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/jquery.flot.js"></script>
+<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/jquery.flot.selection.js"></script>
+
+<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/specview.js"></script>
+<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/peptide.js"></script>
+<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/aminoacid.js"></script>
+<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/ion.js"></script>
+
+
+<link REL="stylesheet" TYPE="text/css" HREF="../css/lorikeet.css">
+
+<!-- PLACE HOLDER DIV FOR THE SPECTRUM -->
+<div id="lorikeet"></div>
+
+
+<script type="text/javascript">
+
+LABKEY.requiresCss("MS2/lorikeet_0.3/css/lorikeet.css");
+
+$(document).ready(function () {
+
+	/* render the spectrum with the given options */
+	$("#lorikeet").specview({sequence: <%= PageFlowUtil.jsString(p.getTrimmedPeptide()) %>,
+								precursorMz: 1012.1,
+								staticMods: staticMods,
+								variableMods: varMods,
+                                width: 600,
+                                // Pretend to be one charge state higher so that the viewer shows the right number of y/b charge ions
+                                charge: <%= p.getCharge() + 1 %>,
+//								ntermMod: ntermMod,
+								//ctermMod: ctermMod,
+								peaks: peaks,
+                                extraPeakSeries: extraPeakSeries
+								});
+
+});
+
+var staticMods = [];
+<%
+int staticModIndex = 0;
+for (org.labkey.ms2.MS2Modification mod : run.getModifications())
+{
+    if (!mod.getVariable())
+    { %>
+        <%= staticModIndex == 0 ? "" : "," %>staticMods[<%= staticModIndex++%>] = { modMass: <%= Formats.f4.format(mod.getMassDiff()) %>, aminoAcid: <%= PageFlowUtil.jsString(mod.getAminoAcid())%>}<%
+    }
+}
+%>
+
+var varMods = [];
+<%
+String trimmedWithMods = MS2Peptide.trimPeptide(p.getPeptide());
+int aaIndex = 0;
+int varModIndex = 0;
+for (int i = 0; i < trimmedWithMods.length(); i++)
+{
+    if (Character.isLetter(trimmedWithMods.charAt(i)))
+    {
+        aaIndex++;
+    }
+    else
+    {
+        Double varModWeight=run.getVarModifications().get(trimmedWithMods.substring(i - 1, i + 1));
+        if (varModWeight != null)
+        { %>
+            varMods[<%= varModIndex++ %>] = {index: <%= aaIndex %>, modMass: <%= Formats.f4.format(varModWeight) %>, aminoAcid: '<%= trimmedWithMods.charAt(i - 1)%>'}; <%
+        }
+    }
+}
+%>
+
+// peaks in the scan: [m/z, intensity] pairs.
+var peaks = [
+    <%
+    boolean firstPeak = true;
+    java.util.Map<String, java.util.List<Pair<Float, Float>>> customHits = new java.util.HashMap<String, java.util.List<Pair<Float, Float>>>();
+    for (int i = 0; i < mzs.length; i++)
+    {
+        String libraMatch = libra != null ? libra.getMatch(mzs[i], 0.2) : null;
+        if (libraMatch != null)
+        {
+            java.util.List<Pair<Float, Float>> peaks = customHits.get(libraMatch);
+            if (peaks == null)
+            {
+                peaks = new java.util.ArrayList<Pair<Float, Float>>();
+                customHits.put(libraMatch, peaks);
+            }
+            peaks.add(new org.labkey.api.util.Pair<Float, Float>(mzs[i], intensities[i]));
+        }
+        else
+        { %>
+            <%= (firstPeak ? "" : ",") %> [<%= mzs[i]%>, <%= intensities[i]%>]<%
+            firstPeak = false;
+        }
+    } %>
+];
+var extraPeakSeries = [];
+<%
+int seriesIndex = 0;
+for (Map.Entry<String,java.util.List<Pair<Float,Float>>> customHit : customHits.entrySet())
+{ %>
+    extraPeakSeries[<%= seriesIndex++ %>] = { data: [ <%
+    boolean firstCustomPeak = true;
+    for (Pair<Float,Float> peak : customHit.getValue())
+    { %>
+        <%= firstCustomPeak ? "" : ", "%><% firstCustomPeak = false; %>[<%= Formats.f4.format(peak.getKey())%>, <%= Formats.f4.format(peak.getValue())%>] <%
+    } %>
+], color: "green"}; <%
+} %>
+</script>
+<% } %>
+
+<style type="text/css">
+    /*Hide the redundant peptide sequence info*/
+    div#seqinfo { display: none; }
+</style>

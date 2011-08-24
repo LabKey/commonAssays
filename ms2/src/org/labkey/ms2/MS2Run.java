@@ -112,7 +112,7 @@ public abstract class MS2Run implements Serializable
     }
 
 
-    public Map getVarModifications()
+    public Map<String, Double> getVarModifications()
     {
         if (null == varModifications)
             initModifications();

@@ -56,7 +56,7 @@ public class MS2Peptide
 
     // Calculated variables
     private double[] _massTable = null;
-    private Map _variableModifications = null;
+    private Map<String, Double> _variableModifications = null;
     private double[][] _b = {};
     private double[][] _y = {};
     private boolean[][] _bMatches = {};
@@ -231,7 +231,7 @@ public class MS2Peptide
             // Variable modification... look it up and add the mass difference
             if (1 < aa.length())
             {
-                Double massDiff = (Double) _variableModifications.get(aa);
+                Double massDiff = _variableModifications.get(aa);
                 if (null != massDiff)
                     aaMass[i] += massDiff;
                 else

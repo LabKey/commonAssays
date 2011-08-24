@@ -43,38 +43,6 @@ public class MS2Modification
         return run + " " + aminoAcid + " " + massDiff + " " + variable + " " + symbol;
     }
 
-    /**
-     * dhmay adding for msInspect.  This is kind of hacky; if CPAS needs
-     * something like it, talk to me.
-     * @param modAsString
-     * @return
-     * @throws IllegalArgumentException
-     */
-    public static MS2Modification parseString(String modAsString)
-            throws IllegalArgumentException
-    {
-        String[] chunks = modAsString.split(" ");
-        if (chunks.length != 5 && chunks.length != 4)
-            throw new IllegalArgumentException("Bad modification string: " + modAsString);
-        int run = Integer.parseInt(chunks[0]);
-        String aminoAcid = chunks[1];
-        float massDiff = Float.parseFloat(chunks[2]);
-        boolean variable = Boolean.parseBoolean(chunks[3]);
-        String symbol = null;
-        if (chunks.length == 5)
-            symbol = chunks[4];
-
-        MS2Modification result = new MS2Modification();
-        result.setRun(run);
-        result.setAminoAcid(aminoAcid);
-        result.setMassDiff(massDiff);
-        result.setVariable(variable);
-        result.setSymbol(symbol);
-
-        return result;
-    }
-
-
     public int getRun()
     {
         return run;

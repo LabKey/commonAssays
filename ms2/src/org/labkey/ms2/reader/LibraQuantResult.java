@@ -490,4 +490,41 @@ public class LibraQuantResult extends AbstractQuantAnalysisResult
 
         pepXmlImporter._iTraqQuantStmt.executeUpdate();
     }
+
+    public String getMatch(float mz, double tolerance)
+    {
+        if (_targetMass1 != null && Math.abs(mz - _targetMass1.doubleValue()) < tolerance)
+        {
+            return "iTRAQ Channel 1";
+        }
+        if (_targetMass2 != null && Math.abs(mz - _targetMass2.doubleValue()) < tolerance)
+        {
+            return "iTRAQ Channel 2";
+        }
+        if (_targetMass3 != null && Math.abs(mz - _targetMass3.doubleValue()) < tolerance)
+        {
+            return "iTRAQ Channel 3";
+        }
+        if (_targetMass4 != null && Math.abs(mz - _targetMass4.doubleValue()) < tolerance)
+        {
+            return "iTRAQ Channel 4";
+        }
+        if (_targetMass5 != null && Math.abs(mz - _targetMass5.doubleValue()) < tolerance)
+        {
+            return "iTRAQ Channel 5";
+        }
+        if (_targetMass6 != null && Math.abs(mz - _targetMass6.doubleValue()) < tolerance)
+        {
+            return "iTRAQ Channel 6";
+        }
+        if (_targetMass7 != null && Math.abs(mz - _targetMass7.doubleValue()) < tolerance)
+        {
+            return "iTRAQ Channel 7";
+        }
+        if (_targetMass8 != null && Math.abs(mz - _targetMass8.doubleValue()) < tolerance)
+        {
+            return "iTRAQ Channel 8";
+        }
+        return null;
+    }
 }
