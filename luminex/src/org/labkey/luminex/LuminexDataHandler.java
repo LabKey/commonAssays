@@ -416,7 +416,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         
     }
 
-    public static ParameterCurveImpl.FitParameters parseBioPlexStdCurve(String stdCurve)
+    private ParameterCurveImpl.FitParameters parseBioPlexStdCurve(String stdCurve)
     {
         Matcher matcher = CURVE_PATTERN.matcher(stdCurve);
         if (matcher.matches())
@@ -438,7 +438,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         @Test
         public void testBioPlexCurveParsingNegativeMinimum()
         {
-            ParameterCurveImpl.FitParameters params = parseBioPlexStdCurve("FI = -2.08995 + (29934.1 + 2.08995) / ((1 + (Conc / 2.49287)^-4.99651))^0.215266");
+            ParameterCurveImpl.FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = -2.08995 + (29934.1 + 2.08995) / ((1 + (Conc / 2.49287)^-4.99651))^0.215266");
             assertNotNull("Couldn't parse standard curve", params);
             assertEquals(params.asymmetry, 0.215266);
             assertEquals(params.min, -2.08995);
@@ -450,7 +450,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         @Test
         public void testBioPlexCurveParsingPositiveMinimum()
         {
-            ParameterCurveImpl.FitParameters params = parseBioPlexStdCurve("FI = 0.441049 + (30395.4 - 0.441049) / ((1 + (Conc / 5.04206)^-11.8884))^0.0999998");
+            ParameterCurveImpl.FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = 0.441049 + (30395.4 - 0.441049) / ((1 + (Conc / 5.04206)^-11.8884))^0.0999998");
             assertNotNull("Couldn't parse standard curve", params);
             assertEquals(0.0999998, params.asymmetry);
             assertEquals(.441049, params.min);
@@ -458,10 +458,55 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals(5.04206, params.inflection);
             assertEquals(-11.8884, params.slope);
         }
+
+        @Test
+        public void test5PLCurveFit() throws DilutionCurve.FitFailedException
+        {
+            ParameterCurveImpl.FitParameters params = new ParameterCurveImpl.FitParameters();
+            params.asymmetry = 0.0999998;
+            params.min= .441049;
+            params.max = 30394.958951;
+            params.inflection = 5.04206;
+            params.slope = -11.8884;
+            
+            List<LuminexWell> wells = new ArrayList<LuminexWell>();
+
+            wells.add(new LuminexWell(new LuminexDataRow("C1", 30138.5, 500, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("D2", 30160.5, 500, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("C3", 29141, 13.88889, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("D3", 29482.5, 13.88889, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("C4", 24376.5, 2.31481, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("D4", 24335, 2.31481, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("C5", 2798, 0.3858, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("D5", 2956.5, 0.3858, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("C6", 349, 0.0643, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("D6", 350.5, 0.0643, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("C7", 50, 0.01072, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("D7", 58, 0.01072, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("C8", 9.5, 0.00179, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("D8", 7, 0.00179, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("C9", 1, 0.0003, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("D9", 3, 0.0003, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("C10", -1, 0.00005, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("D10", 2, 0.00005, 1)));
+            LuminexWellGroup group = new LuminexWellGroup(wells);
+
+            CurveFit fit = new LuminexDataHandler().createCurveFit(group, new Titration(), new Analyte(), params, DilutionCurve.FitType.FIVE_PARAMETER, "Test");
+            assertEquals("MaxFI", 30160.5, fit.getMaxFI());
+            assertEquals("EC50", 1198.008444104608, fit.getEC50());
+            assertEquals("AUC", 107.5578170270846, fit.getAUC());
+        }
     }
 
     private void insertCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source)
             throws DilutionCurve.FitFailedException, SQLException
+    {
+        CurveFit fit = createCurveFit(wellGroup, titration, analyte, params, fitType, source);
+        Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
+    }
+
+    private CurveFit createCurveFit(LuminexWellGroup wellGroup, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source)
+            throws DilutionCurve.FitFailedException
     {
         ParameterCurveImpl.FiveParameterCurve curveImpl = new ParameterCurveImpl.FiveParameterCurve(Collections.singletonList(wellGroup), false, params);
 
@@ -472,12 +517,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         CurveFit fit = new CurveFit();
         fit.setAnalyteId(analyte.getRowId());
         fit.setTitrationId(titration.getRowId());
-        fit.setAUC(Double.isNaN(Double.NaN) ? 0 : auc);
-        fit.setEC50(Double.isInfinite(ec50) || ec50 > 5000 ? 5000 : ec50);
+        fit.setAUC(Double.isNaN(auc) || Double.isInfinite(auc) ? null : auc);
+        fit.setEC50(Double.isNaN(ec50) || Double.isInfinite(ec50) ? null : ec50);
         fit.setMaxFI(maxFI);
         fit.setCurveType(source + " " + fitType.getLabel());
-
-        Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
+        return fit;
     }
 
     private ParticipantVisitResolver findParticipantVisitResolver(ExpRun expRun, User user, LuminexAssayProvider provider)

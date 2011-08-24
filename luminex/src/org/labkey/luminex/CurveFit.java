@@ -10,9 +10,9 @@ public class CurveFit
     private int _titrationId;
     private int _analyteId;
     private String _curveType;
-    private double _maxFI;
-    private double _ec50;
-    private double _auc;
+    private Double _maxFI;
+    private Double _ec50;
+    private Double _auc;
 
     public int getRowId()
     {
@@ -54,32 +54,32 @@ public class CurveFit
         _curveType = curveType;
     }
 
-    public double getMaxFI()
+    public Double getMaxFI()
     {
         return _maxFI;
     }
 
-    public void setMaxFI(double maxFI)
+    public void setMaxFI(Double maxFI)
     {
         _maxFI = maxFI;
     }
 
-    public double getEC50()
+    public Double getEC50()
     {
         return _ec50;
     }
 
-    public void setEC50(double ec50)
+    public void setEC50(Double ec50)
     {
         _ec50 = ec50;
     }
 
-    public double getAUC()
+    public Double getAUC()
     {
         return _auc;
     }
 
-    public void setAUC(double auc)
+    public void setAUC(Double auc)
     {
         _auc = auc;
     }

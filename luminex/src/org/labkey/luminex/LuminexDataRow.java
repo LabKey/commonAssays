@@ -77,6 +77,17 @@ public class LuminexDataRow
     // Extra properties that aren't stored directly in the database
     private String _dataFile;
 
+
+    /** For testing */
+    public LuminexDataRow(String well, double fiBackground, double expConc, double dilution)
+    {
+        setWell(well);
+        setFiBackground(fiBackground);
+        setExpConc(expConc);
+        setDilution(dilution);
+    }
+
+    /** General purpose and for reflection */
     public LuminexDataRow()
     {
     }
