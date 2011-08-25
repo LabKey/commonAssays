@@ -160,6 +160,33 @@ public class PeptidesTableInfo extends FilteredTable
                 FilteredTable result = new FilteredTable(MS2Manager.getTableInfoITraqPeptideQuantitation());
                 result.wrapAllColumns(true);
                 result.getColumn("PeptideId").setHidden(true);
+
+                SQLFragment sumSQL = new SQLFragment(
+                        "(COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity1, 0) + " +
+                        "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity2, 0) + " +
+                        "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity3, 0) + " +
+                        "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity4, 0) + " +
+                        "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity5, 0) + " +
+                        "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity6, 0) + " +
+                        "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity7, 0) + " +
+                        "COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity8, 0))");
+                for (int i = 1; i <= 8; i++)
+                {
+                    SQLFragment sql = new SQLFragment("CASE WHEN (");
+                    sql.append(sumSQL);
+                    sql.append(") = 0 THEN NULL ELSE ");
+                    sql.append(ExprColumn.STR_TABLE_ALIAS);
+                    sql.append(".AbsoluteIntensity");
+                    sql.append(i);
+                    sql.append(" / ");
+                    sql.append(sumSQL);
+                    sql.append(" END");
+                    ExprColumn nonNormalizedRatio = new ExprColumn(result, "NonNormalized" + i, sql, JdbcType.REAL);
+                    nonNormalizedRatio.setLabel("Non-normlized " + i);
+                    nonNormalizedRatio.setFormat("0.00");
+                    result.addColumn(nonNormalizedRatio);
+                }
+
                 return result;
             }
         });
