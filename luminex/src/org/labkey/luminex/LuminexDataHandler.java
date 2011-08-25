@@ -400,7 +400,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         Number upper = (Number)dataRow.getExtraProperties().get("Upper" + suffix);
         Number lower = (Number)dataRow.getExtraProperties().get("Lower" + suffix);
         Number inflection = (Number)dataRow.getExtraProperties().get("Inflection" + suffix);
-        Number asymmetry = (Number)dataRow.getExtraProperties().get("Asymmtery" + suffix);
+        Number asymmetry = (Number)dataRow.getExtraProperties().get("Asymmetry" + suffix);
 
         if (slope != null && upper != null && lower != null && inflection != null)
         {

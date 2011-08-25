@@ -161,7 +161,6 @@ if (file.exists(titration.data.file))
                     fiCol = "FI";
                     if(any(run.props$name == "StndCurveFitInput"))
                         fiCol = run.props$val1[run.props$name == "StndCurveFitInput"];
-                    print(fiCol);
                     if(fiCol == "FI-Bkgd")
                         dat$fi = dat$fiBackground
                     else if(fiCol == "FI-Bkgd-Blank")
