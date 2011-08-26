@@ -266,10 +266,13 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         
         AssayService.get().registerAssayProvider(new MassSpecMetadataAssayProvider());
 
-        ServiceRegistry.get(SearchService.class).addDocumentParser(new MzXMLDocumentParser());
-        ServiceRegistry.get(SearchService.class).addDocumentParser(new MzMLDocumentParser());
-        ServiceRegistry.get(SearchService.class).addDocumentParser(new DatDocumentParser());
-        ServiceRegistry.get(SearchService.class).addDocumentParser(new MGFDocumentParser());
+        if (null != ServiceRegistry.get(SearchService.class))
+        {
+            ServiceRegistry.get(SearchService.class).addDocumentParser(new MzXMLDocumentParser());
+            ServiceRegistry.get(SearchService.class).addDocumentParser(new MzMLDocumentParser());
+            ServiceRegistry.get(SearchService.class).addDocumentParser(new DatDocumentParser());
+            ServiceRegistry.get(SearchService.class).addDocumentParser(new MGFDocumentParser());
+        }
     }
 
     @Override

@@ -157,7 +157,8 @@ public class FlowModule extends DefaultModule
         ExperimentService.get().registerExperimentDataHandler(FlowDataHandler.instance);
         FlowProtocolImplementation.register();
         ModuleLoader.getInstance().registerFolderType(this, new FlowFolderType(this));
-        ServiceRegistry.get(SearchService.class).addDocumentParser(FCSHeader.documentParser);
+        if (null != ServiceRegistry.get(SearchService.class))
+            ServiceRegistry.get(SearchService.class).addDocumentParser(FCSHeader.documentParser);
         FlowController.registerAdminConsoleLinks();
     }
 

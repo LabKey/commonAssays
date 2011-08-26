@@ -146,7 +146,8 @@ public class MicroarrayModule extends SpringModule
                 return Collections.emptySet();
             }
         });
-        ServiceRegistry.get(SearchService.class).addDocumentParser(new MageMLDocumentParser());
+        if (null != ServiceRegistry.get(SearchService.class))
+            ServiceRegistry.get(SearchService.class).addDocumentParser(new MageMLDocumentParser());
     }
 
     @Override
