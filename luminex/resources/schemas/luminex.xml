@@ -30,6 +30,7 @@
             <column columnName="StdCurve"/>
             <column columnName="MinStandardRecovery"/>
             <column columnName="MaxStandardRecovery"/>
+            <column columnName="GuideSetId"/>
         </columns>
     </table>
     
@@ -53,10 +54,44 @@
             </column>
             <column columnName="AnalyteId" />
             <column columnName="TitrationId" />
-            <column columnName="MaxFI" />
             <column columnName="EC50" />
             <column columnName="AUC" />
             <column columnName="CurveType" />
+            <column columnName="MinAsymptote" />
+            <column columnName="MaxAsymptote" />
+            <column columnName="Asymmetry" />
+            <column columnName="Inflection" />
+            <column columnName="Slope" />
+        </columns>
+    </table>
+
+    <table tableName="GuideSet" tableDbType="TABLE">
+        <columns>
+            <column columnName="RowId">
+                <isHidden>true</isHidden>
+            </column>
+            <column columnName="ProtocolId" />
+            <column columnName="AnalyteName" />
+            <column columnName="CurrentGuideSet" />
+            <column columnName="Conjugate" />
+            <column columnName="Isotype" />
+            <column columnName="MaxFIAverage">
+                <columnTitle>Max FI Average</columnTitle>
+            </column>
+            <column columnName="MaxFIStdDev">
+                <columnTitle>Max FI StdDev</columnTitle>
+            </column>
+        </columns>
+    </table>
+
+    <table tableName="GuideSetCurveFit" tableDbType="TABLE">
+        <columns>
+            <column columnName="GuideSetId" />
+            <column columnName="CurveType" />
+            <column columnName="AUCAverage" />
+            <column columnName="AUCStdDev" />
+            <column columnName="EC50Average" />
+            <column columnName="EC50StdDev" />
         </columns>
     </table>
 
@@ -64,6 +99,7 @@
         <columns>
             <column columnName="AnalyteId" />
             <column columnName="TitrationId" />
+            <column columnName="MaxFI" />
         </columns>
     </table>
 

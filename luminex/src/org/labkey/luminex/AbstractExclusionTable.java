@@ -65,6 +65,10 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         getColumn("CreatedBy").setFk(userIdForeignKey);
 
         addColumn(analytesColumn);
+
+        getColumn("Created").setLabel("Excluded At");
+        getColumn("CreatedBy").setLabel("Excluded By");
+        getColumn("Comment").setLabel("Reason for Exclusion");
     }
 
     @Override

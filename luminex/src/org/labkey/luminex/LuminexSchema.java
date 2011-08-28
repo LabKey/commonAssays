@@ -37,6 +37,8 @@ public class LuminexSchema extends AssaySchema
 {
     public static final String ANALYTE_TABLE_NAME = "Analyte";
     public static final String CURVE_FIT_TABLE_NAME = "CurveFit";
+    public static final String GUIDE_SET_TABLE_NAME = "GuideSet";
+    public static final String GUIDE_SET_CURVE_FIT_TABLE_NAME = "GuideSetCurveFit";
     public static final String TITRATION_TABLE_NAME = "Titration";
     public static final String ANALYTE_TITRATION_TABLE_NAME = "AnalyteTitration";
     public static final String DATA_ROW_TABLE_NAME = "DataRow";
@@ -61,7 +63,8 @@ public class LuminexSchema extends AssaySchema
                 prefixTableName(DATA_FILE_TABLE_NAME),
                 prefixTableName(WELL_EXCLUSION_TABLE_NAME),
                 prefixTableName(RUN_EXCLUSION_TABLE_NAME),
-                prefixTableName(CURVE_FIT_TABLE_NAME)
+                prefixTableName(CURVE_FIT_TABLE_NAME),
+                prefixTableName(GUIDE_SET_TABLE_NAME)
         );
     }
 
@@ -82,20 +85,22 @@ public class LuminexSchema extends AssaySchema
 
     public TableInfo createTable(String name)
     {
-        String lname = name.toLowerCase();
-        String protocolPrefix = getProtocol().getName().toLowerCase() + " ";
-        if (lname.startsWith(protocolPrefix))
+        String tableType = AssaySchema.getProviderTableType(getProtocol(), name);
+        if (tableType != null)
         {
-            name = name.substring(protocolPrefix.length());
-            if (ANALYTE_TABLE_NAME.equalsIgnoreCase(name))
+            if (ANALYTE_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createAnalyteTable(true);
             }
-            if (TITRATION_TABLE_NAME.equalsIgnoreCase(name))
+            if (TITRATION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createTitrationTable(true);
             }
-            if (DATA_FILE_TABLE_NAME.equalsIgnoreCase(name))
+            if (GUIDE_SET_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                return createGuideSetTable(true);
+            }
+            if (DATA_FILE_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 ExpDataTable result = createDataTable();
                 SQLFragment filter = new SQLFragment("RowId");
@@ -103,7 +108,7 @@ public class LuminexSchema extends AssaySchema
                 result.addCondition(filter, "RowId");
                 return result;
             }
-            if (WELL_EXCLUSION_TABLE_NAME.equalsIgnoreCase(name))
+            if (WELL_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 FilteredTable result = createWellExclusionTable(true);
                 SQLFragment filter = new SQLFragment("DataId");
@@ -111,7 +116,7 @@ public class LuminexSchema extends AssaySchema
                 result.addCondition(filter, "DataId");
                 return result;
             }
-            if (CURVE_FIT_TABLE_NAME.equalsIgnoreCase(name))
+            if (CURVE_FIT_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 CurveFitTable result = createCurveFitTable(true);
                 SQLFragment filter = new SQLFragment("AnalyteId IN (SELECT a.RowId FROM ");
@@ -122,7 +127,7 @@ public class LuminexSchema extends AssaySchema
                 result.addCondition(filter, "RunId");
                 return result;
             }
-            if (RUN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(name))
+            if (RUN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 FilteredTable result = createRunExclusionTable(true);
                 SQLFragment filter = new SQLFragment("RunId IN (SELECT pa.RunId FROM ");
@@ -137,6 +142,11 @@ public class LuminexSchema extends AssaySchema
             }
         }
         return null;
+    }
+
+    protected TableInfo createGuideSetTable(boolean filterTable)
+    {
+        return new GuideSetTable(this, filterTable);
     }
 
     private CurveFitTable createCurveFitTable(boolean filterTable)
@@ -254,6 +264,16 @@ public class LuminexSchema extends AssaySchema
     public static TableInfo getTableInfoAnalytes()
     {
         return getSchema().getTable(ANALYTE_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoGuideSet()
+    {
+        return getSchema().getTable(GUIDE_SET_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoGuideSetCurveFit()
+    {
+        return getSchema().getTable(GUIDE_SET_CURVE_FIT_TABLE_NAME);
     }
 
     public static TableInfo getTableInfoCurveFit()

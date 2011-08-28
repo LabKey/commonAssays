@@ -2,9 +2,11 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
 
 import java.util.Collection;
@@ -42,6 +44,15 @@ public class CurveFitTable extends AbstractLuminexTable
             }
         });
 
+        SQLFragment maxFISQL = new SQLFragment("(SELECT at.MaxFI FROM ");
+        maxFISQL.append(LuminexSchema.getTableInfoAnalyteTitration(), "at");
+        maxFISQL.append(" WHERE at.TitrationId = ");
+        maxFISQL.append(ExprColumn.STR_TABLE_ALIAS);
+        maxFISQL.append(".TitrationId AND at.AnalyteId = ");
+        maxFISQL.append(ExprColumn.STR_TABLE_ALIAS);
+        maxFISQL.append(".AnalyteId)");
+        ExprColumn maxFICol = new ExprColumn(this, "MaxFI", maxFISQL, JdbcType.REAL);
+        addColumn(maxFICol);
     }
 
     @Override

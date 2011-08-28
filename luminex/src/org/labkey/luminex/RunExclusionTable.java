@@ -22,6 +22,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
@@ -31,7 +32,9 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.UnauthorizedException;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,7 +47,7 @@ public class RunExclusionTable extends AbstractExclusionTable
     {
         super(LuminexSchema.getTableInfoRunExclusion(), schema, filter);
 
-        getColumn("RunId").setLabel("Run");
+        getColumn("RunId").setLabel("Assay ID");
         getColumn("RunId").setFk(new LookupForeignKey("RowId")
         {
             @Override
@@ -63,6 +66,11 @@ public class RunExclusionTable extends AbstractExclusionTable
                 return schema.createRunExclusionAnalyteTable();
             }
         }, "AnalyteId"));
+
+        List<FieldKey> defaultCols = new ArrayList<FieldKey>(getDefaultVisibleColumns());
+        defaultCols.remove(FieldKey.fromParts("Modified"));
+        defaultCols.remove(FieldKey.fromParts("ModifiedBy"));
+        setDefaultVisibleColumns(defaultCols);
     }
 
     @Override

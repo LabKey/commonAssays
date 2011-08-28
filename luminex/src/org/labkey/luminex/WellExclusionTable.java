@@ -18,6 +18,7 @@ package org.labkey.luminex;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -26,6 +27,7 @@ import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryUpdateService;
@@ -61,8 +63,32 @@ public class WellExclusionTable extends AbstractExclusionTable
             }
         }, "AnalyteId"));
 
+        SQLFragment joinSQL = new SQLFragment(" FROM ");
+        joinSQL.append(LuminexSchema.getTableInfoDataRow(), "dr");
+        joinSQL.append(" WHERE (dr.Description = ");
+        joinSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        joinSQL.append(".Description OR (dr.Description IS NULL AND ");
+        joinSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        joinSQL.append(".Description IS NULL)) AND dr.DataId = ");
+        joinSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        joinSQL.append(".DataId AND dr.Dilution = ");
+        joinSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        joinSQL.append(".Dilution");
+
+        SQLFragment wellRoleSQL = new SQLFragment("SELECT WellRole FROM (SELECT DISTINCT dr.WellRole");
+        wellRoleSQL.append(joinSQL);
+        wellRoleSQL.append(") x");
+        addColumn(new ExprColumn(this, "Well Role", schema.getDbSchema().getSqlDialect().getSelectConcat(wellRoleSQL), JdbcType.VARCHAR));
+
+        SQLFragment wellSQL = new SQLFragment("SELECT Well FROM (SELECT DISTINCT dr.Well");
+        wellSQL.append(joinSQL);
+        wellSQL.append(") x");
+        addColumn(new ExprColumn(this, "Wells", schema.getDbSchema().getSqlDialect().getSelectConcat(wellSQL), JdbcType.VARCHAR));
+
         List<FieldKey> defaultCols = new ArrayList<FieldKey>(getDefaultVisibleColumns());
-        defaultCols.add(FieldKey.fromParts("DataId", "Run"));
+        defaultCols.remove(FieldKey.fromParts("ModifiedBy"));
+        defaultCols.remove(FieldKey.fromParts("Modified"));
+        defaultCols.add(0, FieldKey.fromParts("DataId", "Run"));
         setDefaultVisibleColumns(defaultCols);
     }
 

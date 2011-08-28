@@ -57,6 +57,16 @@ public class AnalyteTable extends AbstractLuminexTable
         addColumn(wrapColumn(getRealTable().getColumn("ResVar")));
         addColumn(wrapColumn(getRealTable().getColumn("RegressionType")));
         addColumn(wrapColumn(getRealTable().getColumn("StdCurve")));
+        ColumnInfo guideSetCol = addColumn(wrapColumn(getRealTable().getColumn("GuideSetId")));
+        guideSetCol.setLabel("Guide Set");
+        guideSetCol.setFk(new LookupForeignKey("RowId")
+        {
+            @Override
+            public TableInfo getLookupTableInfo()
+            {
+                return _schema.createGuideSetTable(false);
+            }
+        });
         ColumnInfo titrationColumn = addColumn(wrapColumn("Standard", getRealTable().getColumn("RowId")));
         titrationColumn.setFk(new MultiValuedForeignKey(new LookupForeignKey("Analyte")
         {

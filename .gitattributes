@@ -531,6 +531,7 @@ luminex/resources/schemas/dbscripts/postgresql/luminex-11.15-11.16.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.20-11.21.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.21-11.22.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.22-11.23.sql -text
+luminex/resources/schemas/dbscripts/postgresql/luminex-11.23-11.24.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-9.30-10.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-2.20.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-2.30.sql -text
@@ -564,6 +565,7 @@ luminex/resources/schemas/dbscripts/sqlserver/luminex-11.15-11.16.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.20-11.21.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.21-11.22.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.22-11.23.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/luminex-11.23-11.24.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-9.30-10.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-2.20.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-2.30.sql -text
@@ -601,6 +603,8 @@ luminex/src/org/labkey/luminex/AnalyteTable.java -text
 luminex/src/org/labkey/luminex/CurveFit.java -text
 luminex/src/org/labkey/luminex/CurveFitTable.java -text
 luminex/src/org/labkey/luminex/ExclusionUIDisplayColumn.java -text
+luminex/src/org/labkey/luminex/GuideSet.java -text
+luminex/src/org/labkey/luminex/GuideSetTable.java -text
 luminex/src/org/labkey/luminex/LuminexAssayProvider.java -text
 luminex/src/org/labkey/luminex/LuminexController.java -text
 luminex/src/org/labkey/luminex/LuminexDataExchangeHandler.java -text

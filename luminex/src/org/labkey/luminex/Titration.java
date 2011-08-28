@@ -27,6 +27,7 @@ public class Titration
     private boolean _standard;
     private boolean _qcControl;
     private boolean _unknown;
+    private double _maxFI;
 
     public int getRowId()
     {
@@ -88,6 +89,16 @@ public class Titration
     public boolean isUnknown()
     {
         return _unknown;
+    }
+
+    public double getMaxFI()
+    {
+        return _maxFI;
+    }
+
+    public void setMaxFI(double maxFI)
+    {
+        _maxFI = maxFI;
     }
 
     public enum Type
