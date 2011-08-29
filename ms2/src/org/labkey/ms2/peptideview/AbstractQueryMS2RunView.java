@@ -104,7 +104,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
 
         QueryService.get().ensureRequiredColumns(tinfo, columns, filter, sort, new HashSet<String>());
 
-        SQLFragment sql = QueryService.get().getSelectSQL(tinfo, columns, filter, sort, Table.ALL_ROWS, 0, false);
+        SQLFragment sql = QueryService.get().getSelectSQL(tinfo, columns, filter, sort, Table.ALL_ROWS, Table.NO_OFFSET, false);
 
         if (proteinProphetNesting)
         {

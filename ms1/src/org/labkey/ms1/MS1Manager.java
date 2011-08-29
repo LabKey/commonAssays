@@ -389,7 +389,7 @@ public class MS1Manager
         try
         {
             rs = Table.executeQuery(getSchema(), "SELECT ScanId FROM ms1.Scans WHERE FileId=" + String.valueOf(fileId),
-                    null, 0, false);
+                    null, Table.ALL_ROWS, false);
 
             int scanId = 0;
             long numScans = 0;

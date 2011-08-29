@@ -946,7 +946,7 @@ public class MS2Schema extends UserSchema
         TableInfo proteinGroupMembershipTable = createProteinGroupMembershipTable(form, context, false);
         ColumnInfo proteinGroupColumn = proteinGroupMembershipTable.getColumn("ProteinGroupId");
 
-        SQLFragment selectSQL = QueryService.get().getSelectSQL(proteinGroupMembershipTable, Collections.singleton(proteinGroupColumn), null, null, Table.ALL_ROWS, 0, false);
+        SQLFragment selectSQL = QueryService.get().getSelectSQL(proteinGroupMembershipTable, Collections.singleton(proteinGroupColumn), null, null, Table.ALL_ROWS, Table.NO_OFFSET, false);
         SQLFragment filterSQL = new SQLFragment("ProteinGroupId IN (SELECT " + proteinGroupColumn.getAlias() + " FROM (");
         filterSQL.append(selectSQL);
         filterSQL.append(") x)");

@@ -1105,7 +1105,7 @@ public class ProteinManager
     {
         SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, user);
 
-        return (Table.TableResultSet)Table.executeQuery(getSchema(), sql, 0, false, true);
+        return (Table.TableResultSet)Table.executeQuery(getSchema(), sql, Table.ALL_ROWS, false, true);
     }
 
     public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user)
@@ -1475,7 +1475,7 @@ public class ProteinManager
             ResultSet rs = null;
             try
             {
-                rs = Table.executeQuery(getSchema(), sql, 0, false, false);
+                rs = Table.executeQuery(getSchema(), sql, Table.ALL_ROWS, false, false);
                 int curSeqId = 0;
                 StringBuilder sb = null;
 
