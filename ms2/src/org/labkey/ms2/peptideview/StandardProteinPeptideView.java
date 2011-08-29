@@ -147,7 +147,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
         ResultSet proteinRS = ProteinManager.getProteinRS(_url, run, where, ExcelWriter.MAX_ROWS, getUser());
         GroupedResultSet peptideRS = ProteinManager.getPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS, sqlPeptideColumnNames, getUser());
-        DataRegion peptideRgn = getPeptideGrid(peptideColumnNames, 0, 0);
+        DataRegion peptideRgn = getPeptideGrid(peptideColumnNames, Table.ALL_ROWS, 0);
 
         ewProtein.setResultSet(proteinRS);
         ewProtein.setGroupedResultSet(peptideRS);
@@ -174,8 +174,8 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
         try
         {
-            proteinRS = ProteinManager.getProteinRS(_url, run, where, 0, getUser());
-            peptideRS = ProteinManager.getPeptideRS(_url, run, where, 0, peptideSqlColumnNames, getUser());
+            proteinRS = ProteinManager.getProteinRS(_url, run, where, Table.ALL_ROWS, getUser());
+            peptideRS = ProteinManager.getPeptideRS(_url, run, where, Table.ALL_ROWS, peptideSqlColumnNames, getUser());
 
             TSVGridWriter twPeptide = new TSVGridWriter(new ResultsImpl(peptideRS), getPeptideDisplayColumns(peptideColumnNames))
             {
@@ -198,8 +198,8 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         }
         finally
         {
-            if (proteinRS != null) try { proteinRS.close(); } catch (SQLException e) {}
-            if (peptideRS != null) try { peptideRS.close(); } catch (SQLException e) {}
+            if (proteinRS != null) try { proteinRS.close(); } catch (SQLException ignored) {}
+            if (peptideRS != null) try { peptideRS.close(); } catch (SQLException ignored) {}
         }
     }
 
@@ -217,7 +217,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     {
         SQLFragment fragment = new SQLFragment();
         fragment.append("SELECT DISTINCT sSeqId AS SeqId FROM ( ");
-        ProteinManager.addProteinQuery(fragment, run, queryUrl, null, 0, false, getUser());
+        ProteinManager.addProteinQuery(fragment, run, queryUrl, null, Table.ALL_ROWS, false, getUser());
         fragment.append(" ) seqids");
         return fragment;
     }

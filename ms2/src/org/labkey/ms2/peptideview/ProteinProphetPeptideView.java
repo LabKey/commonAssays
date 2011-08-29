@@ -388,7 +388,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 
         if (expanded)
         {
-            DataRegion peptideRgn = getPeptideGrid(peptideColumnNames, 0, 0);
+            DataRegion peptideRgn = getPeptideGrid(peptideColumnNames, Table.ALL_ROWS, 0);
             ExcelWriter ewPeptide = new ExcelWriter(new ResultsImpl(peptideRS), peptideRgn.getDisplayColumns());
             ExcelColumn ec = ewPeptide.getExcelColumn("Protein");
             if (null != ec)
@@ -402,7 +402,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     {
         String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumns);
         String peptideSqlColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
-        GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, 0, peptideSqlColumnNames, getUser()), "ProteinGroupId");
+        GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, Table.ALL_ROWS, peptideSqlColumnNames, getUser()), "ProteinGroupId");
         tw.setGroupedResultSet(peptideRS);
         if (tw.getExpanded())
         {
@@ -423,7 +423,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         ResultSet proteinRS = null;
         try
         {
-            proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, 0, getUser());
+            proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, Table.ALL_ROWS, getUser());
             tw.writeResultSet(new ResultsImpl(proteinRS));
         }
         finally
