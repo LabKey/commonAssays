@@ -298,19 +298,9 @@ if (mzs != null && intensities != null && mzs.length == intensities.length)
 %>
 
 <!--[if IE]><script language="javascript" type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/excanvas.min.js"></script><![endif]-->
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath()%>/MS2/lorikeet_0.3/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath()%>/MS2/lorikeet_0.3/js/jquery-ui-1.8.4.min.js"></script>
 
-<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/jquery.flot.js"></script>
-<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/jquery.flot.selection.js"></script>
-
-<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/specview.js"></script>
-<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/peptide.js"></script>
-<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/aminoacid.js"></script>
-<script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/ion.js"></script>
-
-
-<link REL="stylesheet" TYPE="text/css" HREF="../css/lorikeet.css">
 
 <!-- PLACE HOLDER DIV FOR THE SPECTRUM -->
 <div id="lorikeet"></div>
@@ -320,21 +310,29 @@ if (mzs != null && intensities != null && mzs.length == intensities.length)
 
 LABKEY.requiresCss("MS2/lorikeet_0.3/css/lorikeet.css");
 
+LABKEY.requiresScript("MS2/lorikeet_0.3/js/jquery.flot.js");
+LABKEY.requiresScript("MS2/lorikeet_0.3/js/jquery.flot.selection.js");
+
+LABKEY.requiresScript("MS2/lorikeet_0.3/js/specview.js");
+LABKEY.requiresScript("MS2/lorikeet_0.3/js/peptide.js");
+LABKEY.requiresScript("MS2/lorikeet_0.3/js/aminoacid.js");
+LABKEY.requiresScript("MS2/lorikeet_0.3/js/ion.js");
+
 $(document).ready(function () {
 
-	/* render the spectrum with the given options */
-	$("#lorikeet").specview({sequence: <%= PageFlowUtil.jsString(p.getTrimmedPeptide()) %>,
-								precursorMz: 1012.1,
-								staticMods: staticMods,
-								variableMods: varMods,
+    /* render the spectrum with the given options */
+    $("#lorikeet").specview({sequence: <%= PageFlowUtil.jsString(p.getTrimmedPeptide()) %>,
+                                precursorMz: 1012.1,
+                                staticMods: staticMods,
+                                variableMods: varMods,
                                 width: 600,
                                 // Pretend to be one charge state higher so that the viewer shows the right number of y/b charge ions
                                 charge: <%= p.getCharge() + 1 %>,
 //								ntermMod: ntermMod,
-								//ctermMod: ctermMod,
-								peaks: peaks,
+                                //ctermMod: ctermMod,
+                                peaks: peaks,
                                 extraPeakSeries: extraPeakSeries
-								});
+                                });
 
 });
 
