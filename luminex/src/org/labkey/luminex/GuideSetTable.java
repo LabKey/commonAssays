@@ -50,6 +50,7 @@ public class GuideSetTable extends AbstractLuminexTable
     {
         super(LuminexSchema.getTableInfoGuideSet(), schema, filter);
         wrapAllColumns(true);
+        setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.GUIDE_SET_TABLE_NAME));
 
         ColumnInfo protocolCol = getColumn("ProtocolId");
         protocolCol.setLabel("Assay Design");

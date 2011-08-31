@@ -17,18 +17,29 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.query.DefaultQueryUpdateService;
 import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
+import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
@@ -99,6 +110,8 @@ public class AnalyteTable extends AbstractLuminexTable
 
         ColumnInfo lsidColumn = addColumn(wrapColumn(getRealTable().getColumn("LSID")));
         lsidColumn.setHidden(true);
+        lsidColumn.setShownInInsertView(false);
+        lsidColumn.setShownInUpdateView(false);
 
         ColumnInfo colProperty = wrapColumn("Properties", getRealTable().getColumn("LSID"));
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_schema.getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
@@ -109,6 +122,9 @@ public class AnalyteTable extends AbstractLuminexTable
         }
         colProperty.setFk(new PropertyForeignKey(map, _schema));
         colProperty.setIsUnselectable(true);
+        colProperty.setReadOnly(true);
+        colProperty.setShownInInsertView(false);
+        colProperty.setShownInUpdateView(false);
         addColumn(colProperty);
     }
 
@@ -122,5 +138,37 @@ public class AnalyteTable extends AbstractLuminexTable
         sql.append("))");
         sql.addAll(ids);
         return sql;
+    }
+
+    @Override
+    public boolean hasPermission(User user, Class<? extends Permission> perm)
+    {
+        return perm.equals(UpdatePermission.class) && _schema.getContainer().hasPermission(user, perm);
+    }
+
+    @Override
+    public QueryUpdateService getUpdateService()
+    {
+        return new DefaultQueryUpdateService(this, getRealTable())
+        {
+            @Override
+            protected Map<String, Object> updateRow(User user, Container container, Map<String, Object> row, Map<String, Object> oldRow) throws InvalidKeyException, ValidationException, QueryUpdateServiceException, SQLException
+            {
+                Number guideSetId = (Number)row.get("GuideSetId");
+                if (guideSetId != null)
+                {
+                    GuideSet guideSet = Table.selectObject(LuminexSchema.getTableInfoGuideSet(), guideSetId.intValue(), GuideSet.class);
+                    if (guideSet == null)
+                    {
+                        throw new ValidationException("No such guideSetId: " + guideSetId);
+                    }
+                    if (guideSet.getProtocolId() != _schema.getProtocol().getRowId())
+                    {
+                        throw new ValidationException("Can't set guideSetId to point to a guide set from another assay definition: " + guideSetId);
+                    }
+                }
+                return super.updateRow(user, container, row, oldRow);
+            }
+        };
     }
 }

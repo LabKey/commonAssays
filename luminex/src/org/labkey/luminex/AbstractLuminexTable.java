@@ -36,7 +36,7 @@ public abstract class AbstractLuminexTable extends FilteredTable
 
     public AbstractLuminexTable(TableInfo table, LuminexSchema schema, boolean filter)
     {
-        super(table);
+        super(table, schema.getContainer());
         _schema = schema;
         _needsFilter = filter;
 
