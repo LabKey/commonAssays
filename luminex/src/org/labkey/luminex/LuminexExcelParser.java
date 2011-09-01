@@ -22,14 +22,12 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarFormatException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.util.GUID;
@@ -76,9 +74,7 @@ public class LuminexExcelParser
             {
                 Workbook workbook = ExcelFactory.create(dataFile);
 
-                Container container = _protocol.getContainer();
-                String excelRunDomainURI = AbstractAssayProvider.getDomainURIForPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
-                Domain excelRunDomain = PropertyService.get().getDomain(container, excelRunDomainURI);
+                Domain excelRunDomain  = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
 
                 for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
                 {

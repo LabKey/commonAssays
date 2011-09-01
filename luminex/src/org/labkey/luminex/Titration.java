@@ -15,6 +15,12 @@
  */
 package org.labkey.luminex;
 
+import org.labkey.api.util.PageFlowUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * User: jeckels
  * Date: Jun 6, 2011
@@ -99,6 +105,24 @@ public class Titration
     public void setMaxFI(double maxFI)
     {
         _maxFI = maxFI;
+    }
+
+    public LuminexWellGroup buildWellGroup(List<LuminexDataRow> dataRows)
+    {
+        List<LuminexWell> wells = new ArrayList<LuminexWell>();
+        LuminexDataRow firstDataRow = null;
+        for (LuminexDataRow dataRow : dataRows)
+        {
+            if (PageFlowUtil.nullSafeEquals(dataRow.getDescription(), getName()))
+            {
+                wells.add(new LuminexWell(dataRow));
+                if (firstDataRow == null)
+                {
+                    firstDataRow = dataRow;
+                }
+            }
+        }
+        return new LuminexWellGroup(wells);
     }
 
     public enum Type

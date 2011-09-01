@@ -97,6 +97,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             }
             rgn.setSettings(getSettings());
 
+            rgn.addHiddenFormField("queryString", _url.getRawQuery());  // Pass query string for exportSelectedToExcel post case... need to display filter & sort to user, and to show the right columns
             rgn.setShowRecordSelectors(true);
             rgn.setFixedWidthColumns(true);
 

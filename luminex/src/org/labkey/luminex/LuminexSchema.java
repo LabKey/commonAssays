@@ -178,7 +178,7 @@ public class LuminexSchema extends AssaySchema
         return result;
     }
 
-    public TableInfo createTitrationTable(boolean filter)
+    public TitrationTable createTitrationTable(boolean filter)
     {
         TitrationTable result = new TitrationTable(this, filter);
         if (filter)

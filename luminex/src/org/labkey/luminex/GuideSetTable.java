@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
@@ -112,12 +113,12 @@ public class GuideSetTable extends AbstractLuminexTable
             super(guideSetTable, guideSetTable.getRealTable());
         }
 
-        public static GuideSet[] getMatchingCurrentGuideSet(int protocolId, String analyteName, String conjugate, String isotype)
+        public static GuideSet getMatchingCurrentGuideSet(@NotNull ExpProtocol protocol, String analyteName, String conjugate, String isotype)
         {
             SQLFragment sql = new SQLFragment("SELECT * FROM ");
             sql.append(LuminexSchema.getTableInfoGuideSet(), "gs");
             sql.append(" WHERE ProtocolId = ? AND AnalyteName");
-            sql.add(protocolId);
+            sql.add(protocol.getRowId());
             appendNullableString(sql, analyteName);
             sql.append(" AND Conjugate");
             appendNullableString(sql, conjugate);
@@ -128,7 +129,17 @@ public class GuideSetTable extends AbstractLuminexTable
 
             try
             {
-                return Table.executeQuery(LuminexSchema.getSchema(), sql, GuideSet.class);
+                GuideSet[] matches = Table.executeQuery(LuminexSchema.getSchema(), sql, GuideSet.class);
+                if (matches.length == 1)
+                {
+                    return matches[0];
+                }
+                if (matches.length == 0)
+                {
+                    return null;
+                }
+
+                throw new IllegalStateException("More than one guide set is current for assay design '" + protocol.getName() + "', analyte '" + analyteName + "', conjugate '" + conjugate + "', isotype '" + isotype + "'");
             }
             catch (SQLException e)
             {
@@ -158,7 +169,7 @@ public class GuideSetTable extends AbstractLuminexTable
                 throw new ValidationException("No ProtocolId specified");
             }
             Boolean current = (Boolean)row.get("CurrentGuideSet");
-            if (current != null && current.booleanValue() && getMatchingCurrentGuideSet(protocol.getRowId(), (String)row.get("AnalyteName"), (String)row.get("Conjugate"), (String)row.get("Isotype")).length > 0)
+            if (current != null && current.booleanValue() && getMatchingCurrentGuideSet(protocol, (String)row.get("AnalyteName"), (String)row.get("Conjugate"), (String)row.get("Isotype")) != null)
             {
                 throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/Conjugate/Isotype combination");
             }
@@ -177,13 +188,10 @@ public class GuideSetTable extends AbstractLuminexTable
             }
             if (current != null && current.booleanValue())
             {
-                GuideSet[] currents = getMatchingCurrentGuideSet(protocol.getRowId(), (String)row.get("AnalyteName"), (String)row.get("Conjugate"), (String)row.get("Isotype"));
-                for (GuideSet guideSet : currents)
+                GuideSet currentGuideSet = getMatchingCurrentGuideSet(protocol, (String)row.get("AnalyteName"), (String)row.get("Conjugate"), (String)row.get("Isotype"));
+                if (currentGuideSet != null && currentGuideSet.getRowId() != rowId.intValue())
                 {
-                    if (guideSet.getRowId() != rowId.intValue())
-                    {
-                        throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/Conjugate/Isotype combination");
-                    }
+                    throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/Conjugate/Isotype combination");
                 }
             }
             return super.updateRow(user, container, row, oldRow);

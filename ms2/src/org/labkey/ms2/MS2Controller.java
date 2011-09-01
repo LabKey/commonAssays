@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2;
 
-import com.extjs.gxt.ui.client.widget.Html;
 import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -28,6 +27,7 @@ import org.labkey.api.cache.CacheManager;
 import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.server.BaseRemoteService;
@@ -60,11 +60,13 @@ import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.ImportScanCountsUpgradeJob;
 import org.labkey.ms2.pipeline.MSPictureUpgradeJob;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
+import org.labkey.ms2.pipeline.tandem.XTandemSearchTask;
 import org.labkey.ms2.protein.*;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
@@ -1087,7 +1089,7 @@ public class MS2Controller extends SpringActionController
                 {
                     form.run = Integer.parseInt(queryURL.getParameter("run"));
                 }
-                catch (NumberFormatException e) {}
+                catch (NumberFormatException ignored) {}
             }
             _run = validateRun(form);
 
@@ -1446,7 +1448,7 @@ public class MS2Controller extends SpringActionController
                 {
                     form.setPeptideProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
                 }
-                catch (NumberFormatException e) {}
+                catch (NumberFormatException ignored) {}
             }
             if (prefs.get(PeptideFilteringFormElements.proteinProphetProbability.name()) != null)
             {
@@ -1454,7 +1456,7 @@ public class MS2Controller extends SpringActionController
                 {
                     form.setProteinProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.proteinProphetProbability.name())));
                 }
-                catch (NumberFormatException e) {}
+                catch (NumberFormatException ignored) {}
             }
 
             return form;
@@ -1494,7 +1496,7 @@ public class MS2Controller extends SpringActionController
                 {
                     form.setPeptideProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
                 }
-                catch (NumberFormatException e) {}
+                catch (NumberFormatException ignored) {}
             }
             form.setTargetProtein(prefs.get(PeptideFilteringFormElements.targetProtein.name()));            
             return form;
@@ -1786,7 +1788,7 @@ public class MS2Controller extends SpringActionController
             _pivotType = pivotType;
         }
 
-        private static void validateTargetProtein(PeptideFilteringComparisonForm form, BindException errors, ViewContext context)
+        private static void validateTargetProtein(PeptideFilteringComparisonForm form, ViewContext context)
         {
             form.setMatchingProtNames(null);
             form.setMatchingSeqIds(null);
@@ -1834,7 +1836,7 @@ public class MS2Controller extends SpringActionController
                             {
                                 rsMatches.close();
                             }
-                            catch (SQLException e)
+                            catch (SQLException ignored)
                             {
                             }
                         }
@@ -1976,7 +1978,7 @@ public class MS2Controller extends SpringActionController
         public void validate(PeptideFilteringComparisonForm form, BindException errors)
         {
             super.validate(form, errors);
-            PeptideFilteringComparisonForm.validateTargetProtein(form, errors, getViewContext());
+            PeptideFilteringComparisonForm.validateTargetProtein(form, getViewContext());
         }
 
         public ComparePeptideQueryAction()
@@ -2422,7 +2424,7 @@ public class MS2Controller extends SpringActionController
                 {
                     form.setPeptideProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
                 }
-                catch (NumberFormatException e) {}
+                catch (NumberFormatException ignored) {}
             }
             return form;
         }
@@ -3263,7 +3265,7 @@ public class MS2Controller extends SpringActionController
                 {
                     form.setMinimumProbability(Float.parseFloat(request.getParameter("ProteinSearchResults.GroupProbability~gte")));
                 }
-                catch (NumberFormatException e) {}
+                catch (NumberFormatException ignored) {}
             }
             if (request.getParameter("ProteinSearchResults.ErrorRate~lte") != null)
             {
@@ -3271,7 +3273,7 @@ public class MS2Controller extends SpringActionController
                 {
                     form.setMaximumErrorRate(Float.parseFloat(request.getParameter("ProteinSearchResults.ErrorRate~lte")));
                 }
-                catch (NumberFormatException e) {}
+                catch (NumberFormatException ignored) {}
             }
             proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
             groupsView.enableExpandCollapse("ProteinSearchGroupMatches", false);
@@ -4460,10 +4462,8 @@ public class MS2Controller extends SpringActionController
             ProteinViewBean bean = new ProteinViewBean();
             // the all peptides matching applies to peptides matching a single protein.  Don't
             // offer it as a choice in the case of protein groups
-            bean.enableAllPeptidesFeature=true;
 
-            if ("proteinprophet".equalsIgnoreCase(form.getGrouping()) || proteinCount > 1 || !showPeptides)
-                bean.enableAllPeptidesFeature=false;
+            bean.enableAllPeptidesFeature = !("proteinprophet".equalsIgnoreCase(form.getGrouping()) || proteinCount > 1 || !showPeptides);
 
             if (showPeptides)
             {
@@ -4485,7 +4485,7 @@ public class MS2Controller extends SpringActionController
 
             for (int i = 0; i < proteinCount; i++)
             {
-                addView(new HtmlView("<a name=\"Protein" + i + "\"/>"));
+                addView(new HtmlView("<a name=\"Protein" + i + "\"></a>"));
                 proteins[i].setPeptides(peptides);
                 proteins[i].setShowEntireFragmentInCoverage(stringSearch);
                 bean.protein = proteins[i];
@@ -5541,7 +5541,7 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getReturnActionURL()
         {
-            ActionURL result = null;
+            ActionURL result;
             try
             {
                 result = super.getReturnActionURL();
@@ -6044,15 +6044,30 @@ public class MS2Controller extends SpringActionController
         {
             MS2Run run = validateRun(form);
 
-            try
+            File paramsFile = null;
+            // First check if we can find the merged set of parameters (project and protocol) that we used for this search
+            String lsid = run.getExperimentRunLSID();
+            if (lsid != null)
             {
-                // TODO: Ensure drive?
-                PageFlowUtil.streamFile(response, run.getPath() + "/" + run.getParamsFileName(), false);
+                ExpRun expRun = ExperimentService.get().getExpRun(lsid);
+                if (expRun != null)
+                {
+                    for (Map.Entry<ExpData, String> entry : expRun.getDataInputs().entrySet())
+                    {
+                        if (AbstractMS2SearchTask.JOB_ANALYSIS_PARAMETERS_ROLE_NAME.equalsIgnoreCase(entry.getValue()))
+                        {
+                            paramsFile = entry.getKey().getFile();
+                            break;
+                        }
+                    }
+                }
             }
-            catch (Exception e)
+            if (paramsFile == null || !NetworkDrive.exists(paramsFile))
             {
-                response.getWriter().print("Error retrieving file: " + e.getMessage());
+                // If not, fall back on the default name
+                paramsFile = new File(run.getPath() + "/" + run.getParamsFileName());
             }
+            PageFlowUtil.streamFile(response, paramsFile, false);
         }
     }
 
@@ -6169,7 +6184,7 @@ public class MS2Controller extends SpringActionController
             {
                 this.peptideId = Long.parseLong(peptideId);
             }
-            catch (NumberFormatException e) {}
+            catch (NumberFormatException ignored) {}
         }
 
         public String getPeptideId()
@@ -6188,7 +6203,7 @@ public class MS2Controller extends SpringActionController
             {
                 this.xStart = Double.parseDouble(xStart);
             }
-            catch (NumberFormatException e) {}
+            catch (NumberFormatException ignored) {}
         }
 
         public String getxStart()
@@ -6267,7 +6282,7 @@ public class MS2Controller extends SpringActionController
             {
                 this.seqId = Integer.parseInt(seqId);
             }
-            catch (NumberFormatException e) {}
+            catch (NumberFormatException ignored) {}
         }
 
         public String getSeqId()
@@ -6497,8 +6512,6 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class AttachFilesUpgradeAction extends FormViewAction
     {
-        private Container _container;
-
         public void validateCommand(Object target, Errors errors)
         {
         }
@@ -6525,7 +6538,7 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getSuccessURL(Object o)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(_container);
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -6537,8 +6550,6 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class ImportMSScanCountsUpgradeAction extends FormViewAction
     {
-        private Container _container;
-
         public void validateCommand(Object target, Errors errors)
         {
         }
@@ -6565,7 +6576,7 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getSuccessURL(Object o)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(_container);
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
         public NavTree appendNavTrail(NavTree root)

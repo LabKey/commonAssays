@@ -33,6 +33,7 @@ public class Analyte
     private int _rowId;
     private int _minStandardRecovery;
     private int _maxStandardRecovery;
+    private Integer _guideSetId;
 
     public Analyte()
     {
@@ -171,5 +172,15 @@ public class Analyte
     public String getSheetName()
     {
         return _sheetName;
+    }
+
+    public void setGuideSetId(Integer guideSetId)
+    {
+        _guideSetId = guideSetId;
+    }
+
+    public Integer getGuideSetId()
+    {
+        return _guideSetId;
     }
 }

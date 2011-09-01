@@ -21,6 +21,7 @@ import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.ParameterCurveImpl;
@@ -34,7 +35,6 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
@@ -98,40 +98,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             importData(data, expRun, info.getUser(), log, parser.getSheets(), parser, form);
             parser.setImported(true);
-        }
-    }
-
-    public void importData(ExpData data, ExpRun run, User user, Logger log, Map<Analyte, List<LuminexDataRow>> sheets, LuminexExcelParser parser, LuminexRunUploadForm form) throws ExperimentException
-    {
-        try
-        {
-            ExpProtocol expProtocol = run.getProtocol();
-            ExpProtocol protocol = ExperimentService.get().getExpProtocol(expProtocol.getRowId());
-            String analyteDomainURI = AbstractAssayProvider.getDomainURIForPrefix(expProtocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
-            String excelRunDomainURI = AbstractAssayProvider.getDomainURIForPrefix(expProtocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
-            Domain analyteDomain = PropertyService.get().getDomain(run.getContainer(), analyteDomainURI);
-            Domain excelRunDomain = PropertyService.get().getDomain(run.getContainer(), excelRunDomainURI);
-
-            if (analyteDomain == null)
-            {
-                throw new ExperimentException("Could not find analyte domain for protocol with LSID " + protocol.getLSID());
-            }
-            if (excelRunDomain == null)
-            {
-                throw new ExperimentException("Could not find Excel run domain for protocol with LSID " + protocol.getLSID());
-            }
-
-            PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), run.getContainer());
-            insertData(excelRunColumns, run, run.getContainer(), data, user, sheets, parser, form);
-        }
-        catch (SQLException e)
-        {
-            if (log == null)
-            {
-                log = Logger.getLogger(LuminexDataHandler.class);
-            }
-            log.error("Failed to load from data file " + data.getFile().getAbsolutePath(), e);
-            throw new ExperimentException("Failed to load from data file " + data.getFile().getAbsolutePath() + "(" + e.toString() + ")", e);
         }
     }
 
@@ -232,7 +198,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     /**
      * Handles persisting of uploaded run data into the database
      */
-    private void insertData(PropertyDescriptor[] excelRunColumns, final ExpRun expRun, Container container, ExpData data, User user, Map<Analyte, List<LuminexDataRow>> sheets, LuminexExcelParser parser, LuminexRunUploadForm form) throws SQLException, ExperimentException
+    private void importData(ExpData data, ExpRun expRun, User user, @NotNull Logger log, Map<Analyte, List<LuminexDataRow>> sheets, LuminexExcelParser parser, LuminexRunUploadForm form) throws ExperimentException
     {
         try
         {
@@ -243,101 +209,106 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             Set<ExpMaterial> inputMaterials = new LinkedHashSet<ExpMaterial>();
             ParticipantVisitResolver resolver = findParticipantVisitResolver(expRun, user, provider);
 
+            Domain excelRunDomain = AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
+            if (excelRunDomain == null)
+            {
+                throw new ExperimentException("Could not find Excel run domain for protocol with LSID " + protocol.getLSID());
+            }
+            PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), expRun.getContainer());
+
+            Domain runDomain = provider.getRunDomain(protocol);
+            if (runDomain == null)
+            {
+                throw new ExperimentException("Could not find run domain for protocol with LSID " + protocol.getLSID());
+            }
+
+            // Look for isotype and conjugate as run properties
+            String isotype = null;
+            String conjugate = null;
+            for (DomainProperty runProp : runDomain.getProperties())
+            {
+                if (runProp.getName().equalsIgnoreCase("Conjugate"))
+                {
+                    Object value = expRun.getProperty(runProp);
+                    conjugate = value == null ? null : value.toString();
+                }
+                else if (runProp.getName().equalsIgnoreCase("Isotype"))
+                {
+                    Object value = expRun.getProperty(runProp);
+                    isotype = value == null ? null : value.toString();
+                }
+            }
+            
             // Name -> Titration
             Map<String, Titration> titrations = insertTitrations(expRun, user, form.getTitrations());
 
             List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
-
             Set<ExpData> sourceFiles = new HashSet<ExpData>();
 
             for (Map.Entry<Analyte, List<LuminexDataRow>> sheet : sheets.entrySet())
             {
                 Analyte analyte = sheet.getKey();
+                List<LuminexDataRow> dataRows = sheet.getValue();
 
-                analyte.setDataId(data.getRowId());
-                analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + data.getRowId() + "." + analyte.getName()).toString());
-
-                analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
-
-                for (String titrationName : form.getTitrationsForAnalyte(analyte.getName()))
+                // Look at analyte properties to find the conjugate if we don't have one from the run properties
+                if (conjugate == null)
                 {
-                    List<LuminexWell> wells = new ArrayList<LuminexWell>();
-                    LuminexDataRow firstDataRow = null;
-                    for (LuminexDataRow dataRow : sheet.getValue())
+                    for (Map.Entry<DomainProperty, String> entry : form.getAnalyteProperties(analyte.getName()).entrySet())
                     {
-                        if (PageFlowUtil.nullSafeEquals(dataRow.getDescription(), titrationName))
+                        if (entry.getKey().getName().equalsIgnoreCase("Conjugate"))
                         {
-                            wells.add(new LuminexWell(dataRow));
-                            if (firstDataRow == null)
-                            {
-                                firstDataRow = dataRow;
-                            }
+                            conjugate = entry.getValue();
                         }
                     }
-                    LuminexWellGroup wellGroup = new LuminexWellGroup(wells);
-                    
-                    Titration titration = titrations.get(titrationName);
-                    Map<String, Object> analyteTitration = new HashMap<String, Object>();
-                    analyteTitration.put("analyteId", analyte.getRowId());
-                    analyteTitration.put("titrationId", titration.getRowId());
-                    analyteTitration.put("maxFI", wellGroup.getMax());
-                    Table.insert(user, LuminexSchema.getTableInfoAnalyteTitration(), analyteTitration);
-
-                    try
+                }
+                // Look at analyte properties to find the isotype if we don't have one from the run properties
+                if (isotype == null)
+                {
+                    for (Map.Entry<DomainProperty, String> entry : form.getAnalyteProperties(analyte.getName()).entrySet())
                     {
-                        String stdCurve = analyte.getStdCurve();
-                        if (stdCurve != null)
+                        if (entry.getKey().getName().equalsIgnoreCase("Isotype"))
                         {
-                            ParameterCurveImpl.FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
-                            if (fitParams != null)
-                            {
-                                insertCurveFit(wellGroup, user, titration, analyte, fitParams, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex");
-                            }
-                            else
-                            {
-                                LOGGER.warn("Could not parse standard curve: " + stdCurve);
-                            }
+                            isotype = entry.getValue();
                         }
-                        if (firstDataRow != null)
-                        {
-                            importRumiCurveFit(DilutionCurve.FitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte);
-                            importRumiCurveFit(DilutionCurve.FitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte);
-                        }
-                    }
-                    catch (DilutionCurve.FitFailedException e)
-                    {
-                        throw new ExperimentException(e);
                     }
                 }
 
-                List<LuminexDataRow> dataRows = sheet.getValue();
+                // Check if we have a guide set for this analyte
+                GuideSet currentGuideSet = determineGuideSet(analyte, conjugate, isotype, protocol);
+                if (currentGuideSet != null)
+                {
+                    analyte.setGuideSetId(currentGuideSet.getRowId());
+                }
+
+                analyte.setDataId(data.getRowId());
+                analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + data.getRowId() + "." + analyte.getName()).toString());
+                analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
+
+                insertTitrationAnalyteMappings(user, form, titrations, sheet.getValue(), analyte);
+
                 performOOR(dataRows, analyte);
 
                 for (LuminexDataRow dataRow : dataRows)
                 {
                     handleParticipantResolver(dataRow, resolver, inputMaterials);
                     dataRow.setProtocol(protocol.getRowId());
-                    dataRow.setContainer(container);
+                    dataRow.setContainer(expRun.getContainer());
                     Titration titration = titrations.get(dataRow.getDescription());
                     if (titration != null)
                     {
                         dataRow.setTitration(titration.getRowId());
-                        StringBuilder sb = new StringBuilder();
+                        List<String> roles = new ArrayList<String>();
                         if (titration.isStandard())
                         {
-                            sb.append("Standard");
+                            roles.add("Standard");
                         }
                         if (titration.isQcControl())
                         {
-                            if (sb.length() > 0)
-                            {
-                                sb.append(", ");
-                            }
-                            sb.append("QC Control");
+                            roles.add("QC Control");
                         }
-                        if (sb.length() > 0)
+                        if (!roles.isEmpty())
                         {
-                            dataRow.setWellRole(sb.toString());
+                            dataRow.setWellRole(StringUtils.join(roles, ", "));
                         }
                     }
                     dataRow.setAnalyte(analyte.getRowId());
@@ -367,9 +338,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 insertExcelProperties(excelRunColumns, sourceFile, parser, user, protocol);
             }
 
-            LuminexDataTable tableInfo = provider.createDataTable(AssayService.get().createSchema(user, container), protocol, false);
+            LuminexDataTable tableInfo = provider.createDataTable(AssayService.get().createSchema(user, expRun.getContainer()), protocol, false);
             LuminexImportHelper helper = new LuminexImportHelper();
-            OntologyManager.insertTabDelimited(tableInfo, container, user, helper, rows, Logger.getLogger(LuminexDataHandler.class));
+            OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, rows, Logger.getLogger(LuminexDataHandler.class));
 
             if (inputMaterials.isEmpty())
             {
@@ -384,9 +355,87 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             throw new ExperimentException(ve.toString(), ve);
         }
+        catch (SQLException e)
+        {
+            log.error("Failed to load from data file " + data.getFile().getAbsolutePath(), e);
+            throw new ExperimentException("Failed to load from data file " + data.getFile().getAbsolutePath() + "(" + e.toString() + ")", e);
+        }
         finally
         {
             ExperimentService.get().closeTransaction();
+        }
+    }
+
+    private GuideSet determineGuideSet(Analyte analyte, String conjugate, String isotype, ExpProtocol protocol)
+    {
+        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentGuideSet(protocol, analyte.getName(), conjugate, isotype);
+        if (guideSet != null)
+        {
+            return guideSet;
+        }
+
+        // Should we create a new one automatically here?
+        return null;
+    }
+
+    private void insertTitrationAnalyteMappings(User user, LuminexRunUploadForm form, Map<String, Titration> titrations, List<LuminexDataRow> dataRows, Analyte analyte)
+            throws ExperimentException, SQLException
+    {
+        // Insert mappings for all of the titrations that aren't standards
+        for (Titration titration : titrations.values())
+        {
+            if (!titration.isStandard())
+            {
+                insertAnalyteTitrationMapping(user, dataRows, analyte, titration);
+            }
+        }
+
+        // Insert mappings for all of the standard titrations that have been selected for this analyte
+        for (String titrationName : form.getTitrationsForAnalyte(analyte.getName()))
+        {
+            Titration titration = titrations.get(titrationName);
+            insertAnalyteTitrationMapping(user, dataRows, analyte, titration);
+        }
+    }
+
+    private void insertAnalyteTitrationMapping(User user, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration)
+            throws SQLException, ExperimentException
+    {
+        LuminexWellGroup wellGroup = titration.buildWellGroup(dataRows);
+
+        // Insert the mapping row, which includes the Max FI
+        Map<String, Object> analyteTitration = new HashMap<String, Object>();
+        analyteTitration.put("analyteId", analyte.getRowId());
+        analyteTitration.put("titrationId", titration.getRowId());
+        analyteTitration.put("maxFI", wellGroup.getMax());
+        Table.insert(user, LuminexSchema.getTableInfoAnalyteTitration(), analyteTitration);
+
+        // Insert the curve fit values (EC50 and AUC)
+        try
+        {
+            String stdCurve = analyte.getStdCurve();
+            if (stdCurve != null)
+            {
+                ParameterCurveImpl.FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
+                if (fitParams != null)
+                {
+                    insertCurveFit(wellGroup, user, titration, analyte, fitParams, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex");
+                }
+                else
+                {
+                    LOGGER.warn("Could not parse standard curve: " + stdCurve);
+                }
+            }
+            if (!wellGroup.getWellData(false).isEmpty())
+            {
+                LuminexDataRow firstDataRow = wellGroup.getWellData(false).get(0)._dataRow;
+                importRumiCurveFit(DilutionCurve.FitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte);
+                importRumiCurveFit(DilutionCurve.FitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte);
+            }
+        }
+        catch (DilutionCurve.FitFailedException e)
+        {
+            throw new ExperimentException(e);
         }
     }
 
@@ -639,7 +688,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         Integer objectId = OntologyManager.ensureObject(container, data.getLSID());
         for (PropertyDescriptor excelRunColumn : excelRunColumns)
         {
-            OntologyManager.deleteProperty(data.getLSID(), excelRunColumn.getPropertyURI(), data.getContainer(), protocol.getContainer());
+            OntologyManager.deleteProperty(data.getLSID(), excelRunColumn.getPropertyURI(), container, protocol.getContainer());
         }
 
         List<Map<String, Object>> excelRunPropsList = new ArrayList<Map<String, Object>>();
@@ -1079,7 +1128,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         LuminexRunUploadForm form = (LuminexRunUploadForm)context;
 
-        importData(data, run, context.getUser(), null, sheets, form.getParser(), form);
+        importData(data, run, context.getUser(), Logger.getLogger(LuminexDataHandler.class), sheets, form.getParser(), form);
     }
 
     public Priority getPriority(ExpData data)

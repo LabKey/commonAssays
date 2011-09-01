@@ -35,6 +35,8 @@ import java.util.ArrayList;
  */
 public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.Factory>
 {
+    private static final FileType FILE_TYPE_INPUT_XML = new FileType(".input.xml");
+
     private static final String INPUT_XML = "input.xml";
     private static final String TAXONOMY_XML = "taxonomy.xml";
     private static final String TAXON_NAME = "sequences";
@@ -45,15 +47,13 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
     // TPP's xtandem build treats xml.gz as a native format
     public static FileType getNativeFileType(FileType.gzSupportLevel gzSupport)
     {
-        FileType FT_XTAN_XML = new FileType(".xtan.xml",gzSupport);
-        return FT_XTAN_XML;
+        return new FileType(".xtan.xml", gzSupport);
     }
     // useful for naming an output file while honoring config preference for gzip output
     public static File getNativeOutputFile(File dirAnalysis, String baseName,
                                            FileType.gzSupportLevel gzSupport)
     {
-        FileType FT_XTAN_XML = getNativeFileType(gzSupport);
-        return FT_XTAN_XML.newFile(dirAnalysis, baseName);
+        return getNativeFileType(gzSupport).newFile(dirAnalysis, baseName);
     }
 
     /**
@@ -122,11 +122,12 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             JobSupport support = getJobSupport();
             String baseName = support.getBaseName();
 
-            // Avoid re-running an X! Tandem search, if the .xtan.xml alreayd exists.
+            // Avoid re-running an X! Tandem search, if the .xtan.xml already exists.
             // Several labs soft-link or copy .xtan.xml files to reduce processing time.
             ProcessBuilder xTandemPB = null;
             File fileOutputXML = getNativeFileType(support.getGZPreference()).newFile(support.getAnalysisDirectory(), baseName);
             File fileWorkOutputXML = null;
+            File fileJobTandemXML = null;
             boolean searchComplete = NetworkDrive.exists(fileOutputXML);
 
             File fileMzXML = _factory.findInputFile(getJobSupport().getDataDirectory(), getJobSupport().getBaseName());
@@ -146,8 +147,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
 
             if (!searchComplete)
             {
-                FileType FT_XTAN_XML = getNativeFileType(support.getGZPreference());
-                fileWorkOutputXML = _wd.newFile(FT_XTAN_XML);
+                fileWorkOutputXML = _wd.newFile(getNativeFileType(support.getGZPreference()));
                 File fileWorkParameters = _wd.newFile(INPUT_XML);
                 File fileWorkTaxonomy = _wd.newFile(TAXONOMY_XML);
 
@@ -166,6 +166,9 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                 xTandemPB = new ProcessBuilder(exePath, INPUT_XML);
 
                 getJob().runSubProcess(xTandemPB, _wd.getDir());
+
+                // Keep the merged parameters file
+                fileJobTandemXML = _wd.outputFile(fileWorkParameters, FILE_TYPE_INPUT_XML.getDefaultName(baseName));
 
                 // Remove parameters files.
                 _wd.discardFile(fileWorkParameters);
@@ -208,6 +211,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                     xtandemAction.addInput(sequenceFile, FASTA_INPUT_ROLE);
                 }
                 xtandemAction.addOutput(fileOutputXML, "TandemXML", false);
+                xtandemAction.addInput(fileJobTandemXML, JOB_ANALYSIS_PARAMETERS_ROLE_NAME);
                 actions.add(xtandemAction);
             }
 

@@ -20,6 +20,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -91,7 +92,9 @@ public class AnalyteTable extends AbstractLuminexTable
                     @Override
                     public TableInfo getLookupTableInfo()
                     {
-                        return _schema.createTitrationTable(false);
+                        TitrationTable titrationTable = _schema.createTitrationTable(false);
+                        titrationTable.addCondition(new SimpleFilter("Standard", Boolean.TRUE));
+                        return titrationTable;
                     }
                 });
                 ColumnInfo analyteColumn = result.addColumn(result.wrapColumn("Analyte", result.getRealTable().getColumn("AnalyteId")));

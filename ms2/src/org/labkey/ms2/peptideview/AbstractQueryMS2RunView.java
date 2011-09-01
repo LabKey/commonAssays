@@ -87,7 +87,12 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
 
         FieldKey desiredFK;
         boolean proteinProphetNesting = queryView._selectedNestingOption instanceof ProteinProphetQueryNestingOption;
+        boolean proteinGroupNesting = queryView._selectedNestingOption instanceof ProteinGroupQueryNestingOption;
         if (proteinProphetNesting)
+        {
+            desiredFK = FieldKey.fromString(queryView._selectedNestingOption.getRowIdColumnName());
+        }
+        else if (proteinGroupNesting)
         {
             desiredFK = FieldKey.fromString(queryView._selectedNestingOption.getRowIdColumnName());
         }
@@ -111,6 +116,13 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
             SQLFragment result = new SQLFragment("SELECT SeqId FROM " + MS2Manager.getTableInfoProteinGroupMemberships() + " WHERE ProteinGroupId IN (");
             result.append(sql);
             result.append(") x");
+            return result;
+        }
+        else if (proteinGroupNesting)
+        {
+            SQLFragment result = new SQLFragment("SELECT SeqId FROM " + MS2Manager.getTableInfoProteinGroupMemberships() + " WHERE ProteinGroupId IN (");
+            result.append(sql);
+            result.append(")");
             return result;
         }
         else

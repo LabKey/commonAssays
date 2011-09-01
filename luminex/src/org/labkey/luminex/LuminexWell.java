@@ -46,7 +46,19 @@ public class LuminexWell implements WellData
     @Override
     public Double getDilution()
     {
-        return _dataRow.getExpConc() == null || _dataRow.getDilution() == null ? null : _dataRow.getDilution() / _dataRow.getExpConc();
+        if (_dataRow.getExpConc() != null && _dataRow.getDilution() != null)
+        {
+            return _dataRow.getDilution() / _dataRow.getExpConc();
+        }
+        if (_dataRow.getDilution() != null)
+        {
+            return _dataRow.getDilution();
+        }
+        if (_dataRow.getExpConc() != null && _dataRow.getExpConc() != 0.0)
+        {
+            return 1.0 / _dataRow.getExpConc();
+        }
+        return null;
     }
 
     @Override
