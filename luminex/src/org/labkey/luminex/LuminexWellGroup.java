@@ -19,12 +19,13 @@ import org.labkey.api.data.Container;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.PositionImpl;
-import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -43,8 +44,51 @@ public class LuminexWellGroup implements WellGroup
     @Override
     public List<LuminexWell> getWellData(boolean combineReplicates)
     {
-        return _wells;
+        if (!combineReplicates)
+        {
+            return _wells;
+        }
+        Map<LuminexReplicate, List<LuminexWell>> allReplicates = new HashMap<LuminexReplicate, List<LuminexWell>>();
+        for (LuminexWell well : _wells)
+        {
+            LuminexReplicate replicate = new LuminexReplicate(well);
+            List<LuminexWell> wells = allReplicates.get(replicate);
+            if (wells == null)
+            {
+                wells = new ArrayList<LuminexWell>();
+                allReplicates.put(replicate, wells);
+            }
+            wells.add(well);
+        }
+
+        List<LuminexWell> result = new ArrayList<LuminexWell>();
+        for (Map.Entry<LuminexReplicate, List<LuminexWell>> entry : allReplicates.entrySet())
+        {
+            double sum = 0;
+            int count = 0;
+            for (LuminexWell well : entry.getValue())
+            {
+                Double value = well.getValue();
+                if (value != null)
+                {
+                    sum += value.doubleValue();
+                    count++;
+                }
+            }
+            LuminexDataRow fakeDataRow = new LuminexDataRow();
+            fakeDataRow.setExpConc(entry.getKey().getExpConc());
+            fakeDataRow.setDilution(entry.getKey().getDilution());
+            fakeDataRow.setData(entry.getKey().getDataId());
+            fakeDataRow.setDescription(entry.getKey().getDescription());
+            fakeDataRow.setFiBackground(sum / count);
+            fakeDataRow.setFi(sum / count);
+            result.add(new LuminexWell(fakeDataRow));
+        }
+        Collections.sort(result);
+        return result;
     }
+
+
 
     @Override
     public Type getType()

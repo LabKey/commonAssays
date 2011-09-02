@@ -431,12 +431,42 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 LuminexDataRow firstDataRow = wellGroup.getWellData(false).get(0)._dataRow;
                 importRumiCurveFit(DilutionCurve.FitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte);
                 importRumiCurveFit(DilutionCurve.FitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte);
+
+                // Do the trapezoidal AUC calculation
+                double auc = calculateTrapezoidalAUC(wellGroup);
+
+                CurveFit fit = new CurveFit();
+                fit.setAUC(auc);
+                fit.setAnalyteId(analyte.getRowId());
+                fit.setTitrationId(titration.getRowId());
+                fit.setCurveType("Trapezoidal");
+
+                Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
             }
         }
         catch (DilutionCurve.FitFailedException e)
         {
             throw new ExperimentException(e);
         }
+    }
+
+    private double calculateTrapezoidalAUC(LuminexWellGroup wellGroup)
+    {
+        double auc = 0;
+        List<LuminexWell> wells = wellGroup.getWellData(true);
+        if (!wells.isEmpty())
+        {
+            LuminexWell previousWell = wells.get(0);
+            for (int i = 1; i < wells.size(); i++)
+            {
+                LuminexWell well = wells.get(i);
+                auc += Math.max(Math.abs(Math.log10(well.getDilution()) - Math.log10(previousWell.getDilution())) *
+                        (Math.min(previousWell.getValue().doubleValue(), well.getValue().doubleValue()) +
+                            0.5 * Math.abs(previousWell.getValue().doubleValue() - well.getValue().doubleValue())), 0);
+                previousWell = well;
+            }
+        }
+        return auc;
     }
 
     private void importRumiCurveFit(DilutionCurve.FitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte) throws DilutionCurve.FitFailedException, SQLException
@@ -528,66 +558,105 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals(-11.8884, params.slope);
         }
 
-//        @Test
-//        public void test5PLCurveFit() throws DilutionCurve.FitFailedException
-//        {
-//            ParameterCurveImpl.FitParameters params = new ParameterCurveImpl.FitParameters();
-//            params.asymmetry = 0.0999998;
-//            params.min= .441049;
-//            params.max = 30394.958951;
-//            params.inflection = 5.04206;
-//            params.slope = -11.8884;
-//
-//            List<LuminexWell> wells = new ArrayList<LuminexWell>();
-//
-//            wells.add(new LuminexWell(new LuminexDataRow("D2", 30160.5, 500, 1)));
-//            wells.add(new LuminexWell(new LuminexDataRow("D10", 2, 0.00005, 1)));
-//            LuminexWellGroup group = new LuminexWellGroup(wells);
-//
-//            CurveFit fit = new LuminexDataHandler().createCurveFit(group, new Titration(), new Analyte(), params, DilutionCurve.FitType.FIVE_PARAMETER, "Test");
-//            assertEquals("EC50", 1198.008444104608, fit.getEC50());
-//            assertEquals("AUC", 107.5578170270846, fit.getAUC());
-//        }
-//
-//        @Test
-//        public void test5PLBioPlexCurveFit() throws DilutionCurve.FitFailedException
-//        {
-//            // Std. Curve: FI = 1.90102 + (30280.8 - 1.90102) / ((1 + (Conc / 11.7853)^-3.80569))^0.300225
-//            ParameterCurveImpl.FitParameters params = new ParameterCurveImpl.FitParameters();
-//            params.asymmetry = 0.300225; // E
-//            params.min= 1.90102;  // A
-//            params.max = 30278.89898; // D
-//            params.inflection = 11.7853; // C
-//            params.slope = -3.80569; // B
-//
-//            List<LuminexWell> wells = new ArrayList<LuminexWell>();
-//
-//            wells.add(new LuminexWell(new LuminexDataRow("D2", 30427, 500, 1)));
-//            wells.add(new LuminexWell(new LuminexDataRow("D10", 1.5, 0.00005, 1)));
-//            LuminexWellGroup group = new LuminexWellGroup(wells);
-//
-//            CurveFit fit = new LuminexDataHandler().createCurveFit(group, new Titration(), new Analyte(), params, DilutionCurve.FitType.FIVE_PARAMETER, "Test");
-//
-//            assertEquals("EC50", 1198.008444104608, fit.getEC50() * 500);
-//            assertEquals("AUC", 107.5578170270846, fit.getAUC());
-//        }
-//
-//        @Test
-//        public void test5PLBioPlexCurveFit2() throws DilutionCurve.FitFailedException
-//        {
-//            ParameterCurveImpl.FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = 0.189509 + (31230.1 - 0.189509) / ((1 + (Conc / 2.8374)^-11.549))^0.1");
-//
-//            List<LuminexWell> wells = new ArrayList<LuminexWell>();
-//
-//            wells.add(new LuminexWell(new LuminexDataRow("D2", 25354.75, 2.31481, 1)));
-//            wells.add(new LuminexWell(new LuminexDataRow("D10", 15.5, 0.00179, 1)));
-//            LuminexWellGroup group = new LuminexWellGroup(wells);
-//
-//            CurveFit fit = new LuminexDataHandler().createCurveFit(group, new Titration(), new Analyte(), params, DilutionCurve.FitType.FIVE_PARAMETER, "Test");
-//
-//            assertEquals("EC50", 1198.008444104608, fit.getEC50());
-//            assertEquals("AUC", 107.5578170270846, fit.getAUC());
-//        }
+        @Test
+        public void testAUCSummaryData() throws DilutionCurve.FitFailedException
+        {
+            List<LuminexWell> wells = new ArrayList<LuminexWell>();
+
+            wells.add(new LuminexWell(new LuminexDataRow("A1", 30427, 1, 100), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("A2", 30139, 1, 600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("A3", 26612.25, 1, 3600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("A4", 4867, 1, 21600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("A5", 571.75, 1, 129600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("A6", 80.5, 1, 777600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("A7", 16, 1, 4665600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("A8", 2.5, 1, 27993600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("A9", 2, 1, 167961600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("A10", 1.5, 1, 1007769600), 1.0));
+            LuminexWellGroup group = new LuminexWellGroup(wells);
+
+            assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
+            assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue());
+            assertEquals("Check number of raw wells", 10, group.getWellData(false).size());
+
+            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
+        }
+
+        @Test
+        public void testAUCRawData() throws DilutionCurve.FitFailedException
+        {
+            List<LuminexWell> wells = new ArrayList<LuminexWell>();
+
+            wells.add(new LuminexWell(new LuminexDataRow("G1", 30271, 1, 100), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("H1", 30583, 1, 100), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("G2", 30151.5, 1, 600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("H2", 30126.5, 1, 600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("G3", 26439, 1, 3600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("H3", 26785.5, 1, 3600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("G4", 4786, 1, 21600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("H4", 4948, 1, 21600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("G5", 553.5, 1, 129601), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("H5", 590, 1, 129601), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("G6", 77.5, 1, 777605), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("H6", 83.5, 1, 777605), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("G7", 16.5, 1, 4664179), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("H7", 15.5, 1, 4664179), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("G8", 1.5, 1, 27932961), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("H8", 3.5, 1, 27932961), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("G9", 1.5, 1, 166666667), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("H9", 2.5, 1, 166666667), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("G10", 1.5, 1, 1000000000), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("H10", 1.5, 1, 1000000000), 1.0));
+            LuminexWellGroup group = new LuminexWellGroup(wells);
+
+            assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
+            assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue());
+            assertEquals("Check number of raw wells", 20, group.getWellData(false).size());
+
+            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
+        }
+
+        @Test
+        public void testDilutionScaling() throws DilutionCurve.FitFailedException
+        {
+            LuminexWell well = new LuminexWell(new LuminexDataRow("G1", 30271, 500, 1));
+            assertEquals(100.0, well.getDilution());
+        }
+
+        @Test
+        public void testAUCRawDataWithScaling() throws DilutionCurve.FitFailedException
+        {
+            List<LuminexWell> wells = new ArrayList<LuminexWell>();
+
+            wells.add(new LuminexWell(new LuminexDataRow("G1", 30271, 500, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("H1", 30583, 500, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("G2", 30151.5, 83.33333, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("H2", 30126.5, 83.33333, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("G3", 26439, 13.88889, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("H3", 26785.5, 13.88889, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("G4", 4786, 2.31481, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("H4", 4948, 2.31481, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("G5", 553.5, 0.3858, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("H5", 590, 0.3858, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("G6", 77.5, 0.0643, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("H6", 83.5, 0.0643, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("G7", 16.5, 0.01072, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("H7", 15.5, 0.01072, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("G8", 1.5, 0.00179, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("H8", 3.5, 0.00179, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("G9", 1.5, 0.0003, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("H9", 2.5, 0.0003, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("G10", 1.5, 0.00005, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("H10", 1.5, 0.00005, 1)));
+            LuminexWellGroup group = new LuminexWellGroup(wells);
+
+            assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
+            assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue());
+            assertEquals("Check scaled dilution value", 100.0, group.getWellData(true).get(0).getDilution());
+            assertEquals("Check number of raw wells", 20, group.getWellData(false).size());
+            
+            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
+        }
     }
 
     private void insertCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source)
@@ -600,10 +669,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private CurveFit createCurveFit(LuminexWellGroup wellGroup, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source)
             throws DilutionCurve.FitFailedException
     {
-        ParameterCurveImpl.FiveParameterCurve curveImpl = new ParameterCurveImpl.FiveParameterCurve(Collections.singletonList(wellGroup), false, params);
-
-        double ec50 = curveImpl.getCutoffDilution(2999.163361 / 100.0);
-        double auc = curveImpl.calculateAUC(DilutionCurve.AUCType.NORMAL);
+//        ParameterCurveImpl.FiveParameterCurve curveImpl = new ParameterCurveImpl.FiveParameterCurve(Collections.singletonList(wellGroup), false, params);
 
         CurveFit fit = new CurveFit();
         fit.setAnalyteId(analyte.getRowId());
@@ -616,8 +682,18 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             fit.setAsymmetry(params.getAsymmetry());
         }
-        fit.setAUC(Double.isNaN(auc) || Double.isInfinite(auc) ? null : auc);
-        fit.setEC50(Double.isNaN(ec50) || Double.isInfinite(ec50) ? null : ec50);
+
+        Double ec50 = null;
+
+        if (fitType == DilutionCurve.FitType.FOUR_PARAMETER)
+        {
+            ec50 = fit.getInflection();
+        }
+
+        // Don't calculate AUC for 4/5PL fits
+//        double auc = curveImpl.calculateAUC(DilutionCurve.AUCType.NORMAL);
+
+        fit.setEC50(ec50);
         fit.setCurveType(source + " " + fitType.getLabel());
         return fit;
     }

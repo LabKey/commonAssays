@@ -22,13 +22,22 @@ import org.labkey.api.study.WellData;
  * User: jeckels
  * Date: Aug 17, 2011
  */
-public class LuminexWell implements WellData
+public class LuminexWell implements WellData, Comparable<LuminexWell>
 {
+    private static final double TOMARAS_SCALE_DILUTION = 50000.0;
+
     public LuminexDataRow _dataRow;
+    private double _scaleDilutionFactor;
+
+    public LuminexWell(LuminexDataRow dataRow, double scaleDilutionFactor)
+    {
+        _dataRow = dataRow;
+        _scaleDilutionFactor = scaleDilutionFactor;
+    }
 
     public LuminexWell(LuminexDataRow dataRow)
     {
-        _dataRow = dataRow;
+        this(dataRow, TOMARAS_SCALE_DILUTION);
     }
 
     @Override
@@ -48,15 +57,15 @@ public class LuminexWell implements WellData
     {
         if (_dataRow.getExpConc() != null && _dataRow.getDilution() != null)
         {
-            return _dataRow.getDilution() / _dataRow.getExpConc();
+            return (_dataRow.getDilution() / _dataRow.getExpConc()) * _scaleDilutionFactor;
         }
         if (_dataRow.getDilution() != null)
         {
-            return _dataRow.getDilution();
+            return _dataRow.getDilution() * _scaleDilutionFactor;
         }
         if (_dataRow.getExpConc() != null && _dataRow.getExpConc() != 0.0)
         {
-            return 1.0 / _dataRow.getExpConc();
+            return 1.0 / _dataRow.getExpConc() * _scaleDilutionFactor;
         }
         return null;
     }
@@ -67,16 +76,8 @@ public class LuminexWell implements WellData
         throw new UnsupportedOperationException();
     }
 
-    private Double getValue()
+    public Double getValue()
     {
-        if (_dataRow.getExtraProperties() != null)
-        {
-            Object value = _dataRow.getExtraProperties().get("fiBackgroundBlank");
-            if (value instanceof Number)
-            {
-                return ((Number)value).doubleValue();
-            }
-        }
         return _dataRow.getFiBackground();
     }
 
@@ -103,5 +104,23 @@ public class LuminexWell implements WellData
     public LuminexDataRow getDataRow()
     {
         return _dataRow;
+    }
+
+    @Override
+    public int compareTo(LuminexWell w)
+    {
+        if (getDilution() == null && w.getDilution() == null)
+        {
+            return 0;
+        }
+        if (getDilution() == null)
+        {
+            return -1;
+        }
+        if (w.getDilution() == null)
+        {
+            return 1;
+        }
+        return getDilution().compareTo(w.getDilution());
     }
 }
