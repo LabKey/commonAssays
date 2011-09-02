@@ -122,11 +122,6 @@ run.data$fiBackgroundBlank[!is.na(run.data$fiBackgroundBlank) & run.data$fiBackg
 ################################## STEP 3: TITRATION CURVE FIT #################################
 
 # initialize the curve coefficient variables
-run.data$Slope_5pl = NA;
-run.data$Lower_5pl = NA;
-run.data$Upper_5pl = NA;
-run.data$Inflection_5pl = NA;
-run.data$Asymmetry_5pl = NA;
 run.data$Slope_4pl = NA;
 run.data$Lower_4pl = NA;
 run.data$Upper_4pl = NA;
@@ -157,41 +152,26 @@ if (file.exists(titration.data.file))
                     print(paste(titrationName, analyteName, sep="..."));
                     runDataIndex = run.data$description == titrationName & run.data$name == analyteName;
 
-                    # choose the FI column for titrations based on the run property provided by the user, default to the original FI value
-                    fiCol = "FI";
-                    if(any(run.props$name == "StndCurveFitInput"))
-                        fiCol = run.props$val1[run.props$name == "StndCurveFitInput"];
-                    if(fiCol == "FI-Bkgd")
-                        dat$fi = dat$fiBackground
-                    else if(fiCol == "FI-Bkgd-Blank")
-                        dat$fi = dat$fiBackgroundBlank;
-
-                    # if no expected concentration for this titration, set expConc = starting conc / dilution
-                    if (any(is.na(dat$expConc)))
+                    # if there is an expected concentration for this titration, use it to set the dilution value for the curve fit function
+                    if (!all(is.na(dat$expConc)))
                     {
-                        dat$expConc = min(dat$dilution) / dat$dilution;
+                        dat$dilution = 50000/dat$expConc;
                     }
 
-                    # get curve fit params for 5PL
-                    fit = fit.drc(log(fi) ~ expConc, data = dat, force.fit=FALSE, fit.4pl=FALSE);
-                    if (!is.null(fit))
-                    {
-                        run.data[runDataIndex,]$Slope_5pl = as.numeric(coef(fit))[1];
-                        run.data[runDataIndex,]$Lower_5pl = as.numeric(coef(fit))[2];
-                        run.data[runDataIndex,]$Upper_5pl = as.numeric(coef(fit))[3];
-                        run.data[runDataIndex,]$Inflection_5pl = as.numeric(coef(fit))[4];
-                        run.data[runDataIndex,]$Asymmetry_5pl = as.numeric(coef(fit))[5];
-                    }
+                    # get curve fit params for 4PL using the rumi curve fit function ###DISABLED###
+                    #fit = fit.drc(log(fi) ~ expConc, data = dat, force.fit=FALSE, fit.4pl=TRUE);
 
                     # get curve fit params for 4PL
-                    fit = fit.drc(log(fi) ~ expConc, data = dat, force.fit=FALSE, fit.4pl=TRUE);
-                    if (!is.null(fit))
-                    {
-                        run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1];
-                        run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2];
-                        run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3];
-                        run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4];
-                    }
+                    tryCatch({
+                            fit = drm(fiBackground~dilution, data=dat, fct=LL.4());
+                            run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1]
+                            run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2]
+                            run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3]
+                            run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4]
+
+                        },
+                        error = function(e) {print(e);}
+                    );
                 }
             }
         }
