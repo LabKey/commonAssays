@@ -16,6 +16,8 @@
 
 package org.labkey.flow.analysis.web;
 
+import org.junit.Assert;
+import org.junit.Test;
 import org.labkey.api.view.Stats;
 import org.labkey.flow.analysis.model.DataFrame;
 import org.labkey.flow.analysis.model.FCS;
@@ -325,4 +327,125 @@ public class StatisticSpec implements Serializable, Comparable
         }
 
     }
+
+
+
+    public static class TestCase extends Assert
+    {
+        @Test
+        public void testParseSave11_1()
+        {
+            for (String s : statitics11_1)
+            {
+                try
+                {
+                    StatisticSpec spec = new StatisticSpec(s);
+                }
+                catch (Exception x)
+                {
+                    System.err.println(s);
+                }
+            }
+        }
+    }
+
+final static String[] statitics11_1 = {
+    "-:Count",
+    "-:Freq_Of_Parent",
+    "Beads/-:Count",
+    "Beads/-:Freq_Of_Parent",
+    "Beads/MIP-1B PerCP Cy55+:Count",
+    "Beads/MIP-1B PerCP Cy55+:Freq_Of_Parent",
+    "Beads:Count",
+    "Beads:Freq_Of_Parent",
+    "Count",
+    "FSC-A; SSC-A subset:Count",
+    "FSC-A; SSC-A subset:Freq_Of_Parent",
+    "HLA-DR Pac Blue:Count",
+    "HLA-DR Pac Blue:Freq_Of_Parent",
+    "L/-:Count",
+    "L/-:Freq_Of_Parent",
+    "L/APC CD3+:Count",
+    "L/APC CD3+:Freq_Of_Parent",
+    "S/-:Count",
+    "S/-:Freq_Of_Parent",
+    "S/HLA-DR+ Pac Blue:Count",
+    "S/HLA-DR+ Pac Blue:Freq_Of_Parent",
+    "S/L/+:Count",
+    "S/L/+:Freq_Of_Parent",
+    "S/L/-:Count",
+    "S/L/-:Freq_Of_Parent",
+    "S/L/3+/4+/4+ Live:Count",
+    "S/L/3+:Count",
+    "S/L/3+:Freq_Of_Parent",
+    "S/L/3-/3- Live:Count",
+    "S/L/3-/3- Live:Freq_Of_Parent",
+    "S/L/3-:Count",
+    "S/L/3-:Freq_Of_Parent",
+    "S/L/<Alexa 680-A>; <APC-A> subset:Count",
+    "S/L/<Alexa 680-A>; <APC-A> subset:Freq_Of_Parent",
+    "S/L/<PerCP Cy55 Blue-A>; <PE Cy5-A> subset:Count",
+    "S/L/<PerCP Cy55 Blue-A>; <PE Cy5-A> subset:Freq_Of_Parent",
+    "S/L/APC-Cy7 HLA-DR+:Freq_Of_Parent",
+    "S/L/APC-H7 CD4+:Count",
+    "S/L/APC-H7 CD4+:Freq_Of_Parent",
+    "S/L/AViD (new)+:Count",
+    "S/L/AViD (new)+:Freq_Of_Parent",
+    "S/L/AViD+:Count",
+    "S/Lv/L/CD3+/CD4+/(45RO+&CCR5+&CCR7+&CD27+&CD28+&!CD57+&D103+):Count",
+    "S/Lv/L/CD3+/CD4+/(45RO+&CCR5+&CCR7+&CD27+&CD28+&!CD57+&D103+):Freq_Of_Parent",
+    "S/Lv/L/CD3+/CD4+/(45RO+&CCR5+&CCR7+&CD27+&CD28+&CD57+&!D103+):Count",
+    "S/Lv/L/CD3+/CD4+/(45RO+&CCR5+&CCR7+&CD27+&CD28+&CD57+&!D103+):Freq_Of_Parent",
+    "S/Lv/L/CD3+/CD4+/CD38+:Freq_Of_Parent",
+    "S/Lv/L/CD3+/CD4+/CD57+:Count",
+    "S/Lv/L/CD3+/CD4+/CD57+:Freq_Of_Parent",
+    "S/Lv/L/CD3+/CD8+/(!45RO+&CCR5+&!CCR7+&CD27+&CD28+&!CD57+&D103+):Count",
+    "S/Lv/L/CD3+/CD8+/(!45RO+&CCR5+&!CCR7+&CD27+&CD28+&!CD57+&D103+):Freq_Of_Parent",
+    "S/Lv/L:Freq_Of_Parent",
+    "S/Lv/L:Mean(Time)",
+    "S/Lv/L:Median(<APC-A>)",
+    "S/Lv/L:Median(Pacific Blue-A)",
+    "S/Lv/L:Median(SSC-A)",
+    "S/Lv/L:Median(Time)",
+    "S/Lv:Count",
+    "S/Lv:Freq_Of_Parent",
+    "S/Lv:Mean(Time)",
+    "S/Lv:Median(<Pacific Blue-A>)",
+    "S/Lv:Median(APC-A)",
+    "S/S/Lv/L/3+/4+/(!IFNg+&IL2+&Perforin+&!TNFa+):Count",
+    "S/S/Lv/L/3+/4+/(!IFNg+&IL2+&Perforin+&!TNFa+):Freq_Of_Parent",
+    "S/S/Lv/L/3+/8+/(!IFNg+&!IL2+&TNFa+&!Granzyme B+&57+):Freq_Of_Parent",
+    "S/S/Lv/L/3+/8+/(!IFNg+&!IL2+&TNFa+&Granzyme B+&!57+):Count",
+    "S:Median(Pacific Blue-A)",
+    "S:Median(SSC-A)",
+    "S:Median(Time)",
+    "SSC-A; FSC-A subset:Count",
+    "SSC-A; FSC-A subset:Freq_Of_Parent",
+    "Singlets/L/Live/3+/4+/(!IFNg+&!IL2+&!IL4+&!TNF+):Count",
+    "Singlets/L/Live/3+/4+/(!IFNg+&!IL2+&!IL4+&!TNF+):Freq_Of_Parent",
+    "Singlets1:Median(Pacific Blue-A)",
+    "Singlets1:Std_Dev(SSC-A)",
+    "Singlets1:Std_Dev(Time)",
+    "Singlets:Count",
+    "Singlets:Freq_Of_Parent",
+    "Singlets:Median(SSC-A)",
+    "Singlets:Median(Time)",
+    "Spill(APC Cy7-A:APC Cy7-A)",
+    "Std_Dev(APC Cy7-A)",
+    "Std_Dev(APC-A)",
+    "Std_Dev(Time)",
+    "comp:Count",
+    "comp:Median(PE-A)",
+    "comp:Median(Pacific Blue-A)",
+    "comp:Median(PerCP Cy55 Blue-A)",
+    "CD45+/LYMPHS/CD3-20-/14-DR-/CD8+159a+/Q10: CD159a (NKG2a)+; HLA Dr+:Count",
+    "CD45+/LYMPHS/CD3-20-/14-DR-/CD8+159a+/Q11: CD159a (NKG2a)+; HLA Dr-:Count",
+    "CD45+/LYMPHS/CD3-20-/14-DR-/CD8+159a+/Q12: CD159a (NKG2a)-; HLA Dr-:Count",
+    "CD45+/LYMPHS/CD3-20-/14-DR-/CD8+159a+/Q5: CD16-; CD335 (NKp46)+:Count",
+    "CD45+/LYMPHS/CD3-20-/14-DR-/CD8+159a+/Q6: CD16+; CD335 (NKp46)+:Count",
+    "CD45+/LYMPHS/CD3-20-/14-DR-/CD8+159a+/Q7: CD16+; CD335 (NKp46)-:Freq_Of_Parent",
+    "CD45+/LYMPHS/CD3-20-/14-DR-/CD8+159a+/Q8: CD16-; CD335 (NKp46)-:Freq_Of_Parent",
+    "CD45+/LYMPHS/CD3-20-/14-DR-/CD8+159a+/Q9: CD159a (NKG2a)-; HLA Dr+:Freq_Of_Parent",
+    "CD45+/LYMPHS/CD3-20-/14-DR-/CD8+159a+/Q9: CD159a; HLA Dr+:Freq_Of_Parent"
+    };
 }
