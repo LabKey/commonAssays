@@ -530,14 +530,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         try
         {
             // Clear out the guide sets that are FK'd to the protocol
-            SQLFragment deleteGuideSetCurveFitsSQL = new SQLFragment("DELETE FROM ");
-            deleteGuideSetCurveFitsSQL.append(LuminexSchema.getTableInfoGuideSetCurveFit());
-            deleteGuideSetCurveFitsSQL.append(" WHERE GuideSetId IN (SELECT RowId FROM ");
-            deleteGuideSetCurveFitsSQL.append(LuminexSchema.getTableInfoGuideSet(), "gs");
-            deleteGuideSetCurveFitsSQL.append(" WHERE gs.ProtocolId = ?)");
-            deleteGuideSetCurveFitsSQL.add(protocol.getRowId());
-            Table.execute(LuminexSchema.getSchema(), deleteGuideSetCurveFitsSQL);
-
             SQLFragment deleteGuideSetSQL = new SQLFragment("DELETE FROM ");
             deleteGuideSetSQL.append(LuminexSchema.getTableInfoGuideSet());
             deleteGuideSetSQL.append(" WHERE ProtocolId = ?");

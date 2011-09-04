@@ -34,6 +34,7 @@ public class Analyte
     private int _minStandardRecovery;
     private int _maxStandardRecovery;
     private Integer _guideSetId;
+    private boolean _includeInGuideSetCalculation;
 
     public Analyte()
     {
@@ -182,5 +183,15 @@ public class Analyte
     public Integer getGuideSetId()
     {
         return _guideSetId;
+    }
+
+    public boolean isIncludeInGuideSetCalculation()
+    {
+        return _includeInGuideSetCalculation;
+    }
+
+    public void setIncludeInGuideSetCalculation(boolean includeInGuideSetCalculation)
+    {
+        _includeInGuideSetCalculation = includeInGuideSetCalculation;
     }
 }

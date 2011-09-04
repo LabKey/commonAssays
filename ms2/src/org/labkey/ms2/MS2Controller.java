@@ -4477,7 +4477,7 @@ public class MS2Controller extends SpringActionController
                 {
                     if (e.getSQLException() instanceof SQLGenerationException)
                     {
-                        throw new NotFoundException("Invalid filter " + e.getSQLException().toString());
+                        throw new NotFoundException("Invalid filter: " + e.getSQLException().getMessage());
                     }
                     throw e;
                 }

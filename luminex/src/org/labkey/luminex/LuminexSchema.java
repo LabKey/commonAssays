@@ -64,7 +64,8 @@ public class LuminexSchema extends AssaySchema
                 prefixTableName(WELL_EXCLUSION_TABLE_NAME),
                 prefixTableName(RUN_EXCLUSION_TABLE_NAME),
                 prefixTableName(CURVE_FIT_TABLE_NAME),
-                prefixTableName(GUIDE_SET_TABLE_NAME)
+                prefixTableName(GUIDE_SET_TABLE_NAME),
+                prefixTableName(GUIDE_SET_CURVE_FIT_TABLE_NAME)
         );
     }
 
@@ -127,6 +128,10 @@ public class LuminexSchema extends AssaySchema
                 result.addCondition(filter, "RunId");
                 return result;
             }
+            if (GUIDE_SET_CURVE_FIT_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                return createGuideSetCurveFitTable(true);
+            }
             if (RUN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 FilteredTable result = createRunExclusionTable(true);
@@ -144,14 +149,19 @@ public class LuminexSchema extends AssaySchema
         return null;
     }
 
-    protected TableInfo createGuideSetTable(boolean filterTable)
+    protected GuideSetTable createGuideSetTable(boolean filterTable)
     {
         return new GuideSetTable(this, filterTable);
     }
 
-    private CurveFitTable createCurveFitTable(boolean filterTable)
+    protected CurveFitTable createCurveFitTable(boolean filterTable)
     {
         return new CurveFitTable(this, filterTable);
+    }
+
+    private GuideSetCurveFitTable createGuideSetCurveFitTable(boolean filterTable)
+    {
+        return new GuideSetCurveFitTable(this, filterTable);
     }
 
     private WellExclusionTable createWellExclusionTable(boolean filterTable)
@@ -164,7 +174,7 @@ public class LuminexSchema extends AssaySchema
         return new RunExclusionTable(this, filterTable);
     }
 
-    protected TableInfo createAnalyteTable(boolean filterTable)
+    protected AnalyteTable createAnalyteTable(boolean filterTable)
     {
         AnalyteTable result = new AnalyteTable(this, filterTable);
 
@@ -269,11 +279,6 @@ public class LuminexSchema extends AssaySchema
     public static TableInfo getTableInfoGuideSet()
     {
         return getSchema().getTable(GUIDE_SET_TABLE_NAME);
-    }
-
-    public static TableInfo getTableInfoGuideSetCurveFit()
-    {
-        return getSchema().getTable(GUIDE_SET_CURVE_FIT_TABLE_NAME);
     }
 
     public static TableInfo getTableInfoCurveFit()

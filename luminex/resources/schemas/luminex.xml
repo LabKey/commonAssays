@@ -31,6 +31,7 @@
             <column columnName="MinStandardRecovery"/>
             <column columnName="MaxStandardRecovery"/>
             <column columnName="GuideSetId"/>
+            <column columnName="IncludeInGuideSetCalculation"/>
         </columns>
     </table>
     
@@ -81,17 +82,6 @@
             <column columnName="MaxFIStdDev">
                 <columnTitle>Max FI StdDev</columnTitle>
             </column>
-        </columns>
-    </table>
-
-    <table tableName="GuideSetCurveFit" tableDbType="TABLE">
-        <columns>
-            <column columnName="GuideSetId" />
-            <column columnName="CurveType" />
-            <column columnName="AUCAverage" />
-            <column columnName="AUCStdDev" />
-            <column columnName="EC50Average" />
-            <column columnName="EC50StdDev" />
         </columns>
     </table>
 

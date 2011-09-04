@@ -34,6 +34,7 @@ import org.labkey.api.settings.PreferenceService;
 import org.labkey.api.util.Path;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.webdav.SimpleDocumentResource;
 import org.labkey.ms2.*;
 
@@ -767,35 +768,56 @@ public class ProteinManager
             String indistId = currentUrl.getParameter("indistinguishableCollectionId");
             if (null != groupNumber)
             {
-                filter.addClause(new ProteinGroupFilter(Integer.parseInt(groupNumber), null == indistId ? 0 : Integer.parseInt(indistId)));
-                return filter;
+                try
+                {
+                    filter.addClause(new ProteinGroupFilter(Integer.parseInt(groupNumber), null == indistId ? 0 : Integer.parseInt(indistId)));
+                    return filter;
+                }
+                catch (NumberFormatException e)
+                {
+                    throw new NotFoundException("Bad groupNumber or indistinguishableCollectionId " + groupNumber + ", " + indistId);
+                }
             }
 
             String groupRowId = currentUrl.getParameter("proteinGroupId");
             if (groupRowId != null)
             {
-                filter.addCondition("ProteinProphetData/ProteinGroupId/RowId", Integer.parseInt(groupRowId));
+                try
+                {
+                    filter.addCondition("ProteinProphetData/ProteinGroupId/RowId", Integer.parseInt(groupRowId));
+                }
+                catch (NumberFormatException e)
+                {
+                    throw new NotFoundException("Bad proteinGroupId " + groupRowId);
+                }
                 return filter;
             }
 
             String seqId = currentUrl.getParameter("seqId");
             if (null != seqId)
             {
-                // if "all peptides" flag is set, add a filter to match peptides to the seqid on the url
-                // rather than just filtering for search engine protein.
-                if (ProteinManager.showAllPeptides(currentUrl, user))
+                try
                 {
-                    try
+                    // if "all peptides" flag is set, add a filter to match peptides to the seqid on the url
+                    // rather than just filtering for search engine protein.
+                    if (ProteinManager.showAllPeptides(currentUrl, user))
                     {
-                        filter.addClause(new SequenceFilter(Integer.parseInt(seqId)));
+                        try
+                        {
+                            filter.addClause(new SequenceFilter(Integer.parseInt(seqId)));
+                        }
+                        catch (SQLException e)
+                        {
+                            throw new RuntimeSQLException(e);
+                        }
                     }
-                    catch (SQLException e)
-                    {
-                        throw new RuntimeSQLException(e);
-                    }
+                    else
+                        filter.addCondition("SeqId", Integer.parseInt(seqId));
                 }
-                else
-                    filter.addCondition("SeqId", Integer.parseInt(seqId));
+                catch (NumberFormatException e)
+                {
+                    throw new NotFoundException("Bad seqId " + seqId);
+                }
             }
         }
         return filter;

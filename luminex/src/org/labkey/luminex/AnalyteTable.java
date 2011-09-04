@@ -27,13 +27,13 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.query.DefaultQueryUpdateService;
+import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FilteredTable;
-import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.query.RowIdQueryUpdateService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
@@ -69,6 +69,7 @@ public class AnalyteTable extends AbstractLuminexTable
         addColumn(wrapColumn(getRealTable().getColumn("ResVar")));
         addColumn(wrapColumn(getRealTable().getColumn("RegressionType")));
         addColumn(wrapColumn(getRealTable().getColumn("StdCurve")));
+        addColumn(wrapColumn(getRealTable().getColumn("IncludeInGuideSetCalculation")));
         ColumnInfo guideSetCol = addColumn(wrapColumn(getRealTable().getColumn("GuideSetId")));
         guideSetCol.setLabel("Guide Set");
         guideSetCol.setFk(new LookupForeignKey("RowId")
@@ -152,25 +153,56 @@ public class AnalyteTable extends AbstractLuminexTable
     @Override
     public QueryUpdateService getUpdateService()
     {
-        return new DefaultQueryUpdateService(this, getRealTable())
+        return new RowIdQueryUpdateService<Analyte>(this, "RowId")
         {
             @Override
-            protected Map<String, Object> updateRow(User user, Container container, Map<String, Object> row, Map<String, Object> oldRow) throws InvalidKeyException, ValidationException, QueryUpdateServiceException, SQLException
+            public Analyte get(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
             {
-                Number guideSetId = (Number)row.get("GuideSetId");
-                if (guideSetId != null)
+                return Table.selectObject(LuminexSchema.getTableInfoAnalytes(), key, Analyte.class);
+            }
+
+            @Override
+            public void delete(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            protected Analyte createNewBean()
+            {
+                return new Analyte();
+            }
+
+            @Override
+            protected Analyte insert(User user, Container container, Analyte bean) throws ValidationException, DuplicateKeyException, QueryUpdateServiceException, SQLException
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            protected Analyte update(User user, Container container, Analyte newAnalyte, Integer oldKey) throws ValidationException, QueryUpdateServiceException, SQLException
+            {
+                Analyte oldAnalyte = get(user, container, oldKey);
+
+                Integer newGuideSetId = newAnalyte.getGuideSetId();
+                Integer oldGuideSetId = oldAnalyte.getGuideSetId();
+                boolean newIncludeInCalc = newAnalyte.isIncludeInGuideSetCalculation();
+                boolean oldIncludeInCalc = oldAnalyte.isIncludeInGuideSetCalculation();
+
+                if (newGuideSetId != null)
                 {
-                    GuideSet guideSet = Table.selectObject(LuminexSchema.getTableInfoGuideSet(), guideSetId.intValue(), GuideSet.class);
+                    GuideSet guideSet = Table.selectObject(LuminexSchema.getTableInfoGuideSet(), newGuideSetId.intValue(), GuideSet.class);
                     if (guideSet == null)
                     {
-                        throw new ValidationException("No such guideSetId: " + guideSetId);
+                        throw new ValidationException("No such guideSetId: " + newGuideSetId);
                     }
                     if (guideSet.getProtocolId() != _schema.getProtocol().getRowId())
                     {
-                        throw new ValidationException("Can't set guideSetId to point to a guide set from another assay definition: " + guideSetId);
+                        throw new ValidationException("Can't set guideSetId to point to a guide set from another assay definition: " + newGuideSetId);
                     }
                 }
-                return super.updateRow(user, container, row, oldRow);
+
+                return Table.update(user, LuminexSchema.getTableInfoAnalytes(), newAnalyte, oldKey);
             }
         };
     }
