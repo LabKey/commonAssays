@@ -577,7 +577,7 @@ GO
 
 -- Add a column for the hash of the file
 ALTER TABLE prot.proteindatabases ADD
-    FileChecksum varchar(50) NULL
+    FileChecksum VARCHAR(50) NULL
 GO
 
 /* ms2-1.20-1.30.sql */
@@ -604,14 +604,14 @@ GO
 
 CREATE TABLE #idents
 (
-    rowid int NOT NULL identity,
-    Identifier varchar(50) NOT NULL,
-    CommonName varchar(20) NULL,
-    Genus varchar(100) NOT NULL,
-    Species varchar(100) NOT NULL,
-    OrgId int NULL,
-    IdentId int NULL,
-    IdentTypeId int NULL
+    rowid INT NOT NULL IDENTITY,
+    Identifier VARCHAR(50) NOT NULL,
+    CommonName VARCHAR(20) NULL,
+    Genus VARCHAR(100) NOT NULL,
+    Species VARCHAR(100) NOT NULL,
+    OrgId INT NULL,
+    IdentId INT NULL,
+    IdentTypeId INT NULL
 )
 
 INSERT #idents (CommonName, Genus, Species, Identifier)
@@ -691,10 +691,10 @@ CREATE TABLE ms2.MS2PeptidesData
     Mass FLOAT NOT NULL,    -- Store mass as high-precision real
     DeltaMass REAL NOT NULL,
     PeptideProphet REAL NOT NULL,
-    Peptide varchar (200) NOT NULL,
-    PrevAA char(1) NOT NULL DEFAULT '',
+    Peptide VARCHAR (200) NOT NULL,
+    PrevAA CHAR(1) NOT NULL DEFAULT '',
     TrimmedPeptide VARCHAR(200) NOT NULL DEFAULT '',
-    NextAA char(1) NOT NULL DEFAULT '',
+    NextAA CHAR(1) NOT NULL DEFAULT '',
     ProteinHits SMALLINT NOT NULL,
     SequencePosition INT NOT NULL DEFAULT 0,
     Protein VARCHAR (100) NOT NULL,
@@ -908,7 +908,7 @@ CREATE TABLE ms2.PeptideProphetData
 GO
 
 ALTER TABLE prot.ProteinDataBases ADD
-    ScoringAnalysis bit NOT NULL DEFAULT 0
+    ScoringAnalysis BIT NOT NULL DEFAULT 0
 GO
 
 /* ms2-1.50-1.60.sql */
@@ -968,9 +968,9 @@ GO
 -- Bug 2195 restructure prot.FastaSequences
 CREATE TABLE prot.FastaSequences
 (
-    FastaId int NOT NULL,
-    LookupString varchar (200) NOT NULL,
-    SeqId int NULL
+    FastaId INT NOT NULL,
+    LookupString VARCHAR (200) NOT NULL,
+    SeqId INT NULL
 )
 
 ALTER TABLE prot.FastaSequences ADD CONSTRAINT PK_FastaSequences PRIMARY KEY CLUSTERED(FastaId,LookupString)
@@ -1034,7 +1034,7 @@ CREATE  INDEX IX_ProteinGroupMemberships_SeqId ON ms2.ProteinGroupMemberships(Se
 GO
 
 -- make PPfileid the left-most column in the index so that results by run can be found
-ALTER TABLE ms2.ProteinGroups drop constraint UQ_MS2ProteinGroups
+ALTER TABLE ms2.ProteinGroups DROP CONSTRAINT UQ_MS2ProteinGroups
 GO
 
 ALTER TABLE ms2.ProteinGroups ADD CONSTRAINT UQ_MS2ProteinGroups UNIQUE  NONCLUSTERED
@@ -1211,7 +1211,7 @@ GO
 
 /* ms2-2.20-2.30.sql */
 
-ALTER TABLE prot.organisms ALTER COLUMN CommonName varchar(100)
+ALTER TABLE prot.organisms ALTER COLUMN CommonName VARCHAR(100)
 GO
 
 -- Create indexes on ms2 Runs table to support common operations in MS2Manager

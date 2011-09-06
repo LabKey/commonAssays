@@ -524,7 +524,7 @@ ALTER TABLE ms2.MS2Fractions
 -- Add a column for the hash of the file
 
 ALTER TABLE prot.proteindatabases
-    ADD COLUMN FileChecksum varchar(50) NULL;
+    ADD COLUMN FileChecksum VARCHAR(50) NULL;
 
 /* ms2-1.20-1.30.sql */
 
@@ -532,13 +532,13 @@ ALTER TABLE prot.proteindatabases
 
 CREATE TEMPORARY TABLE idents
 (
-    Identifier varchar(50) NOT NULL,
-    CommonName varchar(20) NULL,
-    Genus varchar(100) NOT NULL,
-    Species varchar(100) NOT NULL,
-    OrgId int NULL,
-    IdentId int NULL,
-    IdentTypeId int NULL
+    Identifier VARCHAR(50) NOT NULL,
+    CommonName VARCHAR(20) NULL,
+    Genus VARCHAR(100) NOT NULL,
+    Species VARCHAR(100) NOT NULL,
+    OrgId INT NULL,
+    IdentId INT NULL,
+    IdentTypeId INT NULL
 );
 
 INSERT INTO idents (CommonName, Genus, Species, Identifier)
@@ -866,9 +866,9 @@ ALTER TABLE ms2.Runs RENAME COLUMN SampleEnzyme TO SearchEnzyme;
 
 CREATE TABLE prot.FastaSequences
 (
-    FastaId int NOT NULL,
-    LookupString varchar (200) NOT NULL,
-    SeqId int NULL
+    FastaId INT NOT NULL,
+    LookupString VARCHAR (200) NOT NULL,
+    SeqId INT NULL
 );
 
 ALTER TABLE prot.FastaSequences ADD CONSTRAINT PK_FastaSequences PRIMARY KEY (FastaId,LookupString);
@@ -914,7 +914,7 @@ CREATE INDEX IX_PeptidesData_SeqId ON ms2.PeptidesData(SeqId);
 CREATE INDEX IX_ProteinGroupMemberships_SeqId ON ms2.ProteinGroupMemberships(SeqId, ProteinGroupId, Probability);
 
 -- make PPfileid the left-most column in the index so that results by run can be found
-ALTER TABLE ms2.ProteinGroups drop constraint UQ_MS2ProteinGroups;
+ALTER TABLE ms2.ProteinGroups DROP CONSTRAINT UQ_MS2ProteinGroups;
 
 ALTER TABLE ms2.ProteinGroups ADD CONSTRAINT UQ_MS2ProteinGroups UNIQUE
 (
@@ -958,9 +958,9 @@ CREATE TABLE prot.CustomAnnotationSet
     Container EntityId NOT NULL,
     Name VARCHAR(200) NOT NULL,
     CreatedBy UserId,
-    Created timestamp without time zone,
+    Created TIMESTAMP without time zone,
     ModifiedBy userid,
-    Modified timestamp without time zone,
+    Modified TIMESTAMP without time zone,
     CustomAnnotationType VARCHAR(20) NOT NULL,
     Lsid lsidtype,
 
@@ -1073,7 +1073,7 @@ CREATE FUNCTION prot.create_go_indexes() RETURNS void AS '
 
 /* ms2-2.20-2.30.sql */
 
-ALTER TABLE prot.organisms ALTER COLUMN CommonName TYPE varchar(100);
+ALTER TABLE prot.organisms ALTER COLUMN CommonName TYPE VARCHAR(100);
 
 -- Create indexes on ms2 Runs table to support common operations in MS2Manager
 

@@ -19,7 +19,7 @@ EXEC sp_addAppRole 'flow', 'password';
 
 CREATE TABLE flow.Attribute
 (
-    RowId int IDENTITY(1,1) NOT NULL,
+    RowId INT IDENTITY(1,1) NOT NULL,
     Name NVARCHAR(256) COLLATE Latin1_General_BIN NOT NULL,
     CONSTRAINT PK_Attribute PRIMARY KEY (RowId),
     CONSTRAINT UQ_Attribute UNIQUE(Name)
@@ -27,14 +27,14 @@ CREATE TABLE flow.Attribute
 
 CREATE TABLE flow.Object
 (
-    RowId int IDENTITY(1,1) NOT NULL,
+    RowId INT IDENTITY(1,1) NOT NULL,
     Container entityid NOT NULL,
     DataId INT,
     TypeId INT NOT NULL,
     Uri VARCHAR(400),
-    compid int,
-    scriptid int,
-    fcsid int,
+    compid INT,
+    scriptid INT,
+    fcsid INT,
     CONSTRAINT PK_Object PRIMARY KEY (RowId),
     CONSTRAINT UQ_Object UNIQUE(DataId),
     CONSTRAINT FK_Object_Data FOREIGN KEY(DataId) REFERENCES exp.Data(RowId)
@@ -44,7 +44,7 @@ CREATE INDEX flow_object_typeid ON flow.object (container, typeid)
 
 CREATE TABLE flow.Keyword
 (
-    RowId int IDENTITY(1,1) NOT NULL,
+    RowId INT IDENTITY(1,1) NOT NULL,
     ObjectId INT NOT NULL,
     KeywordId INT NOT NULL,
     Value NTEXT,
@@ -56,7 +56,7 @@ CREATE TABLE flow.Keyword
 
 CREATE TABLE flow.Statistic
 (
-    RowId int IDENTITY(1,1) NOT NULL,
+    RowId INT IDENTITY(1,1) NOT NULL,
     ObjectId INT NOT NULL,
     StatisticId INT NOT NULL,
     Value FLOAT NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE flow.Statistic
 
 CREATE TABLE flow.Graph
 (
-    RowId int IDENTITY(1,1) NOT NULL,
+    RowId INT IDENTITY(1,1) NOT NULL,
     ObjectId INT NOT NULL,
     GraphId INT NOT NULL,
     Data IMAGE,
@@ -80,7 +80,7 @@ CREATE TABLE flow.Graph
 
 CREATE TABLE flow.Script
 (
-    RowId int IDENTITY(1,1) NOT NULL,
+    RowId INT IDENTITY(1,1) NOT NULL,
     ObjectId INT NOT NULL,
     Text NTEXT,
     CONSTRAINT PK_Script PRIMARY KEY(RowId),

@@ -27,7 +27,7 @@
 CREATE TABLE flow.StatisticAttr
 (
   container ENTITYID NOT NULL,
-  id int NOT NULL,
+  id INT NOT NULL,
   CONSTRAINT "PK_StatisticAttr" UNIQUE (container, id)
 )
 ;
@@ -42,7 +42,7 @@ FROM flow.object OBJ INNER JOIN
 CREATE TABLE flow.KeywordAttr
 (
   container ENTITYID NOT NULL,
-  id int NOT NULL,
+  id INT NOT NULL,
   CONSTRAINT "PK_KeywordAttr" UNIQUE (container, id)
 )
 ;
@@ -57,7 +57,7 @@ FROM flow.object OBJ INNER JOIN
 CREATE TABLE flow.GraphAttr
 (
   container ENTITYID NOT NULL,
-  id int NOT NULL,
+  id INT NOT NULL,
   CONSTRAINT "PK_GraphAttr" UNIQUE (container, id)
 )
 ;

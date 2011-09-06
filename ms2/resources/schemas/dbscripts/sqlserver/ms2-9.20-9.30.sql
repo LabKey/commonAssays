@@ -27,8 +27,8 @@ ALTER TABLE ms2.peptidesdata ALTER COLUMN score2 REAL NULL;
 ALTER TABLE ms2.peptidesdata ALTER COLUMN score3 REAL NULL;
 
 -- It's a real pain to drop defaults in SQL Server if they weren't created with a specific name
-declare @name nvarchar(32),
-    @sql nvarchar(1000)
+declare @name NVARCHAR(32),
+    @sql NVARCHAR(1000)
 
 -- find constraint name for first score column
 select @name = O.name
