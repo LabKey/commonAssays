@@ -19,6 +19,7 @@
 -- All tables used for MS2 data
 
 CREATE SCHEMA prot;
+CREATE SCHEMA ms2;
 
 /****** ProtAnnotInsertions                                 */
 
@@ -331,8 +332,6 @@ CREATE TABLE prot.ProteinDataBases
 INSERT INTO prot.ProteinDataBases (DataBaseId, ProteinDataBase, Loaded) VALUES (0, NULL, NULL);
 
 
-CREATE SCHEMA ms2;
-
 /**** MS2Runs                                           */
 CREATE TABLE ms2.MS2Runs
 (
@@ -640,7 +639,7 @@ CREATE TABLE ms2.MS2ProteinProphetFiles
     RowId SERIAL NOT NULL,
     FilePath VARCHAR(255) NOT NULL,
     Run INT NOT NULL,
-    Container EntityId NOT NULL,
+    Container ENTITYID NOT NULL,
     UploadCompleted BOOLEAN NOT NULL DEFAULT '0',
     MinProbSeries BYTEA NULL,
     SensitivitySeries BYTEA NULL,
@@ -955,19 +954,19 @@ UPDATE prot.InfoSources SET Url = 'http://amigo.geneontology.org/cgi-bin/amigo/g
 CREATE TABLE prot.CustomAnnotationSet
 (
     CustomAnnotationSetId SERIAL NOT NULL,
-    Container EntityId NOT NULL,
+    Container ENTITYID NOT NULL,
     Name VARCHAR(200) NOT NULL,
-    CreatedBy UserId,
+    CreatedBy USERID,
     Created TIMESTAMP without time zone,
-    ModifiedBy userid,
+    ModifiedBy USERID,
     Modified TIMESTAMP without time zone,
     CustomAnnotationType VARCHAR(20) NOT NULL,
     Lsid lsidtype,
 
     CONSTRAINT customannotationset_pkey PRIMARY KEY (CustomAnnotationSetId),
     CONSTRAINT fk_CustomAnnotationSet_Container FOREIGN KEY (container) REFERENCES core.containers(EntityId),
-    CONSTRAINT fk_CustomAnnotationSet_CreatedBy FOREIGN KEY (createdby) REFERENCES core.usersdata(userid),
-    CONSTRAINT fk_CustomAnnotationSet_ModifiedBy FOREIGN KEY (modifiedby) REFERENCES core.usersdata(userid),
+    CONSTRAINT fk_CustomAnnotationSet_CreatedBy FOREIGN KEY (createdby) REFERENCES core.usersdata(UserId),
+    CONSTRAINT fk_CustomAnnotationSet_ModifiedBy FOREIGN KEY (modifiedby) REFERENCES core.usersdata(UserId),
     CONSTRAINT uq_CustomAnnotationSet UNIQUE (Container, Name)
 );
 

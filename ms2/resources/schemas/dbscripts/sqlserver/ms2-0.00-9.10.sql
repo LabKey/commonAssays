@@ -18,8 +18,8 @@
 
 -- Tables used for Proteins and MS2 data
 
-EXEC sp_addapprole 'prot', 'password'
-GO
+EXEC sp_addapprole 'prot', 'password';
+EXEC sp_addapprole 'ms2', 'password';
 
 /****** ProtAnnotInsertions                                 */
 CREATE TABLE prot.ProtAnnotInsertions
@@ -345,9 +345,6 @@ INSERT INTO prot.ProteinDataBases (ProteinDataBase, Loaded) VALUES (NULL, NULL)
 GO
 
 
-EXEC sp_addapprole 'ms2', 'password'
-GO
-
 CREATE TABLE ms2.MS2Runs
 (
     -- standard fields
@@ -461,10 +458,6 @@ GO
 
 -- GO Term2Term 
 
-IF OBJECT_ID('prot.GoTerm2Term','U') IS NOT NULL
-    DROP TABLE prot.GoTerm2Term
-GO
-
 CREATE TABLE prot.GoTerm2Term
 (
     id INTEGER NOT NULL,
@@ -486,10 +479,6 @@ GO
 
 -- Graph path
 
-IF OBJECT_ID('prot.GoGraphPath','U') IS NOT NULL
-   DROP TABLE prot.GoGraphPath
-GO
-
 CREATE TABLE prot.GoGraphPath
 (
     id INTEGER NOT NULL,
@@ -509,10 +498,6 @@ GO
 
 -- Go term definitions
 
-IF OBJECT_ID('prot.GoTermDefinition','U') IS NOT NULL
-   DROP TABLE prot.GoTermDefinition
-GO
-
 CREATE TABLE prot.GoTermDefinition
 (
     termId INTEGER NOT NULL DEFAULT 0,
@@ -522,16 +507,13 @@ CREATE TABLE prot.GoTermDefinition
     reference VARCHAR(255) NULL DEFAULT NULL
 )
 GO 
+
 CREATE INDEX IX_GoTermDefinition_dbXrefId ON prot.GoTermDefinition(dbXrefId)
 CREATE UNIQUE INDEX UQ_GoTermDefinition_termId ON prot.GoTermDefinition(termId)
 GO
 
 -- GO term synonyms
 
-
-IF OBJECT_ID('prot.GOTermSynonym','U') IS NOT NULL
-   DROP TABLE prot.GOTermSynonym
-GO
 
 CREATE TABLE prot.GoTermSynonym
 (
@@ -914,24 +896,22 @@ GO
 /* ms2-1.50-1.60.sql */
 
 -- Simplify protein table names
-EXEC sp_rename 'prot.ProtAnnotations', 'Annotations'
-EXEC sp_rename 'prot.ProtAnnotationTypes', 'AnnotationTypes'
-EXEC sp_rename 'prot.ProtAnnotInsertions', 'AnnotInsertions'
-EXEC sp_rename 'prot.ProteinDatabases', 'FastaFiles'
-EXEC sp_rename 'prot.ProtFastas', 'FastaLoads'
-EXEC sp_rename 'prot.ProtIdentifiers', 'Identifiers'
-EXEC sp_rename 'prot.ProtIdentTypes', 'IdentTypes'
-EXEC sp_rename 'prot.ProtInfoSources', 'InfoSources'
-EXEC sp_rename 'prot.ProtOrganisms', 'Organisms'
-EXEC sp_rename 'prot.ProtSequences', 'Sequences'
-EXEC sp_rename 'prot.ProtSProtOrgMap', 'SProtOrgMap'
-GO
+EXEC sp_rename 'prot.ProtAnnotations', 'Annotations';
+EXEC sp_rename 'prot.ProtAnnotationTypes', 'AnnotationTypes';
+EXEC sp_rename 'prot.ProtAnnotInsertions', 'AnnotInsertions';
+EXEC sp_rename 'prot.ProteinDatabases', 'FastaFiles';
+EXEC sp_rename 'prot.ProtFastas', 'FastaLoads';
+EXEC sp_rename 'prot.ProtIdentifiers', 'Identifiers';
+EXEC sp_rename 'prot.ProtIdentTypes', 'IdentTypes';
+EXEC sp_rename 'prot.ProtInfoSources', 'InfoSources';
+EXEC sp_rename 'prot.ProtOrganisms', 'Organisms';
+EXEC sp_rename 'prot.ProtSequences', 'Sequences';
+EXEC sp_rename 'prot.ProtSProtOrgMap', 'SProtOrgMap';
 
 -- Rename some columns
-EXEC sp_rename 'prot.FastaFiles.DataBaseId', 'FastaId', 'COLUMN'
-EXEC sp_rename 'prot.FastaFiles.ProteinDataBase', 'FileName', 'COLUMN'
-EXEC sp_rename 'ms2.MS2Runs.DataBaseId', 'FastaId', 'COLUMN'
-GO
+EXEC sp_rename 'prot.FastaFiles.DataBaseId', 'FastaId', 'COLUMN';
+EXEC sp_rename 'prot.FastaFiles.ProteinDataBase', 'FileName', 'COLUMN';
+EXEC sp_rename 'ms2.MS2Runs.DataBaseId', 'FastaId', 'COLUMN';
 
 -- Add column for retention time
 ALTER TABLE ms2.MS2PeptidesData
@@ -941,22 +921,20 @@ GO
 /* ms2-1.60-1.70.sql */
 
 -- Index to speed up deletes from MS2PeptidesData.  Use old names here to allow running this on 1.6 installations.
-IF NOT EXISTS (SELECT * FROM dbo.sysindexes WHERE name = 'IX_MS2PeptideMemberships_PeptideId' AND id = object_id('ms2.MS2PeptideMemberships'))
-    CREATE INDEX IX_MS2PeptideMemberships_PeptideId ON ms2.MS2PeptideMemberships(PeptideId)
+CREATE INDEX IX_MS2PeptideMemberships_PeptideId ON ms2.MS2PeptideMemberships(PeptideId)
 GO
 
 -- Simplify MS2 table names
-EXEC sp_rename 'ms2.MS2Fractions', 'Fractions'
-EXEC sp_rename 'ms2.MS2History', 'History'
-EXEC sp_rename 'ms2.MS2Modifications', 'Modifications'
-EXEC sp_rename 'ms2.MS2PeptideMemberships', 'PeptideMemberships'
-EXEC sp_rename 'ms2.MS2PeptidesData', 'PeptidesData'
-EXEC sp_rename 'ms2.MS2ProteinGroupMemberships', 'ProteinGroupMemberships'
-EXEC sp_rename 'ms2.MS2ProteinGroups', 'ProteinGroups'
-EXEC sp_rename 'ms2.MS2ProteinProphetFiles', 'ProteinProphetFiles'
-EXEC sp_rename 'ms2.MS2Runs', 'Runs'
-EXEC sp_rename 'ms2.MS2SpectraData', 'SpectraData'
-GO
+EXEC sp_rename 'ms2.MS2Fractions', 'Fractions';
+EXEC sp_rename 'ms2.MS2History', 'History';
+EXEC sp_rename 'ms2.MS2Modifications', 'Modifications';
+EXEC sp_rename 'ms2.MS2PeptideMemberships', 'PeptideMemberships';
+EXEC sp_rename 'ms2.MS2PeptidesData', 'PeptidesData';
+EXEC sp_rename 'ms2.MS2ProteinGroupMemberships', 'ProteinGroupMemberships';
+EXEC sp_rename 'ms2.MS2ProteinGroups', 'ProteinGroups';
+EXEC sp_rename 'ms2.MS2ProteinProphetFiles', 'ProteinProphetFiles';
+EXEC sp_rename 'ms2.MS2Runs', 'Runs';
+EXEC sp_rename 'ms2.MS2SpectraData', 'SpectraData';
 
 -- More accurate column name
 EXEC sp_rename
@@ -981,8 +959,8 @@ CREATE INDEX IX_FastaSequences_SeqId ON prot.FastaSequences(SeqId)
 --Bug 2193
 CREATE INDEX IX_SequencesSource ON prot.Sequences(SourceId)
 GO
-IF EXISTS (SELECT * FROM dbo.sysindexes WHERE name = 'IX_SeqHash' AND id = object_id('prot.Sequences'))
-    DROP INDEX prot.Sequences.IX_SeqHash
+
+DROP INDEX prot.Sequences.IX_SeqHash
 GO
 
 /* ms2-1.70-2.00.sql */
@@ -1092,17 +1070,17 @@ CREATE TABLE prot.CustomAnnotationSet
     CustomAnnotationSetId INT IDENTITY(1, 1) NOT NULL,
     Container EntityId NOT NULL,
     Name VARCHAR(200) NOT NULL,
-    CreatedBy UserId,
+    CreatedBy USERID,
     Created DATETIME,
-    ModifiedBy userid,
+    ModifiedBy USERID,
     Modified DATETIME,
     CustomAnnotationType VARCHAR(20) NOT NULL,
     Lsid lsidtype,
 
     CONSTRAINT customannotationset_pkey PRIMARY KEY (CustomAnnotationSetId),
-    CONSTRAINT fk_CustomAnnotationSet_Container FOREIGN KEY (container) REFERENCES core.containers(EntityId),
-    CONSTRAINT fk_CustomAnnotationSet_CreatedBy FOREIGN KEY (createdby) REFERENCES core.usersdata(userid),
-    CONSTRAINT fk_CustomAnnotationSet_ModifiedBy FOREIGN KEY (modifiedby) REFERENCES core.usersdata(userid),
+    CONSTRAINT fk_CustomAnnotationSet_Container FOREIGN KEY (container) REFERENCES core.Containers(EntityId),
+    CONSTRAINT fk_CustomAnnotationSet_CreatedBy FOREIGN KEY (createdby) REFERENCES core.UsersData(UserID),
+    CONSTRAINT fk_CustomAnnotationSet_ModifiedBy FOREIGN KEY (modifiedby) REFERENCES core.UsersData(UserID),
     CONSTRAINT uq_CustomAnnotationSet UNIQUE (Container, Name)
 );
 
