@@ -30,8 +30,6 @@
             <column columnName="StdCurve"/>
             <column columnName="MinStandardRecovery"/>
             <column columnName="MaxStandardRecovery"/>
-            <column columnName="GuideSetId"/>
-            <column columnName="IncludeInGuideSetCalculation"/>
         </columns>
     </table>
     
@@ -82,6 +80,12 @@
             <column columnName="MaxFIStdDev">
                 <columnTitle>Max FI StdDev</columnTitle>
             </column>
+            <column columnName="TitrationName" />
+            <column columnName="Comment" />
+            <column columnName="Created" />
+            <column columnName="CreatedBy" />
+            <column columnName="Modified" />
+            <column columnName="ModifiedBy" />
         </columns>
     </table>
 
@@ -90,6 +94,8 @@
             <column columnName="AnalyteId" />
             <column columnName="TitrationId" />
             <column columnName="MaxFI" />
+            <column columnName="GuideSetId"/>
+            <column columnName="IncludeInGuideSetCalculation"/>
         </columns>
     </table>
 

@@ -65,7 +65,8 @@ public class LuminexSchema extends AssaySchema
                 prefixTableName(RUN_EXCLUSION_TABLE_NAME),
                 prefixTableName(CURVE_FIT_TABLE_NAME),
                 prefixTableName(GUIDE_SET_TABLE_NAME),
-                prefixTableName(GUIDE_SET_CURVE_FIT_TABLE_NAME)
+                prefixTableName(GUIDE_SET_CURVE_FIT_TABLE_NAME),
+                prefixTableName(ANALYTE_TITRATION_TABLE_NAME)
         );
     }
 
@@ -100,6 +101,17 @@ public class LuminexSchema extends AssaySchema
             if (GUIDE_SET_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 return createGuideSetTable(true);
+            }
+            if (ANALYTE_TITRATION_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                AnalyteTitrationTable result = createAnalyteTitrationTable(true);
+                SQLFragment filter = new SQLFragment("AnalyteId IN (SELECT a.RowId FROM ");
+                filter.append(getTableInfoAnalytes(), "a");
+                filter.append(" WHERE a.DataId ");
+                filter.append(createDataFilterInClause());
+                filter.append(")");
+                result.addCondition(filter, "RunId");
+                return result;
             }
             if (DATA_FILE_TABLE_NAME.equalsIgnoreCase(tableType))
             {
@@ -147,6 +159,11 @@ public class LuminexSchema extends AssaySchema
             }
         }
         return null;
+    }
+
+    public AnalyteTitrationTable createAnalyteTitrationTable(boolean filter)
+    {
+        return new AnalyteTitrationTable(this, filter);
     }
 
     protected GuideSetTable createGuideSetTable(boolean filterTable)

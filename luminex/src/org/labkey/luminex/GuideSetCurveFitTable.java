@@ -78,15 +78,11 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
         result.append("AVG(cf.AUC) AS AUCAverage, \n");
         result.append("COUNT(DISTINCT at.AnalyteId) AS RunCount, \n");
         result.append(_schema.getDbSchema().getSqlDialect().getStdDevFunction() + "(cf.AUC) AS AUCStdDev, \n");
-        result.append("a.GuideSetId,\n");
+        result.append("at.GuideSetId,\n");
         result.append("cf.CurveType FROM \n");
 
-        AnalyteTable analyteTable = _schema.createAnalyteTable(true);
-        analyteTable.setContainerFilter(getContainerFilter());
-        result.append(analyteTable, "a");
-        result.append(", ");
-
-        TableInfo analyteTitrationTable = LuminexSchema.getTableInfoAnalyteTitration();
+        AnalyteTitrationTable analyteTitrationTable = _schema.createAnalyteTitrationTable(true);
+        analyteTitrationTable.setContainerFilter(getContainerFilter());
         result.append(analyteTitrationTable, "at");
         result.append(", ");
 
@@ -94,9 +90,9 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
         curveFitTable.setContainerFilter(getContainerFilter());
         result.append(curveFitTable, "cf");
 
-        result.append(" WHERE a.RowId = at.AnalyteId AND at.AnalyteId = cf.AnalyteId AND at.TitrationId = cf.TitrationId AND a.GuideSetId IS NOT NULL AND a.IncludeInGuideSetCalculation = ?\n");
+        result.append(" WHERE at.AnalyteId = cf.AnalyteId AND at.TitrationId = cf.TitrationId AND at.GuideSetId IS NOT NULL AND at.IncludeInGuideSetCalculation = ?\n");
         result.add(true);
-        result.append(" GROUP BY a.GuideSetId, cf.CurveType");
+        result.append(" GROUP BY at.GuideSetId, cf.CurveType");
 
         return result;
     }

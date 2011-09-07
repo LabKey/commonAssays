@@ -18,28 +18,26 @@ package org.labkey.luminex;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.query.DefaultQueryUpdateService;
 import org.labkey.api.query.DuplicateKeyException;
-import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.query.RowIdQueryUpdateService;
+import org.labkey.api.query.UserIdQueryForeignKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * User: jeckels
@@ -56,6 +54,9 @@ public class GuideSetTable extends AbstractLuminexTable
         ColumnInfo protocolCol = getColumn("ProtocolId");
         protocolCol.setLabel("Assay Design");
         protocolCol.setHidden(true);
+        protocolCol.setShownInDetailsView(false);
+        protocolCol.setShownInUpdateView(false);
+        protocolCol.setShownInInsertView(false);
         protocolCol.setFk(new LookupForeignKey("RowId")
         {
             @Override
@@ -69,6 +70,10 @@ public class GuideSetTable extends AbstractLuminexTable
         getColumn("MaxFIAverage").setShownInUpdateView(false);
         getColumn("MaxFIStdDev").setShownInInsertView(false);
         getColumn("MaxFIStdDev").setShownInUpdateView(false);
+
+        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer());
+        getColumn("ModifiedBy").setFk(userIdForeignKey);
+        getColumn("CreatedBy").setFk(userIdForeignKey);
     }
 
     @Override
@@ -106,20 +111,26 @@ public class GuideSetTable extends AbstractLuminexTable
         return new GuideSetTableUpdateService(this);
     }
 
-    public static class GuideSetTableUpdateService extends DefaultQueryUpdateService
+    public static class GuideSetTableUpdateService extends RowIdQueryUpdateService<GuideSet>
     {
+        private ExpProtocol _protocol;
+
         public GuideSetTableUpdateService(GuideSetTable guideSetTable)
         {
-            super(guideSetTable, guideSetTable.getRealTable());
+            super(guideSetTable, "RowId");
+            _protocol = guideSetTable._schema.getProtocol();
         }
 
-        public static GuideSet getMatchingCurrentGuideSet(@NotNull ExpProtocol protocol, String analyteName, String conjugate, String isotype)
+        public static GuideSet getMatchingCurrentGuideSet(@NotNull ExpProtocol protocol, String analyteName, String titrationName, String conjugate, String isotype)
         {
             SQLFragment sql = new SQLFragment("SELECT * FROM ");
             sql.append(LuminexSchema.getTableInfoGuideSet(), "gs");
-            sql.append(" WHERE ProtocolId = ? AND AnalyteName");
+            sql.append(" WHERE ProtocolId = ?");
             sql.add(protocol.getRowId());
+            sql.append(" AND AnalyteName");
             appendNullableString(sql, analyteName);
+            sql.append(" AND TitrationName");
+            appendNullableString(sql, titrationName);
             sql.append(" AND Conjugate");
             appendNullableString(sql, conjugate);
             sql.append(" AND Isotype");
@@ -161,60 +172,67 @@ public class GuideSetTable extends AbstractLuminexTable
         }
 
         @Override
-        protected Map<String, Object> insertRow(User user, Container container, Map<String, Object> row) throws DuplicateKeyException, ValidationException, QueryUpdateServiceException, SQLException
+        public GuideSet get(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
         {
-            ExpProtocol protocol = validateProtocol(row);
-            if (protocol == null)
-            {
-                throw new ValidationException("No ProtocolId specified");
-            }
-            Boolean current = (Boolean)row.get("CurrentGuideSet");
-            if (current != null && current.booleanValue() && getMatchingCurrentGuideSet(protocol, (String)row.get("AnalyteName"), (String)row.get("Conjugate"), (String)row.get("Isotype")) != null)
-            {
-                throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/Conjugate/Isotype combination");
-            }
-            return super.insertRow(user, container, row);
+            return Table.selectObject(LuminexSchema.getTableInfoGuideSet(), key, GuideSet.class);
         }
 
         @Override
-        protected Map<String, Object> updateRow(User user, Container container, Map<String, Object> row, Map<String, Object> oldRow) throws InvalidKeyException, ValidationException, QueryUpdateServiceException, SQLException
+        public void delete(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
         {
-            ExpProtocol protocol = validateProtocol(row);
-            Boolean current = (Boolean)row.get("CurrentGuideSet");
-            Number rowId = (Number)oldRow.get("RowId");
-            if (rowId == null)
-            {
-                throw new InvalidKeyException("RowId is required for updates");
-            }
-            if (current != null && current.booleanValue())
-            {
-                GuideSet currentGuideSet = getMatchingCurrentGuideSet(protocol, (String)row.get("AnalyteName"), (String)row.get("Conjugate"), (String)row.get("Isotype"));
-                if (currentGuideSet != null && currentGuideSet.getRowId() != rowId.intValue())
-                {
-                    throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/Conjugate/Isotype combination");
-                }
-            }
-            return super.updateRow(user, container, row, oldRow);
+            throw new UnsupportedOperationException();
         }
 
-        private ExpProtocol validateProtocol(Map<String, Object> row) throws ValidationException
+        @Override
+        protected GuideSet createNewBean()
         {
-            Number protocolId = (Number)row.get("ProtocolId");
-            if (protocolId != null)
+            return new GuideSet();
+        }
+
+        @Override
+        protected GuideSet insert(User user, Container container, GuideSet bean) throws ValidationException, DuplicateKeyException, QueryUpdateServiceException, SQLException
+        {
+            validateProtocol(bean);
+            boolean current = bean.isCurrentGuideSet();
+            if (current && getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getTitrationName(), bean.getConjugate(), bean.getIsotype()) != null)
             {
-                ExpProtocol protocol = ExperimentService.get().getExpProtocol(protocolId.intValue());
-                if (protocol == null)
-                {
-                    throw new ValidationException("No such ProtocolId:" + protocolId);
-                }
-                AssayProvider provider = AssayService.get().getProvider(protocol);
-                if (!(provider instanceof LuminexAssayProvider))
-                {
-                    throw new ValidationException("The ProtocolId, " + protocolId + ", must refer to a Luminex assay design");
-                }
-                return protocol;
+                throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/Conjugate/Isotype combination");
             }
-            return null;
+            return Table.insert(user, LuminexSchema.getTableInfoGuideSet(), bean);
+        }
+
+        @Override
+        protected GuideSet update(User user, Container container, GuideSet bean, Integer oldKey) throws ValidationException, QueryUpdateServiceException, SQLException
+        {
+            if (oldKey == null)
+            {
+                throw new ValidationException("RowId is required for updates");
+            }
+            if (bean.isCurrentGuideSet())
+            {
+                GuideSet currentGuideSet = getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getTitrationName(), bean.getConjugate(), bean.getIsotype());
+                if (currentGuideSet != null && currentGuideSet.getRowId() != oldKey.intValue())
+                {
+                    throw new ValidationException("There is already a current guide set for that ProtocolId/AnalyteName/TitrationName/Conjugate/Isotype combination");
+                }
+            }
+            return Table.update(user, LuminexSchema.getTableInfoGuideSet(), bean, oldKey);
+        }
+
+        private void validateProtocol(GuideSet bean) throws ValidationException
+        {
+            int protocolId = bean.getProtocolId();
+            if (protocolId == 0)
+            {
+                bean.setProtocolId(_protocol.getRowId());
+            }
+            else
+            {
+                if (protocolId != _protocol.getRowId())
+                {
+                    throw new ValidationException("ProtocolId must be set to " + _protocol.getRowId());
+                }
+            }
         }
     }
 }

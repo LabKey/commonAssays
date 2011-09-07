@@ -29,6 +29,7 @@ public class GuideSet
     private boolean _currentGuideSet;
     private Double _maxFIAverage;
     private Double _maxFIStdDev;
+    private String _titrationName;
 
     public int getRowId()
     {
@@ -108,5 +109,15 @@ public class GuideSet
     public void setCurrentGuideSet(boolean currentGuideSet)
     {
         _currentGuideSet = currentGuideSet;
+    }
+
+    public String getTitrationName()
+    {
+        return _titrationName;
+    }
+
+    public void setTitrationName(String titrationName)
+    {
+        _titrationName = titrationName;
     }
 }

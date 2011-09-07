@@ -273,18 +273,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     }
                 }
 
-                // Check if we have a guide set for this analyte
-                GuideSet currentGuideSet = determineGuideSet(analyte, conjugate, isotype, protocol);
-                if (currentGuideSet != null)
-                {
-                    analyte.setGuideSetId(currentGuideSet.getRowId());
-                }
-
                 analyte.setDataId(data.getRowId());
                 analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + data.getRowId() + "." + analyte.getName()).toString());
                 analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
 
-                insertTitrationAnalyteMappings(user, form, titrations, sheet.getValue(), analyte);
+                insertTitrationAnalyteMappings(user, form, titrations, sheet.getValue(), analyte, conjugate, isotype, protocol);
 
                 performOOR(dataRows, analyte);
 
@@ -366,9 +359,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private GuideSet determineGuideSet(Analyte analyte, String conjugate, String isotype, ExpProtocol protocol)
+    private GuideSet determineGuideSet(Analyte analyte, Titration titration, String conjugate, String isotype, ExpProtocol protocol)
     {
-        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentGuideSet(protocol, analyte.getName(), conjugate, isotype);
+        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentGuideSet(protocol, analyte.getName(), titration.getName(), conjugate, isotype);
         if (guideSet != null)
         {
             return guideSet;
@@ -378,7 +371,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return null;
     }
 
-    private void insertTitrationAnalyteMappings(User user, LuminexRunUploadForm form, Map<String, Titration> titrations, List<LuminexDataRow> dataRows, Analyte analyte)
+    private void insertTitrationAnalyteMappings(User user, LuminexRunUploadForm form, Map<String, Titration> titrations, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, ExpProtocol protocol)
             throws ExperimentException, SQLException
     {
         // Insert mappings for all of the titrations that aren't standards
@@ -386,7 +379,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!titration.isStandard())
             {
-                insertAnalyteTitrationMapping(user, dataRows, analyte, titration);
+                insertAnalyteTitrationMapping(user, dataRows, analyte, titration, conjugate, isotype, protocol);
             }
         }
 
@@ -394,20 +387,28 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         for (String titrationName : form.getTitrationsForAnalyte(analyte.getName()))
         {
             Titration titration = titrations.get(titrationName);
-            insertAnalyteTitrationMapping(user, dataRows, analyte, titration);
+            insertAnalyteTitrationMapping(user, dataRows, analyte, titration, conjugate, isotype, protocol);
         }
     }
 
-    private void insertAnalyteTitrationMapping(User user, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration)
+    private void insertAnalyteTitrationMapping(User user, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration, String conjugate, String isotype, ExpProtocol protocol)
             throws SQLException, ExperimentException
     {
         LuminexWellGroup wellGroup = titration.buildWellGroup(dataRows);
 
         // Insert the mapping row, which includes the Max FI
-        Map<String, Object> analyteTitration = new HashMap<String, Object>();
-        analyteTitration.put("analyteId", analyte.getRowId());
-        analyteTitration.put("titrationId", titration.getRowId());
-        analyteTitration.put("maxFI", wellGroup.getMax());
+        AnalyteTitration analyteTitration = new AnalyteTitration();
+        analyteTitration.setAnalyteId(analyte.getRowId());
+        analyteTitration.setTitrationId(titration.getRowId());
+        analyteTitration.setMaxFI(wellGroup.getMax());
+
+        // Check if we have a guide set for this combo
+        GuideSet currentGuideSet = determineGuideSet(analyte, titration, conjugate, isotype, protocol);
+        if (currentGuideSet != null)
+        {
+            analyteTitration.setGuideSetId(currentGuideSet.getRowId());
+        }
+
         Table.insert(user, LuminexSchema.getTableInfoAnalyteTitration(), analyteTitration);
 
         // Insert the curve fit values (EC50 and AUC)

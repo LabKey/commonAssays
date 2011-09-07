@@ -70,17 +70,7 @@ public class AnalyteTable extends AbstractLuminexTable
         addColumn(wrapColumn(getRealTable().getColumn("ResVar")));
         addColumn(wrapColumn(getRealTable().getColumn("RegressionType")));
         addColumn(wrapColumn(getRealTable().getColumn("StdCurve")));
-        addColumn(wrapColumn(getRealTable().getColumn("IncludeInGuideSetCalculation")));
-        ColumnInfo guideSetCol = addColumn(wrapColumn(getRealTable().getColumn("GuideSetId")));
-        guideSetCol.setLabel("Guide Set");
-        guideSetCol.setFk(new LookupForeignKey("RowId")
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                return _schema.createGuideSetTable(false);
-            }
-        });
+
         ColumnInfo titrationColumn = addColumn(wrapColumn("Standard", getRealTable().getColumn("RowId")));
         titrationColumn.setFk(new MultiValuedForeignKey(new LookupForeignKey("Analyte")
         {
@@ -184,26 +174,6 @@ public class AnalyteTable extends AbstractLuminexTable
             @Override
             protected Analyte update(User user, Container container, Analyte newAnalyte, Integer oldKey) throws ValidationException, QueryUpdateServiceException, SQLException
             {
-                Analyte oldAnalyte = get(user, container, oldKey);
-
-                Integer newGuideSetId = newAnalyte.getGuideSetId();
-                Integer oldGuideSetId = oldAnalyte.getGuideSetId();
-                boolean newIncludeInCalc = newAnalyte.isIncludeInGuideSetCalculation();
-                boolean oldIncludeInCalc = oldAnalyte.isIncludeInGuideSetCalculation();
-
-                if (newGuideSetId != null)
-                {
-                    GuideSet guideSet = Table.selectObject(LuminexSchema.getTableInfoGuideSet(), newGuideSetId.intValue(), GuideSet.class);
-                    if (guideSet == null)
-                    {
-                        throw new ValidationException("No such guideSetId: " + newGuideSetId);
-                    }
-                    if (guideSet.getProtocolId() != _schema.getProtocol().getRowId())
-                    {
-                        throw new ValidationException("Can't set guideSetId to point to a guide set from another assay definition: " + newGuideSetId);
-                    }
-                }
-
                 return Table.update(user, LuminexSchema.getTableInfoAnalytes(), newAnalyte, oldKey);
             }
         };
