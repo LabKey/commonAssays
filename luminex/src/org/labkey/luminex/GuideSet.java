@@ -15,6 +15,8 @@
  */
 package org.labkey.luminex;
 
+import java.sql.Timestamp;
+
 /**
  * User: jeckels
  * Date: Aug 26, 2011
@@ -30,6 +32,11 @@ public class GuideSet
     private Double _maxFIAverage;
     private Double _maxFIStdDev;
     private String _titrationName;
+    private String _comment;
+    private Timestamp _created;
+    private Timestamp _modified;
+    private Integer _createdBy;
+    private Integer _modifiedBy;
 
     public int getRowId()
     {
@@ -119,5 +126,55 @@ public class GuideSet
     public void setTitrationName(String titrationName)
     {
         _titrationName = titrationName;
+    }
+
+    public String getComment()
+    {
+        return _comment;
+    }
+
+    public void setComment(String comment)
+    {
+        _comment = comment;
+    }
+
+    public Timestamp getCreated()
+    {
+        return _created;
+    }
+
+    public void setCreated(Timestamp created)
+    {
+        _created = created;
+    }
+
+    public Timestamp getModified()
+    {
+        return _modified;
+    }
+
+    public void setModified(Timestamp modified)
+    {
+        _modified = modified;
+    }
+
+    public Integer getCreatedBy()
+    {
+        return _createdBy;
+    }
+
+    public void setCreatedBy(Integer createdBy)
+    {
+        _createdBy = createdBy;
+    }
+
+    public Integer getModifiedBy()
+    {
+        return _modifiedBy;
+    }
+
+    public void setModifiedBy(Integer modifiedBy)
+    {
+        _modifiedBy = modifiedBy;
     }
 }
