@@ -145,7 +145,7 @@ public class AnalyteTable extends AbstractLuminexTable
     @Override
     public QueryUpdateService getUpdateService()
     {
-        return new RowIdQueryUpdateService<Analyte>(this, "RowId")
+        return new RowIdQueryUpdateService<Analyte>(this)
         {
             @Override
             public Analyte get(User user, Container container, int key) throws QueryUpdateServiceException, SQLException

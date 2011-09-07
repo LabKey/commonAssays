@@ -20,22 +20,26 @@ import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.AbstractBeanQueryUpdateService;
 import org.labkey.api.query.DuplicateKeyException;
+import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
-import org.labkey.api.query.RowIdQueryUpdateService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.Pair;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -105,34 +109,27 @@ public class AnalyteTitrationTable extends AbstractLuminexTable
     @Override
     public QueryUpdateService getUpdateService()
     {
-        return new RowIdQueryUpdateService<AnalyteTitration>(this, "RowId")
+        // Pair<Integer, Integer> is analyteid/titrationid combo
+        return new AbstractBeanQueryUpdateService<AnalyteTitration, Pair<Integer, Integer>>(this)
         {
             @Override
-            public AnalyteTitration get(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
+            protected Pair<Integer, Integer> keyFromMap(Map<String, Object> map) throws InvalidKeyException
             {
-                return Table.selectObject(LuminexSchema.getTableInfoAnalyteTitration(), key, AnalyteTitration.class);
+                Integer analyteId = getInteger(map, map.containsKey("analyte") ? "analyte" : "analyteid");
+                Integer titrationId = getInteger(map, map.containsKey("titration") ? "titration" : "titrationid");
+                return new Pair<Integer, Integer>(analyteId, titrationId);
             }
 
             @Override
-            public void delete(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
+            protected AnalyteTitration get(User user, Container container, Pair<Integer, Integer> key) throws QueryUpdateServiceException, SQLException
             {
-                throw new UnsupportedOperationException();
+                SimpleFilter filter = new SimpleFilter("AnalyteId", key.getKey());
+                filter.addCondition("TitrationId", key.getValue());
+                return Table.selectObject(LuminexSchema.getTableInfoAnalyteTitration(), filter, null, AnalyteTitration.class);
             }
 
             @Override
-            protected AnalyteTitration createNewBean()
-            {
-                return new AnalyteTitration();
-            }
-
-            @Override
-            protected AnalyteTitration insert(User user, Container container, AnalyteTitration bean) throws ValidationException, DuplicateKeyException, QueryUpdateServiceException, SQLException
-            {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            protected AnalyteTitration update(User user, Container container, AnalyteTitration bean, Integer oldKey) throws ValidationException, QueryUpdateServiceException, SQLException
+            protected AnalyteTitration update(User user, Container container, AnalyteTitration bean, Pair<Integer, Integer> oldKey) throws ValidationException, QueryUpdateServiceException, SQLException
             {
                 Integer newGuideSetId = bean.getGuideSetId();
 
@@ -170,7 +167,31 @@ public class AnalyteTitrationTable extends AbstractLuminexTable
                     }
                 }
 
-                return Table.update(user, LuminexSchema.getTableInfoAnalyteTitration(), bean, oldKey);
+                Object[] keys = new Object[2];
+
+                boolean analyteFirst = LuminexSchema.getTableInfoAnalyteTitration().getPkColumnNames().get(0).equalsIgnoreCase("AnalyteId");
+                keys[0] = analyteFirst ? oldKey.getKey() : oldKey.getValue();
+                keys[1] = analyteFirst ? oldKey.getValue() : oldKey.getKey();
+
+                return Table.update(user, LuminexSchema.getTableInfoAnalyteTitration(), bean, keys);
+            }
+
+            @Override
+            protected void delete(User user, Container container, Pair<Integer, Integer> key) throws QueryUpdateServiceException, SQLException
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            protected AnalyteTitration createNewBean()
+            {
+                return new AnalyteTitration();
+            }
+
+            @Override
+            protected AnalyteTitration insert(User user, Container container, AnalyteTitration bean) throws ValidationException, DuplicateKeyException, QueryUpdateServiceException, SQLException
+            {
+                throw new UnsupportedOperationException();
             }
         };
     }

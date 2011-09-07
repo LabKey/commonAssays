@@ -117,7 +117,7 @@ public class GuideSetTable extends AbstractLuminexTable
 
         public GuideSetTableUpdateService(GuideSetTable guideSetTable)
         {
-            super(guideSetTable, "RowId");
+            super(guideSetTable);
             _protocol = guideSetTable._schema.getProtocol();
         }
 
