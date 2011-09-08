@@ -24,5 +24,5 @@ import java.io.Serializable;
  */
 public interface SubsetPart extends Serializable
 {
-    public String toString(boolean escaped);
+    public String toString(boolean escape, boolean withinExpression);
 }

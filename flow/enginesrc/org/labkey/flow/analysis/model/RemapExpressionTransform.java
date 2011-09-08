@@ -37,19 +37,19 @@ public class RemapExpressionTransform implements SubsetExpression.Transform<Subs
     @Override
     public SubsetExpression and(SubsetExpression.AndTerm term, SubsetExpression leftResult, SubsetExpression rightResult)
     {
-        return new SubsetExpression.AndTerm(leftResult, rightResult);
+        return new SubsetExpression.AndTerm(leftResult, rightResult, term.isGrouped());
     }
 
     @Override
     public SubsetExpression or(SubsetExpression.OrTerm term, SubsetExpression leftResult, SubsetExpression rightResult)
     {
-        return new SubsetExpression.OrTerm(leftResult, rightResult);
+        return new SubsetExpression.OrTerm(leftResult, rightResult, term.isGrouped());
     }
 
     @Override
     public SubsetExpression not(SubsetExpression.NotTerm term, SubsetExpression notResult)
     {
-        return new SubsetExpression.NotTerm(notResult);
+        return new SubsetExpression.NotTerm(notResult, term.isGrouped());
     }
 
     @Override
@@ -58,6 +58,6 @@ public class RemapExpressionTransform implements SubsetExpression.Transform<Subs
         SubsetSpec spec = term.getSpec();
         if (!_mapping.containsKey(spec))
             throw new FlowException("Failed to replace '" + spec + "' in boolean expression using mapping: " + _mapping);
-        return new SubsetExpression.SubsetTerm(_mapping.get(spec));
+        return new SubsetExpression.SubsetTerm(_mapping.get(spec), term.isGrouped());
     }
 }

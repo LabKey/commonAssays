@@ -148,6 +148,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/Analysis.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/AndGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/AutoCompensationScript.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/CalibrationTable.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/CleanNameExpressionTransform.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/CompensationCalculation.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/CompensationMatrix.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/DataFrame.java -text
@@ -206,6 +207,7 @@ flow/enginesrc/org/labkey/flow/analysis/web/StatisticSpec.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/SubsetExpression.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/SubsetParser.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/SubsetSpec.java -text
+flow/enginesrc/org/labkey/flow/analysis/web/SubsetTests.java -text
 flow/enginesrc/org/labkey/flow/persist/AttributeSet.java -text
 flow/enginesrc/org/labkey/flow/persist/InputRole.java -text
 flow/enginesrc/org/labkey/flow/persist/ObjectType.java -text

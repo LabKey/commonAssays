@@ -374,6 +374,17 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
                 File pepXmlFile = TPPTask.getPepXMLFile(_wd.getDir(), getJob().getBaseName());
                 if (!pepXmlFile.exists())
+                {
+                    // If we used an alternative name to keep the path from getting too long, rename the resulting pepXML
+                    // to match our standard convention
+                    File altPepXmlFile = TPPTask.getPepXMLFile(_wd.getDir(), dtaDirName);
+                    if (altPepXmlFile.exists())
+                    {
+                        altPepXmlFile.renameTo(pepXmlFile);
+                    }
+                }
+
+                if (!pepXmlFile.exists())
                     throw new IOException("Failed running out2xml or Sequest - could not find expected file: " + pepXmlFile);
 
                 if (!FileUtil.deleteDir(dirOutputDta))

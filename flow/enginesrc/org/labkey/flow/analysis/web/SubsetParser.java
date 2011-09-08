@@ -25,6 +25,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.model.PopulationName;
+import org.labkey.flow.analysis.model.SubsetPart;
 import org.labkey.flow.analysis.web.SubsetExpression.*;
 
 import static org.labkey.flow.analysis.web.SubsetExpression.*;
@@ -99,7 +100,7 @@ public class SubsetParser
     // full-subset: subset eof
     public final SubsetSpec parseFullSubset()
     {
-        SubsetExpression.SubsetTerm subset = parseSubset();
+        SubsetExpression.SubsetTerm subset = parseSubset(true);
         match(Tok.eof);
         return subset.getSpec();
     }
@@ -112,14 +113,19 @@ public class SubsetParser
         return expr;
     }
 
-    // subset: subsetPart ('/' subset)*
     private final SubsetTerm parseSubset()
     {
-        SubsetTerm part = parseSubsetPart();
+        return parseSubset(false);
+    }
+
+    // subset: subsetPart ('/' subset)*
+    private final SubsetTerm parseSubset(boolean toplevel)
+    {
+        SubsetTerm part = parseSubsetPart(toplevel);
         while (test(Tok.nameDivider))
         {
             match(Tok.nameDivider);
-            SubsetTerm next = parseSubsetPart();
+            SubsetTerm next = parseSubsetPart(toplevel);
             SubsetSpec spec;
             if (next._spec.isExpression())
                 spec = new SubsetSpec(part._spec, next._spec.getExpression());
@@ -132,8 +138,10 @@ public class SubsetParser
     }
 
     // subsetPart: string | expression
-    private final SubsetTerm parseSubsetPart()
+    private final SubsetTerm parseSubsetPart(boolean toplevel)
     {
+        if (toplevel)
+            _lexer.setAllowUnescapedNameNextToken();
         SubsetSpec subset;
         if (test(Tok.name))
         {
@@ -214,8 +222,8 @@ public class SubsetParser
         int _index = -1;
         /** The source string. */
         String _str = null;
-        /** Are we inside an escape. */
-        boolean _escaped = false;
+        /** are we in a spot where we might have an unescaped name? */
+        boolean _allowUnescapedName = false;
 
         static Map<Character, Tok> _charTok = new HashMap<Character, Tok>();
         static
@@ -270,7 +278,24 @@ public class SubsetParser
             return _str.substring(_index, _lookahead);
         }
 
+        void setAllowUnescapedNameNextToken()
+        {
+            _allowUnescapedName = true;
+        }
+
         void lex() throws IOException
+        {
+            try
+            {
+                _lex();
+            }
+            finally
+            {
+                _allowUnescapedName = false;
+            }
+        }
+
+        void _lex() throws IOException
         {
             reset();
 
@@ -281,6 +306,9 @@ public class SubsetParser
             }
 
             Tok tok = lookaheadTok();
+
+            if (_allowUnescapedName && tok != Tok.nameDivider && tok != Tok.opLParen && tok != Tok.escapeStart)
+                tok = null;
             if (tok != null && tok != Tok.escapeStart)
             {
                 _token = new Token(tok, lookahead());
@@ -288,8 +316,8 @@ public class SubsetParser
                 return;
             }
 
-            if (tok == Tok.escapeStart)
-                _escaped = true;
+            boolean escapeStart = tok==Tok.escapeStart;
+            boolean escaped = escapeStart || _allowUnescapedName;
 
             // Read a string of characters until we reach another token or escapeEnd.
             // The escapeEnd character itself may be backslash-escaped.
@@ -307,14 +335,17 @@ public class SubsetParser
                         break;
 
                     if (tok == Tok.escapeStart)
-                        _escaped = true;
+                        escapeStart = escaped = true;
 
-                    if (_escaped)
+                    if (escaped)
                     {
-                        if (tok == Tok.escapeEnd && _str.charAt(_lookahead-1) != '\\')
+                        if (escapeStart && tok == Tok.escapeEnd && _str.charAt(_lookahead-1) != '\\')
                         {
-                            _escaped = false;
                             read();
+                            break;
+                        }
+                        if (!escapeStart && tok == Tok.nameDivider)
+                        {
                             break;
                         }
                     }
@@ -500,6 +531,32 @@ public class SubsetParser
                 fail("Unexpected type: " + actual.getClass());
         }
 
+        void assertName(PopulationName expectedName, PopulationName actualName)
+        {
+            assertEquals(expectedName, actualName);
+        }
+
+        void assertSpec(SubsetSpec expected, SubsetSpec actual)
+        {
+            SubsetPart[] expectedParts = expected.getSubsets();
+            SubsetPart[] actualParts = actual.getSubsets();
+
+            assertEquals(expectedParts.length, actualParts.length);
+            for (int i = 0; i < expectedParts.length; i++)
+            {
+                SubsetPart expectedPart = expectedParts[i];
+                SubsetPart actualPart = actualParts[i];
+
+                assertEquals(expectedPart.getClass(), actualPart.getClass());
+                if (expectedPart instanceof PopulationName)
+                    assertName((PopulationName)expectedPart, (PopulationName)actualPart);
+                else if (expectedPart instanceof SubsetExpression)
+                    assertExpr((SubsetExpression)expectedPart, (SubsetExpression)actualPart);
+                else
+                    fail("Unexpected type: " + actualPart.getClass());
+            }
+        }
+
         @Test
         public void testSubset()
         {
@@ -533,6 +590,45 @@ public class SubsetParser
         }
 
         @Test
+        public void testParensAllowed()
+        {
+            // Parens are allowed in top-level subset parts.
+            // A paren after a /-separator indicates the start of a boolean expression
+            // so the subset below is: "X(A" "B)" and expression "C or D"
+            String s = "X(A/B)/(C|D)";
+            SubsetParser parser = new SubsetParser(s);
+            SubsetSpec spec = parser.parseFullSubset();
+
+            SubsetSpec expected = new SubsetSpec(null, PopulationName.fromString("X(A"));
+            expected = expected.createChild(PopulationName.fromString("B)"));
+            expected = expected.createChild(Or(Subset("C"), Subset("D")));
+
+            assertSpec(expected, spec);
+
+            // Subset spec should round-trip with no changes to the string
+            assertEquals(s, spec.toString());
+        }
+
+        @Test
+        public void compat_11_1()
+        {
+            String s = "Lymphocytes/CD4CD8 Tcells (CD25+)/Q10: CD159a (NKG2a)+, HLA Dr+/PD-1 & 95 +";
+            SubsetParser parser = new SubsetParser(s);
+            SubsetSpec spec = parser.parseFullSubset();
+
+            SubsetSpec expected = new SubsetSpec(null, PopulationName.fromString("Lymphocytes"));
+            expected = expected.createChild(PopulationName.fromString("CD4CD8 Tcells (CD25+)"));
+            expected = expected.createChild(PopulationName.fromString("Q10: CD159a (NKG2a)+, HLA Dr+"));
+            expected = expected.createChild(PopulationName.fromString("PD-1 & 95 +"));
+
+            assertSpec(expected, spec);
+
+            // Subset spec should round-trip with no changes to the string
+            assertEquals(s, spec.toString());
+        }
+
+        /*
+        @Test
         public void testUnexpectedParen()
         {
             SubsetParser parser = new SubsetParser("X/Y(A/B)");
@@ -546,6 +642,7 @@ public class SubsetParser
                 assertEquals("Expected 'eof', found 'tok=opLParen, text=(' at index 4 of 'X/Y(A/B)'", e.getMessage());
             }
         }
+        */
 
         @Test
         public void testUnexpectedNot()

@@ -32,6 +32,7 @@ import java.util.List;
 public class SubsetRef extends Gate implements SubsetExpressionGate
 {
     private SubsetSpec _ref;
+    private SubsetExpression _originalExpression;
 
     public SubsetRef()
     {
@@ -115,9 +116,19 @@ public class SubsetRef extends Gate implements SubsetExpressionGate
     @Override
     public SubsetExpression createTerm()
     {
-        // For backwards compatibility, use only the last part of the subset.
-        // We may want to use the full subset path some time in the future.
-        PopulationName name = _ref.getPopulationName();
-        return new SubsetExpression.SubsetTerm(new SubsetSpec(null, name));
+        return new SubsetExpression.SubsetTerm(_ref);
     }
+
+    @Override
+    public SubsetExpression getOriginalExpression()
+    {
+        return _originalExpression;
+    }
+
+    @Override
+    public void setOriginalExpression(SubsetExpression expr)
+    {
+        _originalExpression = expr;
+    }
+
 }

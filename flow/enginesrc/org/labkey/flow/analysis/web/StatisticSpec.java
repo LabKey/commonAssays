@@ -146,7 +146,7 @@ public class StatisticSpec implements Serializable, Comparable
         StringBuilder ret = new StringBuilder();
         if (_subset != null)
         {
-            ret.append(_subset.toString(escaped));
+            ret.append(_subset.toString(escaped, false));
             ret.append(":");
         }
         ret.append(strStat);

@@ -16,6 +16,8 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.labkey.flow.analysis.web.SubsetExpression;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 abstract public class GateList extends Gate
 {
     protected List<Gate> _gates = new ArrayList();
+    protected SubsetExpression _originalExpression = null;
 
     protected GateList(Gate... gates)
     {
@@ -55,6 +58,16 @@ abstract public class GateList extends Gate
                 return true;
         }
         return false;
+    }
+
+    public SubsetExpression getOriginalExpression()
+    {
+        return _originalExpression;
+    }
+
+    public void setOriginalExpression(SubsetExpression expr)
+    {
+        _originalExpression = expr;
     }
 
 }

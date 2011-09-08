@@ -179,36 +179,36 @@ public class SubsetSpec implements Serializable
 	private transient String _toString = null;
     private transient String _toEscapedString = null;
 
-    public String toString(boolean escaped)
+    public String toString(boolean escaped, boolean withinExpression)
     {
         if (escaped)
         {
             if (_toEscapedString == null)
-                _toEscapedString = _toString(true);
+                _toEscapedString = _toString(true, withinExpression);
             return _toEscapedString;
         }
         else
         {
             if (_toString == null)
-                _toString = _toString(false);
+                _toString = _toString(false, withinExpression);
             return _toString;
         }
     }
 
-    private String _toString(boolean escaped)
+    private String _toString(boolean escape, boolean withinExpression)
     {
         StringBuilder sb = new StringBuilder();
         if (_parent != null)
-            sb.append(_parent.toString(escaped)).append("/");
+            sb.append(_parent.toString(escape, withinExpression)).append("/");
 
         if (_subset instanceof PopulationName)
         {
-            sb.append(((PopulationName)_subset).toString(escaped));
+            sb.append(((PopulationName)_subset).toString(escape, withinExpression));
         }
         else if (_subset instanceof SubsetExpression)
         {
-            String s = ((SubsetExpression)_subset).toString(_parent, escaped);
-            if (!s.startsWith("(") && !s.endsWith(")"))
+            String s = ((SubsetExpression)_subset).toString(_parent, escape);
+            if (!s.startsWith("(") || !s.endsWith(")"))
                 s = "(" + s + ")";
             sb.append(s);
         }
@@ -219,7 +219,7 @@ public class SubsetSpec implements Serializable
     // print in escaped form
     public String toString()
     {
-        return toString(true);
+        return toString(true, false);
     }
 
     public SubsetSpec removeRoot()

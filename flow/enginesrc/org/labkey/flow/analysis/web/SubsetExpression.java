@@ -49,17 +49,19 @@ abstract public class SubsetExpression implements SubsetPart
     // Grouped flag is used for display purposes only
     protected boolean _grouped = false;
 
-    SubsetExpression setGrouped(boolean grouped) { _grouped = grouped; return this; }
+    public SubsetExpression setGrouped(boolean grouped) { _grouped = grouped; return this; }
+    public boolean isGrouped() { return _grouped; }
 
     @Override
     public String toString()
     {
-        return toString(true);
+        return toString(true, false);
     }
 
-    public String toString(boolean escaped)
+    public String toString(boolean escape, boolean withinExpression)
     {
-        return toString(null, escaped);
+        assert !withinExpression : "Nested boolean expression not supported";
+        return toString(null, escape);
     }
 
     public String toString(SubsetSpec parent, boolean escaped)
@@ -87,10 +89,11 @@ abstract public class SubsetExpression implements SubsetPart
     {
         protected SubsetExpression _left;
         protected SubsetExpression _right;
-        BinaryTerm(SubsetExpression left, SubsetExpression right)
+        BinaryTerm(SubsetExpression left, SubsetExpression right, boolean grouped)
         {
             _left = left;
             _right = right;
+            _grouped = grouped;
         }
 
         @Override
@@ -128,7 +131,12 @@ abstract public class SubsetExpression implements SubsetPart
     {
         public OrTerm(SubsetExpression left, SubsetExpression right)
         {
-            super(left, right);
+            this(left, right, false);
+        }
+
+        public OrTerm(SubsetExpression left, SubsetExpression right, boolean grouped)
+        {
+            super(left, right, grouped);
         }
 
         public BitSet apply(Subset subset, PopulationSet populationSet)
@@ -156,8 +164,14 @@ abstract public class SubsetExpression implements SubsetPart
     {
         public AndTerm(SubsetExpression left, SubsetExpression right)
         {
-            super(left, right);
+            this(left, right, false);
         }
+
+        public AndTerm(SubsetExpression left, SubsetExpression right, boolean grouped)
+        {
+            super(left, right, grouped);
+        }
+
         public BitSet apply(Subset subset, PopulationSet populationSet)
         {
             BitSet left = _left.apply(subset, populationSet);
@@ -184,7 +198,13 @@ abstract public class SubsetExpression implements SubsetPart
         SubsetExpression _term;
         public NotTerm(SubsetExpression term)
         {
+            this(term, false);
+        }
+
+        public NotTerm(SubsetExpression term, boolean grouped)
+        {
             _term = term;
+            _grouped = grouped;
         }
         public BitSet apply(Subset subset, PopulationSet populationSet)
         {
@@ -228,9 +248,16 @@ abstract public class SubsetExpression implements SubsetPart
     static public class SubsetTerm extends SubsetExpression
     {
         SubsetSpec _spec;
+
         public SubsetTerm(SubsetSpec spec)
         {
+            this(spec, false);
+        }
+
+        public SubsetTerm(SubsetSpec spec, boolean grouped)
+        {
             _spec = spec;
+            _grouped = grouped;
         }
 
         public SubsetSpec getSpec()
@@ -295,9 +322,9 @@ abstract public class SubsetExpression implements SubsetPart
             // Emit just the last subset part if this spec matches the passed in parent.
             // UNDONE: support relative paths other than just parent (e.g, using backslashes for parents like FlowJo xml)
             if (parent != null && parent.equals(_spec.getParent()))
-                return _spec.getSubset().toString(escaped);
+                return _spec.getSubset().toString(escaped, true);
 
-            return _spec.toString(escaped);
+            return _spec.toString(escaped, true);
         }
 
         @Override

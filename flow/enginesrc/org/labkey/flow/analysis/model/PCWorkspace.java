@@ -24,8 +24,9 @@ import java.util.List;
 
 public class PCWorkspace extends FlowJoWorkspace
 {
-    public PCWorkspace(Element elDoc)
+    public PCWorkspace(String name, Element elDoc)
     {
+        _name = name;
         for (Element elSampleList : getElementsByTagName(elDoc, "SampleList"))
         {
             readSamples(elSampleList);

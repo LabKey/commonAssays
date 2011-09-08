@@ -247,7 +247,7 @@ public class FCSAnalyzer
             StatResult result = new StatResult(stat);
             ret.add(result);
             StatisticSpec statisticSpecification = result.spec;
-            SubsetSpec alias = getAlias(group, statisticSpecification.getSubset());
+            SubsetSpec alias = getSubsetAlias(group, statisticSpecification.getSubset());
             if (alias != null)
                 result.addAlias(new StatisticSpec(alias, statisticSpecification.getStatistic(), statisticSpecification.getParameter()));
             try
@@ -340,28 +340,48 @@ public class FCSAnalyzer
     }
 
     /**
-     * For backwards compatibility, create a SubsetSpec from a gating hierarchy
-     * if it includes any boolean expressions.  If the gating hierachy doesn't
-     * include boolean gates or can't be converted, null is returned.
-     *
-     * @param populationSet
-     * @param subset
-     * @return
+     * Create a backwards compatible String representing an 11.1 SubsetSpec for the given subset.
      */
-    public SubsetSpec getAlias(PopulationSet populationSet, SubsetSpec subset)
+    public SubsetSpec getSubsetAlias(PopulationSet populationSet, SubsetSpec subset)
+    {
+        SubsetSpec alias = _getSubsetAlias(populationSet, subset);
+        if (alias == null || alias.equals(subset))
+            return null;
+
+        return alias;
+    }
+
+    /**
+     * Create a backwards compatible 11.1 SubsetSpec.
+     *
+     * The SubsetSpec will replace any boolean gates with the SubsetExpressions representing the boolean gate in the
+     * gating hierarchy.  Any population names in the SubsetSpec will be escaped if necessary and __cleanName() will be applied.
+     *
+     * Null is returned if the conversion can't be performed.
+     *
+     * @param populationSet The gating hierarchy.
+     * @param subset The target subset.
+     *
+     * @return A SubsetSpec.
+     */
+    protected SubsetSpec _getSubsetAlias(PopulationSet populationSet, SubsetSpec subset)
     {
         if (subset == null) return null;
 
-        // Don't create alias for subset spec containing boolean expressions.
-        // These subsets are from analysis scripts prior to 11.2.
-        if (subset.isExpression()) return null;
+        // For backwards compatibility, we clean the subset names in the expression and
+        // only use the last part of the subset.
+        // We may want to use the full subset path some time in the future for a non-11.1 compatible expression.
+        CleanNameExpressionTransform cleanNameTransform = new CleanNameExpressionTransform(true);
 
+        SubsetSpec parent = null;
         SubsetSpec ret = null;
-        for (SubsetPart name : subset.getSubsets())
+        //List<String> aliasParts = new ArrayList<String>(10);
+        for (SubsetPart part : subset.getSubsets())
         {
-            if (name instanceof PopulationName)
+            if (part instanceof PopulationName)
             {
-                Population population = populationSet.getPopulation((PopulationName)name);
+                PopulationName name = (PopulationName)part;
+                Population population = populationSet.getPopulation(name);
                 if (population == null)
                     return null;
 
@@ -372,25 +392,45 @@ public class FCSAnalyzer
                     SubsetExpression expr = expressionFromGate(gate);
                     if (expr != null)
                     {
-                        ret = new SubsetSpec(ret, expr);
+                        //String cleaned = FlowJoWorkspace.___cleanName(expr.toString(parent, true));
+                        //if (!cleaned.startsWith("(") || !cleaned.endsWith(")"))
+                        //    cleaned = "(" + cleaned + ")";
+                        //aliasParts.add(cleaned);
+                        //ret = new SubsetSpec(ret, expr);
+
+                        SubsetExpression cleanedExpr = expr.reduce(cleanNameTransform);
+                        ret = new SubsetSpec(ret, cleanedExpr);
                         found = true;
                     }
                 }
 
                 if (!found)
-                    ret = new SubsetSpec(ret, name);
+                {
+                    String cleaned = FlowJoWorkspace.___cleanName(name.getRawName());
+                    //aliasParts.add(cleaned);
+                    //ret = new SubsetSpec(ret, part);
+                    ret = new SubsetSpec(ret, PopulationName.fromString(cleaned));
+                }
 
                 populationSet = population;
             }
             else
             {
-                _log.warn("Unexpected subset expression in subset: " + subset);
-                return null;
+                SubsetExpression expr = (SubsetExpression)part;
+                //String cleaned = FlowJoWorkspace.___cleanName(expr.toString(parent, true));
+                //if (!cleaned.startsWith("(") || !cleaned.endsWith(")"))
+                //    cleaned = "(" + cleaned + ")";
+                //aliasParts.add(cleaned);
+                //ret = new SubsetSpec(ret, expr);
+
+                SubsetExpression cleanedExpr = expr.reduce(cleanNameTransform);
+                ret = new SubsetSpec(ret, cleanedExpr);
             }
+
+            parent = new SubsetSpec(parent, part);
         }
 
-        if (subset.equals(ret))
-            return null;
+        //String alias = StringUtils.join(aliasParts, "/");
 
         return ret;
     }
@@ -400,9 +440,15 @@ public class FCSAnalyzer
         if (!(gate instanceof SubsetExpressionGate))
             return null;
 
+        SubsetExpressionGate exprGate = (SubsetExpressionGate)gate;
+
         try
         {
-            return ((SubsetExpressionGate)gate).createTerm();
+            // Re-use the original boolean expression if possible.  It may contain grouping information.
+            if (exprGate.getOriginalExpression() != null)
+                return exprGate.getOriginalExpression();
+
+            return exprGate.createTerm();
         }
         catch (FlowException ex)
         {

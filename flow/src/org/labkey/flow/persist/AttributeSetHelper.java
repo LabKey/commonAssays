@@ -86,37 +86,34 @@ public class AttributeSetHelper
      */
     public static void prepareForSave(AttributeSet attrs, Container c) throws SQLException
     {
-        ensureKeywordIds(attrs, c, attrs.getKeywordNames());
-        ensureStatisticIds(attrs, c, attrs.getStatisticNames());
-        ensureGraphIds(attrs, c, attrs.getGraphNames());
+        ensureKeywordNames(attrs, c, attrs.getKeywordNames());
+        ensureStatisticNames(attrs, c, attrs.getStatisticNames());
+        ensureGraphNames(attrs, c, attrs.getGraphNames());
     }
 
-    private static void ensureKeywordIds(AttributeSet attrs, Container c, Collection<String> specs) throws SQLException
+    private static void ensureKeywordNames(AttributeSet attrs, Container c, Collection<String> specs) throws SQLException
     {
         for (String spec : specs)
         {
-            FlowManager.get().ensureKeywordId(c, spec);
-            FlowManager.get().ensureKeywordAliases(c, spec, attrs.getKeywordAliases(spec));
+            FlowManager.get().ensureKeywordNameAndAliases(c, spec, attrs.getKeywordAliases(spec));
         }
     }
 
-    private static void ensureStatisticIds(AttributeSet attrs, Container c, Collection<StatisticSpec> specs) throws SQLException
+    private static void ensureStatisticNames(AttributeSet attrs, Container c, Collection<StatisticSpec> specs) throws SQLException
     {
         for (StatisticSpec spec : specs)
         {
             String s = spec.toString();
-            FlowManager.get().ensureStatisticId(c, s);
-            FlowManager.get().ensureStatisticAliases(c, s, attrs.getStatisticAliases(spec));
+            FlowManager.get().ensureStatisticNameAndAliases(c, s, attrs.getStatisticAliases(spec));
         }
     }
 
-    private static void ensureGraphIds(AttributeSet attrs, Container c, Collection<GraphSpec> specs) throws SQLException
+    private static void ensureGraphNames(AttributeSet attrs, Container c, Collection<GraphSpec> specs) throws SQLException
     {
         for (GraphSpec spec : specs)
         {
             String s = spec.toString();
-            FlowManager.get().ensureGraphId(c, s);
-            FlowManager.get().ensureGraphAliases(c, s, attrs.getGraphAliases(spec));
+            FlowManager.get().ensureGraphNameAndAliases(c, s, attrs.getGraphAliases(spec));
         }
     }
 

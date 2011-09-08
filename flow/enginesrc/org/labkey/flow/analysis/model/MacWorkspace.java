@@ -17,6 +17,7 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang.StringUtils;
+import org.labkey.api.util.Pair;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetExpression;
@@ -68,8 +69,9 @@ public class MacWorkspace extends FlowJoWorkspace
         }
     }
 
-    public MacWorkspace(Element elDoc) throws Exception
+    public MacWorkspace(String name, Element elDoc) throws Exception
     {
+        _name = name;
         readCompensationMatrices(elDoc);
         readAutoCompensationScripts(elDoc);
         readCalibrationTables(elDoc);
@@ -195,10 +197,13 @@ public class MacWorkspace extends FlowJoWorkspace
 
     protected Gate createBooleanGate(final SubsetExpression expr)
     {
-        return expr.reduce(new GateExpressionTransform());
+        Gate gate = expr.reduce(new GateExpressionTransform());
+        // Uck. Store the original expression on the gate so we can find use it later to generate aliases.
+        ((SubsetExpressionGate)gate).setOriginalExpression(expr);
+        return gate;
     }
 
-    protected Gate readBoolean(SubsetSpec parentSubset, Element elBooleanGate)
+    protected Gate readBoolean(SubsetSpec parentSubset, String name, Element elBooleanGate)
     {
         String specification = elBooleanGate.getAttribute("specification");
         Element elGatePaths = getElementsByTagName(elBooleanGate, "GatePaths").get(0);
@@ -239,12 +244,58 @@ public class MacWorkspace extends FlowJoWorkspace
             count++;
         }
 
-        specification = "(" + specification.replaceAll(" ", "") + ")";
+//        checkGateCodesInOrder(parentSubset, name, specification);
+
+        specification = specification.replaceAll(" ", "");
+        if (!specification.startsWith("(") || !specification.endsWith(")"))
+            specification = "(" + specification + ")";
         SubsetExpression expr = SubsetExpression.expression(specification);
 
         expr = remapExpression(expr, mapping);
         Gate gate = createBooleanGate(expr);
         return gate;
+    }
+
+    Set<Pair<String, String>> seenGateSpecfication = new HashSet<Pair<String, String>>();
+
+    // Silly debugging tool to find swapped gates.
+    private boolean checkGateCodesInOrder(SubsetSpec parentSubset, String name, String specification)
+    {
+        String fullGateName = (parentSubset == null ? "" : parentSubset.toString()) + "/" + name;
+        if (!seenGateSpecfication.add(new Pair<String, String>(fullGateName, specification)))
+            return true;
+
+        StringTokenizer st = new StringTokenizer(specification, "&|", true);
+        int gateCount = 0;
+        while (st.hasMoreTokens())
+        {
+            String gateCode = StringUtils.trim(st.nextToken());
+            if (gateCode.startsWith("!"))
+                gateCode = StringUtils.trim(gateCode.substring(1));
+
+            if (!gateCode.startsWith("G"))
+            {
+                throw new FlowException(String.format("Gate code does not start with 'G': %s", gateCode));
+            }
+            else
+            {
+                // get int from gateCode
+                Integer i = Integer.parseInt(gateCode.substring(1));
+                if (i != gateCount)
+                {
+                    System.err.println(String.format("%s\t%s\t%s", _name==null ? "" : _name, fullGateName, specification));
+                    return false;
+                }
+            }
+
+            // skip the operator
+            if (st.hasMoreTokens())
+                st.nextToken();
+
+            gateCount++;
+        }
+
+        return true;
     }
     
     protected void readStats(SubsetSpec subset, Element elPopulation, AttributeSet results, Analysis analysis)
@@ -338,7 +389,7 @@ public class MacWorkspace extends FlowJoWorkspace
 
         for (Element elBooleanGate : getElementsByTagName(elPopulation, "BooleanGate"))
         {
-            Gate gate = readBoolean(parentSubset, elBooleanGate);
+            Gate gate = readBoolean(parentSubset, name.toString(), elBooleanGate);
             ret.addGate(gate);
 
             // UNDONE: parse <Graph> element to get x & y axes

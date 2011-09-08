@@ -58,10 +58,21 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
 
             FlowManager.FlowEntry preferred = FlowManager.get().getAliased(type(), attrId);
             ColumnInfo column = new ColumnInfo(new FieldKey(null, attrName.toString()), ret);
-            initColumn(attrName, preferred != null ? preferred._name : null, column);
+            initColumn(attrName, preferred, column);
             ret.addColumn(column);
         }
         return ret;
+    }
+
+    private void initColumn(T attrName, FlowManager.FlowEntry preferred, ColumnInfo column)
+    {
+        initColumn(attrName, preferred != null ? preferred._name : null, column);
+
+        if (preferred != null)
+        {
+            column.setDescription("Alias for '" + preferred._name + "'");
+            column.setHidden(true);
+        }
     }
 
     public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
@@ -73,12 +84,12 @@ abstract public class AttributeForeignKey<T> extends AbstractForeignKey
         if (attrName == null)
             return null;
 
-        int attrId = FlowManager.get().getAttributeId(_container, type(), attrName.toString());
-        FlowManager.FlowEntry preferred = FlowManager.get().getAliased(type(), attrId);
+        int rowId = FlowManager.get().getAttributeRowId(_container, type(), attrName.toString());
+        FlowManager.FlowEntry preferred = FlowManager.get().getAliased(type(), rowId);
 
-        SQLFragment sql = sqlValue(parent, attrName, preferred != null ? preferred._rowId : attrId);
+        SQLFragment sql = sqlValue(parent, attrName, preferred != null ? preferred._rowId : rowId);
         ExprColumn ret = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(), displayField), sql, JdbcType.NULL, parent);
-        initColumn(attrName, preferred != null ? preferred._name : null, ret);
+        initColumn(attrName, preferred, ret);
 
         return ret;
     }

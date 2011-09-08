@@ -16,6 +16,7 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,23 +37,33 @@ public class PopulationName implements SubsetPart
     public static final Character ESCAPE_START = '{';
     public static final Character ESCAPE_END = '}';
 
-    private static Set<Character> illegalChars = new HashSet<Character>();
+    // Characters not allowed to appear within a top-level population name.
+    private static Set<Character> illegalTopLevelChars = new HashSet<Character>();
     static
     {
-        illegalChars.add('(');
-        illegalChars.add(')');
-        illegalChars.add('/');
-        illegalChars.add(':');
-        illegalChars.add('&');
-        illegalChars.add('|');
-        illegalChars.add('!');
-        illegalChars.add(ESCAPE_START);
-        illegalChars.add(ESCAPE_END);
+        illegalTopLevelChars.add('/');
+        illegalTopLevelChars.add(ESCAPE_START);
+        illegalTopLevelChars.add(ESCAPE_END);
+    }
+
+    // Characters not allowed to appear within a population name inside of boolean expression.
+    private static Set<Character> illegalExpressionChars = new HashSet<Character>();
+    static
+    {
+        illegalExpressionChars.add('(');
+        illegalExpressionChars.add(')');
+        illegalExpressionChars.add('/');
+        illegalExpressionChars.add('&');
+        illegalExpressionChars.add('|');
+        illegalExpressionChars.add('!');
+        illegalExpressionChars.add(ESCAPE_START);
+        illegalExpressionChars.add(ESCAPE_END);
     }
 
     public static final PopulationName ALL = PopulationName.fromString("*");
 
     final String _escaped;
+    final String _expressionEscaped;
     final String _raw;
 
     public static PopulationName fromString(String str)
@@ -60,27 +71,33 @@ public class PopulationName implements SubsetPart
         if (str == null || str.length() == 0)
             return null;
 
+        // replace mac em-dash
+        str = StringUtils.replaceChars(str, (char) 209, '-');
+
         String raw = str;
 
         if (isEscaped(str))
-        {
             raw = unescape(str);
-        }
-        else if (needsEscaping(str))
-        {
-            str = escape(str);
-        }
+
+        String escaped = raw;
+        if (needsTopLevelEscaping(raw))
+            escaped = escape(raw);
+
+        String expressionEscaped = raw;
+        if (needsExpressionLevelEscaping(raw))
+            expressionEscaped = escape(raw);
         
-        return new PopulationName(str, raw);
+        return new PopulationName(raw, escaped, expressionEscaped);
     }
 
-    private PopulationName(String escaped, String raw)
+    private PopulationName(String raw, String escaped, String expressionEscaped)
     {
-        _escaped = escaped;
         _raw = raw;
+        _escaped = escaped;
+        _expressionEscaped = expressionEscaped;
     }
 
-    /** The population name which may be escaped. */
+    /** The population name which may be escaped for use in a SubsetSpec path part outside of a SubsetExpression. */
     public String getName()
     {
         return _escaped;
@@ -109,9 +126,12 @@ public class PopulationName implements SubsetPart
         return PopulationName.fromString(_raw + suffix);
     }
 
-    public String toString(boolean escaped)
+    public String toString(boolean escape, boolean withinExpression)
     {
-        return escaped ? _escaped : _raw;
+        if (!escape)
+            return _raw;
+
+        return withinExpression ? _expressionEscaped : _escaped;
     }
 
     public String toString()
@@ -146,8 +166,22 @@ public class PopulationName implements SubsetPart
                name.charAt(name.length()-1) == ESCAPE_END.charValue();
     }
 
-    public static boolean needsEscaping(String name)
+    public static boolean needsTopLevelEscaping(String name)
     {
+        return needsEscaping(illegalTopLevelChars, name);
+    }
+
+    public static boolean needsExpressionLevelEscaping(String name)
+    {
+        return needsEscaping(illegalExpressionChars, name);
+    }
+
+    private static boolean needsEscaping(Set<Character> illegalChars, String name)
+    {
+        // only boolean expressions are allowed to start with paren
+        if (name.startsWith("("))
+            return true;
+
         for (int i = 0; i < name.length(); i++)
         {
             char c = name.charAt(i);
@@ -196,40 +230,78 @@ public class PopulationName implements SubsetPart
     {
         void assertPopulation(PopulationName expected, PopulationName actual)
         {
-            assertEquals(expected._raw, actual._raw);
-            assertEquals(expected._escaped, actual._escaped);
+            assertEquals("Raw mismatch", expected._raw, actual._raw);
+            assertEquals("Escaped mismatch", expected._escaped, actual._escaped);
+            assertEquals("Expression escaped mismatch", expected._expressionEscaped, actual._expressionEscaped);
         }
 
         @Test
         public void simple()
         {
-            PopulationName expected = new PopulationName("abc", "abc");
+            PopulationName expected = new PopulationName("abc", "abc", "abc");
             assertPopulation(expected, PopulationName.fromString("abc"));
         }
 
         @Test
-        public void escaped()
+        public void parensAllowed()
         {
-            PopulationName expected = new PopulationName("{one(two)}", "one(two)");
+            // NOTE: parens are escaped only if they are the first character or we are within an expression.
+            PopulationName expected = new PopulationName("one(two)", "one(two)", "{one(two)}");
             assertPopulation(expected, PopulationName.fromString("one(two)"));
             assertPopulation(expected, PopulationName.fromString("{one(two)}"));
         }
 
         @Test
+        public void parensEscaped()
+        {
+            // NOTE: parens are escaped only if they are the first character or we are within an expression.
+            PopulationName expected = new PopulationName("(one two)", "{(one two)}", "{(one two)}");
+            assertPopulation(expected, PopulationName.fromString("(one two)"));
+            assertPopulation(expected, PopulationName.fromString("{(one two)}"));
+        }
+
+        @Test
+        public void slashEscaped()
+        {
+            PopulationName expected = new PopulationName("one/two", "{one/two}", "{one/two}");
+            assertPopulation(expected, PopulationName.fromString("one/two"));
+            assertPopulation(expected, PopulationName.fromString("{one/two}"));
+        }
+
+        @Test
+        public void expressionEscaped()
+        {
+            PopulationName expected = new PopulationName("one&two", "one&two", "{one&two}");
+            assertPopulation(expected, PopulationName.fromString("one&two"));
+            assertPopulation(expected, PopulationName.fromString("{one&two}"));
+        }
+
+        @Test
         public void escapeEscapes()
         {
-            PopulationName expected = new PopulationName("{one{two\\}}", "one{two}");
+            PopulationName expected = new PopulationName("one{two}", "{one{two\\}}", "{one{two\\}}");
             assertPopulation(expected, PopulationName.fromString("one{two}"));
             assertPopulation(expected, PopulationName.fromString("{one{two\\}}"));
         }
 
-
         @Test
         public void escapeEscapes2()
         {
-            PopulationName expected = new PopulationName("{one{two{three\\}\\}}", "one{two{three}}");
+            PopulationName expected = new PopulationName("one{two{three}}", "{one{two{three\\}\\}}", "{one{two{three\\}\\}}");
             assertPopulation(expected, PopulationName.fromString("one{two{three}}"));
             assertPopulation(expected, PopulationName.fromString("{one{two{three\\}\\}}"));
+        }
+
+        @Test
+        public void compat_11_1()
+        {
+            assertEquals("-", PopulationName.fromString("-").toString());
+            assertEquals("HLA-DR+", PopulationName.fromString("HLA-DR+").toString());
+            assertEquals("APC CD3+", PopulationName.fromString("APC CD3+").toString());
+            assertEquals("FSC-A, SSC-A subset", PopulationName.fromString("FSC-A, SSC-A subset").toString());
+            assertEquals("<Alexa 680-A>, <APC-A> subset", PopulationName.fromString("<Alexa 680-A>, <APC-A> subset").toString());
+            assertEquals("Q9: CD159a (NKG2a)-, HLA Dr+", PopulationName.fromString("Q9: CD159a (NKG2a)-, HLA Dr+").toString());
+            assertEquals("PD-1 & 95 +", PopulationName.fromString("PD-1 & 95 +").toString());
         }
 
         @Test

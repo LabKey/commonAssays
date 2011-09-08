@@ -87,9 +87,9 @@ Ext.QuickTips.init();
             jsonStats.append("subset:'',");
         else
         {
-            jsonStats.append("subset:").append(PageFlowUtil.jsString(spec.getSubset().toString(false))).append(",");
+            jsonStats.append("subset:").append(PageFlowUtil.jsString(spec.getSubset().toString())).append(",");
             if (null != spec.getSubset().getParent())
-                jsonStats.append("parent:").append(PageFlowUtil.jsString(spec.getSubset().getParent().toString(false))).append(",");
+                jsonStats.append("parent:").append(PageFlowUtil.jsString(spec.getSubset().getParent().toString())).append(",");
         }
         jsonStats.append("stat:").append(PageFlowUtil.jsString(spec.getStatistic().getShortName())).append(",");
         jsonStats.append("param:").append(PageFlowUtil.jsString(spec.getParameter())).append(",");

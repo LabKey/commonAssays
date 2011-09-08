@@ -24,6 +24,9 @@ import org.labkey.flow.analysis.web.SubsetExpression;
  */
 public interface SubsetExpressionGate
 {
+    abstract public SubsetExpression getOriginalExpression();
+    abstract public void setOriginalExpression(SubsetExpression expr);
+
     /**
      * Create a SubsetExpression from this Gate.  Only gates contributing to
      * a boolean expression are supported.  This is used to create a backwards

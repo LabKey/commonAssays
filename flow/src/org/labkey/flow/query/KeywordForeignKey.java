@@ -55,11 +55,6 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
     {
         column.setSqlTypeName("VARCHAR");
         column.setLabel(attrName);
-        if (preferredName != null)
-        {
-            column.setDescription("Alias for '" + preferredName + "'");
-            column.setHidden(true);
-        }
         if (KeywordUtil.isHidden(attrName))
         {
             column.setHidden(true);

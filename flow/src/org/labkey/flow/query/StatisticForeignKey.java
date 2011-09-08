@@ -64,14 +64,9 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
 
     protected void initColumn(StatisticSpec stat, String preferredName, ColumnInfo column)
     {
-
         SubsetSpec subset = _fps.simplifySubset(stat.getSubset());
         stat = new StatisticSpec(subset, stat.getStatistic(), stat.getParameter());
-        if (preferredName != null)
-        {
-            column.setDescription("Alias for '" + preferredName + "'");
-            column.setHidden(true);
-        }
+
         // Hide spill stats by default for all tables except CompensationMatrix.
         // Hide non-spill stats from the CompensationMatrix table.
         if (_type == FlowDataType.CompensationMatrix)

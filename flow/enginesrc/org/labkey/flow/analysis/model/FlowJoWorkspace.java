@@ -44,6 +44,8 @@ import java.util.*;
 
 abstract public class FlowJoWorkspace implements Serializable
 {
+    protected String _name = null;
+
     // group name -> analysis
     protected Map<PopulationName, Analysis> _groupAnalyses = new LinkedHashMap<PopulationName, Analysis>();
     // sample id -> analysis
@@ -518,18 +520,23 @@ abstract public class FlowJoWorkspace implements Serializable
 
     static public FlowJoWorkspace readWorkspace(InputStream stream) throws Exception
     {
+        return readWorkspace(null, stream);
+    }
+
+    static public FlowJoWorkspace readWorkspace(String name, InputStream stream) throws Exception
+    {
         Document doc = parseXml(stream);
         Element elDoc = doc.getDocumentElement();
 //        System.err.println("DOCUMENT SIZE: " + debugComputeSize(elDoc));
         if ("1.4".equals(elDoc.getAttribute("version")))
         {
-            return new PCWorkspace(elDoc);
+            return new PCWorkspace(name, elDoc);
         }
         if ("2.0".equals(elDoc.getAttribute("version")))
         {
-            return new FJ8Workspace(elDoc);
+            return new FJ8Workspace(name, elDoc);
         }
-        return new MacWorkspace(elDoc);
+        return new MacWorkspace(name, elDoc);
     }
 
     static long debugComputeSize(Object doc)
@@ -598,7 +605,7 @@ abstract public class FlowJoWorkspace implements Serializable
                     alias = aliases.get(stat.getSubset());
                 else
                 {
-                    alias = FCSAnalyzer.get().getAlias(analysis, stat.getSubset());
+                    alias = FCSAnalyzer.get().getSubsetAlias(analysis, stat.getSubset());
                     aliases.put(stat.getSubset(), alias);
                 }
 
@@ -606,19 +613,19 @@ abstract public class FlowJoWorkspace implements Serializable
                     attrs.addStatisticAlias(stat, new StatisticSpec(alias, stat.getStatistic(), stat.getParameter()));
             }
 
-            for (GraphSpec stat : attrs.getGraphs().keySet())
+            for (GraphSpec graph : attrs.getGraphs().keySet())
             {
                 SubsetSpec alias;
-                if (aliases.containsKey(stat.getSubset()))
-                    alias = aliases.get(stat.getSubset());
+                if (aliases.containsKey(graph.getSubset()))
+                    alias = aliases.get(graph.getSubset());
                 else
                 {
-                    alias = FCSAnalyzer.get().getAlias(analysis, stat.getSubset());
-                    aliases.put(stat.getSubset(), alias);
+                    alias = FCSAnalyzer.get().getSubsetAlias(analysis, graph.getSubset());
+                    aliases.put(graph.getSubset(), alias);
                 }
 
                 if (alias != null)
-                    attrs.addGraphAlias(stat, new GraphSpec(alias, stat.getParameters()));
+                    attrs.addGraphAlias(graph, new GraphSpec(alias, graph.getParameters()));
             }
         }
     }
@@ -1278,13 +1285,77 @@ abstract public class FlowJoWorkspace implements Serializable
             Analysis analysis = workspace.getGroupAnalysis(group);
 
             SubsetSpec allCytSpec = SubsetSpec.fromUnescapedString("S/Lv/L/3+/4+/All Cyt");
-            assertEquals("S/Lv/L/3+/4+/(IFNg+|IL2+|IL4+|TNFa+)", FCSAnalyzer.get().getAlias(analysis, allCytSpec).toString());
+            SubsetSpec aliasSpec = FCSAnalyzer.get().getSubsetAlias(analysis, allCytSpec);
+            assertEquals("S/Lv/L/3+/4+/(IFNg+|IL2+|IL4+|TNFa+)", aliasSpec.toString());
         }
 
         @Test
         public void loadSubsets() throws Exception
         {
-            loadWorkspace("sampledata/flow/flowjoquery/Workspaces/subset-parsing.xml");
+            FlowJoWorkspace workspace = loadWorkspace("sampledata/flow/flowjoquery/Workspaces/subset-parsing.xml");
+            SampleInfo sampleInfo = workspace.getSample("2");
+            assertEquals("118795.fcs", sampleInfo.getLabel());
+
+            AttributeSet attrs = workspace.getSampleAnalysisResults(sampleInfo);
+            Set<StatisticSpec> stats = attrs.getStatisticNames();
+
+            // Check boolean gates are in the correct order and illegal characters in subset expression alias are not escaped.
+            // NODE: FlowJo writes the boolean gates in seemingly random order so resaving subset-parsing.xml could break this test.
+            {
+                SubsetSpec subset = SubsetSpec.fromParts("A and not (B or C)");
+                StatisticSpec stat = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
+                assertTrue("Expected statistic '" + stat + "' in analysis results.", stats.contains(stat));
+
+                List<String> aliases = new ArrayList<String>();
+                for (Object alias : attrs.getStatisticAliases(stat))
+                    aliases.add(alias.toString());
+
+                assertEquals(1, aliases.size());
+                String alias = aliases.get(0);
+                assertEquals("({A & co: fun}&!(B|{C (awesome)})):Count", alias);
+            }
+
+            // Check subset population names are cleaned:
+            //   Name as it appears in FJ:  Z,|;<z>!
+            //   LabKey name in database:   Z,|;<z>!     -- not escaped, no illegal characters
+            //   Alias for <11.1 compat:    Z;|;<z>!     -- comma is replaced with semicolon
+            {
+                SubsetSpec subset = SubsetSpec.fromParts("B", "Z,|;<z>!");
+                StatisticSpec stat = new StatisticSpec(subset, StatisticSpec.STAT.Freq_Of_Parent, null);
+                assertTrue("Expected statistic '" + stat + "' in analysis results.", stats.contains(stat));
+
+                // Name as it will appear in the database
+                assertEquals("B/Z,|;<z>!:Freq_Of_Parent", stat.toString());
+
+                // Name as it will appear in the UI
+                assertEquals("B/Z,|;<z>!:%P", stat.toShortString());
+
+                List<String> aliases = new ArrayList<String>();
+                for (Object alias : attrs.getStatisticAliases(stat))
+                    aliases.add(alias.toString());
+
+                assertEquals(1, aliases.size());
+                String alias = aliases.get(0);
+
+                // Alias as it will appear in the database
+                assertEquals("B/Z;|;<z>!:Freq_Of_Parent", alias);
+            }
+
+            // Check subset names that are a part of a boolean expression are cleaned
+            {
+                SubsetSpec subset = SubsetSpec.fromParts("B", "Y and (B/Z or not X-1)");
+                StatisticSpec stat = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
+                assertTrue("Expected statistic '" + stat + "' in analysis results.", stats.contains(stat));
+
+                List<String> aliases = new ArrayList<String>();
+                for (Object alias : attrs.getStatisticAliases(stat))
+                    aliases.add(alias.toString());
+
+                assertEquals(1, aliases.size());
+                String alias = aliases.get(0);
+                // Alias is escaped because it contains illegal characters in the expression.
+                assertEquals("B/({Y{foo\\}}&({Z;|;<z>!}|!{X (x&x)})):Count", alias);
+            }
         }
 
         @Test

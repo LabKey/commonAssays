@@ -26,6 +26,7 @@ import java.util.List;
 public class NotGate extends Gate implements SubsetExpressionGate
 {
     Gate _gate;
+    SubsetExpression _originalExpression;
 
     public NotGate() { }
 
@@ -85,7 +86,28 @@ public class NotGate extends Gate implements SubsetExpressionGate
         if (!(_gate instanceof SubsetExpressionGate))
             throw new FlowException("can't create term from gate type: " + _gate);
 
-        return new SubsetExpression.NotTerm(
+        boolean grouped = false;
+        if (_gate instanceof GateList && ((GateList)_gate).getGates().size() > 1)
+            grouped = true;
+
+        SubsetExpression.NotTerm term =
+            new SubsetExpression.NotTerm(
                 ((SubsetExpressionGate)_gate).createTerm());
+        term.setGrouped(grouped);
+
+        return term;
     }
+
+    @Override
+    public SubsetExpression getOriginalExpression()
+    {
+        return _originalExpression;
+    }
+
+    @Override
+    public void setOriginalExpression(SubsetExpression expr)
+    {
+        _originalExpression = expr;
+    }
+
 }

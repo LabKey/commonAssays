@@ -57,7 +57,7 @@ public class Main
         try
         {
             is = new FileInputStream(file);
-            return FlowJoWorkspace.readWorkspace(is);
+            return FlowJoWorkspace.readWorkspace(file.getPath(), is);
         }
         catch (Exception e)
         {
@@ -260,6 +260,7 @@ public class Main
         usage.append("  -S  -- statistic name. See available stats from list below. May appear more than once.\n");
         usage.append("\n");
         usage.append("Command is one of:\n");
+        usage.append("  parse              -- reads workspace; does nothing\n");
         usage.append("  analysis           -- generate analysis results\n");
         usage.append("  convert-workspace  -- converts a FlowJo workspace xml into a LabKey script file\n");
         usage.append("  trim-workspace     -- trims FlowJo workspace down to only required xml elements\n");
@@ -359,7 +360,7 @@ public class Main
                     return;
                 }
             }
-            else if ("analysis".equals(arg) || "convert-workspace".equals(arg) || "trim-workspace".equals(arg) || "list-samples".equals(arg))
+            else if ("parse".equals(arg) || "analysis".equals(arg) || "convert-workspace".equals(arg) || "trim-workspace".equals(arg) || "list-samples".equals(arg))
             {
                 commandArg = arg;
                 break;
@@ -408,7 +409,9 @@ public class Main
         if (statArgs.isEmpty())
             statArgs = EnumSet.of(StatisticSet.workspace);
 
-        if ("analysis".equals(commandArg))
+        if ("parse".equals(commandArg))
+            readWorkspace(workspaceFile);
+        else if ("analysis".equals(commandArg))
             executeAnalysis(outDir, workspaceFile, fcsDir);
         else if ("convert-workspace".equals(commandArg))
             executeConvertWorkspace(outDir, workspaceFile, groupArgs, sampleArgs, statArgs);
