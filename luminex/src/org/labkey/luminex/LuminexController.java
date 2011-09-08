@@ -24,11 +24,13 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AbstractAssayView;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.util.PageFlowUtil;
@@ -112,6 +114,22 @@ public class LuminexController extends SpringActionController
         {
             NavTree result = super.appendNavTrail(root);
             return result.addChild(_protocol.getName() + " Excluded Data");
+        }
+    }
+
+    @RequiresPermissionClass(UpdatePermission.class)
+    public class ManageGuideSetAction extends SimpleViewAction<GuideSetForm>
+    {
+        @Override
+        public ModelAndView getView(GuideSetForm form, BindException errors) throws Exception
+        {
+            return new JspView<GuideSetForm>("/org/labkey/luminex/manageGuideSet.jsp", form);
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Manage Guide Set");
         }
     }
 }

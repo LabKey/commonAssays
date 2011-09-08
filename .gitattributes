@@ -613,6 +613,7 @@ luminex/src/org/labkey/luminex/CurveFitTable.java -text
 luminex/src/org/labkey/luminex/ExclusionUIDisplayColumn.java -text
 luminex/src/org/labkey/luminex/GuideSet.java -text
 luminex/src/org/labkey/luminex/GuideSetCurveFitTable.java -text
+luminex/src/org/labkey/luminex/GuideSetForm.java -text
 luminex/src/org/labkey/luminex/GuideSetTable.java -text
 luminex/src/org/labkey/luminex/LuminexAssayProvider.java -text
 luminex/src/org/labkey/luminex/LuminexController.java -text
@@ -635,9 +636,11 @@ luminex/src/org/labkey/luminex/RunExclusionTable.java -text
 luminex/src/org/labkey/luminex/Titration.java -text
 luminex/src/org/labkey/luminex/TitrationTable.java -text
 luminex/src/org/labkey/luminex/WellExclusionTable.java -text
+luminex/src/org/labkey/luminex/manageGuideSet.jsp -text
 luminex/src/org/labkey/luminex/titrationWellRoles.jsp -text
 luminex/webapp/AnalyteExclusionPanel.js -text
 luminex/webapp/Exclusion.css -text
+luminex/webapp/ManageGuideSetPanel.js -text
 luminex/webapp/WellExclusionPanel.js -text
 luminex/webapp/luminex/excluded.png -text
 luminex/webapp/luminex/included.png -text
