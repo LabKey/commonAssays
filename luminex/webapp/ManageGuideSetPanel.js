@@ -72,34 +72,33 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             this.criteria = this.titration + ' ' + this.analyte + ' ' + this.isotype + ' ' + this.conjugate;
 
             // add labels for the guide set information to the top of the panel
-            this.add(new Ext.FormPanel({
+            this.add(new Ext.Panel({
                 width: 800,
-                layout: 'column',
-                labelWidth: 100,
                 border: false,
-                defaults:{
-                    columnWidth: 0.5,
-                    layout: 'form',
-                    border: false
-                },
-                items: [
-                    {
+                items: [{
+                    border: false,
+                    layout: 'column',
+                    defaults:{
+                        columnWidth: 0.5,
+                        layout: 'form',
+                        border: false
+                    },
+                    items: [{
                         defaults:{xtype: 'label', labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold'},
                         items: [
                             {fieldLabel: 'Guide Set ID', text: this.guideSetId},
                             {fieldLabel: 'Titration', text: this.titration},
                             {fieldLabel: 'Analyte', text: this.analyte}
                         ]
-                    },
-                    {
+                    },{
                         defaults:{xtype: 'label', labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold'},
                         items: [
                             {fieldLabel: 'Created', text: this.created},
                             {fieldLabel: 'Isotype', text: this.isotype},
                             {fieldLabel: 'Conjugate', text: this.conjugate}
                         ]
-                    }
-                ]
+                    }]
+                }]
             }));
             this.add(new Ext.Spacer({height: 20}));
 
@@ -111,7 +110,6 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             else
             {
                 // add a grid for all of the runs that match the guide set criteria
-                // TODO: set the paging for the all runs grid to 10? 20?
                 var allRunsStore = new LABKEY.ext.Store({
                     storeId: 'allRunsStore',
                     schemaName: 'assay',
@@ -122,11 +120,11 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                             LABKEY.Filter.create('Titration/Run/Isotype', this.isotype),
                             LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate)],
                     columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Isotype, Titration/Run/Conjugate, '
-                            + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, Titration/Run/ExperimentPerformer, Titration/Run/Date, '
+                            + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, Titration/Run/ExperimentPerformer, Titration/Run/Created, '
                             + 'GuideSet, IncludeInGuideSetCalculation',
-                    updatable: false,
-                    autoLoad: true 
+                    updatable: false
                 });
+                allRunsStore.load({params:{start:0, limit:5}});
 
                 // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
                 var allRunsColModel = new Ext.grid.ColumnModel({
@@ -148,7 +146,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                         {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo'},
                         {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:75},
                         {header:'Experiment Performer', dataIndex:'Titration/Run/ExperimentPerformer'},
-                        {header:'Date', dataIndex:'Titration/Run/Date', width:75}
+                        {header:'Created', dataIndex:'Titration/Run/Created', renderer:function(val){return new Date(val).format("Y-m-d");}, width:75}
                     ],
                     scope: this
                 });
@@ -161,14 +159,22 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     store: allRunsStore,
                     colModel: allRunsColModel,
                     disableSelection: true,
-                    viewConfig: {forceFit: true}
+                    viewConfig: {forceFit: true},
+                    bbar: new Ext.PagingToolbar({
+                        pageSize: 5,
+                        store: allRunsStore,
+                        displayInfo: true,
+                        displayMsg: 'Displaying runs {0} - {1} of {2}',
+                        emptyMsg: "No runs to display"
+                    })
                 });
                 this.allRunsGrid.on('cellclick', function(grid, rowIndex, colIndex, event){
                     if (colIndex == 0)
                         this.addRunToGuideSet(grid.getStore().getAt(rowIndex));
                 }, this);
 
-                this.add(new Ext.Panel({
+                this.add(new Ext.Panel(
+                {
                     title: 'All Runs',
                     width:1000,
                     items: [
@@ -188,7 +194,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 filterArray: [LABKEY.Filter.create('GuideSet', this.guideSetId),
                         LABKEY.Filter.create('IncludeInGuideSetCalculation', true)],
                 columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Isotype, Titration/Run/Conjugate, '
-                        + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, Titration/Run/ExperimentPerformer, Titration/Run/Date, '
+                        + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, Titration/Run/ExperimentPerformer, Titration/Run/Created, '
                         + 'GuideSet, IncludeInGuideSetCalculation',
                 updatable: false,
                 autoLoad: true
@@ -214,7 +220,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo'},
                     {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:75},
                     {header:'Experiment Performer', dataIndex:'Titration/Run/ExperimentPerformer'},
-                    {header:'Date', dataIndex:'Titration/Run/Date', width:75}
+                    {header:'Created', dataIndex:'Titration/Run/Created', renderer:function(val){return new Date(val).format("Y-m-d");}, width:75}
                 ],
                 scope: this
             });
@@ -319,11 +325,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                         success: function(data){
                             // reload the grids to get the updated run list (and set icons accordingly)
                             if (this.allRunsGrid)
-                            {
-                                this.allRunsGrid.getSelectionModel().selectRows([]);
                                 this.allRunsGrid.getStore().reload();
-                            }
-                            this.guideRunSetGrid.getSelectionModel().selectRows([]);
                             this.guideRunSetGrid.getStore().reload();
                         },
                         scope: this
@@ -371,11 +373,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                             success: function(data){
                                 // reload the grids to get the updated run list (and set icons accordingly)
                                 if (this.allRunsGrid)
-                                {
-                                    this.allRunsGrid.getSelectionModel().selectRows([]);
                                     this.allRunsGrid.getStore().reload();
-                                }
-                                this.guideRunSetGrid.getSelectionModel().selectRows([]);
                                 this.guideRunSetGrid.getStore().reload();
                             },
                             scope: this
