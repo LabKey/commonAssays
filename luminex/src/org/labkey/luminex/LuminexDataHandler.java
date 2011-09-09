@@ -492,7 +492,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             params.max = upper.doubleValue();
             params.asymmetry = asymmetry == null ? 1 : asymmetry.doubleValue();
 
-            insertCurveFit(wellGroup, user, titration, analyte, params, fitType, "Rumi");
+            insertCurveFit(wellGroup, user, titration, analyte, params, fitType, null);
         }
         
     }
@@ -694,8 +694,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // Don't calculate AUC for 4/5PL fits
 //        double auc = curveImpl.calculateAUC(DilutionCurve.AUCType.NORMAL);
 
+        String fitLabel = fitType.getLabel();
+        if (source != null)
+            fitLabel = source + " " + fitLabel;
+
         fit.setEC50(ec50);
-        fit.setCurveType(source + " " + fitType.getLabel());
+        fit.setCurveType(fitLabel);
         return fit;
     }
 

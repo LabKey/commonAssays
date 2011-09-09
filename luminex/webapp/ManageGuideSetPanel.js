@@ -105,26 +105,21 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             // make sure that this guide set is a "current" guide set (only current sets are editable)
             if (!this.currentGuideSet)
             {
-                Ext.Msg.alert("Error", "The selected guide set is not a currently active guide set. Only current guide sets are editable at this time.");
+                this.add({
+                    xtype: 'displayfield',
+                    hideLabel: true,
+                    value: 'The selected guide set is not a currently active guide set. Only current guide sets are editable at this time.'
+                });
             }
             else
             {
                 // add a grid for all of the runs that match the guide set criteria
-                var allRunsStore = new LABKEY.ext.Store({
+                var allRunsStore = new Ext.data.JsonStore({
                     storeId: 'allRunsStore',
-                    schemaName: 'assay',
-                    queryName: this.assayName + ' AnalyteTitration',
-                    containerFilter: LABKEY.Query.containerFilter.allFolders,
-                    filterArray: [LABKEY.Filter.create('Analyte/Name', this.analyte),
-                            LABKEY.Filter.create('Titration/Name', this.titration),
-                            LABKEY.Filter.create('Titration/Run/Isotype', this.isotype),
-                            LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate)],
-                    columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Isotype, Titration/Run/Conjugate, '
-                            + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, Titration/Run/ExperimentPerformer, Titration/Run/Created, '
-                            + 'GuideSet, IncludeInGuideSetCalculation',
-                    updatable: false
+                    root: 'rows',
+                    fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate',
+                        'Titration/Run/Created', 'Titration/Run/Folder/Name', 'Titration/Run/Isotype', 'Titration/Run/Name']
                 });
-                allRunsStore.load({params:{start:0, limit:5}});
 
                 // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
                 var allRunsColModel = new Ext.grid.ColumnModel({
@@ -134,15 +129,11 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     },
                     columns: [
                         {header:'', dataIndex:'RowId', renderer:this.renderAddRunIcon, scope: this, width:25},
-                        //{header:'Analyte', dataIndex:'Analyte'},
-                        //{header:'Titration', dataIndex:'Titration'},
                         {header:'Assay Id', dataIndex:'Titration/Run/Name', width:225},
                         {header:'Network', dataIndex:'Network', width:75},
                         {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75},
-                        //{header:'Isotype', dataIndex:'Titration/Run/Isotype'},
-                        //{header:'Conjugate', dataIndex:'Titration/Run/Conjugate'},
                         //{header:'Guide Set', dataIndex:'GuideSet'},
-                        //{header:'Included', dataIndex:'IncludeInGuideSetCalculation'}
+                        //{header:'Included', dataIndex:'IncludeInGuideSetCalculation'},
                         {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo'},
                         {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:75},
                         {header:'Experiment Performer', dataIndex:'Titration/Run/ExperimentPerformer'},
@@ -153,20 +144,14 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
                 // create the grid for the full list of runs that match the given guide set criteria
                 this.allRunsGrid = new Ext.grid.GridPanel({
-                    autoHeight:true,
+                    autoScroll:true,
+                    height:200,
                     width:1000,
                     loadMask:{msg:"Loading runs..."},
                     store: allRunsStore,
                     colModel: allRunsColModel,
                     disableSelection: true,
-                    viewConfig: {forceFit: true},
-                    bbar: new Ext.PagingToolbar({
-                        pageSize: 5,
-                        store: allRunsStore,
-                        displayInfo: true,
-                        displayMsg: 'Displaying runs {0} - {1} of {2}',
-                        emptyMsg: "No runs to display"
-                    })
+                    viewConfig: {forceFit: true}
                 });
                 this.allRunsGrid.on('cellclick', function(grid, rowIndex, colIndex, event){
                     if (colIndex == 0)
@@ -176,28 +161,27 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 this.add(new Ext.Panel(
                 {
                     title: 'All Runs',
+                    //autoScroll: true,
                     width:1000,
+                    //height:200,
                     items: [
-                        {xtype: 'displayfield', value: 'List of all of the runs for the "' + this.assayName + '" assay that contain ' + this.criteria + '.'},
+                        {
+                            xtype: 'displayfield',
+                            value: 'List of all of the runs from the "' + this.assayName + '" assay that contain ' + this.criteria + '.'
+                                + ' Note that runs that are already members of a different guide set will not be displayed.'
+                        },
                         this.allRunsGrid
                     ]
                 }));
-                this.add(new Ext.Spacer({height: 20}));
             }
+            this.add(new Ext.Spacer({height: 20}));
 
             // add a grid for the list of runs currently in the selected guide set
-            var guideRunSetStore = new LABKEY.ext.Store({
+            var guideRunSetStore = new Ext.data.JsonStore({
                 storeId: 'guideRunSetStore',
-                schemaName: 'assay',
-                queryName: this.assayName + ' AnalyteTitration',
-                containerFilter: LABKEY.Query.containerFilter.allFolders, 
-                filterArray: [LABKEY.Filter.create('GuideSet', this.guideSetId),
-                        LABKEY.Filter.create('IncludeInGuideSetCalculation', true)],
-                columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Isotype, Titration/Run/Conjugate, '
-                        + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, Titration/Run/ExperimentPerformer, Titration/Run/Created, '
-                        + 'GuideSet, IncludeInGuideSetCalculation',
-                updatable: false,
-                autoLoad: true
+                root: 'rows',
+                fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate',
+                    'Titration/Run/Created', 'Titration/Run/Folder/Name', 'Titration/Run/Isotype', 'Titration/Run/Name']
             });
 
             // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
@@ -207,16 +191,10 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     sortable: true
                 },
                 columns: [
-                    {header:'', dataIndex:'RowId', renderer:this.renderRemoveIcon, scope: this, width:25},
-                    //{header:'Analyte', dataIndex:'Analyte'},
-                    //{header:'Titration', dataIndex:'Titration'},
+                    {header:'', dataIndex:'RowId', renderer:this.renderRemoveIcon, scope: this, hidden: !this.currentGuideSet, width:25},
                     {header:'Assay Id', dataIndex:'Titration/Run/Name', width:225},
                     {header:'Network', dataIndex:'Network', width:75},
                     {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75},
-                    //{header:'Isotype', dataIndex:'Titration/Run/Isotype'},
-                    //{header:'Conjugate', dataIndex:'Titration/Run/Conjugate'},
-                    //{header:'Guide Set', dataIndex:'GuideSet'},
-                    //{header:'Included', dataIndex:'IncludeInGuideSetCalculation'}
                     {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo'},
                     {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:75},
                     {header:'Experiment Performer', dataIndex:'Titration/Run/ExperimentPerformer'},
@@ -229,7 +207,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             this.guideRunSetGrid = new Ext.grid.GridPanel({
                 autoHeight:true,
                 width:1000,
-                loadMask:{msg:"Loading guide run set..."},
+                loadMask:{msg:"Loading runs assigned to guide set..."},
                 store: guideRunSetStore,
                 colModel: guideRunSetColModel,
                 disableSelection: true,
@@ -241,7 +219,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             }, this);
 
             this.add(new Ext.Panel({
-                title: 'Guide Run Set',
+                title: 'Runs Assigned to This Guide Set',
                 width:1000,
                 items: [
                     {xtype: 'displayfield', value: 'List of all of the runs included in the guide set calculations for the selected guide set.'},
@@ -250,139 +228,173 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             }));
             this.add(new Ext.Spacer({height: 20}));
 
-            // TODO: do we want to display the guide set calculated thresholds?
-
             // add a comment text field for the guide set
             this.commentTextField = new Ext.form.TextField({
-                labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold', 
+                labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold',
                 fieldLabel: 'Comment',
                 value: this.comment,
-                width: 900
+                width: 900,
+                enableKeyEvents: true,
+                listeners: {
+                    scope: this,
+                    'keydown': function(){
+                        // enable the save button
+                        Ext.getCmp('saveButton').enable();
+                    }
+                }
             });
+            
             this.add(this.commentTextField);
             this.add(new Ext.Spacer({height: 10}));
 
             // add save and cancel buttons to the toolbar
             if (this.currentGuideSet)
             {
-                this.add({
-                    xtype: 'button',
+                this.addButton({
+                    id: 'saveButton',
                     text: 'Save',
+                    disabled: true,
+                    handler: this.saveGuideSetData,
+                    scope: this
+                });
+                this.addButton({
+                    id: 'cancelButton',
+                    text: 'Cancel',
                     handler: function(){
-                        this.getEl().mask('Saving comment...');
-                        LABKEY.Query.updateRows({
-                            schemaName: 'assay',
-                            queryName: this.assayName + ' GuideSet',
-                            rows: [{
-                                RowId: this.guideSetId,
-                                Comment: this.commentTextField.getValue()
-                            }],
-                            success: function(data){
-                                this.getEl().unmask();
-                            },
-                            scope: this
-                        });
+                        // TODO: once this is a dialog pop-up, this can just close the window
                     },
                     scope: this
                 });
-//                this.add({
-//                    xtype: 'button',
-//                    text: 'Cancel',
-//                    handler: function(){
-//                        alert("Cancel something");
-//                    },
-//                    scope: this
-//                });
             }
 
             this.doLayout();
+
+            this.queryAllRunsForCriteria();
         }
     },
 
-    renderRemoveIcon: function() {
-        return (!this.currentGuideSet ? "&nbsp;" : "<span class='labkey-file-remove-icon labkey-file-remove-icon-enabled'>&nbsp;</span>");
+    saveGuideSetData: function() {
+        var commands = [{
+            schemaName: 'assay',
+            queryName: this.assayName + ' GuideSet',
+            command: 'update',
+            rows: [{
+                RowId: this.guideSetId,
+                Comment: this.commentTextField.getValue()
+            }]
+        }];
+
+        // get the list of modified records and set up the save rows array
+        var modRecords = this.allRunsGrid.getStore().getModifiedRecords();
+        var analyteTitrationRows = [];
+        Ext.each(modRecords, function(record){
+            analyteTitrationRows.push({
+                Analyte: record.get("Analyte"),
+                Titration: record.get("Titration"),
+                IncludeInGuideSetCalculation: record.get("IncludeInGuideSetCalculation"),
+                GuideSetId: record.get("IncludeInGuideSetCalculation") ? this.guideSetId : record.get("GuideSet")
+            });
+        }, this);
+
+        if (analyteTitrationRows.length > 0)
+        {
+            commands.push({
+                schemaName: 'assay',
+                queryName: this.assayName + ' AnalyteTitration',
+                command: 'update',
+                rows: analyteTitrationRows
+            });
+        }
+
+        this.getEl().mask('Saving guide set information...');
+        LABKEY.Query.saveRows({
+            commands: commands,
+            success: this.queryAllRunsForCriteria()
+        });
     },
 
-    removeRunFromGuideSet: function(record) {
-        // ask the user if they are sure they want to remove the selected run from the guide set
-        Ext.Msg.show({
-            title:'Confirmation',
-            msg: 'You are about the remove the following run from the Guide Run Set:<br/><br/>'
-                + record.get("Titration/Run/Name") + '<br/><br/>'
-                + 'Proceed?',
-            buttons: Ext.Msg.YESNO,
-            fn: function(btnId, text, opt){
-                if (btnId == 'yes')
-                {
-                    LABKEY.Query.updateRows({
-                        schemaName: 'assay',
-                        queryName: this.assayName + ' AnalyteTitration',
-                        rows: [{
-                            Analyte: record.get("Analyte"),
-                            Titration: record.get("Titration"),
-                            IncludeInGuideSetCalculation: false
-                        }],
-                        success: function(data){
-                            // reload the grids to get the updated run list (and set icons accordingly)
-                            if (this.allRunsGrid)
-                                this.allRunsGrid.getStore().reload();
-                            this.guideRunSetGrid.getStore().reload();
-                        },
-                        scope: this
-                    });
-                }
-            },
-            icon: Ext.MessageBox.QUESTION,
+    queryAllRunsForCriteria: function() {
+        // it is possible that the panel might be masked from reloading the list of runs
+        if (this.getEl().isMasked())
+            this.getEl().unmask();
+
+        // query the server for the list of runs that meet the given criteria
+        LABKEY.Query.selectRows({
+            schemaName: 'assay',
+            queryName: this.assayName + ' AnalyteTitration',
+            filterArray: [LABKEY.Filter.create('Analyte/Name', this.analyte),
+                    LABKEY.Filter.create('Titration/Name', this.titration),
+                    LABKEY.Filter.create('Titration/Run/Isotype', this.isotype),
+                    LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate)],
+            columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Isotype, Titration/Run/Conjugate, '
+                    + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, Titration/Run/ExperimentPerformer, Titration/Run/Created, '
+                    + 'GuideSet, IncludeInGuideSetCalculation',
+            sort: '-Titration/Run/Created',
+            containerFilter: LABKEY.Query.containerFilter.allFolders,
+            success: this.populateRunGridStores,
             scope: this
         });
     },
 
+    populateRunGridStores: function(data) {
+        // loop through the list of runs and determin which ones are candidates for inclusion in the current guide set and which ones are already included
+        var allRunsStoreData = {rows: []};
+        var guideRunSetStoreData = {rows: []};
+        for (var i = 0; i < data.rows.length; i++)
+        {
+            var row = data.rows[i];
+
+            // include in all runs list if not already a member of a different guide set
+            if (!(row["GuideSet"] != this.guideSetId && row["IncludeInGuideSetCalculation"]))
+                allRunsStoreData.rows.push(row);
+
+            // include in guide run set if that is the case
+            if (row["GuideSet"] == this.guideSetId && row["IncludeInGuideSetCalculation"])
+                guideRunSetStoreData.rows.push(row);    
+        }
+
+        if (this.allRunsGrid)
+            this.allRunsGrid.getStore().loadData(allRunsStoreData);
+        this.guideRunSetGrid.getStore().loadData(guideRunSetStoreData);
+    },
+
+    renderRemoveIcon: function() {
+        return "<span class='labkey-file-remove-icon labkey-file-remove-icon-enabled'>&nbsp;</span>";
+    },
+
+    removeRunFromGuideSet: function(record) {
+        // remove the record from the guide run set store
+        this.guideRunSetGrid.getStore().remove(record);
+
+        // enable the add icon in the all runs store by setting the IncludeInGuideSetCalculation value 
+        var index = this.allRunsGrid.getStore().findBy(function(rec, id){
+            return (record.get("Analyte") == rec.get("Analyte") && record.get("Titration") == rec.get("Titration"));
+        });
+        if (index > -1)
+            this.allRunsGrid.getStore().getAt(index).set("IncludeInGuideSetCalculation", false);
+
+        // enable the save button
+        Ext.getCmp('saveButton').enable();
+    },
+
     renderAddRunIcon: function(value, metaData, record, rowIndex, colIndex, store) {
-        if (record.get("GuideSet") == this.guideSetId && record.get("IncludeInGuideSetCalculation"))
+        if (record.get("IncludeInGuideSetCalculation"))
             return "<span class='labkey-file-add-icon labkey-file-add-icon-disabled'>&nbsp;</span>";
         else
             return "<span class='labkey-file-add-icon labkey-file-add-icon-enabled'>&nbsp;</span>";
     },
 
     addRunToGuideSet: function(record) {
-        if (!(record.get("GuideSet") == this.guideSetId && record.get("IncludeInGuideSetCalculation")))
+        if (!record.get("IncludeInGuideSetCalculation"))
         {
-            // TODO: should we warn the user if they are also about to change the associated guide set for the analyte/titration?
-            console.log("Run currently in guide set: " + record.get("GuideSet"));
-            console.log("Run included in guide set calculation: " + record.get("IncludeInGuideSetCalculation"));
+            // disable the add icon in the all runs store by setting the IncludeInGuideSetCalculation value
+            record.set("IncludeInGuideSetCalculation", true);
 
-            // ask the user if they are sure they want to add the selected run to the guide set
-            Ext.Msg.show({
-                title:'Confirmation',
-                msg: 'You are about the add the following run to the Guide Run Set for inclusion in the guide set calculations:<br/><br/>'
-                    + record.get("Titration/Run/Name") + '<br/><br/>'
-                    + 'Proceed?',
-                buttons: Ext.Msg.YESNO,
-                fn: function(btnId, text, opt){
-                    if (btnId == 'yes')
-                    {
-                        LABKEY.Query.updateRows({
-                            schemaName: 'assay',
-                            queryName: this.assayName + ' AnalyteTitration',
-                            rows: [{
-                                Analyte: record.get("Analyte"),
-                                Titration: record.get("Titration"),
-                                IncludeInGuideSetCalculation: true,
-                                GuideSetId: this.guideSetId
-                            }],
-                            success: function(data){
-                                // reload the grids to get the updated run list (and set icons accordingly)
-                                if (this.allRunsGrid)
-                                    this.allRunsGrid.getStore().reload();
-                                this.guideRunSetGrid.getStore().reload();
-                            },
-                            scope: this
-                        });
-                    }
-                },
-                icon: Ext.MessageBox.QUESTION,
-                scope: this
-            });
+            // add the record to the guide run set store
+            this.guideRunSetGrid.getStore().insert(0, record.copy());
+
+            // enable the save button
+            Ext.getCmp('saveButton').enable();
         }
     }
 });
