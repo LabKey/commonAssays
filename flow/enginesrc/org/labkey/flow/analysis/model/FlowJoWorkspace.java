@@ -1289,7 +1289,6 @@ abstract public class FlowJoWorkspace implements Serializable
             assertEquals("S/Lv/L/3+/4+/(IFNg+|IL2+|IL4+|TNFa+)", aliasSpec.toString());
         }
 
-        @Test
         public void loadSubsets() throws Exception
         {
             FlowJoWorkspace workspace = loadWorkspace("sampledata/flow/flowjoquery/Workspaces/subset-parsing.xml");

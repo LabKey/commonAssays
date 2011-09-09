@@ -29,8 +29,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.UpdateableTableInfo;
-import org.labkey.api.etl.DataIterator;
-import org.labkey.api.etl.Pump;
+import org.labkey.api.etl.DataIteratorBuilder;
 import org.labkey.api.etl.TableInsertDataIterator;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
@@ -320,11 +319,9 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
     }
 
     @Override
-    public int persistRows(DataIterator data, BatchValidationException errors)
+    public DataIteratorBuilder persistRows(DataIteratorBuilder data, BatchValidationException errors)
     {
-        TableInsertDataIterator insert = TableInsertDataIterator.create(data, this, errors);
-        new Pump(insert, errors).run();
-        return insert.getExecuteCount();
+        return TableInsertDataIterator.create(data, this, errors);
     }
 
     @Override
