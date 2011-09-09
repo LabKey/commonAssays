@@ -143,6 +143,8 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         });
 
         var guideSetsSelModel = new Ext.grid.CheckboxSelectionModel({
+            id: 'guideSetsSelModel',
+            header: '',
             singleSelect: true
         });
 

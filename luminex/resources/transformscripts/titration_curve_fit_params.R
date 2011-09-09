@@ -90,7 +90,7 @@ if (file.exists(titration.data.file))
                     # if there is an expected concentration for this titration, use it to set the dilution value for the curve fit function
                     if (!all(is.na(dat$expConc)))
                     {
-                        dat$dilution = 50000/dat$expConc;
+                        dat$dilution = (100 * max(dat$expConc, na.rm=TRUE)) / dat$expConc;
                     }
 
                     # get curve fit params for 4PL using the rumi curve fit function ###DISABLED###
