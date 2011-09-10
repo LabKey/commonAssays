@@ -51,7 +51,7 @@ import java.sql.SQLException;
 public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAssayProvider>
 {
     public static String INPUT_PREFIX = "_pool_";
-    private static String FRONTEIR_SCIENCE_BARCODE_PREFIX = "∟FSQ";
+    private static String FRONTIER_SCIENCE_BARCODE_PREFIX = "\u221fFSQ";
 
     private ExpRun _reRun;
     private Integer _reRunId;
@@ -181,8 +181,8 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                         if (specimenID != null)
                         {
                             specimenID = specimenID.trim();
-                            if (specimenID.startsWith(FRONTEIR_SCIENCE_BARCODE_PREFIX))
-                                specimenID = specimenID.substring(FRONTEIR_SCIENCE_BARCODE_PREFIX.length());
+                            if (specimenID.startsWith(FRONTIER_SCIENCE_BARCODE_PREFIX))
+                                specimenID = specimenID.substring(FRONTIER_SCIENCE_BARCODE_PREFIX.length());
                             if (specimenID.length() > 0)
                                 specimenIDs.add(specimenID);
                         }
