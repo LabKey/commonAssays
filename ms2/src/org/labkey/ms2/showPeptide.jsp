@@ -297,7 +297,7 @@ if (mzs != null && intensities != null && mzs.length == intensities.length)
 {
 %>
 
-<!--[if IE]><script language="javascript" type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/excanvas.min.js"></script><![endif]-->
+<!--[if IE]><script type="text/javascript" src="<%= AppProps.getInstance().getContextPath() %>/MS2/lorikeet_0.3/js/excanvas.min.js"></script><![endif]-->
 <script type="text/javascript" src="<%= AppProps.getInstance().getContextPath()%>/MS2/lorikeet_0.3/js/jquery-1.4.2.min.js"></script>
 <script type="text/javascript" src="<%= AppProps.getInstance().getContextPath()%>/MS2/lorikeet_0.3/js/jquery-ui-1.8.4.min.js"></script>
 
