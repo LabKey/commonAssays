@@ -86,9 +86,9 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     items: [{
                         defaults:{xtype: 'label', labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold'},
                         items: [
-                            {fieldLabel: 'Guide Set ID', text: this.guideSetId},
+                            {fieldLabel: 'Guide Set ID', text: this.guideSetId, id: 'guideSetIdLabel'},
                             {fieldLabel: 'Titration', text: this.titration},
-                            {fieldLabel: 'Analyte', text: this.analyte}
+                            {fieldLabel: 'Analyte', text: this.analyte, id: 'analyteLabel'}
                         ]
                     },{
                         defaults:{xtype: 'label', labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold'},
@@ -230,6 +230,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
             // add a comment text field for the guide set
             this.commentTextField = new Ext.form.TextField({
+                id: 'commentTextField',
                 labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold',
                 fieldLabel: 'Comment',
                 value: this.comment,
@@ -238,6 +239,10 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 listeners: {
                     scope: this,
                     'keydown': function(){
+                        // enable the save button
+                        Ext.getCmp('saveButton').enable();
+                    },
+                    'change': function(){
                         // enable the save button
                         Ext.getCmp('saveButton').enable();
                     }
@@ -358,8 +363,8 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.guideRunSetGrid.getStore().loadData(guideRunSetStoreData);
     },
 
-    renderRemoveIcon: function() {
-        return "<span class='labkey-file-remove-icon labkey-file-remove-icon-enabled'>&nbsp;</span>";
+    renderRemoveIcon: function(value, metaData, record, rowIndex, colIndex, store) {
+        return "<span class='labkey-file-remove-icon labkey-file-remove-icon-enabled' id='guideRunSetRow_" + rowIndex + "'>&nbsp;</span>";
     },
 
     removeRunFromGuideSet: function(record) {
@@ -379,9 +384,9 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
     renderAddRunIcon: function(value, metaData, record, rowIndex, colIndex, store) {
         if (record.get("IncludeInGuideSetCalculation"))
-            return "<span class='labkey-file-add-icon labkey-file-add-icon-disabled'>&nbsp;</span>";
+            return "<span class='labkey-file-add-icon labkey-file-add-icon-disabled' id='allRunsRow_" + rowIndex + "'>&nbsp;</span>";
         else
-            return "<span class='labkey-file-add-icon labkey-file-add-icon-enabled'>&nbsp;</span>";
+            return "<span class='labkey-file-add-icon labkey-file-add-icon-enabled' id='allRunsRow_" + rowIndex + "'>&nbsp;</span>";
     },
 
     addRunToGuideSet: function(record) {
