@@ -142,7 +142,7 @@ public abstract class AbstractRunCompareView extends QueryView
         TSVGridWriter tsvWriter = getTsvWriter();
         try
         {
-            tsvWriter.setCaptionRowVisible(false);
+            tsvWriter.setHeaderRowVisible(false);
             tsvWriter.write(sb);
 
             StringTokenizer lines = new StringTokenizer(sb.toString(), "\n");

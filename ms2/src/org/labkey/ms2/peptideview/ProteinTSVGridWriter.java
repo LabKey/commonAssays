@@ -16,17 +16,18 @@
 
 package org.labkey.ms2.peptideview;
 
+import com.google.common.collect.Iterables;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.data.TSVGridWriter;
 import org.labkey.api.data.RenderContext;
 import org.apache.log4j.Logger;
+import org.labkey.api.view.HttpView;
 
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.util.List;
-import java.io.PrintWriter;
 
 /**
  * User: adam
@@ -67,24 +68,19 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
         _groupedRS = groupedRS;
     }
 
-    protected StringBuilder getHeader(RenderContext ctx, List<DisplayColumn> proteinDisplayColumns)
+    public void writeColumnHeaders()
     {
-        StringBuilder header = super.getHeader(ctx, proteinDisplayColumns);
+        if (_peptideDisplayColumns == null || _peptideDisplayColumns.isEmpty())
+            super.writeColumnHeaders();
 
-        if (null != _peptideDisplayColumns && !_peptideDisplayColumns.isEmpty())
-        {
-            if (header.length() > 0)
-                header.append(_chDelimiter);
-
-            header.append(super.getHeader(ctx, _peptideDisplayColumns));
-        }
-
-        return header;
+        RenderContext context = new RenderContext(HttpView.currentContext());
+        Iterable<DisplayColumn> columns = Iterables.concat(_displayColumns, _peptideDisplayColumns);
+        writeColumnHeaders(context, columns);
     }
 
     protected abstract void addCalculatedValues(RenderContext ctx, ResultSet nestedRS) throws SQLException;
 
-    protected void writeRow(PrintWriter out, RenderContext ctx, List<DisplayColumn> displayColumns)
+    protected void writeRow(RenderContext ctx, List<DisplayColumn> displayColumns)
     {
         try
         {
@@ -93,7 +89,7 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
                 ResultSet rs = _groupedRS.getNextResultSet();
                 try
                 {
-                    writeExpandedRow(out, ctx, displayColumns, rs);
+                    writeExpandedRow(ctx, displayColumns, rs);
                 }
                 finally
                 {
@@ -101,7 +97,7 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
                 }
             }
             else
-                writeCollapsedRow(out, ctx, displayColumns);
+                writeCollapsedRow(ctx, displayColumns);
         }
         catch(SQLException e)
         {
@@ -110,17 +106,13 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
     }
 
 
-    protected void writeExpandedRow(PrintWriter out, RenderContext ctx, List<DisplayColumn> displayColumns, ResultSet nestedRS) throws SQLException
+    protected void writeExpandedRow(RenderContext ctx, List<DisplayColumn> displayColumns, ResultSet nestedRS) throws SQLException
     {
         addCalculatedValues(ctx, nestedRS);
         nestedRS.beforeFirst();
 
         // Generate the protein information and store in the context; it will be pre-pended to each peptide row
-        StringBuilder proteinRow = getRow(ctx, displayColumns);
-
-        // Append a tab if there's data in the protein columns (there won't be in the case of AMT)
-        if (proteinRow.length() > 0)
-            proteinRow.append(_chDelimiter);
+        Iterable<String> proteinRow = getValues(ctx, displayColumns);
 
         RenderContext peptideCtx = new RenderContext(ctx.getViewContext());
         peptideCtx.put("ProteinRow", proteinRow);
@@ -128,12 +120,12 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
     }
 
 
-    protected void writeCollapsedRow(PrintWriter out, RenderContext ctx, List<DisplayColumn> displayColumns) throws SQLException
+    protected void writeCollapsedRow(RenderContext ctx, List<DisplayColumn> displayColumns) throws SQLException
     {
         ResultSet nestedRS = _groupedRS.getNextResultSet();
         addCalculatedValues(ctx, nestedRS);
         nestedRS.close();
 
-        super.writeRow(out, ctx, displayColumns);
+        super.writeRow(ctx, displayColumns);
     }
 }

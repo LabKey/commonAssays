@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.peptideview;
 
+import com.google.common.collect.Iterables;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
@@ -408,11 +409,11 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         {
             TSVGridWriter twPeptide = new TSVGridWriter(new ResultsImpl(peptideRS), getPeptideDisplayColumns(peptideColumnNames))
             {
-                protected StringBuilder getRow(RenderContext ctx, List<DisplayColumn> displayColumns)
+                @Override
+                protected Iterable<String> getValues(RenderContext ctx, Iterable<DisplayColumn> displayColumns)
                 {
-                    StringBuilder row = super.getRow(ctx, displayColumns);
-                    row.insert(0, (StringBuilder)ctx.get("ProteinRow"));
-                    return row;
+                    Iterable<String> proteinRow = (Iterable<String>)ctx.get("ProteinRow");
+                    return Iterables.concat(proteinRow, super.getValues(ctx, displayColumns));
                 }
             };
 
