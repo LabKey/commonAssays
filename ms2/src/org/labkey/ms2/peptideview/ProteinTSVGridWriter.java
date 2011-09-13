@@ -71,11 +71,15 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
     public void writeColumnHeaders()
     {
         if (_peptideDisplayColumns == null || _peptideDisplayColumns.isEmpty())
+        {
             super.writeColumnHeaders();
-
-        RenderContext context = new RenderContext(HttpView.currentContext());
-        Iterable<DisplayColumn> columns = Iterables.concat(_displayColumns, _peptideDisplayColumns);
-        writeColumnHeaders(context, columns);
+        }
+        else
+        {
+            RenderContext context = new RenderContext(HttpView.currentContext());
+            Iterable<DisplayColumn> columns = Iterables.concat(_displayColumns, _peptideDisplayColumns);
+            writeColumnHeaders(context, columns);
+        }
     }
 
     protected abstract void addCalculatedValues(RenderContext ctx, ResultSet nestedRS) throws SQLException;
