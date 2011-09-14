@@ -20,6 +20,8 @@
 NSUB_MIN = 5000
 ALPHA    = 0.00001
 
+DOUBLE_MIN = 1E-307
+
 # I'm not sure why is.numeric() is returning TRUE in my script.
 # We can check both is.numeric() and !is.na() to weed out NA and empty string.
 isNum <- function (x)
@@ -48,6 +50,8 @@ positivity <- function (data, grouping_columns)
         m = matrix(c(x.ant,N.ant,x.neg,N.neg), nc=2, byrow=FALSE)
 
         pval = fisher.test(m, alternative="greater")$p.value
+        if (pval < DOUBLE_MIN)
+          pval = 0
       }
 
       return(pval)
@@ -57,6 +61,8 @@ positivity <- function (data, grouping_columns)
     data = by(data, subset(data, select=grouping_columns), function(ss) {
       #ss$adj_p = p.adjust(ss$raw_p, method="holm")
       ss$adj_p = p.adjust(ss$raw_p, method="bonferroni")
+      if (ss$adj_p < DOUBLE_MIN)
+        ss$adj_p = 0
       return(ss)
     })
     data = do.call(rbind, data)
