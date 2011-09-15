@@ -96,6 +96,9 @@
   <note type="input" label="pipeline, user name">username</note>
         <note>See http://www.matrixscience.com/help/search_field_help.html#NAME</note>
 
+  <note>By default, don't import spectra into the database. We'll still resolve them by looking at the file system --></note>
+  <note type="input" label="pipeline, import spectra">no</note>
+
 <note>default search input parameters</note>
   <note type="input" label="mascot, accession"></note>
         <note>List of accession strings for error tolerant search. Strings are

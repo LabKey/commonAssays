@@ -158,6 +158,8 @@
     <note>values any integer greater than 0. Setting this to '1' makes
           cutting and pasting histograms into spread sheet programs
           easier.</note>
+  <note>By default, don't import spectra into the database. We'll still resolve them by looking at the file system --></note>
+  <note type="input" label="pipeline, import spectra">no</note>
 
 <note>pipeline paramaters</note>
 	<note type="input" label="pipeline, data type">Samples</note>
