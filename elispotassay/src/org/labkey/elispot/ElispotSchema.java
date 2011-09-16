@@ -41,7 +41,7 @@ public class ElispotSchema extends AssaySchema
 
     public ElispotSchema(User user, Container container, ExpProtocol protocol)
     {
-        super("Assay", user, container, ExperimentService.get().getSchema(), protocol);
+        super(AssaySchema.NAME, user, container, ExperimentService.get().getSchema(), protocol);
     }
 
     public static String getAssayTableName(ExpProtocol protocol, String table)
