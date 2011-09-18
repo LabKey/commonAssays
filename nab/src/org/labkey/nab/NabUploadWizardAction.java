@@ -61,7 +61,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
     @Override
     protected InsertView createRunInsertView(NabRunUploadForm newRunForm, boolean errorReshow, BindException errors) throws ExperimentException
     {
-        NabAssayProvider provider = (NabAssayProvider) getProvider(newRunForm);
+        NabAssayProvider provider = newRunForm.getProvider();
         InsertView parent = super.createRunInsertView(newRunForm, errorReshow, errors);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
         PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(newRunForm, resolverType);
@@ -90,7 +90,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         {
             boolean runPropsValid = super.validatePost(form, errors);
 
-            NabAssayProvider provider = (NabAssayProvider) getProvider(form);
+            NabAssayProvider provider = form.getProvider();
             PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
 
             boolean samplePropsValid = true;

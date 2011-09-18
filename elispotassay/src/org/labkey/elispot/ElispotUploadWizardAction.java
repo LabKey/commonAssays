@@ -84,7 +84,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     {
         InsertView parent = super.createRunInsertView(newRunForm, errorReshow, errors);
 
-        ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(newRunForm);
+        ElispotAssayProvider provider = newRunForm.getProvider();
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
 
         PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(newRunForm, resolverType);
@@ -134,7 +134,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             addHiddenBatchProperties(form, view);
             addHiddenRunProperties(form, view);
 
-            ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(form);
+            ElispotAssayProvider provider = form.getProvider();
             PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
             for (Map.Entry<String, Map<DomainProperty, String>> sampleEntry : helper.getPostedPropertyValues(form.getRequest()).entrySet())
                 addHiddenProperties(sampleEntry.getValue(), view, sampleEntry.getKey());
@@ -184,7 +184,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             {
                 try {
                     form.getUploadedData();
-                    ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(form);
+                    ElispotAssayProvider provider = form.getProvider();
 
                     PlateTemplate template = provider.getPlateTemplate(getContainer(), form.getProtocol());
                     if (template == null)

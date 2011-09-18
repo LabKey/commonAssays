@@ -15,7 +15,7 @@
  */
 package org.labkey.luminex;
 
-import org.labkey.api.util.PageFlowUtil;
+import org.apache.commons.lang.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +112,7 @@ public class Titration
         LuminexDataRow firstDataRow = null;
         for (LuminexDataRow dataRow : dataRows)
         {
-            if (PageFlowUtil.nullSafeEquals(dataRow.getDescription(), getName()))
+            if (ObjectUtils.equals(dataRow.getDescription(), getName()))
             {
                 wells.add(new LuminexWell(dataRow));
                 if (firstDataRow == null)
