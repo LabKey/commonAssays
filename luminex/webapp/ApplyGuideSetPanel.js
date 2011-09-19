@@ -12,6 +12,7 @@ Ext.namespace('LABKEY');
 */
 
 LABKEY.requiresCss("GuideSet.css");
+Ext.QuickTips.init();
 
 /**
  * Class to display panel for selecting which runs are part of the current guide set for the given
@@ -59,14 +60,41 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // add a grid of all of the "selected" runs for the given criteria
         var selectedRunsStore = new LABKEY.ext.Store({
             storeId: 'selectedRunsStore',
-            schemaName: 'assay',
-            queryName: this.assayName + ' AnalyteTitration',
             containerFilter: LABKEY.Query.containerFilter.allFolders,
-            filterArray: [LABKEY.Filter.create('Analyte', analyteIds.join(";"), LABKEY.Filter.Types.EQUALS_ONE_OF),
-                    LABKEY.Filter.create('Titration', titrationIds.join(";"), LABKEY.Filter.Types.EQUALS_ONE_OF)],
-            columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Isotype, Titration/Run/Conjugate, '
-                    + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, Titration/Run/ExperimentPerformer, Titration/Run/Created, '
-                    + 'GuideSet, IncludeInGuideSetCalculation',
+            schemaName: 'assay',
+            sql: 'SELECT x.Analyte, '
+                + 'x.Titration, '
+                + 'x.Titration.Run.Name AS AssayId, '
+                + 'x.Titration.Run.Folder.Name AS Folder, '
+                + 'x.Titration.Run.Folder.EntityId AS EntityId, '
+                + 'x.Titration.Run.Isotype AS Isotype, '
+                + 'x.Titration.Run.Conjugate AS Conjugate,  '
+                + 'x.Titration.Run.Batch.Network AS Network, ' // user defined field
+                + 'x.Titration.Run.NotebookNo AS NotebookNo, ' // user defined field
+                + 'x.Titration.Run.AssayType AS AssayType, ' // user defined field
+                + 'x.Titration.Run.ExpPerformer AS ExpPerformer, ' // user defined field
+                + 'd.AcquisitionDate AS Date, '
+                + 'x.GuideSet AS GuideSet, '
+                + 'x.IncludeInGuideSetCalculation AS IncludeInGuideSetCalculation, '
+                + 'cf1.EC50 AS EC50, '
+                + 'cf1.MaxFI AS HighMFI, '
+                + 'cf2.AUC AS AUC '
+                + 'FROM "' + this.assayName + ' AnalyteTitration" AS x '
+                // join to get the acquisition date from the data table
+                + 'LEFT JOIN (SELECT DISTINCT y.Analyte.RowId AS Analyte, y.Titration.RowId AS Titration, y.Data.AcquisitionDate AS AcquisitionDate'
+                + '     FROM "' + this.assayName + ' Data" AS y) AS d '
+                + '     ON x.Analyte = d.Analyte AND x.Titration = d.Titration '
+                // join to CurveFit table for EC50 and MaxFI
+                + 'LEFT JOIN "' + this.assayName + ' CurveFit" AS cf1 '
+                + '    ON x.Titration = cf1.TitrationId AND x.Analyte = cf1.AnalyteId '
+                + '    AND cf1.CurveType = \'Four Parameter\' '
+                // join to CurveFit table for AUC
+                + 'LEFT JOIN "' + this.assayName + ' CurveFit" AS cf2 '
+                + '    ON x.Titration = cf2.TitrationId AND x.Analyte = cf2.AnalyteId '
+                + '    AND cf2.CurveType = \'Trapezoidal\' '
+                + 'WHERE x.Analyte in (' + analyteIds.join(",") + ') '
+                + '     AND x.Titration in (' + titrationIds.join(",") + ') '
+                + 'ORDER BY d.AcquisitionDate DESC, x.Titration.Run.Created DESC ',
             updatable: false,
             autoLoad: true,
             listeners: {
@@ -88,20 +116,18 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
         var selectedRunsColModel = new Ext.grid.ColumnModel({
-            defaults: {
-                width: 150,
-                sortable: true
-            },
+            defaults: {sortable: true},
             columns: [
-                {header:'Assay Id', dataIndex:'Titration/Run/Name', width:225},
+                {header:'Assay Id', dataIndex:'AssayId', renderer: this.tooltipRenderer, width:200},
                 {header:'Network', dataIndex:'Network', width:75},
-                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75},
-                //{header:'Guide Set', dataIndex:'GuideSet'},
-                //{header:'Included', dataIndex:'IncludeInGuideSetCalculation'},
-                {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo'},
-                {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:75},
-                {header:'Experiment Performer', dataIndex:'Titration/Run/ExperimentPerformer'},
-                {header:'Created', dataIndex:'Titration/Run/Created', renderer:function(val){return new Date(val).format("Y-m-d");}, width:75}
+                {header:'Folder', dataIndex:'Folder', width:75},
+                {header:'Notebook No.', dataIndex:'NotebookNo', width:100},
+                {header:'Assay Type', dataIndex:'AssayType', width:100},
+                {header:'Exp Performer', dataIndex:'ExpPerformer', width:100},
+                {header:'Run Date', dataIndex:'Date', renderer: this.dateRenderer, width:100},
+                {header:'EC50', dataIndex:'EC50', width:75},
+                {header:'High MFI', dataIndex:'HighMFI', width:75},
+                {header:'AUC', dataIndex:'AUC', width:75}
             ],
             scope: this
         });
@@ -122,13 +148,25 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         var guideSetsStore = new LABKEY.ext.Store({
             storeId: 'guideSetsStore',
             schemaName: 'assay',
-            queryName: this.assayName + ' GuideSet',
-            filterArray: [LABKEY.Filter.create('AnalyteName', this.analyte),
-                    LABKEY.Filter.create('TitrationName', this.titration),
-                    LABKEY.Filter.create('Isotype', this.isotype),
-                    LABKEY.Filter.create('Conjugate', this.conjugate)],
-            columns: 'RowId, Created, CreatedBy/DisplayName, Comment, CurrentGuideSet',
-            sort: '-Created',
+            sql: 'SELECT x.RowId AS RowId, '
+                + 'x.Created AS Created, '
+                + 'x.CreatedBy.DisplayName AS CreatedBy, '
+                + 'x.Comment AS Comment, '
+                + 'x.CurrentGuideSet AS CurrentGuideSet, '
+                + 'cf1.EC50Average AS EC50Average, '
+                + 'cf2.AUCAverage AS AUCAverage '
+                + 'FROM "' + this.assayName + ' GuideSet" AS x '
+                // join to CurveFit table for average EC50
+                + 'LEFT JOIN "' + this.assayName + ' GuideSetCurveFit" AS cf1 '
+                + '    ON x.RowId = cf1.GuideSetId AND cf1.CurveType = \'Four Parameter\' '
+                // join to CurveFit table for average AUC
+                + 'LEFT JOIN "' + this.assayName + ' GuideSetCurveFit" AS cf2 '
+                + '    ON x.RowId = cf2.GuideSetId AND cf2.CurveType = \'Trapezoidal\' '
+                + 'WHERE x.AnalyteName = \'' + this.analyte.replace(/'/g, "''") + '\' '
+                + '     AND x.TitrationName = \'' + this.titration.replace(/'/g, "''") + '\' '
+                + '     AND x.Isotype = \'' + this.isotype.replace(/'/g, "''") + '\' '
+                + '     AND x.Conjugate = \'' + this.conjugate.replace(/'/g, "''") + '\' '
+                + 'ORDER BY x.Created DESC ',
             updatable: false,
             autoLoad: true,
             listeners: {
@@ -153,11 +191,12 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             defaults: {width: 75, sortable: true},
             columns: [
                 guideSetsSelModel,
-                {header:'', dataIndex:'RowId', renderer:this.renderAddRunIcon, scope: this, width:25},
-                {header:'Created By', dataIndex:'CreatedBy/DisplayName'},
-                {header:'Created', dataIndex:'Created', renderer:function(val){return new Date(val).format("Y-m-d");}},
+                {header:'Created By', dataIndex:'CreatedBy', width:100},
+                {header:'Created', dataIndex:'Created', renderer: this.dateRenderer},
                 {header:'Current', dataIndex:'CurrentGuideSet'},
-                {header:'Comment', dataIndex:'Comment', width:200}
+                {header:'Comment', dataIndex:'Comment', width:200},
+                {header:'Avg EC50', dataIndex:'EC50Average'},
+                {header:'Avg AUC', dataIndex:'AUCAverage'}
             ],
             scope: this
         });
@@ -187,8 +226,8 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     {
                         id: 'highlightedRowDisplayField',
                         xtype: 'displayfield',
-                        value: 'NOTICE: Highlighted rows indicate that the selected run is a member of a guide run set. '
-                            + 'You are currently not allowed to apply guide sets to these rows, so they will be ignored '
+                        value: 'NOTICE: Highlighted rows indicate that the selected assay is a member of a guide run set. '
+                            + 'You are currently not allowed to apply guide sets to these assays, so they will be ignored '
                             + 'with the \'Apply Thresholds\' action.',
                         hidden: true
                     }
@@ -199,7 +238,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 title: 'Guide Run Sets for ' + this.titration + ' : ' + this.analyte + ' ' + this.isotype + ' ' + this.conjugate,
                 width:1000,
                 items: [
-                    {xtype: 'displayfield', value: 'Select the guide set that you would like to apply to the selected runs in the list above.'},
+                    {xtype: 'displayfield', value: 'Choose the guide set that you would like to apply to the selected runs in the list above.'},
                     this.guideSetsGrid    
                 ]
             }),
@@ -265,5 +304,15 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         ];
 
         LABKEY.ApplyGuideSetPanel.superclass.initComponent.call(this);
+    },
+
+    dateRenderer: function(val) {
+        return val ? new Date(val).format("Y-m-d") : null;
+    },
+
+    tooltipRenderer: function(value, p, record) {
+        var msg = Ext.util.Format.htmlEncode(value);
+        p.attr = 'ext:qtip="' + msg + '"';
+        return msg;
     }
 });
