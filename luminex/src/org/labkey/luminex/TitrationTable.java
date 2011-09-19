@@ -22,6 +22,8 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.view.ActionURL;
 
 import java.util.Collection;
 
@@ -39,7 +41,12 @@ public class TitrationTable extends AbstractLuminexTable
         setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.TITRATION_TABLE_NAME));
         _schema = schema;
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
+
+        // TODO: this can be removed once we have an alternate way of getting to the Levey-Jennings Reports
         ColumnInfo nameColumn = addColumn(wrapColumn(getRealTable().getColumn("Name")));
+        ActionURL url = new ActionURL(LuminexController.LeveyJenningsReport.class, schema.getContainer());
+        nameColumn.setURL(StringExpressionFactory.createURL(url + "titration=${Name}" + "&protocol=${Run/Protocol/Name}"));
+
         // Set to be nullable so when a dataset backed by this assay type is exported, it's not considered required
         // to import correctly. This is important because not all Luminex rows will have a titration, and therefore
         // they won't all have a titration name.

@@ -132,4 +132,20 @@ public class LuminexController extends SpringActionController
             return root.addChild("Manage Guide Set");
         }
     }
+
+    @RequiresPermissionClass(UpdatePermission.class)
+    public class LeveyJenningsReport extends SimpleViewAction<TitrationForm>
+    {
+        @Override
+        public ModelAndView getView(TitrationForm form, BindException errors) throws Exception
+        {
+            return new JspView<TitrationForm>("/org/labkey/luminex/leveyJenningsReport.jsp", form);
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Levey-Jennings Report");
+        }
+    }    
 }
