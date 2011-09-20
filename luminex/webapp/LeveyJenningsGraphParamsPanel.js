@@ -32,8 +32,13 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             title: 'Choose Graph Parameters',
             bodyStyle: 'background-color:#EEEEEE',
             labelAlign: 'top',
+            width: 225,
+            height: 450,
+            border: true,
             cls: 'extContainer'
         });
+
+        this.addEvents('resetGraphBtnClicked');        
 
         LABKEY.LeveyJenningsGraphParamsPanel.superclass.constructor.call(this, config);
     },
@@ -80,6 +85,8 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                         this.analyte = grid.getSelectionModel().getSelected().get("value");
                     else
                         this.analyte = undefined;
+
+                    // TODO: need to update the isotype and conjugate combobox stores when analyte is selected
 
                     this.enableResetGraphButton();
                 }
@@ -174,8 +181,10 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             text: 'Reset Graph',
             disabled: true,
             handler: function(){
-                alert("Levey-Jennings plot coming soon.");
-            }
+                // fire the resetGraphBtnClicked event so other panels can update based on the selected params
+                this.fireEvent('resetGraphBtnClicked', this.analyte, this.isotype, this.conjugate);
+            },
+            scope: this
         });
         items.push(this.resetGraphButton);
 

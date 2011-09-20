@@ -31,13 +31,15 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         // apply some Ext panel specific properties to the config
         Ext.apply(config, {
-            padding: 20,
             border: false,
             items: [],
             buttonAlign: 'left',
             buttons: [],
-            cls: 'extContainer'
+            cls: 'extContainer',
+            autoScroll: true
         });
+
+        this.addEvents('closeManageGuideSetPanel');
 
         LABKEY.ManageGuideSetPanel.superclass.constructor.call(this, config);
     },
@@ -234,7 +236,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold',
                 fieldLabel: 'Comment',
                 value: this.comment,
-                width: 900,
+                width: 890,
                 enableKeyEvents: true,
                 listeners: {
                     scope: this,
@@ -266,7 +268,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     id: 'cancelButton',
                     text: 'Cancel',
                     handler: function(){
-                        // TODO: once this is a dialog pop-up, this can just close the window
+                        this.fireEvent('closeManageGuideSetPanel');
                     },
                     scope: this
                 });
@@ -312,17 +314,18 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         }
 
         this.getEl().mask('Saving guide set information...');
+        var that = this; // work-around for 'too much recursion' error
         LABKEY.Query.saveRows({
             commands: commands,
-            success: this.queryAllRunsForCriteria()
+            success: function(data) {
+                if (that.getEl().isMasked())
+                    that.getEl().unmask();
+                that.fireEvent('closeManageGuideSetPanel', data["result"]);
+            }
         });
     },
 
     queryAllRunsForCriteria: function() {
-        // it is possible that the panel might be masked from reloading the list of runs
-        if (this.getEl().isMasked())
-            this.getEl().unmask();
-
         // query the server for the list of runs that meet the given criteria (using executeSql because we have to join in the EC50, AUC, and maxFI values)
         LABKEY.Query.executeSql({
             schemaName: 'assay',
