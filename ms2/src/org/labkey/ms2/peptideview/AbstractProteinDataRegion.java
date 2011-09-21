@@ -205,4 +205,10 @@ public abstract class AbstractProteinDataRegion extends DataRegion
             setWidth(null);
         }
     }
+
+    @Override
+    public boolean getAllowHeaderLock()
+    {
+        return false;
+    }
 }

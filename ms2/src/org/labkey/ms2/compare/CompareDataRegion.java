@@ -130,4 +130,10 @@ public class CompareDataRegion extends DataRegion
 
         super.renderGridHeaderColumns(ctx, out, showRecordSelectors, renderers);
     }
+
+    @Override
+    public boolean getAllowHeaderLock()
+    {
+        return false;
+    }
 }
