@@ -48,9 +48,10 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
 
         // add combo-box element for selection of the antigen/analyte
         this.analyteGrid = new Ext.grid.GridPanel({
+            id: 'analtye-grid-panel',
             fieldLabel: 'Antigens',
             height: 225,
-            border: false,
+            border: true,
             frame: false,
             hideHeaders: true,
             viewConfig: {forceFit: true},
@@ -96,6 +97,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
 
         // add combo-box element for selection of the isotype
         this.isotypeCombobox = new Ext.form.ComboBox({
+            id: 'isotype-combo-box',
             fieldLabel: 'Isotype',
             anchor: '100%',
             store: new Ext.data.Store({
@@ -137,6 +139,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
 
         // add combo-box element for selection of the conjugate
         this.conjugateCombobox = new Ext.form.ComboBox({
+            id: 'conjugate-combo-box',
             fieldLabel: 'Conjugate',
             anchor: '100%',
             store: new Ext.data.Store({
