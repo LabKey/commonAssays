@@ -30,7 +30,7 @@
     TitrationForm bean = me.getModelBean();
 %>
 
-<table cellpadding="0" cellspacing="20">
+<table cellpadding="0" cellspacing="15">
     <tr>
         <td rowspan="2"><div id="graphParamsPanel"></div></td>
         <td><div id="guideSetOverviewPanel"></div></td>
@@ -38,18 +38,23 @@
     <tr>
         <td><div id="rPlotPanel"></div></td>
     </tr>
-    <tr>
-        <td colspan="2"><div id="trackingDataPanel"></div></td>
-    </tr>
 </table>
-
-
+<div id="trackingDataPanelTitle" style="margin-left:15px"></div>
+<div id="trackingDataPanel" style="margin-left:15px"></div>
 
 <script type="text/javascript">
     LABKEY.requiresScript("LeveyJenningsGraphParamsPanel.js");
     LABKEY.requiresScript("LeveyJenningsGuideSetPanel.js");
     LABKEY.requiresScript("LeveyJenningsTrendPlotPanel.js");
+    LABKEY.requiresScript("LeveyJenningsTrackingDataPanel.js");
     LABKEY.requiresScript("ManageGuideSetPanel.js");
+    LABKEY.requiresScript("ApplyGuideSetPanel.js");
+    LABKEY.requiresCss("LeveyJenningsReport.css");
+
+    var $h = Ext.util.Format.htmlEncode;
+
+    // local variables for storing the selected graph parameters
+    var _analyte, _isotype, _conjugate;
 
     Ext.onReady(init);
     function init()
@@ -76,8 +81,13 @@
             assayName: '<%= bean.getProtocol() %>',
             listeners: {
                 'resetGraphBtnClicked': function(analyte, isotype, conjugate){
+                    _analyte = analyte;
+                    _isotype = isotype;
+                    _conjugate = conjugate;
+
                     guideSetPanel.graphParamsSelected(analyte, isotype, conjugate);
                     trendPlotPanel.graphParamsSelected(analyte, isotype, conjugate);
+                    trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate);
                 }
             }
         });
@@ -91,6 +101,7 @@
             listeners: {
                 'currentGuideSetUpdated': function() {
                     trendPlotPanel.displayTrendPlot();
+                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate);
                 }
             }
         });
@@ -101,6 +112,20 @@
             cls: 'extContainer',
             titration: '<%= bean.getTitration() %>',
             assayName: '<%= bean.getProtocol() %>'
+        });
+
+        // initialize the grid panel to display the tracking data
+        var trackingDataPanel = new LABKEY.LeveyJenningsTrackingDataPanel({
+            renderTo: 'trackingDataPanel',
+            cls: 'extContainer',
+            titration: '<%= bean.getTitration() %>',
+            assayName: '<%= bean.getProtocol() %>',
+            listeners: {
+                'appliedGuideSetUpdated': function() {
+                    trendPlotPanel.displayTrendPlot();
+                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate);
+                }
+            }
         });
     }
 </script>

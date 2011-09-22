@@ -522,6 +522,7 @@ flow/webapp/Flow/unflagFCSFile.gif -text
 flow/webapp/Flow/unflagSample.gif -text
 flow/webapp/Flow/util.js -text
 luminex/module.properties -text
+luminex/resources/reports/schemas/core/Containers/EC50TrendPlot.r -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-9.20.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-10.30-11.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.10-11.20.sql -text
@@ -646,6 +647,8 @@ luminex/webapp/Exclusion.css -text
 luminex/webapp/GuideSet.css -text
 luminex/webapp/LeveyJenningsGraphParamsPanel.js -text
 luminex/webapp/LeveyJenningsGuideSetPanel.js -text
+luminex/webapp/LeveyJenningsReport.css -text
+luminex/webapp/LeveyJenningsTrackingDataPanel.js -text
 luminex/webapp/LeveyJenningsTrendPlotPanel.js -text
 luminex/webapp/ManageGuideSetPanel.js -text
 luminex/webapp/WellExclusionPanel.js -text

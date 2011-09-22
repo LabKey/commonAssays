@@ -121,8 +121,9 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 var allRunsStore = new Ext.data.JsonStore({
                     storeId: 'allRunsStore',
                     root: 'rows',
-                    fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Conjugate', 'Network',
-                        'NotebookNo', 'AssayType', 'ExpPerformer', 'Date', 'Folder', 'Isotype', 'AssayId', 'EC50', 'HighMFI', 'AUC']
+                    fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate', 'Titration/Run/Batch/Network',
+                        'Titration/Run/NotebookNo', 'Titration/Run/AssayType', 'Titration/Run/ExpPerformer', 'Titration/Run/TestDate', 'Titration/Run/Folder/Name',
+                        'Titration/Run/Isotype', 'Titration/Run/Name', 'Four ParameterCurveFit/EC50', 'MaxFI', 'TrapezoidalCurveFit/AUC']
                 });
 
                 // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
@@ -130,16 +131,16 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     defaults: {sortable: true},
                     columns: [
                         {header:'', dataIndex:'RowId', renderer:this.renderAddRunIcon, scope: this, width:25},
-                        {header:'Assay Id', dataIndex:'AssayId', renderer: this.tooltipRenderer, width:200},
-                        {header:'Network', dataIndex:'Network', width:75},
-                        {header:'Folder', dataIndex:'Folder', width:75},
-                        {header:'Notebook No.', dataIndex:'NotebookNo', width:100},
-                        {header:'Assay Type', dataIndex:'AssayType', width:100},
-                        {header:'Exp Performer', dataIndex:'ExpPerformer', width:100},
-                        {header:'Run Date', dataIndex:'Date', renderer: this.dateRenderer, width:100},
-                        {header:'EC50', dataIndex:'EC50', width:75},
-                        {header:'High MFI', dataIndex:'HighMFI', width:75},
-                        {header:'AUC', dataIndex:'AUC', width:75}
+                        {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.tooltipRenderer, width:200},
+                        {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75},
+                        {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75},
+                        {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100},
+                        {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100},
+                        {header:'Exp Performer', dataIndex:'Titration/Run/ExpPerformer', width:100},
+                        {header:'Test Date', dataIndex:'Titration/Run/TestDate', renderer: this.dateRenderer, width:100},
+                        {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
+                        {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
+                        {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'}
                     ],
                     scope: this
                 });
@@ -181,8 +182,9 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             var guideRunSetStore = new Ext.data.JsonStore({
                 storeId: 'guideRunSetStore',
                 root: 'rows',
-                fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Conjugate', 'Network',
-                    'NotebookNo', 'AssayType', 'ExpPerformer', 'Date', 'Folder', 'Isotype', 'AssayId', 'EC50', 'HighMFI', 'AUC']
+                fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate', 'Titration/Run/Batch/Network',
+                    'Titration/Run/NotebookNo', 'Titration/Run/AssayType', 'Titration/Run/ExpPerformer', 'Titration/Run/TestDate', 'Titration/Run/Folder/Name',
+                    'Titration/Run/Isotype', 'Titration/Run/Name', 'Four ParameterCurveFit/EC50', 'MaxFI', 'TrapezoidalCurveFit/AUC']
             });
 
             // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
@@ -190,16 +192,16 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 defaults: {sortable: true},
                 columns: [
                     {header:'', dataIndex:'RowId', renderer:this.renderRemoveIcon, scope: this, hidden: !this.currentGuideSet, width:25},
-                    {header:'Assay Id', dataIndex:'AssayId', renderer: this.tooltipRenderer, width:200},
-                    {header:'Network', dataIndex:'Network', width:75},
-                    {header:'Folder', dataIndex:'Folder', width:75},
-                    {header:'Notebook No.', dataIndex:'NotebookNo', width:100},
-                    {header:'Assay Type', dataIndex:'AssayType', width:100},
-                    {header:'Exp Performer', dataIndex:'ExpPerformer', width:100},
-                    {header:'Run Date', dataIndex:'Date', renderer: this.dateRenderer, width:100},
-                    {header:'EC50', dataIndex:'EC50', width:75},
-                    {header:'High MFI', dataIndex:'HighMFI', width:75},
-                    {header:'AUC', dataIndex:'AUC', width:75}
+                    {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.tooltipRenderer, width:200},
+                    {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75},
+                    {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75},
+                    {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100},
+                    {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100},
+                    {header:'Exp Performer', dataIndex:'Titration/Run/ExpPerformer', width:100},
+                    {header:'Test Date', dataIndex:'Titration/Run/TestDate', renderer: this.dateRenderer, width:100},
+                    {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
+                    {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
+                    {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'}
                 ],
                 scope: this
             });
@@ -326,55 +328,23 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
     },
 
     queryAllRunsForCriteria: function() {
-        // query the server for the list of runs that meet the given criteria (using executeSql because we have to join in the EC50, AUC, and maxFI values)
-        LABKEY.Query.executeSql({
+        // query the server for the list of runs that meet the given criteria
+        LABKEY.Query.selectRows({
             schemaName: 'assay',
-            sql: 'SELECT x.Analyte, '
-                + 'x.Titration, '
-                + 'x.Titration.Run.Name AS AssayId, '
-                + 'x.Titration.Run.Folder.Name AS Folder, '
-                + 'x.Titration.Run.Folder.EntityId AS EntityId, '
-                + 'x.Titration.Run.Isotype AS Isotype, '
-                + 'x.Titration.Run.Conjugate AS Conjugate,  '
-                + 'x.Titration.Run.Batch.Network AS Network, ' // user defined field
-                + 'x.Titration.Run.NotebookNo AS NotebookNo, ' // user defined field
-                + 'x.Titration.Run.AssayType AS AssayType, ' // user defined field
-                + 'x.Titration.Run.ExpPerformer AS ExpPerformer, ' // user defined field
-                + 'd.AcquisitionDate AS Date, '
-                + 'x.GuideSet AS GuideSet, '
-                + 'x.IncludeInGuideSetCalculation AS IncludeInGuideSetCalculation, '
-                + 'cf1.EC50 AS EC50, '
-                + 'x.MaxFI AS HighMFI, '
-                + 'cf2.AUC AS AUC '
-                + 'FROM "' + this.assayName + ' AnalyteTitration" AS x '
-                // join to get the acquisition date from the data table
-                + 'LEFT JOIN (SELECT DISTINCT y.Analyte.RowId AS Analyte, y.Titration.RowId AS Titration, y.Data.AcquisitionDate AS AcquisitionDate'
-                + '     FROM "' + this.assayName + ' Data" AS y) AS d '
-                + '     ON x.Analyte = d.Analyte AND x.Titration = d.Titration '
-                // join to CurveFit table for EC50 and MaxFI
-                + 'LEFT JOIN "' + this.assayName + ' CurveFit" AS cf1 '
-                + '    ON x.Titration = cf1.TitrationId AND x.Analyte = cf1.AnalyteId '
-                + '    AND cf1.CurveType = \'Four Parameter\' '
-                // join to CurveFit table for AUC
-                + 'LEFT JOIN "' + this.assayName + ' CurveFit" AS cf2 '
-                + '    ON x.Titration = cf2.TitrationId AND x.Analyte = cf2.AnalyteId '
-                + '    AND cf2.CurveType = \'Trapezoidal\' '
-                + 'WHERE x.Analyte.Name = \'' + this.analyte.replace(/'/g, "''") + '\' '
-                + '     AND x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\' '
-                + '     AND x.Titration.Run.Isotype = \'' + this.isotype.replace(/'/g, "''") + '\' '
-                + '     AND x.Titration.Run.Conjugate = \'' + this.conjugate.replace(/'/g, "''") + '\' '
-                + 'ORDER BY d.AcquisitionDate DESC, x.Titration.Run.Created DESC'
-                + ' LIMIT 10000000',
+            queryName: this.assayName + ' AnalyteTitration',
+            columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
+                    + 'Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/Batch/Network, Titration/Run/NotebookNo, '
+                    + 'Titration/Run/AssayType, Titration/Run/ExpPerformer, Titration/Run/TestDate, GuideSet, IncludeInGuideSetCalculation, '
+                    + 'Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC ',
+            filterArray: [
+                LABKEY.Filter.create('Titration/Name', this.titration),
+                LABKEY.Filter.create('Analyte/Name', this.analyte),
+                LABKEY.Filter.create('Titration/Run/Isotype', this.isotype),
+                LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate)
+            ],
+            sort: '-Titration/Run/TestDate, -Titration/Run/Created',
             containerFilter: LABKEY.Query.containerFilter.allFolders,
             success: this.populateRunGridStores,
-            failure: function(errorInfo){
-                if (errorInfo.exception.indexOf("Unknown field") > -1)
-                    Ext.Msg.alert("Error", "One of the following administrator defined fields are not available for this assay design: "
-                        + "Network (Batch), NotebookNo (Run), AssayType (Run), ExpPerformer (Run). "
-                        + "Please contact an administrator for assistance.");
-                else
-                    Ext.Msg.alert("Error", errorInfo.exception);
-            },
             scope: this
         });
     },

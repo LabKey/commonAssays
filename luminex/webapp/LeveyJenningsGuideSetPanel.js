@@ -53,9 +53,9 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.paramsDisplayField = new Ext.form.DisplayField({
             hideLabel: true,
             value: "",
-            style: "background-color:white; font-weight:bold",
+            style: "font-size:110%; font-weight:bold",
             width: 725,
-            height: 20,
+            height: 25,
             border: true
         });
         items.push(this.paramsDisplayField);
@@ -64,8 +64,9 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.guideSetDisplayField = new Ext.form.DisplayField({
             fieldLabel: "Current Guide Run Set",
             value: "",
+            style: "background-color:#CCCCCC; padding:3px",
             width: 570,
-            height: 20,
+            height: 25,
             border: true
         });
 
@@ -87,7 +88,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         // add the guide set elements as a composite field for layout reasons
         this.guideSetCompositeField = new Ext.form.CompositeField({
-            labelStyle: "font-weight:bold",
+            //labelStyle: "font-weight:bold",
             items: [this.guideSetDisplayField, this.editGuideSetButton, this.newGuideSetButton]
         });
         items.push(this.guideSetCompositeField);

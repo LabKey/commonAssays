@@ -105,23 +105,24 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
     },
 
     displayTrendPlot: function() {
-//        // determine which tab is selected to know which div to update
-//        var trendDiv = 'EC50TrendPlotDiv';
-//
-//        Ext.get(trendDiv).update('Loading...');
-//        var config = {reportId: '1507', showSection: 'ec50trend_png'};
-//        config['query.Titration~eq'] = this.titration;
-//        config['query.Analyte~eq'] = this.analyte;
-//        config['query.Isotype~eq'] = this.isotype;
-//        config['query.Conjugate~eq'] = this.conjugate;
-//        config['query.containerFilterName'] = LABKEY.Query.containerFilter.allFolders;
-//        var wikiWebPartRenderer = new LABKEY.WebPart({
-//               partName: 'Report',
-//               renderTo: trendDiv,
-//               frame: 'none',
-//               partConfig: config
-//        });
-//        wikiWebPartRenderer.render();
+        // determine which tab is selected to know which div to update
+        var trendDiv = 'EC50TrendPlotDiv';
+
+        Ext.get(trendDiv).update('Loading...');
+        var config = {reportId: 'module:luminex/schemas/core/Containers/EC50TrendPlot.r', showSection: 'ec50trend_png'};
+        // Ext.urlEncode({Protocol: this.assayName}).replace('Protocol=','')
+        config['Protocol'] = this.assayName;
+        config['Titration'] = this.titration;
+        config['Analyte'] = this.analyte;
+        config['Isotype'] = this.isotype;
+        config['Conjugate'] = this.conjugate;
+        var wikiWebPartRenderer = new LABKEY.WebPart({
+               partName: 'Report',
+               renderTo: trendDiv,
+               frame: 'none',
+               partConfig: config
+        });
+        wikiWebPartRenderer.render();
     },
 
     refreshGraphWithDates: function() {
