@@ -83,6 +83,39 @@ public class AnalyteTitrationTable extends AbstractLuminexTable
         });
 
         addColumn(wrapColumn(getRealTable().getColumn("IncludeInGuideSetCalculation")));
+
+        for (final String curveType : _schema.getCurveTypes())
+        {
+            ColumnInfo curveFitColumn = wrapColumn(curveType + "CurveFit", getRealTable().getColumn("AnalyteId"));
+
+            LookupForeignKey fk = new LookupForeignKey("Analyte")
+            {
+                @Override
+                public TableInfo getLookupTableInfo()
+                {
+                    CurveFitTable result = _schema.createCurveFitTable(false);
+                    result.addCondition(result.getRealTable().getColumn("CurveType"), curveType);
+                    return result;
+                }
+
+                @Override
+                protected ColumnInfo getPkColumn(TableInfo table)
+                {
+                    return table.getColumn("AnalyteId");
+                }
+            };
+
+            fk.addJoin(getColumn("Titration"), "TitrationId");
+            curveFitColumn.setIsUnselectable(true);
+            curveFitColumn.setShownInDetailsView(false);
+            curveFitColumn.setReadOnly(true);
+            curveFitColumn.setKeyField(false);
+            curveFitColumn.setShownInInsertView(false);
+            curveFitColumn.setShownInUpdateView(false);
+            curveFitColumn.setFk(fk);
+
+            addColumn(curveFitColumn);
+        }
     }
 
     @Override

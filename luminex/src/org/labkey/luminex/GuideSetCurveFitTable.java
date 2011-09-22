@@ -33,12 +33,15 @@ import org.labkey.api.study.assay.AssaySchema;
 public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilterable
 {
     private final LuminexSchema _schema;
+    private final String _curveType;
     private @NotNull ContainerFilter _containerFilter = ContainerFilter.CURRENT;
 
-    public GuideSetCurveFitTable(LuminexSchema schema, boolean filterTable)
+    /** @param curveType the type of curve to filter the results to. Null means don't filter */
+    public GuideSetCurveFitTable(LuminexSchema schema, String curveType)
     {
         super(schema.getDbSchema());
         _schema = schema;
+        _curveType = curveType;
 
         ColumnInfo guideSetIdColumn = new ColumnInfo("GuideSetId", this);
         guideSetIdColumn.setLabel("Guide Set");
@@ -60,21 +63,29 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
         ColumnInfo aucAverageColumn = new ColumnInfo("AUCAverage", this);
         aucAverageColumn.setJdbcType(JdbcType.REAL);
         aucAverageColumn.setFormat("0.00");
+        aucAverageColumn.setLabel("AUC Average");
+        aucAverageColumn.setDescription("Average of area under the curve values");
         addColumn(aucAverageColumn);
 
         ColumnInfo aucStdDevColumn = new ColumnInfo("AUCStdDev", this);
         aucStdDevColumn.setJdbcType(JdbcType.REAL);
         aucStdDevColumn.setFormat("0.00");
+        aucStdDevColumn.setLabel("AUC Std Dev");
+        aucStdDevColumn.setDescription("Standard deviation of area under the curve values");
         addColumn(aucStdDevColumn);
 
         ColumnInfo ec50AverageColumn = new ColumnInfo("EC50Average", this);
         ec50AverageColumn.setJdbcType(JdbcType.REAL);
         ec50AverageColumn.setFormat("0.00");
+        ec50AverageColumn.setLabel("EC50 Average");
+        ec50AverageColumn.setDescription("Average of EC50 values");
         addColumn(ec50AverageColumn);
 
         ColumnInfo ec50StdDevColumn = new ColumnInfo("EC50StdDev", this);
         ec50StdDevColumn.setJdbcType(JdbcType.REAL);
         ec50StdDevColumn.setFormat("0.00");
+        ec50StdDevColumn.setLabel("EC50 Std Dev");
+        ec50StdDevColumn.setDescription("Standard deviation of EC50 values");
         addColumn(ec50StdDevColumn);
 
         ColumnInfo curveTypeColumn = new ColumnInfo("CurveType", this);
@@ -89,10 +100,12 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
     public SQLFragment getFromSQL()
     {
         SQLFragment result = new SQLFragment("SELECT AVG(cf.EC50) AS EC50Average,\n");
-        result.append(_schema.getDbSchema().getSqlDialect().getStdDevFunction() + "(cf.EC50) AS EC50StdDev, \n");
+        result.append(_schema.getDbSchema().getSqlDialect().getStdDevFunction());
+        result.append("(cf.EC50) AS EC50StdDev, \n");
         result.append("AVG(cf.AUC) AS AUCAverage, \n");
         result.append("COUNT(DISTINCT at.AnalyteId) AS RunCount, \n");
-        result.append(_schema.getDbSchema().getSqlDialect().getStdDevFunction() + "(cf.AUC) AS AUCStdDev, \n");
+        result.append(_schema.getDbSchema().getSqlDialect().getStdDevFunction());
+        result.append("(cf.AUC) AS AUCStdDev, \n");
         result.append("at.GuideSetId,\n");
         result.append("cf.CurveType FROM \n");
 
@@ -107,6 +120,11 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
 
         result.append(" WHERE at.AnalyteId = cf.AnalyteId AND at.TitrationId = cf.TitrationId AND at.GuideSetId IS NOT NULL AND at.IncludeInGuideSetCalculation = ?\n");
         result.add(true);
+        if (_curveType != null)
+        {
+            result.append(" AND cf.CurveType = ?");
+            result.add(_curveType);
+        }
         result.append(" GROUP BY at.GuideSetId, cf.CurveType");
 
         return result;

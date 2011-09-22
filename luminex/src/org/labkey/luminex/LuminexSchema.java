@@ -31,6 +31,7 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 
+import java.sql.SQLException;
 import java.util.*;
 
 public class LuminexSchema extends AssaySchema
@@ -47,6 +48,8 @@ public class LuminexSchema extends AssaySchema
     public static final String WELL_EXCLUSION_ANALYTE_TABLE_NAME = "WellExclusionAnalyte";
     public static final String RUN_EXCLUSION_TABLE_NAME = "RunExclusion";
     public static final String RUN_EXCLUSION_ANALYTE_TABLE_NAME = "RunExclusionAnalyte";
+
+    private List<String> _curveTypes;
 
     public LuminexSchema(User user, Container container, ExpProtocol protocol)
     {
@@ -83,6 +86,28 @@ public class LuminexSchema extends AssaySchema
     public static String getRunExclusionTableName(ExpProtocol protocol)
     {
         return getProviderTableName(protocol, RUN_EXCLUSION_TABLE_NAME);
+    }
+
+    public synchronized List<String> getCurveTypes()
+    {
+        if (_curveTypes == null)
+        {
+            QueryDefinition queryDef = QueryService.get().createQueryDef(getUser(), _container, this, "query");
+            queryDef.setSql("SELECT DISTINCT(CurveType) FROM \"" + getProviderTableName(getProtocol(), CURVE_FIT_TABLE_NAME).replace("\"", "\"\"") + "\"");
+
+            try
+            {
+                ArrayList<QueryException> errors = new ArrayList<QueryException>();
+                TableInfo table = queryDef.getTable(this, errors, false);
+                String[] curveTypes = Table.executeArray(table, "CurveType", null, new Sort("CurveType"), String.class);
+                _curveTypes = Arrays.asList(curveTypes);
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+        return _curveTypes;
     }
 
     public TableInfo createTable(String name)
@@ -142,7 +167,7 @@ public class LuminexSchema extends AssaySchema
             }
             if (GUIDE_SET_CURVE_FIT_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createGuideSetCurveFitTable(true);
+                return createGuideSetCurveFitTable();
             }
             if (RUN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
@@ -176,9 +201,15 @@ public class LuminexSchema extends AssaySchema
         return new CurveFitTable(this, filterTable);
     }
 
-    private GuideSetCurveFitTable createGuideSetCurveFitTable(boolean filterTable)
+    protected GuideSetCurveFitTable createGuideSetCurveFitTable()
     {
-        return new GuideSetCurveFitTable(this, filterTable);
+        return new GuideSetCurveFitTable(this, null);
+    }
+
+    /** @param curveType the type of curve to filter the results to */
+    protected GuideSetCurveFitTable createGuideSetCurveFitTable(String curveType)
+    {
+        return new GuideSetCurveFitTable(this, curveType);
     }
 
     private WellExclusionTable createWellExclusionTable(boolean filterTable)

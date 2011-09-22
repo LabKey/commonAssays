@@ -35,8 +35,6 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.AssayUrls;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 
@@ -83,6 +81,35 @@ public class GuideSetTable extends AbstractLuminexTable
         ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer());
         getColumn("ModifiedBy").setFk(userIdForeignKey);
         getColumn("CreatedBy").setFk(userIdForeignKey);
+
+        for (final String curveType : _schema.getCurveTypes())
+        {
+            ColumnInfo curveFitColumn = wrapColumn(curveType + "CurveFit", getRealTable().getColumn("RowId"));
+
+            LookupForeignKey fk = new LookupForeignKey("GuideSetId")
+            {
+                @Override
+                public TableInfo getLookupTableInfo()
+                {
+                    return _schema.createGuideSetCurveFitTable(curveType);
+                }
+
+                @Override
+                protected ColumnInfo getPkColumn(TableInfo table)
+                {
+                    return table.getColumn("GuideSetId");
+                }
+            };
+            curveFitColumn.setIsUnselectable(true);
+            curveFitColumn.setShownInDetailsView(false);
+            curveFitColumn.setReadOnly(true);
+            curveFitColumn.setKeyField(false);
+            curveFitColumn.setShownInInsertView(false);
+            curveFitColumn.setShownInUpdateView(false);
+            curveFitColumn.setFk(fk);
+
+            addColumn(curveFitColumn);
+        }
     }
 
     @Override

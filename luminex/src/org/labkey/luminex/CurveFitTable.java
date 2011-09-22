@@ -17,11 +17,9 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
 
 import java.util.Collection;
@@ -59,15 +57,27 @@ public class CurveFitTable extends AbstractLuminexTable
             }
         });
 
-        SQLFragment maxFISQL = new SQLFragment("(SELECT at.MaxFI FROM ");
-        maxFISQL.append(LuminexSchema.getTableInfoAnalyteTitration(), "at");
-        maxFISQL.append(" WHERE at.TitrationId = ");
-        maxFISQL.append(ExprColumn.STR_TABLE_ALIAS);
-        maxFISQL.append(".TitrationId AND at.AnalyteId = ");
-        maxFISQL.append(ExprColumn.STR_TABLE_ALIAS);
-        maxFISQL.append(".AnalyteId)");
-        ExprColumn maxFICol = new ExprColumn(this, "MaxFI", maxFISQL, JdbcType.REAL);
-        addColumn(maxFICol);
+        ColumnInfo analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
+        analyteTitrationColumn.setIsUnselectable(true);
+        LookupForeignKey fk = new LookupForeignKey("AnalyteId")
+        {
+            @Override
+            public TableInfo getLookupTableInfo()
+            {
+                return _schema.createAnalyteTitrationTable(false);
+            }
+
+            @Override
+            protected ColumnInfo getPkColumn(TableInfo table)
+            {
+                // Pretend that analyte is the sole column in the PK for this table.
+                // We'll get the other key of the compound key with addJoin() below.
+                return table.getColumn("Analyte");
+            }
+        };
+        fk.addJoin(getColumn("TitrationId"), "Titration");
+        analyteTitrationColumn.setFk(fk);
+        addColumn(analyteTitrationColumn);
     }
 
     @Override

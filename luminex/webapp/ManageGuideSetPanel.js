@@ -344,7 +344,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 + 'x.GuideSet AS GuideSet, '
                 + 'x.IncludeInGuideSetCalculation AS IncludeInGuideSetCalculation, '
                 + 'cf1.EC50 AS EC50, '
-                + 'cf1.MaxFI AS HighMFI, '
+                + 'x.MaxFI AS HighMFI, '
                 + 'cf2.AUC AS AUC '
                 + 'FROM "' + this.assayName + ' AnalyteTitration" AS x '
                 // join to get the acquisition date from the data table
@@ -363,7 +363,8 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 + '     AND x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\' '
                 + '     AND x.Titration.Run.Isotype = \'' + this.isotype.replace(/'/g, "''") + '\' '
                 + '     AND x.Titration.Run.Conjugate = \'' + this.conjugate.replace(/'/g, "''") + '\' '
-                + 'ORDER BY d.AcquisitionDate DESC, x.Titration.Run.Created DESC ',
+                + 'ORDER BY d.AcquisitionDate DESC, x.Titration.Run.Created DESC'
+                + ' LIMIT 10000000',
             containerFilter: LABKEY.Query.containerFilter.allFolders,
             success: this.populateRunGridStores,
             failure: function(errorInfo){

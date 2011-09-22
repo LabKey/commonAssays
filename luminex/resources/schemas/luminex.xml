@@ -54,7 +54,9 @@
             <column columnName="AnalyteId" />
             <column columnName="TitrationId" />
             <column columnName="EC50" />
-            <column columnName="AUC" />
+            <column columnName="AUC">
+                <description>Area under the curve</description>
+            </column>
             <column columnName="CurveType" />
             <column columnName="MinAsymptote" />
             <column columnName="MaxAsymptote" />
