@@ -28,7 +28,7 @@ CREATE TABLE flow.Attribute
 CREATE TABLE flow.Object
 (
     RowId INT IDENTITY(1,1) NOT NULL,
-    Container entityid NOT NULL,
+    Container ENTITYID NOT NULL,
     DataId INT,
     TypeId INT NOT NULL,
     Uri VARCHAR(400),
