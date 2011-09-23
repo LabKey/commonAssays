@@ -494,8 +494,8 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 if (showControls() && runId != null)
                 {
                     ActionButton excludeAnalytes = new ActionButton("excludeAnalytes", "Exclude Analytes");
-                    excludeAnalytes.setScript("LABKEY.requiresScript('AnalyteExclusionPanel.js');"
-                            + "LABKEY.requiresCss('Exclusion.css');"
+                    excludeAnalytes.setScript("LABKEY.requiresScript('luminex/AnalyteExclusionPanel.js');"
+                            + "LABKEY.requiresCss('luminex/Exclusion.css');"
                             + "analyteExclusionWindow('" + protocol.getName() + "', " + runId + ");");
                     excludeAnalytes.setDisplayPermission(UpdatePermission.class);
 

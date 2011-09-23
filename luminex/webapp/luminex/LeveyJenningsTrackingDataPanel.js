@@ -19,7 +19,7 @@ Ext.QuickTips.init();
  * @params titration
  * @params assayName
  */
-LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(LABKEY.ext.EditorGridPanel, {
+LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     constructor : function(config){
         // check that the config properties needed are present
         if (!config.titration || config.titration == "null")
@@ -29,11 +29,12 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(LABKEY.ext.EditorGridPanel, {
 
         // apply some Ext panel specific properties to the config
         Ext.apply(config, {
-            width: 1300,
+            width: 1200,
             autoHeight: true,
             editable: false,
-            //enableFilters: true,
-            header: true,
+            pageSize: 0,
+            title: 'Tracking Data',
+            loadMask:{msg:"Loading tracking data..."},
             disabled: true,
             analyte: null,
             isotype: null,
@@ -50,10 +51,44 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(LABKEY.ext.EditorGridPanel, {
         this.selModel = this.getTrackingDataSelModel();
         this.colModel = this.getTrackingDataColModel();
 
+        // initialize an export button for the toolbar
+        this.exportButton = new Ext.Button({
+            text: 'Export',
+            tooltip: 'Click to Export the data to Excel',
+            handler: function(){
+                if (this.store)
+                    this.store.exportData("excel");
+            },
+            scope: this
+        });
+
+        // initialize and add the apply guide set button to the toolbar
+        this.applyGuideSetButton = new Ext.Button({
+            disabled: true,
+            text: 'Apply Guide Set',
+            handler: this.applyGuideSetClicked,
+            scope: this
+        });
+
+        this.tbar = [this.exportButton, '-', this.applyGuideSetButton];
+
         LABKEY.LeveyJenningsTrackingDataPanel.superclass.initComponent.call(this);
     },
 
-    getTrackingDataStore: function() {
+    getTrackingDataStore: function(startDate, endDate) {
+        // build the array of filters to be applied to the store
+        var filterArray = [
+            LABKEY.Filter.create('Titration/Name', this.titration),
+            LABKEY.Filter.create('Analyte/Name', this.analyte || "TEST"), // TODO: fix this
+            LABKEY.Filter.create('Titration/Run/Isotype', this.isotype),
+            LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate)
+        ];
+        if (startDate && endDate)
+        {
+            filterArray.push(LABKEY.Filter.create('Titration/Run/TestDate', startDate, LABKEY.Filter.Types.GREATER_THAN_OR_EQUAL));
+            filterArray.push(LABKEY.Filter.create('Titration/Run/TestDate', endDate, LABKEY.Filter.Types.LESS_THAN_OR_EQUAL));
+        }
+
         return new LABKEY.ext.Store({ // temperary empty store until graph params are selected
             autoLoad: true,
             schemaName: 'assay',
@@ -61,14 +96,11 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(LABKEY.ext.EditorGridPanel, {
             columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
                     + 'Analyte/Properties/LotNumber, Titration/Run/Batch/Network, Titration/Run/NotebookNo, '
                     + 'Titration/Run/AssayType, Titration/Run/ExpPerformer, Titration/Run/TestDate, GuideSet/Created, '
-                    + 'Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC ',
-            filterArray: [
-                LABKEY.Filter.create('Titration/Name', this.titration),
-                LABKEY.Filter.create('Analyte/Name', this.analyte || "TEST"), // TODO: fix this
-                LABKEY.Filter.create('Titration/Run/Isotype', this.isotype),
-                LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate)
-            ],
+                    + 'Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC, '
+                    + 'GuideSet/Four ParameterCurveFit/EC50Average, GuideSet/Four ParameterCurveFit/EC50StdDev ',
+            filterArray: filterArray,
             sort: '-Titration/Run/TestDate, -Titration/Run/Created',
+            maxRows: (startDate && endDate ? undefined : this.defaultRowSize),
             containerFilter: LABKEY.Query.containerFilter.allFolders
         });
     },
@@ -96,16 +128,18 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(LABKEY.ext.EditorGridPanel, {
                 {header:'', dataIndex:'Titration', hidden: true},
                 {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.tooltipRenderer, width:200},
                 {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75},
-                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75},
+                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.tooltipRenderer, width:75},
                 {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100},
                 {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100},
                 {header:'Exp Performer', dataIndex:'Titration/Run/ExpPerformer', width:100},
                 {header:'Test Date', dataIndex:'Titration/Run/TestDate', renderer: this.dateRenderer, width:100},
                 {header:'Analyte Lot No.', dataIndex:'Analyte/Properties/LotNumber', width:100},
                 {header:'Guide Set Date', dataIndex:'GuideSet/Created', renderer: this.dateRenderer, width:100},
-                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
+                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer, align: 'right'},
                 {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
-                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'}
+                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
+                {header:'', dataIndex:'GuideSet/Four ParameterCurveFit/EC50Average', hidden: true},
+                {header:'', dataIndex:'GuideSet/Four ParameterCurveFit/EC50StdDev', hidden: true}
             ],
             scope: this
         });
@@ -121,28 +155,17 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(LABKEY.ext.EditorGridPanel, {
         // set the grid title based on the selected graph params
         this.setTitle('Tracking Data for ' + $h(_analyte) + ' - ' + $h(_isotype) + ' ' + $h(_conjugate));
 
-        // create a new store now that the graph params are selected and bind it to the grid and the paging toolbar
-        var newStore = this.getTrackingDataStore();
+        // create a new store now that the graph params are selected and bind it to the grid
+        this.updateTrackingDataGrid();
+
+        // enable the trending data grid
+        this.enable();
+    },
+
+    updateTrackingDataGrid: function(startDate, endDate) {
+        var newStore = this.getTrackingDataStore(startDate, endDate);
         var newColModel = this.getTrackingDataColModel();
         this.reconfigure(newStore, newColModel);
-        this.getBottomToolbar().bindStore(newStore);
-
-        // if it is not already added, add the apply guide set button
-        if (!this.applyGuideSetButton)
-        {
-            this.applyGuideSetButton = new Ext.Button({
-                disabled: true,
-                text: 'Apply Guide Set',
-                handler: this.applyGuideSetClicked,
-                scope: this
-            });
-            this.getTopToolbar().add({xtype: 'tbseparator'});
-            this.getTopToolbar().add(this.applyGuideSetButton);
-            this.getTopToolbar().doLayout();
-        }
-
-        // show the trending tab panel and date range selection toolbar
-        this.enable();
     },
 
     applyGuideSetClicked: function() {
@@ -156,8 +179,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(LABKEY.ext.EditorGridPanel, {
         // create a pop-up window to display the apply guide set UI
         var win = new Ext.Window({
             layout:'fit',
-            width:1050,
-            height:475,
+            width:1100,
+            height:500,
             closeAction:'close',
             modal: true,
             padding: 15,
@@ -181,6 +204,23 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(LABKEY.ext.EditorGridPanel, {
             })]
         });
         win.show(this);
+    },
+
+    outOfRangeRenderer: function(val, metaData, record) {
+        // if this record has a guide set average and stdDev, check if the value is outside of the +/- 3 stdDev range
+        var avg = record.get('GuideSet/Four ParameterCurveFit/EC50Average');
+        var stdDev = record.get('GuideSet/Four ParameterCurveFit/EC50StdDev');
+        if (val && avg)
+        {
+            // if there is not stdDev (i.e. only one run in the guide set) and the value != avg (compared to two decimals)
+            // OR if the value is outside of the +/- 3 stdDev range from the avg
+            if (!stdDev && Ext.util.Format.number(val, '0.00') != Ext.util.Format.number(avg, '0.00'))
+                metaData.attr = "style='color:red;'";
+            else if(stdDev && (val > (avg + (3 * stdDev)) || val < (avg - (3 * stdDev))))
+                metaData.attr = "style='color:red;'";
+        }
+
+        return Ext.util.Format.number(val, '0.00');
     },
 
     dateRenderer: function(val) {

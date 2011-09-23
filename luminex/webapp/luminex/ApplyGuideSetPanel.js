@@ -11,8 +11,8 @@ Ext.namespace('LABKEY');
 * Date: Sept 8, 2011
 */
 
-LABKEY.requiresCss("GuideSet.css");
-LABKEY.requiresCss("LeveyJenningsReport.css");
+LABKEY.requiresCss("luminex/GuideSet.css");
+LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
 Ext.QuickTips.init();
 
 /**
@@ -101,7 +101,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             columns: [
                 {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.tooltipRenderer, width:200},
                 {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75},
-                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75},
+                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.tooltipRenderer, width:75},
                 {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100},
                 {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100},
                 {header:'Exp Performer', dataIndex:'Titration/Run/ExpPerformer', width:100},

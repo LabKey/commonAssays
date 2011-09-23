@@ -43,15 +43,16 @@
 <div id="trackingDataPanel" style="margin-left:15px"></div>
 
 <script type="text/javascript">
-    LABKEY.requiresScript("LeveyJenningsGraphParamsPanel.js");
-    LABKEY.requiresScript("LeveyJenningsGuideSetPanel.js");
-    LABKEY.requiresScript("LeveyJenningsTrendPlotPanel.js");
-    LABKEY.requiresScript("LeveyJenningsTrackingDataPanel.js");
-    LABKEY.requiresScript("ManageGuideSetPanel.js");
-    LABKEY.requiresScript("ApplyGuideSetPanel.js");
-    LABKEY.requiresCss("LeveyJenningsReport.css");
+    LABKEY.requiresScript("luminex/LeveyJenningsGraphParamsPanel.js");
+    LABKEY.requiresScript("luminex/LeveyJenningsGuideSetPanel.js");
+    LABKEY.requiresScript("luminex/LeveyJenningsTrendPlotPanel.js");
+    LABKEY.requiresScript("luminex/LeveyJenningsTrackingDataPanel.js");
+    LABKEY.requiresScript("luminex/ManageGuideSetPanel.js");
+    LABKEY.requiresScript("luminex/ApplyGuideSetPanel.js");
+    LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
 
     var $h = Ext.util.Format.htmlEncode;
+    var defaultRowSize = 30;
 
     // local variables for storing the selected graph parameters
     var _analyte, _isotype, _conjugate;
@@ -111,7 +112,13 @@
             renderTo: 'rPlotPanel',
             cls: 'extContainer',
             titration: '<%= bean.getTitration() %>',
-            assayName: '<%= bean.getProtocol() %>'
+            assayName: '<%= bean.getProtocol() %>',
+            defaultRowSize: defaultRowSize,
+            listeners: {
+                'reportDateRangeApplied': function(startDate, endDate) {
+                    trackingDataPanel.updateTrackingDataGrid(startDate, endDate);
+                }
+            }
         });
 
         // initialize the grid panel to display the tracking data
@@ -120,6 +127,7 @@
             cls: 'extContainer',
             titration: '<%= bean.getTitration() %>',
             assayName: '<%= bean.getProtocol() %>',
+            defaultRowSize: defaultRowSize,
             listeners: {
                 'appliedGuideSetUpdated': function() {
                     trendPlotPanel.displayTrendPlot();

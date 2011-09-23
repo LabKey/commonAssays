@@ -33,7 +33,7 @@
 <div id="manageGuideSetPanel"></div>
 
 <script type="text/javascript">
-    LABKEY.requiresScript("ManageGuideSetPanel.js");
+    LABKEY.requiresScript("luminex/ManageGuideSetPanel.js");
 
     Ext.onReady(init);
     function init()

@@ -12,15 +12,33 @@
 
 # get the data from the server using the Rlabkey selectRows command
 library(Rlabkey);
+
+# create a list of filters to apply to the selectRows call
+colFilter=makeFilter(c("Analyte/Name","EQUAL",labkey.url.params$Analyte));
+colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Conjugate","EQUAL",labkey.url.params$Conjugate)));
+colFilter=rbind(colFilter,makeFilter(c("Titration/Run/Isotype","EQUAL",labkey.url.params$Isotype)));
+colFilter=rbind(colFilter,makeFilter(c("Titration/Name","EQUAL",labkey.url.params$Titration)));
+
+# either filter on start and end date or on max number of rows
+maxRows = NA;
+if (!is.null(labkey.url.params$MaxRows)) {
+	maxRows = labkey.url.params$MaxRows;
+} else {
+	colFilter=rbind(colFilter,makeFilter(c("Titration/Run/TestDate","GREATER_THAN_OR_EQUAL_TO",labkey.url.params$StartDate)));
+	colFilter=rbind(colFilter,makeFilter(c("Titration/Run/TestDate","LESS_THAN_OR_EQUAL_TO",labkey.url.params$EndDate)));
+}
+
+# call the selectRows function to get the data from the server
 labkey.data <- labkey.selectRows(baseUrl=labkey.url.base,
                             folderPath=labkey.url.path,
                             schemaName="assay",
                             queryName=paste(labkey.url.params$Protocol, "AnalyteTitration", sep=" "),
                             colSelect="Analyte/Name,Titration/Name,Titration/Run/Isotype,Titration/Run/Conjugate,Analyte/Properties/LotNumber,Titration/Run/NotebookNo,Titration/Run/TestDate,GuideSet/Created,Four ParameterCurveFit/EC50,GuideSet/Four ParameterCurveFit/EC50Average,GuideSet/Four ParameterCurveFit/EC50StdDev",
-                            colFilter=makeFilter(c("Analyte/Name","EQUAL",labkey.url.params$Analyte),c("Titration/Run/Conjugate","EQUAL",labkey.url.params$Conjugate),c("Titration/Run/Isotype","EQUAL",labkey.url.params$Isotype),c("Titration/Name","EQUAL",labkey.url.params$Titration)),
+                            colFilter=colFilter,
                             colSort="-Titration/Run/TestDate,-Titration/Run/Created",
                             containerFilter="AllFolders",
-                            colNameOpt="rname");
+                            colNameOpt="rname",
+                            maxRows=maxRows);
 
 mainTitle = paste(labkey.url.params$Titration, "EC50 for", labkey.url.params$Analyte, "-", labkey.url.params$Isotype, labkey.url.params$Conjugate, sep=" ");
 

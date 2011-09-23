@@ -38,16 +38,50 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             disabled: true
         });
 
+        this.addEvents('reportDateRangeApplied');
+
         LABKEY.LeveyJenningsTrendPlotPanel.superclass.constructor.call(this, config);
     },
 
     initComponent : function() {
         // initialize the top toolbar with date range selection fields
         this.startDateLabel = new Ext.form.Label({text: 'Start Date'});
-        this.startDateField = new Ext.form.DateField({});
+        this.startDateField = new Ext.form.DateField({
+            format:  'Y-m-d',
+            listeners: {
+                scope: this,
+                'valid': function (df) {
+                    if (df.getValue() != '' && this.endDateField.isValid() && this.endDateField.getValue() != '')
+                        this.refreshGraphButton.enable();
+                },
+                'invalid': function (df, msg) {
+                    this.refreshGraphButton.disable();
+                }
+            }
+        });
         this.endDateLabel = new Ext.form.Label({text: 'End Date'});
-        this.endDateField = new Ext.form.DateField({});
-        this.refreshGraphButton = new Ext.Button({text: 'Refresh Graph', handler: this.refreshGraphWithDates, scope: this});
+        this.endDateField = new Ext.form.DateField({
+            format:  'Y-m-d',
+            listeners: {
+                scope: this,
+                'valid': function (df) {
+                    if (df.getValue() != '' && this.startDateField.isValid() && this.startDateField.getValue() != '')
+                        this.refreshGraphButton.enable();
+                },
+                'invalid': function (df, msg) {
+                    this.refreshGraphButton.disable();
+                }
+            }
+        });
+
+        // initialize the refesh graph button
+        this.refreshGraphButton = new Ext.Button({
+            disabled: true,
+            text: 'Refresh Graph',
+            handler: this.refreshGraphWithDates,
+            scope: this
+        });
+        
         this.tbar = new Ext.Toolbar({
             height: 30,
             buttonAlign: 'center',
@@ -98,17 +132,23 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.isotype = isotype;
         this.conjugate = conjugate;
 
+        // remove any previously entered values from the start and end date fields
+        this.startDateField.reset();
+        this.endDateField.reset();
+
         // show the trending tab panel and date range selection toolbar
         this.enable();
 
         this.displayTrendPlot();
     },
 
-    displayTrendPlot: function() {
+    displayTrendPlot: function(startDate, endDate) {
         // determine which tab is selected to know which div to update
         var trendDiv = 'EC50TrendPlotDiv';
 
         Ext.get(trendDiv).update('Loading...');
+
+        // build the config object of the properties that will be needed by the R report
         var config = {reportId: 'module:luminex/schemas/core/Containers/EC50TrendPlot.r', showSection: 'ec50trend_png'};
         // Ext.urlEncode({Protocol: this.assayName}).replace('Protocol=','')
         config['Protocol'] = this.assayName;
@@ -116,6 +156,18 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         config['Analyte'] = this.analyte;
         config['Isotype'] = this.isotype;
         config['Conjugate'] = this.conjugate;
+        // provide either a start and end date or the max number of rows to display
+        if (startDate && endDate)
+        {
+            config['StartDate'] = startDate;
+            config['EndDate'] = endDate;
+        }
+        else
+        {
+            config['MaxRows'] = this.defaultRowSize;
+        }
+
+        // call and display the Report webpart
         var wikiWebPartRenderer = new LABKEY.WebPart({
                partName: 'Report',
                renderTo: trendDiv,
@@ -126,6 +178,15 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
     },
 
     refreshGraphWithDates: function() {
-        alert('Support for user defined date range coming soon.');
+        // make sure that both date fields are not null
+        if (this.startDateField.getValue() == '' || this.endDateField.getValue() == '')
+        {
+            Ext.Msg.alert("ERROR", "Please enter both a start date and an end date.");
+        }
+        else
+        {
+            this.displayTrendPlot(this.startDateField.getValue(), this.endDateField.getValue());
+            this.fireEvent('reportDateRangeApplied', this.startDateField.getValue(), this.endDateField.getValue());
+        }
     }
 });
