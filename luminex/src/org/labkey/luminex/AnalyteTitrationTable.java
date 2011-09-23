@@ -45,11 +45,11 @@ import java.util.Map;
  * User: jeckels
  * Date: 7/8/11
  */
-public class AnalyteTitrationTable extends AbstractLuminexTable
+public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 {
     public AnalyteTitrationTable(LuminexSchema schema, boolean filter)
     {
-        super(LuminexSchema.getTableInfoAnalyteTitration(), schema, filter);
+        super(LuminexSchema.getTableInfoAnalyteTitration(), schema, filter, "AnalyteId");
         setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.ANALYTE_TITRATION_TABLE_NAME));
 
         ColumnInfo analyteCol = addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
@@ -84,38 +84,23 @@ public class AnalyteTitrationTable extends AbstractLuminexTable
 
         addColumn(wrapColumn(getRealTable().getColumn("IncludeInGuideSetCalculation")));
 
-        for (final String curveType : _schema.getCurveTypes())
+        addCurveTypeColumns();
+    }
+
+    protected LookupForeignKey createCurveFitFK(final String curveType)
+    {
+        LookupForeignKey fk = new LookupForeignKey("AnalyteId")
         {
-            ColumnInfo curveFitColumn = wrapColumn(curveType + "CurveFit", getRealTable().getColumn("AnalyteId"));
-
-            LookupForeignKey fk = new LookupForeignKey("Analyte")
+            @Override
+            public TableInfo getLookupTableInfo()
             {
-                @Override
-                public TableInfo getLookupTableInfo()
-                {
-                    CurveFitTable result = _schema.createCurveFitTable(false);
-                    result.addCondition(result.getRealTable().getColumn("CurveType"), curveType);
-                    return result;
-                }
-
-                @Override
-                protected ColumnInfo getPkColumn(TableInfo table)
-                {
-                    return table.getColumn("AnalyteId");
-                }
-            };
-
-            fk.addJoin(getColumn("Titration"), "TitrationId");
-            curveFitColumn.setIsUnselectable(true);
-            curveFitColumn.setShownInDetailsView(false);
-            curveFitColumn.setReadOnly(true);
-            curveFitColumn.setKeyField(false);
-            curveFitColumn.setShownInInsertView(false);
-            curveFitColumn.setShownInUpdateView(false);
-            curveFitColumn.setFk(fk);
-
-            addColumn(curveFitColumn);
-        }
+                CurveFitTable result = _schema.createCurveFitTable(false);
+                result.addCondition(result.getRealTable().getColumn("CurveType"), curveType);
+                return result;
+            }
+        };
+        fk.addJoin(getColumn("Titration"), "TitrationId");
+        return fk;
     }
 
     @Override

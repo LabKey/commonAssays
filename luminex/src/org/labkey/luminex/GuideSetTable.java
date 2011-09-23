@@ -45,11 +45,11 @@ import java.util.Collection;
  * User: jeckels
  * Date: Aug 26, 2011
  */
-public class GuideSetTable extends AbstractLuminexTable
+public class GuideSetTable extends AbstractCurveFitPivotTable
 {
     public GuideSetTable(final LuminexSchema schema, boolean filter)
     {
-        super(LuminexSchema.getTableInfoGuideSet(), schema, filter);
+        super(LuminexSchema.getTableInfoGuideSet(), schema, filter, "RowId");
         wrapAllColumns(true);
         setName(LuminexSchema.getProviderTableName(schema.getProtocol(), LuminexSchema.GUIDE_SET_TABLE_NAME));
 
@@ -82,34 +82,19 @@ public class GuideSetTable extends AbstractLuminexTable
         getColumn("ModifiedBy").setFk(userIdForeignKey);
         getColumn("CreatedBy").setFk(userIdForeignKey);
 
-        for (final String curveType : _schema.getCurveTypes())
+        addCurveTypeColumns();
+    }
+
+    protected LookupForeignKey createCurveFitFK(final String curveType)
+    {
+        return new LookupForeignKey("GuideSetId")
         {
-            ColumnInfo curveFitColumn = wrapColumn(curveType + "CurveFit", getRealTable().getColumn("RowId"));
-
-            LookupForeignKey fk = new LookupForeignKey("GuideSetId")
+            @Override
+            public TableInfo getLookupTableInfo()
             {
-                @Override
-                public TableInfo getLookupTableInfo()
-                {
-                    return _schema.createGuideSetCurveFitTable(curveType);
-                }
-
-                @Override
-                protected ColumnInfo getPkColumn(TableInfo table)
-                {
-                    return table.getColumn("GuideSetId");
-                }
-            };
-            curveFitColumn.setIsUnselectable(true);
-            curveFitColumn.setShownInDetailsView(false);
-            curveFitColumn.setReadOnly(true);
-            curveFitColumn.setKeyField(false);
-            curveFitColumn.setShownInInsertView(false);
-            curveFitColumn.setShownInUpdateView(false);
-            curveFitColumn.setFk(fk);
-
-            addColumn(curveFitColumn);
-        }
+                return _schema.createGuideSetCurveFitTable(curveType);
+            }
+        };
     }
 
     @Override

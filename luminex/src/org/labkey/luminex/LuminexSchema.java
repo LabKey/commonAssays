@@ -94,6 +94,7 @@ public class LuminexSchema extends AssaySchema
         {
             QueryDefinition queryDef = QueryService.get().createQueryDef(getUser(), _container, this, "query");
             queryDef.setSql("SELECT DISTINCT(CurveType) FROM \"" + getProviderTableName(getProtocol(), CURVE_FIT_TABLE_NAME).replace("\"", "\"\"") + "\"");
+            queryDef.setContainerFilter(ContainerFilter.EVERYTHING);
 
             try
             {
