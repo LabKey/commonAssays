@@ -24,21 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-/*
-    public enum StatisticSet
-    {
-        count,
-        frequency,
-        frequencyOfParent,
-        frequencyOfGrandparent,
-        medianGated,
-        medianAll,
-        meanAll,
-        stdDevAll,
-    }
-
- */
-
 public enum StatisticSet
 {
     existing("Existing", null),
@@ -49,8 +34,13 @@ public enum StatisticSet
     frequencyOfGrandparent("FrequencyOfGrandparent", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Freq_Of_Grandparent, null)),
     medianAll("Median values of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Median, "*")),
     meanAll("Mean values of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Mean, "*")),
+    //modeAll("Mode values of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Mode, "*")),
+    geometricMeanAll("Geometric mean values of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Geometric_Mean, "*")),
+    medianAbsoluteDeviationAll("Median absolute deviation of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Median_Abs_Dev, "*")),
+    medianAbsoluteDeviationPercentAll("Median absolute deviation percent of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Median_Abs_Dev_Percent, "*")),
     stdDevAll("Standard deviation of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Std_Dev, "*")),
-    cvAll("Coefficient of variation of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.CV, "*"))
+    cvAll("Coefficient of variation of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.CV, "*")),
+    robustCvAll("Robust Coefficient of variation of all parameters", new StatisticSpec(new SubsetSpec(null, PopulationName.ALL), STAT.Robust_CV, "*"))
     ;
 
     final StatisticSpec _spec;
@@ -103,10 +93,20 @@ public enum StatisticSet
                 return statSets.contains(StatisticSet.medianAll);
             case Mean:
                 return statSets.contains(StatisticSet.meanAll);
+            //case Mode:
+            //    return statSets.contains(StatisticSet.modeAll);
+            case Geometric_Mean:
+                return statSets.contains(StatisticSet.geometricMeanAll);
+            case Median_Abs_Dev:
+                return statSets.contains(StatisticSet.medianAbsoluteDeviationAll);
+            case Median_Abs_Dev_Percent:
+                return statSets.contains(StatisticSet.medianAbsoluteDeviationPercentAll);
             case Std_Dev:
                 return statSets.contains(StatisticSet.stdDevAll);
             case CV:
                 return statSets.contains(StatisticSet.cvAll);
+            case Robust_CV:
+                return statSets.contains(StatisticSet.robustCvAll);
         }
         return false;
     }

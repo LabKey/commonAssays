@@ -98,8 +98,13 @@
         <%=statOption(StatisticSet.frequencyOfGrandparent)%> Frequency of Grandparent<br>
         <%=statOption(StatisticSet.medianAll)%> Median value of all parameters<br>
         <%=statOption(StatisticSet.meanAll)%> Mean value of all parameters<br>
+        <%--<%=statOption(StatisticSet.modeAll)%> Mode value of all parameters<br>--%>
+        <%=statOption(StatisticSet.geometricMeanAll)%> Geometric mean value of all parameters<br>
+        <%=statOption(StatisticSet.medianAbsoluteDeviationAll)%> Median absolute deviation of all parameters<br>
+        <%=statOption(StatisticSet.medianAbsoluteDeviationPercentAll)%> Median absolute deviation percent of all parameters<br>
         <%=statOption(StatisticSet.stdDevAll)%> Standard deviation of all parameters<br>
         <%=statOption(StatisticSet.cvAll)%> Coefficient of variation of all parameters<br>
+        <%=statOption(StatisticSet.robustCvAll)%> Robust coefficient of variation of all parameters<br>
     </p>
     <% }
     else

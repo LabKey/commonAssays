@@ -235,15 +235,16 @@ public class WorkspaceJob extends FlowJob
         Map<Analysis, ScriptDocument> scriptDocs = new HashMap();
         Map<Analysis, FlowScript> scripts = new HashMap();
 
-        List<FlowJoWorkspace.SampleInfo> samples = workspace.getSamples();
+        List<String> allSampleIDs = workspace.getAllSampleIDs();
         int iSample = 0;
-        for (FlowJoWorkspace.SampleInfo sample : samples)
+        for (String sampleID : allSampleIDs)
         {
+            FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleID);
             if (job.checkInterrupted())
                 return null;
 
             iSample++;
-            String description = "sample " + iSample + "/" + samples.size() + ":" + sample.getLabel();
+            String description = "sample " + iSample + "/" + allSampleIDs.size() + ":" + sample.getLabel();
             job.addStatus("Preparing " + description);
 
             AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);
@@ -347,8 +348,9 @@ public class WorkspaceJob extends FlowJob
             startingInputs.addDataInput(user, workspaceData, InputRole.Workspace.toString());
             Map<FlowJoWorkspace.SampleInfo, FlowFCSFile> fcsFiles = new HashMap();
             iSample = 0;
-            for (FlowJoWorkspace.SampleInfo sample : samples)
+            for (String sampleID : allSampleIDs)
             {
+                FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleID);
                 if (job.checkInterrupted())
                     return null;
 
@@ -360,7 +362,7 @@ public class WorkspaceJob extends FlowJob
                 fcsFile.setDataFileURI(dataFileURI);
 
                 fcsFile.setSourceApplication(paSample);
-                job.addStatus("Saving FCSFile " + iSample + "/" + samples.size() + ":" + sample.getLabel());
+                job.addStatus("Saving FCSFile " + iSample + "/" + allSampleIDs.size() + ":" + sample.getLabel());
                 fcsFile.save(user);
                 fcsFiles.put(sample, new FlowFCSFile(fcsFile));
                 AttributeSet attrs = keywordsMap.get(sample);

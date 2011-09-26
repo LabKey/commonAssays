@@ -20,14 +20,26 @@
 <%@ page import="java.util.Collection" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.flow.controllers.editscript.AnalysisForm" %>
+<%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% AnalysisForm bean = (AnalysisForm) form; %>
 <%Map<String, String> params = form.getParameters();
     Collection<SubsetSpec> subsets = form.analysisScript.getSubsets();
+
 %>
 <labkey:errors/>
 <script>
+    var STATS = [];
+    <% for (StatisticSpec.STAT stat : StatisticSpec.STAT.values()) { %>
+        STATS.push({
+            name: <%= stat.name() %>,
+            shortName: <%= stat.getShortName() %>,
+            longName: <%= stat.getLongName() %>,
+            parameterRequired: <%= stat.isParameterRequired() %>
+        });
+    <% } %>
+
     function addStat()
     {
         var subset = getValue(document.getElementById("stat_subset"));
@@ -36,7 +48,20 @@
 
         var statistic = "";
 
-        if (stat == "Median" || stat == "Mean" || stat == "Std_Dev" || stat == "Percentile" || stat == "CV")
+        var STAT = null;
+        for (var i = 0; STAT == null && i < STATS.length; i++)
+        {
+            if (STATS[i].name == stat)
+                STAT = STATS[i];
+        }
+
+        if (STAT == null)
+        {
+            alert("Statistic '" + stat + "' is not a valid statistic");
+            return;
+        }
+
+        if (STAT.parameterRequired)
         {
             if (!parameter)
             {
@@ -145,8 +170,12 @@
                         <option value="Freq_Of_Grandparent">Freq_Of_Grandparent</option>
                         <option value="Median">Median</option>
                         <option value="Mean">Mean</option>
+                        <%--<option value="Mode">Mode</option>--%>
                         <option value="Std_Dev">Standard Deviation</option>
+                        <option value="Median_Abs_Dev">Median Absolute Deviation</option>
+                        <option value="Geometric_Mean">Geometric Mean</option>
                         <option value="CV">Coefficient of Variance (CV)</option>
+                        <option value="Robust_CV">Robust Coefficient of Variance (rCV)</option>
                         <option value="Percentile">Percentile</option>
                     </select>
                 </td>

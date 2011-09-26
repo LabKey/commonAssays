@@ -422,12 +422,26 @@ public class FCS extends FCSHeader
         Arrays.fill(bytes, 34, 42, (byte) 32);
         System.arraycopy(rgbDataLast, 0, bytes, 34 + 8 - rgbDataLast.length, rgbDataLast.length);
 
+        // set $ENDDATA keyword value to new data last offset
+        byte[] rgbEndDataKey = new byte[]{(byte) chDelimiter, '$', 'E', 'N', 'D', 'D', 'A', 'T', 'A', (byte) chDelimiter};
+        int ibEndData = indexOf(bytes, rgbEndDataKey, textOffset, textLast);
+        if (ibEndData >= 0)
+        {
+            int ibNumberStart = ibEndData + rgbEndDataKey.length;
+            int ibNumberEnd = indexOf(bytes, new byte[] {(byte) chDelimiter}, ibNumberStart, textLast + 1);
+            if (ibNumberEnd > 0)
+            {
+                Arrays.fill(bytes, ibNumberStart, ibNumberEnd, (byte) 32);
+                System.arraycopy(rgbDataLast, 0, bytes, ibNumberStart, rgbDataLast.length);
+            }
+        }
+
         // now, look for $TOT in the file
         byte[] rgbTotKey = new byte[]{(byte) chDelimiter, '$', 'T', 'O', 'T', (byte) chDelimiter};
         int ibTot = indexOf(bytes, rgbTotKey, textOffset, textLast);
         if (ibTot >= 0)
         {
-            int ibNumberStart = ibTot + 6;
+            int ibNumberStart = ibTot + rgbTotKey.length;
             int ibNumberEnd = indexOf(bytes, new byte[]{(byte) chDelimiter}, ibNumberStart, textLast + 1);
             if (ibNumberEnd > 0)
             {
@@ -437,6 +451,7 @@ public class FCS extends FCSHeader
                 System.arraycopy(rgbNewTot, 0, bytes, ibNumberStart, rgbNewTot.length);
             }
         }
+
         return bytes;
     }
 }

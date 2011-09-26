@@ -101,7 +101,7 @@ public class Main
         {
             Analysis analysis = groupAnalyses.get(groupName);
             if (analysisToGroup.containsKey(analysis))
-                System.out.printf("warning: group analyses '%s' and '%s' are identical.", groupName, analysisToGroup.get(analysis));
+                System.out.printf("warning: group analyses '%s' and '%s' are identical.\n", groupName, analysisToGroup.get(analysis));
             analysisToGroup.put(analysis, groupName);
         }
 
@@ -130,12 +130,23 @@ public class Main
                 {
                     System.out.print("  ");
                     String sep = "";
+                    int lineLen = 2;
                     for (String sampleId : group.getSampleIds())
                     {
                         FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleId);
-                        System.out.print(sep);
+                        if (lineLen + sep.length() + sample.getLabel().length() > 80)
+                        {
+                            System.out.println(sep);
+                            System.out.print("  ");
+                            lineLen = 2;
+                        }
+                        else
+                        {
+                            System.out.print(sep);
+                        }
                         System.out.print(sample.getLabel());
                         sep = ", ";
+                        lineLen += sep.length() + sample.getLabel().length();
                     }
                     System.out.println();
                 }

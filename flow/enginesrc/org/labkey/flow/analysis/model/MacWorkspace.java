@@ -39,11 +39,16 @@ public class MacWorkspace extends FlowJoWorkspace
         statMap.put("Percentile", StatisticSpec.STAT.Percentile);
         statMap.put("Mean", StatisticSpec.STAT.Mean);
         statMap.put("Median", StatisticSpec.STAT.Median);
+        //statMap.put("Mode", StatisticSpec.STAT.Mode);
+        statMap.put("GeometricMean", StatisticSpec.STAT.Geometric_Mean);
         statMap.put("FrequencyOfGrandParent", StatisticSpec.STAT.Freq_Of_Grandparent);
         statMap.put("FrequencyOfParent", StatisticSpec.STAT.Freq_Of_Parent);
         statMap.put("FrequencyOfTotal", StatisticSpec.STAT.Frequency);
         statMap.put("CV", StatisticSpec.STAT.CV);
-        //statMap.put("RobustCV", StatisticSpec.STAT.Robust_CV);
+        statMap.put("SD", StatisticSpec.STAT.Std_Dev);
+        statMap.put("MedianAbsDeviation", StatisticSpec.STAT.Median_Abs_Dev);
+        statMap.put("MedianAbsDeviation%", StatisticSpec.STAT.Median_Abs_Dev_Percent);
+        statMap.put("RobustCV", StatisticSpec.STAT.Robust_CV);
     }
 
 
@@ -463,6 +468,9 @@ public class MacWorkspace extends FlowJoWorkspace
         Analysis ret = new Analysis();
         ret.setSettings(_settings);
         ret.getStatistics().add(new StatisticSpec(null, StatisticSpec.STAT.Count, null));
+
+        readStats(null, elAnalysis, results, ret);
+
         for (Element elPopulation : getElementsByTagName(elAnalysis, "Population"))
         {
             Population child = readPopulation(elPopulation, null, ret, results);

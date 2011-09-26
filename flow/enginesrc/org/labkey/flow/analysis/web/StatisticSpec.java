@@ -37,36 +37,72 @@ public class StatisticSpec implements Serializable, Comparable
     public enum STAT
     {
         // Well statistics
-        Count("Count", "Count"),
-        Frequency("Frequency", "%"),
-        Freq_Of_Parent("Frequency of Parent", "%P"),
-        Freq_Of_Grandparent("Frequency of Grandparent", "%G"),
-        Min("Min", "Min"),
-        Max("Max", "Max"),
-        Median("Median", "Median"),
-        Mean("Mean", "Mean"),
-        Std_Dev("Standard_Deviation", "StdDev"),
-        CV("Coefficient of Variation", "CV"),
-        Median_Abs_Dev("Median Absolute Deviation", "MAD"),
-        //Robust_CV("Robust Coefficient of Variation", "rCV"),
-        Percentile("Percentile", "%ile"),
+        Count("Count", "Count", false),
+        Frequency("Frequency", "%", false),
+        Freq_Of_Parent("Frequency of Parent", "%P", false),
+        Freq_Of_Grandparent("Frequency of Grandparent", "%G", false),
+        Min("Min", "Min", true),
+        Max("Max", "Max", true),
+        Median("Median", "Median", true),
+        Mean("Mean", "Mean", true),
+        //Mode("Mode", "Mode", true),
+        Geometric_Mean("Geometric Mean", "GeomMean", true),
+        Std_Dev("Standard_Deviation", "StdDev", true),
+        CV("Coefficient of Variation", "CV", true),
+        Median_Abs_Dev("Median Absolute Deviation", "MAD", true),
+        Median_Abs_Dev_Percent("Median Absolute Deviation (%)", "MAD%", true),
+        Robust_CV("Robust Coefficient of Variation", "rCV", true),
+        Percentile("Percentile", "%ile", true),
         // Run statistics
-        Spill("Spill", "Spill"); // Used for compensation calculations
+        Spill("Spill", "Spill", true); // Used for compensation calculations
 
-        private String _longName;
-        private String _shortName;
-        STAT(String longName, String shortName)
+        private final String _longName;
+        private final String _shortName;
+        private final boolean _parameterRequired;
+
+        STAT(String longName, String shortName, boolean parameterRequired)
         {
             _longName = longName;
             _shortName = shortName;
+            _parameterRequired = parameterRequired;
         }
+
         public String getShortName()
         {
             return _shortName;
         }
+
         public String getLongName()
         {
             return _longName;
+        }
+
+        public boolean isParameterRequired()
+        {
+            return _parameterRequired;
+        }
+
+        /**
+         * Get a STAT based upon either the STAT enum name or the short name.
+         */
+        public static STAT fromString(String str)
+        {
+            try
+            {
+                return STAT.valueOf(str);
+            }
+            catch (IllegalArgumentException e)
+            {
+                // ok
+            }
+
+            for (STAT stat : STAT.values())
+            {
+                if (stat.getShortName().equals(str))
+                    return stat;
+            }
+
+            throw new IllegalArgumentException(str);
         }
     }
 
@@ -108,7 +144,7 @@ public class StatisticSpec implements Serializable, Comparable
         }
         try
         {
-            _statistic = STAT.valueOf(str);
+            _statistic = STAT.fromString(str);
         }
         catch (Exception e)
         {
@@ -160,6 +196,11 @@ public class StatisticSpec implements Serializable, Comparable
     public String toShortString()
     {
         return toString(_statistic.getShortName(), false);
+    }
+
+    public String toShortString(boolean escaped)
+    {
+        return toString(_statistic.getShortName(), escaped);
     }
 
 
@@ -222,16 +263,25 @@ public class StatisticSpec implements Serializable, Comparable
                 return doubleStats.getMean();
             case Median:
                 return doubleStats.getMedian();
+            //case Mode:
+            //    //return doubleStats.getMode();
+            case Geometric_Mean:
+                return doubleStats.getGeometricMean();
             case Std_Dev:
                 return doubleStats.getStdDev();
             case CV:
+                double mean = doubleStats.getMean();
+                if (mean == 0)
+                    return 0;
+                return 100.0 * doubleStats.getStdDev() / mean;
+            case Median_Abs_Dev:
+                return doubleStats.getMedianAbsoluteDeviation();
+            case Median_Abs_Dev_Percent:
                 double median = doubleStats.getMedian();
                 if (median == 0)
                     return 0;
-                return 100.0 * doubleStats.getStdDev() / median;
-            case Median_Abs_Dev:
-                return doubleStats.getMedianAbsoluteDeviation();
-//            case Robust_CV:
+                return 100.0 * doubleStats.getMedianAbsoluteDeviation() / median;
+            case Robust_CV:
 //                // BD's definition
 //                return 100.0 * doubleStats.getMedianAbsoluteDeviation() / doubleStats.getMedian();
 
@@ -244,6 +294,11 @@ public class StatisticSpec implements Serializable, Comparable
 //                double q1 = doubleStats.getPercentile(.315);
 //                double q3 = doubleStats.getPercentile(.815);
 //                return 100.0 * 0.8413 * (q3 - q1) / doubleStats.getMedian();
+
+                // FlowJo's definition: 100 * 1/2 ( 84.13%ile - 15.87%ile ) / Median
+                double q1 = doubleStats.getPercentile(.1587);
+                double q3 = doubleStats.getPercentile(.8413);
+                return 100.0 * 0.5 * (q3 - q1) / doubleStats.getMedian();
             case Percentile:
                 return doubleStats.getPercentile(percentile / 100);
             default:
@@ -294,7 +349,7 @@ public class StatisticSpec implements Serializable, Comparable
             return;
 
 
-        System.out.println("Name\tMin\t1st Qu.\tMean\tMedian\t3rd Qu.\tMax\tCount\tStd_Dev\tMedian_Abs_Dev\tCV");
+        System.out.println("Name\tMin\t1st Qu.\tMean\tMedian\t3rd Qu.\tMax\tCount\tStd_Dev\tMedian_Abs_Dev\tGeometric_Mean\tCV\tRobust_CV");
 
         DataFrame frame = fcs.getScaledData(null);
         for (int p = 0; p < frame.getColCount(); p++)
@@ -309,12 +364,15 @@ public class StatisticSpec implements Serializable, Comparable
                 new StatisticSpec(null, STAT.Percentile, field.getName() + ":25"),
                 new StatisticSpec(null, STAT.Mean, field.getName()),
                 new StatisticSpec(null, STAT.Median, field.getName()),
+                //new StatisticSpec(null, STAT.Mode, field.getName()),
                 new StatisticSpec(null, STAT.Percentile, field.getName() + ":75"),
                 new StatisticSpec(null, STAT.Max, field.getName()),
                 new StatisticSpec(null, STAT.Count, field.getName()),
                 new StatisticSpec(null, STAT.Std_Dev, field.getName()),
                 new StatisticSpec(null, STAT.Median_Abs_Dev, field.getName()),
+                new StatisticSpec(null, STAT.Geometric_Mean, field.getName()),
                 new StatisticSpec(null, STAT.CV, field.getName()),
+                new StatisticSpec(null, STAT.Robust_CV, field.getName()),
             };
 
             for (StatisticSpec stat : stats)
@@ -431,6 +489,7 @@ final static String[] statitics11_1 = {
     "Singlets:Median(SSC-A)",
     "Singlets:Median(Time)",
     "Spill(APC Cy7-A:APC Cy7-A)",
+    //"Spill(APC-Cy7-A:Indo-1 (Blue)-A)",
     "Std_Dev(APC Cy7-A)",
     "Std_Dev(APC-A)",
     "Std_Dev(Time)",
