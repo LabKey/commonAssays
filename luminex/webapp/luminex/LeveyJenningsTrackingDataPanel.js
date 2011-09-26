@@ -79,7 +79,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         // build the array of filters to be applied to the store
         var filterArray = [
             LABKEY.Filter.create('Titration/Name', this.titration),
-            LABKEY.Filter.create('Analyte/Name', this.analyte || "TEST"), // TODO: fix this
+            LABKEY.Filter.create('Analyte/Name', this.analyte),
             LABKEY.Filter.create('Titration/Run/Isotype', this.isotype),
             LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate)
         ];
@@ -89,8 +89,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             filterArray.push(LABKEY.Filter.create('Titration/Run/TestDate', endDate, LABKEY.Filter.Types.LESS_THAN_OR_EQUAL));
         }
 
-        return new LABKEY.ext.Store({ // temperary empty store until graph params are selected
-            autoLoad: true,
+        return new LABKEY.ext.Store({
+            autoLoad: false,
             schemaName: 'assay',
             queryName: this.assayName + ' AnalyteTitration',
             columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
@@ -138,8 +138,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer, align: 'right'},
                 {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
                 {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
-                {header:'', dataIndex:'GuideSet/Four ParameterCurveFit/EC50Average', hidden: true},
-                {header:'', dataIndex:'GuideSet/Four ParameterCurveFit/EC50StdDev', hidden: true}
+                {header:'EC50 Average', dataIndex:'GuideSet/Four ParameterCurveFit/EC50Average', hidden: true},
+                {header:'EC50 StdDev', dataIndex:'GuideSet/Four ParameterCurveFit/EC50StdDev', hidden: true}
             ],
             scope: this
         });
@@ -166,6 +166,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         var newStore = this.getTrackingDataStore(startDate, endDate);
         var newColModel = this.getTrackingDataColModel();
         this.reconfigure(newStore, newColModel);
+        newStore.load();
     },
 
     applyGuideSetClicked: function() {
