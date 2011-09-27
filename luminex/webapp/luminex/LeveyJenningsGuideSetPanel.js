@@ -108,7 +108,9 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.enable();
 
         // update the display field to show the selected params
-        this.paramsDisplayField.setValue($h(this.analyte) + ' - ' + $h(this.isotype) + ' ' + $h(this.conjugate));
+        this.paramsDisplayField.setValue($h(this.analyte)
+               + ' - ' + $h(this.isotype == '' ? "[None]" : this.isotype)
+               + ' ' + $h(this.conjugate == '' ? "[None]" : this.conjugate));
 
         // update the guide set display field to say loading...
         this.guideSetDisplayField.setValue("Loading...");
@@ -123,8 +125,8 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             queryName: this.assayName + ' GuideSet',
             filterArray: [LABKEY.Filter.create('TitrationName', this.titration),
                     LABKEY.Filter.create('AnalyteName', this.analyte),
-                    LABKEY.Filter.create('Isotype', this.isotype),
-                    LABKEY.Filter.create('Conjugate', this.conjugate),
+                    LABKEY.Filter.create('Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
+                    LABKEY.Filter.create('Conjugate', this.conjugate, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                     LABKEY.Filter.create('CurrentGuideSet', true)],
             columns: 'RowId, Comment, Created',
             success: this.updateGuideSetDisplayField(clickEditButton),

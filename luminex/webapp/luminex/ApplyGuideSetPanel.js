@@ -19,8 +19,10 @@ Ext.QuickTips.init();
  * Class to display panel for selecting which runs are part of the current guide set for the given
  * titration, analyte, isotype, and conjugate combination
  *
- * @params guideSetId
  * @params assayName
+ * @params titration
+ * @params analyte
+ * @params selectedRecords, array of selected records with each record containing an Analyte and Titration Id
  */
 LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
     constructor : function(config){
@@ -31,10 +33,6 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             throw "You must specify a titration!";
         if (!config.analyte)
             throw "You must specify a analyte!";
-        if (!config.isotype)
-            throw "You must specify a isotype!";
-        if (!config.conjugate)
-            throw "You must specify a conjugate!";
         if (!config.selectedRecords)
             throw "You must specify selectedRecords!";
         
@@ -106,9 +104,9 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100},
                 {header:'Exp Performer', dataIndex:'Titration/Run/ExpPerformer', width:100},
                 {header:'Test Date', dataIndex:'Titration/Run/TestDate', renderer: this.dateRenderer, width:100},
-                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
-                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
-                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'}
+                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
+                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'},
+                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'}
             ],
             scope: this
         });
@@ -136,8 +134,8 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             filterArray: [
                 LABKEY.Filter.create('TitrationName', this.titration),
                 LABKEY.Filter.create('AnalyteName', this.analyte),
-                LABKEY.Filter.create('Isotype', this.isotype),
-                LABKEY.Filter.create('Conjugate', this.conjugate)
+                LABKEY.Filter.create('Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
+                LABKEY.Filter.create('Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
             ],
             sort: '-Created',
             containerFilter: LABKEY.Query.containerFilter.allFolders,
@@ -169,9 +167,9 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Created', dataIndex:'Created', renderer: this.dateRenderer},
                 {header:'Current', dataIndex:'CurrentGuideSet'},
                 {header:'Comment', dataIndex:'Comment', width:200},
-                {header:'Avg EC50', dataIndex:'Four ParameterCurveFit/EC50Average', renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
-                {header:'Avg High MFI', dataIndex:'MaxFIAverage', renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
-                {header:'Avg AUC', dataIndex:'TrapezoidalCurveFit/AUCAverage', renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'}
+                {header:'Avg EC50', dataIndex:'Four ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
+                {header:'Avg High MFI', dataIndex:'MaxFIAverage', renderer: this.numberRenderer, align: 'right'},
+                {header:'Avg AUC', dataIndex:'TrapezoidalCurveFit/AUCAverage', renderer: this.numberRenderer, align: 'right'}
             ],
             scope: this
         });
@@ -210,7 +208,9 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             }),
             new Ext.Spacer({height: 20}),
             new Ext.Panel({
-                title: 'Guide Run Sets for ' + this.titration + ' : ' + this.analyte + ' ' + this.isotype + ' ' + this.conjugate,
+                title: 'Guide Run Sets for ' + this.titration + ' : ' + this.analyte + ' '
+                        + (this.isotype == '' ? '[None]' : this.isotype) + ' '
+                        + (this.conjugate == '' ? '[None]' : this.conjugate),
                 width:1000,
                 items: [
                     {xtype: 'displayfield', value: 'Choose the guide set that you would like to apply to the selected runs in the list above.'},
@@ -291,5 +291,13 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         var msg = Ext.util.Format.htmlEncode(value);
         p.attr = 'ext:qtip="' + msg + '"';
         return msg;
+    },
+
+    numberRenderer: function(val) {
+        // if this is a very small number, display more decimal places
+        if (val && val > 0 && val < 1)
+            return Ext.util.Format.number(val, '0.000000');
+        else
+            return Ext.util.Format.number(val, '0.00');
     }
 });

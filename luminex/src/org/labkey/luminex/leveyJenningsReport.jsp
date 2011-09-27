@@ -101,6 +101,7 @@
             assayName: '<%= bean.getProtocol() %>',
             listeners: {
                 'currentGuideSetUpdated': function() {
+                    trendPlotPanel.setTabsToRender();
                     trendPlotPanel.displayTrendPlot();
                     trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate);
                 }
@@ -130,6 +131,7 @@
             defaultRowSize: defaultRowSize,
             listeners: {
                 'appliedGuideSetUpdated': function() {
+                    trendPlotPanel.setTabsToRender();
                     trendPlotPanel.displayTrendPlot();
                     trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate);
                 }

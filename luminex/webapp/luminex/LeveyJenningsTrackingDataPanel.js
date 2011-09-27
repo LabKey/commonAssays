@@ -80,8 +80,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         var filterArray = [
             LABKEY.Filter.create('Titration/Name', this.titration),
             LABKEY.Filter.create('Analyte/Name', this.analyte),
-            LABKEY.Filter.create('Titration/Run/Isotype', this.isotype),
-            LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate)
+            LABKEY.Filter.create('Titration/Run/Isotype', this.isotype, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
+            LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
         ];
         if (startDate && endDate)
         {
@@ -97,7 +97,9 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                     + 'Analyte/Properties/LotNumber, Titration/Run/Batch/Network, Titration/Run/NotebookNo, '
                     + 'Titration/Run/AssayType, Titration/Run/ExpPerformer, Titration/Run/TestDate, GuideSet/Created, '
                     + 'Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC, '
-                    + 'GuideSet/Four ParameterCurveFit/EC50Average, GuideSet/Four ParameterCurveFit/EC50StdDev ',
+                    + 'GuideSet/Four ParameterCurveFit/EC50Average, GuideSet/Four ParameterCurveFit/EC50StdDev, '
+                    + 'GuideSet/TrapezoidalCurveFit/AUCAverage, GuideSet/TrapezoidalCurveFit/AUCStdDev, '
+                    + 'GuideSet/MaxFIAverage, GuideSet/MaxFIStdDev ',
             filterArray: filterArray,
             sort: '-Titration/Run/TestDate, -Titration/Run/Created',
             maxRows: (startDate && endDate ? undefined : this.defaultRowSize),
@@ -135,11 +137,15 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'Test Date', dataIndex:'Titration/Run/TestDate', renderer: this.dateRenderer, width:100},
                 {header:'Analyte Lot No.', dataIndex:'Analyte/Properties/LotNumber', width:100},
                 {header:'Guide Set Date', dataIndex:'GuideSet/Created', renderer: this.dateRenderer, width:100},
-                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer, align: 'right'},
-                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
-                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: Ext.util.Format.numberRenderer('0.00'), align: 'right'},
+                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("EC50"), align: 'right'},
+                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("MaxFI"), align: 'right'},
+                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.outOfRangeRenderer("AUC"), align: 'right'},
                 {header:'EC50 Average', dataIndex:'GuideSet/Four ParameterCurveFit/EC50Average', hidden: true},
-                {header:'EC50 StdDev', dataIndex:'GuideSet/Four ParameterCurveFit/EC50StdDev', hidden: true}
+                {header:'EC50 StdDev', dataIndex:'GuideSet/Four ParameterCurveFit/EC50StdDev', hidden: true},
+                {header:'High MFI Average', dataIndex:'GuideSet/MaxFIAverage', hidden: true},
+                {header:'High MFI StdDev', dataIndex:'GuideSet/MaxFIStdDev', hidden: true},
+                {header:'AUC Average', dataIndex:'GuideSet/TrapezoidalCurveFit/AUCAverage', hidden: true},
+                {header:'AUC StdDev', dataIndex:'GuideSet/TrapezoidalCurveFit/AUCStdDev', hidden: true}
             ],
             scope: this
         });
@@ -153,7 +159,9 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         this.conjugate = conjugate;
 
         // set the grid title based on the selected graph params
-        this.setTitle('Tracking Data for ' + $h(_analyte) + ' - ' + $h(_isotype) + ' ' + $h(_conjugate));
+        this.setTitle('Tracking Data for ' + $h(_analyte)
+                + ' - ' + $h(_isotype == '' ? '[None]' : _isotype)
+                + ' ' + $h(_conjugate == '' ? '[None]' : _conjugate));
 
         // create a new store now that the graph params are selected and bind it to the grid
         this.updateTrackingDataGrid();
@@ -207,21 +215,42 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         win.show(this);
     },
 
-    outOfRangeRenderer: function(val, metaData, record) {
-        // if this record has a guide set average and stdDev, check if the value is outside of the +/- 3 stdDev range
-        var avg = record.get('GuideSet/Four ParameterCurveFit/EC50Average');
-        var stdDev = record.get('GuideSet/Four ParameterCurveFit/EC50StdDev');
-        if (val && avg)
-        {
-            // if there is not stdDev (i.e. only one run in the guide set) and the value != avg (compared to two decimals)
-            // OR if the value is outside of the +/- 3 stdDev range from the avg
-            if (!stdDev && Ext.util.Format.number(val, '0.00') != Ext.util.Format.number(avg, '0.00'))
-                metaData.attr = "style='color:red;'";
-            else if(stdDev && (val > (avg + (3 * stdDev)) || val < (avg - (3 * stdDev))))
-                metaData.attr = "style='color:red;'";
-        }
+    outOfRangeRenderer: function(source) {
+        return function(val, metaData, record) {
+            // if this is a very small number, display more decimal places
+            var formatStr = (val && val > 0 && val < 1) ? '0.000000' : '0.00';
 
-        return Ext.util.Format.number(val, '0.00');
+            // get the average and stdDev values based on the source column type
+            var avg, stdDev = null
+            if (source == "EC50")
+            {
+                avg = record.get('GuideSet/Four ParameterCurveFit/EC50Average');
+                stdDev = record.get('GuideSet/Four ParameterCurveFit/EC50StdDev');
+            }
+            else if (source == "MaxFI")
+            {
+                avg = record.get('GuideSet/MaxFIAverage');
+                stdDev = record.get('GuideSet/MaxFIStdDev');
+            }
+            else if (source == "AUC")
+            {
+                avg = record.get('GuideSet/TrapezoidalCurveFit/AUCAverage');
+                stdDev = record.get('GuideSet/TrapezoidalCurveFit/AUCStdDev');
+            }
+
+            // if this record has a guide set average and stdDev, check if the value is outside of the +/- 3 stdDev range
+            if (val && avg)
+            {
+                // if there is not stdDev (i.e. only one run in the guide set) and the value != avg (compared to two decimals)
+                // OR if the value is outside of the +/- 3 stdDev range from the avg
+                if (!stdDev && Ext.util.Format.number(val, formatStr) != Ext.util.Format.number(avg, formatStr))
+                    metaData.attr = "style='color:red;'";
+                else if(stdDev && (val > (avg + (3 * stdDev)) || val < (avg - (3 * stdDev))))
+                    metaData.attr = "style='color:red;'";
+            }
+
+            return Ext.util.Format.number(val, formatStr);
+        }
     },
 
     dateRenderer: function(val) {

@@ -105,14 +105,16 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                 reader: new Ext.data.JsonReader({
                         root:'rows'
                     },
-                    [{name: 'value'}]
+                    [{name: 'value'}, {name: 'display'}]
                 ),
                 proxy: new Ext.data.HttpProxy({
                     method: 'GET',
                     url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
                         containerFilter: LABKEY.Query.containerFilter.allFolders,
                         schemaName: 'assay',
-                        sql: 'SELECT DISTINCT x.Titration.Run.Isotype AS value FROM "' + this.assayName + ' AnalyteTitration" AS x '
+                        sql: 'SELECT DISTINCT x.Titration.Run.Isotype AS value, '
+                            + 'CASE WHEN x.Titration.Run.Isotype IS NULL THEN \'[None]\' ELSE x.Titration.Run.Isotype END AS display '
+                            + 'FROM "' + this.assayName + ' AnalyteTitration" AS x '
                             + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
                     })
                 }),
@@ -126,7 +128,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             mode: 'local',
             valueField: 'value',
-            displayField: 'value',
+            displayField: 'display',
             listeners: {
                 scope: this,
                 'select': function(combo, record, index) {
@@ -147,14 +149,16 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                 reader: new Ext.data.JsonReader({
                         root:'rows'
                     },
-                    [{name: 'value'}]
+                    [{name: 'value'}, {name: 'display'}]
                 ),
                 proxy: new Ext.data.HttpProxy({
                     method: 'GET',
                     url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
                         containerFilter: LABKEY.Query.containerFilter.allFolders,
                         schemaName: 'assay',
-                        sql: 'SELECT DISTINCT x.Titration.Run.Conjugate AS value FROM "' + this.assayName + ' AnalyteTitration" AS x '
+                        sql: 'SELECT DISTINCT x.Titration.Run.Conjugate AS value, '
+                            + 'CASE WHEN x.Titration.Run.Conjugate IS NULL THEN \'[None]\' ELSE x.Titration.Run.Conjugate END AS display '
+                            + 'FROM "' + this.assayName + ' AnalyteTitration" AS x '
                             + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
                     })
                 }),
@@ -168,7 +172,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             triggerAction: 'all',
             mode: 'local',
             valueField: 'value',
-            displayField: 'value',
+            displayField: 'display',
             listeners: {
                 scope: this,
                 'select': function(combo, record, index) {
@@ -197,6 +201,6 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
     },
 
     enableResetGraphButton: function() {
-        this.resetGraphButton.setDisabled(!(this.analyte && this.isotype && this.conjugate));
+        this.resetGraphButton.setDisabled(!(this.analyte != undefined && this.isotype != undefined && this.conjugate != undefined));
     }
 });

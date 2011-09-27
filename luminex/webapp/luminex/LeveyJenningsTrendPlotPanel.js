@@ -100,16 +100,34 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
         // initialize the tab panel that will show the 3 different trend plots
         this.ec50Panel = new Ext.Panel({
+            itemId: "EC50",
             title: "EC50",
-            html: "<div id='EC50TrendPlotDiv'></div>"
+            html: "<div id='EC50TrendPlotDiv'></div>",
+            isRendered: false,
+            listeners: {
+                scope: this,
+                'activate': this.activateTrendPlotPanel
+            }
         });
         this.aucPanel = new Ext.Panel({
+            itemId: "AUC",
             title: "AUC",
-            html: "<div id='AUCTrendPlotDiv'>Coming Soon</div>"
+            html: "<div id='AUCTrendPlotDiv'></div>",
+            isRendered: false,
+            listeners: {
+                scope: this,
+                'activate': this.activateTrendPlotPanel
+            }
         });
         this.mfiPanel = new Ext.Panel({
+            itemId: "MaxMFI",
             title: "High MFI",
-            html: "<div id='HighMFITrendPlotDiv'>Coming Soon</div>"
+            html: "<div id='MaxMFITrendPlotDiv'></div>",
+            isRendered: false,
+            listeners: {
+                scope: this,
+                'activate': this.activateTrendPlotPanel
+            }
         });
         this.trendTabPanel = new Ext.TabPanel({
             autoScroll: true,
@@ -135,29 +153,49 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         // remove any previously entered values from the start and end date fields
         this.startDateField.reset();
         this.endDateField.reset();
+        this.refreshGraphButton.disable();
 
         // show the trending tab panel and date range selection toolbar
         this.enable();
 
+        this.setTabsToRender();
         this.displayTrendPlot();
     },
 
-    displayTrendPlot: function(startDate, endDate) {
-        // determine which tab is selected to know which div to update
-        var trendDiv = 'EC50TrendPlotDiv';
+    activateTrendPlotPanel: function(panel) {
+        // if the graph params have been selected and the trend plot for this panel hasn't been loaded, then call displayTrendPlot
+        if (this.analyte && !panel.isRendered)
+            this.displayTrendPlot();
+    },
 
+    setTabsToRender: function() {
+        // something about the report has changed and all of the tabs need to be set to re-render
+        this.ec50Panel.isRendered = false;
+        this.aucPanel.isRendered = false;
+        this.mfiPanel.isRendered = false;
+    },
+
+    displayTrendPlot: function() {
+        // determine which tab is selected to know which div to update
+        var plotType = this.trendTabPanel.getActiveTab().itemId;
+        var trendDiv = plotType + 'TrendPlotDiv';
         Ext.get(trendDiv).update('Loading...');
 
+        // get the start and end date, if entered by the user
+        var startDate = this.startDateField.getValue();
+        var endDate = this.endDateField.getValue();
+
         // build the config object of the properties that will be needed by the R report
-        var config = {reportId: 'module:luminex/schemas/core/Containers/EC50TrendPlot.r', showSection: 'ec50trend_png'};
+        var config = {reportId: 'module:luminex/schemas/core/Containers/LeveyJenningsTrendPlot.r', showSection: 'levey_jennings_trend_png'};
         // Ext.urlEncode({Protocol: this.assayName}).replace('Protocol=','')
         config['Protocol'] = this.assayName;
+        config['PlotType'] = plotType;
         config['Titration'] = this.titration;
         config['Analyte'] = this.analyte;
         config['Isotype'] = this.isotype;
         config['Conjugate'] = this.conjugate;
         // provide either a start and end date or the max number of rows to display
-        if (startDate && endDate)
+        if (startDate != '' && endDate != '')
         {
             config['StartDate'] = startDate;
             config['EndDate'] = endDate;
@@ -175,6 +213,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                partConfig: config
         });
         wikiWebPartRenderer.render();
+        this.trendTabPanel.getActiveTab().isRendered = true;
     },
 
     refreshGraphWithDates: function() {
@@ -185,7 +224,8 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         }
         else
         {
-            this.displayTrendPlot(this.startDateField.getValue(), this.endDateField.getValue());
+            this.setTabsToRender();
+            this.displayTrendPlot();
             this.fireEvent('reportDateRangeApplied', this.startDateField.getValue(), this.endDateField.getValue());
         }
     }
