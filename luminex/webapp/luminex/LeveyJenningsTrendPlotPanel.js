@@ -32,7 +32,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             bodyStyle: 'background-color:#EEEEEE',
             labelAlign: 'left',
             width: 850,
-            height: 360,
+            height: 370,
             border: false,
             cls: 'extContainer',
             disabled: true
@@ -102,7 +102,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.ec50Panel = new Ext.Panel({
             itemId: "EC50",
             title: "EC50",
-            html: "<div id='EC50TrendPlotDiv'></div>",
+            html: "<div id='EC50TrendPlotDiv'></div><div id='EC50TrendPdfDiv'></div>",
             isRendered: false,
             listeners: {
                 scope: this,
@@ -112,7 +112,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.aucPanel = new Ext.Panel({
             itemId: "AUC",
             title: "AUC",
-            html: "<div id='AUCTrendPlotDiv'></div>",
+            html: "<div id='AUCTrendPlotDiv'></div><div id='AUCTrendPdfDiv'></div>",
             isRendered: false,
             listeners: {
                 scope: this,
@@ -122,7 +122,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.mfiPanel = new Ext.Panel({
             itemId: "MaxMFI",
             title: "High MFI",
-            html: "<div id='MaxMFITrendPlotDiv'></div>",
+            html: "<div id='MaxMFITrendPlotDiv'></div><div id='MaxMFITrendPdfDiv'></div>",
             isRendered: false,
             listeners: {
                 scope: this,
@@ -133,8 +133,8 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             autoScroll: true,
             activeTab: 0,
             defaults: {
-                height: 298,
-                padding: 10
+                height: 308,
+                padding: 5
             },
             items: [this.ec50Panel, this.aucPanel, this.mfiPanel]
         });
@@ -180,13 +180,15 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         var plotType = this.trendTabPanel.getActiveTab().itemId;
         var trendDiv = plotType + 'TrendPlotDiv';
         Ext.get(trendDiv).update('Loading...');
+        var trendPdfDiv = plotType + 'TrendPdfDiv';
+        Ext.get(trendPdfDiv).update('');
 
         // get the start and end date, if entered by the user
         var startDate = this.startDateField.getValue();
         var endDate = this.endDateField.getValue();
 
         // build the config object of the properties that will be needed by the R report
-        var config = {reportId: 'module:luminex/schemas/core/Containers/LeveyJenningsTrendPlot.r', showSection: 'levey_jennings_trend_png'};
+        var config = {reportId: 'module:luminex/schemas/core/Containers/LeveyJenningsTrendPlot.r', showSection: 'levey_jennings_trend'};
         // Ext.urlEncode({Protocol: this.assayName}).replace('Protocol=','')
         config['Protocol'] = this.assayName;
         config['PlotType'] = plotType;
@@ -206,14 +208,22 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         }
 
         // call and display the Report webpart
-        var wikiWebPartRenderer = new LABKEY.WebPart({
+        new LABKEY.WebPart({
                partName: 'Report',
                renderTo: trendDiv,
                frame: 'none',
                partConfig: config
-        });
-        wikiWebPartRenderer.render();
+        }).render();
         this.trendTabPanel.getActiveTab().isRendered = true;
+
+        // call the R plot code again to get a PDF output version of the plot
+        config['PdfOut'] = true;
+        new LABKEY.WebPart({
+               partName: 'Report',
+               renderTo: trendPdfDiv,
+               frame: 'none',
+               partConfig: config
+        }).render();
     },
 
     refreshGraphWithDates: function() {

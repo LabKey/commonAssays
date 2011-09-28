@@ -86,8 +86,12 @@ if (labkey.url.params$PlotType == "EC50") {
     labkey.data$guideset_stddev = labkey.data$guideset_trapezoidalcurvefit_aucstddev;
 }
 
-# setup the png for the plot
-png(filename="${imgout:levey_jennings_trend_png}", width=810, height=290);
+# setup the png or pdf for the plot
+if (!is.null(labkey.url.params$PdfOut)) {
+    pdf(file="${pdfout:levey_jennings_trend}", width=10, height=6);
+} else {
+    png(filename="${imgout:levey_jennings_trend}", width=810, height=265);
+}
 
 # if there is no data for the selection, display a blank plot
 if(length(labkey.data$analyte_name) > 0)
@@ -124,8 +128,13 @@ if(length(labkey.data$analyte_name) > 0)
   xlabels = as.character(labkey.data$titration_run_notebookno[xtcks]);
 
   # create an empty plotting area with the correct margins
-  par(mar=c(6,5,2,0.2));
+  par(mar=c(5.5,5,2,0.2));
   plot(NA, NA, type = c("b"), ylim=c(ymin,ymax), xlim=c(1,xmax), xlab="", ylab="", axes=F, main=mainTitle);
+
+  # if creating a pdf, increase the line width
+  if (!is.null(labkey.url.params$PdfOut)) {
+    par(lwd=1.5);
+  }
 
   # draw the guide set ranges for each of the records
   for (i in 1:length(labkey.data$analyte_name))
@@ -134,12 +143,12 @@ if(length(labkey.data$analyte_name) > 0)
   	lines(c(labkey.data$seq[i], labkey.data$seq[i]), c(labkey.data$guidesetplus3stddev[i], labkey.data$guidesetminus3stddev[i]), col='grey60', lty='solid');
 
   	# draw dotted lines for the guide set ranges (3 stdDev above average)
-  	lines(c(labkey.data$seq[i] - 0.3, labkey.data$seq[i] + 0.3), c(labkey.data$guidesetplus1stddev[i], labkey.data$guidesetplus1stddev[i]), col='green', lty='dotted');
+  	lines(c(labkey.data$seq[i] - 0.3, labkey.data$seq[i] + 0.3), c(labkey.data$guidesetplus1stddev[i], labkey.data$guidesetplus1stddev[i]), col='darkgreen', lty='dotted');
   	lines(c(labkey.data$seq[i] - 0.3, labkey.data$seq[i] + 0.3), c(labkey.data$guidesetplus2stddev[i], labkey.data$guidesetplus2stddev[i]), col='blue', lty='dotted');
   	lines(c(labkey.data$seq[i] - 0.3, labkey.data$seq[i] + 0.3), c(labkey.data$guidesetplus3stddev[i], labkey.data$guidesetplus3stddev[i]), col='red', lty='dotted');
 
   	# draw dotted lines for the guide set ranges (3 stdDev below average)
-  	lines(c(labkey.data$seq[i] - 0.3, labkey.data$seq[i] + 0.3), c(labkey.data$guidesetminus1stddev[i], labkey.data$guidesetminus1stddev[i]), col='green', lty='dotted');
+  	lines(c(labkey.data$seq[i] - 0.3, labkey.data$seq[i] + 0.3), c(labkey.data$guidesetminus1stddev[i], labkey.data$guidesetminus1stddev[i]), col='darkgreen', lty='dotted');
   	lines(c(labkey.data$seq[i] - 0.3, labkey.data$seq[i] + 0.3), c(labkey.data$guidesetminus2stddev[i], labkey.data$guidesetminus2stddev[i]), col='blue', lty='dotted');
   	lines(c(labkey.data$seq[i] - 0.3, labkey.data$seq[i] + 0.3), c(labkey.data$guidesetminus3stddev[i], labkey.data$guidesetminus3stddev[i]), col='red', lty='dotted');
 
@@ -157,7 +166,7 @@ if(length(labkey.data$analyte_name) > 0)
   box();
 
 } else {
-  par(mar=c(6,5,2,0.2));
+  par(mar=c(5.5,5,2,0.2));
   plot(NA, NA, type = c("b"), ylim=c(0,1), xlim=c(1,30), xlab="", ylab="", axes=F, main=mainTitle);
   text(15,0.5,"No Data Available for Selected Graph Parameters");
   axis(1, at=seq(0,30,by=5), labels=matrix("",1,7));

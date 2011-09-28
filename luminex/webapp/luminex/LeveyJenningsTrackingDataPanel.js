@@ -55,10 +55,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         this.exportButton = new Ext.Button({
             text: 'Export',
             tooltip: 'Click to Export the data to Excel',
-            handler: function(){
-                if (this.store)
-                    this.store.exportData("excel");
-            },
+            handler: this.exportExcelData,
             scope: this
         });
 
@@ -93,10 +90,11 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             autoLoad: false,
             schemaName: 'assay',
             queryName: this.assayName + ' AnalyteTitration',
-            columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
-                    + 'Analyte/Properties/LotNumber, Titration/Run/Batch/Network, Titration/Run/NotebookNo, '
-                    + 'Titration/Run/AssayType, Titration/Run/ExpPerformer, Titration/Run/TestDate, GuideSet/Created, '
-                    + 'Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC, '
+            columns: 'Titration, Analyte, Titration/Run/Isotype, Titration/Run/Conjugate, '
+                    + 'Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
+                    + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, '
+                    + 'Titration/Run/ExpPerformer, Titration/Run/TestDate, Analyte/Properties/LotNumber, '
+                    + 'GuideSet/Created, Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC, '
                     + 'GuideSet/Four ParameterCurveFit/EC50Average, GuideSet/Four ParameterCurveFit/EC50StdDev, '
                     + 'GuideSet/TrapezoidalCurveFit/AUCAverage, GuideSet/TrapezoidalCurveFit/AUCStdDev, '
                     + 'GuideSet/MaxFIAverage, GuideSet/MaxFIStdDev ',
@@ -126,8 +124,10 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             defaults: {sortable: true},
             columns: [
                 this.selModel,
-                {header:'', dataIndex:'Analtye', hidden: true},
-                {header:'', dataIndex:'Titration', hidden: true},
+                {header:'Analyte', dataIndex:'Analyte', hidden: true},
+                {header:'Titration', dataIndex:'Titration', hidden: true},
+                {header:'Isotype', dataIndex:'Titration/Run/Isotype', hidden: true},
+                {header:'Conjugate', dataIndex:'Titration/Run/Conjugate', hidden: true},                    
                 {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.tooltipRenderer, width:200},
                 {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75},
                 {header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.tooltipRenderer, width:75},
@@ -213,6 +213,44 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             })]
         });
         win.show(this);
+    },
+
+    exportExcelData: function() {
+        // build up the JSON to pass to the export util
+        var exportJson = {
+            fileName: this.title,
+            sheets: [{
+                name: 'data',
+                data: []
+            }]
+        };
+
+        // get all of the columns that are currently being shown in the grid (except for the checkbox column)
+        var columns = this.getColumnModel().getColumnsBy(function (c) {
+            return !c.hidden && c.dataIndex != "";
+        });
+
+        // add the column header row to the export JSON object
+        exportJson.sheets[0].data.push([]);
+        Ext.each(columns, function(col) {
+            exportJson.sheets[0].data[0].push(col.header);
+        });
+
+        // loop through the grid store to put the data into the export JSON object
+        Ext.each(this.getStore().getRange(), function(row) {
+            var index = exportJson.sheets[0].data.length;
+            exportJson.sheets[0].data[index] = [];
+
+            // loop through the column list to get the data for each column
+            Ext.each(columns, function(col) {
+                if (row.get(col.dataIndex) instanceof Date)
+                    exportJson.sheets[0].data[index].push(this.dateRenderer(row.get(col.dataIndex)));
+                else
+                    exportJson.sheets[0].data[index].push(row.get(col.dataIndex));
+            }, this);
+        }, this);
+
+        LABKEY.Utils.convertToExcel(exportJson);
     },
 
     outOfRangeRenderer: function(source) {

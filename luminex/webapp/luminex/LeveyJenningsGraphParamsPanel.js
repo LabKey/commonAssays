@@ -33,7 +33,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             bodyStyle: 'background-color:#EEEEEE',
             labelAlign: 'top',
             width: 225,
-            height: 450,
+            height: 460,
             border: true,
             cls: 'extContainer'
         });
