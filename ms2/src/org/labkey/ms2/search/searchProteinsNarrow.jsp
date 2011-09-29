@@ -32,46 +32,33 @@
 
     ActionURL url = new ActionURL(MS2Controller.DoProteinSearchAction.class, ctx.getContainer());
     String viewName = bean.getPeptideCustomViewName(ctx);
+    String separator = bean.isHorizontal() ? "<td>&nbsp;</td>" : "</tr><tr>";
 %>
 
 <script type="text/javascript" src="<%= org.labkey.api.settings.AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
 
 <form action="<%= url %>" method="get">
+    <input type="hidden" name="restrictProteins" value="true" />
     <table>
         <tr>
             <td class="labkey-form-label">Protein name *<%= helpPopup("Protein name", "Required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from an annotations file. You may comma separate multiple names.") %></td>
-            <td nowrap><input size="20" type="text" name="identifier" value="<%= h(bean.getForm().getIdentifier()) %>"/></td>
-
+            <td nowrap><input size="12" type="text" name="identifier" value="<%= h(bean.getForm().getIdentifier()) %>"/></td>
+        </tr>
+        <tr>
             <td nowrap class="labkey-form-label">Minimum prob<%= helpPopup("Minimum probability", "If entered, only ProteinProphet protein groups that have an associated probability greater than or equal to the value will be included.") %></td>
             <td nowrap><input type="text" size="1" name="minimumProbability" <% if (bean.getForm().getMinimumProbability() != null ) { %>value="<%= bean.getForm().getMinimumProbability() %>"<% } %>/></td>
-
-            <td><labkey:button text="Search" /></td>
         </tr>
         <tr>
             <td class="labkey-form-label">Search in subfolders<%= helpPopup("Search in subfolders", "If checked, the search will also look in all of this folder's children.") %></td>
             <td nowrap><input type="checkbox" name="includeSubfolders" <% if (bean.getForm().isIncludeSubfolders()) { %>checked="true" <% } %> /></td>
-
-            <td nowrap class="labkey-form-label">Maximum error rate<%= helpPopup("Maximum error rate", "If entered, only ProteinProphet protein groups that have an associated error rate less than or equal to the value will be included.") %></td>
-            <td nowrap><input type="text" size="1" name="maximumErrorRate"  <% if (bean.getForm().getMaximumErrorRate() != null ) { %>value="<%= bean.getForm().getMaximumErrorRate() %>"<% } %>/></td>
         </tr>
         <tr>
             <td class="labkey-form-label">Exact matches only<%= helpPopup("Exact matches only", "If checked, the search will only find proteins with an exact name match. If not checked, proteins that start with the name entered will also match, but the search may be significantly slower.") %></td>
             <td nowrap><input type="checkbox" name="exactMatch" <% if (bean.getForm().isExactMatch()) { %>checked="true" <% } %> /></td>
-
-            <td class="labkey-form-label">Restrict proteins<%= helpPopup("Restrict proteins", "If checked, the search will only look for proteins that are in FASTA files that have been searched by the included runs. If not checked, the list of Matching Proteins will include all proteins that match the criteria.") %></td>
-            <td nowrap><input type="checkbox" name="restrictProteins" <% if (bean.getForm().isRestrictProteins()) { %>checked="true" <% } %> /></td>
         </tr>
         <tr>
-            <td valign="center" height="100%" class="labkey-form-label">Peptide criteria<%= helpPopup("Peptide criteria", "If specified, at least one peptide assigned to the protein group must meet the criteria.") %></td>
-            <td colspan="100">
-                <div><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" value="none" <%= bean.getForm().isNoPeptideFilter() ? "checked=\"true\"" : "" %> />None</div>
-                <div style="padding-top: 5px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="peptideProphetRadioButton" value="peptideProphet" <%= bean.getForm().isPeptideProphetFilter() ? "checked=\"true\"" : "" %>/>Minimum PeptideProphet prob <input onfocus="document.getElementById('peptideProphetRadioButton').checked=true;" type="text" size="1" name="<%= MS2Controller.PeptideFilteringFormElements.peptideProphetProbability %>" value="<%= bean.getForm().getPeptideProphetProbability() == null ? "" : bean.getForm().getPeptideProphetProbability() %>" /></div>
-                <div style="padding-top: 5px"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="customViewRadioButton" value="customView" <%= bean.getForm().isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>Custom filter:
-                    <% String peptideViewSelectId = bean.getPeptideView(ctx).renderViewList(request, out, viewName); %>
-                    <%= PageFlowUtil.textLink("Create or Edit View", (String)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;", "editPeptidesViewLink") %>
-                </div>
-                <span id="peptidesCustomizeView"></span>
-            </td>
+            <td></td>
+            <td><labkey:button text="Search" /></td>
         </tr>
     </table>
 </form>

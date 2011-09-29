@@ -1382,6 +1382,7 @@ ms2/src/org/labkey/ms2/scoring/discriminate.jsp -text
 ms2/src/org/labkey/ms2/search/ProteinSearchBean.java -text
 ms2/src/org/labkey/ms2/search/ProteinSearchWebPart.java -text
 ms2/src/org/labkey/ms2/search/searchProteins.jsp -text
+ms2/src/org/labkey/ms2/search/searchProteinsNarrow.jsp -text
 ms2/src/org/labkey/ms2/showPeptide.jsp -text
 ms2/src/org/labkey/ms2/showPeptideProphetDetails.jsp -text
 ms2/src/org/labkey/ms2/showPeptideQuantitation.jsp -text
