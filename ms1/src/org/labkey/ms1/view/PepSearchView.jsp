@@ -30,21 +30,19 @@
 <% } %>
 <form action="<%=model.getResultsUri()%>" method="get">
     <input type="hidden" name="<%=MS1Controller.PepSearchForm.ParamNames.runIds.name()%>" value="<%=h(model.getRunIds())%>"/>
-    <p>Peptide Sequence:
-        <input type="text" name="<%=MS1Controller.PepSearchForm.ParamNames.pepSeq.name()%>"
-               value="<%=h(model.getPepSeq())%>" size="40"/>
-        <%=helpPopup("Peptide Sequence", "Enter the peptide sequence to find, or multiple sequences separated by commas. Use * to match any sequence of characters.")%>
-        &nbsp;
-        <input id="cbxExact" type="checkbox" name="<%=MS1Controller.PepSearchForm.ParamNames.exact.name()%>"
-               style="vertical-align:middle" <%=model.isExact() ? "checked=\"1\"" : ""%> />
-        <label for="cbxExact">Exact Match</label>
-        <%=helpPopup("Exact Match", "If checked, the search will match the peptides exactly; if unchecked, it will match any peptide that starts with the specified sequence and ignore modifications.")%>
-        &nbsp;
-        <input id="cbxSubfolders" type="checkbox" name="<%=MS1Controller.PepSearchForm.ParamNames.subfolders.name()%>"
-               style="vertical-align:middle" <%=model.includeSubfolders() ? "checked" : ""%> />
-        <label for="cbxSubfolders">Search Subfolders</label>
-        <%=helpPopup("Search Subfolders", "Check to search this folder and all of its descendants.")%>
-        &nbsp;
-        <%=PageFlowUtil.generateSubmitButton("Search", "", "id=\"btnSearch\" name=\"submit\"")%>
-    </p>
+    <table>
+        <tr>
+            <td class="labkey-form-label"><label for="pepSeq">Peptide sequence</label> *<%=helpPopup("Peptide Sequence", "Enter the peptide sequence to find, or multiple sequences separated by commas. Use * to match any sequence of characters.")%></td>
+            <td><input id="pepSeq" type="text" name="<%=MS1Controller.PepSearchForm.ParamNames.pepSeq.name()%>" value="<%=h(model.getPepSeq())%>" size="40"/></td>
+            <td><%=PageFlowUtil.generateSubmitButton("Search", "", "id=\"btnSearch\" name=\"submit\"")%></td>
+        </tr>
+        <tr>
+            <td class="labkey-form-label"><label for="cbxExact">Exact matches only</label><%=helpPopup("Exact matches only", "If checked, the search will match the peptides exactly; if unchecked, it will match any peptide that starts with the specified sequence and ignore modifications.")%></td>
+            <td><input id="cbxExact" type="checkbox" name="<%=MS1Controller.PepSearchForm.ParamNames.exact.name()%>" style="vertical-align:middle" <%=model.isExact() ? "checked=\"1\"" : ""%> />
+        </tr>
+        <tr>
+            <td class="labkey-form-label"><label for="cbxSubfolders">Search in subfolders</label><%=helpPopup("Search in subfolders", "Check to search this folder and all of its descendants.")%></td>
+            <td><input id="cbxSubfolders" type="checkbox" name="<%=MS1Controller.PepSearchForm.ParamNames.subfolders.name()%>" style="vertical-align:middle" <%=model.includeSubfolders() ? "checked" : ""%> /></td>
+        </tr>
+    </table>
 </form>
