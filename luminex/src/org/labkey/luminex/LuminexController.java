@@ -118,22 +118,6 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public class ManageGuideSetAction extends SimpleViewAction<GuideSetForm>
-    {
-        @Override
-        public ModelAndView getView(GuideSetForm form, BindException errors) throws Exception
-        {
-            return new JspView<GuideSetForm>("/org/labkey/luminex/manageGuideSet.jsp", form);
-        }
-
-        @Override
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Manage Guide Set");
-        }
-    }
-
-    @RequiresPermissionClass(UpdatePermission.class)
     public class LeveyJenningsReport extends SimpleViewAction<TitrationForm>
     {
         @Override

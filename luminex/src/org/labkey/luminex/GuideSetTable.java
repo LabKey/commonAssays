@@ -35,8 +35,6 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.util.StringExpressionFactory;
-import org.labkey.api.view.ActionURL;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -67,11 +65,6 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                 return AssayService.get().createSchema(schema.getUser(), schema.getContainer()).getTable(AssaySchema.ASSAY_LIST_TABLE_NAME);
             }
         });
-
-        // TODO: this can be removed once we have an alternate way of getting to the ManageGuideSetAction
-        ColumnInfo currentGuideSetCol = getColumn("CurrentGuideSet");
-        ActionURL url = new ActionURL(LuminexController.ManageGuideSetAction.class, schema.getContainer());
-        currentGuideSetCol.setURL(StringExpressionFactory.createURL(url + "rowId=${RowId}" + "&protocol=${ProtocolId/Name}"));
 
         getColumn("MaxFIAverage").setShownInInsertView(false);
         getColumn("MaxFIAverage").setShownInUpdateView(false);

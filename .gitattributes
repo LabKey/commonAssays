@@ -640,7 +640,6 @@ luminex/src/org/labkey/luminex/TitrationForm.java -text
 luminex/src/org/labkey/luminex/TitrationTable.java -text
 luminex/src/org/labkey/luminex/WellExclusionTable.java -text
 luminex/src/org/labkey/luminex/leveyJenningsReport.jsp -text
-luminex/src/org/labkey/luminex/manageGuideSet.jsp -text
 luminex/src/org/labkey/luminex/titrationWellRoles.jsp -text
 luminex/webapp/luminex/AnalyteExclusionPanel.js -text
 luminex/webapp/luminex/ApplyGuideSetPanel.js -text

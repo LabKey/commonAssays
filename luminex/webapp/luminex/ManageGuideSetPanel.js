@@ -96,7 +96,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     },{
                         defaults:{xtype: 'label', labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold'},
                         items: [
-                            {fieldLabel: 'Created', text: this.created},
+                            {fieldLabel: 'Created', text: this.dateRenderer(this.created)},
                             {fieldLabel: 'Isotype', text: this.isotype == null ? '[None]' : this.isotype},
                             {fieldLabel: 'Conjugate', text: this.conjugate == null ? '[None]' : this.conjugate}
                         ]

@@ -194,7 +194,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             modal: true,
             padding: 15,
             cls: 'extContainer',
-            title: 'Apply Guide Run Set',
+            title: 'Apply Guide Run Set...',
             items: [new LABKEY.ApplyGuideSetPanel({
                 assayName: this.assayName,
                 titration: this.titration,

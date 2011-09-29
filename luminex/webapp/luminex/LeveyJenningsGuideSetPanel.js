@@ -178,8 +178,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             closeAction:'close',
             modal: true,
             padding: 15,
-            
-            title: 'Manage Guide Set',
+            title: 'Manage Guide Set...',
             items: [new LABKEY.ManageGuideSetPanel({
                 cls: 'extContainer',
                 guideSetId: this.currentGuideSetId,
@@ -218,7 +217,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         if (this.currentGuideSetId)
         {
            Ext.Msg.show({
-                title:'Confirmation',
+                title:'Confirmation...',
                 msg: 'Creating a new guide set will set the current guide set to be inactive. Would you like to proceed?',
                 buttons: Ext.Msg.YESNO,
                 fn: function(btnId, text, opt){
@@ -226,7 +225,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                         this.disableCurrentGuideSet();
                     }
                 },
-                icon: Ext.MessageBox.WARNING,
+                icon: Ext.MessageBox.QUESTION,
                 scope: this
             });
         }
@@ -258,7 +257,16 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 CurrentGuideSet: true
             }],
             success: function(data) {
-                this.queryCurrentGuideSetInfo(true);
+               Ext.Msg.show({
+                    title:'Success...',
+                    msg: 'A new guide set has successfully been created. The "Manage Guide Set" dialog will now be displayed to allow you '
+                        + 'to edit the details of the new guide set.',
+                    buttons: Ext.Msg.OK,
+                    fn: function(){
+                        this.queryCurrentGuideSetInfo(true);
+                    },
+                    scope: this
+                });
             },
             scope: this
         });
