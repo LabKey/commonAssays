@@ -166,7 +166,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Created By', dataIndex:'CreatedBy/DisplayName', width:100},
                 {header:'Created', dataIndex:'Created', renderer: this.dateRenderer},
                 {header:'Current', dataIndex:'CurrentGuideSet'},
-                {header:'Comment', dataIndex:'Comment', width:200},
+                {header:'Comment', dataIndex:'Comment', renderer: this.tooltipRenderer, width:200},
                 {header:'Avg EC50', dataIndex:'Four ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
                 {header:'Avg High MFI', dataIndex:'MaxFIAverage', renderer: this.numberRenderer, align: 'right'},
                 {header:'Avg AUC', dataIndex:'TrapezoidalCurveFit/AUCAverage', renderer: this.numberRenderer, align: 'right'}
