@@ -47,6 +47,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         // initialize the top toolbar with date range selection fields
         this.startDateLabel = new Ext.form.Label({text: 'Start Date'});
         this.startDateField = new Ext.form.DateField({
+            id: 'start-date-field',
             format:  'Y-m-d',
             listeners: {
                 scope: this,
@@ -57,10 +58,12 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 'invalid': function (df, msg) {
                     this.refreshGraphButton.disable();
                 }
+//                'change': this.checkStartEndValid
             }
         });
         this.endDateLabel = new Ext.form.Label({text: 'End Date'});
         this.endDateField = new Ext.form.DateField({
+            id: 'end-date-field',
             format:  'Y-m-d',
             listeners: {
                 scope: this,
@@ -71,6 +74,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 'invalid': function (df, msg) {
                     this.refreshGraphButton.disable();
                 }
+                //'change': this.checkStartEndValid
             }
         });
 
@@ -224,6 +228,14 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                frame: 'none',
                partConfig: config
         }).render();
+    },
+
+    checkStartEndValid: function() {
+        if (this.startDateField.getValue() != '' && this.startDateField.isValid()
+                && this.endDateField.getValue() != '' && this.endDateField.isValid())
+            this.refreshGraphButton.enable();
+        else
+            this.refreshGraphButton.disable();
     },
 
     refreshGraphWithDates: function() {

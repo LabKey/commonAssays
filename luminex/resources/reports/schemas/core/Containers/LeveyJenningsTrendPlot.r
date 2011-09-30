@@ -162,9 +162,9 @@ if(length(labkey.data$analyte_name) > 0)
   # add the axis labels and tick marks
   par(las=2);
   axis(2, col="black", cex.axis=1);
-  mtext(labkey.url.params$PlotType, side=2, line=4, las=0);
+  mtext(labkey.url.params$PlotType, side=2, line=4, las=0, font=2);
   axis(1, col="black", at=xtcks, labels=xlabels, cex.axis=1);
-  mtext("Assay", side=1, line=5.25, las=0);
+  mtext("Assay", side=1, line=5.25, las=0, font=2);
   box();
 
 } else {
@@ -172,8 +172,8 @@ if(length(labkey.data$analyte_name) > 0)
   plot(NA, NA, type = c("b"), ylim=c(0,1), xlim=c(1,30), xlab="", ylab="", axes=F, main=mainTitle);
   text(15,0.5,"No Data Available for Selected Graph Parameters");
   axis(1, at=seq(0,30,by=5), labels=matrix("",1,7));
-  mtext(labkey.url.params$PlotType, side=2, line=4, las=0);
-  mtext("Assay", side=1, line=5.25, las=0);
+  mtext(labkey.url.params$PlotType, side=2, line=4, las=0, font=2);
+  mtext("Assay", side=1, line=5.25, las=0, font=2);
   box();
 }
 

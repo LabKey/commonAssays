@@ -152,10 +152,12 @@ if (file.exists(titration.data.file))
                     print(paste(titrationName, analyteName, sep="..."));
                     runDataIndex = run.data$description == titrationName & run.data$name == analyteName;
 
-                    # if there is an expected concentration for this titration, use it to set the dilution value for the curve fit function
-                    if (!all(is.na(dat$expConc)))
-                    {
-                        dat$dilution = (100 * max(dat$expConc, na.rm=TRUE)) / dat$expConc;
+                    # for standards, use the expected conc values for the curve fit
+                    # for non-standard titrations, use the dilution values for the curve fit
+                    if (toupper(substr(dat$type[1],0,1)) == "S" | toupper(substr(dat$type[1],0,2)) == "ES") {
+                        dat$dose = dat$expConc;
+                    } else {
+                        dat$dose = dat$dilution;
                     }
 
                     # get curve fit params for 4PL using the rumi curve fit function ###DISABLED###
@@ -163,7 +165,7 @@ if (file.exists(titration.data.file))
 
                     # get curve fit params for 4PL
                     tryCatch({
-                            fit = drm(fiBackground~dilution, data=dat, fct=LL.4());
+                            fit = drm(fiBackground~dose, data=dat, fct=LL.4());
                             run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1]
                             run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2]
                             run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3]
@@ -186,6 +188,7 @@ analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
 
 # get the analyte associated standard/titration information from the analyte data file and put it into the run.data object
 run.data$Standard = NA;
+run.data$well_role = "Unknown"; # initialize to Unknown and set to Standard accordingly
 for (index in 1:nrow(analyte.data))
 {
     # hold on to the run data for the given analyte
@@ -202,10 +205,12 @@ for (index in 1:nrow(analyte.data))
             if (stndIndex == 1)
             {
                 run.data$Standard[as.character(run.data$name) == as.character(analyte.data$Name[index])] = stndSet[stndIndex];
+                run.data$well_role[as.character(run.data$name) == as.character(analyte.data$Name[index]) & run.data$description == stndSet[stndIndex]] = "Standard";
             } else
             {
                 temp.data = run.analyte.data;
                 temp.data$Standard = stndSet[stndIndex];
+                temp.data$well_role[temp.data$description == stndSet[stndIndex]] = "Standard";
                 temp.data$lsid = NA; # lsid will be set by the server
                 run.data = rbind(run.data, temp.data);
             }
@@ -226,13 +231,7 @@ run.data$EstConc_4pl = NA;
 run.data$SE_4pl = NA;
 
 # setup the dataframe needed for the call to rumi
-dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "type", "fi", "fiBackground", "fiBackgroundBlank", "dilution"));
-
-# convert the type to a well_role
-dat$well_role[toupper(substr(dat$type,0,1)) == "S" | toupper(substr(dat$type,0,2)) == "ES"] = "Standard";
-dat$well_role[toupper(substr(dat$type,0,1)) == "X"] = "Sample";
-dat$well_role[toupper(substr(dat$type,0,1)) == "C"] = "QC";
-dat$well_role[toupper(substr(dat$type,0,1)) == "B"] = "Blank";
+dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "type", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role"));
 
 # get a booelan vector of the records that are of type standard
 standardRecs = !is.na(dat$well_role) & dat$well_role == "Standard";

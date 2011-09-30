@@ -138,7 +138,6 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 LABKEY.Filter.create('Conjugate', this.conjugate, (this.conjugate == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
             ],
             sort: '-Created',
-            containerFilter: LABKEY.Query.containerFilter.allFolders,
             updatable: false,
             autoLoad: true,
             listeners: {

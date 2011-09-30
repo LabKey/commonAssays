@@ -24,20 +24,11 @@ import org.labkey.api.study.WellData;
  */
 public class LuminexWell implements WellData, Comparable<LuminexWell>
 {
-    private static final double TOMARAS_SCALE_DILUTION = 50000.0;
-
     public LuminexDataRow _dataRow;
-    private double _scaleDilutionFactor;
-
-    public LuminexWell(LuminexDataRow dataRow, double scaleDilutionFactor)
-    {
-        _dataRow = dataRow;
-        _scaleDilutionFactor = scaleDilutionFactor;
-    }
 
     public LuminexWell(LuminexDataRow dataRow)
     {
-        this(dataRow, TOMARAS_SCALE_DILUTION);
+        _dataRow = dataRow;
     }
 
     @Override
@@ -55,19 +46,23 @@ public class LuminexWell implements WellData, Comparable<LuminexWell>
     @Override
     public Double getDilution()
     {
-        if (_dataRow.getExpConc() != null && _dataRow.getDilution() != null)
+        return _dataRow.getDilution();
+    }
+
+    public Double getDose()
+    {
+        // for standards, use the expected conc values for the curve fit
+        // for non-standard titrations, use the dilution values for the curve fit
+        if (_dataRow.getType() != null)
         {
-            return (_dataRow.getDilution() / _dataRow.getExpConc()) * _scaleDilutionFactor;
+            String type = _dataRow.getType().trim().toLowerCase();
+            if (type.startsWith("s") || type.startsWith("es"))
+                return _dataRow.getExpConc();
+            else
+                return _dataRow.getDilution();
         }
-        if (_dataRow.getDilution() != null)
-        {
-            return _dataRow.getDilution() * _scaleDilutionFactor;
-        }
-        if (_dataRow.getExpConc() != null && _dataRow.getExpConc() != 0.0)
-        {
-            return 1.0 / _dataRow.getExpConc() * _scaleDilutionFactor;
-        }
-        return null;
+        else
+            return null;
     }
 
     @Override
@@ -109,18 +104,18 @@ public class LuminexWell implements WellData, Comparable<LuminexWell>
     @Override
     public int compareTo(LuminexWell w)
     {
-        if (getDilution() == null && w.getDilution() == null)
+        if (getDose() == null && w.getDose() == null)
         {
             return 0;
         }
-        if (getDilution() == null)
+        if (getDose() == null)
         {
             return -1;
         }
-        if (w.getDilution() == null)
+        if (w.getDose() == null)
         {
             return 1;
         }
-        return getDilution().compareTo(w.getDilution());
+        return getDose().compareTo(w.getDose());
     }
 }

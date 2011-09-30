@@ -25,6 +25,7 @@ public class LuminexReplicate
     private Double _dilution;
     private int _dataId;
     private Double _expConc;
+    private String _type;
 
     public LuminexReplicate(String description, Double dilution, int dataId)
     {
@@ -39,6 +40,7 @@ public class LuminexReplicate
         _dilution = well._dataRow.getDilution();
         _dataId = well._dataRow.getData();
         _expConc = well._dataRow.getExpConc();
+        _type = well._dataRow.getType();
     }
 
     public String getDescription()
@@ -61,6 +63,11 @@ public class LuminexReplicate
         return _expConc;
     }
 
+    public String getType()
+    {
+        return _type;
+    }
+
     @Override
     public boolean equals(Object o)
     {
@@ -73,6 +80,7 @@ public class LuminexReplicate
         if (_description != null ? !_description.equals(that._description) : that._description != null) return false;
         if (_dilution != null ? !_dilution.equals(that._dilution) : that._dilution != null) return false;
         if (_expConc != null ? !_expConc.equals(that._expConc) : that._expConc != null) return false;
+        if (_type != null ? !_type.equals(that._type) : that._type != null) return false;
 
         return true;
     }
@@ -84,6 +92,7 @@ public class LuminexReplicate
         result = 31 * result + (_dilution != null ? _dilution.hashCode() : 0);
         result = 31 * result + _dataId;
         result = 31 * result + (_expConc != null ? _expConc.hashCode() : 0);
+        result = 31 * result + (_type != null ? _type.hashCode() : 0);
         return result;
     }
 }

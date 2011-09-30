@@ -82,6 +82,7 @@ public class LuminexWellGroup implements WellGroup
             fakeDataRow.setDescription(entry.getKey().getDescription());
             fakeDataRow.setFiBackground(sum / count);
             fakeDataRow.setFi(sum / count);
+            fakeDataRow.setType(entry.getKey().getType());
             result.add(new LuminexWell(fakeDataRow));
         }
         Collections.sort(result);

@@ -79,8 +79,9 @@ public class LuminexDataRow
 
 
     /** For testing */
-    public LuminexDataRow(String well, double fiBackground, double expConc, double dilution)
+    public LuminexDataRow(String type, String well, double fiBackground, double expConc, double dilution)
     {
+        setType(type);
         setWell(well);
         setFiBackground(fiBackground);
         setExpConc(expConc);

@@ -461,7 +461,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             for (int i = 1; i < wells.size(); i++)
             {
                 LuminexWell well = wells.get(i);
-                auc += Math.max(Math.abs(Math.log10(well.getDilution()) - Math.log10(previousWell.getDilution())) *
+                auc += Math.max(Math.abs(Math.log10(well.getDose()) - Math.log10(previousWell.getDose())) *
                         (Math.min(previousWell.getValue().doubleValue(), well.getValue().doubleValue()) +
                             0.5 * Math.abs(previousWell.getValue().doubleValue() - well.getValue().doubleValue())), 0);
                 previousWell = well;
@@ -562,18 +562,19 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         @Test
         public void testAUCSummaryData() throws DilutionCurve.FitFailedException
         {
+            // test calculation using dilutions for a control
             List<LuminexWell> wells = new ArrayList<LuminexWell>();
 
-            wells.add(new LuminexWell(new LuminexDataRow("A1", 30427, 1, 100), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("A2", 30139, 1, 600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("A3", 26612.25, 1, 3600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("A4", 4867, 1, 21600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("A5", 571.75, 1, 129600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("A6", 80.5, 1, 777600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("A7", 16, 1, 4665600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("A8", 2.5, 1, 27993600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("A9", 2, 1, 167961600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("A10", 1.5, 1, 1007769600), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("C1", "A1", 30427, 1, 100)));
+            wells.add(new LuminexWell(new LuminexDataRow("C2", "A2", 30139, 1, 600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C3", "A3", 26612.25, 1, 3600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C4", "A4", 4867, 1, 21600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C5", "A5", 571.75, 1, 129600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C6", "A6", 80.5, 1, 777600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C7", "A7", 16, 1, 4665600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C8", "A8", 2.5, 1, 27993600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C9", "A9", 2, 1, 167961600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C10", "A10", 1.5, 1, 1007769600)));
             LuminexWellGroup group = new LuminexWellGroup(wells);
 
             assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
@@ -581,33 +582,55 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals("Check number of raw wells", 10, group.getWellData(false).size());
 
             assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
+
+            // test calculation using expected concentrations for a standard
+            wells = new ArrayList<LuminexWell>();
+
+            wells.add(new LuminexWell(new LuminexDataRow("S1", "A1,B1", 32320, 100, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S2", "A2,B2", 32189.5, 20, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S3", "A3,B3", 30695.5, 4, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S4", "A4,B4", 20215.25, 0.8, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S5", "A5,B5", 5586.5, 0.16, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S6", "A6,B6", 1204, 0.032, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S7", "A7,B7", 270.25, 0.0064, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S8", "A8,B8", 60.75, 0.00128, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S9", "A9,B9", 20.5, 0.00026, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S10", "A10,B10", 10.5, 0.00005, 1)));
+            group = new LuminexWellGroup(wells);
+
+            assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
+            assertEquals("Check replicate value", 10.5, group.getWellData(true).get(0).getValue());
+            assertEquals("Check number of raw wells", 10, group.getWellData(false).size());
+
+            assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
         }
 
         @Test
         public void testAUCRawData() throws DilutionCurve.FitFailedException
         {
+            // test calculation using dilutions for a control
             List<LuminexWell> wells = new ArrayList<LuminexWell>();
 
-            wells.add(new LuminexWell(new LuminexDataRow("G1", 30271, 1, 100), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("H1", 30583, 1, 100), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("G2", 30151.5, 1, 600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("H2", 30126.5, 1, 600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("G3", 26439, 1, 3600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("H3", 26785.5, 1, 3600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("G4", 4786, 1, 21600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("H4", 4948, 1, 21600), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("G5", 553.5, 1, 129601), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("H5", 590, 1, 129601), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("G6", 77.5, 1, 777605), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("H6", 83.5, 1, 777605), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("G7", 16.5, 1, 4664179), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("H7", 15.5, 1, 4664179), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("G8", 1.5, 1, 27932961), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("H8", 3.5, 1, 27932961), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("G9", 1.5, 1, 166666667), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("H9", 2.5, 1, 166666667), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("G10", 1.5, 1, 1000000000), 1.0));
-            wells.add(new LuminexWell(new LuminexDataRow("H10", 1.5, 1, 1000000000), 1.0));
+            wells.add(new LuminexWell(new LuminexDataRow("C1", "G1", 30271, 1, 100)));
+            wells.add(new LuminexWell(new LuminexDataRow("C1", "H1", 30583, 1, 100)));
+            wells.add(new LuminexWell(new LuminexDataRow("C2", "G2", 30151.5, 1, 600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C2", "H2", 30126.5, 1, 600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C3", "G3", 26439, 1, 3600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C3", "H3", 26785.5, 1, 3600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C4", "G4", 4786, 1, 21600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C4", "H4", 4948, 1, 21600)));
+            wells.add(new LuminexWell(new LuminexDataRow("C5", "G5", 553.5, 1, 129601)));
+            wells.add(new LuminexWell(new LuminexDataRow("C5", "H5", 590, 1, 129601)));
+            wells.add(new LuminexWell(new LuminexDataRow("C6", "G6", 77.5, 1, 777605)));
+            wells.add(new LuminexWell(new LuminexDataRow("C6", "H6", 83.5, 1, 777605)));
+            wells.add(new LuminexWell(new LuminexDataRow("C7", "G7", 16.5, 1, 4664179)));
+            wells.add(new LuminexWell(new LuminexDataRow("C7", "H7", 15.5, 1, 4664179)));
+            wells.add(new LuminexWell(new LuminexDataRow("C8", "G8", 1.5, 1, 27932961)));
+            wells.add(new LuminexWell(new LuminexDataRow("C8", "H8", 3.5, 1, 27932961)));
+            wells.add(new LuminexWell(new LuminexDataRow("C9", "G9", 1.5, 1, 166666667)));
+            wells.add(new LuminexWell(new LuminexDataRow("C9", "H9", 2.5, 1, 166666667)));
+            wells.add(new LuminexWell(new LuminexDataRow("C10", "G10", 1.5, 1, 1000000000)));
+            wells.add(new LuminexWell(new LuminexDataRow("C10", "H10", 1.5, 1, 1000000000)));
             LuminexWellGroup group = new LuminexWellGroup(wells);
 
             assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
@@ -615,48 +638,37 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals("Check number of raw wells", 20, group.getWellData(false).size());
 
             assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
-        }
 
-        @Test
-        public void testDilutionScaling() throws DilutionCurve.FitFailedException
-        {
-            LuminexWell well = new LuminexWell(new LuminexDataRow("G1", 30271, 500, 1));
-            assertEquals(100.0, well.getDilution());
-        }
+            // test calculation using expected concentrations for a standard
+            wells = new ArrayList<LuminexWell>();
 
-        @Test
-        public void testAUCRawDataWithScaling() throws DilutionCurve.FitFailedException
-        {
-            List<LuminexWell> wells = new ArrayList<LuminexWell>();
-
-            wells.add(new LuminexWell(new LuminexDataRow("G1", 30271, 500, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("H1", 30583, 500, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("G2", 30151.5, 83.33333, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("H2", 30126.5, 83.33333, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("G3", 26439, 13.88889, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("H3", 26785.5, 13.88889, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("G4", 4786, 2.31481, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("H4", 4948, 2.31481, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("G5", 553.5, 0.3858, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("H5", 590, 0.3858, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("G6", 77.5, 0.0643, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("H6", 83.5, 0.0643, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("G7", 16.5, 0.01072, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("H7", 15.5, 0.01072, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("G8", 1.5, 0.00179, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("H8", 3.5, 0.00179, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("G9", 1.5, 0.0003, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("H9", 2.5, 0.0003, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("G10", 1.5, 0.00005, 1)));
-            wells.add(new LuminexWell(new LuminexDataRow("H10", 1.5, 0.00005, 1)));
-            LuminexWellGroup group = new LuminexWellGroup(wells);
+            wells.add(new LuminexWell(new LuminexDataRow("S1", "A1", 32298.5, 100, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S1", "B1", 32341.5, 100, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S2", "A2", 32180.5, 20, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S2", "B2", 32198.5, 20, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S3", "A3", 30774.5, 4, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S3", "B3", 30616.5, 4, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S4", "A4", 20194.5, 0.8, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S4", "B4", 20236, 0.8, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S5", "A5", 5566, 0.16, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S5", "B5", 5607, 0.16, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S6", "A6", 1174.5, 0.032, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S6", "B6", 1233.5, 0.032, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S7", "A7", 255.5, 0.0064, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S7", "B7", 285, 0.0064, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S8", "A8", 60, 0.00128, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S8", "B8", 61.5, 0.00128, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S9", "A9", 19.5, 0.00026, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S9", "B9", 21.5, 0.00026, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S10", "A10", 10.5, 0.00005, 1)));
+            wells.add(new LuminexWell(new LuminexDataRow("S10", "B10", 10.5, 0.00005, 1)));
+            group = new LuminexWellGroup(wells);
 
             assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
-            assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue());
-            assertEquals("Check scaled dilution value", 100.0, group.getWellData(true).get(0).getDilution());
+            assertEquals("Check replicate value", 10.5, group.getWellData(true).get(0).getValue());
             assertEquals("Check number of raw wells", 20, group.getWellData(false).size());
-            
-            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
+
+            assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
         }
     }
 
