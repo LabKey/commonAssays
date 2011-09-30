@@ -58,7 +58,6 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 'invalid': function (df, msg) {
                     this.refreshGraphButton.disable();
                 }
-//                'change': this.checkStartEndValid
             }
         });
         this.endDateLabel = new Ext.form.Label({text: 'End Date'});
@@ -74,7 +73,6 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 'invalid': function (df, msg) {
                     this.refreshGraphButton.disable();
                 }
-                //'change': this.checkStartEndValid
             }
         });
 
@@ -228,14 +226,6 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                frame: 'none',
                partConfig: config
         }).render();
-    },
-
-    checkStartEndValid: function() {
-        if (this.startDateField.getValue() != '' && this.startDateField.isValid()
-                && this.endDateField.getValue() != '' && this.endDateField.isValid())
-            this.refreshGraphButton.enable();
-        else
-            this.refreshGraphButton.disable();
     },
 
     refreshGraphWithDates: function() {
