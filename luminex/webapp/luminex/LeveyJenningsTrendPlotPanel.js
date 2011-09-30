@@ -122,9 +122,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             }
         });
         this.mfiPanel = new Ext.Panel({
-            itemId: "MaxMFI",
+            itemId: "High MFI",
             title: "High MFI",
-            html: "<div id='MaxMFITrendPlotDiv'></div><div id='MaxMFITrendPdfDiv'></div>",
+            html: "<div id='High MFITrendPlotDiv'></div><div id='High MFITrendPdfDiv'></div>",
             isRendered: false,
             listeners: {
                 scope: this,

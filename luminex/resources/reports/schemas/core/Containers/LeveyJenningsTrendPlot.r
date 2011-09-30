@@ -32,7 +32,7 @@ colSelect = paste("Analyte/Name", "Titration/Name", "Titration/Run/Isotype", "Ti
                 "Titration/Run/NotebookNo", "Titration/Run/TestDate", "GuideSet/Created", sep=",");
 if (labkey.url.params$PlotType == "EC50") {
     colSelect = paste(colSelect, "Four ParameterCurveFit/EC50", "GuideSet/Four ParameterCurveFit/EC50Average", "GuideSet/Four ParameterCurveFit/EC50StdDev", sep=","); 
-} else if (labkey.url.params$PlotType == "MaxMFI") {
+} else if (labkey.url.params$PlotType == "High MFI") {
     colSelect = paste(colSelect, "MaxFI", "GuideSet/MaxFIAverage", "GuideSet/MaxFIStdDev", sep=",");
 } else if (labkey.url.params$PlotType == "AUC") {
     colSelect = paste(colSelect, "TrapezoidalCurveFit/AUC", "GuideSet/TrapezoidalCurveFit/AUCAverage", "GuideSet/TrapezoidalCurveFit/AUCStdDev", sep=",");
@@ -76,7 +76,7 @@ if (labkey.url.params$PlotType == "EC50") {
     labkey.data$plottype_value = labkey.data$four_parametercurvefit_ec50;
     labkey.data$guideset_average = labkey.data$guideset_four_parametercurvefit_ec50average;
     labkey.data$guideset_stddev = labkey.data$guideset_four_parametercurvefit_ec50stddev;
-} else if (labkey.url.params$PlotType == "MaxMFI") {
+} else if (labkey.url.params$PlotType == "High MFI") {
     labkey.data$plottype_value = labkey.data$maxfi;
     labkey.data$guideset_average = labkey.data$guideset_maxfiaverage;
     labkey.data$guideset_stddev = labkey.data$guideset_maxfistddev;
@@ -105,12 +105,18 @@ if(length(labkey.data$analyte_name) > 0)
   labkey.data$guidesetminus3stddev = labkey.data$guideset_average - (3 * labkey.data$guideset_stddev);
 
   # get the y axis min and max based on the data
-  ymin = min(labkey.data$plottype_value, na.rm=TRUE);
-  if (min(labkey.data$guidesetminus3stddev, na.rm=TRUE) < ymin)
-	ymin = min(labkey.data$guidesetminus3stddev, na.rm=TRUE);
-  ymax = max(labkey.data$plottype_value, na.rm=TRUE);
-  if (max(labkey.data$guidesetplus3stddev, na.rm=TRUE) > ymax)
-  	ymax = max(labkey.data$guidesetplus3stddev, na.rm=TRUE);
+  if (any(!is.na(labkey.data$plottype_value)))
+  {
+      ymin = min(labkey.data$plottype_value, na.rm=TRUE);
+      if (min(labkey.data$guidesetminus3stddev, na.rm=TRUE) < ymin)
+        ymin = min(labkey.data$guidesetminus3stddev, na.rm=TRUE);
+      ymax = max(labkey.data$plottype_value, na.rm=TRUE);
+      if (max(labkey.data$guidesetplus3stddev, na.rm=TRUE) > ymax)
+        ymax = max(labkey.data$guidesetplus3stddev, na.rm=TRUE);
+  } else {
+      ymin = 0;
+      ymax= 1;
+  }
 
   # set the sequence value for the records (in reverse order since they are sorted in DESC order)
   labkey.data$seq = length(labkey.data$analyte_name):1;
@@ -128,7 +134,7 @@ if(length(labkey.data$analyte_name) > 0)
   xlabels = as.character(labkey.data$titration_run_notebookno[xtcks]);
 
   # create an empty plotting area with the correct margins
-  par(mar=c(6.5,5,2,0.2));
+  par(mar=c(7,5,2,0.2));
   plot(NA, NA, type = c("b"), ylim=c(ymin,ymax), xlim=c(1,xmax), xlab="", ylab="", axes=F, main=mainTitle);
 
   # if creating a pdf, increase the line width
@@ -164,16 +170,16 @@ if(length(labkey.data$analyte_name) > 0)
   axis(2, col="black", cex.axis=1);
   mtext(labkey.url.params$PlotType, side=2, line=4, las=0, font=2);
   axis(1, col="black", at=xtcks, labels=xlabels, cex.axis=1);
-  mtext("Assay", side=1, line=5.25, las=0, font=2);
+  mtext("Assay", side=1, line=6, las=0, font=2);
   box();
 
 } else {
-  par(mar=c(6.5,5,2,0.2));
+  par(mar=c(7,5,2,0.2));
   plot(NA, NA, type = c("b"), ylim=c(0,1), xlim=c(1,30), xlab="", ylab="", axes=F, main=mainTitle);
   text(15,0.5,"No Data Available for Selected Graph Parameters");
   axis(1, at=seq(0,30,by=5), labels=matrix("",1,7));
   mtext(labkey.url.params$PlotType, side=2, line=4, las=0, font=2);
-  mtext("Assay", side=1, line=5.25, las=0, font=2);
+  mtext("Assay", side=1, line=6, las=0, font=2);
   box();
 }
 

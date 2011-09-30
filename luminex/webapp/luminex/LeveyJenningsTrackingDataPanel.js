@@ -33,8 +33,9 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             autoHeight: true,
             editable: false,
             pageSize: 0,
-            title: 'Tracking Data',
+            title: $h(config.titration) + ' Tracking Data',
             loadMask:{msg:"Loading tracking data..."},
+            enableColumnHide: false,
             disabled: true,
             analyte: null,
             isotype: null,
@@ -69,6 +70,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
         this.tbar = [this.exportButton, '-', this.applyGuideSetButton];
 
+        this.fbar = [{xtype:'label', text:'Bold values in the "Guide Set Date" column indicate assays that are members of a guide set.'}];
+
         LABKEY.LeveyJenningsTrackingDataPanel.superclass.initComponent.call(this);
     },
 
@@ -94,7 +97,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                     + 'Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
                     + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, '
                     + 'Titration/Run/ExpPerformer, Titration/Run/TestDate, Analyte/Properties/LotNumber, '
-                    + 'GuideSet/Created, Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC, '
+                    + 'GuideSet/Created, IncludeInGuideSetCalculation, '
+                    + 'Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC, '
                     + 'GuideSet/Four ParameterCurveFit/EC50Average, GuideSet/Four ParameterCurveFit/EC50StdDev, '
                     + 'GuideSet/TrapezoidalCurveFit/AUCAverage, GuideSet/TrapezoidalCurveFit/AUCStdDev, '
                     + 'GuideSet/MaxFIAverage, GuideSet/MaxFIStdDev ',
@@ -136,10 +140,11 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'Exp Performer', dataIndex:'Titration/Run/ExpPerformer', width:100},
                 {header:'Test Date', dataIndex:'Titration/Run/TestDate', renderer: this.dateRenderer, width:100},
                 {header:'Analyte Lot No.', dataIndex:'Analyte/Properties/LotNumber', width:100},
-                {header:'Guide Set Date', dataIndex:'GuideSet/Created', renderer: this.dateRenderer, width:100},
-                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("EC50"), align: 'right'},
-                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("MaxFI"), align: 'right'},
-                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.outOfRangeRenderer("AUC"), align: 'right'},
+                {header:'Guide Set Date', dataIndex:'GuideSet/Created', renderer: this.formatGuideSetMembers, scope: this, width:100},
+                {header:'GS Member', dataIndex:'IncludeInGuideSetCalculation', hidden: true},
+                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("EC50"), scope: this, align: 'right'},
+                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("MaxFI"), scope: this, align: 'right'},
+                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.outOfRangeRenderer("AUC"), scope: this, align: 'right'},
                 {header:'EC50 Average', dataIndex:'GuideSet/Four ParameterCurveFit/EC50Average', hidden: true},
                 {header:'EC50 StdDev', dataIndex:'GuideSet/Four ParameterCurveFit/EC50StdDev', hidden: true},
                 {header:'High MFI Average', dataIndex:'GuideSet/MaxFIAverage', hidden: true},
@@ -159,9 +164,9 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         this.conjugate = conjugate;
 
         // set the grid title based on the selected graph params
-        this.setTitle('Tracking Data for ' + $h(_analyte)
-                + ' - ' + $h(_isotype == '' ? '[None]' : _isotype)
-                + ' ' + $h(_conjugate == '' ? '[None]' : _conjugate));
+        this.setTitle($h(this.titration) + ' Tracking Data for ' + $h(this.analyte)
+                + ' - ' + $h(this.isotype == '' ? '[None]' : this.isotype)
+                + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate));
 
         // create a new store now that the graph params are selected and bind it to the grid
         this.updateTrackingDataGrid();
@@ -221,7 +226,13 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             fileName: this.title,
             sheets: [{
                 name: 'data',
-                data: []
+                // add a header section to the export with the graph parameter information
+                data: [['Titration:', this.titration],
+                    ['Analyte:', this.analyte],
+                    ['Isotype:', this.isotype],
+                    ['Conjugate:', this.conjugate],
+                    ['Export Date:', this.dateRenderer(new Date())],
+                    []]
             }]
         };
 
@@ -231,9 +242,10 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         });
 
         // add the column header row to the export JSON object
+        var index = exportJson.sheets[0].data.length;
         exportJson.sheets[0].data.push([]);
         Ext.each(columns, function(col) {
-            exportJson.sheets[0].data[0].push(col.header);
+            exportJson.sheets[0].data[index].push(col.header);
         });
 
         // loop through the grid store to put the data into the export JSON object
@@ -243,10 +255,19 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
             // loop through the column list to get the data for each column
             Ext.each(columns, function(col) {
-                if (row.get(col.dataIndex) instanceof Date)
-                    exportJson.sheets[0].data[index].push(this.dateRenderer(row.get(col.dataIndex)));
-                else
-                    exportJson.sheets[0].data[index].push(row.get(col.dataIndex));
+                var value = row.get(col.dataIndex);
+
+                // render dates with the proper renderer
+                if (value instanceof Date)
+                    value = this.dateRenderer(value);
+                // render numbers with the proper rounding and format
+                if (typeof(value) == 'number')
+                    value = this.numberRenderer(value);
+                // render out of range values with an asterisk
+                if (row.get(col.header + "OOR"))
+                    value = "*" + value;
+
+                exportJson.sheets[0].data[index].push(value);
             }, this);
         }, this);
 
@@ -255,11 +276,11 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
     outOfRangeRenderer: function(source) {
         return function(val, metaData, record) {
-            // if this is a very small number, display more decimal places
-            var formatStr = (val && val > 0 && val < 1) ? '0.000000' : '0.00';
+            if (!val)
+                return null;
 
             // get the average and stdDev values based on the source column type
-            var avg, stdDev = null
+            var avg, stdDev = null;
             if (source == "EC50")
             {
                 avg = record.get('GuideSet/Four ParameterCurveFit/EC50Average');
@@ -276,19 +297,47 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 stdDev = record.get('GuideSet/TrapezoidalCurveFit/AUCStdDev');
             }
 
-            // if this record has a guide set average and stdDev, check if the value is outside of the +/- 3 stdDev range
-            if (val && avg)
+            // if the value is out of range, highlight it in red and store an OOR indicator
+            if (this.checkIfOutOfRange(val, avg, stdDev))
             {
-                // if there is not stdDev (i.e. only one run in the guide set) and the value != avg (compared to two decimals)
-                // OR if the value is outside of the +/- 3 stdDev range from the avg
-                if (!stdDev && Ext.util.Format.number(val, formatStr) != Ext.util.Format.number(avg, formatStr))
-                    metaData.attr = "style='color:red;'";
-                else if(stdDev && (val > (avg + (3 * stdDev)) || val < (avg - (3 * stdDev))))
-                    metaData.attr = "style='color:red;'";
+                metaData.attr = "style='color:red'";
+                record.data[source + "OOR"] = true;
             }
 
-            return Ext.util.Format.number(val, formatStr);
+            // if this is a very small number, display more decimal places
+            var precision = this.getPrecision(val);
+
+            return Ext.util.Format.number(Ext.util.Format.round(val, precision), (precision == 6 ? '0.000000' : '0.00'));
         }
+    },
+
+    getPrecision: function(val) {
+        return (val && val > 0 && val < 1) ? 6 : 2;
+    },
+
+    checkIfOutOfRange: function(val, avg, stdDev) {
+        // if this record has a guide set average and stdDev, check if the value is outside of the +/- 3 stdDev range
+        if (val && avg)
+        {
+            var precision = this.getPrecision(val);
+            val = Ext.util.Format.round(val, precision);
+            if (!stdDev)
+                stdDev = 0;
+            var plus3stdDev = Ext.util.Format.round(avg + (3 * stdDev), precision);
+            var minus3stdDev = Ext.util.Format.round(avg - (3 * stdDev), precision);
+
+            // return true if the value is outside of the +/- 3 stdDev range from the avg
+            if(val > plus3stdDev || val < minus3stdDev)
+                return true;
+        }
+
+        return false;
+    },
+
+    formatGuideSetMembers: function(val, metaData, record) {
+        if (record.get("IncludeInGuideSetCalculation"))
+            metaData.attr = "style='font-weight:bold'"; 
+        return this.dateRenderer(val); 
     },
 
     dateRenderer: function(val) {
@@ -299,5 +348,15 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         var msg = Ext.util.Format.htmlEncode(value);
         p.attr = 'ext:qtip="' + msg + '"';
         return msg;
+    },
+
+    numberRenderer: function(val) {
+        // if this is a very small number, display more decimal places
+        if (!val)
+            return null;
+        else if (val > 0 && val < 1)
+            return Ext.util.Format.number(Ext.util.Format.round(val, 6), '0.000000');
+        else
+            return Ext.util.Format.number(Ext.util.Format.round(val, 2), '0.00');
     }
 });
