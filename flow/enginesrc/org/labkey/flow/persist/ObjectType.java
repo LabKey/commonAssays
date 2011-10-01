@@ -25,7 +25,8 @@ public enum ObjectType
     script(5, InputRole.AnalysisScript),
 
     workspace_fcsAnalysis(6, null),
-    workspace_script(7, InputRole.AnalysisScript)
+    workspace_script(7, InputRole.AnalysisScript),
+    workspace(8, InputRole.Workspace)
     ;
 
     final int _typeId;

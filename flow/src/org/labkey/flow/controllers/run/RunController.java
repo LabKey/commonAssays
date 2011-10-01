@@ -20,18 +20,23 @@ import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.api.writer.VirtualFile;
+import org.labkey.api.writer.ZipFile;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
@@ -39,8 +44,11 @@ import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowWell;
+import org.labkey.flow.persist.AnalysisSerializer;
+import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.MoveRunFromWorkspaceJob;
+import org.labkey.flow.view.ExportAnalysisForm;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -52,9 +60,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -224,6 +235,143 @@ public class RunController extends BaseFlowController
             root.addChild("Download Run");
             return root;
         }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class ExportAnalysis extends FormViewAction<ExportAnalysisForm>
+    {
+        List<FlowRun> _runs = null;
+        List<FlowWell> _wells = null;
+        boolean _success = false;
+
+        @Override
+        public void validateCommand(ExportAnalysisForm form, Errors errors)
+        {
+            int[] runId = form.getRunId();
+            int[] wellId = form.getWellId();
+
+            // If no run or well IDs were in the request, check for selected rows.
+            if ((runId == null || runId.length == 0) && (wellId == null || wellId.length == 0))
+            {
+                Set<String> selection = DataRegionSelection.getSelected(getViewContext(), form.getDataRegionSelectionKey(), true, true);
+                if (form.getSelectionType() == null || form.getSelectionType().equals("runs"))
+                    runId = PageFlowUtil.toInts(selection);
+                else
+                    wellId = PageFlowUtil.toInts(selection);
+            }
+
+            if (runId != null && runId.length > 0)
+            {
+                List<FlowRun> runs = new ArrayList<FlowRun>();
+                for (int id : runId)
+                {
+                    FlowRun run = FlowRun.fromRunId(id);
+                    if (run == null)
+                        throw new NotFoundException("Flow run not found");
+
+                    runs.add(run);
+                }
+                _runs = runs;
+            }
+            else if (wellId != null && wellId.length > 0)
+            {
+                List<FlowWell> wells = new ArrayList<FlowWell>();
+                for (int id : wellId)
+                {
+                    FlowWell well = FlowWell.fromWellId(id);
+                    if (well == null)
+                        throw new NotFoundException("Flow well not found");
+
+                    wells.add(well);
+                }
+                _wells = wells;
+            }
+            else
+            {
+                throw new NotFoundException("Flow run or well ids required");
+            }
+        }
+
+        @Override
+        public ModelAndView getView(ExportAnalysisForm form, boolean reshow, BindException errors) throws Exception
+        {
+            if (_success)
+            {
+                return null;
+            }
+            else
+            {
+                form._renderForm = true;
+                return new JspView<ExportAnalysisForm>("/org/labkey/flow/view/exportAnalysis.jsp", form, errors);
+            }
+        }
+
+        String getBaseName(String runName)
+        {
+            return FileUtil.getBaseName(runName);
+        }
+
+        @Override
+        public boolean handlePost(ExportAnalysisForm form, BindException errors) throws Exception
+        {
+            HttpServletResponse response = getViewContext().getResponse();
+
+            if (_runs != null && _runs.size() > 0)
+            {
+                String zipName = "ExportedRuns.zip";
+                if (_runs.size() == 1)
+                {
+                    FlowRun run = _runs.get(0);
+                    zipName = getBaseName(run.getName()) + ".zip";
+                }
+
+                ZipFile zipFile = new ZipFile(response, zipName);
+                for (FlowRun run : _runs)
+                {
+                    String dirName = getBaseName(run.getName());
+                    VirtualFile dir = zipFile.getDir(dirName);
+                    AnalysisSerializer writer = new AnalysisSerializer(_log, dir);
+                    writer.writeAnalysis(run.getAnalysis(form.isIncludeGraphs()), EnumSet.of(form.getExportFormat()));
+                }
+                zipFile.close();
+            }
+            else if (_wells != null && _wells.size() > 0)
+            {
+                String zipName = "ExportedWells.zip";
+                if (_wells.size() == 1)
+                {
+                    FlowWell well = _wells.get(0);
+                    zipName = getBaseName(well.getName()) + ".zip";
+                }
+
+                Map<String, AttributeSet> analysis = new TreeMap<String, AttributeSet>();
+                for (FlowWell well : _wells)
+                {
+                    AttributeSet attrs = well.getAttributeSet(form.isIncludeGraphs());
+                    analysis.put(well.getName(), attrs);
+                }
+
+                ZipFile zipFile = new ZipFile(response, zipName);
+                AnalysisSerializer writer = new AnalysisSerializer(_log, zipFile);
+                writer.writeAnalysis(analysis, EnumSet.of(form.getExportFormat()));
+                zipFile.close();
+            }
+
+            return _success = true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(ExportAnalysisForm exportAnalysisForm)
+        {
+            return null;
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(getPageConfig(), root, null, "Export Analysis");
+        }
+
     }
 
     @RequiresPermissionClass(UpdatePermission.class)

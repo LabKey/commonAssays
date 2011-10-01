@@ -23,4 +23,5 @@ public enum InputRole
     FCSFile,
     Sample,
     Workspace,
+    ExternalAnalysis
 }

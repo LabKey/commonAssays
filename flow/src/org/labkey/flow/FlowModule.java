@@ -54,6 +54,7 @@ import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocolImplementation;
+import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.FlowContainerListener;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
@@ -188,7 +189,8 @@ public class FlowModule extends DefaultModule
                 SubsetParser.TestLexer.class,
                 SubsetParser.TestParser.class,
                 SubsetTests.class,
-                FlowJoWorkspace.LoadTests.class));
+                FlowJoWorkspace.LoadTests.class,
+                AnalysisSerializer.TestCase.class));
     }
 
     public static String getShortProductName()

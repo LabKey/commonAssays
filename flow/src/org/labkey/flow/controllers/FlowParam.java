@@ -23,6 +23,7 @@ public enum FlowParam
     scriptId,
     runId,
     wellId,
+    workspaceId,
     statusFile,
     refresh,
     redirect,

@@ -93,6 +93,8 @@
     {
         %><labkey:link href="<%=run.urlFor(RunController.DownloadAction.class)%>" text="Download FCS Files" /><br><%
     }
+
+    %><labkey:link href="<%=run.urlFor(RunController.ExportAnalysis.class)%>" text="Download Analysis zip" /><br><%
     
     DiscussionService.Service service = DiscussionService.get();
     DiscussionService.DiscussionView discussion = service.getDisussionArea(

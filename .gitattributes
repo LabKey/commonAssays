@@ -208,6 +208,7 @@ flow/enginesrc/org/labkey/flow/analysis/web/SubsetExpression.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/SubsetParser.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/SubsetSpec.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/SubsetTests.java -text
+flow/enginesrc/org/labkey/flow/persist/AnalysisSerializer.java -text
 flow/enginesrc/org/labkey/flow/persist/AttributeSet.java -text
 flow/enginesrc/org/labkey/flow/persist/InputRole.java -text
 flow/enginesrc/org/labkey/flow/persist/ObjectType.java -text
@@ -430,6 +431,7 @@ flow/src/org/labkey/flow/data/FlowRun.java -text
 flow/src/org/labkey/flow/data/FlowRunWorkspace.java -text
 flow/src/org/labkey/flow/data/FlowScript.java -text
 flow/src/org/labkey/flow/data/FlowWell.java -text
+flow/src/org/labkey/flow/data/FlowWorkspace.java -text
 flow/src/org/labkey/flow/data/ICSMetadata.java -text
 flow/src/org/labkey/flow/data/SampleKey.java -text
 flow/src/org/labkey/flow/persist/AttrObject.java -text
@@ -461,6 +463,7 @@ flow/src/org/labkey/flow/reports/PositivityFlowReport.java -text
 flow/src/org/labkey/flow/reports/editPositivityReport.jsp -text
 flow/src/org/labkey/flow/reports/editQCReport.jsp -text
 flow/src/org/labkey/flow/reports/statPicker.jsp -text
+flow/src/org/labkey/flow/script/AbstractExternalAnalysisJob.java -text
 flow/src/org/labkey/flow/script/AddRunsJob.java -text
 flow/src/org/labkey/flow/script/AnalysisHandler.java -text
 flow/src/org/labkey/flow/script/AnalyzeJob.java -text
@@ -472,14 +475,15 @@ flow/src/org/labkey/flow/script/FlowJob.java -text
 flow/src/org/labkey/flow/script/FlowPipelineProvider.java -text
 flow/src/org/labkey/flow/script/FlowTaskSet.java -text
 flow/src/org/labkey/flow/script/FlowThreadPool.java -text
+flow/src/org/labkey/flow/script/ImportResultsJob.java -text
 flow/src/org/labkey/flow/script/KeywordsHandler.java -text
 flow/src/org/labkey/flow/script/MoveRunFromWorkspaceJob.java -text
-flow/src/org/labkey/flow/script/RImportJob.java -text
 flow/src/org/labkey/flow/script/RScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptXarSource.java -text
 flow/src/org/labkey/flow/script/WorkspaceJob.java -text
 flow/src/org/labkey/flow/util/KeywordUtil.java -text
+flow/src/org/labkey/flow/view/ExportAnalysisForm.java -text
 flow/src/org/labkey/flow/view/FlowQueryView.java -text
 flow/src/org/labkey/flow/view/GraphColumn.java -text
 flow/src/org/labkey/flow/view/GraphDataRegion.java -text
@@ -487,6 +491,7 @@ flow/src/org/labkey/flow/view/GraphView.java -text
 flow/src/org/labkey/flow/view/JobStatusView.java -text
 flow/src/org/labkey/flow/view/SetCommentView.java -text
 flow/src/org/labkey/flow/view/errors.jsp -text
+flow/src/org/labkey/flow/view/exportAnalysis.jsp -text
 flow/src/org/labkey/flow/view/setComment.jsp -text
 flow/src/org/labkey/flow/view/setGraphSize.jsp -text
 flow/src/org/labkey/flow/webparts/AnalysesWebPart.java -text

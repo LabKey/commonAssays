@@ -53,7 +53,9 @@
 <%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.text.DecimalFormat" %>
+<%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <style type="text/css">
     .right {text-align:right;}
 </style>
@@ -100,6 +102,7 @@ Ext.QuickTips.init();
             case Freq_Of_Parent:
             case Freq_Of_Grandparent:
             case Percentile:
+            case Median_Abs_Dev_Percent:
                 formattedValue = percentageFormat.format(value/100);
                 break;
 
@@ -466,7 +469,7 @@ else
                     %><p><a href="<%=h(getWell().urlFor(WellController.ChooseGraphAction.class))%>">More Graphs</a><br><%
                     %><a href="<%=h(getWell().urlFor(WellController.KeywordsAction.class))%>">Keywords from the FCS file</a><br><%
                     String url = context.getContextPath() + "/" + WebdavService.getServletPath() + r.getContainer().getPath() + "/@pipeline/" + rel.toString();
-                    %><a href="<%=h(url)%>">Download FCS file</a><%
+                    %><a href="<%=h(url)%>">Download FCS file</a><br><%
                 }
                 else
                 {
@@ -474,6 +477,11 @@ else
                 }
             }
         }
+    }
+
+    if (well instanceof FlowFCSAnalysis)
+    {
+        %><a href="<%=well.urlFor(RunController.ExportAnalysis.class)%>">Download Analysis zip</a><br><%
     }
     %></p><%
 }

@@ -27,47 +27,57 @@ abstract public class FlowDataType extends DataType
     String _name;
     String _label;
     ObjectType _objType;
-    private FlowDataType(String type, String label, ObjectType objType)
+    boolean _requireAttrObject;
+
+    private FlowDataType(String type, String label, ObjectType objType, boolean requireAttrObject)
     {
         super("Flow-" + type);
         _name = type;
         _label = label;
         _objType = objType;
+        _requireAttrObject = requireAttrObject;
     }
 
-    static final public FlowDataType FCSFile = new FlowDataType("FCSFile", "FCS File", ObjectType.fcsKeywords)
+    static final public FlowDataType FCSFile = new FlowDataType("FCSFile", "FCS File", ObjectType.fcsKeywords, true)
     {
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowFCSFile(data);
         }
     };
-    static final public FlowDataType FCSAnalysis = new FlowDataType("FCSAnalysis", "FCS Analysis", ObjectType.fcsAnalysis)
+    static final public FlowDataType FCSAnalysis = new FlowDataType("FCSAnalysis", "FCS Analysis", ObjectType.fcsAnalysis, true)
     {
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowFCSAnalysis(data);
         }
     };
-    static final public FlowDataType CompensationControl = new FlowDataType("CompensationControl", "Comp. Control", ObjectType.compensationControl)
+    static final public FlowDataType CompensationControl = new FlowDataType("CompensationControl", "Comp. Control", ObjectType.compensationControl, true)
     {
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowCompensationControl(data);
         }
     };
-    static final public FlowDataType CompensationMatrix = new FlowDataType("CompensationMatrix", "Comp. Matrix", ObjectType.compensationMatrix)
+    static final public FlowDataType CompensationMatrix = new FlowDataType("CompensationMatrix", "Comp. Matrix", ObjectType.compensationMatrix, true)
     {
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowCompensationMatrix(data);
         }
     };
-    static final public FlowDataType Script = new FlowDataType("AnalysisScript", "Script", ObjectType.script)
+    static final public FlowDataType Script = new FlowDataType("AnalysisScript", "Script", ObjectType.script, true)
     {
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowScript(data);
+        }
+    };
+    static final public FlowDataType Workspace = new FlowDataType("Workspace", "Workspace", ObjectType.workspace, false)
+    {
+        public FlowDataObject newInstance(ExpData data)
+        {
+            return new FlowWorkspace(data);
         }
     };
 
@@ -79,6 +89,7 @@ abstract public class FlowDataType extends DataType
         ExperimentService.get().registerDataType(CompensationControl);
         ExperimentService.get().registerDataType(CompensationMatrix);
         ExperimentService.get().registerDataType(Script);
+        ExperimentService.get().registerDataType(Workspace);
     }
 
     public ObjectType getObjectType()
@@ -94,6 +105,11 @@ abstract public class FlowDataType extends DataType
     public String getName()
     {
         return _name;
+    }
+
+    public boolean isRequireAttrObject()
+    {
+        return _requireAttrObject;
     }
 
     public String urlFlag(boolean flagged)

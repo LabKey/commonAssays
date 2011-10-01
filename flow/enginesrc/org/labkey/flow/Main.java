@@ -19,11 +19,17 @@ package org.labkey.flow;
 import org.apache.commons.lang.StringUtils;
 import org.apache.xmlbeans.XmlOptions;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.writer.FileSystemFile;
+import org.labkey.api.writer.VirtualFile;
+import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
+import org.labkey.flow.persist.AnalysisSerializer;
+import org.labkey.flow.persist.AttributeSet;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.OutputKeys;
@@ -37,13 +43,19 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
 
 /**
  * User: kevink
@@ -51,6 +63,11 @@ import java.util.Set;
  */
 public class Main
 {
+    private enum AnalysisResultsOutputFormat
+    {
+        tsv, xar, flowjoxml
+    }
+
     private static FlowJoWorkspace readWorkspace(File file)
     {
         InputStream is = null;
@@ -90,6 +107,37 @@ public class Main
         return file;
     }
 
+    private static int MAX_LINE_LEN = 80;
+    private static void printWrapped(PrintStream out, String indent, Collection<String> words)
+    {
+        if (words.size() == 0)
+            return;
+
+        int lineLen = indent.length();
+        String sep = "";
+        Iterator<String> iter = words.iterator();
+        while (iter.hasNext())
+        {
+            String word = iter.next();
+            if (lineLen + sep.length() + word.length() > MAX_LINE_LEN)
+            {
+                out.println(sep);
+                if (iter.hasNext())
+                {
+                    out.print(indent);
+                    lineLen = indent.length();
+                }
+            }
+            else
+            {
+                out.print(sep);
+            }
+            out.print(word);
+            sep = ", ";
+            lineLen += sep.length() + word.length();
+        }
+    }
+
     private static void executeListSamples(File workspaceFile, Set<PopulationName> groupNames)
     {
         FlowJoWorkspace workspace = readWorkspace(workspaceFile);
@@ -116,11 +164,12 @@ public class Main
             samples.add(sample.getLabel());
         }
 
+        // Print the group analysis first and remove the group analysis from the analysisToSamples hash map.
         for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
         {
             if (groupNames.isEmpty() || groupNames.contains(group.getGroupName()))
             {
-                System.out.printf("Group: %s\n", group.getGroupName());
+                System.out.printf("Group %s: %s\n", group.getGroupId(), group.getGroupName());
 
                 if (group.getSampleIds().size() == 0)
                 {
@@ -128,29 +177,18 @@ public class Main
                 }
                 else
                 {
-                    System.out.print("  ");
-                    String sep = "";
-                    int lineLen = 2;
-                    for (String sampleId : group.getSampleIds())
+                    List<String> sampleIDs = group.getSampleIds();
+                    List<String> sampleLabels = new ArrayList<String>(sampleIDs.size());
+                    for (String sampleId : sampleIDs)
                     {
                         FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleId);
-                        if (lineLen + sep.length() + sample.getLabel().length() > 80)
-                        {
-                            System.out.println(sep);
-                            System.out.print("  ");
-                            lineLen = 2;
-                        }
-                        else
-                        {
-                            System.out.print(sep);
-                        }
-                        System.out.print(sample.getLabel());
-                        sep = ", ";
-                        lineLen += sep.length() + sample.getLabel().length();
+                        sampleLabels.add(sample.getLabel());
                     }
-                    System.out.println();
+                    String indent = "  ";
+                    System.out.print(indent);
+                    printWrapped(System.out, indent, sampleLabels);
                 }
-                System.out.println("");
+                System.out.println();
 
                 // Remove the group analysis from the sample analysis map
                 Analysis analysis = groupAnalyses.get(group.getGroupName());
@@ -166,7 +204,11 @@ public class Main
             {
                 Analysis analysis = entry.getKey();
                 List<String> samples = entry.getValue();
-                System.out.printf("  %s: %s\n", analysis.getName(), StringUtils.join(samples, ", "));
+                String header = String.format("  %s: ", analysis.getName());
+                String indent = StringUtils.repeat(" ", header.length());
+                System.out.print(header);
+                printWrapped(System.out, indent, samples);
+                System.out.println();
             }
         }
     }
@@ -242,7 +284,179 @@ public class Main
         }
     }
 
-    private static void executeAnalysis(File outDir, File workspaceFile, File fcsDir)
+    private static void writeAnalysisResults(File outDir, Map<String, AttributeSet> results, AnalysisResultsOutputFormat outputFormat)
+    {
+        if (outputFormat == AnalysisResultsOutputFormat.tsv)
+        {
+            FileSystemFile rootDir = new FileSystemFile(outDir);
+            AnalysisSerializer writer = new AnalysisSerializer(rootDir);
+            try
+            {
+                writer.writeAnalysis(results);
+            }
+            catch (IOException ioe)
+            {
+                System.err.println("Error writing analysis results: " + ioe.getMessage());
+                ioe.printStackTrace(System.err);
+            }
+        }
+        else if (outputFormat == AnalysisResultsOutputFormat.flowjoxml)
+        {
+            // UNDONE: write flowjo xml format
+        }
+        else if (outputFormat == AnalysisResultsOutputFormat.xar)
+        {
+            // UNDONE: write XAR format
+        }
+    }
+
+    private static Map<String, AttributeSet> readWorkspaceAnalysisResults(File workspaceFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    {
+        FlowJoWorkspace workspace = readWorkspace(workspaceFile);
+
+        Set<FlowJoWorkspace.SampleInfo> sampleInfos = new LinkedHashSet<FlowJoWorkspace.SampleInfo>();
+        boolean writeAll = groupNames.isEmpty() && sampleIds.isEmpty();
+        if (writeAll)
+        {
+            sampleInfos.addAll(workspace.getSamples());
+        }
+        else
+        {
+            if (!groupNames.isEmpty())
+            {
+                for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
+                {
+                    if (groupNames.contains(group.getGroupName()))
+                    {
+                        for (String sampleID : group.getSampleIds())
+                            sampleInfos.add(workspace.getSample(sampleID));
+                    }
+                }
+            }
+
+            if (!sampleIds.isEmpty())
+            {
+                for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+                {
+                    if (sampleIds.contains(sampleInfo.getSampleId()) || sampleIds.contains(sampleInfo.getLabel()))
+                        sampleInfos.add(sampleInfo);
+                }
+            }
+        }
+
+        Map<String, AttributeSet> results = new LinkedHashMap<String, AttributeSet>();
+        for (FlowJoWorkspace.SampleInfo sampleInfo : sampleInfos)
+        {
+            if (results.containsKey(sampleInfo.getLabel()))
+            {
+                System.err.printf("warning: sample label '%s' appears on more than one sample info", sampleInfo.getLabel());
+                continue;
+            }
+
+            AttributeSet attrs = workspace.getSampleAnalysisResults(sampleInfo);
+            if (attrs != null)
+                results.put(sampleInfo.getLabel(), attrs);
+
+            // UNDONE: generate graphs if fcs file is available
+        }
+
+        return results;
+    }
+
+    private static Map<String, AttributeSet> readTsvAnalysisResults(File analysisResultsFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    {
+        VirtualFile rootDir;
+        if (analysisResultsFile.getName().endsWith(".zip"))
+        {
+            // NOTE: Duplicated code in AnalysisScriptController
+            File statisticsFile = null;
+            java.util.zip.ZipFile zipFile;
+            try
+            {
+                zipFile = new java.util.zip.ZipFile(analysisResultsFile);
+            }
+            catch (IOException e)
+            {
+                System.err.println("Error reading analysis results: Could not read zip file: " + e.getMessage());
+                return null;
+            }
+
+            String zipBaseName = FileUtil.getBaseName(analysisResultsFile);
+            ZipEntry zipEntry = zipFile.getEntry(AnalysisSerializer.STATISTICS_FILENAME);
+            if (zipEntry == null)
+                zipEntry = zipFile.getEntry(zipBaseName + "/" + AnalysisSerializer.STATISTICS_FILENAME);
+
+            if (zipEntry == null)
+            {
+                System.err.println("Error reading analysis results: Couldn't find '" + AnalysisSerializer.STATISTICS_FILENAME + "' or '" + zipBaseName + "/" + AnalysisSerializer.STATISTICS_FILENAME + "' in the zip archive.");
+                return null;
+            }
+
+            // UNDONE: instead of unzipping into temp dir, make zip VirtualFile impl readable.
+            try
+            {
+                File tmpDir = FileUtil.createTempDirectory("flow");
+                tmpDir.deleteOnExit();
+
+                ZipUtil.unzipToDirectory(analysisResultsFile, tmpDir);
+                statisticsFile = new File(tmpDir, zipEntry.getName());
+                rootDir = new FileSystemFile(statisticsFile.getParentFile());
+            }
+            catch (IOException ioe)
+            {
+                System.err.println("Error unzipping analysis results: " + ioe.getMessage());
+                return null;
+            }
+        }
+        else
+        {
+            rootDir = new FileSystemFile(analysisResultsFile);
+        }
+
+        AnalysisSerializer reader = new AnalysisSerializer(rootDir);
+        try
+        {
+            // UNDONE: filter results by sampleIDs and stats.  Groups can't be supported.
+            return reader.readAnalysis();
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error reading analysis results: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return null;
+        }
+    }
+
+    private static Map<String, AttributeSet> readAnalysisResults(File analysisResultsFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    {
+        Map<String, AttributeSet> results = null;
+        if (FlowJoWorkspace.isFlowJoWorkspace(analysisResultsFile))
+        {
+            results = readWorkspaceAnalysisResults(analysisResultsFile, fcsDir, groupNames, sampleIds, stats);
+        }
+        else if (analysisResultsFile.getName().endsWith(".xar"))
+        {
+            // UNDONE: read XAR analysis
+            throw new RuntimeException("Not yet implemented");
+        }
+        else
+        {
+            results = readTsvAnalysisResults(analysisResultsFile, fcsDir, groupNames, sampleIds, stats);
+        }
+
+        return results;
+    }
+
+    private static void executeConvertAnalysis(File outDir, File workspaceOrAnalysisResults, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats, AnalysisResultsOutputFormat outputFormat)
+    {
+        Map<String, AttributeSet> results = readAnalysisResults(workspaceOrAnalysisResults, fcsDir, groupNames, sampleIds, stats);
+        if (results == null)
+            return;
+
+        writeAnalysisResults(outDir, results, outputFormat);
+    }
+
+    private static void executeRunAnalysis(File outDir, File workspaceFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats, AnalysisResultsOutputFormat outputFormat)
     {
 
     }
@@ -261,18 +475,26 @@ public class Main
         }
 
         StringBuilder usage = new StringBuilder();
-        usage.append("Usage: ").append(Main.class.getName()).append(" -w workspace [-f fcs dir] [-g group] [-s sample] [-S stat] [-o out] command\n");
+        String progName = Main.class.getName();
+        usage.append("Usage: ").append(progName).append(" [-w workspace] [-r results] [-f fcs dir] [-g group] [-s sample] [-S stat] [-o out] [-F (tsv|xar|flowjoxml)] command\n");
         usage.append("\n");
-        usage.append("  -o  -- output directory. Defaults to current directory.\n");
-        usage.append("  -f  -- directory containing FCS files.\n");
-        usage.append("  -w  -- either a FlowJo workspace xml or a LabKey workspace xml file\n");
-        usage.append("  -g  -- group name from FlowJo workspace. May appear more than once.\n");
-        usage.append("  -s  -- sample id or name from FlowJo workspace. May appear more than once.\n");
-        usage.append("  -S  -- statistic name. See available stats from list below. May appear more than once.\n");
+        usage.append("  -w   -- analysis definition: FlowJo workspace xml or LabKey workspace xml file.\n"); // Add gatingML
+        usage.append("  -r   -- analysis results: FlowJo workspace xml, tsv, or XAR.\n"); // add ACS
+        usage.append("  -f   -- directory containing FCS files.\n");
+        usage.append("\n");
+        usage.append("Selection options:\n");
+        usage.append("  -g   -- group id or name from FlowJo workspace. May appear more than once.\n");
+        usage.append("  -s   -- sample id or name from analysis definition. May appear more than once.\n");
+        usage.append("  -S   -- statistic name. See available stats from list below. May appear more than once.\n");
+        usage.append("\n");
+        usage.append("Output options:\n");
+        usage.append("  -o   -- output directory. Defaults to current directory.\n");
+        usage.append("  -F   -- write out analysis results in the given format (tsv, xar, or flowjoxml; defaults to tsv)\n");
         usage.append("\n");
         usage.append("Command is one of:\n");
         usage.append("  parse              -- reads workspace; does nothing\n");
-        usage.append("  analysis           -- generate analysis results\n");
+        usage.append("  run-analysis       -- use LabKey's engine to generate analysis results\n");
+        usage.append("  convert-analysis   -- convert analysis results into a different format (requires -r argument)\n");
         usage.append("  convert-workspace  -- converts a FlowJo workspace xml into a LabKey script file\n");
         usage.append("  trim-workspace     -- trims FlowJo workspace down to only required xml elements\n");
         usage.append("  list-samples       -- lists the groups and samples in the FlowJo workspace xml file\n");
@@ -282,14 +504,26 @@ public class Main
             if (stat != StatisticSet.existing)
                 usage.append("  ").append(stat.name()).append(": ").append(stat.getLabel()).append("\n");
 
+        usage.append("\n");
+        usage.append("Examples:\n");
+        usage.append("\n");
+        usage.append("  Convert from FlowJo xml into tsv files and back into a FlowJo workspace:\n");
+        usage.append("    ").append(progName).append(" -r workspace.xml -o out1 -F tsv convert-analysis\n");
+        usage.append("    ").append(progName).append(" -r out1 -o out2 -F flowjoxml convert-analysis\n");
+        usage.append("\n");
+        usage.append("  Execute LabKey analysis and save as XAR:\n");
+        usage.append("    ").append(progName).append(" -w labkey.xml -f fcsfiles -F xar run-analysis\n");
+
         System.err.println(usage.toString());
     }
 
     public static void main(String[] args)
     {
         String workspaceArg = null;
+        String analysisResultsArg = null;
         String fcsArg = null;
         String outArg = null;
+        String outputFormatArg = null;
         String commandArg = null;
         Set<PopulationName> groupArgs = new LinkedHashSet<PopulationName>();
         Set<String> sampleArgs = new LinkedHashSet<String>();
@@ -305,6 +539,16 @@ public class Main
                 else
                 {
                     usage("--workspace requires argument");
+                    return;
+                }
+            }
+            else if ("-r".equals(arg) || "--results".equals(arg))
+            {
+                if (++i < args.length)
+                    analysisResultsArg = args[i];
+                else
+                {
+                    usage("--results requires argument");
                     return;
                 }
             }
@@ -371,15 +615,32 @@ public class Main
                     return;
                 }
             }
-            else if ("parse".equals(arg) || "analysis".equals(arg) || "convert-workspace".equals(arg) || "trim-workspace".equals(arg) || "list-samples".equals(arg))
+            else if ("-F".equals(arg) || "--format".equals(arg))
             {
-                commandArg = arg;
-                break;
+                if (++i < args.length)
+                    outputFormatArg = args[i];
+                else
+                {
+                    usage("--format requires argument");
+                    return;
+                }
+            }
+            else if ("-tsv".equals(arg))
+            {
+                outputFormatArg = "tsv";
+            }
+            else if ("-xar".equals(arg))
+            {
+                outputFormatArg = "xar";
+            }
+            else if ("-flowjoxml".equals(arg))
+            {
+                outputFormatArg = "flowjoxml";
             }
             else
             {
-                usage("Unknown argument '" + arg + "'");
-                return;
+                commandArg = arg;
+                break;
             }
         }
 
@@ -399,11 +660,25 @@ public class Main
             return;
         }
 
-        File workspaceFile = new File(workspaceArg);
-        if (!workspaceFile.isFile())
+        File workspaceFile = null;
+        if (!commandArg.equals("convert-analysis"))
         {
-            System.err.println("workspace file doesn't exist: " + workspaceArg);
-            return;
+            workspaceFile = new File(workspaceArg);
+            if (!workspaceFile.isFile())
+            {
+                System.err.println("workspace file doesn't exist: " + workspaceArg);
+                return;
+            }
+        }
+        else if (commandArg.equals("convert-analysis"))
+        {
+            // NOTE: Re-using the workspaceFile even though it really is analysis results.  Consider collapsing '-r' and '-w' arguments.
+            workspaceFile = new File(analysisResultsArg);
+            if (!workspaceFile.isFile())
+            {
+                System.err.println("analysis results file doesn't exist: " + workspaceFile);
+                return;
+            }
         }
 
         File fcsDir = null;
@@ -420,10 +695,28 @@ public class Main
         if (statArgs.isEmpty())
             statArgs = EnumSet.of(StatisticSet.workspace);
 
+
+        AnalysisResultsOutputFormat outputFormat = AnalysisResultsOutputFormat.tsv;
+        if (outputFormatArg != null)
+        {
+            try
+            {
+                outputFormat = AnalysisResultsOutputFormat.valueOf(outputFormatArg);
+            }
+            catch (IllegalFormatException nfe)
+            {
+                System.err.println("output format '" + outputFormatArg + "' not supported.");
+                return;
+            }
+        }
+
+
         if ("parse".equals(commandArg))
             readWorkspace(workspaceFile);
-        else if ("analysis".equals(commandArg))
-            executeAnalysis(outDir, workspaceFile, fcsDir);
+        else if ("convert-analysis".equals(commandArg))
+            executeConvertAnalysis(outDir, workspaceFile, fcsDir, groupArgs, sampleArgs, statArgs, outputFormat);
+        else if ("run-analysis".equals(commandArg))
+            executeRunAnalysis(outDir, workspaceFile, fcsDir, groupArgs, sampleArgs, statArgs, outputFormat);
         else if ("convert-workspace".equals(commandArg))
             executeConvertWorkspace(outDir, workspaceFile, groupArgs, sampleArgs, statArgs);
         else if ("trim-workspace".equals(commandArg))
@@ -433,7 +726,6 @@ public class Main
         else
         {
             usage("Unknown command: " + commandArg);
-            return;
         }
 
     }

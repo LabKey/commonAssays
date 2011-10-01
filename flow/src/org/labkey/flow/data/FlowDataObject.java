@@ -28,23 +28,34 @@ import org.apache.commons.lang.ObjectUtils;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 abstract public class FlowDataObject extends FlowObject<ExpData>
 {
     static public List<FlowDataObject> fromDatas(ExpData[] datas)
     {
-        HashMap<Integer,ExpData> flowDatas = new HashMap<Integer,ExpData>(2*datas.length);
+        List<ExpData> flowDatas = new ArrayList<ExpData>(datas.length);
         for (ExpData data : datas)
         {
             if (data.getDataType() instanceof FlowDataType)
-                flowDatas.put(data.getRowId(), data);
+                flowDatas.add(data);
         }
-        List<AttrObject> attrs = FlowManager.get().getAttrObjects(flowDatas.values());
-        List<FlowDataObject> ret = new ArrayList<FlowDataObject>(attrs.size());
-        for (AttrObject a : attrs)
+
+        List<AttrObject> attrs = FlowManager.get().getAttrObjects(flowDatas);
+        Map<Integer, AttrObject> attrMap = new HashMap<Integer, AttrObject>(2*datas.length);
+        for (AttrObject attr : attrs)
         {
-            ExpData data = flowDatas.get(a.getDataId());
-            ret.add(((FlowDataType) data.getDataType()).newInstance(data));
+            attrMap.put(attr.getDataId(), attr);
+        }
+
+        List<FlowDataObject> ret = new ArrayList<FlowDataObject>(attrs.size());
+        for (ExpData data : datas)
+        {
+            FlowDataType dataType = (FlowDataType)data.getDataType();
+            if (!dataType.isRequireAttrObject() || attrMap.containsKey(data.getRowId()))
+            {
+                ret.add(((FlowDataType) data.getDataType()).newInstance(data));
+            }
         }
         return ret;
     }
@@ -56,9 +67,12 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         DataType type = data.getDataType();
         if (!(type instanceof FlowDataType))
             return null;
-        AttrObject obj = FlowManager.get().getAttrObject(data);
-        if (obj == null)
-            return null;
+        if (((FlowDataType)type).isRequireAttrObject())
+        {
+            AttrObject obj = FlowManager.get().getAttrObject(data);
+            if (obj == null)
+                return null;
+        }
         return ((FlowDataType) type).newInstance(data);
     }
 
@@ -194,5 +208,10 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
     public AttributeSet getAttributeSet()
     {
         return AttributeSetHelper.fromData(getData());
+    }
+
+    public AttributeSet getAttributeSet(boolean includeGraphBytes)
+    {
+        return AttributeSetHelper.fromData(getData(), includeGraphBytes);
     }
 }

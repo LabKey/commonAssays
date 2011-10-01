@@ -16,11 +16,11 @@
 
 package org.labkey.flow.view;
 
-import org.apache.log4j.Logger;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.PanelButton;
 import org.labkey.api.data.TSVGridWriter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.query.ExpRunTable;
@@ -46,6 +46,7 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.springframework.validation.Errors;
 
@@ -235,6 +236,33 @@ public class FlowQueryView extends QueryView
             bar.add(button);
         }
         super.populateButtonBar(view, bar, exportAsWebPage);
+    }
+
+    @Override
+    public PanelButton createExportButton(boolean exportAsWebPage)
+    {
+        PanelButton panelButton = super.createExportButton(exportAsWebPage);
+
+        if (getSettings() != null)
+        {
+            String queryName = getSettings().getQueryName();
+            if (queryName.equals(FlowTableType.Runs.toString()))
+            {
+                ExportAnalysisForm form = new ExportAnalysisForm();
+                form.setSelectionType("runs");
+                HttpView analysisExportView = new JspView<ExportAnalysisForm>("/org/labkey/flow/view/exportAnalysis.jsp", form);
+                panelButton.addSubPanel("Analysis", analysisExportView);
+            }
+            else if (queryName.equals(FlowTableType.FCSFiles.toString()) || queryName.equals(FlowTableType.FCSAnalyses.toString()) || queryName.equals(FlowTableType.CompensationControls.toString()))
+            {
+                ExportAnalysisForm form = new ExportAnalysisForm();
+                form.setSelectionType("wells");
+                HttpView analysisExportView = new JspView<ExportAnalysisForm>("/org/labkey/flow/view/exportAnalysis.jsp", form);
+                panelButton.addSubPanel("Analysis", analysisExportView);
+            }
+        }
+
+        return panelButton;
     }
 
     public List<DisplayColumn> getDisplayColumns()

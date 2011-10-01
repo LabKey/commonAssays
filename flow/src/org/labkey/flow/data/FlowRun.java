@@ -22,12 +22,12 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.run.RunController;
+import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.query.FlowSchema;
@@ -74,6 +74,21 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     public List<? extends FlowDataObject> getDatas(FlowDataType type) throws SQLException
     {
         return FlowDataObject.fromDatas(getExperimentRun().getOutputDatas(type));
+    }
+
+    // CONSIDER: Include keyword information?
+    public Map<String, AttributeSet> getAnalysis(boolean includeGraphBytes) throws SQLException
+    {
+        Map<String, AttributeSet> analysis = new TreeMap<String, AttributeSet>();
+        List<? extends FlowDataObject> all = getDatas(FlowDataType.FCSAnalysis);
+        for (FlowDataObject obj : all)
+        {
+            String name = obj.getName();
+            AttributeSet attrs = obj.getAttributeSet(includeGraphBytes);
+            analysis.put(name, attrs);
+        }
+
+        return analysis;
     }
 
     public boolean hasRealWells() throws SQLException
@@ -258,13 +273,21 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return file == null ? null : file.getPath();
     }
 
-    public ActionURL getDownloadWorkspaceURL()
+    public FlowWorkspace getWorkspace()
     {
         ExpData[] datas = getExperimentRun().getInputDatas(InputRole.Workspace.toString(), ExpProtocol.ApplicationType.ExperimentRun);
-        if (datas.length == 0 || !datas[0].isFileOnDisk())
+        if (datas.length == 0)
             return null;
-        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer(), datas[0], false);
-        return url;
+        return (FlowWorkspace) FlowDataObject.fromData(datas[0]);
+    }
+
+    public ActionURL getDownloadWorkspaceURL()
+    {
+        FlowWorkspace workspace = getWorkspace();
+        if (workspace == null)
+            return null;
+
+        return workspace.getDownloadURL();
     }
 
     public void addParams(Map<FlowParam,Object> map)

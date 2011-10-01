@@ -222,6 +222,17 @@ public class AttributeSet implements Serializable
         aliases.add(alias);
     }
 
+    public void setKeywordAliases(Map<String, Set<String>> keywordAliases)
+    {
+        _keywordAliases = new TreeMap<String, Set<String>>();
+
+        for (String keyword : keywordAliases.keySet())
+        {
+            Set<String> aliases = keywordAliases.get(keyword);
+            _keywordAliases.put(keyword, new LinkedHashSet<String>(aliases));
+        }
+    }
+
     public Iterable<String> getKeywordAliases(String spec)
     {
         if (_keywordAliases == null)
@@ -248,6 +259,12 @@ public class AttributeSet implements Serializable
         }
     }
 
+    public void setStatistics(Map<StatisticSpec, Double> statistics)
+    {
+        _statistics = new TreeMap<StatisticSpec, Double>();
+        _statistics.putAll(statistics);
+    }
+
     public void addStatisticAlias(StatisticSpec spec, StatisticSpec alias)
     {
         if (_statisticAliases == null)
@@ -257,6 +274,17 @@ public class AttributeSet implements Serializable
         if (aliases == null)
             _statisticAliases.put(spec, aliases = new LinkedHashSet<StatisticSpec>());
         aliases.add(alias);
+    }
+
+    public void setStatisticAliases(Map<StatisticSpec, Set<StatisticSpec>> statisticAliases)
+    {
+        _statisticAliases = new TreeMap<StatisticSpec, Set<StatisticSpec>>();
+
+        for (StatisticSpec statisticSpec : statisticAliases.keySet())
+        {
+            Set<StatisticSpec> aliases = statisticAliases.get(statisticSpec);
+            _statisticAliases.put(statisticSpec, new LinkedHashSet<StatisticSpec>(aliases));
+        }
     }
 
     public Iterable<StatisticSpec> getStatisticAliases(StatisticSpec spec)
@@ -281,6 +309,12 @@ public class AttributeSet implements Serializable
         _graphs.put(graph, data);
     }
 
+    public void setGraphs(Map<GraphSpec, byte[]> graphs)
+    {
+        _graphs = new TreeMap<GraphSpec, byte[]>();
+        _graphs.putAll(graphs);
+    }
+
     public void addGraphAlias(GraphSpec spec, GraphSpec alias)
     {
         if (_graphAliases == null)
@@ -290,6 +324,17 @@ public class AttributeSet implements Serializable
         if (aliases == null)
             _graphAliases.put(spec, aliases = new LinkedHashSet<GraphSpec>());
         aliases.add(alias);
+    }
+
+    public void setGraphAliases(Map<GraphSpec, Set<GraphSpec>> graphAliases)
+    {
+        _graphAliases = new TreeMap<GraphSpec, Set<GraphSpec>>();
+
+        for (GraphSpec graphSpec : graphAliases.keySet())
+        {
+            Set<GraphSpec> aliases = graphAliases.get(graphSpec);
+            _graphAliases.put(graphSpec, new LinkedHashSet<GraphSpec>(aliases));
+        }
     }
 
     public Iterable<GraphSpec> getGraphAliases(GraphSpec spec)
@@ -336,6 +381,13 @@ public class AttributeSet implements Serializable
         return Collections.unmodifiableSet(_keywords.keySet());
     }
 
+    public Map<String, Set<String>> getKeywordAliases()
+    {
+        if (_keywordAliases == null)
+            return Collections.emptyMap();
+        return Collections.unmodifiableMap(_keywordAliases);
+    }
+
     /** Get statistic specs and values.  Does not include statistic aliases. */
     public Map<StatisticSpec, Double> getStatistics()
     {
@@ -351,6 +403,13 @@ public class AttributeSet implements Serializable
         return Collections.unmodifiableSet(_statistics.keySet());
     }
 
+    public Map<StatisticSpec, Set<StatisticSpec>> getStatisticAliases()
+    {
+        if (_statisticAliases == null)
+            return Collections.emptyMap();
+        return Collections.unmodifiableMap(_statisticAliases);
+    }
+
     /** Get graph specs and values.  Does not include graph aliases. */
     public Map<GraphSpec, byte[]> getGraphs()
     {
@@ -364,6 +423,13 @@ public class AttributeSet implements Serializable
         if (_graphs == null)
             return Collections.emptySet();
         return Collections.unmodifiableSet(_graphs.keySet());
+    }
+
+    public Map<GraphSpec, Set<GraphSpec>> getGraphAliases()
+    {
+        if (_graphAliases == null)
+            return Collections.emptyMap();
+        return Collections.unmodifiableMap(_graphAliases);
     }
 
     public ObjectType getType()

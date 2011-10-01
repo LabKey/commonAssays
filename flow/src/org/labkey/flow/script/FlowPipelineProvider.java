@@ -28,6 +28,7 @@ import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.persist.AnalysisSerializer;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -46,7 +47,7 @@ public class FlowPipelineProvider extends PipelineProvider
     private static final String IMPORT_DIRECTORY_NAVTREE_LABEL = "Import FCS Files";
     private static final String IMPORT_WORKSPACE_LABEL = "Import FlowJo Workspace";
     private static final String IMPORT_DIRECTORY_LABEL = "Import Directory of FCS Files";
-    private static final String IMPORT_ANALYSIS_LABEL = "Import Analysis";
+    private static final String IMPORT_ANALYSIS_LABEL = "Import External Analysis";
 
     public FlowPipelineProvider(Module owningModule)
     {
@@ -193,17 +194,18 @@ public class FlowPipelineProvider extends PipelineProvider
 
 
         // UNDONE: walk directory once instead of multiple times
-        File[] summaryStats = directory.listFiles(new FileFilter() {
+        File[] externalAnalysis = directory.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file)
             {
-                return file.getName().equalsIgnoreCase(RImportJob.SUMMARY_STATS_FILENAME);
+                return file.getName().equalsIgnoreCase(AnalysisSerializer.STATISTICS_FILENAME) ||
+                       file.getName().endsWith(".zip");
             }
         });
-        if (includeAll || (summaryStats != null && summaryStats.length > 0))
+        if (includeAll || (externalAnalysis != null && externalAnalysis.length > 0))
         {
             String actionId = createActionId(AnalysisScriptController.ImportAnalysisResultsAction.class, IMPORT_ANALYSIS_LABEL);
-            addAction(actionId, AnalysisScriptController.ImportAnalysisResultsAction.class, IMPORT_ANALYSIS_LABEL, directory, summaryStats, false, true, includeAll);
+            addAction(actionId, AnalysisScriptController.ImportAnalysisResultsAction.class, IMPORT_ANALYSIS_LABEL, directory, externalAnalysis, false, true, includeAll);
         }
     }
 

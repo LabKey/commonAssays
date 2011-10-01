@@ -806,18 +806,43 @@ abstract public class FlowJoWorkspace implements Serializable
         return allSampleIDs;
     }
 
+    /** Get the sample label list from the "All Samples" group or get all the samples in the workspace. */
+    public List<String> getAllSampleLabels()
+    {
+        List<String> allSampleIDs = getAllSampleIDs();
+        if (allSampleIDs == null || allSampleIDs.size() == 0)
+            return null;
+
+        List<String> allSampleLabels = new ArrayList<String>(allSampleIDs.size());
+        for (String sampleID : allSampleIDs)
+        {
+            SampleInfo sampleInfo = getSample(sampleID);
+            if (sampleInfo != null)
+                allSampleLabels.add(sampleInfo.getLabel());
+        }
+        return allSampleLabels;
+    }
+
+    public int getSampleCount()
+    {
+        return _sampleInfos.size();
+    }
+
     public SampleInfo getSample(String sampleId)
     {
         return _sampleInfos.get(sampleId);
     }
+
     public Analysis getSampleAnalysis(SampleInfo sample)
     {
         return _sampleAnalyses.get(sample._sampleId);
     }
     public AttributeSet getSampleAnalysisResults(SampleInfo sample)
+
     {
         return _sampleAnalysisResults.get(sample._sampleId);
     }
+
     public String[] getParameters()
     {
         return _parameters.keySet().toArray(new String[_parameters.keySet().size()]);

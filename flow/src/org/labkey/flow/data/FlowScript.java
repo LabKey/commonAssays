@@ -70,7 +70,7 @@ public class FlowScript extends FlowDataObject
         return new FlowScript(data);
     }
 
-    static public FlowScript fromURL(ActionURL url) throws ServletException
+    static public FlowScript fromURL(ActionURL url)
     {
         return fromURL(url, null);
     }
@@ -81,7 +81,7 @@ public class FlowScript extends FlowDataObject
     }
 
 
-    static public FlowScript fromURL(ActionURL url, HttpServletRequest request) throws ServletException
+    static public FlowScript fromURL(ActionURL url, HttpServletRequest request)
     {
         FlowScript ret = FlowScript.fromScriptId(getIntParam(url, request, FlowParam.scriptId));
         if (ret == null || ret.getExpObject() == null)

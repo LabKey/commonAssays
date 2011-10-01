@@ -97,10 +97,7 @@ public class AnalysisHandler extends BaseHandler
             _job.error("No compensation matrix found.");
             return;
         }
-        FlowSchema schema = new FlowSchema(_job.getUser(), getContainer());
-        schema.setRun(run);
-        TableInfo tblFCSFiles = schema.createFCSFileTable("FCSFiles");
-        ColumnInfo colRowId = tblFCSFiles.getColumn("RowId");
+
         try
         {
             FlowWell[] wells;

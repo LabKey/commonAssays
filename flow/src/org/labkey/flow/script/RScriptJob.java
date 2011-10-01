@@ -30,6 +30,7 @@ import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.persist.AnalysisSerializer;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -143,8 +144,8 @@ public class RScriptJob extends FlowExperimentJob
         File workingDir = createAnalysisDirectory(getExperiment().getName(), FlowProtocolStep.analysis);
         runScript(workingDir);
 
-        File summaryStats = new File(workingDir, RImportJob.SUMMARY_STATS_FILENAME);
-        RImportJob importJob = new RImportJob(getInfo(), getPipeRoot(), getExperiment(), getProtocol(), _keywordsRun, summaryStats, _analysisRunName);
+        File summaryStats = new File(workingDir, AnalysisSerializer.STATISTICS_FILENAME);
+        ImportResultsJob importJob = null; //new ImportResultsJob(getInfo(), getPipeRoot(), getExperiment(), getProtocol(), _keywordsRun, summaryStats, _analysisRunName);
         importJob.setLogFile(getLogFile());
         importJob.setLogLevel(getLogLevel());
         importJob.setSubmitted();

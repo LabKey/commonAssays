@@ -31,13 +31,16 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
+import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.FlowPreference;
+import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.*;
+import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.script.*;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -45,9 +48,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.zip.ZipEntry;
 
 public class AnalysisScriptController extends BaseFlowController
 {
@@ -798,16 +803,22 @@ public class AnalysisScriptController extends BaseFlowController
                 throw new IllegalArgumentException("Wrong container");
 
             WorkspaceData workspaceData = form.getWorkspace();
+            File pipelineFile = null;
             ViewBackgroundInfo info = getViewBackgroundInfo();
             if (getPipeRoot() == null)
             {
                 // root-less pipeline job for workapce uploaded via the browser
                 info.setURL(null);
             }
+            else
+            {
+                if (workspaceData.getPath() != null)
+                    pipelineFile = getPipeRoot().resolvePath(workspaceData.getPath());
+            }
 
             boolean createKeywordRun = keywordRun == null && runFilePathRoot != null;
             WorkspaceJob job = new WorkspaceJob(info, experiment,
-                    workspaceData, runFilePathRoot, createKeywordRun, false, getPipeRoot());
+                    workspaceData, pipelineFile, runFilePathRoot, createKeywordRun, false, getPipeRoot());
             throw new RedirectException(executeScript(job));
         }
 
@@ -967,51 +978,30 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    // XXX: Merge R analysis import with ImportAnalysisAction wizard above
+    // Called from pipeline import panel
     @RequiresPermissionClass(UpdatePermission.class)
     public class ImportAnalysisResultsAction extends SimpleViewAction<PipelinePathForm>
     {
-        File _summaryStats = null;
-        FlowRun _keywordRun = null;
-
-        @Override
-        public void validate(PipelinePathForm form, BindException errors)
-        {
-            _summaryStats = form.getValidatedSingleFile(getContainer());
-
-            // XXX: only allow 'summaryStats.txt' file for now
-            if (!_summaryStats.getName().equalsIgnoreCase(RImportJob.SUMMARY_STATS_FILENAME))
-                errors.reject(ERROR_MSG, "Can only import '" + RImportJob.SUMMARY_STATS_FILENAME + "' R analysis file at this time.");
-
-            // XXX: Hard code path to existing fcs keyword run for now
-            _keywordRun = null;
-            try
-            {
-                FlowRun[] keywordRuns = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-                for (FlowRun run : keywordRuns)
-                {
-                    if (run.getName().equals("extdata"))
-                    {
-                        _keywordRun = run;
-                        break;
-                    }
-                }
-            }
-            catch (SQLException e)
-            {
-                errors.reject(ERROR_MSG, e.toString());
-            }
-
-            if (_keywordRun == null)
-                errors.reject(ERROR_MSG, "Need to import 'extdata' directory of FCS files");
-        }
-
         @Override
         public ModelAndView getView(PipelinePathForm form, BindException errors) throws Exception
         {
+            File pipelineFile = form.getValidatedSingleFile(getContainer());
+
+            PipeRoot root = form.getPipeRoot(getContainer());
+            File statisticsFile = findStatisticsFile(errors, pipelineFile, FlowSettings.getWorkingDirectory());
+            if (statisticsFile == null && !errors.hasErrors())
+                errors.reject(ERROR_MSG, "No statistics file found.");
+
+            if (errors.hasErrors())
+                return new SimpleErrorView(errors);
+
+            // UNDONE: set runFilePathRoot to path containing FCS files
+            File runFilePathRoot = statisticsFile.getParentFile();
+            File analysisPathRoot = statisticsFile.getParentFile();
+
             // Get an experiment based on the parent folder name
             int suffix = 0;
-            String runName = _summaryStats.getParentFile().getName();
+            String runName = FileUtil.getBaseName(pipelineFile);
             while (true)
             {
                 String experimentName = runName + (suffix == 0 ? "" : suffix);
@@ -1019,7 +1009,7 @@ public class AnalysisScriptController extends BaseFlowController
                 if (experiment == null)
                     break;
 
-                if (!experiment.hasRun(_summaryStats.getParentFile(), FlowProtocolStep.analysis))
+                if (!experiment.hasRun(runFilePathRoot, FlowProtocolStep.analysis))
                     break;
 
                 suffix++;
@@ -1027,16 +1017,20 @@ public class AnalysisScriptController extends BaseFlowController
 
             FlowExperiment experiment = FlowExperiment.createForName(getUser(), getContainer(), runName + (suffix == 0 ? "" : suffix));
 
-            PipeRoot root = form.getPipeRoot(getContainer());
             ViewBackgroundInfo info = getViewBackgroundInfo();
             if (root == null)
             {
-                // root-less pipeline job for summaryStats.txt uploaded via the browser
+                // root-less pipeline job for analysis results uploaded via the browser
                 info.setURL(null);
             }
 
-            FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
-            RImportJob job = new RImportJob(info, root, experiment, protocol, _keywordRun, _summaryStats, runName);
+            boolean createKeywordRun = false;
+            boolean failOnError = true;
+
+            ImportResultsJob job = new ImportResultsJob(
+                    info, root, experiment,
+                    analysisPathRoot, pipelineFile, runFilePathRoot,
+                    runName, createKeywordRun, failOnError);
             throw new RedirectException(executeScript(job));
         }
 
@@ -1045,6 +1039,60 @@ public class AnalysisScriptController extends BaseFlowController
         {
             return root.addChild("Import Analysis");
         }
+    }
 
+    public File findStatisticsFile(BindException errors, File pipelineFile, File tempDir) throws Exception
+    {
+        File statisticsFile = null;
+
+        if (pipelineFile.getName().equalsIgnoreCase(AnalysisSerializer.STATISTICS_FILENAME))
+        {
+            statisticsFile = pipelineFile;
+        }
+        else if (pipelineFile.getName().endsWith(".zip"))
+        {
+            // NOTE: Duplicated code in Main
+            java.util.zip.ZipFile zipFile;
+            try
+            {
+                zipFile = new java.util.zip.ZipFile(pipelineFile);
+            }
+            catch (IOException e)
+            {
+                errors.reject(ERROR_MSG, "Import failed: Could not read zip file: " + e.getMessage());
+                return null;
+            }
+
+            String zipBaseName = FileUtil.getBaseName(pipelineFile);
+            ZipEntry zipEntry = zipFile.getEntry(AnalysisSerializer.STATISTICS_FILENAME);
+            if (zipEntry == null)
+                zipEntry = zipFile.getEntry(zipBaseName + "/" + AnalysisSerializer.STATISTICS_FILENAME);
+
+            if (zipEntry == null)
+            {
+                errors.reject(ERROR_MSG, "Import failed: Couldn't find '" + AnalysisSerializer.STATISTICS_FILENAME + "' or '" + zipBaseName + "/" + AnalysisSerializer.STATISTICS_FILENAME + "' in the zip archive.");
+                return null;
+            }
+
+            File importDir = File.createTempFile(zipBaseName, null, tempDir);
+            if (importDir.exists() && !FileUtil.deleteDir(importDir))
+            {
+                errors.reject(ERROR_MSG, "Import failed: Could not delete the directory \"" + importDir + "\"");
+                return null;
+            }
+
+            try
+            {
+                ZipUtil.unzipToDirectory(pipelineFile, importDir, _log);
+                statisticsFile = new File(importDir, zipEntry.getName());
+            }
+            catch (IOException e)
+            {
+                errors.reject(ERROR_MSG, "Import failed: Could not extract zip archive: " + e.getMessage());
+                return null;
+            }
+        }
+
+        return statisticsFile;
     }
 }
