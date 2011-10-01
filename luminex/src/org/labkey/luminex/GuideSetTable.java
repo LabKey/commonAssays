@@ -19,12 +19,14 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ForeignKey;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.DuplicateKeyException;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
@@ -66,10 +68,29 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             }
         });
 
-        getColumn("MaxFIAverage").setShownInInsertView(false);
-        getColumn("MaxFIAverage").setShownInUpdateView(false);
-        getColumn("MaxFIStdDev").setShownInInsertView(false);
-        getColumn("MaxFIStdDev").setShownInUpdateView(false);
+        SQLFragment maxFISQL = new SQLFragment(" FROM ");
+        maxFISQL.append(LuminexSchema.getTableInfoAnalyteTitration(), "at");
+        maxFISQL.append(" WHERE at.GuideSetId = ");
+        maxFISQL.append(ExprColumn.STR_TABLE_ALIAS);
+        maxFISQL.append(".RowId AND at.IncludeInGuideSetCalculation = ?");
+        maxFISQL.add(Boolean.TRUE);
+        maxFISQL.append(")");
+
+        SQLFragment maxFIAverageSQL = new SQLFragment("(SELECT AVG(at.MaxFI)");
+        maxFIAverageSQL.append(maxFISQL);
+        ExprColumn maxFIAverageCol = new ExprColumn(this, "MaxFIAverage", maxFIAverageSQL, JdbcType.DOUBLE);
+        maxFIAverageCol.setLabel("Max FI Average");
+        maxFIAverageCol.setFormat("0.00");
+        addColumn(maxFIAverageCol);
+
+        SQLFragment maxFIStdDevSQL = new SQLFragment("(SELECT ");
+        maxFIStdDevSQL.append(LuminexSchema.getSchema().getSqlDialect().getStdDevFunction());
+        maxFIStdDevSQL.append("(at.MaxFI)");
+        maxFIStdDevSQL.append(maxFISQL);
+        ExprColumn maxFIStdDevCol = new ExprColumn(this, "MaxFIStdDev", maxFIStdDevSQL, JdbcType.DOUBLE);
+        maxFIStdDevCol.setLabel("Max FI StdDev");
+        maxFIStdDevCol.setFormat("0.00");
+        addColumn(maxFIStdDevCol);
 
         ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer());
         getColumn("ModifiedBy").setFk(userIdForeignKey);

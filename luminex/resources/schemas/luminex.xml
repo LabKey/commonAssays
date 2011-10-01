@@ -76,12 +76,6 @@
             <column columnName="CurrentGuideSet" />
             <column columnName="Conjugate" />
             <column columnName="Isotype" />
-            <column columnName="MaxFIAverage">
-                <columnTitle>Max FI Average</columnTitle>
-            </column>
-            <column columnName="MaxFIStdDev">
-                <columnTitle>Max FI StdDev</columnTitle>
-            </column>
             <column columnName="TitrationName" />
             <column columnName="Comment" />
             <column columnName="Created" />
