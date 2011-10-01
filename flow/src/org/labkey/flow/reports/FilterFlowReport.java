@@ -76,53 +76,7 @@ public abstract class FilterFlowReport extends FlowReport
     {
         if (null == _inner)
         {
-            _inner = new RReport()
-            {
-                @Override
-                public Results generateResults(ViewContext context) throws Exception
-                {
-                    ResultSet rs = generateResultSet(context);
-                    return rs == null ? null : new ResultsImpl(rs);
-                }
-
-                @Override
-                protected String getScriptProlog(ViewContext context, File inputFile)
-                {
-                    String labkeyProlog = super.getScriptProlog(context, inputFile);
-
-                    StringBuffer reportProlog = new StringBuffer(labkeyProlog);
-                    reportProlog.append("report.parameters <- list(");
-                    ReportDescriptor d = FilterFlowReport.this.getDescriptor();
-                    Map<String, Object> props = d.getProperties();
-                    String comma = "";
-
-                    for (Map.Entry<String, Object> e : props.entrySet())
-                    {
-                        String key = e.getKey();
-                        if (ScriptReportDescriptor.Prop.script.name().equals(key))
-                            continue;
-                        String value = null == e.getValue() ? null : String.valueOf(e.getValue());
-                        reportProlog.append(comma);
-                        reportProlog.append(toR(e.getKey())).append("=").append(toR(value));
-                        comma = ",";
-                    }
-
-                    reportProlog.append(")\n");
-                    addScriptProlog(context, reportProlog);
-                    return reportProlog.toString();
-                }
-
-                @Override
-                public File getReportDir()
-                {
-                    // Workaround for Issue 12625: Create unique directory for the background report job
-                    File tempRoot = getTempRoot(getDescriptor());
-                    String name = FileUtil.makeLegalName(getDescriptor().getReportId().toString() + "_" + GUID.makeHash()).replaceAll(" ", "_");
-                    File file = new File(tempRoot, "Report_" + name);
-                    file.mkdirs();
-                    return file;
-                }
-            };
+            _inner = new FilterFlowInnerReport(this);
 
             String script = getScriptResource();
             _inner.getDescriptor().setProperties(getDescriptor().getProperties());
@@ -572,6 +526,69 @@ public abstract class FilterFlowReport extends FlowReport
                 throw new RuntimeException();
 
             return new SimpleFilter(colName, value, compareType);
+        }
+    }
+
+    // Move from annonymous class to static inner class that takes a filterFlowReport to allow de-serialization in Java 7
+    private static class FilterFlowInnerReport extends RReport
+    {
+        private final FilterFlowReport _report;
+
+        // No-args constructor to support de-serialization in Java 7
+        @SuppressWarnings({"UnusedDeclaration"})
+        private FilterFlowInnerReport()
+        {
+            _report = null;
+        }
+
+        public FilterFlowInnerReport(FilterFlowReport filterFlowReport)
+        {
+            _report = filterFlowReport;
+        }
+
+        @Override
+        public Results generateResults(ViewContext context) throws Exception
+        {
+            ResultSet rs = _report.generateResultSet(context);
+            return rs == null ? null : new ResultsImpl(rs);
+        }
+
+        @Override
+        protected String getScriptProlog(ViewContext context, File inputFile)
+        {
+            String labkeyProlog = super.getScriptProlog(context, inputFile);
+
+            StringBuffer reportProlog = new StringBuffer(labkeyProlog);
+            reportProlog.append("report.parameters <- list(");
+            ReportDescriptor d = _report.getDescriptor();
+            Map<String, Object> props = d.getProperties();
+            String comma = "";
+
+            for (Map.Entry<String, Object> e : props.entrySet())
+            {
+                String key = e.getKey();
+                if (ScriptReportDescriptor.Prop.script.name().equals(key))
+                    continue;
+                String value = null == e.getValue() ? null : String.valueOf(e.getValue());
+                reportProlog.append(comma);
+                reportProlog.append(_report.toR(e.getKey())).append("=").append(_report.toR(value));
+                comma = ",";
+            }
+
+            reportProlog.append(")\n");
+            _report.addScriptProlog(context, reportProlog);
+            return reportProlog.toString();
+        }
+
+        @Override
+        public File getReportDir()
+        {
+            // Workaround for Issue 12625: Create unique directory for the background report job
+            File tempRoot = getTempRoot(getDescriptor());
+            String name = FileUtil.makeLegalName(getDescriptor().getReportId().toString() + "_" + GUID.makeHash()).replaceAll(" ", "_");
+            File file = new File(tempRoot, "Report_" + name);
+            file.mkdirs();
+            return file;
         }
     }
 }
