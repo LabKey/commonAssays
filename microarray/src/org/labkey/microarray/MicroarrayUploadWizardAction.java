@@ -194,4 +194,11 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
         }
         return result;
     }
+
+    @Override
+    protected boolean shouldShowDataCollectorUI(MicroarrayRunUploadForm newRunForm)
+    {
+        // Always expect input files, regardless of whether we're configured to import spot-level data
+        return true;
+    }
 }
