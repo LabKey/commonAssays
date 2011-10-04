@@ -35,7 +35,8 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             height: 370,
             border: false,
             cls: 'extContainer',
-            disabled: true
+            disabled: true,
+            yAxisScale: 'linear'
         });
 
         this.addEvents('reportDateRangeApplied');
@@ -44,8 +45,34 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
     },
 
     initComponent : function() {
-        // initialize the top toolbar with date range selection fields
-        this.startDateLabel = new Ext.form.Label({text: 'Start Date'});
+        // initialize the y-axis scale combo for the top toolbar
+        this.scaleLabel = new Ext.form.Label({text: 'Y-Axis Scale:'});
+        this.scaleCombo = new Ext.form.ComboBox({
+            id: 'scale-combo-box',
+            width: 75,
+            triggerAction: 'all',
+            mode: 'local',
+            store: new Ext.data.ArrayStore({
+                fields: ['value', 'display'],
+                data: [['linear', 'Linear'], ['log', 'Log']]
+            }),
+            valueField: 'value',
+            displayField: 'display',
+            value: 'linear',
+            forceSelection: true,
+            editable: false,
+            listeners: {
+                scope: this,
+                'select': function(cmp, newVal, oldVal) {
+                    this.yAxisScale = cmp.getValue();
+                    this.setTabsToRender();
+                    this.displayTrendPlot();
+                }
+            }
+        });
+
+        // initialize the date range selection fields for the top toolbar
+        this.startDateLabel = new Ext.form.Label({text: 'Start Date:'});
         this.startDateField = new Ext.form.DateField({
             id: 'start-date-field',
             format:  'Y-m-d',
@@ -60,7 +87,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 }
             }
         });
-        this.endDateLabel = new Ext.form.Label({text: 'End Date'});
+        this.endDateLabel = new Ext.form.Label({text: 'End Date:'});
         this.endDateField = new Ext.form.DateField({
             id: 'end-date-field',
             format:  'Y-m-d',
@@ -88,14 +115,20 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             height: 30,
             buttonAlign: 'center',
             items: [
+                this.scaleLabel,
+                {xtype: 'tbspacer', width: 10},
+                this.scaleCombo,
+                {xtype: 'tbspacer', width: 25},
+                {xtype: 'tbseparator'},
+                {xtype: 'tbspacer', width: 25},
                 this.startDateLabel,
                 {xtype: 'tbspacer', width: 10},
                 this.startDateField,
-                {xtype: 'tbspacer', width: 50},
+                {xtype: 'tbspacer', width: 25},
                 this.endDateLabel,
                 {xtype: 'tbspacer', width: 10},
                 this.endDateField,
-                {xtype: 'tbspacer', width: 50},
+                {xtype: 'tbspacer', width: 25},
                 this.refreshGraphButton
             ]
         });
@@ -208,6 +241,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         {
             config['MaxRows'] = this.defaultRowSize;
         }
+        // add config for plotting in log scale
+        if (this.yAxisScale == 'log')
+            config['AsLog'] =  true;
 
         // call and display the Report webpart
         new LABKEY.WebPart({
@@ -232,7 +268,22 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         // make sure that both date fields are not null
         if (this.startDateField.getValue() == '' || this.endDateField.getValue() == '')
         {
-            Ext.Msg.alert("ERROR", "Please enter both a start date and an end date.");
+            Ext.Msg.show({
+                title:'ERROR',
+                msg: 'Please enter both start date and end date.',
+                buttons: Ext.Msg.OK,
+                icon: Ext.MessageBox.ERROR
+            });
+        }
+        // verify that the start date is not after the end date
+        else if (this.startDateField.getValue() > this.endDateField.getValue())
+        {
+            Ext.Msg.show({
+                title:'ERROR',
+                msg: 'Please enter an end date that does not occur before the start date.',
+                buttons: Ext.Msg.OK,
+                icon: Ext.MessageBox.ERROR
+            });
         }
         else
         {

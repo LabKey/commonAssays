@@ -86,6 +86,14 @@ if (labkey.url.params$PlotType == "EC50") {
     labkey.data$guideset_stddev = labkey.data$guideset_trapezoidalcurvefit_aucstddev;
 }
 
+# determine if the request is for log scale or not
+asLog = "";
+yAxisLabel = labkey.url.params$PlotType;
+if (!is.null(labkey.url.params$AsLog)) {
+    asLog = "y";
+    yAxisLabel = paste(yAxisLabel, "(log)", sep=" ");
+}
+
 # setup the png or pdf for the plot
 if (!is.null(labkey.url.params$PdfOut)) {
     pdf(file="${pdfout:levey_jennings_trend}", width=10, height=6);
@@ -135,7 +143,7 @@ if(length(labkey.data$analyte_name) > 0)
 
   # create an empty plotting area with the correct margins
   par(mar=c(7,5,2,0.2));
-  plot(NA, NA, type = c("b"), ylim=c(ymin,ymax), xlim=c(1,xmax), xlab="", ylab="", axes=F, main=mainTitle);
+  plot(NA, NA, type = c("b"), ylim=c(ymin,ymax), xlim=c(1,xmax), xlab="", ylab="", axes=F, main=mainTitle, log=asLog);
 
   # if creating a pdf, increase the line width
   if (!is.null(labkey.url.params$PdfOut)) {
@@ -168,17 +176,17 @@ if(length(labkey.data$analyte_name) > 0)
   # add the axis labels and tick marks
   par(las=2);
   axis(2, col="black", cex.axis=1);
-  mtext(labkey.url.params$PlotType, side=2, line=4, las=0, font=2);
+  mtext(yAxisLabel, side=2, line=4, las=0, font=2);
   axis(1, col="black", at=xtcks, labels=xlabels, cex.axis=1);
   mtext("Assay", side=1, line=6, las=0, font=2);
   box();
 
 } else {
   par(mar=c(7,5,2,0.2));
-  plot(NA, NA, type = c("b"), ylim=c(0,1), xlim=c(1,30), xlab="", ylab="", axes=F, main=mainTitle);
-  text(15,0.5,"No Data Available for Selected Graph Parameters");
+  plot(NA, NA, type = c("b"), ylim=c(1,1), xlim=c(1,30), xlab="", ylab="", axes=F, main=mainTitle, log=asLog);
+  text(15,1,"No Data Available for Selected Graph Parameters");
   axis(1, at=seq(0,30,by=5), labels=matrix("",1,7));
-  mtext(labkey.url.params$PlotType, side=2, line=4, las=0, font=2);
+  mtext(yAxisLabel, side=2, line=4, las=0, font=2);
   mtext("Assay", side=1, line=6, las=0, font=2);
   box();
 }
