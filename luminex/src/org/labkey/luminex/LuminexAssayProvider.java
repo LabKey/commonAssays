@@ -261,6 +261,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
         Domain runDomain = result.getKey();
+        addProperty(runDomain, "Isotype", PropertyType.STRING).setShownInUpdateView(false);
+        addProperty(runDomain, "Conjugate", PropertyType.STRING).setShownInUpdateView(false);
+        addProperty(runDomain, "TestDate", "Test Date", PropertyType.DATE_TIME, "Date the assay was run");
         addProperty(runDomain, "ReplacesPreviousFile", "Replaces Previous File", PropertyType.BOOLEAN);
         addProperty(runDomain, "DateModified", "Date file was modified", PropertyType.DATE_TIME);
         addProperty(runDomain, "SpecimenType", "Specimen Type", PropertyType.STRING);
@@ -282,37 +285,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         addProperty(analyteDomain, "StandardName", "Standard Name", PropertyType.STRING);
 
         addProperty(analyteDomain, "UnitsOfConcentration", "Units of Concentration", PropertyType.STRING);
-
-        ListDefinition isotypeList = lists.get("LuminexIsotypes");
-        if (isotypeList == null)
-        {
-            isotypeList = ListService.get().createList(lookupContainer, "LuminexIsotypes");
-            DomainProperty nameProperty = addProperty(isotypeList.getDomain(), "Name", PropertyType.STRING);
-            nameProperty.setPropertyURI(isotypeList.getDomain().getTypeURI() + "#Name");
-            isotypeList.setKeyName("IsotypeID");
-            isotypeList.setTitleColumn(nameProperty.getName());
-            isotypeList.setKeyType(ListDefinition.KeyType.Varchar);
-            isotypeList.setDescription("Isotypes for Luminex assays");
-            try
-            {
-                isotypeList.save(user);
-
-                ListItem agItem = isotypeList.createListItem();
-                agItem.setKey("Ag");
-                agItem.setProperty(nameProperty, "Antigen");
-                agItem.save(user);
-
-                ListItem abItem = isotypeList.createListItem();
-                abItem.setKey("Ab");
-                abItem.setProperty(nameProperty, "Antibody");
-                abItem.save(user);
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-        addProperty(analyteDomain, "Isotype", PropertyType.STRING).setLookup(new Lookup(lookupContainer, "lists", isotypeList.getName()));
 
         addProperty(analyteDomain, "AnalyteType", "Analyte Type", PropertyType.STRING);
         addProperty(analyteDomain, "WeightingMethod", "Weighting Method", PropertyType.STRING);
