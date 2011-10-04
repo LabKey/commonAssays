@@ -85,8 +85,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         ];
         if (startDate && endDate)
         {
-            filterArray.push(LABKEY.Filter.create('Titration/Run/TestDate', startDate, LABKEY.Filter.Types.GREATER_THAN_OR_EQUAL));
-            filterArray.push(LABKEY.Filter.create('Titration/Run/TestDate', endDate, LABKEY.Filter.Types.LESS_THAN_OR_EQUAL));
+            filterArray.push(LABKEY.Filter.create('Titration/Run/TestDate', startDate, LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
+            filterArray.push(LABKEY.Filter.create('Titration/Run/TestDate', endDate, LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
         }
 
         return new LABKEY.ext.Store({
@@ -143,7 +143,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'Guide Set Date', dataIndex:'GuideSet/Created', renderer: this.formatGuideSetMembers, scope: this, width:100},
                 {header:'GS Member', dataIndex:'IncludeInGuideSetCalculation', hidden: true},
                 {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("EC50"), scope: this, align: 'right'},
-                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("MaxFI"), scope: this, align: 'right'},
+                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("High MFI"), scope: this, align: 'right'},
                 {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.outOfRangeRenderer("AUC"), scope: this, align: 'right'},
                 {header:'EC50 Average', dataIndex:'GuideSet/Four ParameterCurveFit/EC50Average', hidden: true},
                 {header:'EC50 StdDev', dataIndex:'GuideSet/Four ParameterCurveFit/EC50StdDev', hidden: true},
@@ -242,20 +242,24 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         });
 
         // add the column header row to the export JSON object
-        var index = exportJson.sheets[0].data.length;
+        var rowIndex = exportJson.sheets[0].data.length;
         exportJson.sheets[0].data.push([]);
         Ext.each(columns, function(col) {
-            exportJson.sheets[0].data[index].push(col.header);
+            exportJson.sheets[0].data[rowIndex].push(col.header);
         });
 
         // loop through the grid store to put the data into the export JSON object
         Ext.each(this.getStore().getRange(), function(row) {
-            var index = exportJson.sheets[0].data.length;
-            exportJson.sheets[0].data[index] = [];
+            var rowIndex = exportJson.sheets[0].data.length;
+            exportJson.sheets[0].data[rowIndex] = [];
 
             // loop through the column list to get the data for each column
+            var colIndex = 0;
             Ext.each(columns, function(col) {
-                var value = row.get(col.dataIndex);
+                // some of the columns may not be defined in the assay design, so set to null
+                var value = null;
+                if (row.get(col.dataIndex))
+                    value = row.get(col.dataIndex);
 
                 // render dates with the proper renderer
                 if (value instanceof Date)
@@ -267,7 +271,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 if (row.get(col.header + "OOR"))
                     value = "*" + value;
 
-                exportJson.sheets[0].data[index].push(value);
+                exportJson.sheets[0].data[rowIndex][colIndex] = value;
+                colIndex++;
             }, this);
         }, this);
 
@@ -286,7 +291,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 avg = record.get('GuideSet/Four ParameterCurveFit/EC50Average');
                 stdDev = record.get('GuideSet/Four ParameterCurveFit/EC50StdDev');
             }
-            else if (source == "MaxFI")
+            else if (source == "High MFI")
             {
                 avg = record.get('GuideSet/MaxFIAverage');
                 stdDev = record.get('GuideSet/MaxFIStdDev');

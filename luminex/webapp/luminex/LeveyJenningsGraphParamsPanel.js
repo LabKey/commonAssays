@@ -87,8 +87,6 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                     else
                         this.analyte = undefined;
 
-                    // TODO: need to update the isotype and conjugate combobox stores when analyte is selected
-
                     this.enableResetGraphButton();
                 }
             }

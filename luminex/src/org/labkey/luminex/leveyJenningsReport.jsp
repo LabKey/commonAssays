@@ -76,21 +76,35 @@
         // set the nav trail page title to include the tiration name
         LABKEY.NavTrail.setTrail('<%= bean.getTitration() %> Levey-Jennings Plots');
 
-        // verify that the given titration and protocol exist
-        LABKEY.Query.executeSql({
+        // verify that the given titration and protocol exist, and that the required report properties exist in the protocol
+        var reqColumns = ['Titration/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Titration/Run/TestDate'];
+        LABKEY.Query.selectRows({
             containerFilter: LABKEY.Query.containerFilter.allFolders,
             schemaName: 'assay',
-            sql: 'SELECT COUNT(x.Titration.Name) AS TitrationCount FROM "<%= bean.getProtocol() %> AnalyteTitration" AS x '
-                    + ' WHERE x.Titration.Name = \'<%= bean.getTitration() %>\''
-                    + ' GROUP BY x.Titration.Name',
+            queryName: '<%= bean.getProtocol() %> AnalyteTitration',
+            filterArray: [LABKEY.Filter.create('Titration/Name', '<%= bean.getTitration() %>')],
+            columns: reqColumns.join(','),
+            maxRows: 1,
             success: function(data) {
                 if (data.rows.length == 0)
-                    Ext.get('graphParamsPanel').update("Error: there were no records found in the specified protocol for " + $h('<%= bean.getTitration() %>') + ".");
+                    Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h('<%= bean.getProtocol() %>') + "' for '" + $h('<%= bean.getTitration() %>') + "'.");
                 else
+                {
+                    // check that all of the required properties for the report exist
+                    for (var i = 0; i < reqColumns.length; i++)
+                    {
+                        if (!(reqColumns[i] in data.rows[0]))
+                        {
+                            Ext.get('graphParamsPanel').update("Error: one or more of the required properties for the report do not exist in '" + $h('<%= bean.getProtocol() %>') + "'.");
+                            return;
+                        }
+                    }
+
                     initializeReportPanels();
+                }
             },
             failure: function(response) {
-                Ext.get('graphParamsPanel').update(response.exception);
+                Ext.get('graphParamsPanel').update("Error: " + response.exception);
             }
         });
     }
