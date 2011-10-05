@@ -23,6 +23,7 @@ import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.util.SymbolTable;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.settings.AppProps;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -52,8 +53,8 @@ abstract public class FlowJoWorkspace implements Serializable
     protected Map<String, Analysis> _sampleAnalyses = new LinkedHashMap<String, Analysis>();
     protected Map<String, AttributeSet> _sampleAnalysisResults = new LinkedHashMap<String, AttributeSet>();
     protected Map<String, GroupInfo> _groupInfos = new LinkedHashMap<String, GroupInfo>();
-    protected Map<String, SampleInfo> _sampleInfos = new LinkedHashMap<String, SampleInfo>();
-    protected Map<String, ParameterInfo> _parameters = new LinkedHashMap<String, ParameterInfo>();
+    protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<SampleInfo>(new LinkedHashMap<String, SampleInfo>());
+    protected Map<String, ParameterInfo> _parameters = new CaseInsensitiveMapWrapper<ParameterInfo>(new LinkedHashMap<String, ParameterInfo>());
     protected List<CalibrationTable> _calibrationTables = new ArrayList<CalibrationTable>();
     protected ScriptSettings _settings = new ScriptSettings();
     protected List<String> _warnings;
@@ -846,6 +847,16 @@ abstract public class FlowJoWorkspace implements Serializable
     public String[] getParameters()
     {
         return _parameters.keySet().toArray(new String[_parameters.keySet().size()]);
+    }
+
+    // Get case-normalized axis name
+    public String getNormalizedParameterName(String param)
+    {
+        param = ___cleanName(param);
+        if (_parameters.containsKey(param))
+            return _parameters.get(param).name;
+
+        return param;
     }
 
     static public class CompensationChannelData

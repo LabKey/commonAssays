@@ -94,6 +94,8 @@ public class SearchFormUtil
                 new CutSite[]{new CutSite(new char[]{'K'}, new char[]{'P'},"[K]|{P}", false)}));
         tppEnzymeList.add(new Enzyme("TrypsinR", new String[]{"trypsin_r"},
                 new CutSite[]{new CutSite(new char[]{'R'}, new char[]{'P'},"[R]|{P}", false)}));
+        tppEnzymeList.add(new Enzyme("Trypsin/Chromotrypsin", new String[]{"trypsin_chromotrypsin"},
+                new CutSite[]{new CutSite(new char[]{'R', 'K', 'W', 'Y', 'F'}, new char[]{'P'},"[RKWYF]|{P}", false)}));
         // Not currently defined correctly in TPP; no cut is at n-term DE not c-term P
 //        tppEnzymeList.add(new Enzyme("Thermolysin", new String[]{"thermolysin"},
 //                new CutSite[]{new CutSite(new char[]{'A','L','I','V','F','M'}, new char[]{'P'},"[ALIVFM]|{P}", true)}));

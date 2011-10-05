@@ -352,8 +352,8 @@ public class MacWorkspace extends FlowJoWorkspace
 
     protected PolygonGate readPolygon(Element el)
     {
-        String xAxis = ___cleanName(el.getAttribute("xAxisName"));
-        String yAxis = ___cleanName(el.getAttribute("yAxisName"));
+        String xAxis = getNormalizedParameterName(el.getAttribute("xAxisName"));
+        String yAxis = getNormalizedParameterName(el.getAttribute("yAxisName"));
 
         List<Double> lstX = new ArrayList<Double>();
         List<Double> lstY = new ArrayList<Double>();
@@ -531,7 +531,7 @@ public class MacWorkspace extends FlowJoWorkspace
     {
         for (Element elParameter : getElementsByTagName(el, "Parameter"))
         {
-            String name = ___cleanName(elParameter.getAttribute("name"));
+            String name = getNormalizedParameterName(elParameter.getAttribute("name"));
             if (!_parameters.containsKey(name))
             {
                 ParameterInfo pi = new ParameterInfo();
