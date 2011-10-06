@@ -118,6 +118,8 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         addColumn(wrapColumn(getRealTable().getColumn("Ratio")));
         addColumn(wrapColumn(getRealTable().getColumn("SamplingErrors")));
         addColumn(wrapColumn(getRealTable().getColumn("BeadCount")));
+        addColumn(wrapColumn(getRealTable().getColumn("CV")));
+        addColumn(wrapColumn(getRealTable().getColumn("Summary")));
         ColumnInfo titrationColumn = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
         titrationColumn.setFk(new LookupForeignKey("RowId")
         {

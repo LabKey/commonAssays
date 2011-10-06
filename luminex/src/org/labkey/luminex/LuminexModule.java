@@ -43,7 +43,7 @@ public class LuminexModule extends DefaultModule
 
     public double getVersion()
     {
-        return 11.252;
+        return 11.253;
     }
 
     protected void init()
@@ -90,7 +90,7 @@ public class LuminexModule extends DefaultModule
     @Override
     public Set<Class> getJUnitTests()
     {
-        return Collections.<Class>singleton(LuminexDataHandler.TestCase.class);
+        return PageFlowUtil.<Class>set(LuminexDataHandler.TestCase.class, LuminexExcelParser.TestCase.class);
     }
 
     @Override

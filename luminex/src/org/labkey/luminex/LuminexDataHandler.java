@@ -19,6 +19,8 @@ package org.labkey.luminex;
 import junit.framework.Assert;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -44,6 +46,7 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.Stats;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
@@ -281,6 +284,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 performOOR(dataRows, analyte);
 
+                ensureSummaryStats(dataRows);
+
                 for (LuminexDataRow dataRow : dataRows)
                 {
                     handleParticipantResolver(dataRow, resolver, inputMaterials);
@@ -356,6 +361,38 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         finally
         {
             ExperimentService.get().closeTransaction();
+        }
+    }
+
+    private void ensureSummaryStats(List<LuminexDataRow> dataRows)
+    {
+        for (LuminexDataRow dataRow : dataRows)
+        {
+            if (!dataRow.isSummary() && (dataRow.getCv() == null || dataRow.getStdDev() == null))
+            {
+                List<Double> fis = new ArrayList<Double>();
+                for (LuminexDataRow statRow : dataRows)
+                {
+                    if (statRow.getFi() != null && !statRow.isSummary() &&
+                        ObjectUtils.equals(statRow.getDilution(), dataRow.getDilution()) &&
+                        ObjectUtils.equals(statRow.getExpConc(), dataRow.getExpConc()) &&
+                        ObjectUtils.equals(statRow.getDescription(), dataRow.getDescription()) &&
+                        ObjectUtils.equals(statRow.getData(), dataRow.getData()) &&
+                        ObjectUtils.equals(statRow.getAnalyte(), dataRow.getAnalyte()))
+                    {
+                        fis.add(statRow.getFi());
+                    }
+                }
+
+                if (fis.size() > 1)
+                {
+                    Stats.DoubleStats stats = new Stats.DoubleStats(ArrayUtils.toPrimitive(fis.toArray(new Double[fis.size()])));
+                    double stdDev = stats.getStdDev();
+                    double mean = Math.abs(stats.getMean());
+                    dataRow.setStdDev(stdDev);
+                    dataRow.setCv(mean == 0.0 ? null : stdDev / mean);
+                }
+            }
         }
     }
 
@@ -669,6 +706,61 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals("Check number of raw wells", 20, group.getWellData(false).size());
 
             assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
+        }
+
+        @Test
+        public void testRawStats()
+        {
+            // Test calculation of stddev and %cv
+            List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
+
+            dataRows.add(new LuminexDataRow("S1", "A1", 30284.5, 500, 1));
+            dataRows.add(new LuminexDataRow("S1", "B1", 30596.5, 500, 1));
+            dataRows.add(new LuminexDataRow("S2", "A2", 30165, 83.33333, 1));
+            dataRows.add(new LuminexDataRow("S2", "B2", 30140, 83.33333, 1));
+            dataRows.add(new LuminexDataRow("S3", "A3", 26452.5, 13.88889, 1));
+            dataRows.add(new LuminexDataRow("S3", "B3", 26799, 13.88889, 1));
+
+            for (LuminexDataRow dataRow : dataRows)
+            {
+                assertFalse("Shouldn't be a summary row", dataRow.isSummary());
+                assertNull("Shouldn't have %CV", dataRow.getCv());
+                assertNull("Shouldn't have StdDev", dataRow.getStdDev());
+            }
+
+            // Add a summary row with a fake CV and StdDev to make sure it doesn't mess up our calcs over the raw data
+            LuminexDataRow bogusSummaryRow = new LuminexDataRow("S2", "A2,B2", 26625.75, 13.88889, 1);
+            bogusSummaryRow.setCv(5000.0);
+            bogusSummaryRow.setStdDev(5000.0);
+            dataRows.add(bogusSummaryRow);
+
+            // Add a summary row that does match the expected stats for the raw data to make sure it doesn't cause problems either
+            LuminexDataRow matchingSummaryRow = new LuminexDataRow("S3", "A3,B3", 26625.75, 13.88889, 1);
+            matchingSummaryRow.setCv(0.0092021);
+            matchingSummaryRow.setStdDev(245.0125);
+            dataRows.add(matchingSummaryRow);
+
+            new LuminexDataHandler().ensureSummaryStats(dataRows);
+
+            assertEquals("Wrong %CV", 0.0072475, Math.round(dataRows.get(0).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 0.0072475, Math.round(dataRows.get(1).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 0.0005863, Math.round(dataRows.get(2).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 0.0005863, Math.round(dataRows.get(3).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 0.0092021, Math.round(dataRows.get(4).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 0.0092021, Math.round(dataRows.get(5).getCv() * 10000000) / 10000000.0);
+
+            assertEquals("Wrong %CV", 5000.0, Math.round(dataRows.get(6).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 0.0092021, Math.round(dataRows.get(7).getCv() * 10000000) / 10000000.0);
+
+            assertEquals("Wrong StdDev", 220.61732, Math.round(dataRows.get(0).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 220.61732, Math.round(dataRows.get(1).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 17.67767, Math.round(dataRows.get(2).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 17.67767, Math.round(dataRows.get(3).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 245.0125, Math.round(dataRows.get(4).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 245.0125, Math.round(dataRows.get(5).getStdDev() * 100000) / 100000.0);
+
+            assertEquals("Wrong StdDev", 5000.0, Math.round(dataRows.get(6).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 245.0125, Math.round(dataRows.get(7).getStdDev() * 100000) / 100000.0);
         }
     }
 

@@ -69,6 +69,8 @@ public class LuminexDataRow
     private String _extraSpecimenInfo;
     private Integer _beadCount;
     private Integer _titration;
+    private boolean _summary;
+    private Double _cv;
 
     /** Unfortunate to have these denormalized values here, but required for acceptable query performance */
     private Container _container;
@@ -83,9 +85,14 @@ public class LuminexDataRow
     {
         setType(type);
         setWell(well);
+        setFi(fiBackground);
         setFiBackground(fiBackground);
         setExpConc(expConc);
         setDilution(dilution);
+        if (well != null && well.contains(","))
+        {
+            setSummary(true);
+        }
     }
 
     /** General purpose and for reflection */
@@ -519,5 +526,25 @@ public class LuminexDataRow
     /* package */ Map<String, Object> getExtraProperties()
     {
         return _extraProperties;
+    }
+
+    public boolean isSummary()
+    {
+        return _summary;
+    }
+
+    public void setSummary(boolean summary)
+    {
+        _summary = summary;
+    }
+
+    public Double getCv()
+    {
+        return _cv;
+    }
+
+    public void setCv(Double cv)
+    {
+        _cv = cv;
     }
 }

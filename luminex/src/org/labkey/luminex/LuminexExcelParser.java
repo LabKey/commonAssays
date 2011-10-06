@@ -15,20 +15,25 @@
  */
 package org.labkey.luminex;
 
+import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.junit.Test;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarFormatException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.reader.ExcelFactory;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.Pair;
@@ -36,6 +41,7 @@ import org.labkey.api.util.Pair;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -51,7 +57,7 @@ import java.util.TreeMap;
 public class LuminexExcelParser
 {
     private Collection<File> _dataFiles;
-    private ExpProtocol _protocol;
+    private Domain _excelRunDomain;
     private Map<Analyte, List<LuminexDataRow>> _sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
     private Map<File, Map<DomainProperty, String>> _excelRunProps = new HashMap<File, Map<DomainProperty, String>>();
     private Map<String, Titration> _titrations = new TreeMap<String, Titration>();
@@ -60,7 +66,12 @@ public class LuminexExcelParser
 
     public LuminexExcelParser(ExpProtocol protocol, Collection<File> dataFiles)
     {
-        _protocol = protocol;
+        this(AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN), dataFiles);
+    }
+
+    public LuminexExcelParser(Domain excelRunDomain, Collection<File> dataFiles)
+    {
+        _excelRunDomain = excelRunDomain;
         _dataFiles = dataFiles;
     }
 
@@ -73,8 +84,6 @@ public class LuminexExcelParser
             try
             {
                 Workbook workbook = ExcelFactory.create(dataFile);
-
-                Domain excelRunDomain  = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
 
                 for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
                 {
@@ -90,7 +99,7 @@ public class LuminexExcelParser
                     Analyte analyte = analyteEntry.getKey();
                     List<LuminexDataRow> dataRows = analyteEntry.getValue();
 
-                    int row = handleHeaderOrFooterRow(sheet, 0, analyte, excelRunDomain, dataFile);
+                    int row = handleHeaderOrFooterRow(sheet, 0, analyte, dataFile);
 
                     // Skip over the blank line
                     row++;
@@ -112,6 +121,7 @@ public class LuminexExcelParser
 
                     if (row <= sheet.getLastRowNum())
                     {
+                        boolean hasMoreRows;
                         do
                         {
                             LuminexDataRow dataRow = createDataRow(sheet, colNames, row, dataFile);
@@ -137,15 +147,18 @@ public class LuminexExcelParser
                             }
 
                             dataRows.add(dataRow);
+                            Pair<Boolean, Integer> nextRow = findNextDataRow(sheet, row);
+                            hasMoreRows = nextRow.getKey();
+                            row = nextRow.getValue();
                         }
-                        while (++row <= sheet.getLastRowNum() && !"".equals(ExcelFactory.getCellContentsAt(sheet, 0, row)));
+                        while (hasMoreRows);
 
                         // Skip over the blank line
                         row++;
                     }
                     while (row <= sheet.getLastRowNum())
                     {
-                        row = handleHeaderOrFooterRow(sheet, row, analyte, excelRunDomain, dataFile);
+                        row = handleHeaderOrFooterRow(sheet, row, analyte, dataFile);
                     }
 
                     // Check if we've accumulated enough instances to consider it to be a titration
@@ -188,6 +201,41 @@ public class LuminexExcelParser
             throw new ExperimentException("No data rows found. Most likely not a supported Luminex file.");
         }
         _parsed = true;
+    }
+
+    private Pair<Boolean, Integer> findNextDataRow(Sheet sheet, int row)
+    {
+        row++;
+        boolean hasNext;
+        if (row == sheet.getLastRowNum())
+        {
+            // We've run out of rows
+            hasNext = false;
+        }
+        else if ("".equals(ExcelFactory.getCellContentsAt(sheet, 0, row)))
+        {
+            // Blank row - check if there are more data rows afterwards
+            int peekRow = row;
+            // Burn any additional blank rows
+            while (peekRow < sheet.getLastRowNum() && "".equals(ExcelFactory.getCellContentsAt(sheet, 0, peekRow)))
+            {
+                peekRow++;
+            }
+
+            Cell cell = sheet.getRow(peekRow).getCell(0);
+            if ("Analyte".equals(ExcelFactory.getCellStringValue(cell)) && sheet.getLastRowNum() > peekRow)
+            {
+                return new Pair<Boolean, Integer>(true, peekRow + 1);
+            }
+
+            hasNext = false;
+        }
+        else
+        {
+            hasNext = true;
+        }
+
+        return new Pair<Boolean, Integer>(hasNext, row);
     }
 
     public static Map.Entry<Analyte, List<LuminexDataRow>> ensureAnalyte(Analyte analyte, Map<Analyte, List<LuminexDataRow>> sheets)
@@ -255,14 +303,14 @@ public class LuminexExcelParser
         return _excelRunProps.get(file);
     }
 
-    private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, Domain excelRunDomain, File dataFile)
+    private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, File dataFile)
     {
         if (row > analyteSheet.getLastRowNum())
         {
             return row;
         }
 
-        Map<String, DomainProperty> excelProps = excelRunDomain.createImportMap(true);
+        Map<String, DomainProperty> excelProps = _excelRunDomain.createImportMap(true);
         Map<DomainProperty, String> excelValues = _excelRunProps.get(dataFile);
         if (excelValues == null)
         {
@@ -404,7 +452,14 @@ public class LuminexExcelParser
                 }
                 else if ("Well".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setWell(StringUtils.trimToNull(value));
+                    String trimmedValue = StringUtils.trimToNull(value);
+                    dataRow.setWell(trimmedValue);
+                    boolean summary = trimmedValue != null && trimmedValue.contains(",");
+                    dataRow.setSummary(summary);
+                }
+                else if ("%CV".equalsIgnoreCase(columnName))
+                {
+                    dataRow.setCv(LuminexDataHandler.determineOutOfRange(value).getValue(value));
                 }
                 else if ("Outlier".equalsIgnoreCase(columnName))
                 {
@@ -493,5 +548,107 @@ public class LuminexExcelParser
     public void setImported(boolean imported)
     {
         _imported = imported;
+    }
+
+    public static class TestCase extends Assert
+    {
+        @Test
+        public void testRaw() throws ExperimentException
+        {
+            LuminexExcelParser parser = createParser("plate 1_IgA-Biot (b12 IgA std).xls");
+            if (parser == null) return;
+            Map<Analyte, List<LuminexDataRow>> m = parser.getSheets();
+            assertEquals("Wrong number of analytes", 5, m.size());
+            validateAnalyte(m.keySet(), "VRC A 5304 gp140 (62)", "FI = 0.582906 + (167.081 - 0.582906) / ((1 + (Conc / 0.531813)^-5.30023))^0.1", .4790, .8266);
+            for (Map.Entry<Analyte, List<LuminexDataRow>> entry : m.entrySet())
+            {
+                assertEquals("Wrong number of data rows", 34, entry.getValue().size());
+                for (LuminexDataRow dataRow : entry.getValue())
+                {
+                    assertFalse("Shouldn't be summary", dataRow.isSummary());
+                }
+            }
+        }
+
+        private void validateAnalyte(Set<Analyte> analytes, String name, String curveFit, Double fitProb, Double resVar)
+        {
+            for (Analyte analyte : analytes)
+            {
+                if (name.equals(analyte.getName()))
+                {
+                    assertEquals("Curve fit", curveFit, analyte.getStdCurve());
+                    assertEquals("Fit prob", fitProb, analyte.getFitProb());
+                    assertEquals("Res var", resVar, analyte.getResVar());
+
+                    // Found it, so return
+                    return;
+                }
+            }
+            fail("Analyte " + name + " was not found");
+        }
+
+        @Test
+        public void testSummary() throws ExperimentException
+        {
+            LuminexExcelParser parser = createParser("Guide Set plate 2.xls");
+            if (parser == null) return;
+            
+            Map<Analyte, List<LuminexDataRow>> m = parser.getSheets();
+            assertEquals("Wrong number of analytes", 2, m.size());
+            validateAnalyte(m.keySet(), "GS Analyte (1)", null, null, null);
+            for (Map.Entry<Analyte, List<LuminexDataRow>> entry : m.entrySet())
+            {
+                assertEquals("Wrong number of data rows", 11, entry.getValue().size());
+                for (LuminexDataRow dataRow : entry.getValue())
+                {
+                    assertTrue("Should be summary", dataRow.isSummary());
+                }
+            }
+        }
+
+        @Test
+        public void testSummaryAndRaw() throws ExperimentException
+        {
+            LuminexExcelParser parser = createParser("RawAndSummary.xlsx");
+            if (parser == null) return;
+
+            Map<Analyte, List<LuminexDataRow>> m = parser.getSheets();
+            assertEquals("Wrong number of analytes", 3, m.size());
+            validateAnalyte(m.keySet(), "Analyte2", "FI = -1.29301 + (490671 + 1.29301) / ((1 + (Conc / 9511.48)^-3.75411))^0.291452", .0136, 2.8665);
+            for (Map.Entry<Analyte, List<LuminexDataRow>> entry : m.entrySet())
+            {
+                assertEquals("Wrong number of data rows", 36, entry.getValue().size());
+                int summaryCount = 0;
+                int rawCount = 0;
+                for (LuminexDataRow dataRow : entry.getValue())
+                {
+                    if (dataRow.isSummary())
+                    {
+                        summaryCount++;
+                    }
+                    else
+                    {
+                        rawCount++;
+                    }
+                }
+                assertEquals("Wrong number of raw data rows", 24, rawCount);
+                assertEquals("Wrong number of summary data rows", 12, summaryCount);
+            }
+        }
+
+        private LuminexExcelParser createParser(String fileName)
+        {
+            AppProps props = AppProps.getInstance();
+            if (!props.isDevMode()) // We can only run the excel tests if we're in dev mode and have access to our samples
+                return null;
+
+            String projectRootPath = props.getProjectRoot();
+            File projectRoot = new File(projectRootPath);
+            File luminexDir = new File(projectRoot, "sampledata/Luminex/");
+            assertTrue("Couldn't find " + luminexDir, luminexDir.isDirectory());
+
+            Domain dummyDomain = PropertyService.get().createDomain(ContainerManager.getRoot(), "fakeURI", "dummyDomain");
+            return new LuminexExcelParser(dummyDomain, Arrays.asList(new File(luminexDir, fileName)));
+        }
     }
 }

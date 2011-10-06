@@ -197,6 +197,12 @@
             <column columnName="ProtocolID"/>
             <column columnName="TitrationID"/>
             <column columnName="WellRole"/>
+            <column columnName="Summary"/>
+            <column columnName="CV">
+                <columnTitle>%CV</columnTitle>
+                <description>Coefficient of variation</description>
+                <formatString>0.00%</formatString>
+            </column>
         </columns>
     </table>
 
