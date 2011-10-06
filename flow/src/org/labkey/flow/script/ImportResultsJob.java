@@ -17,6 +17,7 @@ package org.labkey.flow.script;
 
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -33,6 +34,7 @@ import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttrObject;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.data.*;
+import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
@@ -61,7 +63,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                             boolean createKeywordRun,
                             boolean failOnError) throws Exception
     {
-        super(info, root, experiment, originalImportedFile, runFilePathRoot, createKeywordRun, failOnError);
+        super(info, root, experiment, originalImportedFile, runFilePathRoot, null, createKeywordRun, failOnError);
 
         _analysisPathRoot = analysisPathRoot;
         if (!_analysisPathRoot.isDirectory())
@@ -98,6 +100,9 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
 
         Map<String, AttributeSet> analysis = loadAnalysis();
 
+        // UNDONE: only import attrs that match the filter
+        SimpleFilter filter = _protocol.getFCSAnalysisFilter();
+
         // Split analysis into keywords AttributeSet and stats/graphs AttributeSet. CONSIDER: change loadAnalysis() signature.
         for (Map.Entry<String, AttributeSet> entry : analysis.entrySet())
         {
@@ -111,6 +116,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             keywordAttrs.setKeywords(attrs.getKeywords());
             keywordAttrs.setKeywordAliases(attrs.getKeywordAliases());
             keywordsMap.put(sampleLabel, keywordAttrs);
+            AttributeSetHelper.prepareForSave(keywordAttrs, getContainer());
 
             AttributeSet resultsAttrs = new AttributeSet(ObjectType.fcsAnalysis, null);
             resultsAttrs.setStatistics(attrs.getStatistics());
@@ -118,6 +124,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             resultsAttrs.setGraphs(attrs.getGraphs());
             resultsAttrs.setGraphAliases(attrs.getGraphAliases());
             resultsMap.put(sampleLabel, resultsAttrs);
+            AttributeSetHelper.prepareForSave(resultsAttrs, getContainer());
 
             // UNDONE: comp matrix
         }

@@ -50,7 +50,6 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.zip.ZipEntry;
 
@@ -392,10 +391,11 @@ public class AnalysisScriptController extends BaseFlowController
 
     public enum ImportAnalysisStep
     {
-        INIT("Start"),
-        UPLOAD_WORKSPACE("Upload Workspace"),
-        ASSOCIATE_FCSFILES("Associate FCS Files"),
-        CHOOSE_ANALYSIS("Choose Analysis Folder"),
+        SELECT_WORKSPACE("Select Workspace"),
+        SELECT_FCSFILES("Select FCS Files"),
+        ANALYSIS_ENGINE("Analysis Engine"),
+        ANALYSIS_OPTIONS("Analysis Options"),
+        CHOOSE_ANALYSIS("Analysis Folder"),
         CONFIRM("Confirm");
 
         String title;
@@ -412,15 +412,18 @@ public class AnalysisScriptController extends BaseFlowController
 
         public int getNumber()
         {
-            return ordinal();
+            return ordinal()+1;
         }
 
         public static ImportAnalysisStep fromNumber(int number)
         {
+            if (number <= 0)
+                return SELECT_WORKSPACE;
+
             for (ImportAnalysisStep step : values())
-                if (step.ordinal() == number)
+                if (step.getNumber() == number)
                     return step;
-            return INIT;
+            return SELECT_WORKSPACE;
         }
     }
 
@@ -440,7 +443,7 @@ public class AnalysisScriptController extends BaseFlowController
 
             ActionURL url = new ActionURL(ImportAnalysisAction.class, getContainer());
             url.addParameter("workspace.path", workspacePath);
-            url.addParameter("step", String.valueOf(AnalysisScriptController.ImportAnalysisStep.ASSOCIATE_FCSFILES.getNumber()));
+            url.addParameter("step", String.valueOf(AnalysisScriptController.ImportAnalysisStep.SELECT_FCSFILES.getNumber()));
 
             return HttpView.redirect(url);
         }
@@ -460,12 +463,9 @@ public class AnalysisScriptController extends BaseFlowController
 
         public void validateCommand(ImportAnalysisForm form, Errors errors)
         {
-            if (form.getWizardStep().getNumber() > ImportAnalysisStep.INIT.getNumber())
-            {
-                getWorkspace(form, errors);
-                if (errors.hasErrors())
-                    form.setWizardStep(ImportAnalysisStep.UPLOAD_WORKSPACE);
-            }
+            getWorkspace(form, errors);
+            if (errors.hasErrors())
+                form.setWizardStep(ImportAnalysisStep.SELECT_WORKSPACE);
         }
 
         public ModelAndView getView(ImportAnalysisForm form, boolean reshow, BindException errors) throws Exception
@@ -476,9 +476,9 @@ public class AnalysisScriptController extends BaseFlowController
 
         public boolean handlePost(ImportAnalysisForm form, BindException errors) throws Exception
         {
-            if (form.getWizardStep() == ImportAnalysisStep.INIT)
+            if (form.getWizardStep() == null)
             {
-                form.setWizardStep(ImportAnalysisStep.UPLOAD_WORKSPACE);
+                form.setWizardStep(ImportAnalysisStep.SELECT_WORKSPACE);
             }
             else
             {
@@ -486,12 +486,20 @@ public class AnalysisScriptController extends BaseFlowController
                 // Handle the post and setup the form for the next wizard step.
                 switch (form.getWizardStep())
                 {
-                    case UPLOAD_WORKSPACE:
+                    case SELECT_WORKSPACE:
                         stepUploadWorkspace(form, errors);
                         break;
 
-                    case ASSOCIATE_FCSFILES:
+                    case SELECT_FCSFILES:
                         stepAssociateFCSFiles(form, errors);
+                        break;
+
+                    case ANALYSIS_ENGINE:
+                        stepAnalysisEngine(form, errors);
+                        break;
+
+                    case ANALYSIS_OPTIONS:
+                        stepAnalysisOptions(form, errors);
                         break;
 
                     case CHOOSE_ANALYSIS:
@@ -600,6 +608,16 @@ public class AnalysisScriptController extends BaseFlowController
             return null;
         }
 
+        private String getAnalysisEngine(ImportAnalysisForm form, Errors errors) throws Exception
+        {
+            // UNDONE: validate pipeline root is available for rEngine
+            if ("labkeyEngine".equals(form.getSelectAnalysisEngine()))
+                return "labkeyEngine";
+            if ("rEngine".equals(form.getSelectAnalysisEngine()))
+                return "rEngine";
+            return "noEngine";
+        }
+
         private void stepUploadWorkspace(ImportAnalysisForm form, BindException errors) throws Exception
         {
             WorkspaceData workspaceData = form.getWorkspace();
@@ -664,7 +682,7 @@ public class AnalysisScriptController extends BaseFlowController
                     }
                 }
             }
-            form.setWizardStep(ImportAnalysisStep.ASSOCIATE_FCSFILES);
+            form.setWizardStep(ImportAnalysisStep.SELECT_FCSFILES);
         }
 
         private void stepAssociateFCSFiles(ImportAnalysisForm form, BindException errors) throws Exception
@@ -714,7 +732,45 @@ public class AnalysisScriptController extends BaseFlowController
                     errors.reject(ERROR_MSG, msg);
                     return;
                 }
+
+                form.setWizardStep(ImportAnalysisStep.ANALYSIS_ENGINE);
             }
+            else
+            {
+                // Analysis engine can only be selected when no FCS files are associated with the run
+                form.setWizardStep(ImportAnalysisStep.ANALYSIS_OPTIONS);
+            }
+        }
+
+        private void stepAnalysisEngine(ImportAnalysisForm form, BindException errors) throws Exception
+        {
+            File runFilePathRoot = getRunPathRoot(form, errors);
+            if (errors.hasErrors())
+                return;
+
+            String analysisEngine = getAnalysisEngine(form, errors);
+            if (errors.hasErrors())
+                return;
+
+            if (analysisEngine.equals("labkeyEngine") || analysisEngine.equals("rEngine"))
+            {
+                if (runFilePathRoot == null)
+                {
+                    errors.reject(ERROR_MSG, "You must select FCS Files before selecting an analysis engine.");
+                    //form.setWizardStep(ImportAnalysisStep.SELECT_FCSFILES);
+                    return;
+                }
+            }
+
+            form.setWizardStep(ImportAnalysisStep.ANALYSIS_OPTIONS);
+        }
+
+        private void stepAnalysisOptions(ImportAnalysisForm form, BindException errors) throws Exception
+        {
+            String analysisEngine = getAnalysisEngine(form, errors);
+            if (errors.hasErrors())
+                return;
+
             form.setWizardStep(ImportAnalysisStep.CHOOSE_ANALYSIS);
         }
 
@@ -816,9 +872,45 @@ public class AnalysisScriptController extends BaseFlowController
                     pipelineFile = getPipeRoot().resolvePath(workspaceData.getPath());
             }
 
+            String analysisEngine = getAnalysisEngine(form, errors);
+            if (errors.hasErrors())
+                return;
+
+            List<String> importGroupNames =
+                    form.getImportGroupNames() == null ? null :
+                    Arrays.asList(form.getImportGroupNames().split(","));
+
             boolean createKeywordRun = keywordRun == null && runFilePathRoot != null;
-            WorkspaceJob job = new WorkspaceJob(info, experiment,
-                    workspaceData, pipelineFile, runFilePathRoot, createKeywordRun, false, getPipeRoot());
+
+            FlowJob job = null;
+            if ("noEngine".equals(analysisEngine))
+            {
+                job = new WorkspaceJob(info, experiment,
+                        workspaceData, pipelineFile, runFilePathRoot,
+                        importGroupNames,
+                        createKeywordRun, false, getPipeRoot());
+            }
+            /*
+            else if ("labkeyEngine".equals(analysisEngine))
+            {
+            }
+            */
+            else if ("rEngine".equals(analysisEngine))
+            {
+                job = new RScriptJob(info, root, experiment,
+                        workspaceData, pipelineFile, runFilePathRoot,
+                        importGroupNames,
+                        form.isrEngineNormalization(),
+                        form.getrEngineNormalizationReference(),
+                        form.getrEngineNormalizationParameters(),
+                        createKeywordRun, false);
+            }
+            else
+            {
+                errors.reject(ERROR_MSG, "Analysis engine not recognized: " + analysisEngine);
+                return;
+            }
+
             throw new RedirectException(executeScript(job));
         }
 
@@ -837,146 +929,6 @@ public class AnalysisScriptController extends BaseFlowController
     }
 
 
-    public static class DemoView extends JspView
-    {
-        public DemoView()
-        {
-            this(null, null);
-        }
-
-        public DemoView(DemoForm form, Errors errors)
-        {
-            super(AnalysisScriptController.class, "demo.jsp", form, errors);
-            setTitle("Flow R Demo");
-            setTitleHref(new ActionURL(DemoAction.class, getViewContext().getContainer()));
-        }
-
-    }
-
-    public static class DemoForm
-    {
-        private String runName;
-        private Integer experimentId;
-
-        public String getRunName()
-        {
-            return runName;
-        }
-
-        public void setRunName(String runName)
-        {
-            this.runName = runName;
-        }
-
-        public Integer getExperimentId()
-        {
-            return experimentId;
-        }
-
-        public void setExperimentId(Integer experimentId)
-        {
-            this.experimentId = experimentId;
-        }
-    }
-
-    @RequiresPermissionClass(ReadPermission.class)
-    public class DemoAction extends FormViewAction<DemoForm>
-    {
-        FlowExperiment _experiment;
-        FlowRun _keywordRun;
-
-        public DemoAction() { }
-
-        public DemoAction(ViewContext context)
-        {
-            setViewContext(context);
-        }
-
-        @Override
-        public void validateCommand(DemoForm form, Errors errors)
-        {
-            String runName = StringUtils.trimToNull(form.getRunName());
-            if (runName == null)
-            {
-                errors.rejectValue("runName", ERROR_MSG, "Run name required");
-                return;
-            }
-
-            Integer experimentId = form.getExperimentId();
-            if (experimentId != null)
-            {
-                _experiment = FlowExperiment.fromExperimentId(experimentId);
-                if (_experiment == null)
-                {
-                    errors.reject(ERROR_MSG, String.format("Experiment with id '%d' not found", experimentId));
-                    return;
-                }
-            }
-
-            // XXX: Hard code path to existing fcs keyword run for now
-            _keywordRun = null;
-            try
-            {
-                FlowRun[] keywordRuns = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-                for (FlowRun run : keywordRuns)
-                {
-                    if (run.getName().equals("extdata"))
-                    {
-                        _keywordRun = run;
-                        break;
-                    }
-                }
-            }
-            catch (SQLException e)
-            {
-                errors.reject(ERROR_MSG, e.toString());
-            }
-
-            if (_keywordRun == null)
-                errors.reject(ERROR_MSG, "Need to import 'extdata' directory of FCS files");
-        }
-
-        @Override
-        public ModelAndView getView(DemoForm form, boolean reshow, BindException errors) throws Exception
-        {
-            return new DemoView(form, errors);
-        }
-
-        @Override
-        public boolean handlePost(DemoForm form, BindException errors) throws Exception
-        {
-            if (_experiment == null)
-            {
-                // UNDONE: Let user name the experiment instead of autogenerating
-                String newAnalysisName = FlowExperiment.generateUnusedName(getContainer());
-                _experiment = FlowExperiment.createForName(getUser(), getContainer(), newAnalysisName);
-            }
-
-            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-            ViewBackgroundInfo info = getViewBackgroundInfo();
-            if (root == null)
-            {
-                // root-less pipeline job for summaryStats.txt uploaded via the browser
-                info.setURL(null);
-            }
-
-            FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
-            RScriptJob job = new RScriptJob(info, root, _experiment, protocol, _keywordRun, form.getRunName());
-            throw new RedirectException(executeScript(job));
-        }
-
-        @Override
-        public URLHelper getSuccessURL(DemoForm form)
-        {
-            return null;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            root.addChild("Flow R Demo", new ActionURL(DemoAction.class, getViewContext().getContainer()));
-            return root;
-        }
-    }
 
     // Called from pipeline import panel
     @RequiresPermissionClass(UpdatePermission.class)

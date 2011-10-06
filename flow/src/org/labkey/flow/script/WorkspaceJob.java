@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -86,12 +87,13 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                         WorkspaceData workspaceData,
                         File originalImportedFile,
                         File runFilePathRoot,
+                        List<String> importGroupNames,
                         boolean createKeywordRun,
                         boolean failOnError,
                         PipeRoot root)
             throws Exception
     {
-        super(info, root, experiment, originalImportedFile, runFilePathRoot, createKeywordRun, failOnError);
+        super(info, root, experiment, originalImportedFile, runFilePathRoot, importGroupNames, createKeywordRun, failOnError);
 
         String name = workspaceData.getName();
         if (name == null && workspaceData.getPath() != null)
@@ -133,7 +135,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
 
             return createExperimentRun(this, getUser(), getContainer(), workspace,
                     getExperiment(), _workspaceName, _workspaceFile, getOriginalImportedFile(),
-                    getRunFilePathRoot(), isFailOnError());
+                    getRunFilePathRoot(), getImportGroupNames(), isFailOnError());
         }
         finally
         {
@@ -144,7 +146,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
     private FlowRun createExperimentRun(FlowJob job, User user, Container container,
                                         FlowJoWorkspace workspace, FlowExperiment experiment,
                                         String workspaceName, File workspaceFile, File originalImportedFile,
-                                        File runFilePathRoot, boolean failOnError) throws Exception
+                                        File runFilePathRoot, List<String> importGroupNames, boolean failOnError) throws Exception
     {
         Map<String, AttributeSet> keywordsMap = new LinkedHashMap();
         Map<String, CompensationMatrix> sampleCompMatrixMap = new LinkedHashMap();
@@ -155,7 +157,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         Map<Analysis, FlowScript> scripts = new HashMap();
         List<String> sampleLabels = new ArrayList<String>(workspace.getSampleCount());
 
-        if (extractAnalysis(job, container, workspace, runFilePathRoot, failOnError, keywordsMap, sampleCompMatrixMap, compMatrixMap, resultsMap, analysisMap, scriptDocs, sampleLabels))
+        if (extractAnalysis(job, container, workspace, runFilePathRoot, importGroupNames, failOnError, keywordsMap, sampleCompMatrixMap, compMatrixMap, resultsMap, analysisMap, scriptDocs, sampleLabels))
             return null;
 
         if (job.checkInterrupted())
@@ -176,9 +178,28 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 sampleLabels);
     }
 
+    private List<String> getSampleIDs(FlowJoWorkspace workspace, List<String> groupNames)
+    {
+        if (groupNames == null || groupNames.isEmpty())
+            return workspace.getAllSampleIDs();
+
+        List<String> sampleIDs = new ArrayList<String>(workspace.getSampleCount());
+        for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
+        {
+            if (groupNames.contains(group.getGroupId()) || groupNames.contains(group.getGroupName().toString()))
+            {
+                info("Getting samples IDs for group '" + group.getGroupName() + "'");
+                sampleIDs.addAll(group.getSampleIds());
+            }
+        }
+        return sampleIDs;
+    }
+
     private boolean extractAnalysis(FlowJob job, Container container,
                                     FlowJoWorkspace workspace,
-                                    File runFilePathRoot, boolean failOnError,
+                                    File runFilePathRoot,
+                                    List<String> importGroupNames,
+                                    boolean failOnError,
                                     Map<String, AttributeSet> keywordsMap,
                                     Map<String, CompensationMatrix> sampleCompMatrixMap,
                                     Map<CompensationMatrix, AttributeSet> compMatrixMap,
@@ -187,9 +208,18 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                     Map<Analysis, ScriptDocument> scriptDocs,
                                     Collection<String> sampleLabels) throws SQLException, IOException
     {
-        List<String> allSampleIDs = workspace.getAllSampleIDs();
+        List<String> sampleIDs = getSampleIDs(workspace, importGroupNames);
+        if (sampleIDs == null || sampleIDs.isEmpty())
+        {
+            job.addStatus("No samples to import");
+            return false;
+        }
+
+        // UNDONE: only import attrs that match the filter
+        SimpleFilter filter = _protocol.getFCSAnalysisFilter();
+
         int iSample = 0;
-        for (String sampleID : allSampleIDs)
+        for (String sampleID : sampleIDs)
         {
             FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleID);
             sampleLabels.add(sample.getLabel());
@@ -197,7 +227,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 return true;
 
             iSample++;
-            String description = "sample " + iSample + "/" + allSampleIDs.size() + ":" + sample.getLabel();
+            String description = "sample " + iSample + "/" + sampleIDs.size() + ":" + sample.getLabel();
             job.addStatus("Preparing " + description);
 
             AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);

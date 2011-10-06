@@ -13,5 +13,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ##
-library(labkeyDemo)
-runAnalysis("${output-directory}", "${run-name}")
+
+library(flowWorkspace)
+
+# ${workspace-path}
+# ${fcsfile-directory}
+# ${run-name}
+# ${group-names}
+# ${perform-normalization}
+# ${normalization-reference}
+# ${normalization-parameters}
+
+x <- system("cp -Rf /Users/kevink/labkey/trunk/sampledata/flow/external-analysis/* ${output-directory}", intern=TRUE)
+x

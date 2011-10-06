@@ -838,8 +838,8 @@ abstract public class FlowJoWorkspace implements Serializable
     {
         return _sampleAnalyses.get(sample._sampleId);
     }
-    public AttributeSet getSampleAnalysisResults(SampleInfo sample)
 
+    public AttributeSet getSampleAnalysisResults(SampleInfo sample)
     {
         return _sampleAnalysisResults.get(sample._sampleId);
     }

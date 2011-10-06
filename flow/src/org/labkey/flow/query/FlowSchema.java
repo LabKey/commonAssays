@@ -24,6 +24,7 @@ import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.ContainerForeignKey;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.FilterInfo;
 import org.labkey.api.data.JdbcType;
@@ -351,6 +352,9 @@ public class FlowSchema extends UserSchema
                 flag.setDescription(type.getLabel() + " Flag");
         }
         ret.addColumn(ExpRunTable.Column.Name);
+        ColumnInfo containerCol = ret.addColumn(ExpRunTable.Column.Folder);
+        containerCol.setHidden(true);
+        ContainerForeignKey.initColumn(containerCol, null);
         ret.addColumn(ExpRunTable.Column.FilePathRoot).setHidden(true);
         ret.addColumn(ExpRunTable.Column.LSID).setHidden(true);
         ret.addColumn(ExpRunTable.Column.ProtocolStep);

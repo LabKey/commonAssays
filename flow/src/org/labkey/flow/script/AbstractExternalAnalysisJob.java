@@ -71,6 +71,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     private final FlowExperiment _experiment;
     private final File _originalImportedFile;
     private final File _runFilePathRoot;
+    private final List<String> _importGroupNames;
     private final boolean _createKeywordRun;
     private final boolean _failOnError;
 
@@ -83,6 +84,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             FlowExperiment experiment,
             File originalImportedFile,
             File runFilePathRoot,
+            List<String> importGroupNames,
             boolean createKeywordRun,
             boolean failOnError)
         throws Exception
@@ -92,6 +94,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         _experiment = experiment;
         _originalImportedFile = originalImportedFile;
         _runFilePathRoot = runFilePathRoot;
+        _importGroupNames = importGroupNames;
         _createKeywordRun = createKeywordRun;
         _failOnError = failOnError;
         assert !_createKeywordRun || _runFilePathRoot != null;
@@ -109,6 +112,11 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         if (_run == null)
             return null;
         return _run.urlShow();
+    }
+
+    public List<String> getImportGroupNames()
+    {
+        return _importGroupNames;
     }
 
     public File getRunFilePathRoot()

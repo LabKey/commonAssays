@@ -48,7 +48,12 @@
 </p>
 <form action="<%=form.getProtocol().urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" method="POST">
     <table>
-        <tr class="labkey-wp-header"><th colspan="3" align="left">Filter FCS files by keyword:</th></tr>
+        <tr>
+            <th>&nbsp;</th>
+            <th align="center" class="labkey-form-label">Keyword</th>
+            <th align="center" class="labkey-form-label">Operator</th>
+            <th align="center" class="labkey-form-label">Value</th>
+        </tr>
         <% for (int i = 0; i < clauseCount; i ++) {
         FieldKey field = null;
         String op = null;
@@ -61,16 +66,15 @@
             value = form.ff_value[i];
         }
         %>
-            <% if (i != 0) { %>
-        <tr><td>and</td></tr>
-            <% } %>
-        <tr><td><select name="ff_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /> </select></td>
+        <tr>
+            <td><%=i == 0 ? "&nbsp;" : "and"%></td>
+            <td><select name="ff_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /> </select></td>
             <td><select name="ff_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
             <td><input name="ff_value" type="text" value="<%=h(value)%>" /></td>
-
         </tr>
         <% } %>
 
     </table>
+    <p>
     <labkey:button text="Set filter" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
 </form>

@@ -26,6 +26,8 @@ import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.FlowModule;
+import org.labkey.flow.FlowSettings;
+import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
@@ -38,9 +40,12 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,25 +53,69 @@ import java.util.Map;
  */
 public class RScriptJob extends FlowExperimentJob
 {
-    private static final String SCRIPT_TEMPLATE =
-            "library(labkeyDemo)\n" +
-            "runAnalysis(\"${output-directory}\", \"${run-name}\")\n";
+    private static final String WORKSPACE_PATH_REPLACEMENT = "workspace-path";
+    private static final String FCSFILE_DIRECTORY_REPLACEMENT = "fcsfile-directory";
     private static final String OUTPUT_DIRECTORY_REPLACEMENT = "output-directory";
     private static final String RUN_NAME_REPLACEMENT = "run-name";
 
-    private FlowExperiment _experiment;
-    private FlowRun _keywordsRun;
-    //private ScriptEngineReport _report;
-    private String _analysisRunName;
+    private static final String GROUP_NAMES_REPLACEMENT = "group-names";
+    private static final String NORMALIZATION = "perform-normalization";
+    private static final String NORM_REFERENCE = "normalization-reference";
+    private static final String NORM_PARAMTERS = "normalization-parameters";
 
-    public RScriptJob(ViewBackgroundInfo info, PipeRoot root, FlowExperiment experiment, FlowProtocol protocol, FlowRun keywordsRun, String analysisRunName)
-            throws Exception
+    private final FlowExperiment _experiment;
+    private final File _workspaceFile;
+    private final String _workspaceName;
+    private final File _originalImportedFile;
+    private final File _runFilePathRoot;
+    private final List<String> _importGroupNames;
+    private final boolean _performNormalization;
+    private final String _normalizationReference;
+    private final String _normalizationParameters;
+    private final boolean _createKeywordRun;
+    private final boolean _failOnError;
+
+    public RScriptJob(ViewBackgroundInfo info,
+                      PipeRoot root,
+                      FlowExperiment experiment,
+                      WorkspaceData workspaceData,
+                      File originalImportedFile,
+                      File runFilePathRoot,
+                      List<String> importGroupNames,
+                      boolean performNormalization,
+                      String normalizationReference,
+                      String normalizationParameters,
+                      boolean createKeywordRun,
+                      boolean failOnError) throws Exception
     {
-        super(info, root, experiment.getLSID(), protocol, experiment.getName(), FlowProtocolStep.analysis);
+        super(info, root, experiment.getLSID(), FlowProtocol.ensureForContainer(info.getUser(), info.getContainer()), experiment.getName(), FlowProtocolStep.analysis);
         _experiment = experiment;
-        _keywordsRun = keywordsRun;
-        //_report = report;
-        _analysisRunName = analysisRunName;
+        _originalImportedFile = originalImportedFile;
+        _runFilePathRoot = runFilePathRoot;
+        _importGroupNames = importGroupNames;
+        _performNormalization = performNormalization;
+        _normalizationReference = normalizationReference;
+        _normalizationParameters = normalizationParameters;
+        _createKeywordRun = createKeywordRun;
+        _failOnError = failOnError;
+        assert !_createKeywordRun || _runFilePathRoot != null;
+
+        String name = workspaceData.getName();
+        if (name == null && workspaceData.getPath() != null)
+        {
+            String[] parts = workspaceData.getPath().split(File.pathSeparator);
+            if (parts.length > 0)
+                name = parts[parts.length];
+        }
+        if (name == null)
+            name = "workspace";
+        _workspaceName = name;
+        _workspaceFile = File.createTempFile(_workspaceName, null, FlowSettings.getWorkingDirectory());
+
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(_workspaceFile));
+        oos.writeObject(workspaceData.getWorkspaceObject());
+        oos.flush();
+        oos.close();
     }
 
     @Override
@@ -75,41 +124,11 @@ public class RScriptJob extends FlowExperimentJob
         return _experiment;
     }
 
-    // Use Report based scripts so they can exist in the file-system like other reports?
-    /*
-    private ScriptEngineReport getReport()
-    {
-        //return _report;
-
-        // UNDONE: Use a saved report rather than creating a new dummy report.
-        Module flowModule = ModuleLoader.getInstance().getModule(FlowModule.NAME);
-        String reportKey = "~~FlowDemo~~";
-        String reportPath = "META-INF";
-        FileResource sourceResource = (FileResource)flowModule.getModuleResource(new Path(reportPath, "ranalysis-demo.r"));
-        File sourceFile = sourceResource.getFile();
-
-        ModuleRReportDescriptor descriptor = new ModuleRReportDescriptor(flowModule, reportKey, sourceFile, reportPath);
-        ScriptEngineReport report = new RReport();
-        report.setDescriptor(descriptor);
-        return report;
-    }
-
-    private void runReportScript(File workingDir) throws ScriptException
-    {
-        ScriptEngineReport report = getReport();
-        ScriptEngine engine = report.getScriptEngine();
-
-        List<ParamReplacement> outputReplacements = new ArrayList<ParamReplacement>();
-        ViewContext context = new ViewContext(getInfo());
-        String output = report.runScript(context, outputReplacements, null);
-    }
-    */
-
     private String getScript() throws IOException
     {
         Module flowModule = ModuleLoader.getInstance().getModule(FlowModule.NAME);
         String reportPath = "META-INF";
-        Resource r = flowModule.getModuleResource(new Path(reportPath, "ranalysis-demo.r"));
+        Resource r = flowModule.getModuleResource(new Path(reportPath, "ranalysis.r"));
         InputStream is = null;
         try
         {
@@ -130,8 +149,14 @@ public class RScriptJob extends FlowExperimentJob
         Map<String, String> replacements = (Map<String, String>)bindings.get(ExternalScriptEngine.PARAM_REPLACEMENT_MAP);
         if (replacements == null)
             bindings.put(ExternalScriptEngine.PARAM_REPLACEMENT_MAP, replacements = new HashMap<String, String>());
+        replacements.put(WORKSPACE_PATH_REPLACEMENT, _workspaceFile.getAbsolutePath()); // ? escape
+        replacements.put(FCSFILE_DIRECTORY_REPLACEMENT, _runFilePathRoot.getAbsolutePath()); // ? escape
         replacements.put(OUTPUT_DIRECTORY_REPLACEMENT, workingDir.getAbsolutePath()); // ? escape
-        replacements.put(RUN_NAME_REPLACEMENT, _analysisRunName); // ? escape
+        replacements.put(RUN_NAME_REPLACEMENT, _workspaceName); // ? escape
+        replacements.put(GROUP_NAMES_REPLACEMENT, _importGroupNames == null ? "" : _importGroupNames.toString());
+        replacements.put(NORMALIZATION, String.valueOf(_performNormalization));
+        replacements.put(NORM_REFERENCE, _normalizationReference);
+        replacements.put(NORM_PARAMTERS, _normalizationParameters);
 
         String script = getScript();
         String output = (String)engine.eval(script);
@@ -144,8 +169,9 @@ public class RScriptJob extends FlowExperimentJob
         File workingDir = createAnalysisDirectory(getExperiment().getName(), FlowProtocolStep.analysis);
         runScript(workingDir);
 
-        File summaryStats = new File(workingDir, AnalysisSerializer.STATISTICS_FILENAME);
-        ImportResultsJob importJob = null; //new ImportResultsJob(getInfo(), getPipeRoot(), getExperiment(), getProtocol(), _keywordsRun, summaryStats, _analysisRunName);
+        ImportResultsJob importJob = new ImportResultsJob(getInfo(), getPipeRoot(), getExperiment(),
+                workingDir, _originalImportedFile, _runFilePathRoot,
+                _workspaceName, _createKeywordRun, _failOnError);
         importJob.setLogFile(getLogFile());
         importJob.setLogLevel(getLogLevel());
         importJob.setSubmitted();

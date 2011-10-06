@@ -23,9 +23,17 @@ import org.labkey.flow.controllers.WorkspaceData;
  */
 public class ImportAnalysisForm
 {
-    private int step;
+    private int step = AnalysisScriptController.ImportAnalysisStep.SELECT_WORKSPACE.getNumber();
     private WorkspaceData workspace = new WorkspaceData();
     private int existingKeywordRunId;
+    private String selectAnalysisEngine = "noEngine";
+
+    // general analysis options and R normalization configuration
+    private String importGroupNames = "All Samples";
+    private boolean rEngineNormalization = true;
+    private String rEngineNormalizationReference = null;
+    private String rEngineNormalizationParameters = null;
+
     private boolean createAnalysis;
     private String newAnalysisName;
     private int existingAnalysisId;
@@ -60,6 +68,56 @@ public class ImportAnalysisForm
     public int getExistingKeywordRunId()
     {
         return existingKeywordRunId;
+    }
+
+    public String getSelectAnalysisEngine()
+    {
+        return selectAnalysisEngine;
+    }
+
+    public void setSelectAnalysisEngine(String selectAnalysisEngine)
+    {
+        this.selectAnalysisEngine = selectAnalysisEngine;
+    }
+
+    public String getImportGroupNames()
+    {
+        return importGroupNames;
+    }
+
+    public void setImportGroupNames(String importGroupNames)
+    {
+        this.importGroupNames = importGroupNames;
+    }
+
+    public boolean isrEngineNormalization()
+    {
+        return rEngineNormalization;
+    }
+
+    public void setrEngineNormalization(boolean rEngineNormalization)
+    {
+        this.rEngineNormalization = rEngineNormalization;
+    }
+
+    public String getrEngineNormalizationReference()
+    {
+        return rEngineNormalizationReference;
+    }
+
+    public void setrEngineNormalizationReference(String rEngineNormalizationReference)
+    {
+        this.rEngineNormalizationReference = rEngineNormalizationReference;
+    }
+
+    public String getrEngineNormalizationParameters()
+    {
+        return rEngineNormalizationParameters;
+    }
+
+    public void setrEngineNormalizationParameters(String rEngineNormalizationParameters)
+    {
+        this.rEngineNormalizationParameters = rEngineNormalizationParameters;
     }
 
     public void setExistingKeywordRunId(int existingKeywordRunId)

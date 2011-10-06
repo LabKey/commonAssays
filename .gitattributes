@@ -308,7 +308,7 @@ flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-8.30-9.10.sql -text
 flow/resources/schemas/flow.xml -text
 flow/src/META-INF/positivity.R -text
 flow/src/META-INF/qc.R -text
-flow/src/META-INF/ranalysis-demo.r -text
+flow/src/META-INF/ranalysis.r -text
 flow/src/org/labkey/flow/FlowModule.java -text
 flow/src/org/labkey/flow/FlowPreference.java -text
 flow/src/org/labkey/flow/FlowServiceImpl.java -text
@@ -370,8 +370,13 @@ flow/src/org/labkey/flow/controllers/executescript/ScriptOverview.java -text
 flow/src/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/chooseRunsToAnalyze.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/confirmRunsToImport.jsp -text
-flow/src/org/labkey/flow/controllers/executescript/demo.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysis.jsp -text
+flow/src/org/labkey/flow/controllers/executescript/importAnalysisAnalysisEngine.jsp -text
+flow/src/org/labkey/flow/controllers/executescript/importAnalysisAnalysisOptions.jsp -text
+flow/src/org/labkey/flow/controllers/executescript/importAnalysisChooseAnalysis.jsp -text
+flow/src/org/labkey/flow/controllers/executescript/importAnalysisConfirm.jsp -text
+flow/src/org/labkey/flow/controllers/executescript/importAnalysisSelectFCSFiles.jsp -text
+flow/src/org/labkey/flow/controllers/executescript/importAnalysisSelectWorkspace.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/showScript.jsp -text
 flow/src/org/labkey/flow/controllers/flowAdmin.jsp -text
 flow/src/org/labkey/flow/controllers/newFolder.jsp -text
