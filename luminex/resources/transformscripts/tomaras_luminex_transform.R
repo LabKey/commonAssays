@@ -59,6 +59,10 @@ run.output.file = run.props$val3[run.props$name == "runDataFile"];
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 
+# determine if the data contains both raw and summary data
+# if both exists, only the raw data will be used for the calculations
+bothRawAndSummary = any(run.data$summary == "true") & any(run.data$summary == "false");
+
 ######################## STEP 1: SET THE VERSION NUMBERS ################################
 
 runprop.output.file = run.props$val1[run.props$name == "transformedRunPropertiesFile"];
@@ -67,7 +71,7 @@ writeLines(c(paste("TransformVersion",transformVersion,sep="\t"),
     paste("RuminexVersion",ruminexVersion,sep="\t")), fileConn);
 close(fileConn);
 
-################################# STEP 2: BLANK BEAD SUBTRACTION ################################  
+################################# STEP 2: BLANK BEAD SUBTRACTION ################################
 
 # initialize the FI - Bkgd - Blank variable
 run.data$fiBackgroundBlank = NA;
@@ -140,12 +144,24 @@ if (file.exists(titration.data.file))
             titration.data[tIndex,]$QCControl == "true" |
             titration.data[tIndex,]$Unknown == "true")
         {
+            titrationName = as.character(titration.data[tIndex,]$Name);
+
+            # we want to create PDF plots of the curves for QC Controls
+            if (titration.data[tIndex,]$QCControl == "true") {
+                mypdf(file=paste(titrationName, "QC_Curves", sep="_"), mfrow=c(1,1));
+            }
+
             # calculate the 4PL and 5PL curve fit params for each analyte
             for (aIndex in 1:length(analytes))
             {
-                titrationName = as.character(titration.data[tIndex,]$Name);
                 analyteName = as.character(analytes[aIndex]);
-                dat = subset(run.data, description == titrationName & name == analyteName);
+
+                # if both raw and summary data are available, just use the raw data for the calc
+                if (bothRawAndSummary) {
+                    dat = subset(run.data, description == titrationName & name == analyteName & summary == "false");
+                } else {
+                    dat = subset(run.data, description == titrationName & name == analyteName);
+                }
 
                 if (nrow(dat) > 0)
                 {
@@ -156,8 +172,10 @@ if (file.exists(titration.data.file))
                     # for non-standard titrations, use the dilution values for the curve fit
                     if (toupper(substr(dat$type[1],0,1)) == "S" | toupper(substr(dat$type[1],0,2)) == "ES") {
                         dat$dose = dat$expConc;
+                        xLabel = "Expected Conc";
                     } else {
                         dat$dose = dat$dilution;
+                        xLabel = "Dilution";
                     }
 
                     # get curve fit params for 4PL using the rumi curve fit function ###DISABLED###
@@ -171,10 +189,26 @@ if (file.exists(titration.data.file))
                             run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3]
                             run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4]
 
+                            # plot the curve fit for the QC Controls
+                            if (titration.data[tIndex,]$QCControl == "true") {
+                                plot(fit, type="all", main=analyteName, cex=.5, ylab="FI-Bkgd", xlab=xLabel);
+                            }
                         },
-                        error = function(e) {print(e);}
+                        error = function(e) {
+                            print(e);
+
+                            # plot the individual data points for the QC Controls
+                            if (titration.data[tIndex,]$QCControl == "true") {
+                                plot (fiBackground ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab="FI-Bkgd", xlab=xLabel);
+                            }
+                        }
                     );
                 }
+            }
+
+            # if we are creating a PDF for the QC Control, close the device
+            if (titration.data[tIndex,]$QCControl == "true") {
+                dev.off();
             }
         }
     }
@@ -197,7 +231,7 @@ for (index in 1:nrow(analyte.data))
     # some analytes may have > 1 standard selected
     stndSet = unlist(strsplit(as.character(analyte.data$titrations[index]), ","));
 
-    # if there are more than 1 standard for this analyte, duplicate run.data records for that analyte at set standard accordingly
+    # if there are more than 1 standard for this analyte, duplicate run.data records for that analyte and set standard accordingly
     if (length(stndSet) > 0)
     {
         for (stndIndex in 1:length(stndSet))
@@ -231,7 +265,12 @@ run.data$EstConc_4pl = NA;
 run.data$SE_4pl = NA;
 
 # setup the dataframe needed for the call to rumi
-dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "type", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role"));
+dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "type", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role", "summary"));
+
+# if both raw and summary data are available, just use the raw data for the calc
+if (bothRawAndSummary) {
+    dat = subset(dat, summary == "false");
+}
 
 # get a booelan vector of the records that are of type standard
 standardRecs = !is.na(dat$well_role) & dat$well_role == "Standard";
@@ -258,7 +297,7 @@ if(any(standardRecs) & length(standards) > 0){
     else if(fiCol == "FI-Bkgd-Blank")
         dat$fi[standardRecs] = dat$fiBackgroundBlank[standardRecs]
     else
-        dat$fi[standardRecs] = dat$fiOrig[standardRecs];        
+        dat$fi[standardRecs] = dat$fiOrig[standardRecs];
 
     # choose the FI column for unknowns based on the run property provided by the user, default to the original FI value
     if(any(!standardRecs)){
@@ -313,7 +352,7 @@ if(any(standardRecs) & length(standards) > 0){
         standard.dat$assay_id = stndVal;
 
         # call the rumi function to calculate new estimated log concentrations using 5PL for the uknowns
-        mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2))
+        mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2));
         fits = rumi(standard.dat, verbose=TRUE);
         fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
         dev.off();
@@ -341,7 +380,7 @@ if(any(standardRecs) & length(standards) > 0){
         }
 
         # call the rumi function to calculate new estimated log concentrations using 4PL for the uknowns
-        mypdf(file=paste(stndVal, "4PL", sep="_"), mfrow=c(2,2))
+        mypdf(file=paste(stndVal, "4PL", sep="_"), mfrow=c(2,2));
         fits = rumi(standard.dat, fit.4pl=TRUE, verbose=TRUE);
         fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
         dev.off();

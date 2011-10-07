@@ -35,10 +35,20 @@ import java.util.Set;
 public class LuminexWellGroup implements WellGroup
 {
     private List<LuminexWell> _wells;
+    private boolean _containsSummaryData = false;
+    private boolean _containsRawData = false;
 
     public LuminexWellGroup(List<LuminexWell> wells)
     {
         _wells = wells;
+
+        for (LuminexWell well : wells)
+        {
+            if (well.getDataRow().isSummary())
+                setContainsSummaryData(true);
+            else if (!well.getDataRow().isSummary())
+                setContainsRawData(true);
+        }
     }
 
     @Override
@@ -51,6 +61,10 @@ public class LuminexWellGroup implements WellGroup
         Map<LuminexReplicate, List<LuminexWell>> allReplicates = new HashMap<LuminexReplicate, List<LuminexWell>>();
         for (LuminexWell well : _wells)
         {
+            // if there is both raw and summary data for this wellgroup, only use the raw data
+            if (hasRawData() && hasSummaryData() && well.getDataRow().isSummary())
+                continue;
+
             LuminexReplicate replicate = new LuminexReplicate(well);
             List<LuminexWell> wells = allReplicates.get(replicate);
             if (wells == null)
@@ -246,5 +260,25 @@ public class LuminexWellGroup implements WellGroup
     public void setDilution(Double dilution)
     {
         throw new UnsupportedOperationException();
+    }
+
+    public boolean hasSummaryData()
+    {
+        return _containsSummaryData;
+    }
+
+    public void setContainsSummaryData(boolean containsSummaryData)
+    {
+        _containsSummaryData = containsSummaryData;
+    }
+
+    public boolean hasRawData()
+    {
+        return _containsRawData;
+    }
+
+    public void setContainsRawData(boolean containsRawData)
+    {
+        _containsRawData = containsRawData;
     }
 }
