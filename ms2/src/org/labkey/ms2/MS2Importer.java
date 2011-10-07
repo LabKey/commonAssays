@@ -141,7 +141,7 @@ public abstract class MS2Importer
         {
             boolean alreadyImported = false;
             MS2Manager.getSchema().getScope().ensureTransaction();
-            
+
             synchronized (_schemaLock)
             {
                 // Don't import if we've already imported this file (undeleted run exists matching this file name)
@@ -340,6 +340,7 @@ public abstract class MS2Importer
             {
                 fraction.setPepXmlDataLSID(pepXMLData.getLSID());
             }
+            fraction.setFileName(mzXmlFile.getName());
         }
 
         fraction = Table.insert(user, MS2Manager.getTableInfoFractions(), fraction);

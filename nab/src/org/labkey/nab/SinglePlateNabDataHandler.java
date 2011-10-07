@@ -181,7 +181,10 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                 Cell cell = currentRow.getCell(col + startColumn);
                 try
                 {
-                    cellValues[row][col] = cell.getNumericCellValue();
+                    if (ExcelFactory.isCellNumeric(cell))
+                        cellValues[row][col] = cell.getNumericCellValue();
+                    else
+                        cellValues[row][col] = 0.0;
                 }
                 catch (NumberFormatException e)
                 {
@@ -246,7 +249,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             if (current != null)
             {
                 String indexString = String.valueOf(colIndex - startCol);
-                if (!StringUtils.equals(current.getStringCellValue(), indexString))
+                if (!StringUtils.equals(ExcelFactory.getCellStringValue(current), indexString))
                     return false;
             }
         }
@@ -261,7 +264,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                 if (current != null)
                 {
                     String indexString = String.valueOf(start++);
-                    if (!StringUtils.equals(current.getStringCellValue(), indexString))
+                    if (!StringUtils.equals(ExcelFactory.getCellStringValue(current), indexString))
                         return false;
                 }
             }

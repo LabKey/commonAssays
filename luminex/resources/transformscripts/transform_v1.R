@@ -286,6 +286,29 @@ if(any(standardRecs) & length(standards) > 0){
         # note: also need to subset the standard records for only those where description matches the given standard
         standard.dat = subset(dat, Standard == stndVal & (well_role != "Standard" | (well_role == "Standard" & description == stndVal)));
 
+        # LabKey Issue 13033: check if we need to "add" standard data for any analytes if this is a subclass assay
+        #              (i.e. standard data from "Anti-Human" analyte to be used for other analytes)
+        selectedAnalytes = unique(standard.dat$analyte);
+        subclass.dat = subset(dat, well_role == "Standard" & description == stndVal & !is.na(lsid));
+        subclass.dat = subset(subclass.dat, regexpr("^blank", analyte, ignore.case=TRUE) == -1);
+        # if we only have standard data for one analyte, it is the subclass standard data to be used
+        if (length(unique(subclass.dat$analyte)) == 1)
+        {
+            subclassAnalyte = subclass.dat$analyte[1];
+            for(a in 1:length(selectedAnalytes))
+            {
+                analyteStnd.dat = subset(standard.dat, well_role == "Standard" & analyte == selectedAnalytes[a]);
+                # if there is no standard data for this analyte/standard, "use" the subclass analyte standard data
+                if (nrow(analyteStnd.dat) == 0)
+                {
+                    print(paste("Using ", subclassAnalyte, " standard data for analyte ", selectedAnalytes[a], sep=""));
+                    subclass.dat$sample_id = NA;
+                    subclass.dat$analyte = selectedAnalytes[a]; 
+                    standard.dat = rbind(standard.dat, subclass.dat);
+                }
+            }
+        }
+
         # set the assay_id (this value will be used in the PDF plot header)
         standard.dat$assay_id = stndVal;
 
