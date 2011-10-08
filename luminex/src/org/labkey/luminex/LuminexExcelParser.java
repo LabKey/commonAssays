@@ -459,7 +459,13 @@ public class LuminexExcelParser
                 }
                 else if ("%CV".equalsIgnoreCase(columnName))
                 {
-                    dataRow.setCv(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                    Double doubleValue = LuminexDataHandler.determineOutOfRange(value).getValue(value);
+                    if (doubleValue != null)
+                    {
+                        // We store the values as 1 == 100%, so translate from the Excel file's values
+                        doubleValue = doubleValue.doubleValue() / 100.0;
+                    }
+                    dataRow.setCv(doubleValue);
                 }
                 else if ("Outlier".equalsIgnoreCase(columnName))
                 {

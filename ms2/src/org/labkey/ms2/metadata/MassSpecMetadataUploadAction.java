@@ -143,4 +143,10 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
         super.addSampleInputColumns(form, insertView);
         insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(1, 2, Collections.<ExpMaterial>emptyList(), 1));
     }
+
+    @Override
+    protected boolean shouldShowDataCollectorUI(MassSpecMetadataAssayForm newRunForm)
+    {
+        return true;
+    }
 }

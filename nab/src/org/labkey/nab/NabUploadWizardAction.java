@@ -142,4 +142,10 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         return new ActionURL(NabAssayController.DetailsAction.class,
                     run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true");
     }
+
+    @Override
+    protected boolean shouldShowDataCollectorUI(NabRunUploadForm newRunForm)
+    {
+        return true;
+    }
 }

@@ -505,4 +505,10 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             return NAME;
         }
     }
+
+    @Override
+    protected boolean shouldShowDataCollectorUI(ElispotRunUploadForm newRunForm)
+    {
+        return true;
+    }
 }

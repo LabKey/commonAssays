@@ -643,6 +643,8 @@ luminex/src/org/labkey/luminex/LuminexModule.java -text
 luminex/src/org/labkey/luminex/LuminexOORIndicator.java -text
 luminex/src/org/labkey/luminex/LuminexReplicate.java -text
 luminex/src/org/labkey/luminex/LuminexResultsDataRegion.java -text
+luminex/src/org/labkey/luminex/LuminexRunContext.java -text
+luminex/src/org/labkey/luminex/LuminexRunDatabaseContext.java -text
 luminex/src/org/labkey/luminex/LuminexRunUploadForm.java -text
 luminex/src/org/labkey/luminex/LuminexSchema.java -text
 luminex/src/org/labkey/luminex/LuminexUploadWizardAction.java -text

@@ -36,11 +36,9 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.list.ListDefinition;
-import org.labkey.api.exp.list.ListItem;
 import org.labkey.api.exp.list.ListService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpRunTable;
@@ -68,6 +66,7 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -514,5 +513,11 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
 
         super.deleteProtocol(protocol, user);
+    }
+
+    @Override
+    public AssayRunDatabaseContext createRunDatabaseContext(ExpRun run, User user, HttpServletRequest request)
+    {
+        return new LuminexRunDatabaseContext(run, user, request);
     }
 }

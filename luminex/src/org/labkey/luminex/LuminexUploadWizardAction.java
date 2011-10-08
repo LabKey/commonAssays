@@ -578,4 +578,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             return NAME;
         }
     }
+
+    @Override
+    protected boolean shouldShowDataCollectorUI(LuminexRunUploadForm newRunForm)
+    {
+        // Always expect input files, regardless of whether we're configured to import spot-level data
+        return true;
+    }
 }

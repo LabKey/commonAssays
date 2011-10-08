@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.ParameterCurveImpl;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.RuntimeSQLException;
@@ -38,6 +39,8 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.ParticipantVisit;
@@ -284,8 +287,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 performOOR(dataRows, analyte);
 
-                ensureSummaryStats(dataRows);
-
                 for (LuminexDataRow dataRow : dataRows)
                 {
                     handleParticipantResolver(dataRow, resolver, inputMaterials);
@@ -329,6 +330,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     dataRow.setData(sourceDataForRow.getRowId());
                     rows.add(dataRow.toMap(analyte));
                 }
+
+                // Now that we've made sure each data row to the appropriate data file, make sure that we
+                // have %CV and StdDev. It's important to wait so that we know the scope in which to do the aggregate
+                // calculations - we only want to look for replicates within the same plate.
+                ensureSummaryStats(dataRows);
             }
 
             for (ExpData sourceFile : sourceFiles)
@@ -364,6 +370,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
+    /** Calculate %CV and StdDev for raw data rows that don't have it already, aggregating the matching replicate wells */
     private void ensureSummaryStats(List<LuminexDataRow> dataRows)
     {
         for (LuminexDataRow dataRow : dataRows)
@@ -373,10 +380,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 List<Double> fis = new ArrayList<Double>();
                 for (LuminexDataRow statRow : dataRows)
                 {
+                    // Only look for replicates within the same data file (plate)
                     if (statRow.getFi() != null && !statRow.isSummary() &&
                         ObjectUtils.equals(statRow.getDilution(), dataRow.getDilution()) &&
                         ObjectUtils.equals(statRow.getExpConc(), dataRow.getExpConc()) &&
                         ObjectUtils.equals(statRow.getDescription(), dataRow.getDescription()) &&
+                        ObjectUtils.equals(statRow.getType(), dataRow.getType()) &&
                         ObjectUtils.equals(statRow.getData(), dataRow.getData()) &&
                         ObjectUtils.equals(statRow.getAnalyte(), dataRow.getAnalyte()))
                     {
@@ -1261,13 +1270,16 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
-        ExpProtocol protocol = data.getRun().getProtocol();
+        ExpRun run = data.getRun();
+        ExpProtocol protocol = run.getProtocol();
         LuminexExcelParser parser = new LuminexExcelParser(protocol, Collections.singleton(dataFile));
 
         Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
         List<Map<String, Object>> dataRows = new ArrayList<Map<String, Object>>();
 
         Set<String> titrations = parser.getTitrations();
+
+        Set<Object> excludedWells = getExcludedWellKeys(run, protocol, info);
 
         for (Map.Entry<Analyte, List<LuminexDataRow>> entry : parser.getSheets().entrySet())
         {
@@ -1276,11 +1288,65 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
                 dataMap.put("titration", dataRow.getDescription() != null && titrations.contains(dataRow.getDescription()));
                 dataMap.remove("data");
+                // Merge in whether it's been excluded or not.
+                // We write out all the wells, excluded or not, but the transform script can choose to ignore them
+                dataMap.put("excluded", excludedWells.contains(createKey(entry.getKey().getName(), dataRow.getDataFile(), dataRow.getWell())));
                 dataRows.add(dataMap);
             }
         }
         datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, dataRows);
         return datas;
+    }
+
+    /**
+     * Check the database to see if any wells have been excluded so that we can pass the info to the transform script.
+     * If the run is in the process of being inserted, nothing's been excluded, but there's no harm in looking. 
+     */
+    private Set<Object> getExcludedWellKeys(ExpRun run, ExpProtocol protocol, ViewBackgroundInfo info)
+    {
+        LuminexSchema schema = new LuminexSchema(info.getUser(), info.getContainer(), protocol);
+        LuminexDataTable table = new LuminexDataTable(schema);
+        AssayProvider provider = AssayService.get().getProvider(protocol);
+
+        Set<Object> excludedWells = new HashSet<Object>();
+
+        try
+        {
+            // Well, data file, and analyte are sufficient to identify which wells from the Excel file need to be
+            // marked as excluded
+            FieldKey wellFK = FieldKey.fromParts("Well");
+            FieldKey dataNameFK = FieldKey.fromParts("Data", "Name");
+            FieldKey analyteFK = FieldKey.fromParts("Analyte", "Name");
+
+            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(wellFK, dataNameFK, analyteFK));
+
+            SimpleFilter filter = new SimpleFilter(provider.getTableMetadata().getRunFieldKeyFromResults().toString(), run.getRowId());
+            filter.addCondition(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME, true);
+            Map<String, Object>[] rows = Table.select(table, new ArrayList<ColumnInfo>(cols.values()), filter, null, Map.class);
+
+            String wellAlias = cols.get(wellFK).getAlias();
+            String dataNameAlias = cols.get(dataNameFK).getAlias();
+            String analyteNameAlias = cols.get(analyteFK).getAlias();
+
+            for (Map<String, Object> row : rows)
+            {
+                String well = (String)row.get(wellAlias);
+                String dataName = (String)row.get(dataNameAlias);
+                String analyteName = (String)row.get(analyteNameAlias);
+                excludedWells.add(createKey(analyteName, dataName, well));
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        return excludedWells;
+    }
+
+    /** Create a simple object to use as a key, combining the three properties */
+    private Object createKey(String analyteName, String dataFileName, String well)
+    {
+        return Arrays.asList(analyteName, dataFileName, well);
     }
 
     public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException

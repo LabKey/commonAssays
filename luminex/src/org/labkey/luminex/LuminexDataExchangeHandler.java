@@ -41,7 +41,7 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
     @Override
     public File createValidationRunInfo(AssayRunUploadContext context, ExpRun run, File scriptDir) throws Exception
     {
-        LuminexRunUploadForm form = (LuminexRunUploadForm)context;
+        LuminexRunContext form = (LuminexRunContext)context;
         List<Map<String, Object>> analytes = new ArrayList<Map<String, Object>>();
 
         for (String analyteName : form.getAnalyteNames())
@@ -69,6 +69,7 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
             titrations.add(titrationRow);
         }
         addSampleProperties(TITRATION_DATA_PROP_NAME, titrations);
+
         return super.createValidationRunInfo(context, run, scriptDir);
     }
 }

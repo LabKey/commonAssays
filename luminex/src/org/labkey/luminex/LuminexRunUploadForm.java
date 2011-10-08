@@ -37,7 +37,7 @@ import java.sql.SQLException;
  * User: jeckels
  * Date: Aug 8, 2007
  */
-public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvider>
+public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvider> implements LuminexRunContext
 {
     private String[] _analyteNames;
     private LuminexExcelParser _parser;

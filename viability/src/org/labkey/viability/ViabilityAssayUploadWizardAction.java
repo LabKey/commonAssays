@@ -420,4 +420,10 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         }
 
     }
+
+    @Override
+    protected boolean shouldShowDataCollectorUI(ViabilityAssayRunUploadForm newRunForm)
+    {
+        return true;
+    }
 }
