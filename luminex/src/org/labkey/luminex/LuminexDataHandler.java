@@ -1290,7 +1290,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 dataMap.remove("data");
                 // Merge in whether it's been excluded or not.
                 // We write out all the wells, excluded or not, but the transform script can choose to ignore them
-                dataMap.put("excluded", excludedWells.contains(createKey(entry.getKey().getName(), dataRow.getDataFile(), dataRow.getWell())));
+                dataMap.put(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME, excludedWells.contains(createKey(entry.getKey().getName(), dataRow.getDataFile(), dataRow.getWell())));
                 dataRows.add(dataMap);
             }
         }
