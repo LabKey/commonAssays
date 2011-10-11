@@ -307,15 +307,22 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
         LABKEY.Query.executeSql({
             schemaName: 'assay',
             sql: sql,
+            sort: 'Well',
             success: function(data){
-                var wells = "";
+                var wells = [];
                 var filename = "";
                 for (var i = 0; i < data.rows.length; i++)
                 {
-                    wells += (wells.length > 0 ? ", " : "") + data.rows[i].Well;
+                    // summary rows will have > 1 well (separated by a comma)
+                    Ext.each(data.rows[i].Well.split(","), function(well) {
+                        if (wells.indexOf(well) == -1)
+                            wells.push(well);
+                    });
+
                     filename = data.rows[i].Name;
                 }
-                Ext.get('replicate_group_wells').update(wells);
+                
+                Ext.get('replicate_group_wells').update(wells.join(", "));
                 Ext.get('replicate_group_filename').update(filename);
             },
             scope: this

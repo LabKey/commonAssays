@@ -100,7 +100,7 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext implement
         sql.append(LuminexSchema.getTableInfoTitration(), "t");
         sql.append(", ");
         sql.append(LuminexSchema.getTableInfoAnalyteTitration(), "at");
-        sql.append(" WHERE t.RowId = at.TitrationId AND at.AnalyteId = ?");
+        sql.append(" WHERE t.RowId = at.TitrationId AND t.Standard AND at.AnalyteId = ?");
         sql.add(analyte.getRowId());
 
         try

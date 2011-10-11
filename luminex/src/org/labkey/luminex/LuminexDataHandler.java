@@ -328,13 +328,16 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     }
                     sourceFiles.add(sourceDataForRow);
                     dataRow.setData(sourceDataForRow.getRowId());
-                    rows.add(dataRow.toMap(analyte));
                 }
 
                 // Now that we've made sure each data row to the appropriate data file, make sure that we
                 // have %CV and StdDev. It's important to wait so that we know the scope in which to do the aggregate
                 // calculations - we only want to look for replicates within the same plate.
                 ensureSummaryStats(dataRows);
+
+                // now add the dataRows to the rows list to be persisted
+                for (LuminexDataRow dataRow : dataRows)
+                    rows.add(dataRow.toMap(analyte));
             }
 
             for (ExpData sourceFile : sourceFiles)

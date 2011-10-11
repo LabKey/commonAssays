@@ -155,13 +155,15 @@ if (file.exists(titration.data.file))
             for (aIndex in 1:length(analytes))
             {
                 analyteName = as.character(analytes[aIndex]);
+                dat = subset(run.data, description == titrationName & name == analyteName);
 
                 # if both raw and summary data are available, just use the raw data for the calc
                 if (bothRawAndSummary) {
-                    dat = subset(run.data, description == titrationName & name == analyteName & summary == "false");
-                } else {
-                    dat = subset(run.data, description == titrationName & name == analyteName);
+                    dat = subset(dat, summary == "false");
                 }
+
+                # remove any excluded replicate groups for this titration/analyte
+                dat = subset(dat, tolower(FlaggedAsExcluded) == "false");
 
                 if (nrow(dat) > 0)
                 {
@@ -265,12 +267,15 @@ run.data$EstConc_4pl = NA;
 run.data$SE_4pl = NA;
 
 # setup the dataframe needed for the call to rumi
-dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "type", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role", "summary"));
+dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "type", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role", "summary", "FlaggedAsExcluded"));
 
 # if both raw and summary data are available, just use the raw data for the calc
 if (bothRawAndSummary) {
     dat = subset(dat, summary == "false");
 }
+
+# remove any excluded standard replicate groups
+dat = subset(dat, (well_role == "Standard" & tolower(FlaggedAsExcluded) == "false") | well_role != "Standard");
 
 # get a booelan vector of the records that are of type standard
 standardRecs = !is.na(dat$well_role) & dat$well_role == "Standard";
