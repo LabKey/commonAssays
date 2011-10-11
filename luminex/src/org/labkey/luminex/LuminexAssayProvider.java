@@ -227,7 +227,20 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     @Override
     public Domain getResultsDomain(ExpProtocol protocol)
     {
-        return getDomainByPrefix(protocol, ASSAY_DOMAIN_CUSTOM_DATA);
+        try
+        {
+            return getDomainByPrefix(protocol, ASSAY_DOMAIN_CUSTOM_DATA);
+        }
+        catch (IllegalArgumentException e)
+        {
+            // This means we couldn't find the results domain.
+
+            // We tried to add it during the the upgrade, but try it again in case we imported an old XAR file or similar
+            addResultsDomain(null, protocol);
+            // Clear the cache so we can find the domain we just created
+            protocol.setObjectProperties(null);
+            return getDomainByPrefix(protocol, ASSAY_DOMAIN_CUSTOM_DATA);
+        }
     }
 
     public LuminexDataTable createDataTable(AssaySchema schema, ExpProtocol protocol, boolean includeCopiedToStudyColumns)
@@ -419,23 +432,28 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         {
             // 11.11 is when we started supporting custom results/data fields for Luminex
             // Add the domain to any existing assay designs
-            String domainURI = new Lsid(ASSAY_DOMAIN_CUSTOM_DATA, "Folder-" + protocol.getContainer().getRowId(), protocol.getName()).toString();
-            Domain domain = createResultsDomain(protocol.getContainer(), domainURI, protocol.getName() + " Data Fields");
-            try
-            {
-                domain.save(user);
+            addResultsDomain(user, protocol);
+        }
+    }
 
-                ObjectProperty prop = new ObjectProperty(protocol.getLSID(), protocol.getContainer(), domainURI, domainURI);
-                OntologyManager.insertProperties(protocol.getContainer(), protocol.getLSID(), prop);
-            }
-            catch (ChangePropertyDescriptorException e)
-            {
-                throw new UnexpectedException(e);
-            }
-            catch (ValidationException e)
-            {
-                throw new UnexpectedException(e);
-            }
+    private void addResultsDomain(User user, ExpProtocol protocol)
+    {
+        String domainURI = new Lsid(ASSAY_DOMAIN_CUSTOM_DATA, "Folder-" + protocol.getContainer().getRowId(), protocol.getName()).toString();
+        Domain domain = createResultsDomain(protocol.getContainer(), domainURI, protocol.getName() + " Data Fields");
+        try
+        {
+            domain.save(user);
+
+            ObjectProperty prop = new ObjectProperty(protocol.getLSID(), protocol.getContainer(), domainURI, domainURI);
+            OntologyManager.insertProperties(protocol.getContainer(), protocol.getLSID(), prop);
+        }
+        catch (ChangePropertyDescriptorException e)
+        {
+            throw new UnexpectedException(e);
+        }
+        catch (ValidationException e)
+        {
+            throw new UnexpectedException(e);
         }
     }
 
