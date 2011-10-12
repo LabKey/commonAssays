@@ -152,7 +152,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         exclusionUnionSQL.append(LuminexSchema.getTableInfoWellExclusionAnalyte(), "wea");
         exclusionUnionSQL.append(" WHERE we.RowId = wea.WellExclusionId AND ");
         exclusionUnionSQL.append(" (we.Description = " + ExprColumn.STR_TABLE_ALIAS + ".Description OR (we.Description IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Description IS NULL)) AND ");
-        exclusionUnionSQL.append("(we.Dilution = " + ExprColumn.STR_TABLE_ALIAS + ".Dilution OR (we.Dilution IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Dilution IS NULL)) AND ");
+        exclusionUnionSQL.append("(we.Type = " + ExprColumn.STR_TABLE_ALIAS + ".Type OR (we.Type IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Type IS NULL)) AND ");
         exclusionUnionSQL.append("(we.DataId = " + ExprColumn.STR_TABLE_ALIAS + ".DataId OR (we.DataId IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".DataId IS NULL)) AND ");
         exclusionUnionSQL.append("(wea.AnalyteId = " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId)");
         exclusionUnionSQL.append("UNION SELECT ");

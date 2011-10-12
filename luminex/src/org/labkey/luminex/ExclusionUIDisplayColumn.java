@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class ExclusionUIDisplayColumn extends DataColumn
 {
-    private final FieldKey _dilutionFieldKey;
+    private final FieldKey _typeFieldKey;
     private final FieldKey _descriptionFieldKey;
     private final FieldKey _dataFieldKey;
     private final FieldKey _runFieldKey;
@@ -53,7 +53,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         _user = user;
         FieldKey parentFK = colInfo.getFieldKey().getParent();
 
-        _dilutionFieldKey = new FieldKey(parentFK, "Dilution");
+        _typeFieldKey = new FieldKey(parentFK, "Type");
         _descriptionFieldKey = new FieldKey(parentFK, "Description");
         _exclusionCommentKey = new FieldKey(parentFK, "ExclusionComment");
         _dataFieldKey = new FieldKey(new FieldKey(parentFK, "Data"), "RowId");
@@ -66,7 +66,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
     public void addQueryFieldKeys(Set<FieldKey> keys)
     {
         super.addQueryFieldKeys(keys);
-        keys.add(_dilutionFieldKey);
+        keys.add(_typeFieldKey);
         keys.add(_descriptionFieldKey);
         keys.add(_exclusionCommentKey);
         keys.add(_dataFieldKey);
@@ -82,7 +82,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
     @Override
     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
     {
-        Number dilution = (Number)ctx.get(_dilutionFieldKey);
+        String type = (String)ctx.get(_typeFieldKey);
         String description = (String)ctx.get(_descriptionFieldKey);
         String exclusionComment = (String)ctx.get(_exclusionCommentKey);
         Integer dataId = (Integer)ctx.get(_dataFieldKey);
@@ -108,7 +108,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         if (canEdit)
         {
             out.write("<a onclick=\"wellExclusionWindow('" + _protocolName + "', " + runId + ", " + dataId + ", "
-                + (description == null ? null : "'" + description + "'") + ", " + dilution + ");\">");
+                + (description == null ? null : "'" + description + "'") + ", '" + type + "');\">");
         }
 
         Boolean excluded = (Boolean)ctx.get(getColumnInfo().getFieldKey());

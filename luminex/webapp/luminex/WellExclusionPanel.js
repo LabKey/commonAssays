@@ -7,7 +7,7 @@
 Ext.namespace('LABKEY');
 
 // function called onclick of Exclusion Toggle to open the well exclusion window 
-function wellExclusionWindow(assayName, runId, dataId, description, dilution)
+function wellExclusionWindow(assayName, runId, dataId, description, type)
 {
     var win = new Ext.Window({
         cls: 'extContainer',
@@ -24,7 +24,7 @@ function wellExclusionWindow(assayName, runId, dataId, description, dilution)
             runId: runId,
             dataId: dataId,
             description: description,
-            dilution: dilution,
+            type: type,
             listeners: {
                 scope: this,
                 'closeWindow': function(){
@@ -43,7 +43,7 @@ function wellExclusionWindow(assayName, runId, dataId, description, dilution)
  * @params runId = runId for the selected replicate group
  * @params dataId = dataId for the selected replicate group
  * @params description = description for the selected replicate group
- * @params dilution = dilution for the selected replicate group
+ * @params type = type for the selected replicate group (i.e. S1, C2, X3, etc.)
  */
 LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
     constructor : function(config){
@@ -52,8 +52,8 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             throw "You must specify a schemaName!";
         if (!config.queryName)
             throw "You must specify a queryName!";
-        if (!config.runId || !config.dataId || !config.dilution)
-            throw "You must specify the following: runId, dataId, and dilution!";
+        if (!config.runId || !config.dataId || !config.type)
+            throw "You must specify the following: runId, dataId, and type!";
 
         Ext.apply(config, {
             cls: 'extContainer',
@@ -75,7 +75,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             queryName: this.queryName + ' WellExclusion',
             filterArray: [
                 LABKEY.Filter.create('description', this.description),
-                LABKEY.Filter.create('dilution', this.dilution),
+                LABKEY.Filter.create('type', this.type),
                 LABKEY.Filter.create('dataId', this.dataId)
             ],
             columns: 'RowId,Comment,Analytes/RowId',
@@ -301,7 +301,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
         var sql = "SELECT DISTINCT x.Well, x.Data.Name AS Name "
                 + "FROM \"" + this.queryName + " Data\" AS x WHERE ";
         sql += (this.description != null ? " x.Description = '" + this.description + "'" : " x.Description IS NULL ");
-        sql += " AND x.Dilution = " + this.dilution + " AND x.Data.RowId = " + this.dataId;
+        sql += " AND x.Type = '" + this.type + "' AND x.Data.RowId = " + this.dataId;
 
         // query to get the wells and data id (file name) for the given replicate group
         LABKEY.Query.executeSql({
@@ -349,11 +349,11 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
 
     getExclusionPanelHeader: function()
     {
-        // return an HTML table with the description and dilution and place holder divs for the file name and wells
+        // return an HTML table with the description and type and place holder divs for the file name and wells
         return "<table cellspacing='0' width='100%' style='border-collapse: collapse'>"
                     + "<tr><td class='labkey-exclusion-td-label'>File Name:</td><td class='labkey-exclusion-td-cell' colspan='3'><div id='replicate_group_filename'>...</div></td></tr>"
                     + "<tr><td class='labkey-exclusion-td-label'>Sample:</td><td class='labkey-exclusion-td-cell' colspan='3'>" + (this.description != null ? this.description : "") + "</td></tr>"
-                    + "<tr><td class='labkey-exclusion-td-label'>Dilution:</td><td class='labkey-exclusion-td-cell'>" + this.dilution + "</td>"
+                    + "<tr><td class='labkey-exclusion-td-label'>Type:</td><td class='labkey-exclusion-td-cell'>" + this.type + "</td>"
                     + "<td class='labkey-exclusion-td-label'>Wells:</td><td class='labkey-exclusion-td-cell'><div id='replicate_group_wells'>...</div></td></tr>"
                     + "</table>";
     },
@@ -372,7 +372,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             queryName: this.queryName + ' WellExclusion',
             rows: [{
                 description: this.description,
-                dilution: this.dilution,
+                type: this.type,
                 dataId: this.dataId,
                 comment: this.findById('comment').getValue(),
                 "analyteId/RowId": (analytesForExclusionStr != "" ? analytesForExclusionStr : null)

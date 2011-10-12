@@ -71,9 +71,9 @@ public class WellExclusionTable extends AbstractExclusionTable
         joinSQL.append(ExprColumn.STR_TABLE_ALIAS);
         joinSQL.append(".Description IS NULL)) AND dr.DataId = ");
         joinSQL.append(ExprColumn.STR_TABLE_ALIAS);
-        joinSQL.append(".DataId AND dr.Dilution = ");
+        joinSQL.append(".DataId AND dr.Type = ");
         joinSQL.append(ExprColumn.STR_TABLE_ALIAS);
-        joinSQL.append(".Dilution");
+        joinSQL.append(".Type");
 
         SQLFragment wellRoleSQL = new SQLFragment("SELECT WellRole FROM (SELECT DISTINCT dr.WellRole");
         wellRoleSQL.append(joinSQL);
