@@ -24,6 +24,7 @@ import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.AttrObject;
 import org.apache.commons.lang.ObjectUtils;
+import org.labkey.flow.persist.ObjectType;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -210,8 +211,32 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return AttributeSetHelper.fromData(getData());
     }
 
+    /*
+    public Map<ObjectType, AttributeSet> getAttributeSet(boolean includeKeywords, boolean includeGraphBytes)
+    {
+        Map<ObjectType, AttributeSet> map = new HashMap<ObjectType, AttributeSet>();
+        AttributeSet attrs = AttributeSetHelper.fromData(getData(), includeGraphBytes);
+        map.put(attrs.getType(), attrs);
+
+        if (includeKeywords && (this instanceof FlowWell))
+        {
+            FlowFCSFile fcsFile = ((FlowWell)this).getFCSFile();
+            if (fcsFile != null && fcsFile != this)
+            {
+                AttributeSet keywords = fcsFile.getAttributeSet();
+                assert keywords.getType() == ObjectType.fcsKeywords;
+                if (keywords.getType() == ObjectType.fcsKeywords)
+                    map.put(ObjectType.fcsKeywords, keywords);
+            }
+        }
+
+        return map;
+    }
+    */
+
     public AttributeSet getAttributeSet(boolean includeGraphBytes)
     {
         return AttributeSetHelper.fromData(getData(), includeGraphBytes);
     }
+
 }

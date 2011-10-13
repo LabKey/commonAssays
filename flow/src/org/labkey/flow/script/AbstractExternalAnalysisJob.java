@@ -59,8 +59,10 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: kevink
@@ -217,7 +219,6 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                                    File runFilePathRoot,
                                    Map<String, AttributeSet> keywordsMap,
                                    Map<String, CompensationMatrix> sampleCompMatrixMap,
-                                   Map<CompensationMatrix, AttributeSet> compMatrixMap,
                                    Map<String, AttributeSet> resultsMap,
                                    Map<String, Analysis> analysisMap,
                                    Map<Analysis, ScriptDocument> scriptDocs,
@@ -226,6 +227,16 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     {
         // Fake file URI set on the FCSFile/FCSAnalsyis ExpData to ensure it's recognized by the FlowDataHandler.
         URI dataFileURI = new File(externalAnalysisFile.getParent(), "attributes.flowdata.xml").toURI();
+
+        // Prepare comp matrices for saving
+        Map<CompensationMatrix, AttributeSet> compMatrixMap = new HashMap<CompensationMatrix, AttributeSet>();
+        Set<CompensationMatrix> comps = new HashSet<CompensationMatrix>(sampleCompMatrixMap.values());
+        for (CompensationMatrix comp : comps)
+        {
+            AttributeSet compAttrs = new AttributeSet(comp);
+            AttributeSetHelper.prepareForSave(compAttrs, container);
+            compMatrixMap.put(comp, compAttrs);
+        }
 
         ExperimentService.Interface svc = ExperimentService.get();
         boolean success = false;
@@ -265,6 +276,8 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 fcsFile.save(user);
                 fcsFiles.put(sampleLabel, new FlowFCSFile(fcsFile));
                 AttributeSet attrs = keywordsMap.get(sampleLabel);
+                if (attrs == null)
+                    attrs = new AttributeSet(ObjectType.fcsKeywords, null);
                 assert attrs.getType() == ObjectType.fcsKeywords;
                 AttributeSetHelper.doSave(attrs, user, fcsFile);
 
@@ -294,7 +307,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 ExpProtocolApplication paComp = run.addProtocolApplication(user, FlowProtocolStep.calculateCompensation.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, FlowProtocolStep.calculateCompensation.getName());
                 paComp.addDataInput(user, externalAnalysisData, InputRole.Workspace.toString());
                 flowComp.getData().setSourceApplication(paComp);
-                flowComp.getData().setName(compMatrix.getName() + " " + analysisName);
+                flowComp.getData().setName(compMatrix.getName());
 
                 job.addStatus("Saving CompMatrix " + iComp + "/" + compMatrixMap.size() + ":" + flowComp.getName());
                 flowComp.getData().save(user);

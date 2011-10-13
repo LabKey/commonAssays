@@ -26,6 +26,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.User;
+import org.labkey.api.util.Tuple3;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.flow.analysis.model.Analysis;
@@ -78,7 +79,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         return "Import External Analysis " + _analysisRunName;
     }
 
-    private Map<String, AttributeSet> loadAnalysis() throws Exception
+    private Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> loadAnalysis() throws Exception
     {
         FileSystemFile rootDir = new FileSystemFile(_analysisPathRoot);
         AnalysisSerializer serializer = new AnalysisSerializer(getLogger(), rootDir);
@@ -90,40 +91,38 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
     protected FlowRun createExperimentRun() throws Exception
     {
         Map<String, AttributeSet> keywordsMap = new LinkedHashMap();
-        //Map<String, CompensationMatrix> sampleCompMatrixMap = new LinkedHashMap();
-        //Map<CompensationMatrix, AttributeSet> compMatrixMap = new LinkedHashMap();
+        Map<String, CompensationMatrix> sampleCompMatrixMap = new LinkedHashMap();
         Map<String, AttributeSet> resultsMap = new LinkedHashMap();
         //Map<String, Analysis> analysisMap = new LinkedHashMap();
         //Map<Analysis, ScriptDocument> scriptDocs = new HashMap();
         //Map<Analysis, FlowScript> scripts = new HashMap();
-        List<String> sampleLabels = new ArrayList<String>();
 
-        Map<String, AttributeSet> analysis = loadAnalysis();
+        Set<String> sampleLabels = new LinkedHashSet<String>();
+
+        Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> analysis = loadAnalysis();
+        keywordsMap = analysis.first;
+        resultsMap = analysis.second;
+        sampleCompMatrixMap = analysis.third;
 
         // UNDONE: only import attrs that match the filter
         SimpleFilter filter = _protocol.getFCSAnalysisFilter();
 
-        // Split analysis into keywords AttributeSet and stats/graphs AttributeSet. CONSIDER: change loadAnalysis() signature.
-        for (Map.Entry<String, AttributeSet> entry : analysis.entrySet())
+        for (Map.Entry<String, AttributeSet> entry : keywordsMap.entrySet())
         {
             String sampleLabel = entry.getKey();
             sampleLabels.add(sampleLabel);
 
-            AttributeSet attrs = entry.getValue();
-
-            AttributeSet keywordAttrs = new AttributeSet(ObjectType.fcsKeywords, null);
+            AttributeSet keywordAttrs = entry.getValue();
             // UNDONE: set URI if runFilePathRoot/sample.fcs exists
-            keywordAttrs.setKeywords(attrs.getKeywords());
-            keywordAttrs.setKeywordAliases(attrs.getKeywordAliases());
-            keywordsMap.put(sampleLabel, keywordAttrs);
             AttributeSetHelper.prepareForSave(keywordAttrs, getContainer());
+        }
 
-            AttributeSet resultsAttrs = new AttributeSet(ObjectType.fcsAnalysis, null);
-            resultsAttrs.setStatistics(attrs.getStatistics());
-            resultsAttrs.setStatisticAliases(attrs.getStatisticAliases());
-            resultsAttrs.setGraphs(attrs.getGraphs());
-            resultsAttrs.setGraphAliases(attrs.getGraphAliases());
-            resultsMap.put(sampleLabel, resultsAttrs);
+        for (Map.Entry<String, AttributeSet> entry : resultsMap.entrySet())
+        {
+            String sampleLabel = entry.getKey();
+            sampleLabels.add(sampleLabel);
+
+            AttributeSet resultsAttrs = entry.getValue();
             AttributeSetHelper.prepareForSave(resultsAttrs, getContainer());
 
             // UNDONE: comp matrix
@@ -135,13 +134,12 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                 _analysisRunName, statisticsFile, getOriginalImportedFile(),
                 getRunFilePathRoot(),
                 keywordsMap,
-                Collections.<String, CompensationMatrix>emptyMap(),
-                Collections.<CompensationMatrix, AttributeSet>emptyMap(),
+                sampleCompMatrixMap,
                 resultsMap,
                 Collections.<String, Analysis>emptyMap(),
                 Collections.<Analysis, ScriptDocument>emptyMap(),
                 Collections.<Analysis, FlowScript>emptyMap(),
-                sampleLabels);
+                new ArrayList<String>(sampleLabels));
     }
 
     @Override

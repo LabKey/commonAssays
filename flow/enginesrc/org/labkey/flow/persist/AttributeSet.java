@@ -205,6 +205,20 @@ public class AttributeSet implements Serializable
             aliasesXb.addAlias(alias.toString());
     }
 
+    public void setKeyword(String keyword, String value)
+    {
+        if (_keywords == null)
+            _keywords = new TreeMap();
+        if (StringUtils.isEmpty(value))
+        {
+            _keywords.remove(keyword);
+        }
+        else
+        {
+            _keywords.put(keyword, value);
+        }
+    }
+
     public void setKeywords(Map<String, String> keywords)
     {
         _keywords = new TreeMap();

@@ -29,6 +29,7 @@ import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.study.assay.AssayFileWriter;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.writer.ZipUtil;
@@ -526,14 +527,41 @@ public class AnalysisScriptController extends BaseFlowController
             return root;
         }
 
-        // reads uploaded workspace.file or workspace.path from pipeline
+        // Saves uploaded "workspace.file" to pipeline root
+        // or reads "workspace.path" from pipeline.
         private void getWorkspace(ImportAnalysisForm form, Errors errors)
         {
             WorkspaceData workspace = form.getWorkspace();
             Map<String, MultipartFile> files = getFileMap();
             MultipartFile file = files.get("workspace.file");
             if (file != null && StringUtils.isNotEmpty(file.getOriginalFilename()))
-                form.getWorkspace().setFile(file);
+            {
+                // ensure the pipeline root exists
+                PipeRoot root = getPipeRoot();
+                if (root == null)
+                {
+                    errors.reject(ERROR_MSG, "Please configure the pipeline root for this folder");
+                    return;
+                }
+
+                try
+                {
+                    // save the uploaded workspace
+                    AssayFileWriter writer = new AssayFileWriter();
+                    File dir = writer.ensureUploadDirectory(getContainer());
+                    File uploadedFile = AssayFileWriter.findUniqueFileName(file.getOriginalFilename(), dir);
+                    file.transferTo(uploadedFile);
+
+                    String uploadedPath = root.relativePath(uploadedFile);
+                    form.getWorkspace().setPath(uploadedPath);
+                }
+                catch (Exception e)
+                {
+                    errors.reject(ERROR_MSG, "Error saving uploaded workspace to pipeline: " + e.getMessage());
+                    return;
+                }
+            }
+
             workspace.validate(getContainer(), errors, getRequest());
         }
 
@@ -744,6 +772,7 @@ public class AnalysisScriptController extends BaseFlowController
 
         private void stepAnalysisEngine(ImportAnalysisForm form, BindException errors) throws Exception
         {
+            WorkspaceData workspaceData = form.getWorkspace();
             File runFilePathRoot = getRunPathRoot(form, errors);
             if (errors.hasErrors())
                 return;
@@ -754,10 +783,15 @@ public class AnalysisScriptController extends BaseFlowController
 
             if (analysisEngine.equals("labkeyEngine") || analysisEngine.equals("rEngine"))
             {
+                if (workspaceData.getPath() == null)
+                {
+                    errors.reject(ERROR_MSG, "Selecting an engine requires using a workspace from the pipeline.");
+                    return;
+                }
+
                 if (runFilePathRoot == null)
                 {
                     errors.reject(ERROR_MSG, "You must select FCS Files before selecting an analysis engine.");
-                    //form.setWizardStep(ImportAnalysisStep.SELECT_FCSFILES);
                     return;
                 }
             }

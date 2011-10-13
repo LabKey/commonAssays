@@ -59,11 +59,12 @@
     <tr>
         <td class="labkey-export-tab-options">Include:</td>
         <td class="labkey-export-tab-options">
-            <%--<input id="includeFCSFiles" name="includeFCSFiles" type="checkbox" /> <label for="includeFCSFiles">FCS Files</label><br>--%>
-            <input id="includeGraphs" name="includeGraphs" type="checkbox" checked /> <label for="includeGraphs">Graphs</label>
+            <input id="includeFCSFiles" name="includeFCSFiles" type="checkbox" /> <label for="includeFCSFiles">FCS Files</label><br>
+            <input id="includeGraphs" name="includeGraphs" type="checkbox" checked /> <label for="includeGraphs">Graphs</label><br>
+            <input id="includeCompensation" name="includeCompensation" type="checkbox" checked /> <label for="includeCompensation">Compensation</label>
         </td>
         <td class="labkey-export-tab-options" style="padding-left:2em;">
-            <%--<input id="includeKeywords" name="includeKeywords" type="checkbox" /> <label for="includeKeywords">Keywords</label><br>--%>
+            <input id="includeKeywords" name="includeKeywords" type="checkbox" /> <label for="includeKeywords">Keywords</label><br>
             <input id="includeStatistics" name="includeStatistics" type="checkbox" checked onchange="toggleShortNames(this.checked)" /> <label for="includeStatistics">Statistics</label><br>
             &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: smaller;">(<input id="useShortStatNames" name="useShortStatNames" type="checkbox" checked /> <label for="useShortStatNames">Short stat names</label>)</span>
         </td>

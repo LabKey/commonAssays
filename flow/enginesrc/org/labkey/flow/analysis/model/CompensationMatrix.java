@@ -91,7 +91,7 @@ public class CompensationMatrix implements Serializable
 
     public CompensationMatrix(File file) throws Exception
     {
-        this (new FileInputStream(file));
+        this(new FileInputStream(file));
     }
 
     public CompensationMatrix(InputStream is) throws Exception
@@ -141,7 +141,7 @@ public class CompensationMatrix implements Serializable
         String[] lines = StringUtils.split(strFile, "\r\n");
         if (lines.length < 5)
             throw new IllegalArgumentException("Compensation matrix file should be at least 5 lines long");
-        String name = lines[0];
+        _name = lines[0];
         String[] prefixSuffix = StringUtils.split(lines[1], "\t");
 
         if (prefixSuffix.length == 2)
@@ -323,6 +323,39 @@ public class CompensationMatrix implements Serializable
             ret.append("\n");
         }
         return ret.toString();
+    }
+
+    public String toExportFormat()
+    {
+        final String eol = "\r\n";
+
+        DecimalFormat format = new DecimalFormat();
+        format.setMaximumFractionDigits(4);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(getName()).append(eol);
+        sb.append(_prefix).append("\t").append(_suffix).append(eol);
+
+        String sep = "";
+        for (String channelName : _channelNames)
+        {
+            sb.append(sep).append(channelName);
+            sep = "\t";
+        }
+        sb.append(eol);
+
+        for (int i = 0; i < _channelNames.length; i++)
+        {
+            sep = "";
+            for (int j = 0; j < _channelNames.length; j++)
+            {
+                sb.append(sep).append(format.format(_rows[i][j]));
+                sep = "\t";
+            }
+            sb.append(eol);
+        }
+
+        return sb.toString();
     }
 
     public Document toXML()

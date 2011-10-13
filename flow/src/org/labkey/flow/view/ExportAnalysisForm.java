@@ -30,6 +30,7 @@ public class ExportAnalysisForm implements DataRegionSelection.DataSelectionKeyF
     private boolean _includeKeywords = false;
     private boolean _includeStatistics = false;
     private boolean _includeGraphs = false;
+    private boolean _includeCompensation = false;
     private boolean _useShortStatNames = false;
     private AnalysisSerializer.Options _exportFormat = AnalysisSerializer.Options.FormatGroupBySamplePopulation;
     private String _dataRegionSelectionKey = null;
@@ -96,6 +97,16 @@ public class ExportAnalysisForm implements DataRegionSelection.DataSelectionKeyF
     public void setIncludeGraphs(boolean includeGraphs)
     {
         _includeGraphs = includeGraphs;
+    }
+
+    public boolean isIncludeCompensation()
+    {
+        return _includeCompensation;
+    }
+
+    public void setIncludeCompensation(boolean includeCompensation)
+    {
+        _includeCompensation = includeCompensation;
     }
 
     public boolean isUseShortStatNames()

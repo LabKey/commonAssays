@@ -36,7 +36,9 @@
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.flow.controllers.compensation.CompensationController" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
     String compImg(FlowWell well, String param, String graphSize) throws Exception
     {
@@ -184,6 +186,7 @@
     <%}%>
 </table>
 <% } %>
+<labkey:link href="<%=flowComp.urlFor(CompensationController.DownloadAction.class)%>" text="Download" /><br>
 <%
     DiscussionService.Service service = DiscussionService.get();
     DiscussionService.DiscussionView discussion = service.getDisussionArea(

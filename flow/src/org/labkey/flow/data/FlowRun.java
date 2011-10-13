@@ -76,21 +76,6 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return FlowDataObject.fromDatas(getExperimentRun().getOutputDatas(type));
     }
 
-    // CONSIDER: Include keyword information?
-    public Map<String, AttributeSet> getAnalysis(boolean includeGraphBytes) throws SQLException
-    {
-        Map<String, AttributeSet> analysis = new TreeMap<String, AttributeSet>();
-        List<? extends FlowDataObject> all = getDatas(FlowDataType.FCSAnalysis);
-        for (FlowDataObject obj : all)
-        {
-            String name = obj.getName();
-            AttributeSet attrs = obj.getAttributeSet(includeGraphBytes);
-            analysis.put(name, attrs);
-        }
-
-        return analysis;
-    }
-
     public boolean hasRealWells() throws SQLException
     {
         List<? extends FlowDataObject> all = getDatas(null);
@@ -175,6 +160,11 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     public FlowFCSFile[] getFCSFiles() throws SQLException
     {
         return getDatas(FlowDataType.FCSFile).toArray(new FlowFCSFile[0]);
+    }
+
+    public FlowFCSAnalysis[] getFCSAnalyses() throws SQLException
+    {
+        return getDatas(FlowDataType.FCSAnalysis).toArray(new FlowFCSAnalysis[0]);
     }
 
     public FlowFCSFile findFCSFile(URI uri) throws Exception

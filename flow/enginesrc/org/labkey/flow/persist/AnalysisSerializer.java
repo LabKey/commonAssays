@@ -1,8 +1,10 @@
 package org.labkey.flow.persist;
 
+import Jama.Matrix;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.collections.RowMapFactory;
@@ -13,6 +15,7 @@ import org.labkey.api.reader.TabLoader;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.Tuple3;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.api.writer.VirtualFile;
 import org.labkey.flow.analysis.model.CompensationMatrix;
@@ -30,11 +33,14 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -84,11 +90,20 @@ import java.util.TreeSet;
  */
 public class AnalysisSerializer
 {
+    public static final String KEYWORDS_FILENAME = "keywords.tsv";
     public static final String STATISTICS_FILENAME = "statistics.tsv";
     public static final String GRAPHS_FILENAME = "graphs.tsv";
+    public static final String COMPENSATION_FILENAME = "compensation.tsv";
 
     JobLog _log;
     VirtualFile _rootDir;
+
+    private enum KeywordColumnName
+    {
+        Sample,
+        Keyword,
+        Value
+    }
 
     private enum StatColumnName
     {
@@ -107,6 +122,12 @@ public class AnalysisSerializer
         Path
     }
 
+    private enum CompensationColumnName
+    {
+        Sample,
+        Path
+    }
+
     public enum Options
     {
         ShortStatNames,
@@ -114,7 +135,8 @@ public class AnalysisSerializer
         FormatGroupBySample,
         FormatGroupBySamplePopulation,
         FormatGroupBySamplePopulationParameter,
-        FormatRowPerStatistic
+        FormatRowPerStatistic,
+        FormatRowPerKeyword
     }
 
     // Used for testing
@@ -517,6 +539,141 @@ public class AnalysisSerializer
         }
     }
 
+    private void readKeywordsRowPerKeyword(TabLoader loader, Map<String, AttributeSet> results)
+    {
+        Map<String, String> keywords = new TreeMap<String, String>();
+        int index = 0;
+        for (Map<String, Object> row : loader)
+        {
+            index++;
+            String name = (String)row.get(KeywordColumnName.Sample.toString());
+            String keyword = (String)(row.get(KeywordColumnName.Keyword.toString()));
+            String value = (String)row.get(StatColumnName.Value.toString());
+
+            if (StringUtils.isEmpty(name))
+            {
+                _log.error(String.format("Sample name on row %d must not be empty", index));
+                continue;
+            }
+
+            if (StringUtils.isEmpty(keyword))
+            {
+                _log.error(String.format("Keyword name on row %d must not be empty", index));
+                continue;
+            }
+
+            if (value == null)
+            {
+                _log.error(String.format("Keyword value on row %d must not be empty", index));
+                continue;
+            }
+
+            AttributeSet attrs = results.get(name);
+            if (attrs == null)
+            {
+                attrs = new AttributeSet(ObjectType.fcsKeywords, null);
+                results.put(name, attrs);
+            }
+
+            attrs.setKeyword(keyword, value);
+        }
+    }
+
+    private void readKeywordsGroupBySample(TabLoader loader, Map<String, AttributeSet> results)
+    {
+        int index = 0;
+        Set<String> keywords = null;
+        for (Map<String, Object> row : loader)
+        {
+            index++;
+            String name = (String)row.get(KeywordColumnName.Sample.toString());
+            if (StringUtils.isEmpty(name))
+            {
+                _log.error(String.format("Sample name on row %d must not be empty", index));
+                continue;
+            }
+
+            AttributeSet attrs = results.get(name);
+            if (attrs == null)
+            {
+                attrs = new AttributeSet(ObjectType.fcsKeywords, null);
+                results.put(name, attrs);
+            }
+
+            if (keywords == null)
+            {
+                keywords = new LinkedHashSet<String>();
+                for (String keyword : row.keySet())
+                {
+                    if (StringUtils.isEmpty(keyword))
+                    {
+                        _log.error(String.format("Keyword name must not be empty"));
+                        continue;
+                    }
+
+                    if (keyword.equalsIgnoreCase(KeywordColumnName.Sample.toString()))
+                        continue;
+
+                    keywords.add(keyword);
+                }
+            }
+
+            for (String keyword : keywords)
+            {
+                String value = (String)row.get(keyword);
+                if (value == null)
+                    continue;
+
+                attrs.setKeyword(keyword, value);
+            }
+        }
+    }
+
+    private void readKeywords(InputStream statFile, Map<String, AttributeSet> results) throws IOException
+    {
+        Reader reader = null;
+        try
+        {
+            reader = new InputStreamReader(statFile);
+            TabLoader loader = new TabLoader(reader, true);
+            loader.setUnescapeBackslashes(false);
+            loader.setInferTypes(false);
+
+            // Determine if the stat file is long-skinny or short-wide
+            boolean foundSampleColumn = false;
+            boolean foundKeywordColumn = false;
+            boolean foundValueColumn = false;
+            ColumnDescriptor[] columns = loader.getColumns();
+            for (ColumnDescriptor col : columns)
+            {
+                if (col.name.equalsIgnoreCase(KeywordColumnName.Sample.toString()))
+                    foundSampleColumn = true;
+                else if (col.name.equalsIgnoreCase(KeywordColumnName.Keyword.toString()))
+                    foundKeywordColumn = true;
+                else if (col.name.equalsIgnoreCase(KeywordColumnName.Value.toString()))
+                    foundValueColumn = true;
+                else
+                {
+                    // assume any other column is a String keyword value
+                    col.clazz = String.class;
+                }
+            }
+
+            if (!foundSampleColumn)
+                throw new RuntimeException("Keywords file must contain a sample column.");
+
+            if (foundKeywordColumn && foundValueColumn)
+                readKeywordsRowPerKeyword(loader, results);
+            else
+                readKeywordsGroupBySample(loader, results);
+        }
+        finally
+        {
+            if (reader != null)
+                try { reader.close(); } catch (IOException e) { }
+        }
+    }
+
     private void readGraphs(InputStream graphsFile, Map<String, AttributeSet> results) throws IOException
     {
         Reader reader = null;
@@ -625,14 +782,96 @@ public class AnalysisSerializer
         }
     }
 
-    // Read stats results and graphs.
-    public Map<String, AttributeSet> readAnalysis() throws Exception
+    private void readCompMatrices(InputStream compensationFile, Map<String, CompensationMatrix> matrices) throws IOException
     {
-        Map<String, AttributeSet> results = new LinkedHashMap<String, AttributeSet>();
+        Reader reader = null;
+        try
+        {
+            reader = new InputStreamReader(compensationFile);
+            TabLoader loader = new TabLoader(reader, true);
+            loader.setUnescapeBackslashes(false);
+            loader.setInferTypes(false);
 
-        //InputStream keywordsFile = _rootDir.getInputStream(KEYWORDS_FILENAME);
-        //if (keywordsFile != null)
-        //    readKeywords(keywordsFile, results);
+            // Determine if the stat file is long-skinny or short-wide
+            boolean foundSampleColumn = false;
+            boolean foundPathColumn = false;
+            ColumnDescriptor[] columns = loader.getColumns();
+            for (ColumnDescriptor col : columns)
+            {
+                if (col.name.equalsIgnoreCase(CompensationColumnName.Sample.toString()))
+                    foundSampleColumn = true;
+                else if (col.name.equalsIgnoreCase(CompensationColumnName.Path.toString()))
+                    foundPathColumn = true;
+            }
+
+            if (!foundSampleColumn || !foundPathColumn)
+                throw new RuntimeException("Compensation file must contain a sample and path column.");
+
+            readCompMatrices(loader, matrices);
+        }
+        finally
+        {
+            if (reader != null)
+                try { reader.close(); } catch (IOException e) { }
+        }
+
+    }
+
+    private void readCompMatrices(TabLoader loader, Map<String, CompensationMatrix> matrices) throws IOException
+    {
+        int index = 0;
+        Map<String, CompensationMatrix> compPaths = new HashMap<String, CompensationMatrix>();
+        for (Map<String, Object> row : loader)
+        {
+            index++;
+            String sampleName = StringUtils.trimToNull((String)row.get(CompensationColumnName.Sample.toString()));
+            String path = StringUtils.trimToNull((String)row.get(CompensationColumnName.Path.toString()));
+
+            if (sampleName == null || path == null)
+            {
+                _log.error(String.format("Compensation file requires sample name and path on line %d", index));
+            }
+
+            CompensationMatrix matrix = compPaths.get(path);
+            if (matrix == null)
+            {
+                InputStream is = _rootDir.getInputStream(path);
+                if (is == null)
+                {
+                    _log.error(String.format("Compensation matrix '%s' not found", path));
+                    continue;
+                }
+
+                try
+                {
+                    matrix = new CompensationMatrix(is);
+                }
+                catch (IOException ioe)
+                {
+                    throw ioe;
+                }
+                catch (Exception e)
+                {
+                    throw new RuntimeException(e);
+                }
+
+                compPaths.put(path, matrix);
+            }
+
+            matrices.put(sampleName, matrix);
+        }
+    }
+
+    // Read keywords, stats, graphs, and compensation matrices.
+    public Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readAnalysis() throws Exception
+    {
+        Map<String, AttributeSet> keywords = new LinkedHashMap<String, AttributeSet>();
+        Map<String, AttributeSet> results = new LinkedHashMap<String, AttributeSet>();
+        Map<String, CompensationMatrix> matrices = new LinkedHashMap<String, CompensationMatrix>();
+
+        InputStream keywordsFile = _rootDir.getInputStream(KEYWORDS_FILENAME);
+        if (keywordsFile != null)
+            readKeywords(keywordsFile, keywords);
 
         InputStream statisticsFile = _rootDir.getInputStream(STATISTICS_FILENAME);
         if (statisticsFile != null)
@@ -641,6 +880,10 @@ public class AnalysisSerializer
         InputStream graphsFile = _rootDir.getInputStream(GRAPHS_FILENAME);
         if (graphsFile != null)
             readGraphs(graphsFile, results);
+
+        InputStream compensationFile = _rootDir.getInputStream(COMPENSATION_FILENAME);
+        if (compensationFile != null)
+            readCompMatrices(compensationFile, matrices);
 
         /*
         // Look for directories containing either a statistics or graphs file.
@@ -665,16 +908,16 @@ public class AnalysisSerializer
         }
         */
 
-        if (results.isEmpty())
+        if (keywords.isEmpty() && results.isEmpty())
         {
             _log.error("Nothing to import");
-            return Collections.emptyMap();
+            return Tuple3.of(Collections.<String, AttributeSet>emptyMap(), Collections.<String, AttributeSet>emptyMap(), Collections.<String, CompensationMatrix>emptyMap());
         }
 
-        return results;
+        return Tuple3.of(keywords, results, matrices);
     }
 
-    private Pair<List<String>, List<Map<String, Object>>> writeRowPerStatistic(Map<String, AttributeSet> analysis, boolean shortStatNames) throws IOException
+    private Pair<List<String>, List<Map<String, Object>>> writeRowPerStatistic(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
         List<String> columns = new ArrayList<String>();
         columns.add(StatColumnName.Sample.toString());
@@ -711,7 +954,7 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private Pair<List<String>, List<Map<String, Object>>> writeGroupBySample(Map<String, AttributeSet> analysis, boolean shortStatNames) throws IOException
+    private Pair<List<String>, List<Map<String, Object>>> writeGroupBySample(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics
         Set<StatisticSpec> stats = new TreeSet<StatisticSpec>();
@@ -755,7 +998,7 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulation(Map<String, AttributeSet> analysis, boolean shortStatNames) throws IOException
+    private Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulation(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics with the population removed
         Set<StatisticSpec> stats = new TreeSet<StatisticSpec>();
@@ -821,7 +1064,7 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulationParameter(Map<String, AttributeSet> analysis, boolean shortStatNames) throws IOException
+    private Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulationParameter(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics with the population and parameter removed
         Set<StatisticSpec> stats = new TreeSet<StatisticSpec>();
@@ -954,6 +1197,9 @@ public class AnalysisSerializer
 
     private void writeStatistics(Map<String, AttributeSet> analysis, EnumSet<Options> saveOptions) throws IOException
     {
+        if (analysis == null || analysis.isEmpty())
+            return;
+
         boolean shortStatNames = saveOptions.contains(Options.ShortStatNames);
 
         Pair<List<String>, List<Map<String, Object>>> results;
@@ -972,6 +1218,152 @@ public class AnalysisSerializer
             OutputStream statisticsFile = _rootDir.getOutputStream(STATISTICS_FILENAME);
             PrintWriter pw = new PrintWriter(statisticsFile);
             TSVWriter writer = new TSVMapWriter(results.first, results.second);
+            writer.write(pw);
+            pw.flush();
+            pw.close();
+        }
+    }
+
+    private Pair<List<String>, List<Map<String, Object>>> writeRowPerKeyword(Map<String, AttributeSet> keywords)
+    {
+        List<String> columns = new ArrayList<String>();
+        columns.add(KeywordColumnName.Sample.toString());
+        columns.add(KeywordColumnName.Keyword.toString());
+        columns.add(KeywordColumnName.Value.toString());
+
+        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
+
+        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        for (String sampleName : keywords.keySet())
+        {
+            AttributeSet attrs = keywords.get(sampleName);
+            if (attrs == null)
+                continue;
+
+            Map<String, String> keys = attrs.getKeywords();
+            for (String key : keys.keySet())
+            {
+                String value = keys.get(key);
+
+                // now create a row to be written
+                List<Object> values = new ArrayList<Object>(columns.size());
+                values.add(sampleName);
+                values.add(key);
+                values.add(value);
+
+                rows.add(rowMapFactory.getRowMap(values));
+            }
+        }
+
+        return Pair.of(columns, rows);
+    }
+
+    private Pair<List<String>, List<Map<String, Object>>> writeGroupByKeyword(Map<String, AttributeSet> keywords)
+    {
+        // collect all used keywords
+        Set<String> allKeywords = new TreeSet<String>();
+        for (String sampleName : keywords.keySet())
+        {
+            AttributeSet attrs = keywords.get(sampleName);
+            if (attrs == null)
+                continue;
+
+            allKeywords.addAll(attrs.getKeywordNames());
+        }
+
+        List<String> columns = new ArrayList<String>();
+        columns.add(KeywordColumnName.Sample.toString());
+        for (String keyword : allKeywords)
+            columns.add(keyword);
+
+        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
+
+        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        for (String sampleName : keywords.keySet())
+        {
+            AttributeSet attrs = keywords.get(sampleName);
+            if (attrs == null)
+                continue;
+
+            // now create a row to be written
+            List<Object> values = new ArrayList<Object>(columns.size());
+            values.add(sampleName);
+
+            Map<String, String> keys = attrs.getKeywords();
+            for (String key : allKeywords)
+            {
+                String value = keys.get(key);
+
+                values.add(key);
+                values.add(value);
+
+                rows.add(rowMapFactory.getRowMap(values));
+            }
+        }
+
+        return Pair.of(columns, rows);
+    }
+
+    private void writeKeywords(Map<String, AttributeSet> keywords, EnumSet<Options> saveOptions) throws IOException
+    {
+        if (keywords == null || keywords.isEmpty())
+            return;
+
+        Pair<List<String>, List<Map<String, Object>>> results;
+        if (saveOptions.contains(Options.FormatRowPerKeyword))
+            results = writeRowPerKeyword(keywords);
+        else /*if (saveOptions.contains(Options.FormatGroupBySample))*/
+            results = writeGroupByKeyword(keywords);
+
+        // write the tsv file
+        if (results != null && results.second.size() > 0)
+        {
+            OutputStream statisticsFile = _rootDir.getOutputStream(KEYWORDS_FILENAME);
+            PrintWriter pw = new PrintWriter(statisticsFile);
+            TSVWriter writer = new TSVMapWriter(results.first, results.second);
+            writer.write(pw);
+            pw.flush();
+            pw.close();
+        }
+    }
+
+    private void writeCompMatrices(Map<String, CompensationMatrix> matrices, EnumSet<Options> saveOptions) throws IOException
+    {
+        if (matrices == null || matrices.isEmpty())
+            return;
+
+        List<String> columns = Arrays.asList(CompensationColumnName.Sample.toString(), CompensationColumnName.Path.toString());
+        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[0]));
+        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+
+        Map<CompensationMatrix, String> compPaths = new HashMap<CompensationMatrix, String>();
+        for (String sampleName : matrices.keySet())
+        {
+            CompensationMatrix matrix = matrices.get(sampleName);
+            if (matrix == null)
+                continue;
+
+            String path = compPaths.get(matrix);
+            if (path == null)
+            {
+                // write out new matrix
+                path = _rootDir.makeLegalName(matrix.getName());
+                compPaths.put(matrix, path);
+
+                OutputStream os = _rootDir.getOutputStream(path);
+                IOUtils.write(matrix.toExportFormat(), os);
+                os.close();
+            }
+
+            rows.add(rowMapFactory.getRowMap(new String[] { sampleName, path }));
+        }
+
+        // write the tsv file
+        if (rows.size() > 0)
+        {
+            OutputStream statisticsFile = _rootDir.getOutputStream(COMPENSATION_FILENAME);
+            PrintWriter pw = new PrintWriter(statisticsFile);
+            TSVWriter writer = new TSVMapWriter(columns, rows);
             writer.write(pw);
             pw.flush();
             pw.close();
@@ -1009,6 +1401,9 @@ public class AnalysisSerializer
 
     private void writeGraphs(Map<String, AttributeSet> analysis, boolean friendlyImageNames) throws IOException
     {
+        if (analysis == null || analysis.isEmpty())
+            return;
+
         List<String> columns = new ArrayList<String>();
         columns.add(GraphColumnName.Sample.toString());
         columns.add(GraphColumnName.Population.toString());
@@ -1078,15 +1473,17 @@ public class AnalysisSerializer
         }
     }
 
-    public void writeAnalysis(Map<String, AttributeSet> analysis) throws IOException
+    public void writeAnalysis(Map<String, AttributeSet> keywords, Map<String, AttributeSet> analysis, Map<String, CompensationMatrix> matrices) throws IOException
     {
-        writeAnalysis(analysis, EnumSet.noneOf(Options.class));
+        writeAnalysis(keywords, analysis, matrices, EnumSet.noneOf(Options.class));
     }
 
-    public void writeAnalysis(Map<String, AttributeSet> analysis, EnumSet<Options> saveOptions) throws IOException
+    public void writeAnalysis(Map<String, AttributeSet> keywords, Map<String, AttributeSet> analysis, Map<String, CompensationMatrix> matrices, EnumSet<Options> saveOptions) throws IOException
     {
         writeGraphs(analysis, saveOptions.contains(Options.FriendlyImageNames));
         writeStatistics(analysis, saveOptions);
+        writeKeywords(keywords, saveOptions);
+        writeCompMatrices(matrices, saveOptions);
     }
 
     public static class TestCase extends Assert
@@ -1119,7 +1516,11 @@ public class AnalysisSerializer
             FileSystemFile rootDir = new FileSystemFile(dir);
             TestLog log = new TestLog();
             AnalysisSerializer serializer = new AnalysisSerializer(log, rootDir);
-            Map<String, AttributeSet> results = serializer.readAnalysis();
+            Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> tuple = serializer.readAnalysis();
+
+            Map<String, AttributeSet> keywords = tuple.first;
+            Map<String, AttributeSet> results = tuple.second;
+            Map<String, CompensationMatrix> matrices = tuple.third;
 
             assertEquals("Expected to load two samples", 2, results.size());
             assertTrue(results.containsKey("118760.fcs"));

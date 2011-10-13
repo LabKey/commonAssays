@@ -95,10 +95,10 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
 
     public CompensationMatrix getCompensationMatrix() throws SQLException
     {
-        return getCompensationMatrix(getAttributeSet());
+        return getCompensationMatrix(getName(), getAttributeSet());
     }
 
-    static public CompensationMatrix getCompensationMatrix(AttributeSet attrs)
+    static public CompensationMatrix getCompensationMatrix(String name, AttributeSet attrs)
     {
         TreeSet<String> channelNames = new TreeSet();
         Map<String, Double> values = new HashMap();
@@ -116,7 +116,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         }
         if (channelNames.size() == 0)
             return null;
-        CompensationMatrix ret = new CompensationMatrix("Compensation");
+        CompensationMatrix ret = new CompensationMatrix(name);
         String[] arrChannelNames = channelNames.toArray(new String[channelNames.size()]);
 
         for (int iChannel = 0; iChannel < arrChannelNames.length; iChannel ++)

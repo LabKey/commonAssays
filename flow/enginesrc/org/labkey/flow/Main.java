@@ -20,16 +20,19 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.xmlbeans.XmlOptions;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Tuple3;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.api.writer.VirtualFile;
 import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.analysis.model.Analysis;
+import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.ObjectType;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.OutputKeys;
@@ -284,7 +287,7 @@ public class Main
         }
     }
 
-    private static void writeAnalysisResults(File outDir, Map<String, AttributeSet> results, AnalysisResultsOutputFormat outputFormat)
+    private static void writeAnalysisResults(File outDir, Map<String, AttributeSet> keywords, Map<String, AttributeSet> results, Map<String, CompensationMatrix> matrices, AnalysisResultsOutputFormat outputFormat)
     {
         if (outputFormat == AnalysisResultsOutputFormat.tsv)
         {
@@ -292,7 +295,7 @@ public class Main
             AnalysisSerializer writer = new AnalysisSerializer(rootDir);
             try
             {
-                writer.writeAnalysis(results);
+                writer.writeAnalysis(keywords, results, matrices);
             }
             catch (IOException ioe)
             {
@@ -310,7 +313,7 @@ public class Main
         }
     }
 
-    private static Map<String, AttributeSet> readWorkspaceAnalysisResults(File workspaceFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    private static Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readWorkspaceAnalysisResults(File workspaceFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
         FlowJoWorkspace workspace = readWorkspace(workspaceFile);
 
@@ -344,10 +347,12 @@ public class Main
             }
         }
 
-        Map<String, AttributeSet> results = new LinkedHashMap<String, AttributeSet>();
+        Map<String, AttributeSet> keywords = new LinkedHashMap<String, AttributeSet>();
+        Map<String, AttributeSet> analysis = new LinkedHashMap<String, AttributeSet>();
+        Map<String, CompensationMatrix> matrices = new LinkedHashMap<String, CompensationMatrix>();
         for (FlowJoWorkspace.SampleInfo sampleInfo : sampleInfos)
         {
-            if (results.containsKey(sampleInfo.getLabel()))
+            if (analysis.containsKey(sampleInfo.getLabel()))
             {
                 System.err.printf("warning: sample label '%s' appears on more than one sample info", sampleInfo.getLabel());
                 continue;
@@ -355,15 +360,28 @@ public class Main
 
             AttributeSet attrs = workspace.getSampleAnalysisResults(sampleInfo);
             if (attrs != null)
-                results.put(sampleInfo.getLabel(), attrs);
+                analysis.put(sampleInfo.getLabel(), attrs);
+
+
+            Map<String, String> sampleKeywords = sampleInfo.getKeywords();
+            if (sampleKeywords != null && !sampleKeywords.isEmpty())
+            {
+                AttributeSet keywordAttrs = new AttributeSet(ObjectType.fcsKeywords, null);
+                keywordAttrs.setKeywords(sampleKeywords);
+                keywords.put(sampleInfo.getLabel(), keywordAttrs);
+            }
+
+            CompensationMatrix matrix = sampleInfo.getCompensationMatrix();
+            if (matrix != null)
+                matrices.put(sampleInfo.getLabel(), matrix);
 
             // UNDONE: generate graphs if fcs file is available
         }
 
-        return results;
+        return Tuple3.of(keywords, analysis, matrices);
     }
 
-    private static Map<String, AttributeSet> readTsvAnalysisResults(File analysisResultsFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    private static Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readTsvAnalysisResults(File analysisResultsFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
         VirtualFile rootDir;
         if (analysisResultsFile.getName().endsWith(".zip"))
@@ -427,9 +445,9 @@ public class Main
         }
     }
 
-    private static Map<String, AttributeSet> readAnalysisResults(File analysisResultsFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    private static Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readAnalysisResults(File analysisResultsFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
-        Map<String, AttributeSet> results = null;
+        Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> results = null;
         if (FlowJoWorkspace.isFlowJoWorkspace(analysisResultsFile))
         {
             results = readWorkspaceAnalysisResults(analysisResultsFile, fcsDir, groupNames, sampleIds, stats);
@@ -449,11 +467,11 @@ public class Main
 
     private static void executeConvertAnalysis(File outDir, File workspaceOrAnalysisResults, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats, AnalysisResultsOutputFormat outputFormat)
     {
-        Map<String, AttributeSet> results = readAnalysisResults(workspaceOrAnalysisResults, fcsDir, groupNames, sampleIds, stats);
+        Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> results = readAnalysisResults(workspaceOrAnalysisResults, fcsDir, groupNames, sampleIds, stats);
         if (results == null)
             return;
 
-        writeAnalysisResults(outDir, results, outputFormat);
+        writeAnalysisResults(outDir, results.first, results.second, results.third, outputFormat);
     }
 
     private static void executeRunAnalysis(File outDir, File workspaceFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats, AnalysisResultsOutputFormat outputFormat)

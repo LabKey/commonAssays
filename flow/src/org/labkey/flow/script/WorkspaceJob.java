@@ -150,14 +150,13 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
     {
         Map<String, AttributeSet> keywordsMap = new LinkedHashMap();
         Map<String, CompensationMatrix> sampleCompMatrixMap = new LinkedHashMap();
-        Map<CompensationMatrix, AttributeSet> compMatrixMap = new LinkedHashMap();
         Map<String, AttributeSet> resultsMap = new LinkedHashMap();
         Map<String, Analysis> analysisMap = new LinkedHashMap();
         Map<Analysis, ScriptDocument> scriptDocs = new HashMap();
         Map<Analysis, FlowScript> scripts = new HashMap();
         List<String> sampleLabels = new ArrayList<String>(workspace.getSampleCount());
 
-        if (extractAnalysis(job, container, workspace, runFilePathRoot, importGroupNames, failOnError, keywordsMap, sampleCompMatrixMap, compMatrixMap, resultsMap, analysisMap, scriptDocs, sampleLabels))
+        if (extractAnalysis(job, container, workspace, runFilePathRoot, importGroupNames, failOnError, keywordsMap, sampleCompMatrixMap, resultsMap, analysisMap, scriptDocs, sampleLabels))
             return null;
 
         if (job.checkInterrupted())
@@ -170,7 +169,6 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 originalImportedFile, runFilePathRoot,
                 keywordsMap,
                 sampleCompMatrixMap,
-                compMatrixMap,
                 resultsMap,
                 analysisMap,
                 scriptDocs,
@@ -202,7 +200,6 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                     boolean failOnError,
                                     Map<String, AttributeSet> keywordsMap,
                                     Map<String, CompensationMatrix> sampleCompMatrixMap,
-                                    Map<CompensationMatrix, AttributeSet> compMatrixMap,
                                     Map<String, AttributeSet> resultsMap,
                                     Map<String, Analysis> analysisMap,
                                     Map<Analysis, ScriptDocument> scriptDocs,
@@ -298,13 +295,6 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             if (comp != null)
             {
                 sampleCompMatrixMap.put(sample.getLabel(), comp);
-
-                if (!compMatrixMap.containsKey(comp))
-                {
-                    AttributeSet compAttrs = new AttributeSet(comp);
-                    AttributeSetHelper.prepareForSave(compAttrs, container);
-                    compMatrixMap.put(comp, compAttrs);
-                }
             }
         }
         return false;

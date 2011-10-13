@@ -51,6 +51,10 @@
 <%@ page import="org.labkey.api.flow.api.FlowService" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="org.labkey.api.data.SimpleFilter" %>
+<%@ page import="java.util.TreeSet" %>
+<%@ page import="org.json.JSONObject" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.TreeMap" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -83,12 +87,17 @@
     opOptions.put(CompareType.DOES_NOT_START_WITH.getPreferredUrlKey(), CompareType.DOES_NOT_START_WITH.getDisplayValue());
     opOptions.put(CompareType.IN.getPreferredUrlKey(), CompareType.IN.getDisplayValue());
 
-    String importGroupNames = form.getImportGroupNames();
-
-    JSONArray jsonGroupNames = new JSONArray();
+    Map<String, Set<String>> groups = new TreeMap<String, Set<String>>();
     for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
     {
-        jsonGroupNames.put(new String[] { group.getGroupName().toString(), group.getGroupName().toString() });
+        Set<String> groupSamples = new TreeSet<String>();
+        for (String sampleID : group.getSampleIds())
+        {
+            FlowJoWorkspace.SampleInfo sampleInfo = workspace.getSample(sampleID);
+            if (sampleInfo != null)
+                groupSamples.add(sampleInfo.getLabel());
+        }
+        groups.put(group.getGroupName().toString(), groupSamples);
     }
 
 %>
@@ -103,57 +112,65 @@
 
 <p>Which samples should be imported?</p>
 <div style="padding-left: 2em; padding-bottom: 1em;">
-<% if (protocol != null) { %>
-    <% if (protocol.getFCSAnalysisFilterString() != null) { %>
+<%
+if (protocol != null)
+{
+    if (protocol.getFCSAnalysisFilterString() != null)
+    {
+        %>
         Samples will be filtered by the current protocol <a href="<%=protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" target="_blank">FCS analysis filter</a>:
         <br>
         <div style="padding-left: 2em;">
             <%=protocol.getFCSAnalysisFilter().getFilterText()%>
         </div>
-    <% } else { %>
-        No protocol <a href="<%=protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" target="_blank">FCS analysis filter</a> has been defined in this folder.
-        <%System.out.println("qq");%>
-    <% } %>
-<% } %>
+        <%
+    }
+    else
+    {
+        %>No protocol <a href="<%=protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" target="_blank">FCS analysis filter</a> has been defined in this folder.<%
+    }
+}
+%>
     <p>
-    Select the FlowJo groups to import from the workspace. Leave blank to import all samples.
-    <div id="importGroupNamesDiv"></div>
     <script>
-        LABKEY.requiresScript('Ext.ux.form.LovCombo.js');
-        LABKEY.requiresCss('Ext.ux.form.LovCombo.css');
+        function onGroupChanged(selectedGroup)
+        {
+            var rEngineNormalizationReferenceSelect = document.getElementById("rEngineNormalizationReference");
+            if (rEngineNormalizationReferenceSelect)
+            {
+                var nl = rEngineNormalizationReferenceSelect.childNodes;
+                for (var i = 0; i < nl.length; i++)
+                {
+                    if (nl[i].tagName === "OPTGROUP")
+                    {
+                        var optgroup = nl[i];
+                        if (selectedGroup === "All Samples")
+                            optgroup.disabled = false;
+                        else
+                            optgroup.disabled = (optgroup.label !== selectedGroup);
+                    }
+                }
+            }
+        }
     </script>
-    <script>
-        Ext.onReady(function () {
-            var combo = new Ext.ux.form.LovCombo({
-                id: "importGroupNames",
-                renderTo: "importGroupNamesDiv",
-                width: 275,
-                value: <%=PageFlowUtil.jsString(importGroupNames)%>,
-                triggerAction: "all",
-                mode: "local",
-                valueField: "myId",
-                displayField: "displayText",
-                store: new Ext.data.ArrayStore({
-                    fields: ["myId", "displayText"],
-                    data: <%=jsonGroupNames%>
-                })
-            });
-        });
-    </script>
+    <label for="importGroupNames">Select a FlowJo group to import from the workspace.</label>
+    <select id="importGroupNames" name="importGroupNames" onchange="onGroupChanged(this.value);">
+        <labkey:options value="<%=form.getImportGroupNames()%>" set="<%=groups.keySet()%>" />
+    </select>
 </div>
 
 <%
     if ("rEngine".equals(form.getSelectAnalysisEngine()))
     {
-        Set<String> sampleLabels = new LinkedHashSet<String>(workspace.getAllSampleLabels());
-
+        Set<String> ignore = new HashSet<String>(Arrays.asList("Time", "FSC-H", "FSC-A", "SSC-H", "SSC-A"));
         JSONArray jsonParams = new JSONArray();
         for (String param : workspace.getParameters())
         {
-            jsonParams.put(new String[]{param, param});
+            if (!ignore.contains(param))
+                jsonParams.put(new String[]{param, param});
         }
 %>
-<p><b>Normalization Options</b></p>
+<p>Normalization Options</p>
 <script>
     function onNormalizationChange()
     {
@@ -169,16 +186,36 @@
 </div>
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
-    <label for="rEngineNormalizationReference">Select sample to be use as normalization reference.</label>
-    <br>
+    <label for="rEngineNormalizationReference">Select sample to be use as normalization reference.</label><br>
+    <em>NOTE:</em> The list of available samples is restricted to those in the imported group above.<br>
     <select name="rEngineNormalizationReference" id="rEngineNormalizationReference">
-        <labkey:options value="<%=form.getrEngineNormalizationReference()%>" set="<%=sampleLabels%>" />
+        <%
+            String rEngineNormalizationReference = form.getrEngineNormalizationReference();
+            for (String group : groups.keySet())
+            {
+                if ("All Samples".equalsIgnoreCase(group))
+                    continue;
+
+                Set<String> groupSamples = groups.get(group);
+
+                %><optgroup label="<%=group%>"><%
+                for (String sample : groupSamples)
+                {
+                    %><option <%=sample.equals(rEngineNormalizationReference) ? "selected" : ""%>><%=sample%></option><%
+                }
+                %></optgroup><%
+            }
+        %>
     </select>
 </div>
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <label for="rEngineNormalizationParameters">Select parameters to be normalized.  Leave blank to normalize all parameters.</label>
     <div id="rEngineNormalizationParametersDiv"></div>
+    <script>
+        LABKEY.requiresScript('Ext.ux.form.LovCombo.js');
+        LABKEY.requiresCss('Ext.ux.form.LovCombo.css');
+    </script>
     <script>
         Ext.onReady(function () {
             var combo = new Ext.ux.form.LovCombo({
@@ -203,4 +240,5 @@
 <%
     }
 %>
+
 

@@ -26,8 +26,10 @@ import org.labkey.api.jsp.FormPage;
 import org.labkey.api.query.*;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.*;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.*;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.data.FlowCompensationMatrix;
@@ -40,6 +42,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletResponse;
 
 public class CompensationController extends BaseFlowController
 {
@@ -135,6 +138,42 @@ public class CompensationController extends BaseFlowController
         public NavTree appendNavTrail(NavTree root)
         {
             return appendFlowNavTrail(getPageConfig(), root, null, "Upload a new compensation matrix");
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class DownloadAction extends SimpleViewAction<ViewForm>
+    {
+        FlowCompensationMatrix _comp;
+
+        public ModelAndView getView(ViewForm form, BindException errors) throws Exception
+        {
+            _comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
+            if (_comp == null)
+                throw new NotFoundException("Compensation Matrix not found");
+
+            CompensationMatrix comp = _comp.getCompensationMatrix();
+            if (comp == null)
+                throw new NotFoundException("Compensation Matrix has no channels");
+
+            FlowRun run = _comp.getRun();
+            String fileName = comp.getName();
+            if (fileName.endsWith(" " + run.getName()))
+                fileName = fileName.substring(0, fileName.length() - run.getName().length() - 1);
+
+            String result = comp.toExportFormat();
+
+            HttpServletResponse response = getViewContext().getResponse();
+            response.setContentType("text/plain");
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + FileUtil.makeLegalName(fileName) + "\";");
+            response.getWriter().write(result);
+
+            return null;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
         }
     }
 

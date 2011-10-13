@@ -37,10 +37,14 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.writer.VirtualFile;
 import org.labkey.api.writer.ZipFile;
+import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
+import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowFCSAnalysis;
+import org.labkey.flow.data.FlowFCSFile;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowWell;
@@ -59,8 +63,12 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -173,7 +181,7 @@ public class RunController extends BaseFlowController
 
             for (FlowWell well : wells)
             {
-                URI uri = FlowAnalyzer.getFCSUri(well);
+                URI uri = well.getFCSURI();
                 File file = new File(uri);
                 if (file.exists() && file.canRead())
                     _files.put(file.getName(), file);
@@ -196,35 +204,8 @@ public class RunController extends BaseFlowController
             else
             {
                 HttpServletResponse response = getViewContext().getResponse();
-
-                response.reset();
-                response.setContentType("application/zip");
-                response.setHeader("Content-Disposition", "attachment; filename=\"" + _run.getName() + ".zip\"");
-                ZipOutputStream stream = new ZipOutputStream(response.getOutputStream());
-                byte[] buffer = new byte[524288];
-                for (File file : _files.values())
-                {
-                    if (file.canRead())
-                    {
-                        ZipEntry entry = new ZipEntry(file.getName());
-                        stream.putNextEntry(entry);
-                        InputStream is;
-                        if (form.getEventCount() == null)
-                        {
-                            is = new FileInputStream(file);
-                        }
-                        else
-                        {
-                            is = new ByteArrayInputStream(new FCS(file).getFCSBytes(file, form.getEventCount().intValue()));
-                        }
-                        int cb;
-                        while((cb = is.read(buffer)) > 0)
-                        {
-                            stream.write(buffer, 0, cb);
-                        }
-                    }
-                }
-                stream.close();
+                ZipFile zipFile = new ZipFile(response, _run.getName());
+                exportFCSFiles(zipFile, _run, form.getEventCount() == null ? 0 : form.getEventCount());
 
                 return null;
             }
@@ -234,6 +215,46 @@ public class RunController extends BaseFlowController
         {
             root.addChild("Download Run");
             return root;
+        }
+    }
+
+    protected void exportFCSFiles(VirtualFile dir, FlowRun run, int eventCount)
+            throws Exception
+    {
+        FlowWell[] wells = run.getWells(true);
+        exportFCSFiles(dir, Arrays.asList(wells), eventCount);
+    }
+
+    protected void exportFCSFiles(VirtualFile dir, Collection<FlowWell> wells, int eventCount)
+            throws Exception
+    {
+        byte[] buffer = new byte[524288];
+        for (FlowWell well : wells)
+        {
+            URI uri = well.getFCSURI();
+            if (uri == null)
+                continue;
+
+            File file = new File(uri);
+            if (file.canRead())
+            {
+                OutputStream os = dir.getOutputStream(file.getName());
+                InputStream is;
+                if (eventCount == 0)
+                {
+                    is = new FileInputStream(file);
+                }
+                else
+                {
+                    is = new ByteArrayInputStream(new FCS(file).getFCSBytes(file, eventCount));
+                }
+                int cb;
+                while((cb = is.read(buffer)) > 0)
+                {
+                    os.write(buffer, 0, cb);
+                }
+                os.close();
+            }
         }
     }
 
@@ -314,7 +335,8 @@ public class RunController extends BaseFlowController
         @Override
         public boolean handlePost(ExportAnalysisForm form, BindException errors) throws Exception
         {
-            HttpServletResponse response = getViewContext().getResponse();
+            final String fcsDirName = "FCSFiles";
+            final HttpServletResponse response = getViewContext().getResponse();
 
             if (_runs != null && _runs.size() > 0)
             {
@@ -328,10 +350,20 @@ public class RunController extends BaseFlowController
                 ZipFile zipFile = new ZipFile(response, zipName);
                 for (FlowRun run : _runs)
                 {
+                    Map<String, AttributeSet> keywords = new TreeMap<String, AttributeSet>();
+                    Map<String, AttributeSet> analysis = new TreeMap<String, AttributeSet>();
+                    Map<String, CompensationMatrix> matrices = new TreeMap<String, CompensationMatrix>();
+                    getAnalysis(Arrays.asList(run.getWells()), keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation());
+
                     String dirName = getBaseName(run.getName());
                     VirtualFile dir = zipFile.getDir(dirName);
                     AnalysisSerializer writer = new AnalysisSerializer(_log, dir);
-                    writer.writeAnalysis(run.getAnalysis(form.isIncludeGraphs()), EnumSet.of(form.getExportFormat()));
+                    writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
+
+                    if (form.isIncludeFCSFiles())
+                    {
+                        exportFCSFiles(dir.getDir(fcsDirName), run, 0);
+                    }
                 }
                 zipFile.close();
             }
@@ -344,16 +376,20 @@ public class RunController extends BaseFlowController
                     zipName = getBaseName(well.getName()) + ".zip";
                 }
 
+                Map<String, AttributeSet> keywords = new TreeMap<String, AttributeSet>();
                 Map<String, AttributeSet> analysis = new TreeMap<String, AttributeSet>();
-                for (FlowWell well : _wells)
-                {
-                    AttributeSet attrs = well.getAttributeSet(form.isIncludeGraphs());
-                    analysis.put(well.getName(), attrs);
-                }
+                Map<String, CompensationMatrix> matrices = new TreeMap<String, CompensationMatrix>();
+                getAnalysis(_wells, keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation());
 
                 ZipFile zipFile = new ZipFile(response, zipName);
                 AnalysisSerializer writer = new AnalysisSerializer(_log, zipFile);
-                writer.writeAnalysis(analysis, EnumSet.of(form.getExportFormat()));
+                writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
+
+                if (form.isIncludeFCSFiles())
+                {
+                    exportFCSFiles(zipFile.getDir(fcsDirName), _wells, 0);
+                }
+
                 zipFile.close();
             }
 
@@ -372,6 +408,44 @@ public class RunController extends BaseFlowController
             return appendFlowNavTrail(getPageConfig(), root, null, "Export Analysis");
         }
 
+    }
+
+    public void getAnalysis(List<FlowWell> wells,
+                            Map<String, AttributeSet> keywordAttrs,
+                            Map<String, AttributeSet> analysisAttrs,
+                            Map<String, CompensationMatrix> matrices,
+                            boolean includeKeywords, boolean includeGraphBytes, boolean includeCompMatrices)
+            throws SQLException
+    {
+        for (FlowWell well : wells)
+        {
+            String name = well.getName();
+            if (well instanceof FlowFCSAnalysis)
+            {
+                FlowFCSAnalysis analysis = (FlowFCSAnalysis) well;
+                AttributeSet attrs = analysis.getAttributeSet(includeGraphBytes);
+                analysisAttrs.put(name, attrs);
+
+            }
+
+            if (includeKeywords)
+            {
+                FlowFCSFile file = well.getFCSFile();
+                AttributeSet attrs = file.getAttributeSet();
+                keywordAttrs.put(name, attrs);
+            }
+
+            if (includeCompMatrices)
+            {
+                FlowCompensationMatrix flowCompMatrix = well.getCompensationMatrix();
+                if (flowCompMatrix != null)
+                {
+                    CompensationMatrix matrix = flowCompMatrix.getCompensationMatrix();
+                    if (matrix != null)
+                        matrices.put(name, matrix);
+                }
+            }
+        }
     }
 
     @RequiresPermissionClass(UpdatePermission.class)

@@ -25,8 +25,11 @@ import org.labkey.api.resource.Resource;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.writer.FileSystemFile;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.FlowSettings;
+import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
@@ -40,6 +43,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -100,6 +104,9 @@ public class RScriptJob extends FlowExperimentJob
         _failOnError = failOnError;
         assert !_createKeywordRun || _runFilePathRoot != null;
 
+        if (workspaceData.getPath() == null || originalImportedFile == null)
+            throw new IllegalArgumentException("External R analysis requires workspace file from pipeline");
+
         String name = workspaceData.getName();
         if (name == null && workspaceData.getPath() != null)
         {
@@ -110,12 +117,9 @@ public class RScriptJob extends FlowExperimentJob
         if (name == null)
             name = "workspace";
         _workspaceName = name;
-        _workspaceFile = File.createTempFile(_workspaceName, null, FlowSettings.getWorkingDirectory());
 
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(_workspaceFile));
-        oos.writeObject(workspaceData.getWorkspaceObject());
-        oos.flush();
-        oos.close();
+        // NOTE: may need to copy workspace file for clustered jobs
+        _workspaceFile = originalImportedFile;
     }
 
     @Override
@@ -153,14 +157,33 @@ public class RScriptJob extends FlowExperimentJob
         replacements.put(FCSFILE_DIRECTORY_REPLACEMENT, _runFilePathRoot.getAbsolutePath()); // ? escape
         replacements.put(OUTPUT_DIRECTORY_REPLACEMENT, workingDir.getAbsolutePath()); // ? escape
         replacements.put(RUN_NAME_REPLACEMENT, _workspaceName); // ? escape
-        replacements.put(GROUP_NAMES_REPLACEMENT, _importGroupNames == null ? "" : _importGroupNames.toString());
+        replacements.put(GROUP_NAMES_REPLACEMENT, _importGroupNames != null && _importGroupNames.size() > 0 ? _importGroupNames.get(0) : "");
         replacements.put(NORMALIZATION, String.valueOf(_performNormalization));
-        replacements.put(NORM_REFERENCE, _normalizationReference);
-        replacements.put(NORM_PARAMTERS, _normalizationParameters);
+        replacements.put(NORM_REFERENCE, _normalizationReference == null ? "" : _normalizationReference);
+        replacements.put(NORM_PARAMTERS, _normalizationParameters == null ? "" : _normalizationParameters);
 
         String script = getScript();
         String output = (String)engine.eval(script);
         info(output);
+    }
+
+    private void writeCompensation(File workingDir) throws Exception
+    {
+        info("Writing compensation matrices...");
+        FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(new FileInputStream(_workspaceFile));
+        Map<String, CompensationMatrix> matrices = new HashMap<String, CompensationMatrix>();
+        for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+        {
+            CompensationMatrix matrix = sampleInfo.getCompensationMatrix();
+            if (matrix == null)
+                continue;
+
+            matrices.put(sampleInfo.getLabel(), matrix);
+        }
+
+        FileSystemFile rootDir = new FileSystemFile(workingDir);
+        AnalysisSerializer writer = new AnalysisSerializer(_logger, rootDir);
+        writer.writeAnalysis(null, null, matrices);
     }
 
     @Override
@@ -169,25 +192,31 @@ public class RScriptJob extends FlowExperimentJob
         File workingDir = createAnalysisDirectory(getExperiment().getName(), FlowProtocolStep.analysis);
         runScript(workingDir);
 
-        ImportResultsJob importJob = new ImportResultsJob(getInfo(), getPipeRoot(), getExperiment(),
-                workingDir, _originalImportedFile, _runFilePathRoot,
-                _workspaceName, _createKeywordRun, _failOnError);
-        importJob.setLogFile(getLogFile());
-        importJob.setLogLevel(getLogLevel());
-        importJob.setSubmitted();
+        if (!hasErrors())
+            writeCompensation(workingDir);
 
-        try
+        if (!hasErrors())
         {
-            importJob.doRun();
-            if (importJob.hasErrors())
+            ImportResultsJob importJob = new ImportResultsJob(getInfo(), getPipeRoot(), getExperiment(),
+                    workingDir, _originalImportedFile, _runFilePathRoot,
+                    _workspaceName, _createKeywordRun, _failOnError);
+            importJob.setLogFile(getLogFile());
+            importJob.setLogLevel(getLogLevel());
+            importJob.setSubmitted();
+
+            try
             {
-                getLogger().error("Failed to import results from R analysis.");
-                setStatus(PipelineJob.ERROR_STATUS);
+                importJob.doRun();
+                if (importJob.hasErrors())
+                {
+                    getLogger().error("Failed to import results from R analysis.");
+                    setStatus(PipelineJob.ERROR_STATUS);
+                }
             }
-        }
-        catch (Exception e)
-        {
-            error("Import failed to complete", e);
+            catch (Exception e)
+            {
+                error("Import failed to complete", e);
+            }
         }
 
         deleteAnalysisDirectory(workingDir);

@@ -41,7 +41,6 @@ public class WorkspaceData implements Serializable
     String path;
     String name;
     FlowJoWorkspace object;
-    transient MultipartFile file;
 
     public void setPath(String path)
     {
@@ -50,15 +49,6 @@ public class WorkspaceData implements Serializable
             path = PageFlowUtil.decode(path);
             this.path = path;
             this.name = new File(path).getName();
-        }
-    }
-
-    public void setFile(MultipartFile file)
-    {
-        if (file != null)
-        {
-            this.file = file;
-            this.name = file.getOriginalFilename();
         }
     }
 
@@ -75,11 +65,6 @@ public class WorkspaceData implements Serializable
     public void setObject(String object) throws Exception
     {
         this.object = (FlowJoWorkspace) PageFlowUtil.decodeObject(object);
-    }
-
-    public MultipartFile getFile()
-    {
-        return file;
     }
 
     public FlowJoWorkspace getWorkspaceObject()
@@ -132,10 +117,6 @@ public class WorkspaceData implements Serializable
 
                 File file = pipeRoot.resolvePath(path);
                 object = readWorkspace(file, path);
-            }
-            else if (file != null && !file.isEmpty())
-            {
-                object = readWorkspace(file.getInputStream());
             }
             else
             {

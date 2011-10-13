@@ -14,15 +14,60 @@
 #  limitations under the License.
 ##
 
-library(flowWorkspace)
+# workspace-path: ${workspace-path}
+# fcsfile-directory: ${fcsfile-directory}
+# run-name: ${run-name}
+# group-names: ${group-names}
+# perform-normalization: ${perform-normalization}
+# normalization-reference: ${normalization-reference}
+# normalization-parameters: ${normalization-parameters}
 
-# ${workspace-path}
-# ${fcsfile-directory}
-# ${run-name}
-# ${group-names}
-# ${perform-normalization}
-# ${normalization-reference}
-# ${normalization-parameters}
+NCDF<-FALSE
+USEMPI<-FALSE
+USEMULTICORE<-FALSE
+if(USEMPI){
+    require(Rmpi)
+}
+if (NCDF) {
+    require(ncdfFlow)
+}
+if(USEMULTICORE){
+    require(multicore)
+}
 
-x <- system("cp -Rf /Users/kevink/labkey/trunk/sampledata/flow/external-analysis/* ${output-directory}", intern=TRUE)
-x
+require(flowWorkspace)
+
+# for md5sum
+require(tools)
+
+# Some hard-coded variables that should be passed in by the calling process.
+workspacePath <- "${workspace-path}"
+fcsFileDir <- "${fcsfile-directory}"
+#workspacefile <- dir(path=pathtoxml,pattern="xml")
+
+
+# A legacy flowWorkspace parameter.. should always be true
+EXECUTENOW <- TRUE
+
+# The group to import .. should be a homogeneous group (ie. 'All Samples' group is probably not a good idea)
+GROUP <- "${group-names}"
+
+# Keywords that you should use to annotate the samples
+Keywords <- c("Stim","EXPERIMENT NAME","Sample Order")
+
+# Directory to export the results
+outputDir <- "${output-directory}"
+
+
+# open the workspace
+print(paste("opening workspace", workspacePath, "..."))
+ws <- openWorkspace(workspacePath)
+
+# parse the workspace
+print(paste("parsing workspace", workspacePath, "..."))
+G <- parseWorkspace(ws, path=fcsFileDir, isNcdf=NCDF, execute=EXECUTENOW, name=GROUP)
+
+# export the required files
+print(paste("exporting workspace", workspacePath, "to", outputDir, "..."))
+ExportTSVAnalysis(x=G, Keywords=Keywords, EXPORT=outputDir)
+
