@@ -23,7 +23,7 @@ public class AnalyteTitration
 {
     private int _analyteId;
     private int _titrationId;
-    private double _maxFI;
+    private Double _maxFI;
     private Integer _guideSetId;
     private boolean _includeInGuideSetCalculation;
 
@@ -47,12 +47,12 @@ public class AnalyteTitration
         _titrationId = titrationId;
     }
 
-    public double getMaxFI()
+    public Double getMaxFI()
     {
         return _maxFI;
     }
 
-    public void setMaxFI(double maxFI)
+    public void setMaxFI(Double maxFI)
     {
         _maxFI = maxFI;
     }

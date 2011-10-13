@@ -17,10 +17,22 @@
 package org.labkey.ms2.metadata;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.IconDisplayColumn;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
@@ -29,26 +41,42 @@ import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.query.*;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.assay.*;
-import org.labkey.api.util.GUID;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayDataCollector;
+import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.study.assay.AssayPipelineProvider;
+import org.labkey.api.study.assay.AssayRunCreator;
+import org.labkey.api.study.assay.AssayRunUploadContext;
+import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AssayTableMetadata;
+import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Module;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
+import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: Peter@labkey.com
@@ -67,7 +95,6 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
     public static final String FRACTION_DOMAIN_PREFIX = ExpProtocol.ASSAY_DOMAIN_PREFIX + "Fractions";
     public static final String FRACTION_SET_NAME = "Fraction Fields";
     public static final String FRACTION_SET_LABEL = "These fields are used to describe searches where one sample has been divided into multiple fractions. The fields should describe the properties that vary from fraction to fraction.";
-    private static final String FRACTION_INPUT_ROLE = "Fraction";
 
     public MassSpecMetadataAssayProvider()
     {
@@ -125,6 +152,11 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
                 out.write("&nbsp;");
             }
         }
+    }
+
+    public AssayRunCreator getRunCreator()
+    {
+        return new MassSpecRunCreator(this);
     }
 
     @Override
@@ -193,112 +225,6 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
 
         searchCountSQL.append(")");
         return searchCountSQL;
-    }
-
-    @Override
-    public Pair<ExpRun, ExpExperiment> saveExperimentRun(AssayRunUploadContext context, ExpExperiment batch) throws ExperimentException, ValidationException
-    {
-        MassSpecMetadataAssayForm form = (MassSpecMetadataAssayForm)context;
-        if (form.isFractions())
-        {
-            // If this is a fractions search, first derive the fraction samples
-            deriveFractions(form);
-            Pair<ExpRun, ExpExperiment> result = null;
-            // Then upload a bunch of runs
-            while (!PipelineDataCollector.getFileQueue(form).isEmpty())
-            {
-                result = super.saveExperimentRun(context, batch);
-                batch = result.getValue();
-                form.clearUploadedData();
-                form.getSelectedDataCollector().uploadComplete(form);
-            }
-            return result;
-        }
-        else
-        {
-            return super.saveExperimentRun(context, batch);
-        }
-    }
-
-    private ExpRun deriveFractions(MassSpecMetadataAssayForm form) throws ExperimentException
-    {
-        ExpSampleSet fractionSet = getFractionSampleSet(form);
-
-        Map<File, Map<DomainProperty, String>> mapFilesToFractionProperties = form.getFractionProperties(fractionSet);
-
-        Map<ExpMaterial, String> derivedSamples = new HashMap<ExpMaterial, String>();
-
-        try
-        {
-            for (Map.Entry<File,Map<DomainProperty, String>> entry : mapFilesToFractionProperties.entrySet())
-            {
-                // generate unique lsids for the derived samples
-                File mzxmlFile = entry.getKey();
-                String fileNameBase = mzxmlFile.getName().substring(0, (mzxmlFile.getName().lastIndexOf('.')));
-                Map<DomainProperty, String> properties = entry.getValue();
-                Lsid derivedLsid = new Lsid(fractionSet.getMaterialLSIDPrefix() + "OBJECT");
-                derivedLsid.setObjectId(GUID.makeGUID());
-                int index = 0;
-                while(ExperimentService.get().getExpMaterial(derivedLsid.toString()) != null)
-                    derivedLsid.setObjectId(derivedLsid.getObjectId() + "-" + ++index);
-
-                ExpMaterial derivedMaterial = ExperimentService.get().createExpMaterial(form.getContainer()
-                        , derivedLsid.toString(), "Fraction - " + fileNameBase);
-                derivedMaterial.setCpasType(fractionSet.getLSID());
-                // could put the fraction properties on the fraction material object or on the run.  decided to do the run
-
-                for (Map.Entry<DomainProperty, String> property : properties.entrySet())
-                {
-                    String value = property.getValue();
-                    derivedMaterial.setProperty(form.getUser(), property.getKey().getPropertyDescriptor(), value);
-                }
-
-                derivedSamples.put(derivedMaterial, FRACTION_INPUT_ROLE);
-                form.getFileFractionMap().put(mzxmlFile, derivedMaterial);
-            }
-            ViewBackgroundInfo info = new ViewBackgroundInfo(form.getContainer(), form.getUser(), form.getActionURL());
-            Map<ExpMaterial, String> startingMaterials = form.getInputMaterials();
-            ExpRun run = ExperimentService.get().deriveSamples(startingMaterials, derivedSamples, info, null);
-
-            // Change the run's name
-            StringBuilder sb = new StringBuilder("Fractionate ");
-            String separator = "";
-            for (ExpMaterial inputMaterial : startingMaterials.keySet())
-            {
-                sb.append(separator);
-                sb.append(inputMaterial.getName());
-                separator = ", ";
-            }
-            sb.append(" into ");
-            sb.append(derivedSamples.size());
-            sb.append(" fractions");
-            run.setName(sb.toString());
-            run.save(form.getUser());
-
-            return run;
-        }
-        catch (ValidationException e)
-        {
-            throw new ExperimentException(e);
-        }
-    }
-
-    protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
-    {
-        MassSpecMetadataAssayForm form = (MassSpecMetadataAssayForm)context;
-        if (form.isFractions())
-        {
-            Map<String, File> files = form.getUploadedData();
-            assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
-            File mzXMLFile = files.get(AssayDataCollector.PRIMARY_FILE);
-            ExpMaterial sample = form.getFileFractionMap().get(mzXMLFile);
-            assert sample != null;
-            inputMaterials.put(sample, FRACTION_INPUT_ROLE);
-        }
-        else
-        {
-            inputMaterials.putAll(form.getInputMaterials());
-        }
     }
 
     protected Pair<Domain, Map<DomainProperty, Object>> createFractionDomain(Container c)
@@ -383,7 +309,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
         return FieldKey.fromParts(
                         ExpDataTable.Column.Run.toString(),
                         ExpRunTable.Column.Input.toString(),
-                        FRACTION_INPUT_ROLE,
+                        MassSpecRunCreator.FRACTION_INPUT_ROLE,
                         ExpMaterialTable.Column.Property.toString(),
                         fractionProperty.getName());
     }
@@ -409,7 +335,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
     }
 
     @NotNull
-    protected ExpSampleSet getFractionSampleSet(AssayRunUploadContext context) throws ExperimentException
+    public static ExpSampleSet getFractionSampleSet(AssayRunUploadContext context) throws ExperimentException
     {
         String domainURI = getDomainURIForPrefix(context.getProtocol(), FRACTION_DOMAIN_PREFIX);
         ExpSampleSet sampleSet=null;

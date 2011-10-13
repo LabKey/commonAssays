@@ -23,7 +23,7 @@ import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.WorkDirectoryTask;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
-import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.DefaultAssayRunCreator;
 import org.labkey.api.util.FileType;
 import org.labkey.microarray.MicroarrayModule;
 
@@ -55,7 +55,7 @@ public class MageMLDataCreatorTask extends WorkDirectoryTask<MageMLDataCreatorTa
 
         for (File mage : mageFiles)
         {
-            ExpData data = AbstractAssayProvider.createData(getJob().getContainer(), mage, mage.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE);
+            ExpData data = DefaultAssayRunCreator.createData(getJob().getContainer(), mage, mage.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE);
             data.save(getJob().getUser());
         }
 

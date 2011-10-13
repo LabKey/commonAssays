@@ -704,6 +704,7 @@ microarray/src/org/labkey/microarray/MicroarrayUploadWizardAction.java -text
 microarray/src/org/labkey/microarray/PendingMageMLFilesView.java -text
 microarray/src/org/labkey/microarray/assay/MageMLDataHandler.java -text
 microarray/src/org/labkey/microarray/assay/MicroarrayAssayProvider.java -text
+microarray/src/org/labkey/microarray/assay/MicroarrayRunCreator.java -text
 microarray/src/org/labkey/microarray/assay/TrimmedFileInputStream.java -text
 microarray/src/org/labkey/microarray/pipeline/ArrayPipelineManager.java -text
 microarray/src/org/labkey/microarray/pipeline/FeatureExtractorTask.java -text
@@ -1127,6 +1128,7 @@ ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayProvider.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataController.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataDataCollector.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataUploadAction.java -text
+ms2/src/org/labkey/ms2/metadata/MassSpecRunCreator.java -text
 ms2/src/org/labkey/ms2/metadata/MsFractionPropertyHelper.java -text
 ms2/src/org/labkey/ms2/metadata/fractionsInput.jsp -text
 ms2/src/org/labkey/ms2/ms2Admin.jsp -text

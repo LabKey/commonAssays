@@ -18,12 +18,9 @@ package org.labkey.microarray.assay;
 
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.LsidManager;
 import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.XarContext;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentUrls;
@@ -34,10 +31,20 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.assay.*;
+import org.labkey.api.study.assay.AbstractTsvAssayProvider;
+import org.labkey.api.study.assay.AssayDataCollector;
+import org.labkey.api.study.assay.AssayPipelineProvider;
+import org.labkey.api.study.assay.AssayResultTable;
+import org.labkey.api.study.assay.AssayRunCreator;
+import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayTableMetadata;
+import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.PipelineDataCollector;
+import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
+import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
@@ -45,7 +52,10 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.microarray.*;
+import org.labkey.microarray.MicroarrayController;
+import org.labkey.microarray.MicroarrayModule;
+import org.labkey.microarray.MicroarraySchema;
+import org.labkey.microarray.MicroarrayUploadWizardAction;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -54,9 +64,13 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -151,79 +165,6 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return result;
     }
 
-    @Override
-    protected FileFilter getRelatedOutputDataFileFilter(final File primaryFile, final String baseName)
-    {
-        return new FileFilter()
-        {
-            public boolean accept(File f)
-            {
-                // Microarray, unlike the other assay providers, wants to associate myrun_FEATURES.tsv
-                // with myrun.tsv, so we don't include the "." when comparing other files against the base file name. 
-                return f.getName().startsWith(baseName) && !primaryFile.equals(f);
-            }
-        };
-    }
-
-    @Override
-    protected void addInputDatas(AssayRunUploadContext context, Map<ExpData, String> inputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
-    {
-        super.addInputDatas(context, inputDatas, resolverType);
-
-        try
-        {
-            File mageMLFile = getMageMLFile(context);
-            // Look up two directories for a TIFF file that matches the naming convention
-            if (mageMLFile.getParentFile() != null && mageMLFile.getParentFile().getParentFile() != null
-                    && mageMLFile.getParentFile().getParentFile().getParentFile() != null)
-            {
-                File dir = mageMLFile.getParentFile().getParentFile().getParentFile();
-                File[] files = dir.listFiles(new PipelineProvider.FileTypesEntryFilter(MicroarrayModule.TIFF_INPUT_TYPE.getFileType()));
-                if (files != null)
-                {
-                    for (File file : files)
-                    {
-                        // MageML files are named with <TIFF_FILE_BASE_NAME>_<PROTOCOL_NAME>.mageML (or other file extension)
-                        if (mageMLFile.getName().startsWith(MicroarrayModule.TIFF_INPUT_TYPE.getFileType().getBaseName(file) + "_"))
-                        {
-                            // Found a match, add it as an input to this run
-                            ExpData tiffData = createData(context.getContainer(), file, file.getName(), MicroarrayModule.TIFF_INPUT_TYPE);
-                            inputDatas.put(tiffData, MicroarrayModule.TIFF_INPUT_TYPE.getRole());
-                        }
-                    }
-                }
-            }
-        }
-        catch (IOException e)
-        {
-            throw new ExperimentException(e);
-        }
-    }
-
-    private File getMageMLFile(AssayRunUploadContext context)
-            throws IOException, ExperimentException
-    {
-        Map<String, File> files = context.getUploadedData();
-        assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
-        return files.get(AssayDataCollector.PRIMARY_FILE);
-    }
-
-    protected void addOutputDatas(AssayRunUploadContext context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
-    {
-        try
-        {
-            File mageMLFile = getMageMLFile(context);
-            ExpData mageData = createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE);
-
-            outputDatas.put(mageData, MicroarrayModule.MAGE_ML_INPUT_TYPE.getRole());
-            addRelatedOutputDatas(context.getContainer(), outputDatas, mageMLFile, MicroarrayModule.RELATED_INPUT_TYPES);
-        }
-        catch (IOException e)
-        {
-            throw new ExperimentException(e);
-        }
-    }
-
     public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles, AssayRunUploadForm context)
     {
         return Collections.<AssayDataCollector>singletonList(new PipelineDataCollector());
@@ -257,23 +198,10 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, MicroarrayUploadWizardAction.class);
     }
 
-    protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
+    @Override
+    public AssayRunCreator getRunCreator()
     {
-        MicroarrayRunUploadForm form = (MicroarrayRunUploadForm)context;
-        int count = form.getSampleCount(form.getCurrentMageML());
-        for (int i = 0; i < count; i++)
-        {
-            ExpMaterial material = form.getSample(i);
-            if (!material.getContainer().hasPermission(context.getUser(), ReadPermission.class))
-            {
-                throw new ExperimentException("You do not have permission to reference the sample '" + material.getName() + ".");
-            }
-            if (inputMaterials.containsKey(material))
-            {
-                throw new ExperimentException("The same material, '" + material.getName() + "', cannot be used multiple times for a single run");
-            }
-            inputMaterials.put(material, "Sample " + (i + 1));
-        }
+        return new MicroarrayRunCreator(this);
     }
 
     public Class<? extends Controller> getDesignerAction()

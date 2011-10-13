@@ -449,7 +449,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         AnalyteTitration analyteTitration = new AnalyteTitration();
         analyteTitration.setAnalyteId(analyte.getRowId());
         analyteTitration.setTitrationId(titration.getRowId());
-        analyteTitration.setMaxFI(wellGroup.getMax());
+        double maxFI = wellGroup.getMax();
+        analyteTitration.setMaxFI(maxFI == Double.MIN_VALUE ? null : maxFI);
 
         // Check if we have a guide set for this combo
         GuideSet currentGuideSet = determineGuideSet(analyte, titration, conjugate, isotype, protocol);

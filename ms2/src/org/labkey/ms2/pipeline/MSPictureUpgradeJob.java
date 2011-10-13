@@ -23,8 +23,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.DefaultAssayRunCreator;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -32,7 +31,6 @@ import org.labkey.ms2.MS2Module;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
@@ -211,7 +209,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
                         roleName = null;
                     }
                     
-                    ExpData outputData = AbstractAssayProvider.createData(run.getContainer(), file, file.getName(), DATA_TYPE);
+                    ExpData outputData = DefaultAssayRunCreator.createData(run.getContainer(), file, file.getName(), DATA_TYPE);
                     if (outputData.getSourceApplication() != null)
                     {
                         info("File " + file.getName() + " is already associated with another run");
