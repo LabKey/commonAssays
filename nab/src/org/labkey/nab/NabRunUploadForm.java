@@ -41,7 +41,7 @@ import java.io.File;
  * Date: Sep 27, 2007
  * Time: 4:00:02 PM
  */
-public class NabRunUploadForm extends PlateUploadForm<NabAssayProvider> implements AssayRunUploadContext
+public class NabRunUploadForm extends PlateUploadForm<NabAssayProvider> implements AssayRunUploadContext<NabAssayProvider>
 {
     private ExpRun _reRun;
     private Integer _reRunId;

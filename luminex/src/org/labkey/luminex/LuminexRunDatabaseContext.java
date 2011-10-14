@@ -28,9 +28,10 @@ import java.util.Set;
  * User: jeckels
  * Date: Oct 7, 2011
  */
-public class LuminexRunDatabaseContext extends AssayRunDatabaseContext implements LuminexRunContext
+public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAssayProvider> implements LuminexRunContext
 {
     private Map<String, Analyte> _analytes = new LinkedHashMap<String, Analyte>();
+    private LuminexExcelParser _parser;
 
     public LuminexRunDatabaseContext(ExpRun run, User user, HttpServletRequest request)
     {
@@ -132,5 +133,16 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext implement
         {
             throw new RuntimeSQLException(e);
         }
+    }
+
+    @Override
+    public LuminexExcelParser getParser() throws ExperimentException
+    {
+        if (_parser == null)
+        {
+            _parser = new LuminexExcelParser(getProtocol(), getUploadedData().values());
+        }
+        return _parser;
+
     }
 }

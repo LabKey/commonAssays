@@ -15,7 +15,6 @@ import org.labkey.api.study.assay.DefaultAssayRunCreator;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.util.GUID;
-import org.labkey.api.util.Pair;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
@@ -36,27 +35,25 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
     }
 
     @Override
-    public Pair<ExpRun, ExpExperiment> saveExperimentRun(AssayRunUploadContext context, ExpExperiment batch) throws ExperimentException, ValidationException
+    public ExpExperiment saveExperimentRun(AssayRunUploadContext context, ExpExperiment batch, ExpRun run) throws ExperimentException, ValidationException
     {
         MassSpecMetadataAssayForm form = (MassSpecMetadataAssayForm)context;
         if (form.isFractions())
         {
             // If this is a fractions search, first derive the fraction samples
             deriveFractions(form);
-            Pair<ExpRun, ExpExperiment> result = null;
             // Then upload a bunch of runs
             while (!PipelineDataCollector.getFileQueue(form).isEmpty())
             {
-                result = super.saveExperimentRun(context, batch);
-                batch = result.getValue();
+                batch = super.saveExperimentRun(context, batch, run);
                 form.clearUploadedData();
                 form.getSelectedDataCollector().uploadComplete(form);
             }
-            return result;
+            return batch;
         }
         else
         {
-            return super.saveExperimentRun(context, batch);
+            return super.saveExperimentRun(context, batch, run);
         }
     }
 

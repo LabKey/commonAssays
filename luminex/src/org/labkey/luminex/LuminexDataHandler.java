@@ -86,10 +86,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         LuminexExcelParser parser;
-        LuminexRunUploadForm form = null;
-        if (context instanceof AssayUploadXarContext && ((AssayUploadXarContext)context).getContext() instanceof LuminexRunUploadForm)
+        LuminexRunContext form = null;
+        if (context instanceof AssayUploadXarContext && ((AssayUploadXarContext)context).getContext() instanceof LuminexRunContext)
         {
-            form = (LuminexRunUploadForm)((AssayUploadXarContext)context).getContext();
+            form = (LuminexRunContext)((AssayUploadXarContext)context).getContext();
             parser = form.getParser();
         }
         else
@@ -204,12 +204,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     /**
      * Handles persisting of uploaded run data into the database
      */
-    private void importData(ExpData data, ExpRun expRun, User user, @NotNull Logger log, Map<Analyte, List<LuminexDataRow>> sheets, LuminexExcelParser parser, LuminexRunUploadForm form) throws ExperimentException
+    private void importData(ExpData data, ExpRun expRun, User user, @NotNull Logger log, Map<Analyte, List<LuminexDataRow>> sheets, LuminexExcelParser parser, LuminexRunContext form) throws ExperimentException
     {
         try
         {
             ExperimentService.get().ensureTransaction();
-            ExpProtocol protocol = form.getProtocol(false);
+            ExpProtocol protocol = form.getProtocol();
             String dataFileName = data.getFile().getName();
             LuminexAssayProvider provider = form.getProvider();
             Set<ExpMaterial> inputMaterials = new LinkedHashSet<ExpMaterial>();
@@ -420,7 +420,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return null;
     }
 
-    private void insertTitrationAnalyteMappings(User user, LuminexRunUploadForm form, Map<String, Titration> titrations, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, ExpProtocol protocol)
+    private void insertTitrationAnalyteMappings(User user, LuminexRunContext form, Map<String, Titration> titrations, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, ExpProtocol protocol)
             throws ExperimentException, SQLException
     {
         // Insert mappings for all of the titrations that aren't standards

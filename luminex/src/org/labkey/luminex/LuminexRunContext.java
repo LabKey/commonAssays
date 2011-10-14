@@ -13,7 +13,7 @@ import java.util.Set;
  * User: jeckels
  * Date: Oct 7, 2011
  */
-public interface LuminexRunContext extends AssayRunUploadContext
+public interface LuminexRunContext extends AssayRunUploadContext<LuminexAssayProvider>
 {
     public String[] getAnalyteNames();
 
@@ -22,4 +22,6 @@ public interface LuminexRunContext extends AssayRunUploadContext
     public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException;
 
     public List<Titration> getTitrations() throws ExperimentException;
+
+    public LuminexExcelParser getParser() throws ExperimentException;
 }
