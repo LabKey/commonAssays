@@ -32,6 +32,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ObjectFactory;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.*;
@@ -60,6 +61,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * We've made the simplifying assumption that in the case of updating an existing run, we don't have to worry about
+ * deleting any data (no data rows, analytes, etc have disappeared completely).
  * User: klum
  * Date: May 14, 2009
  */
@@ -220,7 +223,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             {
                 throw new ExperimentException("Could not find Excel run domain for protocol with LSID " + protocol.getLSID());
             }
-            PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), expRun.getContainer());
 
             Domain runDomain = provider.getRunDomain(protocol);
             if (runDomain == null)
@@ -248,8 +250,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             // Name -> Titration
             Map<String, Titration> titrations = insertTitrations(expRun, user, form.getTitrations());
 
-            List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+            // Keep these in a map so that we can easily look them up against the rows that are already in the database
+            Map<DataRowKey, Map<String, Object>> rows = new LinkedHashMap<DataRowKey, Map<String, Object>>();
             Set<ExpData> sourceFiles = new HashSet<ExpData>();
+
+            Map<String, Analyte> existingAnalytes = getExistingAnalytes(expRun);
 
             for (Map.Entry<Analyte, List<LuminexDataRow>> sheet : sheets.entrySet())
             {
@@ -280,8 +285,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 }
 
                 analyte.setDataId(data.getRowId());
-                analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + data.getRowId() + "." + analyte.getName()).toString());
-                analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
+
+                analyte = saveAnalyte(expRun, user, existingAnalytes, analyte);
 
                 insertTitrationAnalyteMappings(user, form, titrations, sheet.getValue(), analyte, conjugate, isotype, protocol);
 
@@ -337,17 +342,17 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 // now add the dataRows to the rows list to be persisted
                 for (LuminexDataRow dataRow : dataRows)
-                    rows.add(dataRow.toMap(analyte));
+                    rows.put(new DataRowKey(dataRow), dataRow.toMap(analyte));
             }
 
+            List<Integer> dataIds = new ArrayList<Integer>();
             for (ExpData sourceFile : sourceFiles)
             {
-                insertExcelProperties(excelRunColumns, sourceFile, parser, user, protocol);
+                insertExcelProperties(excelRunDomain, sourceFile, parser, user, protocol);
+                dataIds.add(sourceFile.getRowId());
             }
 
-            LuminexDataTable tableInfo = provider.createDataTable(AssayService.get().createSchema(user, expRun.getContainer()), protocol, false);
-            LuminexImportHelper helper = new LuminexImportHelper();
-            OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, rows, Logger.getLogger(LuminexDataHandler.class));
+            saveDataRows(expRun, user, protocol, provider, rows, dataIds);
 
             if (inputMaterials.isEmpty())
             {
@@ -370,6 +375,123 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         finally
         {
             ExperimentService.get().closeTransaction();
+        }
+    }
+
+    /** Saves the data rows, updating if they already exist, inserting if not */
+    private void saveDataRows(ExpRun expRun, User user, ExpProtocol protocol, LuminexAssayProvider provider, Map<DataRowKey, Map<String, Object>> rows, List<Integer> dataIds)
+            throws SQLException, ValidationException
+    {
+        // Do a query to find all of the rows that have already been inserted 
+        LuminexDataTable tableInfo = provider.createDataTable(AssayService.get().createSchema(user, expRun.getContainer()), protocol, false);
+        SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause("Data", dataIds));
+        LuminexDataRow[] databaseRows = Table.select(tableInfo, Table.ALL_COLUMNS, filter, null, LuminexDataRow.class);
+
+        Map<DataRowKey, LuminexDataRow> existingRows = new HashMap<DataRowKey, LuminexDataRow>();
+        for (LuminexDataRow existingRow : databaseRows)
+        {
+            existingRows.put(new DataRowKey(existingRow), existingRow);
+        }
+
+        List<Map<String, Object>> insertRows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> updateRows = new ArrayList<Map<String, Object>>();
+
+        // Sort them into new and existing rows
+        for (Map.Entry<DataRowKey, Map<String, Object>> entry : rows.entrySet())
+        {
+            LuminexDataRow existingRow = existingRows.get(entry.getKey());
+            if (existingRow == null)
+            {
+                insertRows.add(entry.getValue());
+            }
+            else
+            {
+                Map<String, Object> updateRow = entry.getValue();
+                updateRow.put("RowId", existingRow.getRowId());
+                updateRow.put("LSID", existingRow.getLsid());
+                updateRows.add(updateRow);
+            }
+        }
+
+        LuminexImportHelper helper = new LuminexImportHelper();
+        OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, insertRows, Logger.getLogger(LuminexDataHandler.class));
+        OntologyManager.updateTabDelimited(tableInfo, expRun.getContainer(), user, helper, updateRows, Logger.getLogger(LuminexDataHandler.class));
+    }
+
+    /** Inserts or updates an analyte row in the hard table */
+    private Analyte saveAnalyte(ExpRun expRun, User user, Map<String, Analyte> existingAnalytes, Analyte analyte)
+            throws SQLException
+    {
+        Analyte existingAnalyte = existingAnalytes.get(analyte.getName());
+        if (existingAnalyte != null)
+        {
+            // Need the original rowId so that we update the existing row
+            analyte.setRowId(existingAnalyte.getRowId());
+            // Retain the LSID so we don't lose the custom property values
+            analyte.setLsid(existingAnalyte.getLsid());
+            analyte = Table.update(user, LuminexSchema.getTableInfoAnalytes(), analyte, analyte.getRowId());
+        }
+        else
+        {
+            analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + expRun.getRowId() + "." + analyte.getName()).toString());
+            analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
+        }
+        return analyte;
+    }
+
+    /** @return Name->Analyte for all of the analytes that are already associated with this run */
+    private Map<String, Analyte> getExistingAnalytes(ExpRun expRun) throws SQLException
+    {
+        SQLFragment sql = new SQLFragment("SELECT a.* FROM ");
+        sql.append(LuminexSchema.getTableInfoAnalytes(), "a");
+        sql.append(", ");
+        sql.append(ExperimentService.get().getTinfoData(), "d");
+        sql.append(" WHERE a.DataId = d.RowId AND d.RunId = ?");
+        sql.add(expRun.getRowId());
+        Analyte[] databaseAnalytes = Table.executeQuery(LuminexSchema.getSchema(), sql, Analyte.class);
+        Map<String, Analyte> existingAnalytes = new HashMap<String, Analyte>();
+        for (Analyte databaseAnalyte : databaseAnalytes)
+        {
+            existingAnalytes.put(databaseAnalyte.getName(), databaseAnalyte);
+        }
+        return existingAnalytes;
+    }
+
+    private static class DataRowKey
+    {
+        private int _dataId;
+        private int _analyteId;
+        private String _well;
+
+        public DataRowKey(LuminexDataRow dataRow)
+        {
+            _dataId = dataRow.getData();
+            _analyteId = dataRow.getAnalyte();
+            _well = dataRow.getWell();
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            DataRowKey that = (DataRowKey) o;
+
+            if (_analyteId != that._analyteId) return false;
+            if (_dataId != that._dataId) return false;
+            if (_well != null ? !_well.equals(that._well) : that._well != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode()
+        {
+            int result = _dataId;
+            result = 31 * result + _analyteId;
+            result = 31 * result + (_well != null ? _well.hashCode() : 0);
+            return result;
         }
     }
 
@@ -446,20 +568,40 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         LuminexWellGroup wellGroup = titration.buildWellGroup(dataRows);
 
         // Insert the mapping row, which includes the Max FI
-        AnalyteTitration analyteTitration = new AnalyteTitration();
-        analyteTitration.setAnalyteId(analyte.getRowId());
-        analyteTitration.setTitrationId(titration.getRowId());
+        SimpleFilter filter = new SimpleFilter("AnalyteId", analyte.getRowId());
+        filter.addCondition("TitrationId", titration.getRowId());
+
+        AnalyteTitration analyteTitration = Table.selectObject(LuminexSchema.getTableInfoAnalyteTitration(), filter, null, AnalyteTitration.class);
+        boolean newRow = analyteTitration == null;
+        if (analyteTitration == null)
+        {
+            analyteTitration = new AnalyteTitration();
+            analyteTitration.setAnalyteId(analyte.getRowId());
+            analyteTitration.setTitrationId(titration.getRowId());
+        }
+
+        // TODO - be sure that we respect exclusion state
         double maxFI = wellGroup.getMax();
         analyteTitration.setMaxFI(maxFI == Double.MIN_VALUE ? null : maxFI);
 
-        // Check if we have a guide set for this combo
-        GuideSet currentGuideSet = determineGuideSet(analyte, titration, conjugate, isotype, protocol);
-        if (currentGuideSet != null)
+        if (newRow)
         {
-            analyteTitration.setGuideSetId(currentGuideSet.getRowId());
-        }
+            // Check if we have a guide set for this combo
+            GuideSet currentGuideSet = determineGuideSet(analyte, titration, conjugate, isotype, protocol);
+            if (currentGuideSet != null)
+            {
+                analyteTitration.setGuideSetId(currentGuideSet.getRowId());
+            }
 
-        Table.insert(user, LuminexSchema.getTableInfoAnalyteTitration(), analyteTitration);
+            Table.insert(user, LuminexSchema.getTableInfoAnalyteTitration(), analyteTitration);
+        }
+        else
+        {
+            Map<String, Object> keys = new CaseInsensitiveHashMap<Object>();
+            keys.put("AnalyteId", analyte.getRowId());
+            keys.put("TitrationId", titration.getRowId());
+            Table.update(user, LuminexSchema.getTableInfoAnalyteTitration(), analyteTitration, keys);
+        }
 
         // Insert the curve fit values (EC50 and AUC)
         try
@@ -470,7 +612,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 ParameterCurveImpl.FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
                 if (fitParams != null)
                 {
-                    insertCurveFit(wellGroup, user, titration, analyte, fitParams, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex");
+                    insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex");
                 }
                 else
                 {
@@ -492,7 +634,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 fit.setTitrationId(titration.getRowId());
                 fit.setCurveType("Trapezoidal");
 
-                Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
+                insertOrUpdateCurveFit(user, fit);
             }
         }
         catch (DilutionCurve.FitFailedException e)
@@ -542,7 +684,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             params.max = upper.doubleValue();
             params.asymmetry = asymmetry == null ? 1 : asymmetry.doubleValue();
 
-            insertCurveFit(wellGroup, user, titration, analyte, params, fitType, null);
+            insertOrUpdateCurveFit(wellGroup, user, titration, analyte, params, fitType, null);
         }
         
     }
@@ -777,11 +919,29 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private void insertCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source)
+    private void insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source)
             throws DilutionCurve.FitFailedException, SQLException
     {
         CurveFit fit = createCurveFit(wellGroup, titration, analyte, params, fitType, source);
-        Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
+        insertOrUpdateCurveFit(user, fit);
+    }
+
+    private void insertOrUpdateCurveFit(User user, CurveFit fit)
+            throws SQLException
+    {
+        SimpleFilter filter = new SimpleFilter("AnalyteId", fit.getAnalyteId());
+        filter.addCondition("TitrationId", fit.getTitrationId());
+        filter.addCondition("CurveType", fit.getCurveType());
+        CurveFit existingFit = Table.selectObject(LuminexSchema.getTableInfoCurveFit(), filter, null, CurveFit.class);
+        if (existingFit != null)
+        {
+            fit.setRowId(existingFit.getRowId());
+            Table.update(user, LuminexSchema.getTableInfoCurveFit(), fit, fit.getRowId());
+        }
+        else
+        {
+            Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
+        }
     }
 
     private CurveFit createCurveFit(LuminexWellGroup wellGroup, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source)
@@ -878,15 +1038,18 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return result;
     }
 
-    private void insertExcelProperties(PropertyDescriptor[] excelRunColumns, final ExpData data, LuminexExcelParser parser, User user, ExpProtocol protocol) throws SQLException, ValidationException, ExperimentException
+    private void insertExcelProperties(Domain domain, final ExpData data, LuminexExcelParser parser, User user, ExpProtocol protocol) throws SQLException, ValidationException, ExperimentException
     {
         Container container = data.getContainer();
         // Clear out the values - this is necessary if this is a XAR import where the run properties would
         // have been loaded as part of the ExperimentRun itself.
         Integer objectId = OntologyManager.ensureObject(container, data.getLSID());
-        for (PropertyDescriptor excelRunColumn : excelRunColumns)
+        DomainProperty[] props = domain.getProperties();
+        PropertyDescriptor[] pds = new PropertyDescriptor[props.length];
+        for (int i = 0; i < props.length; i++)
         {
-            OntologyManager.deleteProperty(data.getLSID(), excelRunColumn.getPropertyURI(), container, protocol.getContainer());
+            OntologyManager.deleteProperty(data.getLSID(), props[i].getPropertyURI(), container, protocol.getContainer());
+            pds[i] = props[i].getPropertyDescriptor();
         }
 
         List<Map<String, Object>> excelRunPropsList = new ArrayList<Map<String, Object>>();
@@ -910,7 +1073,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             public void updateStatistics(int currentRow) throws SQLException
             {
             }
-        }, excelRunColumns, excelRunPropsList, true);
+        }, pds, excelRunPropsList, true);
     }
 
     protected void performOOR(List<LuminexDataRow> dataRows, Analyte analyte)
@@ -1381,8 +1544,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             entry.getValue().add(dataRow);
         }
 
-        LuminexRunUploadForm form = (LuminexRunUploadForm)context;
-
+        LuminexRunContext form = (LuminexRunContext)context;
         importData(data, run, context.getUser(), Logger.getLogger(LuminexDataHandler.class), sheets, form.getParser(), form);
     }
 

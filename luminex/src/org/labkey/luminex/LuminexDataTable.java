@@ -335,7 +335,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
     @Override
     public Parameter.ParameterMap updateStatement(Connection conn, User user, Set<String> columns) throws SQLException
     {
-        throw new UnsupportedOperationException();
+        return Table.updateStatement(conn, this, getContainer(), user, false, true);
     }
 
     @Override

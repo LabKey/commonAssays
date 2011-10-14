@@ -24,6 +24,7 @@ import org.labkey.api.study.WellGroup;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -99,6 +100,18 @@ public class LuminexWellGroup implements WellGroup
             fakeDataRow.setType(entry.getKey().getType());
             result.add(new LuminexWell(fakeDataRow));
         }
+
+        // Strip out any incomplete data points that will mess up the AUC calculations
+        Iterator<LuminexWell> i = result.iterator();
+        while (i.hasNext())
+        {
+            LuminexWell well = i.next();
+            if (well.getDose() == null || well.getValue() == null)
+            {
+                i.remove();
+            }
+        }
+
         Collections.sort(result);
         return result;
     }
