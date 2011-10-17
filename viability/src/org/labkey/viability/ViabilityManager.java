@@ -261,7 +261,7 @@ public class ViabilityManager
      */
     /*package*/ static ExpData getResultExpData(int resultRowId)
     {
-        Integer dataId = Table.executeSingleton(ViabilitySchema.getTableInfoResults(), "DataID", new SimpleFilter("RowID", resultRowId), null, Integer.class);
+        Integer dataId = Table.executeSingleton(ViabilitySchema.getTableInfoResults(), "DataID", new SimpleFilter("RowID", resultRowId), Integer.class);
         if (dataId != null)
             return ExperimentService.get().getExpData(dataId.intValue());
         return null;
