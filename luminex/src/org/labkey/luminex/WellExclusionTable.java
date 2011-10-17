@@ -17,29 +17,41 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayRunDatabaseContext;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.UnauthorizedException;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jeckels
@@ -109,6 +121,8 @@ public class WellExclusionTable extends AbstractExclusionTable
     {
         return new ExclusionUpdateService(this, getRealTable(), LuminexSchema.getTableInfoWellExclusionAnalyte(), "WellExclusionId")
         {
+            private Set<ExpRun> _runsToRefresh = new HashSet<ExpRun>();
+
             private Integer getDataId(Map<String, Object> rowMap) throws QueryUpdateServiceException
             {
                 Integer dataId = convertToInteger(rowMap.get("DataId"));
@@ -141,7 +155,7 @@ public class WellExclusionTable extends AbstractExclusionTable
             }
 
             @Override
-            protected @NotNull ExpRun resolveRun(Map<String, Object> rowMap) throws QueryUpdateServiceException
+            protected @NotNull ExpRun resolveRun(Map<String, Object> rowMap) throws QueryUpdateServiceException, SQLException
             {
                 ExpData data = getData(rowMap);
                 ExpProtocolApplication protApp = data.getSourceApplication();
@@ -154,7 +168,90 @@ public class WellExclusionTable extends AbstractExclusionTable
                 {
                     throw new QueryUpdateServiceException("Unable to resolve run for data " + data.getRowId());
                 }
+                if (!_runsToRefresh.contains(run))
+                {
+                    String description = rowMap.get("Description") == null ? null : rowMap.get("Description").toString();
+                    String type = rowMap.get("Type") == null ? null : rowMap.get("Type").toString();
+
+                    SQLFragment dataRowSQL = new SQLFragment("SELECT COUNT(*) FROM ");
+                    dataRowSQL.append(LuminexSchema.getTableInfoDataRow(), "dr");
+                    dataRowSQL.append(" WHERE dr.TitrationId IS NOT NULL AND dr.DataId = ? AND dr.Description ");
+                    dataRowSQL.add(data.getRowId());
+                    if (description == null)
+                    {
+                        dataRowSQL.append("IS NULL");
+                    }
+                    else
+                    {
+                        dataRowSQL.append("= ?");
+                        dataRowSQL.add(description);
+                    }
+
+                    dataRowSQL.append(" AND dr.Type ");
+                    if (type == null)
+                    {
+                        dataRowSQL.append("IS NULL");
+                    }
+                    else
+                    {
+                        dataRowSQL.append("= ?");
+                        dataRowSQL.add(type);
+                    }
+
+
+                    Integer count = Table.executeSingleton(LuminexSchema.getSchema(), dataRowSQL.getSQL(), dataRowSQL.getParamsArray(), Integer.class);
+                    if (count.intValue() > 0)
+                    {
+                        _runsToRefresh.add(run);
+                    }
+                }
+
                 return run;
+            }
+
+            @Override
+            public List<Map<String, Object>> insertRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors, Map<String, Object> extraScriptContext) throws DuplicateKeyException, QueryUpdateServiceException, SQLException
+            {
+                List<Map<String, Object>> result = super.insertRows(user, container, rows, errors, extraScriptContext);
+                rerunTransformScripts();
+                return result;
+            }
+
+            @Override
+            public List<Map<String, Object>> deleteRows(User user, Container container, List<Map<String, Object>> keys, Map<String, Object> extraScriptContext) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+            {
+                List<Map<String, Object>> result = super.deleteRows(user, container, keys, extraScriptContext);
+                rerunTransformScripts();
+                return result;
+            }
+
+            @Override
+            public List<Map<String, Object>> updateRows(User user, Container container, List<Map<String, Object>> rows, List<Map<String, Object>> oldKeys, Map<String, Object> extraScriptContext) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+            {
+                List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, extraScriptContext);
+                rerunTransformScripts();
+                return result;
+            }
+
+            private void rerunTransformScripts() throws QueryUpdateServiceException
+            {
+                try
+                {
+                    for (ExpRun run : _runsToRefresh)
+                    {
+                        AssayProvider provider = AssayService.get().getProvider(run);
+                        AssayRunDatabaseContext context = provider.createRunDatabaseContext(run, _schema.getUser(), null);
+                        provider.getRunCreator().saveExperimentRun(context, AssayService.get().findBatch(run), run);
+                    }
+                }
+                catch (ExperimentException e)
+                {
+                    throw new QueryUpdateServiceException(e);
+                }
+                catch (ValidationException e)
+                {
+                    throw new QueryUpdateServiceException(e);
+                }
             }
         };
     }

@@ -144,6 +144,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         {
             checkPermissions(user, oldRowMap, DeletePermission.class);
             deleteAnalytes(oldRowMap);
+            resolveRun(oldRowMap);
             return super.deleteRow(user, container, oldRowMap);
         }
 
@@ -228,10 +229,10 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         }
 
         /** @return the run associated with this exclusion */
-        protected abstract @NotNull ExpRun resolveRun(Map<String, Object> rowMap) throws QueryUpdateServiceException;
+        protected abstract @NotNull ExpRun resolveRun(Map<String, Object> rowMap) throws QueryUpdateServiceException, SQLException;
 
         /** Make sure that the analyte is part of the same data/run object that this exclusion is attached to */
-        private void validateAnalyte(Map<String, Object> rowMap, Analyte analyte) throws QueryUpdateServiceException
+        private void validateAnalyte(Map<String, Object> rowMap, Analyte analyte) throws QueryUpdateServiceException, SQLException
         {
             for (ExpData data : resolveRun(rowMap).getAllDataUsedByRun())
             {
