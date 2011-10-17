@@ -16,8 +16,8 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang.StringUtils;
-import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.exp.PropertyType;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
 import org.labkey.api.pipeline.PipelineJob;
@@ -328,7 +328,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                     quantParams = getQuantitationCmd(params, _wd.getRelativePath(dirMzXml), quantConfigFile);
                     peptideQuantAction = new RecordedAction(PEPTIDE_QUANITATION_ACTION_NAME);
                     peptideQuantAction.setDescription(quantitationAlgorithm.name() + " " + peptideQuantAction.getName());
-                    peptideQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), quantitationAlgorithm.name());
+                    peptideQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", PropertyType.STRING), quantitationAlgorithm.name());
                     if (quantConfigFile != null)
                     {
                         peptideQuantAction.addInput(quantConfigFile.getKey(), quantConfigFile.getValue());
@@ -404,7 +404,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 {
                     proteinQuantAction = new RecordedAction(PROTEIN_QUANITATION_ACTION_NAME);
                     proteinQuantAction.setDescription(quantitationAlgorithm.name() + " " + proteinQuantAction.getName());
-                    proteinQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), quantitationAlgorithm.name());
+                    proteinQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", PropertyType.STRING), quantitationAlgorithm.name());
                     if (quantConfigFile != null)
                     {
                         proteinQuantAction.addInput(quantConfigFile.getKey(), quantConfigFile.getValue());
