@@ -26,6 +26,7 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.Table;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
@@ -261,7 +262,8 @@ public class ViabilityManager
      */
     /*package*/ static ExpData getResultExpData(int resultRowId)
     {
-        Integer dataId = Table.executeSingleton(ViabilitySchema.getTableInfoResults(), "DataID", new SimpleFilter("RowID", resultRowId), Integer.class);
+        Integer dataId = new TableSelector(ViabilitySchema.getTableInfoResults(), Collections.singleton("DataID"), new SimpleFilter("RowID", resultRowId), null).getObject(Integer.class);
+// WAS:        Integer dataId = Table.executeSingleton(ViabilitySchema.getTableInfoResults(), "DataID", new SimpleFilter("RowID", resultRowId), Integer.class);
         if (dataId != null)
             return ExperimentService.get().getExpData(dataId.intValue());
         return null;
