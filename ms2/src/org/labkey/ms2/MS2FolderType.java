@@ -52,12 +52,6 @@ public class MS2FolderType extends DefaultFolderType
             module);
     }
 
-
-    public String getStartPageLabel(ViewContext ctx)
-    {
-        return super.getStartPageLabel(ctx);
-    }
-
     @Override
     public HelpTopic getHelpTopic()
     {
