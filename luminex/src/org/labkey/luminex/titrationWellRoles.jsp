@@ -62,7 +62,7 @@
                 <td class="labkey-form-label"><%= titrationEntry.getValue().getName() %></td>
                 <td>
                     <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>'
-                           value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn(this.name, "<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName())) %>", this.checked);' />
+                           value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn();' />
                 </td>
                 <td>
                     <input type='checkbox' name='<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue())) %>'
@@ -115,33 +115,44 @@
             hiddenEl.value = el.checked ? "true" : "";
     }
 
-    function showHideAnalytePropertyColumn(titrationRoleName, titrationCellName, isChecked)
+    function showHideAnalytePropertyColumn()
     {
-        // set the hidden helper showcol field value
-        var showcols = document.getElementsByName(titrationRoleName + "_showcol");
-        if (showcols.length == 1)
-            showcols[0].value = (isChecked ? "true" : "");
-
-        // show/hide the column associated with this titration
-        var elements = Ext.select('*[name=' + titrationCellName + ']').elements;
-        for (var i = 0; i < elements.length; i++)
+<%
+        for (Map.Entry<String, Titration> titrationEntry : nonUnknownTitrations.entrySet())
         {
-            if (isChecked)
-            {
-                elements[i].style.display = "table-cell";
-            }
-            else
-            {
-                elements[i].style.display = "none";
+%>
+            var titrationRoleName = '<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>';
+            var titrationCellName = '<%= PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName())) %>';
+            var isChecked = document.getElementsByName(titrationRoleName)[0].checked;
 
-                // also need to make sure all input checkboxes are unchecked if hiding column cell
-                var cellInputs = elements[i].getElementsByTagName("input");
-                if (cellInputs.length == 1)
+            // set the hidden helper showcol field value
+            var showcols = document.getElementsByName(titrationRoleName + "_showcol");
+            if (showcols.length == 1)
+                showcols[0].value = (isChecked ? "true" : "");
+
+            // show/hide the column associated with this titration
+            var elements = Ext.select('*[name=' + titrationCellName + ']').elements;
+            for (var i = 0; i < elements.length; i++)
+            {
+                if (isChecked)
                 {
-                    cellInputs[0].checked = false;
+                    elements[i].style.display = "table-cell";
+                }
+                else
+                {
+                    elements[i].style.display = "none";
+
+                    // also need to make sure all input checkboxes are unchecked if hiding column cell
+                    var cellInputs = elements[i].getElementsByTagName("input");
+                    if (cellInputs.length == 1)
+                    {
+                        cellInputs[0].checked = false;
+                    }
                 }
             }
+<%
         }
+%>
     }
 
     function getHiddenFormElement(elName)

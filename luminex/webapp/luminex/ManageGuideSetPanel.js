@@ -317,7 +317,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             });
         }
 
-        this.getEl().mask('Saving guide set information...');
+        this.getEl().mask('Saving guide set information...', "x-mask-loading");
         var that = this; // work-around for 'too much recursion' error
         LABKEY.Query.saveRows({
             commands: commands,

@@ -249,7 +249,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     // persist the applied guide set changes to the server
                     if (nonMemberUpdateRows.length > 0)
                     {
-                        this.getEl().mask('Applying guide run set...');
+                        this.getEl().mask('Applying guide run set...', "x-mask-loading");
                         LABKEY.Query.updateRows({
                             schemaName: 'assay',
                             queryName: this.assayName + ' AnalyteTitration',

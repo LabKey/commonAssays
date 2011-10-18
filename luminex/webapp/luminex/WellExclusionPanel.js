@@ -276,6 +276,17 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             border: false
         }));
 
+        // add a warning message for when exclusions of titrations will result in assay re-run
+        this.add(new Ext.form.DisplayField({
+            id: 'reCalcDisplay',
+            hidden: true,
+            value: 'Your titration curve is now out of date and will be re-calculated',
+            style: {
+                color: 'red',
+                fontStyle: 'italic'
+            }
+        }));
+
         // add save and cancel buttons
         this.addButton({
             id: 'saveBtn',
@@ -298,7 +309,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
 
     queryForReplicateGroupWellsAndFileName: function()
     {
-        var sql = "SELECT DISTINCT x.Well, x.Data.Name AS Name "
+        var sql = "SELECT DISTINCT x.Well, x.Data.Name AS Name, x.Titration "
                 + "FROM \"" + this.queryName + " Data\" AS x WHERE ";
         sql += (this.description != null ? " x.Description = '" + this.description + "'" : " x.Description IS NULL ");
         sql += " AND x.Type = '" + this.type + "' AND x.Data.RowId = " + this.dataId;
@@ -311,6 +322,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             success: function(data){
                 var wells = [];
                 var filename = "";
+                var isTitration = false;
                 for (var i = 0; i < data.rows.length; i++)
                 {
                     // summary rows will have > 1 well (separated by a comma)
@@ -320,10 +332,12 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
                     });
 
                     filename = data.rows[i].Name;
+                    isTitration = data.rows[i].Titration != null;
                 }
                 
                 Ext.get('replicate_group_wells').update(wells.join(", "));
                 Ext.get('replicate_group_filename').update(filename);
+                this.findById('reCalcDisplay').setVisible(isTitration);
             },
             scope: this
         });
@@ -359,6 +373,12 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
     },
 
     insertUpdateWellExclusions: function(){
+        // mask the window until the insert/update is complete (or if something goes wrong)
+        var message = "Saving replicate group exclusion...";
+        if (this.findById('reCalcDisplay').isVisible())
+            message = "Saving replicate group exclusion and re-calculating curve...";
+        this.findParentByType('window').getEl().mask(message, "x-mask-loading");
+
         // generage a comma delim string of the analyte Ids to exclude
         var analytesForExclusion = this.findById('availableanalytes').getSelectionModel().getSelections();
         var analytesForExclusionStr = "";
@@ -380,6 +400,12 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
             success: function(){
                 this.fireEvent('closeWindow');
                 window.location.reload();
+            },
+            failure: function(info, response, options){
+                if (this.findParentByType('window').getEl().isMasked())
+                    this.findParentByType('window').getEl().unmask();
+
+                LABKEY.Utils.displayAjaxErrorResponse(response, options);
             },
             scope: this
         };

@@ -27,15 +27,17 @@ ruminexVersion = installed.packages()["Ruminex","Version"];
 
 ########################################## FUNCTIONS ##########################################
 
-getCurveFitInputCol <- function(runProps, fiRunCol)
+getCurveFitInputCol <- function(runProps, fiRunCol, defaultFiCol)
 {
     runCol = runProps$val1[runProps$name == fiRunCol];
-    if (runCol == "FI-Bkgd") {
+    if (runCol == "FI") {
+        runCol = "fi"
+    } else if (runCol == "FI-Bkgd") {
     	runCol = "fiBackground"
     } else if (runCol == "FI-Bkgd-Blank") {
     	runCol = "fiBackgroundBlank"
     } else {
-        runCol = "fi"
+        runCol = defaultFiCol
     }
     runCol;
 }
@@ -173,18 +175,18 @@ if (file.exists(titration.data.file))
                 analyteName = as.character(analytes[aIndex]);
                 dat = subset(run.data, description == titrationName & name == analyteName);
 
-                yLabel = "FI";
+                yLabel = "FI-Bkgd";
                 if (titration.data[tIndex,]$Standard == "true") {
-                    # choose the FI column for standards based on the run property provided by the user, default to the original FI value
+                    # choose the FI column for standards based on the run property provided by the user, default to the FI-Bkgd value
                     if(any(run.props$name == "StndCurveFitInput")) {
-                        fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput")
+                        fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput", "fiBackground")
                         yLabel = run.props$val1[run.props$name == "StndCurveFitInput"]
                         dat$fi = dat[, fiCol]
                     }
                 } else {
-                    # choose the FI column for unknowns based on the run property provided by the user, default to the original FI value
+                    # choose the FI column for unknowns based on the run property provided by the user, default to the FI-Bkgd value
                     if(any(run.props$name == "UnkCurveFitInput")) {
-                        fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput")
+                        fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput", "fiBackground")
                         yLabel = run.props$val1[run.props$name == "UnkCurveFitInput"]
                         dat$fi = dat[, fiCol]
                     }
@@ -325,14 +327,14 @@ if(any(standardRecs) & length(standards) > 0){
 
     # choose the FI column for standards based on the run property provided by the user, default to the original FI value
     if(any(run.props$name == "StndCurveFitInput")) {
-        fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput")
+        fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput", "fi")
         dat$fi[standardRecs] = dat[standardRecs, fiCol]
     }
 
     # choose the FI column for unknowns based on the run property provided by the user, default to the original FI value
     if(any(!standardRecs)){
         if(any(run.props$name == "UnkCurveFitInput")) {
-            fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput")
+            fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput", "fi")
             dat$fi[!standardRecs] = dat[!standardRecs, fiCol]
         }
     }
