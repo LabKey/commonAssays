@@ -50,6 +50,7 @@ public class LuminexDataRow
     private String _fiBackgroundString;
     private Double _fiBackground;
     private String _fiBackgroundOORIndicator;
+    private Double _fiBackgroundBlank;
     private String _stdDevString;
     private Double _stdDev;
     private String _stdDevOORIndicator;
@@ -71,6 +72,7 @@ public class LuminexDataRow
     private Integer _titration;
     private boolean _summary;
     private Double _cv;
+    private boolean _excluded;
 
     /** Unfortunate to have these denormalized values here, but required for acceptable query performance */
     private Container _container;
@@ -168,6 +170,16 @@ public class LuminexDataRow
     public void setFiBackground(Double fiBackground)
     {
         _fiBackground = fiBackground;
+    }
+
+    public Double getFiBackgroundBlank()
+    {
+        return _fiBackgroundBlank;
+    }
+
+    public void setFiBackgroundBlank(Double fiBackgroundBlank)
+    {
+        _fiBackgroundBlank = fiBackgroundBlank;
     }
 
     public Double getStdDev()
@@ -546,5 +558,15 @@ public class LuminexDataRow
     public void setCv(Double cv)
     {
         _cv = cv;
+    }
+
+    public boolean isExcluded()
+    {
+        return _excluded;
+    }
+
+    public void setExcluded(boolean excluded)
+    {
+        _excluded = excluded;
     }
 }

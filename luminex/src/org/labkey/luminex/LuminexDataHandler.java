@@ -231,8 +231,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             }
 
             // Look for isotype and conjugate as run properties
+            // and look for curve fit input properties for AUC calculation
             String isotype = null;
             String conjugate = null;
+            String stndCurveFitInput = null;
+            String unkCurveFitInput = null;
             for (DomainProperty runProp : runDomain.getProperties())
             {
                 if (runProp.getName().equalsIgnoreCase("Conjugate"))
@@ -244,6 +247,16 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 {
                     Object value = expRun.getProperty(runProp);
                     isotype = value == null ? null : value.toString();
+                }
+                else if (runProp.getName().equalsIgnoreCase("StndCurveFitInput"))
+                {
+                    Object value = expRun.getProperty(runProp);
+                    stndCurveFitInput = value == null ? null : value.toString();
+                }
+                else if (runProp.getName().equalsIgnoreCase("UnkCurveFitInput"))
+                {
+                    Object value = expRun.getProperty(runProp);
+                    unkCurveFitInput = value == null ? null : value.toString();
                 }
             }
             
@@ -287,8 +300,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 analyte.setDataId(data.getRowId());
 
                 analyte = saveAnalyte(expRun, user, existingAnalytes, analyte);
-
-                insertTitrationAnalyteMappings(user, form, titrations, sheet.getValue(), analyte, conjugate, isotype, protocol);
 
                 performOOR(dataRows, analyte);
 
@@ -334,6 +345,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     sourceFiles.add(sourceDataForRow);
                     dataRow.setData(sourceDataForRow.getRowId());
                 }
+
+                insertTitrationAnalyteMappings(user, form, titrations, sheet.getValue(), analyte, conjugate, isotype, stndCurveFitInput, unkCurveFitInput, protocol);
 
                 // Now that we've made sure each data row to the appropriate data file, make sure that we
                 // have %CV and StdDev. It's important to wait so that we know the scope in which to do the aggregate
@@ -542,7 +555,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return null;
     }
 
-    private void insertTitrationAnalyteMappings(User user, LuminexRunContext form, Map<String, Titration> titrations, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, ExpProtocol protocol)
+    private void insertTitrationAnalyteMappings(User user, LuminexRunContext form, Map<String, Titration> titrations, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, String stndCurveFitInput, String unkCurveFitInput, ExpProtocol protocol)
             throws ExperimentException, SQLException
     {
         // Insert mappings for all of the titrations that aren't standards
@@ -550,7 +563,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!titration.isStandard())
             {
-                insertAnalyteTitrationMapping(user, dataRows, analyte, titration, conjugate, isotype, protocol);
+                insertAnalyteTitrationMapping(user, dataRows, analyte, titration, conjugate, isotype, unkCurveFitInput, protocol);
             }
         }
 
@@ -558,11 +571,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         for (String titrationName : form.getTitrationsForAnalyte(analyte.getName()))
         {
             Titration titration = titrations.get(titrationName);
-            insertAnalyteTitrationMapping(user, dataRows, analyte, titration, conjugate, isotype, protocol);
+            insertAnalyteTitrationMapping(user, dataRows, analyte, titration, conjugate, isotype, stndCurveFitInput, protocol);
         }
     }
 
-    private void insertAnalyteTitrationMapping(User user, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration, String conjugate, String isotype, ExpProtocol protocol)
+    private void insertAnalyteTitrationMapping(User user, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration, String conjugate, String isotype, String curveFitInput, ExpProtocol protocol)
             throws SQLException, ExperimentException
     {
         LuminexWellGroup wellGroup = titration.buildWellGroup(dataRows);
@@ -626,7 +639,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 importRumiCurveFit(DilutionCurve.FitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte);
 
                 // Do the trapezoidal AUC calculation
-                double auc = calculateTrapezoidalAUC(wellGroup);
+                Double auc = calculateTrapezoidalAUC(wellGroup, curveFitInput);
 
                 CurveFit fit = new CurveFit();
                 fit.setAUC(auc);
@@ -643,10 +656,23 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private double calculateTrapezoidalAUC(LuminexWellGroup wellGroup)
+    private Double calculateTrapezoidalAUC(LuminexWellGroup wellGroup, String curveFitInput)
     {
         double auc = 0;
         List<LuminexWell> wells = wellGroup.getWellData(true);
+
+        // Strip out any incomplete data points that will mess up the AUC calculations
+        // along with any excluded wells
+        Iterator<LuminexWell> it = wells.iterator();
+        while (it.hasNext())
+        {
+            LuminexWell well = it.next();
+            if (well.getDose() == null || well.getAucValue(curveFitInput) == null || well.getDataRow().isExcluded())
+            {
+                it.remove();
+            }
+        }
+
         if (!wells.isEmpty())
         {
             LuminexWell previousWell = wells.get(0);
@@ -654,12 +680,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             {
                 LuminexWell well = wells.get(i);
                 auc += Math.max(Math.abs(Math.log10(well.getDose()) - Math.log10(previousWell.getDose())) *
-                        (Math.min(previousWell.getValue().doubleValue(), well.getValue().doubleValue()) +
-                            0.5 * Math.abs(previousWell.getValue().doubleValue() - well.getValue().doubleValue())), 0);
+                        (Math.min(previousWell.getAucValue(curveFitInput).doubleValue(), well.getAucValue(curveFitInput).doubleValue()) +
+                            0.5 * Math.abs(previousWell.getAucValue(curveFitInput).doubleValue() - well.getAucValue(curveFitInput).doubleValue())), 0);
                 previousWell = well;
             }
+            return auc;
         }
-        return auc;
+        else
+            return null;
     }
 
     private void importRumiCurveFit(DilutionCurve.FitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte) throws DilutionCurve.FitFailedException, SQLException
@@ -773,7 +801,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue());
             assertEquals("Check number of raw wells", 10, group.getWellData(false).size());
 
-            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
+            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0);
 
             // test calculation using expected concentrations for a standard
             wells = new ArrayList<LuminexWell>();
@@ -794,7 +822,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals("Check replicate value", 10.5, group.getWellData(true).get(0).getValue());
             assertEquals("Check number of raw wells", 10, group.getWellData(false).size());
 
-            assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
+            assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0);
         }
 
         @Test
@@ -829,7 +857,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue());
             assertEquals("Check number of raw wells", 20, group.getWellData(false).size());
 
-            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
+            assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0);
 
             // test calculation using expected concentrations for a standard
             wells = new ArrayList<LuminexWell>();
@@ -860,7 +888,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals("Check replicate value", 10.5, group.getWellData(true).get(0).getValue());
             assertEquals("Check number of raw wells", 20, group.getWellData(false).size());
 
-            assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group) * 10.0) / 10.0);
+            assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0);
         }
 
         @Test

@@ -76,6 +76,22 @@ public class LuminexWell implements WellData, Comparable<LuminexWell>
         return _dataRow.getFiBackground();
     }
 
+    public Double getAucValue(String curveFitInput)
+    {
+        // return the FI column based on the run property for which curve fit input to use for AUC calc (default is FI-Bkgd)
+        if (curveFitInput != null)
+        {
+            if (curveFitInput.equals("FI"))
+                return _dataRow.getFi();
+            else if (curveFitInput.equals("FI-Bkgd-Blank"))
+                return _dataRow.getFiBackgroundBlank();
+            else
+                return _dataRow.getFiBackground();
+        }
+        else
+            return getValue();
+    }
+
     @Override
     public double getMax()
     {

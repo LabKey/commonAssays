@@ -79,37 +79,54 @@ public class LuminexWellGroup implements WellGroup
         List<LuminexWell> result = new ArrayList<LuminexWell>();
         for (Map.Entry<LuminexReplicate, List<LuminexWell>> entry : allReplicates.entrySet())
         {
-            double sum = 0;
-            int count = 0;
+            double sumFi = 0;
+            int countFi = 0;
+            double sumFiBackground = 0;
+            int countFiBackground = 0;
+            double sumFiBackgroundBlank = 0;
+            int countFiBackgroundBlank = 0;
+            boolean excluded = false;
+
             for (LuminexWell well : entry.getValue())
             {
-                Double value = well.getValue();
+                Double value = well.getDataRow().getFi();
                 if (value != null)
                 {
-                    sum += value.doubleValue();
-                    count++;
+                    sumFi += value.doubleValue();
+                    countFi++;
                 }
+
+                value = well.getDataRow().getFiBackground();
+                if (value != null)
+                {
+                    sumFiBackground += value.doubleValue();
+                    countFiBackground++;
+                }
+
+                value = (Double)well.getDataRow().getExtraProperties().get("fiBackgroundBlank");
+                if (value != null)
+                {
+                    sumFiBackgroundBlank += value.doubleValue();
+                    countFiBackgroundBlank++;
+                }
+
+                if (well.getDataRow().getExtraProperties().get("FlaggedAsExcluded") != null)
+                    excluded = (Boolean)well.getDataRow().getExtraProperties().get("FlaggedAsExcluded");
             }
             LuminexDataRow fakeDataRow = new LuminexDataRow();
             fakeDataRow.setExpConc(entry.getKey().getExpConc());
             fakeDataRow.setDilution(entry.getKey().getDilution());
             fakeDataRow.setData(entry.getKey().getDataId());
             fakeDataRow.setDescription(entry.getKey().getDescription());
-            fakeDataRow.setFiBackground(sum / count);
-            fakeDataRow.setFi(sum / count);
+            if (countFi > 0)
+                fakeDataRow.setFi(sumFi / countFi);
+            if (countFiBackground > 0)
+                fakeDataRow.setFiBackground(sumFiBackground / countFiBackground);
+            if (countFiBackgroundBlank > 0)
+                fakeDataRow.setFiBackgroundBlank(sumFiBackgroundBlank / countFiBackgroundBlank);
             fakeDataRow.setType(entry.getKey().getType());
+            fakeDataRow.setExcluded(excluded);
             result.add(new LuminexWell(fakeDataRow));
-        }
-
-        // Strip out any incomplete data points that will mess up the AUC calculations
-        Iterator<LuminexWell> i = result.iterator();
-        while (i.hasNext())
-        {
-            LuminexWell well = i.next();
-            if (well.getDose() == null || well.getValue() == null)
-            {
-                i.remove();
-            }
         }
 
         Collections.sort(result);

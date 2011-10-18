@@ -25,6 +25,22 @@ source("${srcDirectory}/youtil.R");
 library(Ruminex);
 ruminexVersion = installed.packages()["Ruminex","Version"];
 
+########################################## FUNCTIONS ##########################################
+
+getCurveFitInputCol <- function(runProps, fiRunCol)
+{
+    runCol = runProps$val1[runProps$name == fiRunCol];
+    if (runCol == "FI-Bkgd") {
+    	runCol = "fiBackground"
+    } else if (runCol == "FI-Bkgd-Blank") {
+    	runCol = "fiBackgroundBlank"
+    } else {
+        runCol = "fi"
+    }
+    runCol;
+}
+
+
 ######################## STEP 0: READ IN THE RUN PROPERTIES AND RUN DATA #######################
 
 # set up a data frame to store the run properties
@@ -157,6 +173,26 @@ if (file.exists(titration.data.file))
                 analyteName = as.character(analytes[aIndex]);
                 dat = subset(run.data, description == titrationName & name == analyteName);
 
+                yLabel = "FI";
+                if (titration.data[tIndex,]$Standard == "true") {
+                    # choose the FI column for standards based on the run property provided by the user, default to the original FI value
+                    if(any(run.props$name == "StndCurveFitInput")) {
+                        fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput")
+                        yLabel = run.props$val1[run.props$name == "StndCurveFitInput"]
+                        dat$fi = dat[, fiCol]
+                    }
+                } else {
+                    # choose the FI column for unknowns based on the run property provided by the user, default to the original FI value
+                    if(any(run.props$name == "UnkCurveFitInput")) {
+                        fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput")
+                        yLabel = run.props$val1[run.props$name == "UnkCurveFitInput"]
+                        dat$fi = dat[, fiCol]
+                    }
+                }
+
+                # subset the dat object to just those records that have an FI
+                dat = subset(dat, !is.na(fi));
+
                 # if both raw and summary data are available, just use the raw data for the calc
                 if (bothRawAndSummary) {
                     dat = subset(dat, summary == "false");
@@ -180,12 +216,9 @@ if (file.exists(titration.data.file))
                         xLabel = "Dilution";
                     }
 
-                    # get curve fit params for 4PL using the rumi curve fit function ###DISABLED###
-                    #fit = fit.drc(log(fi) ~ expConc, data = dat, force.fit=FALSE, fit.4pl=TRUE);
-
                     # get curve fit params for 4PL
                     tryCatch({
-                            fit = drm(fiBackground~dose, data=dat, fct=LL.4());
+                            fit = drm(fi~dose, data=dat, fct=LL.4());
                             run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1]
                             run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2]
                             run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3]
@@ -193,7 +226,7 @@ if (file.exists(titration.data.file))
 
                             # plot the curve fit for the QC Controls
                             if (titration.data[tIndex,]$QCControl == "true") {
-                                plot(fit, type="all", main=analyteName, cex=.5, ylab="FI-Bkgd", xlab=xLabel);
+                                plot(fit, type="all", main=analyteName, cex=.5, ylab=yLabel, xlab=xLabel);
                             }
                         },
                         error = function(e) {
@@ -201,7 +234,7 @@ if (file.exists(titration.data.file))
 
                             # plot the individual data points for the QC Controls
                             if (titration.data[tIndex,]$QCControl == "true") {
-                                plot (fiBackground ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab="FI-Bkgd", xlab=xLabel);
+                                plot (fi ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
                             }
                         }
                     );
@@ -290,32 +323,18 @@ if(any(standardRecs) & length(standards) > 0){
     # set the sample_id to be description||dilution concatination
     dat$sample_id = paste(dat$description, "||", dat$dilution, sep="");
 
-    # designate which value to use for the FI to be passed to the rumi function
-    colnames(dat)[colnames(dat) == "fi"] = "fiOrig";
-
     # choose the FI column for standards based on the run property provided by the user, default to the original FI value
-    fiCol = "FI";
-    if(any(run.props$name == "StndCurveFitInput"))
-        fiCol = run.props$val1[run.props$name == "StndCurveFitInput"];
-    if(fiCol == "FI-Bkgd")
-        dat$fi[standardRecs] = dat$fiBackground[standardRecs]
-    else if(fiCol == "FI-Bkgd-Blank")
-        dat$fi[standardRecs] = dat$fiBackgroundBlank[standardRecs]
-    else
-        dat$fi[standardRecs] = dat$fiOrig[standardRecs];
+    if(any(run.props$name == "StndCurveFitInput")) {
+        fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput")
+        dat$fi[standardRecs] = dat[standardRecs, fiCol]
+    }
 
     # choose the FI column for unknowns based on the run property provided by the user, default to the original FI value
     if(any(!standardRecs)){
-        fiCol = "FI";
-        if(any(run.props$name == "UnkCurveFitInput"))
-            fiCol = run.props$val1[run.props$name == "UnkCurveFitInput"];
-
-        if(fiCol == "FI-Bkgd")
-            dat$fi[!standardRecs] = dat$fiBackground[!standardRecs]
-        else if(fiCol == "FI-Bkgd-Blank")
-            dat$fi[!standardRecs] = dat$fiBackgroundBlank[!standardRecs]
-        else
-            dat$fi[!standardRecs] = dat$fiOrig[!standardRecs];
+        if(any(run.props$name == "UnkCurveFitInput")) {
+            fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput")
+            dat$fi[!standardRecs] = dat[!standardRecs, fiCol]
+        }
     }
 
     # subset the dat object to just those records that have an FI
