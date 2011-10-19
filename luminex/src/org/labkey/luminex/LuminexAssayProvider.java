@@ -210,7 +210,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                                     sb.append("</a><br/>");
                                 }
 
-                                out.write("<a onclick=\"return showHelpDiv(this, 'Standard Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");\">");
+                                out.write("<a onclick=\"return showHelpDiv(this, 'Titration Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");\">");
                                 out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
                                 out.write("</a>");
                             }
