@@ -202,7 +202,7 @@ LABKEY.AnalyteExclusionPanel = Ext.extend(Ext.Panel, {
         // add save and cancel buttons
         this.addButton({
             id: 'saveBtn',
-            text: 'Save Changes',
+            text: 'Save',
             disabled: true,
             handler: this.insertUpdateAnalyteExclusions,
             scope: this

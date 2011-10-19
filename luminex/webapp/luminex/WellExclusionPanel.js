@@ -280,7 +280,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
         this.add(new Ext.form.DisplayField({
             id: 'reCalcDisplay',
             hidden: true,
-            value: 'Your titration curve is now out of date and will be re-calculated',
+            value: 'With this exclusion, your titration curve will be out-of-date and will be re-calculated.',
             style: {
                 color: 'red',
                 fontStyle: 'italic'
@@ -290,7 +290,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
         // add save and cancel buttons
         this.addButton({
             id: 'saveBtn',
-            text: 'Save Changes',
+            text: 'Save',
             disabled: true,
             handler: this.insertUpdateWellExclusions,
             scope: this
