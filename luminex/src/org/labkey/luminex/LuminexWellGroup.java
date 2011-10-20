@@ -103,9 +103,10 @@ public class LuminexWellGroup implements WellGroup
                     countFiBackground++;
                 }
 
-                value = (Double)well.getDataRow().getExtraProperties().get("fiBackgroundBlank");
-                if (value != null)
+                Object fbb = well.getDataRow().getExtraProperties().get("fiBackgroundBlank");
+                if (fbb != null)
                 {
+                    value = Double.parseDouble(fbb.toString());
                     sumFiBackgroundBlank += value.doubleValue();
                     countFiBackgroundBlank++;
                 }

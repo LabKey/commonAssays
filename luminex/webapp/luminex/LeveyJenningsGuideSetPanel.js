@@ -74,7 +74,9 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.editGuideSetButton = new Ext.Button({
             disabled: true,
             text: "Edit",
-            handler: this.editCurrentGuideSetClicked,
+            handler: function() {
+                this.manageGuideSetClicked(false);
+            },
             scope: this
         });
 
@@ -118,7 +120,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.queryCurrentGuideSetInfo(false);
     },
 
-    queryCurrentGuideSetInfo: function(clickEditButton) {
+    queryCurrentGuideSetInfo: function() {
         // query the server for the current guide set for the selected graph params
         LABKEY.Query.selectRows({
             schemaName: 'assay',
@@ -129,12 +131,12 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     LABKEY.Filter.create('Conjugate', this.conjugate, (this.isotype == '' ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                     LABKEY.Filter.create('CurrentGuideSet', true)],
             columns: 'RowId, Comment, Created',
-            success: this.updateGuideSetDisplayField(clickEditButton),
+            success: this.updateGuideSetDisplayField(),
             scope: this
         });
     },
 
-    updateGuideSetDisplayField: function(clickEditButton) {
+    updateGuideSetDisplayField: function() {
         return function(data) {
             if (data.rows.length == 0)
             {
@@ -156,11 +158,6 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 this.currentGuideSetId = row["RowId"];
                 this.editGuideSetButton.enable();
                 this.newGuideSetButton.enable();
-
-                // if this function is being called after a new current guide set is created we need to
-                // click the edit button to open the manage guide set window
-                if (clickEditButton)
-                    this.editCurrentGuideSetClicked();
             }
         }
     },
@@ -169,7 +166,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         return val ? new Date(val).format("Y-m-d") : null;
     },
 
-    editCurrentGuideSetClicked: function() {
+    manageGuideSetClicked: function(createNewGuideSet) {
         // create a pop-up window to display the manage guide set UI
         var win = new Ext.Window({
             layout:'fit',
@@ -178,11 +175,16 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             closeAction:'close',
             modal: true,
             padding: 15,
-            title: 'Manage Guide Set...',
+            title: (createNewGuideSet ? 'Create' : 'Manage') + ' Guide Set...',
             items: [new LABKEY.ManageGuideSetPanel({
                 cls: 'extContainer',
-                guideSetId: this.currentGuideSetId,
+                disableId: createNewGuideSet ? this.currentGuideSetId : null,
+                guideSetId: createNewGuideSet ? null : this.currentGuideSetId,
                 assayName: this.assayName,
+                titration: this.titration,
+                analyte: this.analyte,
+                isotype: this.isotype,
+                conjugate: this.conjugate,
                 listeners: {
                     scope: this,
                     'closeManageGuideSetPanel': function(saveResults) {
@@ -222,7 +224,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 buttons: Ext.Msg.YESNO,
                 fn: function(btnId, text, opt){
                     if(btnId == 'yes'){
-                        this.disableCurrentGuideSet();
+                        this.manageGuideSetClicked(true);
                     }
                 },
                 icon: Ext.MessageBox.QUESTION,
@@ -231,44 +233,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         }
         else
         {
-            this.createNewGuideSet();
+            this.manageGuideSetClicked(true);
         }
-    },
-
-    disableCurrentGuideSet: function() {
-        LABKEY.Query.updateRows({
-            schemaName: 'assay',
-            queryName: this.assayName + ' GuideSet',
-            rows: [{RowId: this.currentGuideSetId, CurrentGuideSet: false}],
-            success: this.createNewGuideSet,
-            scope: this
-        });
-    },
-
-    createNewGuideSet: function() {
-        LABKEY.Query.insertRows({
-            schemaName: 'assay',
-            queryName: this.assayName + ' GuideSet',
-            rows: [{
-                TitrationName: this.titration,
-                AnalyteName: this.analyte,
-                Isotype: this.isotype,
-                Conjugate: this.conjugate,
-                CurrentGuideSet: true
-            }],
-            success: function(data) {
-               Ext.Msg.show({
-                    title:'Success...',
-                    msg: 'A new guide set has successfully been created. The "Manage Guide Set" dialog will now be displayed to allow you '
-                        + 'to edit the details of the new guide set.',
-                    buttons: Ext.Msg.OK,
-                    fn: function(){
-                        this.queryCurrentGuideSetInfo(true);
-                    },
-                    scope: this
-                });
-            },
-            scope: this
-        });
     }
 });
