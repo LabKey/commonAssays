@@ -14,6 +14,4 @@
  * limitations under the License.
  */
 
-/* microarray-0.00-8.10.sql */
-
 CREATE SCHEMA microarray;

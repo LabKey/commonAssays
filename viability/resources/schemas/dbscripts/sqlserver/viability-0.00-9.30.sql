@@ -14,47 +14,41 @@
  * limitations under the License.
  */
 
-EXEC sp_addapprole 'viability', 'password'
-GO
+EXEC sp_addapprole 'viability', 'password';
 
 CREATE TABLE viability.Results
 (
-  RowID INT IDENTITY(1,1) NOT NULL,
-  Container EntityID NOT NULL,
-  ProtocolID INT NOT NULL,
-  DataID INT NOT NULL,
-  ObjectID INT NOT NULL,
+    RowID INT IDENTITY(1,1) NOT NULL,
+    Container EntityID NOT NULL,
+    ProtocolID INT NOT NULL,
+    DataID INT NOT NULL,
+    ObjectID INT NOT NULL,
 
-  Date DATETIME NULL,
-  VisitID FLOAT,
-  ParticipantID VARCHAR(32),
+    Date DATETIME NULL,
+    VisitID FLOAT,
+    ParticipantID VARCHAR(32),
 
-  -- assay data
-  SampleNum INT NOT NULL DEFAULT 0,
-  PoolID VARCHAR(50) NOT NULL,
-  TotalCells INT NOT NULL,
-  ViableCells INT NOT NULL,
+    -- assay data
+    SampleNum INT NOT NULL DEFAULT 0,
+    PoolID VARCHAR(50) NOT NULL,
+    TotalCells INT NOT NULL,
+    ViableCells INT NOT NULL,
 
-  CONSTRAINT PK_Viability_Results PRIMARY KEY (RowID),
-  CONSTRAINT FK_Results_Container FOREIGN KEY (Container) REFERENCES core.Containers (EntityID),
-  CONSTRAINT FK_Results_ProtocolID FOREIGN KEY (ProtocolID) REFERENCES exp.Protocol (RowID),
-  CONSTRAINT FK_Viability_DataID FOREIGN KEY (DataID) REFERENCES exp.Data(RowId),
-  CONSTRAINT FK_Viability_ObjectID FOREIGN KEY (ObjectID) REFERENCES exp.Object(ObjectId)
-)
-GO
-
-CREATE INDEX IDX_Results_Container_ProtocolID ON viability.Results(Container, ProtocolID)
-GO
+    CONSTRAINT PK_Viability_Results PRIMARY KEY (RowID),
+    CONSTRAINT FK_Results_Container FOREIGN KEY (Container) REFERENCES core.Containers (EntityID),
+    CONSTRAINT FK_Results_ProtocolID FOREIGN KEY (ProtocolID) REFERENCES exp.Protocol (RowID),
+    CONSTRAINT FK_Viability_DataID FOREIGN KEY (DataID) REFERENCES exp.Data(RowId),
+    CONSTRAINT FK_Viability_ObjectID FOREIGN KEY (ObjectID) REFERENCES exp.Object(ObjectId)
+);
+CREATE INDEX IDX_Results_Container_ProtocolID ON viability.Results(Container, ProtocolID);
 
 CREATE TABLE viability.ResultSpecimens
 (
-  ResultID INT NOT NULL,
-  SpecimenID VARCHAR(32) NOT NULL,
-  SpecimenIndex INT NOT NULL,
+    ResultID INT NOT NULL,
+    SpecimenID VARCHAR(32) NOT NULL,
+    SpecimenIndex INT NOT NULL,
 
-  CONSTRAINT PK_Viability_ResultSpecimens PRIMARY KEY (ResultID, SpecimenIndex),
-  CONSTRAINT UQ_Viability_ResultSpecimens_ResultIDSpecimenID UNIQUE (ResultID, SpecimenID),
-  CONSTRAINT FK_ResultSpecimens_ResultID FOREIGN KEY (ResultID) REFERENCES viability.Results(RowId)
-)
-GO
-
+    CONSTRAINT PK_Viability_ResultSpecimens PRIMARY KEY (ResultID, SpecimenIndex),
+    CONSTRAINT UQ_Viability_ResultSpecimens_ResultIDSpecimenID UNIQUE (ResultID, SpecimenID),
+    CONSTRAINT FK_ResultSpecimens_ResultID FOREIGN KEY (ResultID) REFERENCES viability.Results(RowId)
+);

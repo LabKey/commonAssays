@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-/* ms1-0.00-2.10.sql */
-
-EXEC sp_addapprole 'ms1', 'password'
-GO
-
-/* ms1-2.20-2.30.sql */
+EXEC sp_addapprole 'ms1', 'password';
 
 /* table for storing information about the data files themselves (both features.tsv and peaks.xml) */
 CREATE TABLE ms1.Files
@@ -32,10 +27,8 @@ CREATE TABLE ms1.Files
     Deleted BIT NOT NULL DEFAULT 0,
 
     CONSTRAINT PK_Files PRIMARY KEY NONCLUSTERED (FileId)
-)
-GO
-CREATE CLUSTERED INDEX IDX_Files_ExpDataFileId ON ms1.Files(ExpDataFileId)
-GO
+);
+CREATE CLUSTERED INDEX IDX_Files_ExpDataFileId ON ms1.Files(ExpDataFileId);
 
 /* table for storing information about software packages used to produce those files */
 CREATE TABLE ms1.Software
@@ -48,10 +41,8 @@ CREATE TABLE ms1.Software
 
     CONSTRAINT PK_Software PRIMARY KEY NONCLUSTERED (SoftwareId),
     CONSTRAINT FK_Software_FileId FOREIGN KEY (FileId) REFERENCES ms1.Files
-)
-GO
-CREATE CLUSTERED INDEX IDX_Software_FileId ON ms1.Software(FileId)
-GO
+);
+CREATE CLUSTERED INDEX IDX_Software_FileId ON ms1.Software(FileId);
 
 /* table to record parameters used by software to produce data files */
 CREATE TABLE ms1.SoftwareParams
@@ -62,8 +53,7 @@ CREATE TABLE ms1.SoftwareParams
 
     CONSTRAINT PK_FileSoftwareParams PRIMARY KEY (SoftwareId,Name),
     CONSTRAINT FK_FileSoftwareParams_SoftwareId FOREIGN KEY (SoftwareId) REFERENCES ms1.Software(SoftwareId)
-)
-GO
+);
 
 /* table to store information about scans */
 CREATE TABLE ms1.Scans
@@ -76,13 +66,9 @@ CREATE TABLE ms1.Scans
 
     CONSTRAINT PK_Scans PRIMARY KEY NONCLUSTERED (ScanId),
     CONSTRAINT FK_Scans_FileId FOREIGN KEY (FileID) REFERENCES ms1.Files(FileId)
-)
-GO
-CREATE CLUSTERED INDEX IDX_Scans_FileId ON ms1.Scans(FileId)
-GO
-CREATE INDEX IDX_Scans_Scan ON ms1.Scans(Scan)
-GO
-
+);
+CREATE CLUSTERED INDEX IDX_Scans_FileId ON ms1.Scans(FileId);
+CREATE INDEX IDX_Scans_Scan ON ms1.Scans(Scan);
 
 /* table to store calibrations for each scan */
 CREATE TABLE ms1.Calibrations
@@ -93,8 +79,7 @@ CREATE TABLE ms1.Calibrations
 
     CONSTRAINT PK_Calibrations PRIMARY KEY (ScanId,Name),
     CONSTRAINT FK_Calibrations_ScanId FOREIGN KEY (ScanId) REFERENCES ms1.Scans(ScanId)
-)
-GO
+);
 
 /* table to store information about peaks within a scan */
 CREATE TABLE ms1.Peaks
@@ -111,10 +96,8 @@ CREATE TABLE ms1.Peaks
 
     CONSTRAINT PK_Peaks PRIMARY KEY NONCLUSTERED (PeakId),
     CONSTRAINT FK_Peaks_ScanId FOREIGN KEY (ScanId) REFERENCES ms1.Scans(ScanId)
-)
-GO
-CREATE CLUSTERED INDEX IDX_Peaks_ScanId ON ms1.Peaks(ScanId)
-GO
+);
+CREATE CLUSTERED INDEX IDX_Peaks_ScanId ON ms1.Peaks(ScanId);
 
 /* table to store information about peak families, which are a set of related peaks */
 CREATE TABLE ms1.PeakFamilies
@@ -125,10 +108,8 @@ CREATE TABLE ms1.PeakFamilies
     Charge TINYINT NULL,
 
     CONSTRAINT PK_PeakFamilies PRIMARY KEY NONCLUSTERED (PeakFamilyId)
-)
-GO
-CREATE CLUSTERED INDEX IDX_PeakFamilies_ScanId ON ms1.PeakFamilies(ScanId)
-GO
+);
+CREATE CLUSTERED INDEX IDX_PeakFamilies_ScanId ON ms1.PeakFamilies(ScanId);
 
 /* table to link peak families to peaks (m:m) */
 CREATE TABLE ms1.PeaksToFamilies
@@ -139,8 +120,8 @@ CREATE TABLE ms1.PeaksToFamilies
     CONSTRAINT PK_PeaksToFamilies PRIMARY KEY (PeakFamilyId,PeakId),
     CONSTRAINT FK_PeaksToFamilies_PeakId FOREIGN KEY (PeakId) REFERENCES ms1.Peaks(PeakId),
     CONSTRAINT FK_PeaksToFamilies_PeakFamilyId FOREIGN KEY (PeakFamilyId) REFERENCES ms1.PeakFamilies(PeakFamilyId)
-)
-GO
+);
+CREATE INDEX IDX_PeaksToFamilies_PeakId ON ms1.PeaksToFamilies(PeakId);
 
 /* table to store information about features */
 CREATE TABLE ms1.Features
@@ -168,19 +149,9 @@ CREATE TABLE ms1.Features
     /* extra cols for ceders-sinai */
     MS2Scan INT NULL,
     MS2ConnectivityProbability FLOAT NULL,
+    MS2Charge TINYINT NULL,
 
     CONSTRAINT PK_Features PRIMARY KEY NONCLUSTERED (FeatureId),
     CONSTRAINT FK_Features_FileId FOREIGN KEY (FileID) REFERENCES ms1.Files(FileId)
-)
-GO
-CREATE CLUSTERED INDEX IDX_Features_FileId ON ms1.Features(FileId)
-GO
-
-/* ms1-2.30-8.10.sql */
-
-CREATE INDEX IDX_PeaksToFamilies_PeakId ON ms1.PeaksToFamilies(PeakId)
-GO
-
-ALTER TABLE ms1.Features
-    ADD MS2Charge TINYINT NULL
-GO
+);
+CREATE CLUSTERED INDEX IDX_Features_FileId ON ms1.Features(FileId);

@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-/* ms1-0.00-2.10.sql */
-
 CREATE SCHEMA ms1;
-
-/* ms1-2.20-2.30.sql */
 
 /* table for storing information about the data files themselves (both features.tsv and peaks.xml) */
 CREATE TABLE ms1.Files
@@ -32,7 +28,6 @@ CREATE TABLE ms1.Files
 
     CONSTRAINT PK_Files PRIMARY KEY (FileId)
 );
-
 CREATE INDEX IDX_Files_ExpDataFileId ON ms1.Files(ExpDataFileId);
 
 /* table for storing information about software packages used to produce those files */
@@ -126,6 +121,7 @@ CREATE TABLE ms1.PeaksToFamilies
     CONSTRAINT FK_PeaksToFamilies_PeakId FOREIGN KEY (PeakId) REFERENCES ms1.Peaks(PeakId),
     CONSTRAINT FK_PeaksToFamilies_PeakFamilyId FOREIGN KEY (PeakFamilyId) REFERENCES ms1.PeakFamilies(PeakFamilyId)
 );
+CREATE INDEX IDX_PeaksToFamilies_PeakId ON ms1.PeaksToFamilies(PeakId);
 
 /* table to store information about features */
 CREATE TABLE ms1.Features
@@ -153,15 +149,9 @@ CREATE TABLE ms1.Features
     /* extra cols for ceders-sinai */
     MS2Scan INT NULL,
     MS2ConnectivityProbability DOUBLE PRECISION NULL,
+    MS2Charge SMALLINT NULL,
 
     CONSTRAINT PK_Features PRIMARY KEY (FeatureId),
     CONSTRAINT FK_Features_FileId FOREIGN KEY (FileID) REFERENCES ms1.Files(FileId)
 );
 CREATE INDEX IDX_Features_FileId ON ms1.Features(FileId);
-
-/* ms1-2.30-8.10.sql */
-
-CREATE INDEX IDX_PeaksToFamilies_PeakId ON ms1.PeaksToFamilies(PeakId);
-
-ALTER TABLE ms1.Features
-    ADD COLUMN MS2Charge smallint NULL;

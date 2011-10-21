@@ -14,8 +14,5 @@
  * limitations under the License.
  */
 
-/* microarray-0.00-8.10.sql */
-
 -- Tables used for Microarray module
-EXEC sp_addapprole 'microarray', 'password'
-GO
+EXEC sp_addapprole 'microarray', 'password';
