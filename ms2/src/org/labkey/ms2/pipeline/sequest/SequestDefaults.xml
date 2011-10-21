@@ -224,6 +224,8 @@
 		<note> max # of diff. mod in a peptide. </note>
 	<note type="input" label="sequest, mass_type_parent">1</note>
 		<note>0=average masses, 1=monoisotopic masses</note>
+	<note type="input" label="sequest, mass_type_index">1</note>
+		<note>0=average masses, 1=monoisotopic masses</note>
 	<note type="input" label="sequest, normalize_xcorr">0</note>
 		<note>use normalized xcorr values in the out file</note>
 	<note type="input" label="sequest, remove_precursor_peak">0</note>

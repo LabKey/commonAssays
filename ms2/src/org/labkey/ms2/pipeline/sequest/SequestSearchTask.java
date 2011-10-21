@@ -54,6 +54,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     private static final String MAKEDB_ACTION_NAME = "MakeDB";
     
     public static final String MASS_TYPE_PARENT = "sequest, mass_type_parent";
+    public static final String MASS_TYPE_INDEX = "sequest, mass_type_index";
 
     public static final String USE_INDEX_PARAMETER_NAME = "pipeline, use index";
     public static final String INDEX_FILE_NAME_PARAMETER_NAME = "pipeline, index file name";
@@ -194,10 +195,14 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             sb.append(params.get(AbstractMS2SearchTask.MAXIMUM_PARENT_M_H));
             sb.append(".MaxMissedCleavages-");
             sb.append(params.get(AbstractMS2SearchTask.MAXIMUM_MISSED_CLEAVAGE_SITES));
-            sb.append(".MassTypeParent-");
-            sb.append(params.get(SequestSearchTask.MASS_TYPE_PARENT));
+            sb.append(".MassTypeIndex-");
+            sb.append(params.get(SequestSearchTask.MASS_TYPE_INDEX));
             sb.append(".StaticMod-");
             sb.append(params.get(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD));
+            sb.append(".FASTAModified-");
+            sb.append(fastaFile.lastModified());
+            sb.append(".FASTASize-");
+            sb.append(fastaFile.length());
 
             CRC32 crc = new CRC32();
             crc.update(toBytes(sb.toString()));

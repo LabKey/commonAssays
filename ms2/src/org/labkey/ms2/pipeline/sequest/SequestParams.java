@@ -272,6 +272,16 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
         ).setInputXmlLabels("spectrum, fragment mass type"));
 
         _params.add(new SequestParam(
+            195,                                                       //sortOrder
+            "1",                                            //The value of the property
+            "use_mono/avg_masses",                                // the sequest.params property name
+            "0=average masses, 1=monoisotopic masses",       // the sequest.params comment
+            ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+            ParamsValidatorFactory.getBooleanParamsValidator(),
+            true
+        ).setInputXmlLabels(SequestSearchTask.MASS_TYPE_INDEX));
+
+        _params.add(new SequestParam(
             200,                                                       //sortOrder
             "0",                                            //The value of the property
             "normalize_xcorr",                                // the sequest.params property name
