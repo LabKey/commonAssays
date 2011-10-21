@@ -4318,14 +4318,13 @@ public class MS2Controller extends SpringActionController
             }
 
             getPageConfig().setTemplate(PageConfig.Template.Print);
-            getPageConfig().setTitle(getProteinTitle(_protein, true));
 
             return new ProteinsView(currentURL, _run, form, new Protein[] {_protein}, null, peptideQueryView);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return null;
+            return root.addChild(getProteinTitle(_protein, true));
         }
     }
 
@@ -4637,15 +4636,49 @@ public class MS2Controller extends SpringActionController
         return null;
     }
 }
-    @RequiresPermissionClass(ReadPermission.class)
-    public class PieSliceSectionAction extends SimpleViewAction
+    public static class PieSliceSectionForm
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        private String _sliceTitle;
+        private String _sqids;
+
+        public String getSliceTitle()
         {
+            return _sliceTitle;
+        }
+
+        public void setSliceTitle(String sliceTitle)
+        {
+            _sliceTitle = sliceTitle;
+        }
+
+        public String getSqids()
+        {
+            return _sqids;
+        }
+
+        public void setSqids(String sqids)
+        {
+            _sqids = sqids;
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class PieSliceSectionAction extends SimpleViewAction<PieSliceSectionForm>
+    {
+        private PieSliceSectionForm _form;
+
+        public ModelAndView getView(PieSliceSectionForm form, BindException errors) throws Exception
+        {
+            _form = form;
             VBox vbox = new VBox();
             HttpServletRequest req = getViewContext().getRequest();
 
-            String accn = req.getParameter("sliceTitle").split(" ")[0];
+            if (form.getSliceTitle() == null || form.getSqids() == null)
+            {
+                throw new NotFoundException();
+            }
+
+            String accn = form.getSliceTitle().split(" ")[0];
             String sliceDefinition = ProteinDictionaryHelpers.getGODefinitionFromAcc(accn);
             if (StringUtils.isBlank(sliceDefinition))
                 sliceDefinition = "Miscellaneous or Defunct Category";
@@ -4653,7 +4686,7 @@ public class MS2Controller extends SpringActionController
             HttpView definitionView = new HtmlView("Definition", html);
             vbox.addView(definitionView);
 
-            String sqids = req.getParameter("sqids");
+            String sqids = form.getSqids();
             String sqidArr[] = sqids.split(",");
             for (String curSqid : sqidArr)
             {
@@ -4662,14 +4695,12 @@ public class MS2Controller extends SpringActionController
                 vbox.addView(new AnnotView(protein));
             }
 
-            getPageConfig().setTitle("Pieslice Details for: " + req.getParameter("sliceTitle"));
-
             return vbox;
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return null;  // TODO: add nav trail, once we pass run url along
+            return root.addChild("Pieslice Details for: " + _form.getSliceTitle());
         }
     }
 
@@ -5971,7 +6002,6 @@ public class MS2Controller extends SpringActionController
             ct.render(html);
             html.append("</table>");
 
-            getPageConfig().setTitle("Move Runs");
             getPageConfig().setTemplate(PageConfig.Template.Dialog);
 
             return new HtmlView(html.toString());
@@ -5979,7 +6009,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return null;
+            return root.addChild("Move Runs");
         }
     }
 
