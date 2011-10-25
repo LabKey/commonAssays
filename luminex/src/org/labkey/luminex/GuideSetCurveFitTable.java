@@ -42,6 +42,7 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
         super(schema.getDbSchema());
         _schema = schema;
         _curveType = curveType;
+        setDescription("Contains one row per curve fit/guide set combination, and contains average and other statistics for all of the matching runs");
 
         ColumnInfo guideSetIdColumn = new ColumnInfo("GuideSetId", this);
         guideSetIdColumn.setLabel("Guide Set");

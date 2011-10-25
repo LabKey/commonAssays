@@ -24,6 +24,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.ParameterCurveImpl;
@@ -619,24 +620,45 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // Insert the curve fit values (EC50 and AUC)
         try
         {
+            // Look up any existing curve fits that might already be in the database
+            SimpleFilter curveFitFilter = new SimpleFilter("AnalyteId", analyte.getRowId());
+            curveFitFilter.addCondition("TitrationId", titration.getRowId());
+            CurveFit[] existingCurveFits = Table.select(LuminexSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, filter, null, CurveFit.class);
+
+            // Keep track of the curve fits that should be part of this run
+            List<CurveFit> newCurveFits = new ArrayList<CurveFit>();
+
             String stdCurve = analyte.getStdCurve();
             if (stdCurve != null)
             {
                 ParameterCurveImpl.FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
                 if (fitParams != null)
                 {
-                    insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex");
+                    CurveFit fit = insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex", existingCurveFits);
+                    if (fit != null)
+                    {
+                        newCurveFits.add(fit);
+                    }
                 }
                 else
                 {
                     LOGGER.warn("Could not parse standard curve: " + stdCurve);
                 }
             }
+
             if (!wellGroup.getWellData(false).isEmpty())
             {
                 LuminexDataRow firstDataRow = wellGroup.getWellData(false).get(0)._dataRow;
-                importRumiCurveFit(DilutionCurve.FitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte);
-                importRumiCurveFit(DilutionCurve.FitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte);
+                CurveFit rumi5PLFit = importRumiCurveFit(DilutionCurve.FitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
+                if (rumi5PLFit != null)
+                {
+                    newCurveFits.add(rumi5PLFit);
+                }
+                CurveFit rumi4PLFit = importRumiCurveFit(DilutionCurve.FitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
+                if (rumi4PLFit != null)
+                {
+                    newCurveFits.add(rumi4PLFit);
+                }
 
                 // Do the trapezoidal AUC calculation
                 Double auc = calculateTrapezoidalAUC(wellGroup, curveFitInput);
@@ -647,13 +669,40 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 fit.setTitrationId(titration.getRowId());
                 fit.setCurveType("Trapezoidal");
 
-                insertOrUpdateCurveFit(user, fit);
+                fit = insertOrUpdateCurveFit(user, fit, existingCurveFits);
+                newCurveFits.add(fit);
+            }
+
+            // Look through the original set of curve fits. If there are any that don't have an updated curve fit,
+            // delete them.
+            for (CurveFit existingCurveFit : existingCurveFits)
+            {
+                CurveFit newFit = findMatch(existingCurveFit, newCurveFits);
+                if (newFit == null)
+                {
+                    Table.delete(LuminexSchema.getTableInfoCurveFit(), existingCurveFit.getRowId());
+                }
             }
         }
         catch (DilutionCurve.FitFailedException e)
         {
             throw new ExperimentException(e);
         }
+    }
+
+    /** Walks the newCurveFits list to find fit for the same analyte/titration/curve type combination */
+    private CurveFit findMatch(CurveFit existingCurveFit, List<CurveFit> newCurveFits)
+    {
+        for (CurveFit newCurveFit : newCurveFits)
+        {
+            if (existingCurveFit.getAnalyteId() == newCurveFit.getAnalyteId() &&
+                existingCurveFit.getTitrationId() == newCurveFit.getTitrationId() &&
+                existingCurveFit.getCurveType().equals(newCurveFit.getCurveType()))
+            {
+                return newCurveFit;
+            }
+        }
+        return null;
     }
 
     private Double calculateTrapezoidalAUC(LuminexWellGroup wellGroup, String curveFitInput)
@@ -690,7 +739,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             return null;
     }
 
-    private void importRumiCurveFit(DilutionCurve.FitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte) throws DilutionCurve.FitFailedException, SQLException
+    /** @return null if we can't find matching Rumi curve fit data */
+    @Nullable
+    private CurveFit importRumiCurveFit(DilutionCurve.FitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits) throws DilutionCurve.FitFailedException, SQLException
     {
         if (fitType != DilutionCurve.FitType.FIVE_PARAMETER && fitType != DilutionCurve.FitType.FOUR_PARAMETER)
         {
@@ -712,9 +763,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             params.max = upper.doubleValue();
             params.asymmetry = asymmetry == null ? 1 : asymmetry.doubleValue();
 
-            insertOrUpdateCurveFit(wellGroup, user, titration, analyte, params, fitType, null);
+            return insertOrUpdateCurveFit(wellGroup, user, titration, analyte, params, fitType, null, existingCurveFits);
         }
-        
+        return null;
     }
 
     private ParameterCurveImpl.FitParameters parseBioPlexStdCurve(String stdCurve)
@@ -947,28 +998,35 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private void insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source)
+    @NotNull
+    private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source, CurveFit[] existingCurveFits)
             throws DilutionCurve.FitFailedException, SQLException
     {
         CurveFit fit = createCurveFit(wellGroup, titration, analyte, params, fitType, source);
-        insertOrUpdateCurveFit(user, fit);
+        return insertOrUpdateCurveFit(user, fit, existingCurveFits);
     }
 
-    private void insertOrUpdateCurveFit(User user, CurveFit fit)
+    @NotNull
+    private CurveFit insertOrUpdateCurveFit(User user, CurveFit fit, CurveFit[] existingCurveFits)
             throws SQLException
     {
-        SimpleFilter filter = new SimpleFilter("AnalyteId", fit.getAnalyteId());
-        filter.addCondition("TitrationId", fit.getTitrationId());
-        filter.addCondition("CurveType", fit.getCurveType());
-        CurveFit existingFit = Table.selectObject(LuminexSchema.getTableInfoCurveFit(), filter, null, CurveFit.class);
-        if (existingFit != null)
+        CurveFit matchingFit = null;
+        for (CurveFit existingCurveFit : existingCurveFits)
         {
-            fit.setRowId(existingFit.getRowId());
-            Table.update(user, LuminexSchema.getTableInfoCurveFit(), fit, fit.getRowId());
+            if (existingCurveFit.getCurveType().equals(fit.getCurveType()))
+            {
+                matchingFit = existingCurveFit;
+                break;
+            }
+        }
+        if (matchingFit != null)
+        {
+            fit.setRowId(matchingFit.getRowId());
+            return Table.update(user, LuminexSchema.getTableInfoCurveFit(), fit, fit.getRowId());
         }
         else
         {
-            Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
+            return Table.insert(user, LuminexSchema.getTableInfoCurveFit(), fit);
         }
     }
 

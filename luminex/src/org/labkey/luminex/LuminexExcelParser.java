@@ -416,121 +416,134 @@ public class LuminexExcelParser
                 String columnName = colNames.get(col);
 
                 String value = ExcelFactory.getCellStringValue(cell).trim();
-                if ("FI".equalsIgnoreCase(columnName))
+
+                try
                 {
-                    dataRow.setFiString(StringUtils.trimToNull(value));
-                    dataRow.setFi(LuminexDataHandler.determineOutOfRange(value).getValue(value));
-                }
-                else if ("FI - Bkgd".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setFiBackgroundString(StringUtils.trimToNull(value));
-                    dataRow.setFiBackground(LuminexDataHandler.determineOutOfRange(value).getValue(value));
-                }
-                else if ("Type".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setType(StringUtils.trimToNull(value));
-                    if (value != null)
+                    if ("FI".equalsIgnoreCase(columnName))
                     {
-                        String upper = value.toUpperCase();
-                        if (upper.startsWith("S") || upper.startsWith("ES"))
+                        dataRow.setFiString(StringUtils.trimToNull(value));
+                        dataRow.setFi(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                    }
+                    else if ("FI - Bkgd".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setFiBackgroundString(StringUtils.trimToNull(value));
+                        dataRow.setFiBackground(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                    }
+                    else if ("Type".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setType(StringUtils.trimToNull(value));
+                        if (value != null)
                         {
-                            dataRow.setWellRole("Standard");
+                            String upper = value.toUpperCase();
+                            if (upper.startsWith("S") || upper.startsWith("ES"))
+                            {
+                                dataRow.setWellRole("Standard");
+                            }
+                            if (upper.startsWith("C"))
+                            {
+                                dataRow.setWellRole("Control");
+                            }
+                            if (upper.startsWith("U") || upper.startsWith("X"))
+                            {
+                                dataRow.setWellRole("Unknown");
+                            }
+                            if (upper.startsWith("B"))
+                            {
+                                dataRow.setWellRole("Background");
+                            }
                         }
-                        if (upper.startsWith("C"))
+                    }
+                    else if ("Well".equalsIgnoreCase(columnName))
+                    {
+                        String trimmedValue = StringUtils.trimToNull(value);
+                        dataRow.setWell(trimmedValue);
+                        boolean summary = trimmedValue != null && trimmedValue.contains(",");
+                        dataRow.setSummary(summary);
+                    }
+                    else if ("%CV".equalsIgnoreCase(columnName))
+                    {
+                        Double doubleValue = LuminexDataHandler.determineOutOfRange(value).getValue(value);
+                        if (doubleValue != null)
                         {
-                            dataRow.setWellRole("Control");
+                            // We store the values as 1 == 100%, so translate from the Excel file's values
+                            doubleValue = doubleValue.doubleValue() / 100.0;
                         }
-                        if (upper.startsWith("U") || upper.startsWith("X"))
+                        dataRow.setCv(doubleValue);
+                    }
+                    else if ("Outlier".equalsIgnoreCase(columnName))
+                    {
+                        double outlier = 0;
+                        if (value != null && !"".equals(value.trim()))
                         {
-                            dataRow.setWellRole("Unknown");
+                            outlier = cell.getNumericCellValue();
                         }
-                        if (upper.startsWith("B"))
+                        dataRow.setOutlier((int)outlier);
+                    }
+                    else if ("Description".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setDescription(StringUtils.trimToNull(value));
+                    }
+                    else if ("Std Dev".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setStdDevString(StringUtils.trimToNull(value));
+                        dataRow.setStdDev(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                    }
+                    else if ("Exp Conc".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setExpConc(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                    }
+                    else if ("Obs Conc".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setObsConcString(StringUtils.trimToNull(value));
+                        dataRow.setObsConc(LuminexDataHandler.determineOutOfRange(value).getValue(value));
+                    }
+                    else if ("(Obs/Exp) * 100".equalsIgnoreCase(columnName))
+                    {
+                        if (!value.equals("***"))
                         {
-                            dataRow.setWellRole("Background");
+                            dataRow.setObsOverExp(parseDouble(value));
                         }
                     }
-                }
-                else if ("Well".equalsIgnoreCase(columnName))
-                {
-                    String trimmedValue = StringUtils.trimToNull(value);
-                    dataRow.setWell(trimmedValue);
-                    boolean summary = trimmedValue != null && trimmedValue.contains(",");
-                    dataRow.setSummary(summary);
-                }
-                else if ("%CV".equalsIgnoreCase(columnName))
-                {
-                    Double doubleValue = LuminexDataHandler.determineOutOfRange(value).getValue(value);
-                    if (doubleValue != null)
+                    else if ("Conc in Range".equalsIgnoreCase(columnName))
                     {
-                        // We store the values as 1 == 100%, so translate from the Excel file's values
-                        doubleValue = doubleValue.doubleValue() / 100.0;
+                        dataRow.setConcInRangeString(StringUtils.trimToNull(value));
+                        dataRow.setConcInRange(LuminexDataHandler.determineOutOfRange(value).getValue(value));
                     }
-                    dataRow.setCv(doubleValue);
-                }
-                else if ("Outlier".equalsIgnoreCase(columnName))
-                {
-                    double outlier = 0;
-                    if (value != null && !"".equals(value.trim()))
+                    else if ("Ratio".equalsIgnoreCase(columnName))
                     {
-                        outlier = cell.getNumericCellValue();
+                        dataRow.setRatio(StringUtils.trimToNull(value));
                     }
-                    dataRow.setOutlier((int)outlier);
-                }
-                else if ("Description".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setDescription(StringUtils.trimToNull(value));
-                }
-                else if ("Std Dev".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setStdDevString(StringUtils.trimToNull(value));
-                    dataRow.setStdDev(LuminexDataHandler.determineOutOfRange(value).getValue(value));
-                }
-                else if ("Exp Conc".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setExpConc(LuminexDataHandler.determineOutOfRange(value).getValue(value));
-                }
-                else if ("Obs Conc".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setObsConcString(StringUtils.trimToNull(value));
-                    dataRow.setObsConc(LuminexDataHandler.determineOutOfRange(value).getValue(value));
-                }
-                else if ("(Obs/Exp) * 100".equalsIgnoreCase(columnName))
-                {
-                    if (!value.equals("***"))
+                    else if ("Bead Count".equalsIgnoreCase(columnName) || "BeadCount".equalsIgnoreCase(columnName))
                     {
-                        dataRow.setObsOverExp(parseDouble(value));
+                        Double beadCount = parseDouble(value);
+                        dataRow.setBeadCount(beadCount == null ? null : beadCount.intValue());
+                    }
+                    else if ("Dilution".equalsIgnoreCase(columnName))
+                    {
+                        String dilutionValue = value;
+                        if (dilutionValue != null && dilutionValue.startsWith("1:"))
+                        {
+                            dilutionValue = dilutionValue.substring("1:".length());
+                        }
+                        Double dilution = parseDouble(dilutionValue);
+                        if (dilution != null && dilution.doubleValue() == 0.0)
+                        {
+                            throw new ExperimentException("Dilution values must not be zero");
+                        }
+                        dataRow.setDilution(dilution);
+                    }
+                    else if ("Group".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setDataRowGroup(StringUtils.trimToNull(value));
+                    }
+                    else if ("Sampling Errors".equalsIgnoreCase(columnName))
+                    {
+                        dataRow.setSamplingErrors(StringUtils.trimToNull(value));
                     }
                 }
-                else if ("Conc in Range".equalsIgnoreCase(columnName))
+                catch (NumberFormatException e)
                 {
-                    dataRow.setConcInRangeString(StringUtils.trimToNull(value));
-                    dataRow.setConcInRange(LuminexDataHandler.determineOutOfRange(value).getValue(value));
-                }
-                else if ("Ratio".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setRatio(StringUtils.trimToNull(value));
-                }
-                else if ("Bead Count".equalsIgnoreCase(columnName) || "BeadCount".equalsIgnoreCase(columnName))
-                {
-                    Double beadCount = parseDouble(value);
-                    dataRow.setBeadCount(beadCount == null ? null : beadCount.intValue());
-                }
-                else if ("Dilution".equalsIgnoreCase(columnName))
-                {
-                    String dilutionValue = value;
-                    if (dilutionValue != null && dilutionValue.startsWith("1:"))
-                    {
-                        dilutionValue = dilutionValue.substring("1:".length());
-                    }
-                    dataRow.setDilution(parseDouble(dilutionValue));
-                }
-                else if ("Group".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setDataRowGroup(StringUtils.trimToNull(value));
-                }
-                else if ("Sampling Errors".equalsIgnoreCase(columnName))
-                {
-                    dataRow.setSamplingErrors(StringUtils.trimToNull(value));
+                    throw new ExperimentException("Unable to parse " + columnName + " value as a number: " + value);
                 }
             }
         }

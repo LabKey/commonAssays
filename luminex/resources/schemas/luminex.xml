@@ -19,6 +19,7 @@
 <tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <table tableName="Analyte" tableDbType="TABLE">
+        <description>Contains one row per analyte/antigen within a Luminex assay run</description>
         <columns>
             <column columnName="RowId"/>
             <column columnName="LSID"/>
@@ -46,7 +47,7 @@
     </table>
 
     <table tableName="CurveFit" tableDbType="TABLE">
-        <description>Contains EC50 and other values per titration/analyte combination</description>
+        <description>Contains EC50, area-under-the curve, curve fit parameters and other values per titration/analyte combination</description>
         <columns>
             <column columnName="RowId">
                 <isHidden>true</isHidden>
@@ -67,6 +68,7 @@
     </table>
 
     <table tableName="GuideSet" tableDbType="TABLE">
+        <description>Contains one row per guide set that has been established to calculate historical ranges for the assay results</description>
         <columns>
             <column columnName="RowId">
                 <isHidden>true</isHidden>
@@ -86,6 +88,7 @@
     </table>
 
     <table tableName="AnalyteTitration" tableDbType="TABLE">
+        <description>Contains one row per analyte/titration combination within a run</description>
         <columns>
             <column columnName="AnalyteId" />
             <column columnName="TitrationId" />
@@ -96,6 +99,7 @@
     </table>
 
     <table tableName="WellExclusion" tableDbType="TABLE">
+        <description>Contains one row per well-level exclusion, which is associated with all wells for the same replicate, and may consist of one or more analytes</description>
         <columns>
             <column columnName="RowId">
                 <isHidden>true</isHidden>
@@ -119,6 +123,7 @@
     </table>
 
     <table tableName="RunExclusion" tableDbType="TABLE">
+        <description>Contains one row per run-level exclusion, which may consist of one or more analytes</description>
         <columns>
             <column columnName="RunId" />
             <column columnName="Comment" />
