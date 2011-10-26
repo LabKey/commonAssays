@@ -377,60 +377,64 @@ if(any(standardRecs) & length(standards) > 0){
         # set the assay_id (this value will be used in the PDF plot header)
         standard.dat$assay_id = stndVal;
 
-        # call the rumi function to calculate new estimated log concentrations using 5PL for the uknowns
-        mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2));
-        fits = rumi(standard.dat, verbose=TRUE);
-        fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
-        dev.off();
+        # check to make sure there are expected_conc values in the standard data frame that will be passed to Rumi
+        if (any(!is.na(standard.dat$expected_conc)))
+        {
+            # call the rumi function to calculate new estimated log concentrations using 5PL for the uknowns
+            mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2));
+            fits = rumi(standard.dat, verbose=TRUE);
+            fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
+            dev.off();
 
-        # put the calculated values back into the run.data dataframe by matching on analyte, description, dilution, and standard
-        if(nrow(fits) > 0){
-            for(index in 1:nrow(fits)){
-                a = fits$analyte[index];
-                dil = fits$dilution[index];
-                desc = fits$description[index];
+            # put the calculated values back into the run.data dataframe by matching on analyte, description, dilution, and standard
+            if(nrow(fits) > 0){
+                for(index in 1:nrow(fits)){
+                    a = fits$analyte[index];
+                    dil = fits$dilution[index];
+                    desc = fits$description[index];
 
-                elc = fits$"est.log.conc"[index];
-                ec = fits$"est.conc"[index];
-                se = fits$"se"[index];
+                    elc = fits$"est.log.conc"[index];
+                    ec = fits$"est.conc"[index];
+                    se = fits$"se"[index];
 
-                runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal;
-                run.data$EstLogConc_5pl[runDataIndex] = elc;
-                run.data$EstConc_5pl[runDataIndex] = ec;
-                run.data$SE_5pl[runDataIndex] = se;
+                    runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal;
+                    run.data$EstLogConc_5pl[runDataIndex] = elc;
+                    run.data$EstConc_5pl[runDataIndex] = ec;
+                    run.data$SE_5pl[runDataIndex] = se;
+                }
+
+                # convert Inf and -Inf to Java string representation for DB persistance
+                run.data$SE_5pl[run.data$SE_5pl == "Inf"] = "Infinity";
+                run.data$SE_5pl[run.data$SE_5pl == "-Inf"] = "-Infinity";
             }
 
-            # convert Inf and -Inf to Java string representation for DB persistance
-            run.data$SE_5pl[run.data$SE_5pl == "Inf"] = "Infinity";
-            run.data$SE_5pl[run.data$SE_5pl == "-Inf"] = "-Infinity";
-        }
+            # call the rumi function to calculate new estimated log concentrations using 4PL for the uknowns
+            mypdf(file=paste(stndVal, "4PL", sep="_"), mfrow=c(2,2));
+            fits = rumi(standard.dat, fit.4pl=TRUE, verbose=TRUE);
+            fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
+            dev.off();
 
-        # call the rumi function to calculate new estimated log concentrations using 4PL for the uknowns
-        mypdf(file=paste(stndVal, "4PL", sep="_"), mfrow=c(2,2));
-        fits = rumi(standard.dat, fit.4pl=TRUE, verbose=TRUE);
-        fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
-        dev.off();
+            # put the calculated values back into the run.data dataframe by matching on analyte, description, dilution, and standard
+            if(nrow(fits) > 0){
+                for(index in 1:nrow(fits)){
+                    a = fits$analyte[index];
+                    dil = fits$dilution[index];
+                    desc = fits$description[index];
 
-        # put the calculated values back into the run.data dataframe by matching on analyte, description, dilution, and standard
-        if(nrow(fits) > 0){
-            for(index in 1:nrow(fits)){
-                a = fits$analyte[index];
-                dil = fits$dilution[index];
-                desc = fits$description[index];
+                    elc = fits$"est.log.conc"[index];
+                    ec = fits$"est.conc"[index];
+                    se = fits$"se"[index];
 
-                elc = fits$"est.log.conc"[index];
-                ec = fits$"est.conc"[index];
-                se = fits$"se"[index];
+                    runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal;
+                    run.data$EstLogConc_4pl[runDataIndex] = elc;
+                    run.data$EstConc_4pl[runDataIndex] = ec;
+                    run.data$SE_4pl[runDataIndex] = se;
+                }
 
-                runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal;
-                run.data$EstLogConc_4pl[runDataIndex] = elc;
-                run.data$EstConc_4pl[runDataIndex] = ec;
-                run.data$SE_4pl[runDataIndex] = se;
+                # convert Inf and -Inf to Java string representation for DB persistance
+                run.data$SE_4pl[run.data$SE_4pl == "Inf"] = "Infinity";
+                run.data$SE_4pl[run.data$SE_4pl == "-Inf"] = "-Infinity";
             }
-
-            # convert Inf and -Inf to Java string representation for DB persistance
-            run.data$SE_4pl[run.data$SE_4pl == "Inf"] = "Infinity";
-            run.data$SE_4pl[run.data$SE_4pl == "-Inf"] = "-Infinity";
         }
     }
 }
