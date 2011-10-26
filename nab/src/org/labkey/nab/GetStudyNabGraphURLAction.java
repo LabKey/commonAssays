@@ -32,7 +32,6 @@ import java.util.*;
  * Date: April 21, 2010
  */
 
-@ActionNames("getStudyNAbGraphURL, getStudyNabGraphURL")
 @RequiresPermissionClass(ReadPermission.class)
 @ApiVersion(10.2)
 public class GetStudyNabGraphURLAction extends ApiAction<NabAssayController.GraphSelectedForm>

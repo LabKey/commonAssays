@@ -35,7 +35,6 @@ import java.util.*;
  * Time: 5:13:30 PM
  */
 
-@ActionNames("getStudyNabRuns, getStudyNAbRuns")
 @RequiresPermissionClass(ReadPermission.class)
 @ApiVersion(10.1)
 public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetStudyNabRunsForm>

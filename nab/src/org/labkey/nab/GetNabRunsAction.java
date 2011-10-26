@@ -54,7 +54,6 @@ import java.util.Map;
  * Time: 5:13:30 PM
  */
 
-@ActionNames("getNabRuns, getNAbRuns")
 @RequiresPermissionClass(ReadPermission.class)
 @ApiVersion(9.1)
 public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
