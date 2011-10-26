@@ -38,7 +38,7 @@ public class MS2FolderType extends DefaultFolderType
                         "Use existing analytic tools like PeptideProphet and ProteinProphet.",
             Arrays.asList(
                 Portal.getPortalPart("Data Pipeline").createWebPart(),
-                Portal.getPortalPart(MS2Module.MS2_RUNS_ENHANCED_LEGACY_NAME).createWebPart()
+                Portal.getPortalPart(MS2Module.MS2_RUNS_NAME).createWebPart()
             ),
             Arrays.asList(
                 Portal.getPortalPart(ProteinSearchWebPart.NAME).createWebPart(),

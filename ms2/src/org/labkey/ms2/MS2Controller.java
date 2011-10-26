@@ -255,15 +255,11 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            MS2WebPart gridView = new MS2WebPart(getViewContext());
-            DataRegion rgn = gridView.getDataRegion();
-            rgn.setShowRecordSelectors(true);
-
-            ButtonBar bb = getListButtonBar(getContainer(), gridView);
-            rgn.addDisplayColumn(new HideShowScoringColumn(bb));
-            rgn.setButtonBar(bb, DataRegion.MODE_GRID);
-
             ProteinSearchWebPart searchView = new ProteinSearchWebPart(true, ProteinSearchForm.createDefault());
+
+            QueryView gridView = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module.SEARCH_RUN_TYPE);
+            gridView.setTitle(MS2Module.MS2_RUNS_NAME);
+            gridView.setTitleHref(PageFlowUtil.urlProvider(MS2Urls.class).getShowListUrl(getContainer()));
 
             return new VBox(searchView, gridView);
         }
@@ -1961,7 +1957,6 @@ public class MS2Controller extends SpringActionController
                 setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getPeptideCustomViewName(getViewContext()));
                 setupURL.addParameter(NORMALIZE_PROTEIN_GROUPS_NAME, _form.isNormalizeProteinGroups());
                 setupURL.addParameter(PIVOT_TYPE_NAME, _form.getPivotTypeEnum().toString());
-                root.addChild("MS2 Dashboard");
                 root.addChild("Setup Compare ProteinProphet", setupURL);
             }
             setHelpTopic("compareProteinProphet");
@@ -2075,7 +2070,6 @@ public class MS2Controller extends SpringActionController
 
                 setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList() == null ? -1 : _form.getRunList());
                 setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getPeptideCustomViewName(getViewContext()));
-                root.addChild("MS2 Dashboard");
                 root.addChild("Setup Compare Peptides", setupURL);
                 StringBuilder title = new StringBuilder("Compare Peptides: ");
                 _form.appendPeptideFilterDescription(title, getViewContext());
@@ -6482,6 +6476,11 @@ public class MS2Controller extends SpringActionController
         public ActionURL getShowRunUrl(MS2Run run)
         {
             return new ActionURL(ShowRunAction.class, run.getContainer()).addParameter("run", run.getRun());
+        }
+
+        public ActionURL getShowListUrl(Container container)
+        {
+            return new ActionURL(ShowListAction.class, container);
         }
 
         public ActionURL getShowProteinAdminUrl()

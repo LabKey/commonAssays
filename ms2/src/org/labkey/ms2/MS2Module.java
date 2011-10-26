@@ -29,6 +29,7 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
+import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
@@ -108,9 +109,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     };
 
     public static final String MS2_SAMPLE_PREPARATION_RUNS_NAME = "MS2 Sample Preparation Runs";
-    public static final String MS2_EXPERIMENT_RUNS_NAME = "MS2 Experiment Runs";
-    public static final String MS2_RUNS_ENHANCED_LEGACY_NAME = "MS2 Runs (Enhanced)";
-    private static final String MS2_RUNS_DEPRECATED_NAME = "MS2 Runs (Deprecated)";
+    public static final String MS2_RUNS_NAME = "MS2 Runs";
 
     public String getName()
     {
@@ -124,31 +123,19 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     protected Collection<WebPartFactory> createWebPartFactories()
     {
-        BaseWebPartFactory legacyRunsFactory = new BaseWebPartFactory(MS2_RUNS_DEPRECATED_NAME)
-        {
-            public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
-            {
-                MS2WebPart part = new MS2WebPart(portalCtx);
-                part.setTitle(MS2_RUNS_DEPRECATED_NAME);
-                part.setTitlePopupHelp(MS2_RUNS_DEPRECATED_NAME, "The MS2 Experiment Runs web part replaces this MS2 Runs web part and adds significant new functionality.");
-                return part;
-            }
-        };
-        legacyRunsFactory.addLegacyNames("MS2 Runs");
-
-        BaseWebPartFactory runsFactory = new BaseWebPartFactory(MS2_EXPERIMENT_RUNS_NAME)
+        BaseWebPartFactory runsFactory = new BaseWebPartFactory(MS2_RUNS_NAME)
         {
             public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
             {
                 QueryView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), SEARCH_RUN_TYPE);
-                result.setTitle("MS2 Experiment Runs");
+                result.setTitle(MS2_RUNS_NAME);
+                result.setTitleHref(PageFlowUtil.urlProvider(MS2Urls.class).getShowListUrl(portalCtx.getContainer()));
                 return result;
             }
         };
-        runsFactory.addLegacyNames(MS2_RUNS_ENHANCED_LEGACY_NAME);
+        runsFactory.addLegacyNames("MS2 Runs (Enhanced)", "MS2 Runs (Deprecated)", "MS2 Experiment Runs");
 
         return new ArrayList<WebPartFactory>(Arrays.asList(
-                legacyRunsFactory,
                 runsFactory,
             new BaseWebPartFactory(MS2_SAMPLE_PREPARATION_RUNS_NAME)
             {
