@@ -157,14 +157,14 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProteinSearchForm.createDefault());
+                    return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProteinSearchForm.createDefault());
                 }
             },
             new BaseWebPartFactory(ProteinSearchWebPart.NAME)
             {
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                 {
-                    return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProteinSearchForm.createDefault());
+                    return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProteinSearchForm.createDefault());
                 }
             },
             new BaseWebPartFactory(CustomProteinListView.NAME)
