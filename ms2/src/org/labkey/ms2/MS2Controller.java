@@ -35,7 +35,6 @@ import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.PipelineRootContainerTree;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineUrls;
@@ -66,7 +65,6 @@ import org.labkey.ms2.pipeline.MSPictureUpgradeJob;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
-import org.labkey.ms2.pipeline.tandem.XTandemSearchTask;
 import org.labkey.ms2.protein.*;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
@@ -321,54 +319,11 @@ public class MS2Controller extends SpringActionController
         return compareMenu;
     }
 
-    private ButtonBar getListButtonBar(Container c, GridView view)
-    {
-        ButtonBar bb = new ButtonBar();
-
-        bb.add(createCompareMenu(c, view, false));
-
-        ActionButton compareScoring = new ActionButton(new ActionURL(ScoringController.CompareAction.class, c), CAPTION_SCORING_BUTTON);
-        compareScoring.setRequiresSelection(true);
-        compareScoring.setActionType(ActionButton.Action.GET);
-        compareScoring.setDisplayPermission(ReadPermission.class);
-        compareScoring.setVisible(false);   // Hidden unless turned on during grid rendering.
-        bb.add(compareScoring);
-
-        ActionButton exportRuns = new ActionButton(PickExportRunsView.class, "MS2 Export");
-        exportRuns.setRequiresSelection(true);
-        exportRuns.setActionType(ActionButton.Action.GET);
-        exportRuns.setDisplayPermission(ReadPermission.class);
-        bb.add(exportRuns);
-
-        ActionButton moveRuns = new ActionButton(SelectMoveLocationAction.class, "Move");
-        moveRuns.setRequiresSelection(true);
-        moveRuns.setActionType(ActionButton.Action.GET);
-        moveRuns.setDisplayPermission(DeletePermission.class);
-        bb.add(moveRuns);
-
-        ActionButton deleteRuns = new ActionButton(DeleteRunsAction.class, "Delete");
-        deleteRuns.setRequiresSelection(true);
-        deleteRuns.setActionType(ActionButton.Action.POST);
-        deleteRuns.setDisplayPermission(DeletePermission.class);
-        bb.add(deleteRuns);
-
-        return bb;
-    }
-
-
     public static ActionURL getShowRunURL(Container c, int runId)
     {
         ActionURL url = new ActionURL(ShowRunAction.class, c);
         url.addParameter(RunForm.PARAMS.run, String.valueOf(runId));
         return url;
-    }
-
-
-    public static String getShowRunSubstitutionURL(Container c)
-    {
-        ActionURL url = new ActionURL(ShowRunAction.class, c);
-
-        return url.getPath() + "?run=${Run}";
     }
 
 
@@ -2122,70 +2077,6 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermissionClass(InsertPermission.class)
-    public class MoveRunsAction extends SimpleRedirectAction
-    {
-        public ActionURL getRedirectURL(Object o) throws Exception
-        {
-            ActionURL currentURL = getViewContext().cloneActionURL();
-            String moveRuns = currentURL.getParameter("moveRuns");
-            String[] idStrings = moveRuns.split(",");
-            List<Integer> ids = new ArrayList<Integer>();
-            for (String idString : idStrings)
-            {
-                ids.add(new Integer(idString));
-            }
-            List<MS2Run> runs;
-            try
-            {
-                runs = MS2Manager.lookupRuns(ids, false, getUser());
-            }
-            catch (RunListException e)
-            {
-                throw new NotFoundException(e.getMessage());
-            }
-            List<ExpRun> expRuns = new ArrayList<ExpRun>();
-            Container sourceContainer = null;
-            for (Iterator<MS2Run> iter = runs.iterator(); iter.hasNext(); )
-            {
-                MS2Run run = iter.next();
-                if (run.getExperimentRunLSID() != null)
-                {
-                    ExpRun expRun = ExperimentService.get().getExpRun(run.getExperimentRunLSID());
-                    if (expRun != null && expRun.getContainer().equals(run.getContainer()))
-                    {
-                        sourceContainer = expRun.getContainer();
-                        expRuns.add(expRun);
-                        iter.remove();
-                    }
-                }
-            }
-            if (runs.size() > 0)
-            {
-                MS2Manager.moveRuns(getUser(), runs, getContainer());
-            }
-            if (expRuns.size() > 0)
-            {
-                ViewBackgroundInfo info = getViewBackgroundInfo();
-                info.setContainer(getContainer());
-                try
-                {
-                    ExperimentService.get().moveRuns(info, sourceContainer, expRuns);
-                }
-                catch (IOException e)
-                {
-                    throw new NotFoundException("Failed to initialize move. Check that the pipeline root is configured correctly. " + e);
-                }
-            }
-
-            currentURL.setAction(ShowListAction.class);
-            currentURL.deleteParameter("moveRuns");
-
-            return currentURL;
-        }
-    }
-
-
     @RequiresPermissionClass(ReadPermission.class)
     public class ExportRunsAction extends ExportAction<ExportForm>
     {
@@ -3638,7 +3529,7 @@ public class MS2Controller extends SpringActionController
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
 
-            JspView<PeptideProphetDetailsBean> result = new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showPeptideProphetDetails.jsp", new PeptideProphetDetailsBean(run, summary, "showPeptideProphetSensitivityPlot.view", title));
+            JspView<PeptideProphetDetailsBean> result = new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showPeptideProphetDetails.jsp", new PeptideProphetDetailsBean(run, summary, ShowPeptideProphetSensitivityPlotAction.class, title));
             result.setFrame(WebPartView.FrameType.PORTAL);
             result.setTitle("PeptideProphet Details: " + run.getDescription());
             return result;
@@ -3655,10 +3546,10 @@ public class MS2Controller extends SpringActionController
     {
         public MS2Run run;
         public SensitivitySummary summary;
-        public String action;
+        public Class<? extends Controller> action;
         public String title;
 
-        public PeptideProphetDetailsBean(MS2Run run, SensitivitySummary summary, String action, String title)
+        public PeptideProphetDetailsBean(MS2Run run, SensitivitySummary summary, Class<? extends Controller> action, String title)
         {
             this.run = run;
             this.summary = summary;
@@ -3694,7 +3585,7 @@ public class MS2Controller extends SpringActionController
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
             ProteinProphetFile summary = MS2Manager.getProteinProphetFileByRun(form.run);
-            JspView<PeptideProphetDetailsBean> result = new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showSensitivityDetails.jsp", new PeptideProphetDetailsBean(run, summary, "showProteinProphetSensitivityPlot.view", title));
+            JspView<PeptideProphetDetailsBean> result = new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showSensitivityDetails.jsp", new PeptideProphetDetailsBean(run, summary, ShowProteinProphetSensitivityPlotAction.class, title));
             result.setFrame(WebPartView.FrameType.PORTAL);
             result.setTitle(title  + run.getDescription());
             return result;
@@ -4665,7 +4556,6 @@ public class MS2Controller extends SpringActionController
         {
             _form = form;
             VBox vbox = new VBox();
-            HttpServletRequest req = getViewContext().getRequest();
 
             if (form.getSliceTitle() == null || form.getSqids() == null)
             {
@@ -4903,31 +4793,6 @@ public class MS2Controller extends SpringActionController
             showElutionGraph(response, form, true, true);
         }
     }
-
-
-    @RequiresPermissionClass(DeletePermission.class)
-    public class DeleteRunsAction extends FormHandlerAction
-    {
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
-
-        public boolean handlePost(Object o, BindException errors) throws Exception
-        {
-            Set<String> runIds = DataRegionSelection.getSelected(getViewContext(), true);
-
-            if (null != runIds)
-                MS2Manager.markAsDeleted(MS2Manager.parseIds(runIds), getContainer(), getUser());
-
-            return true;
-        }
-
-        public ActionURL getSuccessURL(Object o)
-        {
-            return getShowListURL(getContainer());
-        }
-    }
-
 
     @RequiresSiteAdmin
     public class MascotTestAction extends SimpleViewAction<TestMascotForm>
@@ -5948,62 +5813,6 @@ public class MS2Controller extends SpringActionController
         public void setDeleted(boolean deleted)
         {
             this.deleted = deleted;
-        }
-    }
-
-
-    @RequiresPermissionClass(DeletePermission.class)
-    public class SelectMoveLocationAction extends SimpleRedirectAction
-    {
-        public ActionURL getRedirectURL(Object o) throws Exception
-        {
-            List<String> moveRuns = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
-
-            ActionURL url = new ActionURL(PickMoveLocationAction.class, getContainer()).addParameter("moveRuns", StringUtils.join(moveRuns, ','));
-
-            if ("true".equals(getViewContext().getRequest().getParameter("ExperimentRunIds")))
-                url.addParameter("ExperimentRunIds", "true");
-
-            return url;
-        }
-    }
-
-
-    @RequiresPermissionClass(DeletePermission.class)
-    public class PickMoveLocationAction extends SimpleViewAction
-    {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
-        {
-            ActionURL moveURL = new ActionURL(MoveRunsAction.class, ContainerManager.getRoot());
-            moveURL.addParameters(getViewContext().getActionURL().getParameters());
-            final Container originalContainer = getContainer();
-            PipelineRootContainerTree ct = new PipelineRootContainerTree(getUser(), moveURL)
-            {
-                protected void renderCellContents(StringBuilder html, Container c, ActionURL url, boolean hasRoot)
-                {
-                    if (hasRoot && !c.equals(originalContainer))
-                    {
-                        super.defaultRenderCellContents(html, c, url);
-                    }
-                    else
-                    {
-                        html.append(PageFlowUtil.filter(c.getName()));
-                    }
-                }
-            };
-
-            StringBuilder html = new StringBuilder("<table class=\"labkey-data-region\"><tr><td>Please select the destination folder. Folders that are not configured with a pipeline root are not valid destinations. They are shown in the list, but are not linked.</td></tr><tr><td>&nbsp;</td></tr>");
-            ct.render(html);
-            html.append("</table>");
-
-            getPageConfig().setTemplate(PageConfig.Template.Dialog);
-
-            return new HtmlView(html.toString());
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Move Runs");
         }
     }
 
