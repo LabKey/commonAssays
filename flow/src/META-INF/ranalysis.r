@@ -42,8 +42,10 @@ require(tools)
 
 # Some hard-coded variables that should be passed in by the calling process.
 workspacePath <- "${workspace-path}"
+if (!file.exists(workspacePath)) stop(paste("workspace doesn't eixst: ", workspacePath))
+
 fcsFileDir <- "${fcsfile-directory}"
-#workspacefile <- dir(path=pathtoxml,pattern="xml")
+if (!file.exists(fcsFileDir)) stop(paste("FCS directory doesn't eixst: ", fcsFileDir))
 
 
 # A legacy flowWorkspace parameter.. should always be true
@@ -57,17 +59,18 @@ Keywords <- c("Stim","EXPERIMENT NAME","Sample Order")
 
 # Directory to export the results
 outputDir <- "${output-directory}"
+if (!file.exists(outputDir)) stop(paste("Output directory doesn't eixst: ", outputDir))
 
 
 # open the workspace
-print(paste("opening workspace", workspacePath, "..."))
+cat("opening workspace", workspacePath, "...\n")
 ws <- openWorkspace(workspacePath)
 
 # parse the workspace
-print(paste("parsing workspace", workspacePath, "..."))
+cat("parsing workspace", workspacePath, "...\n")
 G <- parseWorkspace(ws, path=fcsFileDir, isNcdf=NCDF, execute=EXECUTENOW, name=GROUP)
 
 # export the required files
-print(paste("exporting workspace", workspacePath, "to", outputDir, "..."))
+cat("exporting workspace", workspacePath, "to", outputDir, "...\n")
 ExportTSVAnalysis(x=G, Keywords=Keywords, EXPORT=outputDir)
 

@@ -27,14 +27,12 @@ import org.labkey.api.util.Path;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.flow.FlowModule;
-import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
-import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.persist.AnalysisSerializer;
 
 import javax.script.Bindings;
@@ -44,10 +42,8 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,12 +53,12 @@ import java.util.Map;
  */
 public class RScriptJob extends FlowExperimentJob
 {
-    private static final String WORKSPACE_PATH_REPLACEMENT = "workspace-path";
-    private static final String FCSFILE_DIRECTORY_REPLACEMENT = "fcsfile-directory";
-    private static final String OUTPUT_DIRECTORY_REPLACEMENT = "output-directory";
-    private static final String RUN_NAME_REPLACEMENT = "run-name";
+    private static final String WORKSPACE_PATH = "workspace-path";
+    private static final String FCSFILE_DIRECTORY = "fcsfile-directory";
+    private static final String OUTPUT_DIRECTORY = "output-directory";
+    private static final String RUN_NAME = "run-name";
 
-    private static final String GROUP_NAMES_REPLACEMENT = "group-names";
+    private static final String GROUP_NAMES = "group-names";
     private static final String NORMALIZATION = "perform-normalization";
     private static final String NORM_REFERENCE = "normalization-reference";
     private static final String NORM_PARAMTERS = "normalization-parameters";
@@ -148,16 +144,22 @@ public class RScriptJob extends FlowExperimentJob
     private void runScript(File workingDir) throws IOException, ScriptException
     {
         ScriptEngine engine = ServiceRegistry.get().getService(ScriptEngineManager.class).getEngineByExtension("r");
+        if (engine == null)
+        {
+            error("The R script engine is not available.  Please configure the R script engine in the admin console.");
+            return;
+        }
 
         Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
         Map<String, String> replacements = (Map<String, String>)bindings.get(ExternalScriptEngine.PARAM_REPLACEMENT_MAP);
         if (replacements == null)
             bindings.put(ExternalScriptEngine.PARAM_REPLACEMENT_MAP, replacements = new HashMap<String, String>());
-        replacements.put(WORKSPACE_PATH_REPLACEMENT, _workspaceFile.getAbsolutePath()); // ? escape
-        replacements.put(FCSFILE_DIRECTORY_REPLACEMENT, _runFilePathRoot.getAbsolutePath()); // ? escape
-        replacements.put(OUTPUT_DIRECTORY_REPLACEMENT, workingDir.getAbsolutePath()); // ? escape
-        replacements.put(RUN_NAME_REPLACEMENT, _workspaceName); // ? escape
-        replacements.put(GROUP_NAMES_REPLACEMENT, _importGroupNames != null && _importGroupNames.size() > 0 ? _importGroupNames.get(0) : "");
+
+        replacements.put(WORKSPACE_PATH, _workspaceFile.getAbsolutePath().replaceAll("\\\\", "/"));
+        replacements.put(FCSFILE_DIRECTORY, _runFilePathRoot.getAbsolutePath().replaceAll("\\\\", "/"));
+        replacements.put(OUTPUT_DIRECTORY, workingDir.getAbsolutePath().replaceAll("\\\\", "/"));
+        replacements.put(RUN_NAME, _workspaceName);
+        replacements.put(GROUP_NAMES, _importGroupNames != null && _importGroupNames.size() > 0 ? _importGroupNames.get(0) : "");
         replacements.put(NORMALIZATION, String.valueOf(_performNormalization));
         replacements.put(NORM_REFERENCE, _normalizationReference == null ? "" : _normalizationReference);
         replacements.put(NORM_PARAMTERS, _normalizationParameters == null ? "" : _normalizationParameters);
