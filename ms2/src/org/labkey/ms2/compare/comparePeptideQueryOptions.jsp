@@ -23,6 +23,7 @@
 <%@ page import="org.labkey.ms2.query.FilterView" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -32,7 +33,7 @@ MS2Controller.PeptideFilteringComparisonForm form = bean.getForm();
 String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 %>
 
-<script type="text/javascript" src="<%= org.labkey.api.settings.AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
+<script type="text/javascript" src="<%=AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
 
 <form action="<%= bean.getTargetURL() %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />

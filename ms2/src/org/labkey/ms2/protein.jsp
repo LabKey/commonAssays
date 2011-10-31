@@ -49,7 +49,7 @@
             <td class="labkey-form-label">Peptides<%= PageFlowUtil.helpPopup("Peptides", "<p><strong>Show only peptides assigned by search engine</strong><br/>The page displays only the set of peptides that the search engine has chosen as matching the subject protein, based on engine-specific scoring.</p><p><strong>Show all peptides with sequence matches</strong><br/>The coverage map and peptide grid show all the filtered trimmed peptides from the run that match a sequence within the subject protein, regardless of whether the protein was chosen by the search engine as matching that specific peptide.</p>", true) %></td>
             <td>
                 <form action="<%= urlProteinDetailsPage %>" method="GET">
-                    <% for (org.labkey.api.util.Pair<String, String> param : urlProteinDetailsPage.getParameters()) { %>
+                    <% for (Pair<String, String> param : urlProteinDetailsPage.getParameters()) { %>
                         <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
                     <% } %>
                     <select name="<%= MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM %>" onchange="this.form.submit();">

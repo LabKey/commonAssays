@@ -23,11 +23,13 @@
 <%@ page import="org.labkey.api.jsp.JspLoader" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
+<%@ page import="org.labkey.api.security.SecurityManager" %>
 <%@ page import="org.labkey.api.security.SecurityPolicy" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
-<%@ page import="org.labkey.api.util.Tuple3" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.util.Tuple3" %>
 <%@ page import="org.labkey.api.util.URIUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -36,8 +38,14 @@
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
 <%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
+<%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
-<%@ page import="org.labkey.flow.data.*" %>
+<%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
+<%@ page import="org.labkey.flow.data.FlowExperiment" %>
+<%@ page import="org.labkey.flow.data.FlowFCSAnalysis" %>
+<%@ page import="org.labkey.flow.data.FlowRun" %>
+<%@ page import="org.labkey.flow.data.FlowScript" %>
+<%@ page import="org.labkey.flow.data.FlowWell" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page import="org.labkey.flow.reports.FlowReportManager" %>
@@ -45,15 +53,13 @@
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
 <%@ page import="java.io.File" %>
 <%@ page import="java.net.URI" %>
+<%@ page import="java.text.DecimalFormat" %>
+<%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
-<%@ page import="java.text.NumberFormat" %>
-<%@ page import="java.text.DecimalFormat" %>
-<%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <style type="text/css">
@@ -457,7 +463,7 @@ else
         //as the old permissions-checking code did not do this. We need to consider
         //whether the pipeline root's parent really is the container, or if we should
         //be checking a different (more specific) permission.
-        SecurityPolicy policy = org.labkey.api.security.SecurityManager.getPolicy(r, false);
+        SecurityPolicy policy = SecurityManager.getPolicy(r, false);
         if (policy.hasPermission(context.getUser(), ReadPermission.class))
         {
             URI rel = URIUtil.relativize(r.getUri(), fileURI);

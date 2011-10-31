@@ -20,6 +20,7 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
@@ -61,5 +62,5 @@ LABKEY.requiresScript("util.js");
     exportUrl.setAction(MS2Controller.ExportProteinCoverageMapAction.class);
     if (null==exportUrl.getParameter("seqId"))
         exportUrl.addParameter("seqId", bean.protein.getSeqId());
-%><%= org.labkey.api.util.PageFlowUtil.generateButton("Export", exportUrl)%></p>
+%><%=PageFlowUtil.generateButton("Export", exportUrl)%></p>
 <p><%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl) %></p>

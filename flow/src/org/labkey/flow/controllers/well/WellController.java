@@ -19,19 +19,38 @@ package org.labkey.flow.controllers.well;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.action.*;
-import org.labkey.api.data.*;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.ReturnUrlForm;
+import org.labkey.api.action.SimpleErrorView;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Table;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.SecurityPolicy;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.util.*;
-import org.labkey.api.view.*;
+import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.HeartBeat;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.util.ReturnURLString;
+import org.labkey.api.util.URIUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.FCSViewer;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -39,7 +58,12 @@ import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.data.*;
+import org.labkey.flow.data.FlowCompensationMatrix;
+import org.labkey.flow.data.FlowDataObject;
+import org.labkey.flow.data.FlowObject;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.AttributeCache;
@@ -238,7 +262,7 @@ public class WellController extends BaseFlowController
             //as the old permissions-checking code did not do this. We need to consider
             //whether the pipeline root's parent really is the container, or if we should
             //be checking a different (more specific) permission.
-            SecurityPolicy policy = org.labkey.api.security.SecurityManager.getPolicy(r, false);
+            SecurityPolicy policy = SecurityManager.getPolicy(r, false);
             if (!policy.hasPermission(getViewContext().getUser(), ReadPermission.class))
                 return new HtmlView("<span class='error'>You don't have permission to the FCS file.</span>");
 

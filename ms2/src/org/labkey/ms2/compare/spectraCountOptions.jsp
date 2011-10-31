@@ -15,24 +15,22 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.ms2.query.SpectraCountConfiguration" %>
-<%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.query.SpectraCountConfiguration" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-
 <%
-JspView<MS2Controller.CompareOptionsBean> view = (JspView<MS2Controller.CompareOptionsBean>) HttpView.currentView();
-MS2Controller.CompareOptionsBean<MS2Controller.SpectraCountForm> bean = view.getModelBean();
-MS2Controller.SpectraCountForm form = bean.getForm();
-String peptideViewName = form.getPeptideCustomViewName(HttpView.currentContext());
-
+    JspView<MS2Controller.CompareOptionsBean> view = (JspView<MS2Controller.CompareOptionsBean>) HttpView.currentView();
+    MS2Controller.CompareOptionsBean<MS2Controller.SpectraCountForm> bean = view.getModelBean();
+    MS2Controller.SpectraCountForm form = bean.getForm();
+    String peptideViewName = form.getPeptideCustomViewName(HttpView.currentContext());
 %>
-
-<script type="text/javascript" src="<%= org.labkey.api.settings.AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
+<script type="text/javascript" src="<%=AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
 
 <form action="<%= bean.getTargetURL() %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />

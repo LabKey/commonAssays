@@ -22,6 +22,7 @@
 <%@ page import="org.labkey.ms2.search.ProteinSearchBean" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
@@ -35,7 +36,7 @@
     String separator = bean.isHorizontal() ? "<td>&nbsp;</td>" : "</tr><tr>";
 %>
 
-<script type="text/javascript" src="<%= org.labkey.api.settings.AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
+<script type="text/javascript" src="<%=AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
 
 <form action="<%= url %>" method="get">
     <input type="hidden" name="restrictProteins" value="true" />

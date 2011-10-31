@@ -21,6 +21,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.nab.NabController" %>
+<%@ page import="org.labkey.api.study.WellGroup" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <script type="text/javascript">LABKEY.requiresScript('completion.js');</script>
@@ -62,7 +63,7 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
 %>
         </tr>
 <%
-    for (org.labkey.api.study.WellGroup group : bean.getSampleInfoMap().keySet())
+    for (WellGroup group : bean.getSampleInfoMap().keySet())
     {
         ParticipantVisit sampleInfo = bean.getSampleInfoMap().get(group);
 

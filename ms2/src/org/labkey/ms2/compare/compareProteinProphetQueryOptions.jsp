@@ -34,7 +34,7 @@ String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext());
 %>
 
-<script type="text/javascript" src="<%= org.labkey.api.settings.AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
+<script type="text/javascript" src="<%=AppProps.getInstance().getContextPath() %>/MS2/inlineViewDesigner.js"></script>
 
 <form action="<%= bean.getTargetURL() %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />

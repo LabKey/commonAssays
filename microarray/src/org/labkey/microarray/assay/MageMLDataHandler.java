@@ -153,7 +153,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
                             tabColumns[i].errorValues = ERROR_VALUE;
                         }
                         loader.setColumns(tabColumns);
-                        Map<org.labkey.api.exp.api.DataType, List<Map<String, Object>>> datas = new HashMap<org.labkey.api.exp.api.DataType, List<Map<String, Object>>>();
+                        Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
 
                         datas.put(MicroarrayModule.MAGE_ML_INPUT_TYPE, loader.load());
                         return datas;

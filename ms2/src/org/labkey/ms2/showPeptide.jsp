@@ -18,24 +18,19 @@
 <%@ page import="org.labkey.api.settings.AppProps"%>
 <%@ page import="org.labkey.api.util.Formats"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.util.Pair"%>
 <%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.ms2.MS2Controller"%>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.MS2Fraction" %>
 <%@ page import="org.labkey.ms2.MS2GZFileRenderer" %>
 <%@ page import="org.labkey.ms2.MS2Manager" %>
 <%@ page import="org.labkey.ms2.MS2Peptide" %>
 <%@ page import="org.labkey.ms2.ShowPeptideContext" %>
-<%@ page import="java.util.Collections" %>
-<%@ page import="org.labkey.ms2.MS2Run" %>
 <%@ page import="org.labkey.ms2.reader.LibraQuantResult" %>
-<%@ page import="org.labkey.ms2.MS2Modification" %>
-<%@ page import="org.labkey.api.util.Pair" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.HashMap" %>
-<%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
@@ -383,10 +378,10 @@ var peaks = [
             java.util.List<Pair<Float, Float>> peaks = customHits.get(libraMatch);
             if (peaks == null)
             {
-                peaks = new java.util.ArrayList<Pair<Float, Float>>();
+                peaks = new ArrayList<Pair<Float, Float>>();
                 customHits.put(libraMatch, peaks);
             }
-            peaks.add(new org.labkey.api.util.Pair<Float, Float>(mzs[i], intensities[i]));
+            peaks.add(new Pair<Float, Float>(mzs[i], intensities[i]));
         }
         else
         { %>

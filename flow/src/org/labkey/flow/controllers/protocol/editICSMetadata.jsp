@@ -55,7 +55,7 @@
     addCompare(opOptions, CompareType.STARTS_WITH);
     addCompare(opOptions, CompareType.IN);
 
-    org.labkey.api.view.ActionURL submitURL = form.getProtocol().urlFor(ProtocolController.EditICSMetadataAction.class);
+    ActionURL submitURL = form.getProtocol().urlFor(ProtocolController.EditICSMetadataAction.class);
     if (form.getReturnActionURL() != null)
         submitURL.addParameter(ActionURL.Param.returnUrl, form.getReturnActionURL().toString());
 %>
