@@ -138,7 +138,7 @@ public class KeywordsHandler extends BaseHandler
             File file = files[i];
             if (!isFCSFile(file))
                 continue;
-            addStatus("Reading file " + file.getName());
+            addStatus("Reading keywords from file " + file.getName());
             lstFileData.add( getAnalyzer().readAllKeywords(file.toURI()));
         }
         if (lstFileData.size() == 0)
