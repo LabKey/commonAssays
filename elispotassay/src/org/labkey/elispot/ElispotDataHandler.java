@@ -21,6 +21,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.AssayRunUploadContext;
@@ -125,7 +126,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         importData(data, run, context.getProtocol(), dataMap);
     }
 
-    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
 

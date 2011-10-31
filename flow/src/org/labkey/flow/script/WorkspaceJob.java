@@ -31,6 +31,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
@@ -60,6 +61,7 @@ import org.labkey.flow.FlowSettings;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.util.KeywordUtil;
 
 import java.io.*;
 import java.net.URI;
@@ -141,6 +143,64 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         {
             PageFlowUtil.close(ois);
         }
+    }
+
+    /**
+     * Filter the FlowJoWorkspace samples to using the FlowProtocol's FCS analysis filter.
+     * @param workspace workspace
+     * @return List of filtered samples.
+     */
+    private List<FlowJoWorkspace.SampleInfo> filterSamples(FlowJoWorkspace workspace)
+    {
+        List<FlowJoWorkspace.SampleInfo> samples;
+
+        SimpleFilter analysisFilter = null;
+        FlowProtocol flowProtocol = getProtocol();
+        if (flowProtocol != null)
+            analysisFilter = flowProtocol.getFCSAnalysisFilter();
+
+        if (analysisFilter != null && analysisFilter.getClauses().size() > 0)
+        {
+            info("Using protocol FCS analysis filter: " + analysisFilter.getFilterText());
+
+            samples = new ArrayList<FlowJoWorkspace.SampleInfo>();
+            for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples())
+            {
+                // Build a map that uses FieldKey strings as keys to represent a fake row of the FCSFiles table.
+                // The pairs in the map are those allowed by the ProtocolForm.getKeywordFieldMap().
+                Map<String, String> fakeRow = new HashMap<String, String>();
+                fakeRow.put("Name", sample.getLabel());
+                //fakeRow.put(FieldKey.fromParts("Run", "Name").toString(), "run name?");
+
+                FieldKey keyKeyword = FieldKey.fromParts("Keyword");
+                Map<String, String> keywords = sample.getKeywords();
+                for (String keyword : KeywordUtil.filterHidden(keywords.keySet()))
+                {
+                    String keywordValue = keywords.get(keyword);
+                    fakeRow.put(new FieldKey(keyKeyword, keyword).toString(), keywordValue);
+                }
+
+/*
+                // kbl: commented out on 10-31 merge - SimpleFilter class no longer has a meetsCriteria method. Kevin
+                // will need to fix this as well as decide where to invoke the filterSample method added in the branch
+
+                if (analysisFilter.meetsCriteria(fakeRow))
+                {
+                    samples.add(sample);
+                }
+                else
+                {
+                    info("Skipping " + sample.getLabel() + " as it doesn't match FCS analysis filter");
+                }
+*/
+            }
+        }
+        else
+        {
+            samples = workspace.getSamples();
+        }
+
+        return samples;
     }
 
     private FlowRun createExperimentRun(FlowJob job, User user, Container container,

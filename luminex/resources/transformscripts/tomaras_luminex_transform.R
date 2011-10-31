@@ -42,6 +42,11 @@ getCurveFitInputCol <- function(runProps, fiRunCol, defaultFiCol)
     runCol;
 }
 
+fiConversion <- function(val)
+{
+    1 + max(val,0);
+}
+
 
 ######################## STEP 0: READ IN THE RUN PROPERTIES AND RUN DATA #######################
 
@@ -351,6 +356,14 @@ if(any(standardRecs) & length(standards) > 0){
         # note: also need to subset the standard records for only those where description matches the given standard
         standard.dat = subset(dat, Standard == stndVal & (well_role != "Standard" | (well_role == "Standard" & description == stndVal)));
 
+        # LabKey Issue 13034: replicate standard records as unknowns so that Rumi will calculated estimated concentrations
+        tempStnd.dat = subset(standard.dat, well_role=="Standard");
+        if (nrow(tempStnd.dat) > 0) {
+            tempStnd.dat$well_role = "UnkStandard";
+            tempStnd.dat$sample_id = paste(tempStnd.dat$description, "||", tempStnd.dat$expected_conc, sep="");
+            standard.dat=rbind(standard.dat, tempStnd.dat);
+        }
+
         # LabKey Issue 13033: check if we need to "add" standard data for any analytes if this is a subclass assay
         #              (i.e. standard data from "Anti-Human" analyte to be used for other analytes)
         selectedAnalytes = unique(standard.dat$analyte);
@@ -380,24 +393,32 @@ if(any(standardRecs) & length(standards) > 0){
         # check to make sure there are expected_conc values in the standard data frame that will be passed to Rumi
         if (any(!is.na(standard.dat$expected_conc)))
         {
+            # use the decided upon conversion function for handling of negative values
+            standard.dat$fi = sapply(standard.dat$fi, fiConversion);
+        
             # call the rumi function to calculate new estimated log concentrations using 5PL for the uknowns
             mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2));
-            fits = rumi(standard.dat, verbose=TRUE);
+            fits = rumi(standard.dat, force.fit=TRUE, verbose=TRUE);
             fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
             dev.off();
 
-            # put the calculated values back into the run.data dataframe by matching on analyte, description, dilution, and standard
+            # put the calculated values back into the run.data dataframe by matching on analyte, description, expConc OR dilution, and standard
             if(nrow(fits) > 0){
                 for(index in 1:nrow(fits)){
                     a = fits$analyte[index];
                     dil = fits$dilution[index];
                     desc = fits$description[index];
+                    exp = fits$expected_conc[index];
 
                     elc = fits$"est.log.conc"[index];
                     ec = fits$"est.conc"[index];
                     se = fits$"se"[index];
 
-                    runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal;
+                    if (!is.na(exp)) {
+                        runDataIndex = run.data$name == a & run.data$expConc == exp & run.data$description == desc & run.data$Standard == stndVal
+                    } else {
+                        runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal
+                    }
                     run.data$EstLogConc_5pl[runDataIndex] = elc;
                     run.data$EstConc_5pl[runDataIndex] = ec;
                     run.data$SE_5pl[runDataIndex] = se;
@@ -410,7 +431,7 @@ if(any(standardRecs) & length(standards) > 0){
 
             # call the rumi function to calculate new estimated log concentrations using 4PL for the uknowns
             mypdf(file=paste(stndVal, "4PL", sep="_"), mfrow=c(2,2));
-            fits = rumi(standard.dat, fit.4pl=TRUE, verbose=TRUE);
+            fits = rumi(standard.dat, fit.4pl=TRUE, force.fit=TRUE, verbose=TRUE);
             fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
             dev.off();
 
@@ -420,12 +441,17 @@ if(any(standardRecs) & length(standards) > 0){
                     a = fits$analyte[index];
                     dil = fits$dilution[index];
                     desc = fits$description[index];
+                    exp = fits$expected_conc[index];
 
                     elc = fits$"est.log.conc"[index];
                     ec = fits$"est.conc"[index];
                     se = fits$"se"[index];
 
-                    runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal;
+                    if (!is.na(exp)) {
+                        runDataIndex = run.data$name == a & run.data$expConc == exp & run.data$description == desc & run.data$Standard == stndVal
+                    } else {
+                        runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal
+                    }
                     run.data$EstLogConc_4pl[runDataIndex] = elc;
                     run.data$EstConc_4pl[runDataIndex] = ec;
                     run.data$SE_4pl[runDataIndex] = se;
