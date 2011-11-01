@@ -17,6 +17,8 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
@@ -78,6 +80,26 @@ public class CurveFitTable extends AbstractLuminexTable
         fk.addJoin(getColumn("TitrationId"), "Titration");
         analyteTitrationColumn.setFk(fk);
         addColumn(analyteTitrationColumn);
+
+        ColumnInfo ec50Col = getColumn("EC50");
+        ec50Col.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new GuideSetOutOfRangeDisplayColumn(colInfo, "EC50", "EC50", "Four Parameter");
+            }
+        });
+
+        ColumnInfo aucCol = getColumn("AUC");
+        aucCol.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new GuideSetOutOfRangeDisplayColumn(colInfo, "AUC", "AUC", "Trapezoidal");
+            }
+        });
     }
 
     @Override

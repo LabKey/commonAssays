@@ -42,9 +42,8 @@ public class TitrationTable extends AbstractLuminexTable
         _schema = schema;
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
 
-        // TODO: this can be removed once we have an alternate way of getting to the Levey-Jennings Reports
         ColumnInfo nameColumn = addColumn(wrapColumn(getRealTable().getColumn("Name")));
-        ActionURL url = new ActionURL(LuminexController.LeveyJenningsReport.class, schema.getContainer());
+        ActionURL url = new ActionURL(LuminexController.LeveyJenningsReportAction.class, schema.getContainer());
         nameColumn.setURL(StringExpressionFactory.createURL(url + "titration=${Name}" + "&protocol=${Run/Protocol/Name}"));
 
         // Set to be nullable so when a dataset backed by this assay type is exported, it's not considered required
@@ -55,14 +54,16 @@ public class TitrationTable extends AbstractLuminexTable
         addColumn(wrapColumn(getRealTable().getColumn("QCControl")));
         addColumn(wrapColumn(getRealTable().getColumn("Unknown")));
         ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
-        runColumn.setFk(new LookupForeignKey("RowId")
+        LookupForeignKey runFk = new LookupForeignKey("RowId")
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
                 return QueryService.get().getUserSchema(_schema.getUser(), _schema.getContainer(), LuminexSchema.NAME).getTable(_schema.getRunsTableName(_schema.getProtocol()));
             }
-        });
+        };
+        runFk.setPrefixColumnCaption(false);
+        runColumn.setFk(runFk);
         setTitleColumn("Name");
     }
 

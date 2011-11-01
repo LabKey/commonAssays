@@ -21,9 +21,13 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
     constructor : function(config){
         // check that the config properties needed are present
         if (!config.titration || config.titration == "null")
+        {
             throw "You must specify a titration!";
+        }
         if (!config.assayName || config.assayName == "null")
-            throw "You must specify a assayName!";        
+        {
+            throw "You must specify a assayName!";
+        }
 
         // apply some Ext panel specific properties to the config
         Ext.apply(config, {
@@ -44,7 +48,22 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
     },
 
     initComponent : function() {
+        this.paramsToLoad = 3;
         var items = [];
+
+        // need to distinguish between null analyte/isotype/conjugate on URL and not requested (i.e. not on URL)
+        if (LABKEY.ActionURL.getParameter("analyte") != undefined)
+        {
+            this.analyte = LABKEY.ActionURL.getParameter("analyte");
+        }
+        if (LABKEY.ActionURL.getParameter("isotype") != undefined)
+        {
+            this.isotype = LABKEY.ActionURL.getParameter("isotype");
+        }
+        if (LABKEY.ActionURL.getParameter("conjugate") != undefined)
+        {
+            this.conjugate = LABKEY.ActionURL.getParameter("conjugate");
+        }
 
         // add combo-box element for selection of the antigen/analyte
         this.analyteGrid = new Ext.grid.GridPanel({
@@ -83,14 +102,36 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                 scope: this,
                 'rowClick': function(grid, rowIndex) {
                     if (grid.getSelectionModel().hasSelection())
+                    {
                         this.analyte = grid.getSelectionModel().getSelected().get("value");
+                    }
                     else
+                    {
                         this.analyte = undefined;
+                    }
 
                     this.enableResetGraphButton();
                 }
             }
         });
+        this.analyteGrid.getStore().on('load', function(store, records, options) {
+            var index = store.findExact('value', this.analyte);
+            if (this.analyte != undefined && index > -1)
+            {
+                this.analyteGrid.getSelectionModel().selectRow(index);
+                this.analyteGrid.getView().focusRow(index);  // TODO: this doesn't seem to be working
+            }
+            else
+            {
+                this.analyte = undefined;
+            }
+
+            this.paramsToLoad--;
+            if (this.paramsToLoad == 0)
+            {
+                this.allParamsLoaded();
+            }
+        }, this);
         items.push(this.analyteGrid);
 
         // add combo-box element for selection of the isotype
@@ -135,6 +176,22 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                 }
             }
         });
+        this.isotypeCombobox.getStore().on('load', function(store, records, options) {
+            if (this.isotype != undefined && store.findExact('value', this.isotype) > -1)
+            {
+                this.isotypeCombobox.setValue(this.isotype);
+            }
+            else
+            {
+                this.isotype = undefined;
+            }
+
+            this.paramsToLoad--;
+            if (this.paramsToLoad == 0)
+            {
+                this.allParamsLoaded();
+            }
+        }, this);
         items.push(this.isotypeCombobox);
 
         // add combo-box element for selection of the conjugate
@@ -179,6 +236,22 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                 }
             }
         });
+        this.conjugateCombobox.getStore().on('load', function(store, records, options) {
+            if (this.conjugate != undefined && store.findExact('value', this.conjugate) > -1)
+            {
+                this.conjugateCombobox.setValue(this.conjugate);
+            }
+            else
+            {
+                this.conjugate = undefined;
+            }
+
+            this.paramsToLoad--;
+            if (this.paramsToLoad == 0)
+            {
+                this.allParamsLoaded();
+            }
+        }, this);
         items.push(this.conjugateCombobox);
 
         // add button to apply selections to the generated graph/report
@@ -199,6 +272,16 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
     },
 
     enableResetGraphButton: function() {
-        this.resetGraphButton.setDisabled(!(this.analyte != undefined && this.isotype != undefined && this.conjugate != undefined));
+        var enable = (this.analyte != undefined && this.isotype != undefined && this.conjugate != undefined);
+        this.resetGraphButton.setDisabled(!enable);
+        return enable;
+    },
+
+    allParamsLoaded: function() {
+        if (this.enableResetGraphButton())
+        {
+            // fire the resetGraphBtnClicked event so other panels can update based on the selected params
+            this.fireEvent('resetGraphBtnClicked', this.analyte, this.isotype, this.conjugate);
+        }
     }
 });

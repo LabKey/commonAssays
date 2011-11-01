@@ -18,6 +18,8 @@ package org.labkey.luminex;
 
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.data.SimpleDisplayColumn;
+import org.labkey.api.data.UrlColumn;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
@@ -30,6 +32,9 @@ import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AbstractAssayView;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.HttpView;
@@ -117,8 +122,56 @@ public class LuminexController extends SpringActionController
         }
     }
 
+    @RequiresPermissionClass(ReadPermission.class)
+    public class QcReportAction extends BaseAssayAction<ProtocolIdForm>
+    {
+        private ExpProtocol _protocol;
+
+        @Override
+        public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
+        {
+            _protocol = form.getProtocol();
+
+            AbstractAssayView result = new AbstractAssayView();
+            AssaySchema schema = AssayService.get().createSchema(getUser(), getContainer());
+            QuerySettings settings = new QuerySettings(getViewContext(), LuminexSchema.getAnalyteTitrationTableName(form.getProtocol()), LuminexSchema.getAnalyteTitrationTableName(form.getProtocol()));
+            settings.setAllowChooseQuery(false);
+            QueryView view = new QueryView(schema, settings, errors)
+            {
+                @Override
+                protected void setupDataView(DataView ret)
+                {
+                    super.setupDataView(ret);
+
+                    ActionURL graph = new ActionURL(LeveyJenningsReportAction.class, getContainer());
+                    graph.addParameter("protocol", "${Titration/Run/Protocol/Name}");
+                    graph.addParameter("titration", "${Titration/Name}");
+                    graph.addParameter("analyte", "${Analyte/Name}");
+                    graph.addParameter("isotype", "${Titration/Run/Isotype}");
+                    graph.addParameter("conjugate", "${Titration/Run/Conjugate}");
+                    SimpleDisplayColumn graphDetails = new UrlColumn(StringExpressionFactory.createURL(graph), "graph");
+                    ret.getDataRegion().addDisplayColumn(0, graphDetails);
+                }
+            };
+            view.setShadeAlternatingRows(true);
+            view.setShowBorders(true);
+            view.setShowUpdateColumn(false);
+            view.setFrame(WebPartView.FrameType.NONE);
+            result.setupViews(view, false, form.getProvider(), form.getProtocol());
+
+            return result;
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            NavTree result = super.appendNavTrail(root);
+            return result.addChild(_protocol.getName() + " QC Report");
+        }
+    }
+
     @RequiresPermissionClass(UpdatePermission.class)
-    public class LeveyJenningsReport extends SimpleViewAction<TitrationForm>
+    public class LeveyJenningsReportAction extends SimpleViewAction<TitrationForm>
     {
         @Override
         public ModelAndView getView(TitrationForm form, BindException errors) throws Exception

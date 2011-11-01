@@ -129,6 +129,29 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
                 return _schema.createTitrationTable(true);
             }
         });
+
+//        ColumnInfo analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
+//        analyteTitrationColumn.setIsUnselectable(true);
+//        LookupForeignKey fk = new LookupForeignKey("AnalyteId")
+//        {
+//            @Override
+//            public TableInfo getLookupTableInfo()
+//            {
+//                return _schema.createAnalyteTitrationTable(false);
+//            }
+//
+//            @Override
+//            protected ColumnInfo getPkColumn(TableInfo table)
+//            {
+//                // Pretend that analyte is the sole column in the PK for this table.
+//                // We'll get the other key of the compound key with addJoin() below.
+//                return table.getColumn("Analyte");
+//            }
+//        };
+//        fk.addJoin(getColumn("Titration"), "Titration");
+//        analyteTitrationColumn.setFk(fk);
+//        addColumn(analyteTitrationColumn);
+
         ColumnInfo containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));
         containerColumn.setHidden(true);
         containerColumn.setFk(new ContainerForeignKey());

@@ -19,6 +19,8 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
@@ -26,6 +28,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.AbstractBeanQueryUpdateService;
 import org.labkey.api.query.DuplicateKeyException;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryUpdateService;
@@ -38,7 +41,9 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.Pair;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,15 +67,27 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             }
         });
         ColumnInfo titrationCol = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
-        titrationCol.setFk(new LookupForeignKey("RowId")
+        LookupForeignKey titrationFk = new LookupForeignKey("RowId")
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
                 return _schema.createTitrationTable(false);
             }
+        };
+        titrationFk.setPrefixColumnCaption(false);
+        titrationCol.setFk(titrationFk);
+
+        ColumnInfo maxFiCol = wrapColumn(getRealTable().getColumn("MaxFI"));
+        maxFiCol.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new GuideSetOutOfRangeDisplayColumn(colInfo, "High MFI", "MaxFI", null);
+            }
         });
-        addColumn(wrapColumn(getRealTable().getColumn("MaxFI")));
+        addColumn(maxFiCol);
 
         ColumnInfo guideSetCol = addColumn(wrapColumn("GuideSet", getRealTable().getColumn("GuideSetId")));
         guideSetCol.setFk(new LookupForeignKey("RowId")
@@ -85,6 +102,28 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         addColumn(wrapColumn(getRealTable().getColumn("IncludeInGuideSetCalculation")));
 
         addCurveTypeColumns();
+
+        // set the default columns for this table to be those used for the QC Report
+        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "Name"));
+        defaultCols.add(FieldKey.fromParts("Titration"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Standard"));
+        defaultCols.add(FieldKey.fromParts("Titration", "QCControl"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "Batch", "Network"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "Folder"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "NotebookNo"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "AssayType"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "ExpPerformer"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "TestDate"));
+        defaultCols.add(FieldKey.fromParts("Analyte"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "Isotype"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "Conjugate"));
+        defaultCols.add(FieldKey.fromParts("Analyte", "Properties", "LotNumber"));
+        defaultCols.add(FieldKey.fromParts("GuideSet", "Created"));
+        defaultCols.add(FieldKey.fromParts("Four ParameterCurveFit", "EC50"));
+        defaultCols.add(FieldKey.fromParts("MaxFI"));
+        defaultCols.add(FieldKey.fromParts("TrapezoidalCurveFit", "AUC"));
+        setDefaultVisibleColumns(defaultCols);
     }
 
     protected LookupForeignKey createCurveFitFK(final String curveType)

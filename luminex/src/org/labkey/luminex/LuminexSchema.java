@@ -88,6 +88,11 @@ public class LuminexSchema extends AssaySchema
         return getProviderTableName(protocol, RUN_EXCLUSION_TABLE_NAME);
     }
 
+    public static String getAnalyteTitrationTableName(ExpProtocol protocol)
+    {
+        return getProviderTableName(protocol, ANALYTE_TITRATION_TABLE_NAME);
+    }
+
     public synchronized List<String> getCurveTypes()
     {
         if (_curveTypes == null)

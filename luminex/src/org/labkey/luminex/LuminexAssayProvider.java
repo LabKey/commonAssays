@@ -502,6 +502,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         List<NavTree> result = super.getHeaderLinks(viewContext, protocol, containerFilter);
 
+        String currentRunId = viewContext.getRequest().getParameter(protocol.getName() + " Data.Data/Run/RowId~eq");
+
+        // add header link for the Excluded Data Report
         ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.ExcludedDataAction.class);
         if (containerFilter != null && containerFilter != ContainerFilter.EVERYTHING)
         {
@@ -509,7 +512,24 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             url.addParameter(protocol.getName() + " RunExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
         }
 
+        if (null != currentRunId)
+        {
+            url.addParameter(protocol.getName() + " WellExclusion.DataId/Run/RowId~eq", currentRunId);
+            url.addParameter(protocol.getName() + " RunExclusion.RunId~eq", currentRunId);
+        }
+
         result.add(new NavTree("view excluded data", PageFlowUtil.addLastFilterParameter(url)));
+
+        // add header link for the QC Report
+        url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.QcReportAction.class);
+        if (containerFilter != null && containerFilter != ContainerFilter.EVERYTHING)
+            url.addParameter(protocol.getName() + " AnalyteTitration." + QueryParam.containerFilterName, containerFilter.getType().name());
+
+        if (null != currentRunId)
+            url.addParameter(protocol.getName() + " AnalyteTitration.Titration/Run/RowId~eq", currentRunId);
+
+        result.add(new NavTree("view qc report", PageFlowUtil.addLastFilterParameter(url)));
+
         return result;
     }
 

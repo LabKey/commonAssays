@@ -237,14 +237,18 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     // not member runs (i.e. not members of a guide run set)
                     var allSelectedRecords = this.selectedRunsGrid.getStore().getRange();
                     var nonMemberUpdateRows = [];
-                    Ext.each(allSelectedRecords, function(record){
+                    for (var i = 0; i < allSelectedRecords.length; i++)
+                    {
+                        var record = allSelectedRecords[i];
                         if (!record.get("IncludeInGuideSetCalculation"))
+                        {
                             nonMemberUpdateRows.push({
                                 Analyte: record.get("Analyte"),
                                 Titration: record.get("Titration"),
                                 GuideSetId: selectedGuideSet.get("RowId")
                             });
-                    });
+                        }
+                    }
 
                     // persist the applied guide set changes to the server
                     if (nonMemberUpdateRows.length > 0)
