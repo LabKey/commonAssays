@@ -71,13 +71,16 @@
         <td>&nbsp;</td>
     </tr>
     <tr>
-        <td class="labkey-export-tab-options">TSV Format:</td>
-        <td class="labkey-export-tab-options" colspan=2>
+        <td>TSV Format:</td>
+        <td colspan=2>
             <select name="exportFormat">
                 <labkey:options value="<%=bean.getExportFormat()%>" map="<%=exportFormats%>" />
             </select>
         </td>
-        <td class="labkey-export-tab-buttons">
+    </tr>
+    <tr>
+        <td></td>
+        <td>
             <% if (bean.getRunId() != null || bean.getWellId() != null) { %>
             <%=PageFlowUtil.generateSubmitButton("Export")%>
             <% } else { %>
