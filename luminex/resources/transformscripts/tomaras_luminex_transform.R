@@ -142,10 +142,6 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
 	}
 }
 
-# convert fiBackground and fiBackgroundBlank values that are less than or equal to 0 to a value of 1 (as per the lab's calculation)
-run.data$fiBackground[!is.na(run.data$fiBackground) & run.data$fiBackground <= 0] = 1;
-run.data$fiBackgroundBlank[!is.na(run.data$fiBackgroundBlank) & run.data$fiBackgroundBlank <= 0] = 1;
-
 ################################## STEP 3: TITRATION CURVE FIT #################################
 
 # initialize the curve coefficient variables
@@ -222,6 +218,9 @@ if (file.exists(titration.data.file))
                         dat$dose = dat$dilution;
                         xLabel = "Dilution";
                     }
+
+                    # use the decided upon conversion function for handling of negative values
+                    dat$fi = sapply(dat$fi, fiConversion);
 
                     # get curve fit params for 4PL
                     tryCatch({

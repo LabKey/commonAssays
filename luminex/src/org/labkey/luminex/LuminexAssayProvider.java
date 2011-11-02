@@ -510,23 +510,25 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             url.addParameter(protocol.getName() + " WellExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
             url.addParameter(protocol.getName() + " RunExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
         }
-
         if (null != currentRunId)
         {
             url.addParameter(protocol.getName() + " WellExclusion.DataId/Run/RowId~eq", currentRunId);
             url.addParameter(protocol.getName() + " RunExclusion.RunId~eq", currentRunId);
         }
-
         result.add(new NavTree("view excluded data", PageFlowUtil.addLastFilterParameter(url)));
 
         // add header link for the QC Report
         url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(viewContext.getContainer(), protocol, LuminexController.QcReportAction.class);
         if (containerFilter != null && containerFilter != ContainerFilter.EVERYTHING)
+        {
             url.addParameter(protocol.getName() + " AnalyteTitration." + QueryParam.containerFilterName, containerFilter.getType().name());
-
+        }
         if (null != currentRunId)
+        {
             url.addParameter(protocol.getName() + " AnalyteTitration.Titration/Run/RowId~eq", currentRunId);
-
+        }
+        // just show titrations that are either standards or qc controls
+        url.addParameter(protocol.getName() + " AnalyteTitration.Titration/Unknown~eq", "false");
         result.add(new NavTree("view qc report", PageFlowUtil.addLastFilterParameter(url)));
 
         return result;
