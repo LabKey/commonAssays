@@ -73,9 +73,6 @@
             return;
         }
 
-        // set the nav trail page title to include the tiration name
-        LABKEY.NavTrail.setTrail('<%= bean.getTitration() %> Levey-Jennings Plots');
-
         // verify that the given titration and protocol exist, and that the required report properties exist in the protocol
         var reqColumns = ['Titration/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Titration/Run/TestDate'];
         LABKEY.Query.selectRows({
@@ -141,6 +138,12 @@
                     trendPlotPanel.setTabsToRender();
                     trendPlotPanel.displayTrendPlot();
                     trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate);
+                },
+                'exportPdfBtnClicked': function() {
+                    if (trendPlotPanel.getPdfHref())
+                    {
+                        window.location = trendPlotPanel.getPdfHref() + "&attachment=true&deleteFile=false";
+                    }
                 }
             }
         });

@@ -173,16 +173,24 @@ public class LuminexController extends SpringActionController
     @RequiresPermissionClass(UpdatePermission.class)
     public class LeveyJenningsReportAction extends SimpleViewAction<TitrationForm>
     {
+        private String _titration;
+
         @Override
         public ModelAndView getView(TitrationForm form, BindException errors) throws Exception
         {
+            _titration = form.getTitration();
+
+            // TODO: add assay header links to top of report
+//            AbstractAssayView result = new AbstractAssayView();
+//            result.setupViews(new JspView<TitrationForm>("/org/labkey/luminex/leveyJenningsReport.jsp", form), false, form.getProvider(), form.getProtocol());
             return new JspView<TitrationForm>("/org/labkey/luminex/leveyJenningsReport.jsp", form);
         }
 
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Levey-Jennings Report");
+            NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            return result.addChild(_titration + " Levey-Jennings Report");
         }
     }    
 }

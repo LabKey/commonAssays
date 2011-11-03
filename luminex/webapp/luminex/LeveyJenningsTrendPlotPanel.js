@@ -11,6 +11,8 @@ Ext.namespace('LABKEY');
 * Date: Sept 20, 2011
 */
 
+LABKEY.requiresCss("luminex/GuideSet.css");
+
 /**
  * Class to create a tab panel for displaying the R plot for the trending of EC50, AUC, and High MFI values for the selected graph parameters.
  *
@@ -45,6 +47,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
     },
 
     initComponent : function() {
+        this.plotRenderedHtml = null;
+        this.pdfHref = null;
+
         // initialize the y-axis scale combo for the top toolbar
         this.scaleLabel = new Ext.form.Label({text: 'Y-Axis Scale:'});
         this.scaleCombo = new Ext.form.ComboBox({
@@ -133,12 +138,12 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             ]
         });
 
-        // initialize the tab panel that will show the 3 different trend plots
+        // initialize the tab panel that will show the trend plot
         this.ec50Panel = new Ext.Panel({
             itemId: "EC50",
             title: "EC50",
-            html: "<div id='EC50TrendPlotDiv'></div><div id='EC50TrendPdfDiv'></div>",
-            isRendered: false,
+            html: "<div id='EC50TrendPlotDiv' class='ec50TrendPlot'></div></div>",
+            deferredRender: false,
             listeners: {
                 scope: this,
                 'activate': this.activateTrendPlotPanel
@@ -147,8 +152,8 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.aucPanel = new Ext.Panel({
             itemId: "AUC",
             title: "AUC",
-            html: "<div id='AUCTrendPlotDiv'></div><div id='AUCTrendPdfDiv'></div>",
-            isRendered: false,
+            html: "<div id='AUCTrendPlotDiv' class='aucTrendPlot'></div></div>",
+            deferredRender: false,
             listeners: {
                 scope: this,
                 'activate': this.activateTrendPlotPanel
@@ -157,8 +162,8 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.mfiPanel = new Ext.Panel({
             itemId: "High MFI",
             title: "High MFI",
-            html: "<div id='High MFITrendPlotDiv'></div><div id='High MFITrendPdfDiv'></div>",
-            isRendered: false,
+            html: "<div id='High MFITrendPlotDiv' class='mfiTrendPlot'></div></div>",
+            deferredRender: false,
             listeners: {
                 scope: this,
                 'activate': this.activateTrendPlotPanel
@@ -174,6 +179,10 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             items: [this.ec50Panel, this.aucPanel, this.mfiPanel]
         });
         this.items.push(this.trendTabPanel);
+
+        // add an additional panel to render the PDF export link HTML to (this will always be hidden)
+        this.pdfPanel = new Ext.Panel({hidden: true});
+        this.items.push(this.pdfPanel);
 
         LABKEY.LeveyJenningsTrendPlotPanel.superclass.initComponent.call(this);
     },
@@ -199,15 +208,14 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
     activateTrendPlotPanel: function(panel) {
         // if the graph params have been selected and the trend plot for this panel hasn't been loaded, then call displayTrendPlot
-        if (this.analyte && !panel.isRendered)
+        if (this.analyte && this.isotype && this.conjugate)
             this.displayTrendPlot();
     },
 
     setTabsToRender: function() {
-        // something about the report has changed and all of the tabs need to be set to re-render
-        this.ec50Panel.isRendered = false;
-        this.aucPanel.isRendered = false;
-        this.mfiPanel.isRendered = false;
+        // something about the report has changed and the plot needs to be set to re-render
+        this.plotRenderedHtml = null;
+        this.pdfHref = null;
     },
 
     displayTrendPlot: function() {
@@ -215,53 +223,71 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         var plotType = this.trendTabPanel.getActiveTab().itemId;
         var trendDiv = plotType + 'TrendPlotDiv';
         Ext.get(trendDiv).update('Loading...');
-        var trendPdfDiv = plotType + 'TrendPdfDiv';
-        Ext.get(trendPdfDiv).update('');
 
-        // get the start and end date, if entered by the user
-        var startDate = this.startDateField.getValue();
-        var endDate = this.endDateField.getValue();
-
-        // build the config object of the properties that will be needed by the R report
-        var config = {reportId: 'module:luminex/schemas/core/Containers/LeveyJenningsTrendPlot.r', showSection: 'levey_jennings_trend'};
-        // Ext.urlEncode({Protocol: this.assayName}).replace('Protocol=','')
-        config['Protocol'] = this.assayName;
-        config['PlotType'] = plotType;
-        config['Titration'] = this.titration;
-        config['Analyte'] = this.analyte;
-        config['Isotype'] = this.isotype;
-        config['Conjugate'] = this.conjugate;
-        // provide either a start and end date or the max number of rows to display
-        if (startDate != '' && endDate != '')
+        if (this.plotRenderedHtml)
         {
-            config['StartDate'] = startDate;
-            config['EndDate'] = endDate;
+            Ext.get(trendDiv).update(this.plotRenderedHtml);
         }
         else
         {
-            config['MaxRows'] = this.defaultRowSize;
+            // get the start and end date, if entered by the user
+            var startDate = this.startDateField.getValue();
+            var endDate = this.endDateField.getValue();
+
+            // build the config object of the properties that will be needed by the R report
+            var config = {reportId: 'module:luminex/schemas/core/Containers/LeveyJenningsTrendPlot.r', showSection: 'levey_jennings_trend'};
+            // Ext.urlEncode({Protocol: this.assayName}).replace('Protocol=','')
+            config['Protocol'] = this.assayName;
+            config['Titration'] = this.titration;
+            config['Analyte'] = this.analyte;
+            config['Isotype'] = this.isotype;
+            config['Conjugate'] = this.conjugate;
+            // provide either a start and end date or the max number of rows to display
+            if (startDate != '' && endDate != '')
+            {
+                config['StartDate'] = startDate;
+                config['EndDate'] = endDate;
+            }
+            else
+            {
+                config['MaxRows'] = this.defaultRowSize;
+            }
+            // add config for plotting in log scale
+            if (this.yAxisScale == 'log')
+                config['AsLog'] =  true;
+
+            // call and display the Report webpart
+            new LABKEY.WebPart({
+                   partName: 'Report',
+                   renderTo: trendDiv,
+                   frame: 'none',
+                   partConfig: config,
+                   success: function() {
+                       // store the HTML for the src plot image (image will be shifted to the relevant plot for other plot types)
+                       this.plotRenderedHtml = Ext.getDom(trendDiv).innerHTML;
+                   },
+                   scope: this
+            }).render();
+
+            // call the R plot code again to get a PDF output version of the plot
+            config['PdfOut'] = true;
+            new LABKEY.WebPart({
+                   partName: 'Report',
+                   renderTo: this.pdfPanel.getId(),
+                   frame: 'none',
+                   partConfig: config,
+                   success: function() {
+                       // ugly way of getting the href for the pdf file (to be used when the user clicks the export pdf button)
+                       if (Ext.getDom(this.pdfPanel.getId()))
+                       {
+                           var html = Ext.getDom(this.pdfPanel.getId()).innerHTML;
+                           this.pdfHref = html.substring(html.indexOf('href="') + 6, html.indexOf('&amp;attachment=true'));
+                       }
+                   },
+                   scope: this
+            }).render();
+            
         }
-        // add config for plotting in log scale
-        if (this.yAxisScale == 'log')
-            config['AsLog'] =  true;
-
-        // call and display the Report webpart
-        new LABKEY.WebPart({
-               partName: 'Report',
-               renderTo: trendDiv,
-               frame: 'none',
-               partConfig: config
-        }).render();
-        this.trendTabPanel.getActiveTab().isRendered = true;
-
-        // call the R plot code again to get a PDF output version of the plot
-        config['PdfOut'] = true;
-        new LABKEY.WebPart({
-               partName: 'Report',
-               renderTo: trendPdfDiv,
-               frame: 'none',
-               partConfig: config
-        }).render();
     },
 
     refreshGraphWithDates: function() {
@@ -290,6 +316,17 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             this.setTabsToRender();
             this.displayTrendPlot();
             this.fireEvent('reportDateRangeApplied', this.startDateField.getValue(), this.endDateField.getValue());
+        }
+    },
+
+    getPdfHref: function() {
+        if (this.pdfHref)
+        {
+            return this.pdfHref;
+        }
+        else
+        {
+            return null;
         }
     }
 });

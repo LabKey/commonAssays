@@ -41,7 +41,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             disabled: true
         });
 
-        this.addEvents('currentGuideSetUpdated');
+        this.addEvents('currentGuideSetUpdated', 'exportPdfBtnClicked');
 
         LABKEY.LeveyJenningsGuideSetPanel.superclass.constructor.call(this, config);
     },
@@ -54,18 +54,33 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             hideLabel: true,
             value: "",
             style: "font-size:110%; font-weight:bold",
-            width: 725,
+            width: 738,
             height: 25,
             border: true
         });
-        items.push(this.paramsDisplayField);
+
+        // add a button for exporting the PDF
+        this.exportPdftButton = new Ext.Button({
+            disabled: true,
+            icon: LABKEY.contextPath + "/_icons/pdf.gif",
+            tooltip: "Export PDF of plots",
+            handler: function() {
+                this.fireEvent('exportPdfBtnClicked');
+            },
+            scope: this
+        });
+
+        items.push(new Ext.form.CompositeField({
+            hideLabel: true,
+            items: [this.paramsDisplayField, this.exportPdftButton]
+        }));
 
         // add a display field listing the current guide set for the graph params
         this.guideSetDisplayField = new Ext.form.DisplayField({
             fieldLabel: "Current Guide Run Set",
             value: "",
             style: "background-color:#CCCCCC; padding:3px",
-            width: 570,
+            width: 583,
             height: 25,
             border: true
         });
@@ -74,6 +89,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.editGuideSetButton = new Ext.Button({
             disabled: true,
             text: "Edit",
+            tooltip: "Edit current guide run set",
             handler: function() {
                 this.manageGuideSetClicked(false);
             },
@@ -84,6 +100,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.newGuideSetButton = new Ext.Button({
             disabled: true,
             text: "New",
+            tooltip: "Create new guide run set",
             handler: this.newGuideSetClicked,
             scope: this
         });
@@ -108,6 +125,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.conjugate = conjugate;
 
         this.enable();
+        this.exportPdftButton.enable();
 
         // update the display field to show the selected params
         this.paramsDisplayField.setValue($h(this.analyte)
