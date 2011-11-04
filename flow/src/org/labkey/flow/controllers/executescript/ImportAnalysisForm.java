@@ -30,7 +30,7 @@ public class ImportAnalysisForm
 
     // general analysis options and R normalization configuration
     private String importGroupNames = "All Samples";
-    private boolean rEngineNormalization = true;
+    private Boolean rEngineNormalization = true;
     private String rEngineNormalizationReference = null;
     private String rEngineNormalizationParameters = null;
 
@@ -90,12 +90,12 @@ public class ImportAnalysisForm
         this.importGroupNames = importGroupNames;
     }
 
-    public boolean isrEngineNormalization()
+    public Boolean isrEngineNormalization()
     {
         return rEngineNormalization;
     }
 
-    public void setrEngineNormalization(boolean rEngineNormalization)
+    public void setrEngineNormalization(Boolean rEngineNormalization)
     {
         this.rEngineNormalization = rEngineNormalization;
     }

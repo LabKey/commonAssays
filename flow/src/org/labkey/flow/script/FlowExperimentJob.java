@@ -28,6 +28,7 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.persist.InputRole;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -143,14 +144,16 @@ public abstract class FlowExperimentJob extends FlowJob
         File dirRun = new File(dirFolder, dirName);
         if (!dirRun.exists())
         {
-            dirRun.mkdir();
+            if (!dirRun.mkdirs())
+                throw new IOException("Could not create analysis directory: " + dirRun.getAbsolutePath());
         }
         for (int i = 1; ; i ++)
         {
             File dirData = new File(dirRun, step.getLabel() + i);
             if (!dirData.exists())
             {
-                dirData.mkdir();
+                if (!dirData.mkdirs())
+                    throw new IOException("Could not create analysis directory: " + dirData.getAbsolutePath());
                 return dirData;
             }
         }

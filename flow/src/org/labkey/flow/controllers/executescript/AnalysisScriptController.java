@@ -17,6 +17,7 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.*;
@@ -801,9 +802,42 @@ public class AnalysisScriptController extends BaseFlowController
 
         private void stepAnalysisOptions(ImportAnalysisForm form, BindException errors) throws Exception
         {
+            WorkspaceData workspaceData = form.getWorkspace();
+            File runFilePathRoot = getRunPathRoot(form, errors);
+            if (errors.hasErrors())
+                return;
+
             String analysisEngine = getAnalysisEngine(form, errors);
             if (errors.hasErrors())
                 return;
+
+            if (form.isrEngineNormalization() != null && form.isrEngineNormalization().booleanValue())
+            {
+                if (form.getrEngineNormalizationReference() == null || form.getrEngineNormalizationReference().length() == 0)
+                {
+                    errors.reject(ERROR_MSG, "You must select a normalization reference sample.");
+                    return;
+                }
+
+                if (form.getrEngineNormalizationParameters() == null || form.getrEngineNormalizationParameters().length() == 0)
+                {
+                    errors.reject(ERROR_MSG, "You must select at least one parameter to normalize.");
+                    return;
+                }
+
+                FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
+                String[] parameters = workspace.getParameters();
+                String[] params = form.getrEngineNormalizationParameters().split(",");
+                for (String param : params)
+                {
+                    int index = ArrayUtils.indexOf(parameters, param);
+                    if (index == -1)
+                    {
+                        errors.reject(ERROR_MSG, "Parameter '" + param + "' does not exist in the workspace");
+                        return;
+                    }
+                }
+            }
 
             form.setWizardStep(ImportAnalysisStep.CHOOSE_ANALYSIS);
         }

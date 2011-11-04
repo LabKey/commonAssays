@@ -16,6 +16,7 @@
 package org.labkey.flow.script;
 
 import org.apache.commons.io.IOUtils;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipeRoot;
@@ -44,6 +45,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,13 +58,14 @@ public class RScriptJob extends FlowExperimentJob
 {
     private static final String WORKSPACE_PATH = "workspace-path";
     private static final String FCSFILE_DIRECTORY = "fcsfile-directory";
-    private static final String OUTPUT_DIRECTORY = "output-directory";
+    private static final String R_ANALYSIS_DIRECTORY = "r-analysis-directory";
+    private static final String NORMALIZED_DIRECTORY = "normalized-directory";
     private static final String RUN_NAME = "run-name";
 
     private static final String GROUP_NAMES = "group-names";
     private static final String NORMALIZATION = "perform-normalization";
     private static final String NORM_REFERENCE = "normalization-reference";
-    private static final String NORM_PARAMTERS = "normalization-parameters";
+    private static final String NORM_SKIP_PARAMTERS = "normalization-skip-parameters";
 
     private final FlowExperiment _experiment;
     private final File _workspaceFile;
@@ -71,7 +75,7 @@ public class RScriptJob extends FlowExperimentJob
     private final List<String> _importGroupNames;
     private final boolean _performNormalization;
     private final String _normalizationReference;
-    private final String _normalizationParameters;
+    private final List<String> _normalizationSkipParameters;
     private final boolean _createKeywordRun;
     private final boolean _failOnError;
 
@@ -95,7 +99,6 @@ public class RScriptJob extends FlowExperimentJob
         _importGroupNames = importGroupNames;
         _performNormalization = performNormalization;
         _normalizationReference = normalizationReference;
-        _normalizationParameters = normalizationParameters;
         _createKeywordRun = createKeywordRun;
         _failOnError = failOnError;
         assert !_createKeywordRun || _runFilePathRoot != null;
@@ -116,6 +119,24 @@ public class RScriptJob extends FlowExperimentJob
 
         // NOTE: may need to copy workspace file for clustered jobs
         _workspaceFile = originalImportedFile;
+
+        // Invert the list of desired parameters
+        FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
+        List<String> parameters = new ArrayList<String>();
+        for (String param : workspace.getParameters())
+        {
+            parameters.add(param);
+            parameters.add(CompensationMatrix.PREFIX + param + CompensationMatrix.SUFFIX);
+        }
+        if (normalizationParameters != null && normalizationParameters.length() > 0)
+        {
+            for (String param : normalizationParameters.split(","))
+            {
+                parameters.remove(param);
+                parameters.remove(CompensationMatrix.PREFIX + param + CompensationMatrix.SUFFIX);
+            }
+        }
+        _normalizationSkipParameters = parameters;
     }
 
     @Override
@@ -141,7 +162,7 @@ public class RScriptJob extends FlowExperimentJob
         }
     }
 
-    private void runScript(File workingDir) throws IOException, ScriptException
+    private void runScript(File rAnalysisDir, File normalizedDir) throws IOException, ScriptException
     {
         ScriptEngine engine = ServiceRegistry.get().getService(ScriptEngineManager.class).getEngineByExtension("r");
         if (engine == null)
@@ -157,12 +178,26 @@ public class RScriptJob extends FlowExperimentJob
 
         replacements.put(WORKSPACE_PATH, _workspaceFile.getAbsolutePath().replaceAll("\\\\", "/"));
         replacements.put(FCSFILE_DIRECTORY, _runFilePathRoot.getAbsolutePath().replaceAll("\\\\", "/"));
-        replacements.put(OUTPUT_DIRECTORY, workingDir.getAbsolutePath().replaceAll("\\\\", "/"));
+        replacements.put(R_ANALYSIS_DIRECTORY, rAnalysisDir.getAbsolutePath().replaceAll("\\\\", "/"));
+        replacements.put(NORMALIZED_DIRECTORY, normalizedDir.getAbsolutePath().replaceAll("\\\\", "/"));
         replacements.put(RUN_NAME, _workspaceName);
         replacements.put(GROUP_NAMES, _importGroupNames != null && _importGroupNames.size() > 0 ? _importGroupNames.get(0) : "");
-        replacements.put(NORMALIZATION, String.valueOf(_performNormalization));
+        replacements.put(NORMALIZATION, _performNormalization ? "TRUE" : "FALSE");
         replacements.put(NORM_REFERENCE, _normalizationReference == null ? "" : _normalizationReference);
-        replacements.put(NORM_PARAMTERS, _normalizationParameters == null ? "" : _normalizationParameters);
+
+        String sep = "";
+        StringBuilder skipParams = new StringBuilder("c(");
+        for (String param : _normalizationSkipParameters)
+        {
+            skipParams.append(sep);
+            skipParams.append("\"").append(param).append("\"");
+            sep = ", ";
+        }
+        skipParams.append(")");
+        replacements.put(NORM_SKIP_PARAMTERS, skipParams.toString());
+
+        // UNDONE: add protocol filter to script
+        SimpleFilter filter = _protocol.getFCSAnalysisFilter();
 
         String script = getScript();
         String output = (String)engine.eval(script);
@@ -188,40 +223,52 @@ public class RScriptJob extends FlowExperimentJob
         writer.writeAnalysis(null, null, matrices);
     }
 
+    private void importResults(File dir, String analysisRunName) throws Throwable
+    {
+        if (hasErrors())
+            return;
+
+        ImportResultsJob importJob = new ImportResultsJob(getInfo(), getPipeRoot(), getExperiment(),
+                dir, _originalImportedFile, _runFilePathRoot,
+                analysisRunName, _createKeywordRun, _failOnError);
+        importJob.setLogFile(getLogFile());
+        importJob.setLogLevel(getLogLevel());
+        importJob.setSubmitted();
+
+        try
+        {
+            importJob.doRun();
+            if (importJob.hasErrors())
+            {
+                getLogger().error("Failed to import results from R analysis '" + dir + "'.");
+                setStatus(PipelineJob.ERROR_STATUS);
+            }
+        }
+        catch (Exception e)
+        {
+            error("Import failed to complete", e);
+        }
+    }
+
     @Override
     protected void doRun() throws Throwable
     {
         File workingDir = createAnalysisDirectory(getExperiment().getName(), FlowProtocolStep.analysis);
-        runScript(workingDir);
+        File rAnalysisDir = new File(workingDir, "rAnalysis");
+        File normalizedDir = new File(workingDir, "normalized");
+        runScript(rAnalysisDir, normalizedDir);
 
         if (!hasErrors())
             writeCompensation(workingDir);
 
         if (!hasErrors())
-        {
-            ImportResultsJob importJob = new ImportResultsJob(getInfo(), getPipeRoot(), getExperiment(),
-                    workingDir, _originalImportedFile, _runFilePathRoot,
-                    _workspaceName, _createKeywordRun, _failOnError);
-            importJob.setLogFile(getLogFile());
-            importJob.setLogLevel(getLogLevel());
-            importJob.setSubmitted();
+            importResults(rAnalysisDir, _workspaceName);
 
-            try
-            {
-                importJob.doRun();
-                if (importJob.hasErrors())
-                {
-                    getLogger().error("Failed to import results from R analysis.");
-                    setStatus(PipelineJob.ERROR_STATUS);
-                }
-            }
-            catch (Exception e)
-            {
-                error("Import failed to complete", e);
-            }
-        }
+        if (_performNormalization && !hasErrors())
+            importResults(normalizedDir, "Normalized " + _workspaceName);
 
-        deleteAnalysisDirectory(workingDir);
+        if (!hasErrors())
+            deleteAnalysisDirectory(workingDir);
     }
 
     @Override

@@ -145,64 +145,6 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         }
     }
 
-    /**
-     * Filter the FlowJoWorkspace samples to using the FlowProtocol's FCS analysis filter.
-     * @param workspace workspace
-     * @return List of filtered samples.
-     */
-    private List<FlowJoWorkspace.SampleInfo> filterSamples(FlowJoWorkspace workspace)
-    {
-        List<FlowJoWorkspace.SampleInfo> samples;
-
-        SimpleFilter analysisFilter = null;
-        FlowProtocol flowProtocol = getProtocol();
-        if (flowProtocol != null)
-            analysisFilter = flowProtocol.getFCSAnalysisFilter();
-
-        if (analysisFilter != null && analysisFilter.getClauses().size() > 0)
-        {
-            info("Using protocol FCS analysis filter: " + analysisFilter.getFilterText());
-
-            samples = new ArrayList<FlowJoWorkspace.SampleInfo>();
-            for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples())
-            {
-                // Build a map that uses FieldKey strings as keys to represent a fake row of the FCSFiles table.
-                // The pairs in the map are those allowed by the ProtocolForm.getKeywordFieldMap().
-                Map<String, String> fakeRow = new HashMap<String, String>();
-                fakeRow.put("Name", sample.getLabel());
-                //fakeRow.put(FieldKey.fromParts("Run", "Name").toString(), "run name?");
-
-                FieldKey keyKeyword = FieldKey.fromParts("Keyword");
-                Map<String, String> keywords = sample.getKeywords();
-                for (String keyword : KeywordUtil.filterHidden(keywords.keySet()))
-                {
-                    String keywordValue = keywords.get(keyword);
-                    fakeRow.put(new FieldKey(keyKeyword, keyword).toString(), keywordValue);
-                }
-
-/*
-                // kbl: commented out on 10-31 merge - SimpleFilter class no longer has a meetsCriteria method. Kevin
-                // will need to fix this as well as decide where to invoke the filterSample method added in the branch
-
-                if (analysisFilter.meetsCriteria(fakeRow))
-                {
-                    samples.add(sample);
-                }
-                else
-                {
-                    info("Skipping " + sample.getLabel() + " as it doesn't match FCS analysis filter");
-                }
-*/
-            }
-        }
-        else
-        {
-            samples = workspace.getSamples();
-        }
-
-        return samples;
-    }
-
     private FlowRun createExperimentRun(FlowJob job, User user, Container container,
                                         FlowJoWorkspace workspace, FlowExperiment experiment,
                                         String workspaceName, File workspaceFile, File originalImportedFile,
@@ -236,21 +178,60 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 sampleLabels);
     }
 
+    private List<String> filterSamples(FlowJoWorkspace workspace, List<String> sampleIDs)
+    {
+        SimpleFilter analysisFilter = null;
+        FlowProtocol flowProtocol = getProtocol();
+        if (flowProtocol != null)
+            analysisFilter = flowProtocol.getFCSAnalysisFilter();
+
+        if (analysisFilter != null && analysisFilter.getClauses().size() > 0)
+        {
+            info("Using protocol FCS analysis filter: " + analysisFilter.getFilterText());
+
+            List<String> filteredSampleIDs = new ArrayList<String>(sampleIDs.size());
+            for (String sampleID : sampleIDs)
+            {
+                FlowJoWorkspace.SampleInfo sampleInfo = workspace.getSample(sampleID);
+                if (matchesFilter(analysisFilter, sampleInfo.getLabel(), sampleInfo.getKeywords()))
+                {
+                    filteredSampleIDs.add(sampleID);
+                }
+                else
+                {
+                    info("Skipping " + sampleInfo.getLabel() + " as it doesn't match FCS analysis filter");
+                }
+            }
+            return filteredSampleIDs;
+        }
+        else
+        {
+            return sampleIDs;
+        }
+    }
+
     private List<String> getSampleIDs(FlowJoWorkspace workspace, List<String> groupNames)
     {
+        List<String> sampleIDs;
         if (groupNames == null || groupNames.isEmpty())
-            return workspace.getAllSampleIDs();
-
-        List<String> sampleIDs = new ArrayList<String>(workspace.getSampleCount());
-        for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
         {
-            if (groupNames.contains(group.getGroupId()) || groupNames.contains(group.getGroupName().toString()))
+            sampleIDs = workspace.getAllSampleIDs();
+        }
+        else
+        {
+            sampleIDs = new ArrayList<String>(workspace.getSampleCount());
+            for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
             {
-                info("Getting samples IDs for group '" + group.getGroupName() + "'");
-                sampleIDs.addAll(group.getSampleIds());
+                if (groupNames.contains(group.getGroupId()) || groupNames.contains(group.getGroupName().toString()))
+                {
+                    info("Getting samples IDs for group '" + group.getGroupName() + "'");
+                    sampleIDs.addAll(group.getSampleIds());
+                }
             }
         }
-        return sampleIDs;
+
+        // filter the samples
+        return filterSamples(workspace, sampleIDs);
     }
 
     private boolean extractAnalysis(FlowJob job, Container container,
@@ -271,9 +252,6 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             job.addStatus("No samples to import");
             return false;
         }
-
-        // UNDONE: only import attrs that match the filter
-        SimpleFilter filter = _protocol.getFCSAnalysisFilter();
 
         int iSample = 0;
         for (String sampleID : sampleIDs)

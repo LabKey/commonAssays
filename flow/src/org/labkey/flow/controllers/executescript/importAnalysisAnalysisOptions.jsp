@@ -15,46 +15,25 @@
     * limitations under the License.
     */
 %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.labkey.api.action.SpringActionController" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
-<%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
-<%@ page import="org.labkey.api.portal.ProjectUrls" %>
-<%@ page import="org.labkey.api.query.QueryParam" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
-<%@ page import="org.labkey.flow.data.FlowExperiment" %>
-<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
-<%@ page import="org.labkey.flow.data.FlowRun" %>
-<%@ page import="org.labkey.flow.query.FlowTableType" %>
-<%@ page import="java.io.File" %>
-<%@ page import="java.sql.SQLException" %>
-<%@ page import="java.util.HashMap" %>
-<%@ page import="java.util.HashSet" %>
-<%@ page import="java.util.Iterator" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
+<%@ page import="org.labkey.flow.data.FlowProtocol" %>
+<%@ page import="org.labkey.flow.util.KeywordUtil" %>
 <%@ page import="java.util.LinkedHashMap" %>
+<%@ page import="java.util.LinkedHashSet" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
-<%@ page import="org.json.JSONArray" %>
-<%@ page import="java.util.Arrays" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="java.util.LinkedHashSet" %>
-<%@ page import="org.labkey.flow.util.KeywordUtil" %>
-<%@ page import="org.labkey.flow.data.FlowProtocol" %>
-<%@ page import="org.labkey.api.flow.api.FlowService" %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
-<%@ page import="org.labkey.api.data.SimpleFilter" %>
-<%@ page import="java.util.TreeSet" %>
-<%@ page import="org.json.JSONObject" %>
-<%@ page import="java.util.List" %>
 <%@ page import="java.util.TreeMap" %>
+<%@ page import="java.util.TreeSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -97,7 +76,8 @@
             if (sampleInfo != null)
                 groupSamples.add(sampleInfo.getLabel());
         }
-        groups.put(group.getGroupName().toString(), groupSamples);
+        if (groupSamples.size() > 0)
+            groups.put(group.getGroupName().toString(), groupSamples);
     }
 
 %>
@@ -162,11 +142,10 @@ if (protocol != null)
 <%
     if ("rEngine".equals(form.getSelectAnalysisEngine()))
     {
-        Set<String> ignore = new HashSet<String>(Arrays.asList("Time", "FSC-H", "FSC-A", "SSC-H", "SSC-A"));
         JSONArray jsonParams = new JSONArray();
         for (String param : workspace.getParameters())
         {
-            if (!ignore.contains(param))
+            if (!"Time".equals(param) && !param.startsWith("FSC") && !param.startsWith("SSC"))
                 jsonParams.put(new String[]{param, param});
         }
 %>
@@ -182,6 +161,7 @@ if (protocol != null)
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <input type="checkbox" name="rEngineNormalization" id="rEngineNormalization" <%=form.isrEngineNormalization() ? "checked" : ""%> onchange="onNormalizationChange();">
+    <input type="hidden" name="<%=SpringActionController.FIELD_MARKER%>rEngineNormalization"/>
     <label for="rEngineNormalization">Perform normalization?</label>
 </div>
 
@@ -210,7 +190,7 @@ if (protocol != null)
 </div>
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
-    <label for="rEngineNormalizationParameters">Select parameters to be normalized.  Leave blank to normalize all parameters.</label>
+    <label for="rEngineNormalizationParameters">Select parameters to be normalized.  At least one parameter must be selected.</label>
     <div id="rEngineNormalizationParametersDiv"></div>
     <script>
         LABKEY.requiresScript('Ext.ux.form.LovCombo.js');
@@ -227,6 +207,7 @@ if (protocol != null)
                 mode: "local",
                 valueField: "myId",
                 displayField: "displayText",
+                allowBlank: false,
                 store: new Ext.data.ArrayStore({
                     fields: ["myId", "displayText"],
                     data: <%=jsonParams%>

@@ -20,7 +20,7 @@
 # group-names: ${group-names}
 # perform-normalization: ${perform-normalization}
 # normalization-reference: ${normalization-reference}
-# normalization-parameters: ${normalization-parameters}
+# normalization-skip-parameters: ${normalization-skip-parameters}
 
 NCDF<-FALSE
 USEMPI<-FALSE
@@ -35,10 +35,12 @@ if(USEMULTICORE){
     require(multicore)
 }
 
-require(flowWorkspace)
-
 # for md5sum
 require(tools)
+
+require(flowStats)
+require(flowWorkspace)
+
 
 # Some hard-coded variables that should be passed in by the calling process.
 workspacePath <- "${workspace-path}"
@@ -58,9 +60,17 @@ GROUP <- "${group-names}"
 Keywords <- c("Stim","EXPERIMENT NAME","Sample Order")
 
 # Directory to export the results
-outputDir <- "${output-directory}"
-if (!file.exists(outputDir)) stop(paste("Output directory doesn't eixst: ", outputDir))
+rAnalysisDir <- "${r-analysis-directory}"
+if (!file.exists(rAnalysisDir)) {
+    dir.create(rAnalysisDir, recursive=TRUE)
+}
+if (!file.exists(rAnalysisDir)) stop(paste("Output directory doesn't eixst: ", rAnalysisDir))
 
+normalizedDir <- "${normalized-directory}"
+if (!file.exists(normalizedDir)) {
+    dir.create(normalizedDir, recursive=TRUE)
+}
+if (!file.exists(normalizedDir)) stop(paste("Output directory doesn't eixst: ", normalizedDir))
 
 # open the workspace
 cat("opening workspace", workspacePath, "...\n")
@@ -71,6 +81,17 @@ cat("parsing workspace", workspacePath, "...\n")
 G <- parseWorkspace(ws, path=fcsFileDir, isNcdf=NCDF, execute=EXECUTENOW, name=GROUP)
 
 # export the required files
-cat("exporting workspace", workspacePath, "to", outputDir, "...\n")
-ExportTSVAnalysis(x=G, Keywords=Keywords, EXPORT=outputDir)
+cat("exporting R analysis ", workspacePath, "to", rAnalysisDir, "...\n")
+ExportTSVAnalysis(x=G, Keywords=Keywords, EXPORT=rAnalysisDir)
+
+# perform normalization if requested
+if (${perform-normalization}) {
+    cat("performing normalization...\n")
+    #N = flowStats:::normalizeGatingSet(G, target="${normalization-reference}", skipdims=${normalization-skip-parameters}, minCountThreshold=500)
+    N = flowStats:::normalizeGatingSet(G, target="${normalization-reference}", skipdims=${normalization-skip-parameters})
+
+    cat("exporting normalized analysis", workspacePath, "to", normalizedDir, "...\n")
+    ExportTSVAnalysis(x=N, Keywords=Keywords, EXPORT=normalizedDir)
+}
+
 

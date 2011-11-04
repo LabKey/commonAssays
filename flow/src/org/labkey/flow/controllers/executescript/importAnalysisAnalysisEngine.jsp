@@ -15,33 +15,14 @@
     * limitations under the License.
     */
 %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
-<%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page import="org.labkey.api.portal.ProjectUrls" %>
-<%@ page import="org.labkey.api.query.QueryParam" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
-<%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
-<%@ page import="org.labkey.flow.data.FlowExperiment" %>
-<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
-<%@ page import="org.labkey.flow.data.FlowRun" %>
-<%@ page import="org.labkey.flow.query.FlowTableType" %>
-<%@ page import="java.io.File" %>
-<%@ page import="java.sql.SQLException" %>
-<%@ page import="java.util.HashMap" %>
-<%@ page import="java.util.HashSet" %>
-<%@ page import="java.util.Iterator" %>
-<%@ page import="java.util.LinkedHashMap" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.Set" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -78,7 +59,7 @@
 --%>
 
 <input type="radio" name="selectAnalysisEngine" id="rEngine" value="rEngine" <%="rEngine".equals(form.getSelectAnalysisEngine()) ? "checked" : ""%> />
-<label for="rEngine">R statistics and graphs.</label>
+<label for="rEngine">R statistics and graphs. (experimental)</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
     The analysis defined in the FlowJo workspace will be used
     by the R engine to generate statistics and graphs.

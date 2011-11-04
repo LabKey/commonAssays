@@ -18,6 +18,7 @@ package org.labkey.flow.script;
 
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -28,6 +29,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -52,14 +54,17 @@ import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowPropertySet;
+import org.labkey.flow.util.KeywordUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -203,6 +208,24 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 setStatus(PipelineJob.ERROR_STATUS);
             }
         }
+    }
+
+    protected boolean matchesFilter(SimpleFilter filter, String sampleName, Map<String, String> keywords)
+    {
+        // Build a map that uses FieldKey strings as keys to represent a fake row of the FCSFiles table.
+        // The pairs in the map are those allowed by the ProtocolForm.getKeywordFieldMap().
+        Map<String, String> fakeRow = new HashMap<String, String>();
+        fakeRow.put("Name", sampleName);
+        //fakeRow.put(FieldKey.fromParts("Run", "Name").toString(), "run name?");
+
+        FieldKey keyKeyword = FieldKey.fromParts("Keyword");
+        for (String keyword : KeywordUtil.filterHidden(keywords.keySet()))
+        {
+            String keywordValue = keywords.get(keyword);
+            fakeRow.put(new FieldKey(keyKeyword, keyword).toString(), keywordValue);
+        }
+
+        return filter.meetsCriteria(fakeRow);
     }
 
     protected abstract FlowRun createExperimentRun() throws Exception;
