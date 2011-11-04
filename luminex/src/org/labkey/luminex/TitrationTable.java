@@ -44,7 +44,7 @@ public class TitrationTable extends AbstractLuminexTable
 
         ColumnInfo nameColumn = addColumn(wrapColumn(getRealTable().getColumn("Name")));
         ActionURL url = new ActionURL(LuminexController.LeveyJenningsReportAction.class, schema.getContainer());
-        nameColumn.setURL(StringExpressionFactory.createURL(url + "titration=${Name}" + "&protocol=${Run/Protocol/Name}"));
+        nameColumn.setURL(StringExpressionFactory.createURL(url + "rowId=${Run/Protocol/RowId}" + "&titration=${Name}"));
 
         // Set to be nullable so when a dataset backed by this assay type is exported, it's not considered required
         // to import correctly. This is important because not all Luminex rows will have a titration, and therefore

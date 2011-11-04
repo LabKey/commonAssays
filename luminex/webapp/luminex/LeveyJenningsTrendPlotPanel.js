@@ -41,7 +41,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             yAxisScale: 'linear'
         });
 
-        this.addEvents('reportDateRangeApplied');
+        this.addEvents('reportDateRangeApplied', 'togglePdfBtn');
 
         LABKEY.LeveyJenningsTrendPlotPanel.superclass.constructor.call(this, config);
     },
@@ -49,6 +49,8 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
     initComponent : function() {
         this.plotRenderedHtml = null;
         this.pdfHref = null;
+        this.startDate = null;
+        this.endDate = null;
 
         // initialize the y-axis scale combo for the top toolbar
         this.scaleLabel = new Ext.form.Label({text: 'Y-Axis Scale:'});
@@ -195,7 +197,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.conjugate = conjugate;
 
         // remove any previously entered values from the start and end date fields
+        this.startDate = null;
         this.startDateField.reset();
+        this.endDate = null;
         this.endDateField.reset();
         this.refreshGraphButton.disable();
 
@@ -208,7 +212,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
     activateTrendPlotPanel: function(panel) {
         // if the graph params have been selected and the trend plot for this panel hasn't been loaded, then call displayTrendPlot
-        if (this.analyte && this.isotype && this.conjugate)
+        if (this.analyte != undefined && this.isotype != undefined && this.conjugate != undefined)
             this.displayTrendPlot();
     },
 
@@ -216,6 +220,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         // something about the report has changed and the plot needs to be set to re-render
         this.plotRenderedHtml = null;
         this.pdfHref = null;
+        this.fireEvent('togglePdfBtn', false);
     },
 
     displayTrendPlot: function() {
@@ -230,10 +235,6 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         }
         else
         {
-            // get the start and end date, if entered by the user
-            var startDate = this.startDateField.getValue();
-            var endDate = this.endDateField.getValue();
-
             // build the config object of the properties that will be needed by the R report
             var config = {reportId: 'module:luminex/schemas/core/Containers/LeveyJenningsTrendPlot.r', showSection: 'levey_jennings_trend'};
             // Ext.urlEncode({Protocol: this.assayName}).replace('Protocol=','')
@@ -243,10 +244,10 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             config['Isotype'] = this.isotype;
             config['Conjugate'] = this.conjugate;
             // provide either a start and end date or the max number of rows to display
-            if (startDate != '' && endDate != '')
+            if (this.startDate && this.endDate)
             {
-                config['StartDate'] = startDate;
-                config['EndDate'] = endDate;
+                config['StartDate'] = this.startDate;
+                config['EndDate'] = this.endDate;
             }
             else
             {
@@ -282,6 +283,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                        {
                            var html = Ext.getDom(this.pdfPanel.getId()).innerHTML;
                            this.pdfHref = html.substring(html.indexOf('href="') + 6, html.indexOf('&amp;attachment=true'));
+                           this.fireEvent('togglePdfBtn', true);
                        }
                    },
                    scope: this
@@ -313,20 +315,24 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         }
         else
         {
+            this.startDate = this.startDateField.getValue();
+            this.endDate = this.endDateField.getValue();
+
             this.setTabsToRender();
             this.displayTrendPlot();
-            this.fireEvent('reportDateRangeApplied', this.startDateField.getValue(), this.endDateField.getValue());
+            this.fireEvent('reportDateRangeApplied', this.startDate, this.endDate);
         }
     },
 
     getPdfHref: function() {
-        if (this.pdfHref)
-        {
-            return this.pdfHref;
-        }
-        else
-        {
-            return null;
-        }
+        return this.pdfHref ? this.pdfHref : null;
+    },
+
+    getStartDate: function() {
+        return this.startDate ? this.startDate : null;
+    },
+
+    getEndDate: function() {
+        return this.endDate ? this.endDate : null;
     }
 });

@@ -27,6 +27,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AbstractAssayView;
@@ -40,6 +41,7 @@ import org.labkey.api.view.NavTree;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
@@ -143,8 +145,7 @@ public class LuminexController extends SpringActionController
                 {
                     super.setupDataView(ret);
 
-                    ActionURL graph = new ActionURL(LeveyJenningsReportAction.class, getContainer());
-                    graph.addParameter("protocol", "${Titration/Run/Protocol/Name}");
+                    ActionURL graph = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getViewContext().getContainer(), _protocol, LuminexController.LeveyJenningsReportAction.class);
                     graph.addParameter("titration", "${Titration/Name}");
                     graph.addParameter("analyte", "${Analyte/Name}");
                     graph.addParameter("isotype", "${Titration/Run/Isotype}");
@@ -180,10 +181,12 @@ public class LuminexController extends SpringActionController
         {
             _titration = form.getTitration();
 
-            // TODO: add assay header links to top of report
-//            AbstractAssayView result = new AbstractAssayView();
-//            result.setupViews(new JspView<TitrationForm>("/org/labkey/luminex/leveyJenningsReport.jsp", form), false, form.getProvider(), form.getProtocol());
-            return new JspView<TitrationForm>("/org/labkey/luminex/leveyJenningsReport.jsp", form);
+            VBox result = new VBox();
+            AssayHeaderView header = new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null);
+            result.addView(header);
+            JspView report = new JspView<TitrationForm>("/org/labkey/luminex/leveyJenningsReport.jsp", form);
+            result.addView(report);
+            return result;
         }
 
         @Override

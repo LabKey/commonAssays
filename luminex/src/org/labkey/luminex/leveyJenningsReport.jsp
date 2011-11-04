@@ -67,7 +67,7 @@
             Ext.get('graphParamsPanel').update("Error: no titration specified.");
             return;
         }
-        if ("null" == "<%= bean.getProtocol() %>")
+        if ("null" == "<%= bean.getProtocol().getName() %>")
         {
             Ext.get('graphParamsPanel').update("Error: no protocol specified.");
             return;
@@ -78,13 +78,13 @@
         LABKEY.Query.selectRows({
             containerFilter: LABKEY.Query.containerFilter.allFolders,
             schemaName: 'assay',
-            queryName: '<%= bean.getProtocol() %> AnalyteTitration',
+            queryName: '<%= bean.getProtocol().getName() %> AnalyteTitration',
             filterArray: [LABKEY.Filter.create('Titration/Name', '<%= bean.getTitration() %>')],
             columns: reqColumns.join(','),
             maxRows: 1,
             success: function(data) {
                 if (data.rows.length == 0)
-                    Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h('<%= bean.getProtocol() %>') + "' for '" + $h('<%= bean.getTitration() %>') + "'.");
+                    Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h('<%= bean.getProtocol().getName() %>') + "' for '" + $h('<%= bean.getTitration() %>') + "'.");
                 else
                 {
                     // check that all of the required properties for the report exist
@@ -92,7 +92,7 @@
                     {
                         if (!(reqColumns[i] in data.rows[0]))
                         {
-                            Ext.get('graphParamsPanel').update("Error: one or more of the required properties for the report do not exist in '" + $h('<%= bean.getProtocol() %>') + "'.");
+                            Ext.get('graphParamsPanel').update("Error: one or more of the required properties for the report do not exist in '" + $h('<%= bean.getProtocol().getName() %>') + "'.");
                             return;
                         }
                     }
@@ -113,7 +113,7 @@
             renderTo: 'graphParamsPanel',
             cls: 'extContainer',
             titration: '<%= bean.getTitration() %>',
-            assayName: '<%= bean.getProtocol() %>',
+            assayName: '<%= bean.getProtocol().getName() %>',
             listeners: {
                 'resetGraphBtnClicked': function(analyte, isotype, conjugate){
                     _analyte = analyte;
@@ -122,7 +122,7 @@
 
                     guideSetPanel.graphParamsSelected(analyte, isotype, conjugate);
                     trendPlotPanel.graphParamsSelected(analyte, isotype, conjugate);
-                    trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate);
+                    trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate, null, null);
                 }
             }
         });
@@ -132,12 +132,12 @@
             renderTo: 'guideSetOverviewPanel',
             cls: 'extContainer',
             titration: '<%= bean.getTitration() %>',
-            assayName: '<%= bean.getProtocol() %>',
+            assayName: '<%= bean.getProtocol().getName() %>',
             listeners: {
                 'currentGuideSetUpdated': function() {
                     trendPlotPanel.setTabsToRender();
                     trendPlotPanel.displayTrendPlot();
-                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate);
+                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate());
                 },
                 'exportPdfBtnClicked': function() {
                     if (trendPlotPanel.getPdfHref())
@@ -153,11 +153,14 @@
             renderTo: 'rPlotPanel',
             cls: 'extContainer',
             titration: '<%= bean.getTitration() %>',
-            assayName: '<%= bean.getProtocol() %>',
+            assayName: '<%= bean.getProtocol().getName() %>',
             defaultRowSize: defaultRowSize,
             listeners: {
                 'reportDateRangeApplied': function(startDate, endDate) {
-                    trackingDataPanel.updateTrackingDataGrid(startDate, endDate);
+                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, startDate, endDate);
+                },
+                'togglePdfBtn': function(toEnable) {
+                    guideSetPanel.toggleExportBtn(toEnable);
                 }
             }
         });
@@ -167,13 +170,13 @@
             renderTo: 'trackingDataPanel',
             cls: 'extContainer',
             titration: '<%= bean.getTitration() %>',
-            assayName: '<%= bean.getProtocol() %>',
+            assayName: '<%= bean.getProtocol().getName() %>',
             defaultRowSize: defaultRowSize,
             listeners: {
                 'appliedGuideSetUpdated': function() {
                     trendPlotPanel.setTabsToRender();
                     trendPlotPanel.displayTrendPlot();
-                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate);
+                    trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate());
                 }
             }
         });

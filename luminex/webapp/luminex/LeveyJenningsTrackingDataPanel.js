@@ -157,7 +157,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     },
 
     // function called by the JSP when the graph params are selected and the "Reset Graph" button is clicked
-    graphParamsSelected: function(analyte, isotype, conjugate) {
+    graphParamsSelected: function(analyte, isotype, conjugate, startDate, endDate) {
         // store the params locally
         this.analyte = analyte;
         this.isotype = isotype;
@@ -169,17 +169,13 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate));
 
         // create a new store now that the graph params are selected and bind it to the grid
-        this.updateTrackingDataGrid();
-
-        // enable the trending data grid
-        this.enable();
-    },
-
-    updateTrackingDataGrid: function(startDate, endDate) {
         var newStore = this.getTrackingDataStore(startDate, endDate);
         var newColModel = this.getTrackingDataColModel();
         this.reconfigure(newStore, newColModel);
         newStore.load();
+        
+        // enable the trending data grid
+        this.enable();
     },
 
     applyGuideSetClicked: function() {

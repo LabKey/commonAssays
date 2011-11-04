@@ -16,16 +16,15 @@
 
 package org.labkey.luminex;
 
-import org.labkey.api.view.ViewForm;
+import org.labkey.api.study.actions.ProtocolIdForm;
 
 /**
 * User: cnathe
 * Date: Sept 19, 2011
 */
-public class TitrationForm extends ViewForm
+public class TitrationForm extends ProtocolIdForm
 {
     private String _titration;
-    private String _protocol;
 
     public String getTitration()
     {
@@ -35,15 +34,5 @@ public class TitrationForm extends ViewForm
     public void setTitration(String titration)
     {
         _titration = titration;
-    }
-
-    public String getProtocol()
-    {
-        return _protocol;
-    }
-
-    public void setProtocol(String protocol)
-    {
-        _protocol = protocol;
     }
 }

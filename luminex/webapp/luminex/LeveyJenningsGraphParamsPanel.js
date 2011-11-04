@@ -89,6 +89,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                         schemaName: 'assay',
                         sql: 'SELECT DISTINCT x.Analyte.Name AS value FROM "' + this.assayName + ' AnalyteTitration" AS x '
                             + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
+                            + ' AND x.MaxFI IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
                     })
                 }),
                 sortInfo: {
@@ -155,6 +156,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                             + 'CASE WHEN x.Titration.Run.Isotype IS NULL THEN \'[None]\' ELSE x.Titration.Run.Isotype END AS display '
                             + 'FROM "' + this.assayName + ' AnalyteTitration" AS x '
                             + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
+                            + ' AND x.MaxFI IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
                     })
                 }),
                 sortInfo: {
@@ -215,6 +217,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                             + 'CASE WHEN x.Titration.Run.Conjugate IS NULL THEN \'[None]\' ELSE x.Titration.Run.Conjugate END AS display '
                             + 'FROM "' + this.assayName + ' AnalyteTitration" AS x '
                             + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
+                            + ' AND x.MaxFI IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
                     })
                 }),
                 sortInfo: {

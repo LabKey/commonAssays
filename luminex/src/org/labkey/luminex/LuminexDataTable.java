@@ -74,7 +74,6 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         setDescription("Contains all the Luminex data rows for the " + protocol.getName() + " assay definition");
         _schema = schema;
 
-        addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
         ColumnInfo dataColumn = addColumn(wrapColumn("Data", getRealTable().getColumn("DataId")));
         dataColumn.setFk(new LookupForeignKey("RowId")
         {
@@ -130,27 +129,28 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
             }
         });
 
-//        ColumnInfo analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
-//        analyteTitrationColumn.setIsUnselectable(true);
-//        LookupForeignKey fk = new LookupForeignKey("AnalyteId")
-//        {
-//            @Override
-//            public TableInfo getLookupTableInfo()
-//            {
-//                return _schema.createAnalyteTitrationTable(false);
-//            }
-//
-//            @Override
-//            protected ColumnInfo getPkColumn(TableInfo table)
-//            {
-//                // Pretend that analyte is the sole column in the PK for this table.
-//                // We'll get the other key of the compound key with addJoin() below.
-//                return table.getColumn("Analyte");
-//            }
-//        };
-//        fk.addJoin(getColumn("Titration"), "Titration");
-//        analyteTitrationColumn.setFk(fk);
-//        addColumn(analyteTitrationColumn);
+        ColumnInfo analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
+        analyteTitrationColumn.setIsUnselectable(true);
+        LookupForeignKey fk = new LookupForeignKey("AnalyteId")
+        {
+            @Override
+            public TableInfo getLookupTableInfo()
+            {
+                return _schema.createAnalyteTitrationTable(false);
+            }
+
+            @Override
+            protected ColumnInfo getPkColumn(TableInfo table)
+            {
+                // Pretend that analyte is the sole column in the PK for this table.
+                // We'll get the other key of the compound key with addJoin() below.
+                return table.getColumn("Analyte");
+            }
+        };
+        fk.addJoin(getColumn("Titration"), "Titration");
+        analyteTitrationColumn.setFk(fk);
+        addColumn(analyteTitrationColumn);
+        addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
 
         ColumnInfo containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));
         containerColumn.setHidden(true);

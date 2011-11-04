@@ -253,5 +253,9 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         {
             this.manageGuideSetClicked(true);
         }
+    },
+
+    toggleExportBtn: function(toEnable) {
+        this.exportPdftButton.setDisabled(!toEnable);
     }
 });
