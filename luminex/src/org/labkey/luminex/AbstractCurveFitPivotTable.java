@@ -59,6 +59,8 @@ public abstract class AbstractCurveFitPivotTable extends AbstractLuminexTable
         ColumnInfo curveFitColumn = wrapColumn(curveType + "CurveFit", getRealTable().getColumn(_primaryCurveFitJoinColumn));
 
         LookupForeignKey fk = createCurveFitFK(curveType);
+        // We need the prefix to distinguish between the different kinds of curve fits
+        fk.setPrefixColumnCaption(true);
         curveFitColumn.setIsUnselectable(true);
         curveFitColumn.setShownInDetailsView(false);
         curveFitColumn.setReadOnly(true);
