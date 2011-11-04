@@ -34,6 +34,7 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.TreeMap" %>
 <%@ page import="java.util.TreeSet" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -81,6 +82,9 @@
     }
 
 %>
+<script>
+    var groups = <%=new JSONObject(groups)%>;
+</script>
 
 <input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
 <input type="hidden" name="runFilePathRoot" id="runFilePathRoot" value="<%=h(form.getRunFilePathRoot())%>">
@@ -118,16 +122,26 @@ if (protocol != null)
             var rEngineNormalizationReferenceSelect = document.getElementById("rEngineNormalizationReference");
             if (rEngineNormalizationReferenceSelect)
             {
-                var nl = rEngineNormalizationReferenceSelect.childNodes;
-                for (var i = 0; i < nl.length; i++)
+                // Remove all but "<Select Sample>" option.
+                var value = rEngineNormalizationReferenceSelect.value;
+                while (rEngineNormalizationReferenceSelect.length > 1)
+                    rEngineNormalizationReferenceSelect.remove(1);
+
+                if (!selectedGroup)
+                    selectedGroup = "All Samples";
+
+                var group = groups[selectedGroup];
+                if (group)
                 {
-                    if (nl[i].tagName === "OPTGROUP")
+                    for (var i = 0; i < group.length; i++)
                     {
-                        var optgroup = nl[i];
-                        if (selectedGroup === "All Samples")
-                            optgroup.disabled = false;
-                        else
-                            optgroup.disabled = (optgroup.label !== selectedGroup);
+                        var sample = group[i];
+                        var opt = document.createElement("option");
+                        opt.value = sample;
+                        opt.text = sample;
+                        if (value == sample)
+                            opt.selected = true;
+                        rEngineNormalizationReferenceSelect.add(opt, null);
                     }
                 }
             }
@@ -169,21 +183,22 @@ if (protocol != null)
     <label for="rEngineNormalizationReference">Select sample to be use as normalization reference.</label><br>
     <em>NOTE:</em> The list of available samples is restricted to those in the imported group above.<br>
     <select name="rEngineNormalizationReference" id="rEngineNormalizationReference">
+        <option value="">&lt;Select sample&gt;</option>
         <%
             String rEngineNormalizationReference = form.getrEngineNormalizationReference();
-            for (String group : groups.keySet())
+            if (form.getImportGroupNames() != null && form.getImportGroupNames().length() > 0)
             {
-                if ("All Samples".equalsIgnoreCase(group))
-                    continue;
-
-                Set<String> groupSamples = groups.get(group);
-
-                %><optgroup label="<%=group%>"><%
-                for (String sample : groupSamples)
+                for (String group : groups.keySet())
                 {
-                    %><option <%=sample.equals(rEngineNormalizationReference) ? "selected" : ""%>><%=sample%></option><%
+                    if (form.getImportGroupNames().contains(group))
+                    {
+                        Set<String> groupSamples = groups.get(group);
+                        for (String sample : groupSamples)
+                        {
+        %><option value=<%=PageFlowUtil.filter(sample)%> <%=sample.equals(rEngineNormalizationReference) ? "selected" : ""%>><%=PageFlowUtil.filter(sample)%></option><%
+                        }
+                    }
                 }
-                %></optgroup><%
             }
         %>
     </select>
