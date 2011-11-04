@@ -811,7 +811,7 @@ public class AnalysisScriptController extends BaseFlowController
             if (errors.hasErrors())
                 return;
 
-            if (form.isrEngineNormalization() != null && form.isrEngineNormalization().booleanValue())
+            if (analysisEngine.equals("rEngine") && (form.isrEngineNormalization() != null && form.isrEngineNormalization().booleanValue()))
             {
                 if (form.getrEngineNormalizationReference() == null || form.getrEngineNormalizationReference().length() == 0)
                 {
