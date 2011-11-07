@@ -328,7 +328,7 @@ CREATE TABLE prot.SprotOrgMap
 
 CREATE TABLE prot.FastaFiles
 (
-    FastaId INT IDENTITY (0, 1) NOT NULL,
+    FastaId INT IDENTITY (1, 1) NOT NULL,
     FileName NVARCHAR (400),
     Loaded DATETIME,
     FileChecksum VARCHAR(50) NULL,           -- Hash of the file
