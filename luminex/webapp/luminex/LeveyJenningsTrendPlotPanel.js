@@ -87,10 +87,10 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 scope: this,
                 'valid': function (df) {
                     if (df.getValue() != '' && this.endDateField.isValid() && this.endDateField.getValue() != '')
-                        this.refreshGraphButton.enable();
+                        this.applyFilterButton.enable();
                 },
                 'invalid': function (df, msg) {
-                    this.refreshGraphButton.disable();
+                    this.applyFilterButton.disable();
                 }
             }
         });
@@ -102,19 +102,27 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 scope: this,
                 'valid': function (df) {
                     if (df.getValue() != '' && this.startDateField.isValid() && this.startDateField.getValue() != '')
-                        this.refreshGraphButton.enable();
+                        this.applyFilterButton.enable();
                 },
                 'invalid': function (df, msg) {
-                    this.refreshGraphButton.disable();
+                    this.applyFilterButton.disable();
                 }
             }
         });
 
         // initialize the refesh graph button
-        this.refreshGraphButton = new Ext.Button({
+        this.applyFilterButton = new Ext.Button({
             disabled: true,
-            text: 'Refresh Graph',
-            handler: this.refreshGraphWithDates,
+            text: 'Apply',
+            handler: this.applyDateFilter,
+            scope: this
+        });
+
+        // initialize the clear graph button
+        this.clearFilterButton = new Ext.Button({
+            disabled: true,
+            text: 'Clear',
+            handler: this.clearDateFilter,
             scope: this
         });
         
@@ -136,7 +144,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 {xtype: 'tbspacer', width: 10},
                 this.endDateField,
                 {xtype: 'tbspacer', width: 25},
-                this.refreshGraphButton
+                this.applyFilterButton,
+                {xtype: 'tbspacer', width: 10},
+                this.clearFilterButton
             ]
         });
 
@@ -201,7 +211,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.startDateField.reset();
         this.endDate = null;
         this.endDateField.reset();
-        this.refreshGraphButton.disable();
+        this.applyFilterButton.disable();
 
         // show the trending tab panel and date range selection toolbar
         this.enable();
@@ -292,7 +302,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         }
     },
 
-    refreshGraphWithDates: function() {
+    applyDateFilter: function() {
         // make sure that both date fields are not null
         if (this.startDateField.getValue() == '' || this.endDateField.getValue() == '')
         {
@@ -317,11 +327,25 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         {
             this.startDate = this.startDateField.getValue();
             this.endDate = this.endDateField.getValue();
+            this.clearFilterButton.enable();
 
             this.setTabsToRender();
             this.displayTrendPlot();
             this.fireEvent('reportDateRangeApplied', this.startDate, this.endDate);
         }
+    },
+
+    clearDateFilter: function() {
+        this.startDate = null;
+        this.startDateField.reset();
+        this.endDate = null;
+        this.endDateField.reset();
+        this.applyFilterButton.disable();
+        this.clearFilterButton.disable();
+
+        this.setTabsToRender();
+        this.displayTrendPlot();
+        this.fireEvent('reportDateRangeApplied', this.startDate, this.endDate);
     },
 
     getPdfHref: function() {

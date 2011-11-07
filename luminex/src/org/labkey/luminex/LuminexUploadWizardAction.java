@@ -250,6 +250,16 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 final Map<String, String> defaultTitrationValues = PropertyManager.getProperties(getViewContext().getUser().getUserId(),
                         getContainer().getId(), _protocol.getName() + ": " + titrationEntry.getValue().getName());
 
+                String titrationCheckboxName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
+                final String titrationCellName = PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName()));
+                final boolean hideCell;
+                if (errorReshow && getViewContext().getRequest().getParameter(titrationCheckboxName + "_showcol").equals("true"))
+                    hideCell = false;
+                else if (!errorReshow && standardTitrations.size() > 1 && standardTitrations.contains(titrationEntry.getValue()))
+                    hideCell = false;
+                else
+                    hideCell = true;
+
                 List<DisplayColumn> cols = new ArrayList<DisplayColumn>();
                 for (final String analyte : analyteNames)
                 {
@@ -289,13 +299,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         @Override
                         public void renderInputCell(RenderContext ctx, Writer out, int span) throws IOException
                         {
-                            String propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
-                            boolean hideCell = true;
-                            if (errorReshow && getViewContext().getRequest().getParameter(propertyName + "_showcol").equals("true"))
-                                hideCell = false;
-                            else if (!errorReshow && standardTitrations.size() > 1 && standardTitrations.contains(titrationEntry.getValue()))
-                                hideCell = false;
-                            out.write("<td colspan=" + span + " name='" + PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName()))
+                            out.write("<td colspan=" + span + " name='" + titrationCellName
                                     + "' style='display:" + (hideCell ? "none" : "table-cell") + "' >");
                             renderInputHtml(ctx, out, 1);
                             out.write("</td>");
@@ -304,23 +308,58 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         @Override
                         public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
                         {
-                            String propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
-                            boolean hideCell = true;
-                            if (errorReshow && getViewContext().getRequest().getParameter(propertyName + "_showcol").equals("true"))
-                                hideCell = false;
-                            else if (!errorReshow && standardTitrations.size() > 1 && standardTitrations.contains(titrationEntry.getValue()))
-                                hideCell = false;
-                            out.write("<td name='" + PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName())) + "' "
+                            out.write("<td name='" + titrationCellName + "' "
                                 + " class='labkey-form-label' style='display:" + (hideCell ? "none" : "table-cell") + "' >");
                             renderTitle(ctx, out);
                             out.write("</td>");
+                        }
+
+                        @Override
+                        public String getFormFieldName(RenderContext ctx)
+                        {
+                            return PageFlowUtil.filter(getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte));
                         }
                     };
 
                     col.setCaption("Use " + titrationEntry.getKey() + " Standard");
                     cols.add(col);
                 }
-                view.getDataRegion().addGroup(new DisplayColumnGroup(cols, titrationEntry.getKey(), false));
+                view.getDataRegion().addGroup(new DisplayColumnGroup(cols, titrationEntry.getKey(), true)
+                {
+                    @Override
+                    public void writeSameCheckboxCell(RenderContext ctx, Writer out) throws IOException
+                    {
+                        String groupName = ColumnInfo.propNameFromName(getColumns().get(0).getFormFieldName(ctx));
+                        out.write("<td name='" + titrationCellName + "' style='display:" + (hideCell ? "none" : "table-cell") + "' >");
+                        out.write("<input type=checkbox name='" + groupName + "CheckBox' id='" + groupName + "CheckBox' onchange=\"");
+                        out.write(" b = this.checked;" );
+                        for (int i = 1; i < getColumns().size(); i++)
+                        {
+                            DisplayColumn col = getColumns().get(i);
+                            out.write("document.getElementsByName('" + col.getFormFieldName(ctx) + "')[0].style.display = b ? 'none' : 'block';\n");
+                        }
+                        out.write(" if (b) { " + groupName + "Updated(); }\">");
+                        out.write("</td>");
+                    }
+
+                    @Override
+                    public void writeCopyableJavaScript(RenderContext ctx, Writer out) throws IOException
+                    {
+                        String groupName = ColumnInfo.propNameFromName(getColumns().get(0).getFormFieldName(ctx));
+                        out.write("function " + groupName + "Updated() {\n");
+                        out.write("  if (document.getElementById('" + groupName + "CheckBox') != null && document.getElementById('" + groupName + "CheckBox').checked) {\n");
+                        out.write("    var v = document.getElementsByName('" + getColumns().get(0).getFormFieldName(ctx) + "')[0].checked;\n");
+                        for (int i = 1; i < getColumns().size(); i++)
+                        {
+                            out.write("    document.getElementsByName('" + getColumns().get(i).getFormFieldName(ctx) + "')[0].checked = v;\n");
+                        }
+                        out.write("  }\n");
+                        out.write("}\n");
+                        out.write("var e = document.getElementsByName('" + getColumns().get(0).getFormFieldName(ctx) + "')[0];\n");
+                        out.write("e.onchange=" + groupName + "Updated;\n");
+                        out.write("e.onkeyup=" + groupName + "Updated;\n");
+                        out.write("\n");                    }
+                });
             }
 
             ButtonBar bbar = new ButtonBar();

@@ -142,9 +142,9 @@
                 {
                     elements[i].style.display = "none";
 
-                    // also need to make sure all input checkboxes are unchecked if hiding column cell
+                    // also need to make sure all input checkboxes are unchecked if hiding column cell (except for the "Same" checkbox)
                     var cellInputs = elements[i].getElementsByTagName("input");
-                    if (cellInputs.length == 1)
+                    if (cellInputs.length == 1 && cellInputs[0].id.indexOf("CheckBox") == -1)
                     {
                         cellInputs[0].checked = false;
                     }
