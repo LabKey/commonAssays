@@ -85,10 +85,33 @@ public class DataFrame
         {
             String name = field.getName();
             fieldsMap.put(name, field);
-            fieldsMap.put(name, field);
-            name = canonicalFieldName(name);
-            if (!fieldsMap.containsKey(name))
-                fieldsMap.put(name, field);
+            String canonName = canonicalFieldName(name);
+            if (!fieldsMap.containsKey(canonName))
+                fieldsMap.put(canonName, field);
+
+            // Remove a " Lin" or " Log" suffix.
+            if (name.endsWith(" Lin") || name.endsWith(" Log"))
+            {
+                String baseName = name.substring(0, name.length() - 4);
+                if (!fieldsMap.containsKey(baseName))
+                    fieldsMap.put(baseName, field);
+            }
+            else
+            {
+                // Append a " Lin" or " Log" suffix.
+                if (field.getScalingFunction().isLogarithmic())
+                {
+                    String logName = name + " Log";
+                    if (!fieldsMap.containsKey(logName))
+                        fieldsMap.put(logName, field);
+                }
+                else
+                {
+                    String linName = name + " Lin";
+                    if (!fieldsMap.containsKey(linName))
+                        fieldsMap.put(linName, field);
+                }
+            }
         }
         this.data = data;
     }
@@ -238,7 +261,7 @@ public class DataFrame
         Field f = fieldsMap.get(s);
         if (f != null)
             return f;
-            s = canonicalFieldName(s);
+        s = canonicalFieldName(s);
         return fieldsMap.get(s);
     }
 

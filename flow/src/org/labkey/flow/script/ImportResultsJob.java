@@ -81,6 +81,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
 
     private Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> loadAnalysis() throws Exception
     {
+        addStatus("Loading external analysis from '" + _analysisPathRoot + "'");
         FileSystemFile rootDir = new FileSystemFile(_analysisPathRoot);
         AnalysisSerializer serializer = new AnalysisSerializer(getLogger(), rootDir);
         return serializer.readAnalysis();
@@ -107,6 +108,8 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         // UNDONE: only import attrs that match the filter
         SimpleFilter filter = _protocol.getFCSAnalysisFilter();
 
+        if (keywordsMap.size() > 0)
+            info("Preparing keywords for " + keywordsMap.size() + " samples...");
         for (Map.Entry<String, AttributeSet> entry : keywordsMap.entrySet())
         {
             String sampleLabel = entry.getKey();
@@ -117,6 +120,8 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             AttributeSetHelper.prepareForSave(keywordAttrs, getContainer());
         }
 
+        if (resultsMap.size() > 0)
+            info("Preparing results for " + resultsMap.size() + " samples...");
         for (Map.Entry<String, AttributeSet> entry : resultsMap.entrySet())
         {
             String sampleLabel = entry.getKey();

@@ -77,21 +77,27 @@ cat("opening workspace", workspacePath, "...\n")
 ws <- openWorkspace(workspacePath)
 
 # parse the workspace
-cat("parsing workspace", workspacePath, "...\n")
-G <- parseWorkspace(ws, path=fcsFileDir, isNcdf=NCDF, execute=EXECUTENOW, name=GROUP)
+if (length(GROUP) > 0) {
+    cat("parsing workspace", workspacePath, "and loading group", GROUP, "...\n")
+} else {
+    cat("parsing workspace", workspacePath, "...\n")
+}
+system.time(G <- parseWorkspace(ws, path=fcsFileDir, isNcdf=NCDF, execute=EXECUTENOW, name=GROUP))
+cat("finished parsing", length(G), "samples \n")
 
 # export the required files
 cat("exporting R analysis ", workspacePath, "to", rAnalysisDir, "...\n")
 ExportTSVAnalysis(x=G, Keywords=Keywords, EXPORT=rAnalysisDir)
+cat("finished exporting analysis.\n")
 
 # perform normalization if requested
 if (${perform-normalization}) {
     cat("performing normalization...\n")
-    #N = flowStats:::normalizeGatingSet(G, target="${normalization-reference}", skipdims=${normalization-skip-parameters}, minCountThreshold=500)
-    N = flowStats:::normalizeGatingSet(G, target="${normalization-reference}", skipdims=${normalization-skip-parameters})
+    system.time(N <- flowStats:::normalizeGatingSet(G, target="${normalization-reference}", skipdims=${normalization-skip-parameters}))
+    cat("finished normalizing", length(N), "samples\n")
 
     cat("exporting normalized analysis", workspacePath, "to", normalizedDir, "...\n")
     ExportTSVAnalysis(x=N, Keywords=Keywords, EXPORT=normalizedDir)
+    cat("finished exporting normalized analysis.\n")
 }
-
 

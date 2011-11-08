@@ -721,7 +721,7 @@ public class AnalysisSerializer
 
             Map<String, GraphSpec> graphs = new TreeMap<String, GraphSpec>();
             int index = 0;
-            for (Map<String, Object> row : loader)
+            ROWS_LOOP: for (Map<String, Object> row : loader)
             {
                 index++;
                 String name = (String)row.get(GraphColumnName.Sample.toString());
@@ -773,15 +773,16 @@ public class AnalysisSerializer
                     dir = dir.getDir(pathParts[i]);
                     if (dir == null)
                     {
-                        _log.info(String.format("Skipping graph '%s' for sample '%s'.  Image directory not found for path '%s'", spec, name, path));
-                        continue;
+                        _log.info(String.format("Skipping graph '%s' for sample '%s'.  Image directory '%s' not found in dir '%s'", spec, name, pathParts[i], dir.getLocation()));
+                        continue ROWS_LOOP;
                     }
                 }
 
-                InputStream image = dir.getInputStream(pathParts[pathParts.length-1]);
+                String imageFile = pathParts[pathParts.length-1];
+                InputStream image = dir.getInputStream(imageFile);
                 if (image == null)
                 {
-                    _log.info(String.format("Skipping graph '%s' for sample '%s'.  Image file not found at path '%s'", spec, name, path));
+                    _log.info(String.format("Skipping graph '%s' for sample '%s'.  Image file '%s' not found in dir '%s'", spec, name, imageFile, dir.getLocation()));
                     continue;
                 }
 
@@ -886,19 +887,31 @@ public class AnalysisSerializer
 
         InputStream keywordsFile = _rootDir.getInputStream(KEYWORDS_FILENAME);
         if (keywordsFile != null)
+        {
+            _log.info(String.format("Reading keywords from '%s/%s'", _rootDir.getLocation(), KEYWORDS_FILENAME));
             readKeywords(keywordsFile, keywords);
+        }
 
         InputStream statisticsFile = _rootDir.getInputStream(STATISTICS_FILENAME);
         if (statisticsFile != null)
+        {
+            _log.info(String.format("Reading statistics from '%s/%s'", _rootDir.getLocation(), STATISTICS_FILENAME));
             readStatistics(statisticsFile, results);
+        }
 
         InputStream graphsFile = _rootDir.getInputStream(GRAPHS_FILENAME);
         if (graphsFile != null)
+        {
+            _log.info(String.format("Reading graphs from '%s/%s'", _rootDir.getLocation(), GRAPHS_FILENAME));
             readGraphs(graphsFile, results);
+        }
 
         InputStream compensationFile = _rootDir.getInputStream(COMPENSATION_FILENAME);
         if (compensationFile != null)
+        {
+            _log.info(String.format("Reading comp. matrices from '%s/%s'", _rootDir.getLocation(), COMPENSATION_FILENAME));
             readCompMatrices(compensationFile, matrices);
+        }
 
         /*
         // Look for directories containing either a statistics or graphs file.
@@ -927,6 +940,10 @@ public class AnalysisSerializer
         {
             _log.error("Nothing to import");
             return Tuple3.of(Collections.<String, AttributeSet>emptyMap(), Collections.<String, AttributeSet>emptyMap(), Collections.<String, CompensationMatrix>emptyMap());
+        }
+        else
+        {
+            _log.info(String.format("Read %d keyword samples, %d result samples, and %d comp. matrices.", keywords.size(), results.size(), matrices.size()));
         }
 
         return Tuple3.of(keywords, results, matrices);

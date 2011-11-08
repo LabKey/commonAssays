@@ -43,8 +43,10 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -200,8 +202,23 @@ public class RScriptJob extends FlowExperimentJob
         SimpleFilter filter = _protocol.getFCSAnalysisFilter();
 
         String script = getScript();
-        String output = (String)engine.eval(script);
-        info(output);
+        ScriptContext context = engine.getContext();
+        Writer writer = null;
+        try
+        {
+            writer = new FileWriter(getLogFile());
+            context.setWriter(writer);
+            String output = (String)engine.eval(script, context);
+            info(output);
+        }
+        catch (ScriptException e)
+        {
+            error("Error running R script", e);
+        }
+        finally
+        {
+            IOUtils.closeQuietly(writer);
+        }
     }
 
     private void writeCompensation(File workingDir) throws Exception
@@ -221,6 +238,8 @@ public class RScriptJob extends FlowExperimentJob
         FileSystemFile rootDir = new FileSystemFile(workingDir);
         AnalysisSerializer writer = new AnalysisSerializer(_logger, rootDir);
         writer.writeAnalysis(null, null, matrices);
+        if (!hasErrors())
+            info("Wrote compensation matrices.");
     }
 
     private void importResults(File dir, String analysisRunName) throws Throwable
@@ -237,11 +256,16 @@ public class RScriptJob extends FlowExperimentJob
 
         try
         {
+            info("Importing results from '" + dir + "'");
             importJob.doRun();
             if (importJob.hasErrors())
             {
                 getLogger().error("Failed to import results from R analysis '" + dir + "'.");
                 setStatus(PipelineJob.ERROR_STATUS);
+            }
+            else
+            {
+                info("Finished importing results from '" + dir + "'");
             }
         }
         catch (Exception e)

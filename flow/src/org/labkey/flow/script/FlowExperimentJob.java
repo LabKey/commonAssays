@@ -115,10 +115,10 @@ public abstract class FlowExperimentJob extends FlowJob
         FlowRun[] existing = findRuns(path, step);
         if (existing.length > 0)
         {
-            addStatus("Skipping " + path.toString() + " for step '" + step.getName() + "' because it already exists.");
+            addStatus("Skipping " + path.toString() + " for " + step.getName() + " step because it already exists.");
             return false;
         }
-        addStatus("Processing " + path.toString() + " for step '" + step.getName() + "'");
+        addStatus("Processing " + path.toString() + " for " + step.getName() + " step.");
         return true;
     }
 

@@ -77,7 +77,8 @@ public class Main
         try
         {
             is = new FileInputStream(file);
-            return FlowJoWorkspace.readWorkspace(file.getPath(), is);
+            FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(file.getPath(), is);
+            return workspace;
         }
         catch (Exception e)
         {

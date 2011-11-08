@@ -130,6 +130,7 @@ public class KeywordsHandler extends BaseHandler
 
     protected FlowRun importRun(File directory) throws Exception
     {
+        addStatus("Reading keywords from directory " + directory);
         File[] files = directory.listFiles();
         List<FCSKeywordData> lstFileData = new ArrayList();
 

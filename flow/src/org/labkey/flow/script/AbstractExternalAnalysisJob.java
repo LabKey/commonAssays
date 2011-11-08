@@ -163,14 +163,20 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 addruns.setSubmitted();
 
                 List<FlowRun> runs = addruns.go();
-                if (runs == null || runs.size() == 0 || addruns.hasErrors())
+                if (addruns.hasErrors())
                 {
                     getLogger().error("Failed to import keywords from '" + getRunFilePathRoot() + "'.");
                     setStatus(PipelineJob.ERROR_STATUS);
                 }
+                else
+                {
+                    for (FlowRun run : runs)
+                        info("Created keywords run '" + run.getName() + "' for path '" + run.getPath() + "'");
+                }
             }
 
-            _run = createExperimentRun();
+            if (!hasErrors())
+                _run = createExperimentRun();
 
             if (_run != null)
             {
@@ -254,6 +260,8 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         // Prepare comp matrices for saving
         Map<CompensationMatrix, AttributeSet> compMatrixMap = new HashMap<CompensationMatrix, AttributeSet>();
         Set<CompensationMatrix> comps = new HashSet<CompensationMatrix>(sampleCompMatrixMap.values());
+        if (comps.size() > 0)
+            info("Preparing " + comps.size() + " comp. matrices...");
         for (CompensationMatrix comp : comps)
         {
             AttributeSet compAttrs = new AttributeSet(comp);

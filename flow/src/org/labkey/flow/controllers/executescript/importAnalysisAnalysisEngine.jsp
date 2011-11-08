@@ -59,7 +59,7 @@
 --%>
 
 <input type="radio" name="selectAnalysisEngine" id="rEngine" value="rEngine" <%="rEngine".equals(form.getSelectAnalysisEngine()) ? "checked" : ""%> />
-<label for="rEngine">R statistics and graphs. (experimental)</label>
+<label for="rEngine">R statistics and graphs.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
     The analysis defined in the FlowJo workspace will be used
     by the R engine to generate statistics and graphs.
