@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.Handler;
@@ -279,7 +280,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         }
         catch (SQLException x)
         {
-            list.add(x.getMessage());
+            throw new RuntimeSQLException(x);
         }
         return list;
     }
