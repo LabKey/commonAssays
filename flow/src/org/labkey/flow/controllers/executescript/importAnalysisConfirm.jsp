@@ -72,7 +72,12 @@
 %>
 <ul>
     <li style="padding-bottom:0.5em;">
-        <b>Analysis Engine:</b> <%=h(form.getSelectAnalysisEngine())%>
+        <b>Analysis Engine:</b>
+        <% if (form.getSelectAnalysisEngine() == null || form.getSelectAnalysisEngine().equals("noEngine")) { %>
+            No analysis engine selected
+        <% } else if (form.getSelectAnalysisEngine().equals("rEngine")) { %>
+            External R analysis engine
+        <% } %>
     </li>
     <li style="padding-bottom:0.5em;">
         <b>Import Groups:</b> <%=form.getImportGroupNames() == null ? "<em>All Samples</em>" : h(form.getImportGroupNames())%>
