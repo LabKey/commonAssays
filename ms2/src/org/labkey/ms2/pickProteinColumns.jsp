@@ -74,8 +74,8 @@
         <td><textarea style="width: 100%;" name="columns" id="columns" rows="3" cols="100"><%=h(bean.currentColumns)%></textArea></td>
     </tr>
     <tr><td colspan=2 align=center>
-        <%=PageFlowUtil.generateSubmitButton("Pick Columns", "this.form.action='" + h(MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, false)) + "';")%>
-        <%=PageFlowUtil.generateSubmitButton("Save As Default", "this.form.action='" + h(MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, true)) + "';")%></td></tr>
+        <%=PageFlowUtil.generateSubmitButton("Pick Columns", "this.form.action='" + MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, false) + "';")%>
+        <%=PageFlowUtil.generateSubmitButton("Save As Default", "this.form.action='" + MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, true) + "';")%></td></tr>
   </table></form></td>
 </tr></table>
 
