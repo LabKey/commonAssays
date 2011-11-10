@@ -107,7 +107,7 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
     # store a boolean vector of blanks, nonBlanks, and unknowns
     blanks = regexpr("^blank", run.data$name, ignore.case=TRUE) > -1;
     nonBlanks = regexpr("^blank", run.data$name, ignore.case=TRUE) == -1;
-    unks = toupper(substr(run.data$type,0,1)) == "X";
+    unks = toupper(substr(run.data$type,0,1)) == "X" | toupper(substr(run.data$type,0,1)) == "C";
 
     # read the run property from user to determine if we are to only blank bead subtract from unks
     unksOnly = TRUE;
@@ -326,8 +326,9 @@ if(any(standardRecs) & length(standards) > 0){
     # change column name from expConc to expected_conc
     colnames(dat)[colnames(dat) == "expConc"] = "expected_conc";
 
-    # set the sample_id to be description||dilution concatination
-    dat$sample_id = paste(dat$description, "||", dat$dilution, sep="");
+    # set the sample_id to be description||dilution or description||expected_conc
+    dat$sample_id[!is.na(dat$expected_conc)] = paste(dat$description[!is.na(dat$expected_conc)], "||", dat$expected_conc[!is.na(dat$expected_conc)], sep="");
+    dat$sample_id[is.na(dat$expected_conc)] = paste(dat$description[is.na(dat$expected_conc)], "||", dat$dilution[is.na(dat$expected_conc)], sep="");
 
     # choose the FI column for standards based on the run property provided by the user, default to the original FI value
     if(any(run.props$name == "StndCurveFitInput")) {

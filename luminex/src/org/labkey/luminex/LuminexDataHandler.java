@@ -563,7 +563,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // Insert mappings for all of the titrations that aren't standards
         for (Titration titration : titrations.values())
         {
-            if (!titration.isStandard())
+            if (!titration.isStandard() && (titration.isQcControl() || titration.isUnknown()))
             {
                 insertAnalyteTitrationMapping(user, dataRows, analyte, titration, conjugate, isotype, unkCurveFitInput, protocol);
             }
@@ -749,11 +749,16 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             throw new IllegalArgumentException("Unsupported fit type: " + fitType);
         }
         String suffix = fitType == DilutionCurve.FitType.FIVE_PARAMETER ? "_5pl" : "_4pl";
-        Number slope = (Number)dataRow.getExtraProperties().get("Slope" + suffix);
-        Number upper = (Number)dataRow.getExtraProperties().get("Upper" + suffix);
-        Number lower = (Number)dataRow.getExtraProperties().get("Lower" + suffix);
-        Number inflection = (Number)dataRow.getExtraProperties().get("Inflection" + suffix);
-        Number asymmetry = (Number)dataRow.getExtraProperties().get("Asymmetry" + suffix);
+        Object value = dataRow.getExtraProperties().get("Slope" + suffix);
+        Number slope = (value == null ? (Number)value : Double.parseDouble(value.toString()));
+        value = dataRow.getExtraProperties().get("Upper" + suffix);
+        Number upper = (value == null ? (Number)value : Double.parseDouble(value.toString()));
+        value = dataRow.getExtraProperties().get("Lower" + suffix);
+        Number lower = (value == null ? (Number)value : Double.parseDouble(value.toString()));
+        value = dataRow.getExtraProperties().get("Inflection" + suffix);
+        Number inflection = (value == null ? (Number)value : Double.parseDouble(value.toString()));
+        value = dataRow.getExtraProperties().get("Asymmetry" + suffix);
+        Number asymmetry = (value == null ? (Number)value : Double.parseDouble(value.toString()));
 
         if (slope != null && upper != null && lower != null && inflection != null)
         {
