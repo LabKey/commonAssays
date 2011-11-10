@@ -36,12 +36,12 @@ public class MicroarrayFolderType extends DefaultFolderType
                 "Import and analyze microarray data",
             Arrays.asList(
                 Portal.getPortalPart("Data Pipeline").createWebPart(),
-                Portal.getPortalPart(MicroarrayModule.WEBPART_PENDING_FILES).createWebPart(),
                 Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_STATISTICS).createWebPart()
             ),
             Arrays.asList(
                 Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_RUNS).createWebPart(),
                 Portal.getPortalPart("Assay Details").createWebPart(),
+                Portal.getPortalPart(MicroarrayModule.WEBPART_PENDING_FILES).createWebPart(),
                 Portal.getPortalPart("Assay List").createWebPart()
             ),
             getDefaultModuleSet(module, getModule(MicroarrayModule.NAME), getModule(PipelineService.MODULE_NAME), getModule(ExperimentService.MODULE_NAME)),
