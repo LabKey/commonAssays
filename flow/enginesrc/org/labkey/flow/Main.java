@@ -71,13 +71,18 @@ public class Main
         tsv, xar, flowjoxml
     }
 
-    private static FlowJoWorkspace readWorkspace(File file)
+    private static FlowJoWorkspace readWorkspace(File file, boolean printWarnings)
     {
         InputStream is = null;
         try
         {
             is = new FileInputStream(file);
             FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(file.getPath(), is);
+            if (printWarnings && workspace.getWarnings().size() > 0)
+            {
+                for (String warning : workspace.getWarnings())
+                    System.out.println("warning: " + warning);
+            }
             return workspace;
         }
         catch (Exception e)
@@ -144,7 +149,7 @@ public class Main
 
     private static void executeListSamples(File workspaceFile, Set<PopulationName> groupNames)
     {
-        FlowJoWorkspace workspace = readWorkspace(workspaceFile);
+        FlowJoWorkspace workspace = readWorkspace(workspaceFile, false);
 
         // Hash the group and sample Analysis to see if they are equivalent
         Map<Analysis, PopulationName> analysisToGroup = new HashMap<Analysis, PopulationName>();
@@ -237,7 +242,7 @@ public class Main
 
     private static void executeConvertWorkspace(File outDir, File workspaceFile, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
-        FlowJoWorkspace workspace = readWorkspace(workspaceFile);
+        FlowJoWorkspace workspace = readWorkspace(workspaceFile, false);
 
         boolean writeAll = groupNames.isEmpty() && sampleIds.isEmpty();
         if (writeAll || !groupNames.isEmpty())
@@ -316,7 +321,7 @@ public class Main
 
     private static Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readWorkspaceAnalysisResults(File workspaceFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
-        FlowJoWorkspace workspace = readWorkspace(workspaceFile);
+        FlowJoWorkspace workspace = readWorkspace(workspaceFile, true);
 
         Set<FlowJoWorkspace.SampleInfo> sampleInfos = new LinkedHashSet<FlowJoWorkspace.SampleInfo>();
         boolean writeAll = groupNames.isEmpty() && sampleIds.isEmpty();
@@ -659,7 +664,6 @@ public class Main
             else
             {
                 commandArg = arg;
-                break;
             }
         }
 
@@ -682,6 +686,11 @@ public class Main
         File workspaceFile = null;
         if (!commandArg.equals("convert-analysis"))
         {
+            if (workspaceArg == null)
+            {
+                System.err.println(commandArg + " command requires workspace");
+                return;
+            }
             workspaceFile = new File(workspaceArg);
             if (!workspaceFile.isFile())
             {
@@ -691,6 +700,11 @@ public class Main
         }
         else if (commandArg.equals("convert-analysis"))
         {
+            if (analysisResultsArg == null)
+            {
+                System.err.println("convert-analysis command requires workspace");
+                return;
+            }
             // NOTE: Re-using the workspaceFile even though it really is analysis results.  Consider collapsing '-r' and '-w' arguments.
             workspaceFile = new File(analysisResultsArg);
             if (!workspaceFile.isFile())
@@ -731,7 +745,7 @@ public class Main
 
 
         if ("parse".equals(commandArg))
-            readWorkspace(workspaceFile);
+            readWorkspace(workspaceFile, true);
         else if ("convert-analysis".equals(commandArg))
             executeConvertAnalysis(outDir, workspaceFile, fcsDir, groupArgs, sampleArgs, statArgs, outputFormat);
         else if ("run-analysis".equals(commandArg))

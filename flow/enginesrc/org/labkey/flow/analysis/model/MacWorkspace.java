@@ -138,9 +138,7 @@ public class MacWorkspace extends FlowJoWorkspace
     protected Analysis readSampleAnalysis(Element elSampleAnalysis)
     {
         AttributeSet results = new AttributeSet(ObjectType.fcsAnalysis, null);
-        Analysis ret = readAnalysis(elSampleAnalysis, results);
-        PopulationName name = PopulationName.fromString(elSampleAnalysis.getAttribute("name"));
-        ret.setName(name);
+        Analysis ret = readAnalysis(elSampleAnalysis, results, true);
         String sampleId = elSampleAnalysis.getAttribute("sampleID");
         _sampleAnalyses.put(sampleId, ret);
         if (results.getStatistics().size() > 0)
@@ -303,13 +301,18 @@ public class MacWorkspace extends FlowJoWorkspace
         return true;
     }
     
-    protected void readStats(SubsetSpec subset, Element elPopulation, AttributeSet results, Analysis analysis)
+    protected void readStats(SubsetSpec subset, Element elPopulation, AttributeSet results, Analysis analysis, boolean warnOnMissingStats)
     {
         String strCount = elPopulation.getAttribute("count");
         if (!StringUtils.isEmpty(strCount))
         {
             StatisticSpec statCount = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
             results.setStatistic(statCount, Double.valueOf(strCount).doubleValue());
+        }
+        else
+        {
+            if (warnOnMissingStats)
+                warning(analysis.getName(), subset, "Count statistic missing");
         }
         for (Element elStat : getElementsByTagName(elPopulation, "Statistic"))
         {
@@ -346,6 +349,11 @@ public class MacWorkspace extends FlowJoWorkspace
                 }
                 results.setStatistic(spec, value);
             }
+            else
+            {
+                if (warnOnMissingStats)
+                    warning(analysis.getName(), subset, stat.getLongName() + " statistic missing");
+            }
             analysis.addStatistic(spec);
         }
     }
@@ -374,7 +382,7 @@ public class MacWorkspace extends FlowJoWorkspace
         return gate;
     }
 
-    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, AttributeSet results)
+    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, AttributeSet results, boolean warnOnMissingStats)
     {
         /*
         SubsetSpec booleanSubset = toBooleanExpression(parentSubset, elPopulation);
@@ -449,11 +457,11 @@ public class MacWorkspace extends FlowJoWorkspace
             }
         }
 
-        readStats(subset, elPopulation, results, analysis);
+        readStats(subset, elPopulation, results, analysis, warnOnMissingStats);
 
         for (Element elChild: getElementsByTagName(elPopulation, "Population"))
         {
-            Population child = readPopulation(elChild, subset, analysis, results);
+            Population child = readPopulation(elChild, subset, analysis, results, warnOnMissingStats);
             if (child != null)
             {
                 ret.addPopulation(child);
@@ -463,17 +471,19 @@ public class MacWorkspace extends FlowJoWorkspace
     }
 
 
-    protected Analysis readAnalysis(Element elAnalysis, AttributeSet results)
+    protected Analysis readAnalysis(Element elAnalysis, AttributeSet results, boolean warnOnMissingStats)
     {
         Analysis ret = new Analysis();
+        PopulationName name = PopulationName.fromString(elAnalysis.getAttribute("name"));
+        ret.setName(name);
         ret.setSettings(_settings);
         ret.getStatistics().add(new StatisticSpec(null, StatisticSpec.STAT.Count, null));
 
-        readStats(null, elAnalysis, results, ret);
+        readStats(null, elAnalysis, results, ret, warnOnMissingStats);
 
         for (Element elPopulation : getElementsByTagName(elAnalysis, "Population"))
         {
-            Population child = readPopulation(elPopulation, null, ret, results);
+            Population child = readPopulation(elPopulation, null, ret, results, warnOnMissingStats);
             if (child != null)
                 ret.addPopulation(child);
 
@@ -491,9 +501,7 @@ public class MacWorkspace extends FlowJoWorkspace
 
     protected Analysis readGroupAnalysis(Element elGroupAnalysis)
     {
-        Analysis ret = readAnalysis(elGroupAnalysis, null);
-        PopulationName name = PopulationName.fromString(elGroupAnalysis.getAttribute("name"));
-        ret.setName(name);
+        Analysis ret = readAnalysis(elGroupAnalysis, null, false);
         _groupAnalyses.put(ret.getName(), ret);
 
         // Group name attribute only appears on the GroupAnalysis node in old workspace format.

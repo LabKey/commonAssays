@@ -57,7 +57,7 @@ abstract public class FlowJoWorkspace implements Serializable
     protected Map<String, ParameterInfo> _parameters = new CaseInsensitiveMapWrapper<ParameterInfo>(new LinkedHashMap<String, ParameterInfo>());
     protected List<CalibrationTable> _calibrationTables = new ArrayList<CalibrationTable>();
     protected ScriptSettings _settings = new ScriptSettings();
-    protected List<String> _warnings;
+    protected List<String> _warnings = new LinkedList<String>();
     protected List<CompensationMatrix> _compensationMatrices = new ArrayList<CompensationMatrix>();
     protected List<AutoCompensationScript> _autoCompensationScripts = new ArrayList<AutoCompensationScript>();
 
@@ -1184,9 +1184,27 @@ abstract public class FlowJoWorkspace implements Serializable
         return Double.valueOf(el.getAttribute(attribute)).doubleValue();
     }
 
+    protected void warning(PopulationName name, SubsetSpec subset, String msg)
+    {
+        StringBuilder sb = new StringBuilder();
+        if (name != null)
+            sb.append(name.toString()).append(": ");
+
+        if (subset != null)
+            sb.append(subset.toString()).append(": ");
+
+        sb.append(msg);
+        warning(sb.toString());
+    }
+
     protected void warning(String str)
     {
         _warnings.add(str);
+    }
+
+    public List<String> getWarnings()
+    {
+        return _warnings;
     }
 
     /**
