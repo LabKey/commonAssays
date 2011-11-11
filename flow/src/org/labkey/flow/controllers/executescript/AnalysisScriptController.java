@@ -473,6 +473,11 @@ public class AnalysisScriptController extends BaseFlowController
 
         public ModelAndView getView(ImportAnalysisForm form, boolean reshow, BindException errors) throws Exception
         {
+            // When entering the wizard from the pipeline browser "Import Workspace" button,
+            // we aren't POST'ing and so haven't parsed or validated the workspace yet.
+            if ("GET".equals(getRequest().getMethod()) && form.getWorkspace().getWorkspaceObject() == null)
+                validateCommand(form, errors);
+
             title = form.getWizardStep().getTitle();
             return new JspView<ImportAnalysisForm>(AnalysisScriptController.class, "importAnalysis.jsp", form, errors);
         }
