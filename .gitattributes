@@ -531,6 +531,16 @@ flow/webapp/Flow/unflagFCSAnalysis.gif -text
 flow/webapp/Flow/unflagFCSFile.gif -text
 flow/webapp/Flow/unflagSample.gif -text
 flow/webapp/Flow/util.js -text
+lab/Lab.iml -text
+lab/build.xml -text
+lab/module.properties -text
+lab/src/org/labkey/lab/LabContainerListener.java -text
+lab/src/org/labkey/lab/LabController.java -text
+lab/src/org/labkey/lab/LabFolderTabs.java -text
+lab/src/org/labkey/lab/LabFolderType.java -text
+lab/src/org/labkey/lab/LabManager.java -text
+lab/src/org/labkey/lab/LabModule.java -text
+lab/src/org/labkey/lab/LabSchema.java -text
 luminex/module.properties -text
 luminex/resources/reports/schemas/core/Containers/LeveyJenningsTrendPlot.r -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-9.20.sql -text
