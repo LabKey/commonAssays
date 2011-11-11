@@ -42,6 +42,40 @@ abstract public class GateList extends Gate
         _gates.add(gate);
     }
 
+    @Override
+    public boolean equals(Object other)
+    {
+        return super.equals(other) && _gates.equals(((GateList)other)._gates);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return super.hashCode() ^ _gates.hashCode();
+    }
+
+    @Override
+    public boolean isSimilar(Gate other)
+    {
+        if (equals(other))
+            return true;
+
+        if (other.getClass() != this.getClass())
+            return false;
+
+        GateList otherGateList = (GateList)other;
+        if (_gates.size() != otherGateList._gates.size())
+            return false;
+
+        for (int i = 0; i < _gates.size(); i++)
+        {
+            if (!_gates.get(i).isSimilar(otherGateList._gates.get(i)))
+                return false;
+        }
+
+        return true;
+    }
+
     public void getPolygons(List<Polygon> list, String xAxis, String yAxis)
     {
         for (Gate gate : _gates)

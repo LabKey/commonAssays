@@ -32,7 +32,7 @@ import java.util.Set;
  * value is wrapped in curly brackets to escape the string.  If an end
  * curly is found in the escaped string it is preceeded by backslash '\'.
  */
-public class PopulationName implements SubsetPart
+public class PopulationName implements SubsetPart, Comparable<PopulationName>
 {
     public static final Character ESCAPE_START = '{';
     public static final Character ESCAPE_END = '}';
@@ -153,6 +153,12 @@ public class PopulationName implements SubsetPart
     public int hashCode()
     {
         return _escaped.hashCode();
+    }
+
+    @Override
+    public int compareTo(PopulationName o)
+    {
+        return _escaped.compareTo(o._escaped);
     }
 
     public boolean isEscaped()

@@ -93,6 +93,28 @@ public class SubsetRef extends Gate implements SubsetExpressionGate
     }
 
     @Override
+    public int hashCode()
+    {
+        return super.hashCode() ^ this._ref.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (!super.equals(other))
+            return false;
+
+        SubsetRef otherSubetRef = (SubsetRef)other;
+        return _ref.equals(otherSubetRef._ref);
+    }
+
+    @Override
+    public boolean isSimilar(Gate other)
+    {
+        return super.equals(other);
+    }
+
+    @Override
     public void getPolygons(List<Polygon> list, String xAxis, String yAxis)
     {
     }

@@ -36,6 +36,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
+import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.BaseFlowController;
@@ -834,6 +835,42 @@ public class AnalysisScriptController extends BaseFlowController
                     if (index == -1)
                     {
                         errors.reject(ERROR_MSG, "Parameter '" + param + "' does not exist in the workspace");
+                        return;
+                    }
+                }
+
+                // All samples in group should have the same staining panel for normalization to succeed.
+                List<FlowJoWorkspace.SampleInfo> sampleInfos = new ArrayList<FlowJoWorkspace.SampleInfo>();
+                List<String> importGroupNames =
+                        form.getImportGroupNames() == null ? null :
+                        Arrays.asList(form.getImportGroupNames().split(","));
+                if (importGroupNames == null)
+                {
+                    sampleInfos = workspace.getSamples();
+                }
+                else
+                {
+                    for (FlowJoWorkspace.GroupInfo groupInfo : workspace.getGroups())
+                    {
+                        if (importGroupNames.contains(groupInfo.getGroupName().toString()))
+                            sampleInfos.addAll(groupInfo.getSampleInfos());
+                    }
+                }
+
+                if (sampleInfos.size() <= 1)
+                {
+                    errors.reject(ERROR_MSG, "More than one sample is needed to perform normalization.  Please select a different group to import.");
+                    return;
+                }
+
+                FlowJoWorkspace.SampleInfo referenceSample = sampleInfos.get(0);
+                Analysis referenceAnalysis = workspace.getSampleAnalysis(referenceSample);
+                for (int i = 1; i < sampleInfos.size(); i++)
+                {
+                    Analysis analysis = workspace.getSampleAnalysis(sampleInfos.get(i));
+                    if (!analysis.isSimilar(referenceAnalysis))
+                    {
+                        errors.reject(ERROR_MSG, "All samples in the selected import groups must have similar gating to perform normalization.");
                         return;
                     }
                 }

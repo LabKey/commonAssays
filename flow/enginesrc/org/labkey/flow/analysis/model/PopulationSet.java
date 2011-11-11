@@ -18,6 +18,8 @@ package org.labkey.flow.analysis.model;
 
 import org.labkey.flow.analysis.web.SubsetSpec;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.Serializable;
@@ -27,6 +29,15 @@ import java.io.Serializable;
  */
 public class PopulationSet implements Serializable, Cloneable
 {
+    public static Comparator<PopulationSet> NAME_COMPARATOR = new Comparator<PopulationSet>()
+    {
+        @Override
+        public int compare(PopulationSet a, PopulationSet b)
+        {
+            return a.getName().compareTo(b.getName());
+        }
+    };
+
     List<Population> _populations = new ArrayList<Population>();
     PopulationName _name;
 
@@ -77,6 +88,38 @@ public class PopulationSet implements Serializable, Cloneable
     public int hashCode()
     {
         return _populations.hashCode();
+    }
+
+    /**
+     * Compares the populations of this PopulationSet to another.
+     * If gating hierarchy is similar, the PopulationSets are similar.
+     *
+     * @param other PopulationSet to compare to.
+     * @return true if similar.
+     */
+    public boolean isSimilar(PopulationSet other)
+    {
+        if (equals(other))
+            return true;
+
+        if (getPopulations().size() != other.getPopulations().size())
+            return false;
+
+        ArrayList<Population> thisSortedPopulation = new ArrayList<Population>(getPopulations());
+        Collections.sort(thisSortedPopulation, NAME_COMPARATOR);
+
+        ArrayList<Population> otherSortedPopulation = new ArrayList<Population>(other.getPopulations());
+        Collections.sort(otherSortedPopulation, NAME_COMPARATOR);
+
+        for (int i = 0; i < thisSortedPopulation.size(); i++)
+        {
+            Population thisPopulation = thisSortedPopulation.get(i);
+            Population otherPopulation = otherSortedPopulation.get(i);
+            if (!thisPopulation.isSimilar(otherPopulation))
+                return false;
+        }
+
+        return true;
     }
 
     public boolean requiresCompensationMatrix()

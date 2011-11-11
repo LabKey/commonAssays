@@ -22,6 +22,7 @@ import org.w3c.dom.Node;
 
 import java.util.BitSet;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.io.Serializable;
 
@@ -32,6 +33,15 @@ import java.io.Serializable;
  */
 public abstract class Gate implements Serializable
 {
+    public static Comparator<Gate> NAME_COMPARATOR = new Comparator<Gate>()
+    {
+        @Override
+        public int compare(Gate a, Gate b)
+        {
+            return a.getName().compareTo(b.getName());
+        }
+    };
+
     PopulationName _name;
 
     public Gate()
@@ -124,6 +134,8 @@ public abstract class Gate implements Serializable
             return false;
         return otherGate._name.equals(_name);
     }
+
+    abstract public boolean isSimilar(Gate other);
 
     abstract public void getPolygons(List<Polygon> list, String xAxis, String yAxis);
     abstract public boolean requiresCompensationMatrix();

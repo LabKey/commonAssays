@@ -117,25 +117,21 @@ public class Main
     }
 
     private static int MAX_LINE_LEN = 80;
-    private static void printWrapped(PrintStream out, String indent, Collection<String> words)
+    private static void printWrapped(PrintStream out, String indent, Collection<? extends Object> os)
     {
-        if (words.size() == 0)
+        if (os.size() == 0)
             return;
 
         int lineLen = indent.length();
         String sep = "";
-        Iterator<String> iter = words.iterator();
-        while (iter.hasNext())
+        for (Object o : os)
         {
-            String word = iter.next();
+            String word = o.toString();
             if (lineLen + sep.length() + word.length() > MAX_LINE_LEN)
             {
                 out.println(sep);
-                if (iter.hasNext())
-                {
-                    out.print(indent);
-                    lineLen = indent.length();
-                }
+                out.print(indent);
+                lineLen = indent.length();
             }
             else
             {
@@ -151,7 +147,7 @@ public class Main
     {
         FlowJoWorkspace workspace = readWorkspace(workspaceFile, false);
 
-        // Hash the group and sample Analysis to see if they are equivalent
+        // First, hash the group analysis...
         Map<Analysis, PopulationName> analysisToGroup = new HashMap<Analysis, PopulationName>();
         Map<PopulationName, Analysis> groupAnalyses = workspace.getGroupAnalyses();
         for (PopulationName groupName : groupAnalyses.keySet())
@@ -162,18 +158,35 @@ public class Main
             analysisToGroup.put(analysis, groupName);
         }
 
-        Map<Analysis, List<String>> analysisToSamples = new HashMap<Analysis, List<String>>();
+        // ... then, hash the sample analysis
+        Map<Analysis, List<FlowJoWorkspace.SampleInfo>> analysisToSamples = new HashMap<Analysis, List<FlowJoWorkspace.SampleInfo>>();
+        Map<String, List<FlowJoWorkspace.SampleInfo>> sampleLabels = new HashMap<String, List<FlowJoWorkspace.SampleInfo>>();
         for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples())
         {
             Analysis analysis = workspace.getSampleAnalysis(sample);
-            List<String> samples = analysisToSamples.get(analysis);
+            List<FlowJoWorkspace.SampleInfo> samples = analysisToSamples.get(analysis);
             if (samples == null)
-                analysisToSamples.put(analysis, samples = new ArrayList<String>());
+                analysisToSamples.put(analysis, samples = new ArrayList<FlowJoWorkspace.SampleInfo>());
 
-            samples.add(sample.getLabel());
+            samples.add(sample);
+
+            List<FlowJoWorkspace.SampleInfo> dups = sampleLabels.get(sample.getLabel());
+            if (dups == null)
+                sampleLabels.put(sample.getLabel(), dups = new ArrayList<FlowJoWorkspace.SampleInfo>());
+            dups.add(sample);
         }
 
-        // Print the group analysis first and remove the group analysis from the analysisToSamples hash map.
+        // CONSIDER: move warning into FlowJoWorkspace parsing code, but I'm not sure if it is an error to have two samples representing the same FCS file.
+        // Check for duplicate sample labels
+        for (List<FlowJoWorkspace.SampleInfo> dups : sampleLabels.values())
+        {
+            if (dups.size() > 1)
+                System.out.println("warning: duplicate sample labels: " + StringUtils.join(dups, ", "));
+        }
+
+        // Using the group and sample analysis hash maps,
+        // print the group analysis first and remove the group analysis from the analysisToSamples hash map
+        // leaving behind any modified sample analysis.
         for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
         {
             if (groupNames.isEmpty() || groupNames.contains(group.getGroupName()))
@@ -187,15 +200,16 @@ public class Main
                 else
                 {
                     List<String> sampleIDs = group.getSampleIds();
-                    List<String> sampleLabels = new ArrayList<String>(sampleIDs.size());
+                    List<FlowJoWorkspace.SampleInfo> samples = new ArrayList<FlowJoWorkspace.SampleInfo>(sampleIDs.size());
                     for (String sampleId : sampleIDs)
                     {
                         FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleId);
-                        sampleLabels.add(sample.getLabel());
+                        samples.add(sample);
                     }
                     String indent = "  ";
                     System.out.print(indent);
-                    printWrapped(System.out, indent, sampleLabels);
+                    printWrapped(System.out, indent, samples);
+                    System.out.println();
                 }
                 System.out.println();
 
@@ -209,11 +223,11 @@ public class Main
         if (!analysisToSamples.isEmpty())
         {
             System.out.println("Samples with modified analysis:");
-            for (Map.Entry<Analysis, List<String>> entry : analysisToSamples.entrySet())
+            for (Map.Entry<Analysis, List<FlowJoWorkspace.SampleInfo>> entry : analysisToSamples.entrySet())
             {
                 Analysis analysis = entry.getKey();
-                List<String> samples = entry.getValue();
-                String header = String.format("  %s: ", analysis.getName());
+                List<FlowJoWorkspace.SampleInfo> samples = entry.getValue();
+                String header = String.format("  %s: ", samples.get(0));
                 String indent = StringUtils.repeat(" ", header.length());
                 System.out.print(header);
                 printWrapped(System.out, indent, samples);
@@ -260,7 +274,15 @@ public class Main
             for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
             {
                 if (writeAll || sampleIds.contains(sampleInfo.getSampleId()) || sampleIds.contains(sampleInfo.getLabel()))
-                    writeAnalysis(outDir, "sample-" + sampleInfo.getLabel() + ".xml", workspace, null, sampleInfo.getSampleId(), stats);
+                {
+                    String sampleId = sampleInfo.getSampleId();
+                    String sampleLabel = sampleInfo.getLabel();
+                    if (sampleLabel == sampleId)
+                        sampleLabel = "unlabeled";
+
+                    String fileName = String.format("sample-%s-%s.xml", sampleLabel, sampleId);
+                    writeAnalysis(outDir, fileName, workspace, null, sampleInfo.getSampleId(), stats);
+                }
             }
         }
     }

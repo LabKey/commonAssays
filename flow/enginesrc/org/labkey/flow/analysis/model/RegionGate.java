@@ -30,4 +30,23 @@ public abstract class RegionGate extends Gate
 {
     public abstract String getXAxis();
     public abstract String getYAxis();
+
+    @Override
+    public boolean isSimilar(Gate other)
+    {
+        if (equals(other))
+            return true;
+
+        if (other.getClass() != this.getClass())
+            return false;
+
+        RegionGate otherGate = (RegionGate)other;
+        if (!getXAxis().equals(otherGate.getXAxis()))
+            return false;
+
+        if (!getYAxis().equals(otherGate.getYAxis()))
+            return false;
+
+        return true;
+    }
 }

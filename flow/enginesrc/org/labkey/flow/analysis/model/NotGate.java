@@ -57,6 +57,19 @@ public class NotGate extends Gate implements SubsetExpressionGate
         return super.hashCode() ^ _gate.hashCode();
     }
 
+    @Override
+    public boolean isSimilar(Gate other)
+    {
+        if (equals(other))
+            return true;
+
+        if (!(other instanceof NotGate))
+            return false;
+
+        NotGate notGate = (NotGate) other;
+        return _gate.isSimilar(notGate._gate);
+    }
+
     public void getPolygons(List<Polygon> list, String xAxis, String yAxis)
     {
         _gate.getPolygons(list, xAxis, yAxis);

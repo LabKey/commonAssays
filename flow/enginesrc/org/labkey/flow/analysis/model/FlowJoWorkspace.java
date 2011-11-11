@@ -126,6 +126,15 @@ abstract public class FlowJoWorkspace implements Serializable
             }
             return _compensationMatrices.get(id - 1);
         }
+
+        public String toString()
+        {
+            String $FIL = getKeywords().get("$FIL");
+            if ($FIL == null)
+                return _sampleId;
+
+            return $FIL + " (" + _sampleId + ")";
+        }
     }
 
     public class GroupInfo implements Serializable
@@ -137,6 +146,18 @@ abstract public class FlowJoWorkspace implements Serializable
         public List<String> getSampleIds()
         {
             return _sampleIds;
+        }
+
+        public List<SampleInfo> getSampleInfos()
+        {
+            ArrayList<SampleInfo> sampleInfos = new ArrayList<SampleInfo>(_sampleIds.size());
+            for (String sampleId : _sampleIds)
+            {
+                SampleInfo sampleInfo = getSample(sampleId);
+                if (sampleInfo != null)
+                    sampleInfos.add(sampleInfo);
+            }
+            return sampleInfos;
         }
 
         public String getGroupId()

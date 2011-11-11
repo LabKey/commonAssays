@@ -16,6 +16,7 @@
 
 package org.labkey.flow.analysis.model;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -61,4 +62,39 @@ public class Population extends PopulationSet
         }
         return false;
     }
+
+    @Override
+    public boolean isSimilar(PopulationSet other)
+    {
+        if (!(other instanceof Population))
+            return false;
+
+        return isSimilar((Population)other);
+    }
+
+    private boolean isSimilar(Population other)
+    {
+        if (equals(other))
+            return true;
+
+        if (getGates().size() != other.getGates().size())
+            return false;
+
+        ArrayList<Gate> thisSortedGates = new ArrayList<Gate>(getGates());
+        Collections.sort(thisSortedGates, Gate.NAME_COMPARATOR);
+
+        ArrayList<Gate> otherSortedGates = new ArrayList<Gate>(other.getGates());
+        Collections.sort(otherSortedGates, Gate.NAME_COMPARATOR);
+
+        for (int i = 0; i < thisSortedGates.size(); i++)
+        {
+            Gate thisGate = thisSortedGates.get(i);
+            Gate otherGate = otherSortedGates.get(i);
+            if (!thisGate.isSimilar(otherGate))
+                return false;
+        }
+
+        return super.isSimilar(other);
+    }
+
 }
