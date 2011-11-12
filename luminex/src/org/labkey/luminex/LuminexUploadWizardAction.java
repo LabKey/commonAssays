@@ -213,7 +213,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 if (!titrationEntry.getValue().isUnknown())
                 {
                     propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
-                    value = standardTitrations.contains(titrationEntry.getValue()) ? "true" : "";
+                    defVal = defaultWellRoleValues.get(propertyName);
+                    value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isStandard()) ? "true" : "";
                     view.getDataRegion().addHiddenFormField(propertyName, value);
 
                     // field to help w/ when to store default values
