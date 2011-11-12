@@ -435,12 +435,6 @@ public abstract class FilterFlowReport extends FlowReport
         return sb.toString();
     }
 
-    public String toR(String s)
-    {
-        String r = PageFlowUtil.jsString(s);
-        return "\"" + StringUtils.strip(r, "'") + "\"";
-    }
-
     public static class Filter
     {
         public String property;
@@ -571,7 +565,7 @@ public abstract class FilterFlowReport extends FlowReport
                     continue;
                 String value = null == e.getValue() ? null : String.valueOf(e.getValue());
                 reportProlog.append(comma);
-                reportProlog.append(_report.toR(e.getKey())).append("=").append(_report.toR(value));
+                reportProlog.append(toR(e.getKey())).append("=").append(toR(value));
                 comma = ",";
             }
 
