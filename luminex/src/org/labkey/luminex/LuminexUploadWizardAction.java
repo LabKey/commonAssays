@@ -18,11 +18,24 @@ package org.labkey.luminex;
 
 import org.labkey.api.action.LabkeyError;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.DisplayColumnGroup;
+import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SimpleDisplayColumn;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.Table;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
@@ -32,7 +45,10 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.*;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
@@ -45,7 +61,12 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -496,92 +517,70 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     ExpRun run = saveExperimentRun(form);
 
-                    List<ExpData> outputs = run.getDataOutputs();
-                    int dataId = 0;
-                    if (!form.getTransformResult().getTransformedData().isEmpty())
-                    {
-                        // data transform occurred, need to find the transformed output that was persisted
-                        for (ExpData data : outputs)
-                        {
-                            if (LuminexDataHandler.LUMINEX_TRANSFORMED_DATA_TYPE.matches(new Lsid(data.getLSID())))
-                            {
-                                dataId = data.getRowId();
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (ExpData output : outputs)
-                        {
-                            if (form.getProvider().getDataType().matches(new Lsid(output.getLSID())))
-                            {
-                                dataId = output.getRowId();
-                            }
-                        }
-                        if (dataId == 0)
-                        {
-                            throw new IllegalStateException("Could not find primary file in run outputs");
-                        }
-                    }
-
-                    for (Analyte analyte : getAnalytes(dataId))
-                    {
-                        Map<DomainProperty, String> properties = form.getAnalyteProperties(analyte.getName());
-
-                        ObjectProperty[] objProperties = new ObjectProperty[properties.size()];
-                        int i = 0;
-                        for (Map.Entry<DomainProperty, String> entry : properties.entrySet())
-                        {
-                            ObjectProperty property = new ObjectProperty(analyte.getLsid(),
-                                    getContainer(), entry.getKey().getPropertyURI(),
-                                    entry.getValue(), entry.getKey().getPropertyDescriptor().getPropertyType());
-                            objProperties[i++] = property;
-                        }
-                        OntologyManager.insertProperties(getContainer(), analyte.getLsid(), objProperties);
-                        form.saveDefaultValues(properties, analyte.getName());
-                    }
-
                     // save the defalut values for the analyte standards/titrations information in 2 categories: well roles and titrations
                     PropertyManager.PropertyMap defaultWellRoleValues = PropertyManager.getWritableProperties(
                             getViewContext().getUser().getUserId(), getContainer().getId(), _protocol.getName() + ": Well Role", true);
-                    for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
+                    
+                    List<ExpData> outputs = run.getDataOutputs();
+                    for (ExpData output : outputs)
                     {
-                        String propertyName;
-                        Boolean value;
-
-                        // add the name/value pairs for the titration well role definition section
-                        if (!titrationEntry.getValue().isUnknown())
+                        int dataId = output.getRowId();
+                        
+                        for (Analyte analyte : getAnalytes(dataId))
                         {
-                            propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
-                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
-                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+                            Map<DomainProperty, String> properties = form.getAnalyteProperties(analyte.getName());
 
-                            propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
-                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
-                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
-                        }
-                        else
-                        {
-                            propertyName = getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
-                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
-                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
-                        }
-
-                        // add the name/value pairs for each of the analyte standards if the columns was shown in the UI
-                        propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) + "_showcol";
-                        if (!titrationEntry.getValue().isUnknown() && getViewContext().getRequest().getParameter(propertyName).equals("true"))
-                        {
-                            PropertyManager.PropertyMap defaultTitrationValues = PropertyManager.getWritableProperties(
-                                    getViewContext().getUser().getUserId(), getContainer().getId(),
-                                    _protocol.getName() + ": " + titrationEntry.getValue().getName(), true);
-                            for (Analyte analyte : getAnalytes(dataId))
+                            ObjectProperty[] objProperties = new ObjectProperty[properties.size()];
+                            int i = 0;
+                            for (Map.Entry<DomainProperty, String> entry : properties.entrySet())
                             {
-                                propertyName = getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte.getName());
-                                value = getViewContext().getRequest().getParameter(propertyName) != null;
-                                defaultTitrationValues.put(propertyName, Boolean.toString(value));
+                                ObjectProperty property = new ObjectProperty(analyte.getLsid(),
+                                        getContainer(), entry.getKey().getPropertyURI(),
+                                        entry.getValue(), entry.getKey().getPropertyDescriptor().getPropertyType());
+                                objProperties[i++] = property;
                             }
-                            PropertyManager.saveProperties(defaultTitrationValues);
+                            OntologyManager.insertProperties(getContainer(), analyte.getLsid(), objProperties);
+                            form.saveDefaultValues(properties, analyte.getName());
+                        }
+
+                        for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
+                        {
+                            String propertyName;
+                            Boolean value;
+
+                            // add the name/value pairs for the titration well role definition section
+                            if (!titrationEntry.getValue().isUnknown())
+                            {
+                                propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
+                                value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                                defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+
+                                propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
+                                value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                                defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+                            }
+                            else
+                            {
+                                propertyName = getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
+                                value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                                defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+                            }
+
+                            // add the name/value pairs for each of the analyte standards if the columns was shown in the UI
+                            propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) + "_showcol";
+                            if (!titrationEntry.getValue().isUnknown() && getViewContext().getRequest().getParameter(propertyName).equals("true"))
+                            {
+                                PropertyManager.PropertyMap defaultTitrationValues = PropertyManager.getWritableProperties(
+                                        getViewContext().getUser().getUserId(), getContainer().getId(),
+                                        _protocol.getName() + ": " + titrationEntry.getValue().getName(), true);
+                                for (Analyte analyte : getAnalytes(dataId))
+                                {
+                                    propertyName = getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte.getName());
+                                    value = getViewContext().getRequest().getParameter(propertyName) != null;
+                                    defaultTitrationValues.put(propertyName, Boolean.toString(value));
+                                }
+                                PropertyManager.saveProperties(defaultTitrationValues);
+                            }
                         }
                     }
                     PropertyManager.saveProperties(defaultWellRoleValues);

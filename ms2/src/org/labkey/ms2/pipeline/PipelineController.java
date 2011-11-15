@@ -486,6 +486,7 @@ public class PipelineController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
+            root.addChild("File List", PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer()));
             return root.addChild("Search MS2 Data");
         }
     }

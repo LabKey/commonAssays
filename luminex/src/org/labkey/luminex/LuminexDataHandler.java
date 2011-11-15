@@ -301,6 +301,31 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 analyte.setDataId(data.getRowId());
 
+                for (LuminexDataRow dataRow : dataRows)
+                {
+                    // Iterate through all of the data rows, figuring out what data file they
+                    // originally came from. Additionally, set that as the analyte's source file.
+                    // This way they don't end up pointing at the transform script result file instead.
+                    ExpData sourceDataForRow = data;
+
+                    // If we've run a transform script, wire up data rows to the original data file(s) instead of the
+                    // result TSV so that we can match up Excel run properties correctly
+                    if (!dataFileName.equalsIgnoreCase(dataRow.getDataFile()))
+                    {
+                        for (ExpData potentialSourceData : expRun.getDataOutputs())
+                        {
+                            if (potentialSourceData.getFile() != null && potentialSourceData.getFile().getName().equalsIgnoreCase(dataRow.getDataFile()))
+                            {
+                                sourceDataForRow = potentialSourceData;
+                                break;
+                            }
+                        }
+                    }
+                    sourceFiles.add(sourceDataForRow);
+                    dataRow.setData(sourceDataForRow.getRowId());
+                    analyte.setDataId(sourceDataForRow.getRowId());
+                }
+
                 analyte = saveAnalyte(expRun, user, existingAnalytes, analyte);
 
                 performOOR(dataRows, analyte);
@@ -329,23 +354,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         }
                     }
                     dataRow.setAnalyte(analyte.getRowId());
-                    ExpData sourceDataForRow = data;
-
-                    // If we've run a transform script, wire up data rows to the original data file(s) instead of the
-                    // result TSV so that we can match up Excel run properties correctly
-                    if (!dataFileName.equalsIgnoreCase(dataRow.getDataFile()))
-                    {
-                        for (ExpData potentialSourceData : expRun.getDataOutputs())
-                        {
-                            if (potentialSourceData.getFile() != null && potentialSourceData.getFile().getName().equalsIgnoreCase(dataRow.getDataFile()))
-                            {
-                                sourceDataForRow = potentialSourceData;
-                                break;
-                            }
-                        }
-                    }
-                    sourceFiles.add(sourceDataForRow);
-                    dataRow.setData(sourceDataForRow.getRowId());
                 }
 
                 insertTitrationAnalyteMappings(user, form, titrations, sheet.getValue(), analyte, conjugate, isotype, stndCurveFitInput, unkCurveFitInput, protocol);
