@@ -58,7 +58,7 @@ if (errorMessage != null)
     <span class="labkey-error"><%= errorMessage %></span>
 <%  }
 %>
-<a name="quantitation" />
+<a name="quantitation"></a>
 <table class="labkey-tab-strip">
     <tr>
         <td class="labkey-tab-space"><img width="5" src="<%= AppProps.getInstance().getContextPath() %>/_.gif"></td>
