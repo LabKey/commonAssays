@@ -128,7 +128,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 storeId: 'allRunsStore',
                 root: 'rows',
                 fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate', 'Titration/Run/Batch/Network',
-                    'Titration/Run/NotebookNo', 'Titration/Run/AssayType', 'Titration/Run/ExpPerformer', 'Titration/Run/TestDate', 'Titration/Run/Folder/Name',
+                    'Titration/Run/NotebookNo', 'Titration/Run/AssayType', 'Titration/Run/ExpPerformer', 'Analyte/Data/AcquisitionDate', 'Titration/Run/Folder/Name',
                     'Titration/Run/Isotype', 'Titration/Run/Name', 'Four ParameterCurveFit/EC50', 'MaxFI', 'TrapezoidalCurveFit/AUC']
             });
 
@@ -143,7 +143,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100},
                     {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100},
                     {header:'Exp Performer', dataIndex:'Titration/Run/ExpPerformer', width:100},
-                    {header:'Test Date', dataIndex:'Titration/Run/TestDate', renderer: this.dateRenderer, width:100},
+                    {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
                     {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
                     {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'},
                     {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'}
@@ -192,7 +192,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             storeId: 'guideRunSetStore',
             root: 'rows',
             fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate', 'Titration/Run/Batch/Network',
-                'Titration/Run/NotebookNo', 'Titration/Run/AssayType', 'Titration/Run/ExpPerformer', 'Titration/Run/TestDate', 'Titration/Run/Folder/Name',
+                'Titration/Run/NotebookNo', 'Titration/Run/AssayType', 'Titration/Run/ExpPerformer', 'Analyte/Data/AcquisitionDate', 'Titration/Run/Folder/Name',
                 'Titration/Run/Isotype', 'Titration/Run/Name', 'Four ParameterCurveFit/EC50', 'MaxFI', 'TrapezoidalCurveFit/AUC']
         });
 
@@ -207,7 +207,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100},
                 {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100},
                 {header:'Exp Performer', dataIndex:'Titration/Run/ExpPerformer', width:100},
-                {header:'Test Date', dataIndex:'Titration/Run/TestDate', renderer: this.dateRenderer, width:100},
+                {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
                 {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
                 {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'},
                 {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'}
@@ -391,7 +391,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             queryName: this.assayName + ' AnalyteTitration',
             columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
                     + 'Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/Batch/Network, Titration/Run/NotebookNo, '
-                    + 'Titration/Run/AssayType, Titration/Run/ExpPerformer, Titration/Run/TestDate, GuideSet, IncludeInGuideSetCalculation, '
+                    + 'Titration/Run/AssayType, Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, GuideSet, IncludeInGuideSetCalculation, '
                     + 'Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC ',
             filterArray: [
                 LABKEY.Filter.create('Titration/Name', this.titration),
@@ -399,7 +399,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 LABKEY.Filter.create('Titration/Run/Isotype', this.isotype, (this.isotype == "" ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL)),
                 LABKEY.Filter.create('Titration/Run/Conjugate', this.conjugate, (this.conjugate == "" ? LABKEY.Filter.Types.MISSING : LABKEY.Filter.Types.EQUAL))
             ],
-            sort: '-Titration/Run/TestDate, -Titration/Run/Created',
+            sort: '-Analyte/Data/AcquisitionDate, -Titration/Run/Created',
             containerFilter: LABKEY.Query.containerFilter.allFolders,
             success: this.populateRunGridStores,
             scope: this

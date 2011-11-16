@@ -74,7 +74,7 @@
         }
 
         // verify that the given titration and protocol exist, and that the required report properties exist in the protocol
-        var reqColumns = ['Titration/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Titration/Run/TestDate'];
+        var reqColumns = ['Titration/Name', 'Titration/Run/Isotype', 'Titration/Run/Conjugate', 'Analyte/Data/AcquisitionDate'];
         LABKEY.Query.selectRows({
             containerFilter: LABKEY.Query.containerFilter.allFolders,
             schemaName: 'assay',

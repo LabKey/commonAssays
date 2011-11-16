@@ -31,7 +31,7 @@ if (labkey.url.params$Isotype == "") {
 
 # create a list of the columns that are needed for the trending plot
 colSelect = paste("Analyte/Name", "Titration/Name", "Titration/Run/Isotype", "Titration/Run/Conjugate", "Analyte/Properties/LotNumber",
-                "Titration/Run/NotebookNo", "Titration/Run/TestDate", "GuideSet/Created", sep=",");
+                "Titration/Run/NotebookNo", "Analyte/Data/AcquisitionDate", "GuideSet/Created", sep=",");
 
 # get the columns needed for each of the 3 plot types : EC50, MaxFI, and AUC
 colSelect = paste(colSelect, "Four ParameterCurveFit/EC50", "GuideSet/Four ParameterCurveFit/EC50Average", "GuideSet/Four ParameterCurveFit/EC50StdDev", sep=",");
@@ -43,8 +43,8 @@ maxRows = NA;
 if (!is.null(labkey.url.params$MaxRows)) {
 	maxRows = labkey.url.params$MaxRows;
 } else {
-	colFilter=rbind(colFilter,makeFilter(c("Titration/Run/TestDate","GREATER_THAN_OR_EQUAL_TO",labkey.url.params$StartDate)));
-	colFilter=rbind(colFilter,makeFilter(c("Titration/Run/TestDate","LESS_THAN_OR_EQUAL_TO",labkey.url.params$EndDate)));
+	colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","GREATER_THAN_OR_EQUAL_TO",labkey.url.params$StartDate)));
+	colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","LESS_THAN_OR_EQUAL_TO",labkey.url.params$EndDate)));
 }
 
 # call the selectRows function to get the data from the server
@@ -54,7 +54,7 @@ labkey.data <- labkey.selectRows(baseUrl=labkey.url.base,
                             queryName=paste(labkey.url.params$Protocol, "AnalyteTitration", sep=" "),
                             colSelect=colSelect,
                             colFilter=colFilter,
-                            colSort="-Titration/Run/TestDate,-Titration/Run/Created",
+                            colSort="-Analyte/Data/AcquisitionDate,-Titration/Run/Created",
                             containerFilter="AllFolders",
                             colNameOpt="rname",
                             maxRows=maxRows);

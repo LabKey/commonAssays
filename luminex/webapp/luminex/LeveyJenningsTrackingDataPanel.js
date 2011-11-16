@@ -85,8 +85,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         ];
         if (startDate && endDate)
         {
-            filterArray.push(LABKEY.Filter.create('Titration/Run/TestDate', startDate, LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
-            filterArray.push(LABKEY.Filter.create('Titration/Run/TestDate', endDate, LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
+            filterArray.push(LABKEY.Filter.create('Analyte/Data/AcquisitionDate', startDate, LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
+            filterArray.push(LABKEY.Filter.create('Analyte/Data/AcquisitionDate', endDate, LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL));
         }
 
         return new LABKEY.ext.Store({
@@ -96,14 +96,14 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             columns: 'Titration, Analyte, Titration/Run/Isotype, Titration/Run/Conjugate, '
                     + 'Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
                     + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, '
-                    + 'Titration/Run/ExpPerformer, Titration/Run/TestDate, Analyte/Properties/LotNumber, '
+                    + 'Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, Analyte/Properties/LotNumber, '
                     + 'GuideSet/Created, IncludeInGuideSetCalculation, '
                     + 'Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC, '
                     + 'GuideSet/Four ParameterCurveFit/EC50Average, GuideSet/Four ParameterCurveFit/EC50StdDev, '
                     + 'GuideSet/TrapezoidalCurveFit/AUCAverage, GuideSet/TrapezoidalCurveFit/AUCStdDev, '
                     + 'GuideSet/MaxFIAverage, GuideSet/MaxFIStdDev ',
             filterArray: filterArray,
-            sort: '-Titration/Run/TestDate, -Titration/Run/Created',
+            sort: '-Analyte/Data/AcquisitionDate, -Titration/Run/Created',
             maxRows: (startDate && endDate ? undefined : this.defaultRowSize),
             containerFilter: LABKEY.Query.containerFilter.allFolders
         });
@@ -138,7 +138,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100},
                 {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100},
                 {header:'Exp Performer', dataIndex:'Titration/Run/ExpPerformer', width:100},
-                {header:'Test Date', dataIndex:'Titration/Run/TestDate', renderer: this.dateRenderer, width:100},
+                {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
                 {header:'Analyte Lot No.', dataIndex:'Analyte/Properties/LotNumber', width:100},
                 {header:'Guide Set Date', dataIndex:'GuideSet/Created', renderer: this.formatGuideSetMembers, scope: this, width:100},
                 {header:'GS Member', dataIndex:'IncludeInGuideSetCalculation', hidden: true},

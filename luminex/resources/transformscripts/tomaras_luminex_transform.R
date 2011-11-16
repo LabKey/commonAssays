@@ -42,6 +42,19 @@ getCurveFitInputCol <- function(runProps, fiRunCol, defaultFiCol)
     runCol;
 }
 
+getFiDisplayName <- function(fiCol)
+{
+    displayVal = fiCol;
+    if (fiCol == "fi") {
+        displayVal = "FI"
+    } else if (fiCol == "fiBackground") {
+        displayVal = "FI-Bkgd"
+    } else if (fiCol == "fiBackgroundBlank") {
+        displayVal = "FI-Bkgd-Blank"
+    }
+    displayVal;
+}
+
 fiConversion <- function(val)
 {
     1 + max(val,0);
@@ -96,6 +109,28 @@ close(fileConn);
 
 ################################# STEP 2: BLANK BEAD SUBTRACTION ################################
 
+# read in the titration information
+run.data$isStandard = NA;
+run.data$isQCControl = NA;
+run.data$isUnknown = NA;
+titration.data.file = run.props$val1[run.props$name == "titrationData"];
+if (file.exists(titration.data.file))
+{
+    titration.data = read.delim(titration.data.file, header=TRUE, sep="\t");
+
+    # apply the titration data to the run.data object
+    run.data$isStandard[run.data$titration == "false"] = FALSE;
+    run.data$isQCControl[run.data$titration == "false"] = FALSE;
+    run.data$isUnknown[run.data$titration == "false"] = TRUE;
+    for (tIndex in 1:nrow(titration.data))
+    {
+        titrationName = as.character(titration.data[tIndex,]$Name);
+        run.data$isStandard[run.data$titration == "true" & run.data$description == titrationName] = (titration.data[tIndex,]$Standard == "true");
+        run.data$isQCControl[run.data$titration == "true" & run.data$description == titrationName] = (titration.data[tIndex,]$QCControl == "true");
+        run.data$isUnknown[run.data$titration == "true" & run.data$description == titrationName] = (titration.data[tIndex,]$Unknown == "true");
+    }
+}
+
 # initialize the FI - Bkgd - Blank variable
 run.data$fiBackgroundBlank = NA;
 
@@ -104,10 +139,10 @@ analytes = unique(run.data$name);
 
 # if there is a "Blank" bead, then continue. otherwise, there is no new variable to calculate
 if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
-    # store a boolean vector of blanks, nonBlanks, and unknowns
+    # store a boolean vector of blanks, nonBlanks, and unknowns (i.e. non-standards)
     blanks = regexpr("^blank", run.data$name, ignore.case=TRUE) > -1;
     nonBlanks = regexpr("^blank", run.data$name, ignore.case=TRUE) == -1;
-    unks = toupper(substr(run.data$type,0,1)) == "X" | toupper(substr(run.data$type,0,1)) == "C";
+    unks = !run.data$isStandard;
 
     # read the run property from user to determine if we are to only blank bead subtract from unks
     unksOnly = TRUE;
@@ -117,7 +152,9 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
     }
 
 	# loop through the unique dataFile/description/excpConc/dilution combos and subtract the mean blank fiBackground from the fiBackground
-	combos = unique(data.frame(dataFile=run.data$dataFile, description=run.data$description, dilution=run.data$dilution, expConc=run.data$expConc));
+	blank.data = run.data[blanks,];
+	combos = unique(subset(blank.data, select=c("dataFile", "description", "dilution", "expConc")));
+
 	for(index in 1:nrow(combos)){
 	    dataFile = combos$dataFile[index];
 	    description = combos$description[index];
@@ -150,107 +187,105 @@ run.data$Lower_4pl = NA;
 run.data$Upper_4pl = NA;
 run.data$Inflection_4pl = NA;
 
-# read in the titration information
-titration.data.file = run.props$val1[run.props$name == "titrationData"];
-if (file.exists(titration.data.file))
+# loop through the possible titrations and to see if it is a standard, qc control, or titrated unknown
+for (tIndex in 1:nrow(titration.data))
 {
-    titration.data = read.delim(titration.data.file, header=TRUE, sep="\t");
-
-    # loop through the possible titrations and to see if it is a standard, qc control, or titrated unknown
-    for (tIndex in 1:nrow(titration.data))
+    if (titration.data[tIndex,]$Standard == "true" |
+        titration.data[tIndex,]$QCControl == "true" |
+        titration.data[tIndex,]$Unknown == "true")
     {
-        if (titration.data[tIndex,]$Standard == "true" |
-            titration.data[tIndex,]$QCControl == "true" |
-            titration.data[tIndex,]$Unknown == "true")
+        titrationName = as.character(titration.data[tIndex,]$Name);
+
+        # we want to create PDF plots of the curves for QC Controls
+        if (titration.data[tIndex,]$QCControl == "true") {
+            mypdf(file=paste(titrationName, "QC_Curves", sep="_"), mfrow=c(1,1));
+        }
+
+        # calculate the 4PL and 5PL curve fit params for each analyte
+        for (aIndex in 1:length(analytes))
         {
-            titrationName = as.character(titration.data[tIndex,]$Name);
+            analyteName = as.character(analytes[aIndex]);
+            print(paste(titrationName, analyteName, sep="..."));
 
-            # we want to create PDF plots of the curves for QC Controls
-            if (titration.data[tIndex,]$QCControl == "true") {
-                mypdf(file=paste(titrationName, "QC_Curves", sep="_"), mfrow=c(1,1));
+            dat = subset(run.data, description == titrationName & name == analyteName);
+
+            yLabel = "";
+            if (titration.data[tIndex,]$Standard == "true") {
+                # choose the FI column for standards based on the run property provided by the user, default to the FI-Bkgd value
+                if(any(run.props$name == "StndCurveFitInput")) {
+                    fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput", "fiBackground")
+                    yLabel = getFiDisplayName(fiCol);
+                    dat$fi = dat[, fiCol]
+                }
+            } else {
+                # choose the FI column for unknowns based on the run property provided by the user, default to the FI-Bkgd value
+                if(any(run.props$name == "UnkCurveFitInput")) {
+                    fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput", "fiBackground")
+                    yLabel = getFiDisplayName(fiCol);
+                    dat$fi = dat[, fiCol]
+                }
             }
 
-            # calculate the 4PL and 5PL curve fit params for each analyte
-            for (aIndex in 1:length(analytes))
+            # subset the dat object to just those records that have an FI
+            dat = subset(dat, !is.na(fi));
+
+            # if both raw and summary data are available, just use the raw data for the calc
+            if (bothRawAndSummary) {
+                dat = subset(dat, summary == "false");
+            }
+
+            # remove any excluded replicate groups for this titration/analyte
+            dat = subset(dat, tolower(FlaggedAsExcluded) == "false");
+
+            # for standards, use the expected conc values for the curve fit
+            # for non-standard titrations, use the dilution values for the curve fit
+            if (nrow(dat) > 0 & all(dat$isStandard)) {
+                dat$dose = dat$expConc;
+                xLabel = "Expected Conc";
+            } else {
+                dat$dose = dat$dilution;
+                xLabel = "Dilution";
+            }
+
+            if (nrow(dat) > 0)
             {
-                analyteName = as.character(analytes[aIndex]);
-                dat = subset(run.data, description == titrationName & name == analyteName);
+                runDataIndex = run.data$description == titrationName & run.data$name == analyteName;
 
-                yLabel = "FI-Bkgd";
-                if (titration.data[tIndex,]$Standard == "true") {
-                    # choose the FI column for standards based on the run property provided by the user, default to the FI-Bkgd value
-                    if(any(run.props$name == "StndCurveFitInput")) {
-                        fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput", "fiBackground")
-                        yLabel = run.props$val1[run.props$name == "StndCurveFitInput"]
-                        dat$fi = dat[, fiCol]
-                    }
-                } else {
-                    # choose the FI column for unknowns based on the run property provided by the user, default to the FI-Bkgd value
-                    if(any(run.props$name == "UnkCurveFitInput")) {
-                        fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput", "fiBackground")
-                        yLabel = run.props$val1[run.props$name == "UnkCurveFitInput"]
-                        dat$fi = dat[, fiCol]
-                    }
-                }
+                # use the decided upon conversion function for handling of negative values
+                dat$fi = sapply(dat$fi, fiConversion);
 
-                # subset the dat object to just those records that have an FI
-                dat = subset(dat, !is.na(fi));
+                # get curve fit params for 4PL
+                tryCatch({
+                        fit = drm(fi~dose, data=dat, fct=LL.4());
+                        run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1]
+                        run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2]
+                        run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3]
+                        run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4]
 
-                # if both raw and summary data are available, just use the raw data for the calc
-                if (bothRawAndSummary) {
-                    dat = subset(dat, summary == "false");
-                }
-
-                # remove any excluded replicate groups for this titration/analyte
-                dat = subset(dat, tolower(FlaggedAsExcluded) == "false");
-
-                if (nrow(dat) > 0)
-                {
-                    print(paste(titrationName, analyteName, sep="..."));
-                    runDataIndex = run.data$description == titrationName & run.data$name == analyteName;
-
-                    # for standards, use the expected conc values for the curve fit
-                    # for non-standard titrations, use the dilution values for the curve fit
-                    if (toupper(substr(dat$type[1],0,1)) == "S" | toupper(substr(dat$type[1],0,2)) == "ES") {
-                        dat$dose = dat$expConc;
-                        xLabel = "Expected Conc";
-                    } else {
-                        dat$dose = dat$dilution;
-                        xLabel = "Dilution";
-                    }
-
-                    # use the decided upon conversion function for handling of negative values
-                    dat$fi = sapply(dat$fi, fiConversion);
-
-                    # get curve fit params for 4PL
-                    tryCatch({
-                            fit = drm(fi~dose, data=dat, fct=LL.4());
-                            run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1]
-                            run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2]
-                            run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3]
-                            run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4]
-
-                            # plot the curve fit for the QC Controls
-                            if (titration.data[tIndex,]$QCControl == "true") {
-                                plot(fit, type="all", main=analyteName, cex=.5, ylab=yLabel, xlab=xLabel);
-                            }
-                        },
-                        error = function(e) {
-                            print(e);
-
-                            # plot the individual data points for the QC Controls
-                            if (titration.data[tIndex,]$QCControl == "true") {
-                                plot (fi ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
-                            }
+                        # plot the curve fit for the QC Controls
+                        if (titration.data[tIndex,]$QCControl == "true") {
+                            plot(fit, type="all", main=analyteName, cex=.5, ylab=yLabel, xlab=xLabel);
                         }
-                    );
-                }
-            }
+                    },
+                    error = function(e) {
+                        print(e);
 
-            # if we are creating a PDF for the QC Control, close the device
-            if (titration.data[tIndex,]$QCControl == "true") {
-                dev.off();
+                        # plot the individual data points for the QC Controls
+                        if (titration.data[tIndex,]$QCControl == "true") {
+                            plot(fi ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
+                        }
+                    }
+                );
+            } else {
+                # create an empty plot indicating that there is no data available
+                plot(NA, NA, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel, xlim=c(1,1), ylim=c(0,1));
+                text(1, 0.5, "Data Not Available");
             }
+        }
+
+        # if we are creating a PDF for the QC Control, close the device
+        if (titration.data[tIndex,]$QCControl == "true") {
+            dev.off();
         }
     }
 }
@@ -306,7 +341,7 @@ run.data$EstConc_4pl = NA;
 run.data$SE_4pl = NA;
 
 # setup the dataframe needed for the call to rumi
-dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "type", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role", "summary", "FlaggedAsExcluded"));
+dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role", "summary", "FlaggedAsExcluded"));
 
 # if both raw and summary data are available, just use the raw data for the calc
 if (bothRawAndSummary) {
