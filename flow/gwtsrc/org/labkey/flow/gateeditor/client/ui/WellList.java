@@ -16,6 +16,8 @@
 
 package org.labkey.flow.gateeditor.client.ui;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.FlowUtil;
 import org.labkey.flow.gateeditor.client.model.GWTWell;
@@ -51,14 +53,6 @@ public class WellList extends GateComponent
         public void onWorkspaceChanged()
         {
             setWells(getWorkspace().getWells());
-        }
-    };
-    ClickListener clickListener = new ClickListener()
-    {
-        public void onClick(Widget widget)
-        {
-            GWTWell well = labelWellMap.get(widget);
-            editor.getState().setWell(well);
         }
     };
 
@@ -105,7 +99,7 @@ public class WellList extends GateComponent
         currentLabel = null;
         for (GWTWell well : wells)
         {
-            Label label = new Label(well.getLabel());
+            final Label label = new Label(well.getLabel());
             DOM.setStyleAttribute(label.getElement(), "cursor", "default");
             if (well.getScript() != null)
             {
@@ -113,7 +107,15 @@ public class WellList extends GateComponent
             }
             labelWellMap.put(label, well);
             wellLabelMap.put(new Integer(well.getWellId()), label);
-            label.addClickListener(clickListener);
+            label.addClickHandler(new ClickHandler()
+            {
+                public void onClick(ClickEvent e)
+                {
+                    GWTWell well = labelWellMap.get(label);
+                    editor.getState().setWell(well);
+                }
+
+            });
             list.add(label);
         }
         selectWell(getWell());
