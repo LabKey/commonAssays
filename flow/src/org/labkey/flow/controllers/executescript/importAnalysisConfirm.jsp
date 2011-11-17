@@ -76,7 +76,7 @@
         <% if (form.getSelectAnalysisEngine() == null || form.getSelectAnalysisEngine().equals("noEngine")) { %>
             No analysis engine selected
         <% } else if (form.getSelectAnalysisEngine().equals("rEngine")) { %>
-            External R analysis engine
+            External R analysis engine <%=(form.isrEngineNormalization() ? "with normalization" : "without normalization")%>
         <% } %>
     </li>
     <li style="padding-bottom:0.5em;">

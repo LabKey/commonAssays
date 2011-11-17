@@ -30,7 +30,7 @@
 <%@ page import="org.labkey.flow.data.FlowDataType"%>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.data.FlowWell" %>
-<%@ page import="org.labkey.flow.view.GraphView" %>
+<%@ page import="org.labkey.flow.view.GraphDataRegion" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.HashMap" %>
@@ -157,7 +157,7 @@
                     }
             };
 %>
-<% include(new JspView(JspLoader.createPage(GraphView.class, "setGraphSize.jsp")), out);%>
+<% include(new JspView(JspLoader.createPage(GraphDataRegion.class, "setGraphSize.jsp")), out);%>
 <% for (Callback callback : callbacks)
 { %>
 <p><%=callback.title%></p>

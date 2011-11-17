@@ -492,7 +492,6 @@ flow/src/org/labkey/flow/view/ExportAnalysisForm.java -text
 flow/src/org/labkey/flow/view/FlowQueryView.java -text
 flow/src/org/labkey/flow/view/GraphColumn.java -text
 flow/src/org/labkey/flow/view/GraphDataRegion.java -text
-flow/src/org/labkey/flow/view/GraphView.java -text
 flow/src/org/labkey/flow/view/JobStatusView.java -text
 flow/src/org/labkey/flow/view/SetCommentView.java -text
 flow/src/org/labkey/flow/view/errors.jsp -text

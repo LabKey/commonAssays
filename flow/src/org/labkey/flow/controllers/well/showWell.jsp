@@ -49,7 +49,7 @@
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page import="org.labkey.flow.reports.FlowReportManager" %>
-<%@ page import="org.labkey.flow.view.GraphView" %>
+<%@ page import="org.labkey.flow.view.GraphDataRegion" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
 <%@ page import="java.io.File" %>
 <%@ page import="java.net.URI" %>
@@ -419,7 +419,7 @@ for (Tuple3<FlowReport, Domain, FlowTableType> pair : FlowReportManager.getRepor
 if (getGraphs().length > 0)
 {
     final String graphSize = FlowPreference.graphSize.getValue(request);
-    include(new JspView(JspLoader.createPage(GraphView.class, "setGraphSize.jsp")), out);
+    include(new JspView(JspLoader.createPage(GraphDataRegion.class, "setGraphSize.jsp")), out);
     for (GraphSpec graph : getGraphs())
     {
         %>
