@@ -1507,7 +1507,9 @@ nab/src/org/labkey/nab/view/sampleProperties.jsp -text
 portal/module.properties -text
 portal/src/org/labkey/portal/PortalJUnitTest.java -text
 portal/src/org/labkey/portal/PortalModule.java -text
+portal/src/org/labkey/portal/UtilController.java -text
 portal/src/org/labkey/portal/customizeErrors.jsp -text
+portal/src/org/labkey/portal/testsvg.jsp -text
 viability/Viability.iml -text
 viability/build.xml -text
 viability/module.properties -text
