@@ -758,7 +758,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
-           long peptideId = form.getPeptideIdLong();
+            long peptideId = form.getPeptideId();
             MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
 
             if (peptide == null)
@@ -2546,7 +2546,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
+            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
 
             if (null != peptide)
             {
@@ -4159,9 +4159,9 @@ public class MS2Controller extends SpringActionController
                 runId = form.run;
                 seqId = form.getSeqIdInt();
             }
-            else if (form.getPeptideIdLong() != 0)
+            else if (form.getPeptideId() != 0)
             {
-                MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
+                MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
                 if (peptide != null)
                 {
                     runId = peptide.getRun();
@@ -4223,17 +4223,12 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
-            MS2Run run = validateRun(form);
+            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
 
-            long peptideId = form.getPeptideIdLong();
+            if (peptide == null)
+                throw new NotFoundException("Could not find peptide with RowId " + form.getPeptideId());
 
-            if (peptideId == 0)
-                throw new NotFoundException("No peptide specified");
-
-            MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
-
-            if (null == peptide)
-                throw new NotFoundException("Could not locate peptide with this ID: " + peptideId);
+            MS2Run run = validateRun(peptide.getRun());
 
             setTitle("Proteins Containing " + peptide);
             getPageConfig().setTemplate(PageConfig.Template.Print);
@@ -4700,55 +4695,54 @@ public class MS2Controller extends SpringActionController
 
     protected void showElutionGraph(HttpServletResponse response, DetailsForm form, boolean showLight, boolean showHeavy) throws Exception
     {
-        validateRun(form);
+        long peptideId = form.getPeptideId();
+        MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
 
-        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
+        if (peptide == null)
+            throw new NotFoundException("Could not find peptide with RowId " + peptideId);
 
-        if (null != peptide)
+        int runId = peptide.getRun();
+
+        MS2Run run = validateRun(runId);
+
+        PeptideQuantitation quantitation = peptide.getQuantitation();
+        if (quantitation == null)
         {
-            PeptideQuantitation quantitation = peptide.getQuantitation();
-            if (quantitation == null)
-            {
-                renderErrorImage("No quantitation data for this peptide", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
-                return;
-            }
-            response.setDateHeader("Expires", 0);
-            response.setContentType("image/png");
+            renderErrorImage("No quantitation data for this peptide", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
+            return;
+        }
+        response.setDateHeader("Expires", 0);
+        response.setContentType("image/png");
 
-            File f = quantitation.findScanFile();
-            if (f != null)
+        File f = quantitation.findScanFile();
+        if (f != null)
+        {
+            ElutionGraph g = new ElutionGraph();
+            int charge = form.getQuantitationCharge() == Integer.MIN_VALUE ? peptide.getCharge() : form.getQuantitationCharge();
+            if (charge < 1 || charge > PeptideQuantitation.MAX_CHARGE)
             {
-                ElutionGraph g = new ElutionGraph();
-                int charge = form.getQuantitationCharge() == Integer.MIN_VALUE ? peptide.getCharge() : form.getQuantitationCharge();
-                if (charge < 1 || charge > PeptideQuantitation.MAX_CHARGE)
-                {
-                    renderErrorImage("Invalid charge state: " + charge, response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
-                }
-                if (showLight)
-                {
-                    g.addInfo(quantitation.getLightElutionProfile(charge), quantitation.getLightFirstScan(), quantitation.getLightLastScan(), quantitation.getMinDisplayScan(), quantitation.getMaxDisplayScan(), Color.RED);
-                }
-                if (showHeavy)
-                {
-                    g.addInfo(quantitation.getHeavyElutionProfile(charge), quantitation.getHeavyFirstScan(), quantitation.getHeavyLastScan(), quantitation.getMinDisplayScan(), quantitation.getMaxDisplayScan(), Color.BLUE);
-                }
-                if (quantitation.isNoScansFound())
-                {
-                    renderErrorImage("No relevant MS1 scans found in spectra file", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
-                }
-                else
-                {
-                    g.render(response.getOutputStream());
-                }
+                renderErrorImage("Invalid charge state: " + charge, response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
+            }
+            if (showLight)
+            {
+                g.addInfo(quantitation.getLightElutionProfile(charge), quantitation.getLightFirstScan(), quantitation.getLightLastScan(), quantitation.getMinDisplayScan(), quantitation.getMaxDisplayScan(), Color.RED);
+            }
+            if (showHeavy)
+            {
+                g.addInfo(quantitation.getHeavyElutionProfile(charge), quantitation.getHeavyFirstScan(), quantitation.getHeavyLastScan(), quantitation.getMinDisplayScan(), quantitation.getMaxDisplayScan(), Color.BLUE);
+            }
+            if (quantitation.isNoScansFound())
+            {
+                renderErrorImage("No relevant MS1 scans found in spectra file", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
             }
             else
             {
-                renderErrorImage("Could not open spectra file to get MS1 scans", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
+                g.render(response.getOutputStream());
             }
         }
         else
         {
-            throw new NotFoundException("Could not find peptide with id " + form.getPeptideIdLong());
+            renderErrorImage("Could not open spectra file to get MS1 scans", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
         }
     }
 
@@ -5939,15 +5933,12 @@ public class MS2Controller extends SpringActionController
     {
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            validateRun(form);
+            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
 
-            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
+            if (peptide == null)
+                throw new NotFoundException("Could not find peptide with RowId " + form.getPeptideId());
 
-            if (null == peptide)
-            {
-                // This should only happen if an old, cached link is being used... a saved favorite or google bot with fraction=x&scan=y&charge=z instead of peptideId
-                throw new NotFoundException("Couldn't find peptide " + form.getPeptideIdLong() + ". " + getViewContext().getActionURL().toString());
-            }
+            validateRun(peptide.getRun());
 
             response.setContentType("text/plain");
             PrintWriter out = response.getWriter();
@@ -6011,21 +6002,12 @@ public class MS2Controller extends SpringActionController
             this.indistinguishableCollectionId = indistinguishableCollectionId;
         }
 
-        public void setPeptideId(String peptideId)
+        public void setPeptideId(long peptideId)
         {
-            try
-            {
-                this.peptideId = Long.parseLong(peptideId);
-            }
-            catch (NumberFormatException ignored) {}
+            this.peptideId = peptideId;
         }
 
-        public String getPeptideId()
-        {
-            return Long.toString(peptideId);
-        }
-
-        public long getPeptideIdLong()
+        public long getPeptideId()
         {
             return this.peptideId;
         }
@@ -6183,15 +6165,12 @@ public class MS2Controller extends SpringActionController
         @Override
         public boolean doAction(DetailsForm form, BindException errors) throws Exception
         {
-            long peptideId = form.getPeptideIdLong();
-            MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
+            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
 
             if (peptide == null)
-                throw new NotFoundException("Could not find peptide with RowId " + peptideId);
+                throw new NotFoundException("Could not find peptide with RowId " + form.getPeptideId());
 
-            int runId = peptide.getRun();
-
-            validateRun(runId);
+            validateRun(peptide.getRun());
 
             PeptideQuantitation quantitation = peptide.getQuantitation();
             if (quantitation == null)
@@ -6224,9 +6203,14 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ElutionProfileForm form, boolean reshow, BindException errors) throws Exception
         {
-            validateRun(form);
+            long peptideId = form.getPeptideId();
+            MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
 
-            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
+            if (peptide == null)
+                throw new NotFoundException("Could not find peptide with RowId " + peptideId);
+
+            MS2Run run = validateRun(peptide.getRun());
+
             PeptideQuantitation quant = peptide.getQuantitation();
 
             EditElutionGraphContext ctx = new EditElutionGraphContext(quant.getLightElutionProfile(peptide.getCharge()), quant.getHeavyElutionProfile(peptide.getCharge()), quant, getViewContext().getActionURL(), peptide);
@@ -6235,17 +6219,17 @@ public class MS2Controller extends SpringActionController
 
         public boolean handlePost(ElutionProfileForm form, BindException errors) throws Exception
         {
-            validateRun(form);
+            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
 
-            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
             if (peptide == null)
-            {
-                throw new NotFoundException();
-            }
+                throw new NotFoundException("Could not find peptide with RowId " + form.getPeptideId());
+
+            MS2Run run = validateRun(peptide.getRun());
+
             PeptideQuantitation quant = peptide.getQuantitation();
             if (quant == null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("No quantitation data found for peptide " + form.getPeptideId());
             }
 
             boolean validRanges = quant.resetRanges(form.getLightFirstScan(), form.getLightLastScan(), form.getHeavyFirstScan(), form.getHeavyLastScan(), peptide.getCharge());

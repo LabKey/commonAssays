@@ -288,7 +288,7 @@
 <%
 float[] mzs = p.getSpectrumMZ();
 float[] intensities = p.getSpectrumIntensity();
-if (mzs != null && intensities != null && mzs.length == intensities.length)
+if (mzs != null && intensities != null && mzs.length == intensities.length && mzs.length > 0)
 {
 %>
 
@@ -317,7 +317,7 @@ $(document).ready(function () {
 
     /* render the spectrum with the given options */
     $("#lorikeet").specview({sequence: <%= PageFlowUtil.jsString(p.getTrimmedPeptide()) %>,
-                                precursorMz: 1012.1,
+                                precursorMz: 1,
                                 staticMods: staticMods,
                                 variableMods: varMods,
                                 width: 600,
@@ -404,7 +404,9 @@ for (Map.Entry<String,java.util.List<Pair<Float,Float>>> customHit : customHits.
 ], color: "green"}; <%
 } %>
 </script>
-<% } %>
+<% }
+else { %> Spectra not available.<% }%>
+
 
 <style type="text/css">
     /*Hide the redundant peptide sequence info*/
