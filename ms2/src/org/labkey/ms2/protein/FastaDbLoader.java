@@ -792,7 +792,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         if (loadedFile != null && existingProtFastasCount != null && existingProtFastasCount.longValue() > 0)
         {
             String previousFileWithSameChecksum =
-                    Table.executeSingleton(ProteinManager.getSchema(), "SELECT FileName FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hashArray, String.class);
+                    Table.executeSingleton(ProteinManager.getSchema(), "SELECT MIN(FileName) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hashArray, String.class);
 
             if (convertedName.equals(previousFileWithSameChecksum))
                 log.info("FASTA file \"" + convertedName + "\" has already been imported");

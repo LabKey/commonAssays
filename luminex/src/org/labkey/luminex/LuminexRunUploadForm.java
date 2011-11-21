@@ -16,8 +16,8 @@
 
 package org.labkey.luminex;
 
+import org.apache.commons.lang.StringUtils;
 import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.OntologyManager;
@@ -28,7 +28,6 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.data.ColumnInfo;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -61,6 +60,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
             if (dp.isRequired() && dp.getPropertyDescriptor().getPropertyType() == PropertyType.BOOLEAN &&
                     (value == null || value.length() == 0))
                 value = Boolean.FALSE.toString();
+            value = StringUtils.trimToNull(value);
             properties.put(dp, value);
         }
         return properties;
