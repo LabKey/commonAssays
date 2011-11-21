@@ -31,6 +31,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.settings.AppProps;
@@ -354,7 +355,14 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
 
     public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
     {
-        importRows(data, context.getUser(), run, context.getProtocol(), context.getProvider(), dataMap);
+        try
+        {
+            importRows(data, context.getUser(), run, context.getProtocol(), context.getProvider(), dataMap);
+        }
+        catch (ValidationException e)
+        {
+            throw new ExperimentException(e.toString(), e);
+        }
     }
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
