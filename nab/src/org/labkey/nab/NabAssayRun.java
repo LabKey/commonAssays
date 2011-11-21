@@ -26,6 +26,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
@@ -102,15 +103,22 @@ public abstract class NabAssayRun extends Luc5Assay
         TableInfo runTableInfo = AssayService.get().createRunTable(_protocol, _provider, _user, _run.getContainer());
         for (ColumnInfo runColumn : runTableInfo.getColumns())
         {
-            // Fake up a property descriptor. Currently only name and label are actually used for rendering the page,
-            // but set a few more so that toString() works for debugging purposes
-            PropertyDescriptor pd = new PropertyDescriptor();
-            pd.setName(runColumn.getName());
-            pd.setLabel(runColumn.getLabel());
-            pd.setPropertyURI(runColumn.getPropertyURI());
-            pd.setContainer(_protocol.getContainer());
-            pd.setProject(_protocol.getContainer().getProject());
-            fieldKeys.put(FieldKey.fromParts(runColumn.getName()), pd);
+            // The DataOutputs column causes an UnauthorizedException if the user has permission to see the dataset
+            // this run has been copied to, but not the run folder, because the column joins to the exp.Datas query
+            // which doesn't know anything about the extra permission the user has been granted by the copy to study linkage.
+            // We don't need to show it in the details view, so just skip it.
+            if (!ExpRunTable.Column.DataOutputs.name().equalsIgnoreCase(runColumn.getName()))
+            {
+                // Fake up a property descriptor. Currently only name and label are actually used for rendering the page,
+                // but set a few more so that toString() works for debugging purposes
+                PropertyDescriptor pd = new PropertyDescriptor();
+                pd.setName(runColumn.getName());
+                pd.setLabel(runColumn.getLabel());
+                pd.setPropertyURI(runColumn.getPropertyURI());
+                pd.setContainer(_protocol.getContainer());
+                pd.setProject(_protocol.getContainer().getProject());
+                fieldKeys.put(FieldKey.fromParts(runColumn.getName()), pd);
+            }
         }
 
         return fieldKeys;
