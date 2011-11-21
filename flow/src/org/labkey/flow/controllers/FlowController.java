@@ -22,6 +22,7 @@ import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.gwt.client.util.StringUtils;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
@@ -36,6 +37,7 @@ import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.JobRunner;
@@ -65,6 +67,9 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.io.File;
 import java.net.URI;
 
@@ -247,7 +252,6 @@ public class FlowController extends BaseFlowController
                     }
                     ActionURL helper = getViewContext().cloneActionURL();
                     helper.replaceParameter("refresh", Integer.toString(refresh));
-                    helper.setFragment("end");
                     getViewContext().getResponse().setHeader("Refresh", refresh + ";URL=" + helper.toString());
                 }
                 return new JobStatusView(psf, findJob(form.getStatusFile()));
@@ -422,15 +426,16 @@ public class FlowController extends BaseFlowController
             checkPerms();
             Container parent = getContainer().getParent();
 
-            if (parent.hasChild(form.getFolderName()))
-            {
-                errors.rejectValue("folderName", ERROR_MSG, "There is already a folder with the name '" + form.getFolderName() + "'");
-                return false;
-            }
+            String folderName = StringUtils.trimToNull(form.getFolderName());
             StringBuilder error = new StringBuilder();
-            if (!Container.isLegalName(form.getFolderName(), error))
+            if (!Container.isLegalName(folderName, error))
             {
                 errors.rejectValue("folderName", ERROR_MSG, error.toString());
+                return false;
+            }
+            if (parent.hasChild(folderName))
+            {
+                errors.rejectValue("folderName", ERROR_MSG, "There is already a folder with the name '" + folderName + "'");
                 return false;
             }
             FlowModule flowModule = null;
@@ -447,7 +452,7 @@ public class FlowController extends BaseFlowController
                 return false;
             }
 
-            destContainer = ContainerManager.createContainer(parent, form.getFolderName());
+            destContainer = ContainerManager.createContainer(parent, folderName);
             destContainer.setActiveModules(getContainer().getActiveModules());
             destContainer.setFolderType(getContainer().getFolderType());
             destContainer.setDefaultModule(flowModule);
@@ -489,8 +494,28 @@ public class FlowController extends BaseFlowController
     @RequiresSiteAdmin
     public class FlowAdminAction extends FormViewAction<FlowAdminForm>
     {
-        public void validateCommand(FlowAdminForm target, Errors errors)
+        public void validateCommand(FlowAdminForm form, Errors errors)
         {
+            // If we are enabling flow normalization, check that flowWorkspace R library has been installed.
+            if (form.isNormalizationEnabled() && !FlowSettings.isNormalizationEnabled())
+            {
+                ScriptEngine engine = ServiceRegistry.get().getService(ScriptEngineManager.class).getEngineByExtension("r");
+                if (engine == null)
+                {
+                    errors.reject(ERROR_MSG, "The R script engine is not available.  Please configure the R script engine in the admin console.");
+                    return;
+                }
+
+                try
+                {
+                    engine.eval("library(flowWorkspace)\n");
+                }
+                catch (ScriptException e)
+                {
+                    errors.reject(ERROR_MSG, "Please install the flowWorkspace R library to enable normalization.\n" + e.getMessage());
+                    return;
+                }
+            }
         }
 
         public ModelAndView getView(FlowAdminForm form, boolean reshow, BindException errors) throws Exception
@@ -518,10 +543,11 @@ public class FlowController extends BaseFlowController
             try
             {
                 FlowSettings.setWorkingDirectoryPath(form.getWorkingDirectory());
+                FlowSettings.setNormalizationEnabled(form.isNormalizationEnabled());
             }
             catch (Exception e)
             {
-                errors.reject(ERROR_MSG, "An exception occurred:" + e);
+                errors.reject(ERROR_MSG, "An exception occurred: " + e);
                 _log.error("Error", e);
                 return false;
             }

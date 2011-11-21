@@ -31,6 +31,10 @@
         Which directory should the flow module use to do work in?  By default, it will use the system temporary directory.<br>
         <input size=50 type="text" id="workingDirectory" name="workingDirectory" value="<%=h(form.getWorkingDirectory())%>">
     </p>
+    <p>
+        <labkey:checkbox name="normalizationEnabled" id="normalizationEnabled" value="true" checked="<%=form.isNormalizationEnabled()%>"/>
+        <label for="normalizationEnabled">Enable experimental R normalization in FlowJo import wizard?</label>
+    </p>
     <labkey:button text="update" />
     <labkey:button text="cancel" href="<%=urlProvider(AdminUrls.class).getAdminConsoleURL()%>" />
 </form>

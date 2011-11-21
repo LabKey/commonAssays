@@ -51,12 +51,14 @@
     {
         %><p class="labkey-warning-messages"><b>Warning:</b><br><%
         int len = Math.min(10, warnings.size());
-        for (int i = 0; i < len; i++)
+        int i = 0;
+        for (; i < len; i++)
         {
             %><%=warnings.get(i)%><br><%
         }
-        if (len < warnings.size())
-            %><em>not showing <%=warnings.size() - len%> more warnings ...</em><%
+        if (i < warnings.size()) {
+            %><em>not showing <%=warnings.size() - i%> more warnings ...</em><%
+        }
         %></p><%
     }
 %>

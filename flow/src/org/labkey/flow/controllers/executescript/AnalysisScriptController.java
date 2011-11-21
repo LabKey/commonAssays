@@ -475,7 +475,7 @@ public class AnalysisScriptController extends BaseFlowController
         {
             // When entering the wizard from the pipeline browser "Import Workspace" button,
             // we aren't POST'ing and so haven't parsed or validated the workspace yet.
-            if ("GET".equals(getRequest().getMethod()) && form.getWorkspace().getWorkspaceObject() == null)
+            if ("GET".equals(getRequest().getMethod()) && form.getWorkspace().getWorkspaceObject() == null && form.getWizardStep() == ImportAnalysisStep.SELECT_FCSFILES)
                 validateCommand(form, errors);
 
             title = form.getWizardStep().getTitle();
@@ -819,6 +819,12 @@ public class AnalysisScriptController extends BaseFlowController
 
             if (analysisEngine.equals("rEngine") && (form.isrEngineNormalization() != null && form.isrEngineNormalization().booleanValue()))
             {
+                if (!FlowSettings.isNormalizationEnabled())
+                {
+                    errors.reject(ERROR_MSG, "Normalization must be enabled in the admin console > flow cytometry settings");
+                    return;
+                }
+
                 if (form.getrEngineNormalizationReference() == null || form.getrEngineNormalizationReference().length() == 0)
                 {
                     errors.reject(ERROR_MSG, "You must select a normalization reference sample.");

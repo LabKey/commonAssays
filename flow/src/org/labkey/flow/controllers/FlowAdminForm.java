@@ -21,10 +21,12 @@ import org.labkey.flow.FlowSettings;
 public class FlowAdminForm
 {
     private String _workingDirectory;
+    private boolean _normalizationEnabled;
 
     public FlowAdminForm()
     {
         _workingDirectory = FlowSettings.getWorkingDirectoryPath();
+        _normalizationEnabled = FlowSettings.isNormalizationEnabled();
     }
 
     public void setWorkingDirectory(String path)
@@ -35,5 +37,15 @@ public class FlowAdminForm
     public String getWorkingDirectory()
     {
         return _workingDirectory;
+    }
+
+    public boolean isNormalizationEnabled()
+    {
+        return _normalizationEnabled;
+    }
+
+    public void setNormalizationEnabled(boolean normalizationEnabled)
+    {
+        _normalizationEnabled = normalizationEnabled;
     }
 }

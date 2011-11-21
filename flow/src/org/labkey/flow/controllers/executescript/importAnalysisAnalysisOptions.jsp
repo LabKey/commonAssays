@@ -35,6 +35,8 @@
 <%@ page import="java.util.TreeMap" %>
 <%@ page import="java.util.TreeSet" %>
 <%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.flow.FlowSettings" %>
+<%@ page import="org.labkey.api.admin.AdminUrls" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -44,6 +46,8 @@
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
     FlowProtocol protocol = FlowProtocol.getForContainer(container);
+
+    boolean normalizationEnabled = FlowSettings.isNormalizationEnabled();
 
     FlowJoWorkspace workspace = form.getWorkspace().getWorkspaceObject();
 
@@ -94,7 +98,7 @@
 </p>
 <hr/>
 
-<p>Which samples should be imported?</p>
+<h3>Which samples should be imported?</h3>
 <div style="padding-left: 2em; padding-bottom: 1em;">
 <%
 if (protocol != null)
@@ -163,7 +167,12 @@ if (protocol != null)
                 jsonParams.put(new String[]{param, param});
         }
 %>
-<p>Normalization Options</p>
+<h3>Normalization Options</h3>
+<% if (!normalizationEnabled) { %>
+<p>
+    <em>NOTE:</em> Normalization is current disabled.  Administrators can enable normalization in the Flow Cytometry settings of the <a href="<%=PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL()%>">Admin Console</a>.
+</p>
+<% } %>
 <script>
     function onNormalizationChange()
     {
@@ -174,15 +183,18 @@ if (protocol != null)
 </script>
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
-    <input type="checkbox" name="rEngineNormalization" id="rEngineNormalization" <%=form.isrEngineNormalization() ? "checked" : ""%> onchange="onNormalizationChange();">
+    <input type="checkbox" name="rEngineNormalization" id="rEngineNormalization" onchange="onNormalizationChange();"
+        <%=form.isrEngineNormalization() ? "checked" : ""%>
+        <%=normalizationEnabled ? "" : "disabled"%> >
     <input type="hidden" name="<%=SpringActionController.FIELD_MARKER%>rEngineNormalization"/>
-    <label for="rEngineNormalization">Perform normalization?</label>
+    <label for="rEngineNormalization">Perform normalization using flowWorkspace R library?</label>
 </div>
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <label for="rEngineNormalizationReference">Select sample to be use as normalization reference.</label><br>
     <em>NOTE:</em> The list of available samples is restricted to those in the imported group above.<br>
-    <select name="rEngineNormalizationReference" id="rEngineNormalizationReference">
+    <select name="rEngineNormalizationReference" id="rEngineNormalizationReference"
+        <%=normalizationEnabled ? "" : "disabled"%> >
         <option value="">&lt;Select sample&gt;</option>
         <%
             String rEngineNormalizationReference = form.getrEngineNormalizationReference();
@@ -217,6 +229,7 @@ if (protocol != null)
                 id: "rEngineNormalizationParameters",
                 renderTo: "rEngineNormalizationParametersDiv",
                 value: <%=PageFlowUtil.jsString(form.getrEngineNormalizationParameters())%>,
+                disabled: <%=normalizationEnabled ? "false" : "true"%>,
                 width: 275,
                 triggerAction: "all",
                 mode: "local",
