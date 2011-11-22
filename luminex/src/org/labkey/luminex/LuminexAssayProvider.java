@@ -151,6 +151,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         // Render any PDF outputswe found direct download links since they should be plots of standard curves
         ColumnInfo curvesColumn = result.addColumn("Curves", ExpRunTable.Column.Name);
         curvesColumn.setWidth("30");
+        curvesColumn.setReadOnly(true);
+        curvesColumn.setShownInInsertView(false);
+        curvesColumn.setShownInUpdateView(false);
         curvesColumn.setDescription("Link to titration curves in PDF format. Available if assay design is configured to generate them.");
         List<FieldKey> visibleColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
         visibleColumns.add(Math.min(visibleColumns.size(), 3), curvesColumn.getFieldKey());
