@@ -17,6 +17,7 @@ package org.labkey.ms2.compare;
 
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.reports.ReportService;
+import org.labkey.api.reports.report.RReport;
 import org.labkey.api.reports.report.view.DefaultReportUIProvider;
 import org.labkey.api.reports.report.view.RReportBean;
 import org.labkey.api.reports.report.view.ReportUtil;
@@ -43,14 +44,17 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
     {
         List<ReportService.DesignerInfo> reportDesigners = new ArrayList<ReportService.DesignerInfo>();
 
-        addDesignerURL(context, settings, reportDesigners, SingleMS2RunRReport.TYPE, SingleMS2RunRReport.PARAMS);
+        boolean canCreateScript = ReportUtil.canCreateScript(context);
+        if (canCreateScript && RReport.isEnabled())
+        {
+            addDesignerURL(context, settings, reportDesigners, SingleMS2RunRReport.TYPE, SingleMS2RunRReport.PARAMS);
 
-        RReportBean bean = new RReportBean(settings);
-        bean.setReportType(SpectraCountRReport.TYPE);
-        bean.setRedirectUrl(context.getActionURL().toString());
+            RReportBean bean = new RReportBean(settings);
+            bean.setReportType(SpectraCountRReport.TYPE);
+            bean.setRedirectUrl(context.getActionURL().toString());
 
-        reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R View", "MS2 Spectra Count R Report", ReportUtil.getRReportDesignerURL(context, bean)));
-
+            reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R View", "MS2 Spectra Count R Report", ReportUtil.getRReportDesignerURL(context, bean)));
+        }
         return reportDesigners;
     }
 
