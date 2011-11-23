@@ -4432,8 +4432,31 @@ public class MS2Controller extends SpringActionController
         {
             view.applyFilterAndSortToURL(currentUrl, MS2Manager.getDataRegionNamePeptides());
         }
-        return ProteinManager.getPeptideFilter(currentUrl,
+        SimpleFilter filter = ProteinManager.getPeptideFilter(currentUrl,
                 ProteinManager.URL_FILTER + ProteinManager.PROTEIN_FILTER + ProteinManager.EXTRA_FILTER, ctx.getUser(), run);
+
+        // Clean up the filter to remove any columns that aren't available in this query-based Peptides view
+        // The legacy views may include some columns like GeneName that aren't available, and leaving them
+        // in the filter causes a SQLException
+        TableInfo peptidesTable = QueryService.get().getUserSchema(user, c, MS2Schema.SCHEMA_NAME).getTable(MS2Schema.TableType.Peptides.toString());
+        SimpleFilter result = new SimpleFilter();
+        for (SimpleFilter.FilterClause filterClause : filter.getClauses())
+        {
+            boolean legit = true;
+            for (String columnName : filterClause.getColumnNames())
+            {
+                if (QueryService.get().getColumns(peptidesTable, Collections.singleton(FieldKey.fromString(columnName))).isEmpty())
+                {
+                    legit = false;
+                    break;
+                }
+            }
+            if (legit)
+            {
+                result.addClause(filterClause);
+            }
+        }
+        return result;
     }
 
     /**

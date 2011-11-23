@@ -1204,7 +1204,7 @@ public class MS2Schema extends UserSchema
     {
         if (form != null)
         {
-            if (form.isPeptideProphetFilter())
+            if (form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
             {
                 filter.addClause(new CompareType.CompareClause("PeptideMemberships/PeptideId/PeptideProphet", CompareType.GTE, form.getPeptideProphetProbability()));
             }

@@ -37,7 +37,6 @@ import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Sort;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
@@ -95,7 +94,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -174,11 +172,6 @@ public class MS2Manager
     public static TableInfo getTableInfoRuns()
     {
         return getSchema().getTable("Runs");
-    }
-
-    public static TableInfo getTableInfoExperimentRuns()
-    {
-        return getSchema().getTable("ExperimentRuns");
     }
 
     public static TableInfo getTableInfoProteinGroups()
@@ -286,14 +279,24 @@ public class MS2Manager
         return getSchema().getTable("QuantSummaries");
     }
 
-    public static Sort getRunsBaseSort()
-    {
-        return new Sort("-Run");
-    }
-
     public static MS2Run getRun(int runId)
     {
-        return getRun(String.valueOf(runId));
+        MS2Run run = _getRunFromCache(runId);
+
+        if (null != run)
+            return run;
+
+        MS2Run[] runs = getRuns("Run = ? AND deleted = ?", runId, false);
+
+        if (runs != null && runs.length == 1)
+        {
+            run = runs[0];
+            // Cache only successfully imported files so message updates as run is imported
+            if (run.getStatusId() == MS2Importer.STATUS_SUCCESS)
+                _addRunToCache(runId, run);
+        }
+
+        return run;
     }
 
     public static MS2Run getRunByFileName(String path, String fileName, Container c)
@@ -643,32 +646,14 @@ public class MS2Manager
 
     public static MS2Run getRun(String runId)
     {
-        MS2Run run = _getRunFromCache(runId);
-
-        if (null != run)
-            return run;
-
-        int runIdInt;
         try
         {
-            runIdInt = Integer.parseInt(runId);
+            return getRun(Integer.parseInt(runId));
         }
         catch (NumberFormatException e)
         {
             return null;
         }
-
-        MS2Run[] runs = getRuns("Run = ? AND deleted = ?", runIdInt, false);
-
-        if (runs != null && runs.length == 1)
-        {
-            run = runs[0];
-            // Cache only successfully imported files so message updates as run is imported
-            if (run.getStatusId() == MS2Importer.STATUS_SUCCESS)
-                _addRunToCache(runId, run);
-        }
-
-        return run;
     }
 
     public static RelativeQuantAnalysisSummary getQuantSummaryForRun(int runId)
@@ -777,7 +762,7 @@ public class MS2Manager
         }
         catch (SQLException e)
         {
-            _log.error("renameRun", e);
+            throw new RuntimeSQLException(e);
         }
 
         _removeRunsFromCache(Arrays.asList(runId));
@@ -851,15 +836,6 @@ public class MS2Manager
             throw new RuntimeSQLException(e);
         }
     }
-
-    public static List<Integer> parseIds(Collection<String> stringIds)
-    {
-        List<Integer> integerIds = new ArrayList<Integer>(stringIds.size());
-        for (String runId : stringIds)
-            integerIds.add(Integer.parseInt(runId));
-        return integerIds;
-    }
-
 
     private static String _purgeStatus = null;
 
@@ -1263,28 +1239,21 @@ public class MS2Manager
     }
 
 
-    private static void _addRunToCache(String runId, MS2Run run)
+    private static void _addRunToCache(int runId, MS2Run run)
     {
         RUN_CACHE.put(RUN_CACHE_PREFIX + runId, run);
     }
 
 
-    private static MS2Run _getRunFromCache(String runId)
+    private static MS2Run _getRunFromCache(int runId)
     {
         return RUN_CACHE.get(RUN_CACHE_PREFIX + runId);
     }
 
-
-    private static void _removeRunFromCache(Integer runId)
-    {
-        RUN_CACHE.remove(RUN_CACHE_PREFIX + runId);
-    }
-
-
     private static void _removeRunsFromCache(List<Integer> runIds)
     {
         for (Integer runId : runIds)
-            _removeRunFromCache(runId);
+            RUN_CACHE.remove(RUN_CACHE_PREFIX + runId);
     }
 
 
@@ -1976,20 +1945,6 @@ public class MS2Manager
         }
 
         return collection;
-    }
-
-    public static List<MS2Run> lookupRuns(List<Integer> runIds, boolean requireSameType, User user) throws ServletException, RunListException
-    {
-        List<MS2Run> runs = new ArrayList<MS2Run>(runIds.size());
-
-        for (Integer runId : runIds)
-        {
-            runs.add(MS2Manager.getRun(runId.intValue()));
-        }
-
-        validateRuns(runs, requireSameType, user);
-
-        return runs;
     }
 
     public static void validateRuns(List<MS2Run> runs, boolean requireSameType, User user) throws UnauthorizedException, RunListException

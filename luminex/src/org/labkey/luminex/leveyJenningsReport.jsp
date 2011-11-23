@@ -87,14 +87,21 @@
                     Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h('<%= bean.getProtocol().getName() %>') + "' for '" + $h('<%= bean.getTitration() %>') + "'.");
                 else
                 {
+                    var missingColumns = '';
+                    var separator = '';
                     // check that all of the required properties for the report exist
                     for (var i = 0; i < reqColumns.length; i++)
                     {
                         if (!(reqColumns[i] in data.rows[0]))
                         {
-                            Ext.get('graphParamsPanel').update("Error: one or more of the required properties for the report do not exist in '" + $h('<%= bean.getProtocol().getName() %>') + "'.");
-                            return;
+                            missingColumns += separator + reqColumns[i];
+                            separator = ", ";
                         }
+                    }
+                    if (missingColumns.length > 0)
+                    {
+                        Ext.get('graphParamsPanel').update("Error: one or more of the required properties (" + missingColumns + ") for the report do not exist in '" + $h('<%= bean.getProtocol().getName() %>') + "'.");
+                        return;
                     }
 
                     initializeReportPanels();
