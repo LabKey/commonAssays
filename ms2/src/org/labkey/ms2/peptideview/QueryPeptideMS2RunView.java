@@ -231,7 +231,12 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             throw new RuntimeException(e);
         }
         PeptideQueryView view = new PeptideQueryView(schema, settings, true, true);
-        QueryPeptideDataRegion rgn = (QueryPeptideDataRegion)view.createDataRegion();
+        DataRegion region = view.createDataRegion();
+        if (!(region instanceof QueryPeptideDataRegion))
+        {
+            throw new NotFoundException("No nesting possible");
+        }
+        QueryPeptideDataRegion rgn = (QueryPeptideDataRegion) region;
 
         DataRegion nestedRegion = rgn.getNestedRegion();
         GridView result = new GridView(nestedRegion, (BindException)null);

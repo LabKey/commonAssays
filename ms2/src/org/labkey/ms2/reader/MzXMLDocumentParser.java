@@ -47,7 +47,7 @@ public class MzXMLDocumentParser extends AbstractXMLDocumentParser
     @Override
     protected DefaultHandler createSAXHandler(ContentHandler xhtmlHandler)
     {
-        SAXHandler result = new SAXHandler(xhtmlHandler, true, true, true, true);
+        SAXHandler result = new SAXHandler(xhtmlHandler, true, true, true, true, SAXHandler.DEFAULT_MAX_INDEXABLE_SIZE);
         result.addStopElement("scan");
         return result;
     }

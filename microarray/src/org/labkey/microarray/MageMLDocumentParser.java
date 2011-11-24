@@ -52,7 +52,7 @@ public class MageMLDocumentParser extends AbstractXMLDocumentParser
     @Override
     protected DefaultHandler createSAXHandler(ContentHandler xhtmlHandler)
     {
-        SAXHandler result = new SAXHandler(xhtmlHandler, false, false, true, true);
+        SAXHandler result = new SAXHandler(xhtmlHandler, false, false, true, true, SAXHandler.DEFAULT_MAX_INDEXABLE_SIZE);
         result.addStopElement("DataInternal");
         return result;
     }
