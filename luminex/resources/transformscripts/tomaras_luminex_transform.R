@@ -20,6 +20,9 @@
 # Author: Cory Nathe, LabKey
 transformVersion = "2.0";
 
+# print the starting time for the transform script
+writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
+
 source("${srcDirectory}/youtil.R");
 # Ruminex package available from http://labs.fhcrc.org/fong/Ruminex/index.html
 library(Ruminex);
@@ -71,14 +74,18 @@ colnames(run.props) = c("name", "val1", "val2", "val3");
 lines = readLines("${runInfo}");
 
 # each line has a run property with the name, val1, val2, etc.
-for(i in 1:length(lines)) {
+for (i in 1:length(lines))
+{
 	# split the line into the various parts (tab separated)
 	parts = strsplit(lines[i], split="\t")[[1]];
 
 	# if the line does not have 4 parts, add NA's as needed
-	if(length(parts) < 4) {
-		for(j in 1:4) {
-			if(is.na(parts[j])) {
+	if (length(parts) < 4)
+	{
+		for (j in 1:4)
+		{
+			if (is.na(parts[j]))
+			{
 				parts[j] = NA;
 			}
 		}
@@ -138,24 +145,29 @@ run.data$fiBackgroundBlank = NA;
 analytes = unique(run.data$name);
 
 # if there is a "Blank" bead, then continue. otherwise, there is no new variable to calculate
-if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
+if (any(regexpr("^blank", analytes, ignore.case=TRUE) > -1))
+{
     # store a boolean vector of blanks, nonBlanks, and unknowns (i.e. non-standards)
     blanks = regexpr("^blank", run.data$name, ignore.case=TRUE) > -1;
     nonBlanks = regexpr("^blank", run.data$name, ignore.case=TRUE) == -1;
-    unks = !run.data$isStandard;
+    unks = !run.data$isStandard & !run.data$isQCControl;
 
     # read the run property from user to determine if we are to only blank bead subtract from unks
     unksOnly = TRUE;
-    if(any(run.props$name == "SubtBlankFromAll")){
-        if(run.props$val1[run.props$name == "SubtBlankFromAll"] == "1")
-                unksOnly = FALSE;
+    if (any(run.props$name == "SubtBlankFromAll"))
+    {
+        if (run.props$val1[run.props$name == "SubtBlankFromAll"] == "1")
+        {
+            unksOnly = FALSE;
+        }
     }
 
 	# loop through the unique dataFile/description/excpConc/dilution combos and subtract the mean blank fiBackground from the fiBackground
 	blank.data = run.data[blanks,];
 	combos = unique(subset(blank.data, select=c("dataFile", "description", "dilution", "expConc")));
 
-	for(index in 1:nrow(combos)){
+	for (index in 1:nrow(combos))
+	{
 	    dataFile = combos$dataFile[index];
 	    description = combos$description[index];
 	    dilution = combos$dilution[index];
@@ -163,7 +175,8 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
 
         # only standards have expConc, the rest are NA
 	    combo = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution & run.data$expConc == expConc;
-	    if(is.na(expConc)){
+	    if (is.na(expConc))
+	    {
 	        combo = run.data$dataFile == dataFile & run.data$description == description & run.data$dilution == dilution & is.na(run.data$expConc);
 	    }
 
@@ -171,7 +184,7 @@ if(any(regexpr("^blank", analytes, ignore.case=TRUE) > -1)){
 		blank.mean = mean(run.data$fiBackground[blanks & combo]);
 
 		# calc the fiBackgroundBlank for all of the non-"Blank" analytes for this combo
-        if(unksOnly){
+        if (unksOnly) {
 		    run.data$fiBackgroundBlank[unks & nonBlanks & combo] = run.data$fiBackground[unks & nonBlanks & combo] - blank.mean;
 		} else{
 		    run.data$fiBackgroundBlank[nonBlanks & combo] = run.data$fiBackground[nonBlanks & combo] - blank.mean;
@@ -201,7 +214,7 @@ for (tIndex in 1:nrow(titration.data))
             mypdf(file=paste(titrationName, "QC_Curves", sep="_"), mfrow=c(1,1));
         }
 
-        # calculate the 4PL and 5PL curve fit params for each analyte
+        # calculate the 4PL curve fit params for each analyte
         for (aIndex in 1:length(analytes))
         {
             analyteName = as.character(analytes[aIndex]);
@@ -210,16 +223,18 @@ for (tIndex in 1:nrow(titration.data))
             dat = subset(run.data, description == titrationName & name == analyteName);
 
             yLabel = "";
-            if (titration.data[tIndex,]$Standard == "true") {
-                # choose the FI column for standards based on the run property provided by the user, default to the FI-Bkgd value
-                if(any(run.props$name == "StndCurveFitInput")) {
+            if (titration.data[tIndex,]$Standard == "true" | titration.data[tIndex,]$QCControl == "true") {
+                # choose the FI column for standards and qc controls based on the run property provided by the user, default to the FI-Bkgd value
+                if (any(run.props$name == "StndCurveFitInput"))
+                {
                     fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput", "fiBackground")
                     yLabel = getFiDisplayName(fiCol);
                     dat$fi = dat[, fiCol]
                 }
             } else {
                 # choose the FI column for unknowns based on the run property provided by the user, default to the FI-Bkgd value
-                if(any(run.props$name == "UnkCurveFitInput")) {
+                if (any(run.props$name == "UnkCurveFitInput"))
+                {
                     fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput", "fiBackground")
                     yLabel = getFiDisplayName(fiCol);
                     dat$fi = dat[, fiCol]
@@ -278,8 +293,10 @@ for (tIndex in 1:nrow(titration.data))
                 );
             } else {
                 # create an empty plot indicating that there is no data available
-                plot(NA, NA, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel, xlim=c(1,1), ylim=c(0,1));
-                text(1, 0.5, "Data Not Available");
+                if (titration.data[tIndex,]$QCControl == "true") {
+                    plot(NA, NA, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel, xlim=c(1,1), ylim=c(0,1));
+                    text(1, 0.5, "Data Not Available");
+                }
             }
         }
 
@@ -354,7 +371,8 @@ dat = subset(dat, (well_role == "Standard" & tolower(FlaggedAsExcluded) == "fals
 # get a booelan vector of the records that are of type standard
 standardRecs = !is.na(dat$well_role) & dat$well_role == "Standard";
 
-if(any(standardRecs) & length(standards) > 0){
+if (any(standardRecs) & length(standards) > 0)
+{
     # change column name from "name" to "analyte"
     colnames(dat)[colnames(dat) == "name"] = "analyte";
 
@@ -366,14 +384,17 @@ if(any(standardRecs) & length(standards) > 0){
     dat$sample_id[is.na(dat$expected_conc)] = paste(dat$description[is.na(dat$expected_conc)], "||", dat$dilution[is.na(dat$expected_conc)], sep="");
 
     # choose the FI column for standards based on the run property provided by the user, default to the original FI value
-    if(any(run.props$name == "StndCurveFitInput")) {
+    if (any(run.props$name == "StndCurveFitInput"))
+    {
         fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput", "fi")
         dat$fi[standardRecs] = dat[standardRecs, fiCol]
     }
 
     # choose the FI column for unknowns based on the run property provided by the user, default to the original FI value
-    if(any(!standardRecs)){
-        if(any(run.props$name == "UnkCurveFitInput")) {
+    if (any(!standardRecs))
+    {
+        if (any(run.props$name == "UnkCurveFitInput"))
+        {
             fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput", "fi")
             dat$fi[!standardRecs] = dat[!standardRecs, fiCol]
         }
@@ -384,7 +405,8 @@ if(any(standardRecs) & length(standards) > 0){
 
     # loop through the selected standards in the data.frame and call the rumi function once for each
     # this will also create one pdf for each standard
-    for(s in 1:length(standards)){
+    for (s in 1:length(standards))
+    {
         stndVal = as.character(standards[s]);
 
         # subset the data for those analytes set to use the given standard curve
@@ -393,7 +415,8 @@ if(any(standardRecs) & length(standards) > 0){
 
         # LabKey Issue 13034: replicate standard records as unknowns so that Rumi will calculated estimated concentrations
         tempStnd.dat = subset(standard.dat, well_role=="Standard");
-        if (nrow(tempStnd.dat) > 0) {
+        if (nrow(tempStnd.dat) > 0)
+        {
             tempStnd.dat$well_role = "UnkStandard";
             tempStnd.dat$sample_id = paste(tempStnd.dat$description, "||", tempStnd.dat$expected_conc, sep="");
             standard.dat=rbind(standard.dat, tempStnd.dat);
@@ -408,7 +431,7 @@ if(any(standardRecs) & length(standards) > 0){
         if (length(unique(subclass.dat$analyte)) == 1)
         {
             subclassAnalyte = subclass.dat$analyte[1];
-            for(a in 1:length(selectedAnalytes))
+            for (a in 1:length(selectedAnalytes))
             {
                 analyteStnd.dat = subset(standard.dat, well_role == "Standard" & analyte == selectedAnalytes[a]);
                 # if there is no standard data for this analyte/standard, "use" the subclass analyte standard data
@@ -430,7 +453,20 @@ if(any(standardRecs) & length(standards) > 0){
         {
             # use the decided upon conversion function for handling of negative values
             standard.dat$fi = sapply(standard.dat$fi, fiConversion);
-        
+
+            # LabKey issue 13445: Don't calculate estimated concentrations for analytes where max(FI) is < 1000
+            agg.dat = subset(standard.dat, well_role == "Standard");
+            agg.dat = aggregate(agg.dat$fi, list(Standard=agg.dat$Standard,Analyte=agg.dat$analyte), max);
+            for (aggIndex in 1:nrow(agg.dat))
+            {
+                # remove the rows from the standard.dat object where the max FI < 1000
+                if (agg.dat$x[aggIndex] < 1000)
+                {
+                    print(paste("Max(FI) is < 1000 for", agg.dat$Standard[aggIndex], agg.dat$Analyte[aggIndex], "don't calculate estimated concentrations for this standard/analyte.", sep=" "));
+                    standard.dat = subset(standard.dat, !(Standard == agg.dat$Standard[aggIndex] & analyte == agg.dat$Analyte[aggIndex]));
+                }
+            }
+
             # call the rumi function to calculate new estimated log concentrations using 5PL for the uknowns
             mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2));
             fits = rumi(standard.dat, force.fit=TRUE, verbose=TRUE);
@@ -438,8 +474,10 @@ if(any(standardRecs) & length(standards) > 0){
             dev.off();
 
             # put the calculated values back into the run.data dataframe by matching on analyte, description, expConc OR dilution, and standard
-            if(nrow(fits) > 0){
-                for(index in 1:nrow(fits)){
+            if (nrow(fits) > 0)
+            {
+                for (index in 1:nrow(fits))
+                {
                     a = fits$analyte[index];
                     dil = fits$dilution[index];
                     desc = fits$description[index];
@@ -471,8 +509,10 @@ if(any(standardRecs) & length(standards) > 0){
             dev.off();
 
             # put the calculated values back into the run.data dataframe by matching on analyte, description, dilution, and standard
-            if(nrow(fits) > 0){
-                for(index in 1:nrow(fits)){
+            if (nrow(fits) > 0)
+            {
+                for (index in 1:nrow(fits))
+                {
                     a = fits$analyte[index];
                     dil = fits$dilution[index];
                     desc = fits$description[index];
@@ -504,3 +544,6 @@ if(any(standardRecs) & length(standards) > 0){
 
 # write the new set of run data out to an output file
 write.table(run.data, file=run.output.file, sep="\t", na="", row.names=FALSE, quote=FALSE);
+
+# print the ending time for the transform script
+writeLines(paste("\nProcessing end time:",Sys.time(),sep=" "));

@@ -98,7 +98,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                 },
                 scope: this
             }),
-            columns: [{header: '', dataIndex:'value'}],
+            columns: [{header: '', dataIndex:'value', renderer: this.tooltipRenderer}],
             listeners: {
                 scope: this,
                 'rowClick': function(grid, rowIndex) {
@@ -286,5 +286,11 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             // fire the resetGraphBtnClicked event so other panels can update based on the selected params
             this.fireEvent('resetGraphBtnClicked', this.analyte, this.isotype, this.conjugate);
         }
+    },
+
+    tooltipRenderer: function(value, p, record) {
+        var msg = Ext.util.Format.htmlEncode(value);
+        p.attr = 'ext:qtip="' + msg + '"';
+        return msg;
     }
 });

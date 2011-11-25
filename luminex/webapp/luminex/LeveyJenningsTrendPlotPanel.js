@@ -246,7 +246,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         else
         {
             // build the config object of the properties that will be needed by the R report
-            var config = {reportId: 'module:luminex/LeveyJenningsTrendPlot.r', showSection: 'levey_jennings_trend'};
+            var config = {reportId: 'module:luminex/LeveyJenningsTrendPlot.r', showSection: 'Levey-Jennings Trend Plot'};
             config['Protocol'] = this.assayName;
             config['Titration'] = this.titration;
             config['Analyte'] = this.analyte;

@@ -10,8 +10,9 @@
 #
 # Author: Cory Nathe, LabKey
 
-# get the data from the server using the Rlabkey selectRows command
+# load R libraries
 library(Rlabkey);
+library(Cairo);
 
 plotTypes = c("EC50", "AUC", "High MFI");
 
@@ -61,9 +62,9 @@ labkey.data <- labkey.selectRows(baseUrl=labkey.url.base,
 
 # setup the png or pdf for the plot
 if (!is.null(labkey.url.params$PdfOut)) {
-    pdf(file="${pdfout:levey_jennings_trend}", width=10, height=6);
+    pdf(file="${pdfout:Levey-Jennings Trend Plot}", width=10, height=6);
 } else {
-    png(filename="${imgout:levey_jennings_trend}", width=810, height=295 * length(plotTypes));
+    CairoPNG(filename="${imgout:Levey-Jennings Trend Plot}", width=810, height=295 * length(plotTypes));
     layout(matrix(1:length(plotTypes), length(plotTypes), 1));
     par(cex=1);
 }
@@ -184,7 +185,7 @@ for (typeIndex in 1:length(plotTypes))
 	  par(las=2);
 	  axis(2, col="black");
 	  mtext(yAxisLabel, side=2, line=4, las=0, font=2);
-	  axis(1, col="black", at=xtcks, labels=xlabels);
+	  axis(1, col="black", at=xtcks, labels=xlabels, cex.axis=0.8);
 	  mtext("Assay", side=1, line=6, las=0, font=2);
 	  box();
 
@@ -192,7 +193,7 @@ for (typeIndex in 1:length(plotTypes))
 	  par(mar=c(7.5,5,2,0.2));
 	  plot(NA, NA, type = c("b"), ylim=c(1,1), xlim=c(1,30), xlab="", ylab="", axes=F, main=mainTitle, log=asLog);
 	  text(15,1,"No Data Available for Selected Graph Parameters");
-	  axis(1, at=seq(0,30,by=5), labels=matrix("",1,7));
+	  axis(1, at=seq(0,30,by=5), labels=matrix("",1,7), cex.axis=0.8);
 	  mtext(yAxisLabel, side=2, line=4, las=0, font=2);
 	  mtext("Assay", side=1, line=6, las=0, font=2);
 	  box();

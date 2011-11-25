@@ -219,7 +219,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     exportExcelData: function() {
         // build up the JSON to pass to the export util
         var exportJson = {
-            fileName: this.title,
+            fileName: this.title + ".xls",
             sheets: [{
                 name: 'data',
                 // add a header section to the export with the graph parameter information
