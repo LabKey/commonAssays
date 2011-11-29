@@ -93,7 +93,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
 
     }
 
-    public CompensationMatrix getCompensationMatrix() throws SQLException
+    public CompensationMatrix getCompensationMatrix()
     {
         return getCompensationMatrix(getName(), getAttributeSet());
     }

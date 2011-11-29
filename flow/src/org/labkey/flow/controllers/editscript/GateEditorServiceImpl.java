@@ -302,20 +302,12 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
 
     public GWTCompensationMatrix makeCompensationMatrix(FlowCompensationMatrix matrix, boolean includeExperimentInLabel)
     {
-        try
-        {
-            GWTCompensationMatrix ret = new GWTCompensationMatrix();
-            ret.setCompId(matrix.getCompId());
-            ret.setName(matrix.getName());
-            ret.setLabel(matrix.getLabel(includeExperimentInLabel));
-            ret.setParameterNames(matrix.getCompensationMatrix().getChannelNames());
-            return ret;
-        }
-        catch (SQLException e)
-        {
-            _log.error("Error", e);
-            throw UnexpectedException.wrap(e);
-        }
+        GWTCompensationMatrix ret = new GWTCompensationMatrix();
+        ret.setCompId(matrix.getCompId());
+        ret.setName(matrix.getName());
+        ret.setLabel(matrix.getLabel(includeExperimentInLabel));
+        ret.setParameterNames(matrix.getCompensationMatrix().getChannelNames());
+        return ret;
     }
 
     public GWTWorkspace getWorkspace(GWTWorkspaceOptions workspaceOptions)

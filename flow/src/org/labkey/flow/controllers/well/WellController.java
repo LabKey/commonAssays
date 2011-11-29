@@ -311,6 +311,10 @@ public class WellController extends BaseFlowController
                 String graph = getParam(FlowParam.graph);
                 bytes = well.getGraphBytes(new GraphSpec(graph));
             }
+            catch (IOException ioe)
+            {
+                _log.error("Error retrieving graph", ioe);
+            }
             catch (Exception ex)
             {
                 _log.error("Error retrieving graph", ex);
@@ -340,11 +344,27 @@ public class WellController extends BaseFlowController
     @RequiresPermissionClass(ReadPermission.class)
     public class GenerateGraphAction extends SimpleViewAction<ChooseGraphForm>
     {
-        public ModelAndView getView(ChooseGraphForm form, BindException errors) throws Exception
+        public ModelAndView getView(ChooseGraphForm form, BindException errors) throws IOException
         {
             GraphSpec graph = new GraphSpec(getRequest().getParameter("graph"));
-            FCSAnalyzer.GraphResult res = FlowAnalyzer.generateGraph(form.getWell(), form.getScript(), FlowProtocolStep.fromActionSequence(form.getActionSequence()), form.getCompensationMatrix(), graph);
-            if (res.exception != null)
+            FCSAnalyzer.GraphResult res = null;
+            try
+            {
+                res = FlowAnalyzer.generateGraph(form.getWell(), form.getScript(), FlowProtocolStep.fromActionSequence(form.getActionSequence()), form.getCompensationMatrix(), graph);
+            }
+            catch (IOException ioe)
+            {
+                _log.error("Error retrieving graph", ioe);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _log.error("Error retrieving graph", ex);
+                ExceptionUtil.logExceptionToMothership(getRequest(), ex);
+                return null;
+            }
+
+            if (res == null || res.exception != null)
             {
                 _log.error("Error generating graph", res.exception);
             }

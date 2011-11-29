@@ -50,7 +50,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         }
 
         List<FlowDataObject> ret = new ArrayList<FlowDataObject>(attrs.size());
-        for (ExpData data : datas)
+        for (ExpData data : flowDatas)
         {
             FlowDataType dataType = (FlowDataType)data.getDataType();
             if (!dataType.isRequireAttrObject() || attrMap.containsKey(data.getRowId()))
