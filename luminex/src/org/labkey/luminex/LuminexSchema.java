@@ -104,7 +104,7 @@ public class LuminexSchema extends AssaySchema
             try
             {
                 ArrayList<QueryException> errors = new ArrayList<QueryException>();
-                TableInfo table = queryDef.getTable(this, errors, false);
+                TableInfo table = queryDef.getTable(errors, false);
                 String[] curveTypes = Table.executeArray(table, "CurveType", null, new Sort("CurveType"), String.class);
                 _curveTypes = Arrays.asList(curveTypes);
             }
