@@ -218,7 +218,7 @@ for (tIndex in 1:nrow(titration.data))
         for (aIndex in 1:length(analytes))
         {
             analyteName = as.character(analytes[aIndex]);
-            print(paste(titrationName, analyteName, sep="..."));
+            print(paste("Calculating the 4PL curve fit params for ",titrationName, analyteName, sep=" "));
 
             dat = subset(run.data, description == titrationName & name == analyteName);
 
@@ -465,6 +465,11 @@ if (any(standardRecs) & length(standards) > 0)
                     print(paste("Max(FI) is < 1000 for", agg.dat$Standard[aggIndex], agg.dat$Analyte[aggIndex], "don't calculate estimated concentrations for this standard/analyte.", sep=" "));
                     standard.dat = subset(standard.dat, !(Standard == agg.dat$Standard[aggIndex] & analyte == agg.dat$Analyte[aggIndex]));
                 }
+            }
+            # check to make sure that we still have some data to pass to the rumi function
+            if (nrow(standard.dat) == 0)
+            {
+                next();
             }
 
             # call the rumi function to calculate new estimated log concentrations using 5PL for the uknowns
