@@ -36,6 +36,7 @@ import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.RowIdQueryUpdateService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
@@ -136,7 +137,7 @@ public class AnalyteTable extends AbstractLuminexTable
     }
 
     @Override
-    public boolean hasPermission(User user, Class<? extends Permission> perm)
+    public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
     {
         return (perm.equals(UpdatePermission.class) || perm.equals(ReadPermission.class))
                 && _schema.getContainer().hasPermission(user, perm);

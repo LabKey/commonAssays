@@ -34,6 +34,7 @@ import org.labkey.api.query.RowIdQueryUpdateService;
 import org.labkey.api.query.UserIdQueryForeignKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
@@ -121,7 +122,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     }
 
     @Override
-    public boolean hasPermission(User user, Class<? extends Permission> perm)
+    public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
     {
         // First check if the user has the permission in the folder where the assay is defined
         if (_schema.getProtocol().getContainer().hasPermission(user, perm))

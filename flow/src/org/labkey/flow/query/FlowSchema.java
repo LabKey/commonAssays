@@ -61,6 +61,7 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.query.RowIdForeignKey;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
+import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.IdentifierString;
@@ -90,7 +91,6 @@ import org.labkey.flow.reports.FlowReportManager;
 import org.labkey.flow.view.FlowQueryView;
 import org.springframework.validation.BindException;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -104,6 +104,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
 
 public class FlowSchema extends UserSchema
 {
@@ -532,7 +533,7 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public boolean hasPermission(User user, Class<? extends Permission> perm)
+        public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
         {
             return _expData.hasPermission(user, perm);
         }
