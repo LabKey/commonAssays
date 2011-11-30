@@ -193,6 +193,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             closeAction:'close',
             modal: true,
             padding: 15,
+            bodyStyle: 'background-color: white;',
             title: (createNewGuideSet ? 'Create' : 'Manage') + ' Guide Set...',
             items: [new LABKEY.ManageGuideSetPanel({
                 cls: 'extContainer',

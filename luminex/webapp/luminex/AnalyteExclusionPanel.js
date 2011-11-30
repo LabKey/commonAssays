@@ -18,6 +18,7 @@ function analyteExclusionWindow(assayName, runId)
         padding: 15,
         modal: true,
         closeAction:'close',
+        bodyStyle: 'background-color: white;',
         items: new LABKEY.AnalyteExclusionPanel({
             schemaName: 'assay',
             queryName: assayName,

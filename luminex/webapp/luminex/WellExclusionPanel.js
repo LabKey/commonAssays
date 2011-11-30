@@ -18,6 +18,7 @@ function wellExclusionWindow(assayName, runId, dataId, description, type)
         padding: 15,
         modal: true,
         closeAction:'close',
+        bodyStyle: 'background-color: white;',
         items: new LABKEY.WellExclusionPanel({
             schemaName: 'assay',
             queryName: assayName,
