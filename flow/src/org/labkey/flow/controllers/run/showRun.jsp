@@ -35,6 +35,7 @@
 <%@ page import="org.labkey.api.attachments.AttachmentService" %>
 <%@ page import="org.labkey.api.util.MimeMap" %>
 <%@ page import="java.util.Collection" %>
+<%@ page import="org.labkey.api.security.User" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -83,19 +84,24 @@
 
     ActionURL urlShowRunGraph = urlProvider(ExperimentUrls.class).getShowRunGraphURL(run.getExperimentRun()); %>
     <labkey:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br><%
-        
+
     ActionURL showFileURL = run.getDownloadWorkspaceURL();
     if (showFileURL != null)
     {
         %><labkey:link href="<%=showFileURL%>" text="Download Workspace XML File"/><br/><%
     }
-    if (run.getPath() != null)
+
+    User user = context.getUser();
+    if (user != null && !user.isGuest())
     {
-        %><labkey:link href="<%=run.urlFor(RunController.DownloadAction.class)%>" text="Download FCS Files" /><br><%
+        if (run.getPath() != null)
+        {
+        %><labkey:link href="<%=run.urlFor(RunController.DownloadAction.class)%>" text="Download FCS Files" rel="nofollow"/><br><%
+        }
+        %><labkey:link href="<%=run.urlFor(RunController.ExportAnalysis.class)%>" text="Download Analysis zip" rel="nofollow" /><br><%
     }
 
-    %><labkey:link href="<%=run.urlFor(RunController.ExportAnalysis.class)%>" text="Download Analysis zip" /><br><%
-    
+
     DiscussionService.Service service = DiscussionService.get();
     DiscussionService.DiscussionView discussion = service.getDisussionArea(
             getViewContext(),

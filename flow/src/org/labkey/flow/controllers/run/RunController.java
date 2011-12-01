@@ -22,6 +22,7 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -155,6 +156,7 @@ public class RunController extends BaseFlowController
     }
 
 
+    @RequiresLogin
     @RequiresPermissionClass(ReadPermission.class)
     public class DownloadAction extends SimpleViewAction<DownloadRunForm>
     {
@@ -204,7 +206,7 @@ public class RunController extends BaseFlowController
             else
             {
                 HttpServletResponse response = getViewContext().getResponse();
-                ZipFile zipFile = new ZipFile(response, _run.getName());
+                ZipFile zipFile = new ZipFile(response, _run.getName() + ".zip");
                 exportFCSFiles(zipFile, _run, form.getEventCount() == null ? 0 : form.getEventCount());
 
                 return null;
@@ -258,6 +260,7 @@ public class RunController extends BaseFlowController
         }
     }
 
+    @RequiresLogin
     @RequiresPermissionClass(ReadPermission.class)
     public class ExportAnalysis extends FormViewAction<ExportAnalysisForm>
     {

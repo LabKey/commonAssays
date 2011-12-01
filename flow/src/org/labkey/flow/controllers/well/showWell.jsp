@@ -60,6 +60,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
+<%@ page import="org.labkey.api.security.User" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <style type="text/css">
@@ -448,13 +449,16 @@ if (analyses.size() > 0)
     %></table><%
 }
 
+%><p><%
+
 URI fileURI = well.getFCSURI();
 if (null == fileURI)
 {
-    %><p>There is no file on disk for this well.</p><%
+    %>There is no file on disk for this well.<%
 }
 else
 {
+    User user = context.getUser();
     PipeRoot r = PipelineService.get().findPipelineRoot(well.getContainer());
     if (null != r)
     {
@@ -464,7 +468,7 @@ else
         //whether the pipeline root's parent really is the container, or if we should
         //be checking a different (more specific) permission.
         SecurityPolicy policy = SecurityManager.getPolicy(r, false);
-        if (policy.hasPermission(context.getUser(), ReadPermission.class))
+        if (user != null && !user.isGuest() && policy.hasPermission(user, ReadPermission.class))
         {
             URI rel = URIUtil.relativize(r.getUri(), fileURI);
             if (null != rel)
@@ -472,10 +476,10 @@ else
                 File f = r.resolvePath(rel.getPath());
                 if (f != null && f.canRead())
                 {
-                    %><p><a href="<%=h(getWell().urlFor(WellController.ChooseGraphAction.class))%>">More Graphs</a><br><%
+                    %><a href="<%=h(getWell().urlFor(WellController.ChooseGraphAction.class))%>">More Graphs</a><br><%
                     %><a href="<%=h(getWell().urlFor(WellController.KeywordsAction.class))%>">Keywords from the FCS file</a><br><%
                     String url = context.getContextPath() + "/" + WebdavService.getServletPath() + r.getContainer().getPath() + "/@pipeline/" + rel.toString();
-                    %><a href="<%=h(url)%>">Download FCS file</a><br><%
+                    %><a href="<%=h(url)%>" rel="nofollow">Download FCS file</a><br><%
                 }
                 else
                 {
@@ -485,12 +489,14 @@ else
         }
     }
 
-    if (well instanceof FlowFCSAnalysis)
+    if (user != null && !user.isGuest() && well instanceof FlowFCSAnalysis)
     {
-        %><a href="<%=well.urlFor(RunController.ExportAnalysis.class)%>">Download Analysis zip</a><br><%
+        %><a href="<%=well.urlFor(RunController.ExportAnalysis.class)%>" rel="nofollow">Download Analysis zip</a><br><%
     }
-    %></p><%
 }
+
+%></p><%
+
     DiscussionService.Service service = DiscussionService.get();
     DiscussionService.DiscussionView discussion = service.getDisussionArea(
             getViewContext(),

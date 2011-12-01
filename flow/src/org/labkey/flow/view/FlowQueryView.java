@@ -243,7 +243,8 @@ public class FlowQueryView extends QueryView
     {
         PanelButton panelButton = super.createExportButton(exportAsWebPage);
 
-        if (getSettings() != null)
+        User user = getUser();
+        if (user != null && !user.isGuest() && getSettings() != null)
         {
             String queryName = getSettings().getQueryName();
             if (queryName.equals(FlowTableType.Runs.toString()))

@@ -309,7 +309,8 @@ public class WellController extends BaseFlowController
                     well.checkContainer(getActionURL());
                 }
                 String graph = getParam(FlowParam.graph);
-                bytes = well.getGraphBytes(new GraphSpec(graph));
+                GraphSpec spec = new GraphSpec(graph);
+                bytes = well.getGraphBytes(spec);
             }
             catch (IOException ioe)
             {

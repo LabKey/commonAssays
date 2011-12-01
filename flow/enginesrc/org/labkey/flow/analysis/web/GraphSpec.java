@@ -16,6 +16,8 @@
 
 package org.labkey.flow.analysis.web;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 import java.io.Serializable;
@@ -31,8 +33,10 @@ public class GraphSpec implements Serializable, Comparable
         _parameters = parameters;
     }
 
-    public GraphSpec(String str)
+    public GraphSpec(@NotNull String str)
     {
+        if (str == null)
+            throw new IllegalArgumentException("null graph spec");
         int ichParen = str.indexOf("(");
         if (ichParen < 0)
             throw new IllegalArgumentException("missing '('");
