@@ -65,39 +65,18 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             this.conjugate = LABKEY.ActionURL.getParameter("conjugate");
         }
 
-        // add combo-box element for selection of the antigen/analyte
+        // add grid panel element for selection of the antigen/analyte
         this.analyteGrid = new Ext.grid.GridPanel({
             id: 'analtye-grid-panel',
             fieldLabel: 'Antigens',
+            disabled: true,
             height: 225,
             border: true,
             frame: false,
             hideHeaders: true,
             viewConfig: {forceFit: true},
             selModel: new Ext.grid.RowSelectionModel({singleSelect: true}),
-            store: new Ext.data.Store({
-                autoLoad: true,
-                reader: new Ext.data.JsonReader({
-                        root:'rows'
-                    },
-                    [{name: 'value'}]
-                ),
-                proxy: new Ext.data.HttpProxy({
-                    method: 'GET',
-                    url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
-                        containerFilter: LABKEY.Query.containerFilter.allFolders,
-                        schemaName: 'assay',
-                        sql: 'SELECT DISTINCT x.Analyte.Name AS value FROM "' + this.assayName + ' AnalyteTitration" AS x '
-                            + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
-                            + ' AND x.MaxFI IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
-                    })
-                }),
-                sortInfo: {
-                    field: 'value',
-                    direction: 'ASC'
-                },
-                scope: this
-            }),
+            store: new Ext.data.ArrayStore({fields: ['value', 'display']}),
             columns: [{header: '', dataIndex:'value', renderer: this.tooltipRenderer}],
             listeners: {
                 scope: this,
@@ -111,6 +90,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                         this.analyte = undefined;
                     }
 
+                    this.filterIsotypeCombo();
                     this.enableResetGraphButton();
                 }
             }
@@ -120,12 +100,17 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             if (this.analyte != undefined && index > -1)
             {
                 this.analyteGrid.getSelectionModel().selectRow(index);
+                this.analyteGrid.fireEvent('rowClick', this.analyteGrid, index);
                 this.analyteGrid.getView().focusRow(index);  // TODO: this doesn't seem to be working
             }
             else
             {
                 this.analyte = undefined;
+                this.isotype = undefined;
+                this.conjugate = undefined;
             }
+            
+            this.analyteGrid.enable();
 
             this.paramsToLoad--;
             if (this.paramsToLoad == 0)
@@ -139,32 +124,9 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
         this.isotypeCombobox = new Ext.form.ComboBox({
             id: 'isotype-combo-box',
             fieldLabel: 'Isotype',
+            disabled: true,
             anchor: '100%',
-            store: new Ext.data.Store({
-                autoLoad: true,
-                reader: new Ext.data.JsonReader({
-                        root:'rows'
-                    },
-                    [{name: 'value'}, {name: 'display'}]
-                ),
-                proxy: new Ext.data.HttpProxy({
-                    method: 'GET',
-                    url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
-                        containerFilter: LABKEY.Query.containerFilter.allFolders,
-                        schemaName: 'assay',
-                        sql: 'SELECT DISTINCT x.Titration.Run.Isotype AS value, '
-                            + 'CASE WHEN x.Titration.Run.Isotype IS NULL THEN \'[None]\' ELSE x.Titration.Run.Isotype END AS display '
-                            + 'FROM "' + this.assayName + ' AnalyteTitration" AS x '
-                            + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
-                            + ' AND x.MaxFI IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
-                    })
-                }),
-                sortInfo: {
-                    field: 'value',
-                    direction: 'ASC'
-                },
-                scope: this
-            }),
+            store: new Ext.data.ArrayStore({fields: ['value', 'display']}),
             editable: false,
             triggerAction: 'all',
             mode: 'local',
@@ -174,6 +136,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                 scope: this,
                 'select': function(combo, record, index) {
                     this.isotype = combo.getValue();
+                    this.filterConjugateCombo();
                     this.enableResetGraphButton();
                 }
             }
@@ -182,10 +145,15 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             if (this.isotype != undefined && store.findExact('value', this.isotype) > -1)
             {
                 this.isotypeCombobox.setValue(this.isotype);
+                this.isotypeCombobox.fireEvent('select', this.isotypeCombobox);
+                this.isotypeCombobox.enable();
             }
             else
             {
                 this.isotype = undefined;
+                this.conjugate = undefined;
+                this.conjugateCombobox.clearValue();
+                this.conjugateCombobox.disable();
             }
 
             this.paramsToLoad--;
@@ -200,32 +168,9 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
         this.conjugateCombobox = new Ext.form.ComboBox({
             id: 'conjugate-combo-box',
             fieldLabel: 'Conjugate',
+            disabled: true,
             anchor: '100%',
-            store: new Ext.data.Store({
-                autoLoad: true,
-                reader: new Ext.data.JsonReader({
-                        root:'rows'
-                    },
-                    [{name: 'value'}, {name: 'display'}]
-                ),
-                proxy: new Ext.data.HttpProxy({
-                    method: 'GET',
-                    url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
-                        containerFilter: LABKEY.Query.containerFilter.allFolders,
-                        schemaName: 'assay',
-                        sql: 'SELECT DISTINCT x.Titration.Run.Conjugate AS value, '
-                            + 'CASE WHEN x.Titration.Run.Conjugate IS NULL THEN \'[None]\' ELSE x.Titration.Run.Conjugate END AS display '
-                            + 'FROM "' + this.assayName + ' AnalyteTitration" AS x '
-                            + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
-                            + ' AND x.MaxFI IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
-                    })
-                }),
-                sortInfo: {
-                    field: 'value',
-                    direction: 'ASC'
-                },
-                scope: this
-            }),
+            store: new Ext.data.ArrayStore({fields: ['value', 'display']}),
             editable: false,
             triggerAction: 'all',
             mode: 'local',
@@ -243,6 +188,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             if (this.conjugate != undefined && store.findExact('value', this.conjugate) > -1)
             {
                 this.conjugateCombobox.setValue(this.conjugate);
+                this.conjugateCombobox.enable();
             }
             else
             {
@@ -256,6 +202,41 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             }
         }, this);
         items.push(this.conjugateCombobox);
+
+        // store of all of the unique analyte/isotype/conjugate combinations for this assay design
+        this.graphParamStore = new Ext.data.Store({
+            autoLoad: true,
+            reader: new Ext.data.JsonReader({
+                    root:'rows'
+                },
+                [{name: 'Analyte'}, {name: 'Isotype'}, {name: 'Conjugate'}]
+            ),
+            proxy: new Ext.data.HttpProxy({
+                method: 'GET',
+                url : LABKEY.ActionURL.buildURL('query', 'executeSql', LABKEY.ActionURL.getContainer(), {
+                    containerFilter: LABKEY.Query.containerFilter.allFolders,
+                    schemaName: 'assay',
+                    sql: 'SELECT DISTINCT x.Analyte.Name AS Analyte, x.Titration.Run.Isotype AS Isotype, x.Titration.Run.Conjugate AS Conjugate, '
+                        + 'FROM "' + this.assayName + ' AnalyteTitration" AS x '
+                        + ' WHERE x.Titration.Name = \'' + this.titration.replace(/'/g, "''") + '\''
+                        + ' AND x.MaxFI IS NOT NULL' // this check added to only select analytes uploaded after EC50, AUC, and MaxFI calculations were added to server
+                })
+            }),
+            sortInfo: {
+                field: 'Analyte',
+                direction: 'ASC'
+            },
+            listeners: {
+                scope: this,
+                'load': function(store, recrods, options){
+                    // load data into the stores for each of the 3 graph params based on unique values from this store
+                    this.analyteGrid.getStore().loadData(this.getArrayStoreData(store, 'Analyte'));
+                    //this.isotypeCombobox.getStore().loadData(this.getArrayStoreData(store, 'Isotype'));
+                    //this.conjugateCombobox.getStore().loadData(this.getArrayStoreData(store, 'Conjugate'));
+                }
+            },
+            scope: this
+        });        
 
         // add button to apply selections to the generated graph/report
         this.resetGraphButton = new Ext.Button({
@@ -278,6 +259,51 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
         var enable = (this.analyte != undefined && this.isotype != undefined && this.conjugate != undefined);
         this.resetGraphButton.setDisabled(!enable);
         return enable;
+    },
+
+    filterIsotypeCombo: function() {
+        if (this.analyte != undefined)
+        {
+            this.isotypeCombobox.clearValue();
+            this.graphParamStore.filter([{property: 'Analyte', value: this.analyte, anyMatch: false, exactMatch: true}]);
+            this.isotypeCombobox.getStore().loadData(this.getArrayStoreData(this.graphParamStore, 'Isotype'));
+            this.isotypeCombobox.enable();
+        }
+        else
+        {
+            this.isotypeCombobox.clearValue();
+            this.isotypeCombobox.disable();
+            this.conjugateCombobox.clearValue();
+            this.conjugateCombobox.disable();
+        }
+    },
+
+    filterConjugateCombo: function() {
+        if (this.isotype != undefined)
+        {
+            this.conjugateCombobox.clearValue();
+            this.graphParamStore.filter({
+                fn: function(record) {
+                    return record.get('Analyte') == this.analyte && record.get('Isotype') == this.isotype;
+                },
+                scope: this
+            }),
+            this.conjugateCombobox.getStore().loadData(this.getArrayStoreData(this.graphParamStore, 'Conjugate'));
+            this.conjugateCombobox.enable();
+        }
+        else
+        {
+            this.conjugateCombobox.clearValue();
+            this.conjugateCombobox.disable();
+        }
+    },
+
+    getArrayStoreData: function(store, colName) {
+        var storeData = [];
+        Ext.each(store.collect(colName, true, false).sort(), function(value){
+            storeData.push([value, value == "" ? "[None]" : value]);
+        });
+        return storeData;
     },
 
     allParamsLoaded: function() {
