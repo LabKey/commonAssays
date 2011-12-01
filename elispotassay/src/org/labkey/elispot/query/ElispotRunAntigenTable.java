@@ -15,8 +15,11 @@
  */
 package org.labkey.elispot.query;
 
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.query.PlateBasedAssayRunDataTable;
 import org.labkey.elispot.ElispotDataHandler;
@@ -31,7 +34,7 @@ import java.sql.SQLException;
  * Time: 1:45:11 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
+public class ElispotRunAntigenTable extends ElispotRunDataTable
 {
     public ElispotRunAntigenTable(final AssaySchema schema, final ExpProtocol protocol)
     {
@@ -52,5 +55,31 @@ public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
     public String getDataRowLsidPrefix()
     {
         return ElispotDataHandler.ELISPOT_ANTIGEN_ROW_LSID_PREFIX;  
+    }
+
+    @Override
+    protected ColumnInfo resolveColumn(String name)
+    {
+        ColumnInfo result = super.resolveColumn(name);
+
+        if ("Properties".equalsIgnoreCase(name))
+        {
+            // Hook up a column that joins back to this table so that the columns formerly under the Properties
+            // node can still be queried there.
+            result = wrapColumn("Properties", getRealTable().getColumn("ObjectId"));
+            result.setIsUnselectable(true);
+            LookupForeignKey fk = new LookupForeignKey("ObjectId")
+            {
+                @Override
+                public TableInfo getLookupTableInfo()
+                {
+                    return new ElispotRunAntigenTable(_schema, _protocol);
+                }
+            };
+            fk.setPrefixColumnCaption(false);
+            result.setFk(fk);
+        }
+
+        return result;
     }
 }
