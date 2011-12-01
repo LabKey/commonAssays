@@ -72,12 +72,39 @@ public class GroupNumberDisplayColumn extends DataColumn
         long groupNumber;
         if (_fromQuery)
         {
-            if (row.get(_collectionIdColumn.getAlias()) == null)
+            if (_collectionIdColumn == null || getColumnInfo() == null)
             {
-                return "";
+                StringBuilder sb = new StringBuilder();
+                if (_collectionIdColumn == null)
+                {
+                    sb.append("Could not resolve IndistinguishableCollectionId column, please be sure that it is included in any custom queries. ");
+                }
+                if (getColumnInfo() == null)
+                {
+                    sb.append("Could not resolve RowId column, please be sure that it is included in any custom queries. ");
+                }
+
+                return sb.toString();
             }
-            collectionId = ((Number)row.get(_collectionIdColumn.getAlias())).longValue();
-            groupNumber = ((Number)row.get(getColumnInfo().getAlias())).longValue();
+            else
+            {
+                if (row.get(_collectionIdColumn.getAlias()) == null)
+                {
+                    return "";
+                }
+                Number collectionIdObject = (Number) row.get(_collectionIdColumn.getAlias());
+                if (collectionIdObject == null)
+                {
+                    return "";
+                }
+                collectionId = collectionIdObject.longValue();
+                Number groupNumberObject = (Number) row.get(getColumnInfo().getAlias());
+                if (groupNumberObject == null)
+                {
+                    return "";
+                }
+                groupNumber = groupNumberObject.longValue();
+            }
         }
         else
         {
@@ -114,18 +141,16 @@ public class GroupNumberDisplayColumn extends DataColumn
             Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(getColumnInfo().getParentTable(), keys);
 
             _collectionIdColumn = cols.get(idiKey);
-            if (_collectionIdColumn == null)
+            if (_collectionIdColumn != null)
             {
-                throw new IllegalStateException("Could not resolve IndistinguishableCollectionId column from " + thisFieldKey + ", parent table was " + getColumnInfo().getParentTable());
+                columns.add(_collectionIdColumn);
             }
-            columns.add(_collectionIdColumn);
 
             ColumnInfo groupIdCol = cols.get(groupIdKey);
-            if (groupIdCol == null)
+            if (groupIdCol != null)
             {
-                throw new IllegalStateException("Could not resolve RowId column from " + thisFieldKey + ", parent table was " + getColumnInfo().getParentTable());
+                columns.add(groupIdCol);
             }
-            columns.add(groupIdCol);
 
             ActionURL url = new ActionURL(MS2Controller.ShowProteinGroupAction.class, _container);
             setURL(url.toString() + "&grouping=proteinprophet&proteinGroupId=${" + groupIdKey.toString() + "}");

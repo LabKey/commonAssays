@@ -28,6 +28,7 @@
 <%@ page import="org.labkey.ms2.ShowPeptideContext" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="org.labkey.ms2.ElutionGraph" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
 JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
@@ -72,7 +73,7 @@ if (errorMessage != null)
         <td class="labkey-tab-space"><img width="5" src="<%= AppProps.getInstance().getContextPath() %>/_.gif"></td>
     </tr>
 </table>
-<table>
+<table style="height: <%= ElutionGraph.HEIGHT * 3 + 50 %>px;">
     <tr>
         <td>
             <table align="center">
@@ -91,7 +92,7 @@ if (errorMessage != null)
                 </tr>
             </table>
         </td>
-        <td><img src="<%=elutionGraphUrl.getEncodedLocalURIString()%>" alt="Light Elution Graph"/></td>
+        <td><img height="<%= ElutionGraph.HEIGHT %>" width="<%= ElutionGraph.WIDTH %>" src="<%=elutionGraphUrl.getEncodedLocalURIString()%>" alt="Light Elution Graph"/></td>
     </tr>
     <%
         elutionGraphUrl.setAction(MS2Controller.ShowHeavyElutionGraphAction.class);
@@ -114,7 +115,7 @@ if (errorMessage != null)
                 </tr>
             </table>
         </td>
-        <td><img src="<%=elutionGraphUrl.getEncodedLocalURIString()%>" alt="Heavy Elution Graph"/></td>
+        <td><img height="<%= ElutionGraph.HEIGHT %>" width="<%= ElutionGraph.WIDTH %>" src="<%=elutionGraphUrl.getEncodedLocalURIString()%>" alt="Heavy Elution Graph"/></td>
     </tr>
     <%
         elutionGraphUrl.setAction(MS2Controller.ShowCombinedElutionGraphAction.class);
@@ -133,6 +134,6 @@ if (errorMessage != null)
                 </tr>
             </table>
         </td>
-        <td><img src="<%=elutionGraphUrl.getEncodedLocalURIString()%>" alt="Combined Elution Graph"/></td>
+        <td><img height="<%= ElutionGraph.HEIGHT %>" width="<%= ElutionGraph.WIDTH %>" src="<%=elutionGraphUrl.getEncodedLocalURIString()%>" alt="Combined Elution Graph"/></td>
     </tr>
 </table>

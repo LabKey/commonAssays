@@ -37,8 +37,12 @@ public class QueryAACoverageColumn extends PeptideAggregrationDisplayColumn
 
         _sequenceColumn = sequenceColumn;
 
-        setFormatString("0.0%");
-        setTsvFormatString("0.00");
+        // Don't set a format if we don't have all of the columns or we'll blow up trying to format the error string
+        if (sequenceColumn != null && seqIdColumn != null && peptideColumn != null)
+        {
+            setFormatString("0.0%");
+            setTsvFormatString("0.00");
+        }
         setWidth("90");
         setTextAlign("right");
     }

@@ -368,7 +368,7 @@ public class PeptidesTableInfo extends FilteredTable
             {
                 SequencesTableInfo sequenceTable = new SequencesTableInfo(ProteinManager.getTableInfoSequences().getName(), _schema);
                 SQLFragment fastaNameSQL = new SQLFragment(getName() + ".Protein");
-                ExprColumn fastaNameColumn = new ExprColumn(PeptidesTableInfo.this, "Database Sequence Name", fastaNameSQL, JdbcType.VARCHAR);
+                ExprColumn fastaNameColumn = new ExprColumn(sequenceTable, "Database Sequence Name", fastaNameSQL, JdbcType.VARCHAR);
                 sequenceTable.addColumn(fastaNameColumn);
 
                 fastaNameColumn.setDisplayColumnFactory(new ProteinDisplayColumnFactory(showProteinURLString));

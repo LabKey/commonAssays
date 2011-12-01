@@ -48,6 +48,20 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
 
     public Object getValue(RenderContext ctx)
     {
+        if (_peptideColumn == null || _groupingColumn == null)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (_peptideColumn == null)
+            {
+                sb.append("Could not resolve 'Peptide' column, please be sure it is part of any custom queries. ");
+            }
+            if (_groupingColumn == null)
+            {
+                sb.append("Could not resolve 'SeqId' column, please be sure it is part of any custom queries. ");
+            }
+            return sb.toString();
+        }
+
         ResultSet originalRS = ctx.getResultSet();
         ResultSet rs = originalRS;
 
@@ -115,8 +129,14 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
     public void addQueryColumns(Set<ColumnInfo> set)
     {
         super.addQueryColumns(set);
-        set.add(_groupingColumn);
-        set.add(_peptideColumn);
+        if (_groupingColumn != null)
+        {
+            set.add(_groupingColumn);
+        }
+        if (_peptideColumn != null)
+        {
+            set.add(_peptideColumn);
+        }
     }
 
     public abstract Class getValueClass();

@@ -3760,6 +3760,9 @@ public class MS2Controller extends SpringActionController
 
             gridView.setFilter(runFilter);
             gridView.setTitle("Show All Runs");
+            rgn.setShadeAlternatingRows(true);
+            rgn.setShowBorders(true);
+            rgn.setButtonBarPosition(DataRegion.ButtonBarPosition.NONE);
 
             setTitle("Show All Runs");
 
@@ -4404,7 +4407,7 @@ public class MS2Controller extends SpringActionController
                 CurrentFilterView peptideCountsView = new CurrentFilterView(null, sqlSummaries);
                 peptideCountsView.setFrame(FrameType.NONE);
                 gridView.setFrame(FrameType.NONE);
-                VBox vBox = new VBox(peptideCountsView, new HtmlView("<a name=\"Peptides\" />"), gridView);
+                VBox vBox = new VBox(peptideCountsView, new HtmlView("<a name=\"Peptides\"></a>"), gridView);
                 vBox.setFrame(FrameType.PORTAL);
                 vBox.setTitle("Peptides");
                 vBox.enableExpandCollapse("Peptides", false);
