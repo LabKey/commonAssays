@@ -30,41 +30,34 @@
 <form method="post" action="insertAnnots.post" enctype="multipart/form-data">
 <table>
     <tr>
-      <td>Full file path:</td>
+      <td class="labkey-form-label">Full file path</td>
       <td><input type="text" name="fileName" id='fname' size="70" value="<%= h(bean.getFileName())%>"></td>
     </tr>
     <tr>
-      <td>Comment:</td>
+      <td class="labkey-form-label">Comment</td>
       <td><input type='text' name='comment' size='70' value="<%= h(bean.getComment())%>"></td>
     </tr>
     <tr>
-      <td>Type:</td>
+      <td class="labkey-form-label">Type</td>
       <td>
-       <select name='fileType' onchange="document.getElementById('fastaOnly').style.display = 'fasta' == this.value ? 'block' : 'none'; document.getElementById('uniprotOnly').style.display = 'uniprot' == this.value ? 'block' : 'none';">
+       <select name='fileType' onchange="document.getElementById('fastaGuess').style.display = ('fasta' == this.value ? 'table-row' : 'none'); document.getElementById('fastaOrganism').style.display = ('fasta' == this.value ? 'table-row' : 'none'); document.getElementById('uniprotOnly').style.display = 'uniprot' == this.value ? 'table-row' : 'none';">
           <option value='uniprot' <% if ("uniprot".equals(bean.getFileType())) { %>selected<% } %>>uniprot</option>
           <option value='fasta' <% if ("fasta".equals(bean.getFileType())) { %>selected<% } %>>fasta</option>
        </select>
       </td>
     </tr>
-    <tr>
-        <td/>
+    <tr id="fastaOrganism" style="display: <%= "fasta".equals(bean.getFileType()) ? "table-row" : "none" %>;">
+       <td class="labkey-form-label">Default Organism</td>
+       <td><input type='text' name='defaultOrganism' size='50' value='<%= bean.getDefaultOrganism() %>'></td>
+    </tr>
+    <tr id="fastaGuess" style="display: <%= "fasta".equals(bean.getFileType()) ? "table-row" : "none" %>;">
+       <td></td>
+       <td><input type='checkbox' name='shouldGuess' <%= "1".equals(bean.getShouldGuess()) ? "checked" : ""%> value='1'> Try to guess organism</td>
+    </tr>
+    <tr id="uniprotOnly" style="display: <%= "uniprot".equals(bean.getFileType()) ? "table-row" : "none" %>;">
+        <td></td>
         <td>
-            <table id="fastaOnly" style="display: <%= "fasta".equals(bean.getFileType()) ? "block" : "none" %>;">
-                <tr>
-                   <td>Try to guess organism?</td>
-                   <td><input type='checkbox' name='shouldGuess' <%= "1".equals(bean.getShouldGuess()) ? "checked" : ""%> value='1'></td>
-                </tr>
-                <tr>
-                   <td>Default Organism:</td>
-                   <td><input type='text' name='defaultOrganism' size='50' value='<%= bean.getDefaultOrganism() %>'></td>
-                </tr>
-            </table>
-            <table id="uniprotOnly" style="display: <%= "uniprot".equals(bean.getFileType()) ? "block" : "none" %>;">
-                <tr>
-                   <td>Clear existing identifiers and annotations?</td>
-                   <td><input type='checkbox' name='clearExisting' <%= bean.isClearExisting() ? "checked" : ""%>><%= helpPopup("Clear Existing", "By default, LabKey Server will merge protein identifiers and annotations with the ones it has already loaded. By checking this box, you can make the server clear out any existing identifiers and annotations it might have, so that the ones in the new file replace them.")%></td>
-                </tr>
-            </table>
+           <input type='checkbox' name='clearExisting' <%= bean.isClearExisting() ? "checked" : ""%>>Clear existing identifiers and annotations<%= helpPopup("Clear Existing", "By default, LabKey Server will merge protein identifiers and annotations with the ones it has already loaded. By checking this box, you can make the server clear out any existing identifiers and annotations it might have, so that the ones in the new file replace them.")%>
         </td>
     </tr>
     <tr>

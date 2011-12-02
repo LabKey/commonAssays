@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
+import org.labkey.api.reader.FastaLoader;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.ResultSetUtil;
@@ -108,6 +109,20 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         if (!NetworkDrive.exists(file) || !file.isFile())
         {
             throw new FileNotFoundException("File " + _parseFName + " does not exist.");
+        }
+        FastaLoader loader = new ProteinFastaLoader(file);
+        FastaLoader.FastaIterator fastaIterator = loader.iterator();
+        try
+        {
+            fastaIterator.hasNext();
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new IOException(e.getMessage());
+        }
+        finally
+        {
+            fastaIterator.close();
         }
     }
 
