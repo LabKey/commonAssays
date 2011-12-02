@@ -293,8 +293,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         analyteDomain.setDescription("The user will be prompted to enter these properties for each of the analytes in the file they upload. This is the third and final step of the upload process.");
         addProperty(analyteDomain, "StandardName", "Standard Name", PropertyType.STRING);
 
-        addProperty(analyteDomain, "UnitsOfConcentration", "Units of Concentration", PropertyType.STRING);
-
         addProperty(analyteDomain, "AnalyteType", "Analyte Type", PropertyType.STRING);
         addProperty(analyteDomain, "WeightingMethod", "Weighting Method", PropertyType.STRING);
         
