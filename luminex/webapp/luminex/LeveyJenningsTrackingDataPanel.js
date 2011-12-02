@@ -93,7 +93,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             autoLoad: false,
             schemaName: 'assay',
             queryName: this.assayName + ' AnalyteTitration',
-            columns: 'Titration, Analyte, Titration/Run/Isotype, Titration/Run/Conjugate, '
+            columns: 'Titration, Analyte, Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/RowId, '
                     + 'Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
                     + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, '
                     + 'Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, Analyte/Properties/LotNumber, '
@@ -132,7 +132,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'Titration', dataIndex:'Titration', hidden: true},
                 {header:'Isotype', dataIndex:'Titration/Run/Isotype', hidden: true},
                 {header:'Conjugate', dataIndex:'Titration/Run/Conjugate', hidden: true},                    
-                {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.tooltipRenderer, width:200},
+                {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.assayIdHrefRenderer, width:200},
                 {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75},
                 {header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.tooltipRenderer, width:75},
                 {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100},
@@ -360,5 +360,12 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             return Ext.util.Format.number(Ext.util.Format.round(val, 6), '0.000000');
         else
             return Ext.util.Format.number(Ext.util.Format.round(val, 2), '0.00');
+    },
+
+    assayIdHrefRenderer: function(val, p, record) {
+        var msg = Ext.util.Format.htmlEncode(val);
+        p.attr = 'ext:qtip="' + msg + '"';
+        var url = LABKEY.ActionURL.buildURL('assay', 'assayDetailRedirect', LABKEY.container.path,  {runId: record.get('Titration/Run/RowId')});
+        return "<a href='" + url + "'>" + msg + "</a>";
     }
 });
