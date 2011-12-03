@@ -708,8 +708,8 @@ public class FlowSchema extends UserSchema
         @Override
         public String getPublicName()
         {
-            // 7471 Let schema explorer resolve lookup table names to "exp.Datas" table.
-            return ExpSchema.TableType.Datas.toString();
+            // 7471 Let schema explorer resolve lookup table names to "exp.Data" table.
+            return ExpSchema.TableType.Data.toString();
         }
 
         @Override

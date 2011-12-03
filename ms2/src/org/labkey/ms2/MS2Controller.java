@@ -872,6 +872,7 @@ public class MS2Controller extends SpringActionController
                 quantView.setFrame(WebPartView.FrameType.PORTAL);
                 result.addView(quantView);
             }
+            getPageConfig().setTemplate(PageConfig.Template.Print);
             return result;
         }
 
@@ -4306,6 +4307,7 @@ public class MS2Controller extends SpringActionController
             summaryView.setTitle("Protein Group Details");
             summaryView.setFrame(WebPartView.FrameType.PORTAL);
 
+            getPageConfig().setTemplate(PageConfig.Template.Print);
             return new VBox(summaryView, view);
         }
 

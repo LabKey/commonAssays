@@ -100,7 +100,7 @@ public class ViabilityAssaySchema extends AssaySchema
 
     public ExpDataTable createDataTable()
     {
-        ExpDataTable ret = ExperimentService.get().createDataTable(ExpSchema.TableType.Datas.toString(), this);
+        ExpDataTable ret = ExperimentService.get().createDataTable(ExpSchema.TableType.Data.toString(), this);
         ret.addColumn(ExpDataTable.Column.RowId);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
