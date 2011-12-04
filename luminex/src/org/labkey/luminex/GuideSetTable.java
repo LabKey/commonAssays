@@ -229,6 +229,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         protected GuideSet insert(User user, Container container, GuideSet bean) throws ValidationException, DuplicateKeyException, QueryUpdateServiceException, SQLException
         {
             validateProtocol(bean);
+            validateGuideSetValues(bean);
             boolean current = bean.isCurrentGuideSet();
             if (current && getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getTitrationName(), bean.getConjugate(), bean.getIsotype()) != null)
             {
@@ -244,6 +245,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             {
                 throw new ValidationException("RowId is required for updates");
             }
+            validateGuideSetValues(bean);
             if (bean.isCurrentGuideSet())
             {
                 GuideSet currentGuideSet = getMatchingCurrentGuideSet(_protocol, bean.getAnalyteName(), bean.getTitrationName(), bean.getConjugate(), bean.getIsotype());
@@ -268,6 +270,30 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                 {
                     throw new ValidationException("ProtocolId must be set to " + _protocol.getRowId());
                 }
+            }
+        }
+
+        private void validateGuideSetValues(GuideSet bean) throws ValidationException
+        {
+            int maxLength = LuminexSchema.getTableInfoGuideSet().getColumn("AnalyteName").getScale();
+            if (bean.getAnalyteName() != null && bean.getAnalyteName().length() > maxLength)
+            {
+                throw new ValidationException("AnalyteName value '" + bean.getAnalyteName() + "' is too long, maximum length is " + maxLength + " characters");
+            }
+            maxLength = LuminexSchema.getTableInfoGuideSet().getColumn("Conjugate").getScale();
+            if (bean.getConjugate() != null && bean.getConjugate().length() > maxLength)
+            {
+                throw new ValidationException("Conjugate value '" + bean.getConjugate() + "' is too long, maximum length is " + maxLength + " characters");
+            }
+            maxLength = LuminexSchema.getTableInfoGuideSet().getColumn("Isotype").getScale();
+            if (bean.getIsotype() != null && bean.getIsotype().length() > maxLength)
+            {
+                throw new ValidationException("Isotype value '" + bean.getIsotype() + "' is too long, maximum length is " + maxLength + " characters");
+            }
+            maxLength = LuminexSchema.getTableInfoGuideSet().getColumn("TitrationName").getScale();
+            if (bean.getTitrationName() != null && bean.getTitrationName().length() > maxLength)
+            {
+                throw new ValidationException("TitrationName value '" + bean.getTitrationName() + "' is too long, maximum length is " + maxLength + " characters");
             }
         }
     }
