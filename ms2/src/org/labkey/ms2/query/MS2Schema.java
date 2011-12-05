@@ -561,23 +561,12 @@ public class MS2Schema extends UserSchema
             protected void applyContainerFilter(ContainerFilter filter)
             {
                 clearConditions("Container");
-                Collection<String> ids = filter.getIds(MS2Schema.this.getContainer());
-                if (ids != null)
-                {
-                    SQLFragment sql = new SQLFragment("Run IN (SELECT r.Run FROM ");
-                    sql.append(MS2Manager.getTableInfoRuns(), "r");
-                    sql.append(" WHERE r.Container IN (");
-                    String separator = "";
-                    for (String containerId : ids)
-                    {
-                        sql.append(separator);
-                        separator = ", ";
-                        sql.append("?");
-                        sql.add(containerId);
-                    }
-                    sql.append("))");
-                    addCondition(sql, "Container");
-                }
+                SQLFragment sql = new SQLFragment("Run IN (SELECT r.Run FROM ");
+                sql.append(MS2Manager.getTableInfoRuns(), "r");
+                sql.append(" WHERE ");
+                sql.append(filter.getSQLFragment(getSchema(), "r.Container", MS2Schema.this.getContainer()));
+                sql.append(")");
+                addCondition(sql, "Container");
             }
         };
         result.setContainerFilter(result.getContainerFilter());

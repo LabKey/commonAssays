@@ -15,9 +15,9 @@
  */
 package org.labkey.luminex;
 
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
@@ -47,7 +47,6 @@ import org.labkey.api.view.UnauthorizedException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -105,14 +104,13 @@ public class WellExclusionTable extends AbstractExclusionTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(Collection<String> ids)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
     {
         SQLFragment sql = new SQLFragment("DataId IN (SELECT RowId FROM ");
         sql.append(ExperimentService.get().getTinfoData(), "d");
-        sql.append(" WHERE Container IN (");
-        sql.append(StringUtils.repeat("?", ", ", ids.size()));
-        sql.append("))");
-        sql.addAll(ids);
+        sql.append(" WHERE ");
+        sql.append(filter.getSQLFragment(getSchema(), "Container", container));
+        sql.append(")");
         return sql;
     }
 

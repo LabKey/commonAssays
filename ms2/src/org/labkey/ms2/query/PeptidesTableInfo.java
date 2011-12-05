@@ -307,23 +307,9 @@ public class PeptidesTableInfo extends FilteredTable
         sql.append(MS2Manager.getTableInfoFractions());
         sql.append(" WHERE Run IN (SELECT Run FROM ");
         sql.append(MS2Manager.getTableInfoRuns());
-        sql.append(" WHERE Deleted = ?");
+        sql.append(" WHERE Deleted = ? AND ");
         sql.add(Boolean.FALSE);
-        Collection<String> ids = getContainerFilter().getIds(_schema.getContainer());
-        if(ids != null)
-        {
-            sql.append(" AND Container IN (");
-            String separator = "";
-            for (String containerId : ids)
-            {
-                sql.append(separator);
-                separator = ", ";
-                sql.append("'");
-                sql.append(containerId);
-                sql.append("'");
-            }
-            sql.append(")");
-        }
+        sql.append(getContainerFilter().getSQLFragment(getSchema(), new SQLFragment("Container"), _schema.getContainer(), false, true));
         if (_schema.getRuns() != null)
         {
             sql.append(" AND Run IN ");

@@ -17,7 +17,20 @@
 package org.labkey.viability;
 
 import org.apache.commons.lang.StringUtils;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.MVDisplayColumnFactory;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -28,7 +41,11 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
-import org.labkey.api.query.*;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
@@ -38,7 +55,16 @@ import org.labkey.api.view.HttpView;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ViabilityAssaySchema extends AssaySchema
 {
@@ -506,16 +532,10 @@ public class ViabilityAssaySchema extends AssaySchema
                     "ResultID IN (" +
                         "SELECT result.RowId FROM " +
                             ViabilitySchema.getTableInfoResults() + " result " +
-                        "WHERE result.ProtocolID = ? ");
+                        "WHERE result.ProtocolID = ? AND ");
             filter.add(getProtocol().getRowId());
 
-            Collection<String> ids = containerFilter.getIds(getContainer());
-            if (ids != null)
-            {
-                String questionMarks = StringUtils.repeat("?, ", ids.size());
-                filter.append("AND result.Container IN (" + questionMarks.substring(0, questionMarks.length() - 2) + ")");
-                filter.addAll(ids);
-            }
+            filter.append(containerFilter.getSQLFragment(getSchema(), "result.Container", getContainer()));
 
             filter.append(")");
             addCondition(filter, "ResultID");

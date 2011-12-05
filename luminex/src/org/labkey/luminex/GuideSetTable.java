@@ -18,6 +18,7 @@ package org.labkey.luminex;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RuntimeSQLException;
@@ -40,7 +41,6 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 
 import java.sql.SQLException;
-import java.util.Collection;
 
 /**
  * User: jeckels
@@ -113,7 +113,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(Collection<String> ids)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
     {
         // Guide sets are scoped to the protocol, not to folders
         SQLFragment sql = new SQLFragment("ProtocolId = ?");

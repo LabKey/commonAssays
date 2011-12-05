@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -49,15 +50,11 @@ public abstract class AbstractLuminexTable extends FilteredTable
         if (_needsFilter)
         {
             clearConditions(CONTAINER_FAKE_COLUMN_NAME);
-            Collection<String> ids = filter.getIds(_schema.getContainer());
-            if (ids != null)
-            {
-                addCondition(createContainerFilterSQL(ids), CONTAINER_FAKE_COLUMN_NAME);
-            }
+            addCondition(createContainerFilterSQL(filter, _schema.getContainer()), CONTAINER_FAKE_COLUMN_NAME);
         }
     }
 
-    protected abstract SQLFragment createContainerFilterSQL(Collection<String> ids);
+    protected abstract SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container);
 
     @Override
     public String getPublicSchemaName()

@@ -55,23 +55,11 @@ public class FilesTableInfo extends FilteredTable
 
         //add a condition that excludes deleted and not full-imported files
         //also limit to the passed container if not null
-        SQLFragment sf = new SQLFragment("Imported=? AND Deleted=?");
+        SQLFragment sf = new SQLFragment("Imported=? AND Deleted=? AND ExpDataFileId IN (SELECT RowId FROM Exp.Data WHERE ");
         sf.add(true);
         sf.add(false);
-        Collection<String> containerIds = filter.getIds(_expSchema.getContainer());
-        if (containerIds != null)
-        {
-            sf.append(" AND ExpDataFileId IN (SELECT RowId FROM Exp.Data WHERE Container IN (");
-            String separator = "";
-            for (String containerId : containerIds)
-            {
-                sf.append(separator);
-                separator = ", ";
-                sf.append("?");
-                sf.add(containerId);
-            }
-            sf.append("))");
-        }
+        sf.append(filter.getSQLFragment(getSchema(), "Container", _expSchema.getContainer()));
+        sf.append(")");
         addCondition(sf, "Imported", "Deleted", "ExpDataFileId");
     }
 

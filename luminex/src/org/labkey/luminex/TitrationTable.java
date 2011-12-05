@@ -15,8 +15,9 @@
  */
 package org.labkey.luminex;
 
-import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
@@ -24,8 +25,6 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
-
-import java.util.Collection;
 
 /**
  * User: jeckels
@@ -68,14 +67,13 @@ public class TitrationTable extends AbstractLuminexTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(Collection<String> ids)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
     {
         SQLFragment sql = new SQLFragment("RunId IN (SELECT RowId FROM ");
         sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
-        sql.append(" WHERE Container IN (");
-        sql.append(StringUtils.repeat("?", ", ", ids.size()));
-        sql.append("))");
-        sql.addAll(ids);
+        sql.append(" WHERE ");
+        sql.append(filter.getSQLFragment(getSchema(), "Container", container));
+        sql.append(")");
         return sql;
     }
 }

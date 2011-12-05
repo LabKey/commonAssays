@@ -16,9 +16,9 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.SQLFragment;
@@ -43,7 +43,6 @@ import org.labkey.api.util.Pair;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -144,16 +143,15 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(Collection<String> ids)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
     {
         SQLFragment sql = new SQLFragment("AnalyteId IN (SELECT RowId FROM ");
         sql.append(LuminexSchema.getTableInfoAnalytes(), "a");
         sql.append(" WHERE DataId IN (SELECT RowId FROM ");
         sql.append(ExperimentService.get().getTinfoData(), "d");
-        sql.append(" WHERE Container IN (");
-        sql.append(StringUtils.repeat("?", ", ", ids.size()));
-        sql.append(")))");
-        sql.addAll(ids);
+        sql.append(" WHERE ");
+        sql.append(filter.getSQLFragment(getSchema(), "Container", container));
+        sql.append("))");
         return sql;
     }
 

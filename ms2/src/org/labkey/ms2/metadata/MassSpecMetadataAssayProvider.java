@@ -207,21 +207,8 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
             searchCountSQL.add(prefix);
             separator = " OR ";
         }
-        searchCountSQL.append(")");
-        Collection<String> ids = containerFilter.getIds(container);
-        if (ids != null)
-        {
-            searchCountSQL.append(" AND er.Container IN (");
-            separator = "";
-            for (String id : ids)
-            {
-                searchCountSQL.append(separator);
-                searchCountSQL.append("?");
-                searchCountSQL.add(id);
-                separator = ", ";
-            }
-            searchCountSQL.append(")");
-        }
+        searchCountSQL.append(") AND ");
+        searchCountSQL.append(containerFilter.getSQLFragment(ExperimentService.get().getSchema(), "er.Container", container));
 
         searchCountSQL.append(")");
         return searchCountSQL;

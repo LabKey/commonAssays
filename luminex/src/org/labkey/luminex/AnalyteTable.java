@@ -15,9 +15,9 @@
  */
 package org.labkey.luminex;
 
-import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -43,7 +43,6 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -125,14 +124,13 @@ public class AnalyteTable extends AbstractLuminexTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(Collection<String> ids)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
     {
         SQLFragment sql = new SQLFragment("DataId IN (SELECT RowId FROM ");
         sql.append(ExperimentService.get().getTinfoData(), "d");
-        sql.append(" WHERE Container IN (");
-        sql.append(StringUtils.repeat("?", ", ", ids.size()));
-        sql.append("))");
-        sql.addAll(ids);
+        sql.append(" WHERE ");
+        sql.append(filter.getSQLFragment(getSchema(), "Container", container));
+        sql.append(")");
         return sql;
     }
 
