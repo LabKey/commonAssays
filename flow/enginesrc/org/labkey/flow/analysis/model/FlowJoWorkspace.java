@@ -749,7 +749,8 @@ abstract public class FlowJoWorkspace implements Serializable
         name = StringUtils.replace(name, "<", CompensationMatrix.PREFIX);
         name = StringUtils.replace(name, ">", CompensationMatrix.SUFFIX);
         name = StringUtils.replaceChars(name, ',', ';');
-        name = StringUtils.replaceChars(name, (char) 209, '-'); // crazy mac em-dash
+        name = StringUtils.replaceChars(name, (char) 209, '-'); // crazy mac em-dash (unicode mis-encoding?)
+        name = StringUtils.replaceChars(name, (char) 208, '-'); // and another?
         return name;
     }
 
