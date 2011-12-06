@@ -351,7 +351,7 @@
             },
 
             getTemplateArgs : function() {
-                return [this.type, this.messages, this.style]
+                return [this.type, this.messages, this.msgStyle]
             },
 
             close : function() {
@@ -371,7 +371,7 @@
             renderTo : 'nab-msg-target',
             messages : '<b>Note:</b> This NAb workflow was deprecated in version 11.3. Consider using the updated NAb assay tool. ' +
                        '<a href="https://www.labkey.org/wiki/home/Documentation/page.view?name=nabAssayTutorial" target="_blank">See&nbsp;Tutorial</a>',
-            style    : 'width: 764px; text-align: center;'
+            msgStyle : 'width: 764px; text-align: center;'
         });
     });
 </script>
