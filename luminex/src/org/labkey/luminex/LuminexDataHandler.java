@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.assay.dilution.ParameterCurveImpl;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ObjectFactory;
@@ -408,11 +409,15 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // Do a query to find all of the rows that have already been inserted 
         LuminexDataTable tableInfo = provider.createDataTable(AssayService.get().createSchema(user, expRun.getContainer()), protocol, false);
         SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause("Data", dataIds));
-        LuminexDataRow[] databaseRows = Table.select(tableInfo, Table.ALL_COLUMNS, filter, null, LuminexDataRow.class);
+        // Pull back as a map so that we get custom properties as well
+        Map[] databaseMaps = Table.select(tableInfo, Table.ALL_COLUMNS, filter, null, Map.class);
 
         Map<DataRowKey, LuminexDataRow> existingRows = new HashMap<DataRowKey, LuminexDataRow>();
-        for (LuminexDataRow existingRow : databaseRows)
+        for (Map<String, Object> databaseMap : databaseMaps)
         {
+            LuminexDataRow existingRow = BeanObjectFactory.Registry.getFactory(LuminexDataRow.class).fromMap(databaseMap);
+            // Make sure an extra properties are made available
+            existingRow.setExtraProperties(new CaseInsensitiveHashMap<Object>(databaseMap));
             existingRows.put(new DataRowKey(existingRow), existingRow);
         }
 
