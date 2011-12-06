@@ -35,6 +35,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -485,7 +486,14 @@ public class PepXmlImporter extends MS2Importer
         if (v == null)
             stmt.setNull(n, java.sql.Types.FLOAT);
         else
-            stmt.setFloat(n, Float.valueOf(v).floatValue());
+        {
+            float f = Float.valueOf(v).floatValue();
+            if (f >= 0 && f < 1e-30)
+            {
+                f = 1e-30f;
+            }
+            stmt.setFloat(n, f);
+        }
     }
 
     private long getPeptideId(PreparedStatement stmt) throws SQLException

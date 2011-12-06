@@ -95,7 +95,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
         }
         catch (Exception e)
         {
-            error("Error occurred running the microarray upgrade background job", e);
+            error("Error occurred running the mspicture upgrade background job", e);
             setStatus(PipelineJob.ERROR_STATUS, "Job finished at: " + DateUtil.nowISO());
         }
         finally

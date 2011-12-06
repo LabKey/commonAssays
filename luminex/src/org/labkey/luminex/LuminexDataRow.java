@@ -16,6 +16,7 @@
 
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ObjectFactory;
@@ -535,7 +536,7 @@ public class LuminexDataRow
         return row;
     }
 
-    /* package */ Map<String, Object> getExtraProperties()
+    /* package */ @NotNull Map<String, Object> getExtraProperties()
     {
         return _extraProperties;
     }

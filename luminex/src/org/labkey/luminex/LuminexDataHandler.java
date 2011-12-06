@@ -485,12 +485,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         private int _dataId;
         private int _analyteId;
         private String _well;
+        private Object _standard;
 
         public DataRowKey(LuminexDataRow dataRow)
         {
             _dataId = dataRow.getData();
             _analyteId = dataRow.getAnalyte();
             _well = dataRow.getWell();
+            _standard = dataRow.getExtraProperties().get("Standard");
         }
 
         @Override
@@ -503,6 +505,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
             if (_analyteId != that._analyteId) return false;
             if (_dataId != that._dataId) return false;
+            if (_standard != null ? !_standard.equals(that._standard) : that._standard != null) return false;
             if (_well != null ? !_well.equals(that._well) : that._well != null) return false;
 
             return true;
@@ -514,6 +517,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             int result = _dataId;
             result = 31 * result + _analyteId;
             result = 31 * result + (_well != null ? _well.hashCode() : 0);
+            result = 31 * result + (_standard != null ? _standard.hashCode() : 0);
             return result;
         }
     }
