@@ -97,12 +97,16 @@ public class KeywordsHandler extends BaseHandler
         for (FCSKeywordData fileData : data)
         {
             ProtocolApplicationBaseType app = addProtocolApplication(run);
-            ProtocolApplicationBaseType.OutputDataObjects outputs = app.getOutputDataObjects();
             String filename = URIUtil.getFilename(fileData.getURI());
-            String lsidFile = ExperimentService.get().generateGuidLSID(_job.getContainer(), ExpData.class);
-            _job.addStartingInput(lsidFile, URIUtil.getFilename(fileData.getURI()), null, null);
-            app.getInputRefs().addNewDataLSID().setStringValue(lsidFile);
+            // Using AutoFileLSID will try to find an existing exp.data (say an FCS file uploaded via webdav)
+            // otherwise will create a new LSID using the data's file url.
+            String lsidFile = "${AutoFileLSID}";
+            _job.addStartingInput(lsidFile, filename, new File(fileData.getURI().getPath()), null);
+            InputOutputRefsType.DataLSID dataLSID = app.getInputRefs().addNewDataLSID();
+            dataLSID.setDataFileUrl(fileData.getURI().toString());
+            dataLSID.setStringValue(lsidFile);
 
+            ProtocolApplicationBaseType.OutputDataObjects outputs = app.getOutputDataObjects();
             DataBaseType well = outputs.addNewData();
             well.setName(filename);
             well.setAbout(FlowDataObject.generateDataLSID(_job.getContainer(), FlowDataType.FCSFile));

@@ -275,6 +275,7 @@ flow/resources/schemas/dbscripts/postgresql/flow-0.00-9.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-10.10-10.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-11.10-11.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-11.19-11.191.sql -text
+flow/resources/schemas/dbscripts/postgresql/flow-11.20-11.21.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-8.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-1.50-1.60.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-1.53-1.54.sql -text
@@ -292,6 +293,7 @@ flow/resources/schemas/dbscripts/sqlserver/flow-0.00-9.10.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-10.10-10.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-11.10-11.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-11.19-11.191.sql -text
+flow/resources/schemas/dbscripts/sqlserver/flow-11.20-11.21.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-8.10.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-1.50-1.60.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-1.53-1.54.sql -text

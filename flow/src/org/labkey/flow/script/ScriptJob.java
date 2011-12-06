@@ -276,21 +276,26 @@ abstract public class ScriptJob extends FlowExperimentJob
 
         ExperimentArchiveType.StartingInputDefinitions defns = xar.getStartingInputDefinitions();
         InputOutputRefsType inputRefs = appInput.getInputRefs();
-        for (Map.Entry<String, StartingInput> input : _runData._startingDataInputs.entrySet())
+        for (StartingInput input : _runData._startingDataInputs.values())
         {
             InputOutputRefsType.DataLSID dataLSID = inputRefs.addNewDataLSID();
-            dataLSID.setStringValue(input.getKey());
-            if (input.getValue().role != null)
+            dataLSID.setStringValue(input.lsid);
+            if (input.role != null)
             {
-                dataLSID.setRoleName(input.getValue().role.toString());
+                dataLSID.setRoleName(input.role.toString());
             }
-            DataBaseType dbt = defns.addNewData();
-            dbt.setAbout(input.getKey());
-
-            dbt.setName(input.getValue().name);
-            if (input.getValue().file != null)
+            if (input.file != null)
             {
-                dbt.setDataFileUrl(input.getValue().file.toURI().toString());
+                dataLSID.setDataFileUrl(input.file.toURI().toString());
+            }
+
+            DataBaseType dbt = defns.addNewData();
+            dbt.setAbout(input.lsid);
+
+            dbt.setName(input.name);
+            if (input.file != null)
+            {
+                dbt.setDataFileUrl(input.file.toURI().toString());
             }
         }
         for (Map.Entry<String, StartingInput> input : _runData._startingMaterialInputs.entrySet())
@@ -303,13 +308,13 @@ abstract public class ScriptJob extends FlowExperimentJob
         appOutput.setActionSequence(FlowProtocolStep.markRunOutputs.getDefaultActionSequence());
         appOutput.setCpasType(ExpProtocol.ApplicationType.ExperimentRunOutput.toString());
         inputRefs = appOutput.getInputRefs();
-        for (Map.Entry<String, StartingInput> entry : _runData._runOutputs.entrySet())
+        for (StartingInput output : _runData._runOutputs.values())
         {
             InputOutputRefsType.DataLSID dataLSID = inputRefs.addNewDataLSID();
-            dataLSID.setStringValue(entry.getKey());
-            if (entry.getValue().role != null)
+            dataLSID.setStringValue(output.lsid);
+            if (output.role != null)
             {
-                dataLSID.setRoleName(entry.getValue().role.toString());
+                dataLSID.setRoleName(output.role.toString());
             }
         }
         _pendingRunLSIDs.add(_runData.getLSID());
@@ -351,7 +356,7 @@ abstract public class ScriptJob extends FlowExperimentJob
 
     public void addStartingMaterial(ExpMaterial material)
     {
-        _runData._startingMaterialInputs.put(material.getLSID(), new StartingInput(material.getName(), null, null));
+        _runData._startingMaterialInputs.put(material.getLSID(), new StartingInput(material.getLSID(), material.getName(), null, null));
     }
 
     public void addInput(ProtocolApplicationBaseType app, FlowDataObject data, InputRole role)
@@ -397,7 +402,7 @@ abstract public class ScriptJob extends FlowExperimentJob
             List<String> list = _processedRunLSIDs.get(step);
             if (list == null)
             {
-                list = new ArrayList();
+                list = new ArrayList<String>();
                 _processedRunLSIDs.put(step, list);
             }
             list.addAll(lsids);
@@ -406,13 +411,13 @@ abstract public class ScriptJob extends FlowExperimentJob
 
     public void addRunOutput(String lsid, InputRole role)
     {
-        StartingInput input = new StartingInput(lsid, null, role);
+        StartingInput input = new StartingInput(lsid, null, null, role);
         _runData._runOutputs.put(lsid, input);
     }
 
     public void addStartingInput(String lsid, String name, File file, InputRole role)
     {
-        _runData._startingDataInputs.put(lsid, new StartingInput(name, file, role));
+        _runData._startingDataInputs.put(name, new StartingInput(lsid, name, file, role));
     }
 
     public boolean allowMultipleSimultaneousJobs()

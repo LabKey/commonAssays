@@ -220,12 +220,14 @@ public abstract class FlowExperimentJob extends FlowJob
 
     class StartingInput
     {
-        public StartingInput(String name, File file, InputRole role)
+        public StartingInput(String lsid, String name, File file, InputRole role)
         {
+            this.lsid = lsid;
             this.name = name;
             this.file = file;
             this.role = role;
         }
+        String lsid;
         String name;
         File file;
         InputRole role;

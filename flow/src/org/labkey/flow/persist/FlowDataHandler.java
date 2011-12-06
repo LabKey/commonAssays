@@ -45,7 +45,9 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
 {
     static public final String EXT_DATA = "flowdata.xml";
     static public final String EXT_SCRIPT = "flowscript.xml";
+
     static public final FlowDataHandler instance = new FlowDataHandler();
+
     public void beforeDeleteData(List<ExpData> datas) throws ExperimentException
     {
         try
@@ -65,10 +67,12 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
             FlowDataObject obj = FlowDataObject.fromData(data);
             if (obj != null)
             {
+                // XXX: doesn't include graph bytes.
                 AttributeSet attrs = AttributeSetHelper.fromData(data);
                 PipelineService service = PipelineService.get();
 
                 attrs.relativizeURI(service.findPipelineRoot(data.getContainer()).getUri());
+                // XXX: perhaps save to more than one file for graphs?
                 attrs.save(out);
             }
         }
@@ -143,6 +147,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
 
     public void deleteData(ExpData data, Container container, User user)
     {
+        data.delete(user);
     }
 
     public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException

@@ -24,6 +24,9 @@ import org.labkey.flow.persist.ObjectType;
 
 abstract public class FlowDataType extends DataType
 {
+    // The prefix of the LSID namepsace prefix :)
+    public static final String FLOW_DATA_PREFIX = "Flow-";
+
     String _name;
     String _label;
     ObjectType _objType;
@@ -31,7 +34,7 @@ abstract public class FlowDataType extends DataType
 
     private FlowDataType(String type, String label, ObjectType objType, boolean requireAttrObject)
     {
-        super("Flow-" + type);
+        super(FLOW_DATA_PREFIX + type);
         _name = type;
         _label = label;
         _objType = objType;
