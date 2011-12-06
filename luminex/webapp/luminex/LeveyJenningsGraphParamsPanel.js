@@ -42,7 +42,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             cls: 'extContainer'
         });
 
-        this.addEvents('resetGraphBtnClicked');        
+        this.addEvents('applyGraphBtnClicked', 'graphParamsChanged');
 
         LABKEY.LeveyJenningsGraphParamsPanel.superclass.constructor.call(this, config);
     },
@@ -91,7 +91,8 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                     }
 
                     this.filterIsotypeCombo();
-                    this.enableResetGraphButton();
+                    this.enableApplyGraphButton();
+                    this.fireEvent('graphParamsChanged');
                 }
             }
         });
@@ -137,7 +138,8 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                 'select': function(combo, record, index) {
                     this.isotype = combo.getValue();
                     this.filterConjugateCombo();
-                    this.enableResetGraphButton();
+                    this.enableApplyGraphButton();
+                    this.fireEvent('graphParamsChanged');
                 }
             }
         });
@@ -180,7 +182,8 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
                 scope: this,
                 'select': function(combo, record, index) {
                     this.conjugate = combo.getValue();
-                    this.enableResetGraphButton();
+                    this.enableApplyGraphButton();
+                    this.fireEvent('graphParamsChanged');
                 }
             }
         });
@@ -239,25 +242,25 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
         });        
 
         // add button to apply selections to the generated graph/report
-        this.resetGraphButton = new Ext.Button({
-            text: 'Reset Graph',
+        this.applyGraphButton = new Ext.Button({
+            text: 'Apply',
             disabled: true,
             handler: function(){
-                // fire the resetGraphBtnClicked event so other panels can update based on the selected params
-                this.fireEvent('resetGraphBtnClicked', this.analyte, this.isotype, this.conjugate);
+                // fire the applyGraphBtnClicked event so other panels can update based on the selected params
+                this.fireEvent('applyGraphBtnClicked', this.analyte, this.isotype, this.conjugate);
             },
             scope: this
         });
-        items.push(this.resetGraphButton);
+        items.push(this.applyGraphButton);
 
         this.items = items;
 
         LABKEY.LeveyJenningsGraphParamsPanel.superclass.initComponent.call(this);
     },
 
-    enableResetGraphButton: function() {
+    enableApplyGraphButton: function() {
         var enable = (this.analyte != undefined && this.isotype != undefined && this.conjugate != undefined);
-        this.resetGraphButton.setDisabled(!enable);
+        this.applyGraphButton.setDisabled(!enable);
         return enable;
     },
 
@@ -307,10 +310,10 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
     },
 
     allParamsLoaded: function() {
-        if (this.enableResetGraphButton())
+        if (this.enableApplyGraphButton())
         {
-            // fire the resetGraphBtnClicked event so other panels can update based on the selected params
-            this.fireEvent('resetGraphBtnClicked', this.analyte, this.isotype, this.conjugate);
+            // fire the applyGraphBtnClicked event so other panels can update based on the selected params
+            this.fireEvent('applyGraphBtnClicked', this.analyte, this.isotype, this.conjugate);
         }
     },
 

@@ -122,7 +122,7 @@
             titration: '<%= bean.getTitration() %>',
             assayName: '<%= bean.getProtocol().getName() %>',
             listeners: {
-                'resetGraphBtnClicked': function(analyte, isotype, conjugate){
+                'applyGraphBtnClicked': function(analyte, isotype, conjugate){
                     _analyte = analyte;
                     _isotype = isotype;
                     _conjugate = conjugate;
@@ -130,6 +130,11 @@
                     guideSetPanel.graphParamsSelected(analyte, isotype, conjugate);
                     trendPlotPanel.graphParamsSelected(analyte, isotype, conjugate);
                     trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate, null, null);
+                },
+                'graphParamsChanged': function(){
+                    guideSetPanel.disable();
+                    trendPlotPanel.disable();
+                    trackingDataPanel.disable();
                 }
             }
         });

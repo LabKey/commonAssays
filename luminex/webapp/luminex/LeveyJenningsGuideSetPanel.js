@@ -35,7 +35,6 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             bodyStyle: 'background-color:#EEEEEE',
             labelWidth: 150,
             width: 850,
-            height: 70,
             border: true,
             cls: 'extContainer',
             disabled: true
@@ -55,7 +54,6 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             value: "",
             style: "font-size:110%; font-weight:bold",
             width: 738,
-            height: 25,
             border: true
         });
 
@@ -81,7 +79,6 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             value: "",
             style: "background-color:#CCCCCC; padding:3px",
             width: 583,
-            height: 25,
             border: true
         });
 
@@ -117,7 +114,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         LABKEY.LeveyJenningsGuideSetPanel.superclass.initComponent.call(this);
     },
 
-    // function called by the JSP when the graph params are selected and the "Reset Graph" button is clicked
+    // function called by the JSP when the graph params are selected and the "Apply" button is clicked
     graphParamsSelected: function(analyte, isotype, conjugate) {
         // store the params locally
         this.analyte = analyte;
@@ -177,6 +174,8 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 this.editGuideSetButton.enable();
                 this.newGuideSetButton.enable();
             }
+
+            this.guideSetCompositeField.doLayout();
         }
     },
 

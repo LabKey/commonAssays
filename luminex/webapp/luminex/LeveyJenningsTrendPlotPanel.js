@@ -199,7 +199,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         LABKEY.LeveyJenningsTrendPlotPanel.superclass.initComponent.call(this);
     },
 
-    // function called by the JSP when the graph params are selected and the "Reset Graph" button is clicked
+    // function called by the JSP when the graph params are selected and the "Apply" button is clicked
     graphParamsSelected: function(analyte, isotype, conjugate) {
         // store the params locally
         this.analyte = analyte;

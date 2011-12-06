@@ -178,7 +178,7 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
         var title = "Select the checkbox next to the analytes to be excluded";
         if (this.exclusionsExist)
         {
-            title += "<BR/><span style='color:red;font-style:italic;'>Uncheck analytes to remove exclusions</span>";
+            title += "<BR/><span style='color:red;font-style:italic;'>Uncheck all analytes to remove exclusions</span>";
         }
 
         // grid of avaialble/excluded analytes
@@ -431,6 +431,10 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
                         {
                             LABKEY.Query.deleteRows(config);
                         }
+                        else
+                        {
+                            this.findParentByType('window').getEl().unmask();
+                        }
                     },
                     icon: Ext.MessageBox.WARNING,
                     scope: this
@@ -440,7 +444,13 @@ LABKEY.WellExclusionPanel = Ext.extend(Ext.Panel, {
         else
         {
             if (analytesForExclusionStr != "")
+            {
                 LABKEY.Query.insertRows(config);
+            }
+            else
+            {
+                this.findParentByType('window').getEl().unmask();
+            }
         }
     }
 });

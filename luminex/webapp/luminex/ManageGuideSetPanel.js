@@ -480,9 +480,20 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
     numberRenderer: function(val) {
         // if this is a very small number, display more decimal places
-        if (val && val > 0 && val < 1)
-            return Ext.util.Format.number(Ext.util.Format.round(val, 6), '0.000000');
+        if (!val)
+        {
+            return null;
+        }
         else
-            return Ext.util.Format.number(Ext.util.Format.round(val, 2), '0.00');
+        {
+            if (val > 0 && val < 1)
+            {
+                return Ext.util.Format.number(Ext.util.Format.round(val, 6), '0.000000');
+            }
+            else
+            {
+                return Ext.util.Format.number(Ext.util.Format.round(val, 2), '0.00');
+            }
+        }
     }
 });

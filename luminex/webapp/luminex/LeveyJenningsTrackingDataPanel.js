@@ -156,7 +156,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         });
     },
 
-    // function called by the JSP when the graph params are selected and the "Reset Graph" button is clicked
+    // function called by the JSP when the graph params are selected and the "Apply" button is clicked
     graphParamsSelected: function(analyte, isotype, conjugate, startDate, endDate) {
         // store the params locally
         this.analyte = analyte;
@@ -355,11 +355,20 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     numberRenderer: function(val) {
         // if this is a very small number, display more decimal places
         if (!val)
+        {
             return null;
-        else if (val > 0 && val < 1)
-            return Ext.util.Format.number(Ext.util.Format.round(val, 6), '0.000000');
+        }
         else
-            return Ext.util.Format.number(Ext.util.Format.round(val, 2), '0.00');
+        {
+            if (val > 0 && val < 1)
+            {
+                return Ext.util.Format.number(Ext.util.Format.round(val, 6), '0.000000');
+            }
+            else
+            {
+                return Ext.util.Format.number(Ext.util.Format.round(val, 2), '0.00');
+            }
+        }
     },
 
     assayIdHrefRenderer: function(val, p, record) {
