@@ -52,42 +52,14 @@
         out.write(errorParameter);
         out.write("</span>");
     }
+
+    String messageId = "editRunProperies";
+    Boolean showWarning = null != session && !Boolean.FALSE.equals(session.getAttribute(messageId));
+    if (showWarning)
+    {
 %>
-<script type="text/javascript">
-    function changeVisibility(elementPrefix, visible)
-    {
-        for (var sampId = 1; sampId < <%= specimenCount %>; sampId++)
-        {
-            var elem = document.getElementById(elementPrefix + sampId);
-            elem.style.display = (visible ? "block" : "none");
-        }
-        copyImpliedValue(elementPrefix);
-    }
-
-    function copyImpliedValues()
-    {
-        copyImpliedValue("initialDilutionText");
-        copyImpliedValue("methodName");
-        copyImpliedValue("factor");
-        return true;
-    }
-
-    function copyImpliedValue(prefix)
-    {
-        var checkbox = document.getElementById(prefix + "Check");
-        if (!checkbox.checked)
-            return;
-        var copiedValue = document.getElementById(prefix + "0").value;
-        for (var i = 1; i < <%= specimenCount %>; i++)
-            document.getElementById(prefix + i).value = copiedValue;
-    }
-
-    function toggleFileProperties(disabled)
-    {
-        document.getElementById("experimentDate").disabled = disabled;
-        document.getElementById("fileId").disabled = disabled;
-    }
-</script>
+<div id="nab-msg-target" style="margin-bottom: 10px;"></div>
+<%  } %>
 <form method="post" onSubmit="return copyImpliedValues();" action="upload.view" enctype="multipart/form-data">
 
 <table>
@@ -293,3 +265,114 @@
     <%= generateSubmitButton("Calculate") %> <%= generateButton("Reset Form", "begin.view?reset=true") %>
 
 </form>
+<script type="text/javascript">
+    function changeVisibility(elementPrefix, visible)
+    {
+        for (var sampId = 1; sampId < <%= specimenCount %>; sampId++)
+        {
+            var elem = document.getElementById(elementPrefix + sampId);
+            elem.style.display = (visible ? "block" : "none");
+        }
+        copyImpliedValue(elementPrefix);
+    }
+
+    function copyImpliedValues()
+    {
+        copyImpliedValue("initialDilutionText");
+        copyImpliedValue("methodName");
+        copyImpliedValue("factor");
+        return true;
+    }
+
+    function copyImpliedValue(prefix)
+    {
+        var checkbox = document.getElementById(prefix + "Check");
+        if (!checkbox.checked)
+            return;
+        var copiedValue = document.getElementById(prefix + "0").value;
+        for (var i = 1; i < <%= specimenCount %>; i++)
+            document.getElementById(prefix + i).value = copiedValue;
+    }
+
+    function toggleFileProperties(disabled)
+    {
+        document.getElementById("experimentDate").disabled = disabled;
+        document.getElementById("fileId").disabled = disabled;
+    }
+</script>
+<%
+    if (showWarning)
+    {
+%>
+<script type="text/javascript">
+
+    Ext.onReady(function() {
+
+        // Prototype for Messaging Component to show general page/site information
+        LABKEY.MessageComponent = Ext.extend(Ext.BoxComponent, {
+
+            initComponent : function() {
+
+                Ext.applyIf(this, {
+                    closable : true
+                });
+
+                LABKEY.MessageComponent.superclass.initComponent.call(this);
+            },
+
+            onRender : function(ct, position) {
+                if (!this.template) {
+                    if (!LABKEY.MessageComponent.msgTemplate) {
+                        var tpl  = '<div class="labkey-warning-messages" style="{2}">';
+
+                        // closeable icon
+                        if (this.closable) {
+                            tpl += '<img src="' + LABKEY.contextPath + '/_images/partdelete.gif" alt="x" style="float: right;cursor:pointer;">';
+                        }
+
+                        tpl     += '{1}</div>';
+
+                        LABKEY.MessageComponent.msgTemplate = new Ext.Template(tpl);
+                        LABKEY.MessageComponent.msgTemplate.compile();
+                    }
+                    this.template = LABKEY.MessageComponent.msgTemplate;
+                }
+
+                var targs = this.getTemplateArgs();
+
+                if(position){
+                    btn = this.template.insertBefore(position, targs, true);
+                }else{
+                    btn = this.template.append(ct, targs, true);
+                }
+
+                if (this.closable)
+                    this.container.child('img').on('click', this.close, this);
+            },
+
+            getTemplateArgs : function() {
+                return [this.type, this.messages, this.style]
+            },
+
+            close : function() {
+                this.container.setDisplayed(false);
+                Ext.Ajax.request({
+                    method : 'GET',
+                    url    : LABKEY.ActionURL.buildURL('user', 'setShowWarningMessages.api'),
+                    params : {
+                        action       : 'editRunProperies',
+                        showMessages : false
+                    }
+                });
+            }
+        });
+
+        var msgComponent = new LABKEY.MessageComponent({
+            renderTo : 'nab-msg-target',
+            messages : '<b>Note:</b> This NAb workflow was deprecated in version 11.3. Consider using the updated NAb assay tool. ' +
+                       '<a href="https://www.labkey.org/wiki/home/Documentation/page.view?name=nabAssayTutorial" target="_blank">See&nbsp;Tutorial</a>',
+            style    : 'width: 764px; text-align: center;'
+        });
+    });
+</script>
+<% } %>

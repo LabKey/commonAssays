@@ -31,15 +31,26 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.labkey.api.action.*;
+import org.labkey.api.action.ExportAction;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.SimpleErrorView;
+import org.labkey.api.action.SimpleRedirectAction;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.attachments.AttachmentFile;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.SpringAttachmentFile;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
@@ -47,10 +58,31 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.study.*;
+import org.labkey.api.study.ParticipantVisit;
+import org.labkey.api.study.Plate;
+import org.labkey.api.study.PlateQueryView;
+import org.labkey.api.study.PlateService;
+import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.SpecimenService;
+import org.labkey.api.study.Study;
+import org.labkey.api.study.TimepointType;
+import org.labkey.api.study.WellData;
+import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AssayPublishService;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.DateUtil;
-import org.labkey.api.view.*;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.RedirectException;
+import org.labkey.api.view.UnauthorizedException;
+import org.labkey.api.view.VBox;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ViewForm;
 import org.labkey.api.view.template.PageConfig.Template;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -64,8 +96,17 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class NabController extends SpringActionController
@@ -127,9 +168,28 @@ public class NabController extends SpringActionController
 
 
     @RequiresNoPermission
-    public class BeginAction extends SimpleViewAction<BeginForm>
+    public class BeginAction extends SimpleViewAction<CreateForm>
     {
-        public ModelAndView getView(BeginForm form, BindException errors) throws Exception
+        public ModelAndView getView(CreateForm form, BindException errors) throws Exception
+        {
+            VBox box = new VBox();
+
+            box.addView(AssayService.get().createAssayListView(getViewContext(), false));
+            box.addView(new HtmlView(PageFlowUtil.textLink("Deprecated NAb Run", new ActionURL(CreateAction.class, getContainer()))));
+
+            return box;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Assays");
+        }
+    }
+
+    @RequiresNoPermission
+    public class CreateAction extends SimpleViewAction<CreateForm>
+    {
+        public ModelAndView getView(CreateForm form, BindException errors) throws Exception
         {
             if (!getUser().isGuest() && !getContainer().hasPermission(getUser(), InsertPermission.class))
             {
@@ -160,12 +220,11 @@ public class NabController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Create Nab Run");
+            return root.addChild("Create NAb Run");
         }
     }
 
-
-    public static class BeginForm
+    public static class CreateForm
     {
         private boolean _reset;
         private String _plateTemplate;
@@ -202,7 +261,7 @@ public class NabController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Create Nab Run");
+            return root.addChild("Create NAb Run");
         }
     }
 
