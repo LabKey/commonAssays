@@ -135,7 +135,7 @@ public class ElispotController extends SpringActionController
             queryView.setShowBorders(true);
             queryView.setShowDetailsColumn(false);
             queryView.setFrame(WebPartView.FrameType.NONE);
-            queryView.setAllowableContainerFilterTypes();
+            queryView.disableContainerFilterSelection();
             queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
 
             ElispotDetailsHeaderView header = new ElispotDetailsHeaderView(_protocol, provider, null);
