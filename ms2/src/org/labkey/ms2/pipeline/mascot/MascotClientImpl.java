@@ -1156,33 +1156,6 @@ public class MascotClientImpl implements SearchClient
         parts[i] = new StringPart(formFieldKey,(null==formFieldValue)?"":formFieldValue);
         i++;
 
-        /*String [] submitFields = {
-            "default, intermediate", "default, formver",
-            "default, search", "default, iatol", "default, iastol",
-            "default, ia2tol", "default, ibtol", "default, ibstol",
-            "default, ib2tol", "default, iytol", "default, iystol",
-            "default, iy2tol", "default, peak", "default, ltol",
-            "default, reptype", "default, errortolerant",
-            "default, showallmods", "search, username",
-            "search, usermail", "search, com", "search, db",
-            "search, taxonomy", "search, cle", "search, pfa",
-            "search, mods", "search, it_mods", "search, seg",
-            "search, icat", "search, tol", "search, tolu",
-            "search, itol", "search, itolu", "search, charge",
-            "search, mass", "search, format", "search, precursor",
-            "search, instrument", "search, overview", "search, report"
-        };
-
-        Part [] parts = new Part[submitFields.length+1];
-        int i;
-        for (i=0; i<submitFields.length; i++)
-        {
-            String val = parser.getInputParameter(submitFields[i]);
-            String[] keyParts = submitFields[i].split(", ");
-            parts[i] = new StringPart(keyParts[1].toUpperCase(),(null==val)?"":val);
-        }
-        */
-
         File queryFile = new File(analysisFile);
         getLogger().info("Submitting query file, size="+queryFile.length());
         try {
