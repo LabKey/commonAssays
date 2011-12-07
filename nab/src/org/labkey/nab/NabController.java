@@ -52,6 +52,7 @@ import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.reports.report.view.ReportUtil;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.User;
@@ -657,6 +658,8 @@ public class NabController extends SpringActionController
             }
 
             OldNabAssayRun assay = getCachedAssay(form.getRowId());
+            if (assay == null)
+                return new HtmlView("The requested assay run is no longer available.");
 
             JspView<RenderAssayBean> assayView = new JspView<RenderAssayBean>("/org/labkey/nab/runResults.jsp", new RenderAssayBean(assay, form.isNewRun(), form.isPrint()));
 
@@ -825,7 +828,10 @@ public class NabController extends SpringActionController
         public void export(RowIdForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             Luc5Assay assay = getCachedAssay(form.getRowId());
-            renderChartPNG(response, assay.getSummaries(), assay.getCutoffs());
+            if (assay == null)
+                ReportUtil.renderErrorImage(response.getOutputStream(), 425, 300, "The requested assay run is no longer available");
+            else
+                renderChartPNG(response, assay.getSummaries(), assay.getCutoffs());
         }
     }
 
