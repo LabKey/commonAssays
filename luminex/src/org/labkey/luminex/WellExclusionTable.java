@@ -16,10 +16,15 @@
 package org.labkey.luminex;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MultiValuedForeignKey;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
@@ -45,12 +50,16 @@ import org.labkey.api.study.assay.AssayRunDatabaseContext;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.UnauthorizedException;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * User: jeckels
@@ -94,7 +103,43 @@ public class WellExclusionTable extends AbstractExclusionTable
         SQLFragment wellSQL = new SQLFragment("SELECT Well FROM (SELECT DISTINCT dr.Well");
         wellSQL.append(joinSQL);
         wellSQL.append(") x");
-        addColumn(new ExprColumn(this, "Wells", schema.getDbSchema().getSqlDialect().getSelectConcat(wellSQL), JdbcType.VARCHAR));
+        ExprColumn wellsCol = new ExprColumn(this, "Wells", schema.getDbSchema().getSqlDialect().getSelectConcat(wellSQL), JdbcType.VARCHAR);
+        wellsCol.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new DataColumn(colInfo)
+                {
+                    @Override
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        if (getValue(ctx) == null)
+                        {
+                                out.write("");
+                        }
+                        else
+                        {
+                            // get the list of unique wells (by splitting the comma separated string)
+                            TreeSet<String> uniqueWells = new TreeSet<String>();
+                            uniqueWells.addAll(Arrays.asList(((String)getValue(ctx)).split(",")));
+
+                            // put the unique wells back into a comma separated string
+                            StringBuilder sb = new StringBuilder();
+                            String comma = "";
+                            for (String well : uniqueWells)
+                            {
+                                sb.append(comma);
+                                sb.append(well);
+                                comma = ",";
+                            }
+                            out.write(sb.toString());
+                        }
+                    }
+                };
+            }
+        });
+        addColumn(wellsCol);
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>(getDefaultVisibleColumns());
         defaultCols.remove(FieldKey.fromParts("ModifiedBy"));
