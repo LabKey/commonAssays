@@ -139,6 +139,15 @@
             }
         });
 
+        var resizer = new Ext.Resizable('graphParamsPanel', {
+            handles: 'e',
+            minWidth: 225
+        });
+        resizer.on('resize', function(rez, width, height){
+            graphParamsPanel.setWidth(width);
+            graphParamsPanel.doLayout();
+        });        
+
         // initialize the panel for user to interact with the current guide set (edit and create new)
         var guideSetPanel = new LABKEY.LeveyJenningsGuideSetPanel({
             renderTo: 'guideSetOverviewPanel',
