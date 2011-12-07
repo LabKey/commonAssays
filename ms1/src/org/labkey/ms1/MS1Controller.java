@@ -24,6 +24,7 @@ import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpRun;
@@ -289,7 +290,7 @@ public class MS1Controller extends SpringActionController
         {
             ActionURL url = new ActionURL(MS1Controller.ShowFeaturesAction.class, container);
             url.addParameter(ShowFeaturesForm.ParamNames.runId.name(), runId);
-            url.addParameter(".lastFilter", "true");
+            url.addParameter(DataRegion.LAST_FILTER_PARAM, "true");
             return url;
         }
     } //class ShowFeaturesAction

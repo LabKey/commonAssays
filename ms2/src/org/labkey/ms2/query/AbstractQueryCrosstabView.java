@@ -90,7 +90,7 @@ public abstract class AbstractQueryCrosstabView extends ComparisonCrosstabView
             }
 
             GWTComparisonMember gwtMember = new GWTComparisonMember(run.getDescription(), hits[i]);
-            ActionURL runURL = MS2Controller.MS2UrlsImpl.get().getShowRunUrl(run);
+            ActionURL runURL = MS2Controller.MS2UrlsImpl.get().getShowRunUrl(getUser(), run);
             gwtMember.setUrl(runURL.toString());
             gwtMembers[i] = gwtMember;
             if (expRun != null)

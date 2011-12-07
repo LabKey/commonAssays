@@ -258,7 +258,18 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         List<DisplayColumn> displayColumns = getPeptideDisplayColumns(columnNames);
         changePeptideCaptionsForTsv(displayColumns);
 
-        TSVGridWriter tw = new TSVGridWriter(ctx, MS2Manager.getTableInfoPeptides(), displayColumns, MS2Manager.getDataRegionNamePeptides());
+        TableInfo tableInfo = null;
+        for (DisplayColumn displayColumn : displayColumns)
+        {
+            ColumnInfo columnInfo = displayColumn.getColumnInfo();
+            if (columnInfo != null && columnInfo.getParentTable() != null)
+            {
+                tableInfo = columnInfo.getParentTable();
+                break;
+            }
+        }
+
+        TSVGridWriter tw = new TSVGridWriter(ctx, tableInfo, displayColumns, MS2Manager.getDataRegionNamePeptides());
         if (form.isExportAsWebPage())
             tw.setExportAsWebPage(true);
         tw.setFilenamePrefix("MS2Runs");

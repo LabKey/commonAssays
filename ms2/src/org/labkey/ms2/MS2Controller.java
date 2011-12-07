@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.action.*;
 import org.labkey.api.admin.AdminUrls;
@@ -100,10 +101,11 @@ public class MS2Controller extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(MS2Controller.class);
     private static final Logger _log = Logger.getLogger(MS2Controller.class);
+    /** Bogus view name to use as a marker for showing the standard peptide view instead of a custom view or the .lastFilter view */
+    private static final String STANDARD_VIEW_NAME = "~~~~~~StandardView~~~~~~~";
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";
     private static final String MS2_DEFAULT_VIEW_CATEGORY = "MS2DefaultView";
     private static final String DEFAULT_VIEW_NAME = "DefaultViewName";
-    private static final String LAST_VIEW = "LastView";
     private static final int MAX_INSERTIONS_DISPLAY_ROWS = 1000; // Limit annotation table insertions to 1000 rows
     private static final String SHARED_VIEW_SUFFIX = " (Shared)";
     static final String CAPTION_SCORING_BUTTON = "Compare Scoring";
@@ -319,9 +321,22 @@ public class MS2Controller extends SpringActionController
         return compareMenu;
     }
 
-    public static ActionURL getShowRunURL(Container c, int runId)
+    /** @return URL with .lastFilter if user has configured their default view that way and WITHOUT a run id */
+    public static ActionURL getShowRunURL(User user, Container c)
     {
         ActionURL url = new ActionURL(ShowRunAction.class, c);
+        if (getDefaultViewNamePreference(user) == null)
+        {
+            url = PageFlowUtil.addLastFilterParameter(url);
+        }
+
+        return url;
+    }
+
+    /** @return URL with .lastFilter if user has configured their default view that way and with a run id */
+    public static ActionURL getShowRunURL(User user, Container c, int runId)
+    {
+        ActionURL url = getShowRunURL(user, c);
         url.addParameter(RunForm.PARAMS.run, String.valueOf(runId));
         return url;
     }
@@ -339,44 +354,26 @@ public class MS2Controller extends SpringActionController
 
             MS2Run run = validateRun(form);
 
-            ActionURL currentURL = getViewContext().getActionURL();
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
+            ActionURL currentURL = getViewContext().getActionURL().clone();
+
+            currentURL.deleteParameter(DataRegion.LAST_FILTER_PARAM);
             // If the user hasn't customized the view at all, show them their default view
             if (currentURL.getParameters().length == 1)
             {
-                Map<String, String> props = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY);
-                String params;
+                String defaultViewName = getDefaultViewNamePreference(getUser());
                 // Check if they've explicitly requested a view by name as their default
-                if (props.get(MS2Controller.DEFAULT_VIEW_NAME) != null)
+                if (defaultViewName != null)
                 {
                     Map<String, String> savedViews = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY);
-                    params = savedViews.get(props.get(MS2Controller.DEFAULT_VIEW_NAME));
-                }
-                else
-                {
-                    // Grab the last URL that they used
-                    params = props.get(MS2Controller.LAST_VIEW);
-                }
+                    String params = savedViews.get(defaultViewName);
 
-                if (params != null && params.trim().length() > 0)
-                {
-                    throw new RedirectException(currentURL + "&" + params);
-                }
-            }
-            else if (!getUser().isGuest())
-            {
-                PropertyManager.PropertyMap props = PropertyManager.getWritableProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY, true);
-                ActionURL newURL = currentURL.clone().deleteParameter("run");
-                for (String paramName : newURL.getParameterMap().keySet())
-                {
-                    if (paramName.endsWith("." + QueryParam.offset))
+                    if (params != null && params.trim().length() > 0)
                     {
-                        newURL.deleteParameter(paramName);
+                        throw new RedirectException(currentURL + "&" + params);
                     }
                 }
-                props.put(MS2Controller.LAST_VIEW, newURL.getRawQuery());
-                PropertyManager.saveProperties(props);
             }
 
             WebPartView grid = peptideView.createGridView(form);
@@ -428,6 +425,17 @@ public class MS2Controller extends SpringActionController
 
             return root;
         }
+    }
+
+    /** @param user if null, assume no manually configured default view */
+    private static String getDefaultViewNamePreference(@Nullable User user)
+    {
+        if (user == null)
+        {
+            return null;
+        }
+        Map<String, String> props = PropertyManager.getProperties(user.getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY);
+        return props.get(DEFAULT_VIEW_NAME);
     }
 
 
@@ -710,7 +718,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(RenameForm form, boolean reshow, BindException errors) throws Exception
         {
             _run = validateRun(form);
-            _returnURL = form.getReturnURLHelper(getShowRunURL(getContainer(), form.getRun()));
+            _returnURL = form.getReturnURLHelper(getShowRunURL(getUser(), getContainer(), form.getRun()));
 
             String description = form.getDescription();
             if (description == null || description.length() == 0)
@@ -1075,7 +1083,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            ActionURL runURL = new ActionURL(ShowRunAction.class, getContainer());
+            ActionURL runURL = MS2Controller.getShowRunURL(getUser(), getContainer());
             String queryString = getViewContext().getActionURL().getParameter("queryString");
             runURL.setRawQuery(queryString);
 
@@ -1182,20 +1190,25 @@ public class MS2Controller extends SpringActionController
             _returnURL = form.getReturnActionURL();
 
             DefaultViewType defaultViewType;
-            String viewName;
             Map<String, String> props = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY);
-            if (props.get(MS2Controller.DEFAULT_VIEW_NAME) == null)
+            Map<String, String> viewMap = getViewMap(true, getContainer().hasPermission(getUser(), DeletePermission.class));
+
+            String viewName = props.get(MS2Controller.DEFAULT_VIEW_NAME);
+            if (viewName == null)
             {
                 defaultViewType = DefaultViewType.LastViewed;
-                viewName = null;
+            }
+            else if (STANDARD_VIEW_NAME.equals(viewName) || !viewMap.containsKey(viewName))
+            {
+                defaultViewType = DefaultViewType.Standard;
             }
             else
             {
                 defaultViewType = DefaultViewType.Manual;
-                viewName = props.get(MS2Controller.DEFAULT_VIEW_NAME);
             }
 
-            ManageViewsBean bean = new ManageViewsBean(_returnURL, defaultViewType, getViewMap(true, getContainer().hasPermission(getUser(), DeletePermission.class)), viewName);
+
+            ManageViewsBean bean = new ManageViewsBean(_returnURL, defaultViewType, viewMap, viewName);
             JspView<ManageViewsBean> view = new JspView<ManageViewsBean>("/org/labkey/ms2/manageViews.jsp", bean);
             view.setFrame(WebPartView.FrameType.PORTAL);
             view.setTitle("Manage Views");
@@ -1240,8 +1253,18 @@ public class MS2Controller extends SpringActionController
 
             DefaultViewType viewType = DefaultViewType.valueOf(form.getDefaultViewType());
 
+            String viewName = null;
+            if (viewType == DefaultViewType.Standard)
+            {
+                viewName = STANDARD_VIEW_NAME;
+            }
+            else if (viewType == DefaultViewType.Manual)
+            {
+                viewName = form.getDefaultViewName();
+            }
+
             PropertyManager.PropertyMap m = PropertyManager.getWritableProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY, true);
-            m.put(DEFAULT_VIEW_NAME, viewType == DefaultViewType.Manual ? form.getDefaultViewName() : null);
+            m.put(DEFAULT_VIEW_NAME, viewName);
             PropertyManager.saveProperties(m);
 
             return true;
@@ -1255,8 +1278,9 @@ public class MS2Controller extends SpringActionController
 
     public enum DefaultViewType
     {
-        LastViewed("Remember the last MS2 run view that I looked at and use it the next time I look at a different MS2 run"),
-        Manual("Use the selected default below when I look at a MS2 run");
+        LastViewed("Remember the last view that I looked at and use it the next time I look at a MS2 run"),
+        Standard("Use the standard peptide list view"),
+        Manual("Use the selected view below");
 
         private final String _description;
 
@@ -3360,7 +3384,11 @@ public class MS2Controller extends SpringActionController
             for (int i = 0; i < Math.min(exportRows.size(), ExcelWriter.MAX_ROWS); i++)
             {
                 String[] row = exportRows.get(i).split(",");
-                peptideIds.add(Long.parseLong(row[row.length == 1 ? 0 : 1]));
+                try
+                {
+                    peptideIds.add(Long.parseLong(row[row.length == 1 ? 0 : 1]));
+                }
+                catch (NumberFormatException ignored) {} // Skip any ids that got posted with invalid formats
             }
 
             baseFilter.addInClause("RowId", peptideIds);
@@ -3740,7 +3768,7 @@ public class MS2Controller extends SpringActionController
                         out.write(getFormattedValue(ctx));
                 }
             };
-            ActionURL showRunURL = new ActionURL(ShowRunAction.class, ContainerManager.getRoot());
+            ActionURL showRunURL = MS2Controller.getShowRunURL(getUser(), ContainerManager.getRoot());
             StringBuilder sb = new StringBuilder(showRunURL.getLocalURIString());
             int i = sb.lastIndexOf("/");
             sb.replace(i, i, "\\$\\{ContainerPath}/");
@@ -5480,7 +5508,7 @@ public class MS2Controller extends SpringActionController
             Container c = HttpView.currentContext().getContainer();
 
             if (0 != run)
-                return getShowRunURL(c, run);
+                return getShowRunURL(HttpView.currentContext().getUser(), c, run);
             else
                 return getShowListURL(c);
         }
@@ -6303,9 +6331,9 @@ public class MS2Controller extends SpringActionController
             return new ActionURL(MS2Controller.ShowPeptideAction.class, container);
         }
 
-        public ActionURL getShowRunUrl(MS2Run run)
+        public ActionURL getShowRunUrl(User user, MS2Run run)
         {
-            return new ActionURL(ShowRunAction.class, run.getContainer()).addParameter("run", run.getRun());
+            return getShowRunURL(user, run.getContainer(), run.getRun());
         }
 
         public ActionURL getShowListUrl(Container container)

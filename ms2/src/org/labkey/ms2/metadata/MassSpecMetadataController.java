@@ -118,7 +118,7 @@ public class MassSpecMetadataController extends SpringActionController
                 {
                     throw new IllegalStateException("Could not find MS2Run for experiment run LSID " + searchRun.getLSID());
                 }
-                throw new RedirectException(MS2Controller.MS2UrlsImpl.get().getShowRunUrl(ms2Run));
+                throw new RedirectException(MS2Controller.MS2UrlsImpl.get().getShowRunUrl(getUser(), ms2Run));
             }
 
             // Otherwise show

@@ -80,7 +80,7 @@ public class MS2RunHierarchyTree extends ContainerTree
                 if (moreRuns)
                 {
                     ActionURL runUrl = url.clone();
-                    runUrl.setAction("showRun");
+                    runUrl.setAction(MS2Controller.ShowRunAction.class);
 
                     html.append("<tr>");
                     html.append(firstTd);

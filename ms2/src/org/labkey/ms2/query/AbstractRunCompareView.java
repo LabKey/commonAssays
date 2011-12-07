@@ -170,7 +170,7 @@ public abstract class AbstractRunCompareView extends QueryView
             for (int runIndex = 0; runIndex < _runs.size(); runIndex++)
             {
                 MS2Run run = _runs.get(runIndex);
-                ActionURL runURL = MS2Controller.getShowRunURL(run.getContainer(), run.getRun());
+                ActionURL runURL = MS2Controller.getShowRunURL(getUser(), run.getContainer(), run.getRun());
                 String lsid = run.getExperimentRunLSID();
                 ExpRun expRun = null;
                 if (lsid != null)
@@ -283,7 +283,7 @@ public abstract class AbstractRunCompareView extends QueryView
         List<String> headings = new ArrayList<String>();
         for (MS2Run run : _runs)
         {
-            ActionURL url = MS2Controller.getShowRunURL(run.getContainer(), run.getRun());
+            ActionURL url = MS2Controller.getShowRunURL(getUser(), run.getContainer(), run.getRun());
             headings.add("<a href=\"" + url.getLocalURIString() + "\">" + PageFlowUtil.filter(run.getDescription()) + "</a>");
         }
         rgn.setMultiColumnCaptions(headings);

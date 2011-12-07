@@ -289,6 +289,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
     {
         FilteredTable table = new FilteredTable(MS2Manager.getTableInfoPeptides());
         table.wrapAllColumns(true);
+        table.getColumn("RowId").setKeyField(true);
         // Different renderer to ensure that SeqId is always selected when Protein column is displayed
         table.getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
 

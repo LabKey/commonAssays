@@ -20,6 +20,7 @@
 <%@ page import="org.labkey.nab.NabController"%>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.data.DataRegion" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -32,12 +33,12 @@
     if (bean.showNewRunLink())
     {
 %>
-<%= textLink("New Run", "begin.view?.lastFilter=1") %>
+<%= textLink("New Run", "begin.view?" + DataRegion.LAST_FILTER_PARAM + "=1") %>
 <%
     }
 %>
-<%= textLink("Previous Runs", "runs.view?.lastFilter=1") %>
-<%= textLink("Previous Runs By Sample", "sampleList.view?.lastFilter=1") %>
+<%= textLink("Previous Runs", "runs.view?" + DataRegion.LAST_FILTER_PARAM + "=1") %>
+<%= textLink("Previous Runs By Sample", "sampleList.view?" + DataRegion.LAST_FILTER_PARAM + "=1") %>
 <%
     if (bean.showPrintView())
     {

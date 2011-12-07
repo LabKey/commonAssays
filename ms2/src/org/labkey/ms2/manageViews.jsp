@@ -23,46 +23,38 @@
     HttpView<MS2Controller.ManageViewsBean> me = (HttpView<MS2Controller.ManageViewsBean>) HttpView.currentView();
     MS2Controller.ManageViewsBean bean = me.getModelBean();
 %>
-<table class="labkey-data-region">
-    <tr>
-        <td>
-            <form method="post" name="manageViewsForm" action="">
-                <p>
-                    <input type=hidden value="<%=h(bean.getReturnURL())%>">
-                    <% for (MS2Controller.DefaultViewType defaultViewType : MS2Controller.DefaultViewType.values())
-                    { %>
-                        <input onchange="updateForm();" type="radio" <% if (bean.getDefaultViewType() == defaultViewType) { %>checked<% } %> name="defaultViewType" value="<%=h(defaultViewType.toString()) %>" id="defaultViewType<%=h(defaultViewType.toString()) %>"/> <%=h(defaultViewType.getDescription()) %><br/>
-                    <% } %>
-                </p>
-                <table class="labkey-data-region">
-                    <tr>
-                        <td><strong>Default</strong></td><td><strong>Delete</strong></td><td><strong>View Name</strong></td>
-                    </tr>
-                    <%
-                    // Use TreeSet to sort by name
-                    TreeSet<String> names = new TreeSet<String>(bean.getViews().keySet());
-                    for (String name : names)
-                    { %>
-                        <tr>
-                            <td>
-                                <input <% if (name.equals(bean.getViewName())) { %>checked <% } %> type="radio" name="defaultViewName" value="<%=h(name) %>" />
-                            </td>
-                            <td>
-                                <input type="checkbox" name="viewsToDelete" value="<%=h(name) %>" />
-                            </td>
-                            <td>
-                                <%=h(name) %>
-                            </td>
-                        </tr>
-                    <% } %>
-                    <tr>
-                        <td colspan="3"><%=generateSubmitButton("OK")%> <%=generateButton("Cancel", bean.getReturnURL())%></td>
-                    </tr>
-                </table>
-            </form>
-        </td>
-    </tr>
-</table>
+<form method="post" name="manageViewsForm" action="">
+    <p>
+        <input type=hidden value="<%=h(bean.getReturnURL())%>">
+        <% for (MS2Controller.DefaultViewType defaultViewType : MS2Controller.DefaultViewType.values())
+        { %>
+            <input onchange="updateForm();" type="radio" <% if (bean.getDefaultViewType() == defaultViewType) { %>checked<% } %> name="defaultViewType" value="<%=h(defaultViewType.toString()) %>" id="defaultViewType<%=h(defaultViewType.toString()) %>"/> <%=h(defaultViewType.getDescription()) %><br/>
+        <% } %>
+    </p>
+    <table class="labkey-data-region" border="1">
+        <tr>
+            <td><strong>Use as Default</strong></td><td><strong>Delete</strong></td><td><strong>View Name</strong></td>
+        </tr>
+        <%
+        // Use TreeSet to sort by name
+        TreeSet<String> names = new TreeSet<String>(bean.getViews().keySet());
+        for (String name : names)
+        { %>
+            <tr>
+                <td>
+                    <input <% if (name.equals(bean.getViewName())) { %>checked <% } %> type="radio" name="defaultViewName" value="<%=h(name) %>" />
+                </td>
+                <td>
+                    <input type="checkbox" name="viewsToDelete" value="<%=h(name) %>" />
+                </td>
+                <td>
+                    <%=h(name) %>
+                </td>
+            </tr>
+        <% } %>
+    </table><br/>
+    <%=generateSubmitButton("OK")%> <%=generateButton("Cancel", bean.getReturnURL())%>
+</form>
 
 <script type="text/javascript">
     function updateForm()

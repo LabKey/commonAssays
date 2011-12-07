@@ -143,7 +143,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         {
             return null;
         }
-        return MS2Controller.MS2UrlsImpl.get().getShowRunUrl(run);
+        return MS2Controller.MS2UrlsImpl.get().getShowRunUrl(null, run);
     }
 
     public void deleteData(ExpData data, Container container, User user)

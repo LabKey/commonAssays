@@ -23,9 +23,11 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
@@ -593,7 +595,7 @@ public class MS2Schema extends UserSchema
         dataColumn.setFk(new ExpSchema(getUser(), getContainer()).getDataIdForeignKey());
         result.addColumn(dataColumn);
 
-        ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
+        ActionURL url = MS2Controller.getShowRunURL(getUser(), getContainer());
         result.getColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
             public TableInfo getLookupTableInfo()
@@ -632,7 +634,7 @@ public class MS2Schema extends UserSchema
                 "\nWHERE ms2Runs.ExperimentRunLSID = " + ExprColumn.STR_TABLE_ALIAS + ".LSID AND ms2Runs.Deleted = ?)");
         sql.add(Boolean.FALSE);
         ColumnInfo ms2DetailsColumn = new ExprColumn(result, "MS2Details", sql, JdbcType.INTEGER);
-        ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
+        ActionURL url = MS2Controller.getShowRunURL(getUser(), getContainer());
         ms2DetailsColumn.setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
             public TableInfo getLookupTableInfo()
@@ -656,7 +658,7 @@ public class MS2Schema extends UserSchema
                 {
                     public DisplayColumn createRenderer(ColumnInfo colInfo)
                     {
-                        ActionURL linkURL = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
+                        ActionURL linkURL = MS2Controller.getShowRunURL(getUser(), getContainer());
                         return new IconDisplayColumn(colInfo, 18, 18, linkURL, "run", AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif");
                     }
                 });
@@ -699,7 +701,7 @@ public class MS2Schema extends UserSchema
                         if (_runCol != null)
                         {
                             columns.add(_runCol);
-                            ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
+                            ActionURL url = MS2Controller.getShowRunURL(getUser(), getContainer());
                             setURLExpression(new DetailsURL(url, Collections.singletonMap("run", _runCol.getFieldKey())));
                         }
                     }
@@ -956,14 +958,14 @@ public class MS2Schema extends UserSchema
             settings.setInstanceCountCaption("Num Fractions");
             settings.getColumnAxis().setCaption("Fractions");
             colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("PeptideMemberships", "PeptideId", "Fraction"));
-            colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "fraction=" + CrosstabMember.VALUE_TOKEN + "&MS2Peptides.Fraction~eq=" + CrosstabMember.VALUE_TOKEN);
+            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer()).getLocalURIString() + "&fraction=" + CrosstabMember.VALUE_TOKEN + "&MS2Peptides.Fraction~eq=" + CrosstabMember.VALUE_TOKEN);
         }
         else
         {
             settings.setInstanceCountCaption("Found In Runs");
             settings.getColumnAxis().setCaption("Runs");
             colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
-            colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);
+            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);
         }
 
         settings.getRowAxis().addDimension(normalizedIdCol.getFieldKey());
@@ -1140,14 +1142,14 @@ public class MS2Schema extends UserSchema
             settings.setInstanceCountCaption("Num Fractions");
             settings.getColumnAxis().setCaption("Fractions");
             colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("PeptideMemberships", "PeptideId", "Fraction"));
-            colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "fraction=" + CrosstabMember.VALUE_TOKEN + "&MS2Peptides.Fraction~eq=" + CrosstabMember.VALUE_TOKEN);
+            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer()).getLocalURIString() + "&fraction=" + CrosstabMember.VALUE_TOKEN + "&MS2Peptides.Fraction~eq=" + CrosstabMember.VALUE_TOKEN);
         }
         else
         {
             settings.setInstanceCountCaption("Num Runs");
             settings.getColumnAxis().setCaption("Runs");
             colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
-            colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);
+            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer()).getLocalURIString() + "&run=" + CrosstabMember.VALUE_TOKEN);
         }
 
         CrosstabTableInfo result;
@@ -1269,7 +1271,7 @@ public class MS2Schema extends UserSchema
         else
         {
             // in all oather cases do the uusual thing of linking to the MS2 show run page
-            linkUrlOnRunColuumn = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
+            linkUrlOnRunColuumn = MS2Controller.getShowRunURL(getUser(), getContainer());
         }
         colDim.setUrl(linkUrlOnRunColuumn.getLocalURIString() + "&run=" + CrosstabMember.VALUE_TOKEN);
 

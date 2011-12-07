@@ -137,7 +137,7 @@ public class SpectraCountTableInfo extends VirtualTable
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
 
         ExprColumn runColumn = new ExprColumn(this, "Run", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Run"), JdbcType.INTEGER);
-        runColumn.setFk(new LookupForeignKey(new ActionURL(MS2Controller.ShowRunAction.class, _ms2Schema.getContainer()), "run", "MS2Details", "Name")
+        runColumn.setFk(new LookupForeignKey(MS2Controller.getShowRunURL(_ms2Schema.getUser(), _ms2Schema.getContainer()), "run", "MS2Details", "Name")
         {
             public TableInfo getLookupTableInfo()
             {

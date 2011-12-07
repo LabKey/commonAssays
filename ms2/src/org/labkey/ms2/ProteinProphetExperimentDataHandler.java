@@ -80,7 +80,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         {
             return null;
         }
-        ActionURL result = MS2Controller.MS2UrlsImpl.get().getShowRunUrl(run);
+        ActionURL result = MS2Controller.MS2UrlsImpl.get().getShowRunUrl(null, run);
         result.addParameter("expanded", "1");
         result.addParameter("grouping", "proteinprophet");
         return result;
