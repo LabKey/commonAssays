@@ -17,6 +17,7 @@
 package org.labkey.ms2.peptideview;
 
 import com.google.common.collect.Iterables;
+import org.labkey.api.query.FilteredTable;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
@@ -59,31 +60,54 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         ProteinGroupProteins proteins = new ProteinGroupProteins(Arrays.asList(_runs));
         Set<String> sequenceColumnNames = new CaseInsensitiveHashSet(ProteinListDisplayColumn.SEQUENCE_COLUMN_NAMES);
 
+        FilteredTable table = new FilteredTable(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+        table.wrapAllColumns(true);
+
+        ColumnInfo totalPeptidesColumn = table.wrapColumn(TotalFilteredPeptidesColumn.NAME, table.getRealTable().getColumn("ProteinGroupId"));
+        totalPeptidesColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new TotalFilteredPeptidesColumn();
+            }
+        });
+        table.addColumn(totalPeptidesColumn);
+
+        ColumnInfo uniquePeptidesColumn = table.wrapColumn(UniqueFilteredPeptidesColumn.NAME, table.getRealTable().getColumn("ProteinGroupId"));
+        uniquePeptidesColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new UniqueFilteredPeptidesColumn();
+            }
+        });
+        table.addColumn(uniquePeptidesColumn);
+        
         for (String name : originalNames)
         {
             if (name.equalsIgnoreCase("GroupNumber"))
             {
-                displayColumns.add(new GroupNumberDisplayColumn(MS2Manager.getTableInfoProteinGroupsWithQuantitation().getColumn("GroupNumber"), _url, "GroupNumber", "IndistinguishableCollectionId"));
+                displayColumns.add(new GroupNumberDisplayColumn(table.getColumn("GroupNumber"), _url, "GroupNumber", "IndistinguishableCollectionId"));
             }
             else if (name.equalsIgnoreCase("AACoverage"))
             {
-                addColumn(_calculatedProteinColumns, "PercentCoverage", displayColumns, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+                addColumn("PercentCoverage", displayColumns, table);
             }
             else if (name.equalsIgnoreCase(TotalFilteredPeptidesColumn.NAME))
             {
-                addColumn(_calculatedProteinColumns, TotalFilteredPeptidesColumn.NAME, displayColumns, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+                addColumn(TotalFilteredPeptidesColumn.NAME, displayColumns, table);
             }
             else if (name.equalsIgnoreCase(UniqueFilteredPeptidesColumn.NAME))
             {
-                addColumn(_calculatedProteinColumns, UniqueFilteredPeptidesColumn.NAME, displayColumns, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+                addColumn(UniqueFilteredPeptidesColumn.NAME, displayColumns, table);
             }
             else if (name.equalsIgnoreCase("Peptides"))
             {
-                addColumn(_calculatedProteinColumns, "TotalNumberPeptides", displayColumns, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+                addColumn("TotalNumberPeptides", displayColumns, table);
             }
             else if (name.equalsIgnoreCase("UniquePeptides"))
             {
-                addColumn(_calculatedProteinColumns, "UniquePeptidesCount", displayColumns, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+                addColumn("UniquePeptidesCount", displayColumns, table);
             }
             else if (name.equalsIgnoreCase("FirstProtein"))
             {
@@ -107,7 +131,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
             }
             else
             {
-                addColumn(_calculatedProteinColumns, name, displayColumns, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+                addColumn(name, displayColumns, table);
             }
         }
 
@@ -116,7 +140,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 
     public List<DisplayColumn> getPeptideDisplayColumns(String peptideColumnNames) throws SQLException
     {
-        return getColumns(_calculatedPeptideColumns, new PeptideColumnNameList(peptideColumnNames), MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoPeptideMemberships());
+        return getColumns(new PeptideColumnNameList(peptideColumnNames), MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoPeptideMemberships());
     }
 
     public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception

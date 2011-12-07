@@ -30,18 +30,13 @@ public class HydrophobicityColumn extends SimpleDisplayColumn
 {
     private ColumnInfo _colInfo;
 
-    /** This constructor is invoked through reflection - don't delete */
-    public HydrophobicityColumn()
-    {
-        this(null);
-    }
-
     public HydrophobicityColumn(ColumnInfo colInfo)
     {
         super();
         _colInfo = colInfo;
         setCaption("H");
         setName("h");
+        setDescription("Hydrophobicity");
         setFormatString("0.00");
         setWidth("50");
         setTextAlign("right");
@@ -68,13 +63,6 @@ public class HydrophobicityColumn extends SimpleDisplayColumn
 
     public void addQueryColumns(Set<ColumnInfo> set)
     {
-        if (_colInfo == null)
-        {
-            set.add(MS2Manager.getTableInfoPeptides().getColumn("Peptide"));
-        }
-        else
-        {
-            set.add(_colInfo);
-        }
+        set.add(_colInfo);
     }
 }

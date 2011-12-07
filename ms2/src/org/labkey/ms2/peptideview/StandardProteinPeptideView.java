@@ -17,6 +17,8 @@
 package org.labkey.ms2.peptideview;
 
 import com.google.common.collect.Iterables;
+import org.labkey.api.query.FilteredTable;
+import org.labkey.ms2.AACoverageColumn;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.api.view.ActionURL;
@@ -25,6 +27,8 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.*;
 import org.labkey.api.util.Pair;
 import org.labkey.api.query.DetailsURL;
+import org.labkey.ms2.TotalFilteredPeptidesColumn;
+import org.labkey.ms2.UniqueFilteredPeptidesColumn;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.ServletException;
@@ -69,9 +73,22 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     {
         List<DisplayColumn> result = new ArrayList<DisplayColumn>();
 
+        FilteredTable table = new FilteredTable(MS2Manager.getTableInfoProteins());
+        table.wrapAllColumns(true);
+
+        ColumnInfo aaCoverageColumn = table.wrapColumn("AACoverage", table.getRealTable().getColumn("SeqId"));
+        aaCoverageColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new AACoverageColumn();
+            }
+        });
+        table.addColumn(aaCoverageColumn);
+
         for (String columnName : new ProteinColumnNameList(requestedProteinColumnNames))
         {
-            addColumn(_calculatedProteinColumns, columnName, result, MS2Manager.getTableInfoProteins());
+            addColumn(columnName, result, table);
         }
         return result;
     }

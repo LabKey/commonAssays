@@ -97,26 +97,7 @@ public class PeptidesTableInfo extends FilteredTable
         }
         SqlDialect dialect = MS2Manager.getSqlDialect();
 
-        ColumnInfo hColumn = wrapColumn("H", getRealTable().getColumn("Peptide"));
-        hColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                return new HydrophobicityColumn(colInfo);
-            }
-        });
-        addColumn(hColumn);
-
-        ColumnInfo deltaScanColumn = wrapColumn("DeltaScan", getRealTable().getColumn("Fraction"));
-        deltaScanColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                return new DeltaScanColumn(colInfo);
-            }
-        });
-        deltaScanColumn.setFk(null);
-        addColumn(deltaScanColumn);
+        addCalculatedColumns(this);
 
         addMassColumns(dialect);
 
@@ -518,5 +499,29 @@ public class PeptidesTableInfo extends FilteredTable
     public String getPublicName()
     {
         return MS2Schema.TableType.Peptides.toString();
+    }
+
+    public static void addCalculatedColumns(FilteredTable table)
+    {
+        ColumnInfo hColumn = table.wrapColumn("H", table.getRealTable().getColumn("Peptide"));
+        hColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new HydrophobicityColumn(colInfo);
+            }
+        });
+        table.addColumn(hColumn);
+
+        ColumnInfo deltaScanColumn = table.wrapColumn("DeltaScan", table.getRealTable().getColumn("Fraction"));
+        deltaScanColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new DeltaScanColumn(colInfo);
+            }
+        });
+        deltaScanColumn.setFk(null);
+        table.addColumn(deltaScanColumn);
     }
 }

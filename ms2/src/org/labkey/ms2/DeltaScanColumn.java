@@ -44,12 +44,6 @@ public class DeltaScanColumn extends SimpleDisplayColumn
     private ColumnInfo _scanColInfo;
     private ColumnInfo _peptideColInfo;
 
-    /** This constructor is invoked through reflection - don't delete */
-    public DeltaScanColumn()
-    {
-        this(null);
-    }
-
     public DeltaScanColumn(ColumnInfo colInfo)
     {
         super();
@@ -194,16 +188,8 @@ public class DeltaScanColumn extends SimpleDisplayColumn
 
     public void addQueryColumns(Set<ColumnInfo> set)
     {
-        if (_fractionColInfo != null)
-        {
-            set.add(_fractionColInfo);
-            set.add(_scanColInfo);
-            set.add(_peptideColInfo);
-        }
-        else
-        {
-            set.addAll(new HashSet<ColumnInfo>(MS2Manager.getTableInfoPeptides().getColumns("Fraction,Scan,Peptide")));
-            super.addQueryColumns(set);
-        }
+        set.add(_fractionColInfo);
+        set.add(_scanColInfo);
+        set.add(_peptideColInfo);
     }
 }

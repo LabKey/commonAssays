@@ -19,8 +19,8 @@ package org.labkey.ms2.peptideview;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.*;
+import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
-import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.util.Formats;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
@@ -33,6 +33,7 @@ import org.labkey.ms2.*;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.ms2.query.PeptidesTableInfo;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -49,18 +50,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 {
     private static Logger _log = Logger.getLogger(AbstractMS2RunView.class);
 
-    protected static Map<String, Class<? extends DisplayColumn>> _calculatedPeptideColumns = new CaseInsensitiveHashMap<Class<? extends DisplayColumn>>();
-
     protected static final String AMT_PEPTIDE_COLUMN_NAMES = "Run,Fraction,Mass,Scan,RetentionTime,H,PeptideProphet,Peptide";
-
-    static
-    {
-        _calculatedPeptideColumns.put("H", HydrophobicityColumn.class);
-        _calculatedPeptideColumns.put("DeltaScan", DeltaScanColumn.class);
-
-        // Different renderer to ensure that SeqId is always selected when Protein column is displayed
-        MS2Manager.getTableInfoPeptides().getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
-    }
 
     private final Container _container;
     private final User _user;
@@ -297,10 +287,16 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     public List<DisplayColumn> getPeptideDisplayColumns(String peptideColumnNames) throws SQLException
     {
-        return getColumns(_calculatedPeptideColumns, new PeptideColumnNameList(peptideColumnNames), MS2Manager.getTableInfoPeptides());
+        FilteredTable table = new FilteredTable(MS2Manager.getTableInfoPeptides());
+        table.wrapAllColumns(true);
+        // Different renderer to ensure that SeqId is always selected when Protein column is displayed
+        table.getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
+
+        PeptidesTableInfo.addCalculatedColumns(table);
+        return getColumns(new PeptideColumnNameList(peptideColumnNames), table);
     }
 
-    protected void addColumn(Map<String, Class<? extends DisplayColumn>> calculatedColumns, String columnName, List<DisplayColumn> columns, TableInfo... tinfos)
+    protected void addColumn(String columnName, List<DisplayColumn> columns, TableInfo... tinfos)
     {
         ColumnInfo ci = null;
         for (TableInfo tableInfo : tinfos)
@@ -315,42 +311,27 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
         if (null != ci)
             dc = ci.getRenderer();
-        else
-        {
-            Class<? extends DisplayColumn> clss = calculatedColumns.get(columnName);
 
-            if (null != clss)
-            {
-                try
-                {
-                    dc = clss.newInstance();
-                }
-                catch (Exception e)
-                {
-                    _log.error("Failed to create a column", e);
-                }
-            }
-        }
         if (dc != null)
         {
             columns.add(dc);
         }
     }
 
-    protected List<DisplayColumn> getColumns(Map<String, Class<? extends DisplayColumn>> calculatedColumns, List<String> columnNames, TableInfo... tinfos) throws SQLException
+    protected List<DisplayColumn> getColumns(List<String> columnNames, TableInfo... tinfos) throws SQLException
     {
         List<DisplayColumn> result = new ArrayList<DisplayColumn>();
 
         for (String columnName : columnNames)
         {
-            addColumn(calculatedColumns, columnName, result, tinfos);
+            addColumn(columnName, result, tinfos);
         }
 
         if (result.isEmpty())
         {
             for (String columnName : new PeptideColumnNameList(getStandardPeptideColumnNames()))
             {
-                addColumn(calculatedColumns, columnName, result, tinfos);
+                addColumn(columnName, result, tinfos);
             }
         }
 

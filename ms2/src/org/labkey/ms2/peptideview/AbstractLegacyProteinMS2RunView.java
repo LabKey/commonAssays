@@ -37,15 +37,6 @@ import jxl.write.WritableWorkbook;
  */
 public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView<WebPartView>
 {
-    protected static Map<String, Class<? extends DisplayColumn>> _calculatedProteinColumns = new CaseInsensitiveHashMap<Class<? extends DisplayColumn>>();
-
-    static
-    {
-        _calculatedProteinColumns.put("AACoverage", AACoverageColumn.class);
-        _calculatedProteinColumns.put(TotalFilteredPeptidesColumn.NAME, TotalFilteredPeptidesColumn.class);
-        _calculatedProteinColumns.put(UniqueFilteredPeptidesColumn.NAME, UniqueFilteredPeptidesColumn.class);
-    }
-
     public AbstractLegacyProteinMS2RunView(ViewContext viewContext, String columnPropertyName, MS2Run... runs)
     {
         super(viewContext, columnPropertyName, runs);
