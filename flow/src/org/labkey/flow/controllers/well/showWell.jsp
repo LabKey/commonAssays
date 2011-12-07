@@ -413,8 +413,8 @@ for (Tuple3<FlowReport, Domain, FlowTableType> pair : FlowReportManager.getRepor
     }
 %>
 
-<p id="keywordsGrid" class="extContainer"></p>
-<p id="statsTree" class="extContainer"></p>
+<div id="keywordsGrid" class="extContainer"></div>
+<div id="statsTree" class="extContainer"></div>
 
 <%
 if (getGraphs().length > 0)
