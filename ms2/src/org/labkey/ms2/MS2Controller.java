@@ -108,7 +108,7 @@ public class MS2Controller extends SpringActionController
     private static final String SHARED_VIEW_SUFFIX = " (Shared)";
     static final String CAPTION_SCORING_BUTTON = "Compare Scoring";
     private static final int MAX_MATCHING_PROTEINS = 100;
-   
+
     public MS2Controller()
     {
         setActionResolver(_actionResolver);
@@ -1450,7 +1450,7 @@ public class MS2Controller extends SpringActionController
                 }
                 catch (NumberFormatException ignored) {}
             }
-            form.setTargetProtein(prefs.get(PeptideFilteringFormElements.targetProtein.name()));            
+            form.setTargetProtein(prefs.get(PeptideFilteringFormElements.targetProtein.name()));
             return form;
         }
 
@@ -1997,7 +1997,7 @@ public class MS2Controller extends SpringActionController
                 gwtView.setFrame(WebPartView.FrameType.PORTAL);
                 gwtView.enableExpandCollapse("PeptideQueryCompare", true);
                 result.addView(gwtView);
-            } 
+            }
             view.setTitle("Comparison Details");
             view.setFrame(WebPartView.FrameType.PORTAL);
 
@@ -4200,7 +4200,16 @@ public class MS2Controller extends SpringActionController
             {
                 _run = validateRun(runId);
 
-                peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), _run);
+                // Hack up the URL so that we export the peptides view, not the main MS2 run view
+                ViewContext context = new ViewContext(getViewContext());
+                // Remove the grouping parameter so that we end up exporting peptides, not proteins
+                ActionURL targetURL = getViewContext().getActionURL().clone().deleteParameter("grouping");
+                // Apply the peptide filter to the URL so it's respected in the export
+                SimpleFilter allPeptidesQueryFilter = getAllPeptidesFilter(getViewContext(), targetURL, _run);
+                String queryString = allPeptidesQueryFilter.toQueryString(MS2Manager.getDataRegionNamePeptides());
+                context.setActionURL(new ActionURL(targetURL + "&" + queryString));
+
+                peptideQueryView = new QueryPeptideMS2RunView(context, _run);
 
                 // Set the protein name used in this run's FASTA file; we want to include it in the view.
                 _protein.setLookupString(form.getProtein());
@@ -4337,7 +4346,7 @@ public class MS2Controller extends SpringActionController
             int proteinCount = Math.min(100, proteins.length);
             // string search:  searching for a peptide string in the proteins of a given run
             boolean stringSearch = (null != peptides);
-            // don't show the peptides grid or the coveage map for the Proteins matching a peptide or the no run case (e.g click on a protein Name in Matching Proteins grid of search results)            
+            // don't show the peptides grid or the coveage map for the Proteins matching a peptide or the no run case (e.g click on a protein Name in Matching Proteins grid of search results)
             boolean showPeptides = !stringSearch && run != null;
             SimpleFilter allPeptidesQueryFilter = null;
             AbstractQueryMS2RunView.AbstractMS2QueryView gridView = null;
@@ -4533,7 +4542,7 @@ public class MS2Controller extends SpringActionController
             QueryPeptideMS2RunView peptideView = new QueryPeptideMS2RunView(getViewContext(), runs);
             WebPartView gv = peptideView.createGridView(form);
             VBox vBox = new VBox();
-            vBox.setFrame(WebPartView.FrameType.DIALOG);           
+            vBox.setFrame(WebPartView.FrameType.DIALOG);
             vBox.addView(gv);
             return vBox;
         }
