@@ -510,13 +510,14 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         if (!dirOutputDta.mkdir())
             throw new IOException("Failed to create output directory for DTA files '" + dirOutputDta + "'.");
         ArrayList<String> mzXML2SearchArgs = new ArrayList<String>();
+        File localMzXML = _wd.inputFile(fileMzXML, false);
         mzXML2SearchArgs.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", tppVersion, getJob().getLogger()));
         mzXML2SearchArgs.add("-dta");
         mzXML2SearchArgs.add("-O" + dirOutputDta.getName());
         Mzxml2SearchParams mzXml2SearchParams = new Mzxml2SearchParams();
         Collection<String> inputXmlParams = convertParams(mzXml2SearchParams.getParams(), params);
         mzXML2SearchArgs.addAll(inputXmlParams);
-        mzXML2SearchArgs.add(fileMzXML.getAbsolutePath());
+        mzXML2SearchArgs.add(localMzXML.getAbsolutePath());
 
         RecordedAction action = new RecordedAction(MZXML2SEARCH_ACTION_NAME);
         action.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(mzXML2SearchArgs, " "));
