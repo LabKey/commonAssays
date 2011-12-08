@@ -31,7 +31,10 @@ isNum <- function (x)
 
 positivity <- function (data, grouping_columns)
 {
+    cat("** calculating positivity for", length(data), "rows.\n")
+
     # generate raw p-values
+    cat("** generate raw p-values\n")
     data$raw_p = sapply(1:nrow(data), function(i) {
       pval = NA
 
@@ -40,6 +43,8 @@ positivity <- function (data, grouping_columns)
       parent    = data$parent[i]
       parent_bg = data$parent_bg[i]
 
+      cat("  run=", as.character(data$run[i]), ", well=", as.character(data$well[i]), sep="")
+      cat(", stat=", stat, ", parent=", parent, ", stat_bg=", stat_bg, ", parent_bg=", parent_bg, sep="")
       if (isNum(stat) && isNum(stat_bg) && isNum(parent) && isNum(parent_bg))
       {
         x.ant = as.integer(stat)
@@ -50,26 +55,41 @@ positivity <- function (data, grouping_columns)
         m = matrix(c(x.ant,N.ant,x.neg,N.neg), nc=2, byrow=FALSE)
 
         pval = fisher.test(m, alternative="greater")$p.value
-        if (pval < DOUBLE_MIN)
+        #cat(", raw_p=", pval, sep="")
+        if (pval < DOUBLE_MIN) {
+          #cat(" ** below 1e-307 cutoff **")
           pval = 0
+        }
+      } else {
+        cat(" ** one or more values are not a number. skipping well. **")
       }
+      cat("\n")
 
       return(pval)
     })
 
     # compute adjusted p-values
+    cat("\n** compute adjusted p-values\n")
     data = by(data, subset(data, select=grouping_columns), function(ss) {
       #ss$adj_p = p.adjust(ss$raw_p, method="holm")
       ss$adj_p = p.adjust(ss$raw_p, method="bonferroni")
-      if (ss$adj_p < DOUBLE_MIN)
-        ss$adj_p = 0
+      ss$adj_p[ss$adj_p < DOUBLE_MIN] <- 0
+
+      #cat("\n")
+      #print(ss[1,grouping_columns])
+      #cat("  number of wells in group:", length(ss$well), "\n")
+      #cat("  well:", as.character(ss$well), "\n", sep="\t")
+      #cat("  raw_p:", ss$raw_p, "\n", sep="\t")
+      #cat("  adj_p:", ss$adj_p, "\n", sep="\t")
       return(ss)
     })
     data = do.call(rbind, data)
 
     # define response call
+    cat("\n** response cutoff for adjusted p-values <=", ALPHA, "\n", sep="")
     data$response = as.numeric(data$adj_p <= ALPHA)
 
+    cat("\n** done\n");
     return(data)
 }
 
@@ -77,7 +97,7 @@ if (length(labkey.data$stat) == 0)
     stop("labkey.data is empty");
 
 if (length(labkey.data$stat) == 0 || length(labkey.data$stat_bg) == 0 || length(labkey.data$parent) == 0 || length(labkey.data$parent_bg) == 0)
-    stop("labkey.data$stat, labkey.data$stat_bg, labkey.data$parent, labkey.data$paarent_bg are required");
+    stop("labkey.data$stat, labkey.data$stat_bg, labkey.data$parent, labkey.data$parent_bg are required");
 
 if (!exists("flow.metadata.study.participantColumn"))
     stop("ICS study metadata must include participant column")
@@ -90,6 +110,7 @@ if (exists("flow.metadata.study.visitColumn")) {
 } else {
     grouping_cols = c(flow.metadata.study.participantColumn, flow.metadata.study.dateColumn)
 }
+cat("Grouping by:", grouping_cols, "\n")
 
 result <- positivity(labkey.data, grouping_cols)
 
