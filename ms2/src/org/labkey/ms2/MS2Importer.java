@@ -467,6 +467,11 @@ public abstract class MS2Importer
     {
         updateRunStatus("Updating peptide columns");
         MS2Run run = MS2Manager.getRun(_runId);
+        if (run == null)
+        {
+            // Run has already been deleted in the UI, don't bother updating the columns
+            return;
+        }
         MS2Fraction[] fractions = run.getFractions();
         int fractionCount = fractions.length;
 
