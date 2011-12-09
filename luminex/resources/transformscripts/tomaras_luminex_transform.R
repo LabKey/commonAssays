@@ -121,6 +121,7 @@ run.data$isStandard = NA;
 run.data$isQCControl = NA;
 run.data$isUnknown = NA;
 titration.data.file = run.props$val1[run.props$name == "titrationData"];
+titration.data = data.frame();
 if (file.exists(titration.data.file))
 {
     titration.data = read.delim(titration.data.file, header=TRUE, sep="\t");
@@ -201,8 +202,10 @@ run.data$Upper_4pl = NA;
 run.data$Inflection_4pl = NA;
 
 # loop through the possible titrations and to see if it is a standard, qc control, or titrated unknown
-for (tIndex in 1:nrow(titration.data))
+if (nrow(titration.data) > 0)
 {
+  for (tIndex in 1:nrow(titration.data))
+  {
     if (titration.data[tIndex,]$Standard == "true" |
         titration.data[tIndex,]$QCControl == "true" |
         titration.data[tIndex,]$Unknown == "true")
@@ -305,7 +308,8 @@ for (tIndex in 1:nrow(titration.data))
             dev.off();
         }
     }
-}
+  }
+}  
 
 ################################## STEP 4: CALCULATE EST CONC #################################
 
