@@ -276,6 +276,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                        // store the HTML for the src plot image (image will be shifted to the relevant plot for other plot types)
                        this.plotRenderedHtml = Ext.getDom(trendDiv).innerHTML;
                    },
+                   failure: function(response) {
+                        Ext.get(trendDiv).update("Error: " + response.statusText);
+                   },
                    scope: this
             }).render();
 
@@ -295,6 +298,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                            this.fireEvent('togglePdfBtn', true);
                        }
                    },
+                   failure: function(response){},
                    scope: this
             }).render();
             

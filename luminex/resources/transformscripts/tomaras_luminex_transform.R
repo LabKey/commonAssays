@@ -18,7 +18,7 @@
 #
 
 # Author: Cory Nathe, LabKey
-transformVersion = "2.0";
+transformVersion = "2.0.0";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));

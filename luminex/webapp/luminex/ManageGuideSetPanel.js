@@ -65,7 +65,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             });
         }
         else
-            this.addGuideSetInfoLabels();    
+            this.addGuideSetInfoLabels();
     },
 
     addGuideSetInfoLabels: function(data) {
@@ -167,6 +167,9 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 if (colIndex == 0)
                     this.addRunToGuideSet(grid.getStore().getAt(rowIndex));
             }, this);
+            this.allRunsGrid.on('viewready', function(grid){
+                grid.getEl().mask("loading...", "x-mask-loading");
+            });
 
             this.add(new Ext.Panel(
             {
@@ -230,6 +233,9 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             if (colIndex == 0)
                 this.removeRunFromGuideSet(grid.getStore().getAt(rowIndex));
         }, this);
+        this.guideRunSetGrid.on('viewready', function(grid){
+            grid.getEl().mask("loading...", "x-mask-loading");
+        });
 
         this.add(new Ext.Panel({
             title: 'Runs Assigned to This Guide Set',
@@ -402,6 +408,11 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             sort: '-Analyte/Data/AcquisitionDate, -Titration/Run/Created',
             containerFilter: LABKEY.Query.containerFilter.allFolders,
             success: this.populateRunGridStores,
+            failure: function(response){
+                Ext.Msg.alert("Error", response.exception);
+                this.allRunsGrid.getEl().unmask();
+                this.guideRunSetGrid.getEl().unmask();
+            },
             scope: this
         });
     },
@@ -424,8 +435,16 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         }
 
         if (this.allRunsGrid)
+        {
             this.allRunsGrid.getStore().loadData(allRunsStoreData);
-        this.guideRunSetGrid.getStore().loadData(guideRunSetStoreData);
+            this.allRunsGrid.getEl().unmask();
+        }
+
+        if (this.guideRunSetGrid)
+        {
+            this.guideRunSetGrid.getStore().loadData(guideRunSetStoreData);
+            this.guideRunSetGrid.getEl().unmask();
+        }
     },
 
     renderRemoveIcon: function(value, metaData, record, rowIndex, colIndex, store) {

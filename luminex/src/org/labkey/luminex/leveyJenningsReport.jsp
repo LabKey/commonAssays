@@ -52,6 +52,7 @@
     LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
 
     var $h = Ext.util.Format.htmlEncode;
+    Ext.Ajax.timeout = 60000 * 5; // increase the timeout from the default of 30 sec
 
     // the default number of records to return for the report when no start and end date are provided
     var defaultRowSize = 30;

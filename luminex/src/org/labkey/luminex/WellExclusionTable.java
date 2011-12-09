@@ -48,6 +48,7 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunDatabaseContext;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.UnauthorizedException;
 
 import java.io.IOException;
@@ -114,15 +115,19 @@ public class WellExclusionTable extends AbstractExclusionTable
                     @Override
                     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                     {
-                        if (getValue(ctx) == null)
-                        {
-                                out.write("");
-                        }
-                        else
+                        Object o = getDisplayValue(ctx);
+                        out.write(null == o ? "&nbsp;" : PageFlowUtil.filter(o.toString()));
+                    }
+
+                    @Override
+                    public Object getDisplayValue(RenderContext ctx)
+                    {
+                        Object result = getValue(ctx);
+                        if (null != result)
                         {
                             // get the list of unique wells (by splitting the comma separated string)
                             TreeSet<String> uniqueWells = new TreeSet<String>();
-                            uniqueWells.addAll(Arrays.asList(((String)getValue(ctx)).split(",")));
+                            uniqueWells.addAll(Arrays.asList(result.toString().split(",")));
 
                             // put the unique wells back into a comma separated string
                             StringBuilder sb = new StringBuilder();
@@ -133,8 +138,9 @@ public class WellExclusionTable extends AbstractExclusionTable
                                 sb.append(well);
                                 comma = ",";
                             }
-                            out.write(sb.toString());
+                            result = sb.toString();
                         }
+                        return result;
                     }
                 };
             }
