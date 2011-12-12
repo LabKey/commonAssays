@@ -16,8 +16,10 @@
 
 package org.labkey.nab;
 
-import jxl.format.PaperSize;
-import jxl.write.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.PrintSetup;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
@@ -1118,64 +1120,56 @@ public class NabAssayController extends SpringActionController
         }
 
         @Override
-        public void renderSheet(WritableWorkbook workbook, int sheetNumber)
+        public void renderSheet(int sheetNumber)
         {
-            WritableSheet sheet = workbook.createSheet(getSheetName(), sheetNumber);
-            sheet.getSettings().setPaperSize(PaperSize.LETTER);
+            Sheet sheet = _workbook.createSheet(getSheetName(sheetNumber));
+            sheet.getPrintSetup().setPaperSize(PrintSetup.LETTER_PAPERSIZE);
 
-            try
+            // Render the header row:
+            List<String> headers = new ArrayList<String>();
+            headers.add(PlateSampleFilePropertyHelper.WELLGROUP_COLUMN);
+            headers.add(PlateSampleFilePropertyHelper.PLATELOCATION_COLUMN);
+
+            Map<DomainProperty, Object> defaultValues = DefaultValueService.get().getDefaultValues(_container, _sampleDomain);
+            Map<Integer, Object> columnToDefaultValue = new HashMap<Integer, Object>();
+            for (DomainProperty property : _sampleDomain.getProperties())
             {
-                // Render the header row:
-                List<String> headers = new ArrayList<String>();
-                headers.add(PlateSampleFilePropertyHelper.WELLGROUP_COLUMN);
-                headers.add(PlateSampleFilePropertyHelper.PLATELOCATION_COLUMN);
+                columnToDefaultValue.put(headers.size(), defaultValues.get(property));
+                headers.add(property.getName());
+            }
 
-                Map<DomainProperty, Object> defaultValues = DefaultValueService.get().getDefaultValues(_container, _sampleDomain);
-                Map<Integer, Object> columnToDefaultValue = new HashMap<Integer, Object>();
-                for (DomainProperty property : _sampleDomain.getProperties())
-                {
-                    columnToDefaultValue.put(headers.size(), defaultValues.get(property));
-                    headers.add(property.getName());
-                }
+            Row firstRow = sheet.createRow(0);
+            for (int column = 0; column < headers.size(); column++)
+            {
+                String header = headers.get(column);
+                Cell cell = firstRow.getCell(column, Row.CREATE_NULL_AS_BLANK);
+                cell.setCellValue(header);
+                cell.setCellStyle(getBoldFormat());
+            }
 
-                for (int column = 0; column < headers.size(); column++)
+            // Render the rows, which just contain well group names:
+            for (int group = 0; group < _sampleGroups.size(); group++)
+            {
+                Row row = sheet.createRow(group + 1);
+                WellGroupTemplate sample = _sampleGroups.get(group);
+                row.createCell(0).setCellValue(sample.getName());
+                row.createCell(1).setCellValue(sample.getPositionDescription());
+                for (int column = 2; column < headers.size(); column++)
                 {
-                    String header = headers.get(column);
-                    WritableCell cell = new Label(column, 0, header, getBoldFormat());
-                    sheet.addCell(cell);
-                }
-
-                // Render the rows, which just contain well group names:
-                for (int group = 0; group < _sampleGroups.size(); group++)
-                {
-                    int row = group + 1;
-                    WellGroupTemplate sample = _sampleGroups.get(group);
-                    WritableCell wellgroupNameCell = new Label(0, row, sample.getName());
-                    sheet.addCell(wellgroupNameCell);
-                    WritableCell plateLocationCell = new Label(1, row, sample.getPositionDescription());
-                    sheet.addCell(plateLocationCell);
-                    for (int column = 2; column < headers.size(); column++)
+                    Object defaultValue = columnToDefaultValue.get(column);
+                    if (defaultValue != null)
                     {
-                        Object defaultValue = columnToDefaultValue.get(column);
-                        if (defaultValue != null)
-                        {
-                            WritableCell defaultValueCell;
-                            if (defaultValue instanceof Number)
-                                defaultValueCell = new jxl.write.Number(column, row, ((Number) defaultValue).doubleValue());
-                            else if (defaultValue instanceof Date)
-                                defaultValueCell = new DateTime(column, row, (Date) defaultValue);
-                            else if (defaultValue instanceof Boolean)
-                                defaultValueCell = new jxl.write.Boolean(column, row, ((Boolean) defaultValue).booleanValue());
-                            else
-                                defaultValueCell = new Label(column, row, defaultValue.toString());
-                            sheet.addCell(defaultValueCell);
-                        }
+                        Cell cell = row.createCell(column);
+                        if (defaultValue instanceof Number)
+                            cell.setCellValue(((Number) defaultValue).doubleValue());
+                        else if (defaultValue instanceof Date)
+                            cell.setCellValue((Date) defaultValue);
+                        else if (defaultValue instanceof Boolean)
+                            cell.setCellValue(((Boolean) defaultValue).booleanValue());
+                        else
+                            cell.setCellValue(defaultValue.toString());
                     }
                 }
-            }
-            catch (WriteException e)
-            {
-                throw new RuntimeException(e);
             }
         }
     }

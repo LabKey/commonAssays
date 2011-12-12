@@ -20,16 +20,13 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.data.*;
-import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.ms2.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletOutputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.*;
-
-import jxl.write.WritableWorkbook;
 
 /**
  * User: jeckels
@@ -117,9 +114,6 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
 
         boolean includeHeaders = form.getExportFormat().equals("Excel");
 
-        ServletOutputStream outputStream = ExcelWriter.getOutputStream(response, "MS2Runs");
-        WritableWorkbook workbook = ExcelWriter.getWorkbook(outputStream);
-
         ActionURL currentUrl = _url.clone();
 
         AbstractProteinExcelWriter ew = getExcelProteinGridWriter(form.getProteinColumns());
@@ -141,7 +135,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
             ew.setHeaders(headers);
         }
 
-        ew.renderNewSheet(workbook);
+        ew.renderNewSheet();
         ew.setHeaders(Collections.<String>emptyList());
         ew.setCaptionRowVisible(false);
 
@@ -159,10 +153,13 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
             }
 
             setUpExcelProteinGrid(ew, form.getExpanded(), form.getColumns(), runs.get(i), where);
-            ew.renderCurrentSheet(workbook);
+            ew.renderCurrentSheet();
         }
 
-        ExcelWriter.closeWorkbook(workbook, outputStream);
+        OutputStream outputStream = ExcelWriter.getOutputStream(response, "MS2Runs", ew.getDocumentType());
+
+        ew.getWorkbook().write(outputStream);
+
         return null;
     }
 

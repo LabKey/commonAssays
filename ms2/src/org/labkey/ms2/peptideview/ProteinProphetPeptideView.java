@@ -414,7 +414,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         if (expanded)
         {
             DataRegion peptideRgn = getPeptideGrid(peptideColumnNames, Table.ALL_ROWS, 0);
-            ExcelWriter ewPeptide = new ExcelWriter(new ResultsImpl(peptideRS), peptideRgn.getDisplayColumns());
+            ExcelWriter ewPeptide = new ExcelWriter(new ResultsImpl(peptideRS), peptideRgn.getDisplayColumns(), ewProtein);
             ExcelColumn ec = ewPeptide.getExcelColumn("Protein");
             if (null != ec)
                 ec.setVisible(false);

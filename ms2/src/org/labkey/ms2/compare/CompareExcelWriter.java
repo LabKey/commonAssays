@@ -16,14 +16,15 @@
 
 package org.labkey.ms2.compare;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.ExcelColumn;
 import org.labkey.api.data.DisplayColumn;
 
 import java.util.List;
-import java.sql.ResultSet;
 
-import jxl.write.*;
 import org.labkey.api.data.Results;
 
 /**
@@ -58,13 +59,20 @@ public class CompareExcelWriter extends ExcelWriter
     }
 
     @Override
-    public void renderColumnCaptions(WritableSheet sheet, List<ExcelColumn> visibleColumns) throws WriteException, MaxRowsExceededException
+    public void renderColumnCaptions(Sheet sheet, List<ExcelColumn> visibleColumns) throws MaxRowsExceededException
     {
         int column = _offset;
 
         for (String caption : _multiColumnCaptions)
         {
-            sheet.addCell(new Label(column, getCurrentRow(), caption, getBoldFormat()));
+            Row row = sheet.getRow(getCurrentRow());
+            if (row == null)
+            {
+                row = sheet.createRow(getCurrentRow());
+            }
+            Cell cell = row.getCell(column, Row.CREATE_NULL_AS_BLANK);
+            cell.setCellValue(caption);
+            cell.setCellStyle(getBoldFormat());
             column += _colSpan;
         }
 

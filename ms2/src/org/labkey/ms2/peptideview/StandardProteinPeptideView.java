@@ -17,34 +17,45 @@
 package org.labkey.ms2.peptideview;
 
 import com.google.common.collect.Iterables;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.ExcelColumn;
+import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.GroupedResultSet;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.ResultsImpl;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TSVGridWriter;
+import org.labkey.api.data.Table;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FilteredTable;
-import org.labkey.ms2.AACoverageColumn;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Manager;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.data.*;
-import org.labkey.api.util.Pair;
-import org.labkey.api.query.DetailsURL;
-import org.labkey.ms2.TotalFilteredPeptidesColumn;
-import org.labkey.ms2.UniqueFilteredPeptidesColumn;
+import org.labkey.ms2.AACoverageColumn;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
+import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Collections;
-import java.io.PrintWriter;
 import java.io.IOException;
-
-import org.labkey.ms2.MS2Controller;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.validation.BindException;
+import java.io.PrintWriter;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -169,7 +180,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
         ewProtein.setResultSet(proteinRS);
         ewProtein.setGroupedResultSet(peptideRS);
-        ExcelWriter ewPeptide = new ExcelWriter(new ResultsImpl(peptideRS), peptideRgn.getDisplayColumns());
+        ExcelWriter ewPeptide = new ExcelWriter(new ResultsImpl(peptideRS), peptideRgn.getDisplayColumns(), ewProtein);
         if (expanded)
         {
             ExcelColumn ec = ewPeptide.getExcelColumn("Protein");

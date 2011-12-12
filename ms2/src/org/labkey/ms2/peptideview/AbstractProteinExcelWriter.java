@@ -16,8 +16,7 @@
 
 package org.labkey.ms2.peptideview;
 
-import jxl.write.WritableSheet;
-import jxl.write.WriteException;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.labkey.api.data.ExcelColumn;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.GroupedResultSet;
@@ -37,7 +36,7 @@ public abstract class AbstractProteinExcelWriter extends ExcelWriter
     protected GroupedResultSet _groupedRS = null;
 
     @Override
-    public void renderGrid(WritableSheet sheet, List<ExcelColumn> columns, Results rs) throws SQLException, WriteException, MaxRowsExceededException
+    public void renderGrid(Sheet sheet, List<ExcelColumn> columns, Results rs) throws SQLException, MaxRowsExceededException
     {
         super.renderGrid(sheet, columns, rs);
 

@@ -16,8 +16,7 @@
 
 package org.labkey.ms2.peptideview;
 
-import jxl.write.WritableSheet;
-import jxl.write.WriteException;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.labkey.api.data.ExcelColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.ms2.TotalFilteredPeptidesColumn;
@@ -37,7 +36,7 @@ public class ProteinProphetExcelWriter extends AbstractProteinExcelWriter
     }
 
     @Override
-    protected void renderGridRow(WritableSheet sheet, RenderContext ctx, List<ExcelColumn> columns) throws SQLException, WriteException, MaxRowsExceededException
+    protected void renderGridRow(Sheet sheet, RenderContext ctx, List<ExcelColumn> columns) throws SQLException, MaxRowsExceededException
     {
         ResultSet nestedRS = _groupedRS.getNextResultSet();
         try

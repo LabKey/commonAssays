@@ -27,7 +27,6 @@ import org.labkey.api.view.WebPartView;
 import org.labkey.api.util.Pair;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.util.*;
@@ -36,7 +35,6 @@ import java.io.IOException;
 import org.labkey.ms2.MS2Controller;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
-import jxl.write.WritableWorkbook;
 
 /**
  * User: jeckels
@@ -75,12 +73,9 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
 
         boolean includeHeaders = form.getExportFormat().equals("Excel");
 
-        ServletOutputStream outputStream = ExcelWriter.getOutputStream(response, "MS2Runs");
-        WritableWorkbook workbook = ExcelWriter.getWorkbook(outputStream);
-
         ActionURL currentUrl = _url.clone();
 
-        ExcelWriter ew = new ExcelWriter();
+        ExcelWriter ew = new ExcelWriter(ExcelWriter.ExcelDocumentType.xls);
         ew.setSheetName("MS2 Runs");
 
         List<String> headers;
@@ -117,7 +112,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
 
         // Always include column captions at the top
         ew.setDisplayColumns(getPeptideDisplayColumns(getPeptideColumnNames(form.getColumns())));
-        ew.renderNewSheet(workbook);
+        ew.renderNewSheet();
         ew.setCaptionRowVisible(false);
 
         // TODO: Footer?
@@ -140,11 +135,10 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
             }
 
             setupExcelPeptideGrid(ew, filter, form.getColumns(), runs.get(i));
-            ew.renderCurrentSheet(workbook);
+            ew.renderCurrentSheet();
         }
-        
 
-        ExcelWriter.closeWorkbook(workbook, outputStream);
+        ew.write(response, "MS2Runs");
         return null;
     }
 

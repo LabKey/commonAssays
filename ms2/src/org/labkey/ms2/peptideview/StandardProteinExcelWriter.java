@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.peptideview;
 
+import org.apache.poi.ss.usermodel.Sheet;
 import org.labkey.api.data.*;
 import org.labkey.ms2.Protein;
 
@@ -23,9 +24,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
-
-import jxl.write.WritableSheet;
-import jxl.write.WriteException;
 
 /**
  * User: jeckels
@@ -41,7 +39,7 @@ public class StandardProteinExcelWriter extends AbstractProteinExcelWriter
     }
 
     @Override
-    protected void renderGridRow(WritableSheet sheet, RenderContext ctx, List<ExcelColumn> columns) throws SQLException, WriteException, MaxRowsExceededException
+    protected void renderGridRow(Sheet sheet, RenderContext ctx, List<ExcelColumn> columns) throws SQLException, MaxRowsExceededException
     {
         Protein protein = new Protein();
 
