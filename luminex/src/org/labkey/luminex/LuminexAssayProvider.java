@@ -80,6 +80,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     public static final String ASSAY_DOMAIN_CUSTOM_DATA = ExpProtocol.ASSAY_DOMAIN_PREFIX + "LuminexData";
     public static final String ASSAY_DOMAIN_EXCEL_RUN = ExpProtocol.ASSAY_DOMAIN_PREFIX + "ExcelRun";
     public static final String LUMINEX_DATA_ROW_LSID_PREFIX = "LuminexDataRow";
+    public static final String NAME = "Luminex";
 
     public LuminexAssayProvider()
     {
@@ -93,7 +94,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public String getName()
     {
-        return "Luminex";
+        return NAME;
     }
 
     @Override
