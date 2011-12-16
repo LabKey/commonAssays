@@ -27,7 +27,6 @@ import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AssayQCFlagTable;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
@@ -49,7 +48,6 @@ public class LuminexSchema extends AssaySchema
     public static final String WELL_EXCLUSION_ANALYTE_TABLE_NAME = "WellExclusionAnalyte";
     public static final String RUN_EXCLUSION_TABLE_NAME = "RunExclusion";
     public static final String RUN_EXCLUSION_ANALYTE_TABLE_NAME = "RunExclusionAnalyte";
-    public static final String QC_FLAG_TABLE_NAME = "QCFlag";
 
     private List<String> _curveTypes;
 
@@ -71,8 +69,7 @@ public class LuminexSchema extends AssaySchema
                 prefixTableName(CURVE_FIT_TABLE_NAME),
                 prefixTableName(GUIDE_SET_TABLE_NAME),
                 prefixTableName(GUIDE_SET_CURVE_FIT_TABLE_NAME),
-                prefixTableName(ANALYTE_TITRATION_TABLE_NAME),
-                prefixTableName(QC_FLAG_TABLE_NAME)
+                prefixTableName(ANALYTE_TITRATION_TABLE_NAME)
         );
     }
 
@@ -94,6 +91,16 @@ public class LuminexSchema extends AssaySchema
     public static String getAnalyteTitrationTableName(ExpProtocol protocol)
     {
         return getProviderTableName(protocol, ANALYTE_TITRATION_TABLE_NAME);
+    }
+
+    public static String getAnalyteTableName(ExpProtocol protocol)
+    {
+        return getProviderTableName(protocol, ANALYTE_TABLE_NAME);
+    }
+
+    public static String getTitrationTableName(ExpProtocol protocol)
+    {
+        return getProviderTableName(protocol, TITRATION_TABLE_NAME);
     }
 
     public synchronized List<String> getCurveTypes()
@@ -191,27 +198,8 @@ public class LuminexSchema extends AssaySchema
                 result.addCondition(filter, "RunId");
                 return result;
             }
-            if (QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
-            {
-                AssayQCFlagTable result = createQCFlagTable();
-                return result;
-            }
         }
         return null;
-    }
-
-    private AssayQCFlagTable createQCFlagTable()
-    {
-        AssayQCFlagTable result = new AssayQCFlagTable(this, getProtocol());
-        new LookupForeignKey("RowId")
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                return createDataRowTable();
-            }
-        };
-        return result;
     }
 
     public AnalyteTitrationTable createAnalyteTitrationTable(boolean filter)

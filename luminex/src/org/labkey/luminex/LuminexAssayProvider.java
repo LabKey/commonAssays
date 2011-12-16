@@ -39,8 +39,10 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpDataTable;
+import org.labkey.api.exp.query.ExpQCFlagTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryParam;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
@@ -128,6 +130,32 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 return dataURL.getLocalURIString();
             }
         });
+    }
+
+    @Override
+    public ExpQCFlagTable createQCFlagTable(final AssaySchema schema, final ExpProtocol protocol)
+    {
+        ExpQCFlagTable result = super.createQCFlagTable(schema, protocol);
+        ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
+        analyteColumn.setFk(new LookupForeignKey("RowId")
+        {
+            @Override
+            public TableInfo getLookupTableInfo()
+            {
+                return schema.getTable(LuminexSchema.getAnalyteTableName(protocol));
+            }
+        });
+
+        ColumnInfo titrationColumn = result.addColumn("Titration", ExpQCFlagTable.Column.IntKey2);
+        titrationColumn.setFk(new LookupForeignKey("RowId")
+        {
+            @Override
+            public TableInfo getLookupTableInfo()
+            {
+                return schema.getTable(LuminexSchema.getTitrationTableName(protocol));
+            }
+        });
+        return result;
     }
 
     @Override
