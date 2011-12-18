@@ -63,17 +63,26 @@ public enum QuantitationAlgorithm
 
             String ver = params.get("pipeline, msinspect ver");
 
-            // NOTE: Because the java command-line for msInspect gets passed as a
-            // single argument to xinteract, it cannot support spaces in any
-            // of its arguments. If the path to java.exe contains spaces,
-            // then just use "java", and rely on it being on the path.
+            // NOTE: The java command-line for msInspect gets passed as a
+            // single argument to xinteract, and it the path to the java executable cannot contain spaces.
+            // If it does contains spaces, then just use "java", and rely on it being on the path.
             String javaPath = PipelineJobService.get().getJavaPath();
             if (javaPath.indexOf(' ') >= 0)
                 javaPath = "java";
+
+            // We can support viewerPath.jar paths with spaces by wrapping in \" - not sure why this same
+            // trick doesn't work with the path to the java executable, but it must be different xinteract internal
+            // handling of arguments
+            String viewerAppPath = PipelineJobService.get().getJarPath("viewerApp.jar", "msinspect", ver);
+            if (viewerAppPath.contains(" "))
+            {
+                viewerAppPath = "\\\"" + viewerAppPath + "\\\"";
+            }
+            
             return new String[] {
                 "-C1" + javaPath + " " +
                     (factory.getJavaVMOptions() == null ? "-Xmx1024M" : factory.getJavaVMOptions())
-                    + " -jar " + PipelineJobService.get().getJarPath("viewerApp.jar", "msinspect", ver)
+                    + " -jar " + viewerAppPath
                     + " --q3 " + StringUtils.join(quantOpts.iterator(), ' ')
                     ,
                     "-C2Q3ProteinRatioParser"

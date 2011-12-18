@@ -842,6 +842,7 @@ public class AnalysisScriptController extends BaseFlowController
                 String[] params = form.getrEngineNormalizationParameters().split(",");
                 for (String param : params)
                 {
+                    param = StringUtils.trim(param);
                     int index = ArrayUtils.indexOf(parameters, param);
                     if (index == -1)
                     {
@@ -881,7 +882,8 @@ public class AnalysisScriptController extends BaseFlowController
                     Analysis analysis = workspace.getSampleAnalysis(sampleInfos.get(i));
                     if (!analysis.isSimilar(referenceAnalysis))
                     {
-                        errors.reject(ERROR_MSG, "All samples in the selected import groups must have similar gating to perform normalization.");
+                        String msg = "All samples in the selected import groups must have similar gating to perform normalization. Try selecting a different group to import.";
+                        errors.reject(ERROR_MSG, msg);
                         return;
                     }
                 }

@@ -184,10 +184,10 @@ if (protocol != null)
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <input type="checkbox" name="rEngineNormalization" id="rEngineNormalization" onchange="onNormalizationChange();"
-        <%=form.isrEngineNormalization() ? "checked" : ""%>
+        <%=normalizationEnabled && form.isrEngineNormalization() ? "checked" : ""%>
         <%=normalizationEnabled ? "" : "disabled"%> >
     <input type="hidden" name="<%=SpringActionController.FIELD_MARKER%>rEngineNormalization"/>
-    <label for="rEngineNormalization">Perform normalization using flowWorkspace R library?</label>
+    <label for="rEngineNormalization">Perform normalization using flowWorkspace R library? (experimental)</label>
 </div>
 
 <div style="padding-left: 2em; padding-bottom: 1em;">

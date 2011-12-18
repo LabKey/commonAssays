@@ -15,11 +15,9 @@
  */
 package org.labkey.flow.persist;
 
-import Jama.Matrix;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Row;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.collections.RowMapFactory;
@@ -34,11 +32,9 @@ import org.labkey.api.util.Tuple3;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.api.writer.VirtualFile;
 import org.labkey.flow.analysis.model.CompensationMatrix;
-import org.labkey.flow.analysis.model.FCSKeywordData;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
-import sun.security.provider.SHA;
 
 import java.io.File;
 import java.io.IOException;
@@ -1326,11 +1322,9 @@ public class AnalysisSerializer
             {
                 String value = keys.get(key);
 
-                values.add(key);
                 values.add(value);
-
-                rows.add(rowMapFactory.getRowMap(values));
             }
+            rows.add(rowMapFactory.getRowMap(values));
         }
 
         return Pair.of(columns, rows);
@@ -1341,11 +1335,14 @@ public class AnalysisSerializer
         if (keywords == null || keywords.isEmpty())
             return;
 
-        Pair<List<String>, List<Map<String, Object>>> results;
-        if (saveOptions.contains(Options.FormatRowPerKeyword))
-            results = writeRowPerKeyword(keywords);
-        else /*if (saveOptions.contains(Options.FormatGroupBySample))*/
-            results = writeGroupByKeyword(keywords);
+        // UNDONE: writeGroupByKeyword: 'Sample' keyword and Sample name column collide
+        //Pair<List<String>, List<Map<String, Object>>> results;
+        //if (saveOptions.contains(Options.FormatRowPerKeyword))
+        //    results = writeRowPerKeyword(keywords);
+        //else /*if (saveOptions.contains(Options.FormatGroupBySample))*/
+        //    results = writeGroupByKeyword(keywords);
+
+        Pair<List<String>, List<Map<String, Object>>> results = writeRowPerKeyword(keywords);
 
         // write the tsv file
         if (results != null && results.second.size() > 0)

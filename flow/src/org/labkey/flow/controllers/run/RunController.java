@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -230,6 +231,9 @@ public class RunController extends BaseFlowController
     protected void exportFCSFiles(VirtualFile dir, Collection<FlowWell> wells, int eventCount)
             throws Exception
     {
+        // 118754: The list of wells may contain both FlowFCSFile and FlowFCSAnalysis wells representing the same FCS file URI.
+        // Keep track of which ones we've already seen during export.
+        Set<String> seen = new HashSet<String>();
         byte[] buffer = new byte[524288];
         for (FlowWell well : wells)
         {
@@ -240,22 +244,27 @@ public class RunController extends BaseFlowController
             File file = new File(uri);
             if (file.canRead())
             {
-                OutputStream os = dir.getOutputStream(file.getName());
-                InputStream is;
-                if (eventCount == 0)
+                String fileName = file.getName();
+                if (!seen.contains(fileName))
                 {
-                    is = new FileInputStream(file);
+                    seen.add(fileName);
+                    OutputStream os = dir.getOutputStream(fileName);
+                    InputStream is;
+                    if (eventCount == 0)
+                    {
+                        is = new FileInputStream(file);
+                    }
+                    else
+                    {
+                        is = new ByteArrayInputStream(new FCS(file).getFCSBytes(file, eventCount));
+                    }
+                    int cb;
+                    while((cb = is.read(buffer)) > 0)
+                    {
+                        os.write(buffer, 0, cb);
+                    }
+                    os.close();
                 }
-                else
-                {
-                    is = new ByteArrayInputStream(new FCS(file).getFCSBytes(file, eventCount));
-                }
-                int cb;
-                while((cb = is.read(buffer)) > 0)
-                {
-                    os.write(buffer, 0, cb);
-                }
-                os.close();
             }
         }
     }
@@ -356,7 +365,7 @@ public class RunController extends BaseFlowController
                     Map<String, AttributeSet> keywords = new TreeMap<String, AttributeSet>();
                     Map<String, AttributeSet> analysis = new TreeMap<String, AttributeSet>();
                     Map<String, CompensationMatrix> matrices = new TreeMap<String, CompensationMatrix>();
-                    getAnalysis(Arrays.asList(run.getWells()), keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation());
+                    getAnalysis(Arrays.asList(run.getWells()), keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation(), form.isIncludeStatistics());
 
                     String dirName = getBaseName(run.getName());
                     VirtualFile dir = zipFile.getDir(dirName);
@@ -382,7 +391,7 @@ public class RunController extends BaseFlowController
                 Map<String, AttributeSet> keywords = new TreeMap<String, AttributeSet>();
                 Map<String, AttributeSet> analysis = new TreeMap<String, AttributeSet>();
                 Map<String, CompensationMatrix> matrices = new TreeMap<String, CompensationMatrix>();
-                getAnalysis(_wells, keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation());
+                getAnalysis(_wells, keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation(), form.isIncludeStatistics());
 
                 ZipFile zipFile = new ZipFile(response, zipName);
                 AnalysisSerializer writer = new AnalysisSerializer(_log, zipFile);
@@ -417,18 +426,17 @@ public class RunController extends BaseFlowController
                             Map<String, AttributeSet> keywordAttrs,
                             Map<String, AttributeSet> analysisAttrs,
                             Map<String, CompensationMatrix> matrices,
-                            boolean includeKeywords, boolean includeGraphBytes, boolean includeCompMatrices)
+                            boolean includeKeywords, boolean includeGraphBytes, boolean includeCompMatrices, boolean includeStatistics)
             throws SQLException
     {
         for (FlowWell well : wells)
         {
             String name = well.getName();
-            if (well instanceof FlowFCSAnalysis)
+            if (well instanceof FlowFCSAnalysis && (includeStatistics || includeGraphBytes))
             {
                 FlowFCSAnalysis analysis = (FlowFCSAnalysis) well;
                 AttributeSet attrs = analysis.getAttributeSet(includeGraphBytes);
                 analysisAttrs.put(name, attrs);
-
             }
 
             if (includeKeywords)

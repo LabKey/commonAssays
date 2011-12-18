@@ -16,9 +16,11 @@
 # rumi function. The rumi function takes a dataframe as input and uses the given Standard curve data to
 # calculate est.log.conc an se for the unknowns.
 #
-
+# CHANGES
+#  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
+#
 # Author: Cory Nathe, LabKey
-transformVersion = "2.0.0";
+transformVersion = "2.1.20111216";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -257,7 +259,8 @@ if (nrow(titration.data) > 0)
 
             # for standards, use the expected conc values for the curve fit
             # for non-standard titrations, use the dilution values for the curve fit
-            if (nrow(dat) > 0 & all(dat$isStandard)) {
+            # Issue 13696
+            if (nrow(dat) > 0 && (toupper(substr(dat$type[1],0,1)) == "S" || toupper(substr(dat$type[1],0,2)) == "ES")) {
                 dat$dose = dat$expConc;
                 xLabel = "Expected Conc";
             } else {

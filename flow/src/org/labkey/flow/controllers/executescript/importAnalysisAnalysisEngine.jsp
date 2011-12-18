@@ -62,7 +62,8 @@
 <label for="rEngine">R statistics and graphs.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
     The analysis defined in the FlowJo workspace will be used
-    by the R engine to generate statistics and graphs.
+    by the R engine to generate statistics and graphs.<br>
+    R must be configured and the flowWorkspace library must be installed to use this engine.
 </div>
 
 
