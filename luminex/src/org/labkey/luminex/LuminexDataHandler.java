@@ -357,7 +357,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     dataRow.setAnalyte(analyte.getRowId());
                 }
 
-                insertTitrationAnalyteMappings(user, form, titrations, sheet.getValue(), analyte, conjugate, isotype, stndCurveFitInput, unkCurveFitInput, protocol);
+                insertTitrationAnalyteMappings(user, form, expRun, titrations, sheet.getValue(), analyte, conjugate, isotype, stndCurveFitInput, unkCurveFitInput, protocol);
 
                 // Now that we've made sure each data row to the appropriate data file, make sure that we
                 // have %CV and StdDev. It's important to wait so that we know the scope in which to do the aggregate
@@ -574,7 +574,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return null;
     }
 
-    private void insertTitrationAnalyteMappings(User user, LuminexRunContext form, Map<String, Titration> titrations, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, String stndCurveFitInput, String unkCurveFitInput, ExpProtocol protocol)
+    private void insertTitrationAnalyteMappings(User user, LuminexRunContext form, ExpRun expRun, Map<String, Titration> titrations, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, String stndCurveFitInput, String unkCurveFitInput, ExpProtocol protocol)
             throws ExperimentException, SQLException
     {
         // Insert mappings for all of the titrations that aren't standards
@@ -582,11 +582,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!titration.isStandard() && titration.isQcControl())
             {
-                insertAnalyteTitrationMapping(user, dataRows, analyte, titration, conjugate, isotype, stndCurveFitInput, protocol);
+                insertAnalyteTitrationMapping(user, expRun, dataRows, analyte, titration, conjugate, isotype, stndCurveFitInput, protocol);
             }
             else if (!titration.isStandard() && titration.isUnknown())
             {
-                insertAnalyteTitrationMapping(user, dataRows, analyte, titration, conjugate, isotype, unkCurveFitInput, protocol);
+                insertAnalyteTitrationMapping(user, expRun, dataRows, analyte, titration, conjugate, isotype, unkCurveFitInput, protocol);
             }
         }
 
@@ -594,11 +594,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         for (String titrationName : form.getTitrationsForAnalyte(analyte.getName()))
         {
             Titration titration = titrations.get(titrationName);
-            insertAnalyteTitrationMapping(user, dataRows, analyte, titration, conjugate, isotype, stndCurveFitInput, protocol);
+            insertAnalyteTitrationMapping(user, expRun, dataRows, analyte, titration, conjugate, isotype, stndCurveFitInput, protocol);
         }
     }
 
-    private void insertAnalyteTitrationMapping(User user, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration, String conjugate, String isotype, String curveFitInput, ExpProtocol protocol)
+    private void insertAnalyteTitrationMapping(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration, String conjugate, String isotype, String curveFitInput, ExpProtocol protocol)
             throws SQLException, ExperimentException
     {
         LuminexWellGroup wellGroup = titration.buildWellGroup(dataRows);
@@ -704,6 +704,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 {
                     Table.delete(LuminexSchema.getTableInfoCurveFit(), existingCurveFit.getRowId());
                 }
+            }
+
+            // insert QC Flags on upload for High MFI, 4PL EC50, or AUC values that are out of the guide set range
+            // if this AnalyteTitration record is new and has a current GuideSet
+            if (newRow && null != analyteTitration.getGuideSetId())
+            {
+                insertQCFlags(user, expRun, protocol, analyteTitration, analyte, titration, isotype, conjugate, newCurveFits);
             }
         }
         catch (DilutionCurve.FitFailedException e)
@@ -1091,6 +1098,101 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         fit.setEC50(ec50);
         fit.setCurveType(fitLabel);
         return fit;
+    }
+
+    private void insertQCFlags(User user, ExpRun expRun, ExpProtocol protocol, AnalyteTitration analyteTitration, Analyte analyte, Titration titration, String isotype, String conjugate, List<CurveFit> curveFits)
+            throws SQLException
+    {
+        // query the guide set table to get the average and stddev values for the out of guide set range comparisons
+        LuminexSchema schema = new LuminexSchema(user, expRun.getContainer(), protocol);
+        GuideSetTable table = schema.createGuideSetTable(false);
+
+        FieldKey maxFIAverageFK = FieldKey.fromParts("MaxFIAverage");
+        FieldKey maxFIStdDevFK = FieldKey.fromParts("MaxFIStdDev");
+        FieldKey ec50AverageFK = FieldKey.fromParts("Four ParameterCurveFit", "EC50Average");
+        FieldKey ec50StdDevFK = FieldKey.fromParts("Four ParameterCurveFit", "EC50StdDev");
+        FieldKey aucAverageFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCAverage");
+        FieldKey aucStdDevFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCStdDev");
+
+        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(maxFIAverageFK, maxFIStdDevFK, ec50AverageFK, ec50StdDevFK, aucAverageFK, aucStdDevFK));
+        SimpleFilter guideSetFilter = new SimpleFilter("RowId", analyteTitration.getGuideSetId());
+        Map<String, Object>[] rows = Table.select(table, new ArrayList<ColumnInfo>(cols.values()), guideSetFilter, null, Map.class);
+        assert rows.length == 1;
+
+        Map<String, Object> row = rows[0];
+        String descriptionPrefix = titration.getName() + " " + analyte.getName() + " - " + isotype + " " + conjugate + " ";
+
+        // add QCFlag for High MFI, if out of guide set range
+        Double average = (Double)row.get(cols.get(maxFIAverageFK).getAlias());
+        Double stdDev = (Double)row.get(cols.get(maxFIStdDevFK).getAlias());
+        String outOfRangeType = isOutOfGuideSetRange(analyteTitration.getMaxFI(), average, stdDev);
+        if (null != outOfRangeType)
+            insertNewQCFlag(user, expRun, "HMFI", descriptionPrefix + outOfRangeType + " threshold for High MFI", analyte, titration);
+
+        for (CurveFit curveFit : curveFits)
+        {
+            // add QCFlag for new 4PL EC50 curvefit value, if out of guide set range
+            if (curveFit.getCurveType().equals(DilutionCurve.FitType.FOUR_PARAMETER.getLabel()))
+            {
+                average = (Double)row.get(cols.get(ec50AverageFK).getAlias());
+                stdDev = (Double)row.get(cols.get(ec50StdDevFK).getAlias());
+                outOfRangeType = isOutOfGuideSetRange(curveFit.getEC50(), average, stdDev);
+                if (null != outOfRangeType)
+                    insertNewQCFlag(user, expRun, "EC50", descriptionPrefix + outOfRangeType + " threshold for EC50", analyte, titration);
+            }
+
+            // add QCFlag for new Trapezoidal AUC curvefit value, if out of guide set range
+            if (curveFit.getCurveType().equals("Trapezoidal"))
+            {
+                average = (Double)row.get(cols.get(aucAverageFK).getAlias());
+                stdDev = (Double)row.get(cols.get(aucStdDevFK).getAlias());
+                outOfRangeType = isOutOfGuideSetRange(curveFit.getAUC(), average, stdDev);
+                if (null != outOfRangeType)
+                    insertNewQCFlag(user, expRun, "AUC", descriptionPrefix + outOfRangeType + " threshold for AUC", analyte, titration);
+            }
+        }
+    }
+
+    private void insertNewQCFlag(User user, ExpRun expRun, String flagType, String description, Analyte analyte, Titration titration)
+            throws SQLException
+    {
+        ExpQCFlag newQcFlag = new ExpQCFlag();
+        newQcFlag.setRunId(expRun.getRowId());
+        newQcFlag.setFlagType(flagType);
+        newQcFlag.setDescription(description);
+        newQcFlag.setEnabled(true);
+        newQcFlag.setIntKey1(analyte.getRowId());
+        newQcFlag.setIntKey2(titration.getRowId());
+
+        Table.insert(user, ExperimentService.get().getTinfoAssayQCFlag(), newQcFlag);
+    }
+
+    /**
+     * Check if the given value is outside of the Guide Set range (i.e. average +/- 3 stdDev threshold)
+     * @param value The value to be compared with the range
+     * @param average The average of the given guide set
+     * @param stdDev The standard deviation of the given guide set
+     * @return Return null if the value is within range and "over" or "under" if the value is not in the range
+     */
+    public static String isOutOfGuideSetRange(Double value, Double average, Double stdDev)
+    {
+        if (null != value && null != average)
+        {
+            // set the stdDev to zero if there is none
+            if (null == stdDev)
+                stdDev = 0.0;
+
+            // compare everything to two decimal places
+            value = (double)Math.round(value * 100) / 100;
+            double top = (double)Math.round((average + 3 * stdDev) * 100) / 100;
+            double bottom = (double)Math.round((average - 3 * stdDev) * 100) / 100;
+
+            if (value > top)
+                return "over";
+            else if (value < bottom)
+                return "under";
+        }
+        return null;
     }
 
     private ParticipantVisitResolver findParticipantVisitResolver(ExpRun expRun, User user, LuminexAssayProvider provider)

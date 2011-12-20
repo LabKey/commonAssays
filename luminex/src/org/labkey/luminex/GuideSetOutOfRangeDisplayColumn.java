@@ -81,31 +81,13 @@ public class GuideSetOutOfRangeDisplayColumn extends DataColumn
         Double stdDev = (Double)ctx.get(_stdDevFieldKey);
 
         // display values that are outside of guide set range in red
-        boolean outOfRange = isOutOfRange(value, avg, stdDev);
-        if (outOfRange)
+        String outOfRangeType = LuminexDataHandler.isOutOfGuideSetRange(value, avg, stdDev);
+        if (null != outOfRangeType)
             out.write("<span style='color:red;'>");
 
         super.renderGridCellContents(ctx, out);
 
-        if (outOfRange)
+        if (null != outOfRangeType)
             out.write("</span>");
-    }
-
-    private boolean isOutOfRange(Double value, Double avg, Double stdDev)
-    {
-        if (null != value && null != avg)
-        {
-            // set the stdDev to zero if there is none
-            if (null == stdDev)
-                stdDev = 0.0;
-
-            value = (double)Math.round(value * 100) / 100;
-            double top = (double)Math.round((avg + 3 * stdDev) * 100) / 100;
-            double bottom = (double)Math.round((avg - 3 * stdDev) * 100) / 100;
-            if (value > top || value < bottom)
-                return true;
-        }
-
-        return false;
     }
 }
