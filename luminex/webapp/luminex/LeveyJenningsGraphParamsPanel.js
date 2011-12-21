@@ -133,6 +133,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             mode: 'local',
             valueField: 'value',
             displayField: 'display',
+            tpl: '<tpl for="."><div class="x-combo-list-item">{display:htmlEncode}</div></tpl>',
             listeners: {
                 scope: this,
                 'select': function(combo, record, index) {
@@ -178,6 +179,7 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             mode: 'local',
             valueField: 'value',
             displayField: 'display',
+            tpl: '<tpl for="."><div class="x-combo-list-item">{display:htmlEncode}</div></tpl>',
             listeners: {
                 scope: this,
                 'select': function(combo, record, index) {

@@ -1030,6 +1030,47 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             assertEquals("Wrong StdDev", 5000.0, Math.round(dataRows.get(6).getStdDev() * 100000) / 100000.0);
             assertEquals("Wrong StdDev", 245.0125, Math.round(dataRows.get(7).getStdDev() * 100000) / 100000.0);
         }
+
+        @Test
+        public void testGuideSetOutOfRange()
+        {
+            // check some actual values used in the first set of runs for the LuminexGuideSetTest (all are in range)
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(164.07, 177.15, 18.49));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(190.23, 177.15, 18.49));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(43988.21, 43426.10, 794.95));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(42863.98, 43426.10, 794.95));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(9031.46, 8662.50, 521.79));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(8293.54, 8662.50, 521.79));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(85464.34, 80851.83, 6523.08));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(76239.32, 80851.83, 6523.08));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(11845.50, 11457.15, 549.21));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(11068.80, 11457.15, 549.21));
+
+            // check some of the values used in the second set of runs for the LuminexGuideSetTest
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(138.90, 177.15, 18.49));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(207.49, 177.15, 18.49));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(151.95, 177.15, 18.49));
+            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(6333.02, 8662.50, 521.79));
+            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(7028.96, 8662.50, 521.79));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(7491.69, 8662.50, 521.79));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(28005.89, 42158.22, 4833.76));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(36676.66, 42158.22, 4833.76));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(45809.80, 42158.22, 4833.76));
+            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(78448.67, 85268.04, 738.55));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(84451.16, 85268.04, 738.55));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(85888.60, 85268.04, 738.55));
+
+            // other checks using null values, etc.
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(90.0, 60.0, 10.0));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(30.0, 60.0, 10.0));
+            assertEquals("Wrong out of guide set range type", "over", isOutOfGuideSetRange(91.0, 60.0, 10.0));
+            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(29.0, 60.0, 10.0));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(null, 60.0, 10.0));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(90.0, null, null));
+            assertNull("Wrong out of guide set range type", isOutOfGuideSetRange(60.0, 60.0, null));
+            assertEquals("Wrong out of guide set range type", "over", isOutOfGuideSetRange(60.01, 60.0, null));
+            assertEquals("Wrong out of guide set range type", "under", isOutOfGuideSetRange(59.99, 60.0, null));
+        }
     }
 
     @NotNull

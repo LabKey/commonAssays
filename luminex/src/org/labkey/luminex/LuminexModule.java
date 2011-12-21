@@ -23,6 +23,7 @@ import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.study.assay.AssayQCFlagColumn;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.ContextListener;
 import org.labkey.api.util.PageFlowUtil;
@@ -90,7 +91,7 @@ public class LuminexModule extends DefaultModule
     @Override
     public Set<Class> getJUnitTests()
     {
-        return PageFlowUtil.<Class>set(LuminexDataHandler.TestCase.class, LuminexExcelParser.TestCase.class);
+        return PageFlowUtil.<Class>set(LuminexDataHandler.TestCase.class, LuminexExcelParser.TestCase.class, AssayQCFlagColumn.TestCase.class);
     }
 
     @Override
