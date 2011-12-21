@@ -543,6 +543,7 @@ public class FlowController extends BaseFlowController
             try
             {
                 FlowSettings.setWorkingDirectoryPath(form.getWorkingDirectory());
+                FlowSettings.setDeleteFiles(form.isDeleteFiles());
                 FlowSettings.setNormalizationEnabled(form.isNormalizationEnabled());
             }
             catch (Exception e)

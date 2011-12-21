@@ -21,11 +21,13 @@ import org.labkey.flow.FlowSettings;
 public class FlowAdminForm
 {
     private String _workingDirectory;
+    private boolean _deleteFiles;
     private boolean _normalizationEnabled;
 
     public FlowAdminForm()
     {
         _workingDirectory = FlowSettings.getWorkingDirectoryPath();
+        _deleteFiles = FlowSettings.isDeleteFiles();
         _normalizationEnabled = FlowSettings.isNormalizationEnabled();
     }
 
@@ -37,6 +39,16 @@ public class FlowAdminForm
     public String getWorkingDirectory()
     {
         return _workingDirectory;
+    }
+
+    public boolean isDeleteFiles()
+    {
+        return _deleteFiles;
+    }
+
+    public void setDeleteFiles(boolean deleteFiles)
+    {
+        _deleteFiles = deleteFiles;
     }
 
     public boolean isNormalizationEnabled()

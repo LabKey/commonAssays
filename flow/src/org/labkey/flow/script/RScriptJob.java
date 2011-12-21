@@ -291,8 +291,7 @@ public class RScriptJob extends FlowExperimentJob
         if (_performNormalization && !hasErrors())
             importResults(normalizedDir, "Normalized " + _workspaceName);
 
-        if (!hasErrors())
-            deleteAnalysisDirectory(workingDir);
+        deleteAnalysisDirectory(workingDir.getParentFile());
     }
 
     @Override

@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.fhcrc.cpas.exp.xml.ExperimentRunType;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
@@ -161,7 +162,7 @@ public abstract class FlowExperimentJob extends FlowJob
 
     public void deleteAnalysisDirectory(File directory)
     {
-        if (!FlowSettings.getDeleteFiles())
+        if (!FlowSettings.isDeleteFiles())
             return;
         if (hasErrors())
             return;
@@ -172,11 +173,7 @@ public abstract class FlowExperimentJob extends FlowJob
             {
                 return;
             }
-            for (File file : directory.listFiles())
-            {
-                file.delete();
-            }
-            directory.delete();
+            FileUtil.deleteDir(directory);
         }
         catch (Exception ioe)
         {

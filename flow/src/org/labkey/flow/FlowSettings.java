@@ -30,6 +30,7 @@ public class FlowSettings
     static private final String PROPCAT_FLOW = "flow";
     static private final String PROPNAME_WORKINGDIRECTORY = "workingDirectory";
     static private final String PROPNAME_NORMALIZATION_ENABLED = "normalizationEnabled";
+    static private final String PROPNAME_DELETE_FILES = "deleteFiles";
 
     static private File getTempAnalysisDirectory() throws Exception
     {
@@ -101,8 +102,29 @@ public class FlowSettings
         PropertyManager.saveProperties(map);
     }
 
-    static public boolean getDeleteFiles()
+    public static void setDeleteFiles(boolean deleteFiles)
     {
-        return false;
+        Container container = ContainerManager.getRoot();
+        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(container.getId(), PROPCAT_FLOW, !deleteFiles);
+        if (map == null)
+            return;
+
+        if (deleteFiles)
+            map.remove(PROPNAME_DELETE_FILES);
+        else
+            map.put(PROPNAME_DELETE_FILES, "false");
+        PropertyManager.saveProperties(map);
+    }
+
+    /** Defaults to 'true' if no value has been set. */
+    static public boolean isDeleteFiles()
+    {
+        Container container = ContainerManager.getRoot();
+        Map<String, String> map = PropertyManager.getProperties(container.getId(), PROPCAT_FLOW);
+        String value = StringUtils.trimToNull(map.get(PROPNAME_DELETE_FILES));
+        if (value == null)
+            return true;
+
+        return Boolean.valueOf(value);
     }
 }

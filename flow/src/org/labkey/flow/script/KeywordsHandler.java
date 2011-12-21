@@ -127,7 +127,7 @@ public class KeywordsHandler extends BaseHandler
         }
         _job.finishExperimentRun(xar, run);
         _job.importRuns(xarDoc, directory, runDirectory, FlowProtocolStep.keywords);
-        _job.deleteAnalysisDirectory(runDirectory);
+        _job.deleteAnalysisDirectory(runDirectory.getParentFile());
 
         return FlowRun.fromLSID(run.getAbout());
     }
