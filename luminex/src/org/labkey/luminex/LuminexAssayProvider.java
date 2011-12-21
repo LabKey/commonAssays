@@ -161,23 +161,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     @Override
     public ExpRunTable createRunTable(final AssaySchema schema, final ExpProtocol protocol)
     {
-        ExpRunTable result = super.createRunTable(schema, protocol);
+        final ExpRunTable result = super.createRunTable(schema, protocol);
 
-        /** RowId -> Name */
-        final Map<FieldKey, FieldKey> pdfColumns = new HashMap<FieldKey, FieldKey>();
-        TableInfo outputTable = result.getColumn(ExpRunTable.Column.Output).getFk().getLookupTableInfo();
-        // Check for data outputs that are PDFs
-        for (ColumnInfo columnInfo : outputTable.getColumns())
-        {
-            if (columnInfo.getName().toLowerCase().endsWith("pdf"))
-            {
-                pdfColumns.put(
-                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.RowId.toString()),
-                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.Name.toString()));
-            }
-        }
-
-        // Render any PDF outputswe found direct download links since they should be plots of standard curves
+        // Render any PDF outputs we found as direct download links since they should be plots of standard curves
         ColumnInfo curvesColumn = result.addColumn("Curves", ExpRunTable.Column.Name);
         curvesColumn.setWidth("30");
         curvesColumn.setReadOnly(true);
@@ -195,18 +181,35 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             {
                 return new DataColumn(colInfo)
                 {
+                    /** RowId -> Name */
+                    private Map<FieldKey, FieldKey> _pdfColumns = new HashMap<FieldKey, FieldKey>();
+
+                    {
+                        TableInfo outputTable = result.getColumn(ExpRunTable.Column.Output).getFk().getLookupTableInfo();
+                        // Check for data outputs that are PDFs
+                        for (ColumnInfo columnInfo : outputTable.getColumns())
+                        {
+                            if (columnInfo.getName().toLowerCase().endsWith("pdf"))
+                            {
+                                _pdfColumns.put(
+                                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.RowId.toString()),
+                                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.Name.toString()));
+                            }
+                        }
+                    }
+
                     @Override
                     public void addQueryFieldKeys(Set<FieldKey> keys)
                     {
-                        keys.addAll(pdfColumns.keySet());
-                        keys.addAll(pdfColumns.values());
+                        keys.addAll(_pdfColumns.keySet());
+                        keys.addAll(_pdfColumns.values());
                     }
 
                     @Override
                     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                     {
                         Map<Integer, String> pdfs = new HashMap<Integer, String>();
-                        for (Map.Entry<FieldKey, FieldKey> entry : pdfColumns.entrySet())
+                        for (Map.Entry<FieldKey, FieldKey> entry : _pdfColumns.entrySet())
                         {
                             Number rowId = (Number)ctx.get(entry.getKey());
                             if (rowId != null)
@@ -324,11 +327,11 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
         addProperty(analyteDomain, "AnalyteType", "Analyte Type", PropertyType.STRING);
         addProperty(analyteDomain, "WeightingMethod", "Weighting Method", PropertyType.STRING);
-        
+
         addProperty(analyteDomain, "BeadManufacturer", "Bead Manufacturer", PropertyType.STRING);
         addProperty(analyteDomain, "BeadDist", "Bead Dist", PropertyType.STRING);
         addProperty(analyteDomain, "BeadCatalogNumber", "Bead Catalog Number", PropertyType.STRING);
-        
+
         result.add(new Pair<Domain, Map<DomainProperty, Object>>(analyteDomain, Collections.<DomainProperty, Object>emptyMap()));
 
         Domain excelRunDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_EXCEL_RUN + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":${AssayName}", "Excel File Run Properties");
@@ -364,7 +367,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexUploadWizardAction.class);
     }
-    
+
     public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
     {
         // on Postgres 8.3, we must pass in an integer row ID; passing a string that happens to be all digits isn't
@@ -439,13 +442,13 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public DataExchangeHandler createDataExchangeHandler()
     {
-        return new LuminexDataExchangeHandler();        
+        return new LuminexDataExchangeHandler();
     }
 
     public PipelineProvider getPipelineProvider()
     {
         return new AssayPipelineProvider(LuminexModule.class,
-                new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()), 
+                new PipelineProvider.FileTypesEntryFilter(getDataType().getFileType()),
                 this, "Import Luminex");
     }
 
