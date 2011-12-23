@@ -57,7 +57,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -283,7 +282,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 {
                     // Add the user's property column
                     PropertyDescriptor pd = dp.getPropertyDescriptor();
-                    col = new PropertyColumn(pd, objectIdCol, _container, _user);
+                    col = new PropertyColumn(pd, objectIdCol, _container, _user, true);
                     ((PropertyColumn)col).setParentIsObjectId(true);
                     copyProperties(col, dp);
                     if (!dp.isHidden())
@@ -293,7 +292,7 @@ public class ViabilityAssaySchema extends AssaySchema
 
                 if (col.getMvColumnName() != null)
                 {
-                    MVDisplayColumnFactory.addMvColumns(this, col, dp, objectIdCol, _user);
+                    MVDisplayColumnFactory.addMvColumns(this, col, dp, objectIdCol, _container, _user);
                 }
             }
 

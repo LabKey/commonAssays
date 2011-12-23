@@ -208,7 +208,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 if (initialValue != null)
                     view.setInitialValue(inputName, initialValue);
 
-                ColumnInfo col = resultDomainProperty.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidCol, form.getUser());
+                ColumnInfo col = resultDomainProperty.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidCol, form.getUser(), form.getContainer());
                 col.setUserEditable(editable);
                 col.setName(inputName);
 

@@ -147,7 +147,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     if (defaultValues != null)
                         view.setInitialValue(inputName, defaultValues.get(analyteDP));
 
-                    ColumnInfo info = analyteDP.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getViewContext().getUser());
+                    ColumnInfo info = analyteDP.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getViewContext().getUser(), getViewContext().getContainer());
                     info.setName(inputName);
                     info.setDisplayColumnFactory(new DisplayColumnFactory()
                     {

@@ -240,7 +240,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         defaultCols.add(FieldKey.fromParts("Titration"));
 
         Domain domain = getDomain();
-        for (ColumnInfo propertyCol : domain.getColumns(this, getColumn("LSID"), schema.getUser()))
+        for (ColumnInfo propertyCol : domain.getColumns(this, getColumn("LSID"), schema.getContainer(), schema.getUser()))
         {
             addColumn(propertyCol);
             defaultCols.add(propertyCol.getFieldKey());

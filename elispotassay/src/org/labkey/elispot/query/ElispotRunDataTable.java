@@ -114,7 +114,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
                     }
                 }
 
-                ColumnInfo materialColumn = new PropertyColumn(materialProperty, objectUriColumn, getContainer(), schema.getUser());
+                ColumnInfo materialColumn = new PropertyColumn(materialProperty, objectUriColumn, getContainer(), schema.getUser(), true);
                 materialColumn.setLabel("Specimen");
                 materialColumn.setFk(new LookupForeignKey("LSID")
                 {
@@ -144,7 +144,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
             // run through the property columns, setting all to be visible by default:
             for (PropertyDescriptor pd : properties)
             {
-                ColumnInfo propColumn = new PropertyColumn(pd, objectUriColumn, getContainer(), schema.getUser());
+                ColumnInfo propColumn = new PropertyColumn(pd, objectUriColumn, getContainer(), schema.getUser(), true);
                 if (getColumn(propColumn.getName()) == null)
                     addColumn(propColumn);
 
