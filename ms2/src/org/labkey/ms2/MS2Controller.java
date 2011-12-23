@@ -17,7 +17,6 @@ package org.labkey.ms2;
 
 import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +27,7 @@ import org.labkey.api.cache.CacheManager;
 import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.Filter;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -627,7 +627,7 @@ public class MS2Controller extends SpringActionController
         Map<String, String> fixed = new TreeMap<String, String>();
         Map<String, String> var = new TreeMap<String, String>();
 
-        for (MS2Modification mod : run.getModifications())
+        for (MS2Modification mod : run.getModifications(MassType.Average))
         {
             if (mod.getVariable())
                 var.put(mod.getAminoAcid() + mod.getSymbol(), Formats.f3.format(mod.getMassDiff()));
@@ -758,6 +758,67 @@ public class MS2Controller extends SpringActionController
         public MS2Run run;
         public String description;
         public URLHelper returnURL;
+    }
+
+    public void exportMS2Ions(RunForm form, HttpServletResponse response) throws Exception
+    {
+        MS2Run run = validateRun(form);
+        Filter filter = new SimpleFilter("Run", run.getRun());
+        MS2Peptide[] peptides = Table.select(MS2Manager.getTableInfoPeptides(), Table.ALL_COLUMNS, filter, new Sort("Scan"), MS2Peptide.class);
+        response.setContentType("text/tab-separated-values");
+        response.setHeader("Content-disposition", "attachment; filename=\"" + run.getDescription() + ".MS2Ions.tsv");
+        response.getWriter().write("Scan\tPeptide\tPeptideProphet\tProtein\tIonType\tFragmentLength\tAverageTheoreticalMass\tAverageObservedMass\tAverageDeltaMass\tAverageIntensity\tMonoisotopicTheoreticalMass\tMonoisotopicObservedMass\tMonoisotopicDeltaMass\tMonoisotopicIntesity\n");
+        for (MS2Peptide peptide : peptides)
+        {
+            peptide.init(0.5, 0, 10000);
+            exportPeptideIonRows(response.getWriter(), peptide, "y",
+                    peptide.getYIons(MassType.Average),
+                    peptide.getYIons(MassType.Monoisotopic));
+            exportPeptideIonRows(response.getWriter(), peptide, "b",
+                    peptide.getBIons(MassType.Average),
+                    peptide.getBIons(MassType.Monoisotopic));
+        }
+    }
+
+    private void exportPeptideIonRows(Writer writer, MS2Peptide peptide, String ionType,
+                            MS2Peptide.FragmentIon[][] allAverageIons,
+                            MS2Peptide.FragmentIon[][] allMonoisotopicIons) throws IOException
+    {
+        for (int i = 0; i < allAverageIons.length; i++)
+        {
+            MS2Peptide.FragmentIon[] averageIons = allAverageIons[i];
+            MS2Peptide.FragmentIon[] monoisotopicIons = allMonoisotopicIons[i];
+
+            for (int j = 0; j < averageIons.length; j++)
+            {
+                writer.write(peptide.getScan() + "\t");
+                writer.write(peptide.getPeptide() + "\t");
+                writer.write(peptide.getPeptideProphet() + "\t");
+                writer.write(peptide.getProtein() + "\t");
+                writer.write(ionType + (i + 1) + "+\t");
+                writer.write((j + 1) + "\t");
+                writeIonColumns(writer, averageIons[j], i + 1);
+                writer.write("\t");
+                writeIonColumns(writer, monoisotopicIons[j], i + 1);
+
+                writer.write("\n");
+            }
+        }
+    }
+
+    private void writeIonColumns(Writer writer, MS2Peptide.FragmentIon ion, int chargeState) throws IOException
+    {
+        writer.write(ion.getTheoreticalMZ() * chargeState + "\t");
+        if (ion.isMatch())
+        {
+            writer.write(ion.getObservedMZ() * chargeState + "\t");
+            writer.write((ion.getTheoreticalMZ() * chargeState - ion.getObservedMZ() * chargeState) + "\t");
+            writer.write(Double.toString(ion.getIntensity()));
+        }
+        else
+        {
+            writer.write("\t\t");
+        }
     }
 
 
@@ -2124,37 +2185,100 @@ public class MS2Controller extends SpringActionController
             ActionURL currentURL = getViewContext().cloneActionURL();
             SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getViewContext().getUser());
 
-            if (form.getExportFormat() != null && form.getExportFormat().startsWith("Excel"))
+            MS2ExportType exportType = MS2ExportType.valueOfOrNotFound(form.getExportFormat());
+            switch (exportType)
             {
-                peptideView.exportToExcel(form, response, null);
-                return;
+                case Excel:
+                    peptideView.exportToExcel(form, response, null);
+                    break;
+                case TSV:
+                    peptideView.exportToTSV(form, response, null, null);
+                    break;
+                case AMT:
+                    peptideView.exportToAMT(form, response, null);
+                    break;
+                case DTA:
+                case PKL:
+                    if (peptideView instanceof FlatPeptideView)
+                        exportSpectra(runs, currentURL, peptideFilter, form.getExportFormat().toLowerCase());
+                    else
+                        exportProteinsAsSpectra(runs, currentURL, form.getExportFormat().toLowerCase(), peptideView, null, getViewContext().getUser());
+                    break;
+                case MS2Ions:
+                    exportMS2Ions(form, response);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unsupported export type: " + exportType);
             }
-
-            if ("TSV".equals(form.getExportFormat()))
-            {
-                peptideView.exportToTSV(form, response, null, null);
-                return;
-            }
-
-            if ("DTA".equals(form.getExportFormat()) || "PKL".equals(form.getExportFormat()))
-            {
-                if (peptideView instanceof FlatPeptideView)
-                    exportSpectra(runs, currentURL, peptideFilter, form.getExportFormat().toLowerCase());
-                else
-                    exportProteinsAsSpectra(runs, currentURL, form.getExportFormat().toLowerCase(), peptideView, null, getViewContext().getUser());
-                return;
-            }
-
-            if ("AMT".equals(form.getExportFormat()))
-            {
-                peptideView.exportToAMT(form, response, null);
-                return;
-            }
-
-            throw new IllegalArgumentException("Unsupported export type: " + form.getExportFormat());
         }
     }
 
+    public enum MS2ExportType
+    {
+        Excel,
+        TSV,
+        PKL,
+        DTA,
+        AMT,
+        MS2Ions("MS2 Ions TSV")
+        {
+            @Override
+            public boolean supportsSelectedOnly()
+            {
+                return false;
+            }
+
+            @Override
+            public String getDescription()
+            {
+                return "Ignores all peptide and protein filters, exports a row for each peptide's y and b ion/charge state combinations";
+            }
+        };
+
+        private final String _name;
+
+        private MS2ExportType(String name)
+        {
+            _name = name;
+        }
+
+        private MS2ExportType()
+        {
+            this(null);
+        }
+
+        @Override
+        public String toString()
+        {
+            return _name == null ? super.toString() : _name;
+        }
+
+        public static MS2ExportType valueOfOrNotFound(String name)
+        {
+            if (name == null)
+            {
+                throw new NotFoundException("No export format specified");
+            }
+            try
+            {
+                return MS2ExportType.valueOf(name);
+            }
+            catch (IllegalArgumentException e)
+            {
+                throw new NotFoundException("Unknown export format specified: " + name);
+            }
+        }
+
+        public boolean supportsSelectedOnly()
+        {
+            return true;
+        }
+
+        public String getDescription()
+        {
+            return null;
+        }
+    }
 
     private void exportSpectra(List<MS2Run> runs, ActionURL currentURL, SimpleFilter filter, String extension) throws IOException
     {
@@ -2565,31 +2689,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
-    @RequiresPermissionClass(ReadPermission.class)
-    public class ShowGraphAction extends ExportAction<DetailsForm>
-    {
-        public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
-        {
-            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
-
-            if (null != peptide)
-            {
-                validateRun(peptide.getRun());
-
-                response.setDateHeader("Expires", System.currentTimeMillis() + DateUtils.MILLIS_PER_HOUR);
-                response.setHeader("Pragma", "");
-                response.setContentType("image/png");
-                peptide.renderGraph(response, form.getTolerance(), form.getxStartDouble(), form.getxEnd(), form.getWidth(), form.getHeight());
-            }
-            else
-            {
-                throw new NotFoundException();
-            }
-        }
-    }
-
-
     @RequiresSiteAdmin
     public class ReloadFastaAction extends FormHandlerAction
     {
@@ -2916,22 +3015,27 @@ public class MS2Controller extends SpringActionController
             where = sb.toString();
         }
 
-        if ("Excel".equals(form.getExportFormat()))
+        MS2ExportType exportType = MS2ExportType.valueOfOrNotFound(form.getExportFormat());
+        switch (exportType)
         {
-            peptideView.exportToExcel(form, response, proteins);
-//            exportProteinGroupsToExcel(getActionURL(), form, what, where);
-        }
-        else if ("TSV".equals(form.getExportFormat()))
-        {
-            peptideView.exportToTSV(form, response, proteins, null);
-        }
-        else if ("AMT".equals(form.getExportFormat()))
-        {
-            peptideView.exportToAMT(form, response, proteins);
-        }
-        else if ("DTA".equals(form.getExportFormat()) || "PKL".equals(form.getExportFormat()))
-        {
-            exportProteinsAsSpectra(Arrays.asList(run), getViewContext().getActionURL(), form.getExportFormat().toLowerCase(), peptideView, where, getViewContext().getUser());
+            case Excel:
+                peptideView.exportToExcel(form, response, proteins);
+                break;
+            case TSV:
+                peptideView.exportToTSV(form, response, proteins, null);
+                break;
+            case AMT:
+                peptideView.exportToAMT(form, response, proteins);
+                break;
+            case DTA:
+            case PKL:
+                exportProteinsAsSpectra(Arrays.asList(run), getViewContext().getActionURL(), form.getExportFormat().toLowerCase(), peptideView, where, getViewContext().getUser());
+                break;
+            case MS2Ions:
+                exportMS2Ions(form, response);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported export type: " + exportType);
         }
     }
 
@@ -2967,21 +3071,27 @@ public class MS2Controller extends SpringActionController
         MS2Run run = validateRun(form);
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
-        if ("Excel".equals(form.getExportFormat()))
+        MS2ExportType exportType = MS2ExportType.valueOfOrNotFound(form.getExportFormat());
+        switch (exportType)
         {
-            peptideView.exportToExcel(form, response, proteins);
-        }
-        else if ("TSV".equals(form.getExportFormat()))
-        {
-            peptideView.exportToTSV(form, response, proteins, null);
-        }
-        else if ("AMT".equals(form.getExportFormat()))
-        {
-            peptideView.exportToAMT(form, response, proteins);
-        }
-        else if ("DTA".equals(form.getExportFormat()) || "PKL".equals(form.getExportFormat()))
-        {
-            exportProteinsAsSpectra(Arrays.asList(run), getViewContext().getActionURL(), form.getExportFormat().toLowerCase(), peptideView, extraWhere, getViewContext().getUser());
+            case Excel:
+                peptideView.exportToExcel(form, response, proteins);
+                break;
+            case TSV:
+                peptideView.exportToTSV(form, response, proteins, null);
+                break;
+            case AMT:
+                peptideView.exportToAMT(form, response, proteins);
+                break;
+            case DTA:
+            case PKL:
+                exportProteinsAsSpectra(Arrays.asList(run), getViewContext().getActionURL(), form.getExportFormat().toLowerCase(), peptideView, extraWhere, getViewContext().getUser());
+                break;
+            case MS2Ions:
+                exportMS2Ions(form, response);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported export type: " + exportType);
         }
     }
 
@@ -3394,29 +3504,30 @@ public class MS2Controller extends SpringActionController
             baseFilter.addInClause("RowId", peptideIds);
         }
 
-        if ("Excel".equals(form.getExportFormat()))
+        MS2ExportType exportType = MS2ExportType.valueOfOrNotFound(form.getExportFormat());
+        switch (exportType)
         {
-            peptideView.exportToExcel(form, response, exportRows);
-            return;
+            case Excel:
+                peptideView.exportToExcel(form, response, exportRows);
+                break;
+            case TSV:
+                peptideView.exportToTSV(form, response, exportRows, null);
+                break;
+            case AMT:
+                peptideView.exportToAMT(form, response, exportRows);
+                break;
+            case DTA:
+            case PKL:
+                // Add URL filter manually
+                baseFilter.addAllClauses(ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER, getViewContext().getUser(), run));
+                exportSpectra(Arrays.asList(run), currentURL, baseFilter, form.getExportFormat().toLowerCase());
+                break;
+            case MS2Ions:
+                exportMS2Ions(form, response);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported export type: " + exportType);
         }
-
-        if ("TSV".equals(form.getExportFormat()))
-        {
-            peptideView.exportToTSV(form, response, exportRows, null);
-            return;
-        }
-
-        if ("AMT".equals(form.getExportFormat()))
-        {
-            peptideView.exportToAMT(form, response, exportRows);
-            return;
-        }
-
-        // Add URL filter manually
-        baseFilter.addAllClauses(ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER, getViewContext().getUser(), run));
-
-        if ("DTA".equals(form.getExportFormat()) || "PKL".equals(form.getExportFormat()))
-            exportSpectra(Arrays.asList(run), currentURL, baseFilter, form.getExportFormat().toLowerCase());
     }
 
     public static class ExportForm extends RunForm

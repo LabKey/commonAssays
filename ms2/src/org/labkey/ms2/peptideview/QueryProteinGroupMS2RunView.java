@@ -197,11 +197,8 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         return result;
     }
 
-    protected List<String> getExportFormats()
+    protected List<MS2Controller.MS2ExportType> getExportTypes()
     {
-        List<String> result = new ArrayList<String>();
-        result.add("Excel");
-        result.add("TSV");
-        return result;
+        return Arrays.asList(MS2Controller.MS2ExportType.Excel, MS2Controller.MS2ExportType.TSV);
     }
 }

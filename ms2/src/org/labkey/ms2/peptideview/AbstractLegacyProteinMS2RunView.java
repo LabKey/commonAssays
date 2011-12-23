@@ -171,14 +171,8 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
 
     public abstract AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException;
     
-    protected List<String> getExportFormats()
+    protected List<MS2Controller.MS2ExportType> getExportTypes()
     {
-        List<String> result = new ArrayList<String>();
-        result.add("Excel");
-        result.add("TSV");
-        result.add("DTA");
-        result.add("PKL");
-        result.add("AMT");
-        return result;
+        return Arrays.asList(MS2Controller.MS2ExportType.values());
     }
 }

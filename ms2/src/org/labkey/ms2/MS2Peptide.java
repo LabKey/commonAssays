@@ -16,15 +16,14 @@
 
 package org.labkey.ms2;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.ms2.protein.fasta.Peptide;
 import org.labkey.api.util.Pair;
+import org.labkey.ms2.protein.fasta.Peptide;
 import org.labkey.ms2.reader.LibraQuantResult;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,9 +31,7 @@ public class MS2Peptide
 {
     private static Logger _log = Logger.getLogger(MS2Peptide.class);
 
-    public static final double hMass = 1.00794;
     public static final double pMass = 1.007276;  // Mass of a proton, according to X! Tandem
-    public static final double oMass = 15.9994;
 
     // Bean variables
     private int _runId;
@@ -55,13 +52,12 @@ public class MS2Peptide
     private Integer _seqId;
 
     // Calculated variables
-    private double[] _massTable = null;
-    private Map<String, Double> _variableModifications = null;
-    private double[][] _b = {};
-    private double[][] _y = {};
-    private boolean[][] _bMatches = {};
-    private boolean[][] _yMatches = {};
-    private List<String>[] _massMatches;
+    private Map<MassType, double[]> _massTables = new HashMap<MassType, double[]>();
+    private Map<MassType, Map<String, Double>> _variableModifications = new HashMap<MassType, Map<String, Double>>();
+    private Map<MassType, double[][]> _b = new HashMap<MassType, double[][]>();
+    private Map<MassType, double[][]> _y = new HashMap<MassType, double[][]>();
+    private Map<MassType, FragmentIon[][]> _yIons = new HashMap<MassType, FragmentIon[][]>();
+    private Map<MassType, FragmentIon[][]> _bIons = new HashMap<MassType, FragmentIon[][]>();
     private float[] _spectrumMZ = null;
     private float[] _spectrumIntensity = null;
     private String[] _aa = {};
@@ -83,12 +79,6 @@ public class MS2Peptide
     public void init(double tolerance, double xStart, double xEnd) throws IOException
     {
         MS2Run run = MS2Manager.getRun(_runId);
-        _massTable = run.getMassTable();
-        _variableModifications = run.getVarModifications();
-
-        _ionCount = _charge;
-
-        fragment();
 
         try
         {
@@ -103,19 +93,18 @@ public class MS2Peptide
             _spectrumErrorMessage = e.getMessage();
         }
 
-        _massMatches = new ArrayList[_spectrumMZ.length];
-        _bMatches = computeMatches(_b, "b", tolerance, xStart, xEnd);
-        _yMatches = computeMatches(_y, "y", tolerance, xStart, xEnd);
-    }
+        _ionCount = _charge;
+        
+        for (MassType massType : MassType.values())
+        {
+            _massTables.put(massType, run.getMassTable(massType));
+            _variableModifications.put(massType, run.getVarModifications(massType));
 
+            fragment(massType);
 
-    public void renderGraph(HttpServletResponse response, double tolerance, double xStart, double xEnd, int width, int height) throws IOException
-    {
-        init(tolerance, xStart, xEnd);
-        width = Math.max(width, 50);
-        height = Math.max(height, 50);
-        SpectrumGraph g = new SpectrumGraph(this, width, height, tolerance, xStart, xEnd);
-        g.render(response);
+            _bIons.put(massType, computeMatches(_b, "b", tolerance, xStart, xEnd, massType));
+            _yIons.put(massType, computeMatches(_y, "y", tolerance, xStart, xEnd, massType));
+        }
     }
 
 
@@ -186,7 +175,7 @@ public class MS2Peptide
     }
 
 
-    private void fragment()
+    private void fragment(MassType massType)
     {
         // TODO: Rename to eliminate confusion between trimmedPeptide, trimPeptide(), and _trimmedPeptide
         String trimmedPeptide = trimPeptide(_peptide);
@@ -226,12 +215,12 @@ public class MS2Peptide
         for (int i = 0; i < _aaCount; i++)
         {
             String aa = _aa[i];
-            aaMass[i] = _massTable[aa.charAt(0) - 65];
+            aaMass[i] = _massTables.get(massType)[aa.charAt(0) - 65];
 
             // Variable modification... look it up and add the mass difference
             if (1 < aa.length())
             {
-                Double massDiff = _variableModifications.get(aa);
+                Double massDiff = _variableModifications.get(massType).get(aa);
                 if (null != massDiff)
                     aaMass[i] += massDiff;
                 else
@@ -243,38 +232,96 @@ public class MS2Peptide
 
         // Handle case of spectrum that didn't get a match
         if (_fragmentCount <= 0)
+        {
+            _b.put(massType, new double[0][]);
+            _y.put(massType, new double[0][]);
+            _yIons.put(massType, new FragmentIon[0][]);
+            _bIons.put(massType, new FragmentIon[0][]);
             return;
+        }
+
+        double[][] b = new double[_ionCount][_fragmentCount];
+        double[][] y = new double[_ionCount][_fragmentCount];
+
+        _b.put(massType, b);
+        _y.put(massType, y);
 
         // Compute b+ and y+ ions
-        _b = new double[_ionCount][_fragmentCount];
-        _y = new double[_ionCount][_fragmentCount];
         double bTotal[] = new double[_ionCount];
         double yTotal[] = new double[_ionCount];
 
         for (int i = 0; i < _ionCount; i++)
         {
-            bTotal[i] = hMass;                                      // Extra H on N-terminal
-            yTotal[i] = (hMass * 2 + oMass) / (i + 1) + hMass;      // Extra OH on C-terminal
+            bTotal[i] = massType.getHydrogenMass();                                      // Extra H on N-terminal
+            yTotal[i] = (massType.getHydrogenMass() * 2 + massType.getOxygenMass()) / (i + 1) + massType.getHydrogenMass();      // Extra OH on C-terminal
         }
 
         for (int i = 0; i < _fragmentCount; i++)
             for (int j = 0; j < _ionCount; j++)
             {
                 bTotal[j] = bTotal[j] + aaMass[i] / (j + 1);
-                _b[j][i] = bTotal[j];
+                b[j][i] = bTotal[j];
                 yTotal[j] = yTotal[j] + aaMass[_fragmentCount - i] / (j + 1);
-                _y[j][i] = yTotal[j];
+                y[j][i] = yTotal[j];
             }
     }
 
-
-    private boolean[][] computeMatches(double fragment[][], String fragmentPrefix, double tolerance, double xStart, double xEnd)
+    public static class FragmentIon
     {
+        private double _theoreticalMZ;
+        private double _observedMZ;
+        private double _intensity;
+        private MassType _massType;
+
+        private final static double NO_MATCH = -1.0;
+
+        public FragmentIon(double theoreticalMZ, MassType massType)
+        {
+            this(theoreticalMZ, massType, NO_MATCH, NO_MATCH);
+        }
+
+        public FragmentIon(double theoreticalMZ, MassType massType, double observedMZ, double intensity)
+        {
+            _theoreticalMZ = theoreticalMZ;
+            _observedMZ = observedMZ;
+            _intensity = intensity;
+            _massType = massType;
+        }
+
+        public boolean isMatch()
+        {
+            return _observedMZ != NO_MATCH;
+        }
+
+        public double getTheoreticalMZ()
+        {
+            return _theoreticalMZ;
+        }
+
+        public double getObservedMZ()
+        {
+            return _observedMZ;
+        }
+
+        public double getIntensity()
+        {
+            return _intensity;
+        }
+
+        public MassType getMassType()
+        {
+            return _massType;
+        }
+    }
+
+    private FragmentIon[][] computeMatches(Map<MassType, double[][]> fragments, String fragmentPrefix, double tolerance, double xStart, double xEnd, MassType massType)
+    {
+        double[][] fragment = fragments.get(massType);
         // Handle case of spectrum that resulted in no matches
         if (0 == fragment.length)
-            return new boolean[0][0];
+            return new FragmentIon[0][0];
 
-        boolean[][] matches = new boolean[fragment.length][fragment[0].length];
+        FragmentIon[][] result = new FragmentIon[fragment.length][fragment[0].length];
 
         for (int i = 0; i < _ionCount; i++)
             for (int j = 0; j < _fragmentCount; j++)
@@ -294,47 +341,30 @@ public class MS2Peptide
                         break;
                 }
 
+                FragmentIon ion;
                 if (-1 != maxIdx)
                 {
-                    matches[i][j] = true;
-                    if (null == _massMatches[maxIdx])
-                        _massMatches[maxIdx] = new ArrayList<String>(1);
-
-                    _massMatches[maxIdx].add(fragmentPrefix + (j + 1) + StringUtils.repeat("+", i + 1));
+                    ion = new FragmentIon(frag, massType, _spectrumMZ[maxIdx], _spectrumIntensity[maxIdx]);
                 }
+                else
+                {
+                    ion = new FragmentIon(frag, massType);
+                }
+                result[i][j] = ion;
             }
 
-        return matches;
+        return result;
+    }
+
+    public FragmentIon[][] getBIons(MassType massType)
+    {
+        return _bIons.get(massType);
     }
 
 
-    public double[][] getBFragments()
+    public FragmentIon[][] getYIons(MassType massType)
     {
-        return _b;
-    }
-
-
-    public double[][] getYFragments()
-    {
-        return _y;
-    }
-
-
-    public boolean[][] getBMatches()
-    {
-        return _bMatches;
-    }
-
-
-    public boolean[][] getYMatches()
-    {
-        return _yMatches;
-    }
-
-
-    public List<String>[] getMassMatches()
-    {
-        return _massMatches;
+        return _yIons.get(massType);
     }
 
 

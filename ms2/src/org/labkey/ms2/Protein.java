@@ -559,7 +559,7 @@ public class Protein
         double total = 0;
 
         for (int i = 0; i < s.length(); i++)
-            total += MS2Run.aaMassTable[s.charAt(i) - 'A'];
+            total += MassType.Average.getAaMasses()[s.charAt(i) - 'A'];
 
         return total;
     }

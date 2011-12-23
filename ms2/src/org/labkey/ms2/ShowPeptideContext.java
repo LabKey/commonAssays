@@ -19,8 +19,6 @@ package org.labkey.ms2;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.util.Formats;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.ms1.MS1Urls;
 import org.labkey.api.services.ServiceRegistry;
 
@@ -40,8 +38,6 @@ public class ShowPeptideContext
     public ActionURL previousUrl;
     public ActionURL nextUrl;
     public ActionURL showGzUrl;
-    public String actualXStart;
-    public String actualXEnd;
     public String modificationHref;
     public String pepSearchHref;
 
@@ -62,16 +58,5 @@ public class ShowPeptideContext
         MS1Urls ms1Urls = ServiceRegistry.get().getService(MS1Urls.class);
         if(null != ms1Urls)
             pepSearchHref = ms1Urls.getPepSearchUrl(container, peptide.getTrimmedPeptide()).getLocalURIString();
-
-        calcXRange();
-    }
-
-
-    private void calcXRange()
-    {
-        SpectrumGraph graph = new SpectrumGraph(peptide, form.getWidth(), form.getHeight(), form.getTolerance(), form.getxStartDouble(),  form.getxEnd());
-
-        actualXStart = Formats.f0.format(graph.getXStart());
-        actualXEnd = Formats.f0.format(graph.getXEnd());
     }
 }

@@ -272,14 +272,8 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         return null;
     }
 
-    protected List<String> getExportFormats()
+    protected List<MS2Controller.MS2ExportType> getExportTypes()
     {
-        List<String> result = new ArrayList<String>();
-        result.add("Excel");
-        result.add("TSV");
-        result.add("DTA");
-        result.add("PKL");
-        result.add("AMT");
-        return result;
+        return Arrays.asList(MS2Controller.MS2ExportType.values());
     }
 }

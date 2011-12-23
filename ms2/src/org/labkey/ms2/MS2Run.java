@@ -30,18 +30,6 @@ public abstract class MS2Run implements Serializable
 {
     private static Logger _log = Logger.getLogger(MS2Run.class);
 
-    // Average AA masses
-    // UNDONE: Add U == Selenocysteine??  Add Z == glutamic acid or glutamine?
-    // B denotes N or D
-    // X denotes L or I
-    public static final double[] aaMassTable = new double[]
-            {/* A */  71.07880, /* B */ 114.59622, /* C */ 103.13880, /* D */ 115.08860, /* E */ 129.11548,
-                    /* F */ 147.17656, /* G */  57.05192, /* H */ 137.14108, /* I */ 113.15944, /* J */   0.00000,
-                    /* K */ 128.17408, /* L */ 113.15944, /* M */ 131.19256, /* N */ 114.10384, /* O */ 114.14720,
-                    /* P */  97.11668, /* Q */ 128.13072, /* R */ 156.18748, /* S */  87.07820, /* T */ 101.10508,
-                    /* U */   0.00000, /* V */  99.13256, /* W */ 186.21320, /* X */ 113.15944, /* Y */ 163.17596,
-                    /* Z */   0.00000};
-
     protected int run;
     protected Container container;
     protected String description;
@@ -55,9 +43,9 @@ public abstract class MS2Run implements Serializable
     protected Date loaded;
     protected int fastaId;
     protected String searchEnzyme;
-    protected MS2Modification[] modifications = null;
-    protected Map<String, Double> varModifications = null;
-    protected double[] massTable = null;
+    protected Map<MassType, MS2Modification[]> modifications = new HashMap<MassType, MS2Modification[]>();
+    protected Map<MassType, Map<String, Double>> varModifications = new HashMap<MassType, Map<String, Double>>();
+    protected Map<MassType, double[]> massTables = new HashMap<MassType, double[]>();
     protected MS2Fraction[] fractions;
     protected int statusId;
     protected boolean deleted;
@@ -81,52 +69,57 @@ public abstract class MS2Run implements Serializable
     }
 
 
-    protected void initModifications()
+    protected void initModifications(MassType massType)
     {
-        if (null == modifications)
-            modifications = MS2Manager.getModifications(this);
+        MS2Modification[] staticModifications = modifications.get(massType);
+        if (null == staticModifications)
+            staticModifications = MS2Manager.getModifications(this);
 
-        varModifications = new HashMap<String, Double>(10);
-        massTable = aaMassTable.clone();
+        Map<String, Double> variableModifications = new HashMap<String, Double>(10);
+        double[] massTable = massType.getAaMasses().clone();
 
         // Store variable modifications in HashMap; apply fixed modifications to massTable
-        for (MS2Modification modification : modifications)
+        for (MS2Modification modification : staticModifications)
         {
             if (modification.getVariable())
-                varModifications.put(modification.getAminoAcid() + modification.getSymbol(), (double)modification.getMassDiff());
+                variableModifications.put(modification.getAminoAcid() + modification.getSymbol(), (double)modification.getMassDiff());
             else
             {
                 int index = modification.getAminoAcid().charAt(0) - 65;
                 massTable[index] += modification.getMassDiff();
             }
         }
+
+        modifications.put(massType, staticModifications);
+        varModifications.put(massType, variableModifications);
+        massTables.put(massType, massTable);
     }
 
 
-    public MS2Modification[] getModifications()
+    public MS2Modification[] getModifications(MassType massType)
     {
-        if (null == modifications)
-            initModifications();
+        if (null ==  modifications.get(massType))
+            initModifications(massType);
 
-        return modifications;
+        return modifications.get(massType);
     }
 
 
-    public Map<String, Double> getVarModifications()
+    public Map<String, Double> getVarModifications(MassType massType)
     {
-        if (null == varModifications)
-            initModifications();
+        if (null == varModifications.get(massType))
+            initModifications(massType);
 
-        return varModifications;
+        return varModifications.get(massType);
     }
 
 
-    public double[] getMassTable()
+    public double[] getMassTable(MassType massType)
     {
-        if (null == massTable)
-            initModifications();
+        if (null == massTables.get(massType))
+            initModifications(massType);
 
-        return massTable;
+        return massTables.get(massType);
     }
 
 

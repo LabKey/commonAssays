@@ -24,6 +24,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.Formats;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
+import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.MS2Modification;
@@ -98,24 +99,35 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
     {
         ButtonBar result = new ButtonBar();
 
-        List<String> exportFormats = getExportFormats();
+        List<MS2Controller.MS2ExportType> exportFormats = getExportTypes();
 
         ActionURL exportUrl = _url.clone();
         exportUrl.setAction(exportAllAction);
         MenuButton exportAll = new MenuButton("Export All");
-        for (String exportFormat : exportFormats)
+        for (MS2Controller.MS2ExportType exportFormat : exportFormats)
         {
-            exportUrl.replaceParameter("exportFormat", exportFormat);
-            exportAll.addMenuItem(exportFormat, null, dataRegion.getJavascriptFormReference(false) + ".action=\"" + exportUrl.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference(false) + ".submit();");
+            exportUrl.replaceParameter("exportFormat", exportFormat.name());
+            NavTree menuItem = exportAll.addMenuItem(exportFormat.toString(), null, dataRegion.getJavascriptFormReference(false) + ".action=\"" + exportUrl.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference(false) + ".submit();");
+            if (exportFormat.getDescription() != null)
+            {
+                menuItem.setDescription(exportFormat.getDescription());
+            }
         }
         result.add(exportAll);
 
         MenuButton exportSelected = new MenuButton("Export Selected");
         exportUrl.setAction(exportSelectedAction);
-        for (String exportFormat : exportFormats)
+        for (MS2Controller.MS2ExportType exportFormat : exportFormats)
         {
-            exportUrl.replaceParameter("exportFormat", exportFormat);
-            exportSelected.addMenuItem(exportFormat, null, "if (verifySelected(" + dataRegion.getJavascriptFormReference(false) + ", \"" + exportUrl.getLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")) { " + dataRegion.getJavascriptFormReference(false) + ".submit(); }");
+            if (exportFormat.supportsSelectedOnly())
+            {
+                exportUrl.replaceParameter("exportFormat", exportFormat.name());
+                NavTree menuItem = exportSelected.addMenuItem(exportFormat.toString(), null, "if (verifySelected(" + dataRegion.getJavascriptFormReference(false) + ", \"" + exportUrl.getLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")) { " + dataRegion.getJavascriptFormReference(false) + ".submit(); }");
+                if (exportFormat.getDescription() != null)
+                {
+                    menuItem.setDescription(exportFormat.getDescription());
+                }
+            }
         }
         result.add(exportSelected);
 
@@ -137,7 +149,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         return result;
     }
 
-    protected abstract List<String> getExportFormats();
+    protected abstract List<MS2Controller.MS2ExportType> getExportTypes();
 
     public void changePeptideCaptionsForTsv(List<DisplayColumn> displayColumns)
     {
@@ -484,7 +496,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         Map<String, String> fixedMods = new TreeMap<String, String>();
         Map<String, String> variableMods = new TreeMap<String, String>();
 
-        for (MS2Modification mod : run.getModifications())
+        for (MS2Modification mod : run.getModifications(MassType.Average))
         {
             if (mod.getVariable())
                 variableMods.put(mod.getAminoAcid() + mod.getSymbol(), Formats.f3.format(mod.getMassDiff()));
@@ -549,7 +561,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
             header.append(run.getFileName()).append("|");
             header.append(run.getLoaded()).append("|");
 
-            MS2Modification[] mods = run.getModifications();
+            MS2Modification[] mods = run.getModifications(MassType.Average);
 
             for (MS2Modification mod : mods)
             {
