@@ -11,7 +11,7 @@ Ext.namespace('LABKEY');
 * Date: Sept 20, 2011
 */
 
-LABKEY.requiresCss("luminex/GuideSet.css");
+LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
 
 /**
  * Class to create a tab panel for displaying the R plot for the trending of EC50, AUC, and High MFI values for the selected graph parameters.
