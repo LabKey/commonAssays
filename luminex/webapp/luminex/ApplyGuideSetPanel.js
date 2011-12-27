@@ -97,12 +97,12 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         var selectedRunsColModel = new Ext.grid.ColumnModel({
             defaults: {sortable: true},
             columns: [
-                {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.tooltipRenderer, width:200},
-                {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75},
-                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.tooltipRenderer, width:75},
-                {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100},
-                {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100},
-                {header:'Exp Performer', dataIndex:'Titration/Run/ExpPerformer', width:100},
+                {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.encodingRenderer, width:200},
+                {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
+                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.encodingRenderer, width:75},
+                {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100, renderer: this.encodingRenderer},
+                {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer},
+                {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
                 {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
                 {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
                 {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'},
@@ -165,7 +165,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Created By', dataIndex:'CreatedBy/DisplayName', width:100},
                 {header:'Created', dataIndex:'Created', renderer: this.dateRenderer},
                 {header:'Current', dataIndex:'CurrentGuideSet'},
-                {header:'Comment', dataIndex:'Comment', renderer: this.tooltipRenderer, width:200},
+                {header:'Comment', dataIndex:'Comment', renderer: this.encodingRenderer, width:200},
                 {header:'Avg EC50', dataIndex:'Four ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
                 {header:'Avg High MFI', dataIndex:'MaxFIAverage', renderer: this.numberRenderer, align: 'right'},
                 {header:'Avg AUC', dataIndex:'TrapezoidalCurveFit/AUCAverage', renderer: this.numberRenderer, align: 'right'}
@@ -290,12 +290,6 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         return val ? new Date(val).format("Y-m-d") : null;
     },
 
-    tooltipRenderer: function(value, p, record) {
-        var msg = Ext.util.Format.htmlEncode(value);
-        p.attr = 'ext:qtip="' + msg + '"';
-        return msg;
-    },
-
     numberRenderer: function(val) {
         // if this is a very small number, display more decimal places
         if (!val)
@@ -313,5 +307,9 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 return Ext.util.Format.number(Ext.util.Format.round(val, 2), '0.00');
             }
         }
+    },
+
+    encodingRenderer: function(value, p, record) {
+        return $h(value);
     }
 });

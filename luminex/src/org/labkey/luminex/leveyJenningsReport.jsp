@@ -49,6 +49,7 @@
     LABKEY.requiresScript("luminex/LeveyJenningsTrackingDataPanel.js");
     LABKEY.requiresScript("luminex/ManageGuideSetPanel.js");
     LABKEY.requiresScript("luminex/ApplyGuideSetPanel.js");
+    LABKEY.requiresScript("Experiment/QCFlagToggleWindow.js");
     LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
 
     var $h = Ext.util.Format.htmlEncode;

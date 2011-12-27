@@ -11,6 +11,7 @@ Ext.namespace('LABKEY');
 * Date: Sept 21, 2011
 */
 
+LABKEY.requiresCss("luminex/LeveyJenningsReport.css");
 Ext.QuickTips.init();
 
 /**
@@ -29,13 +30,16 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
         // apply some Ext panel specific properties to the config
         Ext.apply(config, {
-            width: 1200,
+            width: 1300,
             autoHeight: true,
-            editable: false,
-            pageSize: 0,
             title: $h(config.titration) + ' Tracking Data',
-            loadMask:{msg:"Loading tracking data..."},
-            enableColumnHide: false,
+            loadMask:{msg:"loading tracking data..."},
+            columnLines: true,
+            stripeRows: true,
+            viewConfig: {
+                forceFit: true,
+                scrollOffset: 0
+            },
             disabled: true,
             analyte: null,
             isotype: null,
@@ -105,7 +109,13 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             filterArray: filterArray,
             sort: '-Analyte/Data/AcquisitionDate, -Titration/Run/Created',
             maxRows: (startDate && endDate ? undefined : this.defaultRowSize),
-            containerFilter: LABKEY.Query.containerFilter.allFolders
+            containerFilter: LABKEY.Query.containerFilter.allFolders,
+            listeners: {
+                scope: this,
+                // add a listener to the store to load the QC Flags for the given runs/analyte/titration
+                'load': this.loadQCFlags
+            },
+            scope: this
         });
     },
 
@@ -128,29 +138,30 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             defaults: {sortable: true},
             columns: [
                 this.selModel,
-                {header:'Analyte', dataIndex:'Analyte', hidden: true},
-                {header:'Titration', dataIndex:'Titration', hidden: true},
-                {header:'Isotype', dataIndex:'Titration/Run/Isotype', hidden: true},
-                {header:'Conjugate', dataIndex:'Titration/Run/Conjugate', hidden: true},                    
+                {header:'Analyte', dataIndex:'Analyte', hidden: true, renderer: this.encodingRenderer},
+                {header:'Titration', dataIndex:'Titration', hidden: true, renderer: this.encodingRenderer},
+                {header:'Isotype', dataIndex:'Titration/Run/Isotype', hidden: true, renderer: this.encodingRenderer},
+                {header:'Conjugate', dataIndex:'Titration/Run/Conjugate', hidden: true, renderer: this.encodingRenderer},
+                {header:'Flags', dataIndex:'QCFlags', width: 75}, 
                 {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.assayIdHrefRenderer, width:200},
-                {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75},
-                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', renderer: this.tooltipRenderer, width:75},
-                {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100},
-                {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100},
-                {header:'Exp Performer', dataIndex:'Titration/Run/ExpPerformer', width:100},
+                {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
+                {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75, renderer: this.encodingRenderer},
+                {header:'Notebook No.', dataIndex:'Titration/Run/NotebookNo', width:100, renderer: this.encodingRenderer},
+                {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer},
+                {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
                 {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
-                {header:'Analyte Lot No.', dataIndex:'Analyte/Properties/LotNumber', width:100},
-                {header:'Guide Set Date', dataIndex:'GuideSet/Created', renderer: this.formatGuideSetMembers, scope: this, width:100},
+                {header:'Analyte Lot No.', dataIndex:'Analyte/Properties/LotNumber', width:100, renderer: this.encodingRenderer},
+                {header:'Guide Set Start Date', dataIndex:'GuideSet/Created', renderer: this.formatGuideSetMembers, scope: this, width:100},
                 {header:'GS Member', dataIndex:'IncludeInGuideSetCalculation', hidden: true},
                 {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("EC50"), scope: this, align: 'right'},
-                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("High MFI"), scope: this, align: 'right'},
                 {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.outOfRangeRenderer("AUC"), scope: this, align: 'right'},
+                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("High MFI"), scope: this, align: 'right'},
                 {header:'EC50 Average', dataIndex:'GuideSet/Four ParameterCurveFit/EC50Average', hidden: true},
                 {header:'EC50 StdDev', dataIndex:'GuideSet/Four ParameterCurveFit/EC50StdDev', hidden: true},
-                {header:'High MFI Average', dataIndex:'GuideSet/MaxFIAverage', hidden: true},
-                {header:'High MFI StdDev', dataIndex:'GuideSet/MaxFIStdDev', hidden: true},
                 {header:'AUC Average', dataIndex:'GuideSet/TrapezoidalCurveFit/AUCAverage', hidden: true},
-                {header:'AUC StdDev', dataIndex:'GuideSet/TrapezoidalCurveFit/AUCStdDev', hidden: true}
+                {header:'AUC StdDev', dataIndex:'GuideSet/TrapezoidalCurveFit/AUCStdDev', hidden: true},
+                {header:'High MFI Average', dataIndex:'GuideSet/MaxFIAverage', hidden: true},
+                {header:'High MFI StdDev', dataIndex:'GuideSet/MaxFIStdDev', hidden: true}
             ],
             scope: this
         });
@@ -268,6 +279,10 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 if (row.get(col.header + "OOR"))
                     value = "*" + value;
 
+                // render the flags in an excel friendly format
+                if (col.dataIndex == "QCFlags")
+                    value = this.flagsExcelRenderer(value);
+
                 exportJson.sheets[0].data[rowIndex][colIndex] = value;
                 colIndex++;
             }, this);
@@ -342,14 +357,86 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         return this.dateRenderer(val); 
     },
 
-    dateRenderer: function(val) {
-        return val ? new Date(val).format("Y-m-d") : null;
+    loadQCFlags: function(store, records, options) {
+        // query the server for the QC Flags that match the selected Titratio and Analyte and update the grid store accordingly
+        this.getEl().mask("loading QC Flags...", "x-mask-loading");
+        LABKEY.Query.executeSql({
+            schemaName: "assay",
+            sql: 'SELECT DISTINCT x.Run, x.FlagType, x.Enabled, FROM "' + this.assayName + ' QCFlags" AS x '
+                 + 'WHERE x.Analyte.Name=\'' + this.analyte + '\' AND x.Titration.Name=\'' + this.titration + '\'',
+            sort: "Run,FlagType,Enabled",
+            success: function(data) {
+                // put together the flag display for each runId
+                var runFlagList = {};
+                for (var i = 0; i < data.rows.length; i++)
+                {
+                    var row = data.rows[i];
+                    if (runFlagList[row.Run] == undefined)
+                        runFlagList[row.Run] = {id: row.Run, count: 0, value: ""};
+
+                    // add a comma separator
+                    if (runFlagList[row.Run].count > 0)
+                        runFlagList[row.Run].value += ", ";
+
+                    // add strike-thru for disabled flags
+                    if (row.Enabled)
+                        runFlagList[row.Run].value += row.FlagType;
+                    else
+                        runFlagList[row.Run].value += '<span style="text-decoration: line-through;">' + row.FlagType + '</span>';
+
+                    runFlagList[row.Run].count++;
+                }
+
+                // update the store records with the QC Flag values
+                this.store.each(function(record) {
+                    var runFlag = runFlagList[record.get("Titration/Run/RowId")];
+                    if (runFlag)
+                        record.set("QCFlags", "<a>" + runFlag.value + "</a>");
+                }, this);
+
+                // add cellclick event to the grid to trigger the QCFlagToggleWindow
+                this.on('cellclick', this.showQCFlagToggleWindow, this);
+
+                if (this.getEl().isMasked())
+                    this.getEl().unmask();
+            },
+            failure: function(info, response, options){
+                if (this.getEl().isMasked())
+                    this.getEl().unmask();
+
+                LABKEY.Utils.displayAjaxErrorResponse(response, options);
+            },
+            scope: this
+        })
     },
 
-    tooltipRenderer: function(value, p, record) {
-        var msg = Ext.util.Format.htmlEncode(value);
-        p.attr = 'ext:qtip="' + msg + '"';
-        return msg;
+    showQCFlagToggleWindow: function(grid, rowIndex, colIndex, evnt) {
+        var record = grid.getStore().getAt(rowIndex);
+        var fieldName = grid.getColumnModel().getDataIndex(colIndex);
+        var value = record.get(fieldName);
+
+        if (fieldName == "QCFlags" && value != null)
+        {
+            var win = new LABKEY.QCFlagToggleWindow({
+                schemaName: "assay",
+                queryName: this.assayName + " QCFlags",
+                runId: record.get("Titration/Run/RowId"),
+                analyte: this.analyte,
+                titration: this.titration,
+                listeners: {
+                    scope: this,
+                    'saveSuccess': function(){
+                        this.store.reload();
+                        win.close();
+                    }
+                }
+            });
+            win.show();
+        }
+    },
+
+    dateRenderer: function(val) {
+        return val ? new Date(val).format("Y-m-d") : null;
     },
 
     numberRenderer: function(val) {
@@ -373,8 +460,20 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
     assayIdHrefRenderer: function(val, p, record) {
         var msg = Ext.util.Format.htmlEncode(val);
-        p.attr = 'ext:qtip="' + msg + '"';
         var url = LABKEY.ActionURL.buildURL('assay', 'assayDetailRedirect', LABKEY.container.path,  {runId: record.get('Titration/Run/RowId')});
         return "<a href='" + url + "'>" + msg + "</a>";
+    },
+
+    encodingRenderer: function(value, p, record) {
+        return $h(value);
+    },
+
+    flagsExcelRenderer: function(value) {
+        if (value != null)
+        {
+            value = value.replace(/<a>/gi, "").replace(/<\/a>/gi, "");
+            value = value.replace(/<span style="text-decoration: line-through;">/gi, "-").replace(/<\/span>/gi, "-");
+        }
+        return value;
     }
 });
