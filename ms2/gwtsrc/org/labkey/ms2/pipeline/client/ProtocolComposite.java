@@ -122,13 +122,13 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
         instance.getColumnFormatter().setWidth(1,"98%");
     }
 
-    public void update(List protocolList, String defaultProtocol, String textArea)
+    public void update(List<String> protocolList, String defaultProtocol, String textArea)
     {
         setProtocolListBoxContents(protocolList, defaultProtocol);
         protocolDescTextArea.setText(textArea);
     }
 
-    public void setProtocolListBoxContents(List protocols, String defaultProtocol)
+    public void setProtocolListBoxContents(List<String> protocols, String defaultProtocol)
     {
         if(protocolListBox.getItemCount()== 0 )
         {
@@ -141,12 +141,11 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
             protocolListBox.clear();
             Collections.sort(protocols);
             protocols.add(0,NEW_PROTOCOL);
-            for(Iterator it = protocols.iterator(); it.hasNext();)
+            for (String protocol : protocols)
             {
-                String protocol = (String)it.next();
-                if(protocol.equals(NEW_PROTOCOL))
+                if (protocol.equals(NEW_PROTOCOL))
                 {
-                   protocolListBox.addItem(protocol, "new");
+                    protocolListBox.addItem(protocol, "new");
                 }
                 else
                 {
@@ -193,7 +192,6 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
     public void setReadOnly(boolean readOnly)
     {
         super.setReadOnly(readOnly);
-        int index = 0;
 
         if(readOnly)
         {
@@ -293,30 +291,14 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
                 for (int i = 0; i < protocolNameTextBox.getText().length(); i++)
                 {
                     char ch = protocolNameTextBox.getText().charAt(i);
-                    if (!Character.isLetterOrDigit(ch) && ch != '_')
+                    if (!Character.isLetterOrDigit(ch) && ch != '_'  && ch != ' ')
                     {
                         return "The name '" + protocolNameTextBox.getText() + "' is not a valid protocol name.";
-                    }
-                    if (ch == ' ')
-                    {
-                        return "The cluster pipeline does not currently support spaces in search protocol names.";
                     }
                 }
             }
         }
         return "";
-    }
-
-    public boolean existingProtocol()
-    {
-        if(!getSelectedProtocolValue().equals("new"))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
     }
 
     public void newProtocol()
