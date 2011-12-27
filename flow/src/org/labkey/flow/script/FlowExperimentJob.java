@@ -129,7 +129,7 @@ public abstract class FlowExperimentJob extends FlowJob
         File dirFolder = new File(dirRoot, "Folder" + container.getRowId());
         if (!dirFolder.exists())
         {
-            dirFolder.mkdir();
+            dirFolder.mkdirs();
         }
         return dirFolder;
     }
