@@ -305,7 +305,14 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                     uri, comp, analysis, analysis.getGraphs());
                             for (FCSAnalyzer.GraphResult graphResult : graphResults)
                             {
-                                if (graphResult.exception == null)
+                                if (graphResult.exception != null)
+                                {
+                                    if (failOnError)
+                                        job.error("Error generating graph '" + graphResult.spec + "' for '" + sample.getLabel() + "'", graphResult.exception);
+                                    else
+                                        job.warn("Error generating graph '" + graphResult.spec + "' for '" + sample.getLabel() + "'", graphResult.exception);
+                                }
+                                else
                                 {
                                     results.setGraph(graphResult.spec, graphResult.bytes);
                                 }
@@ -315,13 +322,9 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                         {
                             String msg = "Can't generate graphs for sample. FCS File doesn't exist for " + description;
                             if (failOnError)
-                            {
                                 job.error(msg);
-                            }
                             else
-                            {
                                 job.warn(msg);
-                            }
                         }
                     }
                 }
