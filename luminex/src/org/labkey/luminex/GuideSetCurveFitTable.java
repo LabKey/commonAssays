@@ -110,12 +110,12 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
         result.append("at.GuideSetId,\n");
         result.append("cf.CurveType FROM \n");
 
-        AnalyteTitrationTable analyteTitrationTable = _schema.createAnalyteTitrationTable(true);
+        AnalyteTitrationTable analyteTitrationTable = (AnalyteTitrationTable)_schema.getTable(LuminexSchema.getAnalyteTitrationTableName(_schema.getProtocol()));
         analyteTitrationTable.setContainerFilter(ContainerFilter.EVERYTHING);
         result.append(analyteTitrationTable, "at");
         result.append(", ");
 
-        CurveFitTable curveFitTable = _schema.createCurveFitTable(true);
+        CurveFitTable curveFitTable = (CurveFitTable)_schema.getTable(LuminexSchema.getCurveFitTableName(_schema.getProtocol()));
         curveFitTable.setContainerFilter(ContainerFilter.EVERYTHING);
         result.append(curveFitTable, "cf");
 
