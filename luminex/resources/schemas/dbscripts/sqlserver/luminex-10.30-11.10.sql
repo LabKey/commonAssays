@@ -15,21 +15,16 @@
  */
 
 ALTER TABLE luminex.DataRow
-    ALTER COLUMN fistring NVARCHAR(64)
-GO
+    ALTER COLUMN fistring NVARCHAR(64);
 
 ALTER TABLE luminex.DataRow
-    ALTER COLUMN fibackgroundstring NVARCHAR(64)
-GO
+    ALTER COLUMN fibackgroundstring NVARCHAR(64);
 
 ALTER TABLE luminex.DataRow
-    ALTER COLUMN stddevstring NVARCHAR(64)
-GO
+    ALTER COLUMN stddevstring NVARCHAR(64);
 
 ALTER TABLE luminex.DataRow
-    ALTER COLUMN obsconcstring NVARCHAR(64)
-GO
+    ALTER COLUMN obsconcstring NVARCHAR(64);
 
 ALTER TABLE luminex.DataRow
-    ALTER COLUMN concinrangestring NVARCHAR(64)
-GO
+    ALTER COLUMN concinrangestring NVARCHAR(64);

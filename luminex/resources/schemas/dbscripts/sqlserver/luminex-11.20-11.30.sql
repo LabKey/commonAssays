@@ -29,13 +29,11 @@ CREATE TABLE luminex.CurveFit
 	CONSTRAINT PK_luminex_CurveFit PRIMARY KEY (rowid),
 	CONSTRAINT FK_CurveFit_AnalyteIdTitrationId FOREIGN KEY (AnalyteId, TitrationId) REFERENCES luminex.AnalyteTitration (AnalyteId, TitrationId),
 	CONSTRAINT UQ_CurveFit UNIQUE (AnalyteId, TitrationId, CurveType)
-)
-GO
+);
 
 /* luminex-11.21-11.22.sql */
 
-ALTER TABLE luminex.CurveFit ALTER COLUMN CurveType VARCHAR(30)
-GO
+ALTER TABLE luminex.CurveFit ALTER COLUMN CurveType VARCHAR(30);
 
 /* luminex-11.22-11.23.sql */
 
@@ -46,23 +44,16 @@ ALTER TABLE luminex.CurveFit ALTER COLUMN EC50 REAL NULL;
 /* luminex-11.23-11.24.sql */
 
 -- Add the 4 and 5 PL curve fit values
-ALTER TABLE luminex.CurveFit ADD MinAsymptote REAL
-GO
-ALTER TABLE luminex.CurveFit ADD MaxAsymptote REAL
-GO
-ALTER TABLE luminex.CurveFit ADD Asymmetry REAL
-GO
-ALTER TABLE luminex.CurveFit ADD Inflection REAL
-GO
-ALTER TABLE luminex.CurveFit ADD Slope REAL
-GO
+ALTER TABLE luminex.CurveFit ADD MinAsymptote REAL;
+ALTER TABLE luminex.CurveFit ADD MaxAsymptote REAL;
+ALTER TABLE luminex.CurveFit ADD Asymmetry REAL;
+ALTER TABLE luminex.CurveFit ADD Inflection REAL;
+ALTER TABLE luminex.CurveFit ADD Slope REAL;
 
 -- Move MaxFI from CurveFit to Titration as it doesn't depend on the fit parameters
 -- Don't bother to migrate values, no real data MaxFI has been stored in the CurveFit table yet
-ALTER TABLE luminex.CurveFit DROP COLUMN MaxFI
-GO
-ALTER TABLE luminex.AnalyteTitration ADD MaxFI REAL
-GO
+ALTER TABLE luminex.CurveFit DROP COLUMN MaxFI;
+ALTER TABLE luminex.AnalyteTitration ADD MaxFI REAL;
 
 CREATE TABLE luminex.GuideSet
 (
@@ -77,11 +68,9 @@ CREATE TABLE luminex.GuideSet
 
 	CONSTRAINT PK_luminex_GuideSet PRIMARY KEY (RowId),
 	CONSTRAINT FK_luminex_GuideSet_ProtocolId FOREIGN KEY (ProtocolId) REFERENCES exp.Protocol(RowId)
-)
-GO
+);
 
-CREATE INDEX IDX_GuideSet_ProtocolId ON luminex.GuideSet(ProtocolId)
-GO
+CREATE INDEX IDX_GuideSet_ProtocolId ON luminex.GuideSet(ProtocolId);
 
 CREATE TABLE luminex.GuideSetCurveFit
 (
@@ -93,93 +82,66 @@ CREATE TABLE luminex.GuideSetCurveFit
     EC50StdDev REAL,
 
 	CONSTRAINT PK_luminex_GuideSetCurveFit PRIMARY KEY (GuideSetId, CurveType)
-)
-GO
+);
 
-ALTER TABLE luminex.Analyte ADD GuideSetId INT
-GO
+ALTER TABLE luminex.Analyte ADD GuideSetId INT;
+ALTER TABLE luminex.Analyte ADD CONSTRAINT FK_Analyte_GuideSetId FOREIGN KEY (GuideSetId) REFERENCES luminex.GuideSet(RowId);
 
-ALTER TABLE luminex.Analyte ADD CONSTRAINT FK_Analyte_GuideSetId FOREIGN KEY (GuideSetId) REFERENCES luminex.GuideSet(RowId)
-GO
-
-CREATE INDEX IDX_Analyte_GuideSetId ON luminex.Analyte(GuideSetId)
-GO
+CREATE INDEX IDX_Analyte_GuideSetId ON luminex.Analyte(GuideSetId);
 
 /* luminex-11.24-11.25.sql */
 
-ALTER TABLE luminex.Analyte ADD IncludeInGuideSetCalculation BIT
+ALTER TABLE luminex.Analyte ADD IncludeInGuideSetCalculation BIT;
+
 GO
 
-UPDATE luminex.analyte SET IncludeInGuideSetCalculation = 0
-GO
+UPDATE luminex.analyte SET IncludeInGuideSetCalculation = 0;
+ALTER TABLE luminex.analyte ALTER COLUMN IncludeInGuideSetCalculation BIT NOT NULL;
 
-ALTER TABLE luminex.analyte ALTER COLUMN IncludeInGuideSetCalculation BIT NOT NULL
-GO
-
-DROP TABLE luminex.GuideSetCurveFit
-GO
+DROP TABLE luminex.GuideSetCurveFit;
 
 /* luminex-11.250-11.251.sql */
 
-ALTER TABLE luminex.GuideSet ADD TitrationName VARCHAR(255)
-GO
-ALTER TABLE luminex.GuideSet ADD Comment TEXT
-GO
-ALTER TABLE luminex.GuideSet ADD CreatedBy USERID
-GO
-ALTER TABLE luminex.GuideSet ADD Created DATETIME
-GO
-ALTER TABLE luminex.GuideSet ADD ModifiedBy USERID
-GO
-ALTER TABLE luminex.GuideSet ADD Modified DATETIME
+ALTER TABLE luminex.GuideSet ADD TitrationName VARCHAR(255);
+ALTER TABLE luminex.GuideSet ADD Comment TEXT;
+ALTER TABLE luminex.GuideSet ADD CreatedBy USERID;
+ALTER TABLE luminex.GuideSet ADD Created DATETIME;
+ALTER TABLE luminex.GuideSet ADD ModifiedBy USERID;
+ALTER TABLE luminex.GuideSet ADD Modified DATETIME;
+
+ALTER TABLE luminex.AnalyteTitration ADD GuideSetId INT;
+ALTER TABLE luminex.AnalyteTitration ADD CONSTRAINT FK_AnalytTitration_GuideSetId FOREIGN KEY (GuideSetId) REFERENCES luminex.GuideSet(RowId);
+
+ALTER TABLE luminex.AnalyteTitration ADD IncludeInGuideSetCalculation BIT;
+
 GO
 
-ALTER TABLE luminex.AnalyteTitration ADD GuideSetId INT
-GO
-ALTER TABLE luminex.AnalyteTitration ADD CONSTRAINT FK_AnalytTitration_GuideSetId FOREIGN KEY (GuideSetId) REFERENCES luminex.GuideSet(RowId)
-GO
+UPDATE luminex.AnalyteTitration SET IncludeInGuideSetCalculation = 0;
+ALTER TABLE luminex.AnalyteTitration ALTER COLUMN IncludeInGuideSetCalculation BIT NOT NULL;
 
-ALTER TABLE luminex.AnalyteTitration ADD IncludeInGuideSetCalculation BIT
-GO
-UPDATE luminex.AnalyteTitration SET IncludeInGuideSetCalculation = 0
-GO
-ALTER TABLE luminex.AnalyteTitration ALTER COLUMN IncludeInGuideSetCalculation BIT NOT NULL
-GO
+CREATE INDEX IDX_AnalyteTitration_GuideSetId ON luminex.AnalyteTitration(GuideSetId);
 
-CREATE INDEX IDX_AnalyteTitration_GuideSetId ON luminex.AnalyteTitration(GuideSetId)
-GO
-
-DROP INDEX IDX_Analyte_GuideSetId ON luminex.Analyte
-GO
-ALTER TABLE luminex.Analyte DROP CONSTRAINT FK_Analyte_GuideSetId
-GO
-ALTER TABLE luminex.Analyte DROP COLUMN GuideSetId
-GO
-ALTER TABLE luminex.Analyte DROP COLUMN IncludeInGuideSetCalculation
-GO
+DROP INDEX IDX_Analyte_GuideSetId ON luminex.Analyte;
+ALTER TABLE luminex.Analyte DROP CONSTRAINT FK_Analyte_GuideSetId;
+ALTER TABLE luminex.Analyte DROP COLUMN GuideSetId;
+ALTER TABLE luminex.Analyte DROP COLUMN IncludeInGuideSetCalculation;
 
 /* luminex-11.251-11.252.sql */
 
-ALTER TABLE luminex.GuideSet DROP COLUMN MaxFIAverage
-GO
-
-ALTER TABLE luminex.GuideSet DROP COLUMN MaxFIStdDev
-GO
+ALTER TABLE luminex.GuideSet DROP COLUMN MaxFIAverage;
+ALTER TABLE luminex.GuideSet DROP COLUMN MaxFIStdDev;
 
 /* luminex-11.252-11.253.sql */
 
-ALTER TABLE luminex.DataRow ADD Summary BIT
-GO
-ALTER TABLE luminex.DataRow ADD CV REAL
+ALTER TABLE luminex.DataRow ADD Summary BIT;
+ALTER TABLE luminex.DataRow ADD CV REAL;
+
 GO
 
-UPDATE luminex.DataRow SET Summary = 1 WHERE patindex('%,%', Well) > 0
-GO
-UPDATE luminex.DataRow SET Summary = 0 WHERE Summary IS NULL
-GO
+UPDATE luminex.DataRow SET Summary = 1 WHERE patindex('%,%', Well) > 0;
+UPDATE luminex.DataRow SET Summary = 0 WHERE Summary IS NULL;
 
-ALTER TABLE luminex.DataRow ALTER COLUMN Summary BIT NOT NULL
-GO
+ALTER TABLE luminex.DataRow ALTER COLUMN Summary BIT NOT NULL;
 
 -- Calculate the StdDev for any summary rows that have already been uploaded
 UPDATE luminex.DataRow SET StdDev =
@@ -189,8 +151,7 @@ UPDATE luminex.DataRow SET StdDev =
 		luminex.DataRow.dataid = dr2.dataid AND
 		luminex.DataRow.analyteid = dr2.analyteid AND
 		((dr2.expConc IS NULL AND luminex.DataRow.expConc IS NULL) OR luminex.DataRow.expConc = dr2.expConc))
-	WHERE StdDev IS NULL
-GO
+	WHERE StdDev IS NULL;
 
 -- Calculate the %CV for any summary rows that have already been uploaded
 UPDATE luminex.DataRow SET CV =
@@ -206,12 +167,12 @@ UPDATE luminex.DataRow SET CV =
 		((dr2.dilution IS NULL AND luminex.DataRow.dilution IS NULL) OR luminex.DataRow.dilution = dr2.dilution) AND
 		luminex.DataRow.dataid = dr2.dataid AND
 		luminex.DataRow.analyteid = dr2.analyteid AND
-		((dr2.expConc IS NULL AND luminex.DataRow.expConc IS NULL) OR luminex.DataRow.expConc = dr2.expConc)) != 0
-GO
+		((dr2.expConc IS NULL AND luminex.DataRow.expConc IS NULL) OR luminex.DataRow.expConc = dr2.expConc)) != 0;
 
 /* luminex-11.253-11.254.sql */
 
-ALTER TABLE luminex.WellExclusion ADD Type VARCHAR(10)
+ALTER TABLE luminex.WellExclusion ADD Type VARCHAR(10);
+
 GO
 
 -- Populate the WellExclusion Type column based on the value in the DataRow table for the given DataId/Description/Dilution
@@ -222,22 +183,13 @@ UPDATE luminex.WellExclusion SET Type =
 		WHERE luminex.WellExclusion.DataId = types.DataId
 		AND ((luminex.WellExclusion.Dilution IS NULL AND types.Dilution IS NULL) OR luminex.WellExclusion.Dilution = types.Dilution)
 		AND ((luminex.WellExclusion.Description IS NULL AND types.Description IS NULL) OR luminex.WellExclusion.Description = types.Description))
-	WHERE Type IS NULL
-GO
+	WHERE Type IS NULL;
 
-DROP INDEX UQ_WellExclusion ON luminex.WellExclusion
-GO
-
-CREATE UNIQUE INDEX UQ_WellExclusion ON luminex.WellExclusion(Description, Type, DataId)
-GO
-
-ALTER TABLE luminex.WellExclusion DROP COLUMN Dilution
-GO
+DROP INDEX UQ_WellExclusion ON luminex.WellExclusion;
+CREATE UNIQUE INDEX UQ_WellExclusion ON luminex.WellExclusion(Description, Type, DataId);
+ALTER TABLE luminex.WellExclusion DROP COLUMN Dilution;
 
 /* luminex-11.254-11.255.sql */
 
-DROP INDEX luminex.analyte.ix_luminexdatarow_lsid
-GO
-
-CREATE UNIQUE INDEX UQ_Analyte_LSID ON luminex.Analyte(LSID)
-GO
+DROP INDEX luminex.analyte.ix_luminexdatarow_lsid;
+CREATE UNIQUE INDEX UQ_Analyte_LSID ON luminex.Analyte(LSID);

@@ -16,5 +16,4 @@
 
 /* luminex-9.30-9.31.sql */
 
-ALTER TABLE luminex.datarow ADD BeadCount INT
-GO
+ALTER TABLE luminex.datarow ADD BeadCount INT;

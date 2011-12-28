@@ -30,5 +30,4 @@ UPDATE exp.propertydescriptor SET showninupdateview = 0 WHERE propertyid IN
 			FROM exp.object o, exp.objectproperty op, exp.protocol p, exp.domaindescriptor dd
 			WHERE o.objecturi = p.lsid AND op.objectid = o.objectid AND op.stringvalue = dd.domainuri AND p.lsid LIKE '%:NabAssayProtocol.%' AND dd.domainuri LIKE '%:AssayDomain-Run.%'
 		)
-)
-GO
+);
