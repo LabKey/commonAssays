@@ -17,8 +17,8 @@
 package org.labkey.flow.persist;
 
 import org.apache.commons.collections15.iterators.ArrayIterator;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;

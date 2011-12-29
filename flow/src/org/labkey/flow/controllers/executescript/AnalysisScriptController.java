@@ -17,8 +17,8 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.*;
 import org.labkey.api.data.DataRegionSelection;

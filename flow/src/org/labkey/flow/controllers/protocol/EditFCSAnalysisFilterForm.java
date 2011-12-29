@@ -16,12 +16,11 @@
 
 package org.labkey.flow.controllers.protocol;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.UnauthorizedException;
 
-import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

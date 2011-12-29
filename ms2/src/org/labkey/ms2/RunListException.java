@@ -16,7 +16,7 @@
 
 package org.labkey.ms2;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.LabkeyError;
 import org.springframework.validation.BindException;
 

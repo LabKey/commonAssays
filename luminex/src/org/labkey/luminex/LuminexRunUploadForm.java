@@ -16,7 +16,7 @@
 
 package org.labkey.luminex;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.exp.PropertyType;

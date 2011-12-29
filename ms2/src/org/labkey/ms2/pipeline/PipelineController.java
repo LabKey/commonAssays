@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;

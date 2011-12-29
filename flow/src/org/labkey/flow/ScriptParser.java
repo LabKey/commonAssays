@@ -15,18 +15,18 @@
  */
 package org.labkey.flow;
 
-import org.apache.xmlbeans.XmlOptions;
-import org.apache.xmlbeans.XmlException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xmlbeans.XmlError;
-import org.apache.commons.lang.StringUtils;
-import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.apache.xmlbeans.XmlException;
+import org.apache.xmlbeans.XmlOptions;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
+import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.xml.sax.SAXParseException;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collection;
+import java.util.List;
 
 /**
  */

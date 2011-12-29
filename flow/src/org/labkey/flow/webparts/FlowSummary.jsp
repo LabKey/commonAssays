@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
 <%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>

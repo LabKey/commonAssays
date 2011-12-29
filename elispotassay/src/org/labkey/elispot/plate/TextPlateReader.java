@@ -18,8 +18,8 @@ package org.labkey.elispot.plate;
 
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.exp.ExperimentException;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.File;
 import java.io.LineNumberReader;

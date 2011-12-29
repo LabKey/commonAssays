@@ -16,7 +16,7 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.analysis.model.Analysis;

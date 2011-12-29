@@ -16,7 +16,7 @@
 
 package org.labkey.flow;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xmlbeans.XmlOptions;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.util.FileUtil;

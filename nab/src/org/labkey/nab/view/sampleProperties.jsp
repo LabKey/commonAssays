@@ -15,22 +15,22 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.nab.NabAssayRun" %>
-<%@ page import="org.labkey.nab.NabAssayController" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.labkey.api.exp.Lsid" %>
+<%@ page import="org.labkey.api.exp.OntologyManager" %>
+<%@ page import="org.labkey.api.exp.PropertyDescriptor" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.exp.PropertyDescriptor" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ page import="java.util.LinkedHashMap" %>
-<%@ page import="org.labkey.api.exp.OntologyManager" %>
-<%@ page import="org.labkey.api.exp.Lsid" %>
-<%@ page import="java.util.HashSet" %>
-<%@ page import="java.util.Set" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.nab.NabAssayController" %>
+<%@ page import="org.labkey.nab.NabAssayRun" %>
 <%@ page import="org.labkey.nab.NabDataHandler" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.HashSet" %>
+<%@ page import="java.util.LinkedHashMap" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.Set" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();

@@ -16,24 +16,29 @@
 
 package org.labkey.flow.data;
 
-import org.labkey.api.exp.api.*;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.log4j.Logger;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpDataRunInput;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpProtocolApplication;
+import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
-import org.labkey.flow.persist.FlowManager;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.log4j.Logger;
-
-import java.net.URI;
-import java.sql.SQLException;
-import java.util.*;
-
-import org.labkey.flow.controllers.well.WellController;
-import org.labkey.flow.controllers.editscript.ScriptController;
-import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.editscript.ScriptController;
+import org.labkey.flow.controllers.well.WellController;
+import org.labkey.flow.persist.FlowManager;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URI;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class FlowWell extends FlowDataObject
 {

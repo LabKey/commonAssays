@@ -16,7 +16,7 @@
 
 package org.labkey.flow.analysis.model;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.parsers.DOMParser;

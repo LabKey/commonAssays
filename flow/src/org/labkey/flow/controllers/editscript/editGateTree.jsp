@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="org.apache.commons.lang3.StringUtils"%>
 <%@ page import="org.labkey.flow.analysis.web.SubsetSpec"%>
-<%@ page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="org.labkey.flow.controllers.editscript.EditGateTreeForm" %>
+<%@ page import="org.labkey.flow.controllers.editscript.EditGateTreeForm"%>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 

@@ -20,7 +20,7 @@ import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.web.SubsetExpression;

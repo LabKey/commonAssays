@@ -16,11 +16,11 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.labkey.flow.gateeditor.client.model.GWTEditingMode;
-import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowWell;
-import org.apache.commons.lang.StringUtils;
+import org.labkey.flow.gateeditor.client.model.GWTEditingMode;
+import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
 
 /**
  * User: kevink

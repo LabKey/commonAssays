@@ -16,34 +16,49 @@
 
 package org.labkey.viability;
 
+import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.action.SpringActionController;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnGroup;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.api.ExpExperiment;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.query.PropertyValidationError;
+import org.labkey.api.query.ValidationError;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.StudyPickerColumn;
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.*;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.GUID;
+import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.VBox;
-import org.labkey.api.view.HtmlView;
-import org.labkey.api.data.*;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.api.*;
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.query.ValidationException;
-import org.labkey.api.query.ValidationError;
-import org.labkey.api.query.PropertyValidationError;
-import org.labkey.api.action.SpringActionController;
 import org.labkey.viability.data.MultiValueInputColumn;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
-import org.apache.commons.lang.StringUtils;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 /**
  * User: kevink

@@ -16,7 +16,7 @@
 
 package org.labkey.flow.controllers.protocol;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.data.FieldSubstitution;

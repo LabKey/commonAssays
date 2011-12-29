@@ -16,18 +16,17 @@
 
 package org.labkey.luminex;
 
-import org.apache.commons.lang.StringUtils;
-import org.labkey.api.qc.TsvDataExchangeHandler;
-import org.labkey.api.study.assay.AssayRunUploadContext;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.qc.TsvDataExchangeHandler;
+import org.labkey.api.study.assay.AssayRunUploadContext;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: klum

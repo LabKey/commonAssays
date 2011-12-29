@@ -16,16 +16,19 @@
 
 package org.labkey.ms2.query;
 
-import org.labkey.api.query.*;
+import org.apache.commons.lang3.ObjectUtils;
+import org.labkey.api.query.CustomView;
+import org.labkey.api.query.QueryParam;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
-import org.apache.commons.lang.ObjectUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.Writer;
 import java.io.IOException;
-import java.util.Map;
+import java.io.Writer;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**

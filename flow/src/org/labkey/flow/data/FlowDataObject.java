@@ -16,19 +16,22 @@
 
 package org.labkey.flow.data;
 
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.api.*;
-import org.labkey.api.data.*;
+import org.apache.commons.lang3.ObjectUtils;
+import org.labkey.api.data.Container;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocolApplication;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.flow.persist.AttrObject;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.persist.AttrObject;
-import org.apache.commons.lang.ObjectUtils;
-import org.labkey.flow.persist.ObjectType;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 abstract public class FlowDataObject extends FlowObject<ExpData>

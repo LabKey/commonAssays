@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.collections.CsvSet;
 import org.labkey.api.data.Container;

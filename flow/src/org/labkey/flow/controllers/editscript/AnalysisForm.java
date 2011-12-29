@@ -16,7 +16,7 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.fhcrc.cpas.flow.script.xml.*;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.analysis.web.SubsetSpec;

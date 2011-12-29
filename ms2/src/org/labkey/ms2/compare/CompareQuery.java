@@ -16,7 +16,7 @@
 
 package org.labkey.ms2.compare;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.*;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.security.User;

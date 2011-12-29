@@ -16,8 +16,8 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.fhcrc.cpas.flow.script.xml.FilterDef;
 import org.fhcrc.cpas.flow.script.xml.FiltersDef;
 import org.fhcrc.cpas.flow.script.xml.ParameterDef;
