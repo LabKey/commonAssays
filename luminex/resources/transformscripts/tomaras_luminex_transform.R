@@ -20,7 +20,7 @@
 #  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "2.1.20111216";
+transformVersion = "3.0";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -322,7 +322,7 @@ analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
 
 # get the analyte associated standard/titration information from the analyte data file and put it into the run.data object
 run.data$Standard = NA;
-run.data$well_role = "Unknown"; # initialize to Unknown and set to Standard accordingly
+run.data$well_role = ""; # initialize to empty string and set to Standard accordingly
 for (index in 1:nrow(analyte.data))
 {
     # hold on to the run data for the given analyte
@@ -424,7 +424,7 @@ if (any(standardRecs) & length(standards) > 0)
         tempStnd.dat = subset(standard.dat, well_role=="Standard");
         if (nrow(tempStnd.dat) > 0)
         {
-            tempStnd.dat$well_role = "UnkStandard";
+            tempStnd.dat$well_role = "";
             tempStnd.dat$sample_id = paste(tempStnd.dat$description, "||", tempStnd.dat$expected_conc, sep="");
             standard.dat=rbind(standard.dat, tempStnd.dat);
         }

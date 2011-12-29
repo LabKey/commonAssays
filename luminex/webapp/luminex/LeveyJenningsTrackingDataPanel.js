@@ -142,7 +142,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'Titration', dataIndex:'Titration', hidden: true, renderer: this.encodingRenderer},
                 {header:'Isotype', dataIndex:'Titration/Run/Isotype', hidden: true, renderer: this.encodingRenderer},
                 {header:'Conjugate', dataIndex:'Titration/Run/Conjugate', hidden: true, renderer: this.encodingRenderer},
-                {header:'Flags', dataIndex:'QCFlags', width: 75}, 
+                {header:'QC Flags', dataIndex:'QCFlags', width: 75}, 
                 {header:'Assay Id', dataIndex:'Titration/Run/Name', renderer: this.assayIdHrefRenderer, width:200},
                 {header:'Network', dataIndex:'Titration/Run/Batch/Network', width:75, renderer: this.encodingRenderer},
                 {header:'Folder', dataIndex:'Titration/Run/Folder/Name', width:75, renderer: this.encodingRenderer},
