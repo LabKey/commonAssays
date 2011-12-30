@@ -19,6 +19,7 @@ package org.labkey.ms2.pipeline.sequest;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.*;
@@ -56,8 +57,19 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
 
     private boolean hasSequest()
     {
-        SequestSearchTask.Factory factory = (SequestSearchTask.Factory)PipelineJobService.get().getTaskFactory(new TaskId(SequestSearchTask.class));
-        return factory.getLocation() != null || factory.getSequestInstallDir() != null;
+        for (TaskFactory taskFactory : PipelineJobService.get().getTaskFactories())
+        {
+            if (taskFactory instanceof AbstractSequestSearchTaskFactory)
+            {
+                AbstractSequestSearchTaskFactory sequestFactory = (AbstractSequestSearchTaskFactory)taskFactory;
+                if (sequestFactory.getLocation() != null || sequestFactory.getSequestInstallDir() != null)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)

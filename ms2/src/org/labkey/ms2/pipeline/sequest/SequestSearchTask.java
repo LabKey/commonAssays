@@ -21,7 +21,6 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
-import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.ms2.pipeline.*;
 
@@ -71,12 +70,8 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         return AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis,baseName,gzSupport);
     }
 
-    public static class Factory extends AbstractMS2SearchTaskFactory<Factory>
+    public static class Factory extends AbstractSequestSearchTaskFactory
     {
-        private File _sequestInstallDir;
-        private File _indexRootDir;
-        private List<String> _sequestOptions = new ArrayList<String>();
-
         public Factory()
         {
             super(SequestSearchTask.class);
@@ -87,82 +82,9 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             return new SequestSearchTask(this, job);
         }
 
-        public boolean isJobComplete(PipelineJob job)
-        {
-            SequestPipelineJob support = (SequestPipelineJob) job;
-            String baseName = support.getBaseName();
-            String baseNameJoined = support.getJoinedBaseName();
-            File dirAnalysis = support.getAnalysisDirectory();
-
-            // Fraction roll-up, completely analyzed sample pepXML, or the raw pepXML exist
-            return NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseNameJoined)) ||
-                   NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) ||
-                   NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName));
-        }
-
-
         public List<String> getProtocolActionNames()
         {
             return Arrays.asList(MAKEDB_ACTION_NAME, MZXML2SEARCH_ACTION_NAME, SEQUEST_ACTION_NAME);
-        }
-
-        public String getGroupParameterName()
-        {
-            return "sequest";
-        }
-
-        public String getSequestInstallDir()
-        {
-            return _sequestInstallDir == null ? null : _sequestInstallDir.getAbsolutePath();
-        }
-
-        public void setSequestInstallDir(String sequestInstallDir)
-        {
-            if (sequestInstallDir != null)
-            {
-                _sequestInstallDir = new File(sequestInstallDir);
-                NetworkDrive.exists(_sequestInstallDir);
-                if (!_sequestInstallDir.isDirectory())
-                {
-                    throw new IllegalArgumentException("No such Sequest install dir: " + sequestInstallDir);
-                }
-            }
-            else
-            {
-                _sequestInstallDir = null;
-            }
-        }
-
-        public List<String> getSequestOptions()
-        {
-            return _sequestOptions;
-        }
-
-        public void setSequestOptions(List<String> sequestOptions)
-        {
-            _sequestOptions = sequestOptions;
-        }
-
-        public String getIndexRootDir()
-        {
-            return _indexRootDir == null ? null : _indexRootDir.getAbsolutePath();
-        }
-
-        public void setIndexRootDir(String indexRootDir)
-        {
-            if (indexRootDir != null)
-            {
-                _indexRootDir = new File(indexRootDir);
-                NetworkDrive.exists(_indexRootDir);
-                if (!_indexRootDir.isDirectory())
-                {
-                    throw new IllegalArgumentException("No such index root dir: " + indexRootDir);
-                }
-            }
-            else
-            {
-                _indexRootDir = null;
-            }
         }
     }
 

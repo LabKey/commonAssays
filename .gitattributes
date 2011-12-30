@@ -1230,6 +1230,7 @@ ms2/src/org/labkey/ms2/pipeline/mascot/MascotSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotSearchTask.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/setMascotDefaults.jsp -text
 ms2/src/org/labkey/ms2/pipeline/phenyx/PhenyxRun.java -text
+ms2/src/org/labkey/ms2/pipeline/sequest/AbstractSequestSearchTaskFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/BooleanParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/ConverterFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/IInputXMLConverter.java -text

@@ -30,10 +30,18 @@
                         </list>
                     </property>
                 </bean>
+                <bean class="org.labkey.ms2.pipeline.sequest.UWSequestSearchTask$Factory">
+                    <property name="inputTypes">
+                        <list>
+                            <ref bean="mzXMLFileType" />
+                        </list>
+                    </property>
+                </bean>
                 <bean class="org.labkey.ms2.pipeline.TPPTask$Factory">
                     <property name="javaVMOptions" value="-Xmx1200m" />
                 </bean>
                 <bean class="org.labkey.ms2.pipeline.TPPTask$FactoryJoin"/>
+                <bean class="org.labkey.ms2.pipeline.MSDaPlLoaderTask$Factory" />
             </list>
         </property>
         <property name="factories">
@@ -42,6 +50,13 @@
                 <ref bean="expGeneratorSearch"/>
                 <ref bean="expGeneratorSearchJoin"/>
                 <ref bean="msPrefixCommand"/>
+
+                <!-- MacCoss pipeline support -->
+                <ref bean="makems2Command"/>
+                <ref bean="hardklorCommand"/>
+                <ref bean="bullseyeCommand"/>
+                <ref bean="sqt2pinCommand"/>
+                <ref bean="percolatorCommand"/>
             </list>
         </property>
         <property name="pipelines">
@@ -86,7 +101,7 @@
                     </property>
                 </bean>
 
-                <!-- Sequest search pipelines -->
+                <!-- Thermo Sequest search pipeline -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
                     <property name="protocolObjectId" value="MS2.SequestSearch" />
@@ -107,6 +122,286 @@
                 </bean>
             </list>
         </property>
+    </bean>
+
+    <!-- Part of the MacCoss UW Sequest pipeline -->
+    <bean id="hardklorCommand" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
+        <constructor-arg value="hardklorCommand"/>
+        <property name="statusName" value="HARDKLOR"/>
+        <property name="groupParameterName" value="hardklor" />
+        <property name="protocolActionName" value="Hardklor" />
+        <property name="outputExtension" value=".hk"/>
+        <property name="switchFormat" ref="unixDefaultSwitch"/>
+        <property name="inputPaths">
+            <map>
+                <entry key="spectra">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="ms1FileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="outputPaths">
+            <map>
+                <entry key="hk">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="hkFileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="converters">
+            <list>
+                <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
+                    <property name="parameter" value="accurate mass"/>
+                    <property name="default" value="true"/>
+                    <property name="converters">
+                        <map>
+                            <entry key="true">
+                                <bean class="org.labkey.api.pipeline.cmd.ListToCommandArgs">
+                                    <property name="converters">
+                                        <list>
+                                            <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                                                <property name="exePath" value="hardklor"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                                                <property name="key" value="spectra" />
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                                                <property name="function" value="output" />
+                                                <property name="key" value="hk" />
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                                <property name="switchName" value="mdat"/>
+                                                <property name="value" value="/net/maccoss/vol2/software/bin64/ISOTOPE.DAT" />
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                                <property name="switchName" value="hdat"/>
+                                                <property name="value" value="/net/maccoss/vol2/software/bin64/Hardklor.dat" />
+                                            </bean>
+
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="hardklor, combinations method"/>
+                                                <property name="switchName" value="a"/>
+                                                <property name="help" value="Algorithm for analyzing combinations of multiple peptide/protein isotope distributions. Basic - Computes all combinatorial possibilities and returns the combination with the highest score. FewestPeptides - Computes increasing depths of combinations until the score threshold is exceeded. The smallest combination exceeding the threshold is returned, preventing over-fitting of the data. FastFewestPeptides - Same as the FewestPeptides algorithm, but trades memory usage for speed. Use this method if there is sufficient memory on the system. FewestPeptidesChoice - Same as the FewestPeptides algorithm, but adds a heuristic to evaluate if further combinatorial analysis would produce a better score. This method can dramatically improve speed, but may not be as accurate. FastFewestPeptidesChoice - Same as the FewestPeptidesChoice algorithm, but trades memory usage for speed. Use this method if there is sufficient memory on the system. Default Basic."/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="hardklor, charge state method"/>
+                                                <property name="switchName" value="cmd"/>
+                                                <property name="help" value="Charge state determination method. B=basic assumes all charge states are possible, F=fast fourier transform, P=Patterson algorithm, Q=quickcharge uses inverse peak distances, S=Senko method combines F and P. Default B."/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="hardklor, min charge state"/>
+                                                <property name="switchName" value="chMin"/>
+                                                <property name="help" value="Minimum charge state to predict. Default 1."/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="hardklor, max charge state"/>
+                                                <property name="switchName" value="chMax"/>
+                                                <property name="help" value="Maximum charge state to predict. Default 3."/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="hardklor, correlation"/>
+                                                <property name="switchName" value="corr"/>
+                                                <property name="help" value="Correlation threshold for accepting a predicted isotope distribution. Default 0.90."/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="hardklor, depth"/>
+                                                <property name="switchName" value="d"/>
+                                                <property name="help" value="The maximum number of peptide/protein isotope distributions that can be combined to explain the observed data in a given spectrum segment. Default 3."/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="hardklor, averagine modifications"/>
+                                                <property name="switchName" value="m"/>
+                                                <property name="help" value="Modifications to make to the averaging model. Either the atomic formula for atoms to include or the percent isotopic enrichment. Eg. PO2, Cl, 0.75Hl. To add multiple modifications, option can be used redundantly or multiple strings may be specified separated by spaces."/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="hardklor, max peaks per segment"/>
+                                                <property name="switchName" value="p"/>
+                                                <property name="help" value="Maximum number of peptides or proteins estimated from a segment of spectrum."/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="hardklor, smoothing"/>
+                                                <property name="switchName" value="s"/>
+                                                <property name="help" value="Apply Savitsky-Golay smoothing of spectra prior to analysis using the given window size."/>
+                                            </bean>
+                                        </list>
+                                    </property>
+                                </bean>
+                            </entry>
+                        </map>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>    
+
+    <!-- Part of the MacCoss UW Sequest pipeline -->
+    <bean id="bullseyeCommand" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
+        <constructor-arg value="bullseyeCommand"/>
+        <property name="statusName" value="BULLSEYE"/>
+        <property name="groupParameterName" value="bullseye" />
+        <property name="protocolActionName" value="Bullseye" />
+        <property name="switchFormat" ref="unixDefaultSwitch"/>
+        <property name="inputPaths">
+            <map>
+                <entry key="spectra">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="ms2FileType" />
+                    </bean>
+                </entry>
+                <entry key="hk">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="hkFileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="outputPaths">
+            <map>
+                <entry key="matches">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="matchesFileType" />
+                    </bean>
+                </entry>
+                <entry key="nomatches">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="nomatchesFileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="converters">
+            <list>
+                <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
+                    <property name="parameter" value="accurate mass"/>
+                    <property name="default" value="true"/>
+                    <property name="converters">
+                        <map>
+                            <entry key="true">
+                                <bean class="org.labkey.api.pipeline.cmd.ListToCommandArgs">
+                                    <property name="converters">
+                                        <list>
+                                            <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                                                <property name="exePath" value="bullseye"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                                <property name="switchName" value="p"/>
+                                                <property name="value" value="5" />
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                                                <property name="key" value="hk" />
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                                                <property name="key" value="spectra" />
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                                                <property name="key" value="matches" />
+                                                <property name="function" value="output" />
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                                                <property name="key" value="nomatches" />
+                                                <property name="function" value="output" />
+                                            </bean>
+                                        </list>
+                                     </property>
+                                </bean>
+                            </entry>
+                        </map>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Part of the MacCoss UW Sequest pipeline -->
+    <bean id="percolatorCommand" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
+        <constructor-arg value="percolatorCommand"/>
+        <property name="statusName" value="PERCOLATOR"/>
+        <property name="groupParameterName" value="percolator" />
+        <property name="protocolActionName" value="Percolator" />
+        <property name="switchFormat" ref="unixDefaultSwitch"/>
+        <property name="inputPaths">
+            <map>
+                <entry key="searchResults">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="pinFileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="outputPaths">
+            <map>
+                <entry key="results">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="resultsFileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="converters">
+            <list>
+                <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                    <property name="exePath" value="percolator"/>
+                    <property name="softwarePackage" value="percolator"/>
+                    <property name="versionParamName" value="percolator, version"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="E"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="key" value="searchResults" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="X"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="key" value="results" />
+                    <property name="function" value="output" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="M"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Part of the MacCoss UW Sequest pipeline -->
+    <bean id="sqt2pinCommand" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
+        <constructor-arg value="sqt2pinCommand"/>
+        <property name="statusName" value="SQT2PIN"/>
+        <property name="groupParameterName" value="sqt2pin" />
+        <property name="protocolActionName" value="SQT2PIN" />
+        <property name="switchFormat" ref="unixDefaultSwitch"/>
+        <property name="inputPaths">
+            <map>
+                <entry key="sqt">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="sqtFileType" />
+                    </bean>
+                </entry>
+                <entry key="decoySqt">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="decoySqtFileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="outputExtension" value=".pin.xml" />
+        <property name="converters">
+            <list>
+                <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                    <property name="exePath" value="sqt2pin"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="key" value="sqt" />
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="key" value="decoySqt" />
+                </bean>
+            </list>
+        </property>
+        <property name="pipeToOutput" value="true" />
     </bean>
 
     <!-- TaskIds for TPP tasks registered in factoryImpls -->
@@ -476,6 +771,94 @@
         </property>
     </bean>
 
+    <bean id="makems2Command" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
+        <constructor-arg value="makems2"/>
+        <property name="statusName" value="MAKEMS2"/>
+        <property name="groupParameterName" value="makems2" />
+        <property name="protocolActionName" value="makems2" />
+        <property name="inputPaths">
+            <map>
+                <entry key="RAW">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="rawFileType" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="outputPaths">
+            <map>
+                <entry key="ms1">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg value=".ms1" />
+                    </bean>
+                </entry>
+                <entry key="ms2">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg value=".ms2" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="switchFormat" ref="unixCompactSwitch"/>
+        <property name="converters">
+            <list>
+                <bean class="org.labkey.api.pipeline.cmd.ListToCommandArgs">
+                    <property name="switchFormat" ref="unixDefaultSwitch"/>
+                    <property name="converters">
+                        <list>
+                            <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                                <property name="exePath" value="makems2"/>
+                            </bean>
+                            <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                                <property name="key" value="RAW"/>
+                            </bean>
+                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                <property name="switchName" value="c"/>
+                            </bean>
+                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                <property name="switchName" value="ms1"/>
+                            </bean>
+                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                <property name="switchName" value="ms2"/>
+                            </bean>
+                            
+                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                <property name="parameter" value="makems2, min precursor mass"/>
+                                <property name="switchName" value="ms2Min"/>
+                                <property name="help" value="Write MS2 spectra with at least the given precursor mass"/>
+                            </bean>
+                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                <property name="parameter" value="makems2, max precursor mass"/>
+                                <property name="switchName" value="ms2Max"/>
+                                <property name="help" value="Write MS2 spectra with at most the given precursor mass"/>
+                            </bean>
+                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                <property name="parameter" value="makems2, min fragment mz"/>
+                                <property name="switchName" value="mzMin"/>
+                                <property name="help" value="Write m/z peaks of at least this m/z"/>
+                            </bean>
+                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                <property name="parameter" value="makems2, max fragment mz"/>
+                                <property name="switchName" value="mzMax"/>
+                                <property name="help" value="Write m/z peaks of at most this m/z"/>
+                            </bean>
+                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                <property name="parameter" value="makems2, intensity precision"/>
+                                <property name="switchName" value="pI"/>
+                                <property name="help" value="Write intensity values to this precision"/>
+                            </bean>
+                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                <property name="parameter" value="makems2, mz precision"/>
+                                <property name="switchName" value="pMZ"/>
+                                <property name="help" value="Write m/z values to this precision"/>
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
     <!-- Utility beans -->
     <bean id="unixNewSwitch" class="org.labkey.api.pipeline.cmd.UnixNewSwitchFormat"/>
     <bean id="unixCompactSwitch" class="org.labkey.api.pipeline.cmd.UnixCompactSwitchFormat"/>
@@ -486,9 +869,80 @@
             <list>
                 <value>.msprefix.mzXML</value>
                 <value>.mzXML</value>
+                <value>.matches.cms2</value>
+                <value>.matches.ms2</value>
+                <value>.cms2</value>
+                <value>.ms2</value>
             </list>
         </constructor-arg>
         <constructor-arg value=".mzXML"/>
     </bean>
     <bean id="massSpecDataFileType" class="org.labkey.api.util.massSpecDataFileType" />
+
+    <bean id="rawFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg>
+            <list>
+                <value>.raw</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg value=".raw"/>
+    </bean>
+
+
+    <bean id="ms1FileType" class="org.labkey.api.util.FileType">
+        <constructor-arg>
+            <list>
+                <value>.cms1</value>
+                <value>.ms1</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg value=".ms1"/>
+    </bean>
+
+    <bean id="ms2FileType" class="org.labkey.api.util.FileType">
+        <constructor-arg>
+            <list>
+                <value>.cms2</value>
+                <value>.ms2</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg value=".ms2"/>
+    </bean>
+
+    <bean id="confFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".conf" />
+    </bean>
+
+    <bean id="sqtFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".sqt" />
+    </bean>
+
+    <bean id="decoySqtFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".decoy.sqt" />
+    </bean>
+
+    <bean id="pinFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".pin.xml" />
+    </bean>
+
+    <bean id="hkFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".hk" />
+    </bean>
+
+    <bean id="resultsFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".result.xml" />
+    </bean>
+
+    <bean id="matchesFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".matches.ms2" />
+    </bean>
+    <bean id="nomatchesFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".nomatches.ms2" />
+    </bean>
+
+    <!-- Tasks registered in experiment module -->
+    <bean id="xarGeneratorId" class="org.labkey.api.pipeline.TaskId">
+        <constructor-arg><value type="java.lang.Class">org.labkey.api.exp.pipeline.XarGeneratorId</value></constructor-arg>
+    </bean>
+    
 </beans>
