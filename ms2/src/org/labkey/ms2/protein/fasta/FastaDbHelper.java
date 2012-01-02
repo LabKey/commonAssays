@@ -192,7 +192,7 @@ public class FastaDbHelper
                     " AND PS.hash = " + _seqTableName + ".hash " +
                     " AND (PO.genus<>'Unknown' OR PO.species<>'unknown')  )" +
                 " WHERE " + _seqTableName + ".genus= ? AND "+ _seqTableName + ".species= ? " +
-                " AND 1 = ( SELECT  COUNT(*) " +
+                " AND 1 = ( SELECT COUNT(*) " +
                     " FROM " + ProteinManager.getTableInfoSequences() + " PS INNER JOIN " +  ProteinManager.getTableInfoOrganisms() + " PO ON (PS.orgid = PO.orgid) " +
                     " AND PS.hash = " + _seqTableName + ".hash " +
                     " AND (PO.genus<>'Unknown' OR PO.species<>'unknown')  )");
