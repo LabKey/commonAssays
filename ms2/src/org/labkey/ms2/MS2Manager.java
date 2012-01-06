@@ -79,7 +79,6 @@ import org.labkey.ms2.reader.RandomAccessMzxmlIteratorFactory;
 import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
 import org.labkey.ms2.reader.SimpleScan;
 
-import javax.servlet.ServletException;
 import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.io.File;
