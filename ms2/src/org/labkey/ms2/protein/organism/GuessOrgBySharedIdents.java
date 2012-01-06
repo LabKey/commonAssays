@@ -17,6 +17,7 @@
 package org.labkey.ms2.protein.organism;
 
 import org.labkey.api.cache.CacheManager;
+import org.labkey.api.cache.Stats;
 import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.Table;
@@ -42,7 +43,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
     //TODO: consider parsing TAX_ID
     private static final DbSchema _schema = ProteinManager.getSchema();
 
-    private StringKeyCache<String> _sprotCache = CacheManager.getTemporaryCache(1000, CacheManager.DEFAULT_TIMEOUT, "GuessOrgBySharedIdents sprot cache", null);
+    private StringKeyCache<String> _sprotCache = CacheManager.getTemporaryCache(1000, CacheManager.DEFAULT_TIMEOUT, "GuessOrgBySharedIdents sprot cache", (Stats)null);
     private static final String CACHED_MISS_VALUE = "GuessOrgBySharedIdents.CACHED_MISS_VALUE";
 
     private enum SPROTload
