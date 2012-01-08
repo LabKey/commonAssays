@@ -16,6 +16,7 @@
 
 package org.labkey.flow.analysis.web;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.view.Stats;
@@ -25,14 +26,20 @@ import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.model.Subset;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StatisticSpec implements Serializable, Comparable
 {
     final SubsetSpec _subset;
     final STAT _statistic;
     final String _parameter;
+
+    private static final Pattern _statPattern;
 
     public enum STAT
     {
@@ -106,6 +113,22 @@ public class StatisticSpec implements Serializable, Comparable
         }
     }
 
+    static
+    {
+        List<String> stats = new ArrayList<String>();
+        for (STAT stat : STAT.values())
+            stats.add(stat.name());
+
+        // Create regular expression to find the STAT in a statistic spec
+        //   start-of-line-or-colon ( stat-names ) open-paren-or-end-of-line
+        StringBuilder sb = new StringBuilder();
+        sb.append("(^|:)");
+        sb.append("(").append(StringUtils.join(stats, "|")).append(")");
+        sb.append("(\\(|$)");
+
+        _statPattern = Pattern.compile(sb.toString());
+    }
+
     public StatisticSpec(SubsetSpec subset, STAT statistic, String parameter)
     {
         _subset = subset;
@@ -116,15 +139,21 @@ public class StatisticSpec implements Serializable, Comparable
     // UNDONE: need parser
     public StatisticSpec(String stat)
     {
-        String str = stat;
-        if (str.endsWith(")"))
+        Matcher m = _statPattern.matcher(stat);
+        if (!m.find())
+            throw new FlowException("Invalid statistic spec: " + stat);
+
+        String subset = stat.substring(0, m.start());
+        _subset = SubsetSpec.fromEscapedString(subset);
+
+        String str = stat.substring(m.start());
+        int ichLParen = str.indexOf("(");
+        if (ichLParen >= 0)
         {
-            int ichLParen = str.lastIndexOf("(");
-            if (ichLParen < 0)
-            {
-                throw new FlowException("Missing '('");
-            }
-            _parameter = str.substring(ichLParen + 1, str.length() - 1);
+            if (!str.endsWith(")"))
+                throw new FlowException("Expected matching parens in '" + str + "' from statistic spec: " + stat);
+
+            _parameter = str.substring(ichLParen+1, str.length()-1);
             str = str.substring(0, ichLParen);
         }
         else
@@ -132,23 +161,16 @@ public class StatisticSpec implements Serializable, Comparable
             _parameter = null;
         }
 
-        int ichColon = str.lastIndexOf(":");
-        if (ichColon < 0)
-        {
-            _subset = null;
-        }
-        else
-        {
-            _subset = SubsetSpec.fromEscapedString(str.substring(0, ichColon));
-            str = str.substring(ichColon + 1);
-        }
+        if (str.startsWith(":"))
+            str = str.substring(1);
+
         try
         {
             _statistic = STAT.fromString(str);
         }
         catch (Exception e)
         {
-            throw new FlowException("'" + stat + "' is not a valid statistic.", e);
+            throw new FlowException("Invalid statistic '" + str + "' from statistic spec: " + stat, e);
         }
     }
 
@@ -391,7 +413,7 @@ public class StatisticSpec implements Serializable, Comparable
     public static class TestCase extends Assert
     {
         @Test
-        public void testParseSave11_1()
+        public void testParseSave11_1() throws Exception
         {
             for (String s : statitics11_1)
             {
@@ -402,6 +424,7 @@ public class StatisticSpec implements Serializable, Comparable
                 catch (Exception x)
                 {
                     System.err.println(s);
+                    throw x;
                 }
             }
         }
@@ -489,7 +512,9 @@ final static String[] statitics11_1 = {
     "Singlets:Median(SSC-A)",
     "Singlets:Median(Time)",
     "Spill(APC Cy7-A:APC Cy7-A)",
-    //"Spill(APC-Cy7-A:Indo-1 (Blue)-A)",
+    "Spill(APC-Cy7-A:Indo-1 (Blue)-A)",
+    "Spill(Foo (Violet)-H:Indo-1 (Blue)-A)",
+    "S/L:Count(Indo-1 (Blue)-A)",
     "Std_Dev(APC Cy7-A)",
     "Std_Dev(APC-A)",
     "Std_Dev(Time)",
