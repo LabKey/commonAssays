@@ -91,6 +91,7 @@ public class uniprot extends ParseActions
                 idrs.next();
                 setCurrentInsertId(idrs.getInt(1));
                 idrs.close();
+                context.getConnection().commit();
             }
             else
             {
