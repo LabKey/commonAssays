@@ -153,7 +153,7 @@ public class PepXmlLoader extends MS2Loader
         private String _dataBasename, _dataSuffix;
         private String _spectrumPath = null;
         private Float _importSpectraMinProbability = null;
-        private boolean _loadSpectra = true;
+        private boolean _loadSpectra = false;
         private MS2ModificationList _modifications = new MS2ModificationList();
 
 
