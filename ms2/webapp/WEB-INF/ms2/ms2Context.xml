@@ -590,7 +590,7 @@
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
                     <property name="parameter" value="percolator, retention time file"/>
                     <property name="switchName" value="2"/>
-                    <property name="help" value="percolator, retention time file"/>
+                    <property name="help" value="A file in mzXML, MS2 or cMS2 format containing spectra with retention times. (-2)"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
                     <property name="parameter" value="percolator, feature descriptions"/>
