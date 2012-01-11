@@ -335,26 +335,22 @@ public class LuminexSchema extends AssaySchema
     public ExpQCFlagTable createAnalyteTitrationQCFlagTable()
     {
         ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ExpSchema.TableType.QCFlags.toString(), this);
-        result.addColumn(ExpQCFlagTable.Column.RowId);
-        result.addColumn(ExpQCFlagTable.Column.Run);
-        result.addColumn(ExpQCFlagTable.Column.FlagType);
-        result.addColumn(ExpQCFlagTable.Column.Description);
-        result.addColumn(ExpQCFlagTable.Column.Comment);
-        result.addColumn(ExpQCFlagTable.Column.Enabled);
+        result.populate();
+        result.setAssayProtocol(getProtocol());
 
         ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
         analyteColumn.setFk(new AnalyteForeignKey(this));
         ColumnInfo titrationColumn = result.addColumn("Titration", ExpQCFlagTable.Column.IntKey2);
         titrationColumn.setFk(new TitrationForeignKey(this));
 
-        result.addColumn(ExpQCFlagTable.Column.Created);
-        result.addColumn(ExpQCFlagTable.Column.CreatedBy);
-        result.addColumn(ExpQCFlagTable.Column.Modified);
-        result.addColumn(ExpQCFlagTable.Column.ModifiedBy);
-
         result.setDescription("Contains Run QC Flags that are associated with an analyte/titration combination");
         SQLFragment nonCVFlagFilter = new SQLFragment(" Key1 IS NULL AND Key2 IS NULL ");
         result.addCondition(nonCVFlagFilter);
+
+        // disable insert/update for this table
+        result.setImportURL(TableInfo.LINK_DISABLER);
+        result.setInsertURL(TableInfo.LINK_DISABLER);
+        result.setUpdateURL(TableInfo.LINK_DISABLER);        
 
         return result;
     }
@@ -362,30 +358,25 @@ public class LuminexSchema extends AssaySchema
     public ExpQCFlagTable createCVQCFlagTable()
     {
         ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ExpSchema.TableType.QCFlags.toString(), this);
-        result.addColumn(ExpQCFlagTable.Column.RowId);
-        result.addColumn(ExpQCFlagTable.Column.Run);
-        result.addColumn(ExpQCFlagTable.Column.FlagType);
-        result.addColumn(ExpQCFlagTable.Column.Description);
-        result.addColumn(ExpQCFlagTable.Column.Comment);
-        result.addColumn(ExpQCFlagTable.Column.Enabled);
+        result.populate();
+        result.setAssayProtocol(getProtocol());
 
         ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
         analyteColumn.setFk(new AnalyteForeignKey(this));
-        ColumnInfo dataFileColumn = result.addColumn("DataFile", ExpQCFlagTable.Column.IntKey2);
-        dataFileColumn.setFk(new DataForeignKey(this));
+        result.addColumn("DataId", ExpQCFlagTable.Column.IntKey2);
         ColumnInfo wellTypeColumn = result.addColumn("WellType", ExpQCFlagTable.Column.Key1);
         wellTypeColumn.setLabel("Well Type");
         ColumnInfo wellDescriptionColumn = result.addColumn("WellDescription", ExpQCFlagTable.Column.Key2);
         wellDescriptionColumn.setLabel("Well Description");
 
-        result.addColumn(ExpQCFlagTable.Column.Created);
-        result.addColumn(ExpQCFlagTable.Column.CreatedBy);
-        result.addColumn(ExpQCFlagTable.Column.Modified);
-        result.addColumn(ExpQCFlagTable.Column.ModifiedBy);
-
         result.setDescription("Contains %CV QC Flags that are associated with well replicates");
         SQLFragment cvFlagFilter = new SQLFragment(" Key1 IS NOT NULL AND Key2 IS NOT NULL ");
         result.addCondition(cvFlagFilter);
+
+        // disable insert/update for this table
+        result.setImportURL(TableInfo.LINK_DISABLER);
+        result.setInsertURL(TableInfo.LINK_DISABLER);
+        result.setUpdateURL(TableInfo.LINK_DISABLER);
 
         return result;
     }
@@ -508,23 +499,6 @@ public class LuminexSchema extends AssaySchema
         public TableInfo getLookupTableInfo()
         {
             return _schema.createTitrationTable(false);
-        }
-    }
-
-    public static class DataForeignKey extends LookupForeignKey
-    {
-        private final LuminexSchema _schema;
-
-        public DataForeignKey(LuminexSchema schema)
-        {
-            super("RowId");
-            _schema = schema;
-        }
-
-        @Override
-        public TableInfo getLookupTableInfo()
-        {
-            return _schema.createDataTable();
         }
     }
 }
