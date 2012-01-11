@@ -50,6 +50,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     public static final String ELISPOT_ANTIGEN_ROW_LSID_PREFIX = "ElispotAssayAntigenRow";
 
     public static final String SFU_PROPERTY_NAME = "SpotCount";
+    public static final String NORMALIZED_SFU_PROPERTY_NAME = "NormalizedSpotCount";
     public static final String WELLGROUP_PROPERTY_NAME = "WellgroupName";
     public static final String WELLGROUP_LOCATION_PROPERTY = "WellgroupLocation";
     public static final String WELL_ROW_PROPERTY = "WellRow";
@@ -147,6 +148,11 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         {
             type = PropertyType.DOUBLE;
             format = "0.0";
+        }
+        else if (propertyName.equals(NORMALIZED_SFU_PROPERTY_NAME))
+        {
+            type = PropertyType.DOUBLE;
+            format = "0.00";
         }
         return getResultObjectProperty(container, protocol, objectURI, propertyName, value, type, format);
     }

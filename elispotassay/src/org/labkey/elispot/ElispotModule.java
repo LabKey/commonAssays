@@ -18,6 +18,7 @@ package org.labkey.elispot;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -42,7 +43,7 @@ public class ElispotModule extends DefaultModule
 
     public double getVersion()
     {
-        return 11.30;
+        return 11.31;
     }
 
     protected void init()
@@ -57,7 +58,7 @@ public class ElispotModule extends DefaultModule
 
     public boolean hasScripts()
     {
-        return false;
+        return true;
     }
 
     public Collection<String> getSummary(Container c)
@@ -73,5 +74,11 @@ public class ElispotModule extends DefaultModule
 
         ElispotPlateReaderService.registerProvider(new ExcelPlateReader());
         ElispotPlateReaderService.registerProvider(new TextPlateReader());
+    }
+
+    @Override
+    public UpgradeCode getUpgradeCode()
+    {
+        return new ElispotUpgradeCode();
     }
 }

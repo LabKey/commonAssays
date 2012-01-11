@@ -149,7 +149,10 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
                     addColumn(propColumn);
 
                 if (!hiddenCols.contains(pd.getName()))
-                    visibleColumns.add(FieldKey.fromParts(pd.getName()));
+                {
+                    if (!ElispotDataHandler.NORMALIZED_SFU_PROPERTY_NAME.equals(pd.getName()))
+                        visibleColumns.add(FieldKey.fromParts(pd.getName()));
+                }
             }
         }
         catch (SQLException e)
