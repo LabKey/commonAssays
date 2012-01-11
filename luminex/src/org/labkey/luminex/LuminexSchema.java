@@ -22,6 +22,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
+import org.labkey.api.exp.query.ExpQCFlagTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.*;
@@ -48,6 +49,8 @@ public class LuminexSchema extends AssaySchema
     public static final String WELL_EXCLUSION_ANALYTE_TABLE_NAME = "WellExclusionAnalyte";
     public static final String RUN_EXCLUSION_TABLE_NAME = "RunExclusion";
     public static final String RUN_EXCLUSION_ANALYTE_TABLE_NAME = "RunExclusionAnalyte";
+    public static final String ANALYTE_TITRATION_QC_FLAG_TABLE_NAME = "AnalyteTitrationQCFlags";
+    public static final String CV_QC_FLAG_TABLE_NAME = "CVQCFlags";
 
     private List<String> _curveTypes;
 
@@ -69,7 +72,9 @@ public class LuminexSchema extends AssaySchema
                 prefixTableName(CURVE_FIT_TABLE_NAME),
                 prefixTableName(GUIDE_SET_TABLE_NAME),
                 prefixTableName(GUIDE_SET_CURVE_FIT_TABLE_NAME),
-                prefixTableName(ANALYTE_TITRATION_TABLE_NAME)
+                prefixTableName(ANALYTE_TITRATION_TABLE_NAME),
+                prefixTableName(ANALYTE_TITRATION_QC_FLAG_TABLE_NAME),
+                prefixTableName(CV_QC_FLAG_TABLE_NAME)
         );
     }
 
@@ -203,6 +208,14 @@ public class LuminexSchema extends AssaySchema
                 result.addCondition(filter, "RunId");
                 return result;
             }
+            if (ANALYTE_TITRATION_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                return createAnalyteTitrationQCFlagTable();
+            }
+            if (CV_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                return createCVQCFlagTable();
+            }
         }
         return null;
     }
@@ -319,6 +332,64 @@ public class LuminexSchema extends AssaySchema
         return new LuminexDataTable(this);
     }
 
+    public ExpQCFlagTable createAnalyteTitrationQCFlagTable()
+    {
+        ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ExpSchema.TableType.QCFlags.toString(), this);
+        result.addColumn(ExpQCFlagTable.Column.RowId);
+        result.addColumn(ExpQCFlagTable.Column.Run);
+        result.addColumn(ExpQCFlagTable.Column.FlagType);
+        result.addColumn(ExpQCFlagTable.Column.Description);
+        result.addColumn(ExpQCFlagTable.Column.Comment);
+        result.addColumn(ExpQCFlagTable.Column.Enabled);
+
+        ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
+        analyteColumn.setFk(new AnalyteForeignKey(this));
+        ColumnInfo titrationColumn = result.addColumn("Titration", ExpQCFlagTable.Column.IntKey2);
+        titrationColumn.setFk(new TitrationForeignKey(this));
+
+        result.addColumn(ExpQCFlagTable.Column.Created);
+        result.addColumn(ExpQCFlagTable.Column.CreatedBy);
+        result.addColumn(ExpQCFlagTable.Column.Modified);
+        result.addColumn(ExpQCFlagTable.Column.ModifiedBy);
+
+        result.setDescription("Contains Run QC Flags that are associated with an analyte/titration combination");
+        SQLFragment nonCVFlagFilter = new SQLFragment(" Key1 IS NULL AND Key2 IS NULL ");
+        result.addCondition(nonCVFlagFilter);
+
+        return result;
+    }
+
+    public ExpQCFlagTable createCVQCFlagTable()
+    {
+        ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ExpSchema.TableType.QCFlags.toString(), this);
+        result.addColumn(ExpQCFlagTable.Column.RowId);
+        result.addColumn(ExpQCFlagTable.Column.Run);
+        result.addColumn(ExpQCFlagTable.Column.FlagType);
+        result.addColumn(ExpQCFlagTable.Column.Description);
+        result.addColumn(ExpQCFlagTable.Column.Comment);
+        result.addColumn(ExpQCFlagTable.Column.Enabled);
+
+        ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
+        analyteColumn.setFk(new AnalyteForeignKey(this));
+        ColumnInfo dataFileColumn = result.addColumn("DataFile", ExpQCFlagTable.Column.IntKey2);
+        dataFileColumn.setFk(new DataForeignKey(this));
+        ColumnInfo wellTypeColumn = result.addColumn("WellType", ExpQCFlagTable.Column.Key1);
+        wellTypeColumn.setLabel("Well Type");
+        ColumnInfo wellDescriptionColumn = result.addColumn("WellDescription", ExpQCFlagTable.Column.Key2);
+        wellDescriptionColumn.setLabel("Well Description");
+
+        result.addColumn(ExpQCFlagTable.Column.Created);
+        result.addColumn(ExpQCFlagTable.Column.CreatedBy);
+        result.addColumn(ExpQCFlagTable.Column.Modified);
+        result.addColumn(ExpQCFlagTable.Column.ModifiedBy);
+
+        result.setDescription("Contains %CV QC Flags that are associated with well replicates");
+        SQLFragment cvFlagFilter = new SQLFragment(" Key1 IS NOT NULL AND Key2 IS NOT NULL ");
+        result.addCondition(cvFlagFilter);
+
+        return result;
+    }
+
     protected SQLFragment createDataFilterInClause()
     {
         SQLFragment filter = new SQLFragment(" IN (SELECT d.RowId FROM ");
@@ -420,6 +491,40 @@ public class LuminexSchema extends AssaySchema
         public TableInfo getLookupTableInfo()
         {
             return _schema.createAnalyteTable(false);
+        }
+    }
+
+    public static class TitrationForeignKey extends LookupForeignKey
+    {
+        private final LuminexSchema _schema;
+
+        public TitrationForeignKey(LuminexSchema schema)
+        {
+            super("RowId");
+            _schema = schema;
+        }
+
+        @Override
+        public TableInfo getLookupTableInfo()
+        {
+            return _schema.createTitrationTable(false);
+        }
+    }
+
+    public static class DataForeignKey extends LookupForeignKey
+    {
+        private final LuminexSchema _schema;
+
+        public DataForeignKey(LuminexSchema schema)
+        {
+            super("RowId");
+            _schema = schema;
+        }
+
+        @Override
+        public TableInfo getLookupTableInfo()
+        {
+            return _schema.createDataTable();
         }
     }
 }

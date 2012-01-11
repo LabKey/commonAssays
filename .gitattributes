@@ -642,6 +642,7 @@ luminex/src/org/labkey/luminex/AnalyteTitration.java -text
 luminex/src/org/labkey/luminex/AnalyteTitrationTable.java -text
 luminex/src/org/labkey/luminex/CurveFit.java -text
 luminex/src/org/labkey/luminex/CurveFitTable.java -text
+luminex/src/org/labkey/luminex/CvUIDisplayColumn.java -text
 luminex/src/org/labkey/luminex/ExclusionUIDisplayColumn.java -text
 luminex/src/org/labkey/luminex/GuideSet.java -text
 luminex/src/org/labkey/luminex/GuideSetCurveFitTable.java -text

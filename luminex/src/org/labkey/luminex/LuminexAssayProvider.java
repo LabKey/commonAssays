@@ -133,32 +133,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ExpQCFlagTable createQCFlagTable(final AssaySchema schema, final ExpProtocol protocol)
-    {
-        ExpQCFlagTable result = super.createQCFlagTable(schema, protocol);
-        ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
-        analyteColumn.setFk(new LookupForeignKey("RowId")
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                return schema.getTable(LuminexSchema.getAnalyteTableName(protocol));
-            }
-        });
-
-        ColumnInfo titrationColumn = result.addColumn("Titration", ExpQCFlagTable.Column.IntKey2);
-        titrationColumn.setFk(new LookupForeignKey("RowId")
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                return schema.getTable(LuminexSchema.getTitrationTableName(protocol));
-            }
-        });
-        return result;
-    }
-
-    @Override
     public ExpRunTable createRunTable(final AssaySchema schema, final ExpProtocol protocol)
     {
         final ExpRunTable result = super.createRunTable(schema, protocol);

@@ -364,6 +364,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 // calculations - we only want to look for replicates within the same plate.
                 ensureSummaryStats(dataRows);
 
+                // check if QC Flags need to be inserted for any of the %CV values for this analyte (only on initial insert of run data)
+                if (!existingAnalytes.containsKey(analyte.getName()))
+                    insertCVQCFlags(user, expRun, dataRows, analyte);
+
                 // now add the dataRows to the rows list to be persisted
                 for (LuminexDataRow dataRow : dataRows)
                     rows.put(new DataRowKey(dataRow), dataRow.toMap(analyte));
@@ -544,7 +548,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         ObjectUtils.equals(statRow.getDescription(), dataRow.getDescription()) &&
                         ObjectUtils.equals(statRow.getType(), dataRow.getType()) &&
                         ObjectUtils.equals(statRow.getData(), dataRow.getData()) &&
-                        ObjectUtils.equals(statRow.getAnalyte(), dataRow.getAnalyte()))
+                        ObjectUtils.equals(statRow.getAnalyte(), dataRow.getAnalyte()) &&
+                        ObjectUtils.equals(statRow.getExtraProperties().get("Standard"), dataRow.getExtraProperties().get("Standard")))
                     {
                         fis.add(statRow.getFi());
                     }
@@ -559,6 +564,71 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     dataRow.setCv(mean == 0.0 ? null : stdDev / mean);
                 }
             }
+        }
+    }
+
+    /* Insert QC Flags for %CV values that are over the threshold (Unknown > 20%, Standard/Control > 15%) */
+    private void insertCVQCFlags(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte)
+            throws SQLException
+    {
+        Set<WellReplicatesKey> flaggedReplicates = new HashSet<WellReplicatesKey>();
+        for (LuminexDataRow dataRow : dataRows)
+        {
+            if (null != dataRow.getCv() &&
+                ((dataRow.getWellRole().equals("Unknown") && dataRow.getCv() > 0.2) ||
+                 (dataRow.getWellRole().contains("Standard") && dataRow.getCv() > 0.15) ||
+                 (dataRow.getWellRole().contains("Control") && dataRow.getCv() > 0.15)))
+            {
+                WellReplicatesKey wellReplicateKey = new WellReplicatesKey(dataRow);
+                if (!flaggedReplicates.contains(wellReplicateKey))
+                {
+                    flaggedReplicates.add(wellReplicateKey);
+                    String description = analyte.getName() + " " + dataRow.getType() + " " + dataRow.getDescription() + " over threshold for %CV";
+                    insertNewQCFlag(user, expRun, "CV", description, analyte.getRowId(), dataRow.getData(), dataRow.getType(), dataRow.getDescription());
+                }
+            }
+        }
+    }
+
+    private static class WellReplicatesKey
+    {
+        private int _analyteId;
+        private int _dataId;
+        private String _type;
+        private String _description;
+
+        public WellReplicatesKey(LuminexDataRow dataRow)
+        {
+            _analyteId = dataRow.getAnalyte();
+            _dataId = dataRow.getData();
+            _type = dataRow.getType();
+            _description = dataRow.getDescription();
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            WellReplicatesKey that = (WellReplicatesKey) o;
+
+            if (_analyteId != that._analyteId) return false;
+            if (_dataId != that._dataId) return false;
+            if (_type != null ? !_type.equals(that._type) : that._type != null) return false;
+            if (_description != null ? !_description.equals(that._description) : that._description != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode()
+        {
+            int result = _analyteId;
+            result = 31 * result + _dataId;
+            result = 31 * result + (_type != null ? _type.hashCode() : 0);
+            result = 31 * result + (_description != null ? _description.hashCode() : 0);
+            return result;
         }
     }
 
@@ -1032,6 +1102,27 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         @Test
+        public void testStatsWithMultipleStandards()
+        {
+            List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
+            dataRows.add(new LuminexDataRow("S1", "A1", 62.0, "Stnd1"));
+            dataRows.add(new LuminexDataRow("S1", "B1", 47.0, "Stnd1"));
+            dataRows.add(new LuminexDataRow("S1", "A1", 63.0, "Stnd2"));
+            dataRows.add(new LuminexDataRow("S1", "B1", 46.0, "Stnd2"));
+            new LuminexDataHandler().ensureSummaryStats(dataRows);
+
+            assertEquals("Wrong StdDev", 10.6066, Math.round(dataRows.get(0).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 10.6066, Math.round(dataRows.get(1).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 12.02082, Math.round(dataRows.get(2).getStdDev() * 100000) / 100000.0);
+            assertEquals("Wrong StdDev", 12.02082, Math.round(dataRows.get(3).getStdDev() * 100000) / 100000.0);
+
+            assertEquals("Wrong %CV", 0.1946165, Math.round(dataRows.get(0).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 0.1946165, Math.round(dataRows.get(1).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 0.2205654, Math.round(dataRows.get(2).getCv() * 10000000) / 10000000.0);
+            assertEquals("Wrong %CV", 0.2205654, Math.round(dataRows.get(3).getCv() * 10000000) / 10000000.0);
+        }
+
+        @Test
         public void testGuideSetOutOfRange()
         {
             // check some actual values used in the first set of runs for the LuminexGuideSetTest (all are in range)
@@ -1161,14 +1252,16 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         assert rows.length == 1;
 
         Map<String, Object> row = rows[0];
-        String descriptionPrefix = titration.getName() + " " + analyte.getName() + " - " + isotype + " " + conjugate + " ";
+        String descriptionPrefix = titration.getName() + " " + analyte.getName() + " - "
+                + (isotype == null ? "[None]" : isotype) + " "
+                + (conjugate == null ? "[None]" : conjugate) + " ";
 
         // add QCFlag for High MFI, if out of guide set range
         Double average = (Double)row.get(cols.get(maxFIAverageFK).getAlias());
         Double stdDev = (Double)row.get(cols.get(maxFIStdDevFK).getAlias());
         String outOfRangeType = isOutOfGuideSetRange(analyteTitration.getMaxFI(), average, stdDev);
         if (null != outOfRangeType)
-            insertNewQCFlag(user, expRun, "HMFI", descriptionPrefix + outOfRangeType + " threshold for High MFI", analyte, titration);
+            insertNewQCFlag(user, expRun, "HMFI", descriptionPrefix + outOfRangeType + " threshold for High MFI", analyte.getRowId(), titration.getRowId(), null, null);
 
         for (CurveFit curveFit : curveFits)
         {
@@ -1179,7 +1272,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 stdDev = (Double)row.get(cols.get(ec50StdDevFK).getAlias());
                 outOfRangeType = isOutOfGuideSetRange(curveFit.getEC50(), average, stdDev);
                 if (null != outOfRangeType)
-                    insertNewQCFlag(user, expRun, "EC50", descriptionPrefix + outOfRangeType + " threshold for EC50", analyte, titration);
+                    insertNewQCFlag(user, expRun, "EC50", descriptionPrefix + outOfRangeType + " threshold for EC50", analyte.getRowId(), titration.getRowId(), null, null);
             }
 
             // add QCFlag for new Trapezoidal AUC curvefit value, if out of guide set range
@@ -1189,12 +1282,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 stdDev = (Double)row.get(cols.get(aucStdDevFK).getAlias());
                 outOfRangeType = isOutOfGuideSetRange(curveFit.getAUC(), average, stdDev);
                 if (null != outOfRangeType)
-                    insertNewQCFlag(user, expRun, "AUC", descriptionPrefix + outOfRangeType + " threshold for AUC", analyte, titration);
+                    insertNewQCFlag(user, expRun, "AUC", descriptionPrefix + outOfRangeType + " threshold for AUC", analyte.getRowId(), titration.getRowId(), null, null);
             }
         }
     }
 
-    private void insertNewQCFlag(User user, ExpRun expRun, String flagType, String description, Analyte analyte, Titration titration)
+    private void insertNewQCFlag(User user, ExpRun expRun, String flagType, String description, int intKey1, int intKey2, String key1, String key2)
             throws SQLException
     {
         ExpQCFlag newQcFlag = new ExpQCFlag();
@@ -1202,8 +1295,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         newQcFlag.setFlagType(flagType);
         newQcFlag.setDescription(description);
         newQcFlag.setEnabled(true);
-        newQcFlag.setIntKey1(analyte.getRowId());
-        newQcFlag.setIntKey2(titration.getRowId());
+        newQcFlag.setIntKey1(intKey1);
+        newQcFlag.setIntKey2(intKey2);
+        newQcFlag.setKey1(key1);
+        newQcFlag.setKey2(key2);
 
         Table.insert(user, ExperimentService.get().getTinfoAssayQCFlag(), newQcFlag);
     }

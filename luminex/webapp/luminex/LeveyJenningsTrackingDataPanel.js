@@ -362,7 +362,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         this.getEl().mask("loading QC Flags...", "x-mask-loading");
         LABKEY.Query.executeSql({
             schemaName: "assay",
-            sql: 'SELECT DISTINCT x.Run, x.FlagType, x.Enabled, FROM "' + this.assayName + ' QCFlags" AS x '
+            sql: 'SELECT DISTINCT x.Run, x.FlagType, x.Enabled, FROM "' + this.assayName + ' AnalyteTitrationQCFlags" AS x '
                  + 'WHERE x.Analyte.Name=\'' + this.analyte + '\' AND x.Titration.Name=\'' + this.titration + '\'',
             sort: "Run,FlagType,Enabled",
             success: function(data) {
@@ -419,7 +419,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         {
             var win = new LABKEY.QCFlagToggleWindow({
                 schemaName: "assay",
-                queryName: this.assayName + " QCFlags",
+                queryName: this.assayName + " AnalyteTitrationQCFlags",
                 runId: record.get("Titration/Run/RowId"),
                 analyte: this.analyte,
                 titration: this.titration,

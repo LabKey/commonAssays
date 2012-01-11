@@ -98,6 +98,24 @@ public class LuminexDataRow
         }
     }
 
+    /** For testing */
+    public LuminexDataRow(String type, String well, double fiBackground, String standard)
+    {
+        setType(type);
+        setWell(well);
+        setFi(fiBackground);
+        setFiBackground(fiBackground);
+
+        Map<String, Object> extraProperties = new CaseInsensitiveHashMap<Object>();
+        extraProperties.put("Standard", standard);
+        setExtraProperties(extraProperties);
+
+        if (well != null && well.contains(","))
+        {
+            setSummary(true);
+        }
+    }
+
     /** General purpose and for reflection */
     public LuminexDataRow()
     {
