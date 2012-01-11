@@ -23,6 +23,7 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.controllers.FlowParam;
@@ -551,5 +552,11 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
             }
         }
         return FlowTableType.FCSFiles;
+    }
+
+    @Override
+    public String getDownloadURL(ViewContext context, String name)
+    {
+        return null;
     }
 }
