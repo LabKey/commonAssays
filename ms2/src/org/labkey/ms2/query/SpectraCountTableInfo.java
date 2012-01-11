@@ -128,6 +128,7 @@ public class SpectraCountTableInfo extends VirtualTable
         _form = form;
 
         _aggregates.add(new PeptideAggregate(FieldKey.fromParts("PeptideProphet"), true, true, true, true, false));
+        _aggregates.add(new PeptideAggregate(FieldKey.fromParts("MZ"), true, true, true, true, false));
         _aggregates.add(new PeptideAggregate(FieldKey.fromParts("RetentionTime"), true, true, true, true, false));
         _aggregates.add(new PeptideAggregate(FieldKey.fromParts("PeptideProphetErrorRate"), true, true, true, true, false));
         _aggregates.add(new PeptideAggregate(FieldKey.fromParts("Quantitation", "LightArea"), true, true, true, true, true));
