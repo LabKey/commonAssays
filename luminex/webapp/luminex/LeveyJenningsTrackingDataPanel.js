@@ -266,7 +266,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             Ext.each(columns, function(col) {
                 // some of the columns may not be defined in the assay design, so set to null
                 var value = null;
-                if (row.get(col.dataIndex))
+                if (null != row.get(col.dataIndex))
                     value = row.get(col.dataIndex);
 
                 // render dates with the proper renderer
@@ -293,7 +293,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
     outOfRangeRenderer: function(source) {
         return function(val, metaData, record) {
-            if (!val)
+            if (null == val)
                 return null;
 
             // get the average and stdDev values based on the source column type
@@ -329,16 +329,16 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     },
 
     getPrecision: function(val) {
-        return (val && val > 0 && val < 1) ? 6 : 2;
+        return (null != val && val > 0 && val < 1) ? 6 : 2;
     },
 
     checkIfOutOfRange: function(val, avg, stdDev) {
         // if this record has a guide set average and stdDev, check if the value is outside of the +/- 3 stdDev range
-        if (val && avg)
+        if (null != val && null != avg)
         {
             var precision = this.getPrecision(val);
             val = Ext.util.Format.round(val, precision);
-            if (!stdDev)
+            if (null == stdDev)
                 stdDev = 0;
             var plus3stdDev = Ext.util.Format.round(avg + (3 * stdDev), precision);
             var minus3stdDev = Ext.util.Format.round(avg - (3 * stdDev), precision);
@@ -441,7 +441,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
     numberRenderer: function(val) {
         // if this is a very small number, display more decimal places
-        if (!val)
+        if (null == val)
         {
             return null;
         }

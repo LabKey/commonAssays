@@ -322,6 +322,6 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
     tooltipRenderer: function(value, p, record) {
         var msg = Ext.util.Format.htmlEncode(value);
         p.attr = 'ext:qtip="' + msg + '"';
-        return msg;
+        return "<span class='grid-cell-nowrap'>" + msg + "</span>";
     }
 });

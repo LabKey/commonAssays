@@ -105,8 +105,8 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
                 {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
                 {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
-                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'},
-                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'}
+                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'},
+                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'}
             ],
             scope: this
         });
@@ -167,8 +167,8 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Current', dataIndex:'CurrentGuideSet'},
                 {header:'Comment', dataIndex:'Comment', renderer: this.encodingRenderer, width:200},
                 {header:'Avg EC50', dataIndex:'Four ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
-                {header:'Avg High MFI', dataIndex:'MaxFIAverage', renderer: this.numberRenderer, align: 'right'},
-                {header:'Avg AUC', dataIndex:'TrapezoidalCurveFit/AUCAverage', renderer: this.numberRenderer, align: 'right'}
+                {header:'Avg AUC', dataIndex:'TrapezoidalCurveFit/AUCAverage', renderer: this.numberRenderer, align: 'right'},
+                {header:'Avg High MFI', dataIndex:'MaxFIAverage', renderer: this.numberRenderer, align: 'right'}
             ],
             scope: this
         });
@@ -292,7 +292,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
     numberRenderer: function(val) {
         // if this is a very small number, display more decimal places
-        if (!val)
+        if (null == val)
         {
             return null;
         }

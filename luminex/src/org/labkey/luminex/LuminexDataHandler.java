@@ -41,6 +41,7 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.query.ExpQCFlagTable;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.query.FieldKey;
@@ -571,7 +572,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private void insertCVQCFlags(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte)
             throws SQLException
     {
-        Set<WellReplicatesKey> flaggedReplicates = new HashSet<WellReplicatesKey>();
+        Set<CVQCFlag> newCVQCFlags = new HashSet<CVQCFlag>();
         for (LuminexDataRow dataRow : dataRows)
         {
             if (null != dataRow.getCv() &&
@@ -579,56 +580,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                  (dataRow.getWellRole().contains("Standard") && dataRow.getCv() > 0.15) ||
                  (dataRow.getWellRole().contains("Control") && dataRow.getCv() > 0.15)))
             {
-                WellReplicatesKey wellReplicateKey = new WellReplicatesKey(dataRow);
-                if (!flaggedReplicates.contains(wellReplicateKey))
+                String description = analyte.getName() + " " + dataRow.getType() + " " + dataRow.getDescription() + " over threshold for %CV";
+                CVQCFlag newQcFlag = new CVQCFlag(expRun.getRowId(), "CV", description, analyte.getRowId(), dataRow.getData(), dataRow.getType(), dataRow.getDescription());
+                if (!newCVQCFlags.contains(newQcFlag))
                 {
-                    flaggedReplicates.add(wellReplicateKey);
-                    String description = analyte.getName() + " " + dataRow.getType() + " " + dataRow.getDescription() + " over threshold for %CV";
-                    insertNewQCFlag(user, expRun, "CV", description, analyte.getRowId(), dataRow.getData(), dataRow.getType(), dataRow.getDescription());
+                    newCVQCFlags.add(newQcFlag);
+                    Table.insert(user, ExperimentService.get().getTinfoAssayQCFlag(), newQcFlag);
                 }
             }
-        }
-    }
-
-    private static class WellReplicatesKey
-    {
-        private int _analyteId;
-        private int _dataId;
-        private String _type;
-        private String _description;
-
-        public WellReplicatesKey(LuminexDataRow dataRow)
-        {
-            _analyteId = dataRow.getAnalyte();
-            _dataId = dataRow.getData();
-            _type = dataRow.getType();
-            _description = dataRow.getDescription();
-        }
-
-        @Override
-        public boolean equals(Object o)
-        {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            WellReplicatesKey that = (WellReplicatesKey) o;
-
-            if (_analyteId != that._analyteId) return false;
-            if (_dataId != that._dataId) return false;
-            if (_type != null ? !_type.equals(that._type) : that._type != null) return false;
-            if (_description != null ? !_description.equals(that._description) : that._description != null) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode()
-        {
-            int result = _analyteId;
-            result = 31 * result + _dataId;
-            result = 31 * result + (_type != null ? _type.hashCode() : 0);
-            result = 31 * result + (_description != null ? _description.hashCode() : 0);
-            return result;
         }
     }
 
@@ -776,11 +735,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 }
             }
 
-            // insert QC Flags on upload for High MFI, 4PL EC50, or AUC values that are out of the guide set range
-            // if this AnalyteTitration record is new and has a current GuideSet
-            if (newRow && null != analyteTitration.getGuideSetId())
+            // insert on upload and update on rerun of QC Flags for High MFI, 4PL EC50, or AUC values that are
+            // out of the guide set range if this AnalyteTitration record has a current GuideSet
+            if (null != analyteTitration.getGuideSetId())
             {
-                insertQCFlags(user, expRun, protocol, analyteTitration, analyte, titration, isotype, conjugate, newCurveFits);
+                insertOrUpdateAnalyteTitrationQCFlags(user, expRun, protocol, analyteTitration, analyte, titration, isotype, conjugate, newCurveFits);
             }
         }
         catch (DilutionCurve.FitFailedException e)
@@ -1232,75 +1191,90 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return fit;
     }
 
-    private void insertQCFlags(User user, ExpRun expRun, ExpProtocol protocol, AnalyteTitration analyteTitration, Analyte analyte, Titration titration, String isotype, String conjugate, List<CurveFit> curveFits)
+    private void insertOrUpdateAnalyteTitrationQCFlags(User user, ExpRun expRun, ExpProtocol protocol, AnalyteTitration analyteTitration, Analyte analyte, Titration titration, String isotype, String conjugate, List<CurveFit> curveFits)
             throws SQLException
     {
-        // query the guide set table to get the average and stddev values for the out of guide set range comparisons
         LuminexSchema schema = new LuminexSchema(user, expRun.getContainer(), protocol);
-        GuideSetTable table = schema.createGuideSetTable(false);
 
+        // query the guide set table to get the average and stddev values for the out of guide set range comparisons
+        GuideSetTable guideSetTable = schema.createGuideSetTable(false);
         FieldKey maxFIAverageFK = FieldKey.fromParts("MaxFIAverage");
         FieldKey maxFIStdDevFK = FieldKey.fromParts("MaxFIStdDev");
         FieldKey ec50AverageFK = FieldKey.fromParts("Four ParameterCurveFit", "EC50Average");
         FieldKey ec50StdDevFK = FieldKey.fromParts("Four ParameterCurveFit", "EC50StdDev");
         FieldKey aucAverageFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCAverage");
         FieldKey aucStdDevFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCStdDev");
-
-        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(maxFIAverageFK, maxFIStdDevFK, ec50AverageFK, ec50StdDevFK, aucAverageFK, aucStdDevFK));
+        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(guideSetTable, Arrays.asList(maxFIAverageFK, maxFIStdDevFK, ec50AverageFK, ec50StdDevFK, aucAverageFK, aucStdDevFK));
         SimpleFilter guideSetFilter = new SimpleFilter("RowId", analyteTitration.getGuideSetId());
-        Map<String, Object>[] rows = Table.select(table, new ArrayList<ColumnInfo>(cols.values()), guideSetFilter, null, Map.class);
-        assert rows.length == 1;
+        Map<String, Object>[] guideSetRows = Table.select(guideSetTable, new ArrayList<ColumnInfo>(cols.values()), guideSetFilter, null, Map.class);
+        assert guideSetRows.length == 1;
+        Map<String, Object> guideSetRow = guideSetRows[0];
 
-        Map<String, Object> row = rows[0];
+        // query the QC Flags table to get any existing analyte/titration QC Flags
+        ExpQCFlagTable qcFlagTable = schema.createAnalyteTitrationQCFlagTable();
+        SimpleFilter analyteTitrationFilter = new SimpleFilter("Analyte", analyte.getRowId());
+        analyteTitrationFilter.addCondition("Titration", titration.getRowId());
+        List<AnalyteTitrationQCFlag> existingAnalyteTitrationQCFlags = Arrays.asList(Table.select(qcFlagTable, new ArrayList<ColumnInfo>(qcFlagTable.getColumns()), analyteTitrationFilter, null, AnalyteTitrationQCFlag.class));
+
+        List<AnalyteTitrationQCFlag> newAnalyteTitrationQCFlags = new ArrayList<AnalyteTitrationQCFlag>();
+
         String descriptionPrefix = titration.getName() + " " + analyte.getName() + " - "
                 + (isotype == null ? "[None]" : isotype) + " "
                 + (conjugate == null ? "[None]" : conjugate) + " ";
 
         // add QCFlag for High MFI, if out of guide set range
-        Double average = (Double)row.get(cols.get(maxFIAverageFK).getAlias());
-        Double stdDev = (Double)row.get(cols.get(maxFIStdDevFK).getAlias());
+        Double average = (Double)guideSetRow.get(cols.get(maxFIAverageFK).getAlias());
+        Double stdDev = (Double)guideSetRow.get(cols.get(maxFIStdDevFK).getAlias());
         String outOfRangeType = isOutOfGuideSetRange(analyteTitration.getMaxFI(), average, stdDev);
         if (null != outOfRangeType)
-            insertNewQCFlag(user, expRun, "HMFI", descriptionPrefix + outOfRangeType + " threshold for High MFI", analyte.getRowId(), titration.getRowId(), null, null);
+        {
+            newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "HMFI", descriptionPrefix + outOfRangeType + " threshold for High MFI", analyte.getRowId(), titration.getRowId()));
+        }
 
         for (CurveFit curveFit : curveFits)
         {
             // add QCFlag for new 4PL EC50 curvefit value, if out of guide set range
             if (curveFit.getCurveType().equals(DilutionCurve.FitType.FOUR_PARAMETER.getLabel()))
             {
-                average = (Double)row.get(cols.get(ec50AverageFK).getAlias());
-                stdDev = (Double)row.get(cols.get(ec50StdDevFK).getAlias());
+                average = (Double)guideSetRow.get(cols.get(ec50AverageFK).getAlias());
+                stdDev = (Double)guideSetRow.get(cols.get(ec50StdDevFK).getAlias());
                 outOfRangeType = isOutOfGuideSetRange(curveFit.getEC50(), average, stdDev);
                 if (null != outOfRangeType)
-                    insertNewQCFlag(user, expRun, "EC50", descriptionPrefix + outOfRangeType + " threshold for EC50", analyte.getRowId(), titration.getRowId(), null, null);
+                {
+                    newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "EC50", descriptionPrefix + outOfRangeType + " threshold for EC50", analyte.getRowId(), titration.getRowId()));
+                }
             }
 
             // add QCFlag for new Trapezoidal AUC curvefit value, if out of guide set range
             if (curveFit.getCurveType().equals("Trapezoidal"))
             {
-                average = (Double)row.get(cols.get(aucAverageFK).getAlias());
-                stdDev = (Double)row.get(cols.get(aucStdDevFK).getAlias());
+                average = (Double)guideSetRow.get(cols.get(aucAverageFK).getAlias());
+                stdDev = (Double)guideSetRow.get(cols.get(aucStdDevFK).getAlias());
                 outOfRangeType = isOutOfGuideSetRange(curveFit.getAUC(), average, stdDev);
                 if (null != outOfRangeType)
-                    insertNewQCFlag(user, expRun, "AUC", descriptionPrefix + outOfRangeType + " threshold for AUC", analyte.getRowId(), titration.getRowId(), null, null);
+                {
+                    newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "AUC", descriptionPrefix + outOfRangeType + " threshold for AUC", analyte.getRowId(), titration.getRowId()));
+                }
             }
         }
-    }
 
-    private void insertNewQCFlag(User user, ExpRun expRun, String flagType, String description, int intKey1, int intKey2, String key1, String key2)
-            throws SQLException
-    {
-        ExpQCFlag newQcFlag = new ExpQCFlag();
-        newQcFlag.setRunId(expRun.getRowId());
-        newQcFlag.setFlagType(flagType);
-        newQcFlag.setDescription(description);
-        newQcFlag.setEnabled(true);
-        newQcFlag.setIntKey1(intKey1);
-        newQcFlag.setIntKey2(intKey2);
-        newQcFlag.setKey1(key1);
-        newQcFlag.setKey2(key2);
+        // insert new flags if a matching QC Flag does not exist (based on runId, flagType, desription, analyteId, and titrationId)
+        for (AnalyteTitrationQCFlag newAnalyteTitrationQCFlag : newAnalyteTitrationQCFlags)
+        {
+            if (!existingAnalyteTitrationQCFlags.contains(newAnalyteTitrationQCFlag))
+            {
+                Table.insert(user, ExperimentService.get().getTinfoAssayQCFlag(), newAnalyteTitrationQCFlag);
+            }
+        }
 
-        Table.insert(user, ExperimentService.get().getTinfoAssayQCFlag(), newQcFlag);
+        // remove existing flags that are no longer relevant based on rerunning the transform script with well exclusions
+        for (AnalyteTitrationQCFlag existingAnalyteTitrationQCFlag : existingAnalyteTitrationQCFlags)
+        {
+            if (!newAnalyteTitrationQCFlags.contains(existingAnalyteTitrationQCFlag))
+            {
+                Table.delete(ExperimentService.get().getTinfoAssayQCFlag(), existingAnalyteTitrationQCFlag.getRowId());
+            }
+        }
     }
 
     /**
