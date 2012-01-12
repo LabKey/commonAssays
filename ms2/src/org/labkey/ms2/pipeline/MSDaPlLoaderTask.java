@@ -26,9 +26,9 @@ import org.json.JSONObject;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobException;
-import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.RecordedAction;
 import org.labkey.api.pipeline.RecordedActionSet;
+import org.labkey.api.pipeline.file.PathMapper;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileType;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineJob;
@@ -60,7 +60,7 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         private String _password;
         private Integer _projectId;
         private String _pipeline;
-        private File _baseDirectory;
+        private PathMapper _pathMapper;
 
         public Factory()
         {
@@ -106,8 +106,6 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         protected void configure(MSDaPlLoaderTaskFactorySettings settings)
         {
             super.configure(settings);
-            if (settings.getBaseDirectory() != null)
-                _baseDirectory = settings.getBaseDirectory();
             if (settings.getBaseServerURL() != null)
                 _baseServerURL = settings.getBaseServerURL();
             if (settings.getUsername() != null)
@@ -118,7 +116,13 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
                 _projectId = settings.getProjectId();
             if (settings.getPipeline() != null)
                 _pipeline = settings.getPipeline();
+            if (settings.getPathMapper() != null)
+                _pathMapper = settings.getPathMapper();
+        }
 
+        public PathMapper getPathMapper()
+        {
+            return _pathMapper;
         }
     }
 
@@ -179,7 +183,8 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
             changePermissions(percolatorDir);
 
             String localURI = getJob().getLogFile().getParentFile().getCanonicalFile().toURI().toString();
-            String linuxURI = PipelineJobService.get().getGlobusClientProperties().getPathMapper().remoteToLocal(localURI);
+            PathMapper pathMapper = _factory.getPathMapper();
+            String linuxURI = pathMapper == null ? localURI : pathMapper.remoteToLocal(localURI);
             postBody.put("dataDirectory", linuxURI.substring("file:".length()));
             HttpClient client = new HttpClient();
             client.getState().setCredentials(

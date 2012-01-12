@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
 import org.labkey.api.pipeline.TaskId;
+import org.labkey.api.pipeline.file.PathMapper;
 
 import java.io.File;
 
@@ -32,7 +33,7 @@ public class MSDaPlLoaderTaskFactorySettings extends AbstractTaskFactorySettings
     private String _password;
     private Integer _projectId;
     private String _pipeline;
-    private File _baseDirectory;
+    private PathMapper _pathMapper;
 
     public MSDaPlLoaderTaskFactorySettings(String name)
     {
@@ -109,13 +110,13 @@ public class MSDaPlLoaderTaskFactorySettings extends AbstractTaskFactorySettings
         _pipeline = pipeline;
     }
 
-    public File getBaseDirectory()
+    public PathMapper getPathMapper()
     {
-        return _baseDirectory;
+        return _pathMapper;
     }
 
-    public void setBaseDirectory(File baseDirectory)
+    public void setPathMapper(PathMapper pathMapper)
     {
-        _baseDirectory = baseDirectory;
+        _pathMapper = pathMapper;
     }
 }
