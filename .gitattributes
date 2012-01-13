@@ -545,6 +545,8 @@ lab/src/org/labkey/lab/LabFolderType.java -text
 lab/src/org/labkey/lab/LabManager.java -text
 lab/src/org/labkey/lab/LabModule.java -text
 lab/src/org/labkey/lab/LabSchema.java -text
+lab/src/org/labkey/lab/audit/LabEventsAuditViewFactory.java -text
+lab/src/org/labkey/lab/history.jsp -text
 luminex/module.properties -text
 luminex/resources/reports/schemas/LeveyJenningsTrendPlot.r -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-9.20.sql -text
