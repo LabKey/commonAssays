@@ -25,8 +25,11 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.AbstractBeanQueryUpdateService;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
@@ -43,8 +46,12 @@ import org.labkey.api.util.Pair;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jeckels
@@ -184,6 +191,107 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                 return Table.selectObject(LuminexSchema.getTableInfoAnalyteTitration(), filter, null, AnalyteTitration.class);
             }
 
+            protected Analyte getAnalyte(int rowId)
+            {
+                Analyte analyte = Table.selectObject(LuminexSchema.getTableInfoAnalytes(), rowId, Analyte.class);
+                if (analyte == null)
+                {
+                    throw new IllegalStateException("Unable to find referenced analyte: " + rowId);
+                }
+                return analyte;
+            }
+
+            protected Titration getTitration(int rowId)
+            {
+                Titration titration = Table.selectObject(LuminexSchema.getTableInfoTitration(), rowId, Titration.class);
+                if (titration == null)
+                {
+                    throw new IllegalStateException("Unable to find referenced titration: " + rowId);
+                }
+                return titration;
+            }
+
+            protected ExpRun getRun(int rowId)
+            {
+                ExpRun run = ExperimentService.get().getExpRun(rowId);
+                if (run == null)
+                {
+                    throw new IllegalStateException("Unable to find referenced run: " + rowId);
+                }
+                return run;
+            }
+
+            protected Map<String, String> getIsotypeAndConjugate(ExpRun run)
+            {
+                Map<String, String> isotypeConjugate = new HashMap<String, String>();
+                isotypeConjugate.put("Isotype", null);
+                isotypeConjugate.put("Conjugate", null);
+                Map<String, ObjectProperty> runProps = run.getObjectProperties();
+                for (ObjectProperty property : runProps.values())
+                {
+                    if (property.getName().equalsIgnoreCase("Isotype"))
+                    {
+                        isotypeConjugate.put("Isotype", property.getStringValue());
+                    }
+                    if (property.getName().equalsIgnoreCase("Conjugate"))
+                    {
+                        isotypeConjugate.put("Conjugate", property.getStringValue());
+                    }
+                }
+                return isotypeConjugate;
+            }
+
+            protected void updateAnalyteTitrationQCFlags(User user, AnalyteTitration bean) throws SQLException
+            {
+                // get the run, isotype, conjugate, and analtye/titration curvefit information in order to update QC Flags
+                Analyte analyte = getAnalyte(bean.getAnalyteId());
+                Titration titration = getTitration(bean.getTitrationId());
+                ExpRun run = getRun(titration.getRunId());
+                Map<String, String> runIsotypeConjugate = getIsotypeAndConjugate(run);
+
+                SimpleFilter curveFitFilter = new SimpleFilter("AnalyteId", bean.getAnalyteId());
+                curveFitFilter.addCondition("TitrationId", bean.getTitrationId());
+                CurveFit[] curveFits = Table.select(LuminexSchema.getTableInfoCurveFit(), Table.ALL_COLUMNS, curveFitFilter, null, CurveFit.class);
+                
+                LuminexDataHandler.insertOrUpdateAnalyteTitrationQCFlags(user, run, _schema.getProtocol(), bean, analyte, titration, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), Arrays.asList(curveFits));
+            }
+
+            @Override
+            public List<Map<String, Object>> updateRows(User user, Container container, List<Map<String, Object>> rows, List<Map<String, Object>> oldKeys, Map<String, Object> extraScriptContext) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+            {
+                List<Map<String, Object>> results = super.updateRows(user, container, rows, oldKeys, extraScriptContext);
+
+                // If any of the updated rows includes a change to the guide set calculation (i.e. has IncludeInGuideSetCalculation as an updated value)
+                // then we need to update the AnalyteTitration QC Flags for all AnalyteTitrations that are associated with the given guide set(s)
+                Set<Integer> guideSetIds = new HashSet<Integer>();
+                Set<AnalyteTitration> analyteTitrationsForUpdate = new HashSet<AnalyteTitration>();
+                for (Map<String, Object> row : rows)
+                {
+                    // add the current row to the set of AnalyteTitrations that need to have their QC Flags updated
+                    AnalyteTitration analyteTitration = get(user, container, keyFromMap(row));
+                    analyteTitrationsForUpdate.add(analyteTitration);
+                    if (row.containsKey("IncludeInGuideSetCalculation"))
+                    {
+                        guideSetIds.add(analyteTitration.getGuideSetId());
+                    }
+                }
+
+                // Add all AnalyteTitrations to the update set for the guide sets that have changed
+                for (Integer guideSetId : guideSetIds)
+                {
+                    SimpleFilter guideSetFilter = new SimpleFilter("GuideSetId", guideSetId);
+                    AnalyteTitration[] guideSetAnalyteTitrations = Table.select(LuminexSchema.getTableInfoAnalyteTitration(), Table.ALL_COLUMNS, guideSetFilter, null, AnalyteTitration.class);
+                    analyteTitrationsForUpdate.addAll(Arrays.asList(guideSetAnalyteTitrations));
+                }
+
+                for (AnalyteTitration analyteTitration : analyteTitrationsForUpdate)
+                {
+                    updateAnalyteTitrationQCFlags(user, analyteTitration);
+                }
+
+                return results;
+            }
+
             @Override
             protected AnalyteTitration update(User user, Container container, AnalyteTitration bean, Pair<Integer, Integer> oldKey) throws ValidationException, QueryUpdateServiceException, SQLException
             {
@@ -201,18 +309,8 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                         throw new ValidationException("Can't set guideSetId to point to a guide set from another assay definition: " + newGuideSetId);
                     }
 
-                    Analyte analyte = Table.selectObject(LuminexSchema.getTableInfoAnalytes(), bean.getAnalyteId(), Analyte.class);
-                    Titration titration = Table.selectObject(LuminexSchema.getTableInfoTitration(), bean.getTitrationId(), Titration.class);
-
-                    if (analyte == null)
-                    {
-                        throw new IllegalStateException("Unable to find referenced analyte: " + bean.getAnalyteId());
-                    }
-                    if (titration == null)
-                    {
-                        throw new IllegalStateException("Unable to find referenced titration: " + bean.getTitrationId());
-                    }
-
+                    Analyte analyte = getAnalyte(bean.getAnalyteId());
+                    Titration titration = getTitration(bean.getTitrationId());
                     if (!ObjectUtils.equals(analyte.getName(), guideSet.getAnalyteName()))
                     {
                         throw new ValidationException("GuideSet is for analyte " + guideSet.getAnalyteName(), " but this row is mapped to analyte " + analyte.getName());

@@ -735,12 +735,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 }
             }
 
-            // insert on upload and update on rerun of QC Flags for High MFI, 4PL EC50, or AUC values that are
-            // out of the guide set range if this AnalyteTitration record has a current GuideSet
-            if (null != analyteTitration.getGuideSetId())
-            {
-                insertOrUpdateAnalyteTitrationQCFlags(user, expRun, protocol, analyteTitration, analyte, titration, isotype, conjugate, newCurveFits);
-            }
+            insertOrUpdateAnalyteTitrationQCFlags(user, expRun, protocol, analyteTitration, analyte, titration, isotype, conjugate, newCurveFits);
         }
         catch (DilutionCurve.FitFailedException e)
         {
@@ -1191,69 +1186,80 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return fit;
     }
 
-    private void insertOrUpdateAnalyteTitrationQCFlags(User user, ExpRun expRun, ExpProtocol protocol, AnalyteTitration analyteTitration, Analyte analyte, Titration titration, String isotype, String conjugate, List<CurveFit> curveFits)
+    /* Insert or Update QC Flags for High MFI, 4PL EC50, or AUC values that are
+      out of the guide set range if this AnalyteTitration record has a current GuideSet */
+    public static void insertOrUpdateAnalyteTitrationQCFlags(User user, ExpRun expRun, ExpProtocol protocol, @NotNull AnalyteTitration analyteTitration, @NotNull Analyte analyte, @NotNull Titration titration, String isotype, String conjugate, List<CurveFit> curveFits)
             throws SQLException
     {
         LuminexSchema schema = new LuminexSchema(user, expRun.getContainer(), protocol);
-
-        // query the guide set table to get the average and stddev values for the out of guide set range comparisons
-        GuideSetTable guideSetTable = schema.createGuideSetTable(false);
-        FieldKey maxFIAverageFK = FieldKey.fromParts("MaxFIAverage");
-        FieldKey maxFIStdDevFK = FieldKey.fromParts("MaxFIStdDev");
-        FieldKey ec50AverageFK = FieldKey.fromParts("Four ParameterCurveFit", "EC50Average");
-        FieldKey ec50StdDevFK = FieldKey.fromParts("Four ParameterCurveFit", "EC50StdDev");
-        FieldKey aucAverageFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCAverage");
-        FieldKey aucStdDevFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCStdDev");
-        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(guideSetTable, Arrays.asList(maxFIAverageFK, maxFIStdDevFK, ec50AverageFK, ec50StdDevFK, aucAverageFK, aucStdDevFK));
-        SimpleFilter guideSetFilter = new SimpleFilter("RowId", analyteTitration.getGuideSetId());
-        Map<String, Object>[] guideSetRows = Table.select(guideSetTable, new ArrayList<ColumnInfo>(cols.values()), guideSetFilter, null, Map.class);
-        assert guideSetRows.length == 1;
-        Map<String, Object> guideSetRow = guideSetRows[0];
 
         // query the QC Flags table to get any existing analyte/titration QC Flags
         ExpQCFlagTable qcFlagTable = schema.createAnalyteTitrationQCFlagTable();
         SimpleFilter analyteTitrationFilter = new SimpleFilter("Analyte", analyte.getRowId());
         analyteTitrationFilter.addCondition("Titration", titration.getRowId());
-        List<AnalyteTitrationQCFlag> existingAnalyteTitrationQCFlags = Arrays.asList(Table.select(qcFlagTable, new ArrayList<ColumnInfo>(qcFlagTable.getColumns()), analyteTitrationFilter, null, AnalyteTitrationQCFlag.class));
+        List<AnalyteTitrationQCFlag> existingAnalyteTitrationQCFlags = Arrays.asList(Table.select(qcFlagTable, Table.ALL_COLUMNS, analyteTitrationFilter, null, AnalyteTitrationQCFlag.class));
 
         List<AnalyteTitrationQCFlag> newAnalyteTitrationQCFlags = new ArrayList<AnalyteTitrationQCFlag>();
 
-        String descriptionPrefix = titration.getName() + " " + analyte.getName() + " - "
-                + (isotype == null ? "[None]" : isotype) + " "
-                + (conjugate == null ? "[None]" : conjugate) + " ";
-
-        // add QCFlag for High MFI, if out of guide set range
-        Double average = (Double)guideSetRow.get(cols.get(maxFIAverageFK).getAlias());
-        Double stdDev = (Double)guideSetRow.get(cols.get(maxFIStdDevFK).getAlias());
-        String outOfRangeType = isOutOfGuideSetRange(analyteTitration.getMaxFI(), average, stdDev);
-        if (null != outOfRangeType)
+        if (null != analyteTitration.getGuideSetId())
         {
-            newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "HMFI", descriptionPrefix + outOfRangeType + " threshold for High MFI", analyte.getRowId(), titration.getRowId()));
-        }
-
-        for (CurveFit curveFit : curveFits)
-        {
-            // add QCFlag for new 4PL EC50 curvefit value, if out of guide set range
-            if (curveFit.getCurveType().equals(DilutionCurve.FitType.FOUR_PARAMETER.getLabel()))
+            // query the guide set table to get the average and stddev values for the out of guide set range comparisons
+            GuideSetTable guideSetTable = schema.createGuideSetTable(false);
+            FieldKey maxFIAverageFK = FieldKey.fromParts("MaxFIAverage");
+            FieldKey maxFIStdDevFK = FieldKey.fromParts("MaxFIStdDev");
+            FieldKey ec50AverageFK = FieldKey.fromParts("Four ParameterCurveFit", "EC50Average");
+            FieldKey ec50StdDevFK = FieldKey.fromParts("Four ParameterCurveFit", "EC50StdDev");
+            FieldKey aucAverageFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCAverage");
+            FieldKey aucStdDevFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCStdDev");
+            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(guideSetTable, Arrays.asList(maxFIAverageFK, maxFIStdDevFK, ec50AverageFK, ec50StdDevFK, aucAverageFK, aucStdDevFK));
+            SimpleFilter guideSetFilter = new SimpleFilter("RowId", analyteTitration.getGuideSetId());
+            Map<String, Object>[] guideSetRows = Table.select(guideSetTable, new ArrayList<ColumnInfo>(cols.values()), guideSetFilter, null, Map.class);
+            if (guideSetRows.length != 1)
             {
-                average = (Double)guideSetRow.get(cols.get(ec50AverageFK).getAlias());
-                stdDev = (Double)guideSetRow.get(cols.get(ec50StdDevFK).getAlias());
-                outOfRangeType = isOutOfGuideSetRange(curveFit.getEC50(), average, stdDev);
-                if (null != outOfRangeType)
-                {
-                    newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "EC50", descriptionPrefix + outOfRangeType + " threshold for EC50", analyte.getRowId(), titration.getRowId()));
-                }
+                throw new IllegalStateException("Unable to find referenced guide set: " + analyteTitration.getGuideSetId());
             }
-
-            // add QCFlag for new Trapezoidal AUC curvefit value, if out of guide set range
-            if (curveFit.getCurveType().equals("Trapezoidal"))
+            else
             {
-                average = (Double)guideSetRow.get(cols.get(aucAverageFK).getAlias());
-                stdDev = (Double)guideSetRow.get(cols.get(aucStdDevFK).getAlias());
-                outOfRangeType = isOutOfGuideSetRange(curveFit.getAUC(), average, stdDev);
+                Map<String, Object> guideSetRow = guideSetRows[0];
+
+                String descriptionPrefix = titration.getName() + " " + analyte.getName() + " - "
+                        + (isotype == null ? "[None]" : isotype) + " "
+                        + (conjugate == null ? "[None]" : conjugate) + " ";
+
+                // add QCFlag for High MFI, if out of guide set range
+                Double average = (Double)guideSetRow.get(cols.get(maxFIAverageFK).getAlias());
+                Double stdDev = (Double)guideSetRow.get(cols.get(maxFIStdDevFK).getAlias());
+                String outOfRangeType = isOutOfGuideSetRange(analyteTitration.getMaxFI(), average, stdDev);
                 if (null != outOfRangeType)
                 {
-                    newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "AUC", descriptionPrefix + outOfRangeType + " threshold for AUC", analyte.getRowId(), titration.getRowId()));
+                    newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "HMFI", descriptionPrefix + outOfRangeType + " threshold for High MFI", analyte.getRowId(), titration.getRowId()));
+                }
+
+                for (CurveFit curveFit : curveFits)
+                {
+                    // add QCFlag for new 4PL EC50 curvefit value, if out of guide set range
+                    if (curveFit.getCurveType().equals(DilutionCurve.FitType.FOUR_PARAMETER.getLabel()))
+                    {
+                        average = (Double)guideSetRow.get(cols.get(ec50AverageFK).getAlias());
+                        stdDev = (Double)guideSetRow.get(cols.get(ec50StdDevFK).getAlias());
+                        outOfRangeType = isOutOfGuideSetRange(curveFit.getEC50(), average, stdDev);
+                        if (null != outOfRangeType)
+                        {
+                            newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "EC50", descriptionPrefix + outOfRangeType + " threshold for EC50", analyte.getRowId(), titration.getRowId()));
+                        }
+                    }
+
+                    // add QCFlag for new Trapezoidal AUC curvefit value, if out of guide set range
+                    if (curveFit.getCurveType().equals("Trapezoidal"))
+                    {
+                        average = (Double)guideSetRow.get(cols.get(aucAverageFK).getAlias());
+                        stdDev = (Double)guideSetRow.get(cols.get(aucStdDevFK).getAlias());
+                        outOfRangeType = isOutOfGuideSetRange(curveFit.getAUC(), average, stdDev);
+                        if (null != outOfRangeType)
+                        {
+                            newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "AUC", descriptionPrefix + outOfRangeType + " threshold for AUC", analyte.getRowId(), titration.getRowId()));
+                        }
+                    }
                 }
             }
         }

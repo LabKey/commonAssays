@@ -77,4 +77,22 @@ public class AnalyteTitration
         _includeInGuideSetCalculation = includeInGuideSetCalculation;
     }
 
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AnalyteTitration that = (AnalyteTitration) o;
+
+        return (_analyteId == that._analyteId && _titrationId == that._titrationId);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int result = _analyteId;
+        result = 31 * result + _titrationId;
+        return result;
+    }
 }
