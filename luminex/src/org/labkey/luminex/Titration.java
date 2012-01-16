@@ -112,7 +112,8 @@ public class Titration
         LuminexDataRow firstDataRow = null;
         for (LuminexDataRow dataRow : dataRows)
         {
-            if (ObjectUtils.equals(dataRow.getDescription(), getName()))
+            // look for wells with a description that matches the titration name, and skip excluded wells
+            if (!dataRow.isExcluded() && ObjectUtils.equals(dataRow.getDescription(), getName()))
             {
                 wells.add(new LuminexWell(dataRow));
                 if (firstDataRow == null)

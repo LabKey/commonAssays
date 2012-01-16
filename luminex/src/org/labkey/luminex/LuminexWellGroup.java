@@ -111,8 +111,8 @@ public class LuminexWellGroup implements WellGroup
                     countFiBackgroundBlank++;
                 }
 
-                if (well.getDataRow().getExtraProperties().get("FlaggedAsExcluded") != null)
-                    excluded = (Boolean)well.getDataRow().getExtraProperties().get("FlaggedAsExcluded");
+                if (well.getDataRow().getExtraProperties().get(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME) != null)
+                    excluded = (Boolean)well.getDataRow().getExtraProperties().get(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME);
             }
             LuminexDataRow fakeDataRow = new LuminexDataRow();
             fakeDataRow.setExpConc(entry.getKey().getExpConc());

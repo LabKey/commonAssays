@@ -535,6 +535,10 @@ public class LuminexDataRow
     public void setExtraProperties(Map<String, Object> properties)
     {
         _extraProperties = properties;
+
+        // look for the FlaggedAsExcluded property to set the data row exclusion state
+        if (properties.containsKey(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME))
+            setExcluded((Boolean)properties.get(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME));
     }
 
     public Map<String, Object> toMap(Analyte analyte)

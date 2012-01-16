@@ -645,7 +645,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             analyteTitration.setTitrationId(titration.getRowId());
         }
 
-        // TODO - be sure that we respect exclusion state
         double maxFI = wellGroup.getMax();
         analyteTitration.setMaxFI(maxFI == Double.MIN_VALUE ? null : maxFI);
 
