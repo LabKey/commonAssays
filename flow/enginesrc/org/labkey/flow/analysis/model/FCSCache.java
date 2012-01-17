@@ -19,6 +19,7 @@ package org.labkey.flow.analysis.model;
 import org.labkey.api.cache.BlockingCache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
+import org.labkey.api.cache.Wrapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,13 +32,13 @@ public class FCSCache
 
 
     private static class FCSHeaderCache
-            extends BlockingCache<URI,FCSHeader>  implements CacheLoader<URI, FCSHeader>
+            extends BlockingCache<URI, FCSHeader> implements CacheLoader<URI, FCSHeader>
     {
         private static final int CACHE_SIZE = 100;
 
         private FCSHeaderCache()
         {
-            super(CacheManager.<URI, Object>getCache(CACHE_SIZE, CacheManager.DAY, "FCS header cache"), new CacheLoader<URI, FCSHeader>(){
+            super(CacheManager.<URI, Wrapper<FCSHeader>>getCache(CACHE_SIZE, CacheManager.DAY, "FCS header cache"), new CacheLoader<URI, FCSHeader>(){
                 @Override
                 public FCSHeader load(URI uri, Object argument)
                 {
@@ -76,7 +77,7 @@ public class FCSCache
 
         private FCSCacheMap()
         {
-            super(CacheManager.<URI, Object>getCache(CACHE_SIZE, CacheManager.DAY, "FCS cache"), new CacheLoader<URI, FCS>(){
+            super(CacheManager.<URI, Wrapper<FCS>>getCache(CACHE_SIZE, CacheManager.DAY, "FCS cache"), new CacheLoader<URI, FCS>(){
                 @Override
                 public FCS load(URI uri, Object argument)
                 {
