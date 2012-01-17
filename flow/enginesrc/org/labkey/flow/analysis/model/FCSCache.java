@@ -42,7 +42,7 @@ public class FCSCache
                 @Override
                 public FCSHeader load(URI uri, Object argument)
                 {
-                    // should CacheLoader.load() deckare throw Exception?
+                    // should CacheLoader.load() declare throw Exception?
                     try
                     {
                         return new FCSHeader(new File(uri));
@@ -58,7 +58,7 @@ public class FCSCache
 
         public FCSHeader load(URI uri, Object argument)
         {
-            // should CacheLoader.load() deckare throw Exception?
+            // should CacheLoader.load() declare throw Exception?
             try
             {
                 return new FCSHeader(new File(uri));
