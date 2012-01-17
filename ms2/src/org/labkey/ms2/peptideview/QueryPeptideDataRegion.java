@@ -45,6 +45,12 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
         setShadeAlternatingRows(true);
     }
 
+    @Override
+    protected List<DisplayColumn> getColumnsForMetadata()
+    {
+        return _allColumns;
+    }
+
     public Results getResultSet(RenderContext ctx, boolean async) throws SQLException, IOException
     {
         List<DisplayColumn> realColumns = getDisplayColumns();
