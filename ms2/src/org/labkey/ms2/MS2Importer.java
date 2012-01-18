@@ -529,14 +529,15 @@ public abstract class MS2Importer
         _conn = MS2Manager.getSchema().getScope().getConnection();
         String columnNames = getTableColumnNames();
         int columnCount = StringUtils.countMatches(columnNames, ",") + 1;
-        String insertSql = "INSERT INTO " + MS2Manager.getTableInfoPeptidesData() + " (" + columnNames + ") VALUES (" + StringUtils.repeat("?, ", columnCount - 1) + "?)";
-        String insertWithReselectSql = MS2Manager.getSqlDialect().appendSelectAutoIncrement(insertSql, MS2Manager.getTableInfoPeptidesData(), "RowId");
+        StringBuilder insertSql = new StringBuilder("INSERT INTO " + MS2Manager.getTableInfoPeptidesData() + " (" + columnNames + ") VALUES (" + StringUtils.repeat("?, ", columnCount - 1) + "?)");
+        StringBuilder insertWithReselectSql = new StringBuilder(insertSql);
+        MS2Manager.getSqlDialect().appendSelectAutoIncrement(insertWithReselectSql, MS2Manager.getTableInfoPeptidesData(), "RowId");
 
         _systemLog.debug(insertSql);
-        _stmt = _conn.prepareStatement(insertSql);
+        _stmt = _conn.prepareStatement(insertSql.toString());
 
         _systemLog.debug(insertWithReselectSql);
-        _stmtWithReselect = _conn.prepareStatement(insertWithReselectSql);
+        _stmtWithReselect = _conn.prepareStatement(insertWithReselectSql.toString());
 
         _prophetStmt = _conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoPeptideProphetData() + " (PeptideId,ProphetFVal,ProphetDeltaMass,ProphetNumTrypticTerm,ProphetNumMissedCleav) VALUES (?,?,?,?,?)");
 
