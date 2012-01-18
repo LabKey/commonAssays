@@ -355,7 +355,7 @@ public class FlowSchema extends UserSchema
         ret.addColumn(ExpRunTable.Column.Name);
         ColumnInfo containerCol = ret.addColumn(ExpRunTable.Column.Folder);
         containerCol.setHidden(true);
-        ContainerForeignKey.initColumn(containerCol, null);
+        ContainerForeignKey.initColumn(containerCol, this, null);
         ret.addColumn(ExpRunTable.Column.FilePathRoot).setHidden(true);
         ret.addColumn(ExpRunTable.Column.LSID).setHidden(true);
         ret.addColumn(ExpRunTable.Column.ProtocolStep);

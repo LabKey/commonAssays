@@ -182,7 +182,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
 
         ColumnInfo containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));
         containerColumn.setHidden(true);
-        containerColumn.setFk(new ContainerForeignKey());
+        containerColumn.setFk(new ContainerForeignKey(_schema));
 
         SQLFragment repGroupCaseStatement = new SQLFragment();
         repGroupCaseStatement.append("(CASE WHEN we.Comment IS NOT NULL THEN ");

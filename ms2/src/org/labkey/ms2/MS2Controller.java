@@ -3947,7 +3947,6 @@ public class MS2Controller extends SpringActionController
             rgn.setName(MS2Manager.getDataRegionNameRuns());
             ColumnInfo containerColumnInfo = MS2Manager.getTableInfoRuns().getColumn("Container");
             ContainerDisplayColumn cdc = new ContainerDisplayColumn(containerColumnInfo, true);
-            cdc.setEntityIdColumn(containerColumnInfo);
             cdc.setCaption("Folder");
 
             ActionURL containerURL = getViewContext().cloneActionURL().setAction(ShowListAction.class);

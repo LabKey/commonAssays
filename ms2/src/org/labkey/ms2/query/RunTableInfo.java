@@ -48,7 +48,7 @@ public class RunTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return new ContainerTable();
+                return new ContainerTable(_schema);
             }
         };
         getColumn("Container").setFk(containerFK);
