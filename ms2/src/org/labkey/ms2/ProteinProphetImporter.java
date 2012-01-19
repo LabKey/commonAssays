@@ -51,6 +51,8 @@ public class ProteinProphetImporter
     private final File _file;
     private final String _experimentRunLSID;
     private final XarContext _context;
+    private final SqlDialect _dialect = MS2Manager.getSchema().getSqlDialect();
+
     private static final int STREAM_BUFFER_SIZE = 128 * 1024;
 
     public ProteinProphetImporter(File f, String experimentRunLSID, XarContext context)
@@ -89,10 +91,9 @@ public class ProteinProphetImporter
             throw new ExperimentException("MS2 run already has ProteinProphet data loaded from file " + proteinProphetFile.getFilePath());
         }
 
-        SqlDialect dialect = MS2Manager.getSchema().getSqlDialect();
         int suffix = new Random().nextInt(1000000000);
-        String peptidesTempTableName = dialect.getTempTablePrefix() +  "PeptideMembershipsTemp" + suffix;
-        String proteinsTempTableName = dialect.getTempTablePrefix() +  "ProteinGroupMembershipsTemp" + suffix;
+        String peptidesTempTableName = _dialect.getTempTablePrefix() +  "PeptideMembershipsTemp" + suffix;
+        String proteinsTempTableName = _dialect.getTempTablePrefix() +  "ProteinGroupMembershipsTemp" + suffix;
 
         Connection connection = MS2Manager.getSchema().getScope().beginTransaction();
 
@@ -115,18 +116,18 @@ public class ProteinProphetImporter
             int fastaId = run.getFastaId();
 
             String createPeptidesTempTableSQL =
-                "CREATE " +  dialect.getTempTableKeyword() +  " TABLE " + peptidesTempTableName + " ( " +
+                "CREATE " + _dialect.getTempTableKeyword() +  " TABLE " + peptidesTempTableName + " ( " +
                     "\tTrimmedPeptide VARCHAR(200) NOT NULL,\n" +
                     "\tCharge INT NOT NULL,\n" +
                     "\tProteinGroupId INT NOT NULL,\n" +
                     "\tNSPAdjustedProbability REAL NOT NULL,\n" +
                     "\tWeight REAL NOT NULL,\n" +
-                    "\tNondegenerateEvidence " + dialect.getBooleanDataType() + " NOT NULL,\n" +
+                    "\tNondegenerateEvidence " + _dialect.getBooleanDataType() + " NOT NULL,\n" +
                     "\tEnzymaticTermini INT NOT NULL,\n" +
                     "\tSiblingPeptides REAL NOT NULL,\n" +
                     "\tSiblingPeptidesBin INT NOT NULL,\n" +
                     "\tInstances INT NOT NULL,\n" +
-                    "\tContributingEvidence " + dialect.getBooleanDataType() + " NOT NULL,\n" +
+                    "\tContributingEvidence " + _dialect.getBooleanDataType() + " NOT NULL,\n" +
                     "\tCalcNeutralPepMass REAL NOT NULL" +
                     ")";
 
@@ -134,7 +135,7 @@ public class ProteinProphetImporter
             stmt.execute(createPeptidesTempTableSQL);
 
             String createProteinsTempTableSQL =
-                "CREATE " +  dialect.getTempTableKeyword() +  " TABLE " + proteinsTempTableName + " ( " +
+                "CREATE " + _dialect.getTempTableKeyword() +  " TABLE " + proteinsTempTableName + " ( " +
                     "\tProteinGroupId INT NOT NULL,\n" +
                     "\tProbability REAL NOT NULL,\n" +
                     "\tLookupString VARCHAR(200)\n" +
@@ -152,7 +153,7 @@ public class ProteinProphetImporter
             proteinStmt = connection.prepareStatement("INSERT INTO " + proteinsTempTableName + " (ProteinGroupId, Probability, LookupString) VALUES (?, ?, ?)");
 
             StringBuilder groupString = new StringBuilder("INSERT INTO " + MS2Manager.getTableInfoProteinGroups() + " (groupnumber, groupprobability, proteinprobability, indistinguishablecollectionid, proteinprophetfileid, uniquepeptidescount, totalnumberpeptides, pctspectrumids,  percentcoverage, errorrate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            MS2Manager.getSqlDialect().appendSelectAutoIncrement(groupString, MS2Manager.getTableInfoProteinGroups(), "RowId");
+            _dialect.appendSelectAutoIncrement(groupString, MS2Manager.getTableInfoProteinGroups(), "RowId");
             groupStmt = connection.prepareStatement(groupString.toString());
 
             iterator = reader.iterator();
@@ -429,7 +430,7 @@ public class ProteinProphetImporter
         groupStmt.setInt(groupIndex++, protein.getTotalNumberPeptides());
         if (protein.getPctSpectrumIds() != null)
         {
-            groupStmt.setFloat(groupIndex++, protein.getPctSpectrumIds().floatValue());
+            groupStmt.setFloat(groupIndex++, protein.getPctSpectrumIds());
         }
         else
         {
@@ -450,19 +451,20 @@ public class ProteinProphetImporter
         }
         else
         {
-            groupStmt.setFloat(groupIndex++, errorRate.floatValue());
+            groupStmt.setFloat(groupIndex++, errorRate);
         }
 
-        groupStmt.execute();
-        if (!groupStmt.getMoreResults())
+        ResultSet rs = _dialect.executeInsertWithResults(groupStmt);
+
+        if (null == rs)
         {
             throw new SQLException("Expected a result set with the new group's rowId");
         }
-        ResultSet rs = null;
+
         int groupId;
+
         try
         {
-            rs = groupStmt.getResultSet();
             if (!rs.next())
             {
                 throw new SQLException("Expected a result set with the new group's rowId");
@@ -471,7 +473,7 @@ public class ProteinProphetImporter
         }
         finally
         {
-            if (rs != null) { try { rs.close(); } catch (SQLException ignored) {} }
+            try { rs.close(); } catch (SQLException ignored) {}
         }
 
         if (icatRatio != null)
