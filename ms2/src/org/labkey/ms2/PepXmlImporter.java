@@ -23,24 +23,35 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
-import org.labkey.api.util.*;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.PepXMLFileType;
+import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.util.massSpecDataFileType;
+import org.labkey.ms2.protein.FastaDbLoader;
+import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.reader.AbstractQuantAnalysisResult;
+import org.labkey.ms2.reader.PepXmlLoader;
 import org.labkey.ms2.reader.PepXmlLoader.FractionIterator;
-import org.labkey.ms2.reader.*;
 import org.labkey.ms2.reader.PepXmlLoader.PepXmlFraction;
 import org.labkey.ms2.reader.PepXmlLoader.PepXmlPeptide;
 import org.labkey.ms2.reader.PepXmlLoader.PeptideIterator;
-import org.labkey.ms2.protein.FastaDbLoader;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.reader.PeptideProphetHandler;
+import org.labkey.ms2.reader.PeptideProphetSummary;
+import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 public class PepXmlImporter extends MS2Importer
 {
@@ -113,7 +124,7 @@ public class PepXmlImporter extends MS2Importer
 
                 PeptideIterator pi = fraction.getPeptideIterator();
                 boolean shouldImportSpectra = fraction.shouldLoadSpectra();
-                float importSpectraMinProbability = (null == fraction.getImportSpectraMinProbability() ? -Float.MAX_VALUE : fraction.getImportSpectraMinProbability().floatValue());
+                float importSpectraMinProbability = (null == fraction.getImportSpectraMinProbability() ? -Float.MAX_VALUE : fraction.getImportSpectraMinProbability());
                 progress.setImportSpectra(shouldImportSpectra);
                 // Initialize scans to a decent size, but only if we're going to load spectra
                 HashSet<Integer> scans = new HashSet<Integer>(shouldImportSpectra ? 1000 : 0);
@@ -221,7 +232,7 @@ public class PepXmlImporter extends MS2Importer
             _scoringAnalysis = Table.executeSingleton(ProteinManager.getSchema(),
                     "SELECT ScoringAnalysis " +
                     "FROM " + ProteinManager.getTableInfoFastaFiles() + " " +
-                    "WHERE FastaId = ?", new Object[] {fastaId}, Boolean.class).booleanValue();
+                    "WHERE FastaId = ?", new Object[]{fastaId}, Boolean.class);
 
             m.put("FastaId", fastaId);
         }
@@ -456,7 +467,7 @@ public class PepXmlImporter extends MS2Importer
 
         if (errorRate != null)
         {
-            stmt.setFloat(n++, errorRate.floatValue());
+            stmt.setFloat(n++, errorRate);
         }
         else
         {
@@ -487,7 +498,7 @@ public class PepXmlImporter extends MS2Importer
             stmt.setNull(n, java.sql.Types.FLOAT);
         else
         {
-            float f = Float.valueOf(v).floatValue();
+            float f = Float.valueOf(v);
             if (f >= 0 && f < 1e-30)
             {
                 f = 1e-30f;
