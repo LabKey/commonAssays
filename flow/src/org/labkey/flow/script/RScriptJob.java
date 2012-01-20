@@ -228,7 +228,9 @@ public class RScriptJob extends FlowExperimentJob
         Map<String, CompensationMatrix> matrices = new HashMap<String, CompensationMatrix>();
         for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
         {
-            CompensationMatrix matrix = sampleInfo.getCompensationMatrix();
+            CompensationMatrix matrix = null;
+            if (!sampleInfo.isPrecompensated())
+                matrix = sampleInfo.getCompensationMatrix();
             if (matrix == null)
                 continue;
 

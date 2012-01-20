@@ -17,6 +17,7 @@
 package org.labkey.flow.analysis.model;
 
 import org.fhcrc.cpas.flow.script.xml.*;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.FilterInfo;
@@ -27,7 +28,7 @@ import java.util.Map;
 
 public class ScriptSettings implements Serializable
 {
-    Map<String, ParameterInfo> _parameters = new HashMap<String, ParameterInfo>();
+    Map<String, ParameterInfo> _parameters = new CaseInsensitiveHashMap<ParameterInfo>();
     Map<String, FilterInfo> _filters = new HashMap<String, FilterInfo>();
 
     public static FilterInfo fromFilterDef(FilterDef filter)
@@ -83,6 +84,15 @@ public class ScriptSettings implements Serializable
             result = 31 * result + (_minValue != null ? _minValue.hashCode() : 0);
             return result;
         }
+    }
+
+    public ParameterInfo getParameterInfo(DataFrame.Field field)
+    {
+        for (String alias : field.getAliases())
+            if (_parameters.containsKey(alias))
+                return _parameters.get(alias);
+
+        return null;
     }
 
     public ParameterInfo getParameterInfo(String name, boolean create)

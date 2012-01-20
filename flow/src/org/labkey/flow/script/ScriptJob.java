@@ -188,9 +188,13 @@ abstract public class ScriptJob extends FlowExperimentJob
         {
             error("Error", e);
         }
-        finishExperimentRun(doc.getExperimentArchive(), runElement);
-        importRuns(doc, new File(srcRun.getPath()), workingDirectory, handler._step);
 
+        if (!hasErrors())
+        {
+            finishExperimentRun(doc.getExperimentArchive(), runElement);
+            importRuns(doc, new File(srcRun.getPath()), workingDirectory, handler._step);
+        }
+        
         deleteAnalysisDirectory(workingDirectory.getParentFile());
         return FlowRun.fromLSID(runElement.getAbout());
     }

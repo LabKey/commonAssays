@@ -43,6 +43,7 @@ public class FCSHeader
     char chDelimiter;
     String version;
     File _file;
+    CompensationMatrix spillMatrix;
 
 
     public FCSHeader(File file) throws IOException
@@ -50,7 +51,7 @@ public class FCSHeader
         load(file);
     }
 
-    public FCSHeader()
+    protected FCSHeader()
     {
     }
 
@@ -80,6 +81,42 @@ public class FCSHeader
         return keywords.get(key);
     }
 
+    public String getParameterName(int i)
+    {
+        return getParameterName(keywords, i);
+    }
+
+    public String getParameterDescription(int i)
+    {
+        return getParameterStain(keywords, i);
+    }
+
+    // Remove "Lin" or "Log" suffix
+    public static String cleanParameterName(String name)
+    {
+        if (name == null)
+            return null;
+
+        if (name.endsWith(" Lin") || name.endsWith(" Log"))
+            name = name.substring(0, name.length()-4);
+        return name;
+    }
+
+    public static String getParameterName(Map<String, String> keywords, int index)
+    {
+        return cleanParameterName(StringUtils.trimToNull(keywords.get("$P" + (index+1) + "N")));
+    }
+
+    public static String getParameterStain(Map<String, String> keywords, int index)
+    {
+        return StringUtils.trimToNull(keywords.get("$P" + (index+1) + "S"));
+    }
+
+    // UNDONE: $SPILL, SPILLOVER, COMP, $COMP
+    public static boolean hasSpillKeyword(Map<String, String> keywords)
+    {
+        return keywords.containsKey("SPILL") || keywords.containsKey("$DFC1TO2");
+    }
     public Map<String, String> getKeywords()
     {
         return Collections.unmodifiableMap(keywords);
@@ -164,19 +201,20 @@ public class FCSHeader
         boolean datatypeI = "I".equals(getKeyword("$DATATYPE"));
         boolean facsCalibur = "FACSCalibur".equals(getKeyword("$CYT"));
 
+        CompensationMatrix comp = getSpill();
         int count = getParameterCount();
         DataFrame.Field[] fields = new DataFrame.Field[count];
         for (int i = 0; i < count; i++)
         {
             String key = "$P" + (i + 1);
-            String name = getKeyword(key + "N");
+            String name = getParameterName(i);
             int bits = Integer.parseInt(getKeyword(key + "B"));
             double range = Double.parseDouble(getKeyword(key + "R"));
             String E = getKeyword(key + "E");
             double decade = Double.parseDouble(E.substring(0, E.indexOf(',')));
             final double scale = Double.parseDouble(E.substring(E.indexOf(',') + 1));
             DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
-            f.setDescription(getKeyword(key + "S"));
+            f.setDescription(getParameterDescription(i));
             f.setScalingFunction(ScalingFunction.makeFunction(decade, scale, range));
 
             // By default we use either linear, or a modified log but in some cases we use simple log for FlowJo compatibility.
@@ -194,6 +232,11 @@ public class FCSHeader
             }
             if (datatypeI)
                 f.setDither(true);
+
+            // Create aliases for the field name including compensated aliases if needed.
+            boolean precompensated = comp != null && comp.hasChannel(name);
+            f.initAliases(precompensated);
+
             fields[i] = f;
         }
         return new DataFrame(fields, data);
@@ -204,8 +247,21 @@ public class FCSHeader
         return createDataFrame(new float[getParameterCount()][0]);
     }
 
+    /** Returns true if the sample has already been compensated by the flow cytometer. */
+    // Is it possible to have uncompensated data while still having a $SPILL matrix?
+    public boolean isPrecompensated()
+    {
+        return getSpill() != null;
+    }
 
+    /** Get the spill matrix from the $SPILL keyword or $DFCnTOm keywords if it is non-identity. */
+    public CompensationMatrix getSpill()
+    {
+        if (spillMatrix == null)
+            spillMatrix = CompensationMatrix.fromSpillKeyword(getKeywords());
 
+        return spillMatrix;
+    }
 
     //
     // DocumentParser , tika like methods (w/o the imports)

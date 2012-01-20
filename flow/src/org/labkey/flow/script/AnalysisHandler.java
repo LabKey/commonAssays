@@ -94,8 +94,7 @@ public class AnalysisHandler extends BaseHandler
         }
         if (comp == null && _groupAnalysis.requiresCompensationMatrix())
         {
-            _job.error("No compensation matrix found.");
-            return;
+            _job.warn("No compensation matrix found and a compensation matrix is required for analysis.  You will encounter errors during analysis unless the FCS files have been machine compensated.");
         }
 
         try
@@ -192,6 +191,7 @@ public class AnalysisHandler extends BaseHandler
         ExperimentRunType _runElement;
         Analysis _groupAnalysis;
         String _scriptLSID;
+
         AnalyzeTask(File workingDirectory, FlowRun run, ExperimentRunType runElement, FlowWell well, int wellCount, String scriptLSID, Analysis groupAnalysis, FlowCompensationMatrix flowComp, CompensationMatrix comp)
         {
             _workingDirectory = workingDirectory;

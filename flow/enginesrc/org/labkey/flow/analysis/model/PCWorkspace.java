@@ -53,7 +53,7 @@ public class PCWorkspace extends FlowJoWorkspace
         }
         for (int i = 1; i < 100; i ++)
         {
-            String paramName = sampleInfo._keywords.get("$P" + i + "N");
+            String paramName = FCSHeader.getParameterName(sampleInfo._keywords, i);
             if (paramName == null)
                 break;
             if (_parameters.containsKey(paramName))

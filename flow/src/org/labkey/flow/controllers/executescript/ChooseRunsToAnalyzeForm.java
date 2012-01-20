@@ -38,6 +38,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
 
     static private final String COMPOPTION_EXPERIMENTLSID = "experimentlsid:";
     static private final String COMPOPTION_COMPID = "compid:";
+    static private final String COMPOPTION_SPILL = "spill";
     public String ff_compensationMatrixOption;
     public String ff_analysisName;
     public String ff_targetExperimentId;
@@ -250,9 +251,18 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
 
     public String getCompensationExperimentLSID()
     {
-        if (ff_compensationMatrixOption == null || ff_compensationMatrixOption.startsWith(COMPOPTION_COMPID))
+        if (ff_compensationMatrixOption == null)
+            return null;
+        if (!ff_compensationMatrixOption.startsWith(COMPOPTION_EXPERIMENTLSID))
             return null;
         return ff_compensationMatrixOption.substring(COMPOPTION_EXPERIMENTLSID.length());
+    }
+
+    public boolean useSpillCompensationMatrix()
+    {
+        if (ff_compensationMatrixOption == null)
+            return false;
+        return ff_compensationMatrixOption.equals(COMPOPTION_SPILL);
     }
 
     public Map<String, String> getCompensationMatrixOptions()
@@ -268,6 +278,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
         {
             ret.put("", "No compensation calculation defined; choose one of the other options");
         }
+        
         FlowExperiment[] experiments = FlowExperiment.getExperiments(getContainer());
         for (FlowExperiment compExp : experiments)
         {
@@ -285,6 +296,11 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
             String label = "Matrix: " + comp.getLabel(!sameExperiment);
             ret.put(COMPOPTION_COMPID +  comp.getCompId(), label);
         }
+
+        // We can't know if the machine acquired spill matrix is available until
+        // we check each available run in ChooseRunsRegion.getDisabledReason().
+        ret.put(COMPOPTION_SPILL, "Use machine acquired spill matrix");
+
         return ret;
     }
 

@@ -33,6 +33,8 @@ public class FCS extends FCSHeader
     boolean bigEndian;
     DataFrame rawData;
 
+    protected FCS() { }
+
     public FCS(File f) throws IOException
     {
         load(f);
@@ -449,6 +451,21 @@ public class FCS extends FCSHeader
                 String strNewTot = Integer.toString(newEventCount);
                 byte[] rgbNewTot = strNewTot.getBytes("UTF-8");
                 System.arraycopy(rgbNewTot, 0, bytes, ibNumberStart, rgbNewTot.length);
+            }
+        }
+
+        // replace $NEXTDATA with "0"
+        byte[] rgbNextDataKey = new byte[]{(byte) chDelimiter, '$', 'N', 'E', 'X', 'T', 'D', 'A', 'T', 'A', (byte) chDelimiter};
+        int ibNextData = indexOf(bytes, rgbNextDataKey, textOffset, textLast);
+        if (ibNextData >= 0)
+        {
+            int ibNumberStart = ibNextData + rgbNextDataKey.length;
+            int ibNumberEnd = indexOf(bytes, new byte[]{(byte) chDelimiter}, ibNumberStart, textLast + 1);
+            if (ibNumberEnd > 0)
+            {
+                Arrays.fill(bytes, ibNumberStart, ibNumberEnd, (byte) 32);
+                byte[] rgbNewNextData = "0".getBytes("UTF-8");
+                System.arraycopy(rgbNewNextData, 0, bytes, ibNumberStart, rgbNewNextData.length);
             }
         }
 

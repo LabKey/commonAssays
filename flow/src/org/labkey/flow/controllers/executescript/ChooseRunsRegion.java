@@ -21,8 +21,12 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.data.FlowCompensationControl;
 import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowFCSFile;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowWell;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,16 +80,37 @@ public class ChooseRunsRegion extends DataRegion
         out.write(">");
 
 
+        int visibleCount = 0;
         if (showRecordSelectors)
         {
+            visibleCount++;
             renderRecordSelector(ctx, out);
         }
 
-        for (DisplayColumn renderer : renderers)
+        int nameColumn = 0;
+        for (int i = 0, renderersSize = renderers.size(); i < renderersSize; i++)
+        {
+            DisplayColumn renderer = renderers.get(i);
             if (renderer.isVisible(ctx))
+            {
+                if (renderer.getColumnInfo() != null && "name".equalsIgnoreCase(renderer.getColumnInfo().getName()))
+                    nameColumn = i+1;
+                visibleCount++;
                 renderer.renderGridDataCell(ctx, out);
+            }
+        }
 
         out.write("</tr>\n");
+
+        if (disabledReason != null)
+        {
+            out.write("<tr class='disabledRow'>");
+            out.write("<td style='border-right:0;' colspan='" + nameColumn + "'>&nbsp;</td>");
+            out.write("<td style='font-size:smaller;' colspan='" + visibleCount + "'>");
+            out.write(PageFlowUtil.filter(disabledReason));
+            out.write("</td>");
+            out.write("</tr>");
+        }
     }
 
     String getDisabledReason(RenderContext ctx)
@@ -111,6 +136,21 @@ public class ChooseRunsRegion extends DataRegion
                     {
                         return "There is no compensation matrix for this run in the '" + expComp.getName() + "' analysis folder";
                     }
+                }
+                else if (_form.useSpillCompensationMatrix())
+                {
+                    for (FlowWell well : run.getWells())
+                    {
+                        if (well instanceof FlowCompensationControl)
+                            continue;
+
+                        FlowFCSFile fcsFile = well.getFCSFile();
+                        CompensationMatrix matrix = CompensationMatrix.fromSpillKeyword(fcsFile.getKeywords());
+                        if (matrix != null)
+                            return null;
+                    }
+
+                    return "There are no FCSFile wells with a spill matrix in this run.";
                 }
             }
             return null;

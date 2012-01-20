@@ -33,7 +33,7 @@ public class FCSViewer
     Subset _subset;
     public FCSViewer(URI uriFCSFile) throws IOException
         {
-        _fcs = new FCS(new File(uriFCSFile));
+        _fcs = FCSAnalyzer.get().readFCS(uriFCSFile);
         _subset = new Subset(_fcs, new ScriptSettings());
         }
     public void applyCompensationMatrix(URI uriCompensationMatrix) throws Exception

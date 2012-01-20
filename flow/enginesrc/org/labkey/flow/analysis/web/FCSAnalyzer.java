@@ -290,7 +290,7 @@ public class FCSAnalyzer
     {
         FCS fcs = _cache.readFCS(uri);
         Subset subset = new Subset(fcs, settings);
-        if (comp != null && !comp.isSingular())
+        if (comp != null && !comp.isSingular() && !comp.equals(fcs.getSpill()))
         {
             subset = subset.apply(comp);
         }
@@ -303,7 +303,7 @@ public class FCSAnalyzer
         DataFrame data = header.createEmptyDataFrame();
         data = data.translate(settings);
         Subset subset = new Subset(null, null, header, data);
-        if (comp != null && !comp.isSingular())
+        if (comp != null && !comp.isSingular() && !comp.equals(header.getSpill()))
         {
             subset = subset.apply(comp);
         }
@@ -500,13 +500,13 @@ public class FCSAnalyzer
         return handler.calculateCompensationMatrix(results);
     }
 
+    // UNDONE: If FCS file is precompensated add compensated <name> for color channels?
     private List<String> getFieldNames(FCSHeader header)
     {
         List<String> ret = new ArrayList();
-        for (int i = 1; ; i++)
+        for (int i = 0; ; i++)
         {
-            String keyword = "$P" + i + "N";
-            String name = header.getKeyword(keyword);
+            String name = header.getParameterName(i);
             if (name == null)
             {
                 return ret;
@@ -626,4 +626,5 @@ public class FCSAnalyzer
         ret.height = GRAPH_HEIGHT;
         return ret;
     }
+
 }

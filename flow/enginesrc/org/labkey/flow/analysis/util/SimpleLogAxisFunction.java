@@ -25,6 +25,8 @@ import java.io.Serializable;
  * User: matthewb
  * Date: Sep 13, 2007
  * Time: 2:41:32 PM
+ *
+ * Add 1 to log10(val) to display values < 1.
  */
 public class SimpleLogAxisFunction implements RangeFunction, IsSerializable, Serializable
 {
@@ -36,10 +38,10 @@ public class SimpleLogAxisFunction implements RangeFunction, IsSerializable, Ser
     {
         double sign = signum(val);
         val = Math.abs(val);
-        if (val <= 1)
+        if (val == 0)
             return 0;
-        else
-            return sign * log10(val);
+        double l = log10(val) + 1;
+        return l < 0 ? 0 : sign * l;
     }
 
     public double invert(double val)
@@ -48,7 +50,7 @@ public class SimpleLogAxisFunction implements RangeFunction, IsSerializable, Ser
             return 0;
         double sign = signum(val);
         val = Math.abs(val);
-        return sign * Math.pow(10, val);
+        return sign * Math.pow(10, val-1);
     }
 
     // UNDONE in gwt

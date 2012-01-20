@@ -21,7 +21,6 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYDotRenderer;
-import org.jfree.data.Range;
 import org.jfree.data.xy.XYDataset;
 import org.labkey.api.arrays.DoubleArray;
 import org.labkey.api.view.Stats;
@@ -77,7 +76,7 @@ public class PlotFactory
     {
         double max = field.getMaxValue();
         double min = field.getMinValue();
-        if ("Time".equals(field.getName()))
+        if (field.isTimeChannel())
         {
             Stats.DoubleStats stats = new Stats.DoubleStats(subset.getDataFrame().getDoubleArray(field.getName()));
             max = stats.getMax();
@@ -127,9 +126,9 @@ public class PlotFactory
 
     static public String getLabel(FCSHeader fcs, int index, boolean compensated)
     {
-        String name = fcs.getKeyword("$P" + (index + 1) + "N");
+        String name = fcs.getParameterName(index);
         String label = name;
-        String stain = fcs.getKeyword("$P" + (index + 1) + "S");
+        String stain = fcs.getParameterDescription(index);
 
         String prefix = "";
         String suffix = "";
@@ -159,7 +158,9 @@ public class PlotFactory
         DataFrame.Field field = subset.getDataFrame().getField(fieldName);
         if (field == null)
             throw new FlowException("Channel '" + fieldName + "' required for graph");
-        boolean compensated = field.getOrigIndex() != field.getIndex();
+        boolean compensated =
+                (field.getOrigIndex() != field.getIndex()) ||
+                CompensationMatrix.isParamCompensated(fieldName);
         return getLabel(subset.getFCSHeader(), field.getOrigIndex(), compensated);
     }
 

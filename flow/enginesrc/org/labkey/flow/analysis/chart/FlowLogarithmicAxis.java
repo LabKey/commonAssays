@@ -63,11 +63,45 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
         setNumberFormatOverride(new TickFormat());
         fn = simpleLog ? simpleFN : loglinFN;
     }
-    
 
+    public boolean isSimpleLog()
+    {
+        return fn == simpleFN;
+    }
+
+    /**
+     * Turn on the smallLogFlag if the axis is a simple log and the lower bound is >= zero and < 10.
+     * The superclass will only turn on the smallLogFlag if negatives aren't allowed and the lower bound is > 0 and < 10.
+     */
+    @Override
+    protected void setupSmallLogFlag()
+    {
+        if (fn == simpleFN)
+        {
+            double lowerVal = getRange().getLowerBound();
+            this.smallLogFlag
+                    = (lowerVal < 10.0 && lowerVal >= 0.0);
+        }
+        else
+        {
+            super.setupSmallLogFlag();
+        }
+    }
+
+    /**
+     * LogarithmicAxis tries to force the formatting of the tick to "0.00" style numbers
+     * when displaying small log values in 0-1 range.  We don't care about the small log tick marks.
+     */
+    @Override
+    protected String makeTickLabel(double val, boolean forceFmtFlag)
+    {
+        return makeTickLabel(val);
+    }
+
+    @Override
     protected String makeTickLabel(double val)
     {
-        if (val == 0)
+        if (val == 0 || val == SMALL_LOG_VALUE)
             return "0";
         boolean neg = false;
         if (val < 0)
@@ -82,7 +116,7 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
             tester = tester / 10;
             power++;
         }
-        if (power < 1 || fn == loglinFN && power < 2)
+        if (fn == loglinFN && power < 2)
             return "";
         if (tester == 1)
             return (neg ? "-" : "") + "10^" + power;
@@ -90,12 +124,19 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
             return "";
     }
 
+    // To place the tick marks in the 0-1 range, we subtract one and use our log fn.
+    @Override
+    protected double switchedLog10(double val)
+    {
+        return fn == loglinFN ?
+                super.switchedLog10(val) :
+                (this.smallLogFlag) ? s_adjustedLog10(val-1) : s_adjustedLog10(val);
+    }
 
     public double s_adjustedLog10(double val)
     {
         return fn.compute(val);
     }
-
 
     public double s_adjustedPow10(double val)
     {

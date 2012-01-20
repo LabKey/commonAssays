@@ -40,6 +40,7 @@ import org.labkey.api.writer.VirtualFile;
 import org.labkey.api.writer.ZipFile;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FCS;
+import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.data.FlowCompensationMatrix;
@@ -256,7 +257,7 @@ public class RunController extends BaseFlowController
                     }
                     else
                     {
-                        is = new ByteArrayInputStream(new FCS(file).getFCSBytes(file, eventCount));
+                        is = new ByteArrayInputStream(FCSAnalyzer.get().getFCSBytes(uri, eventCount));
                     }
                     int cb;
                     while((cb = is.read(buffer)) > 0)

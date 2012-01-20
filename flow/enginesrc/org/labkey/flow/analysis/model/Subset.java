@@ -43,6 +43,7 @@ public class Subset
 
     public Subset apply(CompensationMatrix matrix) throws FlowException
     {
+        assert (_fcs.isPrecompensated() && !_fcs.getSpill().equals(matrix)) || !_fcs.isPrecompensated(): "Applying identical compensation to machine compensated FCS file";
         DataFrame data = matrix.getCompensatedData(_data);
         return new Subset(_parent, _name, _fcs, data);
     }

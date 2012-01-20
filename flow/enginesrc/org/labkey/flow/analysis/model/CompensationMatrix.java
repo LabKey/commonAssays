@@ -239,6 +239,15 @@ public class CompensationMatrix implements Serializable
         return _channelNames;
     }
 
+    public boolean hasChannel(String channel)
+    {
+        for (String channelName : _channelNames)
+            if (channelName.equalsIgnoreCase(channel))
+                return true;
+
+        return false;
+    }
+
     public double[] getRow(int irow)
     {
         return _rows[irow];
@@ -279,8 +288,8 @@ public class CompensationMatrix implements Serializable
             DataFrame.Field origField = data.getField(_channelNames[i]);
             if (origField == null)
                 throw new FlowException("Channel '" + _channelNames[i] + "' required for compensation matrix.");
-            DataFrame.Field compField = new DataFrame.Field(data.getColCount() + i, origField, _prefix + _channelNames[i] + _suffix);
-            DataFrame.Field ditheredField = new DataFrame.Field(data.getColCount() + _channelNames.length + i, origField, DITHERED_PREFIX + _prefix + _channelNames[i] + _suffix);
+            DataFrame.Field compField = new DataFrame.Field(data.getColCount() + i, origField, _channelNames[i], _prefix, _suffix);
+            DataFrame.Field ditheredField = new DataFrame.Field(data.getColCount() + _channelNames.length + i, origField, _channelNames[i], DITHERED_PREFIX + _prefix, _suffix);
             fields[compField.getIndex()] = compField;
             fields[ditheredField.getIndex()] = ditheredField;
             cols[compField.getIndex()] = comp.getColumn(_channelNames[i]);
@@ -434,10 +443,29 @@ public class CompensationMatrix implements Serializable
         return true;
     }
 
+    /** Returns true if this matrix is singular and therefore not invertible. */
     public boolean isSingular()
     {
         Matrix m = new Matrix(_rows);
         return m.det() == 0;
+    }
+
+    /** Returns true if this matrix is the identity matrix. */
+    public boolean isIdentity()
+    {
+        for (int i = 0; i < _rows.length; i++)
+        {
+            double[] row = _rows[i];
+            if (_rows.length != row.length)
+                return false;
+            for (int j = 0; j < row.length; j++)
+            {
+                if (_rows[i][j] != (i == j ? 1 : 0))
+                    return false;
+            }
+        }
+
+        return true;
     }
 
     static public boolean isParamCompensated(String param)
@@ -446,6 +474,7 @@ public class CompensationMatrix implements Serializable
     }
 
     // 10,FITC-A,PE-A,ECD-A,PERCP-CY55-A,PE-CY7-A,PACIFIC BLUE-A,AMCYAN-A,APC-A,ALEXA700-A,APC-CY7-A,1,0.3327766322031372,0.08699297487832836,0.008525446763715205,0,0.030025363800367917,0.02979915857838515,0.0036565757271039686,0,0,0,1,0.29986355748731647,0.06143627585576419,0.008331089558338778,0.016684502190259746,0.006805323448541102,0.0021320747409013492,0,0,0,0.16546991509185638,1,0.35973620776132276,0.07313148489024157,0.008247277486239378,0.0033201743601924123,0.0025782639404550063,0,0,0,0,0,1,0.2942568888150039,0.018925486197387757,0.00723083182564879,0.022137246939944292,0.2518111683708703,0.03815142394918861,0.00010326738939971734,0.2697030598543567,0.08293057539597117,0.0205204333759048,1,0.004424313601991271,0.001865910274198225,0.0007811486298667462,0.001664167194771763,0.009672547981150574,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0.009579141973090935,0.0026444048266224965,0.0033388532993441056,0.0004257990187642113,1,0.4972571116470553,0.05013809029413019,0.0008089280838177729,0,0.0004449097690497699,0.024914975224123448,0.013549541639880062,0,0,0.002648227370237401,1,0.09927582503338037,0,0,0,0,0,0,0,0,0,1
+    // UNDONE: $SPILL, SPILLOVER, COMP, $COMP
     static public CompensationMatrix fromSpillKeyword(Map<String,String> keywords)
     {
         String spill = StringUtils.trimToNull(keywords.get("SPILL"));
@@ -460,7 +489,7 @@ public class CompensationMatrix implements Serializable
 
             for (int i = 0; i < channelCount; i ++)
             {
-                channelNames[i] = strings[index ++];
+                channelNames[i] = FCSHeader.cleanParameterName(strings[index++]);
             }
             double[][] rows = new double[channelCount][channelCount];
             for (int i = 0; i < channelCount; i ++)
@@ -473,6 +502,8 @@ public class CompensationMatrix implements Serializable
             CompensationMatrix ret = new CompensationMatrix("spill");
             ret._channelNames = channelNames;
             ret._rows = rows;
+            if (ret.isIdentity())
+                return null;
             return ret;
         }
 
@@ -484,7 +515,7 @@ public class CompensationMatrix implements Serializable
             for (int p=1 ; ; p++)
             {
                 String name;
-                name = StringUtils.trimToNull(keywords.get("$P" + p + "N"));
+                name = FCSHeader.getParameterName(keywords, p);
                 if (null == name)
                     break;
                 if (name.equals("FS") || name.startsWith("FS ") || name.equals("SS") || name.startsWith("SS ") || name.startsWith("TIME"))
@@ -513,6 +544,8 @@ public class CompensationMatrix implements Serializable
             CompensationMatrix ret = new CompensationMatrix("spill");
             ret._channelNames = channelNames.toArray(new String[channelCount]);
             ret._rows = rows;
+            if (ret.isIdentity())
+                return null;
             return ret;
         }
 

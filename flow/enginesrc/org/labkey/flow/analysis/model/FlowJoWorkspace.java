@@ -99,6 +99,26 @@ abstract public class FlowJoWorkspace implements Serializable
             return ret;
         }
 
+        /** Returns true if the sample has already been compensated by the flow cytometer. */
+        public boolean isPrecompensated()
+        {
+            return getSpill() != null;
+        }
+
+        /** Returns the spill matrix. */
+        public CompensationMatrix getSpill()
+        {
+            if (_compensationId == null)
+                return null;
+
+            int id = Integer.parseInt(_compensationId);
+            if (id < 0)
+                return CompensationMatrix.fromSpillKeyword(_keywords);
+
+            return null;
+        }
+
+        /** Returns the spill matrix or FlowJo applied comp matrix. */
         public CompensationMatrix getCompensationMatrix()
         {
             if (_compensationId == null)
@@ -405,7 +425,7 @@ abstract public class FlowJoWorkspace implements Serializable
 
 
     static final short defaultFilter = LSParserFilter.FILTER_SKIP;
-    
+
     final static HashMap<String,Short> elements = new HashMap<String, Short>(100);
     static
     {
@@ -421,7 +441,7 @@ abstract public class FlowJoWorkspace implements Serializable
     {
         SymbolTable fSymbolTable = new SymbolTable();
         Set<String> rejected = new HashSet<String>();
-        
+
         public short startElement(Element element)
         {
             Short s = elements.get(element.getNodeName());
@@ -464,7 +484,7 @@ abstract public class FlowJoWorkspace implements Serializable
     {
         int sizeIn = 0;
         int sizeOut = 0;
-        
+
         @Override
         public String addSymbol(String symbol)
         {
@@ -1230,7 +1250,7 @@ abstract public class FlowJoWorkspace implements Serializable
     }
 
     /**
-     * There are some 
+     * There are some
      * @param axis
      * @param values
      */

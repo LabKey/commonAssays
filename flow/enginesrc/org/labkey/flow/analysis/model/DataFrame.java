@@ -15,14 +15,18 @@
  */
 package org.labkey.flow.analysis.model;
 
+import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.flow.analysis.data.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.BitSet;
+import java.util.Map;
+import java.util.Set;
 
 import Jama.Matrix;
 
@@ -40,9 +44,8 @@ public class DataFrame
 {
     protected NumberArray[] data;
     protected Field[] fields;
-    protected HashMap<String, Field> fieldsMap = new HashMap<String,Field>();
+    protected Map<String, Field> fieldsMap = new CaseInsensitiveHashMap<Field>();
     protected String version = "";
-
 
     public DataFrame(Field[] fields, int rows)
     {
@@ -83,39 +86,12 @@ public class DataFrame
         this.fields = fields.clone();
         for (Field field : fields)
         {
-            String name = field.getName();
-            fieldsMap.put(name, field);
-            String canonName = canonicalFieldName(name);
-            if (!fieldsMap.containsKey(canonName))
-                fieldsMap.put(canonName, field);
-
-            // Remove a " Lin" or " Log" suffix.
-            if (name.endsWith(" Lin") || name.endsWith(" Log"))
-            {
-                String baseName = name.substring(0, name.length() - 4);
-                if (!fieldsMap.containsKey(baseName))
-                    fieldsMap.put(baseName, field);
-            }
-            else
-            {
-                // Append a " Lin" or " Log" suffix.
-                if (field.getScalingFunction().isLogarithmic())
-                {
-                    String logName = name + " Log";
-                    if (!fieldsMap.containsKey(logName))
-                        fieldsMap.put(logName, field);
-                }
-                else
-                {
-                    String linName = name + " Lin";
-                    if (!fieldsMap.containsKey(linName))
-                        fieldsMap.put(linName, field);
-                }
-            }
+            for (String alias : field.getAliases())
+                if (!fieldsMap.containsKey(alias))
+                    fieldsMap.put(alias, field);
         }
         this.data = data;
     }
-
 
     public DataFrame translate(ScriptSettings settings)
     {
@@ -129,7 +105,7 @@ public class DataFrame
             ScriptSettings.ParameterInfo paramInfo = null;
             if (settings != null)
             {
-                paramInfo = settings.getParameterInfo(field.getName(), false);
+                paramInfo = settings.getParameterInfo(field);
             }
             if (paramInfo != null && paramInfo.getMinValue() != null)
             {
@@ -341,6 +317,10 @@ public class DataFrame
     public static class Field
     {
         private String _name;
+        private String _baseName;
+        private String _prefix;
+        private String _suffix;
+        private Set<String> _aliases;
         private String _description;
         private int _index;
         private int _origIndex;
@@ -356,12 +336,15 @@ public class DataFrame
 
         private boolean _dither = false;
 
+        private boolean _precompensated = false;
 
+        /** Once Field has been constructed and completely configured, called should use initAliases() to finish initialization. */
         public Field(int index, String name, int range)
         {
             _index = index;
             _origIndex = index;
-            _name = name;
+            _baseName = FCSHeader.cleanParameterName(name);
+            _name = composeName(_baseName, _prefix, _suffix);
             _range = range;
         }
 
@@ -370,27 +353,75 @@ public class DataFrame
         {
             _index = index;
             _origIndex = other._origIndex;
-            _name = other.getName();
+            _name = other._name;
+            _baseName = other._baseName;
+            _prefix = other._prefix;
+            _suffix = other._suffix;
+            _aliases = new CaseInsensitiveHashSet(other.getAliases());
             _range = other._range;
             _simpleLogAxis = other._simpleLogAxis;
             _scalingFunction = scalingFunction;
             _description = other.getDescription();
+            _precompensated = other._precompensated;
         }
 
         // does not propagate _simpleLogAxis, used by compensation code
-        public Field(int index, Field other, String newName)
+        public Field(int index, Field other, String newName, String prefix, String suffix)
         {
             _index = index;
             _origIndex = other._origIndex;
-            _name = newName;
+            _baseName = newName;
+            _prefix = prefix;
+            _suffix = suffix;
+            _name = composeName(_baseName, _prefix, _suffix);
             _range = other._range;
             _scalingFunction = other._scalingFunction;
             _description = other._description;
+            initAliases(false);
         }
 
         public String getName()
         {
             return _name;
+        }
+
+        public void initAliases(boolean precompensated)
+        {
+            Set<String> aliases = new CaseInsensitiveHashSet();
+            aliases.add(_name);
+            aliases.add(canonicalFieldName(_name));
+
+            String linLogBaseName = _baseName + (isLogarithmic() ? " Log" : " Lin");
+            aliases.add(composeName(linLogBaseName, _prefix, _suffix));
+
+            if (precompensated)
+            {
+                assert _prefix == null && _suffix == null : "Attempting to add precompensated aliases with existing field prefix and suffix";
+                _precompensated = true;
+                String compName = composeName(_baseName, CompensationMatrix.PREFIX, CompensationMatrix.SUFFIX);
+                aliases.add(compName);
+                aliases.add(canonicalFieldName(compName));
+
+                aliases.add(composeName(linLogBaseName, CompensationMatrix.PREFIX, CompensationMatrix.SUFFIX));
+            }
+
+            _aliases = aliases;
+        }
+
+        private static String composeName(String name, String prefix, String suffix)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (prefix != null)
+                sb.append(prefix);
+            sb.append(name);
+            if (suffix != null)
+                sb.append(suffix);
+            return sb.toString();
+        }
+
+        public Set<String> getAliases()
+        {
+            return Collections.unmodifiableSet(_aliases);
         }
 
         public String getDescription()
@@ -433,10 +464,20 @@ public class DataFrame
             return _scalingFunction.getMaxValue();
         }
 
+        public boolean isLogarithmic()
+        {
+            return _scalingFunction.isLogarithmic();
+        }
+
+        public boolean isPrecompensated()
+        {
+            return _precompensated;
+        }
+
 		@Override
 		public String toString()
 		{
-			return _name + "[" + _index + "]";
+			return getName() + "[" + _index + "]";
 		}
 
         public boolean isSimpleLogAxis()
@@ -458,5 +499,11 @@ public class DataFrame
         {
             _dither = dither;
         }
+
+        public boolean isTimeChannel()
+        {
+            return _baseName.toLowerCase().contains("time");
+        }
+
     }
 }
