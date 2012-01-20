@@ -572,16 +572,22 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private void insertCVQCFlags(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte)
             throws SQLException
     {
+        LuminexWellGroup wellGroup = analyte.buildWellGroup(dataRows);
+        List<LuminexWell> allReplicates = wellGroup.getWellData(true); // combine replicates and get mean MFI and %CV
+
         Set<CVQCFlag> newCVQCFlags = new HashSet<CVQCFlag>();
-        for (LuminexDataRow dataRow : dataRows)
+        for (LuminexWell replicate : allReplicates)
         {
-            if (null != dataRow.getCv() &&
+            LuminexDataRow dataRow = replicate.getDataRow();
+
+            // only need to check %CV thresholds for potentially positive samples (i.e. mean MFI of replicates > 100)
+            if (null != dataRow.getCv() && dataRow.getFi() > 100.0 && 
                 ((dataRow.getWellRole().equals("Unknown") && dataRow.getCv() > 0.2) ||
                  (dataRow.getWellRole().contains("Standard") && dataRow.getCv() > 0.15) ||
                  (dataRow.getWellRole().contains("Control") && dataRow.getCv() > 0.15)))
             {
-                String description = analyte.getName() + " " + dataRow.getType() + " " + dataRow.getDescription() + " over threshold for %CV";
-                CVQCFlag newQcFlag = new CVQCFlag(expRun.getRowId(), "CV", description, analyte.getRowId(), dataRow.getData(), dataRow.getType(), dataRow.getDescription());
+                String description = dataRow.getType() + " : " + dataRow.getDescription() + " with " + analyte.getName() + " over threshold value for %CV (" + dataRow.getData() + ")";
+                CVQCFlag newQcFlag = new CVQCFlag(expRun.getRowId(), "PCV", description, analyte.getRowId(), dataRow.getData(), dataRow.getType(), dataRow.getDescription());
                 if (!newCVQCFlags.contains(newQcFlag))
                 {
                     newCVQCFlags.add(newQcFlag);

@@ -85,6 +85,8 @@ public class LuminexWellGroup implements WellGroup
             int countFiBackground = 0;
             double sumFiBackgroundBlank = 0;
             int countFiBackgroundBlank = 0;
+            Double cv = null;
+            String wellRole = null;
             boolean excluded = false;
 
             for (LuminexWell well : entry.getValue())
@@ -111,6 +113,9 @@ public class LuminexWellGroup implements WellGroup
                     countFiBackgroundBlank++;
                 }
 
+                cv = well.getDataRow().getCv();
+                wellRole = well.getDataRow().getWellRole();
+
                 if (well.getDataRow().getExtraProperties().get(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME) != null)
                     excluded = (Boolean)well.getDataRow().getExtraProperties().get(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME);
             }
@@ -127,6 +132,8 @@ public class LuminexWellGroup implements WellGroup
                 fakeDataRow.setFiBackgroundBlank(sumFiBackgroundBlank / countFiBackgroundBlank);
             fakeDataRow.setType(entry.getKey().getType());
             fakeDataRow.setExcluded(excluded);
+            fakeDataRow.setCv(cv);
+            fakeDataRow.setWellRole(wellRole);
             result.add(new LuminexWell(fakeDataRow));
         }
 

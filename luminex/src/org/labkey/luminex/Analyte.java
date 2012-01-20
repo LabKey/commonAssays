@@ -16,6 +16,11 @@
 
 package org.labkey.luminex;
 
+import org.apache.commons.lang3.ObjectUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * User: jeckels
 * Date: Jul 26, 2007
@@ -142,6 +147,20 @@ public class Analyte
     public void setLsid(String lsid)
     {
         _lsid = lsid;
+    }
+
+    public LuminexWellGroup buildWellGroup(List<LuminexDataRow> dataRows)
+    {
+        List<LuminexWell> wells = new ArrayList<LuminexWell>();
+        for (LuminexDataRow dataRow : dataRows)
+        {
+            // look for wells with a matching analyteId, and skip excluded wells
+            if (!dataRow.isExcluded() && ObjectUtils.equals(dataRow.getAnalyte(), getRowId()))
+            {
+                wells.add(new LuminexWell(dataRow));
+            }
+        }
+        return new LuminexWellGroup(wells);
     }
 
     @Override
