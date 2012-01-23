@@ -19,15 +19,12 @@
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
-<%@ page import="org.labkey.api.portal.ProjectUrls" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="java.io.File" %>
-<%@ page import="java.sql.SQLException" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.util.Map" %>
@@ -39,10 +36,6 @@
     Container container = context.getContainer();
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
-
-    ActionURL cancelUrl = urlProvider(ProjectUrls.class).getStartURL(container);
-    boolean hasPipelineRoot = pipeRoot != null;
-    boolean canSetPipelineRoot = context.getUser().isAdministrator() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
 
 <input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
@@ -89,14 +82,10 @@
             String relativeRunFilePathRoot = pipeRoot.relativePath(runFilePathRoot);
             for (FlowExperiment analysis : analyses)
             {
-                try
-                {
-                    if (analysis.hasRun(runFilePathRoot, null))
-                        disabledAnalyses.put(analysis.getExperimentId(), "The '" + analysis.getName() + "' analysis folder already contains the FCS files from '" + relativeRunFilePathRoot + "'.");
-                    else if (firstNonDisabledAnalysis == null)
-                        firstNonDisabledAnalysis = analysis;
-                }
-                catch (SQLException _) { }
+                if (analysis.hasRun(runFilePathRoot, null))
+                    disabledAnalyses.put(analysis.getExperimentId(), "The '" + analysis.getName() + "' analysis folder already contains the FCS files from '" + relativeRunFilePathRoot + "'.");
+                else if (firstNonDisabledAnalysis == null)
+                    firstNonDisabledAnalysis = analysis;
             }
         }
     }

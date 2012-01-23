@@ -78,7 +78,6 @@ public class FastaDbHelper
     public final PreparedStatement _insertIntoSeqsStmt;
     public final PreparedStatement _updateSTempWithSeqIDsStmt;
     public final PreparedStatement _getIdentsStmt;
-    public final PreparedStatement _getCurrentInsertIdStmt;
     public final PreparedStatement _insertIdentTypesStmt;
     public final PreparedStatement _updateIdentsWithIdentTypesStmt;
     public final PreparedStatement _insertIntoIdentsStmt;
@@ -95,7 +94,9 @@ public class FastaDbHelper
 
     public FastaDbHelper(Connection c) throws SQLException
     {
-        _initialInsertionStmt = c.prepareStatement(INITIAL_INSERTION_COMMAND);
+        StringBuilder initialInsert = new StringBuilder(INITIAL_INSERTION_COMMAND);
+        _dialect.appendSelectAutoIncrement(initialInsert, ProteinManager.getTableInfoAnnotInsertions(), "InsertId");
+        _initialInsertionStmt = c.prepareStatement(initialInsert.toString());
         _getCurrentInsertStatsStmt = c.prepareStatement(GET_CURRENT_INSERT_STATS_COMMAND);
         _updateInsertionStmt = c.prepareStatement(UPDATE_INSERTION_COMMAND);
         _finalizeInsertionStmt = c.prepareStatement(FINALIZE_INSERTION_COMMAND);
@@ -185,7 +186,6 @@ public class FastaDbHelper
 
         _emptySeqsStmt = c.prepareStatement("TRUNCATE TABLE " + _seqTableName);
         _emptyIdentsStmt = c.prepareStatement("TRUNCATE TABLE " + _identTableName);
-        _getCurrentInsertIdStmt = c.prepareStatement(_dialect.appendSelectAutoIncrement("", ProteinManager.getTableInfoAnnotInsertions(), "InsertId"));
 
         _guessOrgBySharedHashStmt = c.prepareStatement("UPDATE " + _seqTableName + " SET orgid = ( SELECT MIN(PS.orgid) " +
                     " FROM " + ProteinManager.getTableInfoSequences() + " PS INNER JOIN " +  ProteinManager.getTableInfoOrganisms() + " PO ON (PS.orgid = PO.orgid) " +

@@ -17,6 +17,7 @@
 package org.labkey.flow.data;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -234,7 +235,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return addParams(urlFor(RunController.ShowRunsAction.class));
     }
 
-    public boolean hasRun(File filePath, FlowProtocolStep step) throws SQLException
+    public boolean hasRun(File filePath, @Nullable FlowProtocolStep step)
     {
         FlowRun[] runs = getRuns(step);
         for (FlowRun run : runs)
@@ -275,7 +276,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return getRuns(step).length;
     }
 
-    public FlowRun[] getRuns(FlowProtocolStep step)
+    public FlowRun[] getRuns(@Nullable FlowProtocolStep step)
     {
         ExpProtocol protocol = null;
         if (step != null)

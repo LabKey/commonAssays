@@ -44,11 +44,6 @@ public class ChooseRunsRegion extends DataRegion
     }
 
 
-    protected void renderFormEnd(RenderContext ctx, Writer out) throws IOException
-    {
-        return;
-    }
-
     @Override
     protected void renderFormHeader(RenderContext ctx, Writer out, int mode) throws IOException
     {

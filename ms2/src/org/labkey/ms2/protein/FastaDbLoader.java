@@ -212,12 +212,13 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             fdbu._initialInsertionStmt.setString(3, defaultOrganism);
             fdbu._initialInsertionStmt.setInt(4, organismToBeGuessed ? 1 : 0);
             fdbu._initialInsertionStmt.setTimestamp(5, new java.sql.Timestamp(new java.util.Date().getTime()));
-            fdbu._initialInsertionStmt.executeUpdate();
+
             ResultSet rs = null;
+
             try
             {
-                rs = fdbu._getCurrentInsertIdStmt.executeQuery();
-                if (rs.next())
+                rs = ProteinManager.getSqlDialect().executeInsertWithResults(fdbu._initialInsertionStmt);
+                if (null != rs && rs.next())
                     currentInsertId = rs.getInt(1);
             }
             finally
@@ -229,7 +230,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         {
             Integer skip = Table.executeSingleton(ProteinManager.getSchema(), "SELECT RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" + currentInsertId, null, Integer.class);
             if (skip != null)
-                skipEntries = skip.intValue();
+                skipEntries = skip;
         }
         //c.commit();
         return currentInsertId;
@@ -689,7 +690,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                     ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" +
                     currentInsertId, null, Integer.class);
             if (skipCount != null)
-                skipEntries = skipCount.intValue();
+                skipEntries = skipCount;
         }
 
         Thread.currentThread().setName("AnnotLoader" + currentInsertId);
@@ -804,7 +805,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         }
 
         Long existingProtFastasCount = Table.executeSingleton(ProteinManager.getSchema(), "SELECT COUNT(*) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hashArray, Long.class);
-        if (loadedFile != null && existingProtFastasCount != null && existingProtFastasCount.longValue() > 0)
+        if (loadedFile != null && existingProtFastasCount != null && existingProtFastasCount > 0)
         {
             String previousFileWithSameChecksum =
                     Table.executeSingleton(ProteinManager.getSchema(), "SELECT MIN(FileName) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hashArray, String.class);

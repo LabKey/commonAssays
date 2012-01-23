@@ -507,26 +507,6 @@ public class PepXmlImporter extends MS2Importer
         }
     }
 
-    private long getPeptideId(PreparedStatement stmt) throws SQLException
-    {
-        ResultSet rs = null;
-
-        try
-        {
-            if (!stmt.getMoreResults())
-                throw new IllegalArgumentException("No peptideID reselected after peptide insert");
-            rs = stmt.getResultSet();
-            if (!rs.next())
-                throw new IllegalArgumentException("No peptideID found in result set");
-
-            return rs.getLong(1);
-        }
-        finally
-        {
-            ResultSetUtil.close(rs);
-        }
-    }
-
     protected void write(PepXmlPeptide peptide, PeptideProphetSummary peptideProphetSummary) throws SQLException
     {
         // If we have quantitation, use the statement that reselects the rowId; otherwise, use the simple insert statement
@@ -534,67 +514,86 @@ public class PepXmlImporter extends MS2Importer
         boolean hasProphet = (_scoringAnalysis && pp != null && pp.isSummaryLoaded());
         boolean hasQuant = (null != _quantSummaries && _quantSummaries.size() > 0);
 
-        PreparedStatement stmt = (hasProphet || hasQuant ? _stmtWithReselect : _stmt);
+        if (hasProphet || hasQuant)
+        {
+            // Execute insert with peptideId reselect
+            setPeptideParameters(_stmtWithReselect, peptide, peptideProphetSummary);
+            ResultSet rs = null;
+            long peptideId;
 
-        try
-        {
-            setPeptideParameters(stmt, peptide, peptideProphetSummary);
-            stmt.execute();
-        }
-        catch (SQLException e)
-        {
-            _log.error("Failed to insert scan " + peptide.getScan() + " with charge " +
-                    peptide.getCharge() + " from " + _gzFileName);
-            throw e;
-        }
-
-        long peptideId = -1;
-        if (hasProphet)
-        {
-            peptideId = getPeptideId(stmt);
-            int index = 1;
             try
             {
-                _prophetStmt.setLong(index++, peptideId);
-                _prophetStmt.setFloat(index++, pp.getProphetFval());
-                _prophetStmt.setFloat(index++, pp.getProphetDeltaMass());
-                _prophetStmt.setInt(index++, pp.getProphetNumTrypticTerm());
-                _prophetStmt.setInt(index++, pp.getProphetNumMissedCleav());
-                _prophetStmt.executeUpdate();
-            }
-            catch (SQLException e)
-            {
-                _log.error("Failed to insert prophet info for scan " + peptide.getScan() + " with charge " +
-                        peptide.getCharge() + " from " + _gzFileName);
-                throw e;
-            }
-        }
+                rs = MS2Manager.getSqlDialect().executeInsertWithResults(_stmtWithReselect);
 
-        if (hasQuant)
-        {
-            if (peptideId == -1)
-                peptideId = getPeptideId(stmt);
+                if (null == rs)
+                    throw new IllegalArgumentException("No peptideID reselected after peptide insert");
 
-            // Loop over and insert any quantitation analysis results
-            for (RelativeQuantAnalysisSummary summary : _quantSummaries)
+                if (!rs.next())
+                    throw new IllegalArgumentException("No peptideID found in result set");
+
+                peptideId = rs.getLong(1);
+            }
+            finally
             {
-                AbstractQuantAnalysisResult result = (AbstractQuantAnalysisResult)peptide.getAnalysisResult(summary.getAnalysisType());
-                if (result != null)
+                ResultSetUtil.close(rs);
+            }
+
+            if (hasProphet)
+            {
+                int index = 1;
+                try
                 {
-                    result.setPeptideId(peptideId);
-                    result.setQuantId(summary.getQuantId());
-                    try
+                    _prophetStmt.setLong(index++, peptideId);
+                    _prophetStmt.setFloat(index++, pp.getProphetFval());
+                    _prophetStmt.setFloat(index++, pp.getProphetDeltaMass());
+                    _prophetStmt.setInt(index++, pp.getProphetNumTrypticTerm());
+                    _prophetStmt.setInt(index++, pp.getProphetNumMissedCleav());
+                    _prophetStmt.executeUpdate();
+                }
+                catch (SQLException e)
+                {
+                    _log.error("Failed to insert prophet info for scan " + peptide.getScan() + " with charge " + peptide.getCharge() + " from " + _gzFileName);
+                    throw e;
+                }
+            }
+
+            if (hasQuant)
+            {
+                // Loop over and insert any quantitation analysis results
+                for (RelativeQuantAnalysisSummary summary : _quantSummaries)
+                {
+                    AbstractQuantAnalysisResult result = (AbstractQuantAnalysisResult)peptide.getAnalysisResult(summary.getAnalysisType());
+                    if (result != null)
                     {
-                        result.insert(this);
-                    }
-                    catch (SQLException e)
-                    {
-                        _log.error("Failed to insert quantitation info for scan " + peptide.getScan() +
-                                " with charge " + peptide.getCharge() + " from " + _gzFileName);
-                        throw e;
+                        result.setPeptideId(peptideId);
+                        result.setQuantId(summary.getQuantId());
+
+                        try
+                        {
+                            result.insert(this);
+                        }
+                        catch (SQLException e)
+                        {
+                            _log.error("Failed to insert quantitation info for scan " + peptide.getScan() + " with charge " + peptide.getCharge() + " from " + _gzFileName);
+                            throw e;
+                        }
                     }
                 }
             }
+        }
+        else
+        {
+            try
+            {
+                setPeptideParameters(_stmt, peptide, peptideProphetSummary);
+                _stmt.execute();
+            }
+            catch (SQLException e)
+            {
+                _log.error("Failed to insert scan " + peptide.getScan() + " with charge " + peptide.getCharge() + " from " + _gzFileName);
+                throw e;
+            }
+
         }
     }
 

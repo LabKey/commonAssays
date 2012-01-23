@@ -132,7 +132,7 @@ public class FlowManager
     {
         FlowEntry entry = getAttributeEntry(container, type, attr);
         if (entry != null)
-            return entry._rowId.intValue();
+            return entry._rowId;
 
         return 0;
     }
@@ -149,7 +149,7 @@ public class FlowManager
     {
         FlowEntry entry = getAttributeEntry(container, type, attr);
         if (entry != null)
-            return entry._aliasId.intValue();
+            return entry._aliasId;
 
         return 0;
     }
@@ -238,6 +238,7 @@ public class FlowManager
 
             RowIdCacheKey key = new RowIdCacheKey(type, rowId);
             FlowEntry entry = _attrRowIdToEntryCache.get(key);
+
             if (entry == null)
             {
                 try
@@ -452,7 +453,7 @@ public class FlowManager
             for (Object alias : aliases)
                 ensureAttributeName(c, type, alias.toString(), aliasId);
 
-            return aliasId.intValue();
+            return aliasId;
         }
     }
 
@@ -501,33 +502,18 @@ public class FlowManager
 
     public AttrObject getAttrObject(ExpData data)
     {
-        try
-        {
-            SimpleFilter filter = new SimpleFilter();
-            filter.addCondition("DataId", data.getRowId());
-            AttrObject[] array = Table.select(getTinfoObject(), Table.ALL_COLUMNS, filter, null, AttrObject.class);
-            if (array.length == 0)
-                return null;
-            return array[0];
-        }
-        catch (SQLException e)
-        {
-            throw UnexpectedException.wrap(e);
-        }
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition("DataId", data.getRowId());
+
+        return new TableSelector(getTinfoObject(), Table.ALL_COLUMNS, filter, null).getObject(AttrObject.class);
     }
 
     public AttrObject getAttrObjectFromRowId(int rowid)
     {
-        try
-        {
-            SimpleFilter filter = new SimpleFilter();
-            filter.addCondition("RowId", rowid);
-            return Table.selectObject(getTinfoObject(), Table.ALL_COLUMNS, filter, null, AttrObject.class);
-        }
-        catch (SQLException e)
-        {
-            throw UnexpectedException.wrap(e);
-        }
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition("RowId", rowid);
+
+        return new TableSelector(getTinfoObject(), Table.ALL_COLUMNS, filter, null).getObject(AttrObject.class);
     }
 
 

@@ -21,6 +21,7 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.*;
 import org.labkey.api.data.dialect.SqlDialect;
@@ -918,7 +919,7 @@ public class ProteinManager
          @Override
          protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
          {
-             sb.append("Peptide member of ProteinGroup " + _groupNum);
+             sb.append("Peptide member of ProteinGroup ").append(_groupNum);
              if (_indistinguishableProteinId > 0)
              {
                  sb.append("-");
@@ -1370,7 +1371,7 @@ public class ProteinManager
     }
 
 
-    public static void indexProteins(SearchService.IndexTask task, Date modifiedSince)
+    public static void indexProteins(@Nullable SearchService.IndexTask task, @Nullable Date modifiedSince)
     {
         if (1==1)
             return;

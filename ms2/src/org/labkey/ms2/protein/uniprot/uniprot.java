@@ -77,20 +77,23 @@ public class uniprot extends ParseActions
         try
         {
             setupNames(context.getConnection());
+
             if (getCurrentInsertId() == 0)
             {
                 _initialInsertion.setString(1, getWhatImParsing());
                 if (getComment() == null) setComment("");
                 _initialInsertion.setString(2, getComment());
                 _initialInsertion.setTimestamp(3, new java.sql.Timestamp(new java.util.Date().getTime()));
-                _initialInsertion.executeUpdate();
-                //c.commit();
-                ResultSet idrs =
-                        context.getConnection().createStatement().executeQuery(_dialect.appendSelectAutoIncrement("", ProteinManager.getTableInfoAnnotInsertions(), "InsertId"));
 
-                idrs.next();
-                setCurrentInsertId(idrs.getInt(1));
-                idrs.close();
+                ResultSet idrs = _dialect.executeInsertWithResults(_initialInsertion);
+
+                if (null != idrs)
+                {
+                    idrs.next();
+                    setCurrentInsertId(idrs.getInt(1));
+                    idrs.close();
+                }
+
                 context.getConnection().commit();
             }
             else
@@ -384,11 +387,11 @@ public class uniprot extends ParseActions
                         ProteinManager.getTableInfoOrganisms() + " b, " +
                         ProteinManager.getTableInfoSequences() + " c " +
                         " WHERE c.hash=" + _iTableName + ".hash AND " + _iTableName + ".genus=b.genus AND " + _iTableName + ".species=b.species AND b.orgid=c.orgid" +
-                        ")"
-                ;
+                        ")";
 
-        String initialInsertionCommand = "INSERT INTO " + ProteinManager.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,InsertDate) VALUES (?,'uniprot',?,?)";
-        _initialInsertion = c.prepareStatement(initialInsertionCommand);
+        StringBuilder initialInsertionCommand = new StringBuilder("INSERT INTO " + ProteinManager.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,InsertDate) VALUES (?,'uniprot',?,?)");
+        _dialect.appendSelectAutoIncrement(initialInsertionCommand, ProteinManager.getTableInfoAnnotInsertions(), "InsertId");
+        _initialInsertion = c.prepareStatement(initialInsertionCommand.toString());
         String getCurrentInsertStatsCommand =
                 "SELECT SequencesAdded,AnnotationsAdded,IdentifiersAdded,OrganismsAdded,Mouthsful,RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?";
         _getCurrentInsertStats = c.prepareStatement(getCurrentInsertStatsCommand);
@@ -612,7 +615,7 @@ public class uniprot extends ParseActions
             }
             else
             {
-                _addSeq.setFloat(8, curSeq.getMass().floatValue());
+                _addSeq.setFloat(8, curSeq.getMass());
             }
             if (curSeq.getLength() == null)
             {
@@ -620,7 +623,7 @@ public class uniprot extends ParseActions
             }
             else
             {
-                _addSeq.setInt(9, curSeq.getLength().intValue());
+                _addSeq.setInt(9, curSeq.getLength());
             }
             if (curSeq.getSource() == null)
             {

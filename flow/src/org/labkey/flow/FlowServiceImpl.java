@@ -18,21 +18,18 @@ package org.labkey.flow;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.SqlSelector;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.flow.api.FlowService;
 import org.labkey.flow.persist.FlowManager;
 
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
 
 /**
- * Created by IntelliJ IDEA.
  * User: matthewb
  * Date: Oct 25, 2010
  * Time: 11:16:08 AM
@@ -46,25 +43,22 @@ public class FlowServiceImpl implements FlowService
         List<ExpData> ret = new LinkedList<ExpData>();
         SQLFragment sql = new SQLFragment("SELECT dataid FROM " + FlowManager.get().getTinfoObject().getFromSQL("O") + " WHERE uri=?");
         sql.add(canonicalURL);
+
         if (null != container)
         {
             sql.append(" AND container=?");
             sql.add(container);
         }
-        try
+
+        Integer[] dataids = new SqlSelector(FlowManager.get().getSchema(), sql).getArray(Integer.class);
+
+        for (Integer dataid : dataids)
         {
-            Integer[] dataids = Table.executeArray(FlowManager.get().getSchema(), sql, Integer.class);
-            for (Integer dataid : dataids)
-            {
-                ExpData data = ExperimentService.get().getExpData(dataid);
-                if (null != data)
-                    ret.add(data);
-            }
-            return ret;
+            ExpData data = ExperimentService.get().getExpData(dataid);
+            if (null != data)
+                ret.add(data);
         }
-        catch (SQLException x)
-        {
-            throw new RuntimeSQLException(x);
-        }
+
+        return ret;
     }
 }

@@ -52,7 +52,6 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeSet;
-import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.MoveRunFromWorkspaceJob;
 import org.labkey.flow.view.ExportAnalysisForm;
 import org.springframework.validation.BindException;
@@ -78,8 +77,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class RunController extends BaseFlowController
 {

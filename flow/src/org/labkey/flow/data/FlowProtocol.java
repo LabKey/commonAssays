@@ -19,8 +19,19 @@ package org.labkey.flow.data;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.data.*;
-import org.labkey.api.exp.api.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpProtocolApplication;
+import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpMaterialTable;
@@ -37,12 +48,19 @@ import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class FlowProtocol extends FlowObject<ExpProtocol>
 {
@@ -153,18 +171,22 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     public Map<String, FieldKey> getSampleSetJoinFields()
     {
         String prop;
+
         try
         {
             prop = (String) getProperty(FlowProperty.SampleSetJoin.getPropertyDescriptor());
         }
         catch (SQLException e)
         {
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
+
         if (prop == null)
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
+
         String[] values = StringUtils.split(prop, "&");
-        Map<String, FieldKey> ret = new LinkedHashMap();
+        Map<String, FieldKey> ret = new LinkedHashMap<String, FieldKey>();
+
         for (String value : values)
         {
             int ichEquals = value.indexOf("=");
@@ -172,6 +194,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             String right = PageFlowUtil.decode(value.substring(ichEquals + 1));
             ret.put(left, FieldKey.fromString(right));
         }
+
         return ret;
     }
 
@@ -279,7 +302,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
         FlowSchema schema = new FlowSchema(user, getContainer());
         TableInfo fcsFilesTable = schema.getTable("FCSFiles");
-        List<FieldKey> fields = new ArrayList();
+        List<FieldKey> fields = new ArrayList<FieldKey>();
         FieldKey fieldRowId = new FieldKey(null, "RowId");
         FieldKey fieldSampleRowId = new FieldKey(null, "Sample");
         fields.add(fieldRowId);
