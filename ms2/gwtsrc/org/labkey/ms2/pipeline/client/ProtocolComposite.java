@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline.client;
 
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.*;
 import org.labkey.api.gwt.client.util.StringUtils;
 
@@ -27,7 +28,7 @@ import java.util.List;
  * User: billnelson@uky.edu
  * Date: Mar 25, 2008
  */
-public class ProtocolComposite extends SearchFormComposite implements SourcesChangeEvents
+public class ProtocolComposite extends SearchFormComposite
 {
     private FlexTable instance = new FlexTable();
     private ListBox protocolListBox = new ListBox();
@@ -51,8 +52,8 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
         protocolListBox.setVisibleItemCount(1);
         protocolDescHtml.setWordWrap(true);
         protocolDescHtml.setStylePrimaryName("labkey-read-only");
-        textBoxLabel = new Label("Name:");
-        descriptionLabel = new Label("Description:");
+        textBoxLabel = new Label("Name");
+        descriptionLabel = new Label("Description");
         
         instance.setWidget(0,0,protocolListBox);
         instance.getFlexCellFormatter().setColSpan(0,0,2);
@@ -66,7 +67,7 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
         instance.getCellFormatter().setHorizontalAlignment(2,0,HasHorizontalAlignment.ALIGN_LEFT);
         instance.setWidget(2,1,protocolDescTextArea);
 
-        listBoxLabel = new Label("Analysis protocols:");
+        listBoxLabel = new Label("Analysis protocols");
         listBoxLabel.addStyleName("labkey-strong");
         labelWidget = new VerticalPanel();
         ((VerticalPanel)labelWidget).add(listBoxLabel);
@@ -88,14 +89,9 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
         descriptionLabel.setStylePrimaryName(style);
     }
 
-    public void addChangeListener(ChangeListener changeListener)
+    public void addChangeHandler(ChangeHandler handler)
     {
-        protocolListBox.addChangeListener(changeListener);
-    }
-
-    public void removeChangeListener(ChangeListener changeListener)
-    {
-        protocolListBox.removeChangeListener(changeListener);
+        protocolListBox.addChangeHandler(handler);
     }
 
     public void setName(String name)
@@ -198,7 +194,7 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
             
             protocolNameTextBox.setVisible(false);
             textBoxLabel.setVisible(false);
-            instance.getCellFormatter().removeStyleName(1,0, "labkey-form-label-nowrap");
+            instance.getCellFormatter().removeStyleName(1, 0, "labkey-form-label-nowrap");
             instance.remove(protocolDescTextArea);
             instance.setWidget(2,1,protocolDescHtml);
             if (protocolDescTextArea.getText() != null && !protocolDescTextArea.getText().trim().equals(""))

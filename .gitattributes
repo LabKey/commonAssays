@@ -850,6 +850,7 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/EnzymeComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/EnzymeParseException.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/GWTSearchServiceResult.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/InputXmlComposite.java -text
+ms2/gwtsrc/org/labkey/ms2/pipeline/client/LocationComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/MzXmlComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/ParamParser.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/ProtocolComposite.java -text

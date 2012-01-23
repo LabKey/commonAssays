@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline.client.mascot;
 
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.*;
 import org.labkey.ms2.pipeline.client.SequenceDbComposite;
 
@@ -58,17 +59,17 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
 
     private void initLabel(boolean readonly)
     {
-        taxonomyLabel.setText("Taxonomy:");
+        taxonomyLabel.setText("Taxonomy");
         ((VerticalPanel)labelWidget).clear();
         if(readonly)
         {
-            databaseLabel.setText("Database:");
+            databaseLabel.setText("Database");
             ((VerticalPanel)labelWidget).add(databaseLabel);
             ((VerticalPanel)labelWidget).add(taxonomyLabel);
         }
         else
         {
-            databaseLabel.setText("Databases:");
+            databaseLabel.setText("Databases");
             ((VerticalPanel)labelWidget).add(databaseLabel);
             ((VerticalPanel)labelWidget).add(new Label(" "));
             ((VerticalPanel)labelWidget).add(new Label(" "));
@@ -119,7 +120,7 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
     {
         super.setReadOnly(readOnly);
         String sequenceDbName = " ";
-        String dbWidgetName = "";
+        String dbWidgetName;
         String taxonomyName = "";
 
         if(readOnly)
@@ -199,11 +200,7 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
         return "";
     }
 
-    public void addTaxonomyChangeListener(ChangeListener listener) {
-        taxonomyListBox.addChangeListener(listener);
-    }
-
-    public void removeTaxonomyChangeListener(ChangeListener listener) {
-        taxonomyListBox.removeChangeListener(listener);
+    public void addTaxonomyChangeHandler(ChangeHandler handler) {
+        taxonomyListBox.addChangeHandler(handler);
     }
 }

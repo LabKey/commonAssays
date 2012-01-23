@@ -16,6 +16,8 @@
 
 package org.labkey.ms2.pipeline.client;
 
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
@@ -26,7 +28,7 @@ import org.labkey.api.gwt.client.ui.ImageButton;
  * Date: Mar 13, 2008
  */
 
-public abstract class SequenceDbComposite extends SearchFormComposite implements SourcesChangeEvents, SourcesClickEvents
+public abstract class SequenceDbComposite extends SearchFormComposite
 {
     protected VerticalPanel instance = new VerticalPanel();
     protected ListBox sequenceDbPathListBox = new ListBox();
@@ -222,14 +224,9 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
         return sequenceDbListBox.getValue(index);
     }
 
-    public void addChangeListener(ChangeListener listener)
+    public void addChangeListener(ChangeHandler changeHandler)
     {
-        sequenceDbPathListBox.addChangeListener(listener);
-    }
-
-    public void removeChangeListener(ChangeListener changeListener) {
-
-        sequenceDbPathListBox.removeChangeListener(changeListener);
+        sequenceDbPathListBox.addChangeHandler(changeHandler);
     }
 
     public void setName(String name) {
@@ -253,24 +250,14 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
         sequenceDbListBox.setVisibleItemCount(itemCount);
     }
 
-    public void addRefreshClickListener(ClickListener listener)
+    public void addRefreshClickHandler(ClickHandler handler)
     {
-            refreshButton.addClickListener(listener);
+        refreshButton.addClickHandler(handler);
     }
 
-    public void removeRefreshClickListener(ClickListener listener)
+    public void addClickHandler(ClickHandler handler)
     {
-            refreshButton.removeClickListener(listener);
-    }
-
-    public void addClickListener(ClickListener listener)
-    {
-            sequenceDbListBox.addClickListener(listener);
-    }
-
-    public void removeClickListener(ClickListener listener)
-    {
-            sequenceDbListBox.removeClickListener(listener);
+        sequenceDbListBox.addClickHandler(handler);
     }
 
     public void setReadOnly(boolean readOnly)
@@ -322,7 +309,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
 
     public Widget getLabel(String style)
     {
-        labelWidget = new Label("Databases:");
+        labelWidget = new Label("Databases");
         labelWidget.setStylePrimaryName(style);
         return labelWidget;
     }
@@ -339,8 +326,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
     abstract public void setTaxonomyListBoxContents(List<String> taxonomyList);
     abstract public String getSelectedTaxonomy();
     abstract public String setDefaultTaxonomy(String name);
-    abstract public void addTaxonomyChangeListener(ChangeListener listener);
-    abstract public void removeTaxonomyChangeListener(ChangeListener listener);
+    abstract public void addTaxonomyChangeHandler(ChangeHandler listener);
 
     public void setLoading(boolean loading)
     {

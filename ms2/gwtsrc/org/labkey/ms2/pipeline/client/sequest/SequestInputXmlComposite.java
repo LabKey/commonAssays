@@ -41,7 +41,7 @@ public class SequestInputXmlComposite extends InputXmlComposite
 
     public Widget getLabel(String style)
     {
-        labelWidget = new Label("Sequest XML:");
+        labelWidget = new Label("Sequest XML");
         labelWidget.setStylePrimaryName(style);
         return labelWidget;
     }

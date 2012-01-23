@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline.client;
 
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.*;
 import java.util.*;
 
@@ -27,7 +28,7 @@ import java.util.*;
 /**
  * <code>EnzymeComposite</code>
  */
-public class EnzymeComposite extends SearchFormComposite implements SourcesChangeEvents
+public class EnzymeComposite extends SearchFormComposite
 {
     protected VerticalPanel instance = new VerticalPanel();
     protected ListBox enzymeListBox = new ListBox();
@@ -74,7 +75,7 @@ public class EnzymeComposite extends SearchFormComposite implements SourcesChang
 
     public Widget getLabel(String style)
     {
-        ((Label)labelWidget).setText("Enzyme:");
+        ((Label)labelWidget).setText("Enzyme");
         labelWidget.setStylePrimaryName(style);
         return labelWidget;
     }
@@ -188,13 +189,8 @@ public class EnzymeComposite extends SearchFormComposite implements SourcesChang
         }
     }
 
-    public void addChangeListener(ChangeListener changeListener)
+    public void addChangeListener(ChangeHandler changeHandler)
     {
-        enzymeListBox.addChangeListener(changeListener);
-    }
-
-    public void removeChangeListener(ChangeListener changeListener)
-    {
-        enzymeListBox.removeChangeListener(changeListener);
+        enzymeListBox.addChangeHandler(changeHandler);
     }
 }

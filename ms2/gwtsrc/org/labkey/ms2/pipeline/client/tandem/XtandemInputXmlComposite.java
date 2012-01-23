@@ -42,7 +42,7 @@ public class XtandemInputXmlComposite extends InputXmlComposite
 
     public Widget getLabel(String style)
     {
-        labelWidget = new Label("X! Tandem XML:");
+        labelWidget = new Label("X! Tandem XML");
         labelWidget.setStylePrimaryName(style);
         return labelWidget;
     }

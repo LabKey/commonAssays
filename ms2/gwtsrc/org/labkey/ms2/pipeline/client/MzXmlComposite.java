@@ -57,7 +57,7 @@ public class MzXmlComposite extends SearchFormComposite
         {
             if(num > 1)
             {
-                ((Label)labelWidget).setText("Analyze files:");
+                ((Label)labelWidget).setText("Analyze file:");
             }
             StringBuffer names = new StringBuffer();
             for(int i = 0; i < num; i++)
@@ -102,7 +102,7 @@ public class MzXmlComposite extends SearchFormComposite
 
     public Widget getLabel(String style)
     {
-        ((Label)labelWidget).setText("Analyze file:");
+        ((Label)labelWidget).setText("Analyze file");
         labelWidget.setStylePrimaryName(style);
         return labelWidget;
     }

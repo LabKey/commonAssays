@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline.client.sequest;
 
+import com.google.gwt.event.dom.client.ChangeHandler;
 import org.labkey.ms2.pipeline.client.SequenceDbComposite;
 
 import java.util.List;
@@ -56,11 +57,7 @@ public class SequestSequenceDbComposite extends SequenceDbComposite
         return null;
     }
 
-    public void addTaxonomyChangeListener(ChangeListener listener) {
+    public void addTaxonomyChangeHandler(ChangeHandler handler) {
        //No Mascot style taxonomy in Sequest
-    }
-
-    public void removeTaxonomyChangeListener(ChangeListener listener) {
-        //No Mascot style taxonomy in Sequest
     }
 }

@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * <code>ResidueModComposite</code>
  */
-public abstract class ResidueModComposite extends SearchFormComposite implements SourcesClickEvents
+public abstract class ResidueModComposite extends SearchFormComposite
 {
     protected Search searchForm;
     protected SimplePanel instance = new SimplePanel();
@@ -87,7 +87,6 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
 
     public void setWidth(String width)
     {
-        int intWidth = 0;
         StringBuffer num = new StringBuffer();
         StringBuffer type = new StringBuffer();
         StringBuffer endWidth = new StringBuffer();
@@ -107,7 +106,7 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
         }
         try
         {
-            intWidth = Integer.parseInt(num.toString());
+            int intWidth = Integer.parseInt(num.toString());
             endWidth.append(Integer.toString((intWidth/9) * 4));
             endWidth.append(type);
             centerWidth.append(Integer.toString(intWidth/9));
@@ -133,7 +132,7 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
 
     public Widget getLabel(String style)
     {
-        ((Label)labelWidget).setText("Residue modifications:");
+        ((Label)labelWidget).setText("Residue modifications");
         labelWidget.setStylePrimaryName(style);
         return labelWidget;
     }
@@ -161,9 +160,9 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
 
     protected boolean isValidResidue(char res)
     {
-        for(int i = 0; i < validResidues.length; i++)
+        for (char validResidue : validResidues)
         {
-            if(res == validResidues[i]) return true;
+            if (res == validResidue) return true;
         }
         return false;
     }
@@ -184,14 +183,6 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
     public String getName()
     {
         return null;  //Not yet
-    }
-
-    public void addClickListener(ClickListener clickListener) {
-        //Not needed
-    }
-
-    public void removeClickListener(ClickListener clickListener) {
-        //Not needed.
     }
 
     public Map<String, String> getStaticMods()

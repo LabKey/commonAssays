@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.pipeline.client;
 
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.DOM;
@@ -27,7 +28,7 @@ import java.util.*;
  * User: billnelson@uky.edu
  * Date: Apr 8, 2008
  */
-public abstract class InputXmlComposite extends SearchFormComposite  implements SourcesChangeEvents
+public abstract class InputXmlComposite extends SearchFormComposite
 {
     protected TextAreaWrapable inputXmlTextArea = new TextAreaWrapable();
     protected Hidden inputXmlHidden = new Hidden();
@@ -110,14 +111,9 @@ public abstract class InputXmlComposite extends SearchFormComposite  implements 
         return params.validate();
     }
 
-    public void addChangeListener(ChangeListener changeListener)
+    public void addChangeListener(ChangeHandler changeHandler)
     {
-        inputXmlTextArea.addChangeListener(changeListener);
-    }
-
-    public void removeChangeListener(ChangeListener changeListener)
-    {
-        inputXmlTextArea.removeChangeListener(changeListener);
+        inputXmlTextArea.addChangeHandler(changeHandler);
     }
 
     public void setSequenceDb(String name) throws SearchFormException

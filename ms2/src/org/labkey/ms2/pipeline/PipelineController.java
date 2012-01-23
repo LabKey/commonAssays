@@ -33,9 +33,12 @@ import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
+import org.labkey.ms2.pipeline.mascot.MascotPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
 import org.labkey.ms2.pipeline.sequest.SequestLocalPipelineProvider;
+import org.labkey.ms2.pipeline.sequest.SequestPipelineJob;
 import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
+import org.labkey.ms2.pipeline.tandem.XTandemPipelineJob;
 import org.labkey.ms2.pipeline.tandem.XTandemSearchProtocolFactory;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -181,6 +184,12 @@ public class PipelineController extends SpringActionController
         {
            return XTandemCPipelineProvider.name;
         }
+
+        @Override
+        protected TaskId getTaskId()
+        {
+            return new TaskId(XTandemPipelineJob.class);
+        }
     }
 
     @RequiresPermissionClass(InsertPermission.class)
@@ -190,6 +199,12 @@ public class PipelineController extends SpringActionController
         {
             return MascotCPipelineProvider.name;
         }
+
+        @Override
+        protected TaskId getTaskId()
+        {
+            return new TaskId(MascotPipelineJob.class);
+        }
     }
 
     @RequiresPermissionClass(InsertPermission.class)
@@ -198,6 +213,13 @@ public class PipelineController extends SpringActionController
         public String getProviderName()
         {
             return SequestLocalPipelineProvider.name;
+        }
+
+
+        @Override
+        protected TaskId getTaskId()
+        {
+            return new TaskId(SequestPipelineJob.class);
         }
     }
 
@@ -212,7 +234,7 @@ public class PipelineController extends SpringActionController
 
 
     @RequiresPermissionClass(InsertPermission.class)
-    public class SearchAction extends FormViewAction<MS2SearchForm>
+    public abstract class SearchAction extends FormViewAction<MS2SearchForm>
     {
         private PipeRoot _root;
         private File _dirSeqRoot;
@@ -220,10 +242,7 @@ public class PipelineController extends SpringActionController
         private AbstractMS2SearchPipelineProvider _provider;
         private AbstractMS2SearchProtocol _protocol;
 
-        public String getProviderName()
-        {
-            return null;
-        }
+        public abstract String getProviderName();
 
         public Class<? extends Controller> getAction()
         {
@@ -466,10 +485,13 @@ public class PipelineController extends SpringActionController
             props.put("helpTopic", helpTopic);
             props.put("file", StringUtils.join(form.getFile(), "/"));
             props.put("searchEngine", form.getSearchEngine());
+            props.put("pipelineId", getTaskId().toString());
             props.put("targetAction", SpringActionController.getActionName(getAction()) + ".view");
             props.put("path", form.getPath());
             return new GWTView(org.labkey.ms2.pipeline.client.Search.class, props);
         }
+
+        protected abstract TaskId getTaskId();
 
         private String getErrors(BindException errors)
         {

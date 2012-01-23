@@ -18,7 +18,13 @@ package org.labkey.ms2.pipeline.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
+import org.labkey.api.gwt.client.pipeline.PipelineGWTService;
+import org.labkey.api.gwt.client.pipeline.PipelineGWTServiceAsync;
 import org.labkey.api.gwt.client.util.ErrorDialogAsyncCallback;
 import org.labkey.api.gwt.client.util.PropertyUtil;
 import org.labkey.api.gwt.client.util.ServiceUtil;
@@ -43,6 +49,7 @@ public class Search implements EntryPoint
     private                 VerticalPanel           messagesPanel = new VerticalPanel();
     private                 ProtocolComposite       protocolComposite;
     private                 SequenceDbComposite     sequenceDbComposite;
+    private                 LocationComposite       locationComposite;
     private                 MzXmlComposite          mzXmlComposite = new MzXmlComposite();
     private                 EnzymeComposite         enzymeComposite;
     private                 ResidueModComposite     residueModComposite;
@@ -68,7 +75,9 @@ public class Search implements EntryPoint
     private Map<String, GWTSearchServiceResult> databaseCache = new HashMap<String, GWTSearchServiceResult>();
     private boolean sequencePathsLoaded = false;
 
+    private PipelineGWTServiceAsync pipelineService = null;
     private SearchServiceAsync service = null;
+
     private SearchServiceAsync getSearchService()
     {
         if (service == null)
@@ -79,6 +88,16 @@ public class Search implements EntryPoint
         return service;
     }
 
+    private PipelineGWTServiceAsync getPipelineService()
+    {
+        if (pipelineService == null)
+        {
+            pipelineService = (PipelineGWTServiceAsync) GWT.create(PipelineGWTService.class);
+            ServiceUtil.configureEndpoint(pipelineService, "pipelineConfiguration", "pipeline");
+        }
+        return pipelineService;
+    }
+
 
     public void onModuleLoad()
     {
@@ -87,10 +106,12 @@ public class Search implements EntryPoint
 
         returnURL = PropertyUtil.getReturnURL();
         searchEngine = PropertyUtil.getServerProperty("searchEngine");
+        String pipelineId = PropertyUtil.getServerProperty("pipelineId");
         SearchFormCompositeFactory compositeFactory = new SearchFormCompositeFactory(searchEngine);
         sequenceDbComposite = compositeFactory.getSequenceDbComposite();
         inputXmlComposite = compositeFactory.getInputXmlComposite();
         enzymeComposite = compositeFactory.getEnzymeComposite();
+//        locationComposite = compositeFactory.getLocationComposite();
         residueModComposite = compositeFactory.getResidueModComposite(this);
         protocolComposite = new ProtocolComposite();
 
@@ -109,7 +130,7 @@ public class Search implements EntryPoint
         protocolComposite.setWidth(INPUT_WIDTH);
         protocolComposite.setVisibleLines(4);
 
-        searchEngineLabel.setText("Search engine:");
+        searchEngineLabel.setText("Search engine");
         searchEngineLabel.setStylePrimaryName("labkey-form-label-nowrap");
         actualSearchEngineLabel.setStylePrimaryName("labkey-read-only");
         actualSearchEngineLabel.setText(searchEngine);
@@ -128,7 +149,7 @@ public class Search implements EntryPoint
         helpHTML.setHTML("For detailed explanations of all available input parameters, see the <a href=\"" +
             PropertyUtil.getServerProperty("helpTopic") + "\">" + searchEngine + " Documentation</a>");
 
-        saveProtocolCheckBoxLabel.setText("Save protocol:");
+        saveProtocolCheckBoxLabel.setText("Save protocol");
         saveProtocolCheckBoxLabel.setStylePrimaryName("labkey-form-label-nowrap");
         saveProtocolCheckBox.setName("saveProtocol");
         saveProtocolCheckBox.setValue(Boolean.valueOf(PropertyUtil.getServerProperty("saveProtocol")));
@@ -154,12 +175,14 @@ public class Search implements EntryPoint
         loading();
         getSearchService().getSearchServiceResult(searchEngine, path, fileNames, new SearchServiceAsyncCallback());
 
-        protocolComposite.addChangeListener(new ProtocolChangeListener());
+//        getPipelineService().getLocationOptions(pipelineId, locationComposite);
+
+        protocolComposite.addChangeHandler(new ProtocolChangeListener());
 
         sequenceDbComposite.addChangeListener(new SequenceDbChangeListener());
-        sequenceDbComposite.addRefreshClickListener(new RefreshSequenceDbPathsClickListener());
-        sequenceDbComposite.addClickListener(new SequenceDbClickListener());
-        sequenceDbComposite.addTaxonomyChangeListener(new TaxonomyChangeListener());
+        sequenceDbComposite.addRefreshClickHandler(new RefreshSequenceDbPathsClickListener());
+        sequenceDbComposite.addClickHandler(new SequenceDbClickListener());
+        sequenceDbComposite.addTaxonomyChangeHandler(new TaxonomyChangeListener());
         enzymeComposite.addChangeListener(new EnzymeChangeListener());
 
         inputXmlComposite.addChangeListener(new InputXmlChangeListener());
@@ -264,8 +287,6 @@ public class Search implements EntryPoint
 
     private void loadSubPanel()
     {
-        int rows = 8;
-        int cols = 2;
         String labelStyle = "labkey-form-label-nowrap";
 
         subPanel.add(pathHidden);
@@ -276,7 +297,7 @@ public class Search implements EntryPoint
         subPanel.add(new Label("Choose an existing protocol or define a new one."));
         subPanel.setWidth("100%");
 
-        formGrid.resize(rows , cols);
+        formGrid.resize(9, 2);
         formGrid.setWidget(0, 0, protocolComposite.getLabel(labelStyle));
         formGrid.setWidget(0, 1, protocolComposite);
         formGrid.setWidget(1, 0, searchEngineLabel);
@@ -293,9 +314,11 @@ public class Search implements EntryPoint
         formGrid.setWidget(6, 1, inputXmlComposite);
         formGrid.setWidget(7, 0, saveProtocolCheckBoxLabel);
         formGrid.setWidget(7, 1, saveProtocolCheckBox);
+//        formGrid.setWidget(8, 0, locationComposite.getLabel(labelStyle));
+//        formGrid.setWidget(8, 1, locationComposite);
         formGrid.getColumnFormatter().setWidth(1,"100%");
 
-        for(int i = 0; i< rows; i++)
+        for(int i = 0; i< formGrid.getRowCount(); i++)
         {
             formGrid.getCellFormatter().setStylePrimaryName(i,0, "labkey-form-label-nowrap");
             formGrid.getCellFormatter().setVerticalAlignment(i,0,HasVerticalAlignment.ALIGN_TOP);
@@ -779,12 +802,11 @@ public class Search implements EntryPoint
         }
     }
 
-    private class SequenceDbChangeListener implements ChangeListener
+    private class SequenceDbChangeListener implements ChangeHandler
     {
-        public void onChange(Widget widget)
+        public void onChange(ChangeEvent e)
         {
-            ListBox listBox = (ListBox)widget;
-            String dbDirectory = listBox.getValue(listBox.getSelectedIndex());
+            String dbDirectory = sequenceDbComposite.getSelectedDbPath();
             sequenceDbComposite.setLoading(true);
             sequenceDbComposite.setEnabled(true, false);
             inputXmlComposite.removeSequenceDb();
@@ -807,13 +829,12 @@ public class Search implements EntryPoint
         }
     }
 
-    private class ProtocolChangeListener implements ChangeListener
+    private class ProtocolChangeListener implements ChangeHandler
     {
-        public void onChange(Widget widget)
+        public void onChange(ChangeEvent e)
         {
             clearDisplay();
-            ListBox listBox = (ListBox)widget;
-            String protocolName = listBox.getValue(listBox.getSelectedIndex());
+            String protocolName = protocolComposite.getSelectedProtocolValue();
             if(protocolName.equals("new"))
             {
                 newProtocol();
@@ -824,10 +845,9 @@ public class Search implements EntryPoint
         }
     }
 
-    private class SequenceDbClickListener implements ClickListener
+    private class SequenceDbClickListener implements ClickHandler
     {
-
-        public void onClick(Widget widget)
+        public void onClick(ClickEvent e)
         {
             String db = sequenceDbComposite.getSelectedDb();
             if(db.length() > 0 && !db.equals("None found."))
@@ -848,9 +868,9 @@ public class Search implements EntryPoint
         }
     }
 
-    private class TaxonomyChangeListener implements ChangeListener
+    private class TaxonomyChangeListener implements ChangeHandler
     {
-        public void onChange(Widget widget)
+        public void onChange(ChangeEvent e)
         {
             String tax = sequenceDbComposite.getSelectedTaxonomy();
             if(tax.length() > 0)
@@ -871,9 +891,17 @@ public class Search implements EntryPoint
         }
     }
 
-    private class EnzymeChangeListener implements ChangeListener
+    private class LocationChangeListener implements ChangeHandler
     {
-        public void onChange(Widget widget)
+        public void onChange(ChangeEvent event)
+        {
+
+        }
+    }
+
+    private class EnzymeChangeListener implements ChangeHandler
+    {
+        public void onChange(ChangeEvent e)
         {
             String enz = enzymeComposite.getSelectedEnzyme();
             if(enz.length() > 0)
@@ -894,9 +922,9 @@ public class Search implements EntryPoint
         }
     }
 
-    private class RefreshSequenceDbPathsClickListener implements ClickListener
+    private class RefreshSequenceDbPathsClickListener implements ClickHandler
     {
-        public void onClick(Widget widget)
+        public void onClick(ClickEvent e)
         {
             databaseCache.clear();
             sequencePathsLoaded = false;
@@ -907,10 +935,9 @@ public class Search implements EntryPoint
         }
     }
 
-    private class InputXmlChangeListener implements ChangeListener
+    private class InputXmlChangeListener implements ChangeHandler
     {
-
-        public void onChange(Widget widget)
+        public void onChange(ChangeEvent e)
         {
             String error = inputXmlComposite.validate();
             if(error.length() > 0)

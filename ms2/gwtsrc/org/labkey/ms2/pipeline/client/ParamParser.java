@@ -184,15 +184,6 @@ public class ParamParser
             if(isInputParameterElement(name, elNote))
                 removeNode(elNote);
         }
-//        try
-//        {
-//            xmlWrapper.setText(toXml());
-//        }
-//        catch(SearchFormException e)
-//        {
-//            //sholdn't happen so throw runtime
-//            throw new DOMParseException(e.getMessage());
-//        }
     }
 
     private void removeNode(Node node)

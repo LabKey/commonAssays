@@ -42,7 +42,7 @@ public class MascotInputXmlComposite extends InputXmlComposite
     }
     public Widget getLabel(String style)
     {
-        labelWidget = new Label("Mascot XML:");
+        labelWidget = new Label("Mascot XML");
         labelWidget.setStylePrimaryName(style);
         return labelWidget;
     }

@@ -16,8 +16,9 @@
 
 package org.labkey.ms2.pipeline.client.tandem;
 
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.core.client.GWT;
 import org.labkey.ms2.pipeline.client.SequenceDbComposite;
 
@@ -80,20 +81,12 @@ public class XtandemSequenceDbComposite extends SequenceDbComposite
         {}
     }
 
-    public void addClickListener(ClickListener listener)
+    public void addClickHandler(ClickHandler handler)
     {
-        if(GWT.getTypeName(listener).equals("org.labkey.ms2.pipeline.client.Search$RefreshSequenceDbPathsClickListener"))
-            refreshButton.addClickListener(listener);
+        if(GWT.getTypeName(handler).equals("org.labkey.ms2.pipeline.client.Search$RefreshSequenceDbPathsClickListener"))
+            refreshButton.addClickHandler(handler);
         else
-            super.addClickListener(listener);
-    }
-
-    public void removeClickListener(ClickListener listener)
-    {
-        if(GWT.getTypeName(listener).equals("org.labkey.ms2.pipeline.client.Search$RefreshSequenceDbPathsClickListener"))
-            refreshButton.removeClickListener(listener);
-        else
-            super.removeClickListener(listener);
+            super.addClickHandler(handler);
     }
 
     public void setTaxonomyListBoxContents(List taxonomyList)
@@ -113,11 +106,7 @@ public class XtandemSequenceDbComposite extends SequenceDbComposite
         return null;
     }
 
-    public void addTaxonomyChangeListener(ChangeListener listener) {
+    public void addTaxonomyChangeHandler(ChangeHandler handler) {
         ///No Mascot style taxonomy in X! Tandem
-    }
-
-    public void removeTaxonomyChangeListener(ChangeListener listener) {
-        //No Mascot style taxonomy in X! Tandemm
     }
 }

@@ -93,4 +93,9 @@ public class SearchFormCompositeFactory
         else
             return null;
     }
+
+    public LocationComposite getLocationComposite()
+    {
+        return new LocationComposite();
+    }
 }
