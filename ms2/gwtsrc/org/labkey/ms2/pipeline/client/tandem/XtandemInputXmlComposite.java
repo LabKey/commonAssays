@@ -40,10 +40,10 @@ public class XtandemInputXmlComposite extends InputXmlComposite
         return super.update(text);
     }
 
-    public Widget getLabel(String style)
+    public Widget getLabel()
     {
         labelWidget = new Label("X! Tandem XML");
-        labelWidget.setStylePrimaryName(style);
+        labelWidget.setStylePrimaryName(LABEL_STYLE_NAME);
         return labelWidget;
     }
 

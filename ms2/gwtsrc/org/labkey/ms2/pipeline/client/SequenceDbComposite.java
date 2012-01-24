@@ -43,7 +43,12 @@ public abstract class SequenceDbComposite extends SearchFormComposite
     protected boolean hasDirectories;
     protected boolean foundDefaultDb;
     public static final String DB_DIR_ROOT = "<root>";
+    private final Search _search;
 
+    protected SequenceDbComposite(Search search)
+    {
+        _search = search;
+    }
 
     public void init()
     {
@@ -307,10 +312,10 @@ public abstract class SequenceDbComposite extends SearchFormComposite
         }
     }
 
-    public Widget getLabel(String style)
+    public Widget getLabel()
     {
         labelWidget = new Label("Databases");
-        labelWidget.setStylePrimaryName(style);
+        labelWidget.setStylePrimaryName(LABEL_STYLE_NAME);
         return labelWidget;
     }
 
@@ -348,6 +353,12 @@ public abstract class SequenceDbComposite extends SearchFormComposite
         refreshButton.setEnabled(paths);
     }
 
+    @Override
+    public void syncFormToXml(ParamParser params) throws SearchFormException
+    {
+        params.setSequenceDb(getSelectedDb());
+    }
+
     protected class RefreshButton extends ImageButton
     {
         RefreshButton()
@@ -359,4 +370,56 @@ public abstract class SequenceDbComposite extends SearchFormComposite
         {
         }
     }
+
+    public String syncXmlToForm(ParamParser params)
+    {
+        String sequenceDb = params.getSequenceDb();
+        if(sequenceDb == null || sequenceDb.equals(""))
+        {
+            sequenceDb = getSelectedDb();
+            if(sequenceDb == null || sequenceDb.equals(""))
+            {
+                return "";
+            }
+            else
+            {
+                try
+                {
+                    params.setSequenceDb(sequenceDb);
+                }
+                catch(SearchFormException e)
+                {
+                    return "Cannot set pipeline, database in XML: " + e.getMessage();
+                }
+            }
+        }
+        else if(!sequenceDb.equals(getSelectedDb()))
+        {
+            _search.getSequenceDbs(sequenceDb);
+        }
+
+        String taxonomy = params.getTaxonomy();
+        if(taxonomy == null || taxonomy.equals(""))
+        {
+            taxonomy = getSelectedTaxonomy();
+            if(taxonomy != null && !taxonomy.equals(""))
+            {
+                try
+                {
+                    params.setTaxonomy(taxonomy);
+                }
+                catch(SearchFormException e)
+                {
+                    return "Cannot set protein, taxon in XML: " + e.getMessage();
+                }
+            }
+        }
+        else if(!taxonomy.equals(getSelectedTaxonomy()))
+        {
+            return setDefaultTaxonomy(taxonomy);
+        }
+        return "";
+    }
+
+
 }

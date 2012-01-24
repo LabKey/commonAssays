@@ -17,6 +17,7 @@
 package org.labkey.ms2.pipeline.client.sequest;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
+import org.labkey.ms2.pipeline.client.Search;
 import org.labkey.ms2.pipeline.client.SequenceDbComposite;
 
 import java.util.List;
@@ -34,9 +35,9 @@ import com.google.gwt.user.client.ui.ChangeListener;
 public class SequestSequenceDbComposite extends SequenceDbComposite
 {
 
-    public SequestSequenceDbComposite()
+    public SequestSequenceDbComposite(Search search)
     {
-        super();
+        super(search);
         init();
     }
 

@@ -73,10 +73,10 @@ public class EnzymeComposite extends SearchFormComposite
         enzymeReadOnly.setWidth(width);
     }
 
-    public Widget getLabel(String style)
+    public Widget getLabel()
     {
         ((Label)labelWidget).setText("Enzyme");
-        labelWidget.setStylePrimaryName(style);
+        labelWidget.setStylePrimaryName(LABEL_STYLE_NAME);
         return labelWidget;
     }
 
@@ -192,5 +192,41 @@ public class EnzymeComposite extends SearchFormComposite
     public void addChangeListener(ChangeHandler changeHandler)
     {
         enzymeListBox.addChangeHandler(changeHandler);
+    }
+
+    @Override
+    public void syncFormToXml(ParamParser params) throws SearchFormException
+    {
+        params.setEnzyme(getSelectedEnzyme());
+    }
+
+    @Override
+    public String syncXmlToForm(ParamParser params)
+    {
+        String enzyme = params.getEnzyme();
+        if(enzyme == null || enzyme.equals(""))
+        {
+            enzyme = getSelectedEnzyme();
+            if(enzyme == null || enzyme.equals(""))
+            {
+                return "";
+            }
+            else
+            {
+                try
+                {
+                    params.setEnzyme(enzyme);
+                }
+                catch(SearchFormException e)
+                {
+                    return "Cannot set the enzyme in XML: " + e.getMessage();
+                }
+            }
+        }
+        else if(!enzyme.equals(getSelectedEnzyme()))
+        {
+            return setSelectedEnzyme(enzyme);
+        }
+        return "";
     }
 }

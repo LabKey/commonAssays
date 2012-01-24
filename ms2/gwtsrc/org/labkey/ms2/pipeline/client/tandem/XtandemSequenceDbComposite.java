@@ -20,6 +20,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.core.client.GWT;
+import org.labkey.ms2.pipeline.client.Search;
 import org.labkey.ms2.pipeline.client.SequenceDbComposite;
 
 import java.util.List;
@@ -35,9 +36,9 @@ import java.util.List;
 
 public class XtandemSequenceDbComposite extends SequenceDbComposite
 {
-    public XtandemSequenceDbComposite()
+    public XtandemSequenceDbComposite(Search search)
     {
-        super();
+        super(search);
         init();
     }
 

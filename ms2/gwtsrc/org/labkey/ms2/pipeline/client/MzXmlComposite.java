@@ -100,10 +100,10 @@ public class MzXmlComposite extends SearchFormComposite
         //defaults are okay for now
     }
 
-    public Widget getLabel(String style)
+    public Widget getLabel()
     {
         ((Label)labelWidget).setText("Analyze file");
-        labelWidget.setStylePrimaryName(style);
+        labelWidget.setStylePrimaryName(LABEL_STYLE_NAME);
         return labelWidget;
     }
 
@@ -143,5 +143,17 @@ public class MzXmlComposite extends SearchFormComposite
             mz.setText(name);
         }
         setHasWork(true);
+    }
+
+    @Override
+    public void syncFormToXml(ParamParser params) throws SearchFormException
+    {
+
+    }
+
+    @Override
+    public String syncXmlToForm(ParamParser params)
+    {
+        return "";
     }
 }

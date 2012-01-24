@@ -21,7 +21,6 @@ import com.google.gwt.user.client.ui.*;
 import org.labkey.api.gwt.client.util.StringUtils;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -53,8 +52,10 @@ public class ProtocolComposite extends SearchFormComposite
         protocolDescHtml.setWordWrap(true);
         protocolDescHtml.setStylePrimaryName("labkey-read-only");
         textBoxLabel = new Label("Name");
+        textBoxLabel.setStyleName("labkey-form-label");
         descriptionLabel = new Label("Description");
-        
+        descriptionLabel.setStyleName("labkey-form-label");
+
         instance.setWidget(0,0,protocolListBox);
         instance.getFlexCellFormatter().setColSpan(0,0,2);
 
@@ -67,22 +68,21 @@ public class ProtocolComposite extends SearchFormComposite
         instance.getCellFormatter().setHorizontalAlignment(2,0,HasHorizontalAlignment.ALIGN_LEFT);
         instance.setWidget(2,1,protocolDescTextArea);
 
-        listBoxLabel = new Label("Analysis protocols");
-        listBoxLabel.addStyleName("labkey-strong");
-        labelWidget = new VerticalPanel();
-        ((VerticalPanel)labelWidget).add(listBoxLabel);
+        listBoxLabel = new Label("Analysis protocol");
+        labelWidget = listBoxLabel;
         initWidget(instance);
     }
 
 
-    public Widget getLabel(String style)
+    public Widget getLabel()
     {
-        setLabelStyle(style);
+        setLabelStyle();
         return labelWidget;
     }
 
-    private void setLabelStyle(String style)
+    private void setLabelStyle()
     {
+        String style = "labkey-form-label";
         labelWidget.setStylePrimaryName(style);
         listBoxLabel.setStylePrimaryName(style);
         textBoxLabel.setStylePrimaryName(style);
@@ -349,4 +349,15 @@ public class ProtocolComposite extends SearchFormComposite
         protocolNameTextBox.setFocus(hasFocus);
     }
 
+    @Override
+    public void syncFormToXml(ParamParser params) throws SearchFormException
+    {
+        
+    }
+
+    @Override
+    public String syncXmlToForm(ParamParser params)
+    {
+        return "";
+    }
 }

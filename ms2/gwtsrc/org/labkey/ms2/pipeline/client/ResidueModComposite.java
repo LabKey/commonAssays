@@ -130,10 +130,10 @@ public abstract class ResidueModComposite extends SearchFormComposite
         {}
     }
 
-    public Widget getLabel(String style)
+    public Widget getLabel()
     {
         ((Label)labelWidget).setText("Residue modifications");
-        labelWidget.setStylePrimaryName(style);
+        labelWidget.setStylePrimaryName("labkey-form-label");
         return labelWidget;
     }
 
@@ -491,6 +491,10 @@ public abstract class ResidueModComposite extends SearchFormComposite
                 sb.append((String)it.next());
 
             }
+            if (mods.isEmpty())
+            {
+                sb.append(" <none>");
+            }
             staticReadOnlyLabel.setText(sb.toString());
             modsMap = getListBoxMap(dynamicListBox);
             mods = modsMap.keySet();
@@ -501,7 +505,10 @@ public abstract class ResidueModComposite extends SearchFormComposite
             {
                 if(count > 1) sb.append(", ");
                 sb.append((String)it.next());
-
+            }
+            if (mods.isEmpty())
+            {
+                sb.append(" <none>");
             }
             dynamicReadOnlyLabel.setText(sb.toString());
             instance.remove(modTabPanel);
@@ -519,4 +526,78 @@ public abstract class ResidueModComposite extends SearchFormComposite
 
     abstract public Map<String, String> getModMap(int modType);
 
+    @Override
+    public void syncFormToXml(ParamParser params) throws SearchFormException
+    {
+        params.setStaticMods(getStaticMods());
+        params.setDynamicMods(getDynamicMods());
+    }
+
+    private Map<String, String> mods2Map(String mods, Map<String, String> knownMods)
+    {
+        if(knownMods == null || mods == null) return null;
+        Map<String, String> returnMap = new HashMap<String, String>();
+        if(mods.length() == 0) return returnMap;
+        String[] modsArray = mods.split(",");
+        List<String> modsList = new ArrayList<String>();
+        for (String mod : modsArray)
+        {
+            String checkMod = mod.trim();
+            if (checkMod.length() > 0)
+                modsList.add(checkMod);
+        }
+
+        for (Map.Entry<String, String> knownModEntry : knownMods.entrySet())
+        {
+            String[] sites = knownModEntry.getValue().split(",");
+            boolean found;
+            for (int i = 0; i < sites.length; i++)
+            {
+                found = false;
+                for (String mod : modsList)
+                {
+                    if (mod.equals(sites[i]))
+                    {
+                        found = true;
+                        if (i == (sites.length - 1))
+                        {
+                            returnMap.put(knownModEntry.getKey(), knownModEntry.getValue());
+                            for (String site : sites)
+                            {
+                                modsList.remove(site);
+                            }
+                        }
+                        break;
+                    }
+                }
+                if (!found) break;
+            }
+        }
+        for (String mod : modsList)
+        {
+            returnMap.put(mod, mod);
+        }
+        return returnMap;
+    }
+    
+    @Override
+    public String syncXmlToForm(ParamParser params)
+    {
+        Map<String, String> staticMods = mods2Map(params.getStaticMods(), getModMap(ResidueModComposite.STATIC));
+        setSelectedStaticMods(staticMods);
+
+        Map<String, String> dynamicMods = mods2Map(params.getDynamicMods(), getModMap(DYNAMIC));
+        setSelectedDynamicMods(dynamicMods);
+        try
+        {
+           params.setStaticMods(staticMods);
+           params.setDynamicMods(dynamicMods);
+        }
+        catch(SearchFormException e)
+        {
+          return "Trouble adding residue modification params to input XML.\n" + e.getMessage();
+        }
+
+        return validate();
+    }
 }

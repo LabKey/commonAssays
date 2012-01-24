@@ -16,12 +16,12 @@
 
 package org.labkey.ms2.pipeline.client.mascot;
 
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import org.labkey.ms2.pipeline.client.InputXmlComposite;
-import org.labkey.ms2.pipeline.client.SearchFormException;
 import org.labkey.ms2.pipeline.client.ParamParser;
+import org.labkey.ms2.pipeline.client.SearchFormException;
 
 /**
  * User: billnelson@uky.edu
@@ -40,16 +40,12 @@ public class MascotInputXmlComposite extends InputXmlComposite
             params = new MascotParamParser(inputXmlTextArea);
         return super.update(text);
     }
-    public Widget getLabel(String style)
+
+    public Widget getLabel()
     {
         labelWidget = new Label("Mascot XML");
-        labelWidget.setStylePrimaryName(style);
+        labelWidget.setStylePrimaryName(LABEL_STYLE_NAME);
         return labelWidget;
-    }
-
-    public void setTaxonomy(String name) throws SearchFormException
-    {
-        params.setTaxonomy(name);
     }
 
     private class MascotParamParser extends ParamParser

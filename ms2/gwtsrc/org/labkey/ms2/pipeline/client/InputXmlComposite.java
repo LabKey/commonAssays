@@ -116,52 +116,9 @@ public abstract class InputXmlComposite extends SearchFormComposite
         inputXmlTextArea.addChangeHandler(changeHandler);
     }
 
-    public void setSequenceDb(String name) throws SearchFormException
-    {
-        params.setSequenceDb(name);
-    }
-
     public String getSequenceDb()
     {
         return params.getSequenceDb();
-    }
-
-    public void setTaxonomy(String name) throws SearchFormException
-    {/*only implemented for Mascot*/}
-
-    public String getTaxonomy()
-    {
-        return params.getTaxonomy();
-    }
-
-    public void setEnzyme(String name) throws SearchFormException
-    {
-        params.setEnzyme(name);
-    }
-
-    public String getEnzyme()
-    {
-        return params.getEnzyme();
-    }
-
-    public Map<String, String> getStaticMods(Map<String, String> knownMods)
-    {
-        return mods2Map(params.getStaticMods(), knownMods);
-    }
-
-    public void setStaticMods(Map<String, String> mods) throws SearchFormException
-    {
-        params.setStaticMods(mods);
-    }
-
-    public Map<String, String> getDynamicMods(Map<String, String> knownMods)
-    {
-        return mods2Map(params.getDynamicMods(), knownMods);
-    }
-
-    public void setDynamicMods(Map<String, String> mods) throws SearchFormException
-    {
-        params.setDynamicMods(mods);
     }
 
     public void removeSequenceDb()
@@ -184,51 +141,16 @@ public abstract class InputXmlComposite extends SearchFormComposite
         params.writeXml();
     }
 
-    private Map<String, String> mods2Map(String mods, Map<String, String> knownMods)
+    @Override
+    public void syncFormToXml(ParamParser params) throws SearchFormException
     {
-        if(knownMods == null || mods == null) return null;
-        Map<String, String> returnMap = new HashMap<String, String>();
-        if(mods.length() == 0) return returnMap;
-        String[] modsArray = mods.split(",");
-        List<String> modsList = new ArrayList<String>();
-        for (String mod : modsArray)
-        {
-            String checkMod = mod.trim();
-            if (checkMod.length() > 0)
-                modsList.add(checkMod);
-        }
+        throw new UnsupportedOperationException();
+    }
 
-        for (Map.Entry<String, String> knownModEntry : knownMods.entrySet())
-        {
-            String[] sites = knownModEntry.getValue().split(",");
-            boolean found;
-            for (int i = 0; i < sites.length; i++)
-            {
-                found = false;
-                for (String mod : modsList)
-                {
-                    if (mod.equals(sites[i]))
-                    {
-                        found = true;
-                        if (i == (sites.length - 1))
-                        {
-                            returnMap.put(knownModEntry.getKey(), knownModEntry.getValue());
-                            for (String site : sites)
-                            {
-                                modsList.remove(site);
-                            }
-                        }
-                        break;
-                    }
-                }
-                if (!found) break;
-            }
-        }
-        for (String mod : modsList)
-        {
-            returnMap.put(mod, mod);
-        }
-        return returnMap;
+    @Override
+    public String syncXmlToForm(ParamParser params)
+    {
+        throw new UnsupportedOperationException();
     }
 
     private class TextAreaWrapable extends TextArea

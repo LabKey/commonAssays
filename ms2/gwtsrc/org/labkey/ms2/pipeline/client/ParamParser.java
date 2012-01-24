@@ -173,7 +173,7 @@ public class ParamParser
         return "";
     }
 
-    private void removeInputParameter(String name)
+    public void removeInputParameter(String name)
     {
         if(name == null || name.equals("")) return;
         NodeList notes = getNoteElements();
@@ -327,7 +327,8 @@ public class ParamParser
             {
                 Node n = elNote.getFirstChild();
                 if(n == null) return "";
-                return n.getNodeValue();
+                String result = n.getNodeValue();
+                return result == null ? null : result.trim();
             }
         }
         return "";
@@ -336,7 +337,7 @@ public class ParamParser
     private boolean isInputParameterElement(String name, Element elNote)
     {
         String type = elNote.getAttribute(ATTR_TYPE);
-        return (type.equals(VAL_INPUT) && name.equals(elNote.getAttribute(ATTR_LABEL)));
+        return VAL_INPUT.equals(type) && name.equals(elNote.getAttribute(ATTR_LABEL));
     }
 
     private NodeList getNoteElements()

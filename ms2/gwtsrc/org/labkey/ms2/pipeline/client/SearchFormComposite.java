@@ -16,6 +16,8 @@
 
 package org.labkey.ms2.pipeline.client;
 
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,9 +30,10 @@ import java.util.List;
  */
 public abstract class SearchFormComposite extends Composite implements HasName
 {
+    public static final String LABEL_STYLE_NAME = "labkey-form-label";
+
     protected boolean readOnly;
     protected Widget labelWidget;
-
 
     public boolean isReadOnly()
      {
@@ -46,7 +49,16 @@ public abstract class SearchFormComposite extends Composite implements HasName
 
     abstract public void setWidth(String width);
 
-    abstract public Widget getLabel(String style);
+    abstract public Widget getLabel();
 
     abstract public String validate();
+
+    abstract public void syncFormToXml(ParamParser params) throws SearchFormException;
+
+    abstract public String syncXmlToForm(ParamParser params);
+
+    public void configureCompositeRow(FlexTable table, int row)
+    {
+        
+    }
 }

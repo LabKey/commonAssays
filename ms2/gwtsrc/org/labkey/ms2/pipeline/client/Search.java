@@ -22,6 +22,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.labkey.api.gwt.client.pipeline.PipelineGWTService;
 import org.labkey.api.gwt.client.pipeline.PipelineGWTServiceAsync;
@@ -42,7 +44,7 @@ public class Search implements EntryPoint
     private static final    String                  INPUT_WIDTH = "575px";
     private                 VerticalPanel           subPanel = new VerticalPanel();
     private                 FormPanel               searchFormPanel = new FormPanel();
-    private                 Grid                    formGrid = new Grid();
+    private                 FlexTable               formGrid = new FlexTable();
     private                 Hidden                  pathHidden = new Hidden("path");
     private                 Hidden                  searchEngineHidden = new Hidden();
     private                 Hidden                  runSearch = new Hidden();
@@ -77,6 +79,7 @@ public class Search implements EntryPoint
 
     private PipelineGWTServiceAsync pipelineService = null;
     private SearchServiceAsync service = null;
+    private List<SearchFormComposite> inputs = new ArrayList<SearchFormComposite>();
 
     private SearchServiceAsync getSearchService()
     {
@@ -108,10 +111,10 @@ public class Search implements EntryPoint
         searchEngine = PropertyUtil.getServerProperty("searchEngine");
         String pipelineId = PropertyUtil.getServerProperty("pipelineId");
         SearchFormCompositeFactory compositeFactory = new SearchFormCompositeFactory(searchEngine);
-        sequenceDbComposite = compositeFactory.getSequenceDbComposite();
+        sequenceDbComposite = compositeFactory.getSequenceDbComposite(this);
         inputXmlComposite = compositeFactory.getInputXmlComposite();
         enzymeComposite = compositeFactory.getEnzymeComposite();
-//        locationComposite = compositeFactory.getLocationComposite();
+        locationComposite = new LocationComposite(inputXmlComposite);
         residueModComposite = compositeFactory.getResidueModComposite(this);
         protocolComposite = new ProtocolComposite();
 
@@ -175,7 +178,7 @@ public class Search implements EntryPoint
         loading();
         getSearchService().getSearchServiceResult(searchEngine, path, fileNames, new SearchServiceAsyncCallback());
 
-//        getPipelineService().getLocationOptions(pipelineId, locationComposite);
+        getPipelineService().getLocationOptions(pipelineId, locationComposite);
 
         protocolComposite.addChangeHandler(new ProtocolChangeListener());
 
@@ -184,6 +187,7 @@ public class Search implements EntryPoint
         sequenceDbComposite.addClickHandler(new SequenceDbClickListener());
         sequenceDbComposite.addTaxonomyChangeHandler(new TaxonomyChangeListener());
         enzymeComposite.addChangeListener(new EnzymeChangeListener());
+        locationComposite.addChangeListener(new LocationChangeListener());
 
         inputXmlComposite.addChangeListener(new InputXmlChangeListener());
 
@@ -202,9 +206,10 @@ public class Search implements EntryPoint
     private void setReadOnly(boolean readOnly, boolean force)
     {
         protocolComposite.setReadOnly(readOnly);
-        sequenceDbComposite.setReadOnly(readOnly);
-        enzymeComposite.setReadOnly(readOnly);
-        residueModComposite.setReadOnly(readOnly);
+        for (SearchFormComposite input : inputs)
+        {
+            input.setReadOnly(readOnly);
+        }
         inputXmlComposite.setReadOnly(readOnly);
         saveProtocolCheckBox.setEnabled(!readOnly);
         if(protocolComposite.getSelectedProtocolValue().equals("new"))
@@ -268,22 +273,10 @@ public class Search implements EntryPoint
     private void cancelForm()
     {
         if (null == returnURL || returnURL.length() == 0)
-            back();
+            History.back();
         else
-            navigate(returnURL);
+            Window.Location.replace(returnURL);
     }
-
-
-    public static native void navigate(String url) /*-{
-      $wnd.location.href = url;
-    }-*/;
-
-
-    public static native void back() /*-{
-        $wnd.history.back();
-    }-*/;
-
-
 
     private void loadSubPanel()
     {
@@ -297,25 +290,27 @@ public class Search implements EntryPoint
         subPanel.add(new Label("Choose an existing protocol or define a new one."));
         subPanel.setWidth("100%");
 
-        formGrid.resize(9, 2);
-        formGrid.setWidget(0, 0, protocolComposite.getLabel(labelStyle));
-        formGrid.setWidget(0, 1, protocolComposite);
-        formGrid.setWidget(1, 0, searchEngineLabel);
-        formGrid.setWidget(1, 1, actualSearchEngineLabel);
-        formGrid.setWidget(2, 0, mzXmlComposite.getLabel(labelStyle));
-        formGrid.setWidget(2, 1, mzXmlComposite);
-        formGrid.setWidget(3, 0, sequenceDbComposite.getLabel(labelStyle));
-        formGrid.setWidget(3, 1, sequenceDbComposite);
-        formGrid.setWidget(4, 0, enzymeComposite.getLabel(labelStyle));
-        formGrid.setWidget(4, 1, enzymeComposite);
-        formGrid.setWidget(5, 0, residueModComposite.getLabel(labelStyle));
-        formGrid.setWidget(5, 1, residueModComposite);
-        formGrid.setWidget(6, 0, inputXmlComposite.getLabel(labelStyle));
-        formGrid.setWidget(6, 1, inputXmlComposite);
-        formGrid.setWidget(7, 0, saveProtocolCheckBoxLabel);
-        formGrid.setWidget(7, 1, saveProtocolCheckBox);
-//        formGrid.setWidget(8, 0, locationComposite.getLabel(labelStyle));
-//        formGrid.setWidget(8, 1, locationComposite);
+        inputs.add(mzXmlComposite);
+        inputs.add(sequenceDbComposite);
+        inputs.add(enzymeComposite);
+        inputs.add(residueModComposite);
+        inputs.add(locationComposite);
+
+        int row = 0;
+        formGrid.setWidget(row, 0, protocolComposite.getLabel());
+        formGrid.setWidget(row++, 1, protocolComposite);
+        formGrid.setWidget(row, 0, searchEngineLabel);
+        formGrid.setWidget(row++, 1, actualSearchEngineLabel);
+        for (SearchFormComposite input : inputs)
+        {
+            formGrid.setWidget(row, 0, input.getLabel());
+            formGrid.setWidget(row, 1, input);
+            input.configureCompositeRow(formGrid, row++);
+        }
+        formGrid.setWidget(row, 0, inputXmlComposite.getLabel());
+        formGrid.setWidget(row++, 1, inputXmlComposite);
+        formGrid.setWidget(row, 0, saveProtocolCheckBoxLabel);
+        formGrid.setWidget(row++, 1, saveProtocolCheckBox);
         formGrid.getColumnFormatter().setWidth(1,"100%");
 
         for(int i = 0; i< formGrid.getRowCount(); i++)
@@ -392,19 +387,12 @@ public class Search implements EntryPoint
 
     public String syncForm2Xml()
     {
-        String sequenceDb = sequenceDbComposite.getSelectedDb();
-        String taxonomy   = sequenceDbComposite.getSelectedTaxonomy();
-        String enzyme     = enzymeComposite.getSelectedEnzyme();
-        Map<String, String> staticMods    = residueModComposite.getStaticMods();
-        Map<String, String> dynamicMods   = residueModComposite.getDynamicMods();
-
         try
         {
-            inputXmlComposite.setSequenceDb(sequenceDb);
-            inputXmlComposite.setTaxonomy(taxonomy);
-            inputXmlComposite.setEnzyme(enzyme);
-            inputXmlComposite.setStaticMods(staticMods);
-            inputXmlComposite.setDynamicMods(dynamicMods);
+            for (SearchFormComposite input : inputs)
+            {
+                input.syncFormToXml(inputXmlComposite.params);
+            }
             inputXmlComposite.writeXml();
         }
         catch(SearchFormException e)
@@ -417,139 +405,30 @@ public class Search implements EntryPoint
     public String syncXml2Form()
     {
         StringBuffer error = new StringBuffer();
-        error.append(syncTaxonomyXML2Form());
-        error.append(syncSequenceDbXML2Form());
-        error.append(syncEnzymeXML2Form());
-        error.append(syncResidueMod2Form());
+        for (SearchFormComposite input : inputs)
+        {
+            error.append(input.syncXmlToForm(inputXmlComposite.params));
+        }
         try
         {
             inputXmlComposite.writeXml();
         }
         catch(SearchFormException e)
         {
-            error.append("Trouble writing XML: " + e.getMessage());
+            error.append("Trouble writing XML: ").append(e.getMessage());
         }
 
         return error.toString();
     }
 
-    private String syncResidueMod2Form()
-    {
-        Map<String, String> modMap = residueModComposite.getModMap(residueModComposite.STATIC);
-        Map<String, String> staticMods = inputXmlComposite.getStaticMods(modMap);
-        residueModComposite.setSelectedStaticMods(staticMods);
-
-        modMap = residueModComposite.getModMap(residueModComposite.DYNAMIC);
-        Map<String, String> dynamicMods = inputXmlComposite.getDynamicMods(modMap);
-        residueModComposite.setSelectedDynamicMods(dynamicMods);
-        try
-        {
-           inputXmlComposite.setStaticMods(staticMods);
-           inputXmlComposite.setDynamicMods(dynamicMods);
-        }
-        catch(SearchFormException e)
-        {
-          return "Trouble adding residue modification params to input XML.\n" + e.getMessage();
-        }
-
-        return residueModComposite.validate();
-    }
-
-    private String syncEnzymeXML2Form()
-    {
-        String enzyme = inputXmlComposite.getEnzyme();
-        if(enzyme == null || enzyme.equals(""))
-        {
-            enzyme = enzymeComposite.getSelectedEnzyme();
-            if(enzyme == null || enzyme.equals(""))
-            {
-                return "";
-            }
-            else
-            {
-                try
-                {
-                    inputXmlComposite.setEnzyme(enzyme);
-                }
-                catch(SearchFormException e)
-                {
-                    return "Cannot set the enzyme in XML: " + e.getMessage();
-                }
-            }
-        }
-        else if(!enzyme.equals(enzymeComposite.getSelectedEnzyme()))
-        {
-            return enzymeComposite.setSelectedEnzyme(enzyme);
-        }
-        return "";
-    }
-
-    private String syncSequenceDbXML2Form()
-    {
-        String sequenceDb = inputXmlComposite.getSequenceDb();
-        if(sequenceDb == null || sequenceDb.equals(""))
-        {
-            sequenceDb = sequenceDbComposite.getSelectedDb();
-            if(sequenceDb == null || sequenceDb.equals(""))
-            {
-                return "";
-            }
-            else
-            {
-                try
-                {
-                    inputXmlComposite.setSequenceDb(sequenceDb);
-                }
-                catch(SearchFormException e)
-                {
-                    return "Cannot set pipeline, database in XML: " + e.getMessage();
-                }
-            }
-        }
-        else if(sequenceDb.equals(sequenceDbComposite.getSelectedDb()))
-        {
-            return "";
-        }
-        else
-        {
-            getSearchService().getSequenceDbs(sequenceDb, searchEngine, false, new SequenceDbServiceCallback());
-        }
-        return "";
-    }
-
-    private String syncTaxonomyXML2Form()
-    {
-        String error = "";
-        String taxonomy = inputXmlComposite.getTaxonomy();
-        if(taxonomy == null || taxonomy.equals(""))
-        {
-            taxonomy = sequenceDbComposite.getSelectedTaxonomy();
-            if(taxonomy != null && !taxonomy.equals(""))
-            {
-                try
-                {
-                    inputXmlComposite.setTaxonomy(taxonomy);
-                }
-                catch(SearchFormException e)
-                {
-                    return "Cannot set protein, taxon in XML: " + e.getMessage();
-                }
-            }
-        }
-        else if(!taxonomy.equals(sequenceDbComposite.getSelectedTaxonomy()))
-        {
-            error = sequenceDbComposite.setDefaultTaxonomy(taxonomy);
-            if(error.length() > 0)
-            {
-                return error;
-            }
-        }
-        return error;
-    }
-
     public void setSearchButtonEnabled(boolean enabled)
     {
         searchButton.setEnabled(enabled);
+    }
+
+    public void getSequenceDbs(String sequenceDb)
+    {
+        getSearchService().getSequenceDbs(sequenceDb, searchEngine, false, new SequenceDbServiceCallback());
     }
 
     private class SearchButton extends ImageButton
@@ -658,7 +537,7 @@ public class Search implements EntryPoint
                     appendError("The submit did not return a destination.");
                     setReadOnly(false, true);
                 }
-                navigate(destination);
+                Window.Location.replace(destination);
                 appendMessage("Navigating to " + destination);
 
             }
@@ -689,7 +568,7 @@ public class Search implements EntryPoint
             {
                 cancelForm();
             }
-            else if(!(GWT.getTypeName(caught).equals("com.google.gwt.user.client.rpc.InvocationException")
+            else if(!(caught.getClass().getName().equals("com.google.gwt.user.client.rpc.InvocationException")
                     && caught.getMessage().length() == 0))
             {
                 super.reportFailure(message, caught);
@@ -743,7 +622,7 @@ public class Search implements EntryPoint
             inputXmlComposite.removeSequenceDb();
             try{
                 inputXmlComposite.writeXml();
-            }catch(SearchFormException e){}
+            }catch(SearchFormException ignored){}
             sequenceDbComposite.setEnabled(true, true);
             return;
         }
@@ -895,7 +774,7 @@ public class Search implements EntryPoint
     {
         public void onChange(ChangeEvent event)
         {
-
+            syncForm2Xml();
         }
     }
 

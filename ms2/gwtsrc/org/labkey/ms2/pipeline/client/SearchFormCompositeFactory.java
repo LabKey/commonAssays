@@ -47,14 +47,14 @@ public class SearchFormCompositeFactory
         this.searchEngine = searchEngine;
     }
 
-    public SequenceDbComposite getSequenceDbComposite()
+    public SequenceDbComposite getSequenceDbComposite(Search search)
     {
         if(searchEngine.equals(XTANDEM))
-            return new XtandemSequenceDbComposite();
+            return new XtandemSequenceDbComposite(search);
         else if(searchEngine.equals(MASCOT))
-            return new MascotSequenceDbComposite();
+            return new MascotSequenceDbComposite(search);
         else if(searchEngine.equals(SEQUEST))
-            return new SequestSequenceDbComposite();
+            return new SequestSequenceDbComposite(search);
         return null;
     }
 
@@ -92,10 +92,5 @@ public class SearchFormCompositeFactory
             return new SequestResidueModComposite(searchForm);
         else
             return null;
-    }
-
-    public LocationComposite getLocationComposite()
-    {
-        return new LocationComposite();
     }
 }

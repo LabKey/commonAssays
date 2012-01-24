@@ -18,6 +18,9 @@ package org.labkey.ms2.pipeline.client.mascot;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.*;
+import org.labkey.ms2.pipeline.client.ParamParser;
+import org.labkey.ms2.pipeline.client.Search;
+import org.labkey.ms2.pipeline.client.SearchFormException;
 import org.labkey.ms2.pipeline.client.SequenceDbComposite;
 
 import java.util.List;
@@ -39,9 +42,9 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
     private Label databaseLabel = new Label();
 
 
-    public MascotSequenceDbComposite()
+    public MascotSequenceDbComposite(Search search)
     {
-        super();
+        super(search);
         init();
     }
 
@@ -94,14 +97,15 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
         }
     }
 
-    public Widget getLabel(String style)
+    public Widget getLabel()
     {
-        setLabelStyle(style);
+        setLabelStyle();
         return labelWidget;
     }
 
-    private void setLabelStyle(String style)
+    private void setLabelStyle()
     {
+        String style = "labkey-form-label";
         int widgetCount = ((VerticalPanel)labelWidget).getWidgetCount();
         for(int i = 0; i < widgetCount; i++)
         {
@@ -181,6 +185,13 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
         int index = taxonomyListBox.getSelectedIndex();
         if(index == -1) return "";
         return taxonomyListBox.getValue(index);
+    }
+
+    @Override
+    public void syncFormToXml(ParamParser params) throws SearchFormException
+    {
+        super.syncFormToXml(params);
+        params.setTaxonomy(getSelectedTaxonomy());
     }
 
     public String setDefaultTaxonomy(String tax)
