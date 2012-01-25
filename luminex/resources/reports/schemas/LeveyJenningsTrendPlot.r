@@ -45,8 +45,8 @@ maxRows = NA;
 if (!is.null(labkey.url.params$MaxRows)) {
 	maxRows = labkey.url.params$MaxRows;
 } else {
-	colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","GREATER_THAN_OR_EQUAL_TO",labkey.url.params$StartDate)));
-	colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","LESS_THAN_OR_EQUAL_TO",labkey.url.params$EndDate)));
+	colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","DATE_GREATER_THAN_OR_EQUAL",labkey.url.params$StartDate)));
+	colFilter=rbind(colFilter,makeFilter(c("Analyte/Data/AcquisitionDate","DATE_LESS_THAN_OR_EQUAL",labkey.url.params$EndDate)));
 }
 
 # call the selectRows function to get the data from the server
