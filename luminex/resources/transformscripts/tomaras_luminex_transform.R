@@ -18,6 +18,7 @@
 #
 # CHANGES
 #  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
+#  - 3.0          : Changes for LabKey server 12.1
 #
 # Author: Cory Nathe, LabKey
 transformVersion = "3.0";
@@ -322,7 +323,7 @@ analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
 
 # get the analyte associated standard/titration information from the analyte data file and put it into the run.data object
 run.data$Standard = NA;
-run.data$well_role = ""; # initialize to empty string and set to Standard accordingly
+run.data$well_role = ""; # initialize to empty string and set to Standard accordingly, well_role used by Rumi function
 for (index in 1:nrow(analyte.data))
 {
     # hold on to the run data for the given analyte
@@ -365,7 +366,7 @@ run.data$EstConc_4pl = NA;
 run.data$SE_4pl = NA;
 
 # setup the dataframe needed for the call to rumi
-dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role", "summary", "FlaggedAsExcluded"));
+dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "fi", "fiBackground", "fiBackgroundBlank", "dilution", "well_role", "summary", "FlaggedAsExcluded", "isStandard", "isQCControl", "isUnknown"));
 
 # if both raw and summary data are available, just use the raw data for the calc
 if (bothRawAndSummary) {
@@ -373,12 +374,9 @@ if (bothRawAndSummary) {
 }
 
 # remove any excluded standard replicate groups
-dat = subset(dat, (well_role == "Standard" & tolower(FlaggedAsExcluded) == "false") | well_role != "Standard");
+dat = subset(dat, (isStandard & tolower(FlaggedAsExcluded) == "false") | !isStandard);
 
-# get a booelan vector of the records that are of type standard
-standardRecs = !is.na(dat$well_role) & dat$well_role == "Standard";
-
-if (any(standardRecs) & length(standards) > 0)
+if (any(dat$isStandard) & length(standards) > 0)
 {
     # change column name from "name" to "analyte"
     colnames(dat)[colnames(dat) == "name"] = "analyte";
@@ -390,20 +388,21 @@ if (any(standardRecs) & length(standards) > 0)
     dat$sample_id[!is.na(dat$expected_conc)] = paste(dat$description[!is.na(dat$expected_conc)], "||", dat$expected_conc[!is.na(dat$expected_conc)], sep="");
     dat$sample_id[is.na(dat$expected_conc)] = paste(dat$description[is.na(dat$expected_conc)], "||", dat$dilution[is.na(dat$expected_conc)], sep="");
 
-    # choose the FI column for standards based on the run property provided by the user, default to the original FI value
+    # choose the FI column for standards and qc controls based on the run property provided by the user, default to the original FI value
     if (any(run.props$name == "StndCurveFitInput"))
     {
         fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput", "fi")
-        dat$fi[standardRecs] = dat[standardRecs, fiCol]
+        dat$fi[dat$isStandard] = dat[dat$isStandard, fiCol]
+        dat$fi[dat$isQCControl] = dat[dat$isQCControl, fiCol]
     }
 
     # choose the FI column for unknowns based on the run property provided by the user, default to the original FI value
-    if (any(!standardRecs))
+    if (any(dat$isUnknown))
     {
         if (any(run.props$name == "UnkCurveFitInput"))
         {
             fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput", "fi")
-            dat$fi[!standardRecs] = dat[!standardRecs, fiCol]
+            dat$fi[dat$isUnknown] = dat[dat$isUnknown, fiCol]
         }
     }
 
@@ -418,7 +417,7 @@ if (any(standardRecs) & length(standards) > 0)
 
         # subset the data for those analytes set to use the given standard curve
         # note: also need to subset the standard records for only those where description matches the given standard
-        standard.dat = subset(dat, Standard == stndVal & (well_role != "Standard" | (well_role == "Standard" & description == stndVal)));
+        standard.dat = subset(dat, Standard == stndVal & (!isStandard | (isStandard & description == stndVal)));
 
         # LabKey Issue 13034: replicate standard records as unknowns so that Rumi will calculated estimated concentrations
         tempStnd.dat = subset(standard.dat, well_role=="Standard");
@@ -463,18 +462,22 @@ if (any(standardRecs) & length(standards) > 0)
 
             # LabKey issue 13445: Don't calculate estimated concentrations for analytes where max(FI) is < 1000
             agg.dat = subset(standard.dat, well_role == "Standard");
-            agg.dat = aggregate(agg.dat$fi, list(Standard=agg.dat$Standard,Analyte=agg.dat$analyte), max);
-            for (aggIndex in 1:nrow(agg.dat))
+            if (nrow(agg.dat) > 0)
             {
-                # remove the rows from the standard.dat object where the max FI < 1000
-                if (agg.dat$x[aggIndex] < 1000)
+                agg.dat = aggregate(agg.dat$fi, list(Standard=agg.dat$Standard,Analyte=agg.dat$analyte), max);
+                for (aggIndex in 1:nrow(agg.dat))
                 {
-                    print(paste("Max(FI) is < 1000 for", agg.dat$Standard[aggIndex], agg.dat$Analyte[aggIndex], "don't calculate estimated concentrations for this standard/analyte.", sep=" "));
-                    standard.dat = subset(standard.dat, !(Standard == agg.dat$Standard[aggIndex] & analyte == agg.dat$Analyte[aggIndex]));
+                    # remove the rows from the standard.dat object where the max FI < 1000
+                    if (agg.dat$x[aggIndex] < 1000)
+                    {
+                        print(paste("Max(FI) is < 1000 for", agg.dat$Standard[aggIndex], agg.dat$Analyte[aggIndex], "don't calculate estimated concentrations for this standard/analyte.", sep=" "));
+                        standard.dat = subset(standard.dat, !(Standard == agg.dat$Standard[aggIndex] & analyte == agg.dat$Analyte[aggIndex]));
+                    }
                 }
             }
-            # check to make sure that we still have some data to pass to the rumi function
-            if (nrow(standard.dat) == 0)
+
+            # check to make sure that we still have some standard data to pass to the rumi function calculations
+            if (nrow(standard.dat) == 0 | !any(standard.dat$isStandard))
             {
                 next();
             }

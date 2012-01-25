@@ -586,7 +586,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                  (dataRow.getWellRole().contains("Standard") && dataRow.getCv() > 0.15) ||
                  (dataRow.getWellRole().contains("Control") && dataRow.getCv() > 0.15)))
             {
-                String description = dataRow.getType() + " : " + dataRow.getDescription() + " with " + analyte.getName() + " over threshold value for %CV (" + dataRow.getData() + ")";
+                String description = dataRow.getType() + " : " + dataRow.getDescription() + " with " + analyte.getName() + " over threshold value for %CV";
                 CVQCFlag newQcFlag = new CVQCFlag(expRun.getRowId(), "PCV", description, analyte.getRowId(), dataRow.getData(), dataRow.getType(), dataRow.getDescription());
                 if (!newCVQCFlags.contains(newQcFlag))
                 {
