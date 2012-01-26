@@ -815,8 +815,12 @@
                                                 <property name="exePath" value="msconvert"/>
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
-                                                <property name="switchName" value="p"/>
-                                                <property name="switchFormat" ref="unixDefaultSwitch" />
+                                                <property name="switchName" value="filter"/>
+                                                <property name="value" value="precursorRecalculation"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                                <property name="switchName" value="filter"/>
+                                                <property name="value" value="stripIT"/>
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
                                                 <property name="switchName" value="mzXML"/>

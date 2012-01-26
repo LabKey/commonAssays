@@ -40,17 +40,27 @@ public class XPressHandler extends PepXmlAnalysisResultHandler
         //"decimal_ratio" is a field known to have "inf" as a value representing infinity sometimes
         result.setDecimalRatio(parseFloatHandleInf(parser.getAttributeValue(null, "decimal_ratio")));
         result.setHeavy2lightRatio(parser.getAttributeValue(null, "heavy2light_ratio"));
-        result.setHeavyArea(Float.parseFloat(parser.getAttributeValue(null, "heavy_area")));
+        result.setHeavyArea(parseFloat(parser.getAttributeValue(null, "heavy_area")));
         result.setHeavyFirstscan(Integer.parseInt(parser.getAttributeValue(null, "heavy_firstscan")));
         result.setHeavyLastscan(Integer.parseInt(parser.getAttributeValue(null, "heavy_lastscan")));
-        result.setHeavyMass(Float.parseFloat(parser.getAttributeValue(null, "heavy_mass")));
-        result.setLightArea(Float.parseFloat(parser.getAttributeValue(null, "light_area")));
+        result.setHeavyMass(parseFloat(parser.getAttributeValue(null, "heavy_mass")));
+        result.setLightArea(parseFloat(parser.getAttributeValue(null, "light_area")));
         result.setLightFirstscan(Integer.parseInt(parser.getAttributeValue(null, "light_firstscan")));
         result.setLightLastscan(Integer.parseInt(parser.getAttributeValue(null, "light_lastscan")));
-        result.setLightMass(Float.parseFloat(parser.getAttributeValue(null, "light_mass")));
+        result.setLightMass(parseFloat(parser.getAttributeValue(null, "light_mass")));
         result.setRatio(parser.getAttributeValue(null, "ratio"));
 
         return result;
+    }
+
+    private float parseFloat(String stringValue)
+    {
+        // Float.parseFloat() is case sensitive when parsing "NaN", so be more tolerant
+        if ("nan".equalsIgnoreCase(stringValue))
+        {
+            return Float.NaN;
+        }
+        return Float.parseFloat(stringValue);
     }
 
     protected String getAnalysisType()

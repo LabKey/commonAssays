@@ -16,10 +16,12 @@
 package org.labkey.ms2.pipeline.sequest;
 
 import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTaskFactory;
 import org.labkey.ms2.pipeline.TPPTask;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ import java.util.List;
  * User: jeckels
  * Date: Dec 23, 2011
  */
-public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2SearchTaskFactory<Type>> extends AbstractMS2SearchTaskFactory<Type>
+public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2SearchTaskFactory<Type>> extends AbstractMS2SearchTaskFactory<Type> implements InitializingBean
 {
     private File _sequestInstallDir;
     private File _indexRootDir;
@@ -68,11 +70,6 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
         if (sequestInstallDir != null)
         {
             _sequestInstallDir = new File(sequestInstallDir);
-            NetworkDrive.exists(_sequestInstallDir);
-            if (!_sequestInstallDir.isDirectory())
-            {
-//                throw new IllegalArgumentException("No such Sequest install dir: " + sequestInstallDir);
-            }
         }
         else
         {
@@ -100,15 +97,38 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
         if (indexRootDir != null)
         {
             _indexRootDir = new File(indexRootDir);
-            NetworkDrive.exists(_indexRootDir);
-            if (!_indexRootDir.isDirectory())
-            {
-//                throw new IllegalArgumentException("No such index root dir: " + indexRootDir);
-            }
         }
         else
         {
             _indexRootDir = null;
+        }
+    }
+
+    public void afterPropertiesSet() throws Exception
+    {
+        PipelineJobService.RemoteServerProperties props = PipelineJobService.get().getRemoteServerProperties();
+
+        // Check if we're on the web server and Sequest is going to run there, or that we're a remote server and Sequest is set to run there
+        if ((PipelineJobService.get().getLocationType() == PipelineJobService.LocationType.WebServer && (getLocation() == null || WEBSERVER.equals(getLocation()))) ||
+            (PipelineJobService.get().getLocationType() == PipelineJobService.LocationType.RemoteServer && props != null && props.getLocation() != null && props.getLocation().equals(getLocation())))
+        {
+            if (_indexRootDir != null)
+            {
+                NetworkDrive.exists(_indexRootDir);
+                if (!_indexRootDir.isDirectory())
+                {
+                    throw new IllegalArgumentException("No such index root dir: " + _indexRootDir);
+                }
+            }
+
+            if (_sequestInstallDir != null)
+            {
+                NetworkDrive.exists(_sequestInstallDir);
+                if (!_sequestInstallDir.isDirectory())
+                {
+                    throw new IllegalArgumentException("No such Sequest install dir: " + _sequestInstallDir);
+                }
+            }
         }
     }
 }

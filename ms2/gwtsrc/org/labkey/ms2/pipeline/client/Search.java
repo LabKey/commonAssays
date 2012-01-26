@@ -280,8 +280,6 @@ public class Search implements EntryPoint
 
     private void loadSubPanel()
     {
-        String labelStyle = "labkey-form-label-nowrap";
-
         subPanel.add(pathHidden);
         subPanel.add(searchEngineHidden);
         subPanel.add(runSearch);
