@@ -83,7 +83,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
                 "k-score".equals(paramScore));        
     }
 
-    // if fire does not exist, will append .gz if config indicates preerence for gzipped outputs
+    // if fire does not exist, will append .gz if config indicates preference for gzipped outputs
     public File getSearchNativeOutputFile()
     {
         return XTandemSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName(), getGZPreference());

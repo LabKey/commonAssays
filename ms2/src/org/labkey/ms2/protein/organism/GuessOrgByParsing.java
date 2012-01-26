@@ -115,6 +115,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
             }
             phrase = line.substring(leftPos + 1, rightPos).toUpperCase();
             //TODO: These *so* much need to be databases as "exceptions"
+            if (phrase.isEmpty()) continue;
             if (!Character.isUpperCase(phrase.charAt(0))) continue;
             if (phrase.indexOf('>') != -1) continue;
             if (phrase.indexOf('|') != -1) continue;

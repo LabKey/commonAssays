@@ -50,6 +50,7 @@
                 <ref bean="expGeneratorSearch"/>
                 <ref bean="expGeneratorSearchJoin"/>
                 <ref bean="msPrefixCommand"/>
+                <ref bean="msConvertCommand"/>
 
                 <!-- MacCoss pipeline support -->
                 <ref bean="makems2Command"/>
@@ -837,6 +838,60 @@
                             </entry>
                         </map>
                     </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="msConvertCommand" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
+        <constructor-arg value="msConvertCommand"/>
+        <property name="statusName" value="MZXML CONVERSION"/>
+        <property name="groupParameterName" value="msconvert"/>
+        <property name="protocolActionName" value="msconvert mzXML Conversion"/>
+        <property name="outputExtension" value=".mzXML"/>
+        <property name="inputPaths">
+            <map>
+                <entry key="Spectra">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg ref="rawFileType"/>
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="switchFormat" ref="unixNewSwitch"/>
+        <property name="converters">
+            <list>
+                <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                    <property name="softwarePackage" value="pwiz"/>
+                    <property name="exePath" value="msconvert"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="mzXML"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
+                    <property name="parameter" value="pipeline msconvert, conversion bits"/>
+                    <property name="default" value="64"/>
+                    <property name="converters">
+                        <map>
+                            <entry key="32">
+                                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                    <property name="switchName" value="32"/>
+                                </bean>
+                            </entry>
+                            <entry key="64">
+                                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                    <property name="switchName" value="64"/>
+                                </bean>
+                            </entry>
+                        </map>
+                    </property>
+                </bean>
+
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="zlib"/>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="key" value="Spectra" />
                 </bean>
             </list>
         </property>
