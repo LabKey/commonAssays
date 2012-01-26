@@ -870,7 +870,7 @@
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
                     <property name="parameter" value="pipeline msconvert, conversion bits"/>
-                    <property name="default" value="64"/>
+                    <property name="default" value="none"/>
                     <property name="converters">
                         <map>
                             <entry key="32">
