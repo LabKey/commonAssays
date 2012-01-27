@@ -76,6 +76,7 @@
 
     var sampleGroups = [];
     var antigenGroups = [];
+    var currentSelection;
 <%
     for (Map.Entry<String, String> entry : sampleMap.entrySet()) {
 %>
@@ -95,14 +96,26 @@
 <%
     }
 %>
-    Ext.onReady(function()
-    {
+    Ext.onReady(function() {
         var showSample = function(cls, hilight){
+
+            if (hilight) {
+
+                // clear the current
+                if (currentSelection)
+                    applyStyleToClass(currentSelection, {backgroundColor: '#AAAAAA'});
+
+                applyStyleToClass(cls, {backgroundColor: '#126495'});
+                currentSelection = cls;
+            }
+        };
+
+        var applyStyleToClass = function(cls, style) {
+
             var sample = Ext.select('.' + cls, true);
-            if (sample)
-            {
-                sample.applyStyles({backgroundColor: hilight ? '#126495' : '#AAAAAA'});
-                sample.repaint();                
+            if (sample) {
+                sample.applyStyles(style);
+                sample.repaint();
             }
         };
 
