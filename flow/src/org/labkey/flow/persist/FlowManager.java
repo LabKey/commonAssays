@@ -505,7 +505,7 @@ public class FlowManager
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition("DataId", data.getRowId());
 
-        return new TableSelector(getTinfoObject(), Table.ALL_COLUMNS, filter, null).getObject(AttrObject.class);
+        return new TableSelector(getTinfoObject(), filter, null).getObject(AttrObject.class);
     }
 
     public AttrObject getAttrObjectFromRowId(int rowid)
@@ -513,7 +513,7 @@ public class FlowManager
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition("RowId", rowid);
 
-        return new TableSelector(getTinfoObject(), Table.ALL_COLUMNS, filter, null).getObject(AttrObject.class);
+        return new TableSelector(getTinfoObject(), filter, null).getObject(AttrObject.class);
     }
 
 
@@ -753,7 +753,7 @@ public class FlowManager
         }
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition("ObjectId", obj.getRowId());
-        Script script = Table.selectObject(getTinfoScript(), Table.ALL_COLUMNS, filter, null, Script.class);
+        Script script = new TableSelector(getTinfoScript(), filter, null).getObject(Script.class);
         if (script == null)
         {
             script = new Script();

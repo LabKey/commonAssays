@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2011 LabKey Corporation
+ * Copyright (c) 2007-2012 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,8 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpDataTable;
-import org.labkey.api.exp.query.ExpQCFlagTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryParam;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
@@ -348,7 +346,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         // sufficient, since 8.3 no longer does implicit type casting in this situation.
         Integer dataRowIdInt = null;
         if (dataRowId instanceof Integer)
-            dataRowIdInt = ((Integer) dataRowId).intValue();
+            dataRowIdInt = (Integer) dataRowId;
         else if (dataRowId instanceof String)
         {
             try

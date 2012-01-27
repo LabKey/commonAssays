@@ -16,14 +16,13 @@
 
 package org.labkey.ms2;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.module.DefaultFolderType;
 import org.labkey.api.util.HelpTopic;
-import org.labkey.api.view.Portal;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.NavTree;
-import org.labkey.api.data.Container;
-import org.labkey.ms2.search.ProteinSearchWebPart;
+import org.labkey.api.view.Portal;
 import org.labkey.ms2.protein.ProteinController;
+import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import java.util.Arrays;
 
