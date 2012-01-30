@@ -656,8 +656,10 @@ luminex/src/org/labkey/luminex/GuideSetCurveFitTable.java -text
 luminex/src/org/labkey/luminex/GuideSetForm.java -text
 luminex/src/org/labkey/luminex/GuideSetOutOfRangeDisplayColumn.java -text
 luminex/src/org/labkey/luminex/GuideSetTable.java -text
+luminex/src/org/labkey/luminex/LuminexAnalyteDomainKind.java -text
 luminex/src/org/labkey/luminex/LuminexAssayProvider.java -text
 luminex/src/org/labkey/luminex/LuminexController.java -text
+luminex/src/org/labkey/luminex/LuminexDataDomainKind.java -text
 luminex/src/org/labkey/luminex/LuminexDataExchangeHandler.java -text
 luminex/src/org/labkey/luminex/LuminexDataHandler.java -text
 luminex/src/org/labkey/luminex/LuminexDataRow.java -text

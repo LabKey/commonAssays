@@ -378,35 +378,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
     }
 
-    public Set<String> getReservedPropertyNames(ExpProtocol protocol, Domain domain)
-    {
-        Set<String> result = super.getReservedPropertyNames(protocol, domain);
-
-        if (isDomainType(domain, protocol, ASSAY_DOMAIN_ANALYTE))
-        {
-            result.add("Name");
-            result.add("FitProb");
-            result.add("Fit Prob");
-            result.add("RegressionType");
-            result.add("Regression Type");
-            result.add("ResVar");
-            result.add("Res Var");
-            result.add("StdCurve");
-            result.add("Std Curve");
-            result.add("MinStandardRecovery");
-            result.add("Min Standard Recovery");
-            result.add("MaxStandardRecovery");
-            result.add("Max Standard Recovery");
-        }
-
-        if (isDomainType(domain, protocol, ASSAY_DOMAIN_CUSTOM_DATA))
-        {
-            result.addAll(LuminexSchema.getTableInfoDataRow().getColumnNameSet());
-        }
-
-        return result;
-    }
-
     public String getDescription()
     {
         return "Imports data in the multi-sheet BioPlex Excel file format.";

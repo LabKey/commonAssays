@@ -21,6 +21,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.study.assay.AssayQCFlagColumn;
@@ -71,6 +72,8 @@ public class LuminexModule extends DefaultModule
     {
         AssayService.get().registerAssayProvider(new LuminexAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new LuminexDataHandler());
+        PropertyService.get().registerDomainKind(new LuminexAnalyteDomainKind());
+        PropertyService.get().registerDomainKind(new LuminexDataDomainKind());
     }
 
     @Override
