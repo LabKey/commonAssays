@@ -43,7 +43,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             disabled: true,
             analyte: null,
             isotype: null,
-            conjugate: null
+            conjugate: null,
+            userCanUpdate: LABKEY.user.canUpdate
         });
 
         this.addEvents('appliedGuideSetUpdated');
@@ -64,7 +65,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             scope: this
         });
 
-        // initialize and add the apply guide set button to the toolbar
+        // initialize the apply guide set button to the toolbar
         this.applyGuideSetButton = new Ext.Button({
             disabled: true,
             text: 'Apply Guide Set',
@@ -72,7 +73,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             scope: this
         });
 
-        this.tbar = [this.exportButton, '-', this.applyGuideSetButton];
+        // if the user has permissions to update in this container, show them the Apply Guide Set button
+        this.tbar = this.userCanUpdate ? [this.exportButton, '-', this.applyGuideSetButton] : [this.exportButton];
 
         this.fbar = [{xtype:'label', text:'Bold values in the "Guide Set Date" column indicate assays that are members of a guide set.'}];
 

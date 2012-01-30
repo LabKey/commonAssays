@@ -37,7 +37,8 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
             width: 850,
             border: true,
             cls: 'extContainer',
-            disabled: true
+            disabled: true,
+            userCanUpdate: LABKEY.user.canUpdate
         });
 
         this.addEvents('currentGuideSetUpdated', 'exportPdfBtnClicked');
@@ -104,10 +105,11 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         // add the guide set elements as a composite field for layout reasons
         this.guideSetCompositeField = new Ext.form.CompositeField({
-            //labelStyle: "font-weight:bold",
             items: [this.guideSetDisplayField, this.editGuideSetButton, this.newGuideSetButton]
         });
-        items.push(this.guideSetCompositeField);
+
+        // if the user has permissions to update in this container, show them the Guide Set Edit/New buttons
+        this.userCanUpdate ? items.push(this.guideSetCompositeField) : items.push(this.guideSetDisplayField);
 
         this.items = items;
 

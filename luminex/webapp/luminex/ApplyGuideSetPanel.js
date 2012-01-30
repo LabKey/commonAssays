@@ -263,6 +263,11 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                                     this.getEl().unmask();
                                 this.fireEvent('closeApplyGuideSetPanel', data.rows.length > 0);
                             },
+                            failure: function(response) {
+                                Ext.Msg.alert("Error", response.exception);
+                                if (this.getEl().isMasked())
+                                    this.getEl().unmask();
+                            },
                             scope: this
                         });
                     }

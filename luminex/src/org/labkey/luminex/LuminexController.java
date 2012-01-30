@@ -26,7 +26,6 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.actions.ProtocolIdForm;
@@ -171,7 +170,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(UpdatePermission.class)
+    @RequiresPermissionClass(ReadPermission.class)
     public class LeveyJenningsReportAction extends SimpleViewAction<TitrationForm>
     {
         private String _titration;

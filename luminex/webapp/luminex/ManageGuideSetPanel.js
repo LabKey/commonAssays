@@ -340,6 +340,11 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 }
 
                 that.saveGuideSetData();
+            },
+            failure: function(response) {
+                Ext.Msg.alert("Error", response.exception);
+                if (that.getEl().isMasked())
+                    that.getEl().unmask();
             }
         });        
     },
@@ -386,6 +391,11 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 if (that.getEl().isMasked())
                     that.getEl().unmask();
                 that.fireEvent('closeManageGuideSetPanel', data["result"]);
+            },
+            failure: function(response) {
+                Ext.Msg.alert("Error", response.exception);
+                if (that.getEl().isMasked())
+                    that.getEl().unmask();
             }
         });
     },
