@@ -21,6 +21,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
@@ -31,6 +32,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.AbstractBeanQueryUpdateService;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.LookupForeignKey;
@@ -86,15 +88,21 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         titrationCol.setFk(titrationFk);
 
         ColumnInfo maxFiCol = wrapColumn(getRealTable().getColumn("MaxFI"));
+        maxFiCol.setLabel("High MFI");
         maxFiCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                return new GuideSetOutOfRangeDisplayColumn(colInfo, "High MFI", "MaxFI", null);
+                return new QCFlagHighlightDisplayColumn(colInfo, "MaxFIQCFlagsEnabled");
             }
         });
         addColumn(maxFiCol);
+        SQLFragment maxFiFlagEnabledSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), LuminexDataHandler.QC_FLAG_HIGH_MFI_FLAG_TYPE, null);
+        ExprColumn maxFiFlagEnabledColumn = new ExprColumn(this, "MaxFIQCFlagsEnabled", maxFiFlagEnabledSQL, JdbcType.VARCHAR);
+        maxFiFlagEnabledColumn.setLabel("High MFI QC Flags Enabled State");
+        maxFiFlagEnabledColumn.setHidden(true);
+        addColumn(maxFiFlagEnabledColumn);
 
         ColumnInfo guideSetCol = addColumn(wrapColumn("GuideSet", getRealTable().getColumn("GuideSetId")));
         guideSetCol.setFk(new LookupForeignKey("RowId")

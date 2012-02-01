@@ -63,8 +63,6 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
     private final LuminexSchema _schema;
     private LuminexAssayProvider _provider;
     public static final String FLAGGED_AS_EXCLUDED_COLUMN_NAME = "FlaggedAsExcluded";
-    public static final String CV_QC_FLAG_ENABLED_COLUMN_NAME = "CVQCFlagEnabled";
-    public static final String CV_QC_FLAG_COMMENT_COLUMN_NAME = "CVQCFlagComment";
 
     public LuminexDataTable(LuminexSchema schema)
     {
@@ -120,28 +118,24 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         addColumn(wrapColumn(getRealTable().getColumn("SamplingErrors")));
         addColumn(wrapColumn(getRealTable().getColumn("BeadCount")));
 
-        SQLFragment cvQCFlagJoinSQL = new SQLFragment();
-        cvQCFlagJoinSQL.append(" FROM ");
-        cvQCFlagJoinSQL.append(ExperimentService.get().getTinfoAssayQCFlag(), "qf");
-        cvQCFlagJoinSQL.append(" WHERE " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId = qf.IntKey1");
-        cvQCFlagJoinSQL.append("   AND " + ExprColumn.STR_TABLE_ALIAS + ".DataId = qf.IntKey2");
-        cvQCFlagJoinSQL.append("   AND " + ExprColumn.STR_TABLE_ALIAS + ".Type = qf.Key1");
-        cvQCFlagJoinSQL.append("   AND " + ExprColumn.STR_TABLE_ALIAS + ".Description = qf.Key2)");
-        SQLFragment cvFlagEnabledSQL = new SQLFragment("(SELECT qf.Enabled ").append(cvQCFlagJoinSQL);
-        ExprColumn cvFlagEnabledColumn = new ExprColumn(this, CV_QC_FLAG_ENABLED_COLUMN_NAME, cvFlagEnabledSQL, JdbcType.BOOLEAN);
-        cvFlagEnabledColumn.setLabel("CV QC Flag Enabled");
-        addColumn(cvFlagEnabledColumn);        
-        SQLFragment cvFlagCommentSQL = new SQLFragment("(SELECT qf.Comment ").append(cvQCFlagJoinSQL);
-        ExprColumn cvFlagCommentColumn = new ExprColumn(this, CV_QC_FLAG_COMMENT_COLUMN_NAME, cvFlagCommentSQL, JdbcType.VARCHAR);
-        cvFlagCommentColumn.setLabel("CV QC Flag Comment");
-        addColumn(cvFlagCommentColumn);
+        SQLFragment cvQCFlagSQL = new SQLFragment("SELECT qf.Enabled FROM ");
+        cvQCFlagSQL.append(ExperimentService.get().getTinfoAssayQCFlag(), "qf");
+        cvQCFlagSQL.append(" WHERE " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId = qf.IntKey1");
+        cvQCFlagSQL.append("   AND " + ExprColumn.STR_TABLE_ALIAS + ".DataId = qf.IntKey2");
+        cvQCFlagSQL.append("   AND " + ExprColumn.STR_TABLE_ALIAS + ".Type = qf.Key1");
+        cvQCFlagSQL.append("   AND " + ExprColumn.STR_TABLE_ALIAS + ".Description = qf.Key2");
+        cvQCFlagSQL.append(" ORDER BY qf.RowId");
+        ExprColumn cvFlagEnabledColumn = new ExprColumn(this, "CVQCFlagsEnabled", this.getSqlDialect().getSelectConcat(cvQCFlagSQL), JdbcType.VARCHAR);
+        cvFlagEnabledColumn.setLabel("CV QC Flags Enabled State");
+        cvFlagEnabledColumn.setHidden(true);
+        addColumn(cvFlagEnabledColumn);
         ColumnInfo cvCol = wrapColumn(getRealTable().getColumn("CV"));
         cvCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                return new CvUIDisplayColumn(colInfo, CV_QC_FLAG_ENABLED_COLUMN_NAME);
+                return new QCFlagHighlightDisplayColumn(colInfo, "CVQCFlagsEnabled");
             }
         });
         addColumn(cvCol);

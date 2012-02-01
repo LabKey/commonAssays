@@ -104,10 +104,9 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                     + 'Titration/Run/Batch/Network, Titration/Run/NotebookNo, Titration/Run/AssayType, '
                     + 'Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, Analyte/Properties/LotNumber, '
                     + 'GuideSet/Created, IncludeInGuideSetCalculation, '
-                    + 'Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC, '
-                    + 'GuideSet/Four ParameterCurveFit/EC50Average, GuideSet/Four ParameterCurveFit/EC50StdDev, '
-                    + 'GuideSet/TrapezoidalCurveFit/AUCAverage, GuideSet/TrapezoidalCurveFit/AUCStdDev, '
-                    + 'GuideSet/MaxFIAverage, GuideSet/MaxFIStdDev ',
+                    + 'Four ParameterCurveFit/EC50, Four ParameterCurveFit/EC50QCFlagsEnabled, '
+                    + 'TrapezoidalCurveFit/AUC, TrapezoidalCurveFit/AUCQCFlagsEnabled, '
+                    + 'MaxFI, MaxFIQCFlagsEnabled',
             filterArray: filterArray,
             sort: '-Analyte/Data/AcquisitionDate, -Titration/Run/Created',
             maxRows: (startDate && endDate ? undefined : this.defaultRowSize),
@@ -155,15 +154,12 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'Analyte Lot No.', dataIndex:'Analyte/Properties/LotNumber', width:100, renderer: this.encodingRenderer},
                 {header:'Guide Set Start Date', dataIndex:'GuideSet/Created', renderer: this.formatGuideSetMembers, scope: this, width:100},
                 {header:'GS Member', dataIndex:'IncludeInGuideSetCalculation', hidden: true},
-                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("EC50"), scope: this, align: 'right'},
-                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.outOfRangeRenderer("AUC"), scope: this, align: 'right'},
-                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("High MFI"), scope: this, align: 'right'},
-                {header:'EC50 Average', dataIndex:'GuideSet/Four ParameterCurveFit/EC50Average', hidden: true},
-                {header:'EC50 StdDev', dataIndex:'GuideSet/Four ParameterCurveFit/EC50StdDev', hidden: true},
-                {header:'AUC Average', dataIndex:'GuideSet/TrapezoidalCurveFit/AUCAverage', hidden: true},
-                {header:'AUC StdDev', dataIndex:'GuideSet/TrapezoidalCurveFit/AUCStdDev', hidden: true},
-                {header:'High MFI Average', dataIndex:'GuideSet/MaxFIAverage', hidden: true},
-                {header:'High MFI StdDev', dataIndex:'GuideSet/MaxFIStdDev', hidden: true}
+                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("Four ParameterCurveFit/EC50QCFlagsEnabled"), scope: this, align: 'right'},
+                {header:'EC50 QC Flags Enabled', dataIndex:'Four ParameterCurveFit/EC50QCFlagsEnabled', hidden: true},
+                {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.outOfRangeRenderer("TrapezoidalCurveFit/AUCQCFlagsEnabled"), scope: this, align: 'right'},
+                {header:'AUC  QC Flags Enabled', dataIndex:'TrapezoidalCurveFit/AUCQCFlagsEnabled', hidden: true},
+                {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("MaxFIQCFlagsEnabled"), scope: this, align: 'right'},
+                {header:'High  QC Flags Enabled', dataIndex:'MaxFIQCFlagsEnabled', hidden: true}
             ],
             scope: this
         });
@@ -269,21 +265,32 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 // some of the columns may not be defined in the assay design, so set to null
                 var value = null;
                 if (null != row.get(col.dataIndex))
+                {
                     value = row.get(col.dataIndex);
+                }
 
                 // render dates with the proper renderer
                 if (value instanceof Date)
+                {
                     value = this.dateRenderer(value);
+                }
                 // render numbers with the proper rounding and format
                 if (typeof(value) == 'number')
+                {
                     value = this.numberRenderer(value);
+                }
                 // render out of range values with an asterisk
-                if (row.get(col.header + "OOR"))
+                var enabledStates = row.get(col.dataIndex + "QCFlagsEnabled");
+                if (enabledStates != null && (enabledStates.indexOf('t') > -1 || enabledStates.indexOf('1') > -1))
+                {
                     value = "*" + value;
+                }
 
                 // render the flags in an excel friendly format
                 if (col.dataIndex == "QCFlags")
+                {
                     value = this.flagsExcelRenderer(value);
+                }
 
                 exportJson.sheets[0].data[rowIndex][colIndex] = value;
                 colIndex++;
@@ -293,39 +300,22 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         LABKEY.Utils.convertToExcel(exportJson);
     },
 
-    outOfRangeRenderer: function(source) {
+    outOfRangeRenderer: function(enabledDataIndex) {
         return function(val, metaData, record) {
             if (null == val)
+            {
                 return null;
-
-            // get the average and stdDev values based on the source column type
-            var avg, stdDev = null;
-            if (source == "EC50")
-            {
-                avg = record.get('GuideSet/Four ParameterCurveFit/EC50Average');
-                stdDev = record.get('GuideSet/Four ParameterCurveFit/EC50StdDev');
-            }
-            else if (source == "High MFI")
-            {
-                avg = record.get('GuideSet/MaxFIAverage');
-                stdDev = record.get('GuideSet/MaxFIStdDev');
-            }
-            else if (source == "AUC")
-            {
-                avg = record.get('GuideSet/TrapezoidalCurveFit/AUCAverage');
-                stdDev = record.get('GuideSet/TrapezoidalCurveFit/AUCStdDev');
             }
 
-            // if the value is out of range, highlight it in red and store an OOR indicator
-            if (this.checkIfOutOfRange(val, avg, stdDev))
+            // if the record has an enabled QC flag, highlight it in red
+            var enabledStates = record.get(enabledDataIndex);
+            if (enabledStates != null && (enabledStates.indexOf('t') > -1 || enabledStates.indexOf('1') > -1))
             {
                 metaData.attr = "style='color:red'";
-                record.data[source + "OOR"] = true;
             }
 
             // if this is a very small number, display more decimal places
             var precision = this.getPrecision(val);
-
             return Ext.util.Format.number(Ext.util.Format.round(val, precision), (precision == 6 ? '0.000000' : '0.00'));
         }
     },
@@ -334,28 +324,11 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         return (null != val && val > 0 && val < 1) ? 6 : 2;
     },
 
-    checkIfOutOfRange: function(val, avg, stdDev) {
-        // if this record has a guide set average and stdDev, check if the value is outside of the +/- 3 stdDev range
-        if (null != val && null != avg)
-        {
-            var precision = this.getPrecision(val);
-            val = Ext.util.Format.round(val, precision);
-            if (null == stdDev)
-                stdDev = 0;
-            var plus3stdDev = Ext.util.Format.round(avg + (3 * stdDev), precision);
-            var minus3stdDev = Ext.util.Format.round(avg - (3 * stdDev), precision);
-
-            // return true if the value is outside of the +/- 3 stdDev range from the avg
-            if(val > plus3stdDev || val < minus3stdDev)
-                return true;
-        }
-
-        return false;
-    },
-
     formatGuideSetMembers: function(val, metaData, record) {
         if (record.get("IncludeInGuideSetCalculation"))
-            metaData.attr = "style='font-weight:bold'"; 
+        {
+            metaData.attr = "style='font-weight:bold'";
+        }
         return this.dateRenderer(val); 
     },
 
@@ -374,17 +347,25 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {
                     var row = data.rows[i];
                     if (runFlagList[row.Run] == undefined)
+                    {
                         runFlagList[row.Run] = {id: row.Run, count: 0, value: ""};
+                    }
 
                     // add a comma separator
                     if (runFlagList[row.Run].count > 0)
+                    {
                         runFlagList[row.Run].value += ", ";
+                    }
 
                     // add strike-thru for disabled flags
                     if (row.Enabled)
+                    {
                         runFlagList[row.Run].value += row.FlagType;
+                    }
                     else
+                    {
                         runFlagList[row.Run].value += '<span style="text-decoration: line-through;">' + row.FlagType + '</span>';
+                    }
 
                     runFlagList[row.Run].count++;
                 }
@@ -393,18 +374,24 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 this.store.each(function(record) {
                     var runFlag = runFlagList[record.get("Titration/Run/RowId")];
                     if (runFlag)
+                    {
                         record.set("QCFlags", "<a>" + runFlag.value + "</a>");
+                    }
                 }, this);
 
                 // add cellclick event to the grid to trigger the QCFlagToggleWindow
                 this.on('cellclick', this.showQCFlagToggleWindow, this);
 
                 if (this.getEl().isMasked())
+                {
                     this.getEl().unmask();
+                }
             },
             failure: function(info, response, options){
                 if (this.getEl().isMasked())
+                {
                     this.getEl().unmask();
+                }
 
                 LABKEY.Utils.displayAjaxErrorResponse(response, options);
             },

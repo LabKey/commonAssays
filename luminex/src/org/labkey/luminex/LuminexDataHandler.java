@@ -74,6 +74,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 {
     public static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
     public static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType("LuminexDataFile", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
+    public static final String QC_FLAG_HIGH_MFI_FLAG_TYPE = "HMFI";
+    public static final String QC_FLAG_EC50_FLAG_TYPE = "EC50";
+    public static final String QC_FLAG_AUC_FLAG_TYPE = "AUC";
+    public static final String QC_FLAG_CV_FLAG_TYPE = "PCV";
 
     private static final Logger LOGGER = Logger.getLogger(LuminexDataHandler.class);
 
@@ -587,7 +591,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                  (dataRow.getWellRole().contains("Control") && dataRow.getCv() > 0.15)))
             {
                 String description = dataRow.getType() + " : " + dataRow.getDescription() + " with " + analyte.getName() + " over threshold value for %CV";
-                CVQCFlag newQcFlag = new CVQCFlag(expRun.getRowId(), "PCV", description, analyte.getRowId(), dataRow.getData(), dataRow.getType(), dataRow.getDescription());
+                CVQCFlag newQcFlag = new CVQCFlag(expRun.getRowId(), QC_FLAG_CV_FLAG_TYPE, description, analyte.getRowId(), dataRow.getData(), dataRow.getType(), dataRow.getDescription());
                 if (!newCVQCFlags.contains(newQcFlag))
                 {
                     newCVQCFlags.add(newQcFlag);
@@ -1237,7 +1241,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 String outOfRangeType = isOutOfGuideSetRange(analyteTitration.getMaxFI(), average, stdDev);
                 if (null != outOfRangeType)
                 {
-                    newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "HMFI", descriptionPrefix + outOfRangeType + " threshold for High MFI", analyte.getRowId(), titration.getRowId()));
+                    newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), QC_FLAG_HIGH_MFI_FLAG_TYPE, descriptionPrefix + outOfRangeType + " threshold for High MFI", analyte.getRowId(), titration.getRowId()));
                 }
 
                 for (CurveFit curveFit : curveFits)
@@ -1250,7 +1254,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         outOfRangeType = isOutOfGuideSetRange(curveFit.getEC50(), average, stdDev);
                         if (null != outOfRangeType)
                         {
-                            newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "EC50", descriptionPrefix + outOfRangeType + " threshold for EC50", analyte.getRowId(), titration.getRowId()));
+                            newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), QC_FLAG_EC50_FLAG_TYPE, descriptionPrefix + outOfRangeType + " threshold for EC50", analyte.getRowId(), titration.getRowId()));
                         }
                     }
 
@@ -1262,7 +1266,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         outOfRangeType = isOutOfGuideSetRange(curveFit.getAUC(), average, stdDev);
                         if (null != outOfRangeType)
                         {
-                            newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), "AUC", descriptionPrefix + outOfRangeType + " threshold for AUC", analyte.getRowId(), titration.getRowId()));
+                            newAnalyteTitrationQCFlags.add(new AnalyteTitrationQCFlag(expRun.getRowId(), QC_FLAG_AUC_FLAG_TYPE, descriptionPrefix + outOfRangeType + " threshold for AUC", analyte.getRowId(), titration.getRowId()));
                         }
                     }
                 }

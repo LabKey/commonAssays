@@ -19,6 +19,9 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.dialect.SqlDialect;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.study.assay.AssaySchema;
 
@@ -60,5 +63,22 @@ public abstract class AbstractLuminexTable extends FilteredTable
     public String getPublicSchemaName()
     {
         return AssaySchema.NAME;
+    }
+
+    public static SQLFragment createQCFlagEnabledSQLFragment(SqlDialect sqlDialect, String flagType, String curveType)
+    {
+        SQLFragment sql = new SQLFragment(" ");
+        sql.append("SELECT qf.Enabled FROM ");
+        sql.append(ExperimentService.get().getTinfoAssayQCFlag(), "qf");
+        sql.append(" WHERE " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId = qf.IntKey1");
+        sql.append("   AND " + ExprColumn.STR_TABLE_ALIAS + ".TitrationId = qf.IntKey2");
+        sql.append("   AND qf.FlagType = '" + flagType + "'");
+        if (null != curveType)
+        {
+            sql.append("    AND " + ExprColumn.STR_TABLE_ALIAS + ".CurveType = '" + curveType + "'");
+        }
+        sql.append(" ORDER BY qf.RowId");
+
+        return sqlDialect.getSelectConcat(sql);
     }
 }

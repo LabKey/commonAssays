@@ -20,10 +20,16 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -86,9 +92,14 @@ public class CurveFitTable extends AbstractLuminexTable
             @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                return new GuideSetOutOfRangeDisplayColumn(colInfo, "EC50", "EC50", "Four Parameter");
+                return new QCFlagHighlightDisplayColumn(colInfo, "EC50QCFlagsEnabled");
             }
         });
+        SQLFragment ec50FlagSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), LuminexDataHandler.QC_FLAG_EC50_FLAG_TYPE, "Four Parameter");
+        ExprColumn ec50FlagEnabledColumn = new ExprColumn(this, "EC50QCFlagsEnabled", ec50FlagSQL, JdbcType.VARCHAR);
+        ec50FlagEnabledColumn.setLabel("EC50 QC Flags Enabled State");
+        ec50FlagEnabledColumn.setHidden(true);
+        addColumn(ec50FlagEnabledColumn);
 
         ColumnInfo aucCol = getColumn("AUC");
         aucCol.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -96,9 +107,14 @@ public class CurveFitTable extends AbstractLuminexTable
             @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                return new GuideSetOutOfRangeDisplayColumn(colInfo, "AUC", "AUC", "Trapezoidal");
+                return new QCFlagHighlightDisplayColumn(colInfo, "AUCQCFlagsEnabled");
             }
         });
+        SQLFragment aucFlagSQL = createQCFlagEnabledSQLFragment(this.getSqlDialect(), LuminexDataHandler.QC_FLAG_AUC_FLAG_TYPE, "Trapezoidal");
+        ExprColumn aucFlagEnabledColumn = new ExprColumn(this, "AUCQCFlagsEnabled", aucFlagSQL, JdbcType.VARCHAR);
+        aucFlagEnabledColumn.setLabel("AUC QC Flags Enabled State");
+        aucFlagEnabledColumn.setHidden(true);
+        addColumn(aucFlagEnabledColumn);
     }
 
     @Override
