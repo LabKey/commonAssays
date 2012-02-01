@@ -42,8 +42,11 @@ public abstract class InputXmlComposite extends SearchFormComposite
 
     public InputXmlComposite()
     {
-        super();
-        init();
+        inputXmlTextArea.setVisibleLines(10);
+        inputXmlTextArea.setWrap("OFF");
+        inputXmlHtml.setStylePrimaryName("labkey-read-only");
+        instance.add(inputXmlTextArea);
+        initWidget(instance);
     }
 
     public void setDefault()
@@ -80,15 +83,6 @@ public abstract class InputXmlComposite extends SearchFormComposite
 
     }
 
-    public void init()
-    {
-        inputXmlTextArea.setVisibleLines(10);
-        inputXmlTextArea.setWrap("OFF");
-        inputXmlHtml.setStylePrimaryName("labkey-read-only");
-        instance.add(inputXmlTextArea);
-        initWidget(instance);
-    }
-
     public String getName()
     {
         return inputXmlTextArea.getName();
@@ -114,26 +108,6 @@ public abstract class InputXmlComposite extends SearchFormComposite
     public void addChangeListener(ChangeHandler changeHandler)
     {
         inputXmlTextArea.addChangeHandler(changeHandler);
-    }
-
-    public String getSequenceDb()
-    {
-        return params.getSequenceDb();
-    }
-
-    public void removeSequenceDb()
-    {
-        params.removeSequenceDb();
-    }
-
-    public void removeTaxonomy()
-    {
-        params.removeTaxonomy();
-    }
-
-    public void removeEnzyme()
-    {
-        params.removeEnzyme();
     }
 
     public void writeXml() throws SearchFormException

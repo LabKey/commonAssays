@@ -59,11 +59,6 @@ public abstract class ResidueModComposite extends SearchFormComposite
     
     public ResidueModComposite()
     {
-        super();
-    }
-
-    public void init()
-    {
         modStaticListBox.setVisibleItemCount(3);
         modStaticListBox.setWidth("250px");
         modDynamicListBox.setVisibleItemCount(3);
@@ -81,7 +76,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
         modTabPanel.selectTab(0);
         readOnlyPanel.add(staticReadOnlyLabel);
         readOnlyPanel.add(dynamicReadOnlyLabel);
-        labelWidget = new Label();         
+        labelWidget = new Label();
         initWidget(instance);
     }
 
@@ -526,11 +521,45 @@ public abstract class ResidueModComposite extends SearchFormComposite
 
     abstract public Map<String, String> getModMap(int modType);
 
+    public void setStaticMods(Map<String, String> mods, ParamParser params) throws SearchFormException
+    {
+        if(mods.size() == 0)
+        {
+            params.removeInputParameter(ParameterNames.STATIC_MOD);
+            return;
+        }
+        StringBuffer valuesString = new StringBuffer();
+        for(String mod : mods.values())
+        {
+            if(valuesString.length() > 0)
+                valuesString.append(",");
+            valuesString.append(mod);
+        }
+        params.setInputParameter(ParameterNames.STATIC_MOD, valuesString.toString());
+    }
+
+    public void setDynamicMods(Map<String, String> mods, ParamParser params) throws SearchFormException
+    {
+        if(mods.size() == 0)
+        {
+            params.removeInputParameter(ParameterNames.DYNAMIC_MOD);
+            return;
+        }
+        StringBuffer valuesString = new StringBuffer();
+        for(String mod : mods.values())
+        {
+            if(valuesString.length() > 0)
+                valuesString.append(",");
+            valuesString.append(mod);
+        }
+        params.setInputParameter(ParameterNames.DYNAMIC_MOD, valuesString.toString());
+    }
+
     @Override
     public void syncFormToXml(ParamParser params) throws SearchFormException
     {
-        params.setStaticMods(getStaticMods());
-        params.setDynamicMods(getDynamicMods());
+        setStaticMods(getStaticMods(), params);
+        setDynamicMods(getDynamicMods(), params);
     }
 
     private Map<String, String> mods2Map(String mods, Map<String, String> knownMods)
@@ -583,15 +612,15 @@ public abstract class ResidueModComposite extends SearchFormComposite
     @Override
     public String syncXmlToForm(ParamParser params)
     {
-        Map<String, String> staticMods = mods2Map(params.getStaticMods(), getModMap(ResidueModComposite.STATIC));
+        Map<String, String> staticMods = mods2Map(params.getInputParameter(ParameterNames.STATIC_MOD), getModMap(ResidueModComposite.STATIC));
         setSelectedStaticMods(staticMods);
 
-        Map<String, String> dynamicMods = mods2Map(params.getDynamicMods(), getModMap(DYNAMIC));
+        Map<String, String> dynamicMods = mods2Map(params.getInputParameter(ParameterNames.DYNAMIC_MOD), getModMap(DYNAMIC));
         setSelectedDynamicMods(dynamicMods);
         try
         {
-           params.setStaticMods(staticMods);
-           params.setDynamicMods(dynamicMods);
+           setStaticMods(staticMods, params);
+           setDynamicMods(dynamicMods, params);
         }
         catch(SearchFormException e)
         {
@@ -599,5 +628,11 @@ public abstract class ResidueModComposite extends SearchFormComposite
         }
 
         return validate();
+    }
+
+    @Override
+    public Set<String> getHandledParameterNames()
+    {
+        return new HashSet<String>(Arrays.asList(ParameterNames.STATIC_MOD, ParameterNames.DYNAMIC_MOD));
     }
 }

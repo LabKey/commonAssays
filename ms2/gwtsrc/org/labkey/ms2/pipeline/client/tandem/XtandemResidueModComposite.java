@@ -37,14 +37,8 @@ public class XtandemResidueModComposite extends ResidueModComposite
 {
     public XtandemResidueModComposite(Search searchForm)
     {
-        super();
         this.searchForm = searchForm;
-        init();
-    }
 
-    public void init()
-    {
-        super.init();
         FlexTable.FlexCellFormatter staticFormatter = staticFlexTable.getFlexCellFormatter();
         staticFormatter.setRowSpan(0, 0, 2);
         staticFormatter.setRowSpan(0, 2, 2);

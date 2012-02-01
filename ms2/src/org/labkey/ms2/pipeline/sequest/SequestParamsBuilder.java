@@ -26,6 +26,7 @@ import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.settings.AppProps;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -296,11 +297,11 @@ public class SequestParamsBuilder
 
     protected List<String> initEnzymeInfo()
     {
-        String inputXmlEnzyme = sequestInputParams.get(org.labkey.ms2.pipeline.client.ParamParser.ENZYME);
+        String inputXmlEnzyme = sequestInputParams.get(ParameterNames.ENZYME);
         if (inputXmlEnzyme == null) return Collections.emptyList();
         if (inputXmlEnzyme.equals(""))
         {
-            return Collections.singletonList(org.labkey.ms2.pipeline.client.ParamParser.ENZYME + " did not contain a value.");
+            return Collections.singletonList(ParameterNames.ENZYME + " did not contain a value.");
         }
         String enzyme = removeWhiteSpace(inputXmlEnzyme);
         String[] enzymeSignatures = enzyme.split(",");
@@ -313,7 +314,7 @@ public class SequestParamsBuilder
             }
             catch(SequestParamsException e)
             {
-                return Collections.singletonList(org.labkey.ms2.pipeline.client.ParamParser.ENZYME + " parse error:" + e.getMessage());
+                return Collections.singletonList(ParameterNames.ENZYME + " parse error:" + e.getMessage());
             }
         }
         try
@@ -505,7 +506,7 @@ public class SequestParamsBuilder
         defaultMods.add('T');
         defaultMods.add('Y');
 
-        String mods = sequestInputParams.get(org.labkey.ms2.pipeline.client.ParamParser.DYNAMIC_MOD);
+        String mods = sequestInputParams.get(ParameterNames.DYNAMIC_MOD);
         if (mods == null || mods.equals("")) return Collections.emptyList();
         mods = removeWhiteSpace(mods);
         ArrayList<Character> residues = new ArrayList<Character>();
@@ -555,7 +556,7 @@ public class SequestParamsBuilder
 
     List<String> initStaticMods()
     {
-        String mods = sequestInputParams.get(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD);
+        String mods = sequestInputParams.get(ParameterNames.STATIC_MOD);
 
         ArrayList<Character> residues = new ArrayList<Character>();
         ArrayList<String> masses = new ArrayList<String>();
@@ -1943,7 +1944,7 @@ public class SequestParamsBuilder
                     sp = spb.getProperties().startsWith("add_" + residue + "_");   
                 }
                 String actual = sp.getValue();
-                assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
+                assertEquals(ParameterNames.STATIC_MOD, expected1, actual);
             }
 
             for (char residue : validResidues)
@@ -1971,7 +1972,7 @@ public class SequestParamsBuilder
                     sp = spb.getProperties().startsWith("add_" + residue + "_");
                 }
                 String actual = sp.getValue();
-                assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
+                assertEquals(ParameterNames.STATIC_MOD, expected1, actual);
             }
 
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1984,14 +1985,14 @@ public class SequestParamsBuilder
             if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().startsWith("add_M_");
             String actual = sp.getValue();
-            assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
+            assertEquals(ParameterNames.STATIC_MOD, expected1, actual);
 
             expected1 = "227.0";
             parserError = spb.initStaticMods();
             if (!parserError.isEmpty()) fail(parserError);
             sp = spb.getProperties().startsWith("add_C_");
             actual = sp.getValue();
-            assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
+            assertEquals(ParameterNames.STATIC_MOD, expected1, actual);
         }
 
 
@@ -2024,7 +2025,7 @@ public class SequestParamsBuilder
                     sp = spb.getProperties().startsWith("add_" + residue + "_");
                 }
                 String actual = sp.getValue();
-                assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
+                assertEquals(ParameterNames.STATIC_MOD, expected1, actual);
             }
         }
 
@@ -2055,7 +2056,7 @@ public class SequestParamsBuilder
                     sp = spb.getProperties().startsWith("add_" + residue + "_");
                 }
                 String actual = sp.getValue();
-                assertEquals(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD, expected1, actual);
+                assertEquals(ParameterNames.STATIC_MOD, expected1, actual);
             }
         }
 

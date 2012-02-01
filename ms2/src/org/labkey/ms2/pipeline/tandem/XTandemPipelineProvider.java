@@ -34,18 +34,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * XTandemCPipelineProvider class
- * <p/>
  * Created: Nov 1, 2005
  *
  * @author bmaclean
  */
-public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
+public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     public static String name = "X! Tandem";
     private static final String ACTION_LABEL = "X!Tandem Peptide Search";
 
-    public XTandemCPipelineProvider(Module owningModule)
+    public XTandemPipelineProvider(Module owningModule)
     {
         super(name, owningModule);
     }

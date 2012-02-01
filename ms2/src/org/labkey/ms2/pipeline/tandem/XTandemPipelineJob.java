@@ -50,7 +50,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
                               List<File> filesMzXML,
                               File fileInputXML) throws IOException
     {
-        super(protocol, XTandemCPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
+        super(protocol, XTandemPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
         header("X! Tandem search for " + getBaseName());
         writeInputFilesToLog();

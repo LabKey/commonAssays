@@ -30,17 +30,11 @@ import java.util.*;
  */
 public class EnzymeComposite extends SearchFormComposite
 {
-    protected VerticalPanel instance = new VerticalPanel();
+   protected VerticalPanel instance = new VerticalPanel();
     protected ListBox enzymeListBox = new ListBox();
     protected Label enzymeReadOnly = new Label();
 
     public EnzymeComposite()
-    {
-        super();
-        init();
-    }
-
-    public void init()
     {
         enzymeListBox.setVisibleItemCount(1);
         enzymeReadOnly.setStylePrimaryName("labkey-read-only");
@@ -197,13 +191,13 @@ public class EnzymeComposite extends SearchFormComposite
     @Override
     public void syncFormToXml(ParamParser params) throws SearchFormException
     {
-        params.setEnzyme(getSelectedEnzyme());
+        params.setInputParameter(ParameterNames.ENZYME, getSelectedEnzyme());
     }
 
     @Override
     public String syncXmlToForm(ParamParser params)
     {
-        String enzyme = params.getEnzyme();
+        String enzyme = params.getInputParameter(ParameterNames.ENZYME);
         if(enzyme == null || enzyme.equals(""))
         {
             enzyme = getSelectedEnzyme();
@@ -215,7 +209,7 @@ public class EnzymeComposite extends SearchFormComposite
             {
                 try
                 {
-                    params.setEnzyme(enzyme);
+                    params.setInputParameter(ParameterNames.ENZYME, enzyme);
                 }
                 catch(SearchFormException e)
                 {
@@ -228,5 +222,11 @@ public class EnzymeComposite extends SearchFormComposite
             return setSelectedEnzyme(enzyme);
         }
         return "";
+    }
+
+    @Override
+    public Set<String> getHandledParameterNames()
+    {
+        return Collections.singleton(ParameterNames.ENZYME);
     }
 }

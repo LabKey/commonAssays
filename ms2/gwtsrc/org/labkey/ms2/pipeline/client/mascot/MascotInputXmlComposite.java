@@ -16,12 +16,10 @@
 
 package org.labkey.ms2.pipeline.client.mascot;
 
-import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import org.labkey.ms2.pipeline.client.InputXmlComposite;
-import org.labkey.ms2.pipeline.client.ParamParser;
-import org.labkey.ms2.pipeline.client.SearchFormException;
+import org.labkey.ms2.pipeline.client.ParameterNames;
 
 /**
  * User: billnelson@uky.edu
@@ -34,10 +32,15 @@ import org.labkey.ms2.pipeline.client.SearchFormException;
 public class MascotInputXmlComposite extends InputXmlComposite
 {
 
+    public MascotInputXmlComposite()
+    {
+        ParameterNames.ENZYME = "mascot, enzyme";
+        ParameterNames.STATIC_MOD = "mascot, fixed modifications";
+        ParameterNames.DYNAMIC_MOD = "mascot, variable modifications";
+    }
+
     public String update(String text)
     {
-        if(params == null)
-            params = new MascotParamParser(inputXmlTextArea);
         return super.update(text);
     }
 
@@ -46,16 +49,5 @@ public class MascotInputXmlComposite extends InputXmlComposite
         labelWidget = new Label("Mascot XML");
         labelWidget.setStylePrimaryName(LABEL_STYLE_NAME);
         return labelWidget;
-    }
-
-    private class MascotParamParser extends ParamParser
-    {
-        private MascotParamParser(HasText xml)
-        {
-            super(xml);
-            ENZYME = "mascot, enzyme";
-            STATIC_MOD = "mascot, fixed modifications";
-            DYNAMIC_MOD = "mascot, variable modifications";
-        }
     }
 }

@@ -44,7 +44,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
                               File fileInputXML
     ) throws IOException
     {
-        super(protocol, SequestLocalPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
+        super(protocol, SequestPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
 
         header("Sequest search for " + getBaseName());
         writeInputFilesToLog();

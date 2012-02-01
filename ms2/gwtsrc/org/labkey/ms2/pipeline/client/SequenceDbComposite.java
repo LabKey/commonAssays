@@ -48,10 +48,6 @@ public abstract class SequenceDbComposite extends SearchFormComposite
     protected SequenceDbComposite(Search search)
     {
         _search = search;
-    }
-
-    public void init()
-    {
         sequenceDbPathListBox.setVisibleItemCount(1);
         sequenceDbLabel.setStylePrimaryName("labkey-read-only");
         dirPanel.add(sequenceDbPathListBox);
@@ -356,7 +352,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
     @Override
     public void syncFormToXml(ParamParser params) throws SearchFormException
     {
-        params.setSequenceDb(getSelectedDb());
+        params.setInputParameter(ParameterNames.SEQUENCE_DB, getSelectedDb());
     }
 
     protected class RefreshButton extends ImageButton
@@ -373,7 +369,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
 
     public String syncXmlToForm(ParamParser params)
     {
-        String sequenceDb = params.getSequenceDb();
+        String sequenceDb = params.getInputParameter(ParameterNames.SEQUENCE_DB);
         if(sequenceDb == null || sequenceDb.equals(""))
         {
             sequenceDb = getSelectedDb();
@@ -385,7 +381,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
             {
                 try
                 {
-                    params.setSequenceDb(sequenceDb);
+                    params.setInputParameter(ParameterNames.SEQUENCE_DB, sequenceDb);
                 }
                 catch(SearchFormException e)
                 {
@@ -398,7 +394,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
             _search.getSequenceDbs(sequenceDb);
         }
 
-        String taxonomy = params.getTaxonomy();
+        String taxonomy = params.getInputParameter(ParameterNames.TAXONOMY);
         if(taxonomy == null || taxonomy.equals(""))
         {
             taxonomy = getSelectedTaxonomy();
@@ -406,7 +402,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
             {
                 try
                 {
-                    params.setTaxonomy(taxonomy);
+                    params.setInputParameter(ParameterNames.TAXONOMY, taxonomy);
                 }
                 catch(SearchFormException e)
                 {
@@ -421,5 +417,9 @@ public abstract class SequenceDbComposite extends SearchFormComposite
         return "";
     }
 
-
+    @Override
+    public Set<String> getHandledParameterNames()
+    {
+        return new HashSet<String>(Arrays.asList(ParameterNames.SEQUENCE_DB, ParameterNames.TAXONOMY));
+    }
 }

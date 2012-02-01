@@ -40,11 +40,6 @@ public class ParamParser
     protected   static String XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                                 "<bioml>\n";
     protected   static String XML_FOOTER    = "</bioml>";
-    protected   static String SEQUENCE_DB   = "pipeline, database";
-    protected   static String TAXONOMY      = "protein, taxon";
-    public      static String ENZYME        = "protein, cleavage site";
-    public      static String STATIC_MOD    = "residue, modification mass";
-    public      static String DYNAMIC_MOD   = "residue, potential modification mass";
 
     StringBuffer error;
     Document xmlDoc;
@@ -61,12 +56,6 @@ public class ParamParser
             this.error = new StringBuffer();
         if(error.length() > 0) error.append("\n");
         error.append(s);
-    }
-
-    public String getErrors()
-    {
-        if(error == null) return "";
-        return error.toString();
     }
 
     public String toXml()throws SearchFormException
@@ -201,105 +190,6 @@ public class ParamParser
         el.removeChild(node);
     }
 
-    public void setSequenceDb(String db) throws SearchFormException
-    {
-        setInputParameter(SEQUENCE_DB, db);
-    }
-
-    public void setTaxonomy(String tax) throws SearchFormException
-    {
-        setInputParameter(TAXONOMY, tax);
-    }
-
-    public void setEnzyme(String enz) throws SearchFormException
-    {
-        setInputParameter(ENZYME, enz);
-    }
-
-    public void setStaticMods(Map<String, String> mods) throws SearchFormException
-    {
-        if(mods.size() == 0)
-        {
-            removeStaticMods();
-            return;
-        }
-        StringBuffer valuesString = new StringBuffer();
-        for(String mod : mods.values())
-        {
-            if(valuesString.length() > 0)
-                valuesString.append(",");
-            valuesString.append(mod);
-        }
-        setInputParameter(STATIC_MOD, valuesString.toString());
-    }
-
-    public void setDynamicMods(Map<String, String> mods) throws SearchFormException
-    {
-        if(mods.size() == 0)
-        {
-            removeDynamicMods();
-            return;
-        }
-        StringBuffer valuesString = new StringBuffer();
-        for(String mod : mods.values())
-        {
-            if(valuesString.length() > 0)
-                valuesString.append(",");
-            valuesString.append(mod);
-        }
-        setInputParameter(DYNAMIC_MOD, valuesString.toString());
-    }
-
-    public String getSequenceDb()
-    {
-        return getInputParameter(SEQUENCE_DB);
-    }
-
-    public String getTaxonomy()
-    {
-        return getInputParameter(TAXONOMY);
-    }
-
-    public String getEnzyme()
-    {
-        return getInputParameter(ENZYME);
-    }
-
-    public String getStaticMods()
-    {
-        return getInputParameter(STATIC_MOD);
-    }
-
-    public String getDynamicMods()
-    {
-        return getInputParameter(DYNAMIC_MOD);
-    }
-
-    public void removeSequenceDb()
-    {
-        removeInputParameter(SEQUENCE_DB);
-    }
-
-    public void removeTaxonomy()
-    {
-        removeInputParameter(TAXONOMY);
-    }
-
-    public void removeEnzyme()
-    {
-        removeInputParameter(ENZYME);
-    }
-
-    public void removeStaticMods()
-    {
-        removeInputParameter(STATIC_MOD);
-    }
-
-    public void removeDynamicMods()
-    {
-        removeInputParameter(DYNAMIC_MOD);
-    }
-
     public void setInputParameter(String name, String value) throws SearchFormException
     {
         if(name == null) throw new SearchFormException("Parameter name is null.");
@@ -311,8 +201,25 @@ public class ParamParser
         ip.appendChild(getDocument().createTextNode(value));
         Element de = getDocumentElement();
         if(de == null) return;
-        Node before = de.getFirstChild();
-        de.insertBefore(ip,before);
+        de.appendChild(ip);
+    }
+
+    public Map<String, String> getParameters()
+    {
+        NodeList notes = getNoteElements();
+        if (notes == null)
+        {
+            return Collections.emptyMap();
+        }
+        Map<String, String> result = new LinkedHashMap<String, String>();
+        for(int i = 0; i < notes.getLength(); i++)
+        {
+            Element elNote = (Element)notes.item(i);
+            Node n = elNote.getFirstChild();
+            String value = n == null ? "" : n.getNodeValue();
+            result.put(elNote.getAttribute(ATTR_LABEL), value);
+        }
+        return result;
     }
 
     public String getInputParameter(String name)

@@ -36,12 +36,6 @@ public class MzXmlComposite extends SearchFormComposite
 
     public MzXmlComposite()
     {
-        super();
-        init();
-    }
-
-    public void init()
-    {
         initWidget(instance);
         labelWidget = new Label();
     }

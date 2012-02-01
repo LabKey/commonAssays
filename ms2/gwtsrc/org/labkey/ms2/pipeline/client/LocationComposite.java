@@ -55,12 +55,6 @@ public class LocationComposite extends SearchFormComposite implements AsyncCallb
     public LocationComposite(InputXmlComposite inputXml)
     {
         _inputXml = inputXml;
-        init();
-    }
-
-    @Override
-    public void init()
-    {
         initWidget(instance);
     }
 
@@ -250,7 +244,8 @@ public class LocationComposite extends SearchFormComposite implements AsyncCallb
         {
             for (TaskUserInterface taskUserInterface : _taskUserInterfaces)
             {
-                String locationValue = _pipelineLocations.size() > 1 ? taskUserInterface._locationListBox.getValue(taskUserInterface._locationListBox.getSelectedIndex()) : _pipelineLocations.get(0).getLocation();
+                List<String> clusterLocations = getClusterLocations();
+                String locationValue = clusterLocations.size() > 1 ? taskUserInterface._locationListBox.getValue(taskUserInterface._locationListBox.getSelectedIndex()) : clusterLocations.get(0);
                 if (taskUserInterface._locationListBox != null)
                 {
                     // There's more than one cluster available
@@ -499,5 +494,12 @@ public class LocationComposite extends SearchFormComposite implements AsyncCallb
         {
             _parentTable.getCellFormatter().setVisible(_parentTableRow, col, visible);
         }
+    }
+
+    @Override
+    public boolean isHandledParameterName(String name)
+    {
+        name = name.toLowerCase();
+        return name.endsWith(", globus location") || name.endsWith(", globus queue");
     }
 }

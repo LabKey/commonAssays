@@ -19,6 +19,7 @@ package org.labkey.ms2.pipeline.client.mascot;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.*;
 import org.labkey.ms2.pipeline.client.ParamParser;
+import org.labkey.ms2.pipeline.client.ParameterNames;
 import org.labkey.ms2.pipeline.client.Search;
 import org.labkey.ms2.pipeline.client.SearchFormException;
 import org.labkey.ms2.pipeline.client.SequenceDbComposite;
@@ -45,11 +46,6 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
     public MascotSequenceDbComposite(Search search)
     {
         super(search);
-        init();
-    }
-
-    public void init()
-    {
         sequenceDbLabel.setStylePrimaryName("ms-readonly");
         instance.add(sequenceDbListBox);
         taxonomyReadOnly.setStylePrimaryName("labkey-read-only");
@@ -191,7 +187,7 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
     public void syncFormToXml(ParamParser params) throws SearchFormException
     {
         super.syncFormToXml(params);
-        params.setTaxonomy(getSelectedTaxonomy());
+        params.setInputParameter(ParameterNames.TAXONOMY, getSelectedTaxonomy());
     }
 
     public String setDefaultTaxonomy(String tax)

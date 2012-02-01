@@ -55,6 +55,7 @@ public class Search implements EntryPoint
     private                 MzXmlComposite          mzXmlComposite = new MzXmlComposite();
     private                 EnzymeComposite         enzymeComposite;
     private                 ResidueModComposite     residueModComposite;
+    private                 OtherParametersComposite otherParametersComposite;
     private                 Label                   searchEngineLabel = new Label();
     private                 Label                   actualSearchEngineLabel = new Label();
     private                 InputXmlComposite       inputXmlComposite;
@@ -117,6 +118,7 @@ public class Search implements EntryPoint
         locationComposite = new LocationComposite(inputXmlComposite);
         residueModComposite = compositeFactory.getResidueModComposite(this);
         protocolComposite = new ProtocolComposite();
+        otherParametersComposite = new OtherParametersComposite(inputs, inputXmlComposite);
 
         //form
         searchFormPanel.setAction(PropertyUtil.getServerProperty("targetAction"));
@@ -188,6 +190,7 @@ public class Search implements EntryPoint
         sequenceDbComposite.addTaxonomyChangeHandler(new TaxonomyChangeListener());
         enzymeComposite.addChangeListener(new EnzymeChangeListener());
         locationComposite.addChangeListener(new LocationChangeListener());
+        otherParametersComposite.addChangeListener(new LocationChangeListener());
 
         inputXmlComposite.addChangeListener(new InputXmlChangeListener());
 
@@ -293,6 +296,7 @@ public class Search implements EntryPoint
         inputs.add(enzymeComposite);
         inputs.add(residueModComposite);
         inputs.add(locationComposite);
+        inputs.add(otherParametersComposite);
 
         int row = 0;
         formGrid.setWidget(row, 0, protocolComposite.getLabel());
@@ -478,7 +482,8 @@ public class Search implements EntryPoint
             cancelForm();
         }
     }
-    private class ErrorDialogBox
+
+    public static class ErrorDialogBox
     {
         private DialogBox dialog = new DialogBox();
         private final String error;
@@ -612,12 +617,12 @@ public class Search implements EntryPoint
         appendError(gwtResult.getErrors());
         sequenceDbComposite.selectDefaultDb(gwtResult.getDefaultSequenceDb());
 
-        if(inputXmlComposite.getSequenceDb().length() > 0 &&
-            !inputXmlComposite.getSequenceDb().equals(sequenceDbComposite.getSelectedDb()))
+        if(inputXmlComposite.params.getInputParameter(ParameterNames.SEQUENCE_DB).length() > 0 &&
+            !inputXmlComposite.params.getInputParameter(ParameterNames.SEQUENCE_DB).equals(sequenceDbComposite.getSelectedDb()))
         {
             appendError("The database entered for the input XML label \"pipeline, database\" cannot be found"
             + " at this fasta root.");
-            inputXmlComposite.removeSequenceDb();
+            inputXmlComposite.params.removeInputParameter(ParameterNames.SEQUENCE_DB);
             try{
                 inputXmlComposite.writeXml();
             }catch(SearchFormException ignored){}
@@ -686,7 +691,7 @@ public class Search implements EntryPoint
             String dbDirectory = sequenceDbComposite.getSelectedDbPath();
             sequenceDbComposite.setLoading(true);
             sequenceDbComposite.setEnabled(true, false);
-            inputXmlComposite.removeSequenceDb();
+            inputXmlComposite.params.removeInputParameter(ParameterNames.SEQUENCE_DB);
 
             if (databaseCache.containsKey(dbDirectory))
             {
@@ -730,7 +735,7 @@ public class Search implements EntryPoint
             if(db.length() > 0 && !db.equals("None found."))
             {
                 clearDisplay();
-                inputXmlComposite.removeSequenceDb();
+                inputXmlComposite.params.removeInputParameter(ParameterNames.SEQUENCE_DB);
                 String error = syncForm2Xml();
                 if(error.length() > 0 )
                 {
@@ -752,7 +757,7 @@ public class Search implements EntryPoint
             String tax = sequenceDbComposite.getSelectedTaxonomy();
             if(tax.length() > 0)
             {
-                inputXmlComposite.removeTaxonomy();
+                inputXmlComposite.params.removeInputParameter(ParameterNames.TAXONOMY);
                 clearDisplay();
                 String error = syncForm2Xml();
                 if(error.length() > 0 )
@@ -783,7 +788,7 @@ public class Search implements EntryPoint
             String enz = enzymeComposite.getSelectedEnzyme();
             if(enz.length() > 0)
             {
-                inputXmlComposite.removeEnzyme();
+                inputXmlComposite.params.removeInputParameter(ParameterNames.ENZYME);
                 clearDisplay();
                 String error = syncForm2Xml();
                 if(error.length() > 0 )
@@ -805,7 +810,7 @@ public class Search implements EntryPoint
         {
             databaseCache.clear();
             sequencePathsLoaded = false;
-            String defaultSequenceDb = inputXmlComposite.getSequenceDb();
+            String defaultSequenceDb = inputXmlComposite.params.getInputParameter(ParameterNames.SEQUENCE_DB);
             service.getSequenceDbs(defaultSequenceDb, searchEngine, true, new SequenceDbServiceCallback());
             sequenceDbComposite.setLoading(true);
             sequenceDbComposite.setEnabled(false, false);

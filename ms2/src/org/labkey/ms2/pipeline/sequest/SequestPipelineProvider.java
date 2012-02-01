@@ -39,13 +39,13 @@ import java.util.*;
  * Date: Aug 24, 2006
  * Time: 12:45:45 PM
  */
-public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvider
+public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     private static final String ACTION_LABEL = "Sequest Peptide Search";
 
     public static String name = "Sequest";
 
-    public SequestLocalPipelineProvider(Module owningModule)
+    public SequestPipelineProvider(Module owningModule)
     {
         super(name, owningModule);
     }

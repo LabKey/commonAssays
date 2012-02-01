@@ -38,7 +38,6 @@ public class SequestSequenceDbComposite extends SequenceDbComposite
     public SequestSequenceDbComposite(Search search)
     {
         super(search);
-        init();
     }
 
     public void setTaxonomyListBoxContents(List taxonomyList)

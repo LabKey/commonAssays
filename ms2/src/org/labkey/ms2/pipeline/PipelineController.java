@@ -35,9 +35,9 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
-import org.labkey.ms2.pipeline.sequest.SequestLocalPipelineProvider;
+import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineJob;
-import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
+import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineJob;
 import org.labkey.ms2.pipeline.tandem.XTandemSearchProtocolFactory;
 import org.springframework.validation.BindException;
@@ -182,7 +182,7 @@ public class PipelineController extends SpringActionController
     {
         public String getProviderName()
         {
-           return XTandemCPipelineProvider.name;
+           return XTandemPipelineProvider.name;
         }
 
         @Override
@@ -212,7 +212,7 @@ public class PipelineController extends SpringActionController
     {
         public String getProviderName()
         {
-            return SequestLocalPipelineProvider.name;
+            return SequestPipelineProvider.name;
         }
 
 
@@ -595,12 +595,12 @@ public class PipelineController extends SpringActionController
     {
         public String getProviderName()
         {
-            return XTandemCPipelineProvider.name;
+            return XTandemPipelineProvider.name;
         }
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return new JspView<SetDefaultsForm>(XTandemCPipelineProvider.class, "setTandemDefaults.jsp", form, errors);
+            return new JspView<SetDefaultsForm>(XTandemPipelineProvider.class, "setTandemDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()
@@ -643,12 +643,12 @@ public class PipelineController extends SpringActionController
     {
         public String getProviderName()
         {
-            return SequestLocalPipelineProvider.name;
+            return SequestPipelineProvider.name;
         }
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return new JspView<SetDefaultsForm>(SequestLocalPipelineProvider.class, "setSequestDefaults.jsp", form, errors);
+            return new JspView<SetDefaultsForm>(SequestPipelineProvider.class, "setSequestDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()

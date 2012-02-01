@@ -854,7 +854,9 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/GWTSearchServiceResult.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/InputXmlComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/LocationComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/MzXmlComposite.java -text
+ms2/gwtsrc/org/labkey/ms2/pipeline/client/OtherParametersComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/ParamParser.java -text
+ms2/gwtsrc/org/labkey/ms2/pipeline/client/ParameterNames.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/ProtocolComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/ResidueModComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/Search.java -text
@@ -1266,12 +1268,12 @@ ms2/src/org/labkey/ms2/pipeline/sequest/SequestBasicConverter.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestDefaults.xml -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestEnzymeConverter.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestHeaderConverter.java -text
-ms2/src/org/labkey/ms2/pipeline/sequest/SequestLocalPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestParam.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestParams.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestParamsBuilder.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestParamsException.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestPipelineJob.java -text
+ms2/src/org/labkey/ms2/pipeline/sequest/SequestPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestRun.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestSearchProtocol.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestSearchProtocolFactory.java -text
@@ -1280,9 +1282,9 @@ ms2/src/org/labkey/ms2/pipeline/sequest/UWSequestParamsBuilder.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/UWSequestSearchTask.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/setSequestDefaults.jsp -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XCometRun.java -text
-ms2/src/org/labkey/ms2/pipeline/tandem/XTandemCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemDefaults.xml -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemPipelineJob.java -text
+ms2/src/org/labkey/ms2/pipeline/tandem/XTandemPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemRun.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemSearchProtocol.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemSearchProtocolFactory.java -text

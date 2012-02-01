@@ -60,9 +60,9 @@ import org.labkey.ms2.pipeline.sequest.NaturalNumberParamsValidator;
 import org.labkey.ms2.pipeline.sequest.PositiveDoubleParamsValidator;
 import org.labkey.ms2.pipeline.sequest.PositiveIntegerParamsValidator;
 import org.labkey.ms2.pipeline.sequest.RealNumberParamsValidator;
-import org.labkey.ms2.pipeline.sequest.SequestLocalPipelineProvider;
+import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.SequestParamsBuilder;
-import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
+import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomProteinListView;
 import org.labkey.ms2.protein.ProteinController;
@@ -213,9 +213,9 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new MS2PipelineProvider(this));
-        service.registerPipelineProvider(new XTandemCPipelineProvider(this), "X!Tandem (Cluster)");
+        service.registerPipelineProvider(new XTandemPipelineProvider(this), "X!Tandem (Cluster)");
         service.registerPipelineProvider(new MascotCPipelineProvider(this), "Mascot (Cluster)");
-        service.registerPipelineProvider(new SequestLocalPipelineProvider(this));
+        service.registerPipelineProvider(new SequestPipelineProvider(this));
         service.registerPipelineProvider(new CometCPipelineProvider(this), "Comet (Cluster)");
 
         service.registerPipelineProvider(new ProteinProphetPipelineProvider(this));

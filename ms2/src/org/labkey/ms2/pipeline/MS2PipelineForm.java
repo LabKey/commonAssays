@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
+import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 
 /**
@@ -23,7 +23,7 @@ import org.labkey.api.pipeline.browse.PipelinePathForm;
  */
 public class MS2PipelineForm extends PipelinePathForm
 {
-    private String searchEngine = XTandemCPipelineProvider.name;
+    private String searchEngine = XTandemPipelineProvider.name;
 
     public String getSearchEngine()
     {

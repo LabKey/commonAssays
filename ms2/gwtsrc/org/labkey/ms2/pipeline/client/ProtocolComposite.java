@@ -42,19 +42,11 @@ public class ProtocolComposite extends SearchFormComposite
 
     public ProtocolComposite()
     {
-        super();
-        init();
-    }
-
-    public void init()
-    {
         protocolListBox.setVisibleItemCount(1);
         protocolDescHtml.setWordWrap(true);
         protocolDescHtml.setStylePrimaryName("labkey-read-only");
         textBoxLabel = new Label("Name");
-        textBoxLabel.setStyleName("labkey-form-label");
         descriptionLabel = new Label("Description");
-        descriptionLabel.setStyleName("labkey-form-label");
 
         instance.setWidget(0,0,protocolListBox);
         instance.getFlexCellFormatter().setColSpan(0,0,2);

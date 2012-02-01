@@ -26,6 +26,7 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
+import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -103,7 +104,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
             // Build one based on a CRC of the parameters that define an index file
             StringBuilder sb = new StringBuilder();
             sb.append("Enzyme-");
-            sb.append(params.get(org.labkey.ms2.pipeline.client.ParamParser.ENZYME));
+            sb.append(params.get(ParameterNames.ENZYME));
             sb.append(".MinParentMH-");
             sb.append(params.get(AbstractMS2SearchTask.MINIMUM_PARENT_M_H));
             sb.append(".MaxParentMH-");
@@ -113,7 +114,7 @@ public class UWSequestSearchTask extends AbstractMS2SearchTask<UWSequestSearchTa
             sb.append(".MassTypeParent-");
             sb.append(params.get(UWSequestSearchTask.MASS_TYPE_PARENT));
             sb.append(".StaticMod-");
-            sb.append(params.get(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD));
+            sb.append(params.get(ParameterNames.STATIC_MOD));
 
             CRC32 crc = new CRC32();
             crc.update(toBytes(sb.toString()));

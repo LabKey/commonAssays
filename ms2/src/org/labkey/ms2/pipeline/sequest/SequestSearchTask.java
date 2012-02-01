@@ -23,6 +23,7 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.ms2.pipeline.*;
+import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -110,7 +111,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             // Build one based on a CRC of the parameters that define an index file
             StringBuilder sb = new StringBuilder();
             sb.append("Enzyme-");
-            sb.append(params.get(org.labkey.ms2.pipeline.client.ParamParser.ENZYME));
+            sb.append(params.get(ParameterNames.ENZYME));
             sb.append(".MinParentMH-");
             sb.append(params.get(AbstractMS2SearchTask.MINIMUM_PARENT_M_H));
             sb.append(".MaxParentMH-");
@@ -120,7 +121,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             sb.append(".MassTypeIndex-");
             sb.append(params.get(SequestSearchTask.MASS_TYPE_INDEX));
             sb.append(".StaticMod-");
-            sb.append(params.get(org.labkey.ms2.pipeline.client.ParamParser.STATIC_MOD));
+            sb.append(params.get(ParameterNames.STATIC_MOD));
             sb.append(".FASTAModified-");
             sb.append(fastaFile.lastModified());
             sb.append(".FASTASize-");
@@ -288,7 +289,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 String out2XMLPath = PipelineJobService.get().getExecutablePath("out2xml", "tpp", tppVersion, getJob().getLogger());
                 out2XMLArgs.add(out2XMLPath);
                 String enzyme =
-                    new SequestParamsBuilder(params, null).getSupportedEnzyme(params.get(org.labkey.ms2.pipeline.client.ParamParser.ENZYME));
+                    new SequestParamsBuilder(params, null).getSupportedEnzyme(params.get(ParameterNames.ENZYME));
                 Out2XmlParams out2XmlParams = new Out2XmlParams();
                 out2XMLArgs.add(dirOutputDta.getName());
                 out2XMLArgs.add("1");

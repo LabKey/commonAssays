@@ -22,7 +22,9 @@ import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * User: billnelson@uky.edu
@@ -45,8 +47,6 @@ public abstract class SearchFormComposite extends Composite implements HasName
          this.readOnly = readOnly;
      }
 
-    abstract public void init();
-
     abstract public void setWidth(String width);
 
     abstract public Widget getLabel();
@@ -60,5 +60,15 @@ public abstract class SearchFormComposite extends Composite implements HasName
     public void configureCompositeRow(FlexTable table, int row)
     {
         
+    }
+
+    public boolean isHandledParameterName(String name)
+    {
+        return getHandledParameterNames().contains(name);
+    }
+
+    public Set<String> getHandledParameterNames()
+    {
+        return Collections.emptySet();
     }
 }
