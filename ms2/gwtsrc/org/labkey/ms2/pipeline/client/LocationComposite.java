@@ -17,7 +17,6 @@ package org.labkey.ms2.pipeline.client;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -40,7 +39,7 @@ import java.util.List;
  * User: jeckels
  * Date: Jan 20, 2012
  */
-public class LocationComposite extends SearchFormComposite implements AsyncCallback<GWTPipelineConfig>
+public class LocationComposite extends SearchFormComposite implements PipelineConfigCallback
 {
     protected VerticalPanel instance = new VerticalPanel();
     private List<GWTPipelineLocation> _pipelineLocations;
@@ -48,8 +47,6 @@ public class LocationComposite extends SearchFormComposite implements AsyncCallb
     private ChangeHandler _handler;
     private FlexTable _editableTable;
     private FlexTable _readOnlyTable;
-    private int _parentTableRow;
-    private FlexTable _parentTable;
     private final InputXmlComposite _inputXml;
 
     public LocationComposite(InputXmlComposite inputXml)
@@ -87,13 +84,8 @@ public class LocationComposite extends SearchFormComposite implements AsyncCallb
         return null;
     }
 
-    public void onFailure(Throwable caught)
-    {
-        instance.add(new Label(caught.toString()));
-    }
-
     /** Callback from requesting info on the pipeline tasks and potential execution locations */
-    public void onSuccess(GWTPipelineConfig result)
+    public void setPipelineConfig(GWTPipelineConfig result)
     {
         _pipelineLocations = result.getLocations();
         _taskUserInterfaces = new ArrayList<TaskUserInterface>();
@@ -482,18 +474,13 @@ public class LocationComposite extends SearchFormComposite implements AsyncCallb
     public void configureCompositeRow(FlexTable table, int row)
     {
         super.configureCompositeRow(table, row);
-        _parentTable = table;
-        _parentTableRow = row;
         setVisibilityInParentTable();
     }
 
     private void setVisibilityInParentTable()
     {
         boolean visible = _taskUserInterfaces != null && !_taskUserInterfaces.isEmpty();
-        for (int col = 0; col < _parentTable.getCellCount(_parentTableRow); col++)
-        {
-            _parentTable.getCellFormatter().setVisible(_parentTableRow, col, visible);
-        }
+        _parentTable.getRowFormatter().setVisible(_parentTableRow, visible);
     }
 
     @Override

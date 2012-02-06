@@ -33,6 +33,7 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.ProtXMLFileType;
+import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -100,10 +101,6 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
     public static final String LIBRA_OUTPUT_ROLE = "LibraOutput";
 
     // All of the supported quantitation engines
-
-    public static final String PIPELINE_QUANT_PREFIX = "pipeline quantitation, ";
-    public static final String LIBRA_CONFIG_NAME_PARAM = PIPELINE_QUANT_PREFIX + "libra config name";
-    public static final String LIBRA_NORMALIZATION_CHANNEL_PARAM = PIPELINE_QUANT_PREFIX + "libra normalization channel";
 
     public static String getTPPVersion(PipelineJob job)
     {
@@ -383,13 +380,13 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 if (!getJobSupport().isRefreshRequired())
                     interactCmd.add("-nR");
 
-                String paramMinProb = params.get("pipeline prophet, min probability");
+                String paramMinProb = params.get(ParameterNames.MIN_PEPTIDE_PROPHET_PROBABILITY);
                 if (paramMinProb == null || paramMinProb.length() == 0)
                     paramMinProb = params.get("pipeline prophet, min peptide probability");
                 if (paramMinProb != null && paramMinProb.length() > 0)
                     interactCmd.add("-p" + paramMinProb);
                 
-                paramMinProb = params.get("pipeline prophet, min protein probability");
+                paramMinProb = params.get(ParameterNames.MIN_PROTEIN_PROPHET_PROBABILITY);
                 if (paramMinProb != null && paramMinProb.length() > 0)
                     interactCmd.add("-pr" + paramMinProb);
             }
@@ -601,7 +598,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
     
     private QuantitationAlgorithm getQuantitionAlgorithm(Map<String, String> params)
     {
-        String algorithmName = params.get(PIPELINE_QUANT_PREFIX + "algorithm");
+        String algorithmName = params.get(ParameterNames.QUANTITATION_ALGORITHM);
         if (algorithmName == null)
             return null;
         for (QuantitationAlgorithm algorithm : QuantitationAlgorithm.values())

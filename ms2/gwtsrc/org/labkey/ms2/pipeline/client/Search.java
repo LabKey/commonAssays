@@ -25,13 +25,13 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import org.labkey.api.gwt.client.pipeline.GWTPipelineConfig;
 import org.labkey.api.gwt.client.pipeline.PipelineGWTService;
 import org.labkey.api.gwt.client.pipeline.PipelineGWTServiceAsync;
 import org.labkey.api.gwt.client.util.ErrorDialogAsyncCallback;
 import org.labkey.api.gwt.client.util.PropertyUtil;
 import org.labkey.api.gwt.client.util.ServiceUtil;
 import org.labkey.api.gwt.client.ui.ImageButton;
-import org.labkey.api.gwt.client.ui.WindowUtil;
 
 import java.util.*;
 
@@ -55,6 +55,7 @@ public class Search implements EntryPoint
     private                 MzXmlComposite          mzXmlComposite = new MzXmlComposite();
     private                 EnzymeComposite         enzymeComposite;
     private                 ResidueModComposite     residueModComposite;
+    private                 TPPComposite            tppComposite;
     private                 OtherParametersComposite otherParametersComposite;
     private                 Label                   searchEngineLabel = new Label();
     private                 Label                   actualSearchEngineLabel = new Label();
@@ -117,6 +118,7 @@ public class Search implements EntryPoint
         enzymeComposite = compositeFactory.getEnzymeComposite();
         locationComposite = new LocationComposite(inputXmlComposite);
         residueModComposite = compositeFactory.getResidueModComposite(this);
+        tppComposite = new TPPComposite();
         protocolComposite = new ProtocolComposite();
         otherParametersComposite = new OtherParametersComposite(inputs, inputXmlComposite);
 
@@ -180,7 +182,19 @@ public class Search implements EntryPoint
         loading();
         getSearchService().getSearchServiceResult(searchEngine, path, fileNames, new SearchServiceAsyncCallback());
 
-        getPipelineService().getLocationOptions(pipelineId, locationComposite);
+        getPipelineService().getLocationOptions(pipelineId, new ErrorDialogAsyncCallback<GWTPipelineConfig>()
+        {
+            public void onSuccess(GWTPipelineConfig result)
+            {
+                for (SearchFormComposite input : inputs)
+                {
+                    if (input instanceof PipelineConfigCallback)
+                    {
+                        ((PipelineConfigCallback)input).setPipelineConfig(result);
+                    }
+                }
+            }
+        });
 
         protocolComposite.addChangeHandler(new ProtocolChangeListener());
 
@@ -190,6 +204,7 @@ public class Search implements EntryPoint
         sequenceDbComposite.addTaxonomyChangeHandler(new TaxonomyChangeListener());
         enzymeComposite.addChangeListener(new EnzymeChangeListener());
         locationComposite.addChangeListener(new LocationChangeListener());
+        tppComposite.addChangeListener(new LocationChangeListener());
         otherParametersComposite.addChangeListener(new LocationChangeListener());
 
         inputXmlComposite.addChangeListener(new InputXmlChangeListener());
@@ -295,6 +310,7 @@ public class Search implements EntryPoint
         inputs.add(sequenceDbComposite);
         inputs.add(enzymeComposite);
         inputs.add(residueModComposite);
+        inputs.add(tppComposite);
         inputs.add(locationComposite);
         inputs.add(otherParametersComposite);
 
@@ -517,11 +533,11 @@ public class Search implements EntryPoint
             clearDisplay();
             appendError(protocolComposite.validate());
             appendError(sequenceDbComposite.validate());
+            appendError(tppComposite.validate());
             if (hasErrors())
             {
                 event.cancel();
             }
-            WindowUtil.scrollTo(0, 0);
         }
 
         public void onSubmitComplete(FormPanel.SubmitCompleteEvent event)

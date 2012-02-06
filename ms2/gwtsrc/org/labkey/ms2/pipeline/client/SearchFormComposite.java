@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import org.labkey.api.gwt.client.pipeline.GWTPipelineConfig;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,9 @@ public abstract class SearchFormComposite extends Composite implements HasName
 
     protected boolean readOnly;
     protected Widget labelWidget;
+
+    protected int _parentTableRow;
+    protected FlexTable _parentTable;
 
     public boolean isReadOnly()
      {
@@ -59,7 +63,8 @@ public abstract class SearchFormComposite extends Composite implements HasName
 
     public void configureCompositeRow(FlexTable table, int row)
     {
-        
+        _parentTable = table;
+        _parentTableRow = row;
     }
 
     public boolean isHandledParameterName(String name)

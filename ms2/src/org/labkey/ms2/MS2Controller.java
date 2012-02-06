@@ -4591,13 +4591,9 @@ public class MS2Controller extends SpringActionController
                     gridView = peptideView.createGridView(allPeptidesQueryFilter);
                     peptides = Table.executeArray(gridView.getTable(), "Peptide", allPeptidesQueryFilter, new Sort("Peptide"), String.class);
                 }
-                catch (RuntimeSQLException e)
+                catch (SQLGenerationException e)
                 {
-                    if (e.getSQLException() instanceof SQLGenerationException)
-                    {
-                        throw new NotFoundException("Invalid filter: " + e.getSQLException().getMessage());
-                    }
-                    throw e;
+                    throw new NotFoundException("Invalid filter: " + e.getMessage());
                 }
             }
 

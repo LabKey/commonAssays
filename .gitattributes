@@ -856,6 +856,7 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/MzXmlComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/OtherParametersComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/ParamParser.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/ParameterNames.java -text
+ms2/gwtsrc/org/labkey/ms2/pipeline/client/PipelineConfigCallback.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/ProtocolComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/ResidueModComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/Search.java -text
@@ -865,6 +866,7 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/SearchFormException.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/SearchService.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/SearchServiceAsync.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/SequenceDbComposite.java -text
+ms2/gwtsrc/org/labkey/ms2/pipeline/client/TPPComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/mascot/MascotEnzymeComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/mascot/MascotInputXmlComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/mascot/MascotResidueModComposite.java -text

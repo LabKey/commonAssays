@@ -23,6 +23,7 @@ import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
+import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -51,13 +52,13 @@ public enum QuantitationAlgorithm
         public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile) throws PipelineJobException, FileNotFoundException
         {
             List<String> quantOpts = getCommonXpressQ3Params(params, pathMzXml);
-            String paramMinPP = params.get("pipeline quantitation, min peptide prophet");
+            String paramMinPP = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "min peptide prophet");
             if (paramMinPP != null)
                 quantOpts.add("--minPeptideProphet=" + paramMinPP);
-            String paramMaxDelta = params.get("pipeline quantitation, max fractional delta mass");
+            String paramMaxDelta = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "max fractional delta mass");
             if (paramMaxDelta != null)
                 quantOpts.add("--maxFracDeltaMass=" + paramMaxDelta);
-            String paramCompatQ3 = params.get("pipeline quantitation, q3 compat");
+            String paramCompatQ3 = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "q3 compat");
             if ("yes".equalsIgnoreCase(paramCompatQ3))
                 quantOpts.add("--compat");
 
@@ -94,10 +95,10 @@ public enum QuantitationAlgorithm
         @Override
         public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile) throws PipelineJobException, FileNotFoundException
         {
-            String normalizationChannelString = params.get(TPPTask.LIBRA_NORMALIZATION_CHANNEL_PARAM);
+            String normalizationChannelString = params.get(ParameterNames.LIBRA_NORMALIZATION_CHANNEL_PARAM);
             if (normalizationChannelString == null)
             {
-                throw new PipelineJobException("Libra normalization channel must be specified using \"" + TPPTask.LIBRA_NORMALIZATION_CHANNEL_PARAM + "\"");
+                throw new PipelineJobException("Libra normalization channel must be specified using \"" + ParameterNames.LIBRA_NORMALIZATION_CHANNEL_PARAM + "\"");
             }
             return new String[] { "-L" + configFile.getKey().getName() + "-" + normalizationChannelString};
         }
@@ -105,10 +106,10 @@ public enum QuantitationAlgorithm
         @Override
         protected Pair<File, String> getConfigFile(Map<String, String> params, PipeRoot root, WorkDirectory wd) throws PipelineJobException, IOException
         {
-            String libraConfigName = params.get(TPPTask.LIBRA_CONFIG_NAME_PARAM);
+            String libraConfigName = params.get(ParameterNames.LIBRA_CONFIG_NAME_PARAM);
             if (libraConfigName == null)
             {
-                throw new PipelineJobException("Name of Libra configuration must be specified using \"" + TPPTask.LIBRA_CONFIG_NAME_PARAM + "\"");
+                throw new PipelineJobException("Name of Libra configuration must be specified using \"" + ParameterNames.LIBRA_CONFIG_NAME_PARAM + "\"");
             }
             if (libraConfigName.indexOf(' ') != -1)
             {
@@ -128,20 +129,20 @@ public enum QuantitationAlgorithm
     {
         List<String> quantOpts = new ArrayList<String>();
 
-        String paramQuant = params.get("pipeline quantitation, residue label mass");
+        String paramQuant = params.get(ParameterNames.QUANTITATION_RESIDUE_LABEL_MASS);
         if (paramQuant != null)
             getLabelOptions(paramQuant, quantOpts);
 
-        paramQuant = params.get("pipeline quantitation, mass tolerance");
+        paramQuant = params.get(ParameterNames.QUANTITATION_MASS_TOLERANCE);
         if (paramQuant != null)
             quantOpts.add("-m" + paramQuant);
 
-        paramQuant = params.get("pipeline quantitation, heavy elutes before light");
+        paramQuant = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "heavy elutes before light");
         if (paramQuant != null)
             if("yes".equalsIgnoreCase(paramQuant))
                 quantOpts.add("-b");
 
-        paramQuant = params.get("pipeline quantitation, fix");
+        paramQuant = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "fix");
         if (paramQuant != null)
         {
             if ("heavy".equalsIgnoreCase(paramQuant))
@@ -150,18 +151,18 @@ public enum QuantitationAlgorithm
                 quantOpts.add("-L");
         }
 
-        paramQuant = params.get("pipeline quantitation, fix elution reference");
+        paramQuant = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "fix elution reference");
         if (paramQuant != null)
         {
             String refFlag = "-f";
             if ("peak".equalsIgnoreCase(paramQuant))
                 refFlag = "-F";
-            paramQuant = params.get("pipeline quantitation, fix elution difference");
+            paramQuant = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "fix elution difference");
             if (paramQuant != null)
                 quantOpts.add(refFlag + paramQuant);
         }
 
-        paramQuant = params.get("pipeline quantitation, metabolic search type");
+        paramQuant = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "metabolic search type");
         if (paramQuant != null)
         {
             if ("normal".equalsIgnoreCase(paramQuant))
