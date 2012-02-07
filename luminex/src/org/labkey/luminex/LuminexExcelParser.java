@@ -300,7 +300,12 @@ public class LuminexExcelParser
     public Map<DomainProperty, String> getExcelRunProps(File file) throws ExperimentException
     {
         parseFile();
-        return _excelRunProps.get(file);
+        Map<DomainProperty, String> result = _excelRunProps.get(file);
+        if (result == null)
+        {
+            throw new IllegalArgumentException("No properties found for file: " + file);
+        }
+        return result;
     }
 
     private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, File dataFile)
