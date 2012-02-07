@@ -16,6 +16,7 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -135,7 +136,8 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         defaultCols.add(FieldKey.fromParts("Titration", "Run", "Conjugate"));
         defaultCols.add(FieldKey.fromParts("Analyte", "Properties", "LotNumber"));
         defaultCols.add(FieldKey.fromParts("GuideSet", "Created"));
-        defaultCols.add(FieldKey.fromParts("Four ParameterCurveFit", "EC50"));
+        defaultCols.add(FieldKey.fromParts(DilutionCurve.FitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50"));
+        defaultCols.add(FieldKey.fromParts(DilutionCurve.FitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50"));
         defaultCols.add(FieldKey.fromParts("MaxFI"));
         defaultCols.add(FieldKey.fromParts("TrapezoidalCurveFit", "AUC"));
         setDefaultVisibleColumns(defaultCols);

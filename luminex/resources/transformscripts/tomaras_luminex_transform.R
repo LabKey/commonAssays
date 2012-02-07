@@ -203,6 +203,11 @@ run.data$Slope_4pl = NA;
 run.data$Lower_4pl = NA;
 run.data$Upper_4pl = NA;
 run.data$Inflection_4pl = NA;
+run.data$Slope_5pl = NA;
+run.data$Lower_5pl = NA;
+run.data$Upper_5pl = NA;
+run.data$Inflection_5pl = NA;
+run.data$Asymmetry_5pl = NA;
 
 # loop through the possible titrations and to see if it is a standard, qc control, or titrated unknown
 if (nrow(titration.data) > 0)
@@ -220,11 +225,11 @@ if (nrow(titration.data) > 0)
             mypdf(file=paste(titrationName, "QC_Curves", sep="_"), mfrow=c(1,1));
         }
 
-        # calculate the 4PL curve fit params for each analyte
+        # calculate the 4PL and 5PL curve fit params for each analyte
         for (aIndex in 1:length(analytes))
         {
             analyteName = as.character(analytes[aIndex]);
-            print(paste("Calculating the 4PL curve fit params for ",titrationName, analyteName, sep=" "));
+            print(paste("Calculating the 4PL and 5PL curve fit params for ",titrationName, analyteName, sep=" "));
 
             dat = subset(run.data, description == titrationName & name == analyteName);
 
@@ -286,7 +291,7 @@ if (nrow(titration.data) > 0)
 
                         # plot the curve fit for the QC Controls
                         if (titration.data[tIndex,]$QCControl == "true") {
-                            plot(fit, type="all", main=analyteName, cex=.5, ylab=yLabel, xlab=xLabel);
+                            plot(fit, type="all", main=paste("4PL -",analyteName), cex=.5, ylab=yLabel, xlab=xLabel);
                         }
                     },
                     error = function(e) {
@@ -298,6 +303,26 @@ if (nrow(titration.data) > 0)
                         }
                     }
                 );
+
+                # get curve fit params for 5PL
+                tryCatch({
+                        fit = fit.drc(log(fi)~dose, data=dat, force.fit=TRUE, fit.4pl=FALSE);
+                        run.data[runDataIndex,]$Slope_5pl = as.numeric(coef(fit))[1];
+                        run.data[runDataIndex,]$Lower_5pl = as.numeric(coef(fit))[2];
+                        run.data[runDataIndex,]$Upper_5pl = as.numeric(coef(fit))[3];
+                        run.data[runDataIndex,]$Inflection_5pl = as.numeric(coef(fit))[4];
+                        run.data[runDataIndex,]$Asymmetry_5pl = as.numeric(coef(fit))[5];
+
+                        # plot the curve fit for the QC Controls
+                        if (titration.data[tIndex,]$QCControl == "true") {
+                            plot(fit, type="all", main=paste("5PL -",analyteName), cex=.5, ylab=paste("log(",yLabel,")",sep=""), xlab=xLabel);
+                        }
+                    },
+                    error = function(e) {
+                        print(e);
+                    }
+                );
+
             } else {
                 # create an empty plot indicating that there is no data available
                 if (titration.data[tIndex,]$QCControl == "true") {
@@ -482,7 +507,7 @@ if (any(dat$isStandard) & length(standards) > 0)
                 next();
             }
 
-            # call the rumi function to calculate new estimated log concentrations using 5PL for the uknowns
+            # call the rumi function to calculate new estimated log concentrations using 5PL for the unknowns
             mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2));
             fits = rumi(standard.dat, force.fit=TRUE, verbose=TRUE);
             fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
@@ -517,7 +542,7 @@ if (any(dat$isStandard) & length(standards) > 0)
                 run.data$SE_5pl[run.data$SE_5pl == "-Inf"] = "-Infinity";
             }
 
-            # call the rumi function to calculate new estimated log concentrations using 4PL for the uknowns
+            # call the rumi function to calculate new estimated log concentrations using 4PL for the unknowns
             mypdf(file=paste(stndVal, "4PL", sep="_"), mfrow=c(2,2));
             fits = rumi(standard.dat, fit.4pl=TRUE, force.fit=TRUE, verbose=TRUE);
             fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";

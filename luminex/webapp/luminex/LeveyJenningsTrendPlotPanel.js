@@ -150,11 +150,21 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             ]
         });
 
-        // initialize the tab panel that will show the trend plot
-        this.ec50Panel = new Ext.Panel({
-            itemId: "EC50",
-            title: "EC50",
-            html: "<div id='EC50TrendPlotDiv' class='ec50TrendPlot'></div></div>",
+        // initialize the tab panel that will show the trend plots
+        this.ec504plPanel = new Ext.Panel({
+            itemId: "EC50 4PL",
+            title: "EC50 - 4PL",
+            html: "<div id='EC50 4PLTrendPlotDiv' class='ec504plTrendPlot'></div></div>",
+            deferredRender: false,
+            listeners: {
+                scope: this,
+                'activate': this.activateTrendPlotPanel
+            }
+        });
+        this.ec505plPanel = new Ext.Panel({
+            itemId: "EC50 5PL",
+            title: "EC50 - 5PL Rumi",
+            html: "<div id='EC50 5PLTrendPlotDiv' class='ec505plTrendPlot'></div></div>",
             deferredRender: false,
             listeners: {
                 scope: this,
@@ -188,7 +198,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 height: 308,
                 padding: 5
             },
-            items: [this.ec50Panel, this.aucPanel, this.mfiPanel]
+            items: [this.ec504plPanel, this.ec505plPanel, this.aucPanel, this.mfiPanel]
         });
         this.items.push(this.trendTabPanel);
 

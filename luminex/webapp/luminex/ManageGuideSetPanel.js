@@ -129,7 +129,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 root: 'rows',
                 fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate', 'Titration/Run/Batch/Network',
                     'Titration/Run/NotebookNo', 'Titration/Run/AssayType', 'Titration/Run/ExpPerformer', 'Analyte/Data/AcquisitionDate', 'Titration/Run/Folder/Name',
-                    'Titration/Run/Isotype', 'Titration/Run/Name', 'Four ParameterCurveFit/EC50', 'MaxFI', 'TrapezoidalCurveFit/AUC']
+                    'Titration/Run/Isotype', 'Titration/Run/Name', 'Four ParameterCurveFit/EC50', 'Five ParameterCurveFit/EC50', 'MaxFI', 'TrapezoidalCurveFit/AUC']
             });
 
             // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
@@ -144,7 +144,8 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer},
                     {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
                     {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
-                    {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
+                    {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
+                    {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
                     {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'},
                     {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'}
                 ],
@@ -155,7 +156,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             this.allRunsGrid = new Ext.grid.GridPanel({
                 autoScroll:true,
                 height:200,
-                width:1000,
+                width:1075,
                 loadMask:{msg:"Loading runs..."},
                 store: allRunsStore,
                 colModel: allRunsColModel,
@@ -174,7 +175,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             this.add(new Ext.Panel(
             {
                 title: 'All Runs',
-                width:1000,
+                width:1075,
                 items: [
                     {
                         xtype: 'displayfield',
@@ -196,7 +197,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             root: 'rows',
             fields: ['Analyte', 'GuideSet', 'IncludeInGuideSetCalculation', 'Titration', 'Titration/Run/Conjugate', 'Titration/Run/Batch/Network',
                 'Titration/Run/NotebookNo', 'Titration/Run/AssayType', 'Titration/Run/ExpPerformer', 'Analyte/Data/AcquisitionDate', 'Titration/Run/Folder/Name',
-                'Titration/Run/Isotype', 'Titration/Run/Name', 'Four ParameterCurveFit/EC50', 'MaxFI', 'TrapezoidalCurveFit/AUC']
+                'Titration/Run/Isotype', 'Titration/Run/Name', 'Four ParameterCurveFit/EC50', 'Five ParameterCurveFit/EC50', 'MaxFI', 'TrapezoidalCurveFit/AUC']
         });
 
         // column model for the list of columns to show in the grid (and a special renderer for the rowId column)
@@ -211,7 +212,8 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer},
                 {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
                 {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
-                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
+                {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
+                {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
                 {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'},
                 {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'}
             ],
@@ -221,7 +223,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // create the grid for the runs that are a part of the given guide set
         this.guideRunSetGrid = new Ext.grid.GridPanel({
             autoHeight:true,
-            width:1000,
+            width:1075,
             loadMask:{msg:"Loading runs assigned to guide set..."},
             store: guideRunSetStore,
             colModel: guideRunSetColModel,
@@ -239,7 +241,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         this.add(new Ext.Panel({
             title: 'Runs Assigned to This Guide Set',
-            width:1000,
+            width:1075,
             items: [
                 {xtype: 'displayfield', value: 'List of all of the runs included in the guide set calculations for the selected guide set.'},
                 this.guideRunSetGrid
@@ -253,7 +255,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold',
             fieldLabel: 'Comment',
             value: this.comment,
-            width: 890,
+            width: 965,
             enableKeyEvents: true,
             listeners: {
                 scope: this,
@@ -408,7 +410,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, '
                     + 'Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/Batch/Network, Titration/Run/NotebookNo, '
                     + 'Titration/Run/AssayType, Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, GuideSet, IncludeInGuideSetCalculation, '
-                    + 'Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC ',
+                    + 'Four ParameterCurveFit/EC50, Five ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC ',
             filterArray: [
                 LABKEY.Filter.create('Titration/Name', this.titration),
                 LABKEY.Filter.create('Analyte/Name', this.analyte),

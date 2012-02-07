@@ -30,7 +30,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
         // apply some Ext panel specific properties to the config
         Ext.apply(config, {
-            width: 1300,
+            width: 1375,
             autoHeight: true,
             title: $h(config.titration) + ' Tracking Data',
             loadMask:{msg:"loading tracking data..."},
@@ -105,6 +105,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                     + 'Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, Analyte/Properties/LotNumber, '
                     + 'GuideSet/Created, IncludeInGuideSetCalculation, '
                     + 'Four ParameterCurveFit/EC50, Four ParameterCurveFit/EC50QCFlagsEnabled, '
+                    + 'Five ParameterCurveFit/EC50, Five ParameterCurveFit/EC50QCFlagsEnabled, '
                     + 'TrapezoidalCurveFit/AUC, TrapezoidalCurveFit/AUCQCFlagsEnabled, '
                     + 'MaxFI, MaxFIQCFlagsEnabled',
             filterArray: filterArray,
@@ -154,8 +155,10 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'Analyte Lot No.', dataIndex:'Analyte/Properties/LotNumber', width:100, renderer: this.encodingRenderer},
                 {header:'Guide Set Start Date', dataIndex:'GuideSet/Created', renderer: this.formatGuideSetMembers, scope: this, width:100},
                 {header:'GS Member', dataIndex:'IncludeInGuideSetCalculation', hidden: true},
-                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("Four ParameterCurveFit/EC50QCFlagsEnabled"), scope: this, align: 'right'},
-                {header:'EC50 QC Flags Enabled', dataIndex:'Four ParameterCurveFit/EC50QCFlagsEnabled', hidden: true},
+                {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("Four ParameterCurveFit/EC50QCFlagsEnabled"), scope: this, align: 'right'},
+                {header:'EC50 4PL QC Flags Enabled', dataIndex:'Four ParameterCurveFit/EC50QCFlagsEnabled', hidden: true},
+                {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("Five ParameterCurveFit/EC50QCFlagsEnabled"), scope: this, align: 'right'},
+                {header:'EC50 5PL QC Flags Enabled', dataIndex:'Five ParameterCurveFit/EC50QCFlagsEnabled', hidden: true},
                 {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.outOfRangeRenderer("TrapezoidalCurveFit/AUCQCFlagsEnabled"), scope: this, align: 'right'},
                 {header:'AUC  QC Flags Enabled', dataIndex:'TrapezoidalCurveFit/AUCQCFlagsEnabled', hidden: true},
                 {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("MaxFIQCFlagsEnabled"), scope: this, align: 'right'},
@@ -198,7 +201,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         // create a pop-up window to display the apply guide set UI
         var win = new Ext.Window({
             layout:'fit',
-            width:1100,
+            width:1120,
             height:500,
             closeAction:'close',
             modal: true,

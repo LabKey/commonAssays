@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex;
 
+import org.labkey.api.assay.dilution.DilutionCurve;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
@@ -72,10 +73,20 @@ public abstract class AbstractLuminexTable extends FilteredTable
         sql.append(ExperimentService.get().getTinfoAssayQCFlag(), "qf");
         sql.append(" WHERE " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId = qf.IntKey1");
         sql.append("   AND " + ExprColumn.STR_TABLE_ALIAS + ".TitrationId = qf.IntKey2");
-        sql.append("   AND qf.FlagType = '" + flagType + "'");
         if (null != curveType)
         {
             sql.append("    AND " + ExprColumn.STR_TABLE_ALIAS + ".CurveType = '" + curveType + "'");
+        }
+
+        // special case for EC50 to join flags based on 4PL or 5PL curve fits
+        if (!flagType.equals("EC50"))
+        {
+            sql.append("   AND qf.FlagType = '" + flagType + "'");
+        }
+        else
+        {
+            sql.append("   AND (" + ExprColumn.STR_TABLE_ALIAS + ".CurveType = '" + DilutionCurve.FitType.FOUR_PARAMETER.getLabel() + "' AND qf.FlagType = '" + LuminexDataHandler.QC_FLAG_EC50_4PL_FLAG_TYPE + "' ");
+            sql.append("        OR " + ExprColumn.STR_TABLE_ALIAS + ".CurveType = '" + DilutionCurve.FitType.FIVE_PARAMETER.getLabel() + "' AND qf.FlagType = '" + LuminexDataHandler.QC_FLAG_EC50_5PL_FLAG_TYPE + "') ");
         }
         sql.append(" ORDER BY qf.RowId");
 

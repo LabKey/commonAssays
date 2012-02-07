@@ -118,6 +118,16 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         addColumn(wrapColumn(getRealTable().getColumn("SamplingErrors")));
         addColumn(wrapColumn(getRealTable().getColumn("BeadCount")));
 
+        ColumnInfo cvCol = wrapColumn(getRealTable().getColumn("CV"));
+        cvCol.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            @Override
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new QCFlagHighlightDisplayColumn(colInfo, "CVQCFlagsEnabled");
+            }
+        });
+        addColumn(cvCol);
         SQLFragment cvQCFlagSQL = new SQLFragment("SELECT qf.Enabled FROM ");
         cvQCFlagSQL.append(ExperimentService.get().getTinfoAssayQCFlag(), "qf");
         cvQCFlagSQL.append(" WHERE " + ExprColumn.STR_TABLE_ALIAS + ".AnalyteId = qf.IntKey1");
@@ -129,16 +139,6 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
         cvFlagEnabledColumn.setLabel("CV QC Flags Enabled State");
         cvFlagEnabledColumn.setHidden(true);
         addColumn(cvFlagEnabledColumn);
-        ColumnInfo cvCol = wrapColumn(getRealTable().getColumn("CV"));
-        cvCol.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                return new QCFlagHighlightDisplayColumn(colInfo, "CVQCFlagsEnabled");
-            }
-        });
-        addColumn(cvCol);
 
         addColumn(wrapColumn(getRealTable().getColumn("Summary")));
         ColumnInfo titrationColumn = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));

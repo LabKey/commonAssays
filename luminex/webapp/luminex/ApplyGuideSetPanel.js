@@ -67,7 +67,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             columns: 'Analyte, Titration, Titration/Run/Name, Titration/Run/Folder/Name, Titration/Run/Folder/EntityId, ' 
                     + 'Titration/Run/Isotype, Titration/Run/Conjugate, Titration/Run/Batch/Network, Titration/Run/NotebookNo, '
                     + 'Titration/Run/AssayType, Titration/Run/ExpPerformer, Analyte/Data/AcquisitionDate, GuideSet, IncludeInGuideSetCalculation, '
-                    + 'Four ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC ',
+                    + 'Four ParameterCurveFit/EC50, Five ParameterCurveFit/EC50, MaxFI, TrapezoidalCurveFit/AUC ',
             filterArray: [
                 LABKEY.Filter.create('Titration', titrationIds.join(";"), LABKEY.Filter.Types.EQUALS_ONE_OF),
                 LABKEY.Filter.create('Analyte', analyteIds.join(";"), LABKEY.Filter.Types.EQUALS_ONE_OF)
@@ -104,7 +104,8 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Assay Type', dataIndex:'Titration/Run/AssayType', width:100, renderer: this.encodingRenderer},
                 {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
                 {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
-                {header:'EC50', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
+                {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
+                {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
                 {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'},
                 {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'}
             ],
@@ -114,7 +115,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // create the grid for the full list of runs that match the given guide set criteria
         this.selectedRunsGrid = new Ext.grid.GridPanel({
             autoScroll:true,
-            width:1000,
+            width:1075,
             height:150,
             loadMask:{msg:"Loading selected runs..."},
             store: selectedRunsStore,
@@ -130,7 +131,8 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             schemaName: 'assay',
             queryName: this.assayName + ' GuideSet',
             columns: 'RowId, Created, CreatedBy/DisplayName, Comment, CurrentGuideSet, '
-                    + 'Four ParameterCurveFit/EC50Average, MaxFIAverage, TrapezoidalCurveFit/AUCAverage',
+                    + 'Four ParameterCurveFit/EC50Average, Five ParameterCurveFit/EC50Average, '
+                    + 'MaxFIAverage, TrapezoidalCurveFit/AUCAverage',
             filterArray: [
                 LABKEY.Filter.create('TitrationName', this.titration),
                 LABKEY.Filter.create('AnalyteName', this.analyte),
@@ -166,7 +168,8 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Created', dataIndex:'Created', renderer: this.dateRenderer},
                 {header:'Current', dataIndex:'CurrentGuideSet'},
                 {header:'Comment', dataIndex:'Comment', renderer: this.encodingRenderer, width:200},
-                {header:'Avg EC50', dataIndex:'Four ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
+                {header:'Avg EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
+                {header:'Avg EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
                 {header:'Avg AUC', dataIndex:'TrapezoidalCurveFit/AUCAverage', renderer: this.numberRenderer, align: 'right'},
                 {header:'Avg High MFI', dataIndex:'MaxFIAverage', renderer: this.numberRenderer, align: 'right'}
             ],
@@ -176,7 +179,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // create the grid for the full list of runs that match the given guide set criteria
         this.guideSetsGrid = new Ext.grid.GridPanel({
             autoHeight:true,
-            width:1000,
+            width:1075,
             loadMask:{msg:"Loading guide sets..."},
             store: guideSetsStore,
             colModel: guideSetsColModel,
@@ -188,7 +191,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.items = [
             new Ext.Panel({
                 title: 'Selected Runs',
-                width:1000,
+                width:1075,
                 items: [
                     {
                         xtype: 'displayfield',
@@ -210,7 +213,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 title: 'Guide Run Sets for ' + this.titration + ' : ' + this.analyte + ' '
                         + (this.isotype == '' ? '[None]' : this.isotype) + ' '
                         + (this.conjugate == '' ? '[None]' : this.conjugate),
-                width:1000,
+                width:1075,
                 items: [
                     {xtype: 'displayfield', value: 'Choose the guide set that you would like to apply to the selected runs in the list above.'},
                     this.guideSetsGrid    
