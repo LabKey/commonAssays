@@ -12,11 +12,14 @@
 # Next, the script calculates curve fit parameters for each titration/analyte combination using both
 # 4PL and 5PL curve fits (from the fit.drc function in the Ruminex package (developed by Youyi at SCHARP).
 #
-# Finally, the script calculates new estimated concentration values for unknown samples using the
+# Then, the script calculates new estimated concentration values for unknown samples using the
 # rumi function. The rumi function takes a dataframe as input and uses the given Standard curve data to
 # calculate est.log.conc an se for the unknowns.
 #
-# CHANGES
+# Finally, the script calculates positivity of samples by comparing 3x or 5x fold change of the baseline visit
+# FI-Bkgd and FI-Bkgd-Blank values with other visits.
+#
+# CHANGES :
 #  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
 #  - 3.0          : Changes for LabKey server 12.1
 #
@@ -66,6 +69,29 @@ fiConversion <- function(val)
     1 + max(val,0);
 }
 
+getRunPropertyValue <- function(runProps, colName)
+{
+    value = NA;
+    if (any(run.props$name == colName))
+    {
+        value = run.props$val1[run.props$name == colName];
+
+        # reutrn NA for an empty string
+        if (nchar(value) == 0)
+        {
+            value = NA;
+        }
+    }
+    value;
+}
+
+compareNumbersForEquality <- function(val1, val2, epsilon)
+{
+	val1 = as.numeric(val1);
+	val2 = as.numeric(val2);
+	equal = val1 > (val2 - epsilon) & val1 < val2 + epsilon;
+	equal
+}
 
 ######################## STEP 0: READ IN THE RUN PROPERTIES AND RUN DATA #######################
 
@@ -154,7 +180,7 @@ if (any(regexpr("^blank", analytes, ignore.case=TRUE) > -1))
     # store a boolean vector of blanks, nonBlanks, and unknowns (i.e. non-standards)
     blanks = regexpr("^blank", run.data$name, ignore.case=TRUE) > -1;
     nonBlanks = regexpr("^blank", run.data$name, ignore.case=TRUE) == -1;
-    unks = !run.data$isStandard & !run.data$isQCControl;
+    unks = (is.na(run.data$isStandard) & is.na(run.data$isQCControl)) | (!run.data$isStandard & !run.data$isQCControl);
 
     # read the run property from user to determine if we are to only blank bead subtract from unks
     unksOnly = TRUE;
@@ -489,7 +515,7 @@ if (any(dat$isStandard) & length(standards) > 0)
             agg.dat = subset(standard.dat, well_role == "Standard");
             if (nrow(agg.dat) > 0)
             {
-                agg.dat = aggregate(agg.dat$fi, list(Standard=agg.dat$Standard,Analyte=agg.dat$analyte), max);
+                agg.dat = aggregate(agg.dat$fi, by = list(Standard=agg.dat$Standard,Analyte=agg.dat$analyte), FUN = max);
                 for (aggIndex in 1:nrow(agg.dat))
                 {
                     # remove the rows from the standard.dat object where the max FI < 1000
@@ -580,7 +606,74 @@ if (any(dat$isStandard) & length(standards) > 0)
     }
 }
 
-#####################  STEP 5: WRITE THE RESULTS TO THE OUTPUT FILE LOCATION #####################
+################################## STEP 5: Positivity Calculation ################################
+
+run.data$Positivity = NA;
+
+# get the run property that are used for teh positivity calculation
+calc.positivity = getRunPropertyValue(run.props, "CalculatePositivity");
+base.visit = getRunPropertyValue(run.props, "BaseVisit");
+fold.change = getRunPropertyValue(run.props, "PositivityFoldChange");
+
+# if all run props are specified, and calc positivity is true
+if (!is.na(calc.positivity) & !is.na(base.visit) & !is.na(fold.change) & calc.positivity == "1")
+{
+    #TODO: for testing, to be removed in favor of actual description parsing by server
+    #run.data$participantID = c(NA, NA, "Ptid 1", "Ptid 1", "Ptid 1", "Ptid 1", "Ptid 1", "Ptid 1", "Ptid 2", "Ptid 2", "Ptid 2", "Ptid 2", "Ptid 2", "Ptid 2", "Ptid 3", "Ptid 3", "Ptid 3", "Ptid 3");
+    #run.data$visitID = c(NA, NA, "1.0", "1.0", "2.0", "2.0", "3.0", "3.0", "1.0", "1.0", "1.1", "1.1", "2.0", "2.0", "1.0", "1.0", "8.0", "8.0");
+
+    analytePtids = subset(run.data, select=c("name", "participantID")); # note: analyte variable column name is "name"
+    analytePtids = unique(analytePtids[!is.na(run.data$participantID),]);
+    if (nrow(analytePtids) > 0)
+    {
+        for (index in 1:nrow(analytePtids))
+        {
+            # default MFI threshold is 100, but that can be set manually on upload per analyte
+            threshold = 100;
+            if (!is.null(analyte.data$PositivityThreshold))
+            {
+                if (!is.na(analyte.data$PositivityThreshold[analyte.data$Name == analytePtids$name[index]]))
+                {
+                    threshold = analyte.data$PositivityThreshold[analyte.data$Name == analytePtids$name[index]];
+                }
+            }
+
+            # calculate the positivity by comparing all non-baseline visits with the baseline visit value times the fold change specified
+            fi.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index], select=c("fiBackground", "fiBackgroundBlank"));
+            visits.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index], select=c("name", "participantID", "visitID"));
+            visits.fi.agg = aggregate(fi.dat, by = list(analyte=visits.dat$name, ptid=visits.dat$participantID, visit=visits.dat$visitID), FUN = mean);
+            if (any(compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)))
+            {
+                baseVisitFiBkgd = visits.fi.agg$fiBackground[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)];
+                baseVisitFiBkgdBlank = visits.fi.agg$fiBackgroundBlank[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)];
+                if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
+                {
+                    for (v in 1:nrow(visits.fi.agg))
+                    {
+                        # for each non-baseline visit, verify that the FI-Bkgd and FI-Bkgd-Blank values are above the specified threshold for that analyte
+                        visit = visits.fi.agg$visit[v];
+                        if (!compareNumbersForEquality(visit, base.visit, 1e-10) & visits.fi.agg$fiBackground[v] > threshold & visits.fi.agg$fiBackgroundBlank[v] > threshold)
+                        {
+                            # TODO: how to correct for negative values in fold change comparison?
+
+                            # if the FI-Bkgd and FI-Bkgd-Blank values are greater than the baseline visit value * fold change, consider them positive
+                            runDataIndex = run.data$name == visits.fi.agg$analyte[v] & run.data$participantID == visits.fi.agg$ptid[v] & run.data$visitID == visits.fi.agg$visit[v];
+                            if ((visits.fi.agg$fiBackground[v] > (baseVisitFiBkgd * as.numeric(fold.change))) & (visits.fi.agg$fiBackgroundBlank[v] > (baseVisitFiBkgdBlank * as.numeric(fold.change))))
+                            {
+                                run.data$Positivity[runDataIndex] = "positive"
+                            } else
+                            {
+                                run.data$Positivity[runDataIndex] = "negative"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#####################  STEP 6: WRITE THE RESULTS TO THE OUTPUT FILE LOCATION #####################
 
 # write the new set of run data out to an output file
 write.table(run.data, file=run.output.file, sep="\t", na="", row.names=FALSE, quote=FALSE);
