@@ -17,12 +17,10 @@ package org.labkey.ms2.protein.fasta;
 
 import org.ardverk.collection.ByteArrayKeyAnalyzer;
 import org.ardverk.collection.PatriciaTrie;
-import org.ardverk.collection.StringKeyAnalyzer;
 import org.labkey.api.util.UnexpectedException;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.ArrayList;
