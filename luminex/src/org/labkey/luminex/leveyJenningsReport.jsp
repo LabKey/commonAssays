@@ -24,6 +24,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.luminex.TitrationForm" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 
 <%
     JspView<TitrationForm> me = (JspView<TitrationForm>) HttpView.currentView();
@@ -58,17 +59,20 @@
     var defaultRowSize = 30;
 
     // local variables for storing the selected graph parameters
-    var _analyte, _isotype, _conjugate;
+    var _protocolName, _titration, _analyte, _isotype, _conjugate;
 
     Ext.onReady(init);
     function init()
     {
-        if ("null" == "<%= bean.getTitration() %>")
+        _titration = <%=PageFlowUtil.jsString(bean.getTitration())%>;
+        _protocolName = <%=PageFlowUtil.jsString(bean.getProtocol().getName())%>;
+
+        if ("" == _titration)
         {
             Ext.get('graphParamsPanel').update("Error: no titration specified.");
             return;
         }
-        if ("null" == "<%= bean.getProtocol().getName() %>")
+        if ("" == _protocolName)
         {
             Ext.get('graphParamsPanel').update("Error: no protocol specified.");
             return;
@@ -79,13 +83,13 @@
         LABKEY.Query.selectRows({
             containerFilter: LABKEY.Query.containerFilter.allFolders,
             schemaName: 'assay',
-            queryName: '<%= bean.getProtocol().getName() %> AnalyteTitration',
-            filterArray: [LABKEY.Filter.create('Titration/Name', '<%= bean.getTitration() %>')],
+            queryName: _protocolName + ' AnalyteTitration',
+            filterArray: [LABKEY.Filter.create('Titration/Name', _titration)],
             columns: reqColumns.join(','),
             maxRows: 1,
             success: function(data) {
                 if (data.rows.length == 0)
-                    Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h('<%= bean.getProtocol().getName() %>') + "' for '" + $h('<%= bean.getTitration() %>') + "'.");
+                    Ext.get('graphParamsPanel').update("Error: there were no records found in '" + $h(_protocolName) + "' for '" + $h(_titration) + "'.");
                 else
                 {
                     var missingColumns = '';
@@ -101,7 +105,7 @@
                     }
                     if (missingColumns.length > 0)
                     {
-                        Ext.get('graphParamsPanel').update("Error: one or more of the required properties (" + missingColumns + ") for the report do not exist in '" + $h('<%= bean.getProtocol().getName() %>') + "'.");
+                        Ext.get('graphParamsPanel').update("Error: one or more of the required properties (" + missingColumns + ") for the report do not exist in '" + $h(_protocolName) + "'.");
                         return;
                     }
 
@@ -120,8 +124,8 @@
         var graphParamsPanel = new LABKEY.LeveyJenningsGraphParamsPanel({
             renderTo: 'graphParamsPanel',
             cls: 'extContainer',
-            titration: '<%= bean.getTitration() %>',
-            assayName: '<%= bean.getProtocol().getName() %>',
+            titration: _titration,
+            assayName: _protocolName,
             listeners: {
                 'applyGraphBtnClicked': function(analyte, isotype, conjugate){
                     _analyte = analyte;
@@ -153,8 +157,8 @@
         var guideSetPanel = new LABKEY.LeveyJenningsGuideSetPanel({
             renderTo: 'guideSetOverviewPanel',
             cls: 'extContainer',
-            titration: '<%= bean.getTitration() %>',
-            assayName: '<%= bean.getProtocol().getName() %>',
+            titration: _titration,
+            assayName: _protocolName,
             listeners: {
                 'currentGuideSetUpdated': function() {
                     trendPlotPanel.setTabsToRender();
@@ -174,8 +178,8 @@
         var trendPlotPanel = new LABKEY.LeveyJenningsTrendPlotPanel({
             renderTo: 'rPlotPanel',
             cls: 'extContainer',
-            titration: '<%= bean.getTitration() %>',
-            assayName: '<%= bean.getProtocol().getName() %>',
+            titration: _titration,
+            assayName: _protocolName,
             defaultRowSize: defaultRowSize,
             listeners: {
                 'reportDateRangeApplied': function(startDate, endDate) {
@@ -191,8 +195,8 @@
         var trackingDataPanel = new LABKEY.LeveyJenningsTrackingDataPanel({
             renderTo: 'trackingDataPanel',
             cls: 'extContainer',
-            titration: '<%= bean.getTitration() %>',
-            assayName: '<%= bean.getProtocol().getName() %>',
+            titration: _titration,
+            assayName: _protocolName,
             defaultRowSize: defaultRowSize,
             listeners: {
                 'appliedGuideSetUpdated': function() {

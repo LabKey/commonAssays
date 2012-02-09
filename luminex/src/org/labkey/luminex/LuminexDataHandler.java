@@ -75,8 +75,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static final DataType LUMINEX_TRANSFORMED_DATA_TYPE = new DataType("LuminexTransformedDataFile");  // marker data type
     public static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType("LuminexDataFile", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
     public static final String QC_FLAG_HIGH_MFI_FLAG_TYPE = "HMFI";
-    public static final String QC_FLAG_EC50_4PL_FLAG_TYPE = "EC50";
-    public static final String QC_FLAG_EC50_5PL_FLAG_TYPE = "EC50_5PL";
+    public static final String QC_FLAG_EC50_4PL_FLAG_TYPE = "EC50-4";
+    public static final String QC_FLAG_EC50_5PL_FLAG_TYPE = "EC50-5";
     public static final String QC_FLAG_AUC_FLAG_TYPE = "AUC";
     public static final String QC_FLAG_CV_FLAG_TYPE = "PCV";
 
@@ -695,7 +695,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 ParameterCurveImpl.FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
                 if (fitParams != null)
                 {
-                    CurveFit fit = insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex", existingCurveFits);
+                    CurveFit fit = insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, null, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex", existingCurveFits);
                     if (fit != null)
                     {
                         newCurveFits.add(fit);
@@ -821,6 +821,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         Number inflection = (value == null ? (Number)value : Double.parseDouble(value.toString()));
         value = dataRow.getExtraProperties().get("Asymmetry" + suffix);
         Number asymmetry = (value == null ? (Number)value : Double.parseDouble(value.toString()));
+        value = dataRow.getExtraProperties().get("EC50" + suffix);
+        Double ec50 = (value != null ? Double.parseDouble(value.toString()) : null);
 
         if (slope != null && upper != null && lower != null && inflection != null)
         {
@@ -831,7 +833,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             params.max = upper.doubleValue();
             params.asymmetry = asymmetry == null ? 1 : asymmetry.doubleValue();
 
-            return insertOrUpdateCurveFit(wellGroup, user, titration, analyte, params, fitType, null, existingCurveFits);
+            return insertOrUpdateCurveFit(wellGroup, user, titration, analyte, params, ec50, fitType, null, existingCurveFits);
         }
         return null;
     }
@@ -1129,10 +1131,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     @NotNull
-    private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source, CurveFit[] existingCurveFits)
+    private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, Double ec50, DilutionCurve.FitType fitType, String source, CurveFit[] existingCurveFits)
             throws DilutionCurve.FitFailedException, SQLException
     {
-        CurveFit fit = createCurveFit(wellGroup, titration, analyte, params, fitType, source);
+        CurveFit fit = createCurveFit(wellGroup, titration, analyte, params, ec50, fitType, source);
         return insertOrUpdateCurveFit(user, fit, existingCurveFits);
     }
 
@@ -1160,7 +1162,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private CurveFit createCurveFit(LuminexWellGroup wellGroup, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, DilutionCurve.FitType fitType, String source)
+    private CurveFit createCurveFit(LuminexWellGroup wellGroup, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, Double ec50, DilutionCurve.FitType fitType, String source)
             throws DilutionCurve.FitFailedException
     {
 //        ParameterCurveImpl.FiveParameterCurve curveImpl = new ParameterCurveImpl.FiveParameterCurve(Collections.singletonList(wellGroup), false, params);
@@ -1176,18 +1178,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             fit.setAsymmetry(params.getAsymmetry());
         }
-
-        // get EC50 values for Rumi 4pl and 5pl curve fits
-        Double ec50 = null;
-        if (source == null && fitType == DilutionCurve.FitType.FOUR_PARAMETER)
-        {
-            ec50 = fit.getInflection();
-        }
-        else if (source == null && fitType == DilutionCurve.FitType.FIVE_PARAMETER)
-        {
-            // TODO: this calculation needs to be verified by lab and/or SCHARP
-            ec50 = fit.getInflection() * (Math.pow((Math.pow(2.0, (1 / fit.getAsymmetry()))  - 1), (1 / fit.getSlope())));
-        }
+        fit.setEC50(ec50);
 
         // Don't calculate AUC for 4/5PL fits
 //        double auc = curveImpl.calculateAUC(DilutionCurve.AUCType.NORMAL);
@@ -1196,7 +1187,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         if (source != null)
             fitLabel = source + " " + fitLabel;
 
-        fit.setEC50(ec50);
         fit.setCurveType(fitLabel);
         return fit;
     }
@@ -1804,6 +1794,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         ExpProtocol protocol = run.getProtocol();
         LuminexExcelParser parser = new LuminexExcelParser(protocol, Collections.singleton(dataFile));
 
+        // create a temperary resolver to use for parsing the description value prior to creating the data file for the transform script
+        // i.e. we don't care about about resolving the study or lookup information at this time (that will happen after the transform is run)
+        ParticipantVisitResolver resolver = new StudyParticipantVisitResolverType().createResolver(run, null, info.getUser());
+
         Map<DataType, List<Map<String, Object>>> datas = new HashMap<DataType, List<Map<String, Object>>>();
         List<Map<String, Object>> dataRows = new ArrayList<Map<String, Object>>();
 
@@ -1815,6 +1809,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             for (LuminexDataRow dataRow : entry.getValue())
             {
+                handleParticipantResolver(dataRow, resolver, new LinkedHashSet<ExpMaterial>());
                 Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
                 dataMap.put("titration", dataRow.getDescription() != null && titrations.contains(dataRow.getDescription()));
                 dataMap.remove("data");

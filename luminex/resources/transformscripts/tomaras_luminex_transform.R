@@ -229,11 +229,13 @@ run.data$Slope_4pl = NA;
 run.data$Lower_4pl = NA;
 run.data$Upper_4pl = NA;
 run.data$Inflection_4pl = NA;
+run.data$EC50_4pl = NA;
 run.data$Slope_5pl = NA;
 run.data$Lower_5pl = NA;
 run.data$Upper_5pl = NA;
 run.data$Inflection_5pl = NA;
 run.data$Asymmetry_5pl = NA;
+run.data$EC50_5pl = NA;
 
 # loop through the possible titrations and to see if it is a standard, qc control, or titrated unknown
 if (nrow(titration.data) > 0)
@@ -244,19 +246,22 @@ if (nrow(titration.data) > 0)
         titration.data[tIndex,]$QCControl == "true" |
         titration.data[tIndex,]$Unknown == "true")
     {
-        titrationName = as.character(titration.data[tIndex,]$Name);
+       titrationName = as.character(titration.data[tIndex,]$Name);
 
-        # we want to create PDF plots of the curves for QC Controls
-        if (titration.data[tIndex,]$QCControl == "true") {
-            mypdf(file=paste(titrationName, "QC_Curves", sep="_"), mfrow=c(1,1));
-        }
+       # 2 types of curve fits for the EC50 calculations, with separate PDFs for the QC Curves
+       fitTypes = c("4pl", "5pl");
+       for (typeIndex in 1:length(fitTypes))
+       {
+          # we want to create PDF plots of the curves for QC Controls
+          if (titration.data[tIndex,]$QCControl == "true") {
+              mypdf(file=paste(titrationName, "QC_Curves", toupper(fitTypes[typeIndex]), sep="_"), mfrow=c(1,1));
+          }
 
-        # calculate the 4PL and 5PL curve fit params for each analyte
-        for (aIndex in 1:length(analytes))
-        {
+          # calculate the curve fit params for each analyte
+          for (aIndex in 1:length(analytes))
+          {
             analyteName = as.character(analytes[aIndex]);
-            print(paste("Calculating the 4PL and 5PL curve fit params for ",titrationName, analyteName, sep=" "));
-
+            print(paste("Calculating the", fitTypes[typeIndex], "curve fit params for ",titrationName, analyteName, sep=" "));
             dat = subset(run.data, description == titrationName & name == analyteName);
 
             yLabel = "";
@@ -307,48 +312,63 @@ if (nrow(titration.data) > 0)
                 # use the decided upon conversion function for handling of negative values
                 dat$fi = sapply(dat$fi, fiConversion);
 
-                # get curve fit params for 4PL
-                tryCatch({
-                        fit = drm(fi~dose, data=dat, fct=LL.4());
-                        run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1]
-                        run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2]
-                        run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3]
-                        run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4]
+                if (fitTypes[typeIndex] == "4pl")
+                {
+                    tryCatch({
+                            fit = drm(fi~dose, data=dat, fct=LL.4());
+                            run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1]
+                            run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2]
+                            run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3]
+                            run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4]
+                            run.data[runDataIndex,]$EC50_4pl = as.numeric(coef(fit))[4]
 
-                        # plot the curve fit for the QC Controls
-                        if (titration.data[tIndex,]$QCControl == "true") {
-                            plot(fit, type="all", main=paste("4PL -",analyteName), cex=.5, ylab=yLabel, xlab=xLabel);
+                            # plot the curve fit for the QC Controls
+                            if (titration.data[tIndex,]$QCControl == "true") {
+                                plot(fit, type="all", main=analyteName, cex=.5, ylab=yLabel, xlab=xLabel);
+                            }
+                        },
+                        error = function(e) {
+                            print(e);
+
+                            # plot the individual data points for the QC Controls
+                            if (titration.data[tIndex,]$QCControl == "true") {
+                                plot(fi ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
+                            }
                         }
-                    },
-                    error = function(e) {
-                        print(e);
+                    );
+                } else if (fitTypes[typeIndex] == "5pl")
+                {
+                    tryCatch({
+                            fit = fit.drc(log(fi)~dose, data=dat, force.fit=TRUE, fit.4pl=FALSE);
+                            run.data[runDataIndex,]$Slope_5pl = as.numeric(coef(fit))[1];
+                            run.data[runDataIndex,]$Lower_5pl = as.numeric(coef(fit))[2];
+                            run.data[runDataIndex,]$Upper_5pl = as.numeric(coef(fit))[3];
+                            run.data[runDataIndex,]$Inflection_5pl = as.numeric(coef(fit))[4];
+                            run.data[runDataIndex,]$Asymmetry_5pl = as.numeric(coef(fit))[5];
 
-                        # plot the individual data points for the QC Controls
-                        if (titration.data[tIndex,]$QCControl == "true") {
-                            plot(fi ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
+                            y = log((exp(run.data[runDataIndex,]$Lower_5pl) + exp(run.data[runDataIndex,]$Upper_5pl))/2);
+                            estimated = unname(getConc(fit, y, verbose=TRUE));
+                            if (!is.nan(estimated[3]))
+                            {
+                                run.data[runDataIndex,]$EC50_5pl = estimated[3];
+                            }
+
+                            # plot the curve fit for the QC Controls
+                            if (titration.data[tIndex,]$QCControl == "true") {
+                                plot(fit, type="all", main=analyteName, cex=.5, ylab=paste("log(",yLabel,")",sep=""), xlab=xLabel);
+                            }
+                        },
+                        error = function(e) {
+                            print(e);
+
+                            # plot the individual data points for the QC Controls
+                            if (titration.data[tIndex,]$QCControl == "true") {
+                                plot(fi ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
+                            }
+
                         }
-                    }
-                );
-
-                # get curve fit params for 5PL
-                tryCatch({
-                        fit = fit.drc(log(fi)~dose, data=dat, force.fit=TRUE, fit.4pl=FALSE);
-                        run.data[runDataIndex,]$Slope_5pl = as.numeric(coef(fit))[1];
-                        run.data[runDataIndex,]$Lower_5pl = as.numeric(coef(fit))[2];
-                        run.data[runDataIndex,]$Upper_5pl = as.numeric(coef(fit))[3];
-                        run.data[runDataIndex,]$Inflection_5pl = as.numeric(coef(fit))[4];
-                        run.data[runDataIndex,]$Asymmetry_5pl = as.numeric(coef(fit))[5];
-
-                        # plot the curve fit for the QC Controls
-                        if (titration.data[tIndex,]$QCControl == "true") {
-                            plot(fit, type="all", main=paste("5PL -",analyteName), cex=.5, ylab=paste("log(",yLabel,")",sep=""), xlab=xLabel);
-                        }
-                    },
-                    error = function(e) {
-                        print(e);
-                    }
-                );
-
+                    );
+                }    
             } else {
                 # create an empty plot indicating that there is no data available
                 if (titration.data[tIndex,]$QCControl == "true") {
@@ -356,12 +376,13 @@ if (nrow(titration.data) > 0)
                     text(1, 0.5, "Data Not Available");
                 }
             }
-        }
+          }
 
-        # if we are creating a PDF for the QC Control, close the device
-        if (titration.data[tIndex,]$QCControl == "true") {
+          # if we are creating a PDF for the QC Control, close the device
+          if (titration.data[tIndex,]$QCControl == "true") {
             dev.off();
-        }
+          }
+       }
     }
   }
 }  
@@ -618,10 +639,6 @@ fold.change = getRunPropertyValue(run.props, "PositivityFoldChange");
 # if all run props are specified, and calc positivity is true
 if (!is.na(calc.positivity) & !is.na(base.visit) & !is.na(fold.change) & calc.positivity == "1")
 {
-    #TODO: for testing, to be removed in favor of actual description parsing by server
-    #run.data$participantID = c(NA, NA, "Ptid 1", "Ptid 1", "Ptid 1", "Ptid 1", "Ptid 1", "Ptid 1", "Ptid 2", "Ptid 2", "Ptid 2", "Ptid 2", "Ptid 2", "Ptid 2", "Ptid 3", "Ptid 3", "Ptid 3", "Ptid 3");
-    #run.data$visitID = c(NA, NA, "1.0", "1.0", "2.0", "2.0", "3.0", "3.0", "1.0", "1.0", "1.1", "1.1", "2.0", "2.0", "1.0", "1.0", "8.0", "8.0");
-
     analytePtids = subset(run.data, select=c("name", "participantID")); # note: analyte variable column name is "name"
     analytePtids = unique(analytePtids[!is.na(run.data$participantID),]);
     if (nrow(analytePtids) > 0)
