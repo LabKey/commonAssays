@@ -19,6 +19,7 @@ package org.labkey.ms2.pipeline.client.mascot;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import org.labkey.ms2.pipeline.client.InputXmlComposite;
+import org.labkey.ms2.pipeline.client.ParamParser;
 import org.labkey.ms2.pipeline.client.ParameterNames;
 
 /**
@@ -41,6 +42,8 @@ public class MascotInputXmlComposite extends InputXmlComposite
 
     public String update(String text)
     {
+        if(params == null)
+            params = new ParamParser(inputXmlTextArea);
         return super.update(text);
     }
 

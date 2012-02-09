@@ -53,7 +53,6 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
         instance.add(taxonomyListBox);
         labelWidget = new VerticalPanel();
         initLabel(false);
-        initWidget(instance);
     }
 
     private void initLabel(boolean readonly)
