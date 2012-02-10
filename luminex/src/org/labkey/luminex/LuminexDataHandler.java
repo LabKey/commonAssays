@@ -79,6 +79,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static final String QC_FLAG_EC50_5PL_FLAG_TYPE = "EC50-5";
     public static final String QC_FLAG_AUC_FLAG_TYPE = "AUC";
     public static final String QC_FLAG_CV_FLAG_TYPE = "PCV";
+    public static final String POSITIVITY_THRESHOLD_COLUMN_NAME = "PositivityThreshold";
+    public static final String POSITIVITY_THRESHOLD_DISPLAY_NAME = "Positivity Threshold";
+    public static final String CALCULATE_POSITIVITY_COLUMN_NAME = "calculatePositivity";
 
     private static final Logger LOGGER = Logger.getLogger(LuminexDataHandler.class);
 
@@ -332,6 +335,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     dataRow.setData(sourceDataForRow.getRowId());
                     analyte.setDataId(sourceDataForRow.getRowId());
                 }
+
+                Map<String, String> colProperties = form.getAnalyteColumnProperties(analyte.getName());
+                String posThresholdValue = colProperties.get(POSITIVITY_THRESHOLD_COLUMN_NAME);
+                analyte.setPositivityThreshold(posThresholdValue != null ? Integer.parseInt(posThresholdValue) : null);
 
                 analyte = saveAnalyte(expRun, user, existingAnalytes, analyte);
 

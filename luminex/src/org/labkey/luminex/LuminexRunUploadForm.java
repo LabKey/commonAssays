@@ -17,6 +17,7 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.exp.PropertyType;
@@ -71,6 +72,16 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         List<DomainProperty> domainProperties = Arrays.asList(analyteDomain.getProperties());
         return getAnalytePropertyMapFromRequest(domainProperties, analyteName);
+    }
+
+    public Map<String, String> getAnalyteColumnProperties(String analyteName)
+    {
+        Map<String, String> properties = new HashMap<String, String>();
+        ColumnInfo col = LuminexSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+        String value = getRequest().getParameter(LuminexUploadWizardAction.getAnalytePropertyName(analyteName, col.getName()));
+        value = StringUtils.trimToNull(value);
+        properties.put(col.getName(), value);
+        return properties;
     }
 
     @Override

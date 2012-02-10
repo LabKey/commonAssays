@@ -47,9 +47,15 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
         {
             Map<String, Object> row = new HashMap<String, Object>();
             row.put("Name", analyteName);
+            // get the analyte domain property values
             for (Map.Entry<DomainProperty, String> entry : form.getAnalyteProperties(analyteName).entrySet())
             {
                 row.put(entry.getKey().getName(), entry.getValue());
+            }
+            // get the analyte table column property values
+            for (Map.Entry<String, String> entry : form.getAnalyteColumnProperties(analyteName).entrySet())
+            {
+                row.put(entry.getKey(), entry.getValue());
             }
             // TODO - What delimeter is safest to use?
             row.put("titrations", StringUtils.join(form.getTitrationsForAnalyte(analyteName), ","));

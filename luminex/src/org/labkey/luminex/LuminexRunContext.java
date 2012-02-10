@@ -34,6 +34,8 @@ public interface LuminexRunContext extends AssayRunUploadContext<LuminexAssayPro
 
     public Map<DomainProperty, String> getAnalyteProperties(String analyteName);
 
+    public Map<String, String> getAnalyteColumnProperties(String analyteName);
+
     public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException;
 
     public List<Titration> getTitrations() throws ExperimentException;

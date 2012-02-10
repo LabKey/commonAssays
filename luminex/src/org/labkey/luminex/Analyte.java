@@ -38,6 +38,7 @@ public class Analyte
     private int _rowId;
     private int _minStandardRecovery;
     private int _maxStandardRecovery;
+    private Integer _positivityThreshold;
 
     public Analyte()
     {
@@ -127,6 +128,16 @@ public class Analyte
     public void setMinStandardRecovery(int minStandardRecovery)
     {
         _minStandardRecovery = minStandardRecovery;
+    }
+
+    public Integer getPositivityThreshold()
+    {
+        return _positivityThreshold;
+    }
+
+    public void setPositivityThreshold(Integer positivityThreshold)
+    {
+        _positivityThreshold = positivityThreshold;
     }
 
     public int getMaxStandardRecovery()

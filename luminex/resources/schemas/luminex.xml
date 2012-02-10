@@ -31,6 +31,7 @@
             <column columnName="StdCurve"/>
             <column columnName="MinStandardRecovery"/>
             <column columnName="MaxStandardRecovery"/>
+            <column columnName="PositivityThreshold"/>
         </columns>
     </table>
     

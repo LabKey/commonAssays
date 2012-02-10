@@ -16,6 +16,7 @@
 package org.labkey.luminex;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Table;
@@ -33,6 +34,7 @@ import org.labkey.api.util.PageFlowUtil;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +96,17 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
         {
             throw new RuntimeSQLException(e);
         }
+    }
+
+    @Override
+    public Map<String, String> getAnalyteColumnProperties(String analyteName)
+    {
+        Map<String, String> properties = new HashMap<String, String>();
+        Analyte analyte = getAnalyte(analyteName);
+        ColumnInfo col = LuminexSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+        Integer value = analyte.getPositivityThreshold();
+        properties.put(col.getName(), value != null ? value.toString() : null);
+        return properties;
     }
 
     private @NotNull

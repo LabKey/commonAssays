@@ -39,6 +39,8 @@ public class LuminexAnalyteDomainKind extends AssayDomainKind
         result.add("Min Standard Recovery");
         result.add("MaxStandardRecovery");
         result.add("Max Standard Recovery");
+        result.add("PositivityThreshold");
+        result.add("Positivity Threshold");
         return result;
     }
 }

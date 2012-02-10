@@ -645,8 +645,8 @@ if (!is.na(calc.positivity) & !is.na(base.visit) & !is.na(fold.change) & calc.po
     {
         for (index in 1:nrow(analytePtids))
         {
-            # default MFI threshold is 100, but that can be set manually on upload per analyte
-            threshold = 100;
+            # default MFI threshold is set by the server, but that can be changed manually on upload per analyte
+            threshold = NA;
             if (!is.null(analyte.data$PositivityThreshold))
             {
                 if (!is.na(analyte.data$PositivityThreshold[analyte.data$Name == analytePtids$name[index]]))
@@ -659,7 +659,7 @@ if (!is.na(calc.positivity) & !is.na(base.visit) & !is.na(fold.change) & calc.po
             fi.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index], select=c("fiBackground", "fiBackgroundBlank"));
             visits.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index], select=c("name", "participantID", "visitID"));
             visits.fi.agg = aggregate(fi.dat, by = list(analyte=visits.dat$name, ptid=visits.dat$participantID, visit=visits.dat$visitID), FUN = mean);
-            if (any(compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)))
+            if (!is.na(threshold) & any(compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)))
             {
                 baseVisitFiBkgd = visits.fi.agg$fiBackground[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)];
                 baseVisitFiBkgdBlank = visits.fi.agg$fiBackgroundBlank[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)];

@@ -170,6 +170,39 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 view.getDataRegion().addGroup(new DisplayColumnGroup(cols, analyteDP.getName(), true));
             }
 
+            // add the Positivity Threshold column for each analyte if there was a run property indicating that Positivity should be calculated
+            String calcPositivityValue = form.getRequest().getParameter(LuminexDataHandler.CALCULATE_POSITIVITY_COLUMN_NAME);
+            if (null != calcPositivityValue && calcPositivityValue.equals("1"))
+            {
+                List<DisplayColumn> posThresholdCols = new ArrayList<DisplayColumn>();
+                for (String analyte : analyteNames)
+                {
+                    ColumnInfo info = new ColumnInfo(LuminexSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME), view.getDataRegion().getTable());
+                    final String inputName = getAnalytePropertyName(analyte, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
+                    info.setName(inputName);
+                    info.setDisplayColumnFactory(new DisplayColumnFactory()
+                    {
+                        @Override
+                        public DisplayColumn createRenderer(ColumnInfo colInfo)
+                        {
+                            return new DataColumn(colInfo)
+                            {
+                                @Override
+                                public String getFormFieldName(RenderContext ctx)
+                                {
+                                    return inputName;
+                                }
+                            };
+                        }
+                    });
+                    view.setInitialValue(inputName, 100); // default value is always 100 when column is shown (don't need to recall last entry)
+                    DisplayColumn col = info.getRenderer();
+                    col.setCaption(LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME);
+                    posThresholdCols.add(col);
+                }
+                view.getDataRegion().addGroup(new DisplayColumnGroup(posThresholdCols, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME, false));
+            }
+
             if (errorReshow)
                 view.setInitialValues(getViewContext().getRequest().getParameterMap());
 
@@ -412,7 +445,12 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     public static String getAnalytePropertyName(String analyte, DomainProperty dp)
     {
-        return "_analyte_" + analyte + "_" + dp.getName();
+        return getAnalytePropertyName(analyte, dp.getName());
+    }
+
+    public static String getAnalytePropertyName(String analyte, String property)
+    {
+        return "_analyte_" + analyte + "_" + property;
     }
 
     private boolean setInitialTitrationInput(boolean errorReshow, String propName, String defVal, boolean typeMatch)
