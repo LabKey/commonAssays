@@ -16,8 +16,12 @@
 
 package org.labkey.flow.util;
 
+import org.labkey.api.collections.Sets;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -50,6 +54,22 @@ public class KeywordUtil
             "THREASHOLD|" +
             "WINDOW EXTENSION)$", Pattern.CASE_INSENSITIVE);
 
+    private static final Set<String> sideScatterNames = Sets.newCaseInsensitiveHashSet(
+            "SSC", "SS", "SS Lin", "SS Log",
+            "SS-A", "SSC-A", "SSC-Area",
+            "SS-H", "SSC-H", "SSC-Height",
+            "SS-W", "SSC-W", "SSC-Width", "Comp SSC-A",
+            "Side Scatter", "OrthSc", "ObtSc", "90D"
+    );
+
+    private static final Set<String> forwardScatterNames = Sets.newCaseInsensitiveHashSet(
+            "FSC", "FS", "FS Lin", "FS Log",
+            "FS-A", "FSC-A", "FSC-Area",
+            "FS-H", "FSC-H", "FSC-Height",
+            "FS-W", "FSC-W", "FSC-Width", "Comp FSC-H",
+            "Forward Scatter", "ForSc", "FS Peak"
+    );
+
     private KeywordUtil() { }
 
     /**
@@ -70,4 +90,39 @@ public class KeywordUtil
                 ret.add(s);
         return ret;
     }
+
+    // UNDONE: $SPILL, SPILLOVER, COMP, $COMP
+    public static boolean hasSpillKeyword(Map<String, String> keywords)
+    {
+        return keywords.containsKey("SPILL") || keywords.containsKey("$DFC1TO2");
+    }
+
+    public static boolean isSideScatter(String parameterName)
+    {
+        return sideScatterNames.contains(parameterName);
+    }
+
+    public static boolean isForwardScatter(String parameterName)
+    {
+        return forwardScatterNames.contains(parameterName);
+    }
+
+    public static boolean isTimeChannel(String parameterName)
+    {
+        return parameterName.toLowerCase().contains("time");
+    }
+
+    public static boolean isElectronicVoltage(String parameterName)
+    {
+        return parameterName.equalsIgnoreCase("EV");
+    }
+
+    public static boolean isColorChannel(String parameterName)
+    {
+        return !isForwardScatter(parameterName) &&
+                !isSideScatter(parameterName) &&
+                !isTimeChannel(parameterName) &&
+                !isElectronicVoltage(parameterName);
+    }
+
 }

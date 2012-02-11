@@ -218,6 +218,7 @@ flow/enginesrc/org/labkey/flow/persist/AnalysisSerializer.java -text
 flow/enginesrc/org/labkey/flow/persist/AttributeSet.java -text
 flow/enginesrc/org/labkey/flow/persist/InputRole.java -text
 flow/enginesrc/org/labkey/flow/persist/ObjectType.java -text
+flow/enginesrc/org/labkey/flow/util/KeywordUtil.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/GateEditor.gwt.xml -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/EditorState.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/FlowStyle.java -text
@@ -495,7 +496,6 @@ flow/src/org/labkey/flow/script/RScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptXarSource.java -text
 flow/src/org/labkey/flow/script/WorkspaceJob.java -text
-flow/src/org/labkey/flow/util/KeywordUtil.java -text
 flow/src/org/labkey/flow/view/ExportAnalysisForm.java -text
 flow/src/org/labkey/flow/view/FlowQueryView.java -text
 flow/src/org/labkey/flow/view/GraphColumn.java -text

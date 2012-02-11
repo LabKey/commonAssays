@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import Jama.Matrix;
+import org.labkey.flow.util.KeywordUtil;
 
 
 /**
@@ -332,13 +333,13 @@ public class DataFrame
 
         // for FlowJo compatibility use simple log axis (for uncompensated integer mode data)
         private boolean _simpleLogAxis = false;
-        // set to true as an indication that data is quantized and should be dithered for graphing
 
+        // set to true as an indication that data is quantized and should be dithered for graphing
         private boolean _dither = false;
 
         private boolean _precompensated = false;
 
-        /** Once Field has been constructed and completely configured, called should use initAliases() to finish initialization. */
+        /** Once Field has been constructed and completely configured, caller should use initAliases() to finish initialization. */
         public Field(int index, String name, int range)
         {
             _index = index;
@@ -500,10 +501,24 @@ public class DataFrame
             _dither = dither;
         }
 
-        public boolean isTimeChannel()
+        public boolean isForwardScatter()
         {
-            return _baseName.toLowerCase().contains("time");
+            return KeywordUtil.isForwardScatter(getName());
         }
 
+        public boolean isSideScatter()
+        {
+            return KeywordUtil.isSideScatter(getName());
+        }
+
+        public boolean isTimeChannel()
+        {
+            return KeywordUtil.isTimeChannel(getName());
+        }
+
+        public boolean isColorChannel()
+        {
+            return KeywordUtil.isColorChannel(getName());
+        }
     }
 }
