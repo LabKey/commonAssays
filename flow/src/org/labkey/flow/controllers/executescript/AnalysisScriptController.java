@@ -38,7 +38,7 @@ import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.FCS;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.WorkspaceData;
@@ -236,6 +236,8 @@ public class AnalysisScriptController extends BaseFlowController
         Set<File> usedPaths = new HashSet<File>();
         for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
         {
+            // skip FlowJo workspace imported runs
+            if (run.getWorkspace() == null)
                 usedPaths.add(run.getExperimentRun().getFilePathRoot());
         }
 
@@ -656,8 +658,8 @@ public class AnalysisScriptController extends BaseFlowController
         private void stepUploadWorkspace(ImportAnalysisForm form, BindException errors) throws Exception
         {
             WorkspaceData workspaceData = form.getWorkspace();
-            FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
-            List<FlowJoWorkspace.SampleInfo> samples = workspace.getSamples();
+            Workspace workspace = workspaceData.getWorkspaceObject();
+            List<Workspace.SampleInfo> samples = workspace.getSamples();
             if (samples.size() == 0)
             {
                 errors.reject(ERROR_MSG, "The workspace doesn't have any samples");
@@ -697,7 +699,7 @@ public class AnalysisScriptController extends BaseFlowController
                 if (workspaceFile != null)
                 {
                     File runFilePathRoot = null;
-                    for (FlowJoWorkspace.SampleInfo sampleInfo : samples)
+                    for (Workspace.SampleInfo sampleInfo : samples)
                     {
                         File sampleFile = new File(workspaceFile.getParent(), sampleInfo.getLabel());
                         if (sampleFile.exists())
@@ -750,9 +752,9 @@ public class AnalysisScriptController extends BaseFlowController
 
                 boolean found = false;
                 WorkspaceData workspaceData = form.getWorkspace();
-                FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
-                List<FlowJoWorkspace.SampleInfo> samples = workspace.getSamples();
-                for (FlowJoWorkspace.SampleInfo sampleInfo : samples)
+                Workspace workspace = workspaceData.getWorkspaceObject();
+                List<Workspace.SampleInfo> samples = workspace.getSamples();
+                for (Workspace.SampleInfo sampleInfo : samples)
                 {
                     File sampleFile = new File(runFilePathRoot, sampleInfo.getLabel());
                     if (sampleFile.exists())
@@ -838,7 +840,7 @@ public class AnalysisScriptController extends BaseFlowController
                     return;
                 }
 
-                FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
+                Workspace workspace = workspaceData.getWorkspaceObject();
                 String[] parameters = workspace.getParameters();
                 String[] params = form.getrEngineNormalizationParameters().split(",");
                 for (String param : params)
@@ -853,7 +855,7 @@ public class AnalysisScriptController extends BaseFlowController
                 }
 
                 // All samples in group should have the same staining panel for normalization to succeed.
-                List<FlowJoWorkspace.SampleInfo> sampleInfos = new ArrayList<FlowJoWorkspace.SampleInfo>();
+                List<Workspace.SampleInfo> sampleInfos = new ArrayList<Workspace.SampleInfo>();
                 List<String> importGroupNames =
                         form.getImportGroupNames() == null ? null :
                         Arrays.asList(form.getImportGroupNames().split(","));
@@ -863,7 +865,7 @@ public class AnalysisScriptController extends BaseFlowController
                 }
                 else
                 {
-                    for (FlowJoWorkspace.GroupInfo groupInfo : workspace.getGroups())
+                    for (Workspace.GroupInfo groupInfo : workspace.getGroups())
                     {
                         if (importGroupNames.contains(groupInfo.getGroupName().toString()))
                             sampleInfos.addAll(groupInfo.getSampleInfos());
@@ -876,7 +878,7 @@ public class AnalysisScriptController extends BaseFlowController
                     return;
                 }
 
-                FlowJoWorkspace.SampleInfo referenceSample = sampleInfos.get(0);
+                Workspace.SampleInfo referenceSample = sampleInfos.get(0);
                 Analysis referenceAnalysis = workspace.getSampleAnalysis(referenceSample);
                 for (int i = 1; i < sampleInfos.size(); i++)
                 {
