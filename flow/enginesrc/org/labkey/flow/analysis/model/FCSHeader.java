@@ -196,7 +196,7 @@ public class FCSHeader
     }
 
 
-    protected DataFrame createDataFrame(float[][] data)
+    protected DataFrame createDataFrame(float[][] data, int[] bitCounts)
     {
         boolean datatypeI = "I".equals(getKeyword("$DATATYPE"));
         boolean facsCalibur = "FACSCalibur".equals(getKeyword("$CYT"));
@@ -208,7 +208,7 @@ public class FCSHeader
         {
             String key = "$P" + (i + 1);
             String name = getParameterName(i);
-            int bits = Integer.parseInt(getKeyword(key + "B"));
+            int bits = bitCounts != null ? bitCounts[i] : Integer.parseInt(getKeyword(key + "B"));
             double range = Double.parseDouble(getKeyword(key + "R"));
             String E = getKeyword(key + "E");
             double decade = Double.parseDouble(E.substring(0, E.indexOf(',')));
@@ -244,7 +244,7 @@ public class FCSHeader
 
     public DataFrame createEmptyDataFrame()
     {
-        return createDataFrame(new float[getParameterCount()][0]);
+        return createDataFrame(new float[getParameterCount()][0], null);
     }
 
     /** Returns true if the sample has already been compensated by the flow cytometer. */

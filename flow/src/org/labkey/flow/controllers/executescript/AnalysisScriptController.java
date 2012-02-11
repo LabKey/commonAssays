@@ -236,7 +236,7 @@ public class AnalysisScriptController extends BaseFlowController
         Set<File> usedPaths = new HashSet<File>();
         for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
         {
-            usedPaths.add(run.getExperimentRun().getFilePathRoot());
+                usedPaths.add(run.getExperimentRun().getFilePathRoot());
         }
 
         Map<String, String> ret = new TreeMap<String, String>();
@@ -681,7 +681,8 @@ public class AnalysisScriptController extends BaseFlowController
                 {
                     for (FlowRun keywordRun : keywordRuns)
                     {
-                        if (keywordRun.getExperiment().isKeywords())
+                        FlowExperiment experiment = keywordRun.getExperiment();
+                        if (experiment != null && experiment.isKeywords())
                         {
                             form.setExistingKeywordRunId(keywordRun.getRunId());
                             break;

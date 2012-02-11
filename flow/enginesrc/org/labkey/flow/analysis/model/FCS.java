@@ -16,6 +16,7 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -46,10 +47,10 @@ public class FCS extends FCSHeader
         //
         // METADATA
         //
-        String byteOrder = getKeyword("$BYTEORD");
-        if ("4,3,2,1".equals(byteOrder))
+        String byteOrder = StringUtils.trimToEmpty(getKeyword("$BYTEORD"));
+        if ("4,3,2,1".equals(byteOrder) || "2,1".equals(byteOrder))
             bigEndian = true;
-        else if ("1,2,3,4".equals(byteOrder))
+        else if ("1,2,3,4".equals(byteOrder) || "1,2".equals(byteOrder))
             bigEndian = false;
         else
         {
@@ -58,8 +59,7 @@ public class FCS extends FCSHeader
 
         int eventCount = Integer.parseInt(getKeyword("$TOT"));
         int count = getParameterCount();
-        float[][] data = new float[count][eventCount];
-        DataFrame frame = createDataFrame(data);
+
         //
         // PARAMETERS
         //
@@ -86,6 +86,23 @@ public class FCS extends FCSHeader
                 }
             }
         }
+
+        // if metadata indicates packed data, verify that the data length is consistent
+        // if it is not consistent, fall back to unpacked and fixup bitcounts
+        if (packed)
+        {
+            int expectedLength = expectedDataLengthIntegerPacked(bitCounts, eventCount);
+            int dataLength = (dataLast - dataOffset + 1);
+            if (expectedLength != dataLength)
+            {
+                packed = false;
+                for (int i=0 ; i<bitCounts.length ; i++)
+                    bitCounts[i] = ((bitCounts[i]+7)/8)*8;
+            }
+        }
+
+        float[][] data = new float[count][eventCount];
+        DataFrame frame = createDataFrame(data, bitCounts);
 
         //
         // DATA
@@ -171,15 +188,23 @@ public class FCS extends FCSHeader
         }
     }
 
+
+    int expectedDataLengthIntegerPacked(int[] bitCounts, int events)
+    {
+        int bitsPerRow = 0;
+        for (int i = 0; i < bitCounts.length; i++)
+            bitsPerRow += bitCounts[i];
+        int expectedBytes = (events * bitsPerRow + 7) / 8;
+        return expectedBytes;
+    }
+
+
     void readListDataIntegerPacked(InputStream is, int[] bitCounts, float[][] data) throws IOException
     {
         byte[] dataBuf = new byte[(dataLast - dataOffset + 1)];
         long read = is.read(dataBuf, 0, dataBuf.length);
         assert read == dataBuf.length;
-        int bitsPerRow = 0;
-        for (int i = 0; i < bitCounts.length; i++)
-            bitsPerRow += bitCounts[i];
-        int expectedBytes = (data[0].length * bitsPerRow + 7) / 8;
+        int expectedBytes = expectedDataLengthIntegerPacked(bitCounts, data[0].length);
         if (expectedBytes != read)
         {
             throw new IllegalArgumentException("dataBuf is of length " + dataBuf.length + " expected " + expectedBytes);
