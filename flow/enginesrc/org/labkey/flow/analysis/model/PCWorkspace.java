@@ -17,25 +17,22 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
+import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.ObjectType;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class PCWorkspace extends FlowJoWorkspace
 {
     public PCWorkspace(String name, Element elDoc)
     {
-        _name = name;
-        for (Element elSampleList : getElementsByTagName(elDoc, "SampleList"))
-        {
-            readSamples(elSampleList);
-        }
-        for (Element elGroups : getElementsByTagName(elDoc, "Groups"))
-        {
-            readGroups(elGroups);
-        }
-        postProcess();
+        super(name, elDoc);
     }
 
     protected void readSample(Element elSample)
@@ -43,14 +40,23 @@ public class PCWorkspace extends FlowJoWorkspace
         SampleInfo sampleInfo = new SampleInfo();
         for (Element elKeywords : getElementsByTagName(elSample, "Keywords"))
         {
-            for (Element elKeyword : getElementsByTagName(elKeywords, "Keyword"))
-            {
-                String name = StringUtils.trimToNull(elKeyword.getAttribute("name"));
-                if (null == name)
-                    continue;
-                sampleInfo._keywords.put(name, elKeyword.getAttribute("value"));
-            }
+            readKeywords(sampleInfo, elKeywords);
         }
+        readParameterInfo(sampleInfo);
+
+        Element elSampleNode = getElementByTagName(elSample, "SampleNode");
+        sampleInfo._sampleId = elSampleNode.getAttribute("sampleID");
+        if (elSampleNode.hasAttribute("compensationID"))
+        {
+            sampleInfo._compensationId = elSampleNode.getAttribute("compensationID");
+        }
+
+        _sampleInfos.put(sampleInfo.getSampleId(), sampleInfo);
+        readSampleAnalysis(elSampleNode);
+    }
+
+    protected void readParameterInfo(SampleInfo sampleInfo)
+    {
         for (int i = 1; i < 100; i ++)
         {
             String paramName = FCSHeader.getParameterName(sampleInfo._keywords, i);
@@ -74,16 +80,32 @@ public class PCWorkspace extends FlowJoWorkspace
             }
             _parameters.put(paramInfo.name, paramInfo);
         }
-        for (Element elSampleNode : getElementsByTagName(elSample, "SampleNode"))
+    }
+
+    protected void readStats(SubsetSpec subset, Element elPopulation, @Nullable AttributeSet results, Analysis analysis, boolean warnOnMissingStats)
+    {
+        String strCount = elPopulation.getAttribute("count");
+        if (results != null)
         {
-            sampleInfo._sampleId = elSampleNode.getAttribute("sampleID");
-            if (elSampleNode.hasAttribute("compensationID"))
+            if (!StringUtils.isEmpty(strCount))
             {
-                sampleInfo._compensationId = elSampleNode.getAttribute("compensationID");
+                StatisticSpec statCount = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
+                results.setStatistic(statCount, Double.valueOf(strCount).doubleValue());
             }
-            readSampleAnalysis(elSampleNode);
+            else
+            {
+                if (warnOnMissingStats)
+                    warning(analysis.getName(), subset, "Count statistic missing");
+            }
         }
-        _sampleInfos.put(sampleInfo.getSampleId(), sampleInfo);
+        for (Element elSubpopulations : getElementsByTagName(elPopulation, "Subpopulations"))
+        {
+            for (Element elStat : getElementsByTagName(elSubpopulations, "Statistic"))
+            {
+                readStat(elStat, subset, results, analysis, warnOnMissingStats,
+                        "name", "id", "percent");
+            }
+        }
     }
 
     protected PolygonGate readPolygonGate(Element elPolygonGate)
@@ -120,28 +142,15 @@ public class PCWorkspace extends FlowJoWorkspace
         return new PolygonGate(xAxis, yAxis, poly);
     }
 
-    protected Population readPopulation(Element elPopulation)
+    protected IntervalGate readRangeGate(Element elRangeGate)
     {
-        Population ret = new Population();
-        PopulationName name = PopulationName.fromString(elPopulation.getAttribute("name"));
-        ret.setName(name);
-        for (Element elPolygonGate : getElementsByTagName(elPopulation, "PolygonGate"))
-        {
-            boolean invert = "1".equals(elPolygonGate.getAttribute("negated")) || "0".equals(elPolygonGate.getAttribute("eventsInside"));
-            PolygonGate gate = readPolygonGate(elPolygonGate);
-            ret.addGate(invert ? new NotGate(gate) : gate);
-        }
-        for (Element elRectangleGate : getElementsByTagName(elPopulation, "RectangleGate"))
-        {
-            boolean invert = "1".equals(elRectangleGate.getAttribute("negated")) || "0".equals(elRectangleGate.getAttribute("eventsInside"));
-            PolygonGate gate = readRectangleGate(elRectangleGate);
-            ret.addGate(invert ? new NotGate(gate) : gate);
-        }
-        for (Element elSubpopulations : getElementsByTagName(elPopulation, "Subpopulations"))
-        {
-            readSubpopulations(ret, elSubpopulations);
-        }
-        return ret;
+        Element elAxis = getElementByTagName(elRangeGate, "Axis");
+        String axisName = ___cleanName(elAxis.getAttribute("name"));
+        // UNDONE: support open ranges
+        double min = parseParamValue(axisName, elRangeGate, "min");
+        double max = parseParamValue(axisName, elRangeGate, "max");
+
+        return new IntervalGate(axisName, min, max);
     }
 
     protected PolygonGate readRectangleGate(Element elRectangleGate)
@@ -151,59 +160,215 @@ public class PCWorkspace extends FlowJoWorkspace
         List<Double> lstMax = new ArrayList<Double>();
         for (Element elRangeGate : getElementsByTagName(elRectangleGate, "RangeGate"))
         {
-            Element elAxis = getElementByTagName(elRangeGate, "Axis");
-            String axisName = ___cleanName(elAxis.getAttribute("name"));
-            axes.add(axisName);
-            lstMin.add(parseParamValue(axisName, elRangeGate, "min"));
-            lstMax.add(parseParamValue(axisName, elRangeGate, "max"));
+            IntervalGate rangeGate = readRangeGate(elRangeGate);
+            axes.add(rangeGate.getXAxis());
+            lstMin.add(rangeGate.getMin());
+            lstMax.add(rangeGate.getMax());
         }
         double[] X = new double[] { lstMin.get(0).doubleValue(), lstMin.get(0).doubleValue(), lstMax.get(0).doubleValue(), lstMax.get(0).doubleValue() };
         double[] Y = new double[] { lstMin.get(1).doubleValue(), lstMax.get(1).doubleValue(), lstMax.get(1).doubleValue(), lstMin.get(1).doubleValue() };
         return new PolygonGate(axes.get(0), axes.get(1), new Polygon(X, Y));
     }
 
-    protected void readSubpopulations(PopulationSet pops, Element elSubpopulations)
+    protected Population readBoolean(Element elBoolNode, SubsetSpec parentSubset)
     {
-        for (Element elPopulation : getElementsByTagName(elSubpopulations, "Population"))
+        Population ret = new Population();
+        PopulationName name = PopulationName.fromString(elBoolNode.getAttribute("name"));
+        ret.setName(name);
+
+        List<Gate> gates = new ArrayList<Gate>();
+        Element elDependents = getElementByTagName(elBoolNode, "Dependents");
+        if (elDependents != null)
         {
-            pops.addPopulation(readPopulation(elPopulation));
+            for (Element elDependent : getElementsByTagName(elDependents, "Dependent"))
+            {
+                // NOTE: we only support subset refs relative to the current parent.
+                String dependentName = StringUtils.trimToNull(elDependent.getAttribute("name"));
+                if (dependentName != null)
+                    gates.add(new SubsetRef(new SubsetSpec(parentSubset, PopulationName.fromString(dependentName))));
+            }
         }
+
+        if (gates.size() > 0)
+        {
+            Gate gate = null;
+            String tagName = elBoolNode.getTagName();
+            if ("AndNode".equals(tagName))
+                gate = new AndGate(gates);
+            else if ("OrNode".equals(tagName))
+                gate = new OrGate(gates);
+            else if ("NotNode".equals(tagName))
+                gate = new NotGate(gates.get(0));
+
+            if (gate != null)
+                ret.addGate(gate);
+        }
+        else
+        {
+            warning(name, parentSubset, "No dependent gates found for boolean gate");
+        }
+
+        return ret;
+    }
+
+    protected boolean inverted(Element elGate)
+    {
+        return "1".equals(elGate.getAttribute("negated")) || "0".equals(elGate.getAttribute("eventsInside"));
+    }
+
+    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, @Nullable AttributeSet results, boolean warnOnMissingStats)
+    {
+        Population ret = new Population();
+        PopulationName name = PopulationName.fromString(elPopulation.getAttribute("name"));
+        ret.setName(name);
+        SubsetSpec subset = new SubsetSpec(parentSubset, name);
+
+        for (Element elPolygonGate : getElementsByTagName(elPopulation, "PolygonGate"))
+        {
+            boolean invert = inverted(elPolygonGate);
+            PolygonGate gate = readPolygonGate(elPolygonGate);
+            ret.addGate(invert ? new NotGate(gate) : gate);
+        }
+        for (Element elRectangleGate : getElementsByTagName(elPopulation, "RectangleGate"))
+        {
+            boolean invert = inverted(elRectangleGate);
+            PolygonGate gate = readRectangleGate(elRectangleGate);
+            ret.addGate(invert ? new NotGate(gate) : gate);
+        }
+        for (Element elRangeGate : getElementsByTagName(elPopulation, "RangeGate"))
+        {
+            boolean invert = inverted(elRangeGate);
+            IntervalGate gate = readRangeGate(elRangeGate);
+            ret.addGate(invert ? new NotGate(gate) : gate);
+        }
+        for (Element elEllipseGate : getElementsByTagName(elPopulation, "EllipseGate"))
+        {
+            //boolean invert = inverted(elEllipseGate);
+            //PolygonGate gate = readRectangleGate(elEllipseGate);
+            //ret.addGate(invert ? new NotGate(gate) : gate);
+        }
+
+        readStats(subset, elPopulation, results, analysis, warnOnMissingStats);
+
+        for (Element elSubpopulations : getElementsByTagName(elPopulation, "Subpopulations"))
+        {
+            List<Population> subpops = readSubpopulations(elSubpopulations, subset, analysis, results, warnOnMissingStats);
+            for (Population pop : subpops)
+                ret.addPopulation(pop);
+        }
+
+        return ret;
+    }
+
+    protected List<Population> readSubpopulations(Element elSubpopulations, SubsetSpec parentSubset, Analysis analysis, @Nullable AttributeSet results, boolean warnOnMissingStats)
+    {
+        List<Population> subpops = new LinkedList<Population>();
+        for (Element elPopulation : getElements(elSubpopulations))
+        {
+            String tagName = elPopulation.getTagName();
+            if ("Population".equals(tagName))
+                subpops.add(readPopulation(elPopulation, parentSubset, analysis, results, warnOnMissingStats));
+            else if ("AndNode".equals(tagName) || "OrNode".equals(tagName) || "NotNode".equals(tagName))
+                subpops.add(readBoolean(elPopulation, parentSubset));
+        }
+        return subpops;
+    }
+
+    protected Analysis readAnalysis(Element elAnalysis, @Nullable AttributeSet results, boolean warnOnMissingStats)
+    {
+        Analysis ret = new Analysis();
+        PopulationName name = PopulationName.fromString(elAnalysis.getAttribute("name"));
+        ret.setName(name);
+        ret.setSettings(_settings);
+        ret.getStatistics().add(new StatisticSpec(null, StatisticSpec.STAT.Count, null));
+
+        readStats(null, elAnalysis, results, ret, warnOnMissingStats);
+
+        for (Element elSubpopulations : getElementsByTagName(elAnalysis, "Subpopulations"))
+        {
+            List<Population> subpops = readSubpopulations(elSubpopulations, null, ret, results, warnOnMissingStats);
+            for (Population pop : subpops)
+                ret.addPopulation(pop);
+        }
+
+        if (results != null)
+        {
+            for (StatisticSpec stat : results.getStatistics().keySet())
+            {
+                ret.addStatistic(stat);
+            }
+        }
+
+        return ret;
     }
 
     protected Analysis readSampleAnalysis(Element elSampleNode)
     {
-        Analysis ret = new Analysis();
-        PopulationName name = PopulationName.fromString(elSampleNode.getAttribute("name"));
-        ret.setName(name);
-        _sampleAnalyses.put(elSampleNode.getAttribute("sampleID"), ret);
-
-        for (Element elSubpopulations : getElementsByTagName(elSampleNode, "Subpopulations"))
-        {
-            readSubpopulations(ret, elSubpopulations);
-        }
+        AttributeSet results = new AttributeSet(ObjectType.fcsAnalysis, null);
+        Analysis ret = readAnalysis(elSampleNode, results, true);
+        String sampleId = elSampleNode.getAttribute("sampleID");
+        _sampleAnalyses.put(sampleId, ret);
+        addSampleAnalysisResults(results, sampleId);
         return ret;
     }
 
-    protected void readSamples(Element elSampleList)
+    protected void readSamples(Element elDoc)
     {
-        for (Element elSample : getElementsByTagName(elSampleList, "Sample"))
+        for (Element elSampleList : getElementsByTagName(elDoc, "SampleList"))
         {
-            readSample(elSample);
+            for (Element elSample : getElementsByTagName(elSampleList, "Sample"))
+            {
+                readSample(elSample);
+            }
         }
     }
 
-    protected void readGroups(Element elGroups)
+    protected GroupInfo readGroup(Element elGroupNode)
     {
-        for (Element elGroup: getElementsByTagName(elGroups, "GroupNode"))
+        GroupInfo ret = new GroupInfo();
+        ret._groupId = elGroupNode.getAttribute("name");
+        ret._groupName = PopulationName.fromString(elGroupNode.getAttribute("name"));
+
+        for (Element elSampleList : getElementsByTagName(elGroupNode, "SampleRefs"))
         {
-            Analysis analysis = new Analysis();
-            PopulationName name = PopulationName.fromString(elGroup.getAttribute("name"));
-            analysis.setName(name);
-            for (Element elSubpopulations : getElementsByTagName(elGroup, "Subpopulations"))
+            for (Element elSample : getElementsByTagName(elSampleList, "SampleRef"))
             {
-                readSubpopulations(analysis, elSubpopulations);
+                String sampleID = elSample.getAttribute("sampleID");
+                if (sampleID != null)
+                    ret._sampleIds.add(sampleID);
             }
-            _groupAnalyses.put(analysis.getName(), analysis);
         }
+
+        _groupInfos.put(ret._groupId, ret);
+        return ret;
+    }
+
+    protected Analysis readGroupAnalysis(Element elGroup)
+    {
+        Analysis analysis = readAnalysis(elGroup, null, false);
+        _groupAnalyses.put(analysis.getName(), analysis);
+
+        return analysis;
+    }
+
+    protected void readGroups(Element elDoc)
+    {
+        for (Element elGroups : getElementsByTagName(elDoc, "Groups"))
+        {
+            for (Element elGroupNode : getElementsByTagName(elGroups, "GroupNode"))
+            {
+                for (Element elGroup : getElementsByTagName(elGroupNode, "Group"))
+                {
+                    readGroup(elGroup);
+                }
+
+                readGroupAnalysis(elGroupNode);
+            }
+        }
+    }
+
+    protected void readCompensationMatrices(Element elDoc)
+    {
+        // UNDONE
     }
 }

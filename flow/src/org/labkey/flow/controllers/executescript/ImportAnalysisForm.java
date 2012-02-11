@@ -15,6 +15,7 @@
  */
 package org.labkey.flow.controllers.executescript;
 
+import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
 
 /**
@@ -29,7 +30,7 @@ public class ImportAnalysisForm
     private String selectAnalysisEngine = "noEngine";
 
     // general analysis options and R normalization configuration
-    private String importGroupNames = "All Samples";
+    private String importGroupNames = Workspace.ALL_SAMPLES;
     private Boolean rEngineNormalization = true;
     private String rEngineNormalizationReference = null;
     private String rEngineNormalizationParameters = null;

@@ -34,6 +34,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.flow.analysis.model.Workspace" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -45,7 +46,7 @@
     boolean hasPipelineRoot = pipeRoot != null;
     boolean canSetPipelineRoot = context.getUser().isAdministrator() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 
-    FlowJoWorkspace workspace = form.getWorkspace().getWorkspaceObject();
+    Workspace workspace = form.getWorkspace().getWorkspaceObject();
     List<String> warnings = workspace.getWarnings();
     if (warnings.size() > 0)
     {

@@ -23,9 +23,8 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.analysis.model.Workspace;
 import org.springframework.validation.Errors;
-import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXParseException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +39,7 @@ public class WorkspaceData implements Serializable
 
     String path;
     String name;
-    FlowJoWorkspace object;
+    Workspace _object;
 
     public void setPath(String path)
     {
@@ -64,12 +63,12 @@ public class WorkspaceData implements Serializable
 
     public void setObject(String object) throws Exception
     {
-        this.object = (FlowJoWorkspace) PageFlowUtil.decodeObject(object);
+        this._object = (Workspace) PageFlowUtil.decodeObject(object);
     }
 
-    public FlowJoWorkspace getWorkspaceObject()
+    public Workspace getWorkspaceObject()
     {
-        return object;
+        return _object;
     }
 
     public String getPath()
@@ -96,7 +95,7 @@ public class WorkspaceData implements Serializable
 
     public void validate(Container container) throws WorkspaceValidationException, IOException
     {
-        if (object == null)
+        if (_object == null)
         {
             if (path != null)
             {
@@ -116,7 +115,7 @@ public class WorkspaceData implements Serializable
                 }
 
                 File file = pipeRoot.resolvePath(path);
-                object = readWorkspace(file, path);
+                _object = readWorkspace(file, path);
             }
             else
             {
@@ -125,7 +124,7 @@ public class WorkspaceData implements Serializable
         }
     }
 
-    private static FlowJoWorkspace readWorkspace(File file, String path) throws WorkspaceValidationException
+    private static Workspace readWorkspace(File file, String path) throws WorkspaceValidationException
     {
         if (file == null)
         {
@@ -156,11 +155,11 @@ public class WorkspaceData implements Serializable
         }
     }
 
-    private static FlowJoWorkspace readWorkspace(InputStream is) throws WorkspaceValidationException
+    private static Workspace readWorkspace(InputStream is) throws WorkspaceValidationException
     {
         try
         {
-            return FlowJoWorkspace.readWorkspace(is);
+            return Workspace.readWorkspace(is);
         }
         catch (SAXParseException spe)
         {
@@ -182,11 +181,11 @@ public class WorkspaceData implements Serializable
         else
         {
             Map<String, String> ret = new HashMap<String, String>();
-            if (object != null)
+            if (_object != null)
             {
                 try
                 {
-                    ret.put("object", PageFlowUtil.encodeObject(object));
+                    ret.put("object", PageFlowUtil.encodeObject(_object));
                 }
                 catch (IOException e)
                 {

@@ -17,609 +17,72 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.apache.xerces.impl.Constants;
-import org.apache.xerces.parsers.DOMParser;
-import org.apache.xerces.util.SymbolTable;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.settings.AppProps;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
-import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
 import org.w3c.dom.*;
-import org.w3c.dom.ls.LSParserFilter;
-import org.w3c.dom.traversal.NodeFilter;
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.util.*;
 
 
-abstract public class FlowJoWorkspace implements Serializable
+abstract public class FlowJoWorkspace extends Workspace
 {
-    protected String _name = null;
-
-    // group name -> analysis
-    protected Map<PopulationName, Analysis> _groupAnalyses = new LinkedHashMap<PopulationName, Analysis>();
-    // sample id -> analysis
-    protected Map<String, Analysis> _sampleAnalyses = new LinkedHashMap<String, Analysis>();
-    protected Map<String, AttributeSet> _sampleAnalysisResults = new LinkedHashMap<String, AttributeSet>();
-    protected Map<String, GroupInfo> _groupInfos = new LinkedHashMap<String, GroupInfo>();
-    protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<SampleInfo>(new LinkedHashMap<String, SampleInfo>());
-    protected Map<String, ParameterInfo> _parameters = new CaseInsensitiveMapWrapper<ParameterInfo>(new LinkedHashMap<String, ParameterInfo>());
-    protected List<CalibrationTable> _calibrationTables = new ArrayList<CalibrationTable>();
-    protected ScriptSettings _settings = new ScriptSettings();
-    protected List<String> _warnings = new LinkedList<String>();
-    protected List<CompensationMatrix> _compensationMatrices = new ArrayList<CompensationMatrix>();
-    protected List<AutoCompensationScript> _autoCompensationScripts = new ArrayList<AutoCompensationScript>();
-
-    public class SampleInfo implements Serializable
-    {
-        Map<String, String> _keywords = new HashMap<String, String>();
-        Map<String, ParameterInfo> _parameters;
-        String _sampleId;
-        String _compensationId;
-
-        public void setSampleId(String id)
-        {
-            _sampleId = id;
-        }
-        public Map<String,String> getKeywords()
-        {
-            return _keywords;
-        }
-        public String getSampleId()
-        {
-            return _sampleId;
-        }
-
-        public String getCompensationId()
-        {
-            return _compensationId;
-        }
-
-        public void setCompensationId(String id)
-        {
-            _compensationId = id;
-        }
-
-        public String getLabel()
-        {
-            String ret = getKeywords().get("$FIL");
-            if (ret == null)
-                return _sampleId;
-            return ret;
-        }
-
-        /** Returns true if the sample has already been compensated by the flow cytometer. */
-        public boolean isPrecompensated()
-        {
-            return getSpill() != null;
-        }
-
-        /** Returns the spill matrix. */
-        public CompensationMatrix getSpill()
-        {
-            if (_compensationId == null)
-                return null;
-
-            int id = Integer.parseInt(_compensationId);
-            if (id < 0)
-                return CompensationMatrix.fromSpillKeyword(_keywords);
-
-            return null;
-        }
-
-        /** Returns the spill matrix or FlowJo applied comp matrix. */
-        public CompensationMatrix getCompensationMatrix()
-        {
-            if (_compensationId == null)
-            {
-                return null;
-            }
-
-            int id = Integer.parseInt(_compensationId);
-            if (id < 0)
-            {
-                return CompensationMatrix.fromSpillKeyword(_keywords);
-            }
-
-            if (_compensationMatrices.size() == 0)
-            {
-                return null;
-            }
-            if (_compensationMatrices.size() == 1)
-            {
-                return _compensationMatrices.get(0);
-            }
-            if (_compensationMatrices.size() < id)
-            {
-                return null;
-            }
-            return _compensationMatrices.get(id - 1);
-        }
-
-        public String toString()
-        {
-            String $FIL = getKeywords().get("$FIL");
-            if ($FIL == null)
-                return _sampleId;
-
-            return $FIL + " (" + _sampleId + ")";
-        }
-    }
-
-    public class GroupInfo implements Serializable
-    {
-        String _groupId;
-        PopulationName _groupName;
-        List<String> _sampleIds = new ArrayList<String>();
-
-        public List<String> getSampleIds()
-        {
-            return _sampleIds;
-        }
-
-        public List<SampleInfo> getSampleInfos()
-        {
-            ArrayList<SampleInfo> sampleInfos = new ArrayList<SampleInfo>(_sampleIds.size());
-            for (String sampleId : _sampleIds)
-            {
-                SampleInfo sampleInfo = getSample(sampleId);
-                if (sampleInfo != null)
-                    sampleInfos.add(sampleInfo);
-            }
-            return sampleInfos;
-        }
-
-        public String getGroupId()
-        {
-            return _groupId;
-        }
-
-        public void setGroupId(String groupId)
-        {
-            _groupId = groupId;
-        }
-
-        public PopulationName getGroupName()
-        {
-            return _groupName;
-        }
-
-        public void setGroupName(PopulationName groupName)
-        {
-            _groupName = groupName;
-        }
-    }
-
-    static private class WorkspaceRecognizer extends DefaultHandler
-    {
-        boolean _isWorkspace = false;
-
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
-        {
-            if ("Workspace".equals(qName))
-            {
-                _isWorkspace = true;
-            }
-            else
-            {
-                _isWorkspace = false;
-            }
-            throw new SAXException("Stop parsing");
-        }
-        boolean isWorkspace()
-        {
-            return _isWorkspace;
-        }
-    }
-
-
-    static public boolean isFlowJoWorkspace(File file)
-    {
-        if (file.getName().endsWith(".wsp"))
-            return true;
-        if (file.isDirectory())
-            return false;
-        WorkspaceRecognizer recognizer = new WorkspaceRecognizer();
-        try
-        {
-            SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-
-            parser.parse(file, recognizer);
-        }
-        catch (Exception e)
-        {
-            // suppress
-        }
-        return recognizer.isWorkspace();
-    }
-
-
-    public class ParameterInfo implements Serializable
-    {
-        public String name;
-        // For some parameters, FlowJo maps them as integers between 0 and 4095, even though
-        // they actually range much higher.
-        // This multiplier maps to the range that we actually use.
-        public double multiplier;
-        public double minValue;
-        public CalibrationTable calibrationTable;
-    }
-
-
-	static class FJErrorHandler implements ErrorHandler
-	{
-		public void warning(SAXParseException exception) throws SAXException
-		{
-			// ignore
-		}
-
-		public void error(SAXParseException exception) throws SAXException
-		{
-			throw exception;
-		}
-
-		public void fatalError(SAXParseException exception) throws SAXException
-		{
-			String msg = exception.getLocalizedMessage();
-			if (msg != null)
-			{
-				// ignore malformed XML in <OverlayGraphs> element
-				if (msg.contains("OverlayGraphs") && (msg.contains("xParameter") || msg.contains("yParameter")))
-					return;
-			}
-			throw exception;
-		}
-	}
-
-
-
-    final static String[] parsedElements =
-    {
-        "AutoCompensationScripts",
-        "Axis",
-        "BooleanGate",
-        "CalibrationTables",
-        "Channel",
-        "ChannelValue",
-        "CompensationMatrices",
-        "CompensationMatrix",
-        "Ellipse",
-        "FCSHeader",
-        "GatePaths",
-        "Group",
-        "GroupAnalyses",
-        "GroupNode",
-        "Groups",
-        "Keyword",
-        "Keywords",
-        "MatchingCriteria",
-        "Parameter",
-        "ParameterDefinition",
-        "Point",
-        "PolyRect",
-        "Polygon",
-        "PolygonGate",
-        "Population",
-        "Range",
-        "RangeGate",
-        "RectangleGate",
-        "Sample",
-        "SampleAnalyses",
-        "SampleList",
-        "SampleNode",
-        "SampleRef",
-        "SampleRefs",
-        "Samples",
-        "Script",
-        "Statistic",
-        "String",
-        "StringArray",
-        "Subpopulations",
-        "Table",
-        "ValidateCompensation",
-        "Vertex",
-        "Workspace",
-        "and",
-        "ellipse",
-        "focus",
-        "interval",
-        "not",
-        "or",
-        "point",
-        "polygon"
-    };
-
-
-    final static String[] rejectElements =
-    {
-        "Layout",
-        "LayoutEditor",
-        "LayoutGraph",
-        "OverlayGraphs",
-        "TableEditor"
-    };
-
-
-    final static String[] knownElements =
-    {
-        "Annotation",
-        "AnnotationTextTraits",
-        "AutoCompensationScripts",
-        "Axis",
-        "AxisLabelText",
-        "AxisText",
-        "BooleanGate",
-        "CalibrationTables",
-        "Channel",
-        "ChannelValue",
-        "Column",
-        "Columns",
-        "CompensationMatrices",
-        "CompensationMatrix",
-        "Contents",
-        "Criteria",
-        "CriteriaFormula",
-        "Criterion",
-        "DT_32BitKeepAsLinear",
-        "DataSet",
-        "EventLimit",
-        "GatePaths",
-        "GateText",
-        "Graph",
-        "Group",
-        "GroupNode",
-        "Groups",
-        "Keyword",
-        "Keywords",
-        "Layer",
-        "Layout",
-        "LayoutEditor",
-        "LayoutGraph",
-        "Legend",
-        "LegendTextTraits",
-        "OverlayGraphs",
-        "PCPlotBlueControl",
-        "PCPlotGreenControl",
-        "PCPlotRedControl",
-        "Parameter",
-        "ParameterNames",
-        "PolyChromaticPlot",
-        "PolyRect",
-        "Polygon",
-        "PolygonGate",
-        "Population",
-        "Preferences",
-        "Sample",
-        "SampleList",
-        "SampleNode",
-        "SampleRef",
-        "SampleRefs",
-        "Samples",
-        "SampleSortCriteria",
-        "SciBook",
-        "StainChannelList",
-        "StainCriterion",
-        "String",
-        "StringArray",
-        "Table",
-        "TableEditor",
-        "Text",
-        "TextTraits",
-        "Vertex",
-        "WindowPosition",
-        "Workspace",
-        "graphList",
-        "subsetList"
-    };
-
-
-    static final short defaultFilter = LSParserFilter.FILTER_SKIP;
-
-    final static HashMap<String,Short> elements = new HashMap<String, Short>(100);
+    static Map<String, StatisticSpec.STAT> STATS = new HashMap<String, StatisticSpec.STAT>();
     static
     {
-        for (String s : knownElements)
-            elements.put(s, defaultFilter);
-        for (String s : rejectElements)
-            elements.put(s, LSParserFilter.FILTER_REJECT);
-        for (String s : parsedElements)
-            elements.put(s, LSParserFilter.FILTER_ACCEPT);
+        STATS.put("Count", StatisticSpec.STAT.Count);
+        STATS.put("Percentile", StatisticSpec.STAT.Percentile);
+        STATS.put("Mean", StatisticSpec.STAT.Mean);
+        STATS.put("Median", StatisticSpec.STAT.Median);
+        //statMap.put("Mode", StatisticSpec.STAT.Mode);
+        STATS.put("GeometricMean", StatisticSpec.STAT.Geometric_Mean);
+        STATS.put("CV", StatisticSpec.STAT.CV);
+        STATS.put("SD", StatisticSpec.STAT.Std_Dev);
+        STATS.put("MedianAbsDeviation", StatisticSpec.STAT.Median_Abs_Dev);
+        STATS.put("MedianAbsDeviation%", StatisticSpec.STAT.Median_Abs_Dev_Percent);
+        STATS.put("RobustCV", StatisticSpec.STAT.Robust_CV);
+
+        STATS.put("FrequencyOfGrandParent", StatisticSpec.STAT.Freq_Of_Grandparent);
+        STATS.put("FreqGrandparent", StatisticSpec.STAT.Freq_Of_Grandparent);
+
+        STATS.put("FrequencyOfParent", StatisticSpec.STAT.Freq_Of_Parent);
+        STATS.put("FreqParent", StatisticSpec.STAT.Freq_Of_Parent);
+
+        STATS.put("FrequencyOfTotal", StatisticSpec.STAT.Frequency);
+        STATS.put("FreqOf", StatisticSpec.STAT.Frequency);
+        STATS.put("Freq. Of Total", StatisticSpec.STAT.Frequency);
     }
-
-    static class FJParseFilter implements LSParserFilter
-    {
-        SymbolTable fSymbolTable = new SymbolTable();
-        Set<String> rejected = new HashSet<String>();
-
-        public short startElement(Element element)
-        {
-            Short s = elements.get(element.getNodeName());
-            short filter = null == s ? defaultFilter : s.shortValue();
-//            if (filter != FILTER_ACCEPT && rejected.add(element.getNodeName())) System.err.println((filter == FILTER_SKIP ? "SKIPPED:  " : "REJECTED: ") + element.getNodeName());
-            return filter;
-        }
-
-        public short acceptNode(Node node)
-        {
-            if (node instanceof Text)
-            {
-                String data = ((Text)node).getData();
-                if (data.length() < 10 && data.trim().length() == 0)
-                    return FILTER_REJECT;
-                else
-                    return FILTER_ACCEPT;
-            }
-            if (node instanceof Element)
-            {
-                int len = node.getAttributes().getLength();
-                for (int i=0 ; i<len ; i++)
-                {
-                    Attr a = (Attr)node.getAttributes().item(i);
-                    a.setValue(fSymbolTable.addSymbol(a.getValue()));
-                }
-            }
-            return FILTER_ACCEPT;
-        }
-
-        public int getWhatToShow()
-        {
-            return NodeFilter.SHOW_ALL;
-        }
-    }
-
-
-/*
-    static class FJSymbolTable extends SymbolTable
-    {
-        int sizeIn = 0;
-        int sizeOut = 0;
-
-        @Override
-        public String addSymbol(String symbol)
-        {
-            assert (sizeIn += symbol.length()) > -1;
-            assert (sizeOut += (containsSymbol(symbol) ? 0 : symbol.length())) > -1;
-            return super.addSymbol(symbol);
-        }
-
-        @Override
-        public String addSymbol(char[] buffer, int offset, int length)
-        {
-            assert (sizeIn += length) > -1;
-            assert (sizeOut += (containsSymbol(buffer, offset, length) ? 0 : length)) > -1;
-            return super.addSymbol(buffer, offset, length);
-        }
-    }
-*/
-
-    static class FJDOMParser extends DOMParser
-    {
-        SymbolTable fSymbolTable;
-
-        static FJDOMParser create()
-        {
-            SymbolTable fj = new SymbolTable();
-            return new FJDOMParser(fj);
-        }
-
-        FJDOMParser(SymbolTable st)
-        {
-            super(st);
-            fSymbolTable = st;
-            fSkippedElemStack = new Stack();
-            fDOMFilter = new FJParseFilter();
-            try
-            {
-                setFeature(Constants.SAX_FEATURE_PREFIX + Constants.VALIDATION_FEATURE, false);
-                setFeature(DEFER_NODE_EXPANSION, false);
-                setFeature(NAMESPACES, false);
-                setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.CONTINUE_AFTER_FATAL_ERROR_FEATURE, true);
-                setErrorHandler(new FJErrorHandler());
-            }
-            catch (SAXNotSupportedException x)
-            {
-                throw new RuntimeException(x);
-            }
-            catch (SAXNotRecognizedException x)
-            {
-                throw new RuntimeException(x);
-            }
-        }
-
-        @Override
-        public void parse(InputSource inputSource) throws SAXException, IOException
-        {
-            try
-            {
-                super.parse(inputSource);
-            }
-            catch (RuntimeException x)
-            {
-                Logger.getLogger(FlowJoWorkspace.class).error("Unexpected error", x);
-                throw x;
-            }
-        }
-    }
-
-    /** For debugging. */
-    static public Document parseXml(InputStream stream) throws Exception
-    {
-        DOMParser p = FJDOMParser.create();
-        p.parse(new InputSource(stream));
-        return p.getDocument();
-    }
-
-    static public FlowJoWorkspace readWorkspace(InputStream stream) throws Exception
-    {
-        return readWorkspace(null, stream);
-    }
-
-    static public FlowJoWorkspace readWorkspace(String name, InputStream stream) throws Exception
-    {
-        Document doc = parseXml(stream);
-        Element elDoc = doc.getDocumentElement();
-//        System.err.println("DOCUMENT SIZE: " + debugComputeSize(elDoc));
-        if ("1.4".equals(elDoc.getAttribute("version")))
-        {
-            return new PCWorkspace(name, elDoc);
-        }
-        if ("2.0".equals(elDoc.getAttribute("version")))
-        {
-            return new FJ8Workspace(name, elDoc);
-        }
-        return new MacWorkspace(name, elDoc);
-    }
-
-    static long debugComputeSize(Object doc)
-    {
-        try
-        {
-            final long[] len = new long[1];
-            OutputStream counterStream = new OutputStream()
-            {
-                public void write(int i) throws IOException
-                {
-                    len[0] += 4;
-                }
-
-                @Override
-                public void write(byte[] bytes) throws IOException
-                {
-                    len[0] += bytes.length;
-                }
-
-                @Override
-                public void write(byte[] bytes, int off, int l) throws IOException
-                {
-                    len[0] += l;
-                }
-            };
-            ObjectOutputStream os = new ObjectOutputStream(counterStream);
-            os.writeObject(doc);
-            os.close();
-            return len[0];
-        }
-        catch (IOException x)
-        {
-            return -1;
-        }
-    }
-
 
     protected FlowJoWorkspace()
     {
     }
+
+    protected FlowJoWorkspace(String name, Element elDoc)
+    {
+        _name = name;
+        readAll(elDoc);
+    }
+
+    protected void readAll(Element elDoc)
+    {
+        readCompensationMatrices(elDoc);
+        readSamples(elDoc);
+        readGroups(elDoc);
+        postProcess();
+    }
+
+    abstract protected void readCompensationMatrices(Element elDoc);
+
+    abstract protected void readSamples(Element elDoc);
+
+    abstract protected void readGroups(Element elDoc);
 
     protected void postProcess()
     {
@@ -672,27 +135,72 @@ abstract public class FlowJoWorkspace implements Serializable
         }
     }
 
-    public List<CompensationMatrix> getCompensationMatrices()
+    protected void addSampleAnalysisResults(AttributeSet results, String sampleId)
     {
-        return _compensationMatrices;
+        if (results.getStatistics().size() > 0)
+        {
+            // If the statistic "count" is unavailable, try to get it from the '$TOT" keyword.
+            StatisticSpec count = new StatisticSpec(null, StatisticSpec.STAT.Count, null);
+            Double total = results.getStatistics().get(count);
+            if (total == null || total == 0.0d)
+            {
+                SampleInfo sampleInfo = _sampleInfos.get(sampleId);
+                if (sampleInfo != null)
+                {
+                    String strTot = sampleInfo.getKeywords().get("$TOT");
+                    if (strTot != null)
+                    {
+                        results.setStatistic(count, Double.valueOf(strTot).doubleValue());
+                    }
+                }
+            }
+            // Fill in the Freq Of Parents that can be determined from the existing stats
+            for (Map.Entry<StatisticSpec, Double> entry : new HashMap<StatisticSpec, Double>(results.getStatistics()).entrySet())
+            {
+                final StatisticSpec spec = entry.getKey();
+                if (spec.getStatistic() != StatisticSpec.STAT.Count)
+                {
+                    continue;
+                }
+                if (spec.getSubset() == null)
+                {
+                    continue;
+                }
+                StatisticSpec freqStat = new StatisticSpec(spec.getSubset(), StatisticSpec.STAT.Freq_Of_Parent, null);
+                if (results.getStatistics().containsKey(freqStat))
+                {
+                    continue;
+                }
+                Double denominator = results.getStatistics().get(new StatisticSpec(spec.getSubset().getParent(), StatisticSpec.STAT.Count, null));
+                if (denominator == null)
+                {
+                    continue;
+                }
+                if (entry.getValue().equals(0.0))
+                {
+                    results.setStatistic(freqStat, 0.0);
+                }
+                else if (!denominator.equals(0.0))
+                {
+                    results.setStatistic(freqStat, entry.getValue().doubleValue() / denominator.doubleValue() * 100);
+                }
+            }
+            _sampleAnalysisResults.put(sampleId, results);
+        }
     }
 
-    public Set<CompensationMatrix> getUsedCompensationMatrices()
+    static List<Element> getElements(Element parent)
     {
-        Set<CompensationMatrix> ret = new LinkedHashSet<CompensationMatrix>();
-        for (SampleInfo sample : getSamples())
+        List<Element> ret = new ArrayList<Element>();
+        NodeList nl = parent.getChildNodes();
+        for (int i = 0; i < nl.getLength(); i ++)
         {
-            CompensationMatrix comp = sample.getCompensationMatrix();
-            if (comp == null)
+            Node node = nl.item(i);
+            if (!(node instanceof Element))
                 continue;
-            ret.add(comp);
+            ret.add((Element)node);
         }
         return ret;
-    }
-
-    public List<? extends AutoCompensationScript> getAutoCompensationScripts()
-    {
-        return _autoCompensationScripts;
     }
 
     static List<Element> getElementsByTagName(Element parent, String tagName)
@@ -774,13 +282,6 @@ abstract public class FlowJoWorkspace implements Serializable
         return name;
     }
 
-    static public String ___cleanPopName(String name)
-    {
-        name = ___cleanName(name);
-        name = StringUtils.replaceChars(name, '/', '_');
-        return name;
-    }
-
     protected double getMultiplier(String name)
     {
         ParameterInfo info = _parameters.get(name);
@@ -788,427 +289,102 @@ abstract public class FlowJoWorkspace implements Serializable
             return 1;
         return info.multiplier;
     }
-    protected String getTextValue(Element el)
+
+    protected void readKeywords(SampleInfo sample, Element el)
     {
-        String ret = "";
-        NodeList nl = el.getChildNodes();
-        for (int i = 0; i < nl.getLength(); i ++)
+        for (Element elKeyword : getElementsByTagName(el, "Keyword"))
         {
-            ret += nl.item(i).getNodeValue();
+            String name = StringUtils.trimToNull(elKeyword.getAttribute("name"));
+            if (null == name)
+                continue;
+            sample._keywords.put(name, elKeyword.getAttribute("value"));
         }
-        return ret;
     }
 
-    public List<GroupInfo> getGroups()
+    protected void readStat(Element elStat, SubsetSpec subset, @Nullable AttributeSet results, Analysis analysis, boolean warnOnMissingStats,
+                            String statisticAttr, String parameterAttr, String percentileAttr)
     {
-        return new ArrayList<GroupInfo>(_groupInfos.values());
-    }
-
-    public GroupInfo getGroup(String groupId)
-    {
-        return _groupInfos.get(groupId);
-    }
-    public Analysis getGroupAnalysis(GroupInfo group)
-    {
-        return _groupAnalyses.get(group.getGroupName());
-    }
-    public Map<PopulationName, Analysis> getGroupAnalyses()
-    {
-        return _groupAnalyses;
-    }
-
-    public List<SampleInfo> getSamples()
-    {
-        return new ArrayList<SampleInfo>(_sampleInfos.values());
-    }
-
-    /** Get the sample ID list from the "All Samples" group or get all the samples in the workspace. */
-    public List<String> getAllSampleIDs()
-    {
-        FlowJoWorkspace.GroupInfo allSamplesGroup = getGroup("0");
-        if (allSamplesGroup == null || !allSamplesGroup.getGroupName().toString().equalsIgnoreCase("All Samples"))
+        String statistic = elStat.getAttribute(statisticAttr);
+        StatisticSpec.STAT stat = STATS.get(statistic);
+        if (stat == null)
         {
-            for (FlowJoWorkspace.GroupInfo groupInfo : getGroups())
+            warnOnce(analysis.getName(), subset, statistic + " statistic not yet supported.");
+            return;
+        }
+
+        if (stat == StatisticSpec.STAT.Frequency)
+        {
+            if (elStat.hasAttribute("ancestor") && !"Total".equals(elStat.getAttribute("ancestor")))
             {
-                if (groupInfo.getGroupName().toString().equalsIgnoreCase("All Samples"))
+                warnOnce(analysis.getName(), subset, "Frequency of arbitrary ancestor populations not supported.");
+                return;
+            }
+        }
+
+        String parameter = null;
+        if (stat.isParameterRequired())
+        {
+            parameter = StringUtils.trimToNull(elStat.getAttribute(parameterAttr));
+            if (parameter != null)
+                parameter = ___cleanName(parameter);
+
+            if (stat == StatisticSpec.STAT.Percentile)
+            {
+                String percentile = StringUtils.trimToNull(elStat.getAttribute(percentileAttr));
+                if (percentile == null)
                 {
-                    allSamplesGroup = groupInfo;
-                    break;
+                    warnOnce(analysis.getName(), subset, "Percentile stat requires '" + percentileAttr + "' attribute.");
+                    return;
+                }
+                else
+                {
+                    parameter = parameter + ":" + percentile;
                 }
             }
         }
 
-        List<String> allSampleIDs = null;
-        if (allSamplesGroup != null)
-            allSampleIDs = allSamplesGroup.getSampleIds();
+        StatisticSpec spec = new StatisticSpec(subset, stat, parameter);
+        analysis.addStatistic(spec);
 
-        // No "All Samples" group found or it was empty. Return all sample IDs in the workspace.
-        if (allSampleIDs == null || allSampleIDs.size() == 0)
-            allSampleIDs = new ArrayList<String>(_sampleInfos.keySet());
-
-        return allSampleIDs;
-    }
-
-    /** Get the sample label list from the "All Samples" group or get all the samples in the workspace. */
-    public List<String> getAllSampleLabels()
-    {
-        List<String> allSampleIDs = getAllSampleIDs();
-        if (allSampleIDs == null || allSampleIDs.size() == 0)
-            return null;
-
-        List<String> allSampleLabels = new ArrayList<String>(allSampleIDs.size());
-        for (String sampleID : allSampleIDs)
+        if (results != null)
         {
-            SampleInfo sampleInfo = getSample(sampleID);
-            if (sampleInfo != null)
-                allSampleLabels.add(sampleInfo.getLabel());
+            String strValue = StringUtils.trimToNull(elStat.getAttribute("value"));
+            if (strValue != null)
+            {
+                double value;
+                try
+                {
+                    value = Double.valueOf(strValue).doubleValue();
+                }
+                catch (NumberFormatException nfe)
+                {
+                    warning(analysis.getName(), subset, stat.getLongName() + " statistic value invalid double value: " + strValue);
+                    return;
+                }
+
+                // PC workspace version <= 1.5 doesn't return a percentage in 0-100 range.
+                if ("FreqOf".equals(statistic))
+                    value = 100.0d * value;
+
+                results.setStatistic(spec, value);
+            }
+            else
+            {
+                if (warnOnMissingStats)
+                    warning(analysis.getName(), subset, stat.getLongName() + " statistic value missing");
+            }
         }
-        return allSampleLabels;
     }
 
-    public int getSampleCount()
-    {
-        return _sampleInfos.size();
-    }
-
-    public SampleInfo getSample(String sampleId)
-    {
-        return _sampleInfos.get(sampleId);
-    }
-
-    public Analysis getSampleAnalysis(SampleInfo sample)
-    {
-        return _sampleAnalyses.get(sample._sampleId);
-    }
-
-    public AttributeSet getSampleAnalysisResults(SampleInfo sample)
-    {
-        return _sampleAnalysisResults.get(sample._sampleId);
-    }
-
-    public String[] getParameters()
-    {
-        return _parameters.keySet().toArray(new String[_parameters.keySet().size()]);
-    }
 
     // Get case-normalized axis name
-    public String getNormalizedParameterName(String param)
+    protected String getNormalizedParameterName(String param)
     {
         param = ___cleanName(param);
         if (_parameters.containsKey(param))
             return _parameters.get(param).name;
 
         return param;
-    }
-
-    static public class CompensationChannelData
-    {
-        public String positiveKeywordName;
-        public String positiveKeywordValue;
-        public String positiveSubset;
-        public String negativeKeywordName;
-        public String negativeKeywordValue;
-        public String negativeSubset;
-    }
-
-    public SampleInfo findSampleWithKeywordValue(String keyword, String value)
-    {
-        for (SampleInfo sample : getSamples())
-        {
-            if (value.equals(sample._keywords.get(keyword)))
-                return sample;
-        }
-        return null;
-    }
-
-    private Analysis findAnalysisWithKeywordValue(String keyword, String value, List<String> errors)
-    {
-        SampleInfo sample = findSampleWithKeywordValue(keyword, value);
-        if (sample == null)
-        {
-            errors.add("Could not find sample for " + keyword + "=" + value);
-            return null;
-        }
-
-        Analysis analysis = getSampleAnalysis(sample);
-        if (analysis == null)
-        {
-            errors.add("Could not find sample analysis for " + keyword + "=" + value);
-            return null;
-        }
-
-        return analysis;
-    }
-
-    private SubsetSpec makeSubsetKeyAndAddAnalysis(CompensationCalculation calc, String name, Analysis analysis, String subset, List<String> errors)
-    {
-        if (subset == null || analysis == null)
-            return null;
-        assert !SubsetSpec.___isExpression(name);
-        assert !SubsetSpec.___isExpression(subset);
-        PopulationName rootName = PopulationName.fromString(name);
-        // UNDONE: I'm pretty sure this could be a subset "A/B" so creating a PopulationName here won't work.
-        PopulationName subsetName = PopulationName.fromString(subset);
-        SubsetSpec ret = new SubsetSpec(null, rootName).createChild(subsetName);
-
-        Population pop = calc.getPopulation(rootName);
-        if (pop == null)
-        {
-            pop = new Population();
-            pop.setName(rootName);
-            for (Population child : analysis.getPopulations())
-            {
-                pop.addPopulation(child);
-            }
-            calc.addPopulation(pop);
-        }
-
-        if (!"Ungated".equals(subset) && pop.getPopulation(subsetName) == null)
-        {
-            String analysisName = analysis.getName() == null ? "" : " '" + analysis.getName() + "'";
-            errors.add("Channel '" + name + "' subset '" + subset + "' not found in analysis" + analysisName);
-        }
-
-        return ret;
-    }
-
-    private CompensationCalculation.ChannelSubset makeChannelSubset(
-            CompensationCalculation calc, String name, Analysis analysis, String keyword, String value, String subset, List<String> errors)
-    {
-        if (analysis == null)
-        {
-            analysis = findAnalysisWithKeywordValue(keyword, value, errors);
-        }
-
-        SubsetSpec subsetSpec = makeSubsetKeyAndAddAnalysis(calc, name, analysis, subset, errors);
-        SampleCriteria criteria = new SampleCriteria();
-        criteria.setKeyword(keyword);
-        criteria.setPattern(value);
-        return new CompensationCalculation.ChannelSubset(criteria, subsetSpec);
-    }
-
-    private boolean isUniversalNegative(Map<String, CompensationChannelData> channelDataMap)
-    {
-        String keyword = null;
-        String value = null;
-        for (Map.Entry<String, CompensationChannelData> entry : channelDataMap.entrySet())
-        {
-            if (keyword == null)
-            {
-                keyword = entry.getValue().negativeKeywordName;
-            }
-            else if (!keyword.equals(entry.getValue().negativeKeywordName))
-            {
-                return false;
-            }
-            if (value == null)
-            {
-                value = entry.getValue().negativeKeywordValue;
-            }
-            else if (!value.equals(entry.getValue().negativeKeywordValue))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void addPopulationMap(Map<SubsetSpec, Population> map, SubsetSpec parent, Population pop)
-    {
-        SubsetSpec subset = new SubsetSpec(parent, pop.getName());
-        map.put(subset, pop);
-        for (Population child : pop.getPopulations())
-        {
-            addPopulationMap(map, subset, child);
-        }
-    }
-
-    private boolean gatesEqual(Population pop1, Population pop2)
-    {
-        return pop1.getGates().equals(pop2.getGates());
-    }
-
-    private boolean isUniversal(SubsetSpec subset, List<Map<SubsetSpec,Population>> lstMap)
-    {
-        Population popCompare = null;
-        for (Map<SubsetSpec, Population> aLstMap : lstMap)
-        {
-            Population pop = aLstMap.get(subset);
-            if (pop == null)
-                continue;
-            if (popCompare == null)
-            {
-                popCompare = pop;
-            }
-            else
-            {
-                if (!gatesEqual(popCompare, pop))
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    private void mapSubsetNames(Map<SubsetSpec, SubsetSpec> map, SubsetSpec oldParent, SubsetSpec newParent, Population pop)
-    {
-        SubsetSpec oldSubset = new SubsetSpec(oldParent, pop.getName());
-        SubsetSpec newSubset = new SubsetSpec(newParent, pop.getName());
-        map.put(oldSubset, newSubset);
-        for (Population child : pop.getPopulations())
-        {
-            mapSubsetNames(map, oldSubset, newSubset, child);
-        }
-    }
-
-    /**
-     * Initially, each channel has a unique gating tree with a root population with a name like "FITC+", or something.
-     * This walks through one of these trees, and figures out if the gates within them (e.g. "FITC+/L") is the same
-     * for each other tree.
-     * If it is, then the "FITC+/L" gate is changed to "L".
-     * If it is not, then the "FITC+/L" gate is changed to "FITC+L"
-     */
-    private void simplifySubsetNames(Map<SubsetSpec, SubsetSpec> subsetMap, List<Map<SubsetSpec,Population>> lstPopulationMap, SubsetSpec oldParent, Population population)
-    {
-        SubsetSpec newParent = subsetMap.get(oldParent);
-        SubsetSpec oldSubset = new SubsetSpec(oldParent, population.getName());
-        SubsetSpec subsetTry = new SubsetSpec(newParent, population.getName());
-        SubsetSpec newSubset;
-        if (!isUniversal(subsetTry, lstPopulationMap))
-        {
-            SubsetSpec root = oldParent.getRoot();
-            assert !root.isExpression();
-            assert root.getParent() == null;
-            assert root.getPopulationName() != null;
-            newSubset = new SubsetSpec(newParent, root.getPopulationName().compose(population.getName()));
-            subsetMap.put(oldSubset, newSubset);
-            for (Population child : population.getPopulations())
-            {
-                mapSubsetNames(subsetMap, oldSubset, newSubset, child);
-            }
-            return;
-        }
-        newSubset = subsetTry;
-        subsetMap.put(oldSubset, newSubset);
-        for (Population child : population.getPopulations())
-        {
-            simplifySubsetNames(subsetMap, lstPopulationMap, oldSubset, child);
-        }
-    }
-
-    private Population findPopulation(PopulationSet calc, SubsetSpec spec)
-    {
-        PopulationSet cur = calc;
-        for (SubsetPart term : spec.getSubsets())
-        {
-            if (cur == null)
-                return null;
-            if (term instanceof PopulationName)
-                cur = cur.getPopulation((PopulationName)term);
-            else if (term instanceof SubsetExpression)
-                assert false;
-        }
-        return (Population) cur;
-    }
-
-    private CompensationCalculation simplify(CompensationCalculation calc)
-    {
-        Map<SubsetSpec, SubsetSpec> subsetMap = new LinkedHashMap<SubsetSpec, SubsetSpec>();
-        List<Map<SubsetSpec,Population>> lstPopulationMap = new ArrayList<Map<SubsetSpec,Population>>();
-        for (Population pop : calc.getPopulations())
-        {
-            Map<SubsetSpec,Population> map = new HashMap<SubsetSpec,Population>();
-            for (Population child : pop.getPopulations())
-            {
-                addPopulationMap(map, null, child);
-            }
-            lstPopulationMap.add(map);
-        }
-        for (Population pop : calc.getPopulations())
-        {
-            for (Population child : pop.getPopulations())
-            {
-                simplifySubsetNames(subsetMap, lstPopulationMap, new SubsetSpec(null, pop.getName()), child);
-            }
-        }
-        CompensationCalculation ret = new CompensationCalculation();
-        ret.setSettings(calc.getSettings());
-        for (Map.Entry<SubsetSpec, SubsetSpec> entry : subsetMap.entrySet())
-        {
-            SubsetSpec oldSubset = entry.getKey();
-            SubsetSpec newSubset = entry.getValue();
-            if (findPopulation(ret, newSubset) != null)
-                continue;
-            Population oldPop = findPopulation(calc, oldSubset);
-
-            SubsetSpec newParentSubset = newSubset.getParent();
-            PopulationSet newParent;
-            if (newParentSubset == null)
-            {
-                newParent = ret;
-            }
-            else
-            {
-                newParent = findPopulation(ret, newParentSubset);
-            }
-            Population newPop = new Population();
-            assert !newSubset.isExpression();
-            assert newSubset.getPopulationName() != null;
-            PopulationName name = newSubset.getPopulationName();
-            newPop.setName(name);
-            newPop.getGates().addAll(oldPop.getGates());
-            assert newParent.getPopulation(newPop.getName()) == null;
-            newParent.addPopulation(newPop);
-        }
-        for (CompensationCalculation.ChannelInfo oldChannel : calc.getChannels())
-        {
-            CompensationCalculation.ChannelSubset oldPositive = oldChannel.getPositive();
-            CompensationCalculation.ChannelSubset oldNegative = oldChannel.getNegative();
-            SubsetSpec newPositiveSubset = subsetMap.get(oldPositive.getSubset());
-            SubsetSpec newNegativeSubset = subsetMap.get(oldNegative.getSubset());
-            ret.addChannel(oldChannel.getName(),
-                    new CompensationCalculation.ChannelSubset(oldPositive.getCriteria(), newPositiveSubset),
-                    new CompensationCalculation.ChannelSubset(oldNegative.getCriteria(), newNegativeSubset));
-        }
-        return ret;
-    }
-
-    public CompensationCalculation makeCompensationCalculation(Map<String, CompensationChannelData> channelDataMap, PopulationName groupName, List<String> errors)
-    {
-        CompensationCalculation ret = new CompensationCalculation();
-        ret.setSettings(_settings);
-        boolean isUniversalNegative = isUniversalNegative(channelDataMap);
-
-        Analysis analysis = null;
-        if (groupName != null)
-        {
-            analysis = getGroupAnalyses().get(groupName);
-            if (analysis == null)
-            {
-                errors.add("Group '" + groupName + "' not found in workspace");
-                return ret;
-            }
-        }
-
-        for (Map.Entry<String, CompensationChannelData> entry : channelDataMap.entrySet())
-        {
-            String parameter = entry.getKey();
-            CompensationChannelData data = entry.getValue();
-            if (data.positiveKeywordName == null || data.positiveKeywordValue == null ||
-                    data.negativeKeywordName == null || data.negativeKeywordValue == null)
-            {
-                errors.add("Missing data for parameter '" + parameter +"'");
-                continue;
-            }
-            String positiveName = parameter + "+";
-            String negativeName = isUniversalNegative ? "-" : parameter + "-";
-            CompensationCalculation.ChannelSubset positiveSubset = makeChannelSubset(ret, positiveName, analysis,
-                    data.positiveKeywordName, data.positiveKeywordValue, data.positiveSubset, errors);
-            CompensationCalculation.ChannelSubset negativeSubset = makeChannelSubset(ret, negativeName, analysis,
-                    data.negativeKeywordName, data.negativeKeywordValue, data.negativeSubset, errors);
-            ret.addChannel(parameter, positiveSubset, negativeSubset);
-        }
-        ret = simplify(ret);
-        return ret;
     }
 
     protected double[] toDoubleArray(List<Double> lst)
@@ -1224,6 +400,17 @@ abstract public class FlowJoWorkspace implements Serializable
     protected double parseParamValue(String param, Element el, String attribute)
     {
         return Double.valueOf(el.getAttribute(attribute)).doubleValue();
+    }
+
+    protected void warnOnce(PopulationName name, SubsetSpec subset, String msg)
+    {
+        for (String warning : getWarnings())
+        {
+            if (warning.endsWith(msg))
+                return;
+        }
+
+        warning(name, subset, msg);
     }
 
     protected void warning(PopulationName name, SubsetSpec subset, String msg)
@@ -1242,11 +429,6 @@ abstract public class FlowJoWorkspace implements Serializable
     protected void warning(String str)
     {
         _warnings.add(str);
-    }
-
-    public List<String> getWarnings()
-    {
-        return _warnings;
     }
 
     /**
@@ -1370,10 +552,10 @@ abstract public class FlowJoWorkspace implements Serializable
             return new File(projectRootPath);
         }
 
-        private FlowJoWorkspace loadWorkspace(String path) throws Exception
+        private Workspace loadWorkspace(String path) throws Exception
         {
             File file = new File(projectRoot(), path);
-            return FlowJoWorkspace.readWorkspace(new FileInputStream(file));
+            return Workspace.readWorkspace(path, new FileInputStream(file));
         }
 
         @Test
@@ -1385,13 +567,121 @@ abstract public class FlowJoWorkspace implements Serializable
         @Test
         public void loadPC_5_7_2() throws Exception
         {
-            loadWorkspace("sampledata/flow/versions/v5.7.2.xml");
+            Workspace workspace = loadWorkspace("sampledata/flow/versions/v5.7.2.xml");
+            assertPC(workspace);
         }
 
         @Test
-        public void loadPC_7_2_5() throws Exception
+        public void loadPC_7_5_2() throws Exception
         {
-            loadWorkspace("sampledata/flow/versions/v7.2.5.wsp");
+            Workspace workspace = loadWorkspace("sampledata/flow/versions/v7.2.5.wsp");
+            assertPC(workspace);
+        }
+
+        @Test
+        public void loadPC_7_6_5() throws Exception
+        {
+            Workspace workspace = loadWorkspace("sampledata/flow/versions/v7.2.5.wsp");
+            //assertPC(workspace);
+        }
+
+        private void assertPC(Workspace workspace) throws Exception
+        {
+            assertEquals(72, workspace.getSampleCount());
+            assertEquals(72, workspace._sampleAnalyses.size());
+            assertEquals(72, workspace._sampleAnalysisResults.size());
+            assertEquals(2, workspace.getGroups().size());
+            assertEquals("panel 1", workspace.getGroups().get(1).getGroupName().toString());
+            assertEquals(72, workspace.getGroups().get(1).getSampleIds().size());
+            assertEquals(2, workspace.getGroupAnalyses().size());
+            assertEquals(10, workspace.getParameters().length);
+            assertEquals(0, workspace.getWarnings().size());
+
+            SampleInfo sampleInfo = workspace.getSample("2");
+            assertEquals("Specimen_001_stain.fcs", sampleInfo.getLabel());
+
+            Analysis analysis = workspace.getSampleAnalysis(sampleInfo);
+            Population cd3cd4 = workspace.findPopulation(analysis, SubsetSpec.fromUnescapedString("Viable/Lymphocytes/CD3+CD4+"));
+            assertEquals(1, cd3cd4.getGates().size());
+            PolygonGate cd3cd4gate = (PolygonGate)cd3cd4.getGates().get(0);
+            assertEquals("PE-A", cd3cd4gate.getXAxis());
+            assertEquals("APC-A", cd3cd4gate.getYAxis());
+            assertEquals(8, cd3cd4gate.getPolygon().len);
+
+            AttributeSet attrs = workspace.getSampleAnalysisResults(sampleInfo);
+            Double cd3cd4count = attrs.getStatistics().get(new StatisticSpec("Viable/Lymphocytes/CD3+CD4+:Count"));
+            assertEquals(3821, cd3cd4count.intValue());
+            Double cd3cd4freq = attrs.getStatistics().get(new StatisticSpec("Viable/Lymphocytes/CD3+CD4+:Freq_Of_Parent"));
+            assertEquals(33.465, cd3cd4freq.doubleValue(), 0.001);
+        }
+
+        @Test
+        public void loadAdvanced_7_2_5() throws Exception
+        {
+            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v7.2.5.wsp");
+            assertEquals(16, workspace.getSampleCount());
+            assertEquals(16, workspace._sampleAnalyses.size());
+            //assertEquals(16, workspace._sampleAnalysisResults.size());
+            assertEquals(7, workspace._groupInfos.size());
+            assertEquals(7, workspace._groupAnalyses.size());
+            //assertEquals(1, workspace.getCompensationMatrices().size());
+            assertEquals(4, workspace.getParameters().length);
+            // warnings is mode stat is not yet supported.
+            assertEquals(1, workspace.getWarnings().size());
+
+            SampleInfo sample = workspace.getSample("2");
+            assertEquals("931115-B02- Sample 01.fcs", sample.getLabel());
+
+            Analysis analysis = workspace.getSampleAnalysis(sample);
+            assertEquals(19, analysis.getPopulations().size());
+            Population A = workspace.findPopulation(analysis, SubsetSpec.fromParts("A"));
+            PolygonGate Agate = (PolygonGate)A.getGates().get(0);
+            assertEquals("Fluor", Agate.getXAxis());
+            assertEquals("PhyEry", Agate.getYAxis());
+            assertEquals(new Polygon(
+                    new double[] { 1.107275784176232, 1.107275784176232, 17.239071329506057, 17.239071329506057 },
+                    new double[] { 0.30096014487175127, 4.532357028330131, 4.532357028330131, 0.30096014487175127 }),
+                    Agate.getPolygon());
+
+            Population AandnotB = workspace.findPopulation(analysis, SubsetSpec.fromParts("A and not B"));
+            AndGate AandnotBgate = (AndGate)AandnotB.getGates().get(0);
+            assertEquals("A", ((SubsetRef)AandnotBgate.getGates().get(0)).getRef().toString());
+            assertEquals("not B", ((SubsetRef) AandnotBgate.getGates().get(1)).getRef().toString());
+
+            Population bifurcateCD8plus = workspace.findPopulation(analysis, SubsetSpec.fromParts("bifurcate CD8+"));
+            IntervalGate bifurcateCD8plusGate = (IntervalGate)bifurcateCD8plus.getGates().get(0);
+            assertEquals(new IntervalGate("PhyEry", 16.635275422053418, 1384.6619418378725), bifurcateCD8plusGate);
+
+            Population CD4CD8ellipse = workspace.findPopulation(analysis, SubsetSpec.fromParts("CD4, CD8 ellipse"));
+            //EllipseGate CD4CD8ellipseGate = (EllipseGate)CD4CD8ellipse.getGates().get(0);
+            //assertEquals(...);
+
+            Population notCD4CD8ellipse = workspace.findPopulation(analysis, SubsetSpec.fromParts("not CD4, CD8 ellipse"));
+            NotGate notCD4CD8ellipseGate = (NotGate)notCD4CD8ellipse.getGates().get(0);
+            SubsetRef CD4CD8ellipseRef = (SubsetRef)notCD4CD8ellipseGate.getGate();
+            assertEquals("CD4, CD8 ellipse", CD4CD8ellipseRef.getRef().toString());
+
+            Population Q1 = workspace.findPopulation(analysis, SubsetSpec.fromParts("Q1: CD4- , CD8+"));
+            PolygonGate Q1gate = (PolygonGate)Q1.getGates().get(0);
+            //assertEquals(...);
+
+            AttributeSet results = workspace.getSampleAnalysisResults(sample);
+            Map<StatisticSpec, Double> stats = results.getStatistics();
+            assertEquals(10000, stats.get(new StatisticSpec("Count")).intValue());
+            assertEquals(7554, stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
+            assertEquals(75.540d, stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
+            assertEquals(61.702d, stats.get(new StatisticSpec("Lymphocytes/T cells:Freq_Of_Parent")), 0.001d);
+            assertEquals(18.281d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Grandparent")), 0.001d);
+            assertEquals(29.628d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
+            assertEquals(13.810d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+            assertEquals(72.191d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Percentile(Fluor:90)")), 0.001d);
+            assertEquals(45.803d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
+        }
+
+        @Test
+        public void loadAdvanced_7_6_5() throws Exception
+        {
+            loadWorkspace("sampledata/flow/advanced/advanced-v7.6.5.wsp");
         }
 
         @Test
@@ -1403,7 +693,7 @@ abstract public class FlowJoWorkspace implements Serializable
         @Test
         public void loadMiniFCS() throws Exception
         {
-            FlowJoWorkspace workspace = loadWorkspace("sampledata/flow/flowjoquery/miniFCS/mini-fcs.xml");
+            Workspace workspace = loadWorkspace("sampledata/flow/flowjoquery/miniFCS/mini-fcs.xml");
             GroupInfo group = workspace.getGroup("3");
             Analysis analysis = workspace.getGroupAnalysis(group);
 
@@ -1412,9 +702,10 @@ abstract public class FlowJoWorkspace implements Serializable
             assertEquals("S/Lv/L/3+/4+/(IFNg+|IL2+|IL4+|TNFa+)", aliasSpec.toString());
         }
 
+        @Test
         public void loadSubsets() throws Exception
         {
-            FlowJoWorkspace workspace = loadWorkspace("sampledata/flow/flowjoquery/Workspaces/subset-parsing.xml");
+            Workspace workspace = loadWorkspace("sampledata/flow/flowjoquery/Workspaces/subset-parsing.xml");
             SampleInfo sampleInfo = workspace.getSample("2");
             assertEquals("118795.fcs", sampleInfo.getLabel());
 
@@ -1483,7 +774,7 @@ abstract public class FlowJoWorkspace implements Serializable
         @Test
         public void loadBooleanSubPopulations() throws Exception
         {
-            FlowJoWorkspace workspace = loadWorkspace("sampledata/flow/flowjoquery/Workspaces/boolean-sub-populations.xml");
+            Workspace workspace = loadWorkspace("sampledata/flow/flowjoquery/Workspaces/boolean-sub-populations.xml");
             SampleInfo sampleInfo = workspace.getSample("1");
             assertEquals("118795.fcs", sampleInfo.getLabel());
 

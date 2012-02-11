@@ -20,8 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.analysis.model.Analysis;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.StatisticSet;
+import org.labkey.flow.analysis.model.Workspace;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -31,7 +31,7 @@ public class UploadAnalysisForm extends EditScriptForm
     private static final Logger _log = Logger.getLogger(UploadAnalysisForm.class);
 
     private int existingStatCount = 0;
-    public FlowJoWorkspace workspaceObject;
+    public Workspace _workspaceObject;
     public Set<StatisticSet> ff_statisticSet;
 
 
@@ -60,7 +60,7 @@ public class UploadAnalysisForm extends EditScriptForm
 
     public void setWorkspaceObject(String object) throws Exception
     {
-        workspaceObject = (FlowJoWorkspace) PageFlowUtil.decodeObject(object);
+        _workspaceObject = (Workspace) PageFlowUtil.decodeObject(object);
     }
     public String groupName;
     public void setGroupName(String groupName)

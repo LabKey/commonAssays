@@ -63,6 +63,8 @@ import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.model.RegionGate;
 import org.labkey.flow.analysis.model.ScriptComponent;
+import org.labkey.flow.analysis.model.Workspace;
+import org.labkey.flow.analysis.model.WorkspaceCompensation;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.PlotInfo;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
@@ -382,10 +384,10 @@ public class ScriptController extends BaseFlowController
     {
         public PopulationName[] getGroupAnalysisNames()
         {
-            if (form.workspaceObject == null)
+            if (form._workspaceObject == null)
                 return new PopulationName[0];
             List<PopulationName> ret = new ArrayList<PopulationName>();
-            for (Analysis analysis : form.workspaceObject.getGroupAnalyses().values())
+            for (Analysis analysis : form._workspaceObject.getGroupAnalyses().values())
             {
                 if (analysis.getPopulations().size() > 0)
                 {
@@ -397,14 +399,14 @@ public class ScriptController extends BaseFlowController
 
         public Map<String, String> getSampleAnalysisNames()
         {
-            if (form.workspaceObject == null)
+            if (form._workspaceObject == null)
                 return Collections.emptyMap();
 
             Map<String, String> ret = new LinkedHashMap<String, String>();
 
-            for (FlowJoWorkspace.SampleInfo sample : form.workspaceObject.getSamples())
+            for (Workspace.SampleInfo sample : form._workspaceObject.getSamples())
             {
-                Analysis analysis = form.workspaceObject.getSampleAnalysis(sample);
+                Analysis analysis = form._workspaceObject.getSampleAnalysis(sample);
                 if (analysis.getPopulations().size() > 0)
                 {
                     ret.put(sample.getSampleId(), sample.getLabel());
@@ -441,17 +443,17 @@ public class ScriptController extends BaseFlowController
 
         protected ActionURL doUploadAnalysis(UploadAnalysisForm form, MultipartFile file, BindException errors) throws Exception
         {
-            FlowJoWorkspace newWorkspace = handleWorkspaceUpload(file, errors);
+            Workspace newWorkspace = handleWorkspaceUpload(file, errors);
             if (newWorkspace != null)
             {
-                form.workspaceObject = newWorkspace;
+                form._workspaceObject = newWorkspace;
             }
-            if (form.workspaceObject == null)
+            if (form._workspaceObject == null)
             {
                 errors.reject(ERROR_MSG, "No workspace was uploaded.");
                 return null;
             }
-            FlowJoWorkspace workspace = form.workspaceObject;
+            Workspace workspace = form._workspaceObject;
             PopulationName groupName = PopulationName.fromString(form.groupName);
             String sampleId= form.sampleId;
 
@@ -478,13 +480,13 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    protected FlowJoWorkspace handleWorkspaceUpload(MultipartFile file, BindException errors)
+    protected Workspace handleWorkspaceUpload(MultipartFile file, BindException errors)
     {
         if (file != null && !file.isEmpty())
         {
             try
             {
-                return FlowJoWorkspace.readWorkspace(file.getInputStream());
+                return Workspace.readWorkspace(file.getInputStream());
             }
             catch (Exception e)
             {
@@ -570,7 +572,7 @@ public class ScriptController extends BaseFlowController
             return root;
         }
 
-        protected FlowJoWorkspace handleCompWorkspaceUpload(EditCompensationCalculationForm form, BindException errors)
+        protected Workspace handleCompWorkspaceUpload(EditCompensationCalculationForm form, BindException errors)
         {
             if (form.selectedRunId != 0)
             {
@@ -603,7 +605,7 @@ public class ScriptController extends BaseFlowController
 
         protected ActionURL doEditCompensationCalculation(EditCompensationCalculationForm form, BindException errors) throws Exception
         {
-            FlowJoWorkspace workspace = handleCompWorkspaceUpload(form, errors);
+            Workspace workspace = handleCompWorkspaceUpload(form, errors);
             if (workspace != null)
             {
                 form.initSettings();
@@ -613,11 +615,11 @@ public class ScriptController extends BaseFlowController
             if (form.workspace == null)
                 return null;
             workspace = form.workspace;
-            Map<String, FlowJoWorkspace.CompensationChannelData> dataMap = new HashMap<String, FlowJoWorkspace.CompensationChannelData>();
+            Map<String, Workspace.CompensationChannelData> dataMap = new HashMap<String, Workspace.CompensationChannelData>();
             for (int i = 0; i < form.parameters.length; i ++)
             {
                 String parameter = form.parameters[i];
-                FlowJoWorkspace.CompensationChannelData cd = new FlowJoWorkspace.CompensationChannelData();
+                Workspace.CompensationChannelData cd = new Workspace.CompensationChannelData();
                 cd.positiveKeywordName = StringUtils.trimToNull(form.positiveKeywordName[i]);
                 cd.negativeKeywordName = StringUtils.trimToNull(form.negativeKeywordName[i]);
                 if (cd.positiveKeywordName == null)
@@ -634,7 +636,8 @@ public class ScriptController extends BaseFlowController
             PopulationName groupName = null;
             if (StringUtils.isNotEmpty(form.selectGroupName))
                 groupName = PopulationName.fromString(form.selectGroupName);
-            CompensationCalculation calc = workspace.makeCompensationCalculation(dataMap, groupName, errorslist);
+            WorkspaceCompensation calculator = new WorkspaceCompensation(workspace);
+            CompensationCalculation calc = calculator.makeCompensationCalculation(dataMap, groupName, errorslist);
             if (errorslist.size() > 0)
             {
                 for (String error : errorslist)

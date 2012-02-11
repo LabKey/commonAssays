@@ -29,6 +29,7 @@
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="java.io.File" %>
+<%@ page import="org.labkey.flow.analysis.model.Workspace" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -68,7 +69,7 @@
 
 <p>You are about to import the analysis from the workspace with the following settings:</p>
 <%
-    FlowJoWorkspace workspace = form.getWorkspace().getWorkspaceObject();
+    Workspace workspace = form.getWorkspace().getWorkspaceObject();
 %>
 <ul>
     <li style="padding-bottom:0.5em;">

@@ -29,7 +29,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.analysis.model.CompensationMatrix;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
@@ -48,7 +48,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +122,7 @@ public class RScriptJob extends FlowExperimentJob
         _workspaceFile = originalImportedFile;
 
         // Invert the list of desired parameters
-        FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
+        Workspace workspace = workspaceData.getWorkspaceObject();
         List<String> parameters = new ArrayList<String>();
         for (String param : workspace.getParameters())
         {
@@ -224,9 +223,9 @@ public class RScriptJob extends FlowExperimentJob
     private void writeCompensation(File workingDir) throws Exception
     {
         info("Writing compensation matrices...");
-        FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(new FileInputStream(_workspaceFile));
+        Workspace workspace = Workspace.readWorkspace(new FileInputStream(_workspaceFile));
         Map<String, CompensationMatrix> matrices = new HashMap<String, CompensationMatrix>();
-        for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+        for (Workspace.SampleInfo sampleInfo : workspace.getSamples())
         {
             CompensationMatrix matrix = null;
             if (!sampleInfo.isPrecompensated())

@@ -24,12 +24,17 @@ import java.util.ArrayList;
 
 abstract public class GateList extends Gate
 {
-    protected List<Gate> _gates = new ArrayList();
+    protected List<Gate> _gates = new ArrayList<Gate>();
     protected SubsetExpression _originalExpression = null;
 
     protected GateList(Gate... gates)
     {
         _gates.addAll(Arrays.asList(gates));
+    }
+
+    protected GateList(List<Gate> gates)
+    {
+        _gates.addAll(gates);
     }
 
     public List<Gate> getGates()

@@ -16,59 +16,43 @@
 
 package org.labkey.flow.script;
 
-import org.apache.log4j.Logger;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.StatisticSet;
+import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
-import org.labkey.flow.data.SampleKey;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.controllers.WorkspaceData;
-import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowExperiment;
-import org.labkey.flow.data.FlowFCSAnalysis;
-import org.labkey.flow.data.FlowFCSFile;
-import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.util.KeywordUtil;
 
 import java.io.*;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -133,7 +117,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         try
         {
             ois = new ObjectInputStream(new FileInputStream(_workspaceFile));
-            FlowJoWorkspace workspace = (FlowJoWorkspace)ois.readObject();
+            Workspace workspace = (Workspace)ois.readObject();
 
             return createExperimentRun(this, getUser(), getContainer(), workspace,
                     getExperiment(), _workspaceName, _workspaceFile, getOriginalImportedFile(),
@@ -146,7 +130,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
     }
 
     private FlowRun createExperimentRun(FlowJob job, User user, Container container,
-                                        FlowJoWorkspace workspace, FlowExperiment experiment,
+                                        Workspace workspace, FlowExperiment experiment,
                                         String workspaceName, File workspaceFile, File originalImportedFile,
                                         File runFilePathRoot, List<String> importGroupNames, boolean failOnError) throws Exception
     {
@@ -178,7 +162,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 sampleLabels);
     }
 
-    private List<String> filterSamples(FlowJoWorkspace workspace, List<String> sampleIDs)
+    private List<String> filterSamples(Workspace workspace, List<String> sampleIDs)
     {
         SimpleFilter analysisFilter = null;
         FlowProtocol flowProtocol = getProtocol();
@@ -192,7 +176,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             List<String> filteredSampleIDs = new ArrayList<String>(sampleIDs.size());
             for (String sampleID : sampleIDs)
             {
-                FlowJoWorkspace.SampleInfo sampleInfo = workspace.getSample(sampleID);
+                Workspace.SampleInfo sampleInfo = workspace.getSample(sampleID);
                 if (matchesFilter(analysisFilter, sampleInfo.getLabel(), sampleInfo.getKeywords()))
                 {
                     filteredSampleIDs.add(sampleID);
@@ -210,7 +194,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         }
     }
 
-    private List<String> getSampleIDs(FlowJoWorkspace workspace, List<String> groupNames)
+    private List<String> getSampleIDs(Workspace workspace, List<String> groupNames)
     {
         List<String> sampleIDs;
         if (groupNames == null || groupNames.isEmpty())
@@ -220,7 +204,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         else
         {
             sampleIDs = new ArrayList<String>(workspace.getSampleCount());
-            for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
+            for (Workspace.GroupInfo group : workspace.getGroups())
             {
                 if (groupNames.contains(group.getGroupId()) || groupNames.contains(group.getGroupName().toString()))
                 {
@@ -235,7 +219,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
     }
 
     private boolean extractAnalysis(FlowJob job, Container container,
-                                    FlowJoWorkspace workspace,
+                                    Workspace workspace,
                                     File runFilePathRoot,
                                     List<String> importGroupNames,
                                     boolean failOnError,
@@ -256,7 +240,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         int iSample = 0;
         for (String sampleID : sampleIDs)
         {
-            FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleID);
+            Workspace.SampleInfo sample = workspace.getSample(sampleID);
             sampleLabels.add(sample.getLabel());
             if (job.checkInterrupted())
                 return true;

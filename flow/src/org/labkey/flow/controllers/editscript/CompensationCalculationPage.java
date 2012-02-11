@@ -21,9 +21,9 @@ import org.fhcrc.cpas.flow.script.xml.*;
 import org.labkey.api.query.FieldKey;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.AutoCompensationScript;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.Population;
 import org.labkey.flow.analysis.model.SubsetPart;
+import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.analysis.web.SubsetSpec;
 
 import java.util.*;
@@ -126,11 +126,11 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
      * @param workspace
      * @return Keyword -> Value -> Subsets
      */
-    public Map<String, Map<String, List<String>>> getKeywordValueSampleMap(FlowJoWorkspace workspace)
+    public Map<String, Map<String, List<String>>> getKeywordValueSampleMap(Workspace workspace)
     {
         Set<String> keywordsSet = new TreeSet();
-        Map<FlowJoWorkspace.SampleInfo, List<String>> sampleSubsetMap = new HashMap();
-        for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples()) {
+        Map<Workspace.SampleInfo, List<String>> sampleSubsetMap = new HashMap();
+        for (Workspace.SampleInfo sample : workspace.getSamples()) {
             Analysis analysis = workspace.getSampleAnalysis(sample);
             if (analysis == null)
                 continue;
@@ -142,13 +142,13 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         {
             if (!isValidCompKeyword(keyword))
                 continue;
-            Map<String, List<FlowJoWorkspace.SampleInfo>> sampleMap = new LinkedHashMap();
-            for (FlowJoWorkspace.SampleInfo sample : sampleSubsetMap.keySet())
+            Map<String, List<Workspace.SampleInfo>> sampleMap = new LinkedHashMap();
+            for (Workspace.SampleInfo sample : sampleSubsetMap.keySet())
             {
                 String value = sample.getKeywords().get(keyword);
                 if (value != null)
                 {
-                    List<FlowJoWorkspace.SampleInfo> list = sampleMap.get(value);
+                    List<Workspace.SampleInfo> list = sampleMap.get(value);
                     if (list == null)
                     {
                         list = new ArrayList();
@@ -158,7 +158,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
                 }
             }
             Map<String, List<String>> valueSampleMap = new TreeMap();
-            for (Map.Entry<String, List<FlowJoWorkspace.SampleInfo>> entry : sampleMap.entrySet())
+            for (Map.Entry<String, List<Workspace.SampleInfo>> entry : sampleMap.entrySet())
             {
                 if (entry.getValue().size() != 1)
                     continue;

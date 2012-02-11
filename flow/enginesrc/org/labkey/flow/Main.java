@@ -26,9 +26,10 @@ import org.labkey.api.writer.VirtualFile;
 import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.StatisticSet;
+import org.labkey.flow.analysis.model.Workspace;
+import org.labkey.flow.analysis.model.WorkspaceParser;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeSet;
@@ -52,7 +53,6 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -71,13 +71,13 @@ public class Main
         tsv, xar, flowjoxml
     }
 
-    private static FlowJoWorkspace readWorkspace(File file, boolean printWarnings)
+    private static Workspace readWorkspace(File file, boolean printWarnings)
     {
         InputStream is = null;
         try
         {
             is = new FileInputStream(file);
-            FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(file.getPath(), is);
+            Workspace workspace = Workspace.readWorkspace(file.getPath(), is);
             if (printWarnings && workspace.getWarnings().size() > 0)
             {
                 for (String warning : workspace.getWarnings())
@@ -145,7 +145,7 @@ public class Main
 
     private static void executeListSamples(File workspaceFile, Set<PopulationName> groupNames)
     {
-        FlowJoWorkspace workspace = readWorkspace(workspaceFile, false);
+        Workspace workspace = readWorkspace(workspaceFile, false);
 
         // First, hash the group analysis...
         Map<Analysis, PopulationName> analysisToGroup = new HashMap<Analysis, PopulationName>();
@@ -159,26 +159,26 @@ public class Main
         }
 
         // ... then, hash the sample analysis
-        Map<Analysis, List<FlowJoWorkspace.SampleInfo>> analysisToSamples = new HashMap<Analysis, List<FlowJoWorkspace.SampleInfo>>();
-        Map<String, List<FlowJoWorkspace.SampleInfo>> sampleLabels = new HashMap<String, List<FlowJoWorkspace.SampleInfo>>();
-        for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples())
+        Map<Analysis, List<Workspace.SampleInfo>> analysisToSamples = new HashMap<Analysis, List<Workspace.SampleInfo>>();
+        Map<String, List<Workspace.SampleInfo>> sampleLabels = new HashMap<String, List<Workspace.SampleInfo>>();
+        for (Workspace.SampleInfo sample : workspace.getSamples())
         {
             Analysis analysis = workspace.getSampleAnalysis(sample);
-            List<FlowJoWorkspace.SampleInfo> samples = analysisToSamples.get(analysis);
+            List<Workspace.SampleInfo> samples = analysisToSamples.get(analysis);
             if (samples == null)
-                analysisToSamples.put(analysis, samples = new ArrayList<FlowJoWorkspace.SampleInfo>());
+                analysisToSamples.put(analysis, samples = new ArrayList<Workspace.SampleInfo>());
 
             samples.add(sample);
 
-            List<FlowJoWorkspace.SampleInfo> dups = sampleLabels.get(sample.getLabel());
+            List<Workspace.SampleInfo> dups = sampleLabels.get(sample.getLabel());
             if (dups == null)
-                sampleLabels.put(sample.getLabel(), dups = new ArrayList<FlowJoWorkspace.SampleInfo>());
+                sampleLabels.put(sample.getLabel(), dups = new ArrayList<Workspace.SampleInfo>());
             dups.add(sample);
         }
 
         // CONSIDER: move warning into FlowJoWorkspace parsing code, but I'm not sure if it is an error to have two samples representing the same FCS file.
         // Check for duplicate sample labels
-        for (List<FlowJoWorkspace.SampleInfo> dups : sampleLabels.values())
+        for (List<Workspace.SampleInfo> dups : sampleLabels.values())
         {
             if (dups.size() > 1)
                 System.out.println("warning: duplicate sample labels: " + StringUtils.join(dups, ", "));
@@ -187,7 +187,7 @@ public class Main
         // Using the group and sample analysis hash maps,
         // print the group analysis first and remove the group analysis from the analysisToSamples hash map
         // leaving behind any modified sample analysis.
-        for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
+        for (Workspace.GroupInfo group : workspace.getGroups())
         {
             if (groupNames.isEmpty() || groupNames.contains(group.getGroupName()))
             {
@@ -200,10 +200,10 @@ public class Main
                 else
                 {
                     List<String> sampleIDs = group.getSampleIds();
-                    List<FlowJoWorkspace.SampleInfo> samples = new ArrayList<FlowJoWorkspace.SampleInfo>(sampleIDs.size());
+                    List<Workspace.SampleInfo> samples = new ArrayList<Workspace.SampleInfo>(sampleIDs.size());
                     for (String sampleId : sampleIDs)
                     {
-                        FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleId);
+                        Workspace.SampleInfo sample = workspace.getSample(sampleId);
                         samples.add(sample);
                     }
                     String indent = "  ";
@@ -223,10 +223,10 @@ public class Main
         if (!analysisToSamples.isEmpty())
         {
             System.out.println("Samples with modified analysis:");
-            for (Map.Entry<Analysis, List<FlowJoWorkspace.SampleInfo>> entry : analysisToSamples.entrySet())
+            for (Map.Entry<Analysis, List<Workspace.SampleInfo>> entry : analysisToSamples.entrySet())
             {
                 Analysis analysis = entry.getKey();
-                List<FlowJoWorkspace.SampleInfo> samples = entry.getValue();
+                List<Workspace.SampleInfo> samples = entry.getValue();
                 String header = String.format("  %s: ", samples.get(0));
                 String indent = StringUtils.repeat(" ", header.length());
                 System.out.print(header);
@@ -236,7 +236,7 @@ public class Main
         }
     }
 
-    private static void writeAnalysis(File outDir, String name, FlowJoWorkspace workspace, PopulationName groupName, String sampleId, Set<StatisticSet> stats)
+    private static void writeAnalysis(File outDir, String name, Workspace workspace, PopulationName groupName, String sampleId, Set<StatisticSet> stats)
     {
         ScriptDocument doc = ScriptDocument.Factory.newInstance();
         doc.addNewScript();
@@ -256,7 +256,7 @@ public class Main
 
     private static void executeConvertWorkspace(File outDir, File workspaceFile, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
-        FlowJoWorkspace workspace = readWorkspace(workspaceFile, false);
+        Workspace workspace = readWorkspace(workspaceFile, false);
 
         boolean writeAll = groupNames.isEmpty() && sampleIds.isEmpty();
         if (writeAll || !groupNames.isEmpty())
@@ -271,7 +271,7 @@ public class Main
 
         if (writeAll || !sampleIds.isEmpty())
         {
-            for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+            for (Workspace.SampleInfo sampleInfo : workspace.getSamples())
             {
                 if (writeAll || sampleIds.contains(sampleInfo.getSampleId()) || sampleIds.contains(sampleInfo.getLabel()))
                 {
@@ -295,7 +295,7 @@ public class Main
         try
         {
             is = new FileInputStream(workspaceFile);
-            Document doc = FlowJoWorkspace.parseXml(is);
+            Document doc = WorkspaceParser.parseXml(is);
 
             Source source = new DOMSource(doc);
             Transformer t = TransformerFactory.newInstance().newTransformer();
@@ -343,9 +343,9 @@ public class Main
 
     private static Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readWorkspaceAnalysisResults(File workspaceFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
-        FlowJoWorkspace workspace = readWorkspace(workspaceFile, true);
+        Workspace workspace = readWorkspace(workspaceFile, true);
 
-        Set<FlowJoWorkspace.SampleInfo> sampleInfos = new LinkedHashSet<FlowJoWorkspace.SampleInfo>();
+        Set<Workspace.SampleInfo> sampleInfos = new LinkedHashSet<Workspace.SampleInfo>();
         boolean writeAll = groupNames.isEmpty() && sampleIds.isEmpty();
         if (writeAll)
         {
@@ -355,7 +355,7 @@ public class Main
         {
             if (!groupNames.isEmpty())
             {
-                for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
+                for (Workspace.GroupInfo group : workspace.getGroups())
                 {
                     if (groupNames.contains(group.getGroupName()))
                     {
@@ -367,7 +367,7 @@ public class Main
 
             if (!sampleIds.isEmpty())
             {
-                for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+                for (Workspace.SampleInfo sampleInfo : workspace.getSamples())
                 {
                     if (sampleIds.contains(sampleInfo.getSampleId()) || sampleIds.contains(sampleInfo.getLabel()))
                         sampleInfos.add(sampleInfo);
@@ -378,7 +378,7 @@ public class Main
         Map<String, AttributeSet> keywords = new LinkedHashMap<String, AttributeSet>();
         Map<String, AttributeSet> analysis = new LinkedHashMap<String, AttributeSet>();
         Map<String, CompensationMatrix> matrices = new LinkedHashMap<String, CompensationMatrix>();
-        for (FlowJoWorkspace.SampleInfo sampleInfo : sampleInfos)
+        for (Workspace.SampleInfo sampleInfo : sampleInfos)
         {
             if (analysis.containsKey(sampleInfo.getLabel()))
             {
@@ -476,7 +476,7 @@ public class Main
     private static Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readAnalysisResults(File analysisResultsFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
         Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> results = null;
-        if (FlowJoWorkspace.isFlowJoWorkspace(analysisResultsFile))
+        if (WorkspaceParser.isFlowJoWorkspace(analysisResultsFile))
         {
             results = readWorkspaceAnalysisResults(analysisResultsFile, fcsDir, groupNames, sampleIds, stats);
         }

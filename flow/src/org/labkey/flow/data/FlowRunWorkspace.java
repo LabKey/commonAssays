@@ -22,12 +22,13 @@ import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.Population;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.PopulationSet;
+import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.script.FlowAnalyzer;
 
 import java.util.Map;
 
-public class FlowRunWorkspace extends FlowJoWorkspace
+public class FlowRunWorkspace extends Workspace
 {
     public FlowRunWorkspace(FlowScript analysisScript, FlowProtocolStep step, FlowRun run) throws Exception
     {

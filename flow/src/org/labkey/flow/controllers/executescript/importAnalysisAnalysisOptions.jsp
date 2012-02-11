@@ -37,6 +37,7 @@
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.flow.FlowSettings" %>
 <%@ page import="org.labkey.api.admin.AdminUrls" %>
+<%@ page import="org.labkey.flow.analysis.model.Workspace" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -49,11 +50,11 @@
 
     boolean normalizationEnabled = FlowSettings.isNormalizationEnabled();
 
-    FlowJoWorkspace workspace = form.getWorkspace().getWorkspaceObject();
+    Workspace workspace = form.getWorkspace().getWorkspaceObject();
 
     Set<String> keywordOptions = new LinkedHashSet<String>();
     keywordOptions.add("");
-    for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+    for (Workspace.SampleInfo sampleInfo : workspace.getSamples())
     {
         for (String keyword : sampleInfo.getKeywords().keySet())
         {
@@ -72,12 +73,12 @@
     opOptions.put(CompareType.IN.getPreferredUrlKey(), CompareType.IN.getDisplayValue());
 
     Map<String, Set<String>> groups = new TreeMap<String, Set<String>>();
-    for (FlowJoWorkspace.GroupInfo group : workspace.getGroups())
+    for (Workspace.GroupInfo group : workspace.getGroups())
     {
         Set<String> groupSamples = new TreeSet<String>();
         for (String sampleID : group.getSampleIds())
         {
-            FlowJoWorkspace.SampleInfo sampleInfo = workspace.getSample(sampleID);
+            Workspace.SampleInfo sampleInfo = workspace.getSample(sampleID);
             if (sampleInfo != null)
                 groupSamples.add(sampleInfo.getLabel());
         }
@@ -163,7 +164,7 @@ if (protocol != null)
         JSONArray jsonParams = new JSONArray();
         for (String param : workspace.getParameters())
         {
-            if (!"Time".equals(param) && !param.startsWith("FSC") && !param.startsWith("SSC"))
+            if (KeywordUtil.isColorChannel(param))
                 jsonParams.put(new String[]{param, param});
         }
 %>

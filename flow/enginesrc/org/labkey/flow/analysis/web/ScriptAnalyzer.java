@@ -38,7 +38,6 @@ import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.AndGate;
 import org.labkey.flow.analysis.model.CompensationCalculation;
 import org.labkey.flow.analysis.model.EllipseGate;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.Gate;
 import org.labkey.flow.analysis.model.GateList;
 import org.labkey.flow.analysis.model.IntervalGate;
@@ -52,6 +51,7 @@ import org.labkey.flow.analysis.model.SubsetRef;
 import org.labkey.flow.analysis.model.SampleCriteria;
 import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.analysis.model.StatisticSet;
+import org.labkey.flow.analysis.model.Workspace;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -407,7 +407,7 @@ public class ScriptAnalyzer
         }
     }
 
-    static public void makeAnalysisDef(ScriptDef script, FlowJoWorkspace workspace, PopulationName groupName, String sampleId, Set<StatisticSet> statisticSets)
+    static public void makeAnalysisDef(ScriptDef script, Workspace workspace, PopulationName groupName, String sampleId, Set<StatisticSet> statisticSets)
     {
         Analysis analysis = null;
         if (groupName != null)
@@ -418,7 +418,7 @@ public class ScriptAnalyzer
         }
         else if (sampleId != null)
         {
-            FlowJoWorkspace.SampleInfo sample = workspace.getSample(sampleId);
+            Workspace.SampleInfo sample = workspace.getSample(sampleId);
             if (sample == null)
                 throw new RuntimeException("Cannot find sample '" + sampleId + "'");
 
@@ -439,7 +439,7 @@ public class ScriptAnalyzer
             }
             if (analysis == null)
             {
-                for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples())
+                for (Workspace.SampleInfo sample : workspace.getSamples())
                 {
                     Analysis analysisTry = workspace.getSampleAnalysis(sample);
                     if (analysisTry == null)

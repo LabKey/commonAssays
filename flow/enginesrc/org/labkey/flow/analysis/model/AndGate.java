@@ -20,12 +20,18 @@ import org.labkey.flow.analysis.web.SubsetExpression;
 import org.w3c.dom.Element;
 
 import java.util.BitSet;
+import java.util.List;
 
 public class AndGate extends GateList implements SubsetExpressionGate
 {
     public AndGate() { }
 
     public AndGate(Gate... gates)
+    {
+        super(gates);
+    }
+
+    public AndGate(List<Gate> gates)
     {
         super(gates);
     }

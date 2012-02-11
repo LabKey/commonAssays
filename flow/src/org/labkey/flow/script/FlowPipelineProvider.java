@@ -25,6 +25,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.module.Module;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.FlowModule;
+import org.labkey.flow.analysis.model.WorkspaceParser;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
@@ -59,43 +60,11 @@ public class FlowPipelineProvider extends PipelineProvider
         return FlowModule.isActive(context.getContainer());
     }
 
-    static class WorkspaceRecognizer extends DefaultHandler
-    {
-        boolean _isWorkspace = false;
-
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
-        {
-            _isWorkspace = "Workspace".equals(qName);
-            throw new SAXException("Stop parsing");
-        }
-        boolean isWorkspace()
-        {
-            return _isWorkspace;
-        }
-    }
-
     private class IsFlowJoWorkspaceFilter extends FileEntryFilter
     {
         public boolean accept(File pathname)
         {
-            if (pathname.isDirectory())
-                return false;
-            if (pathname.getName().endsWith(".wsp"))
-                return true;
-            if (!pathname.getName().endsWith(".xml"))
-                return false;
-            WorkspaceRecognizer recognizer = new WorkspaceRecognizer();
-            try
-            {
-                SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-
-                parser.parse(pathname, recognizer);
-            }
-            catch (Exception e)
-            {
-                // suppress
-            }
-            return recognizer.isWorkspace();
+            return WorkspaceParser.isFlowJoWorkspace(pathname);
         }
     }
 

@@ -17,6 +17,7 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.util.Pair;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
@@ -32,25 +33,17 @@ import java.util.*;
 
 public class MacWorkspace extends FlowJoWorkspace
 {
-    static Map<String, StatisticSpec.STAT> statMap = new HashMap<String, StatisticSpec.STAT>();
-    static
+    public MacWorkspace(String name, Element elDoc) throws Exception
     {
-        statMap.put("Count", StatisticSpec.STAT.Count);
-        statMap.put("Percentile", StatisticSpec.STAT.Percentile);
-        statMap.put("Mean", StatisticSpec.STAT.Mean);
-        statMap.put("Median", StatisticSpec.STAT.Median);
-        //statMap.put("Mode", StatisticSpec.STAT.Mode);
-        statMap.put("GeometricMean", StatisticSpec.STAT.Geometric_Mean);
-        statMap.put("FrequencyOfGrandParent", StatisticSpec.STAT.Freq_Of_Grandparent);
-        statMap.put("FrequencyOfParent", StatisticSpec.STAT.Freq_Of_Parent);
-        statMap.put("FrequencyOfTotal", StatisticSpec.STAT.Frequency);
-        statMap.put("CV", StatisticSpec.STAT.CV);
-        statMap.put("SD", StatisticSpec.STAT.Std_Dev);
-        statMap.put("MedianAbsDeviation", StatisticSpec.STAT.Median_Abs_Dev);
-        statMap.put("MedianAbsDeviation%", StatisticSpec.STAT.Median_Abs_Dev_Percent);
-        statMap.put("RobustCV", StatisticSpec.STAT.Robust_CV);
+        super(name, elDoc);
     }
 
+    protected void readAll(Element elDoc)
+    {
+        readAutoCompensationScripts(elDoc);
+        readCalibrationTables(elDoc);
+        super.readAll(elDoc);
+    }
 
     protected void readSamples(Element elDoc)
     {
@@ -61,6 +54,8 @@ public class MacWorkspace extends FlowJoWorkspace
                 readSample(elSample);
             }
         }
+
+        readSampleAnalyses(elDoc);
     }
 
     protected void readGroups(Element elDoc)
@@ -72,21 +67,9 @@ public class MacWorkspace extends FlowJoWorkspace
                 readGroup(elGroup);
             }
         }
-    }
 
-    public MacWorkspace(String name, Element elDoc) throws Exception
-    {
-        _name = name;
-        readCompensationMatrices(elDoc);
-        readAutoCompensationScripts(elDoc);
-        readCalibrationTables(elDoc);
-        readSamples(elDoc);
-        readSampleAnalyses(elDoc);
-        readGroups(elDoc);
         readGroupAnalyses(elDoc);
-        postProcess();
     }
-
 
 
     protected void readSampleAnalyses(Element elDoc)
@@ -141,55 +124,7 @@ public class MacWorkspace extends FlowJoWorkspace
         Analysis ret = readAnalysis(elSampleAnalysis, results, true);
         String sampleId = elSampleAnalysis.getAttribute("sampleID");
         _sampleAnalyses.put(sampleId, ret);
-        if (results.getStatistics().size() > 0)
-        {
-            StatisticSpec count = new StatisticSpec(null, StatisticSpec.STAT.Count, null);
-            // If the statistic "count" is unavailable, try to get it from the '$TOT" keyword.
-            if (!results.getStatistics().containsKey(count))
-            {
-                SampleInfo sampleInfo = _sampleInfos.get(sampleId);
-                if (sampleInfo != null)
-                {
-                    String strTot = sampleInfo.getKeywords().get("$TOT");
-                    if (strTot != null)
-                    {
-                        results.setStatistic(count, Double.valueOf(strTot).doubleValue());
-                    }
-                }
-            }
-            // Fill in the Freq Of Parents that can be determined from the existing stats
-            for (Map.Entry<StatisticSpec, Double> entry : new HashMap<StatisticSpec, Double>(results.getStatistics()).entrySet())
-            {
-                final StatisticSpec spec = entry.getKey();
-                if (spec.getStatistic() != StatisticSpec.STAT.Count)
-                {
-                    continue;
-                }
-                if (spec.getSubset() == null)
-                {
-                    continue;
-                }
-                StatisticSpec freqStat = new StatisticSpec(spec.getSubset(), StatisticSpec.STAT.Freq_Of_Parent, null);
-                if (results.getStatistics().containsKey(freqStat))
-                {
-                    continue;
-                }
-                Double denominator = results.getStatistics().get(new StatisticSpec(spec.getSubset().getParent(), StatisticSpec.STAT.Count, null));
-                if (denominator == null)
-                {
-                    continue;
-                }
-                if (entry.getValue().equals(0.0))
-                {
-                    results.setStatistic(freqStat, 0.0);
-                }
-                else if (!denominator.equals(0.0))
-                {
-                    results.setStatistic(freqStat, entry.getValue().doubleValue() / denominator.doubleValue() * 100);
-                }
-            }
-            _sampleAnalysisResults.put(sampleId, results);
-        }
+        addSampleAnalysisResults(results, sampleId);
         return ret;
     }
 
@@ -217,7 +152,7 @@ public class MacWorkspace extends FlowJoWorkspace
         Map<SubsetSpec, SubsetSpec> mapping = new HashMap<SubsetSpec, SubsetSpec>();
         for (Element elString : nlStrings)
         {
-            String str = getTextValue(elString);
+            String str = getInnerText(elString);
 
             // Absolute gates don't start with '/'.  Relative gates begin with one or more '/' characters.
             SubsetSpec parent = null;
@@ -229,7 +164,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 {
                     str = str.substring(1);
                     if (parent == null)
-                        throw new FlowException("Relative population '" + getTextValue(elString) + "' tried to escape from parent subset '" + parentSubset + "'");
+                        throw new FlowException("Relative population '" + getInnerText(elString) + "' tried to escape from parent subset '" + parentSubset + "'");
                     parent = parent.getParent();
                 }
             }
@@ -301,60 +236,26 @@ public class MacWorkspace extends FlowJoWorkspace
         return true;
     }
     
-    protected void readStats(SubsetSpec subset, Element elPopulation, AttributeSet results, Analysis analysis, boolean warnOnMissingStats)
+    protected void readStats(SubsetSpec subset, Element elPopulation, @Nullable AttributeSet results, Analysis analysis, boolean warnOnMissingStats)
     {
         String strCount = elPopulation.getAttribute("count");
-        if (!StringUtils.isEmpty(strCount))
+        if (results != null)
         {
-            StatisticSpec statCount = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
-            results.setStatistic(statCount, Double.valueOf(strCount).doubleValue());
-        }
-        else
-        {
-            if (warnOnMissingStats)
-                warning(analysis.getName(), subset, "Count statistic missing");
-        }
-        for (Element elStat : getElementsByTagName(elPopulation, "Statistic"))
-        {
-            String statistic = elStat.getAttribute("statistic");
-            StatisticSpec.STAT stat = statMap.get(statistic);
-            if (stat == null)
-                continue;
-            String parameter = StringUtils.trimToNull(elStat.getAttribute("parameter"));
-            if (parameter != null)
+            if (!StringUtils.isEmpty(strCount))
             {
-                parameter = ___cleanName(parameter);
-            }
-            String percentile = StringUtils.trimToNull(elStat.getAttribute("statisticVariable"));
-            StatisticSpec spec;
-            if (percentile == null)
-            {
-                spec = new StatisticSpec(subset, stat, parameter);
-            }
-            else
-            {
-                spec = new StatisticSpec(subset, stat, parameter + ":" + percentile);
-            }
-            String strValue = StringUtils.trimToNull(elStat.getAttribute("value"));
-            if (strValue != null)
-            {
-                double value;
-                try
-                {
-                    value = Double.valueOf(strValue).doubleValue();
-                }
-                catch (NumberFormatException nfe)
-                {
-                    continue;
-                }
-                results.setStatistic(spec, value);
+                StatisticSpec statCount = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
+                results.setStatistic(statCount, Double.valueOf(strCount).doubleValue());
             }
             else
             {
                 if (warnOnMissingStats)
-                    warning(analysis.getName(), subset, stat.getLongName() + " statistic missing");
+                    warning(analysis.getName(), subset, "Count statistic missing");
             }
-            analysis.addStatistic(spec);
+        }
+        for (Element elStat : getElementsByTagName(elPopulation, "Statistic"))
+        {
+            readStat(elStat, subset, results, analysis, warnOnMissingStats,
+                    "statistic", "parameter", "statisticVariable");
         }
     }
 
@@ -382,7 +283,7 @@ public class MacWorkspace extends FlowJoWorkspace
         return gate;
     }
 
-    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, AttributeSet results, boolean warnOnMissingStats)
+    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, @Nullable AttributeSet results, boolean warnOnMissingStats)
     {
         /*
         SubsetSpec booleanSubset = toBooleanExpression(parentSubset, elPopulation);
@@ -471,7 +372,7 @@ public class MacWorkspace extends FlowJoWorkspace
     }
 
 
-    protected Analysis readAnalysis(Element elAnalysis, AttributeSet results, boolean warnOnMissingStats)
+    protected Analysis readAnalysis(Element elAnalysis, @Nullable AttributeSet results, boolean warnOnMissingStats)
     {
         Analysis ret = new Analysis();
         PopulationName name = PopulationName.fromString(elAnalysis.getAttribute("name"));
@@ -521,17 +422,6 @@ public class MacWorkspace extends FlowJoWorkspace
             {
                 readGroupAnalysis(elGroupAnalysis);
             }
-        }
-    }
-
-    protected void readKeywords(SampleInfo sample, Element el)
-    {
-        for (Element elKeyword : getElementsByTagName(el, "Keyword"))
-        {
-            String name = StringUtils.trimToNull(elKeyword.getAttribute("name"));
-            if (null == name)
-                continue;
-            sample._keywords.put(name, elKeyword.getAttribute("value"));
         }
     }
 

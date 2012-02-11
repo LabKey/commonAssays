@@ -23,6 +23,7 @@ import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.data.FlowProtocolStep;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ import java.util.List;
 public class EditCompensationCalculationForm extends EditSettingsForm
 {
     public int selectedRunId;
-    public FlowJoWorkspace workspace;
+    public Workspace workspace;
     public String selectGroupName;
     public String selectAutoCompScript;
     public String[] parameters = new String[0];
@@ -131,7 +132,7 @@ public class EditCompensationCalculationForm extends EditSettingsForm
      * Called when we know what the workspace is.  At this point, we fill in what the current values
      * of the compensation stuff are.
      */
-    protected void setWorkspace(FlowJoWorkspace workspace)
+    protected void setWorkspace(Workspace workspace)
     {
         this.workspace = workspace;
         List<String> lstParameters = new ArrayList();
@@ -200,7 +201,7 @@ public class EditCompensationCalculationForm extends EditSettingsForm
 
         try
         {
-            setWorkspace((FlowJoWorkspace) PageFlowUtil.decodeObject(getRequest().getParameter("workspaceObject")));
+            setWorkspace((Workspace) PageFlowUtil.decodeObject(getRequest().getParameter("workspaceObject")));
         }
         catch (Exception e)
         {

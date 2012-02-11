@@ -32,6 +32,11 @@ public class FJ8Workspace extends MacWorkspace
             for (Element elSample : getElementsByTagName(elSampleList, "Sample"))
             {
                 readSample(elSample);
+
+                for (Element elSampleNode : getElementsByTagName(elSample, "SampleNode"))
+                {
+                    readSampleAnalysis(elSampleNode);
+                }
             }
         }
     }
@@ -60,10 +65,15 @@ public class FJ8Workspace extends MacWorkspace
         {
             for (Element elGroupNode : getElementsByTagName(elGroups, "GroupNode"))
             {
+                PopulationName groupName = PopulationName.fromString(elGroupNode.getAttribute("name"));
+
                 for (Element elGroup : getElementsByTagName(elGroupNode, "Group"))
                 {
-                    readGroup(elGroup);
+                    GroupInfo groupInfo = readGroup(elGroup);
+                    groupInfo.setGroupName(groupName);
                 }
+
+                readGroupAnalysis(elGroupNode);
             }
         }
     }
@@ -72,6 +82,7 @@ public class FJ8Workspace extends MacWorkspace
     {
         GroupInfo ret = new GroupInfo();
         ret._groupId = elGroup.getAttribute("groupID");
+
         for (Element elSampleList : getElementsByTagName(elGroup, "SampleRefs"))
         {
             for (Element elSample : getElementsByTagName(elSampleList, "SampleRef"))
@@ -88,26 +99,11 @@ public class FJ8Workspace extends MacWorkspace
     
     protected void readSampleAnalyses(Element elDoc)
     {
-        for (Element elSampleList : getElementsByTagName(elDoc, "SampleList"))
-        {
-            for (Element elSample : getElementsByTagName(elSampleList, "Sample"))
-            {
-                for (Element elSampleNode : getElementsByTagName(elSample, "SampleNode"))
-                {
-                    readSampleAnalysis(elSampleNode);
-                }
-            }
-        }
+        assert false : "readSampleAnalysis() now called form readSamples()";
     }
 
     protected void readGroupAnalyses(Element elDoc)
     {
-        for (Element elGroups : getElementsByTagName(elDoc, "Groups"))
-        {
-            for (Element elGroupNode : getElementsByTagName(elGroups, "GroupNode"))
-            {
-                readGroupAnalysis(elGroupNode);
-            }
-        }
+        assert false : "readGroupAnalysis() now called form readGroups()";
     }
 }

@@ -192,6 +192,9 @@ flow/enginesrc/org/labkey/flow/analysis/model/SubsetExpressionGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/SubsetPart.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/SubsetRef.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/ValueConstraint.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/Workspace.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/WorkspaceCompensation.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/WorkspaceParser.java -text
 flow/enginesrc/org/labkey/flow/analysis/util/LogAxisFunction.java -text
 flow/enginesrc/org/labkey/flow/analysis/util/RangeFunction.java -text
 flow/enginesrc/org/labkey/flow/analysis/util/SimpleLogAxisFunction.java -text

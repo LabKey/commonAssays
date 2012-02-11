@@ -20,12 +20,18 @@ import org.labkey.flow.analysis.web.SubsetExpression;
 import org.w3c.dom.Element;
 
 import java.util.BitSet;
+import java.util.List;
 
 public class OrGate extends GateList implements SubsetExpressionGate
 {
     public OrGate() { }
 
     public OrGate(Gate... gates)
+    {
+        super(gates);
+    }
+
+    public OrGate(List<Gate> gates)
     {
         super(gates);
     }

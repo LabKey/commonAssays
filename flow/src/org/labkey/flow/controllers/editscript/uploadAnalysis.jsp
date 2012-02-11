@@ -39,9 +39,9 @@
     }
 %>
 <form method="POST" action="<%=formAction(ScriptController.UploadAnalysisAction.class)%>" enctype="multipart/form-data">
-    <% if (form.workspaceObject != null)
+    <% if (form._workspaceObject != null)
     { %>
-    <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form.workspaceObject)%>">
+    <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form._workspaceObject)%>">
     <%
         PopulationName[] analysisNames = this.getGroupAnalysisNames();
         if (analysisNames.length > 0)
@@ -79,7 +79,7 @@
     <input type="hidden" name="ff_statisticOption" value=""/>
     <%-- Add this hidden field so that something gets posted for "ff_statisticOption", even when
     none of the checkboxes are checked --%>
-    <% if (form.workspaceObject == null)
+    <% if (form._workspaceObject == null)
     { %>
     <p>Upload a new FlowJo workspace XML file<br>
         <input type="file" name="workspaceFile">
