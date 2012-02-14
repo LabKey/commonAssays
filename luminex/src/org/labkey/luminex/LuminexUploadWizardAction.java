@@ -28,15 +28,8 @@ import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.DisplayColumnGroup;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleDisplayColumn;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Sort;
-import org.labkey.api.data.Table;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
@@ -192,12 +185,28 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                                 {
                                     return inputName;
                                 }
+
+                                @Override
+                                public void renderTitle(RenderContext ctx, Writer out) throws IOException
+                                {
+                                    out.write(LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME);
+                                }
+
+                                @Override
+                                public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
+                                {
+                                    out.write("<td class='labkey-form-label'>");
+                                    renderTitle(ctx, out);
+                                    StringBuilder sb = new StringBuilder();
+                                    sb.append("Type: ").append(getBoundColumn().getFriendlyTypeName()).append("\n");
+                                    out.write(PageFlowUtil.helpPopup(LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME, sb.toString()));
+                                    out.write("</td>");
+                                }
                             };
                         }
                     });
                     view.setInitialValue(inputName, 100); // default value is always 100 when column is shown (don't need to recall last entry)
                     DisplayColumn col = info.getRenderer();
-                    col.setCaption(LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME);
                     posThresholdCols.add(col);
                 }
                 view.getDataRegion().addGroup(new DisplayColumnGroup(posThresholdCols, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME, false));
@@ -528,9 +537,13 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     for (String analyte : form.getAnalyteNames())
                     {
+                        // validate analyte domain properties
                         Map<DomainProperty, String> properties = form.getAnalyteProperties(analyte);
-
                         validatePostedProperties(properties, errors);
+
+                        // validate analyte column properties
+                        Map<ColumnInfo, String> colProperties = form.getAnalyteColumnProperties(analyte);
+                        validateColumnProperties(colProperties, errors);
                     }
                 }
 

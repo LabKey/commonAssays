@@ -99,13 +99,13 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     }
 
     @Override
-    public Map<String, String> getAnalyteColumnProperties(String analyteName)
+    public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName)
     {
-        Map<String, String> properties = new HashMap<String, String>();
+        Map<ColumnInfo, String> properties = new HashMap<ColumnInfo, String>();
         Analyte analyte = getAnalyte(analyteName);
         ColumnInfo col = LuminexSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
         Integer value = analyte.getPositivityThreshold();
-        properties.put(col.getName(), value != null ? value.toString() : null);
+        properties.put(col, value != null ? value.toString() : null);
         return properties;
     }
 

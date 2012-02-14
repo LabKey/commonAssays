@@ -74,13 +74,13 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         return getAnalytePropertyMapFromRequest(domainProperties, analyteName);
     }
 
-    public Map<String, String> getAnalyteColumnProperties(String analyteName)
+    public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName)
     {
-        Map<String, String> properties = new HashMap<String, String>();
+        Map<ColumnInfo, String> properties = new HashMap<ColumnInfo, String>();
         ColumnInfo col = LuminexSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
         String value = getRequest().getParameter(LuminexUploadWizardAction.getAnalytePropertyName(analyteName, col.getName()));
         value = StringUtils.trimToNull(value);
-        properties.put(col.getName(), value);
+        properties.put(col, value);
         return properties;
     }
 

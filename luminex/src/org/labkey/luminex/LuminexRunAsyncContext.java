@@ -1,5 +1,6 @@
 package org.labkey.luminex;
 
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.assay.pipeline.AssayRunAsyncContext;
@@ -19,7 +20,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     private String[] _analyteNames;
     private Map<String, Map<Integer, String>> _analytePropertiesById = new HashMap<String, Map<Integer, String>>();
     private Map<String, Set<String>> _titrationsByAnalyte = new HashMap<String, Set<String>>();
-    private Map<String, Map<String, String>> _analyteColumnProperties = new HashMap<String, Map<String, String>>();
+    private Map<String, Map<ColumnInfo, String>> _analyteColumnProperties = new HashMap<String, Map<ColumnInfo, String>>();
     private List<Titration> _titrations;
 
     private transient Map<String, Map<DomainProperty, String>> _analyteProperties;
@@ -68,9 +69,9 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     }
 
     @Override
-    public Map<String, String> getAnalyteColumnProperties(String analyteName)
+    public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName)
     {
-        Map<String, String> result = _analyteColumnProperties.get(analyteName);
+        Map<ColumnInfo, String> result = _analyteColumnProperties.get(analyteName);
         if (result == null)
         {
             throw new IllegalStateException("Could not find analyte: " + analyteName);

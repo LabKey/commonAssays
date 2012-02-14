@@ -17,6 +17,7 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TsvDataExchangeHandler;
@@ -53,9 +54,9 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
                 row.put(entry.getKey().getName(), entry.getValue());
             }
             // get the analyte table column property values
-            for (Map.Entry<String, String> entry : form.getAnalyteColumnProperties(analyteName).entrySet())
+            for (Map.Entry<ColumnInfo, String> entry : form.getAnalyteColumnProperties(analyteName).entrySet())
             {
-                row.put(entry.getKey(), entry.getValue());
+                row.put(entry.getKey().getName(), entry.getValue());
             }
             // TODO - What delimeter is safest to use?
             row.put("titrations", StringUtils.join(form.getTitrationsForAnalyte(analyteName), ","));

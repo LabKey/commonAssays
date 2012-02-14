@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex;
 
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.study.assay.AssayRunUploadContext;
@@ -34,7 +35,7 @@ public interface LuminexRunContext extends AssayRunUploadContext<LuminexAssayPro
 
     public Map<DomainProperty, String> getAnalyteProperties(String analyteName);
 
-    public Map<String, String> getAnalyteColumnProperties(String analyteName);
+    public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName);
 
     public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException;
 
