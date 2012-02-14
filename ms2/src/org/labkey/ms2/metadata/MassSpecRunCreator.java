@@ -50,7 +50,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
     }
 
     @Override
-    public ExpExperiment saveExperimentRun(AssayRunUploadContext context, ExpExperiment batch, ExpRun run) throws ExperimentException, ValidationException
+    public ExpExperiment saveExperimentRun(AssayRunUploadContext context, ExpExperiment batch, ExpRun run, boolean forceSaveBatchProps) throws ExperimentException, ValidationException
     {
         MassSpecMetadataAssayForm form = (MassSpecMetadataAssayForm)context;
         if (form.isFractions())
@@ -60,7 +60,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
             // Then upload a bunch of runs
             while (!PipelineDataCollector.getFileQueue(form).isEmpty())
             {
-                batch = super.saveExperimentRun(context, batch, run);
+                batch = super.saveExperimentRun(context, batch, run, forceSaveBatchProps);
                 form.clearUploadedData();
                 form.getSelectedDataCollector().uploadComplete(form);
             }
@@ -68,7 +68,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
         }
         else
         {
-            return super.saveExperimentRun(context, batch, run);
+            return super.saveExperimentRun(context, batch, run, forceSaveBatchProps);
         }
     }
 

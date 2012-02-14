@@ -472,18 +472,6 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return names.toArray(new String[names.size()]);
     }
 
-    private Analyte[] getAnalytes(int dataRowId)
-    {
-        try
-        {
-            return Table.select(LuminexSchema.getTableInfoAnalytes(), Table.ALL_COLUMNS, new SimpleFilter("DataId", dataRowId), new Sort("RowId"), Analyte.class);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-    }
-
     protected void addSampleInputColumns(LuminexRunUploadForm form, InsertView insertView)
     {
         // Don't add any columns - they're part of the uploaded spreadsheet
@@ -555,70 +543,54 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     ExpRun run = saveExperimentRun(form);
 
+                    // Save default values for analytes
+                    for (String analyteName : form.getAnalyteNames())
+                    {
+                        Map<DomainProperty, String> properties = form.getAnalyteProperties(analyteName);
+                        form.saveDefaultValues(properties, analyteName);
+                    }
+
                     // save the defalut values for the analyte standards/titrations information in 2 categories: well roles and titrations
                     PropertyManager.PropertyMap defaultWellRoleValues = PropertyManager.getWritableProperties(
                             getViewContext().getUser().getUserId(), getContainer().getId(), _protocol.getName() + ": Well Role", true);
-                    
-                    List<ExpData> outputs = run.getDataOutputs();
-                    for (ExpData output : outputs)
-                    {
-                        int dataId = output.getRowId();
-                        
-                        for (Analyte analyte : getAnalytes(dataId))
-                        {
-                            Map<DomainProperty, String> properties = form.getAnalyteProperties(analyte.getName());
 
-                            ObjectProperty[] objProperties = new ObjectProperty[properties.size()];
-                            int i = 0;
-                            for (Map.Entry<DomainProperty, String> entry : properties.entrySet())
-                            {
-                                ObjectProperty property = new ObjectProperty(analyte.getLsid(),
-                                        getContainer(), entry.getKey().getPropertyURI(),
-                                        entry.getValue(), entry.getKey().getPropertyDescriptor().getPropertyType());
-                                objProperties[i++] = property;
-                            }
-                            OntologyManager.insertProperties(getContainer(), analyte.getLsid(), objProperties);
-                            form.saveDefaultValues(properties, analyte.getName());
+                    for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
+                    {
+                        String propertyName;
+                        Boolean value;
+
+                        // add the name/value pairs for the titration well role definition section
+                        if (!titrationEntry.getValue().isUnknown())
+                        {
+                            propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
+                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+
+                            propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
+                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+                        }
+                        else
+                        {
+                            propertyName = getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
+                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
                         }
 
-                        for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
+                        // add the name/value pairs for each of the analyte standards if the columns was shown in the UI
+                        propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) + "_showcol";
+                        if (!titrationEntry.getValue().isUnknown() && getViewContext().getRequest().getParameter(propertyName).equals("true"))
                         {
-                            String propertyName;
-                            Boolean value;
-
-                            // add the name/value pairs for the titration well role definition section
-                            if (!titrationEntry.getValue().isUnknown())
+                            PropertyManager.PropertyMap defaultTitrationValues = PropertyManager.getWritableProperties(
+                                    getViewContext().getUser().getUserId(), getContainer().getId(),
+                                    _protocol.getName() + ": " + titrationEntry.getValue().getName(), true);
+                            for (String analyteName : form.getAnalyteNames())
                             {
-                                propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
-                                value = getViewContext().getRequest().getParameter(propertyName).equals("true");
-                                defaultWellRoleValues.put(propertyName, Boolean.toString(value));
-
-                                propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
-                                value = getViewContext().getRequest().getParameter(propertyName).equals("true");
-                                defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+                                propertyName = getTitrationCheckboxName(titrationEntry.getValue().getName(), analyteName);
+                                value = getViewContext().getRequest().getParameter(propertyName) != null;
+                                defaultTitrationValues.put(propertyName, Boolean.toString(value));
                             }
-                            else
-                            {
-                                propertyName = getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
-                                value = getViewContext().getRequest().getParameter(propertyName).equals("true");
-                                defaultWellRoleValues.put(propertyName, Boolean.toString(value));
-                            }
-
-                            // add the name/value pairs for each of the analyte standards if the columns was shown in the UI
-                            propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue()) + "_showcol";
-                            if (!titrationEntry.getValue().isUnknown() && getViewContext().getRequest().getParameter(propertyName).equals("true"))
-                            {
-                                PropertyManager.PropertyMap defaultTitrationValues = PropertyManager.getWritableProperties(
-                                        getViewContext().getUser().getUserId(), getContainer().getId(),
-                                        _protocol.getName() + ": " + titrationEntry.getValue().getName(), true);
-                                for (Analyte analyte : getAnalytes(dataId))
-                                {
-                                    propertyName = getTitrationCheckboxName(titrationEntry.getValue().getName(), analyte.getName());
-                                    value = getViewContext().getRequest().getParameter(propertyName) != null;
-                                    defaultTitrationValues.put(propertyName, Boolean.toString(value));
-                                }
-                                PropertyManager.saveProperties(defaultTitrationValues);
-                            }
+                            PropertyManager.saveProperties(defaultTitrationValues);
                         }
                     }
                     PropertyManager.saveProperties(defaultWellRoleValues);

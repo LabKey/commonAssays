@@ -17,6 +17,7 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang3.ObjectUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ import java.util.List;
  * User: jeckels
  * Date: Jun 6, 2011
  */
-public class Titration
+public class Titration implements Serializable
 {
     private int _rowId;
     private int _runId;

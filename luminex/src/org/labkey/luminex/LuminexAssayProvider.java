@@ -51,6 +51,7 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
+import org.labkey.api.study.assay.pipeline.AssayRunAsyncContext;
 import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
@@ -529,5 +530,17 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     public AssayRunDatabaseContext createRunDatabaseContext(ExpRun run, User user, HttpServletRequest request)
     {
         return new LuminexRunDatabaseContext(run, user, request);
+    }
+
+    @Override
+    public AssayRunAsyncContext createRunAsyncContext(AssayRunUploadContext context) throws IOException, ExperimentException
+    {
+        return new LuminexRunAsyncContext((LuminexRunContext)context);
+    }
+
+    @Override
+    public AssayRunCreator getRunCreator()
+    {
+        return new LuminexRunCreator(this);
     }
 }
