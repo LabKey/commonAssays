@@ -18,6 +18,7 @@ package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
@@ -211,31 +212,35 @@ public class PCWorkspace extends FlowJoWorkspace
         return ret;
     }
 
-    protected void readGates(Element elPopulation, Population ret)
+    protected void readGates(Element elPopulation, SubsetSpec parentSubset, Population ret, Analysis analysis)
     {
         for (Element elPolygonGate : getElementsByTagName(elPopulation, "PolygonGate"))
         {
             boolean invert = inverted(elPolygonGate);
             PolygonGate gate = readPolygonGate(elPolygonGate);
             ret.addGate(invert ? new NotGate(gate) : gate);
+            analysis.addGraph(new GraphSpec(parentSubset, gate.getXAxis(), gate.getYAxis()));
         }
         for (Element elRectangleGate : getElementsByTagName(elPopulation, "RectangleGate"))
         {
             boolean invert = inverted(elRectangleGate);
             PolygonGate gate = readRectangleGate(elRectangleGate);
             ret.addGate(invert ? new NotGate(gate) : gate);
+            analysis.addGraph(new GraphSpec(parentSubset, gate.getXAxis(), gate.getYAxis()));
         }
         for (Element elRangeGate : getElementsByTagName(elPopulation, "RangeGate"))
         {
             boolean invert = inverted(elRangeGate);
             IntervalGate gate = readRangeGate(elRangeGate);
             ret.addGate(invert ? new NotGate(gate) : gate);
+            analysis.addGraph(new GraphSpec(parentSubset, gate.getXAxis()));
         }
         for (Element elEllipseGate : getElementsByTagName(elPopulation, "EllipseGate"))
         {
             //boolean invert = inverted(elEllipseGate);
             //PolygonGate gate = readRectangleGate(elEllipseGate);
             //ret.addGate(invert ? new NotGate(gate) : gate);
+            //analysis.addGraph(new GraphSpec(parentSubset, gate.getXAxis()));
         }
     }
 
@@ -251,7 +256,7 @@ public class PCWorkspace extends FlowJoWorkspace
         ret.setName(name);
         SubsetSpec subset = new SubsetSpec(parentSubset, name);
 
-        readGates(elPopulation, ret);
+        readGates(elPopulation, parentSubset, ret, analysis);
 
         readStats(subset, elPopulation, results, analysis, warnOnMissingStats);
 

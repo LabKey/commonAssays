@@ -30,6 +30,7 @@ public abstract class RegionGate extends Gate
 {
     public abstract String getXAxis();
     public abstract String getYAxis();
+    public abstract List<String> getAxes();
 
     @Override
     public boolean isSimilar(Gate other)
@@ -41,10 +42,7 @@ public abstract class RegionGate extends Gate
             return false;
 
         RegionGate otherGate = (RegionGate)other;
-        if (!getXAxis().equals(otherGate.getXAxis()))
-            return false;
-
-        if (!getYAxis().equals(otherGate.getYAxis()))
+        if (!getAxes().equals(otherGate.getAxes()))
             return false;
 
         return true;

@@ -14,6 +14,8 @@ import org.isacNet.std.gatingML.v15.gating.PolygonGateType;
 import org.isacNet.std.gatingML.v15.gating.RectangleGateDimensionType;
 import org.isacNet.std.gatingML.v15.gating.RectangleGateType;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.SubsetSpec;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
@@ -141,6 +143,8 @@ public class PC75Workspace extends PCWorkspace
                 gate = readRectangleGate((RectangleGateType) xGate);
             //else if (xGate instanceof EllipsoidGateType)
             //    gate = readEllipsoidGate((EllipsoidGateType) xGate);
+            //else if (xGate instanceof BooleanGateType)
+            //    gate = readBooleanGate((BooleanGateType) xGate);
             //else
             //    warnOnce(null, null, "Unsupported gate type: " + xGate.schemaType().getName());
         }
@@ -165,13 +169,17 @@ public class PC75Workspace extends PCWorkspace
     }
 
     @Override
-    protected void readGates(Element elPopulation, Population ret)
+    protected void readGates(Element elPopulation, SubsetSpec parentSubset, Population ret, Analysis analysis)
     {
         for (Element elGate : getElementsByTagName(elPopulation, "Gate"))
         {
             Gate gate = readGate(elGate);
             if (gate != null)
+            {
                 ret.addGate(gate);
+                if (gate instanceof RegionGate)
+                    analysis.addGraph(new GraphSpec(parentSubset, ((RegionGate)gate).getAxes()));
+            }
         }
     }
 }

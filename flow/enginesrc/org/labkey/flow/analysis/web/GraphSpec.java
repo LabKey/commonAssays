@@ -18,6 +18,7 @@ package org.labkey.flow.analysis.web;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 import java.io.Serializable;
@@ -31,6 +32,12 @@ public class GraphSpec implements Serializable, Comparable
     {
         _subset = subset;
         _parameters = parameters;
+    }
+
+    public GraphSpec(SubsetSpec subset, Collection<String> parameters)
+    {
+        _subset = subset;
+        _parameters = parameters.toArray(new String[parameters.size()]);
     }
 
     public GraphSpec(@NotNull String str)

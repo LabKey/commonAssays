@@ -69,6 +69,11 @@ public class EllipseGate extends RegionGate
         return yAxis;
     }
 
+    public List<String> getAxes()
+    {
+        return Arrays.asList(yAxis, yAxis);
+    }
+
 
     public BitSet apply(PopulationSet populations, DataFrame data)
     {

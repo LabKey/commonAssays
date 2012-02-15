@@ -507,7 +507,7 @@ public class CompensationMatrix implements Serializable
             return ret;
         }
 
-        if (null != StringUtils.trimToNull("$DFC1TO2"))
+        if (null != StringUtils.trimToNull(keywords.get("$DFC1TO2")))
         {
             // Not sure how I'm supposed to know which parameters to compensate
             // Skip FS, SS, TIME, and take the rest in order

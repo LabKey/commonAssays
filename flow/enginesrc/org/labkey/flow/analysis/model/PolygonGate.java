@@ -19,6 +19,7 @@ package org.labkey.flow.analysis.model;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
@@ -69,6 +70,12 @@ public class PolygonGate extends RegionGate
     public String getYAxis()
     {
         return _strY;
+    }
+
+    @Override
+    public List<String> getAxes()
+    {
+        return Arrays.asList(_strX, _strY);
     }
 
     public Polygon getPolygon()

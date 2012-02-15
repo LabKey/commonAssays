@@ -19,6 +19,7 @@ package org.labkey.flow.analysis.model;
 import org.w3c.dom.Element;
 
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
 
 import org.labkey.flow.analysis.data.NumberArray;
@@ -64,6 +65,11 @@ public class IntervalGate extends RegionGate
     public String getYAxis()
     {
         return null;
+    }
+
+    public List<String> getAxes()
+    {
+        return Collections.singletonList(_axis);
     }
 
 
