@@ -90,6 +90,12 @@ public class PopulationSet implements Serializable, Cloneable
         return _populations.hashCode();
     }
 
+    @Override
+    public String toString()
+    {
+        return _name.toString() + " (sub:" + _populations.size() + ")";
+    }
+
     /**
      * Compares the populations of this PopulationSet to another.
      * If gating hierarchy is similar, the PopulationSets are similar.

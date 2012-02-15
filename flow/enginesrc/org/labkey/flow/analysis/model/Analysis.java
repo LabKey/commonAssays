@@ -210,4 +210,19 @@ public class Analysis extends ScriptComponent
         result = 31 * result + _graphs.hashCode();
         return result;
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[Analysis ");
+        sb.append(super.toString());
+        sb.setLength(sb.length()-1);
+        sb.append(",subsets:").append(_subsets.size());
+        sb.append(",stats:").append(_statistics.size());
+        sb.append(",graphs:").append(_graphs.size());
+        sb.append(")]");
+
+        return sb.toString();
+    }
 }

@@ -1,0 +1,177 @@
+package org.labkey.flow.analysis.model;
+
+import org.apache.xmlbeans.XmlException;
+import org.apache.xmlbeans.XmlObject;
+import org.apache.xmlbeans.XmlOptions;
+import org.isacNet.std.gatingML.v15.datatypes.ValueAttributeType;
+import org.isacNet.std.gatingML.v15.gating.AbstractGateType;
+import org.isacNet.std.gatingML.v15.gating.BooleanGateType;
+import org.isacNet.std.gatingML.v15.gating.DimensionType;
+import org.isacNet.std.gatingML.v15.gating.EllipsoidGateType;
+import org.isacNet.std.gatingML.v15.gating.GatingMLDocument;
+import org.isacNet.std.gatingML.v15.gating.Point2DType;
+import org.isacNet.std.gatingML.v15.gating.PolygonGateType;
+import org.isacNet.std.gatingML.v15.gating.RectangleGateDimensionType;
+import org.isacNet.std.gatingML.v15.gating.RectangleGateType;
+import org.labkey.api.util.UnexpectedException;
+import org.w3c.dom.Element;
+
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.labkey.flow.analysis.model.WorkspaceParser.GATINGML_NAMESPACES;
+import static org.labkey.flow.analysis.model.WorkspaceParser.GATING_1_5_NS;
+import static org.labkey.flow.analysis.model.WorkspaceParser.TRANSFORMATIONS_1_5_NS;
+import static org.labkey.flow.analysis.model.WorkspaceParser.DATATYPES_1_5_NS;
+
+/**
+ * User: kevink
+ * Date: 2/13/12
+ *
+ * First version of FlowJo that supports Gating-ML v1.5.
+ */
+public class PC75Workspace extends PCWorkspace
+{
+    public PC75Workspace(String name, Element elDoc)
+    {
+        super(name, elDoc);
+    }
+
+    protected PolygonGate readPolygonGate(PolygonGateType xPolygonGate)
+    {
+        DimensionType[] dims = xPolygonGate.getDimensionArray();
+        if (dims == null || dims.length != 2)
+        {
+            warning("PolygonGate must have two dimensions");
+            return null;
+        }
+
+        Point2DType[] vertices = xPolygonGate.getVertexArray();
+        if (vertices == null || vertices.length < 3)
+        {
+            warning("PolygonGate must have at least three vertices");
+            return null;
+        }
+
+        String xAxis = ___cleanName(dims[0].getParameter().getName());
+        String yAxis = ___cleanName(dims[1].getParameter().getName());
+        List<Double> lstX = new ArrayList<Double>();
+        List<Double> lstY = new ArrayList<Double>();
+
+        for (Point2DType vertex : vertices)
+        {
+            ValueAttributeType[] coord = vertex.getCoordinateArray();
+            lstX.add(coord[0].getValue());
+            lstY.add(coord[1].getValue());
+        }
+        scaleValues(xAxis, lstX);
+        scaleValues(yAxis, lstY);
+        double[] X = toDoubleArray(lstX);
+        double[] Y = toDoubleArray(lstY);
+        Polygon poly = new Polygon(X, Y);
+        return new PolygonGate(xAxis, yAxis, poly);
+    }
+
+    private Gate readRectangleGate(RectangleGateType xRectangleGate)
+    {
+        List<String> axes = new ArrayList<String>();
+        List<Double> lstMin = new ArrayList<Double>();
+        List<Double> lstMax = new ArrayList<Double>();
+        for (RectangleGateDimensionType dim : xRectangleGate.getDimensionArray())
+        {
+            axes.add(dim.getParameter().getName());
+            lstMin.add(dim.isSetMin() ? dim.getMin() : Double.MIN_VALUE); // XXX: Comment in IntervalGate implies we use Float.MIN/MAX_VALUE instead
+            lstMax.add(dim.isSetMax() ? dim.getMax() : Double.MAX_VALUE);
+        }
+
+        if (axes.size() == 1)
+        {
+            return new IntervalGate(axes.get(0), lstMin.get(0), lstMax.get(0));
+        }
+        else if (axes.size() == 2)
+        {
+            double[] X = new double[] { lstMin.get(0).doubleValue(), lstMin.get(0).doubleValue(), lstMax.get(0).doubleValue(), lstMax.get(0).doubleValue() };
+            double[] Y = new double[] { lstMin.get(1).doubleValue(), lstMax.get(1).doubleValue(), lstMax.get(1).doubleValue(), lstMin.get(1).doubleValue() };
+            return new PolygonGate(axes.get(0), axes.get(1), new Polygon(X, Y));
+        }
+        else
+        {
+            warning("Multi-dimensional RectangleGate not yet supported");
+            return null;
+        }
+    }
+
+    private Gate readEllipsoidGate(EllipsoidGateType xEllipsoidGate)
+    {
+        return null;
+    }
+
+    private Gate readBooleanGate(BooleanGateType xBooleanGate)
+    {
+        return null;
+    }
+
+    protected Gate readGate(Element elGate)
+    {
+        Gate gate = null;
+        String id = null;
+
+        Element elChild = getElements(elGate).get(0);
+        boolean invert = inverted(elChild);
+
+        try
+        {
+            XmlOptions options = new XmlOptions();
+            options.setLoadReplaceDocumentElement(new QName(GATING_1_5_NS, "Gating-ML"));
+            options.setLoadAdditionalNamespaces(GATINGML_NAMESPACES);
+
+            GatingMLDocument xGatingML = GatingMLDocument.Factory.parse(elGate, options);
+            XmlObject[] xGates = xGatingML.getGatingML().selectPath("./*");
+            if (xGates.length > 1)
+                warnOnce("Ignoring other elements under <Gate>");
+
+            XmlObject xGate = xGates[0];
+            if (xGate instanceof AbstractGateType)
+                id = ((AbstractGateType)xGate).getId();
+
+            if (xGate instanceof PolygonGateType)
+                gate = readPolygonGate((PolygonGateType) xGate);
+            else if (xGate instanceof RectangleGateType)
+                gate = readRectangleGate((RectangleGateType) xGate);
+            //else if (xGate instanceof EllipsoidGateType)
+            //    gate = readEllipsoidGate((EllipsoidGateType) xGate);
+            //else
+            //    warnOnce(null, null, "Unsupported gate type: " + xGate.schemaType().getName());
+        }
+        catch (XmlException e)
+        {
+            throw new UnexpectedException(e);
+        }
+
+        if (gate != null)
+        {
+            if (invert)
+                gate = new NotGate(gate);
+
+            if (id == null)
+                id = elGate.getAttributeNS(GATING_1_5_NS, "id");
+
+            if (id != null)
+                gate.setId(id);
+        }
+
+        return gate;
+    }
+
+    @Override
+    protected void readGates(Element elPopulation, Population ret)
+    {
+        for (Element elGate : getElementsByTagName(elPopulation, "Gate"))
+        {
+            Gate gate = readGate(elGate);
+            if (gate != null)
+                ret.addGate(gate);
+        }
+    }
+}

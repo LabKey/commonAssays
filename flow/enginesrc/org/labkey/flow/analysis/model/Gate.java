@@ -42,6 +42,7 @@ public abstract class Gate implements Serializable
         }
     };
 
+    String _id;
     PopulationName _name;
 
     public Gate()
@@ -49,6 +50,16 @@ public abstract class Gate implements Serializable
     }
 
     public abstract BitSet apply(PopulationSet populations, DataFrame data);
+
+    public String getId()
+    {
+        return _id;
+    }
+
+    public void setId(String id)
+    {
+        _id = id;
+    }
 
     public PopulationName getName()
     {
@@ -114,25 +125,26 @@ public abstract class Gate implements Serializable
         return null;
     }
 
+    @Override
     public int hashCode()
     {
-        if (_name == null)
-            return 0;
-        return _name.hashCode();
+        int result = _id != null ? _id.hashCode() : 0;
+        result = 31 * result + (_name != null ? _name.hashCode() : 0);
+        return result;
     }
 
-    public boolean equals(Object other)
+    @Override
+    public boolean equals(Object o)
     {
-        if (other == null)
-            return false;
-        if (other.getClass() != this.getClass())
-            return false;
-        Gate otherGate = (Gate) other;
-        if (otherGate._name == null && _name == null)
-            return true;
-        if (otherGate._name == null || _name == null)
-            return false;
-        return otherGate._name.equals(_name);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Gate gate = (Gate) o;
+
+        if (_id != null ? !_id.equals(gate._id) : gate._id != null) return false;
+        if (_name != null ? !_name.equals(gate._name) : gate._name != null) return false;
+
+        return true;
     }
 
     abstract public boolean isSimilar(Gate other);

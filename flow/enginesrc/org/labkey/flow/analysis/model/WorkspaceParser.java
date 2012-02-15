@@ -19,6 +19,10 @@ import org.apache.log4j.Logger;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.util.SymbolTable;
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.NamespaceContext;
+import org.apache.xerces.xni.XMLLocator;
+import org.apache.xerces.xni.XNIException;
 import org.w3c.dom.*;
 import org.w3c.dom.ls.LSParserFilter;
 import org.w3c.dom.traversal.NodeFilter;
@@ -32,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -41,6 +46,21 @@ import java.util.Stack;
  */
 public class WorkspaceParser
 {
+    protected static final String GATING_1_5_NS = "http://www.isac-net.org/std/Gating-ML/v1.5/gating";
+    protected static final String TRANSFORMATIONS_1_5_NS = "http://www.isac-net.org/std/Gating-ML/v1.5/transformations";
+    protected static final String DATATYPES_1_5_NS = "http://www.isac-net.org/std/Gating-ML/v1.5/datatypes";
+    protected static final String COMPENSATION_1_5_NS = "http://www.isac-net.org/std/Gating-ML/v1.5/compensation";
+
+    protected static Map<String, String> GATINGML_NAMESPACES;
+    static
+    {
+        GATINGML_NAMESPACES = new HashMap<String, String>();
+        GATINGML_NAMESPACES.put("gating", GATING_1_5_NS);
+        GATINGML_NAMESPACES.put("transforms", TRANSFORMATIONS_1_5_NS);
+        GATINGML_NAMESPACES.put("data-type", DATATYPES_1_5_NS);
+        GATINGML_NAMESPACES.put("comp", COMPENSATION_1_5_NS);
+    }
+
     static public boolean isFlowJoWorkspace(File file)
     {
         if (file.isDirectory())
@@ -105,6 +125,7 @@ public class WorkspaceParser
                     "Ellipse",
                     "EllipseGate",
                     "FCSHeader",
+                    "Gate",
                     "GatePaths",
                     "Group",
                     "GroupAnalyses",
@@ -237,15 +258,16 @@ public class WorkspaceParser
 
     static final short defaultFilter = LSParserFilter.FILTER_SKIP;
 
-    final static HashMap<String,Short> elements = new HashMap<String, Short>(100);
+    final static HashMap<String,Short> noNamespaceElements = new HashMap<String, Short>(100);
+
     static
     {
         for (String s : knownElements)
-            elements.put(s, defaultFilter);
+            noNamespaceElements.put(s, defaultFilter);
         for (String s : rejectElements)
-            elements.put(s, LSParserFilter.FILTER_REJECT);
+            noNamespaceElements.put(s, LSParserFilter.FILTER_REJECT);
         for (String s : parsedElements)
-            elements.put(s, LSParserFilter.FILTER_ACCEPT);
+            noNamespaceElements.put(s, LSParserFilter.FILTER_ACCEPT);
     }
 
     static class FJErrorHandler implements ErrorHandler
@@ -281,8 +303,15 @@ public class WorkspaceParser
 
         public short startElement(Element element)
         {
-            Short s = elements.get(element.getNodeName());
-            short filter = null == s ? defaultFilter : s.shortValue();
+            String localName = element.getLocalName();
+            String nsURI = element.getNamespaceURI();
+
+            short filter = defaultFilter;
+            if (noNamespaceElements.containsKey(localName))
+                filter = noNamespaceElements.get(localName);
+            else if (nsURI != null && (nsURI.equals(GATING_1_5_NS) || nsURI.equals(TRANSFORMATIONS_1_5_NS) || nsURI.equals(DATATYPES_1_5_NS) || nsURI.equals(COMPENSATION_1_5_NS)))
+                filter = FILTER_ACCEPT;
+
 //            if (filter != FILTER_ACCEPT && rejected.add(element.getNodeName())) System.err.println((filter == FILTER_SKIP ? "SKIPPED:  " : "REJECTED: ") + element.getNodeName());
             return filter;
         }
@@ -359,6 +388,7 @@ public class WorkspaceParser
             {
                 setFeature(Constants.SAX_FEATURE_PREFIX + Constants.VALIDATION_FEATURE, false);
                 setFeature(DEFER_NODE_EXPANSION, false);
+                setFeature(INCLUDE_IGNORABLE_WHITESPACE, false);
                 setFeature(NAMESPACES, true);
                 setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.CONTINUE_AFTER_FATAL_ERROR_FEATURE, true);
                 setErrorHandler(new FJErrorHandler());
@@ -371,6 +401,18 @@ public class WorkspaceParser
             {
                 throw new RuntimeException(x);
             }
+        }
+
+        @Override
+        public void startDocument(XMLLocator locator, String encoding, NamespaceContext namespaceContext, Augmentations augs) throws XNIException
+        {
+            // FlowJo v7.5.5 didn't add Gating-ML namepsace declarations.
+            // I'm not sure if this is the preferred way to inject the prefixes, but it seems to work.
+            for (Map.Entry<String, String> entry : GATINGML_NAMESPACES.entrySet())
+            {
+                namespaceContext.declarePrefix(entry.getKey(), entry.getValue());
+            }
+            super.startDocument(locator, encoding, namespaceContext, augs);
         }
 
         @Override

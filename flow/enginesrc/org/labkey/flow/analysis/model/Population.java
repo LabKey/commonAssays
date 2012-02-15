@@ -97,4 +97,16 @@ public class Population extends PopulationSet
         return super.isSimilar(other);
     }
 
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[Population ");
+        sb.append(super.toString());
+        sb.setLength(sb.length()-1);
+        sb.append(",gates:").append(_gates.size());
+        sb.append(")]");
+
+        return sb.toString();
+    }
 }

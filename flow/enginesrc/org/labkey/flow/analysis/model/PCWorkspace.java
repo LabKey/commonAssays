@@ -211,18 +211,8 @@ public class PCWorkspace extends FlowJoWorkspace
         return ret;
     }
 
-    protected boolean inverted(Element elGate)
+    protected void readGates(Element elPopulation, Population ret)
     {
-        return "1".equals(elGate.getAttribute("negated")) || "0".equals(elGate.getAttribute("eventsInside"));
-    }
-
-    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, @Nullable AttributeSet results, boolean warnOnMissingStats)
-    {
-        Population ret = new Population();
-        PopulationName name = PopulationName.fromString(elPopulation.getAttribute("name"));
-        ret.setName(name);
-        SubsetSpec subset = new SubsetSpec(parentSubset, name);
-
         for (Element elPolygonGate : getElementsByTagName(elPopulation, "PolygonGate"))
         {
             boolean invert = inverted(elPolygonGate);
@@ -247,6 +237,21 @@ public class PCWorkspace extends FlowJoWorkspace
             //PolygonGate gate = readRectangleGate(elEllipseGate);
             //ret.addGate(invert ? new NotGate(gate) : gate);
         }
+    }
+
+    protected boolean inverted(Element elGate)
+    {
+        return "1".equals(elGate.getAttribute("negated")) || "0".equals(elGate.getAttribute("eventsInside"));
+    }
+
+    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, @Nullable AttributeSet results, boolean warnOnMissingStats)
+    {
+        Population ret = new Population();
+        PopulationName name = PopulationName.fromString(elPopulation.getAttribute("name"));
+        ret.setName(name);
+        SubsetSpec subset = new SubsetSpec(parentSubset, name);
+
+        readGates(elPopulation, ret);
 
         readStats(subset, elPopulation, results, analysis, warnOnMissingStats);
 

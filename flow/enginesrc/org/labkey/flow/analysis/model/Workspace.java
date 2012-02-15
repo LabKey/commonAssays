@@ -85,19 +85,22 @@ public abstract class Workspace implements Serializable
             // ignore
         }
 
-        if (version >= 1.4 && version < 1.6)
+        if (version > 0)
         {
-            return new PCWorkspace(name, elDoc);
-        }
-        else if (version < 2.0)
-        {
-            // GatingML appears in version >= 1.6
-            return new PCWorkspace(name, elDoc);
-        }
+            if (version >= 1.4 && version < 1.6)
+            {
+                return new PCWorkspace(name, elDoc);
+            }
+            else if (version < 2.0)
+            {
+                // GatingML appears in version >= 1.6 (FlowJo version 7.5.5)
+                return new PC75Workspace(name, elDoc);
+            }
 
-        if (version == 2.0)
-        {
-            return new FJ8Workspace(name, elDoc);
+            if (version == 2.0)
+            {
+                return new FJ8Workspace(name, elDoc);
+            }
         }
 
         if (name != null && name.endsWith(".wsp") || name.endsWith(".WSP"))

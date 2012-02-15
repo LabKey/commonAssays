@@ -173,6 +173,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/MacWorkspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/MinMaxConstraint.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/NotGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/OrGate.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/PC75Workspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/PCWorkspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Polygon.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/PolygonGate.java -text

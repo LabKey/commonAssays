@@ -101,4 +101,17 @@ public class CompensationCalculation extends ScriptComponent
     {
         return getChannelInfo(i).getName();
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[CompCalc ");
+        sb.append(super.toString());
+        sb.setLength(sb.length()-1);
+        sb.append(",channels:").append(_lstChannelInfo.size());
+        sb.append(")]");
+
+        return sb.toString();
+    }
 }

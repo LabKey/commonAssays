@@ -136,4 +136,9 @@ public class IntervalGate extends RegionGate
         return CompensationMatrix.isParamCompensated(_axis);
     }
 
+    @Override
+    public String toString()
+    {
+        return "[IntervalGate " + _name + " (axis:" + _axis + ",min:" + _min + ",max:" + _max + ")]";
+    }
 }
