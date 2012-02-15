@@ -19,11 +19,12 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
 {
     private String[] _analyteNames;
     private Map<String, Map<Integer, String>> _analytePropertiesById = new HashMap<String, Map<Integer, String>>();
+    private Map<String, Map<String, String>> _analyteColumnPropertiesByName = new HashMap<String, Map<String, String>>();
     private Map<String, Set<String>> _titrationsByAnalyte = new HashMap<String, Set<String>>();
-    private Map<String, Map<ColumnInfo, String>> _analyteColumnProperties = new HashMap<String, Map<ColumnInfo, String>>();
     private List<Titration> _titrations;
 
     private transient Map<String, Map<DomainProperty, String>> _analyteProperties;
+    private transient Map<String, Map<ColumnInfo, String>> _analyteColumnProperties;
     private transient LuminexExcelParser _parser;
 
     public LuminexRunAsyncContext(LuminexRunContext originalContext) throws IOException, ExperimentException
@@ -35,8 +36,8 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
         for (String analyteName : _analyteNames)
         {
             _analytePropertiesById.put(analyteName, convertPropertiesToIds(originalContext.getAnalyteProperties(analyteName)));
+            _analyteColumnPropertiesByName.put(analyteName, convertColumnPropertiesToNames(originalContext.getAnalyteColumnProperties(analyteName)));
             _titrationsByAnalyte.put(analyteName, originalContext.getTitrationsForAnalyte(analyteName));
-            _analyteColumnProperties.put(analyteName, originalContext.getAnalyteColumnProperties(analyteName));
         }
         _titrations = originalContext.getTitrations();
     }
@@ -71,10 +72,20 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     @Override
     public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName)
     {
+        if (_analyteColumnProperties == null)
+        {
+            _analyteColumnProperties = new HashMap<String, Map<ColumnInfo, String>>();
+        }
         Map<ColumnInfo, String> result = _analyteColumnProperties.get(analyteName);
         if (result == null)
         {
-            throw new IllegalStateException("Could not find analyte: " + analyteName);
+            Map<String, String> propsByName = _analyteColumnPropertiesByName.get(analyteName);
+            if (propsByName == null)
+            {
+                throw new IllegalStateException("Could not find analyte: " + analyteName);
+            }
+            result = convertColumnPropertiesFromNames(propsByName);
+            _analyteColumnProperties.put(analyteName, result);
         }
         return result;
     }
@@ -104,5 +115,40 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             _parser = new LuminexExcelParser(getProtocol(), getUploadedData().values());
         }
         return _parser;
+    }
+
+    /** Convert to a map that can be serialized - ColumnInfo can't be */
+    private Map<String, String> convertColumnPropertiesToNames(Map<ColumnInfo, String> properties)
+    {
+        Map<String, String> result = new HashMap<String, String>();
+        for (Map.Entry<ColumnInfo, String> entry : properties.entrySet())
+        {
+            result.put(entry.getKey().getName(), entry.getValue());
+        }
+        return result;
+    }
+
+    /** Convert from a serialized map by looking up the ColumnInfo from the Analyte table */
+    private Map<ColumnInfo, String> convertColumnPropertiesFromNames(Map<String, String> properties)
+    {
+        Map<ColumnInfo, String> result = new HashMap<ColumnInfo, String>();
+        for (Map.Entry<String, String> entry : properties.entrySet())
+        {
+            result.put(findColumn(entry.getKey()), entry.getValue());
+        }
+        return result;
+    }
+
+    private ColumnInfo findColumn(String columnName)
+    {
+        List<ColumnInfo> columns = LuminexSchema.getTableInfoAnalytes().getColumns();
+        for (ColumnInfo column : columns)
+        {
+            if (column.getName().equals(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME))
+            {
+                return column;
+            }
+        }
+        throw new IllegalStateException("Could not find property: " + columnName);
     }
 }

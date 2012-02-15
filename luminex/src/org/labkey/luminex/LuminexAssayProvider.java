@@ -543,4 +543,10 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         return new LuminexRunCreator(this);
     }
+
+    @Override
+    public boolean supportsBackgroundUpload()
+    {
+        return true;
+    }
 }
