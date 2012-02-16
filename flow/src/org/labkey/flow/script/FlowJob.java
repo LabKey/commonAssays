@@ -90,11 +90,7 @@ public abstract class FlowJob extends PipelineJob
             long duration = Math.max(0, _end.getTime() - _start.getTime());
             addStatus("Elapsed time " + DateUtil.formatDuration(duration));
         }
-        if (checkInterrupted())
-        {
-            setStatus(INTERRUPTED_STATUS);
-        }
-        else if (hasErrors())
+        if (hasErrors())
         {
             setStatus(ERROR_STATUS);
         }
