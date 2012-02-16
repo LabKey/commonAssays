@@ -129,7 +129,7 @@ public class NestedRenderContext extends RenderContext
     }
 
     @Override
-    public Map<String, Aggregate.Result> getAggregates(List<DisplayColumn> displayColumns, TableInfo tinfo, String dataRegionName, List<Aggregate> aggregatesIn,
+    public Map<String, List<Aggregate.Result>> getAggregates(List<DisplayColumn> displayColumns, TableInfo tinfo, String dataRegionName, List<Aggregate> aggregatesIn,
             Map<String,Object> parameters,  boolean async) throws SQLException, IOException
     {
         if (aggregatesIn == null || aggregatesIn.isEmpty())
