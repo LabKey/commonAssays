@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2.pipeline.client;
 
-import com.extjs.gxt.ui.client.widget.Label;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -28,9 +27,12 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import org.labkey.api.gwt.client.ui.HelpPopup;
 import org.labkey.api.gwt.client.ui.ImageButton;
 import org.labkey.api.gwt.client.ui.PropertiesEditor;
 
@@ -148,7 +150,12 @@ public class OtherParametersComposite extends SearchFormComposite
     @Override
     public Widget getLabel()
     {
-        return new Label("Other parameters");
+        Label label = new Label("Other parameters");
+        label.setStyleName(LABEL_STYLE_NAME);
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.add(label);
+        panel.add(new HelpPopup("Other parameters", "The names and values of other <a href=\"https://www.labkey.org/wiki/home/Documentation/page.view?name=pipelineParams\" target=\"_blank\">analysis parameters</a> that are not controlled by the above inputs."));
+        return panel;
     }
 
     @Override

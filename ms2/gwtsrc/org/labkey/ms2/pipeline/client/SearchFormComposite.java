@@ -36,7 +36,6 @@ public abstract class SearchFormComposite extends Composite implements HasName
     public static final String LABEL_STYLE_NAME = "labkey-form-label";
 
     protected boolean readOnly;
-    protected Widget labelWidget;
 
     protected int _parentTableRow;
     protected FlexTable _parentTable;

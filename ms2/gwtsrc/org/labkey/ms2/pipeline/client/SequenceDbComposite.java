@@ -21,6 +21,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
+
+import org.labkey.api.gwt.client.ui.HelpPopup;
 import org.labkey.api.gwt.client.ui.ImageButton;
 
 /**
@@ -310,9 +312,12 @@ public abstract class SequenceDbComposite extends SearchFormComposite
 
     public Widget getLabel()
     {
-        labelWidget = new Label("Databases");
-        labelWidget.setStylePrimaryName(LABEL_STYLE_NAME);
-        return labelWidget;
+        Label label = new Label("Protein Database");
+        label.setStylePrimaryName(LABEL_STYLE_NAME);
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.add(label);
+        panel.add(new HelpPopup("Protein Database", "A protein database defines the set of sequences that are searched for matches against the input spectra. This is typically in the <a href=\"http://en.wikipedia.org/wiki/FASTA_format\" target=\"_blank\">FASTA format</a>."));
+        return panel;
     }
 
     public String validate()

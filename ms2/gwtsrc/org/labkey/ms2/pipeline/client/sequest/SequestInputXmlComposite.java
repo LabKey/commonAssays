@@ -16,9 +16,11 @@
 
 package org.labkey.ms2.pipeline.client.sequest;
 
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.HasText;
+import org.labkey.api.gwt.client.ui.HelpPopup;
 import org.labkey.ms2.pipeline.client.InputXmlComposite;
 import org.labkey.ms2.pipeline.client.ParamParser;
 
@@ -41,9 +43,12 @@ public class SequestInputXmlComposite extends InputXmlComposite
 
     public Widget getLabel()
     {
-        labelWidget = new Label("Sequest XML");
-        labelWidget.setStylePrimaryName(LABEL_STYLE_NAME);
-        return labelWidget;
+        Label label = new Label("Sequest XML");
+        label.setStyleName(LABEL_STYLE_NAME);
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.add(label);
+        panel.add(new HelpPopup("Sequest XML", "The <a href=\"https://www.labkey.org/wiki/home/Documentation/page.view?name=pipelineSequest\" target=\"_blank\">full set of analysis parameters</a>, represented in XML."));
+        return panel;
     }
 
     private class SequestParamParser extends ParamParser

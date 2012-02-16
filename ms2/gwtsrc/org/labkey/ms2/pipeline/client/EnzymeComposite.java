@@ -18,6 +18,8 @@ package org.labkey.ms2.pipeline.client;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.*;
+import org.labkey.api.gwt.client.ui.HelpPopup;
+
 import java.util.*;
 
 /**
@@ -40,7 +42,6 @@ public class EnzymeComposite extends SearchFormComposite
         enzymeReadOnly.setStylePrimaryName("labkey-read-only");
         instance.add(enzymeListBox);
         initWidget(instance);
-        labelWidget = new Label();
     }
 
     public void update(Map<String, String> enzymeMap)
@@ -69,9 +70,12 @@ public class EnzymeComposite extends SearchFormComposite
 
     public Widget getLabel()
     {
-        ((Label)labelWidget).setText("Enzyme");
-        labelWidget.setStylePrimaryName(LABEL_STYLE_NAME);
-        return labelWidget;
+        Label label = new Label("Enzyme");
+        label.setStylePrimaryName(LABEL_STYLE_NAME);
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.add(label);
+        panel.add(new HelpPopup("Enzyme", "Short peptides are generated from longer protein sequences by the use of either chemical or enzymatic cleavage. Both types of cleavage tend to have preferred sites of cleavage, based on the residues on either side of the peptide bond to be cleaved. Proteomics experiments frequently use enzymes with very strong sequence specificity, to limit the number of peptides generated and the assure that there are a reasonable number of peptides in the length range most useful for protein identification. <div style=\"font-size: smaller\">Text taken from the <a href=\"http://www.thegpm.org/tandem/api/pcs.html\" target=\"_blank\">X!Tandem documentation.</a></div>"));
+        return panel;
     }
 
     public String validate()

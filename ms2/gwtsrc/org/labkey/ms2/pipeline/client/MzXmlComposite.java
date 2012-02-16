@@ -37,7 +37,6 @@ public class MzXmlComposite extends SearchFormComposite
     public MzXmlComposite()
     {
         initWidget(instance);
-        labelWidget = new Label();
     }
 
     public void update(List fileInputNames, List fileInputStatus, boolean isActiveJobs)
@@ -49,10 +48,6 @@ public class MzXmlComposite extends SearchFormComposite
         int num = (fileInputNames == null ? 0 : fileInputNames.size());
         if(num != 0)
         {
-            if(num > 1)
-            {
-                ((Label)labelWidget).setText("Analyze file:");
-            }
             StringBuffer names = new StringBuffer();
             for(int i = 0; i < num; i++)
             {
@@ -96,9 +91,9 @@ public class MzXmlComposite extends SearchFormComposite
 
     public Widget getLabel()
     {
-        ((Label)labelWidget).setText("Analyze file");
-        labelWidget.setStylePrimaryName(LABEL_STYLE_NAME);
-        return labelWidget;
+        Label label = new Label("Analyze file");
+        label.setStylePrimaryName(LABEL_STYLE_NAME);
+        return label;
     }
 
     public String validate()

@@ -16,9 +16,11 @@
 
 package org.labkey.ms2.pipeline.client.tandem;
 
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.HasText;
+import org.labkey.api.gwt.client.ui.HelpPopup;
 import org.labkey.ms2.pipeline.client.InputXmlComposite;
 import org.labkey.ms2.pipeline.client.ParamParser;
 
@@ -42,9 +44,12 @@ public class XtandemInputXmlComposite extends InputXmlComposite
 
     public Widget getLabel()
     {
-        labelWidget = new Label("X! Tandem XML");
-        labelWidget.setStylePrimaryName(LABEL_STYLE_NAME);
-        return labelWidget;
+        Label label = new Label("X! Tandem XML");
+        label.setStyleName(LABEL_STYLE_NAME);
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.add(label);
+        panel.add(new HelpPopup("X! Tandem XML", "The <a href=\"https://www.labkey.org/wiki/home/Documentation/page.view?name=pipelineXTandem\" target=\"_blank\">full set of analysis parameters</a>, represented in XML."));
+        return panel;
     }
 
     private class XtandemParamParser extends ParamParser

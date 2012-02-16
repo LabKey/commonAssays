@@ -17,6 +17,7 @@
 package org.labkey.ms2.pipeline.client;
 
 import com.google.gwt.user.client.ui.*;
+import org.labkey.api.gwt.client.ui.HelpPopup;
 import org.labkey.api.gwt.client.ui.ImageButton;
 
 import java.util.*;
@@ -76,7 +77,6 @@ public abstract class ResidueModComposite extends SearchFormComposite
         modTabPanel.selectTab(0);
         readOnlyPanel.add(staticReadOnlyLabel);
         readOnlyPanel.add(dynamicReadOnlyLabel);
-        labelWidget = new Label();
         initWidget(instance);
     }
 
@@ -127,9 +127,12 @@ public abstract class ResidueModComposite extends SearchFormComposite
 
     public Widget getLabel()
     {
-        ((Label)labelWidget).setText("Residue modifications");
-        labelWidget.setStylePrimaryName("labkey-form-label");
-        return labelWidget;
+        Label label = new Label("Residue modifications");
+        label.setStylePrimaryName(LABEL_STYLE_NAME);
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.add(label);
+        panel.add(new HelpPopup("Residue modifications", "<p>Residue modifications, often referred to as <a href=\"http://en.wikipedia.org/wiki/Posttranslational_modification\" target=\"_blank\">posttranslational modifications</a> (PTM) are the chemical modifications of a protein after its translation. Each modification will alter the mass of its associated amino acid.</p><p><a href=\"http://www.thegpm.org/tandem/api/rmm.html\" target=\"_blank\">Fixed modifications</a> are expected to be present for every amino acid of that type.</p><p><a href=\"http://www.thegpm.org/tandem/api/refpmm.html\" target=\"_blank\">Variable modifications</a> may or may not be present for a given amino acid.</p>"));
+        return panel;
     }
 
     public String validate()

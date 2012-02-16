@@ -34,7 +34,6 @@ public class ProtocolComposite extends SearchFormComposite
     private TextBox protocolNameTextBox = new TextBox();
     private TextArea protocolDescTextArea = new TextArea();
     private HTML protocolDescHtml = new HTML();
-    Label listBoxLabel;
     Label textBoxLabel;
     Label descriptionLabel;
     private static final String NEW_PROTOCOL = "<new protocol>";
@@ -60,25 +59,18 @@ public class ProtocolComposite extends SearchFormComposite
         instance.getCellFormatter().setHorizontalAlignment(2,0,HasHorizontalAlignment.ALIGN_LEFT);
         instance.setWidget(2,1,protocolDescTextArea);
 
-        listBoxLabel = new Label("Analysis protocol");
-        labelWidget = listBoxLabel;
+        textBoxLabel.setStylePrimaryName(LABEL_STYLE_NAME);
+        descriptionLabel.setStylePrimaryName(LABEL_STYLE_NAME);
+
         initWidget(instance);
     }
 
 
     public Widget getLabel()
     {
-        setLabelStyle();
-        return labelWidget;
-    }
-
-    private void setLabelStyle()
-    {
-        String style = "labkey-form-label";
-        labelWidget.setStylePrimaryName(style);
-        listBoxLabel.setStylePrimaryName(style);
-        textBoxLabel.setStylePrimaryName(style);
-        descriptionLabel.setStylePrimaryName(style);
+        Label listBoxLabel = new Label("Analysis protocol");
+        listBoxLabel.setStylePrimaryName(LABEL_STYLE_NAME);
+        return listBoxLabel;
     }
 
     public void addChangeHandler(ChangeHandler handler)

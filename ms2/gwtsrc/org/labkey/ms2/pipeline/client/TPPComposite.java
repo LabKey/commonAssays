@@ -18,12 +18,14 @@ package org.labkey.ms2.pipeline.client;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.labkey.api.gwt.client.pipeline.GWTPipelineConfig;
 import org.labkey.api.gwt.client.pipeline.GWTPipelineTask;
+import org.labkey.api.gwt.client.ui.HelpPopup;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -54,17 +56,27 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
     public TPPComposite()
     {
         int row = 0;
-        _instance.setWidget(row, 0, new Label("Minimum PeptideProphet prob"));
+        
+        HorizontalPanel minPepPropLabel = new HorizontalPanel();
+        minPepPropLabel.add(new Label("Minimum PeptideProphet prob"));
+        minPepPropLabel.add(new HelpPopup("Minimum PeptideProphet prob", "The minimum value for a peptide's probability, as determined by <a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:PeptideProphet\" target=\"_blank\">PeptideProphet</a>, to be retained in the analysis results."));
+        _instance.setWidget(row, 0, minPepPropLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _peptideProphetTextBox.setVisibleLength(4);
         _instance.setText(row, 1, "<default>");
 
-        _instance.setWidget(++row, 0, new Label("Minimum ProteinProphet prob"));
+        HorizontalPanel minProtPropLabel = new HorizontalPanel();
+        minProtPropLabel.add(new Label("Minimum ProteinProphet prob"));
+        minProtPropLabel.add(new HelpPopup("Minimum ProteinProphet prob", "The minimum value for a protein group's probability, as determined by <a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:ProteinProphet\" target=\"_blank\">ProteinProphet</a>, to be retained in the analysis results."));
+        _instance.setWidget(++row, 0, minProtPropLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _proteinProphetTextBox.setVisibleLength(4);
         _instance.setText(row, 1, "<default>");
 
-        _instance.setWidget(++row, 0, new Label("Quantitation engine"));
+        HorizontalPanel quantEngineLabel = new HorizontalPanel();
+        quantEngineLabel.add(new Label("Quantitation engine"));
+        quantEngineLabel.add(new HelpPopup("Quantitation engine", "<p>The tool to use for performing quantitation on isotopically labelled samples.</p><p><a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:XPRESS\" target=\"_blank\">XPRESS</a> and <a href=\"http://proteomics.fhcrc.org/CPL/msinspect/index.html\" target=\"_blank\">Q3</a> can be used for <a href=\"http://en.wikipedia.org/wiki/Isotope-coded_affinity_tag\" target=\"_blank\">Isotope-coded affinity tag</a> (ICAT) or <a href=\"http://en.wikipedia.org/wiki/SILAC\" target=\"_blank\">Stable isotope labeling by amino acids in cell culture</a> (SILAC) experiments.</p><p><a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:Libra\" target=\"_blank\">Libra</a> analyzes <a href=\"http://en.wikipedia.org/wiki/Isobaric_tag_for_relative_and_absolute_quantitation\" target=\"_blank\">Isobaric tag for relative and absolute quantitation</a> (iTRAQ) samples.</p>"));
+        _instance.setWidget(++row, 0, quantEngineLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _quantitationAlgorithmListBox.addItem("<none>");
         _quantitationAlgorithmListBox.addItem("Libra");
@@ -72,28 +84,41 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         _quantitationAlgorithmListBox.addItem("XPRESS");
         _instance.setText(row, 1, "<none>");
 
-        _instance.setWidget(++row, 0, new Label("Quantitation mass tolerance"));
-        _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
-        _massToleranceTextBox.setVisibleLength(4);
-        _instance.setText(row, 1, "<default>");
-        _instance.getRowFormatter().setVisible(row, false);
-        _massToleranceRow = row;
-
-        _instance.setWidget(++row, 0, new Label("Quantitation residue mass label"));
+        HorizontalPanel quantResidueMasslLabel = new HorizontalPanel();
+        quantResidueMasslLabel.add(new Label("Quantitation residue mass label"));
+        quantResidueMasslLabel.add(new HelpPopup("Quantitation residue mass label", "The mass of the quantitation label modification for the each modified amino acid. The format is M1@X1,M2@X2,..., Mn@Xn\n" +
+                "where Mi is a floating point number (modification mass in Daltons) and Xi is a single letter abbreviation for a type of amino acid residue. For example, '9.0@C'. See the <a href=\"http://thegpm.org/TANDEM/api/rmm.html\" target=\"_blank\">X!Tandem documentation</a> for more information."));
+        _instance.setWidget(++row, 0, quantResidueMasslLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _residueLabeLMassTextBox.setVisibleLength(20);
         _instance.setText(row, 1, "");
         _instance.getRowFormatter().setVisible(row, false);
         _residueLabelMassRow = row;
 
-        _instance.setWidget(++row, 0, new Label("Libra config name"));
+        HorizontalPanel quantMassTolLabel = new HorizontalPanel();
+        quantMassTolLabel.add(new Label("Quantitation mass tolerance"));
+        quantMassTolLabel.add(new HelpPopup("Quantitation mass tolerance", "The mass tolerance for XPRESS or Q3 quantitation. The default value is 1.0 daltons."));
+        _instance.setWidget(++row, 0, quantMassTolLabel);
+        _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
+        _massToleranceTextBox.setVisibleLength(4);
+        _instance.setText(row, 1, "<default>");
+        _instance.getRowFormatter().setVisible(row, false);
+        _massToleranceRow = row;
+
+        HorizontalPanel libraConfigNameLabel = new HorizontalPanel();
+        libraConfigNameLabel.add(new Label("Libra config name"));
+        libraConfigNameLabel.add(new HelpPopup("Libra config name", "The name of the <a href=\"http://sashimi.svn.sourceforge.net/viewvc/sashimi/trunk/trans_proteomic_pipeline/src/Quantitation/Libra/docs/libra_info.html\" target=\"_blank\">Libra configuration file</a>. Must be available on server's file system in <File Root>/.labkey/protocols/libra/"));
+        _instance.setWidget(++row, 0, libraConfigNameLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _libraConfigNameTextBox.setVisibleLength(20);
         _instance.setText(row, 1, "");
         _instance.getRowFormatter().setVisible(row, false);
         _libraConfigNameRow = row;
 
-        _instance.setWidget(++row, 0, new Label("Libra normalization channel"));
+        HorizontalPanel libraChannelLabel = new HorizontalPanel();
+        libraChannelLabel.add(new Label("Libra normalization channel"));
+        libraChannelLabel.add(new HelpPopup("Libra normalization channel", "The Libra quantitation channel number to be used for normalization."));
+        _instance.setWidget(++row, 0, libraChannelLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         for (int i = 1; i <= MAX_LIBRA_CHANNELS; i++)
         {
@@ -114,9 +139,12 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
     @Override
     public Widget getLabel()
     {
-        Label result = new Label("TPP");
-        result.setStyleName(LABEL_STYLE_NAME);
-        return result;
+        Label label = new Label("Trans-Proteomic Pipeline");
+        label.setStyleName(LABEL_STYLE_NAME);
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.add(label);
+        panel.add(new HelpPopup("Trans-Proteomic Pipeline", "The <a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP\" target=\"_blank\">Trans-Proteomic Pipeline</a> (TPP) is a suite of analysis tools from the <a href=\"http://www.systemsbiology.org/\" target=\"_blank\">Institute for Systems Biology</a> (ISB). It provides key functionality for the MS2 analysis pipeline, including PeptideProphet, ProteinProphet, and quantitation tools."));
+        return panel;
     }
 
     @Override
@@ -332,8 +360,8 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
             _instance.setText(0, 1, _peptideProphetTextBox.getText().trim().isEmpty() ? "<default>" : _peptideProphetTextBox.getText());
             _instance.setText(++row, 1, _proteinProphetTextBox.getText().trim().isEmpty() ? "<default>" : _proteinProphetTextBox.getText());
             _instance.setText(++row, 1, _quantitationAlgorithmListBox.getItemText(_quantitationAlgorithmListBox.getSelectedIndex()));
-            _instance.setText(++row, 1, _massToleranceTextBox.getText().trim().isEmpty() ? "<default>" : _massToleranceTextBox.getText());
             _instance.setText(++row, 1, _residueLabeLMassTextBox.getText().trim().isEmpty() ? "" : _residueLabeLMassTextBox.getText());
+            _instance.setText(++row, 1, _massToleranceTextBox.getText().trim().isEmpty() ? "<default>" : _massToleranceTextBox.getText());
             _instance.setText(++row, 1, _libraConfigNameTextBox.getText().trim().isEmpty() ? "" : _libraConfigNameTextBox.getText());
             _instance.setText(++row, 1, _libraNormalizationChannelListBox.getItemText(_libraNormalizationChannelListBox.getSelectedIndex()));
         }
@@ -342,8 +370,8 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
             _instance.setWidget(row, 1, _peptideProphetTextBox);
             _instance.setWidget(++row, 1, _proteinProphetTextBox);
             _instance.setWidget(++row, 1, _quantitationAlgorithmListBox);
-            _instance.setWidget(++row, 1, _massToleranceTextBox);
             _instance.setWidget(++row, 1, _residueLabeLMassTextBox);
+            _instance.setWidget(++row, 1, _massToleranceTextBox);
             _instance.setWidget(++row, 1, _libraConfigNameTextBox);
             _instance.setWidget(++row, 1, _libraNormalizationChannelListBox);
             setQuantitationVisibility();

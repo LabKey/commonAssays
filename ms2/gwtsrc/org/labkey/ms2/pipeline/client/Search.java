@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.*;
 import org.labkey.api.gwt.client.pipeline.GWTPipelineConfig;
 import org.labkey.api.gwt.client.pipeline.PipelineGWTService;
 import org.labkey.api.gwt.client.pipeline.PipelineGWTServiceAsync;
+import org.labkey.api.gwt.client.ui.HelpPopup;
 import org.labkey.api.gwt.client.util.ErrorDialogAsyncCallback;
 import org.labkey.api.gwt.client.util.PropertyUtil;
 import org.labkey.api.gwt.client.util.ServiceUtil;
@@ -327,7 +328,12 @@ public class Search implements EntryPoint
         }
         formGrid.setWidget(row, 0, inputXmlComposite.getLabel());
         formGrid.setWidget(row++, 1, inputXmlComposite);
-        formGrid.setWidget(row, 0, saveProtocolCheckBoxLabel);
+
+        HorizontalPanel saveLabelPanel = new HorizontalPanel();
+        saveLabelPanel.add(saveProtocolCheckBoxLabel);
+        saveLabelPanel.add(new HelpPopup("Save protocol", "Whether or not this set of analysis parameters should be saved to use for future searches."));
+
+        formGrid.setWidget(row, 0, saveLabelPanel);
         formGrid.setWidget(row++, 1, saveProtocolCheckBox);
         formGrid.getColumnFormatter().setWidth(1,"100%");
 

@@ -41,6 +41,7 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
     private Label taxonomyReadOnly = new Label();
     private Label taxonomyLabel = new Label();
     private Label databaseLabel = new Label();
+    protected VerticalPanel labelWidget;
 
 
     public MascotSequenceDbComposite(Search search)
@@ -58,22 +59,22 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
     private void initLabel(boolean readonly)
     {
         taxonomyLabel.setText("Taxonomy");
-        ((VerticalPanel)labelWidget).clear();
+        labelWidget.clear();
         if(readonly)
         {
             databaseLabel.setText("Database");
-            ((VerticalPanel)labelWidget).add(databaseLabel);
-            ((VerticalPanel)labelWidget).add(taxonomyLabel);
+            labelWidget.add(databaseLabel);
+            labelWidget.add(taxonomyLabel);
         }
         else
         {
             databaseLabel.setText("Databases");
-            ((VerticalPanel)labelWidget).add(databaseLabel);
-            ((VerticalPanel)labelWidget).add(new Label(" "));
-            ((VerticalPanel)labelWidget).add(new Label(" "));
-            ((VerticalPanel)labelWidget).add(new Label(" "));
-            ((VerticalPanel)labelWidget).add(new Label(" "));
-            ((VerticalPanel)labelWidget).add(taxonomyLabel);
+            labelWidget.add(databaseLabel);
+            labelWidget.add(new Label(" "));
+            labelWidget.add(new Label(" "));
+            labelWidget.add(new Label(" "));
+            labelWidget.add(new Label(" "));
+            labelWidget.add(taxonomyLabel);
         }
     }
 
@@ -101,10 +102,10 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
     private void setLabelStyle()
     {
         String style = "labkey-form-label";
-        int widgetCount = ((VerticalPanel)labelWidget).getWidgetCount();
+        int widgetCount = labelWidget.getWidgetCount();
         for(int i = 0; i < widgetCount; i++)
         {
-            Label l = (Label)((VerticalPanel)labelWidget).getWidget(i);
+            Label l = (Label)labelWidget.getWidget(i);
             l.setStylePrimaryName(style);
         }
     }
