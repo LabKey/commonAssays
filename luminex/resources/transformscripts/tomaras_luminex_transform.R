@@ -661,21 +661,20 @@ if (!is.na(calc.positivity) & !is.na(base.visit) & !is.na(fold.change) & calc.po
             visits.fi.agg = aggregate(fi.dat, by = list(analyte=visits.dat$name, ptid=visits.dat$participantID, visit=visits.dat$visitID), FUN = mean);
             if (!is.na(threshold) & any(compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)))
             {
-                baseVisitFiBkgd = visits.fi.agg$fiBackground[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)];
-                baseVisitFiBkgdBlank = visits.fi.agg$fiBackgroundBlank[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)];
+                baseVisitFiBkgd = fiConversion(visits.fi.agg$fiBackground[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)]);
+                baseVisitFiBkgdBlank = fiConversion(visits.fi.agg$fiBackgroundBlank[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)]);
                 if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
                 {
                     for (v in 1:nrow(visits.fi.agg))
                     {
                         # for each non-baseline visit, verify that the FI-Bkgd and FI-Bkgd-Blank values are above the specified threshold for that analyte
                         visit = visits.fi.agg$visit[v];
-                        if (!compareNumbersForEquality(visit, base.visit, 1e-10) & visits.fi.agg$fiBackground[v] > threshold & visits.fi.agg$fiBackgroundBlank[v] > threshold)
+                        if (!compareNumbersForEquality(visit, base.visit, 1e-10))
                         {
-                            # TODO: how to correct for negative values in fold change comparison?
-
                             # if the FI-Bkgd and FI-Bkgd-Blank values are greater than the baseline visit value * fold change, consider them positive
                             runDataIndex = run.data$name == visits.fi.agg$analyte[v] & run.data$participantID == visits.fi.agg$ptid[v] & run.data$visitID == visits.fi.agg$visit[v];
-                            if ((visits.fi.agg$fiBackground[v] > (baseVisitFiBkgd * as.numeric(fold.change))) & (visits.fi.agg$fiBackgroundBlank[v] > (baseVisitFiBkgdBlank * as.numeric(fold.change))))
+                            if ((visits.fi.agg$fiBackground[v] > threshold) & (visits.fi.agg$fiBackground[v] > (baseVisitFiBkgd * as.numeric(fold.change))) &
+                                (visits.fi.agg$fiBackgroundBlank[v] > threshold) & (visits.fi.agg$fiBackgroundBlank[v] > (baseVisitFiBkgdBlank * as.numeric(fold.change))))
                             {
                                 run.data$Positivity[runDataIndex] = "positive"
                             } else
