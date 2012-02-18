@@ -16,6 +16,7 @@
 
 package org.labkey.microarray;
 
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
@@ -24,6 +25,7 @@ import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.IconDisplayColumn;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SchemaTableInfo;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
@@ -34,7 +36,7 @@ import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
-import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.actions.AssayDetailRedirectAction;
@@ -47,11 +49,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class MicroarraySchema extends UserSchema
+public class MicroarraySchema extends SimpleUserSchema
 {
     public static final String SCHEMA_NAME = "Microarray";
     public static final String SCHMEA_DESCR = "Contains data about Microarray assay runs";
     public static final String TABLE_RUNS = "MicroarrayRuns";
+    public static final String TABLE_GEO_PROPS = "Geo_Properties";
 
     private ExpSchema _expSchema;
     public static final String QC_REPORT_COLUMN_NAME = "QCReport";
@@ -76,7 +79,10 @@ public class MicroarraySchema extends UserSchema
 
     public Set<String> getTableNames()
     {
-        return PageFlowUtil.set(TABLE_RUNS);
+        CaseInsensitiveHashSet hs = new CaseInsensitiveHashSet();
+        hs.add(TABLE_RUNS);
+        hs.add(TABLE_GEO_PROPS);
+        return hs;
     }
 
     public TableInfo createTable(String name)
@@ -85,6 +91,13 @@ public class MicroarraySchema extends UserSchema
         {
             return createRunsTable();
         }
+
+        if(getTableNames().contains(name))
+        {
+            SchemaTableInfo tableInfo = getSchema().getTable(name);
+            return new SimpleUserSchema.SimpleTable(this, tableInfo);
+        }
+
         return null;
     }
 

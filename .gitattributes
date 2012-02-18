@@ -710,16 +710,19 @@ microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayDesignerMainPa
 microarray/lib/jai_imageio.jar -text
 microarray/module.properties -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-0.00-9.10.sql -text
+microarray/resources/schemas/dbscripts/postgresql/microarray-11.30-11.31.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-0.01.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-8.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-8.30-8.31.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-8.30-9.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-0.00-9.10.sql -text
+microarray/resources/schemas/dbscripts/sqlserver/microarray-11.30-11.31.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-0.01.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-8.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-8.30-8.31.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-8.30-9.10.sql -text
 microarray/resources/schemas/microarray.xml -text
+microarray/resources/views/geo_export.html -text
 microarray/src/META-INF/microarray/jars.txt -text
 microarray/src/org/labkey/microarray/FeatureExtractionRun.java -text
 microarray/src/org/labkey/microarray/MageMLDocumentParser.java -text
@@ -746,6 +749,7 @@ microarray/src/org/labkey/microarray/pipeline/MageMLDataCreatorTask.java -text
 microarray/src/org/labkey/microarray/pipeline/ProtocolFileBuilder.java -text
 microarray/src/org/labkey/microarray/statistics.jsp -text
 microarray/webapp/WEB-INF/microarray/microarrayContext.xml -text
+microarray/webapp/microarray/geo_export.js -text
 microarray/webapp/microarray/images/microarrayThumbnailIcon.png -text
 microarray/webapp/microarray/images/qcReportIcon.png -text
 ms1/gwtsrc/org/labkey/ms1/MS1VennDiagramView.gwt.xml -text
