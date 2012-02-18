@@ -354,7 +354,7 @@ public class FlowController extends BaseFlowController
                 else
                 {
                     Container c = getContainer();
-                    PipelineService.get().getPipelineQueue().cancelJob(c, sf.getJobId());
+                    PipelineService.get().getPipelineQueue().cancelJob(c, sf);
 
                     // Attempting to stay consistent with previously existing code, create a FlowJob
                     // from the job store, and go to its status href.  This URL is not set in the
