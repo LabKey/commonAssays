@@ -56,13 +56,14 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
     public TPPComposite()
     {
         int row = 0;
-        
+
         HorizontalPanel minPepPropLabel = new HorizontalPanel();
         minPepPropLabel.add(new Label("Minimum PeptideProphet prob"));
         minPepPropLabel.add(new HelpPopup("Minimum PeptideProphet prob", "The minimum value for a peptide's probability, as determined by <a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:PeptideProphet\" target=\"_blank\">PeptideProphet</a>, to be retained in the analysis results."));
         _instance.setWidget(row, 0, minPepPropLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _peptideProphetTextBox.setVisibleLength(4);
+        _peptideProphetTextBox.setName("minPeptideProphetProb");
         _instance.setText(row, 1, "<default>");
 
         HorizontalPanel minProtPropLabel = new HorizontalPanel();
@@ -71,6 +72,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         _instance.setWidget(++row, 0, minProtPropLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _proteinProphetTextBox.setVisibleLength(4);
+        _proteinProphetTextBox.setName("minProteinProphetProb");
         _instance.setText(row, 1, "<default>");
 
         HorizontalPanel quantEngineLabel = new HorizontalPanel();
@@ -82,6 +84,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         _quantitationAlgorithmListBox.addItem("Libra");
         _quantitationAlgorithmListBox.addItem("Q3");
         _quantitationAlgorithmListBox.addItem("XPRESS");
+        _quantitationAlgorithmListBox.setName("quantitationEngine");
         _instance.setText(row, 1, "<none>");
 
         HorizontalPanel quantResidueMasslLabel = new HorizontalPanel();
@@ -91,6 +94,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         _instance.setWidget(++row, 0, quantResidueMasslLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _residueLabeLMassTextBox.setVisibleLength(20);
+        _residueLabeLMassTextBox.setName("quantitationResidueLabel");
         _instance.setText(row, 1, "");
         _instance.getRowFormatter().setVisible(row, false);
         _residueLabelMassRow = row;
@@ -101,6 +105,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         _instance.setWidget(++row, 0, quantMassTolLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _massToleranceTextBox.setVisibleLength(4);
+        _massToleranceTextBox.setName("quantitationMassTolerance");
         _instance.setText(row, 1, "<default>");
         _instance.getRowFormatter().setVisible(row, false);
         _massToleranceRow = row;
@@ -111,6 +116,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         _instance.setWidget(++row, 0, libraConfigNameLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _libraConfigNameTextBox.setVisibleLength(20);
+        _libraConfigNameTextBox.setName("libraConfigName");
         _instance.setText(row, 1, "");
         _instance.getRowFormatter().setVisible(row, false);
         _libraConfigNameRow = row;
@@ -124,6 +130,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         {
             _libraNormalizationChannelListBox.addItem(Integer.toString(i));
         }
+        _libraNormalizationChannelListBox.setName("libraNormalizationChannel");
         _instance.setText(row, 1, "");
         _instance.getRowFormatter().setVisible(row, false);
         _libraNormalizationChannelRow = row;
