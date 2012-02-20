@@ -834,6 +834,12 @@ public class AnalysisScriptController extends BaseFlowController
                     return;
                 }
 
+                if (form.getrEngineNormalizationSubsets() == null || form.getrEngineNormalizationSubsets().length() == 0)
+                {
+                    errors.reject(ERROR_MSG, "You must select at least one subset to normalize.");
+                    return;
+                }
+
                 if (form.getrEngineNormalizationParameters() == null || form.getrEngineNormalizationParameters().length() == 0)
                 {
                     errors.reject(ERROR_MSG, "You must select at least one parameter to normalize.");
@@ -842,7 +848,7 @@ public class AnalysisScriptController extends BaseFlowController
 
                 Workspace workspace = workspaceData.getWorkspaceObject();
                 String[] parameters = workspace.getParameters();
-                String[] params = form.getrEngineNormalizationParameters().split(",");
+                List<String> params = form.getrEngineNormalizationParameterList();
                 for (String param : params)
                 {
                     param = StringUtils.trim(param);
@@ -856,9 +862,7 @@ public class AnalysisScriptController extends BaseFlowController
 
                 // All samples in group should have the same staining panel for normalization to succeed.
                 List<Workspace.SampleInfo> sampleInfos = new ArrayList<Workspace.SampleInfo>();
-                List<String> importGroupNames =
-                        form.getImportGroupNames() == null ? null :
-                        Arrays.asList(form.getImportGroupNames().split(","));
+                List<String> importGroupNames = form.getImportGroupNameList();
                 if (importGroupNames == null)
                 {
                     sampleInfos = workspace.getSamples();
@@ -1008,7 +1012,7 @@ public class AnalysisScriptController extends BaseFlowController
             {
                 job = new WorkspaceJob(info, experiment,
                         workspaceData, pipelineFile, runFilePathRoot,
-                        importGroupNames,
+                        form.getImportGroupNameList(),
                         createKeywordRun, false, getPipeRoot());
             }
             /*
@@ -1020,10 +1024,11 @@ public class AnalysisScriptController extends BaseFlowController
             {
                 job = new RScriptJob(info, root, experiment,
                         workspaceData, pipelineFile, runFilePathRoot,
-                        importGroupNames,
+                        form.getImportGroupNameList(),
                         form.isrEngineNormalization(),
                         form.getrEngineNormalizationReference(),
-                        form.getrEngineNormalizationParameters(),
+                        form.getrEngineNormalizationSubsetList(),
+                        form.getrEngineNormalizationParameterList(),
                         createKeywordRun, false);
             }
             else

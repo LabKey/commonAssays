@@ -53,6 +53,7 @@
 <input type="hidden" name="importGroupNames" value="<%=h(form.getImportGroupNames())%>"/>
 <input type="hidden" name="rEngineNormalization" value="<%=h(form.isrEngineNormalization())%>"/>
 <input type="hidden" name="rEngineNormalizationReference" value="<%=h(form.getrEngineNormalizationReference())%>"/>
+<input type="hidden" name="rEngineNormalizationSubsets" value="<%=h(form.getrEngineNormalizationSubsets())%>"/>
 <input type="hidden" name="rEngineNormalizationParameters" value="<%=h(form.getrEngineNormalizationParameters())%>"/>
 
 <p>The statistics in this workspace that have been calculated by FlowJo will be imported to <%=FlowModule.getLongProductName()%>.<br><br>

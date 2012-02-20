@@ -59,6 +59,7 @@
 <input type="hidden" name="importGroupNames" value="<%=h(form.getImportGroupNames())%>"/>
 <input type="hidden" name="rEngineNormalization" value="<%=h(form.isrEngineNormalization())%>"/>
 <input type="hidden" name="rEngineNormalizationReference" value="<%=h(form.getrEngineNormalizationReference())%>"/>
+<input type="hidden" name="rEngineNormalizationSubsets" value="<%=h(form.getrEngineNormalizationSubsets())%>"/>
 <input type="hidden" name="rEngineNormalizationParameters" value="<%=h(form.getrEngineNormalizationParameters())%>"/>
 
 <% if (form.isCreateAnalysis()) { %>
@@ -81,7 +82,7 @@
         <% } %>
     </li>
     <li style="padding-bottom:0.5em;">
-        <b>Import Groups:</b> <%=form.getImportGroupNames() == null ? "<em>All Samples</em>" : h(form.getImportGroupNames())%>
+        <b>Import Groups:</b> <%=form.getImportGroupNames() == null ? "<em>All Samples</em>" : h(StringUtils.join(form.getImportGroupNameList(), ", "))%>
     </li>
     <% if ("rEngine".equals(form.getSelectAnalysisEngine()) && form.isrEngineNormalization()) { %>
     <li style="padding-bottom:0.5em;">
@@ -92,10 +93,20 @@
                 <td><%=h(form.getrEngineNormalizationReference())%></td>
             </tr>
             <tr>
+                <td><b>Normalize Subsets:</b></td>
+                <td>
+                    <% if (form.getrEngineNormalizationSubsets() != null) { %>
+                    <%=h(StringUtils.join(form.getrEngineNormalizationSubsetList(), ", "))%>
+                    <% } else { %>
+                    <em>All parameters</em>
+                    <% } %>
+                </td>
+            </tr>
+            <tr>
                 <td><b>Normalize Parameters:</b></td>
                 <td>
                 <% if (form.getrEngineNormalizationParameters() != null) { %>
-                    <%=h(form.getrEngineNormalizationParameters())%>
+                    <%=h(StringUtils.join(form.getrEngineNormalizationParameterList(), ", "))%>
                 <% } else { %>
                     <em>All parameters</em>
                 <% } %>

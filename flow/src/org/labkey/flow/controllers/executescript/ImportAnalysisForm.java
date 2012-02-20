@@ -18,12 +18,21 @@ package org.labkey.flow.controllers.executescript;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * User: kevink
  * Date: Jul 14, 2008 4:06:04 PM
  */
 public class ImportAnalysisForm
 {
+    // unicode small comma (probably not in the gate name so is safer than comma as a separator char in LovCombo)
+    public static final String PARAMATER_SEPARATOR = "\ufe50";
+    // unicode fullwidth comma
+    //public static final String NORMALIZATION_PARAMATER_SEPARATOR = "\uff0c";
+
     private int step = AnalysisScriptController.ImportAnalysisStep.SELECT_WORKSPACE.getNumber();
     private WorkspaceData workspace = new WorkspaceData();
     private int existingKeywordRunId;
@@ -34,6 +43,7 @@ public class ImportAnalysisForm
     private Boolean rEngineNormalization = true;
     private String rEngineNormalizationReference = null;
     private String rEngineNormalizationParameters = null;
+    private String rEngineNormalizationSubsets = null;
 
     private boolean createAnalysis;
     private String newAnalysisName;
@@ -81,6 +91,11 @@ public class ImportAnalysisForm
         this.selectAnalysisEngine = selectAnalysisEngine;
     }
 
+    public List<String> getImportGroupNameList()
+    {
+        return split(importGroupNames);
+    }
+
     public String getImportGroupNames()
     {
         return importGroupNames;
@@ -111,6 +126,11 @@ public class ImportAnalysisForm
         this.rEngineNormalizationReference = rEngineNormalizationReference;
     }
 
+    public List<String> getrEngineNormalizationParameterList()
+    {
+        return split(rEngineNormalizationParameters);
+    }
+
     public String getrEngineNormalizationParameters()
     {
         return rEngineNormalizationParameters;
@@ -119,6 +139,21 @@ public class ImportAnalysisForm
     public void setrEngineNormalizationParameters(String rEngineNormalizationParameters)
     {
         this.rEngineNormalizationParameters = rEngineNormalizationParameters;
+    }
+
+    public List<String> getrEngineNormalizationSubsetList()
+    {
+        return split(rEngineNormalizationSubsets);
+    }
+
+    public String getrEngineNormalizationSubsets()
+    {
+        return rEngineNormalizationSubsets;
+    }
+
+    public void setrEngineNormalizationSubsets(String rEngineNormalizationParameters)
+    {
+        this.rEngineNormalizationSubsets = rEngineNormalizationParameters;
     }
 
     public void setExistingKeywordRunId(int existingKeywordRunId)
@@ -176,4 +211,15 @@ public class ImportAnalysisForm
         this.confirm = confirm;
     }
 
+
+    private List<String> split(String list)
+    {
+        if (list == null)
+            return Collections.emptyList();
+
+        List<String> ret = new ArrayList<String>();
+        for (String s : list.split(PARAMATER_SEPARATOR))
+            ret.add(s.trim());
+        return ret;
+    }
 }

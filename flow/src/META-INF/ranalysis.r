@@ -20,7 +20,8 @@
 # group-names: ${group-names}
 # perform-normalization: ${perform-normalization}
 # normalization-reference: ${normalization-reference}
-# normalization-skip-parameters: ${normalization-skip-parameters}
+# normalization-subsets: ${normalization-subsets}
+# normalization-parameters: ${normalization-parameters}
 
 NCDF<-FALSE
 USEMPI<-FALSE
@@ -38,6 +39,7 @@ if(USEMULTICORE){
 # for md5sum
 require(tools)
 
+require(hexbin)
 require(flowStats)
 require(flowWorkspace)
 
@@ -92,8 +94,16 @@ cat("finished exporting analysis.\n")
 
 # perform normalization if requested
 if (${perform-normalization}) {
+    excludedGates <- flowWorkspace:::.includedGate2ExcludedGate(G, ${normalization-subsets})
+    cat("subsets selected for normalization:", ${normalization-subsets}, "\n")
+    cat("... excluded internal gate ids:", excludedGates, "\n")
+
+    excludedDims <- flowWorkspace:::.includedChannel2ExcludedChannel(G, ${normalization-parameters})
+    cat("channels selected for normalization:", ${normalization-parameters}, "\n")
+    cat("... excluded channels:", excludedDims, "\n")
+
     cat("performing normalization...\n")
-    system.time(N <- flowStats:::normalizeGatingSet(G, bwFac=2, target="${normalization-reference}", skipdims=${normalization-skip-parameters}))
+    system.time(N <- flowStats:::normalizeGatingSet(G, bwFac=2, target="${normalization-reference}", skipdims=excludedDims, skipgates=excludedGates))
     cat("finished normalizing", length(N), "samples\n")
 
     cat("exporting normalized analysis", workspacePath, "to", normalizedDir, "...\n")

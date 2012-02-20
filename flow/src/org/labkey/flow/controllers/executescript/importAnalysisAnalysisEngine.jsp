@@ -23,6 +23,7 @@
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
+<%@ page import="org.labkey.flow.controllers.WorkspaceData" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -30,6 +31,9 @@
     Container container = context.getContainer();
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
+
+    WorkspaceData workspaceData = form.getWorkspace();
+    String workspaceName = workspaceData.getPath() != null ? workspaceData.getPath() : workspaceData.getName();
 
     ActionURL cancelUrl = urlProvider(ProjectUrls.class).getStartURL(container);
     boolean hasPipelineRoot = pipeRoot != null;
@@ -39,7 +43,7 @@
 <input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
 <input type="hidden" name="runFilePathRoot" id="runFilePathRoot" value="<%=h(form.getRunFilePathRoot())%>">
 
-<p>Select analysis engine for workspace <em>'<%=h("need workspace name")%>'</em>.
+<p>Select analysis engine for workspace <em>'<%=h(workspaceName)%>'</em>.
 </p>
 <hr/>
 <input type="radio" name="selectAnalysisEngine" id="noEngine" value="noEngine" <%="noEngine".equals(form.getSelectAnalysisEngine()) ? "checked" : ""%> />

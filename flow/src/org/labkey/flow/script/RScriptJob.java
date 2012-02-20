@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +67,8 @@ public class RScriptJob extends FlowExperimentJob
     private static final String GROUP_NAMES = "group-names";
     private static final String NORMALIZATION = "perform-normalization";
     private static final String NORM_REFERENCE = "normalization-reference";
-    private static final String NORM_SKIP_PARAMTERS = "normalization-skip-parameters";
+    private static final String NORM_SUBSETS = "normalization-subsets";
+    private static final String NORM_PARAMTERS = "normalization-parameters";
 
     private final FlowExperiment _experiment;
     private final File _workspaceFile;
@@ -76,7 +78,9 @@ public class RScriptJob extends FlowExperimentJob
     private final List<String> _importGroupNames;
     private final boolean _performNormalization;
     private final String _normalizationReference;
-    private final List<String> _normalizationSkipParameters;
+    private final List<String> _normalizationSubsets;
+    private final List<String> _normalizationParameters;
+
     private final boolean _createKeywordRun;
     private final boolean _failOnError;
 
@@ -89,7 +93,8 @@ public class RScriptJob extends FlowExperimentJob
                       List<String> importGroupNames,
                       boolean performNormalization,
                       String normalizationReference,
-                      String normalizationParameters,
+                      List<String> normalizationSubsets,
+                      List<String> normalizationParameters,
                       boolean createKeywordRun,
                       boolean failOnError) throws Exception
     {
@@ -120,24 +125,8 @@ public class RScriptJob extends FlowExperimentJob
 
         // NOTE: may need to copy workspace file for clustered jobs
         _workspaceFile = originalImportedFile;
-
-        // Invert the list of desired parameters
-        Workspace workspace = workspaceData.getWorkspaceObject();
-        List<String> parameters = new ArrayList<String>();
-        for (String param : workspace.getParameters())
-        {
-            parameters.add(param);
-            parameters.add(CompensationMatrix.PREFIX + param + CompensationMatrix.SUFFIX);
-        }
-        if (normalizationParameters != null && normalizationParameters.length() > 0)
-        {
-            for (String param : normalizationParameters.split(","))
-            {
-                parameters.remove(param);
-                parameters.remove(CompensationMatrix.PREFIX + param + CompensationMatrix.SUFFIX);
-            }
-        }
-        _normalizationSkipParameters = parameters;
+        _normalizationSubsets = normalizationSubsets;
+        _normalizationParameters = normalizationParameters;
     }
 
     @Override
@@ -187,15 +176,26 @@ public class RScriptJob extends FlowExperimentJob
         replacements.put(NORM_REFERENCE, _normalizationReference == null ? "" : _normalizationReference);
 
         String sep = "";
-        StringBuilder skipParams = new StringBuilder("c(");
-        for (String param : _normalizationSkipParameters)
+        StringBuilder normSubsets = new StringBuilder("c(");
+        for (String subset : _normalizationSubsets)
         {
-            skipParams.append(sep);
-            skipParams.append("\"").append(param).append("\"");
+            normSubsets.append(sep);
+            normSubsets.append("\"").append(subset).append("\"");
             sep = ", ";
         }
-        skipParams.append(")");
-        replacements.put(NORM_SKIP_PARAMTERS, skipParams.toString());
+        normSubsets.append(")");
+        replacements.put(NORM_SUBSETS, normSubsets.toString());
+
+        sep = "";
+        StringBuilder normParams = new StringBuilder("c(");
+        for (String param : _normalizationParameters)
+        {
+            normParams.append(sep);
+            normParams.append("\"").append(param).append("\"");
+            sep = ", ";
+        }
+        normParams.append(")");
+        replacements.put(NORM_PARAMTERS, normParams.toString());
 
         // UNDONE: add protocol filter to script
         SimpleFilter filter = _protocol.getFCSAnalysisFilter();

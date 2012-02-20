@@ -23,7 +23,6 @@
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
@@ -38,6 +37,12 @@
 <%@ page import="org.labkey.flow.FlowSettings" %>
 <%@ page import="org.labkey.api.admin.AdminUrls" %>
 <%@ page import="org.labkey.flow.analysis.model.Workspace" %>
+<%@ page import="org.labkey.flow.analysis.model.Population" %>
+<%@ page import="org.labkey.flow.analysis.model.Analysis" %>
+<%@ page import="org.labkey.flow.analysis.model.PopulationName" %>
+<%@ page import="org.labkey.flow.analysis.web.SubsetSpec" %>
+<%@ page import="org.labkey.flow.analysis.model.SubsetExpressionGate" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -89,6 +94,7 @@
 %>
 <script>
     var groups = <%=new JSONObject(groups)%>;
+    var importedGroup = <%=PageFlowUtil.jsString(form.getImportGroupNames().length() > 0 ? form.getImportGroupNameList().get(0) : "All Samples")%>;
 </script>
 
 <input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
@@ -124,6 +130,8 @@ if (protocol != null)
     <script>
         function onGroupChanged(selectedGroup)
         {
+            importedGroup = selectedGroup || "All Samples";
+
             var rEngineNormalizationReferenceSelect = document.getElementById("rEngineNormalizationReference");
             if (rEngineNormalizationReferenceSelect)
             {
@@ -132,10 +140,7 @@ if (protocol != null)
                 while (rEngineNormalizationReferenceSelect.length > 1)
                     rEngineNormalizationReferenceSelect.remove(1);
 
-                if (!selectedGroup)
-                    selectedGroup = "All Samples";
-
-                var group = groups[selectedGroup];
+                var group = groups[importedGroup];
                 if (group)
                 {
                     for (var i = 0; i < group.length; i++)
@@ -150,23 +155,26 @@ if (protocol != null)
                     }
                 }
             }
+
+            var rEngineNormalizationSubsets = Ext.getCmp('rEngineNormalizationSubsets');
+            if (rEngineNormalizationSubsets)
+            {
+                var value = rEngineNormalizationSubsets.getValue();
+
+                rEngineNormalizationSubsets.getStore().loadData(jsonSubsetMap[importedGroup]);
+                rEngineNormalizationSubsets.setValue(value);
+            }
         }
     </script>
     <label for="importGroupNames">Select a FlowJo group to import from the workspace.</label>
     <select id="importGroupNames" name="importGroupNames" onchange="onGroupChanged(this.value);">
-        <labkey:options value="<%=form.getImportGroupNames()%>" set="<%=groups.keySet()%>" />
+        <labkey:options value="<%=form.getImportGroupNameList()%>" set="<%=groups.keySet()%>" />
     </select>
 </div>
 
 <%
     if ("rEngine".equals(form.getSelectAnalysisEngine()))
     {
-        JSONArray jsonParams = new JSONArray();
-        for (String param : workspace.getParameters())
-        {
-            if (KeywordUtil.isColorChannel(param))
-                jsonParams.put(new String[]{param, param});
-        }
 %>
 <h3>Normalization Options</h3>
 <% if (!normalizationEnabled) { %>
@@ -179,6 +187,7 @@ if (protocol != null)
     {
         var disable = !document.getElementById("rEngineNormalization").checked;
         document.getElementById("rEngineNormalizationReference").disabled = disable;
+        Ext.getCmp("rEngineNormalizationSubsets").setDisabled(disable);
         Ext.getCmp("rEngineNormalizationParameters").setDisabled(disable);
     }
 </script>
@@ -201,9 +210,10 @@ if (protocol != null)
             String rEngineNormalizationReference = form.getrEngineNormalizationReference();
             if (form.getImportGroupNames() != null && form.getImportGroupNames().length() > 0)
             {
+                List<String> importGroupNames = form.getImportGroupNameList();
                 for (String group : groups.keySet())
                 {
-                    if (form.getImportGroupNames().contains(group))
+                    if (importGroupNames.contains(group))
                     {
                         Set<String> groupSamples = groups.get(group);
                         for (String sample : groupSamples)
@@ -218,6 +228,78 @@ if (protocol != null)
 </div>
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
+    <%!
+        public void addPopulation(JSONArray jsonSubsets, SubsetSpec parent, Population pop)
+        {
+            // Can't apply normalization to populations created from boolean gates.  Ignore.
+            if (pop.getGates().size() == 1 && pop.getGates().get(0) instanceof SubsetExpressionGate)
+                return;
+
+            SubsetSpec subset = new SubsetSpec(parent, pop.getName());
+            jsonSubsets.put(new String[] {subset.toString(), subset.toString()});
+
+            for (Population child : pop.getPopulations())
+            {
+                addPopulation(jsonSubsets, subset, child);
+            }
+        }
+    %>
+    <%
+        JSONObject jsonSubsetMap = new JSONObject();
+        for (Map.Entry<PopulationName, Analysis> groupAnalysis : workspace.getGroupAnalyses().entrySet())
+        {
+            JSONArray jsonSubsets = new JSONArray();
+
+            Analysis analysis = groupAnalysis.getValue();
+            for (Population child : analysis.getPopulations())
+            {
+                addPopulation(jsonSubsets, null, child);
+            }
+
+            jsonSubsetMap.put(groupAnalysis.getKey().toString(), jsonSubsets);
+        }
+    %>
+    <label for="rEngineNormalizationSubsets">Select subsets to be normalized.  At least one subset must be selected.</label><br>
+    <em>NOTE:</em> The list of available subsets is restricted to those in the imported group above and excludes boolean subsets.<br>
+    <div id="rEngineNormalizationSubsetsDiv"></div>
+    <script>
+        LABKEY.requiresScript('Ext.ux.form.LovCombo.js');
+        LABKEY.requiresCss('Ext.ux.form.LovCombo.css');
+    </script>
+    <script>
+        var jsonSubsetMap = <%=jsonSubsetMap.toString()%>;
+
+        Ext.onReady(function () {
+            var combo = new Ext.ux.form.LovCombo({
+                id: "rEngineNormalizationSubsets",
+                renderTo: "rEngineNormalizationSubsetsDiv",
+                value: <%=PageFlowUtil.jsString(form.getrEngineNormalizationSubsets())%>,
+                disabled: <%=normalizationEnabled ? "false" : "true"%>,
+                width: 475,
+                triggerAction: "all",
+                mode: "local",
+                valueField: "myId",
+                displayField: "displayText",
+                allowBlank: false,
+                separator: "<%=ImportAnalysisForm.PARAMATER_SEPARATOR%>",
+                store: new Ext.data.ArrayStore({
+                    fields: ["myId", "displayText"],
+                    data: jsonSubsetMap[importedGroup]
+                })
+            });
+        });
+    </script>
+</div>
+
+<div style="padding-left: 2em; padding-bottom: 1em;">
+    <%
+        JSONArray jsonParams = new JSONArray();
+        for (String param : workspace.getParameters())
+        {
+            if (KeywordUtil.isColorChannel(param))
+                jsonParams.put(new String[]{param, param});
+        }
+    %>
     <label for="rEngineNormalizationParameters">Select parameters to be normalized.  At least one parameter must be selected.</label>
     <div id="rEngineNormalizationParametersDiv"></div>
     <script>
@@ -237,6 +319,7 @@ if (protocol != null)
                 valueField: "myId",
                 displayField: "displayText",
                 allowBlank: false,
+                separator: "<%=ImportAnalysisForm.PARAMATER_SEPARATOR%>",
                 store: new Ext.data.ArrayStore({
                     fields: ["myId", "displayText"],
                     data: <%=jsonParams%>
