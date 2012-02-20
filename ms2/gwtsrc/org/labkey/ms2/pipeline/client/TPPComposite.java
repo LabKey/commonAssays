@@ -59,7 +59,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
 
         HorizontalPanel minPepPropLabel = new HorizontalPanel();
         minPepPropLabel.add(new Label("Minimum PeptideProphet prob"));
-        minPepPropLabel.add(new HelpPopup("Minimum PeptideProphet prob", "The minimum value for a peptide's probability, as determined by <a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:PeptideProphet\" target=\"_blank\">PeptideProphet</a>, to be retained in the analysis results."));
+        minPepPropLabel.add(new HelpPopup("Minimum PeptideProphet prob", "The minimum value for a peptide's probability, as determined by <a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:PeptideProphet\" target=\"_blank\">PeptideProphet</a>, to be retained in the analysis results. Values should be between 0 and 1, inclusive."));
         _instance.setWidget(row, 0, minPepPropLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _peptideProphetTextBox.setVisibleLength(4);
@@ -68,7 +68,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
 
         HorizontalPanel minProtPropLabel = new HorizontalPanel();
         minProtPropLabel.add(new Label("Minimum ProteinProphet prob"));
-        minProtPropLabel.add(new HelpPopup("Minimum ProteinProphet prob", "The minimum value for a protein group's probability, as determined by <a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:ProteinProphet\" target=\"_blank\">ProteinProphet</a>, to be retained in the analysis results."));
+        minProtPropLabel.add(new HelpPopup("Minimum ProteinProphet prob", "The minimum value for a protein group's probability, as determined by <a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:ProteinProphet\" target=\"_blank\">ProteinProphet</a>, to be retained in the analysis results. Values should be between 0 and 1, inclusive."));
         _instance.setWidget(++row, 0, minProtPropLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _proteinProphetTextBox.setVisibleLength(4);
@@ -168,7 +168,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         }
         if (isXPRESS() || isQ3())
         {
-            if (!validateNumber(_massToleranceTextBox, 0, Double.MIN_VALUE, true))
+            if (!validateNumber(_massToleranceTextBox, 0, Double.MAX_VALUE, true))
                 return "Mass tolerance must be a non-negative number";
             if (_residueLabeLMassTextBox.getText().trim().isEmpty())
                 return "Residue label mass is required when using XPRESS or Q3";
