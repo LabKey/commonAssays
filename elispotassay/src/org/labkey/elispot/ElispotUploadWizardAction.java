@@ -28,6 +28,7 @@ import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -35,6 +36,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermissionClass;
@@ -43,6 +45,7 @@ import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.WellGroup;
+import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -83,7 +86,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
     protected InsertView createRunInsertView(ElispotRunUploadForm newRunForm, boolean errorReshow, BindException errors) throws ExperimentException
     {
-        InsertView parent = super.createRunInsertView(newRunForm, errorReshow, errors);
+        InsertView view = super.createRunInsertView(newRunForm, errorReshow, errors);
 
         ElispotAssayProvider provider = newRunForm.getProvider();
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
@@ -91,14 +94,62 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(newRunForm, resolverType);
         try
         {
-            helper.addSampleColumns(parent, newRunForm.getUser(), newRunForm, errorReshow);
+            helper.addSampleColumns(view, newRunForm.getUser(), newRunForm, errorReshow);
+
+            Map<String, Object> propNameToValue = new HashMap<String, Object>();
+            for (String name : helper.getSampleNames())
+                propNameToValue.put(name, name);
+
+            addDefaultValues(view, helper, ElispotAssayProvider.PARTICIPANTID_PROPERTY_NAME, propNameToValue);
         }
         catch (ExperimentException e)
         {
             errors.addError(new ObjectError("main", null, null, e.toString()));
         }
 
-        return parent;
+        return view;
+    }
+
+    /**
+     * Helper to populate the default values for sample groups if they don't have any existing values.
+     *
+     * @param helper - a sample property helper to pull sample names from
+     * @param propName - the name of the property to set default values for
+     * @param propertyNamesToValue - a map of sample group names to default values
+     */
+    private void addDefaultValues(InsertView view, SamplePropertyHelper<WellGroupTemplate> helper, String propName,
+                                  Map<String, Object> propertyNamesToValue)
+    {
+        DomainProperty prop = null;
+
+        // find the property we want to check default values for
+        for (DomainProperty dp : helper.getDomainProperties())
+        {
+            if (dp.getName().equals(propName))
+            {
+                prop = dp;
+                break;
+            }
+        }
+
+        if (prop != null)
+        {
+            // we only set the default value for props whose default value type is: LAST ENTERED
+
+            if (prop.getDefaultValueTypeEnum() == DefaultValueType.LAST_ENTERED)
+            {
+                Map<String, Object> initialValues = view.getInitialValues();
+                for (Map.Entry<String, Object> entry : propertyNamesToValue.entrySet())
+                {
+                    String inputName = UploadWizardAction.getInputName(prop, entry.getKey());
+                    Object value = initialValues.get(inputName);
+                    if (value == null)
+                    {
+                        view.setInitialValue(inputName, entry.getValue());
+                    }
+                }
+            }
+        }
     }
 
     public PlateAntigenPropertyHelper createAntigenPropertyHelper(Container container, ExpProtocol protocol, ElispotAssayProvider provider)
@@ -130,6 +181,12 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         try {
             PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
             antigenHelper.addSampleColumns(view, form.getUser(), form, errorReshow);
+
+            Map<String, Object> propNameToValue = new HashMap<String, Object>();
+            for (String name : antigenHelper.getSampleNames())
+                propNameToValue.put(name, name);
+
+            addDefaultValues(view, antigenHelper, ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME, propNameToValue);
 
             // add existing page properties
             addHiddenBatchProperties(form, view);

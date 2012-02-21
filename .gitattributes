@@ -129,6 +129,7 @@ elispotassay/src/org/labkey/elispot/plate/TextPlateReader.java -text
 elispotassay/src/org/labkey/elispot/query/ElispotRunAntigenTable.java -text
 elispotassay/src/org/labkey/elispot/query/ElispotRunDataTable.java -text
 elispotassay/src/org/labkey/elispot/view/plateSummary.jsp -text
+elispotassay/webapp/elispot/PlateSummary.js -text
 flow/FlowEngine.iml -text
 flow/enginesrc/org/labkey/flow/Main.java -text
 flow/enginesrc/org/labkey/flow/analysis/chart/DataFrameXYDataset.java -text

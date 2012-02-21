@@ -17,6 +17,11 @@
 package org.labkey.elispot;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.labkey.api.action.ApiAction;
+import org.labkey.api.action.ApiResponse;
+import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
@@ -110,18 +115,16 @@ public class ElispotController extends SpringActionController
             _hasRunFilter = hasRunFilter(_protocol, getViewContext().getActionURL());
 
             ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(_protocol);
-            PlateTemplate template = provider.getPlateTemplate(getContainer(), _protocol);
-
-            Map<Position, WellInfo> wellInfoMap = createWellInfoMap(_run, _protocol, provider, template);
 
             PlateSummaryBean bean = new PlateSummaryBean();
-            bean.setTemplate(template);
-            bean.setWellInfoMap(wellInfoMap);
             bean.setRun(form.getRowId());
 
             VBox view = new VBox();
 
             JspView plateView = new JspView<PlateSummaryBean>("/org/labkey/elispot/view/plateSummary.jsp", bean);
+
+            plateView.setTitle("Plate Summary Information Run: " + form.getRowId());
+            plateView.setFrame(WebPartView.FrameType.PORTAL);
 
             String tableName = ElispotSchema.getAssayTableName(_protocol, ElispotSchema.ANTIGEN_STATS_TABLE_NAME);
 
@@ -176,63 +179,6 @@ public class ElispotController extends SpringActionController
             return false;
         }
 
-        private Map<Position, WellInfo> createWellInfoMap(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
-                                                          PlateTemplate template) throws SQLException
-        {
-            Map<Position, WellInfo> map = new HashMap<Position, WellInfo>();
-
-            ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
-            assert(data.length == 1);
-
-            Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);
-            DomainProperty[] sampleProperties = sampleDomain.getProperties();
-
-            Map<String, ExpMaterial> inputs = new HashMap<String, ExpMaterial>();
-            for (ExpMaterial material : run.getMaterialInputs().keySet())
-                inputs.put(material.getName(), material);
-
-            for (int row=0; row < template.getRows(); row++)
-            {
-                for (int col=0; col < template.getColumns(); col++)
-                {
-                    Position position = template.getPosition(row, col);
-                    WellInfo wellInfo = new WellInfo();
-
-                    Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data[0].getLSID(), position);
-                    String specimenGroup = "";
-
-                    for (ObjectProperty prop : OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString()).values())
-                    {
-                        wellInfo.addWellProperty(prop);
-                        if (ElispotDataHandler.WELLGROUP_PROPERTY_NAME.equals(prop.getName()))
-                        {
-                            specimenGroup = String.valueOf(prop.value());
-                        }
-                        else if (ElispotDataHandler.SFU_PROPERTY_NAME.equals(prop.getName()))
-                        {
-                            wellInfo.setTitle(String.valueOf(prop.value()));
-                        }
-                    }
-
-                    // get the specimen wellgroup info
-                    if (!StringUtils.isEmpty(specimenGroup))
-                    {
-                        ExpMaterial material = inputs.get(specimenGroup);
-                        if (material != null)
-                        {
-                            for (DomainProperty dp : sampleProperties)
-                            {
-                                Object value = material.getProperty(dp);
-                                wellInfo.addSpecimenProperty(dp, String.valueOf(value));
-                            }
-                        }
-                    }
-                    map.put(position, wellInfo);
-                }
-            }
-            return map;
-        }
-
         public NavTree appendNavTrail(NavTree root)
         {
             String title;
@@ -248,6 +194,63 @@ public class ElispotController extends SpringActionController
             return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
                     " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild(title);
         }
+    }
+
+    private Map<Position, WellInfo> createWellInfoMap(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
+                                                      PlateTemplate template) throws SQLException
+    {
+        Map<Position, WellInfo> map = new HashMap<Position, WellInfo>();
+
+        ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
+        assert(data.length == 1);
+
+        Domain sampleDomain = provider.getSampleWellGroupDomain(protocol);
+        DomainProperty[] sampleProperties = sampleDomain.getProperties();
+
+        Map<String, ExpMaterial> inputs = new HashMap<String, ExpMaterial>();
+        for (ExpMaterial material : run.getMaterialInputs().keySet())
+            inputs.put(material.getName(), material);
+
+        for (int row=0; row < template.getRows(); row++)
+        {
+            for (int col=0; col < template.getColumns(); col++)
+            {
+                Position position = template.getPosition(row, col);
+                WellInfo wellInfo = new WellInfo();
+
+                Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data[0].getLSID(), position);
+                String specimenGroup = "";
+
+                for (ObjectProperty prop : OntologyManager.getPropertyObjects(getContainer(), dataRowLsid.toString()).values())
+                {
+                    wellInfo.addWellProperty(prop);
+                    if (ElispotDataHandler.WELLGROUP_PROPERTY_NAME.equals(prop.getName()))
+                    {
+                        specimenGroup = String.valueOf(prop.value());
+                    }
+                    else if (ElispotDataHandler.SFU_PROPERTY_NAME.equals(prop.getName()))
+                    {
+                        wellInfo.setTitle(String.valueOf(prop.value()));
+                    }
+                }
+
+                // get the specimen wellgroup info
+                if (!StringUtils.isEmpty(specimenGroup))
+                {
+                    ExpMaterial material = inputs.get(specimenGroup);
+                    if (material != null)
+                    {
+                        for (DomainProperty dp : sampleProperties)
+                        {
+                            Object value = material.getProperty(dp);
+                            wellInfo.addSpecimenProperty(dp, String.valueOf(value));
+                        }
+                    }
+                }
+                map.put(position, wellInfo);
+            }
+        }
+        return map;
     }
 
     private void addRunFilter(ExpProtocol protocol, ActionURL url, int rowId)
@@ -293,6 +296,43 @@ public class ElispotController extends SpringActionController
             addRunFilter(run.getProtocol(), url, form.getRowId());
 
             return url;
+        }
+    }
+
+    @RequiresPermissionClass(ReadPermission.class)
+    public class GetPlateSummary extends ApiAction<DetailsForm>
+    {
+        @Override
+        public ApiResponse execute(DetailsForm form, BindException errors) throws Exception
+        {
+            ApiSimpleResponse response = new ApiSimpleResponse();
+
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            if (run == null || !run.getContainer().equals(getContainer()))
+            {
+                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
+            }
+
+            ExpProtocol protocol = run.getProtocol();
+
+            ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(protocol);
+            PlateTemplate template = provider.getPlateTemplate(getContainer(), protocol);
+
+            Map<Position, WellInfo> wellInfoMap = createWellInfoMap(run, protocol, provider, template);
+
+            JSONArray rows = new JSONArray();
+            for (Map.Entry<Position, WellInfo> entry : wellInfoMap.entrySet())
+            {
+                JSONObject row = entry.getValue().toJSON();
+
+                row.put("position", entry.getKey().toString());
+
+                rows.put(row);
+            }
+            response.put("summary", rows);
+            response.put("success", true);
+
+            return response;
         }
     }
 
@@ -371,66 +411,31 @@ public class ElispotController extends SpringActionController
             }
             return sb.toString();
         }
+
+        public JSONObject toJSON()
+        {
+            JSONObject well = new JSONObject();
+
+            well.put("title", getTitle());
+            well.put("dataRowLsid", getDataRowLsid());
+
+            JSONObject wellProps = new JSONObject();
+            for (ObjectProperty prop : _wellProperties.values())
+            {
+                // don't need the specimen lsid
+                if (!ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY.equals(prop.getName()))
+                    wellProps.put(prop.getName(), String.valueOf(prop.value()));
+            }
+
+            well.put("wellProperties", wellProps);
+
+            return well;
+        }
     }
 
     public static class PlateSummaryBean
     {
-        private PlateTemplate _template;
-        private String _dataLsid;
-        private Map<String, PropertyDescriptor> _samplePropertyMap;
-        private Map<String, ExpMaterial> _inputMaterialMap;
-        private Map<Position, WellInfo> _wellInfoMap;
         private int _run;
-
-        public PlateTemplate getTemplate()
-        {
-            return _template;
-        }
-
-        public void setTemplate(PlateTemplate template)
-        {
-            _template = template;
-        }
-
-        public String getDataLsid()
-        {
-            return _dataLsid;
-        }
-
-        public void setDataLsid(String dataLsid)
-        {
-            _dataLsid = dataLsid;
-        }
-
-        public Map<String, PropertyDescriptor> getSamplePropertyMap()
-        {
-            return _samplePropertyMap;
-        }
-
-        public void setSamplePropertyMap(Map<String, PropertyDescriptor> samplePropertyMap)
-        {
-            _samplePropertyMap = samplePropertyMap;
-        }
-
-        public Map<String, ExpMaterial> getInputMaterialMap()
-        {
-            return _inputMaterialMap;
-        }
-
-        public void setInputMaterialMap(Map<String, ExpMaterial> inputMaterialMap)
-        {
-            _inputMaterialMap = inputMaterialMap;
-        }
-
-        public Map<Position, WellInfo> getWellInfoMap()
-        {
-            return _wellInfoMap;
-        }
-
-        public void setWellInfoMap(Map<Position, WellInfo> wellInfoMap)
-        {
-            _wellInfoMap = wellInfoMap;
-        }
 
         public int getRun()
         {
