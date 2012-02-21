@@ -226,7 +226,6 @@ Ext4.define('Microarray.GeoExportPanel', {
                                 if(grid)
                                     sqlPanel.remove(grid);
 
-                                console.log(panel.isVisible())
                                 panel.addGridPanel(field.store.getAt(recIdx).get('name'));
                             }
                         }
@@ -238,7 +237,6 @@ Ext4.define('Microarray.GeoExportPanel', {
                 itemId: 'chooseRunsPanel',
                 //items: [],
                 addGridPanel: function(name){
-                    console.log('adding grid')
                     var grid = this.down('#runsGrid');
 
                     if(grid)
