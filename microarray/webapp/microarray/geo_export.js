@@ -15,7 +15,6 @@ Ext4.define('Microarray.GeoExportPanel', {
 
         Ext4.apply(this, {
             itemId: 'geoExportPanel',
-            deferredRender: false,
             defaults: {
                 bodyStyle: 'padding: 5px;'
             },
@@ -158,15 +157,16 @@ Ext4.define('Microarray.GeoExportPanel', {
 
     getSamplesTab: function(){
         return {
-            xtype: 'tabpanel',
-            //deferredRender: false,
-            //activeTab: activeTab,
+            xtype: 'panel',
             title: 'Samples',
             itemId: 'Samples',
-            //height: 200,
+            deferredRender: true, //important!
+            defaults: {
+                style: 'padding-bottom: 20px;'
+            },
             items: [{
                 xtype: 'panel',
-                title: 'Select Runs',
+                title: 'Step 1: Select Assay',
                 itemId: 'selectRuns',
                 listeners: {
                     beforerender: function(panel){
@@ -217,22 +217,28 @@ Ext4.define('Microarray.GeoExportPanel', {
                     }),
                     listeners: {
                         change: function(field, value){
-                            var panel = field.up('panel');
+                            var panel = field.up('#Samples').down('#chooseRunsPanel');
                             var recIdx = field.store.find('rowid', value);
                             if(recIdx > -1){
                                 //clean up the other panel
-                                var sqlPanel = panel.up('panel').down('#customQueryPreview');
-                                var grid = sqlPanel.down('grid');
+                                var sqlPanel = panel.up('#Samples');
+                                var grid = sqlPanel.down('#resultGrid');
                                 if(grid)
                                     sqlPanel.remove(grid);
-                                //sqlPanel.down('#custom_sql').setValue(null);
 
+                                console.log(panel.isVisible())
                                 panel.addGridPanel(field.store.getAt(recIdx).get('name'));
                             }
                         }
                     }
-                }],
+                }]
+            },{
+                xtype: 'panel',
+                title: 'Step 2: Choose Runs',
+                itemId: 'chooseRunsPanel',
+                //items: [],
                 addGridPanel: function(name){
+                    console.log('adding grid')
                     var grid = this.down('#runsGrid');
 
                     if(grid)
@@ -242,7 +248,6 @@ Ext4.define('Microarray.GeoExportPanel', {
                         xtype: 'labkey-gridpanel',
                         itemId: 'runsGrid',
                         //multiSelect: true,
-                        title: 'Choose Runs',
                         selModel: Ext4.create('Ext.selection.CheckboxModel', {
                             //xtype: 'checkboxmodel',
                             injectCheckbox: 'first',
@@ -301,7 +306,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                             }
                         }),
                         minHeight: 400,
-                        width: 1000,
+                        width: '100%',
                         //forceFit: true,
                         editable: false
                     });
@@ -309,8 +314,7 @@ Ext4.define('Microarray.GeoExportPanel', {
             },{
                 xtype: 'panel',
                 itemId: 'queryPanel',
-                title: 'Custom Query',
-                deferredRender: false,
+                title: 'Step 3: Choose Columns',
                 bodyStyle: 'padding: 5px;',
                 items: [{
                     xtype: 'panel',
@@ -324,15 +328,22 @@ Ext4.define('Microarray.GeoExportPanel', {
                         width: 1000,
                         height: 300
                     },{
-                        xtype: 'panel',
-                        border: false,
-                        width: 1000,
-                        html: 'NOTE: This query must return the field \'rowid\' from the runs table of your assay.  Also, the set of runs will be saved after the query is run.  It does not automatically update if new runs are added or deleted.  To update, re-run the query.'
+                        xtype: 'textfield',
+                        itemId: 'run_field_name',
+                        fieldLabel: 'Field Containing Run ID',
+                        labelAlign: 'top',
+                        value: 'Run/RowId'
+                    },{
+                        xtype: 'displayfield',
+                        itemId: 'sample_ids',
+                        fieldLabel: 'The query will be filtered to show only the following Run Ids.  If blank, all runs will be included',
+                        labelAlign: 'top'
+                        //hidden: true
                     }],
                     buttonAlign: 'left',
                     buttons: [{
                         xype: 'button',
-                        text: 'Execute Query',
+                        text: 'Preview Results',
                         handler: function(btn){
                             var panel = btn.up('panel');
                             var sql = panel.down('#custom_sql').getValue();
@@ -342,13 +353,21 @@ Ext4.define('Microarray.GeoExportPanel', {
                                 return
                             }
 
-                            var target = panel.up('panel').down('#customQueryPreview');
+                            var target = panel.up('#Samples');
 
-                            var grid = target.down('#runsGridSql');
+                            var grid = target.down('#resultGrid');
                             if(grid)
                                 target.remove(grid);
 
-                            var store = Ext4.create('LABKEY.ext4.Store', {
+                            var runIds = target.down('#sample_ids').getValue();
+
+                            var runField = target.down('#run_field_name').getValue();
+                            if(runIds && !runField){
+                                alert("You must supply the name of the field containing the Run's RowId");
+                                return;
+                            }
+
+                            var storeCfg = {
                                 schemaName: 'assay',
                                 sql: sql,
                                 autoLoad: true,
@@ -388,30 +407,22 @@ Ext4.define('Microarray.GeoExportPanel', {
 
                                         var samplePanel = panel.up('panel').up('panel');
 
-                                        //clean up the other panel
-                                        var runsPanel = samplePanel.down('#selectRuns');
-                                        var grid = runsPanel.down('grid');
-                                        if(grid)
-                                            runsPanel.remove(grid);
-                                        runsPanel.down('#sourceAssay').setValue(null);
-
-                                        //add the sample IDs
-                                        var sampleField = samplePanel.down('#sample_ids');
-                                        var sampleIDs = [];
-                                        var name = store.getCanonicalFieldName('rowid');
-                                        store.each(function(rec){
-                                            sampleIDs.push(rec.get(name));
-                                        }, this);
-
-                                        sampleField.setValue(sampleIDs.join(';'));
+//                                        //add the sample IDs
+//                                        var sampleField = samplePanel.down('#sample_ids');
+//                                        var sampleIDs = [];
+//                                        var name = store.getCanonicalFieldName('rowid');
+//                                        store.each(function(rec){
+//                                            sampleIDs.push(rec.get(name));
+//                                        }, this);
+//
+//                                        sampleField.setValue(sampleIDs.join(';'));
 
                                         target.add({
                                             xtype: 'labkey-gridpanel',
-                                            itemId: 'runsGridSql',
-                                            title: 'Selected Runs',
+                                            itemId: 'resultGrid',
+                                            title: 'Step 4: Preview Results',
                                             store: store,
-                                            minHeight: 400,
-                                            width: 1000,
+                                            width: '100%',
                                             //forceFit: true,
                                             editable: false
                                         });
@@ -421,30 +432,17 @@ Ext4.define('Microarray.GeoExportPanel', {
                                         console.log(error);
                                     }
                                 }
-                            });
+                            };
+
+                            if(runIds){
+                                storeCfg.filterArray = [
+                                    LABKEY.Filter.create(runField, runIds, LABKEY.Filter.Types.EQUALS_ONE_OF)
+                                ]
+                            }
+                            Ext4.create('LABKEY.ext4.Store', storeCfg);
 
                         }
                     }]
-                },{
-                    xtype: 'panel',
-                    itemId: 'customQueryPreview',
-                    border: false
-                }]
-            },{
-                xtype: 'panel',
-                title: 'Samples',
-                hidden: true,
-                deferredRender: false,
-                items: [{
-                    xtype: 'displayfield',
-                    itemId: 'sample_ids'
-//                    listeners: {
-//                        scope: this,
-//                        change: function(field, val){
-//                            var panel = field.up('panel').up('panel');
-//                            panel.setSampleIds(val);
-//                        }
-//                    }
                 }]
             }],
             onStoreLoad: function(store){
@@ -473,7 +471,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                 var value;
                 var recordIdx;
                 var record;
-                var fields = ['sourceAssay', 'custom_sql', 'sample_ids'];
+                var fields = ['sourceAssay', 'custom_sql', 'sample_ids', 'run_field_name'];
                 Ext4.each(fields, function(prop_name){
                     field = this.down('#' + prop_name);
                     value = field.getValue();
@@ -808,6 +806,31 @@ Ext4.define('Microarray.GeoExportPanel', {
         });
 
         //get sample info:
+        var resultGrid = panel.down('#resultGrid');
+        if(!resultGrid || !resultGrid.store){
+            alert('No results have been loaded.  Please click \'preview results\' on the Samples tab');
+            return;
+        }
+
+        var resultStore = resultGrid.store;
+        var fields = resultStore.getFields();
+        var row = [];
+        fields.each(function(field){
+            row.push(field.name);
+        }, this);
+        sections.Samples.push(row);
+
+        var val;
+        resultStore.each(function(rec){
+            row = [];
+            fields.each(function(field){
+                val = rec.get(field.name);
+                val = Ext4.isDefined(val) ? val : '';
+                row.push(val);
+            }, this);
+            sections.Samples.push(row);
+        }, this);
+
         var data = [['# Use this template for a Agilent one-color experiment submission.']].concat(sections.Series).concat(sections.Samples).concat(sections.Protocols)
         LABKEY.Utils.convertToExcel({
 	        fileName: 'GEO_Export.xls',
