@@ -312,7 +312,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
 
     public Widget getLabel()
     {
-        Label label = new Label("Protein Database");
+        Label label = new Label("Protein database");
         label.setStylePrimaryName(LABEL_STYLE_NAME);
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(label);

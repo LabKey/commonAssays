@@ -91,7 +91,7 @@ public class MzXmlComposite extends SearchFormComposite
 
     public Widget getLabel()
     {
-        Label label = new Label("Analyze file");
+        Label label = new Label("Input file(s)");
         label.setStylePrimaryName(LABEL_STYLE_NAME);
         return label;
     }

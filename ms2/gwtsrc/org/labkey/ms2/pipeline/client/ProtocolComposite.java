@@ -37,6 +37,7 @@ public class ProtocolComposite extends SearchFormComposite
     Label textBoxLabel;
     Label descriptionLabel;
     private static final String NEW_PROTOCOL = "<new protocol>";
+    private List<String> _protocols;
 
 
     public ProtocolComposite()
@@ -118,6 +119,7 @@ public class ProtocolComposite extends SearchFormComposite
                 protocolListBox.addItem(NEW_PROTOCOL, "new");
                 return;
             }
+            _protocols = protocols;
             protocolListBox.clear();
             Collections.sort(protocols);
             protocols.add(0,NEW_PROTOCOL);
@@ -287,45 +289,47 @@ public class ProtocolComposite extends SearchFormComposite
         protocolDescTextArea.setText("");
     }
 
+    /** We need to create a unique protocol name. We will append "_1", or change an existing "_X" to increment the X */
     public void copy()
     {
-        String suffix = "_Copy";
-        String pName = protocolNameTextBox.getText();
+        String protocolName = protocolNameTextBox.getText();
 
-        if(pName == null || pName.length() == 0 )
+        if(protocolName == null || protocolName.length() == 0 )
         {
             setDefault("");
             return;
         }
 
-        StringBuffer protocolName = new StringBuffer(pName);
-        int index = protocolName.lastIndexOf(suffix);
+        int index = protocolName.lastIndexOf("_");
+        String prefix = protocolName + "_";
 
-        if( index > 0 && index != protocolName.length()-1)
+        int versionInt = 1;
+
+        // See if the current protocol name ends with "_X"
+        if( index > 0 && index != protocolName.length() - 1)
         {
-            String versionString = protocolName.substring(index + suffix.length());
-            int versionInt = 0;
+            String versionString = protocolName.substring(index + 1);
 
             try
             {
-                versionInt = Integer.parseInt(versionString);
+                // See if X is a number
+                versionInt = Integer.parseInt(versionString) + 1;
+
+                // Remove the X from the prefix
+                prefix = protocolName.substring(0, index + 1);
             }
-            catch(NumberFormatException e)
+            catch(NumberFormatException ignored)
             {
-                protocolName.append(suffix + "1");
-                setDefault(protocolName.toString());
-                return;
             }
-
-            versionInt++;
-            protocolName.replace(index + suffix.length(), protocolName.length(), Integer.toString(versionInt));
-
         }
-        else
+
+        // Keep incrementing the number on the suffix until we have a unique name
+        while (_protocols != null && _protocols.contains(prefix + versionInt))
         {
-            protocolName.append(suffix + "1");
+            versionInt++;
         }
-        setDefault(protocolName.toString());
+
+        setDefault(prefix + versionInt);
     }
 
     public void setFocus(boolean hasFocus)

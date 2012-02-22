@@ -98,7 +98,8 @@ public class ParamParser
         }
         else
         {
-            sb.append(text.getNodeValue());
+            // The node value isn't XML encoded, so be sure to escape any special characters when building up the XML
+            sb.append(encode(text.getNodeValue()));
         }
         sb.append("</note>\n");
         return sb.toString();
@@ -193,7 +194,10 @@ public class ParamParser
     public void setInputParameter(String name, String value) throws SearchFormException
     {
         if(name == null) throw new SearchFormException("Parameter name is null.");
-        if(value == null) value = "";
+        if (value != null)
+        {
+            value = value.trim();
+        }
         removeInputParameter(name);
         Element ip = getDocument().createElement(TAG_NOTE);
         ip.setAttribute(ATTR_TYPE, VAL_INPUT);
@@ -202,6 +206,17 @@ public class ParamParser
         Element de = getDocumentElement();
         if(de == null) return;
         de.appendChild(ip);
+    }
+
+    /** Simple XML encoding of a string */
+    private String encode(String value)
+    {
+        if(value == null) value = "";
+        value = value.replace("&", "&amp;");
+        value = value.replace("<", "&lt;");
+        value = value.replace(">", "&gt;");
+        value = value.replace("\"", "&quot;");
+        return value;
     }
 
     public Map<String, String> getParameters()
@@ -215,8 +230,7 @@ public class ParamParser
         for(int i = 0; i < notes.getLength(); i++)
         {
             Element elNote = (Element)notes.item(i);
-            Node n = elNote.getFirstChild();
-            String value = n == null ? "" : n.getNodeValue();
+            String value = getTrimmedTextValue(elNote.getFirstChild());
             result.put(elNote.getAttribute(ATTR_LABEL), value);
         }
         return result;
@@ -232,13 +246,20 @@ public class ParamParser
             Element elNote = (Element)notes.item(i);
             if(isInputParameterElement(name, elNote))
             {
-                Node n = elNote.getFirstChild();
-                if(n == null) return "";
-                String result = n.getNodeValue();
-                return result == null ? null : result.trim();
+                return getTrimmedTextValue(elNote.getFirstChild());
             }
         }
         return "";
+    }
+
+    private String getTrimmedTextValue(Node node)
+    {
+        if (node == null)
+        {
+            return "";
+        }
+        String result = node.getNodeValue();
+        return result == null ? "" : result.trim();
     }
 
     private boolean isInputParameterElement(String name, Element elNote)

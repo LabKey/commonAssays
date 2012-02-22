@@ -277,14 +277,14 @@ public class Search implements EntryPoint
         String error = syncXml2Form();
         if(error.length() > 0)
         {
-            clearDisplay();
+            clearErrors();
             appendError(error);
             setReadOnly(false);
             setSearchButtonEnabled(false);
         }
         else
         {
-            clearDisplay();
+            clearErrors();
             setReadOnly(false);
         }
     }
@@ -374,7 +374,7 @@ public class Search implements EntryPoint
         messagesPanel.add(label);
     }
 
-    public void clearDisplay()
+    public void clearErrors()
     {
         setErrors(false);
         messagesPanel.clear();
@@ -383,13 +383,13 @@ public class Search implements EntryPoint
 
     private void setError(String error)
     {
-        clearDisplay();
+        clearErrors();
         appendError(error);
     }
 
     private void setDisplay(String text)
     {
-        clearDisplay();
+        clearErrors();
         appendMessage(text);
     }
 
@@ -464,7 +464,21 @@ public class Search implements EntryPoint
 
         public void onClick(Widget sender)
         {
-            searchFormPanel.submit();
+            clearErrors();
+            boolean foundError = false;
+            for (SearchFormComposite input : inputs)
+            {
+                String validation = input.validate();
+                if (validation != null && !validation.isEmpty())
+                {
+                    appendError(validation);
+                    foundError = true;
+                }
+            }
+            if (!foundError)
+            {
+                searchFormPanel.submit();
+            }
         }
 
 //        public void setEnabled(boolean enabled)
@@ -536,7 +550,7 @@ public class Search implements EntryPoint
     {
         public void onSubmit(FormPanel.SubmitEvent event)
         {
-            clearDisplay();
+            clearErrors();
             appendError(protocolComposite.validate());
             appendError(sequenceDbComposite.validate());
             appendError(tppComposite.validate());
@@ -659,7 +673,7 @@ public class Search implements EntryPoint
     {
         public void onSuccess(GWTSearchServiceResult gwtResult)
         {
-            clearDisplay();
+            clearErrors();
             appendError(gwtResult.getErrors());
             List<String> protocols = gwtResult.getProtocols();
             String defaultProtocol = gwtResult.getSelectedProtocol();
@@ -737,7 +751,7 @@ public class Search implements EntryPoint
     {
         public void onChange(ChangeEvent e)
         {
-            clearDisplay();
+            clearErrors();
             String protocolName = protocolComposite.getSelectedProtocolValue();
             if(protocolName.equals("new"))
             {
@@ -756,7 +770,7 @@ public class Search implements EntryPoint
             String db = sequenceDbComposite.getSelectedDb();
             if(db.length() > 0 && !db.equals("None found."))
             {
-                clearDisplay();
+                clearErrors();
                 inputXmlComposite.params.removeInputParameter(ParameterNames.SEQUENCE_DB);
                 String error = syncForm2Xml();
                 if(error.length() > 0 )
@@ -780,7 +794,7 @@ public class Search implements EntryPoint
             if(tax.length() > 0)
             {
                 inputXmlComposite.params.removeInputParameter(ParameterNames.TAXONOMY);
-                clearDisplay();
+                clearErrors();
                 String error = syncForm2Xml();
                 if(error.length() > 0 )
                 {
@@ -811,7 +825,7 @@ public class Search implements EntryPoint
             if(enz.length() > 0)
             {
                 inputXmlComposite.params.removeInputParameter(ParameterNames.ENZYME);
-                clearDisplay();
+                clearErrors();
                 String error = syncForm2Xml();
                 if(error.length() > 0 )
                 {
@@ -846,7 +860,7 @@ public class Search implements EntryPoint
             String error = inputXmlComposite.validate();
             if(error.length() > 0)
             {
-                clearDisplay();
+                clearErrors();
                 appendError(error);
                 setReadOnly(true);
                 inputXmlComposite.setReadOnly(false);
@@ -855,12 +869,12 @@ public class Search implements EntryPoint
             error = syncXml2Form();
             if(error.length() > 0)
             {
-                clearDisplay();
+                clearErrors();
                 appendError(error);
                 searchButton.setEnabled(false);
                 return;
             }
-            clearDisplay();
+            clearErrors();
             setReadOnly(false);
         }
     }

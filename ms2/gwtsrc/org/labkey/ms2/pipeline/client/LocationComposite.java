@@ -15,9 +15,11 @@
  */
 package org.labkey.ms2.pipeline.client;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -71,6 +73,17 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
     @Override
     public String validate()
     {
+        // Look for tasks that are set to use the "Other..." queue but don't have a value in their queue name text box
+        for (TaskUserInterface taskUserInterface : _taskUserInterfaces)
+        {
+            if (taskUserInterface._queueListBox.getSelectedIndex() == taskUserInterface._queueListBox.getItemCount() - 1)
+            {
+                if (taskUserInterface._queueTextBox.getText().trim().isEmpty())
+                {
+                    return "Queue name not specified for " + taskUserInterface._task.getGroupName();
+                }
+            }
+        }
         return null;
     }
 
@@ -100,7 +113,8 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
             if (task.isCluster())
             {
                 int col = 0;
-                _editableTable.setText(row, col++, task.getGroupName());
+                _editableTable.setText(row, col, task.getGroupName());
+                setPadding(_editableTable, row, col++);
 
                 final TextBox queueTextBox = new TextBox();
                 final ListBox queuesListBox = new ListBox();
@@ -118,7 +132,8 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
                             locationListBox.setSelectedIndex(locationListBox.getItemCount() - 1);
                         }
                     }
-                    _editableTable.setWidget(row, col++, locationListBox);
+                    _editableTable.setWidget(row, col, locationListBox);
+                    setPadding(_editableTable, row, col++);
 
                     // When the user changes the location, update the queues drop down to match
                     locationListBox.addChangeHandler(new ChangeHandler()
@@ -140,16 +155,16 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
                 // Let the user choose one of the predetermined queues from the drop down, or type in their own queue name
                 HorizontalPanel queuePanel = new HorizontalPanel();
                 queuePanel.add(queuesListBox);
+                // Add a little spacer - setSpacing() on the HorizontalPanel affects both vertical and horizontal spacing
+                queuePanel.add(new HTML("&nbsp;"));
                 queuePanel.add(queueTextBox);
                 _editableTable.setWidget(row, col++, queuePanel);
                 queuesListBox.addChangeHandler(new ChangeHandler()
                 {
                     public void onChange(ChangeEvent event)
                     {
-                        if (queuesListBox.getSelectedIndex() == queuesListBox.getItemCount() - 1)
-                        {
-                            queueTextBox.setVisible(true);
-                        }
+                        boolean showTextBox = queuesListBox.getSelectedIndex() == queuesListBox.getItemCount() - 1;
+                        queueTextBox.setVisible(showTextBox);
                     }
                 });
                 row++;
@@ -189,14 +204,14 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
         int col = 0;
         int row = 0;
 
-        table.setStyleName("labkey-show-borders");
-        
         table.setText(row, col, "Group Name");
+        setPadding(table, row, col);
         table.getCellFormatter().addStyleName(row, col++, "labkey-strong");
         List<String> clusterLocations = getClusterLocations();
         if (clusterLocations.size() > 1)
         {
             table.setText(row, col, "Location");
+            setPadding(table, row, col);
             table.getCellFormatter().addStyleName(row, col++, "labkey-strong");
         }
         table.setText(row, col, "Queue");
@@ -292,6 +307,11 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
                 {
                     // If we have multiple possible locations, sync the combo box
                     String locationValue = params.getInputParameter(getLocationParamName(taskUserInterface));
+                    if (locationValue == null || "".equals(locationValue.trim()))
+                    {
+                        // No location set in the search protocol XML, so fall back to the task's default location
+                        locationValue = taskUserInterface._task.getDefaultLocation().getLocation();
+                    }
                     setValue(taskUserInterface._locationListBox, locationValue);
                     updateQueues(taskUserInterface._queueListBox, locationValue);
                 }
@@ -377,10 +397,12 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
             for (TaskUserInterface taskUserInterface : _taskUserInterfaces)
             {
                 int col = 0;
-                flexTable.setText(row, col++, taskUserInterface._task.getGroupName());
+                flexTable.setText(row, col, taskUserInterface._task.getGroupName());
+                setPadding(flexTable, row, col++);
                 if (taskUserInterface._locationListBox != null)
                 {
-                    flexTable.setText(row, col++, taskUserInterface._locationListBox.getItemText(taskUserInterface._locationListBox.getSelectedIndex()));
+                    flexTable.setText(row, col, taskUserInterface._locationListBox.getItemText(taskUserInterface._locationListBox.getSelectedIndex()));
+                    setPadding(flexTable, row, col++);
                 }
                 if (taskUserInterface._queueListBox.getSelectedIndex() == taskUserInterface._queueListBox.getItemCount() - 1)
                 {
@@ -398,6 +420,11 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
         
     }
 
+    /** Add a little padding to the right of the column */
+    private void setPadding(FlexTable flexTable, int row, int col)
+    {
+        flexTable.getCellFormatter().getElement(row, col).getStyle().setPaddingRight(1.5, Style.Unit.EM);
+    }
 
     private boolean setValue(ListBox listBox, String value)
     {

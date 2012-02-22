@@ -259,7 +259,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
             String error = searchForm.syncForm2Xml();
             if(error.length() > 0)
             {
-                searchForm.clearDisplay();
+                searchForm.clearErrors();
                 searchForm.appendError(error);
                 searchForm.setSearchButtonEnabled(false);
             }
@@ -302,13 +302,13 @@ public abstract class ResidueModComposite extends SearchFormComposite
             String error = searchForm.syncForm2Xml();
             if(error.length() > 0)
             {
-                searchForm.clearDisplay();
+                searchForm.clearErrors();
                 searchForm.appendError(error);
                 searchForm.setSearchButtonEnabled(false);
             }
             else
             {
-                searchForm.clearDisplay();
+                searchForm.clearErrors();
                 searchForm.setReadOnly(false);
             }
         }
@@ -343,7 +343,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
                     catch (NumberFormatException e)
                     {
                         error = "modification mass contained an invalid mass value (" + wt + ")";
-                        searchForm.clearDisplay();
+                        searchForm.clearErrors();
                         searchForm.appendError(error);
                         searchForm.setSearchButtonEnabled(false);
                         molWt.setText("");
@@ -356,13 +356,13 @@ public abstract class ResidueModComposite extends SearchFormComposite
                     error = validate();
                     if(error.length() > 0)
                     {
-                        searchForm.clearDisplay();
+                        searchForm.clearErrors();
                         searchForm.appendError(error);
                         searchForm.setSearchButtonEnabled(false);
                     }
                     else
                     {
-                        searchForm.clearDisplay();
+                        searchForm.clearErrors();
                         searchForm.setSearchButtonEnabled(true);
                     }
 
@@ -373,7 +373,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
                 {
                     dialog.hide();
                     dialog = null;
-                    searchForm.clearDisplay();
+                    searchForm.clearErrors();
                     searchForm.setSearchButtonEnabled(true);
                 }
             });
