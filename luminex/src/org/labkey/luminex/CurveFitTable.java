@@ -60,28 +60,6 @@ public class CurveFitTable extends AbstractLuminexTable
             }
         });
 
-        ColumnInfo analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
-        analyteTitrationColumn.setIsUnselectable(true);
-        LookupForeignKey fk = new LookupForeignKey("AnalyteId")
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                return _schema.createAnalyteTitrationTable(false);
-            }
-
-            @Override
-            protected ColumnInfo getPkColumn(TableInfo table)
-            {
-                // Pretend that analyte is the sole column in the PK for this table.
-                // We'll get the other key of the compound key with addJoin() below.
-                return table.getColumn("Analyte");
-            }
-        };
-        fk.addJoin(getColumn("TitrationId"), "Titration");
-        analyteTitrationColumn.setFk(fk);
-        addColumn(analyteTitrationColumn);
-
         ColumnInfo ec50Col = getColumn("EC50");
         ec50Col.setDisplayColumnFactory(new DisplayColumnFactory()
         {
