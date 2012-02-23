@@ -31,6 +31,7 @@ import com.sun.istack.internal.Nullable;
 import org.labkey.api.gwt.client.pipeline.GWTPipelineConfig;
 import org.labkey.api.gwt.client.pipeline.GWTPipelineLocation;
 import org.labkey.api.gwt.client.pipeline.GWTPipelineTask;
+import org.labkey.api.gwt.client.ui.HelpPopup;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,9 +66,12 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
     @Override
     public Widget getLabel()
     {
-        Label result = new Label("Execution location");
-        result.setStyleName(LABEL_STYLE_NAME);
-        return result;
+        Label label = new Label("Execution location");
+        label.setStyleName(LABEL_STYLE_NAME);
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.add(label);
+        panel.add(new HelpPopup("Execution location", "For the tasks in this analysis pipeline that have been configured to run on a cluster, information about exactly what cluster and queue they should use."));
+        return panel;
     }
 
     @Override
@@ -110,7 +114,7 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
         List<String> clusterLocations = getClusterLocations();
         for (final GWTPipelineTask task : result.getTasks())
         {
-            if (task.isCluster())
+            if (task.isCluster() && task.getGroupName() != null)
             {
                 int col = 0;
                 _editableTable.setText(row, col, task.getGroupName());
@@ -204,18 +208,30 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
         int col = 0;
         int row = 0;
 
-        table.setText(row, col, "Group Name");
-        setPadding(table, row, col);
-        table.getCellFormatter().addStyleName(row, col++, "labkey-strong");
+        HorizontalPanel descriptionPanel = new HorizontalPanel();
+        Label descriptionLabel = new Label("Task Description");
+        descriptionLabel.setStyleName("labkey-strong");
+        descriptionPanel.add(descriptionLabel);
+        descriptionPanel.add(new HelpPopup("Task Description", "The task in the analysis pipeline. Typically a specific analysis tool."));
+        table.setWidget(row, col, descriptionPanel);
+        setPadding(table, row, col++);
         List<String> clusterLocations = getClusterLocations();
         if (clusterLocations.size() > 1)
         {
-            table.setText(row, col, "Location");
-            setPadding(table, row, col);
-            table.getCellFormatter().addStyleName(row, col++, "labkey-strong");
+            HorizontalPanel locationPanel = new HorizontalPanel();
+            Label locationLabel = new Label("Cluster Location");
+            locationLabel.setStyleName("labkey-strong");
+            locationPanel.add(locationLabel);
+            locationPanel.add(new HelpPopup("Cluster Location", "The name of the cluster resource to be used for running the task."));
+            table.setWidget(row, col, locationPanel);
+            setPadding(table, row, col++);
         }
-        table.setText(row, col, "Queue");
-        table.getCellFormatter().addStyleName(row, col++, "labkey-strong");
+        HorizontalPanel queuePanel = new HorizontalPanel();
+        Label queueLabel = new Label("Cluster Queue");
+        queueLabel.setStyleName("labkey-strong");
+        queuePanel.add(queueLabel);
+        queuePanel.add(new HelpPopup("Cluster Queue", "The name of the cluster queue to be used for running the task."));
+        table.setWidget(row, col++, queuePanel);
         return row + 1;
     }
 
