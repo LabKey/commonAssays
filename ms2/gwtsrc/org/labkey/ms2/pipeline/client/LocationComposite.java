@@ -144,7 +144,7 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
                     {
                         public void onChange(ChangeEvent event)
                         {
-                            updateQueues(queuesListBox, locationListBox.getItemText(locationListBox.getSelectedIndex()));
+                            updateQueues(queuesListBox, queueTextBox, locationListBox.getItemText(locationListBox.getSelectedIndex()));
                         }
                     });
                     taskUserInterface = new TaskUserInterface(task, locationListBox, queuesListBox, queueTextBox);
@@ -154,7 +154,7 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
                     taskUserInterface = new TaskUserInterface(task, null, queuesListBox, queueTextBox);
                 }
                 
-                updateQueues(queuesListBox, task.getDefaultLocation().getLocation());
+                updateQueues(queuesListBox, queueTextBox, task.getDefaultLocation().getLocation());
                 _taskUserInterfaces.add(taskUserInterface);
                 // Let the user choose one of the predetermined queues from the drop down, or type in their own queue name
                 HorizontalPanel queuePanel = new HorizontalPanel();
@@ -236,7 +236,7 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
     }
 
     /** Update the combo box with the queues that are known for the current cluster location */
-    private void updateQueues(ListBox queuesListBox, String locationName)
+    private void updateQueues(ListBox queuesListBox, TextBox otherQueueTextBox, String locationName)
     {
         GWTPipelineLocation selectedLocation = null;
         for (GWTPipelineLocation location : _pipelineLocations)
@@ -257,6 +257,8 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
             }
             // Let the user type in their own queue name 
             queuesListBox.addItem("Other...");
+            otherQueueTextBox.setText("");
+            otherQueueTextBox.setVisible(false);
         }
     }
 
@@ -329,11 +331,11 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
                         locationValue = taskUserInterface._task.getDefaultLocation().getLocation();
                     }
                     setValue(taskUserInterface._locationListBox, locationValue);
-                    updateQueues(taskUserInterface._queueListBox, locationValue);
+                    updateQueues(taskUserInterface._queueListBox, taskUserInterface._queueTextBox, locationValue);
                 }
                 else
                 {
-                    updateQueues(taskUserInterface._queueListBox, taskUserInterface._task.getDefaultLocation().getLocation());
+                    updateQueues(taskUserInterface._queueListBox, taskUserInterface._queueTextBox, taskUserInterface._task.getDefaultLocation().getLocation());
                 }
 
                 // Then sync the queue, into the combo box if it's in the list, or show the text field for user-entered names
@@ -343,6 +345,7 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
                     // Use the default queue, which is the first one in the list
                     taskUserInterface._queueListBox.setSelectedIndex(0);
                     taskUserInterface._queueTextBox.setVisible(false);
+                    taskUserInterface._queueTextBox.setText("");
                 }
                 else
                 {
@@ -352,6 +355,7 @@ public class LocationComposite extends SearchFormComposite implements PipelineCo
                         // We have the right queue in the combo box
                         taskUserInterface._queueListBox.setSelectedIndex(index);
                         taskUserInterface._queueTextBox.setVisible(false);
+                        taskUserInterface._queueTextBox.setText("");
                     }
                     else
                     {
