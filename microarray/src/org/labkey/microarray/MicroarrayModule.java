@@ -18,6 +18,7 @@ package org.labkey.microarray;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.ExperimentRunTypeSource;
@@ -134,6 +135,10 @@ public class MicroarrayModule extends SpringModule
         ModuleLoader.getInstance().registerFolderType(this, new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
         PipelineService.get().registerPipelineProvider(new GeneDataPipelineProvider(this));
+
+        // add a container listener so we'll know when our container is deleted:
+        ContainerManager.addContainerListener(new MicroarrayContainerListener());
+
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
         ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
         {
