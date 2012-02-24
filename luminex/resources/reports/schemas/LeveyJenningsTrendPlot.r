@@ -139,6 +139,13 @@ for (typeIndex in 1:length(plotTypes))
 	      ymax= 1;
 	  }
 
+	  # if the plot is in log scale, make sure we don't have values <= 0
+	  if (asLog == "y") {
+	      if (ymin <= 0) { ymin = 1; }
+	      dat$guidesetplus3stddev[dat$guidesetplus3stddev <= 0] = 1;
+          dat$guidesetminus3stddev[dat$guidesetminus3stddev <= 0] = 1;
+	  }
+
 	  # set the sequence value for the records (in reverse order since they are sorted in DESC order)
 	  dat$seq = length(dat$analyte_name):1;
 	  dat = dat[order(dat$seq),];

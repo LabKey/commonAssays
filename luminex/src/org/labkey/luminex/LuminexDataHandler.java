@@ -672,7 +672,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         double maxFI = wellGroup.getMax();
-        analyteTitration.setMaxFI(maxFI == Double.MIN_VALUE ? null : maxFI);
+        analyteTitration.setMaxFI(maxFI == Double.NEGATIVE_INFINITY ? null : maxFI);
 
         if (newRow)
         {

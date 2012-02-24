@@ -257,7 +257,7 @@ public class LuminexWellGroup implements WellGroup
     @Override
     public double getMax()
     {
-        double result = Double.MIN_VALUE;
+        double result = Double.NEGATIVE_INFINITY;
         for (LuminexWell well : _wells)
         {
             if (well.getMax() > result)
