@@ -26,7 +26,7 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.OORDisplayColumnFactory;
 import org.labkey.api.data.Parameter;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.StatementUtils;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.UpdateableTableInfo;
 import org.labkey.api.etl.DataIteratorBuilder;
@@ -374,13 +374,13 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
     @Override
     public Parameter.ParameterMap insertStatement(Connection conn, User user) throws SQLException
     {
-        return Table.insertStatement(conn, this, getContainer(), user, false, true);
+        return StatementUtils.insertStatement(conn, this, getContainer(), user, false, true);
     }
 
     @Override
     public Parameter.ParameterMap updateStatement(Connection conn, User user, Set<String> columns) throws SQLException
     {
-        return Table.updateStatement(conn, this, getContainer(), user, false, true);
+        return StatementUtils.updateStatement(conn, this, getContainer(), user, false, true);
     }
 
     @Override
