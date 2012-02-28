@@ -16,9 +16,15 @@
 
 package org.labkey.microarray;
 
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
 /**
@@ -41,5 +47,17 @@ public class MicroarrayRunType extends ExperimentRunType
             return Priority.HIGH;
         }
         return null;
+    }
+
+    @Override
+    public void populateButtonBar(ViewContext context, ButtonBar bar, DataView view, ContainerFilter containerFilter)
+    {
+        super.populateButtonBar(context, bar, view, containerFilter);
+
+        ActionURL url = new ActionURL();
+        url.setPath("/microarray/geo_export.view");
+        url.setContainer(context.getContainer());
+        ActionButton btn = new ActionButton(url, "Create GEO Export");
+        bar.add(btn);
     }
 }
