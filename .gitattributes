@@ -210,6 +210,7 @@ flow/enginesrc/org/labkey/flow/analysis/web/FCSRef.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/FCSViewer.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/GraphSpec.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/PlotInfo.java -text
+flow/enginesrc/org/labkey/flow/analysis/web/PlotTests.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/ScriptAnalyzer.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/StatisticSpec.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/SubsetExpression.java -text

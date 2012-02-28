@@ -1399,7 +1399,7 @@ public class AnalysisSerializer
         }
     }
 
-    private String generateFriendlyImageName(GraphSpec graph)
+    public static String generateFriendlyImageName(GraphSpec graph)
     {
         StringBuilder path = new StringBuilder();
         if (graph.getSubset() == null)

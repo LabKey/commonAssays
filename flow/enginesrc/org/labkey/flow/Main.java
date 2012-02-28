@@ -345,35 +345,7 @@ public class Main
     {
         Workspace workspace = readWorkspace(workspaceFile, true);
 
-        Set<Workspace.SampleInfo> sampleInfos = new LinkedHashSet<Workspace.SampleInfo>();
-        boolean writeAll = groupNames.isEmpty() && sampleIds.isEmpty();
-        if (writeAll)
-        {
-            sampleInfos.addAll(workspace.getSamples());
-        }
-        else
-        {
-            if (!groupNames.isEmpty())
-            {
-                for (Workspace.GroupInfo group : workspace.getGroups())
-                {
-                    if (groupNames.contains(group.getGroupName()))
-                    {
-                        for (String sampleID : group.getSampleIds())
-                            sampleInfos.add(workspace.getSample(sampleID));
-                    }
-                }
-            }
-
-            if (!sampleIds.isEmpty())
-            {
-                for (Workspace.SampleInfo sampleInfo : workspace.getSamples())
-                {
-                    if (sampleIds.contains(sampleInfo.getSampleId()) || sampleIds.contains(sampleInfo.getLabel()))
-                        sampleInfos.add(sampleInfo);
-                }
-            }
-        }
+        Set<Workspace.SampleInfo> sampleInfos = workspace.getSamples(groupNames, sampleIds);
 
         Map<String, AttributeSet> keywords = new LinkedHashMap<String, AttributeSet>();
         Map<String, AttributeSet> analysis = new LinkedHashMap<String, AttributeSet>();

@@ -110,7 +110,7 @@ public class DataFrame
             }
             if (paramInfo != null && paramInfo.getMinValue() != null)
             {
-                fn = ScalingFunction.makeFunction(fn, paramInfo.getMinValue().intValue());
+                fn = ScalingFunction.makeFunction(fn, paramInfo.getMinValue());
             }
             NumberArray from = data[p];
 

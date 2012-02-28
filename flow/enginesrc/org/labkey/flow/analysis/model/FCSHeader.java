@@ -213,23 +213,28 @@ public class FCSHeader
             String E = getKeyword(key + "E");
             double decade = Double.parseDouble(E.substring(0, E.indexOf(',')));
             final double scale = Double.parseDouble(E.substring(E.indexOf(',') + 1));
-            DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
-            f.setDescription(getParameterDescription(i));
-            f.setScalingFunction(ScalingFunction.makeFunction(decade, scale, range));
 
+            boolean simpleLog = false;
+            
             // By default we use either linear, or a modified log but in some cases we use simple log for FlowJo compatibility.
             if (0 != decade)
             {
                 // Use simple log if the range is <4096 and bits is 32.
                 // This is a legacy behavior of FlowJo due to an internal representation of bins
                 if (range < 4096 && (bits == 16 || bits == 32))
-                    f.setSimpleLogAxis(true);
+                    simpleLog = true;
 
                 // Use simple log for non-compensated integer data.
                 // We're just going to assume the fcs data is non-compensated.
                 if (datatypeI && facsCalibur)
-                    f.setSimpleLogAxis(true);
+                    simpleLog = true;
             }
+
+            DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
+            f.setDescription(getParameterDescription(i));
+            f.setScalingFunction(ScalingFunction.makeFunction(decade, scale, range));
+            f.setSimpleLogAxis(simpleLog);
+
             if (datatypeI)
                 f.setDither(true);
 

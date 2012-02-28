@@ -53,7 +53,7 @@ public abstract class ScalingFunction
 		else
 			fn = new LinearFunction(scale);
 		fn._range = range;
-		fn._minValue = minValue;
+        fn._minValue = fn.translate(minValue);
 		return fn;
 	}
 

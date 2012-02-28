@@ -28,6 +28,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -199,6 +200,46 @@ public abstract class Workspace implements Serializable
         return new ArrayList<SampleInfo>(_sampleInfos.values());
     }
 
+    /**
+     * Get a Set of SampleInfos from any group names or sample IDs or names that match.
+     *
+     * @param groupNames A set of group IDs or group names.
+     * @param sampleNames A set of sample IDs or sample names.
+     * @return Set of SampleInfo.
+     */
+    public Set<SampleInfo> getSamples(Collection<PopulationName> groupNames, Collection<String> sampleNames)
+    {
+        if (groupNames.isEmpty() && sampleNames.isEmpty())
+            return new LinkedHashSet<SampleInfo>(getSamples());
+
+        Set<Workspace.SampleInfo> sampleInfos = new LinkedHashSet<Workspace.SampleInfo>();
+        if (!groupNames.isEmpty())
+        {
+            for (Workspace.GroupInfo group : getGroups())
+            {
+                // TODO: refactor GroupInfo to just use Strings as names
+                PopulationName groupName = group.getGroupName();
+                PopulationName groupId = PopulationName.fromString(group.getGroupId());
+                if (groupNames.contains(groupId) || groupNames.contains(groupName))
+                {
+                    for (String sampleID : group.getSampleIds())
+                        sampleInfos.add(getSample(sampleID));
+                }
+            }
+        }
+
+        if (!sampleNames.isEmpty())
+        {
+            for (Workspace.SampleInfo sampleInfo : getSamples())
+            {
+                if (sampleNames.contains(sampleInfo.getSampleId()) || sampleNames.contains(sampleInfo.getLabel()))
+                    sampleInfos.add(sampleInfo);
+            }
+        }
+
+        return sampleInfos;
+    }
+
     /** Get the sample ID list from the "All Samples" group or get all the samples in the workspace. */
     public List<String> getAllSampleIDs()
     {
@@ -248,9 +289,24 @@ public abstract class Workspace implements Serializable
         return _sampleInfos.size();
     }
 
-    public SampleInfo getSample(String sampleId)
+    /**
+     * Get SampleInfo by either workspace sample ID or by FCS filename ($FIL keyword.)
+     * @param sampleIdOrLabel Sample ID or FCS filename.
+     * @return SampleInfo
+     */
+    public SampleInfo getSample(String sampleIdOrLabel)
     {
-        return _sampleInfos.get(sampleId);
+        SampleInfo sample = _sampleInfos.get(sampleIdOrLabel);
+        if (sample != null)
+            return sample;
+
+        for (SampleInfo sampleInfo : _sampleInfos.values())
+        {
+            if (sampleIdOrLabel.equals(sampleInfo.getLabel()))
+                return sampleInfo;
+        }
+
+        return null;
     }
 
     public Analysis getSampleAnalysis(SampleInfo sample)
