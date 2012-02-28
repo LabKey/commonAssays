@@ -378,6 +378,10 @@ public class PipelineController extends SpringActionController
                 // If not a saved protocol, create one from the information in the form.
                 if (!"new".equals(form.getProtocol()))
                 {
+                    if (_protocol == null)
+                    {
+                        throw new NotFoundException("Protocol '" + form.getProtocol() + "' could not be found");
+                    }
                     _protocol.setDirSeqRoot(_dirSeqRoot);
                     _protocol.setDbPath(form.getSequenceDBPath());
                     _protocol.setDbNames(new String[] {form.getSequenceDB()});

@@ -38,16 +38,23 @@ public class Q3Handler extends PepXmlAnalysisResultHandler
         parser.skipToStart("q3ratio_result");
         Q3Result result = new Q3Result();
 
-        result.setDecimalRatio(Float.parseFloat(parser.getAttributeValue(null, "decimal_ratio")));
-        result.setHeavyArea(Float.parseFloat(parser.getAttributeValue(null, "heavy_area")));
+        result.setDecimalRatio(parseFloat(parser.getAttributeValue(null, "decimal_ratio")));
+        result.setHeavyArea(parseFloat(parser.getAttributeValue(null, "heavy_area")));
         result.setHeavyFirstscan(Integer.parseInt(parser.getAttributeValue(null, "heavy_firstscan")));
         result.setHeavyLastscan(Integer.parseInt(parser.getAttributeValue(null, "heavy_lastscan")));
-        result.setHeavyMass(Float.parseFloat(parser.getAttributeValue(null, "heavy_mass")));
-        result.setLightArea(Float.parseFloat(parser.getAttributeValue(null, "light_area")));
+        result.setHeavyMass(parseFloat(parser.getAttributeValue(null, "heavy_mass")));
+        result.setLightArea(parseFloat(parser.getAttributeValue(null, "light_area")));
         result.setLightFirstscan(Integer.parseInt(parser.getAttributeValue(null, "light_firstscan")));
         result.setLightLastscan(Integer.parseInt(parser.getAttributeValue(null, "light_lastscan")));
-        result.setLightMass(Float.parseFloat(parser.getAttributeValue(null, "light_mass")));
+        result.setLightMass(parseFloat(parser.getAttributeValue(null, "light_mass")));
         return result;
+    }
+
+    private float parseFloat(String s)
+    {
+        // Deal with localized strings that use a comma as the decimal place
+        s = s.replace(',', '.');
+        return Float.parseFloat(s);
     }
 
     public String getAnalysisType()
