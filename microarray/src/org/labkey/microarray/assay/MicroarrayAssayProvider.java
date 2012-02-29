@@ -17,6 +17,9 @@
 package org.labkey.microarray.assay;
 
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
+import org.labkey.api.data.AbstractTableInfo;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.LsidManager;
 import org.labkey.api.exp.ProtocolParameter;
@@ -29,9 +32,11 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.study.actions.AssayRunDetailsAction;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractTsvAssayProvider;
 import org.labkey.api.study.assay.AssayDataCollector;
@@ -49,6 +54,7 @@ import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
@@ -292,10 +298,45 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     @Override
     public RunListQueryView createRunQueryView(ViewContext context, ExpProtocol protocol)
     {
-        RunListQueryView result = super.createRunQueryView(context, protocol);
-        result.setShowUpdateColumn(true);
-        result.setShowAddToRunGroupButton(true);
-        return result;
+        MicroarrayRunListQueryView queryView = new MicroarrayRunListQueryView(context, protocol);
+
+        if (hasCustomView(ExpProtocol.AssayDomainTypes.Run, true))
+        {
+            ActionURL runDetailsURL = new ActionURL(AssayRunDetailsAction.class, context.getContainer());
+            runDetailsURL.addParameter("rowId", protocol.getRowId());
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("runId", "RowId");
+
+            AbstractTableInfo ati = (AbstractTableInfo)queryView.getTable();
+            ati.setDetailsURL(new DetailsURL(runDetailsURL, params));
+            queryView.setShowDetailsColumn(true);
+        }
+
+        queryView.setShowUpdateColumn(true);
+        queryView.setShowAddToRunGroupButton(true);
+
+        return queryView;
+    }
+
+    private class MicroarrayRunListQueryView extends RunListQueryView
+    {
+        public MicroarrayRunListQueryView(ViewContext context, ExpProtocol protocol)
+        {
+            super(protocol, context);
+        }
+
+        protected void populateButtonBar(DataView view, ButtonBar bar)
+        {
+            super.populateButtonBar(view, bar);
+
+            ActionURL url = new ActionURL();
+            url.setPath("/microarray/geo_export.view");
+
+            ViewContext context = HttpView.currentContext();
+            url.setContainer(context.getContainer());
+            ActionButton btn = new ActionButton(url, "Create GEO Export");
+            bar.add(btn);
+        }
     }
 
     public PipelineProvider getPipelineProvider()
