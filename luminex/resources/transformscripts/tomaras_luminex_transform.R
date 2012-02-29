@@ -21,10 +21,10 @@
 #
 # CHANGES :
 #  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
-#  - 3.0          : Changes for LabKey server 12.1
+#  - 3.0.20120229 : Changes for LabKey server 12.1
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "3.0";
+transformVersion = "3.0.20120229";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -304,6 +304,9 @@ if (nrow(titration.data) > 0)
                 dat$dose = dat$dilution;
                 xLabel = "Dilution";
             }
+
+            # subset the dat object to just those records that have a dose (dilution or expConc) issue 13173
+            dat = subset(dat, !is.na(dose));
 
             if (nrow(dat) > 0)
             {

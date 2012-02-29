@@ -11,9 +11,19 @@
 # Author: Cory Nathe, LabKey
 
 # load R libraries
-library(Rlabkey);
-library(Cairo);
-library(plotrix);
+library(Rlabkey, quietly=TRUE);
+library(Cairo, quietly=TRUE);
+library(plotrix, quietly=TRUE);
+
+# verify that the correct version of Rlabkey is installed
+rlabkeyVersion = installed.packages()["Rlabkey","Version"];
+majorVersion = as.numeric(substr(rlabkeyVersion, 0, 3));
+minorVersion = substr(rlabkeyVersion, 5, nchar(rlabkeyVersion));
+if (majorVersion <= 2.1) {
+    if (nchar(minorVersion) > 0 & as.numeric(minorVersion) < 117) {
+        stop(paste("this report requires that version 2.1.117 or greater of Rlabkey be installed\nCurrent version installed: Rlabkey_",rlabkeyVersion,sep=""));
+    }
+}
 
 plotTypes = c("EC50 4PL", "EC50 5PL", "AUC", "High MFI");
 
