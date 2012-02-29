@@ -60,11 +60,6 @@ Ext4.define('Microarray.GeoExportPanel', {
 
                                 Ext4.Msg.wait('Loading...');
 
-                                //reset all items
-                                this.items.each(function(tab){
-                                    tab.onStoreLoad();
-                                }, this);
-
                                 Ext4.create('LABKEY.ext4.Store', {
                                     schemaName: 'microarray',
                                     queryName: 'geo_properties',
@@ -80,6 +75,11 @@ Ext4.define('Microarray.GeoExportPanel', {
                                             var recordStore = this.store;
                                             recordStore.each(function(rec){
                                                 recordStore.remove(rec);
+                                            }, this);
+
+                                            //reset all items
+                                            this.items.each(function(tab){
+                                                tab.onStoreLoad();
                                             }, this);
 
                                             store.each(function(rec){
@@ -103,6 +103,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                 }
             },{
                 text: 'Export',
+                //hidden: !LABKEY.Security.currentUser.canUpdate,
                 scope: this,
                 handler: this.doExport
             }]
@@ -329,7 +330,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                                 fixedWidthColumn: true,
                                 hidden: false,
                                 columnConfig: {
-                                    width: 175,
+                                    width: 220,
                                     showLink: false
                                 }
                             }
@@ -487,21 +488,17 @@ Ext4.define('Microarray.GeoExportPanel', {
         };
     },
 
-    previewResults: function(){
+    generateSql: function(){
         var samplePanel = this.down('#Samples');
-        var sql = samplePanel.down('#custom_sql').getValue();
-
-        var grid = samplePanel.down('#resultGrid');
-        if(grid)
-            samplePanel.remove(grid);
-
-        if(!sql){
-            alert('Must enter a query');
-            return
-        }
 
         if(!samplePanel.down('#sourceAssay').getValue()){
             alert("You must choose an assay");
+            return;
+        }
+
+        var sql = samplePanel.down('#custom_sql').getValue();
+        if(!sql){
+            alert('Must enter a SQL statement to return the results');
             return;
         }
 
@@ -519,6 +516,21 @@ Ext4.define('Microarray.GeoExportPanel', {
         }
         sql = sql.replace(re, runIds.join(","));
 
+        return sql;
+    },
+
+    previewResults: function(){
+        var samplePanel = this.down('#Samples');
+
+        var grid = samplePanel.down('#resultGrid');
+        if(grid)
+            samplePanel.remove(grid);
+
+        var sql = this.generateSql();
+        if(!sql){
+            return
+        }
+
         var storeCfg = {
             schemaName: 'assay',
             sql: sql,
@@ -526,7 +538,7 @@ Ext4.define('Microarray.GeoExportPanel', {
             metadataDefaults: {
                 fixedWidthColumn: true,
                 columnConfig: {
-                    width: 175
+                    width: 220
                 }
             },
             listeners: {
@@ -554,7 +566,21 @@ Ext4.define('Microarray.GeoExportPanel', {
                             store: store,
                             width: '100%',
                             //forceFit: true,
-                            editable: false
+                            editable: false,
+                            listeners: {
+                                scope: this,
+                                beforeload: function(operation){
+                                    console.log('beforeload');
+                                    var grid = this.down('#resultGrid');
+                                    var store = grid.store;
+                                    var sql = this.down('#custom_sql').getValue();
+
+                                    if(sql){
+                                        store.sql = sql;
+                                        operation.sql = sql;
+                                    }
+                                }
+                            }
                         });
                     }
                 }
@@ -576,6 +602,7 @@ Ext4.define('Microarray.GeoExportPanel', {
             buttonAlign: 'left',
             buttons: [{
                 text: 'Add New Field',
+                disabled: !LABKEY.Security.currentUser.canUpdate,
                 handler: function(btn){
                     var panel = btn.up('#geoExportPanel');
                     var newRow = btn.up('panel').add(panel.generateRow({editable: true}));
@@ -620,6 +647,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                 var data;
                 var hasError;
 
+                var recordsToAdd = [];
                 this.items.each(function(row){
                     data = {};
 
@@ -632,7 +660,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                     if(!data.prop_name){
                         alert('One or more records is missing a name on the ' + this.title + ' tab');
                         hasError = true;
-                        return;
+                        return false;
                     }
 
                     var recIdx = store.find('rowid', data.rowid);
@@ -648,11 +676,14 @@ Ext4.define('Microarray.GeoExportPanel', {
                         if(dupIdx > -1){
                             hasError = true;
                             alert('Error: you cannot have duplicate propert names (' + data.prop_name + '). The form was not saved.');
-                            return;
+                            return false;
                         }
-                        store.add(store.model.create(data));
+                        recordsToAdd.push(store.model.create(data));
                     }
                 }, this);
+
+                if(!hasError)
+                    store.add(recordsToAdd);
 
                 return hasError;
             }
@@ -729,21 +760,55 @@ Ext4.define('Microarray.GeoExportPanel', {
                 width: 200,
                 //style: 'margin-right: 5px;',
                 allowBlank: false,
-                value: name
+                value: name,
+                disabled: !LABKEY.Security.currentUser.canUpdate,
+                listeners: {
+                    scope: this,
+                    delay: 100,
+                    blur: function(field){
+                        var val = field.getValue();
+                        if(Ext4.isEmpty(val))
+                            return;
+
+                        var panel = field.up('panel').up('panel');
+
+                        var prop_name_field;
+                        var field_value;
+                        var error;
+                        panel.items.each(function(row){
+                            prop_name_field = row.down('#prop_name');
+                            if(prop_name_field == field)
+                                return;
+                            field_value = prop_name_field.getValue();
+
+                            if(!field_value)
+                                return;
+                            field_value = field_value.toString().toLowerCase();
+
+                            if(field_value == val.toLowerCase()){
+                                alert('The name ' + val + ' is already in use');
+                                field.reset();
+                            }
+                        }, this);
+                    }
+                }
             },{
                 xtype: 'textarea',
                 width: 800,
                 itemId: 'value',
-                value: config.value
+                value: config.value,
+                disabled: !LABKEY.Security.currentUser.canUpdate
             },{
                 xtype: 'hidden',
                 itemId: 'rowid',
-                value: config.rowid
+                value: config.rowid,
+                disabled: !LABKEY.Security.currentUser.canUpdate
             },{
                 xtype: 'button',
                 itemId: 'removeBtn',
                 text: 'Remove',
                 hidden: !config.editable,
+                disabled: !LABKEY.Security.currentUser.canUpdate,
                 handler: function(btn){
                     var row = btn.up('panel');
                     var tab = row.up('panel');
@@ -818,19 +883,65 @@ Ext4.define('Microarray.GeoExportPanel', {
             this.exportAfterSave();
         }, this, {single: true});
 
+        //find the result store, create if needed, and always reload
+        var resultStore = this.down('#Samples').resultStore;
+        if(!resultStore){
+            this.previewResults();
+            resultStore = this.down('#Samples').resultStore;
+        }
+
+        if(!resultStore){
+            return;  //for this to happen, there must have been an error such as missing SQL or no run IDs
+        }
+
+        var sql = this.generateSql();
+        if(!sql){
+            return;
+        }
+        resultStore.sql = sql;
+        resultStore.load();
+
         var saveBtn = this.down('#saveBtn');
         this.onSave(saveBtn);
     },
 
     exportAfterSave: function(){
-        var store = this.store;
-
         var sections = {
             Series: [['SERIES'], ['# This section describes the overall experiment.']],
             Samples: [['SAMPLES'], ['# 2 versions of each Agilent platform are represented in GEO. Include the Accession Number of the "Feature Number" version in the platform column.']],
             Protocols: [['PROTOCOLS'], ['# Protocols which are applicable to specific Samples or specific channels can be included in additional columns of the SAMPLES section instead.']]
         };
 
+        //get sample info:
+        var resultStore = this.down('#Samples').resultStore;
+        if(resultStore.isLoading()){
+            resultStore.on('load', function(store, records, success){
+                if(success)
+                    this.exportAfterSave();
+            }, this, {single: true});
+            return;
+        }
+
+        var fields = resultStore.getFields();
+        var row = [];
+        fields.each(function(field){
+            row.push(field.name);
+        }, this);
+        sections.Samples.push(row);
+
+        var val;
+        resultStore.each(function(rec){
+            row = [];
+            fields.each(function(field){
+                val = rec.get(field.name);
+                val = Ext4.isDefined(val) ? LABKEY.ext.MetaHelper.getDisplayString(val, field, rec, resultStore) : '';
+                row.push(val);
+            }, this);
+            sections.Samples.push(row);
+        }, this);
+
+        //handle other fields
+        var store = this.store;
         if(store.getCount()){
             store.each(function(rec){
                 if(rec.get('category') == 'Comments')
@@ -857,52 +968,15 @@ Ext4.define('Microarray.GeoExportPanel', {
             });
         }
 
-        //get sample info:
-        var resultStore = this.down('#Samples').resultStore;
-        if(!resultStore){
-            this.previewResults();
-            resultStore = this.down('#Samples').resultStore;
-            resultStore.on('load', function(store, records, success){
-                if(success)
-                    this.exportAfterSave();
-            }, this, {single: true});
-            return;
-        }
-//        else {
-//            resultStore.on('load', function(store, records, success){
-//                if(success)
-//                    this.exportAfterSave();
-//            }, this, {single: true});
-//            resultStore.load();
-//            return;
-//        }
-
-        var fields = resultStore.getFields();
-        var row = [];
-        fields.each(function(field){
-            row.push(field.name);
-        }, this);
-        sections.Samples.push(row);
-
-        var val;
-        resultStore.each(function(rec){
-            row = [];
-            fields.each(function(field){
-                val = rec.get(field.name);
-                val = Ext4.isDefined(val) ? LABKEY.ext.MetaHelper.getDisplayString(val, field, rec, resultStore) : '';
-                row.push(val);
-            }, this);
-            sections.Samples.push(row);
-        }, this);
-
         var data = [['# Use this template for a Agilent one-color experiment submission.']].concat(sections.Series).concat(sections.Samples).concat(sections.Protocols)
-        LABKEY.Utils.convertToExcel({
+        //NOTE: this causes a page navigation, which can disrupt the
+        LABKEY.Utils.convertToExcel.defer(50, this, [{
 	        fileName: 'GEO_Export.xls',
 	        sheets: [{
                 name: 'sheet1',
                 data: data
             }]
-        });
+        }]);
     }
 });
 
@@ -920,6 +994,7 @@ Ext4.define('LABKEY.ext4.ContributorField', {
             buttons: [{
                 text: 'Add Contributor',
                 scope: this,
+                disabled: !LABKEY.Security.currentUser.canUpdate,
                 handler: function(btn){
                     btn.up('panel').add({
                         xtype: 'textfield',
@@ -943,6 +1018,7 @@ Ext4.define('LABKEY.ext4.ContributorField', {
             Ext4.each(val, function(item){
                 toAdd.push({
                     xtype: 'textfield',
+                    disabled: !LABKEY.Security.currentUser.canUpdate,
                     width: 800,
                     value: item
                 });
@@ -951,6 +1027,7 @@ Ext4.define('LABKEY.ext4.ContributorField', {
         else {
             toAdd.push({
                 xtype: 'textfield',
+                disabled: !LABKEY.Security.currentUser.canUpdate,
                 width: 800
             })
         }
