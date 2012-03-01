@@ -106,41 +106,43 @@ Ext4.define('Microarray.GeoExportPanel', {
                 //hidden: !LABKEY.Security.currentUser.canUpdate,
                 scope: this,
                 handler: this.doExport
-            },{
-                text: 'Export Raw Data',
-                scope: this,
-                handler: function(btn){
-                    var panel = btn.up('panel');
-
-                    var sourceAssayField = panel.down('#sourceAssay');
-                    var sourceAssay = sourceAssayField.getValue();
-                    if(!sourceAssay){
-                        alert("You must choose an assay");
-                        return;
-                    }
-                    var assayRec = sourceAssayField.store.find('rowid', sourceAssay);
-
-                    var runIds = panel.down('#run_ids').getValue();
-                    if(!runIds){
-                        alert("You must choose one or more runs to include");
-                        return;
-                    }
-
-                    var form = new Ext.FormPanel({
-                        url: LABKEY.ActionURL.buildURL("experiment", "exportRunFiles"),
-                        method: 'GET',
-                        baseParams: {
-                            fileExportType: 'all',
-                            zipFileName: 'Exported Microarray Runs.zip',
-                            '.select': runIds.split(';'),
-                            exportType: 'BROWSER_DOWNLOAD',
-                            dataRegionSelectionKey: 'GEO_excel_selection' //this is completely made up.  however, the server requires that you supply something
-                        },
-                        fileUpload: true
-                    }).render(document.getElementsByTagName('body')[0]);
-                    form.getForm().submit();
-
-                }
+                //NOTE: the Katze lab originally asked for a button to export raw data, but then decided not the add it.
+                //this code is a start at implementing that feature
+//            },{
+//                text: 'Export Raw Data',
+//                scope: this,
+//                handler: function(btn){
+//                    var panel = btn.up('panel');
+//
+//                    var sourceAssayField = panel.down('#sourceAssay');
+//                    var sourceAssay = sourceAssayField.getValue();
+//                    if(!sourceAssay){
+//                        alert("You must choose an assay");
+//                        return;
+//                    }
+//                    var assayRec = sourceAssayField.store.find('rowid', sourceAssay);
+//
+//                    var runIds = panel.down('#run_ids').getValue();
+//                    if(!runIds){
+//                        alert("You must choose one or more runs to include");
+//                        return;
+//                    }
+//
+//                    var form = new Ext.FormPanel({
+//                        url: LABKEY.ActionURL.buildURL("experiment", "exportRunFiles"),
+//                        method: 'GET',
+//                        baseParams: {
+//                            fileExportType: 'all',
+//                            zipFileName: 'Exported Microarray Runs.zip',
+//                            '.select': runIds.split(';'),
+//                            exportType: 'BROWSER_DOWNLOAD',
+//                            dataRegionSelectionKey: 'GEO_excel_selection' //this is completely made up.  however, the server requires that you supply something
+//                        },
+//                        fileUpload: true
+//                    }).render(document.getElementsByTagName('body')[0]);
+//                    form.getForm().submit();
+//
+//                }
             }]
         });
 
