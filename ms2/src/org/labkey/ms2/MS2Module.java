@@ -65,6 +65,7 @@ import org.labkey.ms2.pipeline.sequest.SequestParamsBuilder;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomProteinListView;
+import org.labkey.ms2.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
@@ -213,6 +214,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new MS2PipelineProvider(this));
+        service.registerPipelineProvider(new ProteinAnnotationPipelineProvider(this));
         service.registerPipelineProvider(new XTandemPipelineProvider(this), "X!Tandem (Cluster)");
         service.registerPipelineProvider(new MascotCPipelineProvider(this), "Mascot (Cluster)");
         service.registerPipelineProvider(new SequestPipelineProvider(this));

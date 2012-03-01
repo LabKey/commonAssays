@@ -19,9 +19,11 @@ package org.labkey.ms2.protein;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
+import java.io.File;
+
 public abstract class ParseActions
 {
-    protected String _whatImParsing;
+    protected File _file;
     protected String _comment = null;
     protected int _currentInsertId = 0;
     
@@ -35,14 +37,14 @@ public abstract class ParseActions
         _comment = c;
     }
     
-    public String getWhatImParsing()
+    public File getFile()
     {
-        return _whatImParsing;
+        return _file;
     }
 
-    public void setWhatImParsing(String whatImParsing)
+    public void setFile(File file)
     {
-        _whatImParsing = whatImParsing;
+        _file = file;
     }
 
 

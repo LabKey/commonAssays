@@ -24,6 +24,7 @@ import org.xml.sax.XMLReader;
 import org.labkey.ms2.protein.tools.REProperties;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import java.io.IOException;
@@ -231,10 +232,10 @@ public class XMLProteinHandler extends DefaultHandler
         ParseActions p = _tree.push(local);
         if (p != null)
         {
-            if (p.getWhatImParsing() == null) p.setWhatImParsing(_loader.getParseFName());
+            if (p.getFile() == null) p.setFile(_loader._file);
             if (p.getComment() == null) p.setComment(_loader.getComment());
-            if (p.getCurrentInsertId() == 0 && _loader.getRecoveryId() != 0)
-                p.setCurrentInsertId(_loader.getRecoveryId());
+            if (p.getCurrentInsertId() == 0)
+                p.setCurrentInsertId(_loader.currentInsertId);
             p.beginElement(_parseContext, attrs);
         }
     }
@@ -256,7 +257,7 @@ public class XMLProteinHandler extends DefaultHandler
         ParseActions p = _tree.getCurrent();
         if (p != null)
         {
-            if (p.getWhatImParsing() == null) p.setWhatImParsing(_loader.getParseFName());
+            if (p.getFile() == null) p.setFile(_loader._file);
             if (p.getComment() == null) p.setComment(_loader.getComment());
             p.endElement(_parseContext);
         }
@@ -274,7 +275,7 @@ public class XMLProteinHandler extends DefaultHandler
         ParseActions p = _tree.getCurrent();
         if (p != null)
         {
-            if (p.getWhatImParsing() == null) p.setWhatImParsing(_loader.getParseFName());
+            if (p.getFile() == null) p.setFile(_loader._file);
             p.characters(_parseContext, ch, start, length);
         }
     }
@@ -308,9 +309,9 @@ public class XMLProteinHandler extends DefaultHandler
         _loader.handleThreadStateChangeRequests();
     }
 
-    public void parse(String file) throws IOException, SAXException
+    public void parse(File file) throws IOException, SAXException
     {
-        getParser().parse(file);
+        getParser().parse(file.getPath());
     }
 
     //

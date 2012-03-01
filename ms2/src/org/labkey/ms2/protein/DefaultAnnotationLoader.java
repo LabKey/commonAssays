@@ -16,93 +16,66 @@
 
 package org.labkey.ms2.protein;
 
-import org.apache.log4j.Logger;
+import org.labkey.api.pipeline.CancelledException;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.URLHelper;
+import org.labkey.api.view.ViewBackgroundInfo;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * User: brittp
  * Date: Dec 23, 2005
  * Time: 4:00:42 PM
  */
-public abstract class DefaultAnnotationLoader implements AnnotationLoader
+public abstract class DefaultAnnotationLoader extends PipelineJob
 {
-    protected String _parseFName;
+    protected File _file;
     protected String _comment = null;
-    protected static Logger _log;
-    protected AnnotationLoader.Status _requestedThreadState = null;
-    protected int _recoveryId;
-    private boolean _paused;
+    protected int currentInsertId = 0;
 
-    public DefaultAnnotationLoader()
+    public DefaultAnnotationLoader(File file, ViewBackgroundInfo info, PipeRoot pipeRoot) throws IOException
     {
-        _log = Logger.getLogger(getClass());
+        super(ProteinAnnotationPipelineProvider.NAME, info, pipeRoot);
+        _file = file;
+        validate();
+        setLogFile(new File(file.getPath() + ".log"));
     }
 
-    public String getParseFName()
+    @Override
+    public URLHelper getStatusHref()
     {
-        return _parseFName;
+        return null;
     }
 
-    public void requestThreadState(AnnotationLoader.Status t)
+    public void validate() throws IOException
     {
-        _requestedThreadState = t;
-    }
-
-    public Status getRequestedThreadState()
-    {
-        return _requestedThreadState;
+        if (!NetworkDrive.exists(_file))
+        {
+            throw new FileNotFoundException("Can't open file '" + _file + "'");
+        }
+        if (!_file.isFile())
+        {
+            throw new FileNotFoundException(_file + " is available, but is not a file");
+        }
     }
 
     public void handleThreadStateChangeRequests()
     {
-        if (_requestedThreadState != null)
+        if (checkInterrupted())
         {
-            switch (_requestedThreadState)
-            {
-                case KILLED:
-                    throw new KillRequestedException();
-                case PAUSED:
-                    try
-                    {
-                        _paused = true;
-                        while (_requestedThreadState == Status.PAUSED)
-                        {
-                            try
-                            {
-                                Thread.sleep(10000);
-                            }
-                            catch (InterruptedException e)
-                            {
-                                // continue sleeping?
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        _paused = false;
-                    }
-            }
+            throw new CancelledException();
         }
     }
-
-    public boolean isPaused()
+    
+    public void handleThreadStateChangeRequests(String message)
     {
-        return _paused;
-    }
-
-    public void handleThreadStateChangeRequests(String msg)
-    {
-        _log.debug(msg);
+        info(message);
         handleThreadStateChangeRequests();
-    }
-
-    public void setRecoveryId(int rid)
-    {
-        _recoveryId = rid;
-    }
-
-    public int getRecoveryId()
-    {
-        return _recoveryId;
     }
 
     public void setComment(String c)
@@ -113,16 +86,5 @@ public abstract class DefaultAnnotationLoader implements AnnotationLoader
     public String getComment()
     {
         return _comment;
-    }
-
-    public void parseInBackground()
-    {
-        AnnotationUploadManager.getInstance().enqueueAnnot(this);
-    }
-
-    public void parseInBackground(int recoveryId)
-    {
-        setRecoveryId(recoveryId);
-        AnnotationUploadManager.getInstance().enqueueAnnot(this);
     }
 }

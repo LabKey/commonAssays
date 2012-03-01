@@ -16,14 +16,14 @@
 
 package org.labkey.ms2.protein;
 
-import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Date;
 
 /**
@@ -31,32 +31,20 @@ import java.util.Date;
  * sample SAX2 counter.
  */
 
-public class XMLProteinLoader extends DefaultAnnotationLoader implements AnnotationLoader
+public class XMLProteinLoader extends DefaultAnnotationLoader
 {
     private final boolean _clearExisting;
 
-    public int getId()
+    @Override
+    public String getDescription()
     {
-        return 0;
+        return "Uniprot XML import - " + _file;
     }
 
-    public void validate() throws IOException
+    public XMLProteinLoader(File file, ViewBackgroundInfo info, PipeRoot root, boolean clearExisting) throws IOException
     {
-        getFile();
-    }
-
-    public XMLProteinLoader(String fileName)
-    {
-        this(fileName, false);
-    }
-
-    public XMLProteinLoader(String fileName, boolean clearExisting)
-    {
+        super(file, info, root);
         _clearExisting = clearExisting;
-        // Declare which package our individual parsers belong
-        // to.  We assume that the package is a child of the
-        // current package with the loaderPrefix appended
-        _parseFName = fileName;
     }
 
     public boolean isClearExisting()
@@ -64,49 +52,43 @@ public class XMLProteinLoader extends DefaultAnnotationLoader implements Annotat
         return _clearExisting;
     }
 
-    public void parseFile() throws SQLException, IOException, SAXException
+    @Override
+    public void run()
     {
-        String fName = getFile();
-
+        boolean success = false;
         try
         {
+            info("Starting annotation load for " + _file);
+            setStatus("RUNNING");
+            validate();
             Connection conn = ProteinManager.getSchema().getScope().ensureTransaction();
             XMLProteinHandler handler = new XMLProteinHandler(conn, this);
-            handler.parse(fName);
+            handler.parse(_file);
             conn.setAutoCommit(false);
             ProteinManager.getSchema().getScope().commitTransaction();
             ProteinManager.indexProteins(null, (Date)null);
+            info("Import completed successfully");
+            setStatus(PipelineJob.COMPLETE_STATUS);
+            success = true;
+        }
+        catch (SAXException e)
+        {
+            error("Import failed due to XML parsing error", e);
+        }
+        catch (Exception e)
+        {
+            error("Import failed", e);
         }
         finally
         {
             ProteinManager.getSchema().getScope().closeConnection();
         }
-    }
 
-    private String getFile() throws IOException
-    {
-        String fName = getParseFName();
-        if (fName == null)
+        if (!success)
         {
-            throw new FileNotFoundException("No file name specified");
+            // Need to do this outside of the connection, so can't do it inside the catch block above
+            setStatus(PipelineJob.ERROR_STATUS);
         }
-        File f = new File(fName);
-        if (!NetworkDrive.exists(f))
-        {
-            throw new FileNotFoundException("Can't open file '" + fName + "'");
-        }
-        if (!f.isFile())
-        {
-            throw new FileNotFoundException("Can't open file '" + fName + "'");
-        }
-        return fName;
-    }
-
-    //
-    // ContentHandler methods
-    //
-    public void cleanUp()
-    {
     }
 } // class XMLProteinLoader
 

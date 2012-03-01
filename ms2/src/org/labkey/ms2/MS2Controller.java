@@ -103,6 +103,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.data.xml.queryCustomView.ContainerFilterType;
 import org.labkey.ms2.compare.CompareDataRegion;
 import org.labkey.ms2.compare.CompareExcelWriter;
 import org.labkey.ms2.compare.CompareQuery;
@@ -124,11 +125,11 @@ import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
 import org.labkey.ms2.protein.AnnotationInsertion;
-import org.labkey.ms2.protein.AnnotationLoader;
-import org.labkey.ms2.protein.AnnotationUploadManager;
 import org.labkey.ms2.protein.DefaultAnnotationLoader;
 import org.labkey.ms2.protein.FastaDbLoader;
+import org.labkey.ms2.protein.FastaReloaderJob;
 import org.labkey.ms2.protein.IdentifierType;
+import org.labkey.ms2.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.SetBestNameRunnable;
 import org.labkey.ms2.protein.XMLProteinLoader;
@@ -193,7 +194,6 @@ public class MS2Controller extends SpringActionController
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";
     private static final String MS2_DEFAULT_VIEW_CATEGORY = "MS2DefaultView";
     private static final String DEFAULT_VIEW_NAME = "DefaultViewName";
-    private static final int MAX_INSERTIONS_DISPLAY_ROWS = 1000; // Limit annotation table insertions to 1000 rows
     private static final String SHARED_VIEW_SUFFIX = " (Shared)";
     static final String CAPTION_SCORING_BUTTON = "Compare Scoring";
     private static final int MAX_MATCHING_PROTEINS = 100;
@@ -2787,14 +2787,16 @@ public class MS2Controller extends SpringActionController
         {
             int[] ids = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
 
-            FastaDbLoader.updateSeqIds(ids);
+            FastaReloaderJob job = new FastaReloaderJob(ids, getViewBackgroundInfo(), null);
+
+            PipelineService.get().getPipelineQueue().addJob(job);
 
             return true;
         }
 
         public ActionURL getSuccessURL(Object o)
         {
-            return MS2UrlsImpl.get().getShowProteinAdminUrl();
+            return MS2UrlsImpl.get().getShowProteinAdminUrl("FASTA reload queued. Monitor its progress using the job list at the bottom of this page.");
         }
     }
 
@@ -2802,15 +2804,40 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class DeleteDataBasesAction extends FormHandlerAction
     {
+        private String _message;
+
         public void validateCommand(Object target, Errors errors)
         {
         }
 
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
-            Set<String> fastaIds = DataRegionSelection.getSelected(getViewContext(), true);
+            Set<String> fastaIdStrings = DataRegionSelection.getSelected(getViewContext(), true);
+            Set<Integer> fastaIds = new HashSet<Integer>();
+            for (String fastaIdString : fastaIdStrings)
+            {
+                try
+                {
+                    fastaIds.add(Integer.parseInt(fastaIdString));
+                }
+                catch (NumberFormatException e)
+                {
+                    throw new NotFoundException("Invalid FASTA ID: " + fastaIdString);
+                }
+            }
             String idList = StringUtils.join(fastaIds, ',');
-            Integer[] validIds = Table.executeArray(ProteinManager.getSchema(), "SELECT FastaId FROM " + ProteinManager.getTableInfoFastaAdmin() + " WHERE (FastaId <> 0) AND (Runs IS NULL) AND (FastaId IN (" + idList + "))", new Object[]{}, Integer.class);
+            List<Integer> validIds = Arrays.asList(Table.executeArray(ProteinManager.getSchema(), "SELECT FastaId FROM " + ProteinManager.getTableInfoFastaAdmin() + " WHERE (FastaId <> 0) AND (Runs IS NULL) AND (FastaId IN (" + idList + "))", new Object[]{}, Integer.class));
+
+            fastaIds.removeAll(validIds);
+
+            if (!fastaIds.isEmpty())
+            {
+                _message = "Unable to delete FASTA ID(s) " + StringUtils.join(fastaIds, ", ") + " as they are still referenced by runs";
+            }
+            else
+            {
+                _message = "Successfully deleted " + validIds.size() + " FASTA record(s)";
+            }
 
             for (int id : validIds)
                 ProteinManager.deleteFastaFile(id);
@@ -2820,7 +2847,7 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getSuccessURL(Object o)
         {
-            return MS2UrlsImpl.get().getShowProteinAdminUrl();
+            return MS2UrlsImpl.get().getShowProteinAdminUrl(_message);
         }
     }
 
@@ -2862,6 +2889,17 @@ public class MS2Controller extends SpringActionController
     public static class BlastForm
     {
         private String _blastServerBaseURL;
+        private String _message;
+
+        public String getMessage()
+        {
+            return _message;
+        }
+
+        public void setMessage(String message)
+        {
+            _message = message;
+        }
 
         public String getBlastServerBaseURL()
         {
@@ -2888,7 +2926,18 @@ public class MS2Controller extends SpringActionController
             GridView annots = new GridView(getAnnotInsertsGrid(), errors);
             annots.setTitle("Protein Annotations Loaded");
 
-            return new VBox(blastView, grid, annots);
+            QueryView jobsView = PipelineService.get().getPipelineQueryView(getViewContext(), PipelineService.PipelineButtonOption.Standard);
+            jobsView.getSettings().setBaseFilter(new SimpleFilter("Provider", ProteinAnnotationPipelineProvider.NAME));
+            jobsView.getSettings().setContainerFilterName(ContainerFilterType.ALL_FOLDERS.toString());
+            jobsView.setTitle("Protein Annotation Load Jobs");
+
+            VBox result = new VBox(blastView, grid, annots, jobsView);
+            if (form.getMessage() != null)
+            {
+                HtmlView messageView = new HtmlView("Admin Message", "<strong><span class=\"labkey-message\">" + PageFlowUtil.filter(form.getMessage()) + "</span></strong>");
+                result.addView(messageView, 0);
+            }
+            return result;
         }
 
         @Override
@@ -2914,9 +2963,6 @@ public class MS2Controller extends SpringActionController
             String columnNames = "InsertId, FileName, FileType, Comment, InsertDate, CompletionDate, RecordsProcessed";
             DataRegion rgn = new DataRegion();
 
-            DisplayColumn threadControl1 = new DisplayThreadStatusColumn();
-            threadControl1.setName("threadControl");
-            threadControl1.setCaption("State");
             rgn.addColumns(ProteinManager.getTableInfoAnnotInsertions(), columnNames);
             rgn.getDisplayColumn("fileType").setWidth("20");
             rgn.getDisplayColumn("insertId").setCaption("ID");
@@ -2924,15 +2970,12 @@ public class MS2Controller extends SpringActionController
             ActionURL showURL = new ActionURL(ShowAnnotInsertDetailsAction.class, getContainer());
             String detailURL = showURL.getLocalURIString() + "insertId=${InsertId}";
             rgn.getDisplayColumn("insertId").setURL(detailURL);
-            rgn.addDisplayColumn(threadControl1);
-            rgn.setMaxRows(MAX_INSERTIONS_DISPLAY_ROWS);
             rgn.setShowRecordSelectors(true);
 
             ButtonBar bb = new ButtonBar();
 
             ActionButton delete = new ActionButton(DeleteAnnotInsertEntriesAction.class, "Delete");
-            delete.setRequiresSelection(true, "Are you sure you want to remove this entry from the list?\\n(Note: actual annotations won't be deleted.)", "Are you sure you want to remove these entries from the list?\\n(Note: actual annotations won't be deleted.)"
-            );
+            delete.setRequiresSelection(true, "Are you sure you want to remove this entry from the list?\\n(Note: The protein annotations themselves will not be deleted.)", "Are you sure you want to remove these entries from the list?\\n(Note: The protein annotations themselves will not be deleted.)");
             delete.setActionType(ActionButton.Action.GET);
             bb.add(delete);
 
@@ -2970,7 +3013,7 @@ public class MS2Controller extends SpringActionController
 
             ActionButton delete = new ActionButton(new ActionURL(DeleteDataBasesAction.class, getContainer()), "Delete");
             delete.setActionType(ActionButton.Action.POST);
-            delete.setRequiresSelection(true);
+            delete.setRequiresSelection(true, "Are you sure you want to delete this FASTA record?", "Are you sure you want to delete these FASTA records?");
             bb.add(delete);
 
             ActionButton reload = new ActionButton(ReloadFastaAction.class, "Reload FASTA");
@@ -5227,7 +5270,7 @@ public class MS2Controller extends SpringActionController
         {
             ProteinDictionaryHelpers.loadProtSprotOrgMap();
 
-            return MS2UrlsImpl.get().getShowProteinAdminUrl();
+            return MS2UrlsImpl.get().getShowProteinAdminUrl("SWP organism map reload successful");
         }
     }
 
@@ -5728,9 +5771,10 @@ public class MS2Controller extends SpringActionController
                 errors.addError(new LabkeyError("Please enter a file path."));
                 return false;
             }
+            File file;
             try
             {
-                new File(fname).getCanonicalFile();
+                file = new File(fname).getCanonicalFile();
             }
             catch (IOException e)
             {
@@ -5749,11 +5793,11 @@ public class MS2Controller extends SpringActionController
             //TODO: this style of dealing with different file types must be repaired.
             if ("uniprot".equalsIgnoreCase(form.getFileType()))
             {
-                loader = new XMLProteinLoader(fname, form.isClearExisting());
+                loader = new XMLProteinLoader(file, getViewBackgroundInfo(), null, form.isClearExisting());
             }
             else if ("fasta".equalsIgnoreCase(form.getFileType()))
             {
-                FastaDbLoader fdbl = new FastaDbLoader(new File(fname));
+                FastaDbLoader fdbl = new FastaDbLoader(file, getViewBackgroundInfo(), null);
                 fdbl.setDefaultOrganism(form.getDefaultOrganism());
                 fdbl.setOrganismIsToGuessed(form.getShouldGuess() != null);
                 loader = fdbl;
@@ -5775,14 +5819,14 @@ public class MS2Controller extends SpringActionController
                 return false;
             }
 
-            loader.parseInBackground();
+            PipelineService.get().getPipelineQueue().addJob(loader);
 
             return true;
         }
 
         public ActionURL getSuccessURL(LoadAnnotForm loadAnnotForm)
         {
-            return MS2UrlsImpl.get().getShowProteinAdminUrl();
+            return MS2UrlsImpl.get().getShowProteinAdminUrl("Annotation load queued. Monitor its progress using the job list at the bottom of this page.");
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -6065,59 +6109,6 @@ public class MS2Controller extends SpringActionController
         public void setDeleted(boolean deleted)
         {
             this.deleted = deleted;
-        }
-    }
-
-
-    @RequiresSiteAdmin
-    public class AnnotThreadControlAction extends SimpleRedirectAction
-    {
-        public ActionURL getRedirectURL(Object o) throws Exception
-        {
-            HttpServletRequest req = getViewContext().getRequest();
-            String commandType = req.getParameter("button");
-            int threadId = Integer.parseInt(req.getParameter("id"));
-
-            AnnotationLoader annotLoader = AnnotationUploadManager.getInstance().getActiveLoader(threadId);
-
-            if (annotLoader != null)
-            {
-                if (commandType.equalsIgnoreCase("kill"))
-                {
-                    annotLoader.requestThreadState(AnnotationLoader.Status.KILLED);
-                }
-
-                if (commandType.equalsIgnoreCase("pause"))
-                {
-                    annotLoader.requestThreadState(AnnotationLoader.Status.PAUSED);
-                }
-
-                if (commandType.equalsIgnoreCase("continue"))
-                {
-                    annotLoader.requestThreadState(AnnotationLoader.Status.RUNNING);
-                }
-            }
-
-            if (commandType.equalsIgnoreCase("recover"))
-            {
-                String fnameToRecover = Table.executeSingleton(ProteinManager.getSchema(), "SELECT FileName FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" + threadId, null, String.class);
-                String ftypeToRecover = Table.executeSingleton(ProteinManager.getSchema(), "SELECT FileType FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" + threadId, null, String.class);
-                //TODO:  Major kludge.  This will have to be done correctly.  Possibly with generics, which is what they're for
-                if (ftypeToRecover.equalsIgnoreCase("uniprot"))
-                {
-                    XMLProteinLoader xpl = new XMLProteinLoader(fnameToRecover);
-                    xpl.parseInBackground(threadId);
-                    Thread.sleep(2000);
-                }
-                if (ftypeToRecover.equalsIgnoreCase("fasta"))
-                {
-                    FastaDbLoader fdbl = new FastaDbLoader(new File(fnameToRecover));
-                    fdbl.parseInBackground(threadId);
-                    Thread.sleep(2000);
-                }
-            }
-
-            return MS2UrlsImpl.get().getShowProteinAdminUrl();
         }
     }
 
@@ -6536,7 +6527,17 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getShowProteinAdminUrl()
         {
-            return new ActionURL(ShowProteinAdminAction.class, ContainerManager.getRoot());
+            return getShowProteinAdminUrl(null);
+        }
+
+        public ActionURL getShowProteinAdminUrl(String message)
+        {
+            ActionURL url = new ActionURL(ShowProteinAdminAction.class, ContainerManager.getRoot());
+            if (message != null)
+            {
+                url.addParameter("message", message);
+            }
+            return url;
         }
 
         public static MS2UrlsImpl get()

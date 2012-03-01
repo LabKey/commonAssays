@@ -80,7 +80,7 @@ public class uniprot extends ParseActions
 
             if (getCurrentInsertId() == 0)
             {
-                _initialInsertion.setString(1, getWhatImParsing());
+                _initialInsertion.setString(1, getFile().getPath());
                 if (getComment() == null) setComment("");
                 _initialInsertion.setString(2, getComment());
                 _initialInsertion.setTimestamp(3, new java.sql.Timestamp(new java.util.Date().getTime()));

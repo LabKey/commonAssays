@@ -22,10 +22,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.reader.FastaLoader;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.fasta.FastaDbHelper;
 import org.labkey.ms2.protein.fasta.FastaFile;
@@ -53,13 +56,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class FastaDbLoader extends DefaultAnnotationLoader implements AnnotationLoader
+public class FastaDbLoader extends DefaultAnnotationLoader
 {
-    private Connection conn = null;
-    protected int currentInsertId = 0;
     protected String defaultOrganism = null;
     protected int associatedFastaId = 0;
-    private FastaDbHelper fdbu = null;
     private boolean organismToBeGuessed;
     private static final Object LOCK = new Object();
     protected int mouthfulSize = 20000;
@@ -68,62 +68,29 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
     private String _fileHash;
     public static final String UNKNOWN_ORGANISM = "Unknown unknown";
 
-    private OrganismGuessStrategy _parsingStrategy;
-    private OrganismGuessStrategy _sharedIdentsStrategy;
+    private transient Connection conn = null;
+    private transient FastaDbHelper fdbu = null;
 
-    public FastaDbLoader(File file, String hash, Logger log) throws IOException
+    public FastaDbLoader(File file, ViewBackgroundInfo info, PipeRoot root, String hash) throws IOException
     {
-        this(file, hash);
-        _log = log;
-    }
-
-    public FastaDbLoader(File file, String hash) throws IOException
-    {
-        this(file);
+        super(file, info, root);
         _fileHash = hash;
     }
 
-    public FastaDbLoader(File file) throws IOException
+    public FastaDbLoader(File file, ViewBackgroundInfo info, PipeRoot root) throws IOException
     {
-        // Declare which package our individual parsers belong
-        // to.  We assume that the package is a child of the
-        // current package with the loaderPrefix appended
-        _parseFName = getCanonicalPath(file);
-
-        _parsingStrategy = new GuessOrgByParsing();
-        _sharedIdentsStrategy = new GuessOrgBySharedIdents();
+        this(file, info, root, null);
     }
 
-    public int getId()
+    @Override
+    public String getDescription()
     {
-        return currentInsertId;
+        return "FASTA import - " + _file;
     }
 
     public void validate() throws IOException
     {
-        if (_parseFName == null)
-        {
-            throw new FileNotFoundException("No file name specified");
-        }
-        File file = new File(_parseFName);
-        if (!NetworkDrive.exists(file) || !file.isFile())
-        {
-            throw new FileNotFoundException("File " + _parseFName + " does not exist.");
-        }
-        FastaLoader loader = new ProteinFastaLoader(file);
-        FastaLoader.FastaIterator fastaIterator = loader.iterator();
-        try
-        {
-            fastaIterator.hasNext();
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new IOException(e.getMessage());
-        }
-        finally
-        {
-            fastaIterator.close();
-        }
+        super.validate();
     }
 
     public void setDefaultOrganism(String o)
@@ -141,60 +108,66 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         this.organismToBeGuessed = organismIsToBeGuessed;
     }
 
-    public boolean isFileAvailable() throws SQLException
+    @Override
+    public void run()
     {
-        File f = new File(getParseFName());
-
-        if (!f.exists())
-            NetworkDrive.ensureDrive(f.getPath());
-
-        // Can't access file... set loaded date to null
-        return f.exists();
+        try
+        {
+            setLogFile(getLogFile());
+            info("Starting annotation load for " + _file);
+            setStatus("RUNNING");
+            parseFile(getLogger());
+            getLogger().info("Import completed successfully");
+            setStatus(PipelineJob.COMPLETE_STATUS);
+        }
+        catch (Exception e)
+        {
+            error("Import failed", e);
+            setStatus(PipelineJob.ERROR_STATUS);
+        }
     }
 
-    public void parseFile() throws SQLException, IOException
+    public void parseFile(Logger logger) throws SQLException, IOException
     {
         if (_fileHash == null)
         {
-            _fileHash = HashHelpers.hashFileContents(getParseFName());
+            _fileHash = HashHelpers.hashFileContents(_file);
         }
+
+        OrganismGuessStrategy parsingStrategy = new GuessOrgByParsing();
+        OrganismGuessStrategy sharedIdentsStrategy = new GuessOrgBySharedIdents();
 
         synchronized (LOCK)
         {
             FastaFile file = new FastaFile();
-            file.setFilename(getParseFName());
+            file.setFilename(_file.getPath());
             file.setFileChecksum(_fileHash);
             file = Table.insert(null, ProteinManager.getTableInfoFastaFiles(), file);
             associatedFastaId = file.getFastaId();
         }
 
-        if (isFileAvailable())
+        validate();
+
+        synchronized (LOCK)
         {
-            synchronized (LOCK)
+            try
             {
-                try
-                {
-                    parse();
+                parse(logger, parsingStrategy, sharedIdentsStrategy);
 
-                    Table.execute(ProteinManager.getSchema(), "UPDATE " + ProteinManager.getTableInfoFastaFiles() + " SET Loaded=? WHERE FastaId=?", new Date(), associatedFastaId);
-                }
-                finally
-                {
-                    if (null != conn)
-                        ProteinManager.getSchema().getScope().releaseConnection(conn);
-
-                    // Release all resources used by the guessing strategies (e.g., caches)
-                    _parsingStrategy.close();
-                    _sharedIdentsStrategy.close();
-                }
+                Table.execute(ProteinManager.getSchema(), "UPDATE " + ProteinManager.getTableInfoFastaFiles() + " SET Loaded=? WHERE FastaId=?", new Date(), associatedFastaId);
             }
+            finally
+            {
+                if (null != conn)
+                    ProteinManager.getSchema().getScope().releaseConnection(conn);
 
-            ProteinManager.indexProteins(null, (Date)null);
+                // Release all resources used by the guessing strategies (e.g., caches)
+                parsingStrategy.close();
+                sharedIdentsStrategy.close();
+            }
         }
-        else
-        {
-            throw new IOException("Could not locate file: " + getParseFName());
-        }
+
+        ProteinManager.indexProteins(null, (Date)null);
     }
 
     public int getFastaId()
@@ -206,7 +179,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
     {
         if (currentInsertId == 0)
         {
-            fdbu._initialInsertionStmt.setString(1, getParseFName());
+            fdbu._initialInsertionStmt.setString(1, _file.getPath());
             if (comment == null) setComment("");
             fdbu._initialInsertionStmt.setString(2, comment);
             fdbu._initialInsertionStmt.setString(3, defaultOrganism);
@@ -245,7 +218,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
     private static final int SQL_BATCH_SIZE = 100;
 
-    protected void preProcessSequences(List<ProteinPlus> mouthful, Connection c) throws SQLException
+    protected void preProcessSequences(List<ProteinPlus> mouthful, Connection c, Logger logger, OrganismGuessStrategy parsingStrategy, OrganismGuessStrategy sharedIdentsStrategy) throws SQLException
     {
         long startTime = System.currentTimeMillis();
         c.setAutoCommit(false);
@@ -259,10 +232,10 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             String orgString;
             if (organismToBeGuessed)
             {
-                orgString = _parsingStrategy.guess(curSeq);
+                orgString = parsingStrategy.guess(curSeq);
                 if (orgString == null)
                 {
-                    orgString = _sharedIdentsStrategy.guess(curSeq);
+                    orgString = sharedIdentsStrategy.guess(curSeq);
                 }
             }
             else
@@ -291,7 +264,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             String bestNameTmp = curSeq.getBestName();
             fdbu._addSeqStmt.setString(6, bestNameTmp);
             //todo: rethink best name
-            fdbu._addSeqStmt.setString(7, baseFileName(getParseFName()));
+            fdbu._addSeqStmt.setString(7, baseFileName(_file.getPath()));
             fdbu._addSeqStmt.setString(8, curSeq.getProtein().getLookup());
             if (curSeq.getGenus() == null)
             {
@@ -334,12 +307,12 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         fdbu._addSeqStmt.clearBatch();
         handleThreadStateChangeRequests();
         c.setAutoCommit(true);
-        _log.debug("Sequences = " + transactionCount + ".  preProcessSequences() total elapsed time was " + (System.currentTimeMillis() - startTime)/1000 + " seconds for this mouthful.");
+        logger.debug("Sequences = " + transactionCount + ".  preProcessSequences() total elapsed time was " + (System.currentTimeMillis() - startTime)/1000 + " seconds for this mouthful.");
 
-       guessBySharedHash();
+       guessBySharedHash(logger);
     }
 
-    protected void guessBySharedHash() throws SQLException
+    protected void guessBySharedHash(Logger logger) throws SQLException
     {
         // only guessing for those records that are still 'Unknown unknown'
         // could be changed to
@@ -347,7 +320,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         fdbu._guessOrgBySharedHashStmt.setString(2, "unknown");
 
         int rc = fdbu._guessOrgBySharedHashStmt.executeUpdate();
-        _log.debug("Updated " + rc + " Sequences in guessBySharedHash");
+        logger.debug("Updated " + rc + " Sequences in guessBySharedHash");
 
     }
 
@@ -510,7 +483,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
     protected int guessAssociatedFastaId() throws SQLException
     {
-        String bfn = baseFileName(getParseFName());
+        String bfn = baseFileName(_file.getPath());
         ResultSet rs = null;
         try
         {
@@ -527,15 +500,15 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         }
         finally
         {
-            if (rs != null) { try { rs.close(); } catch (SQLException e) {} }
+            if (rs != null) { try { rs.close(); } catch (SQLException ignored) {} }
         }
         return 0;
     }
 
-    protected void processMouthful(Connection c, List<ProteinPlus> mouthful) throws SQLException
+    protected void processMouthful(Connection c, List<ProteinPlus> mouthful, Logger logger, OrganismGuessStrategy parsingStrategy, OrganismGuessStrategy sharedIdentsStrategy) throws SQLException
     {
         handleThreadStateChangeRequests("Entering Process Mouthful");
-        preProcessSequences(mouthful, c);
+        preProcessSequences(mouthful, c, logger, parsingStrategy, sharedIdentsStrategy);
         int orgsAdded = insertOrganisms(c);
         handleThreadStateChangeRequests();
         int seqsAdded = insertSequences();
@@ -546,19 +519,19 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         if (associatedFastaId <= 0) setAssociatedFastaId(guessAssociatedFastaId());
         int lookupsUpdated = insertLookups(associatedFastaId);
 
-        _log.debug("Updated " + lookupsUpdated + " lookups");
+        logger.debug("Updated " + lookupsUpdated + " lookups");
         handleThreadStateChangeRequests("In Process mouthful - finished mouthful");
 
         fdbu._emptySeqsStmt.executeUpdate();
         fdbu._emptyIdentsStmt.executeUpdate();
 
         // housekeeping and bookkeeping
-        _log.info(" Added: " +
+        logger.info(" Added: " +
                 orgsAdded + " organisms; " +
                 seqsAdded + " sequences; " +
                 identsAdded + " identifiers; " +
                 annotsAdded + " annotations");
-        _log.info(" This batch of records processed successfully");
+        logger.info(" This batch of records processed successfully");
         fdbu._getCurrentInsertStatsStmt.setInt(1, currentInsertId);
         ResultSet r = null;
 
@@ -587,7 +560,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         }
         finally
         {
-            if (r != null) { try { r.close(); } catch (SQLException e) {} }
+            if (r != null) { try { r.close(); } catch (SQLException ignored) {} }
         }
 
         int curNRecords = mouthful.size();
@@ -624,7 +597,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
     {
         handleThreadStateChangeRequests("Creating FASTA record");
 
-        fdbu._insertIntoFastasStmt.setString(1, getParseFName());
+        fdbu._insertIntoFastasStmt.setString(1, _file.getName());
         fdbu._insertIntoFastasStmt.setInt(2, seqIds.size());
         fdbu._insertIntoFastasStmt.setString(3, _comment);
         fdbu._insertIntoFastasStmt.setString(4, hash);
@@ -633,25 +606,24 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         handleThreadStateChangeRequests("Done creating FASTA record");
     }
 
-    public void parse() throws IOException, SQLException
+    public void parse(Logger logger, OrganismGuessStrategy parsingStrategy, OrganismGuessStrategy sharedIdentsStrategy) throws IOException, SQLException
     {
-        File fastaFile = new File(getParseFName());
-        FastaValidator validator = new FastaValidator(fastaFile);
+        FastaValidator validator = new FastaValidator(_file);
         List<String> errors = validator.validate();
 
         if (!errors.isEmpty())
         {
-            _log.error("This FASTA file has " + errors.size() + " duplicate protein name" + (1 == errors.size() ? "" : "s") + ", listed below.  " +
+            logger.error("This FASTA file has " + errors.size() + " duplicate protein name" + (1 == errors.size() ? "" : "s") + ", listed below.  " +
                     "Search engines and the Trans-Proteomic Pipeline use these names to link to specific protein sequeces so the names must be unique.  " +
                     "You should remove or otherwise disambiguate the duplicate entries from this FASTA file and re-run your search.");
 
             String errorString = StringUtils.join(errors, "\n");
-            _log.error(errorString);
+            logger.error(errorString);
 
             throw new RuntimeException("Invalid FASTA file");
         }
 
-        ProteinFastaLoader curLoader = new ProteinFastaLoader(fastaFile);
+        ProteinFastaLoader curLoader = new ProteinFastaLoader(_file);
 
         conn = ProteinManager.getSchema().getScope().getConnection();
         //conn.setAutoCommit(false);
@@ -663,13 +635,12 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         List<ProteinPlus> mouth = new ArrayList<ProteinPlus>();
         List<Integer> seqIds = new ArrayList<Integer>();
 
-        if (_recoveryId == 0)
+        if (currentInsertId == 0)
         {
             currentInsertId = initAnnotLoad(_comment);
         }
         else
         {
-            currentInsertId = _recoveryId;
             ResultSet rs = null;
             try
             {
@@ -680,11 +651,11 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                     setOrganismIsToGuessed(rs.getInt(2) == 1);
                 }
                 else
-                    _log.error("Can't find insert id " + currentInsertId + " in parse recovery.");
+                    logger.error("Can't find insert id " + currentInsertId + " in parse recovery.");
             }
             finally
             {
-                if (rs != null) try { rs.close(); } catch (SQLException e) {}
+                if (rs != null) try { rs.close(); } catch (SQLException ignored) {}
             }
             Integer skipCount = Table.executeSingleton(ProteinManager.getSchema(), "SELECT RecordsProcessed FROM " +
                     ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" +
@@ -720,14 +691,14 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
             if (!proteinIterator.hasNext() || (loadCounter % mouthfulSize) == 0)
             {
-                processMouthful(conn, mouth);
+                processMouthful(conn, mouth, logger, parsingStrategy, sharedIdentsStrategy);
                 mouth.clear();
             }
 
             Integer percentComplete = proteinIterator.getPercentCompleteIfChanged();
 
             if (null != percentComplete)
-                _log.info("Importing FASTA file sequences: " + percentComplete + "% complete");
+                logger.info("Importing FASTA file sequences: " + percentComplete + "% complete");
         }
 
         if (protCount / 3 < negCount)
@@ -740,7 +711,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         finalizeAnnotLoad();
         if (_fileHash == null)
         {
-            _fileHash = HashHelpers.hashFileContents(getParseFName());
+            _fileHash = HashHelpers.hashFileContents(_file);
         }
         genProtFastaRecord(seqIds, _fileHash);
         fdbu._dropIdentTempStmt.executeUpdate();
@@ -753,7 +724,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         try
         {
             ProteinManager.getSchema().getScope().releaseConnection(conn);
-            this.requestThreadState(AnnotationLoader.Status.DYING);
         }
         catch (Exception e)
         {
@@ -787,7 +757,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             throw new FileNotFoundException(fileName);
         }
         String convertedName = getCanonicalPath(f);
-        String hash = HashHelpers.hashFileContents(convertedName);
+        String hash = HashHelpers.hashFileContents(f);
         String[] hashArray = new String[] {hash};
 
         FastaFile[] files = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoFastaFiles() + " WHERE FileChecksum=? ORDER BY FastaId", hashArray, FastaFile.class);
@@ -817,20 +787,13 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             return loadedFile.getFastaId();
         }
 
-        FastaDbLoader fdbl = new FastaDbLoader(f, hash, log);
+        FastaDbLoader fdbl = new FastaDbLoader(f, new ViewBackgroundInfo(context.getContainer(), context.getUser(), null), null, hash);
         fdbl.setComment(new java.util.Date() + " " + convertedName);
         fdbl.setDefaultOrganism(defaultOrganism);
         fdbl.setOrganismIsToGuessed(shouldGuess);
-        fdbl.parseFile();
+        fdbl.parseFile(log);
 
         return fdbl.getFastaId();
-    }
-
-
-    public static void updateSeqIds(int[] fastaIds)
-    {
-        Thread thread = new Thread(new FastaReloader(fastaIds));
-        thread.start();
     }
 
     //JUnit TestCase

@@ -1092,7 +1092,6 @@ ms2/src/org/labkey/ms2/AbstractProteinQuantitation.java -text
 ms2/src/org/labkey/ms2/CompareServiceImpl.java -text
 ms2/src/org/labkey/ms2/CumulativeTimer.java -text
 ms2/src/org/labkey/ms2/DeltaScanColumn.java -text
-ms2/src/org/labkey/ms2/DisplayThreadStatusColumn.java -text
 ms2/src/org/labkey/ms2/DtaSpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/EditElutionGraphContext.java -text
 ms2/src/org/labkey/ms2/ElutionGraph.java -text
@@ -1310,8 +1309,6 @@ ms2/src/org/labkey/ms2/pipeline/tandem/setTandemDefaults.jsp -text
 ms2/src/org/labkey/ms2/protAnnots.jsp -text
 ms2/src/org/labkey/ms2/protein.jsp -text
 ms2/src/org/labkey/ms2/protein/AnnotationInsertion.java -text
-ms2/src/org/labkey/ms2/protein/AnnotationLoader.java -text
-ms2/src/org/labkey/ms2/protein/AnnotationUploadManager.java -text
 ms2/src/org/labkey/ms2/protein/CharactersParseActions.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationImportHelper.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationSet.java -text
@@ -1319,11 +1316,12 @@ ms2/src/org/labkey/ms2/protein/CustomAnnotationType.java -text
 ms2/src/org/labkey/ms2/protein/CustomProteinListView.java -text
 ms2/src/org/labkey/ms2/protein/DefaultAnnotationLoader.java -text
 ms2/src/org/labkey/ms2/protein/FastaDbLoader.java -text
-ms2/src/org/labkey/ms2/protein/FastaReloader.java -text
+ms2/src/org/labkey/ms2/protein/FastaReloaderJob.java -text
 ms2/src/org/labkey/ms2/protein/IdentifierType.java -text
 ms2/src/org/labkey/ms2/protein/ParseActions.java -text
 ms2/src/org/labkey/ms2/protein/ParseContext.java -text
 ms2/src/org/labkey/ms2/protein/ParserTree.java -text
+ms2/src/org/labkey/ms2/protein/ProteinAnnotationPipelineProvider.java -text
 ms2/src/org/labkey/ms2/protein/ProteinController.java -text
 ms2/src/org/labkey/ms2/protein/ProteinException.java -text
 ms2/src/org/labkey/ms2/protein/ProteinManager.java -text
