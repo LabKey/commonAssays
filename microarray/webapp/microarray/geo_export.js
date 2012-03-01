@@ -102,10 +102,45 @@ Ext4.define('Microarray.GeoExportPanel', {
                     }]
                 }
             },{
-                text: 'Export',
+                text: 'Export GEO Template',
                 //hidden: !LABKEY.Security.currentUser.canUpdate,
                 scope: this,
                 handler: this.doExport
+            },{
+                text: 'Export Raw Data',
+                scope: this,
+                handler: function(btn){
+                    var panel = btn.up('panel');
+
+                    var sourceAssayField = panel.down('#sourceAssay');
+                    var sourceAssay = sourceAssayField.getValue();
+                    if(!sourceAssay){
+                        alert("You must choose an assay");
+                        return;
+                    }
+                    var assayRec = sourceAssayField.store.find('rowid', sourceAssay);
+
+                    var runIds = panel.down('#run_ids').getValue();
+                    if(!runIds){
+                        alert("You must choose one or more runs to include");
+                        return;
+                    }
+
+                    var form = new Ext.FormPanel({
+                        url: LABKEY.ActionURL.buildURL("experiment", "exportRunFiles"),
+                        method: 'GET',
+                        baseParams: {
+                            fileExportType: 'all',
+                            zipFileName: 'Exported Microarray Runs.zip',
+                            '.select': runIds.split(';'),
+                            exportType: 'BROWSER_DOWNLOAD',
+                            dataRegionSelectionKey: 'GEO_excel_selection' //this is completely made up.  however, the server requires that you supply something
+                        },
+                        fileUpload: true
+                    }).render(document.getElementsByTagName('body')[0]);
+                    form.getForm().submit();
+
+                }
             }]
         });
 
@@ -229,6 +264,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                     width: 400,
                     queryMode: 'local',
                     itemId: 'sourceAssay',
+                    disabled: !LABKEY.Security.currentUser.canUpdate,
                     displayField: 'name',
                     valueField: 'rowid',
                     store: Ext4.create('Ext.data.Store', {
@@ -293,6 +329,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                     this.add({
                         xtype: 'labkey-gridpanel',
                         itemId: 'runsGrid',
+                        disabled: !LABKEY.Security.currentUser.canUpdate,
                         //multiSelect: true,
                         selModel: Ext4.create('Ext.selection.CheckboxModel', {
                             //xtype: 'checkboxmodel',
@@ -347,12 +384,14 @@ Ext4.define('Microarray.GeoExportPanel', {
                 bodyStyle: 'padding: 5px;',
                 items: [{
                     xtype: 'panel',
+                    //disabled: !LABKEY.Security.currentUser.canUpdate,
                     border: false,
                     width: 1000,
                     items: [{
                         xtype: 'textarea',
                         itemId: 'custom_sql',
                         fieldLabel: 'Custom SQL',
+                        disabled: !LABKEY.Security.currentUser.canUpdate,
                         labelAlign: 'top',
                         width: 1000,
                         height: 300
@@ -387,6 +426,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                     buttons: [{
                         xype: 'button',
                         text: 'Preview Results',
+                        disabled: !LABKEY.Security.currentUser.canUpdate,
                         scope: this,
                         handler: this.previewResults
                     }]
@@ -559,29 +599,32 @@ Ext4.define('Microarray.GeoExportPanel', {
                         }, this);
                     }
                     else {
-                        samplePanel.add({
-                            xtype: 'labkey-gridpanel',
-                            itemId: 'resultGrid',
-                            title: 'Step 4: Preview Results',
-                            store: store,
-                            width: '100%',
-                            //forceFit: true,
-                            editable: false,
-                            listeners: {
-                                scope: this,
-                                beforeload: function(operation){
-                                    console.log('beforeload');
-                                    var grid = this.down('#resultGrid');
-                                    var store = grid.store;
-                                    var sql = this.down('#custom_sql').getValue();
+                        if(!samplePanel.down('#resultGrid')){
+                            samplePanel.add({
+                                xtype: 'labkey-gridpanel',
+                                itemId: 'resultGrid',
+                                title: 'Step 4: Preview Results',
+                                disabled: !LABKEY.Security.currentUser.canUpdate,
+                                store: store,
+                                width: '100%',
+                                //forceFit: true,
+                                editable: false,
+                                listeners: {
+                                    scope: this,
+                                    beforeload: function(operation){
+                                        console.log('beforeload');
+                                        var grid = this.down('#resultGrid');
+                                        var store = grid.store;
+                                        var sql = this.down('#custom_sql').getValue();
 
-                                    if(sql){
-                                        store.sql = sql;
-                                        operation.sql = sql;
+                                        if(sql){
+                                            store.sql = sql;
+                                            operation.sql = sql;
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
                 }
             }
@@ -764,12 +807,13 @@ Ext4.define('Microarray.GeoExportPanel', {
                 disabled: !LABKEY.Security.currentUser.canUpdate,
                 listeners: {
                     scope: this,
-                    delay: 100,
+                    //delay: 100,
                     blur: function(field){
                         var val = field.getValue();
                         if(Ext4.isEmpty(val))
                             return;
 
+                        val = Ext4.String.trim(val);
                         var panel = field.up('panel').up('panel');
 
                         var prop_name_field;
@@ -783,7 +827,7 @@ Ext4.define('Microarray.GeoExportPanel', {
 
                             if(!field_value)
                                 return;
-                            field_value = field_value.toString().toLowerCase();
+                            field_value = Ext4.String.trim(field_value.toString().toLowerCase());
 
                             if(field_value == val.toLowerCase()){
                                 alert('The name ' + val + ' is already in use');
