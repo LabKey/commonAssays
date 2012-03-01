@@ -161,16 +161,16 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 'activate': this.activateTrendPlotPanel
             }
         });
-        this.ec505plPanel = new Ext.Panel({
-            itemId: "EC50 5PL",
-            title: "EC50 - 5PL Rumi",
-            html: "<div id='EC50 5PLTrendPlotDiv' class='ec505plTrendPlot'></div></div>",
-            deferredRender: false,
-            listeners: {
-                scope: this,
-                'activate': this.activateTrendPlotPanel
-            }
-        });
+        //this.ec505plPanel = new Ext.Panel({
+        //    itemId: "EC50 5PL",
+        //    title: "EC50 - 5PL Rumi",
+        //    html: "<div id='EC50 5PLTrendPlotDiv' class='ec505plTrendPlot'></div></div>",
+        //    deferredRender: false,
+        //    listeners: {
+        //        scope: this,
+        //        'activate': this.activateTrendPlotPanel
+        //    }
+        //});
         this.aucPanel = new Ext.Panel({
             itemId: "AUC",
             title: "AUC",
@@ -198,7 +198,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 height: 308,
                 padding: 5
             },
-            items: [this.ec504plPanel, this.ec505plPanel, this.aucPanel, this.mfiPanel]
+            items: [this.ec504plPanel, this.aucPanel, this.mfiPanel] // this.ec505plPanel removed 2012/03/01
         });
         this.items.push(this.trendTabPanel);
 

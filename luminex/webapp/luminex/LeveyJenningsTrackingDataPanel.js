@@ -157,8 +157,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {header:'GS Member', dataIndex:'IncludeInGuideSetCalculation', hidden: true},
                 {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("Four ParameterCurveFit/EC50QCFlagsEnabled"), scope: this, align: 'right'},
                 {header:'EC50 4PL QC Flags Enabled', dataIndex:'Four ParameterCurveFit/EC50QCFlagsEnabled', hidden: true},
-                {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("Five ParameterCurveFit/EC50QCFlagsEnabled"), scope: this, align: 'right'},
-                {header:'EC50 5PL QC Flags Enabled', dataIndex:'Five ParameterCurveFit/EC50QCFlagsEnabled', hidden: true},
+                //{header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.outOfRangeRenderer("Five ParameterCurveFit/EC50QCFlagsEnabled"), scope: this, align: 'right'},
+                //{header:'EC50 5PL QC Flags Enabled', dataIndex:'Five ParameterCurveFit/EC50QCFlagsEnabled', hidden: true},
                 {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.outOfRangeRenderer("TrapezoidalCurveFit/AUCQCFlagsEnabled"), scope: this, align: 'right'},
                 {header:'AUC  QC Flags Enabled', dataIndex:'TrapezoidalCurveFit/AUCQCFlagsEnabled', hidden: true},
                 {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.outOfRangeRenderer("MaxFIQCFlagsEnabled"), scope: this, align: 'right'},
@@ -201,7 +201,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         // create a pop-up window to display the apply guide set UI
         var win = new Ext.Window({
             layout:'fit',
-            width:1120,
+            width:1045,
             height:500,
             closeAction:'close',
             modal: true,
@@ -336,13 +336,15 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     },
 
     loadQCFlags: function(store, records, options) {
-        // query the server for the QC Flags that match the selected Titratio and Analyte and update the grid store accordingly
+        // query the server for the QC Flags that match the selected Titration and Analyte and update the grid store accordingly
         this.getEl().mask("loading QC Flags...", "x-mask-loading");
         LABKEY.Query.executeSql({
             schemaName: "assay",
             sql: 'SELECT DISTINCT x.Run, x.FlagType, x.Enabled, FROM "' + this.assayName + ' AnalyteTitrationQCFlags" AS x '
-                 + 'WHERE x.Analyte.Name=\'' + this.analyte + '\' AND x.Titration.Name=\'' + this.titration + '\'',
+                 + 'WHERE x.Analyte.Name=\'' + this.analyte + '\' AND x.Titration.Name=\'' + this.titration + '\' '
+                 + '  AND x.Titration.Run.Isotype=\'' + this.isotype + '\' AND x.Titration.Run.Conjugate=\'' + this.conjugate + '\'',
             sort: "Run,FlagType,Enabled",
+            containerFilter: LABKEY.Query.containerFilter.allFolders,
             success: function(data) {
                 // put together the flag display for each runId
                 var runFlagList = {};

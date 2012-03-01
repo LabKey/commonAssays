@@ -145,7 +145,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
                     {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
                     {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
-                    {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
+                    //{header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
                     {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'},
                     {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'}
                 ],
@@ -156,7 +156,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             this.allRunsGrid = new Ext.grid.GridPanel({
                 autoScroll:true,
                 height:200,
-                width:1075,
+                width:1000,
                 loadMask:{msg:"Loading runs..."},
                 store: allRunsStore,
                 colModel: allRunsColModel,
@@ -175,7 +175,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             this.add(new Ext.Panel(
             {
                 title: 'All Runs',
-                width:1075,
+                width:1000,
                 items: [
                     {
                         xtype: 'displayfield',
@@ -213,7 +213,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
                 {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
                 {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
-                {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
+                //{header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
                 {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'},
                 {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'}
             ],
@@ -223,7 +223,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // create the grid for the runs that are a part of the given guide set
         this.guideRunSetGrid = new Ext.grid.GridPanel({
             autoHeight:true,
-            width:1075,
+            width:1000,
             loadMask:{msg:"Loading runs assigned to guide set..."},
             store: guideRunSetStore,
             colModel: guideRunSetColModel,
@@ -241,7 +241,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         this.add(new Ext.Panel({
             title: 'Runs Assigned to This Guide Set',
-            width:1075,
+            width:1000,
             items: [
                 {xtype: 'displayfield', value: 'List of all of the runs included in the guide set calculations for the selected guide set.'},
                 this.guideRunSetGrid
@@ -255,7 +255,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             labelStyle: 'background-color:#EEEEEE; padding:3px; font-weight:bold',
             fieldLabel: 'Comment',
             value: this.comment,
-            width: 965,
+            width: 895,
             enableKeyEvents: true,
             listeners: {
                 scope: this,

@@ -192,7 +192,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // create a pop-up window to display the manage guide set UI
         var win = new Ext.Window({
             layout:'fit',
-            width:1150,
+            width:1075,
             height:650,
             closeAction:'close',
             modal: true,

@@ -25,7 +25,8 @@ if (majorVersion <= 2.1) {
     }
 }
 
-plotTypes = c("EC50 4PL", "EC50 5PL", "AUC", "High MFI");
+# "EC50 5PL" removed 2012/03/01
+plotTypes = c("EC50 4PL", "AUC", "High MFI");
 
 # create a list of filters to apply to the selectRows call
 colFilter=makeFilter(c("Analyte/Name","EQUAL",labkey.url.params$Analyte));
@@ -47,7 +48,7 @@ colSelect = paste("Analyte/Name", "Titration/Name", "Titration/Run/Isotype", "Ti
 
 # get the columns needed for each of the 4 plot types : EC50 4PL, EC50 5PL, MaxFI, and AUC
 colSelect = paste(colSelect, "Four ParameterCurveFit/EC50", "GuideSet/Four ParameterCurveFit/EC50Average", "GuideSet/Four ParameterCurveFit/EC50StdDev", sep=",");
-colSelect = paste(colSelect, "Five ParameterCurveFit/EC50", "GuideSet/Five ParameterCurveFit/EC50Average", "GuideSet/Five ParameterCurveFit/EC50StdDev", sep=",");
+#colSelect = paste(colSelect, "Five ParameterCurveFit/EC50", "GuideSet/Five ParameterCurveFit/EC50Average", "GuideSet/Five ParameterCurveFit/EC50StdDev", sep=",");
 colSelect = paste(colSelect, "MaxFI", "GuideSet/MaxFIAverage", "GuideSet/MaxFIStdDev", sep=",");
 colSelect = paste(colSelect, "TrapezoidalCurveFit/AUC", "GuideSet/TrapezoidalCurveFit/AUCAverage", "GuideSet/TrapezoidalCurveFit/AUCStdDev", sep=",");
 
@@ -103,10 +104,10 @@ for (typeIndex in 1:length(plotTypes))
 	    dat$plottype_value = dat$four_parametercurvefit_ec50;
 	    dat$guideset_average = dat$guideset_four_parametercurvefit_ec50average;
 	    dat$guideset_stddev = dat$guideset_four_parametercurvefit_ec50stddev;
-	} else if (plotType == "EC50 5PL") {
-	    dat$plottype_value = dat$five_parametercurvefit_ec50;
-	    dat$guideset_average = dat$guideset_five_parametercurvefit_ec50average;
-	    dat$guideset_stddev = dat$guideset_five_parametercurvefit_ec50stddev;
+	#} else if (plotType == "EC50 5PL") {
+	#    dat$plottype_value = dat$five_parametercurvefit_ec50;
+	#    dat$guideset_average = dat$guideset_five_parametercurvefit_ec50average;
+	#    dat$guideset_stddev = dat$guideset_five_parametercurvefit_ec50stddev;
 	} else if (plotType == "High MFI") {
 	    dat$plottype_value = dat$maxfi;
 	    dat$guideset_average = dat$guideset_maxfiaverage;
