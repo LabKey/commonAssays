@@ -414,9 +414,13 @@ public class LuminexExcelParser
             for (int col=0; col < row.getLastCellNum(); col++)
             {
                 Cell cell = row.getCell(col);
+                if (cell == null)
+                {
+                    continue;
+                }
                 if (colNames.size() <= col)
                 {
-                    throw new ExperimentException("Unable to find header for column index " + col + ". This is likely not a supported Luminex file format.");
+                    throw new ExperimentException("Unable to find header for cell " + ExcelFactory.getCellLocationDescription(col, row.getRowNum(), sheet.getSheetName()) + ". This is likely not a supported Luminex file format.");
                 }
                 String columnName = colNames.get(col);
 
