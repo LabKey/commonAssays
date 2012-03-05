@@ -65,6 +65,9 @@
             <column columnName="Asymmetry" />
             <column columnName="Inflection" />
             <column columnName="Slope" />
+            <column columnName="FailureFlag">
+                <description>Flag indicating that the curve fit has failed or the EC50 value was over the acceptable threshold</description>
+            </column>
         </columns>
     </table>
 

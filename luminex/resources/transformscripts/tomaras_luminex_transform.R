@@ -21,6 +21,7 @@
 #
 # CHANGES :
 #  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
+#  - 2.2.20120217 : Issue 14070: Value out of range error when importing curve fit parameters for titrated unknown with flat dilution curve
 #  - 3.0.20120229 : Changes for LabKey server 12.1
 #
 # Author: Cory Nathe, LabKey
@@ -67,6 +68,12 @@ getFiDisplayName <- function(fiCol)
 fiConversion <- function(val)
 {
     1 + max(val,0);
+}
+
+# fix for Issue 14070 - capp the values at something that can be stored in the DB
+maxValueConversion <- function(val)
+{
+    min(val, 10e37);
 }
 
 getRunPropertyValue <- function(runProps, colName)
@@ -230,12 +237,14 @@ run.data$Lower_4pl = NA;
 run.data$Upper_4pl = NA;
 run.data$Inflection_4pl = NA;
 run.data$EC50_4pl = NA;
+run.data$Flag_4pl = NA;
 run.data$Slope_5pl = NA;
 run.data$Lower_5pl = NA;
 run.data$Upper_5pl = NA;
 run.data$Inflection_5pl = NA;
 run.data$Asymmetry_5pl = NA;
 run.data$EC50_5pl = NA;
+run.data$Flag_5pl = NA;
 
 # loop through the possible titrations and to see if it is a standard, qc control, or titrated unknown
 if (nrow(titration.data) > 0)
@@ -319,11 +328,17 @@ if (nrow(titration.data) > 0)
                 {
                     tryCatch({
                             fit = drm(fi~dose, data=dat, fct=LL.4());
-                            run.data[runDataIndex,]$Slope_4pl = as.numeric(coef(fit))[1]
-                            run.data[runDataIndex,]$Lower_4pl = as.numeric(coef(fit))[2]
-                            run.data[runDataIndex,]$Upper_4pl = as.numeric(coef(fit))[3]
-                            run.data[runDataIndex,]$Inflection_4pl = as.numeric(coef(fit))[4]
-                            run.data[runDataIndex,]$EC50_4pl = as.numeric(coef(fit))[4]
+                            run.data[runDataIndex,]$Slope_4pl = maxValueConversion(as.numeric(coef(fit))[1]);
+                            run.data[runDataIndex,]$Lower_4pl = maxValueConversion(as.numeric(coef(fit))[2]);
+                            run.data[runDataIndex,]$Upper_4pl = maxValueConversion(as.numeric(coef(fit))[3]);
+                            run.data[runDataIndex,]$Inflection_4pl = maxValueConversion(as.numeric(coef(fit))[4]);
+
+                            ec50 = maxValueConversion(as.numeric(coef(fit))[4]);
+                            if (ec50 > 10e6) {
+                                stop("EC50 value over the acceptable level (10e6).")
+                            } else {
+                                run.data[runDataIndex,]$EC50_4pl = ec50
+                            }
 
                             # plot the curve fit for the QC Controls
                             if (titration.data[tIndex,]$QCControl == "true") {
@@ -339,21 +354,27 @@ if (nrow(titration.data) > 0)
                             }
                         }
                     );
+
+                    # set the failure flag if there is no EC50 value at this point
+                    if (all(is.na(run.data[runDataIndex,]$EC50_4pl))) {
+                        run.data[runDataIndex,]$Flag_4pl = TRUE;
+                    }
                 } else if (fitTypes[typeIndex] == "5pl")
                 {
                     tryCatch({
                             fit = fit.drc(log(fi)~dose, data=dat, force.fit=TRUE, fit.4pl=FALSE);
-                            run.data[runDataIndex,]$Slope_5pl = as.numeric(coef(fit))[1];
-                            run.data[runDataIndex,]$Lower_5pl = as.numeric(coef(fit))[2];
-                            run.data[runDataIndex,]$Upper_5pl = as.numeric(coef(fit))[3];
-                            run.data[runDataIndex,]$Inflection_5pl = as.numeric(coef(fit))[4];
-                            run.data[runDataIndex,]$Asymmetry_5pl = as.numeric(coef(fit))[5];
+                            run.data[runDataIndex,]$Slope_5pl = maxValueConversion(as.numeric(coef(fit))[1]);
+                            run.data[runDataIndex,]$Lower_5pl = maxValueConversion(as.numeric(coef(fit))[2]);
+                            run.data[runDataIndex,]$Upper_5pl = maxValueConversion(as.numeric(coef(fit))[3]);
+                            run.data[runDataIndex,]$Inflection_5pl = maxValueConversion(as.numeric(coef(fit))[4]);
+                            run.data[runDataIndex,]$Asymmetry_5pl = maxValueConversion(as.numeric(coef(fit))[5]);
 
                             y = log((exp(run.data[runDataIndex,]$Lower_5pl) + exp(run.data[runDataIndex,]$Upper_5pl))/2);
-                            estimated = unname(getConc(fit, y, verbose=TRUE));
-                            if (!is.nan(estimated[3]))
-                            {
-                                run.data[runDataIndex,]$EC50_5pl = estimated[3];
+                            ec50 = unname(getConc(fit, y))[3];
+                            if (is.nan(ec50) | ec50 > 10e6) {
+                                stop("EC50 value out of acceptable range (either outside standards MFI or greater than 10e6).")
+                            } else {
+                                run.data[runDataIndex,]$EC50_5pl = ec50;
                             }
 
                             # plot the curve fit for the QC Controls
@@ -368,9 +389,13 @@ if (nrow(titration.data) > 0)
                             if (titration.data[tIndex,]$QCControl == "true") {
                                 plot(fi ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
                             }
-
                         }
                     );
+
+                    # set the failure flag if there is no EC50 value at this point
+                    if (all(is.na(run.data[runDataIndex,]$EC50_5pl))) {
+                        run.data[runDataIndex,]$Flag_5pl = TRUE;
+                    }
                 }    
             } else {
                 # create an empty plot indicating that there is no data available

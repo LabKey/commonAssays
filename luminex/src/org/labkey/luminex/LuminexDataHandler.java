@@ -710,7 +710,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 ParameterCurveImpl.FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
                 if (fitParams != null)
                 {
-                    CurveFit fit = insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, null, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex", existingCurveFits);
+                    CurveFit fit = insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, null, null, DilutionCurve.FitType.FIVE_PARAMETER, "BioPlex", existingCurveFits);
                     if (fit != null)
                     {
                         newCurveFits.add(fit);
@@ -838,17 +838,22 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         Number asymmetry = (value == null ? (Number)value : Double.parseDouble(value.toString()));
         value = dataRow.getExtraProperties().get("EC50" + suffix);
         Double ec50 = (value != null ? Double.parseDouble(value.toString()) : null);
+        value = dataRow.getExtraProperties().get("Flag" + suffix);
+        Boolean flag = (value != null ? Boolean.parseBoolean(value.toString()) : null);
 
-        if (slope != null && upper != null && lower != null && inflection != null)
+        if ((slope != null && upper != null && lower != null && inflection != null && ec50 != null) || flag != null)
         {
             ParameterCurveImpl.FitParameters params = new ParameterCurveImpl.FitParameters();
-            params.min = lower.doubleValue();
-            params.slope = slope.doubleValue();
-            params.inflection = inflection.doubleValue();
-            params.max = upper.doubleValue();
-            params.asymmetry = asymmetry == null ? 1 : asymmetry.doubleValue();
+            if (flag == null)
+            {
+                params.min = lower.doubleValue();
+                params.slope = slope.doubleValue();
+                params.inflection = inflection.doubleValue();
+                params.max = upper.doubleValue();
+                params.asymmetry = asymmetry == null ? 1 : asymmetry.doubleValue();
+            }
 
-            return insertOrUpdateCurveFit(wellGroup, user, titration, analyte, params, ec50, fitType, null, existingCurveFits);
+            return insertOrUpdateCurveFit(wellGroup, user, titration, analyte, params, ec50, flag, fitType, null, existingCurveFits);
         }
         return null;
     }
@@ -1146,10 +1151,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     @NotNull
-    private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, Double ec50, DilutionCurve.FitType fitType, String source, CurveFit[] existingCurveFits)
+    private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, Double ec50, Boolean flag, DilutionCurve.FitType fitType, String source, CurveFit[] existingCurveFits)
             throws DilutionCurve.FitFailedException, SQLException
     {
-        CurveFit fit = createCurveFit(wellGroup, titration, analyte, params, ec50, fitType, source);
+        CurveFit fit = createCurveFit(wellGroup, titration, analyte, params, ec50, flag, fitType, source);
         return insertOrUpdateCurveFit(user, fit, existingCurveFits);
     }
 
@@ -1177,7 +1182,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private CurveFit createCurveFit(LuminexWellGroup wellGroup, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, Double ec50, DilutionCurve.FitType fitType, String source)
+    private CurveFit createCurveFit(LuminexWellGroup wellGroup, Titration titration, Analyte analyte, ParameterCurveImpl.FitParameters params, Double ec50, Boolean flag, DilutionCurve.FitType fitType, String source)
             throws DilutionCurve.FitFailedException
     {
 //        ParameterCurveImpl.FiveParameterCurve curveImpl = new ParameterCurveImpl.FiveParameterCurve(Collections.singletonList(wellGroup), false, params);
@@ -1185,18 +1190,25 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         CurveFit fit = new CurveFit();
         fit.setAnalyteId(analyte.getRowId());
         fit.setTitrationId(titration.getRowId());
-        fit.setMinAsymptote(params.getMin());
-        fit.setMaxAsymptote(params.getMax());
-        fit.setInflection(params.getInflection());
-        fit.setSlope(params.getSlope());
-        if (fitType == DilutionCurve.FitType.FIVE_PARAMETER)
+        if (flag != null && flag)
         {
-            fit.setAsymmetry(params.getAsymmetry());
+            fit.setFailureFlag(flag);
         }
-        fit.setEC50(ec50);
+        else
+        {
+            fit.setMinAsymptote(params.getMin());
+            fit.setMaxAsymptote(params.getMax());
+            fit.setInflection(params.getInflection());
+            fit.setSlope(params.getSlope());
+            if (fitType == DilutionCurve.FitType.FIVE_PARAMETER)
+            {
+                fit.setAsymmetry(params.getAsymmetry());
+            }
+            fit.setEC50(ec50);
+        }
 
         // Don't calculate AUC for 4/5PL fits
-//        double auc = curveImpl.calculateAUC(DilutionCurve.AUCType.NORMAL);
+        //double auc = curveImpl.calculateAUC(DilutionCurve.AUCType.NORMAL);
 
         String fitLabel = fitType.getLabel();
         if (source != null)

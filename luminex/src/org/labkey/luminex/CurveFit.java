@@ -32,6 +32,7 @@ public class CurveFit
     private Double _asymmetry;
     private Double _slope;
     private Double _inflection;
+    private Boolean _failureFlag;
 
     public int getRowId()
     {
@@ -141,5 +142,15 @@ public class CurveFit
     public void setInflection(Double inflection)
     {
         _inflection = inflection;
+    }
+
+    public Boolean getFailureFlag()
+    {
+        return _failureFlag;
+    }
+
+    public void setFailureFlag(Boolean failureFlag)
+    {
+        _failureFlag = failureFlag;
     }
 }
