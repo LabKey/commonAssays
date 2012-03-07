@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-EXEC sp_addapprole 'luminex', 'password';
+CREATE SCHEMA luminex;
+GO
 
 CREATE TABLE luminex.Analyte
 (

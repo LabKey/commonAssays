@@ -15,7 +15,8 @@
  */
 /* flow-0.00-8.10.sql */
 
-EXEC sp_addAppRole 'flow', 'password';
+CREATE SCHEMA flow;
+GO
 
 CREATE TABLE flow.Attribute
 (

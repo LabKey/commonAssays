@@ -18,8 +18,11 @@
 
 -- Tables used for Proteins and MS2 data
 
-EXEC sp_addapprole 'prot', 'password';
-EXEC sp_addapprole 'ms2', 'password';
+CREATE SCHEMA prot;
+GO
+
+CREATE SCHEMA ms2;
+GO
 
 /****** AnnotInsertions                                 */
 CREATE TABLE prot.AnnotInsertions

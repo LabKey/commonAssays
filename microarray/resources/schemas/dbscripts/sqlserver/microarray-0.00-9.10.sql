@@ -15,4 +15,5 @@
  */
 
 -- Tables used for Microarray module
-EXEC sp_addapprole 'microarray', 'password';
+CREATE SCHEMA microarray;
+GO

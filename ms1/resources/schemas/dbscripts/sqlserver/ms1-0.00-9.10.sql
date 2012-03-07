@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-EXEC sp_addapprole 'ms1', 'password';
+CREATE SCHEMA ms1;
+GO
 
 /* table for storing information about the data files themselves (both features.tsv and peaks.xml) */
 CREATE TABLE ms1.Files

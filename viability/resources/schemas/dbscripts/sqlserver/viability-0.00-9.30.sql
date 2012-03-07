@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-EXEC sp_addapprole 'viability', 'password';
+CREATE SCHEMA viability;
+GO
 
 CREATE TABLE viability.Results
 (
