@@ -28,13 +28,10 @@ import static java.lang.Math.max;
  * Date: May 2, 2005
  * Time: 3:08:10 PM
  */
-public abstract class ScalingFunction
+public abstract class ScalingFunction implements Cloneable
 {
 	double _minValue;
     double _range;
-    double _decade;
-    double _scale;
-    double _exp;
 
 	/**
 	 * @param decade	0 for linear, otherwise maxOutput = 10^decade
@@ -47,7 +44,10 @@ public abstract class ScalingFunction
 	{
 		ScalingFunction fn;
 		if (decade > 0)
-			fn = new LogarithmicFunction(decade, scale, range);
+            //if (fcsVersion == 2.0 || bits < 32)
+                fn = new LogarithmicFunction(decade, scale, range);
+            //else
+            //    fn = new LogicleFunction(4.5, 1.0, -10.0, 0);
 		else if (scale == 0 || scale == 1)
 			fn = new IdentityFunction();
 		else
@@ -66,9 +66,17 @@ public abstract class ScalingFunction
 
 	static ScalingFunction makeFunction(ScalingFunction that, double minValue)
 	{
-		return makeFunction(that._decade, that._scale, that._range, minValue);
-	}
-
+        try
+        {
+            ScalingFunction fn = (ScalingFunction) that.clone();
+            fn._minValue = fn.translate(minValue);
+            return fn;
+        }
+        catch (CloneNotSupportedException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
 
     public double getMinValue()
     {
@@ -85,19 +93,32 @@ public abstract class ScalingFunction
 		return max(_minValue, value);
     }
 
-    public double dither(double value)
-    {
-		return value;
-    }
+    public abstract boolean isLogarithmic();
 
-	public NumberArray dither(NumberArray values)
-	{
-		return values;
-	}
+    public abstract double dither(double value);
 
-    public boolean isLogarithmic()
+    public NumberArray dither(NumberArray from)
     {
-        return _decade != 0;
+        int len = from.size();
+        float[] out = new float[len];
+        if (from instanceof FloatArray)
+        {
+            float[] in = ((FloatArray)from).getArray();
+            for (int i=0 ; i<len ; i++)
+                out[i] =  (float)(dither(in[i]));
+        }
+        else if (from instanceof DoubleArray)
+        {
+            double[] in = ((DoubleArray)from).getArray();
+            for (int i=0 ; i<len ; i++)
+                out[i] =  (float)(dither(in[i]));
+        }
+        else
+        {
+            for (int i=0 ; i<len ; i++)
+                out[i] = (float)dither(from.getDouble(i));
+        }
+        return new FloatArray(out);
     }
 
 	public abstract double translate(double value);
@@ -132,7 +153,26 @@ public abstract class ScalingFunction
 	}
 
 
-	static class IdentityFunction extends ScalingFunction
+    static abstract class SimpleFunction extends ScalingFunction
+    {
+        public boolean isLogarithmic()
+        {
+            return false;
+        }
+
+        public double dither(double value)
+        {
+            return value;
+        }
+
+        @Override
+        public NumberArray dither(NumberArray values)
+        {
+            return values;
+        }
+    }
+
+	static class IdentityFunction extends SimpleFunction
 	{
 		IdentityFunction()
 		{
@@ -150,8 +190,10 @@ public abstract class ScalingFunction
 	}
 
 
-	static class LinearFunction extends ScalingFunction
+	static class LinearFunction extends SimpleFunction
 	{
+        double _scale;
+
 		LinearFunction(double scale)
 		{
 			_scale = scale == 0 ? 1 : scale;
@@ -166,6 +208,10 @@ public abstract class ScalingFunction
 
 	static class LogarithmicFunction extends ScalingFunction
 	{
+        double _decade;
+        double _scale;
+        double _exp;
+
 		protected LogarithmicFunction(double decade, double scale, double range)
 		{
 			_decade = decade;
@@ -175,40 +221,20 @@ public abstract class ScalingFunction
 				_exp = Math.log(Math.pow(10, _decade)) / _range;
 		}
 
+        public boolean isLogarithmic()
+        {
+            return true;
+        }
+
 		public final double translate(double value)
 		{
 			return _scale * Math.exp(value * _exp);
 		}
 
-		@Override
 		public final double dither(double value)
 		{
 			return value * Math.exp((Math.random() - .5) * _exp);
 		}
-
-		@Override
-		public NumberArray dither(NumberArray from)
-		{
-			int len = from.size();
-			float[] out = new float[len];
-			if (from instanceof FloatArray)
-			{
-				float[] in = ((FloatArray)from).getArray();
-				for (int i=0 ; i<len ; i++)
-					out[i] =  (float)(dither(in[i]));
-			}
-			else if (from instanceof DoubleArray)
-			{
-				double[] in = ((DoubleArray)from).getArray();
-				for (int i=0 ; i<len ; i++)
-					out[i] =  (float)(dither(in[i]));
-			}
-			else
-			{
-				for (int i=0 ; i<len ; i++)
-					out[i] = (float)dither(from.getDouble(i));
-			}
-			return new FloatArray(out);
-		}
 	}
+
 }

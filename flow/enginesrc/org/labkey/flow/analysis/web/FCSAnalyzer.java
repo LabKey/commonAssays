@@ -192,14 +192,16 @@ public class FCSAnalyzer
         {
             return Collections.EMPTY_LIST;
         }
-        List<GraphResult> ret = new ArrayList(graphs.size());
+        Map<GraphSpec, GraphResult> ret = new LinkedHashMap<GraphSpec, GraphResult>(graphs.size());
         Map<SubsetSpec, Subset> subsetMap = new HashMap();
         subsetMap.put(null, getSubset(uri, group.getSettings(), comp));
         for (GraphSpec graph : graphs)
         {
-            ret.add(generateGraph(subsetMap, group, graph));
+            if (ret.containsKey(graph))
+                continue;
+            ret.put(graph, generateGraph(subsetMap, group, graph));
         }
-        return ret;
+        return new ArrayList<GraphResult>(ret.values());
     }
 
     public PlotInfo generateDesignGraph(URI uri, CompensationMatrix comp, ScriptComponent group, GraphSpec spec, int width, int height, boolean useEmptyDataset) throws IOException

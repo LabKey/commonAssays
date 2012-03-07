@@ -19,8 +19,10 @@ package org.labkey.flow.analysis.model;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.search.AbstractDocumentParser;
 import org.labkey.api.search.SearchService;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.webdav.WebdavResource;
+import org.labkey.flow.util.KeywordUtil;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
@@ -91,6 +93,36 @@ public class FCSHeader
         return getParameterStain(keywords, i);
     }
 
+    public long getBeginTime()
+    {
+        String btim = getKeyword("$BTIM");
+        if (btim == null)
+            return 0;
+
+        return DateUtil.parseTime(btim);
+    }
+
+    public long getEndTime()
+    {
+        String etim = getKeyword("$ETIM");
+        if (etim == null)
+            return 0;
+
+        return DateUtil.parseTime(etim);
+    }
+
+    /** Get the duration in seconds. */
+    public long getDuration()
+    {
+        long begin = getBeginTime();
+        long end = getEndTime();
+        if (begin == 0 || end == 0)
+            return 0;
+
+        return (end - begin) / 1000L;
+    }
+
+
     // Remove "Lin" or "Log" suffix
     public static String cleanParameterName(String name)
     {
@@ -117,6 +149,7 @@ public class FCSHeader
     {
         return keywords.containsKey("SPILL") || keywords.containsKey("$DFC1TO2");
     }
+
     public Map<String, String> getKeywords()
     {
         return Collections.unmodifiableMap(keywords);
@@ -212,16 +245,39 @@ public class FCSHeader
             double range = Double.parseDouble(getKeyword(key + "R"));
             String E = getKeyword(key + "E");
             double decade = Double.parseDouble(E.substring(0, E.indexOf(',')));
-            final double scale = Double.parseDouble(E.substring(E.indexOf(',') + 1));
+            double scale = Double.parseDouble(E.substring(E.indexOf(',') + 1));
+            if (scale <= 0)
+                scale = 1;
+
+            // Gain linear amplifier
+            double gain = 1.0;
+            String gainStr = getKeyword(key + "G");
+            if (gainStr != null)
+                gain = Double.parseDouble(gainStr);
+            if (gain <= 0)
+                gain = 1.0;
+
+            // UNDONE: Issue 14170: We need to scale the Time channel
+            /*
+            if (KeywordUtil.isTimeChannel(name))
+            {
+                long duration = getDuration();
+                if (duration != 0)
+                {
+                    range = duration;
+                    gain = 1.0;
+                }
+            }
+            */
 
             boolean simpleLog = false;
             
             // By default we use either linear, or a modified log but in some cases we use simple log for FlowJo compatibility.
             if (0 != decade)
             {
-                // Use simple log if the range is <4096 and bits is 32.
+                // Use simple log if the range is <4096 and bits is <=32.
                 // This is a legacy behavior of FlowJo due to an internal representation of bins
-                if (range < 4096 && (bits == 16 || bits == 32))
+                if (range < 4096 && bits <= 32)
                     simpleLog = true;
 
                 // Use simple log for non-compensated integer data.
@@ -229,6 +285,14 @@ public class FCSHeader
                 if (datatypeI && facsCalibur)
                     simpleLog = true;
             }
+            // NOTE: Scaling by gain fixes the FlowJo advanced tutorial graphs, but messes up the others.
+            /*
+            else
+            {
+                if (gain != 0.0)
+                    scale = 1/gain;
+            }
+            */
 
             DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
             f.setDescription(getParameterDescription(i));

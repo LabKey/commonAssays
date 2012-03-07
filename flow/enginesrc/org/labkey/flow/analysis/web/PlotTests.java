@@ -201,7 +201,21 @@ public class PlotTests extends Assert
         compare(outDir, workspaceFile, fcsFile, expectedImageDir, imageNames);
     }
 
-    // BUGBUG:
+    // BUGBUG: Histogram plots have multiple gates drawn on them.
+    // BUGBUG: Histogram counts are low but the curve looks correct. Scaling issue?
+    // BUGBUG: ForSc is not scaled by gain (see comment in FCSHeader.createDataFrame())
+    @Test
+    public void advanced() throws Exception
+    {
+        File outDir         = new File(outDir(), "flow/advanced");
+        File workspaceFile  = new File(projectRoot(), "sampledata/flow/advanced/advanced-v7.6.5.wsp");
+        File fcsFile        = new File(projectRoot(), "sampledata/flow/advanced/931115-B02- Sample 01.fcs");
+        File expectedImages = new File(projectRoot(), "sampledata/flow/advanced/931115-B02_graphs_v7.6.5");
+
+        generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
+    }
+
+    // Issue 14170:
     // S(Time:<Pacific Blue-A> plot uses range of 0-4000 instead of FlowJo's 0-40
     // which causes the Exclude gate to be squished.
     @Test
@@ -215,7 +229,7 @@ public class PlotTests extends Assert
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }
 
-    // BUGBUG:
+    // Issue 14170:
     // Ungated(Time:SSC-A) not scaled properly
     // Time/singlets/AVID/Lymph/CD3(<APC-Cy7-A>:<PerCP-Cy5-5-A>) doesn't go negative enough
     // Time/singlets/AVID/Lymph/CD3/CD4(<PE-Cy5-A>:<APC-A>) doesn't go negative enough

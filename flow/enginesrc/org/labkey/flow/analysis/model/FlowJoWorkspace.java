@@ -269,7 +269,8 @@ abstract public class FlowJoWorkspace extends Workspace
         if ("1".equals(elParameter.getAttribute("log")))
             return 1;
         // Only check for FSC-A, FSC-H, and SSC-A
-        if (",FSC-A,FSC-H,SSC-A,".indexOf("," + elParameter.getAttribute("name") + ",") < 0)
+        String name = elParameter.getAttribute("name");
+        if (",FSC-A,FSC-H,SSC-A,".indexOf("," + name + ",") < 0)
             return 1;
         if ("4096".equals(elParameter.getAttribute("range")) && "4096".equals(elParameter.getAttribute("highValue")))
             return 64;

@@ -425,6 +425,7 @@ public class MacWorkspace extends FlowJoWorkspace
         }
     }
 
+    // UNDONE: Assumes all parameters in the workspace are scaled the same
     protected void readParameterInfo(Element el)
     {
         for (Element elParameter : getElementsByTagName(el, "Parameter"))
@@ -451,6 +452,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 }
                 _parameters.put(name, pi);
             }
+            
             String lowValue = elParameter.getAttribute("lowValue");
             if (lowValue != null)
             {

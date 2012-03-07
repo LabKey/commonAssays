@@ -56,6 +56,7 @@ public class PCWorkspace extends FlowJoWorkspace
         readSampleAnalysis(elSampleNode);
     }
 
+    // UNDONE: Assumes all parameters in the workspace are scaled the same
     protected void readParameterInfo(SampleInfo sampleInfo)
     {
         for (int i = 1; i < 100; i ++)
@@ -79,6 +80,7 @@ public class PCWorkspace extends FlowJoWorkspace
                     paramInfo.multiplier = range/4096;
                 }
             }
+
             _parameters.put(paramInfo.name, paramInfo);
         }
     }

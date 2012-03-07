@@ -26,9 +26,12 @@ import org.labkey.api.arrays.DoubleArray;
 import org.labkey.api.view.Stats;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.util.RangeFunction;
+import org.labkey.flow.analysis.web.StatisticSpec;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  */
@@ -49,6 +52,8 @@ public class PlotFactory
      */
     static public double[] getPossibleValues(double minValue, double maxValue, boolean fLogarithmic, boolean simpleLog, int bucketCount)
     {
+        // Allow for ranges smaller than the default bucket count.
+        // The Time parameter may be scaled by gain 0.01 reducing the range to 0-40.
         int cBuckets = (int) Math.min(maxValue - minValue, bucketCount);
         double[] ret = new double[cBuckets];
 
@@ -76,11 +81,20 @@ public class PlotFactory
     {
         double max = field.getMaxValue();
         double min = field.getMinValue();
+
         if (field.isTimeChannel())
         {
-            Stats.DoubleStats stats = new Stats.DoubleStats(subset.getDataFrame().getDoubleArray(field.getName()));
-            max = stats.getMax();
-            min = stats.getMin();
+            Subset root = subset;
+            while (root.getParent() != null)
+                root = root.getParent();
+
+            // UNDONE: Share this rootStatsMap
+            Map<String, Stats.DoubleStats> rootStatsMap = new HashMap<String, Stats.DoubleStats>();
+            min = StatisticSpec.calculate(root, new StatisticSpec(null, StatisticSpec.STAT.Min, field.getName()), rootStatsMap);
+            min = field.getScalingFunction().translate(min);
+
+            max = StatisticSpec.calculate(root, new StatisticSpec(null, StatisticSpec.STAT.Max, field.getName()), rootStatsMap);
+            max = field.getScalingFunction().translate(max);
         }
         boolean logarithmic = displayLogarithmic(subset, field);
         boolean simpleLog = logarithmic && field.isSimpleLogAxis();
