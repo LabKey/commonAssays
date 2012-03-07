@@ -17,7 +17,10 @@ package org.labkey.ms2.reader;
 
 import net.systemsbiology.regisWeb.pepXML.PeptideprophetSummaryDocument;
 import org.apache.xmlbeans.XmlException;
-import org.labkey.ms2.reader.SensitivitySummary;
+import org.apache.xmlbeans.XmlOptions;
+import org.jetbrains.annotations.Nullable;
+import org.junit.Assert;
+import org.junit.Test;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.util.MatrixUtil;
 
@@ -26,6 +29,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * User: arauch
@@ -34,6 +41,8 @@ import java.nio.IntBuffer;
  */
 public class PeptideProphetSummary extends SensitivitySummary
 {
+    private static final Pattern VERSION_PATTERN = Pattern.compile(".*TPP v(\\d+(\\.\\d+)?).*");
+
     private float[] _fval;
     private float[][] _modelPos;
     private float[][] _modelNeg;
@@ -43,22 +52,86 @@ public class PeptideProphetSummary extends SensitivitySummary
     {
         parser.skipToStart("peptideprophet_summary");
 
-        PeptideprophetSummaryDocument summaryDoc;
-
         try
         {
-            summaryDoc = PeptideprophetSummaryDocument.Factory.parse(parser);
+            Double version = parseTPPVersion(parser.getAttributeValue(null, "version"));
+            // Starting with version 4.5, the TPP changed the XML schema for where the PeptideProphet summary data
+            // is stored
+            if (version != null && version.doubleValue() >= 4.50)
+            {
+                // We've hacked the namespace for the newer pepXML XSD file that we have checked in so that
+                // XMLBeans doesn't try to generate duplicate classes. Tell the parser to treat the alternative
+                // namespace like the real namespace so that it recognizes the document
+                XmlOptions options = new XmlOptions();
+                Map<String,String> namespaceMap = new HashMap<String,String>();
+                namespaceMap.put("http://regis-web.systemsbiology.net/pepXML", "http://regis-web.systemsbiology.net/pepXML117");
+                options.setLoadSubstituteNamespaces(namespaceMap);
+                net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary summary = net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.Factory.parse(parser, options).getPeptideprophetSummary();
+                return new PeptideProphetSummary(summary);
+            }
+            else
+            {
+                // Fall back on our old parsing code
+                PeptideprophetSummaryDocument.PeptideprophetSummary summary = PeptideprophetSummaryDocument.Factory.parse(parser).getPeptideprophetSummary();
+                return new PeptideProphetSummary(summary);
+            }
         }
         catch(XmlException e)
         {
             throw new XMLStreamException("Parsing peptide prophet summary", e);
         }
-
-        PeptideprophetSummaryDocument.PeptideprophetSummary summary = summaryDoc.getPeptideprophetSummary();
-
-        return new PeptideProphetSummary(summary);
     }
 
+
+    private PeptideProphetSummary(net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary summary)
+    {
+        net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary.RocErrorData[] datas = summary.getRocErrorDataArray();
+
+        for (net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary.RocErrorData data : datas)
+        {
+            // Only import the rollup data, not the individual charge states
+            if ("all".equalsIgnoreCase(data.getCharge()))
+            {
+                net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary.DistributionPoint[] distribution = summary.getDistributionPointArray();
+                _fval = new float[distribution.length];
+                _obs = new float[3][distribution.length];
+                _modelPos = new float[3][distribution.length];
+                _modelNeg = new float[3][distribution.length];
+
+                for (int i=0; i<distribution.length; i++)
+                {
+                    net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary.DistributionPoint point = distribution[i];
+
+                    _fval[i] = point.getFvalue();
+                    _modelPos[0][i] = point.getModel1PosDistr();
+                    _modelNeg[0][i] = point.getModel1NegDistr();
+                    _obs[0][i] = point.getObs1Distr().floatValue();
+                    _modelPos[1][i] = point.getModel2PosDistr();
+                    _modelNeg[1][i] = point.getModel2NegDistr();
+                    _obs[1][i] = point.getObs2Distr().floatValue();
+                    _modelPos[2][i] = point.getModel3PosDistr();
+                    _modelNeg[2][i] = point.getModel3NegDistr();
+                    _obs[2][i] = point.getObs3Distr().floatValue();
+                }
+
+                net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary.RocErrorData.RocDataPoint[] roc = data.getRocDataPointArray();
+
+                _minProb = new float[roc.length];
+                _sensitivity = new float[roc.length];
+                _error = new float[roc.length];
+
+                for (int i = 0; i < roc.length; i++)
+                {
+                    net.systemsbiology.regisWeb.pepXML117.PeptideprophetSummaryDocument.PeptideprophetSummary.RocErrorData.RocDataPoint rocDataPoint = roc[i];
+
+                    _minProb[i] = rocDataPoint.getMinProb();
+                    _sensitivity[i] = rocDataPoint.getSensitivity();
+                    _error[i] = rocDataPoint.getError();
+                }
+            }
+        }
+
+    }
 
     private PeptideProphetSummary(PeptideprophetSummaryDocument.PeptideprophetSummary summary)
     {
@@ -305,5 +378,49 @@ public class PeptideProphetSummary extends SensitivitySummary
         int[] result = new int[ib.capacity()];
         ib.get(result);
         return result;
+    }
+
+    @Nullable
+    private static Double parseTPPVersion(@Nullable String tppVersion)
+    {
+        if (tppVersion == null)
+        {
+            return null;
+        }
+        Matcher matcher = VERSION_PATTERN.matcher(tppVersion);
+        if (matcher.matches())
+        {
+            String versionString = matcher.group(1);
+            try
+            {
+                return new Double(versionString);
+            }
+            catch (NumberFormatException ignored) {}
+        }
+        return null;
+    }
+
+    public static class TestCase extends Assert
+    {
+        @Test
+        public void testVersionParse()
+        {
+            // Test some real version strings
+            assertEquals(4.3, parseTPPVersion("PeptideProphet  (TPP v4.3 JETSTREAM rev 1, Build 200909211148 (MSVC))"));
+            assertEquals(4.5, parseTPPVersion("PeptideProphet  (TPP v4.5 RAPTURE rev 1, Build 201112210851 (linux))"));
+            assertEquals(2.9, parseTPPVersion("PeptideProphet v3.0 April 1, 2004 (TPP v2.9 GALE rev.3, Build 200611090444(Win32))"));
+            assertEquals(3.2, parseTPPVersion("PeptideProphet v3.0 April 1, 2004 (TPP v3.2 SQUALL rev.0, Build 200706151416)"));
+            assertEquals(4.3, parseTPPVersion("PeptideProphet  (TPP v4.3 JETSTREAM rev 1, Build 201011301302 (linux))"));
+            assertEquals(4.4, parseTPPVersion("PeptideProphet  (TPP v4.4 VUVUZELA rev 1, Build 201012011012 (linux))"));
+
+            // Test some hypothetical version strings
+            assertEquals(45.33, parseTPPVersion("PeptideProphet  (TPP v45.33 JETSTREAM rev 1, Build 201011301302 (linux))"));
+            assertEquals(4.5, parseTPPVersion("PeptideProphet  (TPP v4.5.1 JETSTREAM rev 1, Build 201011301302 (linux))"));
+
+            // Test some garbage input
+            assertEquals(null, parseTPPVersion("PeptideProphet  (TPP vBAD JETSTREAM rev 1, Build 201011301302 (linux))"));
+            assertEquals(null, parseTPPVersion(null));
+            assertEquals(null, parseTPPVersion("PeptideProphet"));
+        }
     }
 }

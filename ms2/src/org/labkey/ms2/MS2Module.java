@@ -74,6 +74,7 @@ import org.labkey.ms2.reader.DatDocumentParser;
 import org.labkey.ms2.reader.MGFDocumentParser;
 import org.labkey.ms2.reader.MzMLDocumentParser;
 import org.labkey.ms2.reader.MzXMLDocumentParser;
+import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
@@ -345,7 +346,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             org.labkey.ms2.reader.RandomAccessPwizMSDataIterator.TestCase.class,
             org.labkey.ms2.reader.RandomAccessJrapMzxmlIterator.TestCase.class,
             org.labkey.ms2.protein.fasta.PeptideTestCase.class,
-            MS2Modification.MS2ModificationTest.class
+            MS2Modification.MS2ModificationTest.class,
+            PeptideProphetSummary.TestCase.class
         ));
     }
 
