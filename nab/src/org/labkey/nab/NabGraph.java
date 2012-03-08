@@ -286,6 +286,9 @@ public class NabGraph
             }
         }
 
+        chart.getXYPlot().setBackgroundPaint(Color.WHITE);
+        chart.getXYPlot().setDomainGridlinePaint(Color.LIGHT_GRAY);
+        chart.getXYPlot().setRangeGridlinePaint(Color.LIGHT_GRAY);
         chart.getXYPlot().setDomainAxis(new LogarithmicAxis("Dilution/Concentration"));
         chart.getXYPlot().addRangeMarker(new ValueMarker(0f, Color.DARK_GRAY, new BasicStroke()));
         for (int cutoff : config.getCutoffs())
