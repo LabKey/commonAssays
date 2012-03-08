@@ -38,6 +38,7 @@ import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.FCS;
+import org.labkey.flow.analysis.model.PCWorkspace;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
@@ -771,7 +772,15 @@ public class AnalysisScriptController extends BaseFlowController
                     return;
                 }
 
-                form.setWizardStep(ImportAnalysisStep.ANALYSIS_ENGINE);
+                // R Engine can only be used on Mac FlowJo workspaces currently so skip to Analysis Options step.
+                if (workspaceData.getWorkspaceObject() instanceof PCWorkspace)
+                {
+                    form.setWizardStep(ImportAnalysisStep.ANALYSIS_OPTIONS);
+                }
+                else
+                {
+                    form.setWizardStep(ImportAnalysisStep.ANALYSIS_ENGINE);
+                }
             }
             else
             {
@@ -802,6 +811,13 @@ public class AnalysisScriptController extends BaseFlowController
                 if (runFilePathRoot == null)
                 {
                     errors.reject(ERROR_MSG, "You must select FCS Files before selecting an analysis engine.");
+                    return;
+                }
+
+                // R Engine can only be used on Mac FlowJo workspaces currently.
+                if (analysisEngine.equals("rEngine") && workspaceData.getWorkspaceObject() instanceof PCWorkspace)
+                {
+                    errors.reject(ERROR_MSG, "Java FlowJo workspaces can only be analyzed by the LabKey engine.");
                     return;
                 }
             }

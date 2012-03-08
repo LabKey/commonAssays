@@ -24,6 +24,7 @@
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page import="org.labkey.flow.controllers.WorkspaceData" %>
+<%@ page import="org.labkey.flow.analysis.model.PCWorkspace" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -34,6 +35,7 @@
 
     WorkspaceData workspaceData = form.getWorkspace();
     String workspaceName = workspaceData.getPath() != null ? workspaceData.getPath() : workspaceData.getName();
+    assert !(workspaceData.getWorkspaceObject() instanceof PCWorkspace) : "R Engine can only be used on Mac FlowJo workspaces";
 
     ActionURL cancelUrl = urlProvider(ProjectUrls.class).getStartURL(container);
     boolean hasPipelineRoot = pipeRoot != null;
