@@ -1915,8 +1915,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         for (Map<String, Object> row : dataMap)
         {
             Analyte analyte = analyteFactory.fromMap(row);
-            row.remove("titration");
             LuminexDataRow dataRow = rowFactory.fromMap(row);
+            dataRow.setTitration(null);
             dataRow.setExtraProperties(row);
 
             // since a transform script can generate new records for analytes with > 1 standard selected, set lsids for new records
