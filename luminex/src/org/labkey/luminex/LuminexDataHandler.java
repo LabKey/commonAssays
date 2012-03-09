@@ -1901,7 +1901,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return Arrays.asList(analyteName, dataFileName, well);
     }
 
-    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMaps) throws ExperimentException
     {
         ObjectFactory<Analyte> analyteFactory = ObjectFactory.Registry.getFactory(Analyte.class);
         if (null == analyteFactory)
@@ -1912,11 +1912,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             throw new ExperimentException("Could not find a matching object factory for " + LuminexDataRow.class);
 
         Map<Analyte, List<LuminexDataRow>> sheets = new LinkedHashMap<Analyte, List<LuminexDataRow>>();
-        for (Map<String, Object> row : dataMap)
+        for (Map<String, Object> dataMap : dataMaps)
         {
+            // CONSIDER: subclass the rowFactory to ignore "titration"
+            // titration==true/false so leaving it causes ConversionException(NumberFormatException)
+            CaseInsensitiveHashMap<Object> row = new CaseInsensitiveHashMap<Object>(dataMap);
+            row.remove("titration");
             Analyte analyte = analyteFactory.fromMap(row);
             LuminexDataRow dataRow = rowFactory.fromMap(row);
-            dataRow.setTitration(null);
             dataRow.setExtraProperties(row);
 
             // since a transform script can generate new records for analytes with > 1 standard selected, set lsids for new records
