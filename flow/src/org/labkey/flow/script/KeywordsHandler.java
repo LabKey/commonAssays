@@ -110,7 +110,7 @@ public class KeywordsHandler extends BaseHandler
             DataBaseType well = outputs.addNewData();
             well.setName(filename);
             well.setAbout(FlowDataObject.generateDataLSID(_job.getContainer(), FlowDataType.FCSFile));
-            well.setCpasType("Data");
+            well.setCpasType(ExpData.DEFAULT_CPAS_TYPE);
             AttributeSet attrSet = new AttributeSet(fileData);
             attrSet.save(_job.decideFileName(runDirectory, filename, FlowDataHandler.EXT_DATA), well);
             SampleKey sampleKey = _job.getProtocol().makeSampleKey(runName, well.getName(), attrSet);
