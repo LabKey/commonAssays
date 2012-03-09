@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.HelpTopic"%>
-<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.TestMascotForm form = ((JspView<MS2Controller.TestMascotForm>)HttpView.currentView()).getModelBean();
 
@@ -99,7 +99,7 @@ If you're unfamiliar with your organization's Mascot services configuration you 
 <li>User account is the userid for logging in to your Mascot server.  It is mandatory if Mascot security is enabled.</li>
 <li>Password is the pass pharse to authenticate you to your Mascot server.  It is mandatory if Mascot security is enabled.</li>
 <li>HTTP Proxy URL is typically of the form http://proxyservername.domain.org:8080/ to make HTTP requests on your behalf if necessary.</li>
-<li><a href="<%=(new HelpTopic("configMascot" )).getHelpTopicLink()%>" target="_new">More information...</a>
+<li><%=helpLink("configMascot", "More information...")%></li>
 </ul>
 <%
 }

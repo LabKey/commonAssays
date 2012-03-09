@@ -478,7 +478,7 @@ public class PipelineController extends SpringActionController
                 form.setSaveProtocol(true);
 
              //get help topic
-            String helpTopic = getHelpTopic(_provider.getHelpTopic()).getHelpTopicLink();
+            String helpTopic = getHelpTopic(_provider.getHelpTopic()).getHelpTopicHref();
             ActionURL returnURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlReferer(getContainer());
            
             //properties to send to GWT page

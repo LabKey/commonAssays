@@ -853,7 +853,7 @@ public class MascotClientImpl implements SearchClient
             String msg1="Your mascot installation does not have support for MIME result download via client.pl!";
             getLogger().warn(msg1);
             String msg2="Result retrieval may fail. See " +
-                    (new HelpTopic("configMascot")).getHelpTopicLink() +" for more info.";
+                    (new HelpTopic("configMascot")).getHelpTopicHref() +" for more info.";
             getLogger().warn(msg2);
         }
 
