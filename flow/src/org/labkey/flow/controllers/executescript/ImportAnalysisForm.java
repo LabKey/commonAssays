@@ -15,6 +15,7 @@
  */
 package org.labkey.flow.controllers.executescript;
 
+import org.labkey.api.gwt.client.util.StringUtils;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
 
@@ -123,7 +124,7 @@ public class ImportAnalysisForm
 
     public void setrEngineNormalizationReference(String rEngineNormalizationReference)
     {
-        this.rEngineNormalizationReference = rEngineNormalizationReference;
+        this.rEngineNormalizationReference = StringUtils.join(split(rEngineNormalizationReference), PARAMATER_SEPARATOR);
     }
 
     public List<String> getrEngineNormalizationParameterList()
@@ -138,7 +139,7 @@ public class ImportAnalysisForm
 
     public void setrEngineNormalizationParameters(String rEngineNormalizationParameters)
     {
-        this.rEngineNormalizationParameters = rEngineNormalizationParameters;
+        this.rEngineNormalizationParameters = StringUtils.join(split(rEngineNormalizationParameters), PARAMATER_SEPARATOR);
     }
 
     public List<String> getrEngineNormalizationSubsetList()
@@ -153,7 +154,7 @@ public class ImportAnalysisForm
 
     public void setrEngineNormalizationSubsets(String rEngineNormalizationParameters)
     {
-        this.rEngineNormalizationSubsets = rEngineNormalizationParameters;
+        this.rEngineNormalizationSubsets = StringUtils.join(split(rEngineNormalizationParameters), PARAMATER_SEPARATOR);
     }
 
     public void setExistingKeywordRunId(int existingKeywordRunId)
