@@ -676,6 +676,12 @@ public class FlowSchema extends UserSchema
             ColumnInfo col = _expData.addColumns(domain, legacyName);
             return addExpColumn(col);
         }
+
+        @Override
+        public void setDomain(Domain domain)
+        {
+            _expData.setDomain(domain);
+        }
     }
 
 
@@ -1023,6 +1029,12 @@ public class FlowSchema extends UserSchema
             col.setUserEditable(false);
             col.setIsUnselectable(true);
             return addColumn(col);
+        }
+
+        @Override
+        public void setDomain(Domain domain)
+        {
+            _expData.setDomain(domain);
         }
     }
 
