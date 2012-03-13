@@ -411,7 +411,7 @@ public class LuminexExcelParser
         Row row = sheet.getRow(rowIdx);
         if (row != null)
         {
-            for (int col=0; col <= row.getLastCellNum(); col++)
+            for (int col=0; col < row.getLastCellNum(); col++)
             {
                 Cell cell = row.getCell(col);
                 if (cell == null)

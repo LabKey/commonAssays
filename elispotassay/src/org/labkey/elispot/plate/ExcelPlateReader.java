@@ -84,11 +84,11 @@ public class ExcelPlateReader implements ElispotPlateReaderService.I
             throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: unable to locate spot counts");
         }
 
-        if ((template.getRows() + startRow > (plateSheet.getLastRowNum() + 1)) || (template.getColumns() + startCol > (plateSheet.getRow(startRow).getLastCellNum() + 1)))
+        if ((template.getRows() + startRow > (plateSheet.getLastRowNum() + 1)) || (template.getColumns() + startCol > (plateSheet.getRow(startRow).getLastCellNum())))
         {
             throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: expected " +
                     (template.getRows() + startRow) + " rows and " + (template.getColumns() + startCol) + " columns, but found "+
-                    plateSheet.getLastRowNum() + 1 + " rows and " + plateSheet.getRow(startRow).getLastCellNum() + 1 + " columns.");
+                    plateSheet.getLastRowNum() + 1 + " rows and " + plateSheet.getRow(startRow).getLastCellNum() + " columns.");
         }
 
         for (int row = 0; row < template.getRows(); row++)

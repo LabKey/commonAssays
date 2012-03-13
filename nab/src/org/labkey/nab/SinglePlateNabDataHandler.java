@@ -167,7 +167,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             startColumn = dataLocation.getValue().intValue();
         }
 
-        if ((nabTemplate.getRows() + startRow > (plateSheet.getLastRowNum() + 1)) || (nabTemplate.getColumns() + startColumn > (plateSheet.getRow(startRow).getLastCellNum() + 1)))
+        if ((nabTemplate.getRows() + startRow > (plateSheet.getLastRowNum() + 1)) || (nabTemplate.getColumns() + startColumn > (plateSheet.getRow(startRow).getLastCellNum())))
         {
             Row firstRow = plateSheet.getRow(startRow);
             int colCount = firstRow != null ? firstRow.getLastCellNum() : -1;
@@ -237,7 +237,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     {
         Row row = plateSheet.getRow(startRow);
         // make sure that there are plate_width + 1 cells to the right of startCol:
-        if (startCol + plateWidth > row.getLastCellNum())
+        if (startCol + plateWidth + 1 > row.getLastCellNum())
             return false;
 
         // make sure that there are plate_width + 1 cells to the right of startCol:
