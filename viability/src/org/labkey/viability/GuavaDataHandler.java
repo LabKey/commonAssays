@@ -375,6 +375,10 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
             // Use the .tsv DATA_TYPE so the results will be read back in by the ViabilityTsvDataHandler after transormation
             result.put(ViabilityTsvDataHandler.DATA_TYPE, rows);
         }
+        else
+        {
+            throw new ExperimentException("Unsupported import type: " + context);
+        }
         return result;
     }
 
