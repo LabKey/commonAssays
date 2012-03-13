@@ -167,13 +167,13 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             startColumn = dataLocation.getValue().intValue();
         }
 
-        if (nabTemplate.getRows() + startRow > plateSheet.getLastRowNum() || nabTemplate.getColumns() + startColumn > plateSheet.getRow(startRow).getLastCellNum())
+        if ((nabTemplate.getRows() + startRow > (plateSheet.getLastRowNum() + 1)) || (nabTemplate.getColumns() + startColumn > (plateSheet.getRow(startRow).getLastCellNum() + 1)))
         {
             Row firstRow = plateSheet.getRow(startRow);
             int colCount = firstRow != null ? firstRow.getLastCellNum() : -1;
             throwParseError(dataFile, dataFile.getName() + " does not appear to be a valid data file: expected " +
                     (nabTemplate.getRows() + startRow) + " rows and " + (nabTemplate.getColumns() + startColumn) + " columns, but found "+
-                    plateSheet.getLastRowNum() + " rows and " + (colCount > 0 ? colCount : "no populated") + " columns.");
+                    (plateSheet.getLastRowNum() + 1) + " rows and " + (colCount > 0 ? colCount : "no populated") + " columns.");
         }
 
         for (int row = 0; row < nabTemplate.getRows(); row++)
@@ -215,19 +215,18 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
     private Pair<Integer, Integer> getPlateDataLocation(Sheet plateSheet, int plateHeight, int plateWidth)
     {
-        for (int row = 0; row < plateSheet.getLastRowNum() - plateHeight; row++)
+        for (Row currentRow : plateSheet)
         {
-            Row currentRow = plateSheet.getRow(row);
-            if (currentRow != null)
+            if (currentRow.getRowNum() + plateHeight > plateSheet.getLastRowNum())
+                return null;
+
+            for (Cell cell : currentRow)
             {
-                for (int col = 0; col < currentRow.getLastCellNum() - plateWidth; col++)
+                if (isPlateMatrix(plateSheet, currentRow.getRowNum(), cell.getColumnIndex(), plateHeight, plateWidth))
                 {
-                    if (isPlateMatrix(plateSheet, row, col, plateHeight, plateWidth))
-                    {
-                        // add one to row and col, since (row,col) is the index of the data grid
-                        // where the first row is column labels and the first column is row labels.
-                        return new Pair<Integer, Integer>(row + 1, col + 1);
-                    }
+                    // add one to row and col, since (row,col) is the index of the data grid
+                    // where the first row is column labels and the first column is row labels.
+                    return new Pair<Integer, Integer>(currentRow.getRowNum() + 1, cell.getColumnIndex() + 1);
                 }
             }
         }
@@ -238,11 +237,11 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     {
         Row row = plateSheet.getRow(startRow);
         // make sure that there are plate_width + 1 cells to the right of startCol:
-        if (startCol + plateWidth + 1 > row.getLastCellNum())
+        if (startCol + plateWidth > row.getLastCellNum())
             return false;
 
         // make sure that there are plate_width + 1 cells to the right of startCol:
-        if (startRow + plateHeight + 1 > plateSheet.getLastRowNum())
+        if (startRow + plateHeight > plateSheet.getLastRowNum())
             return false;
 
         // check for 1-12 in the row:
