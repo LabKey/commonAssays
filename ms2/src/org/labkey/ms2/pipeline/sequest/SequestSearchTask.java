@@ -247,13 +247,18 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
             // Don't let the total path name get too long. The actual name doesn't matter much, but we need
             // to avoid collisions so we can't just truncate the path after n characters
-            String dtaDirName = getJob().getBaseName().length() > 20 ? GUID.makeGUID() : getJob().getBaseName();
+            boolean useGUIDFilename = getJob().getBaseName().length() > 20;
+            String dtaDirName = useGUIDFilename ? GUID.makeGUID() : getJob().getBaseName();
             File dirOutputDta = new File(_wd.getDir(), dtaDirName);
             File fileMzXML = _factory.findInputFile(getJob().getDataDirectory(), getJob().getBaseName());
             String tppVersion = TPPTask.getTPPVersion(getJob());
 
+            // out2xml will need the mzXML file in the parent directory of the DTA directory in order to look up
+            // retention times, so make a copy in the right place
+            File localMzXML = _wd.inputFile(fileMzXML, true);
+
             // Translate the mzXML file to dta using MzXML2Search
-            convertToDTA(params, dirOutputDta, fileMzXML, tppVersion, actions);
+            convertToDTA(params, dirOutputDta, localMzXML, tppVersion, actions);
             File dtaListFile = writeDtaList(dirOutputDta);
 
             // Write out sequest.params file
@@ -284,6 +289,14 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             {
                 getJob().runSubProcess(sequestPB, dirOutputDta, sequestLogFileWork, 200, false);
 
+                // out2xml assumes that the mzXML file base name will match the DTA directory name, so rename the file
+                // temporarily
+                File guidMzXMLFile = new File(localMzXML.getParent(), AbstractMS2SearchProtocol.FT_MZXML.getDefaultName(dtaDirName));
+                if (useGUIDFilename)
+                {
+                    localMzXML.renameTo(guidMzXMLFile);
+                }
+
                 // Convert to pepXML using out2xml
                 List<String> out2XMLArgs = new ArrayList<String>();
                 String out2XMLPath = PipelineJobService.get().getExecutablePath("out2xml", "tpp", tppVersion, getJob().getLogger());
@@ -299,6 +312,12 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 ProcessBuilder out2XMLPB = new ProcessBuilder(out2XMLArgs);
                 out2XMLPB.environment().put("WEBSERVER_ROOT", StringUtils.trimToEmpty(new File(out2XMLPath).getParent()));
                 getJob().runSubProcess(out2XMLPB, _wd.getDir());
+
+                // Rename it back
+                if (useGUIDFilename)
+                {
+                    guidMzXMLFile.renameTo(localMzXML);
+                }
 
                 File pepXmlFile = TPPTask.getPepXMLFile(_wd.getDir(), getJob().getBaseName());
                 if (!pepXmlFile.exists())
@@ -433,14 +452,13 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         if (!dirOutputDta.mkdir())
             throw new IOException("Failed to create output directory for DTA files '" + dirOutputDta + "'.");
         ArrayList<String> mzXML2SearchArgs = new ArrayList<String>();
-        File localMzXML = _wd.inputFile(fileMzXML, false);
         mzXML2SearchArgs.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", tppVersion, getJob().getLogger()));
         mzXML2SearchArgs.add("-dta");
         mzXML2SearchArgs.add("-O" + dirOutputDta.getName());
         Mzxml2SearchParams mzXml2SearchParams = new Mzxml2SearchParams();
         Collection<String> inputXmlParams = convertParams(mzXml2SearchParams.getParams(), params);
         mzXML2SearchArgs.addAll(inputXmlParams);
-        mzXML2SearchArgs.add(localMzXML.getAbsolutePath());
+        mzXML2SearchArgs.add(fileMzXML.getAbsolutePath());
 
         RecordedAction action = new RecordedAction(MZXML2SEARCH_ACTION_NAME);
         action.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(mzXML2SearchArgs, " "));
