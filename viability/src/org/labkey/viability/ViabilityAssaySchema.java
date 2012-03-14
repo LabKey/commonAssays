@@ -207,7 +207,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 public TableInfo getLookupTableInfo()
                 {
                     ExpDataTable dataTable = ViabilityAssaySchema.this.createDataTable();
-                    dataTable.setContainerFilter(ContainerFilter.EVERYTHING);
+                    dataTable.setContainerFilter(getContainerFilter());
                     return dataTable;
                 }
             });
@@ -303,7 +303,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 public TableInfo getLookupTableInfo()
                 {
                     ExpRunTable expRunTable = AssayService.get().createRunTable(getProtocol(), _provider, ViabilityAssaySchema.this.getUser(), ViabilityAssaySchema.this.getContainer());
-                    expRunTable.setContainerFilter(ContainerFilter.EVERYTHING);
+                    expRunTable.setContainerFilter(getContainerFilter());
                     return expRunTable;
                 }
             });
@@ -507,7 +507,7 @@ public class ViabilityAssaySchema extends AssaySchema
                 public TableInfo getLookupTableInfo()
                 {
                     ResultsTable results = new ResultsTable();
-                    results.setContainerFilter(ContainerFilter.EVERYTHING);
+                    results.setContainerFilter(getContainerFilter());
                     return results;
                 }
             });
