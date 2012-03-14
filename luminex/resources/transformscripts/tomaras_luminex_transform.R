@@ -22,10 +22,10 @@
 # CHANGES :
 #  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
 #  - 2.2.20120217 : Issue 14070: Value out of range error when importing curve fit parameters for titrated unknown with flat dilution curve
-#  - 3.0.20120229 : Changes for LabKey server 12.1
+#  - 3.0.20120314 : Changes for LabKey server 12.1
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "3.0.20120229";
+transformVersion = "3.0.20120314";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -659,12 +659,12 @@ if (any(dat$isStandard) & length(standards) > 0)
 
 run.data$Positivity = NA;
 
-# get the run property that are used for teh positivity calculation
+# get the run property that are used for the positivity calculation
 calc.positivity = getRunPropertyValue(run.props, "CalculatePositivity");
 base.visit = getRunPropertyValue(run.props, "BaseVisit");
 fold.change = getRunPropertyValue(run.props, "PositivityFoldChange");
 
-# if all run props are specified, and calc positivity is true
+# if all run props are specified and calc positivity is true, continue
 if (!is.na(calc.positivity) & !is.na(base.visit) & !is.na(fold.change) & calc.positivity == "1")
 {
     analytePtids = subset(run.data, select=c("name", "participantID")); # note: analyte variable column name is "name"
@@ -683,31 +683,59 @@ if (!is.na(calc.positivity) & !is.na(base.visit) & !is.na(fold.change) & calc.po
                 }
             }
 
-            # calculate the positivity by comparing all non-baseline visits with the baseline visit value times the fold change specified
-            fi.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index], select=c("fiBackground", "fiBackgroundBlank"));
-            visits.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index], select=c("name", "participantID", "visitID"));
-            visits.fi.agg = aggregate(fi.dat, by = list(analyte=visits.dat$name, ptid=visits.dat$participantID, visit=visits.dat$visitID), FUN = mean);
-            if (!is.na(threshold) & any(compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)))
+            # calculate the positivity by comparing all non-baseline visits with the baseline visit value times the fold change specified,
+            # for any participants that do not have baseline data, just compare against the threshold
+            if (!is.na(threshold))
             {
-                baseVisitFiBkgd = fiConversion(visits.fi.agg$fiBackground[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)]);
-                baseVisitFiBkgdBlank = fiConversion(visits.fi.agg$fiBackgroundBlank[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)]);
-                if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
+                fi.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index] & !is.na(visitID), select=c("fiBackground", "fiBackgroundBlank"));
+                if (nrow(fi.dat) > 0)
                 {
-                    for (v in 1:nrow(visits.fi.agg))
+                    visits.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index] & !is.na(visitID), select=c("name", "participantID", "visitID"));
+                    visits.fi.agg = aggregate(fi.dat, by = list(analyte=visits.dat$name, ptid=visits.dat$participantID, visit=visits.dat$visitID), FUN = mean);
+                    if (any(compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)))
                     {
-                        # for each non-baseline visit, verify that the FI-Bkgd and FI-Bkgd-Blank values are above the specified threshold for that analyte
-                        visit = visits.fi.agg$visit[v];
-                        if (!compareNumbersForEquality(visit, base.visit, 1e-10))
+                        baseVisitFiBkgd = fiConversion(visits.fi.agg$fiBackground[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)]);
+                        baseVisitFiBkgdBlank = fiConversion(visits.fi.agg$fiBackgroundBlank[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)]);
+                        if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
                         {
-                            # if the FI-Bkgd and FI-Bkgd-Blank values are greater than the baseline visit value * fold change, consider them positive
+                            for (v in 1:nrow(visits.fi.agg))
+                            {
+                                # for each non-baseline visit, verify that the FI-Bkgd and FI-Bkgd-Blank values are above the specified threshold for that analyte
+                                visit = visits.fi.agg$visit[v];
+                                if (!compareNumbersForEquality(visit, base.visit, 1e-10))
+                                {
+                                    # if the FI-Bkgd and FI-Bkgd-Blank values are greater than the baseline visit value * fold change, consider them positive
+                                    runDataIndex = run.data$name == visits.fi.agg$analyte[v] & run.data$participantID == visits.fi.agg$ptid[v] & run.data$visitID == visits.fi.agg$visit[v];
+                                    if (!is.na(visits.fi.agg$fiBackground[v]) & !is.na(visits.fi.agg$fiBackgroundBlank[v]))
+                                    {
+                                        if ((visits.fi.agg$fiBackground[v] > threshold) & (visits.fi.agg$fiBackground[v] > (baseVisitFiBkgd * as.numeric(fold.change))) &
+                                            (visits.fi.agg$fiBackgroundBlank[v] > threshold) & (visits.fi.agg$fiBackgroundBlank[v] > (baseVisitFiBkgdBlank * as.numeric(fold.change))))
+                                        {
+                                            run.data$Positivity[runDataIndex] = "positive"
+                                        } else
+                                        {
+                                            run.data$Positivity[runDataIndex] = "negative"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (v in 1:nrow(visits.fi.agg))
+                        {
+                            # since there is no baseline data for this participant, compare each visit FI-Bkgd and FI-Bkgd-Blank values against the threshold
                             runDataIndex = run.data$name == visits.fi.agg$analyte[v] & run.data$participantID == visits.fi.agg$ptid[v] & run.data$visitID == visits.fi.agg$visit[v];
-                            if ((visits.fi.agg$fiBackground[v] > threshold) & (visits.fi.agg$fiBackground[v] > (baseVisitFiBkgd * as.numeric(fold.change))) &
-                                (visits.fi.agg$fiBackgroundBlank[v] > threshold) & (visits.fi.agg$fiBackgroundBlank[v] > (baseVisitFiBkgdBlank * as.numeric(fold.change))))
+                            if (!is.na(visits.fi.agg$fiBackground[v]) & !is.na(visits.fi.agg$fiBackgroundBlank[v]))
                             {
-                                run.data$Positivity[runDataIndex] = "positive"
-                            } else
-                            {
-                                run.data$Positivity[runDataIndex] = "negative"
+                                if (visits.fi.agg$fiBackground[v] > threshold & visits.fi.agg$fiBackgroundBlank[v] > threshold)
+                                {
+                                    run.data$Positivity[runDataIndex] = "positive"
+                                } else
+                                {
+                                    run.data$Positivity[runDataIndex] = "negative"
+                                }
                             }
                         }
                     }
