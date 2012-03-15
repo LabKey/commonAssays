@@ -44,7 +44,8 @@ abstract public class GateComponent
 
     public String u(String s)
     {
-        return URL.encodeComponent(s);
+        //issue 14006: changed encodeComponent to encodePathSegment, b/c the former will convert spaces to '+'
+        return URL.encodePathSegment(s);
     }
 
     public GWTScript getScript()
