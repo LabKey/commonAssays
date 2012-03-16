@@ -1354,7 +1354,6 @@ ms2/src/org/labkey/ms2/protein/tools/PieJChartHelper.java -text
 ms2/src/org/labkey/ms2/protein/tools/ProteinDictionaryHelpers.java -text
 ms2/src/org/labkey/ms2/protein/tools/ProteinPieDataset.java -text
 ms2/src/org/labkey/ms2/protein/tools/REProperties.java -text
-ms2/src/org/labkey/ms2/protein/tools/bioSeq.java -text
 ms2/src/org/labkey/ms2/protein/uniprot/UniprotAnnotation.java -text
 ms2/src/org/labkey/ms2/protein/uniprot/UniprotIdentifier.java -text
 ms2/src/org/labkey/ms2/protein/uniprot/UniprotOrganism.java -text
@@ -1460,7 +1459,6 @@ ms2/src/org/labkey/ms2/showSensitivityDetails.jsp -text
 ms2/src/org/labkey/ms2/stats.jsp -text
 ms2/src/org/labkey/ms2/testFastaParsing.jsp -text
 ms2/src/org/labkey/ms2/testMascot.jsp -text
-ms2/src/org/labkey/ms2/writer/BasePepXmlWriter.java -text
 ms2/webapp/MS2/externalData/ProtSprotOrgMap.txt -text
 ms2/webapp/MS2/images/runIcon.gif -text
 ms2/webapp/MS2/inlineViewDesigner.js -text
