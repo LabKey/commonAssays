@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.PeptidesTableInfo;
@@ -38,6 +39,8 @@ import org.springframework.validation.BindException;
  */
 public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 {
+    private PeptidesTableInfo _peptidesTable;
+
     public QueryPeptideMS2RunView(ViewContext viewContext, MS2Run... runs)
     {
         super(viewContext, "Peptides", runs);
@@ -48,7 +51,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         QuerySettings settings = schema.getSettings(_url.getPropertyValues(), MS2Manager.getDataRegionNamePeptides());
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
-        settings.setQueryName(MS2Schema.TableType.Peptides.toString());
+        settings.setQueryName(createPeptideTable(schema).getPublicName());
         String columnNames = _url.getParameter("columns");
         if (columnNames != null)
         {
@@ -195,11 +198,24 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
         public PeptidesTableInfo createTable()
         {
-            PeptidesTableInfo result = new PeptidesTableInfo((MS2Schema) getSchema(), _url.clone(), true, ContainerFilter.CURRENT);
-            // Manually apply the metadata
-            result.overlayMetadata(result.getPublicName(), getSchema(), new ArrayList<QueryException>());
-            return result;
+            return createPeptideTable((MS2Schema)getSchema());
         }
+    }
+
+    private PeptidesTableInfo createPeptideTable(MS2Schema schema)
+    {
+        if (_peptidesTable == null)
+        {
+            Set<MS2RunType> runTypes = new HashSet<MS2RunType>(_runs.length);
+            for (MS2Run run : _runs)
+            {
+                runTypes.add(run.getRunType());
+            }
+            _peptidesTable =  new PeptidesTableInfo(schema, _url.clone(), true, ContainerFilter.CURRENT, runTypes.toArray(new MS2RunType[runTypes.size()]));
+            // Manually apply the metadata
+            _peptidesTable.overlayMetadata(_peptidesTable.getPublicName(), schema, new ArrayList<QueryException>());
+        }
+        return _peptidesTable;
     }
 
     public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)

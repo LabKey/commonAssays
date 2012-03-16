@@ -54,7 +54,7 @@ public class MS2ServiceImpl implements MS2Service.Service
 
     public TableInfo createPeptidesTableInfo(User user, Container container, boolean includeFeatureFk, ContainerFilter containerFilter, SimpleFilter filter, Iterable<FieldKey> defaultColumns)
     {
-        PeptidesTableInfo table = new PeptidesTableInfo(new MS2Schema(user, container), includeFeatureFk, containerFilter);
+        PeptidesTableInfo table = new PeptidesTableInfo(new MS2Schema(user, container), includeFeatureFk, containerFilter, MS2RunType.values());
         if(null != filter)
             table.addCondition(filter);
         if(null != defaultColumns)

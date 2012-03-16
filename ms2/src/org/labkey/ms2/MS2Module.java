@@ -121,7 +121,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public double getVersion()
     {
-        return 11.30;
+        return 11.31;
     }
 
     protected Collection<WebPartFactory> createWebPartFactories()

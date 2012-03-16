@@ -59,7 +59,13 @@ public enum MS2RunType
             new Pair<String, String>("Delta", "delta"),
             new Pair<String, String>("ZScore", "zscore"),
             new Pair<String, String>("DeltaStar", "deltastar"),
-            new Pair<String, String>("Expect", "expect")),
+            new Pair<String, String>("Expect", "expect"))
+    {
+        public boolean isPeptideTableHidden()
+        {
+            return true;
+        }
+    },
     XTandem(XTandemRun.class,
             new Pair<String, String>("Hyper", "hyperscore"),
             new Pair<String, String>("Next", "nextscore"),
@@ -71,8 +77,20 @@ public enum MS2RunType
             new Pair<String, String>("Delta", "delta"),
             new Pair<String, String>("ZScore", "zscore"),
             new Pair<String, String>("DeltaStar", "deltastar"),
-            new Pair<String, String>("Expect", "expect")),
-    Unknown(UnknownMS2Run.class);
+            new Pair<String, String>("Expect", "expect"))
+    {
+        public boolean isPeptideTableHidden()
+        {
+            return true;
+        }
+    },
+    Unknown(UnknownMS2Run.class)
+    {
+        public boolean isPeptideTableHidden()
+        {
+            return true;
+        }
+    };
 
     private final Class<? extends MS2Run> _runClass;
     private final String _scoreColumnNames;
@@ -153,5 +171,15 @@ public enum MS2RunType
     public List<String> getPepXmlScoreNames()
     {
         return _pepXmlScoreNames;
+    }
+
+    public String getPeptideTableName()
+    {
+        return this.toString() + "Peptides";
+    }
+
+    public boolean isPeptideTableHidden()
+    {
+        return false;
     }
 }

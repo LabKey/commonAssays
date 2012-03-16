@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.query;
 
+import org.apache.commons.collections15.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
@@ -63,21 +64,23 @@ import java.util.Set;
 public class PeptidesTableInfo extends FilteredTable
 {
     private MS2Schema _schema;
+    private final MS2RunType[] _runTypes;
 
     public PeptidesTableInfo(MS2Schema schema)
     {
-        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), true, ContainerFilter.CURRENT);
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), true, ContainerFilter.CURRENT, MS2RunType.values());
     }
 
-    public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk, ContainerFilter containerFilter)
+    public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk, ContainerFilter containerFilter, MS2RunType[] runTypes)
     {
-        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), includeFeatureFk, containerFilter);
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), includeFeatureFk, containerFilter, runTypes);
     }
 
-    public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, ContainerFilter containerFilter)
+    public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, ContainerFilter containerFilter, MS2RunType[] runTypes)
     {
         super(MS2Manager.getTableInfoPeptidesData());
         _schema = schema;
+        _runTypes = runTypes;
         setContainerFilter(containerFilter);
 
         // Stick EndScan column just after Scan column
@@ -227,7 +230,7 @@ public class PeptidesTableInfo extends FilteredTable
         getColumn("Peptide").setURL(StringExpressionFactory.createURL(showPeptideURLString));
         getColumn("Peptide").setDisplayColumnFactory(factory);
 
-        addScoreColumns(info);
+        addScoreColumns();
 
         getColumn("Fraction").setFk(new LookupForeignKey("Fraction")
         {
@@ -285,11 +288,36 @@ public class PeptidesTableInfo extends FilteredTable
 
         SQLFragment sql = new SQLFragment();
         sql.append("Fraction IN (SELECT Fraction FROM ");
-        sql.append(MS2Manager.getTableInfoFractions());
+        sql.append(MS2Manager.getTableInfoFractions(), "f");
         sql.append(" WHERE Run IN (SELECT Run FROM ");
-        sql.append(MS2Manager.getTableInfoRuns());
-        sql.append(" WHERE Deleted = ? AND ");
+        sql.append(MS2Manager.getTableInfoRuns(), "r");
+        sql.append(" WHERE Deleted = ? ");
         sql.add(Boolean.FALSE);
+
+        Collection<MS2RunType> runTypes = getRunTypes();
+        if (runTypes.size() != MS2RunType.values().length)
+        {
+            if (runTypes.isEmpty())
+            {
+                sql.append("AND 1 = 0");
+            }
+            else
+            {
+                sql.append("AND Type IN (");
+                String separator = "";
+                for (MS2RunType runType : runTypes)
+                {
+                    sql.append(separator);
+                    separator = ", ";
+                    sql.append("'");
+                    sql.append(runType.toString());
+                    sql.append("'");
+                }
+                sql.append(")");
+            }
+        }
+        sql.append(" AND ");
+
         sql.append(getContainerFilter().getSQLFragment(getSchema(), new SQLFragment("Container"), _schema.getContainer(), false, true));
         if (_schema.getRuns() != null)
         {
@@ -356,25 +384,10 @@ public class PeptidesTableInfo extends FilteredTable
         getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
     }
 
-    private void addScoreColumns(TableInfo info)
+    private void addScoreColumns()
     {
         Map<String, List<Pair<MS2RunType, Integer>>> columnMap = new HashMap<String, List<Pair<MS2RunType, Integer>>>();
-        List<MS2Run> runs = _schema.getRuns();
-
-        Collection<MS2RunType> runTypes;
-        if (runs != null && runs.size() > 0)
-        {
-            runTypes = new HashSet<MS2RunType>();
-            for (MS2Run run : runs)
-            {
-                runTypes.add(run.getRunType());
-            }
-        }
-        else
-        {
-            runTypes = Arrays.asList(MS2RunType.values());
-        }
-        for (MS2RunType runType : runTypes)
+        for (MS2RunType runType : getRunTypes())
         {
             int index = 1;
             // Since some search engines have the same names for different scores, build a list of all of the
@@ -417,6 +430,27 @@ public class PeptidesTableInfo extends FilteredTable
             newCol.setFormat(realScoreCol.getFormat());
             newCol.setWidth(realScoreCol.getWidth());
         }
+    }
+
+    /**
+     * Looks at the potential set of run types and further filters by including only those that are used
+     * by the set of runs, if known 
+     */
+    private Collection<MS2RunType> getRunTypes()
+    {
+        List<MS2Run> runs = _schema.getRuns();
+
+        Collection<MS2RunType> runTypes = new HashSet<MS2RunType>(Arrays.asList(_runTypes));
+        if (runs != null && runs.size() > 0)
+        {
+            Set<MS2RunType> usedRunTypes = new HashSet<MS2RunType>();
+            for (MS2Run run : runs)
+            {
+                usedRunTypes.add(run.getRunType());
+            }
+            runTypes = CollectionUtils.intersection(runTypes, usedRunTypes);
+        }
+        return runTypes;
     }
 
     private void addMassColumns(SqlDialect dialect)
@@ -464,25 +498,14 @@ public class PeptidesTableInfo extends FilteredTable
         List<FieldKey> result = new ArrayList<FieldKey>();
         result.add(FieldKey.fromParts("Scan"));
         result.add(FieldKey.fromParts("Charge"));
-        List<MS2Run> runs = _schema.getRuns();
-        if (runs != null && runs.size() > 0)
-        {
-            for (String name : runs.get(0).getRunType().getScoreColumnList())
-            {
-                result.add(FieldKey.fromParts(name));
-            }
-        }
-        else
+        for (MS2RunType runType : getRunTypes())
         {
             Set<String> scoreCols = new CaseInsensitiveHashSet();
-            for (MS2RunType runType : MS2RunType.values())
+            for (String name : runType.getScoreColumnList())
             {
-                for (String name : runType.getScoreColumnList())
+                if (scoreCols.add(name))
                 {
-                    if (scoreCols.add(name))
-                    {
-                        result.add(FieldKey.fromParts(name));
-                    }
+                    result.add(FieldKey.fromParts(name));
                 }
             }
         }
@@ -498,7 +521,7 @@ public class PeptidesTableInfo extends FilteredTable
 
     public String getPublicName()
     {
-        return MS2Schema.TableType.Peptides.toString();
+        return _runTypes.length > 1 ? MS2Schema.TableType.Peptides.toString() : _runTypes[0].getPeptideTableName();
     }
 
     public static void addCalculatedColumns(FilteredTable table)

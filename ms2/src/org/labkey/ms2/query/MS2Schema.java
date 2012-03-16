@@ -23,11 +23,9 @@ import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpression;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
@@ -36,6 +34,7 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Fraction;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.ProteinGroupProteins;
 import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
 import org.labkey.ms2.protein.ProteinManager;
@@ -74,6 +73,13 @@ public class MS2Schema extends UserSchema
         for (TableType tableType : TableType.values())
         {
             names.add(tableType.toString());
+        }
+        for (MS2RunType runType : MS2RunType.values())
+        {
+            if (!runType.isPeptideTableHidden())
+            {
+                names.add(runType.getPeptideTableName());
+            }
         }
         TABLE_NAMES = Collections.unmodifiableSet(names);
     }
@@ -157,7 +163,7 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createPeptidesTable(ContainerFilter.CURRENT);
+                return ms2Schema.createPeptidesTable(ContainerFilter.CURRENT, MS2RunType.values());
             }
         },
         Fractions
@@ -193,7 +199,7 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo createTable(MS2Schema ms2Schema)
             {
-                return ms2Schema.createPeptidesTable(ContainerFilter.CURRENT);
+                return ms2Schema.createPeptidesTable(ContainerFilter.CURRENT, MS2RunType.values());
             }
         },
         ProteinGroupsFilter
@@ -281,6 +287,13 @@ public class MS2Schema extends UserSchema
             if (tableType.toString().equalsIgnoreCase(name))
             {
                 return tableType.createTable(this);
+            }
+        }
+        for (MS2RunType runType : MS2RunType.values())
+        {
+            if (runType.getPeptideTableName().equalsIgnoreCase(name))
+            {
+                return createPeptidesTable(ContainerFilter.CURRENT, runType);
             }
         }
 
@@ -547,7 +560,7 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return createPeptidesTable(ContainerFilter.EVERYTHING);
+                return createPeptidesTable(ContainerFilter.EVERYTHING, MS2RunType.values());
             }
         });
 
@@ -612,9 +625,9 @@ public class MS2Schema extends UserSchema
         return new SequencesTableInfo(this);
     }
 
-    public TableInfo createPeptidesTable(ContainerFilter containerFilter)
+    public TableInfo createPeptidesTable(ContainerFilter containerFilter, MS2RunType... runTypes)
     {
-        return new PeptidesTableInfo(this, true, containerFilter);
+        return new PeptidesTableInfo(this, true, containerFilter, runTypes);
     }
 
     private ExpRunTable createSearchTable(String name, ContainerFilter filter, String... protocolObjectPrefix)
