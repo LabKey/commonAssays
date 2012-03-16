@@ -76,7 +76,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static final AssayDataType LUMINEX_DATA_TYPE = new AssayDataType("LuminexDataFile", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
     public static final String QC_FLAG_HIGH_MFI_FLAG_TYPE = "HMFI";
     public static final String QC_FLAG_EC50_4PL_FLAG_TYPE = "EC50-4";
-    //public static final String QC_FLAG_EC50_5PL_FLAG_TYPE = "EC50-5";
+    public static final String QC_FLAG_EC50_5PL_FLAG_TYPE = "EC50-5";
     public static final String QC_FLAG_AUC_FLAG_TYPE = "AUC";
     public static final String QC_FLAG_CV_FLAG_TYPE = "PCV";
     public static final String POSITIVITY_THRESHOLD_COLUMN_NAME = "PositivityThreshold";
@@ -1218,7 +1218,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return fit;
     }
 
-    /* Insert or Update QC Flags for High MFI, 4PL EC50, or AUC values that are
+    /* Insert or Update QC Flags for High MFI, 4PL EC50, 5PL EC50, or AUC values that are
       out of the guide set range if this AnalyteTitration record has a current GuideSet */
     public static void insertOrUpdateAnalyteTitrationQCFlags(User user, ExpRun expRun, ExpProtocol protocol, @NotNull AnalyteTitration analyteTitration, @NotNull Analyte analyte, @NotNull Titration titration, String isotype, String conjugate, List<CurveFit> curveFits)
             throws SQLException
@@ -1241,14 +1241,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             FieldKey maxFIStdDevFK = FieldKey.fromParts("MaxFIStdDev");
             FieldKey ec504plAverageFK = FieldKey.fromParts(DilutionCurve.FitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50Average");
             FieldKey ec504plStdDevFK = FieldKey.fromParts(DilutionCurve.FitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
-            //FieldKey ec505plAverageFK = FieldKey.fromParts(DilutionCurve.FitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50Average");
-            //FieldKey ec505plStdDevFK = FieldKey.fromParts(DilutionCurve.FitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
+            FieldKey ec505plAverageFK = FieldKey.fromParts(DilutionCurve.FitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50Average");
+            FieldKey ec505plStdDevFK = FieldKey.fromParts(DilutionCurve.FitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50StdDev");
             FieldKey aucAverageFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCAverage");
             FieldKey aucStdDevFK = FieldKey.fromParts("TrapezoidalCurveFit", "AUCStdDev");
             Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(guideSetTable, Arrays.asList(
                     maxFIAverageFK, maxFIStdDevFK,
                     ec504plAverageFK, ec504plStdDevFK,
-                    //ec505plAverageFK, ec505plStdDevFK,
+                    ec505plAverageFK, ec505plStdDevFK,
                     aucAverageFK, aucStdDevFK));
             SimpleFilter guideSetFilter = new SimpleFilter("RowId", analyteTitration.getGuideSetId());
             Map<String, Object>[] guideSetRows = Table.select(guideSetTable, new ArrayList<ColumnInfo>(cols.values()), guideSetFilter, null, Map.class);
@@ -1286,13 +1286,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         value = curveFit.getEC50();
                         flagType = QC_FLAG_EC50_4PL_FLAG_TYPE;
                     }
-                    //else if (curveFit.getCurveType().equals(DilutionCurve.FitType.FIVE_PARAMETER.getLabel()))
-                    //{
-                    //    average = (Double)guideSetRow.get(cols.get(ec505plAverageFK).getAlias());
-                    //    stdDev = (Double)guideSetRow.get(cols.get(ec505plStdDevFK).getAlias());
-                    //    value = curveFit.getEC50();
-                    //    flagType = QC_FLAG_EC50_5PL_FLAG_TYPE;
-                    //}
+                    else if (curveFit.getCurveType().equals(DilutionCurve.FitType.FIVE_PARAMETER.getLabel()))
+                    {
+                        average = (Double)guideSetRow.get(cols.get(ec505plAverageFK).getAlias());
+                        stdDev = (Double)guideSetRow.get(cols.get(ec505plStdDevFK).getAlias());
+                        value = curveFit.getEC50();
+                        flagType = QC_FLAG_EC50_5PL_FLAG_TYPE;
+                    }
                     else if (curveFit.getCurveType().equals("Trapezoidal"))
                     {
                         average = (Double)guideSetRow.get(cols.get(aucAverageFK).getAlias());

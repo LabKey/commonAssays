@@ -16,19 +16,17 @@
     top:0;
 }
 
-/*
 .ec505plTrendPlot #resultImage {
     position:relative;
     top:-300px;
 }
-*/
 
 .aucTrendPlot #resultImage {
     position:relative;
-    top:-300px;
+    top:-600px;
 }
 
 .mfiTrendPlot #resultImage {
     position:relative;
-    top:-600px;
+    top:-900px;
 }

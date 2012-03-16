@@ -105,7 +105,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Experiment Performer', dataIndex:'Titration/Run/ExpPerformer', width:100, renderer: this.encodingRenderer},
                 {header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100},
                 {header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
-                //{header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
+                {header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'},
                 {header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'},
                 {header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'}
             ],
@@ -115,7 +115,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // create the grid for the full list of runs that match the given guide set criteria
         this.selectedRunsGrid = new Ext.grid.GridPanel({
             autoScroll:true,
-            width:1000,
+            width:1075,
             height:150,
             loadMask:{msg:"Loading selected runs..."},
             store: selectedRunsStore,
@@ -169,7 +169,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 {header:'Current', dataIndex:'CurrentGuideSet'},
                 {header:'Comment', dataIndex:'Comment', renderer: this.encodingRenderer, width:200},
                 {header:'Avg EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
-                //{header:'Avg EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
+                {header:'Avg EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50Average', renderer: this.numberRenderer, align: 'right'},
                 {header:'Avg AUC', dataIndex:'TrapezoidalCurveFit/AUCAverage', renderer: this.numberRenderer, align: 'right'},
                 {header:'Avg High MFI', dataIndex:'MaxFIAverage', renderer: this.numberRenderer, align: 'right'}
             ],
@@ -179,7 +179,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // create the grid for the full list of runs that match the given guide set criteria
         this.guideSetsGrid = new Ext.grid.GridPanel({
             autoHeight:true,
-            width:1000,
+            width:1075,
             loadMask:{msg:"Loading guide sets..."},
             store: guideSetsStore,
             colModel: guideSetsColModel,
@@ -191,7 +191,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.items = [
             new Ext.Panel({
                 title: 'Selected Runs',
-                width:1000,
+                width:1075,
                 items: [
                     {
                         xtype: 'displayfield',
@@ -213,7 +213,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 title: 'Guide Run Sets for ' + this.titration + ' : ' + this.analyte + ' '
                         + (this.isotype == '' ? '[None]' : this.isotype) + ' '
                         + (this.conjugate == '' ? '[None]' : this.conjugate),
-                width:1000,
+                width:1075,
                 items: [
                     {xtype: 'displayfield', value: 'Choose the guide set that you would like to apply to the selected runs in the list above.'},
                     this.guideSetsGrid    

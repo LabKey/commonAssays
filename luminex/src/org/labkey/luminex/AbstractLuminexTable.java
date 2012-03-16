@@ -85,8 +85,8 @@ public abstract class AbstractLuminexTable extends FilteredTable
         }
         else
         {
-            sql.append("   AND (" + ExprColumn.STR_TABLE_ALIAS + ".CurveType = '" + DilutionCurve.FitType.FOUR_PARAMETER.getLabel() + "' AND qf.FlagType = '" + LuminexDataHandler.QC_FLAG_EC50_4PL_FLAG_TYPE + "') ");
-            //sql.append("        OR " + ExprColumn.STR_TABLE_ALIAS + ".CurveType = '" + DilutionCurve.FitType.FIVE_PARAMETER.getLabel() + "' AND qf.FlagType = '" + LuminexDataHandler.QC_FLAG_EC50_5PL_FLAG_TYPE + "') ");
+            sql.append("   AND (" + ExprColumn.STR_TABLE_ALIAS + ".CurveType = '" + DilutionCurve.FitType.FOUR_PARAMETER.getLabel() + "' AND qf.FlagType = '" + LuminexDataHandler.QC_FLAG_EC50_4PL_FLAG_TYPE + "' ");
+            sql.append("        OR " + ExprColumn.STR_TABLE_ALIAS + ".CurveType = '" + DilutionCurve.FitType.FIVE_PARAMETER.getLabel() + "' AND qf.FlagType = '" + LuminexDataHandler.QC_FLAG_EC50_5PL_FLAG_TYPE + "') ");
         }
         sql.append(" ORDER BY qf.RowId");
 
