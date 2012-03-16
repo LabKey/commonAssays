@@ -137,6 +137,23 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         OrganismGuessStrategy parsingStrategy = new GuessOrgByParsing();
         OrganismGuessStrategy sharedIdentsStrategy = new GuessOrgBySharedIdents();
 
+        validate();
+
+        FastaValidator validator = new FastaValidator(_file);
+        List<String> errors = validator.validate();
+
+        if (!errors.isEmpty())
+        {
+            logger.error("This FASTA file has " + errors.size() + " duplicate protein name" + (1 == errors.size() ? "" : "s") + ", listed below.  " +
+                    "Search engines and the Trans-Proteomic Pipeline use these names to link to specific protein sequeces so the names must be unique.  " +
+                    "You should remove or otherwise disambiguate the duplicate entries from this FASTA file and re-run your search.");
+
+            String errorString = StringUtils.join(errors, "\n");
+            logger.error(errorString);
+
+            throw new RuntimeException("Invalid FASTA file");
+        }
+
         synchronized (LOCK)
         {
             FastaFile file = new FastaFile();
@@ -145,8 +162,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             file = Table.insert(null, ProteinManager.getTableInfoFastaFiles(), file);
             associatedFastaId = file.getFastaId();
         }
-
-        validate();
 
         synchronized (LOCK)
         {
@@ -608,21 +623,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader
 
     public void parse(Logger logger, OrganismGuessStrategy parsingStrategy, OrganismGuessStrategy sharedIdentsStrategy) throws IOException, SQLException
     {
-        FastaValidator validator = new FastaValidator(_file);
-        List<String> errors = validator.validate();
-
-        if (!errors.isEmpty())
-        {
-            logger.error("This FASTA file has " + errors.size() + " duplicate protein name" + (1 == errors.size() ? "" : "s") + ", listed below.  " +
-                    "Search engines and the Trans-Proteomic Pipeline use these names to link to specific protein sequeces so the names must be unique.  " +
-                    "You should remove or otherwise disambiguate the duplicate entries from this FASTA file and re-run your search.");
-
-            String errorString = StringUtils.join(errors, "\n");
-            logger.error(errorString);
-
-            throw new RuntimeException("Invalid FASTA file");
-        }
-
         ProteinFastaLoader curLoader = new ProteinFastaLoader(_file);
 
         conn = ProteinManager.getSchema().getScope().getConnection();

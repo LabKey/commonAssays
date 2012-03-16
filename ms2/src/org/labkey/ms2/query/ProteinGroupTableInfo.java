@@ -158,7 +158,7 @@ public class ProteinGroupTableInfo extends FilteredTable
 
         SQLFragment proteinCountSQL = new SQLFragment();
         proteinCountSQL.append("(SELECT COUNT(SeqId) FROM ");
-        proteinCountSQL.append(MS2Manager.getTableInfoProteinGroupMemberships());
+        proteinCountSQL.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pm");
         proteinCountSQL.append(" WHERE ProteinGroupId = ");
         proteinCountSQL.append(ExprColumn.STR_TABLE_ALIAS);
         proteinCountSQL.append(".RowId)");
