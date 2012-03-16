@@ -533,10 +533,11 @@ public class CompensationMatrix implements Serializable
             {
                 for (int j=0 ; j<channelCount; j++)
                 {
-                    String dfc = StringUtils.trimToNull(keywords.get("$DFC" + (i+1) + "TO" + (j+1)));
+                    String key = keywords.get("$DFC" + (i+1) + "TO" + (j+1));
+                    String dfc = StringUtils.trimToNull(key);
                     if (null == dfc && i==j)
                         dfc = "1";
-                    assert dfc != null;
+                    assert dfc != null : "Expected compensation keyword: " + key;
                     rows[i][j] = Double.parseDouble(dfc);
                 }
             }
