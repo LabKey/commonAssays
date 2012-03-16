@@ -22,17 +22,17 @@
 # CHANGES :
 #  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
 #  - 2.2.20120217 : Issue 14070: Value out of range error when importing curve fit parameters for titrated unknown with flat dilution curve
-#  - 3.0.20120314 : Changes for LabKey server 12.1
+#  - 3.0.20120315 : Changes for LabKey server 12.1
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "3.0.20120314";
+transformVersion = "3.0.20120315";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
 
 source("${srcDirectory}/youtil.R");
 # Ruminex package available from http://labs.fhcrc.org/fong/Ruminex/index.html
-library(Ruminex);
+library(Ruminex, quietly=TRUE);
 ruminexVersion = installed.packages()["Ruminex","Version"];
 
 ########################################## FUNCTIONS ##########################################
@@ -83,7 +83,7 @@ getRunPropertyValue <- function(runProps, colName)
     {
         value = run.props$val1[run.props$name == colName];
 
-        # reutrn NA for an empty string
+        # return NA for an empty string
         if (nchar(value) == 0)
         {
             value = NA;
@@ -246,6 +246,13 @@ run.data$Asymmetry_5pl = NA;
 run.data$EC50_5pl = NA;
 run.data$Flag_5pl = NA;
 
+# determine if the curve fits should be done with or without log transform
+curveFitLogTransform = TRUE;
+if (any(run.props$name == "CurveFitLogTransform")) {
+    curveFitLogTransform = getRunPropertyValue(run.props, "CurveFitLogTransform");
+    if (curveFitLogTransform == "1") curveFitLogTransform = TRUE else curveFitLogTransform = FALSE;
+}
+
 # loop through the possible titrations and to see if it is a standard, qc control, or titrated unknown
 if (nrow(titration.data) > 0)
 {
@@ -362,14 +369,20 @@ if (nrow(titration.data) > 0)
                 } else if (fitTypes[typeIndex] == "5pl")
                 {
                     tryCatch({
-                            fit = fit.drc(log(fi)~dose, data=dat, force.fit=TRUE, fit.4pl=FALSE);
+                            if (curveFitLogTransform) formula = log(fi)~dose else formula = fi~dose;
+                            fit = fit.drc(formula, data=dat, force.fit=TRUE, fit.4pl=FALSE);
                             run.data[runDataIndex,]$Slope_5pl = maxValueConversion(as.numeric(coef(fit))[1]);
                             run.data[runDataIndex,]$Lower_5pl = maxValueConversion(as.numeric(coef(fit))[2]);
                             run.data[runDataIndex,]$Upper_5pl = maxValueConversion(as.numeric(coef(fit))[3]);
                             run.data[runDataIndex,]$Inflection_5pl = maxValueConversion(as.numeric(coef(fit))[4]);
                             run.data[runDataIndex,]$Asymmetry_5pl = maxValueConversion(as.numeric(coef(fit))[5]);
 
-                            y = log((exp(run.data[runDataIndex,]$Lower_5pl) + exp(run.data[runDataIndex,]$Upper_5pl))/2);
+                            if (curveFitLogTransform) {
+                                yLabel = paste("log(",yLabel,")", sep="");
+                                y = log((exp(run.data[runDataIndex,]$Lower_5pl) + exp(run.data[runDataIndex,]$Upper_5pl)) / 2)
+                            } else {
+                                y = (run.data[runDataIndex,]$Lower_5pl + run.data[runDataIndex,]$Upper_5pl) / 2;
+                            }
                             ec50 = unname(getConc(fit, y))[3];
                             if (is.nan(ec50) | ec50 > 10e6) {
                                 stop("EC50 value out of acceptable range (either outside standards MFI or greater than 10e6).")
@@ -379,15 +392,21 @@ if (nrow(titration.data) > 0)
 
                             # plot the curve fit for the QC Controls
                             if (titration.data[tIndex,]$QCControl == "true") {
-                                plot(fit, type="all", main=analyteName, cex=.5, ylab=paste("log(",yLabel,")",sep=""), xlab=xLabel);
+                                plot(fit, type="all", main=analyteName, cex=.5, ylab=yLabel, xlab=xLabel);
                             }
                         },
                         error = function(e) {
                             print(e);
 
                             # plot the individual data points for the QC Controls
+                            if (curveFitLogTransform) {
+                                yLabel = paste("log(",yLabel,")", sep="");
+                                logAxes = "xy"
+                            } else {
+                                logAxes = "x";
+                            }
                             if (titration.data[tIndex,]$QCControl == "true") {
-                                plot(fi ~ dose, data = dat, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
+                                plot(fi ~ dose, data = dat, log=logAxes, cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
                             }
                         }
                     );
@@ -400,7 +419,13 @@ if (nrow(titration.data) > 0)
             } else {
                 # create an empty plot indicating that there is no data available
                 if (titration.data[tIndex,]$QCControl == "true") {
-                    plot(NA, NA, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel, xlim=c(1,1), ylim=c(0,1));
+                    if (curveFitLogTransform) {
+                        yLabel = paste("log(",yLabel,")", sep="");
+                        logAxes = "xy"
+                    } else {
+                        logAxes = "x";
+                    }
+                    plot(NA, NA, log=logAxes, cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel, xlim=c(1,1), ylim=c(0,1));
                     text(1, 0.5, "Data Not Available");
                 }
             }
@@ -584,7 +609,7 @@ if (any(dat$isStandard) & length(standards) > 0)
 
             # call the rumi function to calculate new estimated log concentrations using 5PL for the unknowns
             mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2));
-            fits = rumi(standard.dat, force.fit=TRUE, verbose=TRUE);
+            fits = rumi(standard.dat, force.fit=TRUE, log.transform=curveFitLogTransform, verbose=TRUE);
             fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
             dev.off();
 
@@ -619,7 +644,7 @@ if (any(dat$isStandard) & length(standards) > 0)
 
             # call the rumi function to calculate new estimated log concentrations using 4PL for the unknowns
             mypdf(file=paste(stndVal, "4PL", sep="_"), mfrow=c(2,2));
-            fits = rumi(standard.dat, fit.4pl=TRUE, force.fit=TRUE, verbose=TRUE);
+            fits = rumi(standard.dat, fit.4pl=TRUE, force.fit=TRUE, log.transform=curveFitLogTransform, verbose=TRUE);
             fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
             dev.off();
 
