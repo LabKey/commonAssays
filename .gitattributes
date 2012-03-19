@@ -329,6 +329,7 @@ flow/src/org/labkey/flow/ScriptParser.java -text
 flow/src/org/labkey/flow/controllers/BaseFlowController.java -text
 flow/src/org/labkey/flow/controllers/FlowAdminForm.java -text
 flow/src/org/labkey/flow/controllers/FlowController.java -text
+flow/src/org/labkey/flow/controllers/FlowObjectForm.java -text
 flow/src/org/labkey/flow/controllers/FlowParam.java -text
 flow/src/org/labkey/flow/controllers/IWorkspaceForm.java -text
 flow/src/org/labkey/flow/controllers/NewFolderForm.java -text

@@ -30,7 +30,7 @@
         {
             return "Ungated";
         }
-        ActionURL ret = form.analysisScript.urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.calculateCompensation);
+        ActionURL ret = form.getFlowScript().urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.calculateCompensation);
         ret.addParameter("subset", subset);
         return "<a href=\"" + h(ret) + "\">" + h(subset) + "</a>";
     }
@@ -64,10 +64,10 @@
 <% if (form.canEdit()) { %>
     <p>
         This compensation calculation may be edited in a number of ways:<br>
-        <labkey:link text="Upload a FlowJo workspace" href="<%=form.analysisScript.urlFor(ScriptController.UploadCompensationCalculationAction.class)%>" /><br>
-        <labkey:link text="Switch keywords or gates" href="<%=form.analysisScript.urlFor(ScriptController.ChooseCompensationRunAction.class)%>" /><br>
-        <labkey:link text="Move or define gates" href="<%=form.analysisScript.urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.calculateCompensation)%>" /><br>
-        <labkey:link href="<%=form.analysisScript.urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.calculateCompensation)%>" text="Rename gates" /><br>
-        <labkey:link href="<%=form.analysisScript.urlFor(AnalysisScriptController.BeginAction.class)%>" text="Script main page" />
+        <labkey:link text="Upload a FlowJo workspace" href="<%=form.urlFor(ScriptController.UploadCompensationCalculationAction.class)%>" /><br>
+        <labkey:link text="Switch keywords or gates" href="<%=form.urlFor(ScriptController.ChooseCompensationRunAction.class)%>" /><br>
+        <labkey:link text="Move or define gates" href="<%=form.getFlowScript().urlFor(ScriptController.GateEditorAction.class, FlowProtocolStep.calculateCompensation)%>" /><br>
+        <labkey:link href="<%=form.getFlowScript().urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.calculateCompensation)%>" text="Rename gates" /><br>
+        <labkey:link href="<%=form.urlFor(AnalysisScriptController.BeginAction.class)%>" text="Script main page" />
     </p>
 <% } %>

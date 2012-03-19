@@ -59,7 +59,7 @@ public class GraphForm extends EditScriptForm
     {
         GWTGraphOptions ret = new GWTGraphOptions();
         GateEditorServiceImpl service = new GateEditorServiceImpl(getViewContext());
-        ret.script = service.makeGWTScript(analysisScript);
+        ret.script = service.makeGWTScript(getFlowScript());
         ret.compensation = editingMode.isCompensation();
         ret.editingMode = editingMode;
         FlowCompensationMatrix m = getCompensationMatrix();

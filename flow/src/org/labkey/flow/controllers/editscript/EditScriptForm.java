@@ -31,6 +31,7 @@ import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.model.ScriptComponent;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.controllers.FlowObjectForm;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.*;
 import org.labkey.flow.query.FlowPropertySet;
@@ -42,12 +43,11 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 
-public class EditScriptForm extends ViewForm
+public class EditScriptForm extends FlowObjectForm<FlowScript>
 {
     static private Logger _log = Logger.getLogger(EditScriptForm.class);
     private static int MAX_WELLS_TO_POLL = 15;
 
-    public FlowScript analysisScript;
     public ScriptDocument analysisDocument;
     public FlowProtocolStep step;
     private int _runCount;
@@ -79,12 +79,12 @@ public class EditScriptForm extends ViewForm
             {
                 throw new NotFoundException("scriptId must be an integer");
             }
-            analysisScript = FlowScript.fromScriptId(scriptId);
-            if (analysisScript == null || analysisScript.getExpObject() == null)
+            flowObject = FlowScript.fromScriptId(scriptId);
+            if (flowObject == null || flowObject.getExpObject() == null)
             {
                 throw new NotFoundException("scriptId not found: " + scriptIdStr);
             }
-            _runCount = analysisScript.getRunCount();
+            _runCount = flowObject.getRunCount();
             step = FlowProtocolStep.fromRequest(getRequest());
             _run = FlowRun.fromURL(getViewContext().getActionURL(), getRequest());
             if (_run != null)
@@ -108,17 +108,22 @@ public class EditScriptForm extends ViewForm
         }
         try
         {
-            analysisDocument = analysisScript.getAnalysisScriptDocument();
+            analysisDocument = flowObject.getAnalysisScriptDocument();
         }
         catch (Exception e)
         {
 
         }
     }
-    
+
+    public FlowScript getFlowScript()
+    {
+        return getFlowObject();
+    }
+
     public ScriptComponent getAnalysis() throws Exception
     {
-        return analysisScript.getCompensationCalcOrAnalysis(step);
+        return getFlowScript().getCompensationCalcOrAnalysis(step);
     }
 
     private void addPopulation(Map<SubsetSpec, Population> map, SubsetSpec parent, Population pop)
@@ -201,7 +206,7 @@ public class EditScriptForm extends ViewForm
     {
         try
         {
-            String[] compChannels = analysisScript.getCompensationChannels();
+            String[] compChannels = getFlowScript().getCompensationChannels();
             if (compChannels == null)
             {
                 if (getRun() != null)
@@ -268,7 +273,7 @@ public class EditScriptForm extends ViewForm
 
     public ActionURL urlFor(Class<? extends Controller> actionClass)
     {
-        ActionURL url = analysisScript.urlFor(actionClass);
+        ActionURL url = super.urlFor(actionClass);
 
         if (step != null)
         {

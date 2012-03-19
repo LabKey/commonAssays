@@ -24,7 +24,7 @@ public class EditPropertiesForm extends EditScriptForm
     public void reset()
     {
         super.reset();
-        ff_description = analysisScript.getExpObject().getComment();
+        ff_description = getFlowScript().getExpObject().getComment();
     }
 
     public void setFf_description(String description)

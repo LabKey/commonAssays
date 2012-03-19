@@ -19,7 +19,7 @@
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%  FlowScript script = getForm().analysisScript;
+<%  FlowScript script = getForm().getFlowScript();
     int runCount = script.getRunCount();
 %>
 <labkey:errors/>

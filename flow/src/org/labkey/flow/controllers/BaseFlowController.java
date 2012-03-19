@@ -17,6 +17,7 @@
 package org.labkey.flow.controllers;
 
 import org.labkey.api.action.HasPageConfig;
+import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
@@ -39,6 +40,7 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.script.FlowJob;
 import org.labkey.flow.webparts.FlowFolderType;
+import org.springframework.validation.BindException;
 import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
@@ -140,6 +142,24 @@ public abstract class BaseFlowController extends SpringActionController
         return project;
     }
 
+    abstract public class FlowAction<FORM extends FlowObjectForm> extends SimpleViewAction<FORM>
+    {
+        FORM _form;
+
+        @Override
+        public void validate(FORM form, BindException errors)
+        {
+            _form = form;
+        }
+
+        protected abstract String getPageTitle();
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(getPageConfig(), root, _form.getFlowObject(), getPageTitle());
+        }
+    }
 
     abstract static public class FlowPage<C extends BaseFlowController> extends JspBase
     {

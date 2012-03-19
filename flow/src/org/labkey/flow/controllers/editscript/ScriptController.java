@@ -121,7 +121,7 @@ public class ScriptController extends BaseFlowController
     {
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
         {
-            FlowScript script = form.analysisScript;
+            FlowScript script = form.getFlowScript();
             if (script == null)
             {
                 return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
@@ -136,7 +136,7 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public class EditScriptAction extends SimpleViewAction<EditScriptForm>
+    public class EditScriptAction extends FlowAction<EditScriptForm>
     {
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
         {
@@ -164,10 +164,9 @@ public class ScriptController extends BaseFlowController
             return new JspView<EditScriptForm>(page, form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public String getPageTitle()
         {
-            root.addChild("Source Editor", new ActionURL(EditScriptAction.class, getContainer()));
-            return root;
+            return "Source Editor";
         }
 
         ScriptParser.Error validateScript(FlowScript script) throws SQLException
@@ -244,7 +243,7 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public class EditAnalysisAction extends SimpleViewAction<AnalysisForm>
+    public class EditAnalysisAction extends FlowAction<AnalysisForm>
     {
         public ModelAndView getView(AnalysisForm form, BindException errors) throws Exception
         {
@@ -258,10 +257,9 @@ public class ScriptController extends BaseFlowController
             return new JspView<AnalysisForm>(getPage("editAnalysis.jsp", form), form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public String getPageTitle()
         {
-            root.addChild("Choose statistics and graphs", new ActionURL(EditAnalysisAction.class, getContainer()));
-            return root;
+            return "Choose statistics and graphs";
         }
 
         protected ActionURL updateAnalysis(AnalysisForm form, BindException errors) throws Exception
@@ -298,7 +296,7 @@ public class ScriptController extends BaseFlowController
                         subsets.add(SubsetSpec.fromEscapedString(strSubset));
                     }
                 }
-                ScriptDocument doc = form.analysisScript.getAnalysisScriptDocument();
+                ScriptDocument doc = form.getFlowScript().getAnalysisScriptDocument();
                 ScriptDef script = doc.getScript();
                 AnalysisDef analysis = script.getAnalysis();
                 if (analysis == null)
@@ -337,9 +335,9 @@ public class ScriptController extends BaseFlowController
                     SubsetDef subsetDef = analysis.addNewSubset();
                     subsetDef.setSubset(subset.toString());
                 }
-                if (!safeSetAnalysisScript(form.analysisScript, doc.toString(), errors))
+                if (!safeSetAnalysisScript(form.getFlowScript(), doc.toString(), errors))
                     return null;
-                return form.analysisScript.urlShow();
+                return form.urlShow();
             }
             catch (FlowException e)
             {
@@ -371,7 +369,7 @@ public class ScriptController extends BaseFlowController
 
         public FlowScript getScript()
         {
-            return form.analysisScript;
+            return form.getFlowScript();
         }
 
         public String formAction(Class<? extends Controller> actionClass)
@@ -417,7 +415,7 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public class UploadAnalysisAction extends SimpleViewAction<UploadAnalysisForm>
+    public class UploadAnalysisAction extends FlowAction<UploadAnalysisForm>
     {
         public ModelAndView getView(UploadAnalysisForm form, BindException errors) throws Exception
         {
@@ -435,10 +433,9 @@ public class ScriptController extends BaseFlowController
             return new JspView<UploadAnalysisForm>(page, form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public String getPageTitle()
         {
-            root.addChild("Upload FlowJo Analysis", new ActionURL(UploadAnalysisAction.class, getContainer()));
-            return root;
+            return "Upload FlowJo Analysis";
         }
 
         protected ActionURL doUploadAnalysis(UploadAnalysisForm form, MultipartFile file, BindException errors) throws Exception
@@ -498,7 +495,7 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public class UploadCompensationCalculationAction extends SimpleViewAction<EditCompensationCalculationForm>
+    public class UploadCompensationCalculationAction extends FlowAction<EditCompensationCalculationForm>
     {
         public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
         {
@@ -509,16 +506,15 @@ public class ScriptController extends BaseFlowController
             return new JspView<EditCompensationCalculationForm>(getPage("uploadCompensationCalculation.jsp", form), form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public String getPageTitle()
         {
-            root.addChild("Upload FlowJo Workspace compensation", new ActionURL(UploadCompensationCalculationAction.class, getContainer()));
-            return root;
+            return "Upload FlowJo Workspace compensation";
         }
 
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public class ChooseCompensationRunAction extends SimpleViewAction<EditCompensationCalculationForm>
+    public class ChooseCompensationRunAction extends FlowAction<EditCompensationCalculationForm>
     {
         public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
         {
@@ -529,10 +525,10 @@ public class ScriptController extends BaseFlowController
             return new JspView<EditCompensationCalculationForm>(getPage("chooseCompensationRun.jsp", form), form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        @Override
+        protected String getPageTitle()
         {
-            root.addChild("Choose run for compensation", new ActionURL(ChooseCompensationRunAction.class, getContainer()));
-            return root;
+            return "Choose run for compensation";
         }
     }
 
@@ -550,7 +546,7 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public class EditCompensationCalculationAction extends SimpleViewAction<EditCompensationCalculationForm>
+    public class EditCompensationCalculationAction extends FlowAction<EditCompensationCalculationForm>
     {
         public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
         {
@@ -566,10 +562,9 @@ public class ScriptController extends BaseFlowController
             return new JspView<EditCompensationCalculationForm>(page, form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public String getPageTitle()
         {
-            root.addChild("Compensation Calculation Editor", new ActionURL(EditCompensationCalculationAction.class, getContainer()));
-            return root;
+            return "Compensation Calculation Editor";
         }
 
         protected Workspace handleCompWorkspaceUpload(EditCompensationCalculationForm form, BindException errors)
@@ -585,7 +580,7 @@ public class ScriptController extends BaseFlowController
 
                 try
                 {
-                    return new FlowRunWorkspace(form.analysisScript, form.step, run);
+                    return new FlowRunWorkspace(form.getFlowScript(), form.step, run);
                 }
                 catch (IOException e)
                 {
@@ -652,7 +647,7 @@ public class ScriptController extends BaseFlowController
                 return null;
 
             ScriptAnalyzer.makeCompensationCalculationDef(doc, calc);
-            if (!safeSetAnalysisScript(form.analysisScript, doc.toString(), errors))
+            if (!safeSetAnalysisScript(form.getFlowScript(), doc.toString(), errors))
                 return null;
             return form.urlFor(EditCompensationCalculationAction.class);
         }
@@ -824,7 +819,7 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public class EditGateTreeAction extends SimpleViewAction<EditGateTreeForm>
+    public class EditGateTreeAction extends FlowAction<EditGateTreeForm>
     {
         public ModelAndView getView(EditGateTreeForm form, BindException errors) throws Exception
         {
@@ -847,8 +842,8 @@ public class ScriptController extends BaseFlowController
                 }
                 if (fSuccess)
                 {
-                    ScriptDocument doc = form.analysisScript.getAnalysisScriptDocument();
-                    fSuccess = saveAnalysisOrComp(form.analysisScript, doc, newAnalysis, errors);
+                    ScriptDocument doc = form.getFlowScript().getAnalysisScriptDocument();
+                    fSuccess = saveAnalysisOrComp(form.getFlowScript(), doc, newAnalysis, errors);
                 }
                 if (fSuccess)
                 {
@@ -859,10 +854,9 @@ public class ScriptController extends BaseFlowController
             return new JspView<EditGateTreeForm>(getPage("editGateTree.jsp", form), form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public String getPageTitle()
         {
-            root.addChild("Population Names Editor", new ActionURL(EditGateTreeAction.class, getContainer()));
-            return root;
+            return "Population Names Editor";
         }
 
 
@@ -910,7 +904,7 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public class CopyAction extends SimpleViewAction<CopyProtocolForm>
+    public class CopyAction extends FlowAction<CopyProtocolForm>
     {
         String scriptName;
 
@@ -923,14 +917,13 @@ public class ScriptController extends BaseFlowController
                     return HttpView.redirect(forward);
             }
 
-            scriptName = form.analysisScript.getName();
+            scriptName = form.getFlowScript().getName();
             return new JspView<CopyProtocolForm>(getPage("copy.jsp", form), form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public String getPageTitle()
         {
-            root.addChild("Make a copy of '" + scriptName + "'", new ActionURL(CopyAction.class, getContainer()));
-            return root;
+            return "Make a copy of '" + scriptName + "'";
         }
 
         protected void addChild(XmlObject parent, XmlObject child)
@@ -952,7 +945,7 @@ public class ScriptController extends BaseFlowController
                 errors.reject(ERROR_MSG, "There is already a protocol named '" + form.name + "'");
                 return null;
             }
-            ScriptDef src = form.analysisScript.getAnalysisScriptDocument().getScript();
+            ScriptDef src = form.getFlowScript().getAnalysisScriptDocument().getScript();
             ScriptDocument doc = ScriptDocument.Factory.newInstance();
             ScriptDef script = doc.addNewScript();
             addChild(script, src.getSettings());
@@ -970,28 +963,27 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public class EditPropertiesAction extends SimpleViewAction<EditPropertiesForm>
+    public class EditPropertiesAction extends FlowAction<EditPropertiesForm>
     {
         public ModelAndView getView(EditPropertiesForm form, BindException errors) throws Exception
         {
             if (isPost())
             {
-                ExpData protocol = form.analysisScript.getExpObject();
+                ExpData protocol = form.getFlowScript().getExpObject();
                 protocol.setComment(getUser(), form.ff_description);
                 return HttpView.redirect(form.urlFor(BeginAction.class));
             }
             return new JspView<EditPropertiesForm>(getPage("editProperties.jsp", form), form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public String getPageTitle()
         {
-            root.addChild("Edit Properties", new ActionURL(EditPropertiesAction.class, getContainer()));
-            return root;
+            return "Edit Properties";
         }
     }
 
     @RequiresPermissionClass(UpdatePermission.class)
-    public class EditSettingsAction extends SimpleViewAction<EditSettingsForm>
+    public class EditSettingsAction extends FlowAction<EditSettingsForm>
     {
         public ModelAndView getView(EditSettingsForm form, BindException errors) throws Exception
         {
@@ -1000,7 +992,7 @@ public class ScriptController extends BaseFlowController
                 ScriptDocument doc = form.analysisDocument;
                 if (updateSettingsMinValues(form, doc, errors) &&
                     updateSettingsFilter(form, doc) &&
-                    safeSetAnalysisScript(form.analysisScript, doc.toString(), errors))
+                    safeSetAnalysisScript(form.getFlowScript(), doc.toString(), errors))
                 {
                     return HttpView.redirect(form.urlFor(BeginAction.class));
                 }
@@ -1009,9 +1001,9 @@ public class ScriptController extends BaseFlowController
             return new JspView<EditSettingsForm>(getPage("editSettings.jsp", form), form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public String getPageTitle()
         {
-            return null;
+            return "Edit Settings";
         }
 
         protected boolean updateSettingsMinValues(EditSettingsForm form, ScriptDocument doc, BindException errors)
@@ -1096,34 +1088,30 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermissionClass(DeletePermission.class)
-    public class DeleteAction extends SimpleViewAction<EditScriptForm>
+    public class DeleteAction extends FlowAction<EditScriptForm>
     {
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
         {
             if (isPost())
             {
-                ExpData protocol = form.analysisScript.getExpObject();
+                ExpData protocol = form.getFlowScript().getExpObject();
                 protocol.delete(getUser());
                 return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
             }
             return new JspView<EditScriptForm>(getPage("delete.jsp", form), form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public String getPageTitle()
         {
-            root.addChild("Confirm Delete", new ActionURL(DeleteAction.class, getContainer()));
-            return root;
+            return "Confirm Delete";
         }
     }
 
     @RequiresPermissionClass(ReadPermission.class)
-    public class GateEditorAction extends SimpleViewAction<GateEditorForm>
+    public class GateEditorAction extends FlowAction<GateEditorForm>
     {
-        FlowObject object;
-
         public ModelAndView getView(GateEditorForm form, BindException errors) throws Exception
         {
-            object = form.getFlowObject();
             Map<String, String> props = new HashMap();
             int scriptId = form.getScriptId();
             if (scriptId != 0)
@@ -1149,9 +1137,9 @@ public class ScriptController extends BaseFlowController
             return new GWTView("org.labkey.flow.gateeditor.GateEditor", props);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public String getPageTitle()
         {
-            return appendFlowNavTrail(getPageConfig(), root, object, "Gate Editor");
+            return "Gate Editor";
         }
     }
 

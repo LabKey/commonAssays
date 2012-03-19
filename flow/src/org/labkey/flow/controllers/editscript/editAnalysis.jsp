@@ -25,7 +25,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% AnalysisForm bean = (AnalysisForm) form; %>
 <%Map<String, String> params = form.getParameters();
-    Collection<SubsetSpec> subsets = form.analysisScript.getSubsets();
+    Collection<SubsetSpec> subsets = form.getFlowScript().getSubsets();
 
 %>
 <labkey:errors/>
