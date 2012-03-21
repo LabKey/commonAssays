@@ -241,13 +241,16 @@
                                                 <property name="switchName" value="nb"/>
                                                 <property name="help" value="No base averagine models will be used, only modified."/>
                                             </bean>
-                                            <!-- takes two args, ex. -res arg(=100000) arg(=FTICR)
-                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueToSwitch">
                                                 <property name="parameter" value="hardklor, resolution"/>
                                                 <property name="switchName" value="res"/>
                                                 <property name="help" value="Resolution of observed spectra at m/z 400 for a particular instrument. Default 100000 FTICR."/>
                                             </bean>
-                                            -->
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueToMultiCommandArgs">
+                                                <property name="parameter" value="hardklor, resolution"/>
+                                                <property name="delimiter" value=" "/>
+                                                <property name="help" value="Resolution of observed spectra at m/z 400 for a particular instrument. Default 100000 FTICR."/>
+                                            </bean>
                                             <!-- can take > 1 arg, ex. -sc arg [arg]
                                             <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
                                                 <property name="parameter" value="hardklor, scan number"/>
@@ -350,6 +353,21 @@
                                             <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
                                                 <property name="switchName" value="p"/>
                                                 <property name="value" value="5" />
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
+                                                <property name="parameter" value="bullseye, exact match precursor"/>
+                                                <property name="switchName" value="e"/>
+                                                <property name="help" value="Use exact match to precursor ion. Rather than use wide precursor boundaries, this flag forces Bullseye to match precursors to the base isotope peak identified in Hardklor. The tolerance is set with the -p flag."/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="bullseye, persistent peptides tolerance"/>
+                                                <property name="switchName" value="r"/>
+                                                <property name="help" value="Sets the tolerance (+/- ppm) for finding persistent peptides. Default value: 5"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                                                <property name="parameter" value="bullseye, retention time tolerance"/>
+                                                <property name="switchName" value="t"/>
+                                                <property name="help" value="Sets the tolerance (+/- minutes) around the retention time over which a peptide can be matched to the MS/MS spectrum. Default value: 0.5"/>
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.PathInLine">
                                                 <property name="key" value="hk" />
