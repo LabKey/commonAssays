@@ -249,8 +249,8 @@ run.data$Flag_5pl = NA;
 # determine if the curve fits should be done with or without log transform
 curveFitLogTransform = TRUE;
 if (any(run.props$name == "CurveFitLogTransform")) {
-    curveFitLogTransform = getRunPropertyValue(run.props, "CurveFitLogTransform");
-    if (curveFitLogTransform == "1") curveFitLogTransform = TRUE else curveFitLogTransform = FALSE;
+    propVal = getRunPropertyValue(run.props, "CurveFitLogTransform");
+    if (!is.na(propVal) & propVal != "1") curveFitLogTransform = FALSE;
 }
 
 # loop through the possible titrations and to see if it is a standard, qc control, or titrated unknown
