@@ -1663,7 +1663,7 @@ public class FlowSchema extends UserSchema
             ICSMetadata ics = _protocol.getICSMetadata();
 
             // BACKGROUND            
-            FlowDataTable bg = (FlowDataTable)detach().getTable(FlowTableType.FCSAnalyses.toString());
+            FlowDataTable bg = (FlowDataTable)detach().createTable(FlowTableType.FCSAnalyses.toString());
             bg.addObjectIdColumn("objectid");
             Set<FieldKey> allColumns = new TreeSet<FieldKey>(ics.getMatchColumns());
             for (FilterInfo f : ics.getBackgroundFilter())
@@ -1695,7 +1695,7 @@ public class FlowSchema extends UserSchema
             }
 
             // FOREGROUND
-            FlowDataTable fg = (FlowDataTable)detach().getTable(FlowTableType.FCSAnalyses.toString());
+            FlowDataTable fg = (FlowDataTable)detach().createTable(FlowTableType.FCSAnalyses.toString());
             fg.addObjectIdColumn("objectid");
             Set<FieldKey> setMatchColumns = new HashSet<FieldKey>(ics.getMatchColumns());
             Map<FieldKey,ColumnInfo> fgMap = QueryService.get().getColumns(fg, setMatchColumns);
