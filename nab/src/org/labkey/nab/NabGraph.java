@@ -20,10 +20,12 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogarithmicAxis;
+import org.jfree.chart.labels.StandardXYSeriesLabelGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.labkey.api.assay.dilution.DilutionCurve;
@@ -240,6 +242,19 @@ public class NabGraph
         plot.getRenderer(0).setSeriesVisibleInLegend(false);
         pointRenderer.setShapesFilled(true);
 
+        // Issue 14405: NAb graphs cannot display if same ptid/visit used for more than one sample
+        // XYSeriesCollection doesn't allow multiple series to have the same key
+        // so we give them unique IDs then use the series description as the legend label.
+        plot.getRenderer(1).setLegendItemLabelGenerator(new StandardXYSeriesLabelGenerator() {
+            @Override
+            public String generateLabel(XYDataset dataset, int series)
+            {
+                XYSeriesCollection collection = (XYSeriesCollection)dataset;
+                XYSeries xySeries = collection.getSeries(series);
+                return xySeries.getDescription();
+            }
+        });
+
         int count = 0;
         for (Pair<String, DilutionSummary> summaryEntry : dilutionSummaries)
         {
@@ -252,7 +267,8 @@ public class NabGraph
 
             String sampleId = summaryEntry.getKey();
             DilutionSummary summary = summaryEntry.getValue();
-            XYSeries pointSeries = new XYSeries(sampleId);
+            XYSeries pointSeries = new XYSeries(sampleId + ", point" + count);
+            pointSeries.setDescription(sampleId);
             for (WellData well : summary.getWellData())
             {
                 double percentage = 100 * summary.getPercent(well);
@@ -273,7 +289,7 @@ public class NabGraph
             try
             {
                 DilutionCurve.DoublePoint[] curve = summary.getCurve();
-                XYSeries curvedSeries = new XYSeries(sampleId);
+                XYSeries curvedSeries = new XYSeries(sampleId + ", curved" + count);
                 for (DilutionCurve.DoublePoint point : curve)
                     curvedSeries.add(point.getX(), point.getY());
                 curvesDataset.addSeries(curvedSeries);
