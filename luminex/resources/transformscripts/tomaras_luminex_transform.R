@@ -22,10 +22,10 @@
 # CHANGES :
 #  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
 #  - 2.2.20120217 : Issue 14070: Value out of range error when importing curve fit parameters for titrated unknown with flat dilution curve
-#  - 3.0.20120315 : Changes for LabKey server 12.1
+#  - 3.0.20120323 : Changes for LabKey server 12.1
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "3.0.20120315";
+transformVersion = "3.0.20120323";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -369,8 +369,14 @@ if (nrow(titration.data) > 0)
                 } else if (fitTypes[typeIndex] == "5pl")
                 {
                     tryCatch({
-                            if (curveFitLogTransform) formula = log(fi)~dose else formula = fi~dose;
-                            fit = fit.drc(formula, data=dat, force.fit=TRUE, fit.4pl=FALSE);
+                            if (curveFitLogTransform) {
+                                formula = log(fi)~dose
+                                weighting = FALSE
+                            } else {
+                                formula = fi~dose
+                                weighting = TRUE
+                            }
+                            fit = fit.drc(formula, data=dat, weighting=weighting, force.fit=TRUE, fit.4pl=FALSE);
                             run.data[runDataIndex,]$Slope_5pl = maxValueConversion(as.numeric(coef(fit))[1]);
                             run.data[runDataIndex,]$Lower_5pl = maxValueConversion(as.numeric(coef(fit))[2]);
                             run.data[runDataIndex,]$Upper_5pl = maxValueConversion(as.numeric(coef(fit))[3]);
