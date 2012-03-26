@@ -97,7 +97,7 @@
             return true;
         }
     </script>
-    Statistics from the FlowJo workspace will be imported and no graphs won't be generated.<br>
+    Statistics from the FlowJo workspace will be imported but no graphs will be generated.<br>
     <em>NOTE:</em> Choosing this option will advance past the analysis engine step.
 </div>
 <%
