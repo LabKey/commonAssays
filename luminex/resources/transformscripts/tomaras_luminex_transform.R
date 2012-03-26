@@ -615,7 +615,7 @@ if (any(dat$isStandard) & length(standards) > 0)
 
             # call the rumi function to calculate new estimated log concentrations using 5PL for the unknowns
             mypdf(file=paste(stndVal, "5PL", sep="_"), mfrow=c(2,2));
-            fits = rumi(standard.dat, force.fit=TRUE, log.transform=curveFitLogTransform, verbose=TRUE);
+            fits = rumi(standard.dat, force.fit=TRUE, log.transform=curveFitLogTransform, plot.se.profile=curveFitLogTransform, verbose=TRUE);
             fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
             dev.off();
 
@@ -650,7 +650,7 @@ if (any(dat$isStandard) & length(standards) > 0)
 
             # call the rumi function to calculate new estimated log concentrations using 4PL for the unknowns
             mypdf(file=paste(stndVal, "4PL", sep="_"), mfrow=c(2,2));
-            fits = rumi(standard.dat, fit.4pl=TRUE, force.fit=TRUE, log.transform=curveFitLogTransform, verbose=TRUE);
+            fits = rumi(standard.dat, fit.4pl=TRUE, force.fit=TRUE, log.transform=curveFitLogTransform, plot.se.profile=curveFitLogTransform, verbose=TRUE);
             fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
             dev.off();
 
