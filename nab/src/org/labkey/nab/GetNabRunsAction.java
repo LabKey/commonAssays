@@ -30,13 +30,13 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.DataView;
+import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
 
 import java.io.IOException;
@@ -184,7 +184,7 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
     public ApiResponse execute(GetNabRunsForm form, BindException errors) throws Exception
     {
         if (form.getAssayName() == null)
-            throw new RuntimeException("Assay name is a required parameter.");
+            throw new IllegalArgumentException("Assay name is a required parameter.");
         final Map<String, Object> _properties = new HashMap<String, Object>();
         List<NabRunPropertyMap> runList = new ArrayList<NabRunPropertyMap>();
         _properties.put("runs", runList);
@@ -197,10 +197,10 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
                 protocol = possibleProtocol;
         }
         if (protocol == null)
-            throw new RuntimeException("Assay " + form.getAssayName() + " was not found in current folder or project folder.");
+            throw new NotFoundException("Assay " + form.getAssayName() + " was not found in current folder or project folder.");
         AssayProvider provider = AssayService.get().getProvider(protocol);
         if (!(provider instanceof NabAssayProvider))
-            throw new RuntimeException("Assay " + form.getAssayName() + " is not a NAb assay: it is of type " + provider.getName());
+            throw new IllegalArgumentException("Assay " + form.getAssayName() + " is not a NAb assay: it is of type " + provider.getName());
 
         String tableName = AssayService.get().getRunsTableName(protocol);
 
