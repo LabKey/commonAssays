@@ -60,7 +60,7 @@ public class ProteinStringExpression implements StringExpression, Cloneable
     }
 
     @Override
-    protected ProteinStringExpression clone()
+    public ProteinStringExpression clone()
     {
         try
         {
