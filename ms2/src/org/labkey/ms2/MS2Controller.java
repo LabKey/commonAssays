@@ -723,7 +723,7 @@ public class MS2Controller extends SpringActionController
         }
 
         StringBuilder onClick = new StringBuilder("showHelpDiv(this, 'Modifications', '");
-        StringBuilder html = new StringBuilder();
+        StringBuilder html = new StringBuilder("<table>");
 
         if (0 == (var.size() + fixed.size()))
             html.append("<tr><td colspan=2><b>None</b></td></tr>");
@@ -759,9 +759,10 @@ public class MS2Controller extends SpringActionController
             }
         }
 
+        html.append("</table>");
         onClick.append(PageFlowUtil.filter(html.toString()).replace("'", "\\'"));
 
-        onClick.append("'); return false;");
+        onClick.append("', 100); return false;");
 
         return PageFlowUtil.textLink("Show Modifications", (ActionURL)null, onClick.toString(), "modificationsLink");
     }
