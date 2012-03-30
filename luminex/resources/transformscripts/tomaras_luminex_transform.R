@@ -695,8 +695,8 @@ calc.positivity = getRunPropertyValue(run.props, "CalculatePositivity");
 base.visit = getRunPropertyValue(run.props, "BaseVisit");
 fold.change = getRunPropertyValue(run.props, "PositivityFoldChange");
 
-# if all run props are specified and calc positivity is true, continue
-if (!is.na(calc.positivity) & !is.na(base.visit) & !is.na(fold.change) & calc.positivity == "1")
+# if calc positivity is true, continue
+if (!is.na(calc.positivity) & calc.positivity == "1")
 {
     analytePtids = subset(run.data, select=c("name", "participantID")); # note: analyte variable column name is "name"
     analytePtids = unique(analytePtids[!is.na(run.data$participantID),]);
@@ -723,8 +723,14 @@ if (!is.na(calc.positivity) & !is.na(base.visit) & !is.na(fold.change) & calc.po
                 {
                     visits.dat = subset(run.data, name == analytePtids$name[index] & participantID == analytePtids$participantID[index] & !is.na(visitID), select=c("name", "participantID", "visitID"));
                     visits.fi.agg = aggregate(fi.dat, by = list(analyte=visits.dat$name, ptid=visits.dat$participantID, visit=visits.dat$visitID), FUN = mean);
-                    if (any(compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)))
+                    if (!is.na(base.visit) & any(compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)))
                     {
+                        # if there is a baseline visit supplied, make sure the fold change is not null as well
+                        if (is.na(fold.change))
+                        {
+                            stop("No value provided for 'Positivity Fold Change'.");
+                        }
+
                         baseVisitFiBkgd = fiConversion(visits.fi.agg$fiBackground[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)]);
                         baseVisitFiBkgdBlank = fiConversion(visits.fi.agg$fiBackgroundBlank[compareNumbersForEquality(visits.fi.agg$visit, base.visit, 1e-10)]);
                         if (!is.na(baseVisitFiBkgd) & !is.na(baseVisitFiBkgdBlank))
