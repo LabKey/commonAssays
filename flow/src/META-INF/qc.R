@@ -215,6 +215,6 @@ PRINT <- data.frame(
     well=D$well,
     well.href=D$well.href
 )
-PRINT[D$statistic] = format(D$value,digits=2)
+PRINT$value <- format(D$value,digits=2)
 PRINT <- PRINT[order(D$value),]
 write.table(PRINT, file = "${tsvout:tsvfile}", sep = "\t", qmethod = "double", col.names=NA)

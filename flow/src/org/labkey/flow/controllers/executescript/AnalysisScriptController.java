@@ -37,6 +37,7 @@ import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.Analysis;
+import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.PCWorkspace;
 import org.labkey.flow.analysis.model.Workspace;
@@ -868,6 +869,9 @@ public class AnalysisScriptController extends BaseFlowController
                 for (String param : params)
                 {
                     param = StringUtils.trim(param);
+                    if (param.startsWith(CompensationMatrix.PREFIX) && param.endsWith(CompensationMatrix.SUFFIX))
+                        param = param.substring(1, param.length()-1);
+
                     int index = ArrayUtils.indexOf(parameters, param);
                     if (index == -1)
                     {

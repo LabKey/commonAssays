@@ -43,6 +43,7 @@
 <%@ page import="org.labkey.flow.analysis.web.SubsetSpec" %>
 <%@ page import="org.labkey.flow.analysis.model.SubsetExpressionGate" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.flow.analysis.model.CompensationMatrix" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -297,10 +298,14 @@ if (protocol != null)
         for (String param : workspace.getParameters())
         {
             if (KeywordUtil.isColorChannel(param))
-                jsonParams.put(new String[]{param, param});
+            {
+                String compensated = CompensationMatrix.isParamCompensated(param) ? param :
+                        (CompensationMatrix.PREFIX + param + CompensationMatrix.SUFFIX);
+                jsonParams.put(new String[]{compensated, compensated});
+            }
         }
     %>
-    <label for="rEngineNormalizationParameters">Select parameters to be normalized.  At least one parameter must be selected.</label>
+    <label for="rEngineNormalizationParameters">Select the compensated parameters to be normalized.  At least one parameter must be selected.</label>
     <div id="rEngineNormalizationParametersDiv"></div>
     <script>
         LABKEY.requiresScript('Ext.ux.form.LovCombo.js');

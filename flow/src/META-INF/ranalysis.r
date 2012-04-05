@@ -23,25 +23,19 @@
 # normalization-subsets: ${normalization-subsets}
 # normalization-parameters: ${normalization-parameters}
 
-NCDF<-FALSE
 USEMPI<-FALSE
-USEMULTICORE<-FALSE
 if(USEMPI){
     require(Rmpi)
 }
-if (NCDF) {
-    require(ncdfFlow)
-}
-if(USEMULTICORE){
-    require(multicore)
-}
+NCDF<-require(ncdfFlow)
+USEMULTICORE<-require(multicore)
 
 # for md5sum
-require(tools)
+library(tools)
 
-require(hexbin)
-require(flowStats)
-require(flowWorkspace)
+library(hexbin)
+library(flowStats)
+library(flowWorkspace)
 
 
 # Some hard-coded variables that should be passed in by the calling process.
@@ -94,8 +88,9 @@ cat("finished exporting analysis.\n")
 
 # perform normalization if requested
 if (${perform-normalization}) {
-    excludedGates <- flowWorkspace:::.includedGate2ExcludedGate(G, ${normalization-subsets})
-    cat("subsets selected for normalization:", ${normalization-subsets}, "\n")
+    includedGates <- paste("/", ${normalization-subsets}, sep="")
+    excludedGates <- flowWorkspace:::.includedGate2ExcludedGate(G, includedGates)
+    cat("subsets selected for normalization:", includedGates, "\n")
     cat("... excluded internal gate ids:", excludedGates, "\n")
 
     excludedDims <- flowWorkspace:::.includedChannel2ExcludedChannel(G, ${normalization-parameters})
