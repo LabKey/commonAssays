@@ -42,7 +42,7 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
     public static final String ANTIGEN_DATA_PROP_NAME = "antigenData";
 
     @Override
-    public File createValidationRunInfo(AssayRunUploadContext context, ExpRun run, File scriptDir) throws Exception
+    public File createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, File scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
     {
         ElispotRunUploadForm form = (ElispotRunUploadForm)context;
 
@@ -55,7 +55,7 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
         addSampleProperties(SAMPLE_DATA_PROP_NAME, GROUP_COLUMN_NAME, form.getSampleProperties(), template, WellGroup.Type.SPECIMEN);
         addSampleProperties(ANTIGEN_DATA_PROP_NAME, GROUP_COLUMN_NAME, form.getAntigenProperties(), template, WellGroup.Type.ANTIGEN);
 
-        return super.createValidationRunInfo(context, run, scriptDir);
+        return super.createTransformationRunInfo(context, run, scriptDir, runProperties, batchProperties);
     }
 
     @Override

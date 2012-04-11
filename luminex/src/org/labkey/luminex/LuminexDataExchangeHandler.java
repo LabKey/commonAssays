@@ -21,6 +21,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TsvDataExchangeHandler;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 
 import java.io.File;
@@ -39,7 +40,7 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
     public static final String TITRATION_DATA_PROP_NAME = "titrationData";
 
     @Override
-    public File createValidationRunInfo(AssayRunUploadContext context, ExpRun run, File scriptDir) throws Exception
+    public File createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, File scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
     {
         LuminexRunContext form = (LuminexRunContext)context;
         List<Map<String, Object>> analytes = new ArrayList<Map<String, Object>>();
@@ -76,6 +77,6 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
         }
         addSampleProperties(TITRATION_DATA_PROP_NAME, titrations);
 
-        return super.createValidationRunInfo(context, run, scriptDir);
+        return super.createTransformationRunInfo(context, run, scriptDir, runProperties, batchProperties);
     }
 }

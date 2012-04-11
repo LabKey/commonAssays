@@ -17,7 +17,6 @@ package org.labkey.luminex;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
@@ -49,7 +48,7 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
     }
 
     @Override
-    public ExpExperiment saveExperimentRun(AssayRunUploadContext uploadContext, @Nullable ExpExperiment batch, ExpRun run, boolean forceSaveBatchProps) throws ExperimentException, ValidationException
+    public ExpExperiment saveExperimentRun(AssayRunUploadContext<LuminexAssayProvider> uploadContext, @Nullable ExpExperiment batch, ExpRun run, boolean forceSaveBatchProps) throws ExperimentException, ValidationException
     {
         LuminexRunContext context = (LuminexRunContext)uploadContext;
 

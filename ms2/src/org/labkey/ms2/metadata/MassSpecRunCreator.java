@@ -50,7 +50,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
     }
 
     @Override
-    public ExpExperiment saveExperimentRun(AssayRunUploadContext context, ExpExperiment batch, ExpRun run, boolean forceSaveBatchProps) throws ExperimentException, ValidationException
+    public ExpExperiment saveExperimentRun(AssayRunUploadContext<MassSpecMetadataAssayProvider> context, ExpExperiment batch, ExpRun run, boolean forceSaveBatchProps) throws ExperimentException, ValidationException
     {
         MassSpecMetadataAssayForm form = (MassSpecMetadataAssayForm)context;
         if (form.isFractions())
