@@ -96,7 +96,7 @@ public class LuminexWell implements WellData, Comparable<LuminexWell>
     public double getMax()
     {
         Double result = getValue();
-        return result == null ? Double.MIN_VALUE : result.doubleValue();
+        return result == null ? Double.NEGATIVE_INFINITY : result.doubleValue();
     }
 
     @Override

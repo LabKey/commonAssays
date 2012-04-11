@@ -58,11 +58,8 @@ public class FlowProtocolImplementation extends ProtocolImplementation
         sql.append("    d.sourceapplicationid IS NULL AND\n");
         sql.append("    d.runid IS NULL AND\n");
         sql.append("    (d.lsid LIKE 'urn:lsid:%:Flow-%' OR d.lsid LIKE 'urn:lsid:%:Data.Folder-%') AND\n");
-        sql.append("    d.rowid NOT IN (\n");
-        sql.append("      SELECT dataid FROM exp.datainput\n");
-        sql.append("      UNION\n");
-        sql.append("      SELECT dataid FROM flow.object\n");
-        sql.append("    )\n");
+        sql.append("    NOT EXISTS (SELECT di.dataid FROM exp.datainput di WHERE di.dataid = d.rowid) AND\n");
+        sql.append("    NOT EXISTS (SELECT fo.dataid FROM flow.object fo WHERE fo.dataid = d.rowid AND fo.container = ?)\n").add(container.getId());
         sql.append(")\n");
 
         Table.execute(ExperimentService.get().getSchema(), sql);

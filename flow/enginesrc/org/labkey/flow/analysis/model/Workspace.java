@@ -104,7 +104,7 @@ public abstract class Workspace implements Serializable
             }
         }
 
-        if (name != null && name.endsWith(".wsp") || name.endsWith(".WSP"))
+        if (name != null && (name.endsWith(".wsp") || name.endsWith(".WSP")))
         {
             return new PCWorkspace(name, elDoc);
         }
