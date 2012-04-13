@@ -23,12 +23,14 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.TsvDataExchangeHandler;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunUploadContext;
+import org.labkey.api.util.Pair;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: klum
@@ -40,7 +42,7 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
     public static final String TITRATION_DATA_PROP_NAME = "titrationData";
 
     @Override
-    public File createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, File scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
+    public Pair<File, Set<File>> createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, File scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
     {
         LuminexRunContext form = (LuminexRunContext)context;
         List<Map<String, Object>> analytes = new ArrayList<Map<String, Object>>();

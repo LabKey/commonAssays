@@ -27,10 +27,12 @@ import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ViewContext;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: klum
@@ -40,7 +42,7 @@ import java.util.Map;
 public class NabDataExchangeHandler extends PlateBasedDataExchangeHandler
 {
     @Override
-    public File createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, File scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
+    public Pair<File, Set<File>> createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, File scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
     {
         NabRunUploadForm form = (NabRunUploadForm)context;
 
