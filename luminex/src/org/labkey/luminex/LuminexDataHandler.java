@@ -117,7 +117,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // the Excel files, so we get a cached parser, which has the data for all of the files.
         if (!parser.isImported())
         {
-            importData(data, expRun, info.getUser(), log, parser.getSheets(), parser, form);
+            importData(data, expRun, info.getUser(), log, parser.getSheets(), parser, form, true);
             parser.setImported(true);
         }
     }
@@ -219,7 +219,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     /**
      * Handles persisting of uploaded run data into the database
      */
-    private void importData(ExpData data, ExpRun expRun, User user, @NotNull Logger log, Map<Analyte, List<LuminexDataRow>> sheets, LuminexExcelParser parser, LuminexRunContext form) throws ExperimentException
+    private void importData(ExpData data, ExpRun expRun, User user, @NotNull Logger log, Map<Analyte, List<LuminexDataRow>> sheets, LuminexExcelParser parser, LuminexRunContext form, boolean parseDescription) throws ExperimentException
     {
         try
         {
@@ -354,7 +354,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 for (LuminexDataRow dataRow : dataRows)
                 {
-                    handleParticipantResolver(dataRow, resolver, inputMaterials);
+                    handleParticipantResolver(dataRow, resolver, inputMaterials, parseDescription);
                     dataRow.setProtocol(protocol.getRowId());
                     dataRow.setContainer(expRun.getContainer());
                     Titration titration = titrations.get(dataRow.getDescription());
@@ -1598,75 +1598,91 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    protected void handleParticipantResolver(LuminexDataRow dataRow, ParticipantVisitResolver resolver, Set<ExpMaterial> materialInputs)
+    protected void handleParticipantResolver(LuminexDataRow dataRow, ParticipantVisitResolver resolver, Set<ExpMaterial> materialInputs, boolean parseDescription)
     {
-        String value = dataRow.getDescription();
-        if (resolver != null && value != null)
+        if (resolver == null)
         {
-            value = value.trim();
-            String specimenID = null;
-            if (value.indexOf(",") == -1)
+            return;
+        }
+        ParticipantVisit match = null;
+        if (parseDescription)
+        {
+            String value = dataRow.getDescription();
+            if (value != null)
             {
-                specimenID = value;
-            }
-            // First try resolving the whole description column as a specimen id
-            ParticipantVisit match = resolver.resolve(specimenID, null, null, null, null);
-            String extraSpecimenInfo = null;
-            if (!isResolved(match))
-            {
-                // If that doesn't work, check if we have a specimen ID followed by a : or ; and possibly other text
-                int index = value.indexOf(';');
-                if (index == -1)
+                value = value.trim();
+                String specimenID = null;
+                if (value.indexOf(",") == -1)
                 {
-                    // No ';', might have a ':'
-                    index = value.indexOf(':');
+                    specimenID = value;
                 }
-                else
-                {
-                    int index2 = value.indexOf(':');
-                    if (index2 != -1)
-                    {
-                        // We have both, use the first one
-                        index = Math.min(index, index2);
-                    }
-                }
-
-                if (index != -1)
-                {
-                    specimenID = value.substring(0, index);
-                    match = resolver.resolve(specimenID, null, null, null, null);
-                }
-
-                // If that doesn't work either, try to parse as "<PTID>, Visit <VisitNumber>, <Date>, <ExtraInfo>"
+                // First try resolving the whole description column as a specimen id
+                match = resolver.resolve(specimenID, null, null, null, null);
+                String extraSpecimenInfo = null;
                 if (!isResolved(match))
                 {
-                    String valueToSplit = index == -1 ? value : value.substring(index + 1);
-                    String[] parts = valueToSplit.split(",");
-                    if (parts.length >= 3)
+                    // If that doesn't work, check if we have a specimen ID followed by a : or ; and possibly other text
+                    int index = value.indexOf(';');
+                    if (index == -1)
                     {
-                        match = resolveParticipantVisitInfo(resolver, specimenID, parts);
-
-                        StringBuilder sb = new StringBuilder();
-                        String separator = "";
-                        for (int i = 3; i < parts.length; i++)
+                        // No ';', might have a ':'
+                        index = value.indexOf(':');
+                    }
+                    else
+                    {
+                        int index2 = value.indexOf(':');
+                        if (index2 != -1)
                         {
-                            sb.append(separator);
-                            separator = ", ";
-                            sb.append(parts[i].trim());
+                            // We have both, use the first one
+                            index = Math.min(index, index2);
                         }
-                        if (sb.length() > 0)
+                    }
+
+                    if (index != -1)
+                    {
+                        specimenID = value.substring(0, index);
+                        match = resolver.resolve(specimenID, null, null, null, null);
+                    }
+
+                    // If that doesn't work either, try to parse as "<PTID>, Visit <VisitNumber>, <Date>, <ExtraInfo>"
+                    if (!isResolved(match))
+                    {
+                        String valueToSplit = index == -1 ? value : value.substring(index + 1);
+                        String[] parts = valueToSplit.split(",");
+                        if (parts.length >= 3)
                         {
-                            extraSpecimenInfo = sb.toString();
+                            match = resolveParticipantVisitInfo(resolver, specimenID, parts);
+
+                            StringBuilder sb = new StringBuilder();
+                            String separator = "";
+                            for (int i = 3; i < parts.length; i++)
+                            {
+                                sb.append(separator);
+                                separator = ", ";
+                                sb.append(parts[i].trim());
+                            }
+                            if (sb.length() > 0)
+                            {
+                                extraSpecimenInfo = sb.toString();
+                            }
                         }
                     }
                 }
-            }
 
-            dataRow.setParticipantID(match.getParticipantID());
-            dataRow.setVisitID(match.getVisitID());
-            dataRow.setDate(match.getDate());
-            dataRow.setSpecimenID(specimenID);
-            dataRow.setExtraSpecimenInfo(extraSpecimenInfo == null ? null : extraSpecimenInfo.trim());
+                dataRow.setParticipantID(match.getParticipantID());
+                dataRow.setVisitID(match.getVisitID());
+                dataRow.setDate(match.getDate());
+                dataRow.setSpecimenID(specimenID);
+                dataRow.setExtraSpecimenInfo(extraSpecimenInfo == null ? null : extraSpecimenInfo.trim());
+            }
+        }
+        else
+        {
+            match = resolver.resolve(dataRow.getSpecimenID(), dataRow.getParticipantID(), dataRow.getVisitID(), dataRow.getDate(), null);
+        }
+
+        if (match != null)
+        {
             materialInputs.add(match.getMaterial());
         }
     }
@@ -1836,7 +1852,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             for (LuminexDataRow dataRow : entry.getValue())
             {
-                handleParticipantResolver(dataRow, resolver, new LinkedHashSet<ExpMaterial>());
+                handleParticipantResolver(dataRow, resolver, new LinkedHashSet<ExpMaterial>(), true);
                 Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
                 dataMap.put("titration", dataRow.getDescription() != null && titrations.contains(dataRow.getDescription()));
                 dataMap.remove("data");
@@ -1933,7 +1949,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         LuminexRunContext form = (LuminexRunContext)context;
-        importData(data, run, context.getUser(), Logger.getLogger(LuminexDataHandler.class), sheets, form.getParser(), form);
+        importData(data, run, context.getUser(), Logger.getLogger(LuminexDataHandler.class), sheets, form.getParser(), form, false);
     }
 
     public Priority getPriority(ExpData data)
