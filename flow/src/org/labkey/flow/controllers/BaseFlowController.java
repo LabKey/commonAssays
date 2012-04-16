@@ -23,7 +23,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.jsp.JspLoader;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.User;
