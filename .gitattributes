@@ -656,6 +656,7 @@ luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-9.12-9.13.sql -te
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-9.30-10.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-9.30-9.31.sql -text
 luminex/resources/schemas/luminex.xml -text
+luminex/resources/transformscripts/description_parsing_example.pl -text
 luminex/resources/transformscripts/tomaras_luminex_transform.R -text
 luminex/resources/transformscripts/youtil.R -text
 luminex/src/org/labkey/luminex/AbstractCurveFitPivotTable.java -text
