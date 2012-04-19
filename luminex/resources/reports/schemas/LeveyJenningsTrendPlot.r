@@ -169,7 +169,11 @@ for (typeIndex in 1:length(plotTypes))
 	  tckFactor = ceiling(xmax/30);
 	  # setup the tick marks and labels based on the scaling factor
 	  xtcks = seq(1, xmax, by = tckFactor);
-	  xlabels = as.character(dat$titration_run_notebookno[xtcks]);
+	  if ("titration_run_notebookno" %in% colnames(dat)) {
+	    xlabels = as.character(dat$titration_run_notebookno[xtcks])
+      } else {
+        xlabels = rep(NA, length(xtcks));
+      }
 
 	  # set the point colors, giving each unique lot numer (if more than one) a different color
 	  dat$ptcolor = 1;

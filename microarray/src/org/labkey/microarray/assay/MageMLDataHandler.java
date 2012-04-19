@@ -92,7 +92,9 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler implements Tr
         {
             // Return a single, empty row of results so that we get an entry in the results table and can copy it to
             // a study, which is useful because it propagates the run and batch properties
-            return Collections.<DataType, List<Map<String, Object>>>singletonMap(MicroarrayModule.MAGE_ML_INPUT_TYPE, Collections.singletonList((Map<String, Object>)new HashMap<String, Object>()));
+            List<Map<String, Object>> dataRows = new ArrayList<Map<String, Object>>(1);
+            dataRows.add(new HashMap<String, Object>());
+            return Collections.<DataType, List<Map<String, Object>>>singletonMap(MicroarrayModule.MAGE_ML_INPUT_TYPE, dataRows);
         }
         FileInputStream fIn = null;
         try
