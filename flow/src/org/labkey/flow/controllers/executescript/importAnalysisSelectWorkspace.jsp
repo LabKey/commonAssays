@@ -91,11 +91,11 @@
         {
             Ext.QuickTips.init();
 
-            fileSystem = new LABKEY.WebdavFileSystem({
+            fileSystem = new LABKEY.FileSystem.WebdavFileSystem({
                 baseUrl:<%=q(pipeRoot.getWebdavURL())%>,
                 rootName:<%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>});
 
-            fileBrowser = new LABKEY.FileBrowser({
+            fileBrowser = new LABKEY.ext.FileBrowser({
                 fileSystem:fileSystem
                 ,helpEl:null
                 ,showAddressBar:false
