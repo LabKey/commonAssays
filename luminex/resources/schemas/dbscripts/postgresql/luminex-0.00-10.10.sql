@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* luminex-0.00-9.20.sql */
-
 CREATE SCHEMA luminex;
 
 CREATE TABLE luminex.Analyte
@@ -74,6 +72,7 @@ CREATE TABLE luminex.DataRow
     SpecimenID VARCHAR(50),
     Container UniqueIdentifier NOT NULL,
     ProtocolID INT NOT NULL,
+    BeadCount INT,
 
     CONSTRAINT PK_Luminex_DataRow PRIMARY KEY (RowId),
     CONSTRAINT FK_LuminexDataRow_DataId FOREIGN KEY (DataId) REFERENCES exp.Data(RowId),
@@ -84,7 +83,3 @@ CREATE TABLE luminex.DataRow
 CREATE INDEX IX_LuminexDataRow_DataId ON luminex.DataRow (DataId);
 CREATE INDEX IX_LuminexDataRow_AnalyteId ON luminex.DataRow (AnalyteId);
 CREATE INDEX IDX_DataRow_Container_ProtocolID ON luminex.datarow(Container, ProtocolID);
-
-/* luminex-9.30-10.10.sql */
-
-ALTER TABLE luminex.datarow ADD COLUMN BeadCount INT;
