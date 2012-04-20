@@ -210,7 +210,7 @@
                 ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".fcs") || endsWith(data.name,".facs")|| endsWith(data.name, ".lmd"); }}
             });
 
-            fileBrowser.on(BROWSER_EVENTS.doubleclick, function(record){
+            fileBrowser.on(LABKEY.FileSystem.BROWSER_EVENTS.doubleclick, function(record){
                 if (!record || !record.data.file)
                     return;
                 var path = fileSystem.parentPath(record.data.path);
@@ -218,7 +218,7 @@
                 document.forms["importAnalysis"].submit();
                 return true;
             });
-            fileBrowser.on(BROWSER_EVENTS.selectionchange, function(record){
+            fileBrowser.on(LABKEY.FileSystem.BROWSER_EVENTS.selectionchange, function(record){
                 var path = null;
                 if (record)
                 {
