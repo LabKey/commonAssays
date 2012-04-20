@@ -563,7 +563,6 @@ luminex/resources/schemas/dbscripts/postgresql/luminex-10.30-11.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.10-11.20.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.20-11.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.30-12.10.sql -text
-luminex/resources/schemas/dbscripts/postgresql/luminex-11.31-11.33.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.31-12.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-11.32-11.33.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-0.00-2.20.sql -text
@@ -593,6 +592,7 @@ luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-11.254-11.255.sq
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-11.30-11.31.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-11.30-11.33.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-11.31-11.32.sql -text
+luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-11.31-11.33.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-2.20-2.21.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-2.20-2.30.sql -text
 luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-2.21-2.22.sql -text
@@ -612,7 +612,6 @@ luminex/resources/schemas/dbscripts/sqlserver/luminex-10.30-11.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.10-11.20.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.20-11.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.30-12.10.sql -text
-luminex/resources/schemas/dbscripts/sqlserver/luminex-11.31-11.33.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.31-12.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-11.32-11.33.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-2.20.sql -text
@@ -643,6 +642,7 @@ luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-11.254-11.255.sql
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-11.30-11.31.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-11.30-11.33.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-11.31-11.32.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-11.31-11.33.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-2.20-2.21.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-2.20-2.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-2.21-2.22.sql -text
