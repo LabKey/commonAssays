@@ -155,7 +155,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                 return result;
             }
         };
-        fk.addJoin(getColumn("Titration"), "TitrationId");
+        fk.addJoin(FieldKey.fromParts("Titration"), "TitrationId");
         return fk;
     }
 
