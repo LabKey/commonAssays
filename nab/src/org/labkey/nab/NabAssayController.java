@@ -232,7 +232,7 @@ public class NabAssayController extends SpringActionController
             clearButton.setDisplayPermission(InsertPermission.class);
             bar.add(clearButton);
 
-            ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            ActionButton deleteButton = new ActionButton(NabController.DeleteRunsAction.class, "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
             deleteButton.setRequiresSelection(true);
             deleteButton.setDisplayPermission(DeletePermission.class);
             bar.add(deleteButton);

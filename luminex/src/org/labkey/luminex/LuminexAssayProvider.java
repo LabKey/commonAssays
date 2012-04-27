@@ -453,7 +453,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 // if showing controls and user is viewing data results for a single run, add the Exclude Analytes button to button bar
                 if (showControls() && runId != null)
                 {
-                    ActionButton excludeAnalytes = new ActionButton("excludeAnalytes", "Exclude Analytes");
+                    ActionButton excludeAnalytes = new ActionButton("Exclude Analytes");
                     excludeAnalytes.setScript("LABKEY.requiresScript('luminex/AnalyteExclusionPanel.js');"
                             + "LABKEY.requiresCss('luminex/Exclusion.css');"
                             + "analyteExclusionWindow('" + protocol.getName() + "', " + runId + ");");

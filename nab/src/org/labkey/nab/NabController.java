@@ -723,7 +723,7 @@ public class NabController extends SpringActionController
             clearButton.setDisplayPermission(InsertPermission.class);
             buttons.add(clearButton);
 
-            ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            ActionButton deleteButton = new ActionButton(DeleteRunsAction.class, "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
             deleteButton.setRequiresSelection(true);
             deleteButton.setDisplayPermission(DeletePermission.class);
             buttons.add(deleteButton);
@@ -945,14 +945,14 @@ public class NabController extends SpringActionController
             clearButton.setDisplayPermission(InsertPermission.class);
             buttons.add(clearButton);
 
-            ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            ActionButton deleteButton = new ActionButton(DeleteRunsAction.class, "Delete", DataRegion.MODE_GRID, ActionButton.Action.POST);
             deleteButton.setDisplayPermission(DeletePermission.class);
             deleteButton.setRequiresSelection(true);
             buttons.add(deleteButton);
 
             if (!AssayPublishService.get().getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
             {
-                ActionButton publishButton = new ActionButton("publishPlatesChooseStudy.view", "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
+                ActionButton publishButton = new ActionButton(PublishPlatesChooseStudy.class, "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
                 publishButton.setDisplayPermission(InsertPermission.class);
                 publishButton.setRequiresSelection(true);
                 buttons.add(publishButton);
@@ -1375,7 +1375,7 @@ public class NabController extends SpringActionController
 
             if (!AssayPublishService.get().getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
             {
-                ActionButton publishButton = new ActionButton("publishWellGroupsChooseStudy.view", "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
+                ActionButton publishButton = new ActionButton(PublishWellGroupsChooseStudy.class, "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
                 publishButton.setDisplayPermission(InsertPermission.class);
                 publishButton.setRequiresSelection(true);
                 buttons.add(publishButton);
