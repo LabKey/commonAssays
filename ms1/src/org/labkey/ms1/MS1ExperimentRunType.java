@@ -44,8 +44,10 @@ public class MS1ExperimentRunType extends ExperimentRunType
     public void populateButtonBar(ViewContext context, ButtonBar bar, DataView view, ContainerFilter containerFilter)
     {
         ActionURL compareUrl = new ActionURL(MS1Controller.CompareRunsSetupAction.class, context.getContainer());
-        bar.add(new ActionButton(MS1Controller.createVerifySelectedScript(view, compareUrl),
-                "Compare", DataRegion.MODE_ALL, ActionButton.Action.LINK));
+        String script = MS1Controller.createVerifySelectedScript(view, compareUrl);
+        ActionButton b = new ActionButton(compareUrl, "Compare", DataRegion.MODE_ALL, ActionButton.Action.LINK);
+        b.setScript(script);
+        bar.add(b);
     }
 
     public Priority getPriority(ExpProtocol protocol)
