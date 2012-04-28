@@ -1669,11 +1669,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     }
                 }
 
-                dataRow.setParticipantID(match.getParticipantID());
-                dataRow.setVisitID(match.getVisitID());
-                dataRow.setDate(match.getDate());
-                dataRow.setSpecimenID(specimenID);
-                dataRow.setExtraSpecimenInfo(extraSpecimenInfo == null ? null : extraSpecimenInfo.trim());
+                if (isResolved(match))
+                {
+                    dataRow.setParticipantID(match.getParticipantID());
+                    dataRow.setVisitID(match.getVisitID());
+                    dataRow.setDate(match.getDate());
+                    dataRow.setSpecimenID(specimenID);
+                    dataRow.setExtraSpecimenInfo(extraSpecimenInfo == null ? null : extraSpecimenInfo.trim());
+                }
             }
         }
         else
