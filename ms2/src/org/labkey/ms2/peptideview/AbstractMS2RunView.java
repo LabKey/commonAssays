@@ -299,6 +299,13 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     public List<DisplayColumn> getPeptideDisplayColumns(String peptideColumnNames) throws SQLException
     {
+        FilteredTable table = createLegacyWrappedPeptidesTable();
+        return getColumns(new PeptideColumnNameList(peptideColumnNames), table);
+    }
+
+    /** Creates a version of the Peptides table for use in non-query based views. Includes calculated columns like DeltaScan and Hydrophobicity */
+    protected FilteredTable createLegacyWrappedPeptidesTable()
+    {
         FilteredTable table = new FilteredTable(MS2Manager.getTableInfoPeptides());
         table.wrapAllColumns(true);
         table.getColumn("RowId").setKeyField(true);
@@ -306,7 +313,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         table.getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
 
         PeptidesTableInfo.addCalculatedColumns(table);
-        return getColumns(new PeptideColumnNameList(peptideColumnNames), table);
+        return table;
     }
 
     protected void addColumn(String columnName, List<DisplayColumn> columns, TableInfo... tinfos)

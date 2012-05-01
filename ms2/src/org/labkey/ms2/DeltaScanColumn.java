@@ -19,7 +19,6 @@ package org.labkey.ms2;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.Table;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.FieldKey;
@@ -36,7 +35,7 @@ import java.util.*;
  * Date: Sep 18, 2004
  * Time: 7:20:25 AM
  */
-public class DeltaScanColumn extends SimpleDisplayColumn
+public class DeltaScanColumn extends AbstractPeptideDisplayColumn
 {
     private static final Logger _log = Logger.getLogger(DeltaScanColumn.class);
 
@@ -67,9 +66,15 @@ public class DeltaScanColumn extends SimpleDisplayColumn
         setName("dscan");
     }
 
+    @Override
+    public ColumnInfo getColumnInfo()
+    {
+        return _fractionColInfo;
+    }
+
     public Object getValue(RenderContext ctx)
     {
-        Integer fractionId = (Integer) ctx.get(_fractionColInfo == null ? "Fraction" : _fractionColInfo.getAlias());
+        Integer fractionId = (Integer)getColumnValue(ctx, _fractionColInfo, "Fraction", "Fraction$Fraction");
 
         if (null == fractionId)
             return 0;
@@ -85,8 +90,8 @@ public class DeltaScanColumn extends SimpleDisplayColumn
         }
         else
         {
-            Integer scan = (Integer) ctx.get(_scanColInfo == null ? "Scan" : _scanColInfo.getAlias());
-            String peptide = (String) ctx.get(_peptideColInfo == null ? "Peptide" : _peptideColInfo.getAlias());
+            Integer scan = (Integer) getColumnValue(ctx, _scanColInfo, "Scan");
+            String peptide = (String) getColumnValue(ctx, _peptideColInfo, "Peptide");
 
             if (null != scan && null != peptide)
             {

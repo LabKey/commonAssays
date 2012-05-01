@@ -24,6 +24,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpRun;
@@ -75,6 +76,7 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
                             entry.getValue(), entry.getKey().getPropertyDescriptor().getPropertyType());
                     objProperties[i++] = property;
                 }
+                removeExistingAnalyteProperties(container, analyte);
                 OntologyManager.insertProperties(container, analyte.getLsid(), objProperties);
             }
         }
@@ -94,5 +96,19 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
         }
     }
 
-
+    private void removeExistingAnalyteProperties(Container container, Analyte analyte) throws ExperimentException
+    {
+        try
+        {
+            OntologyObject analyteObject = OntologyManager.getOntologyObject(container, analyte.getLsid());
+            if (analyteObject != null)
+            {
+                OntologyManager.deleteProperties(analyteObject.getObjectId(), container);
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+    }
 }

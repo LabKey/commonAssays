@@ -17,7 +17,6 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.ColumnInfo;
 
 import java.util.Set;
@@ -26,7 +25,7 @@ import java.util.Set;
  * User: arauch
  * Date: Sep 18, 2004
  */
-public class HydrophobicityColumn extends SimpleDisplayColumn
+public class HydrophobicityColumn extends AbstractPeptideDisplayColumn
 {
     private ColumnInfo _colInfo;
 
@@ -42,9 +41,15 @@ public class HydrophobicityColumn extends SimpleDisplayColumn
         setTextAlign("right");
     }
 
+    @Override
+    public ColumnInfo getColumnInfo()
+    {
+        return _colInfo;
+    }
+
     public Object getValue(RenderContext ctx)
     {
-        String peptide = (String) ctx.get(_colInfo == null ? "Peptide" : _colInfo.getAlias());
+        String peptide = (String) getColumnValue(ctx, _colInfo, "Peptide");
         if (null != peptide)
             return MS2Peptide.hydrophobicity(peptide);
         else

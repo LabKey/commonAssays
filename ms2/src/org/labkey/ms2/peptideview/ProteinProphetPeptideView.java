@@ -140,7 +140,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 
     public List<DisplayColumn> getPeptideDisplayColumns(String peptideColumnNames) throws SQLException
     {
-        return getColumns(new PeptideColumnNameList(peptideColumnNames), MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoPeptideMemberships());
+        return getColumns(new PeptideColumnNameList(peptideColumnNames), createLegacyWrappedPeptidesTable(), MS2Manager.getTableInfoPeptideMemberships());
     }
 
     public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception

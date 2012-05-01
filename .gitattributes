@@ -1124,6 +1124,7 @@ ms2/resources/views/MS2[!!-~]Runs[!!-~]Browser.webpart.xml -text
 ms2/resources/views/runsOverview.html -text
 ms2/src/META-INF/ms2/scripts.txt -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
+ms2/src/org/labkey/ms2/AbstractPeptideDisplayColumn.java -text
 ms2/src/org/labkey/ms2/AbstractProteinQuantitation.java -text
 ms2/src/org/labkey/ms2/CompareServiceImpl.java -text
 ms2/src/org/labkey/ms2/CumulativeTimer.java -text
