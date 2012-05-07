@@ -61,6 +61,7 @@
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
 <%@ page import="org.labkey.api.security.User" %>
+<%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <style type="text/css">
@@ -348,13 +349,19 @@ var keywords = <%=jsonKeywords%>;
 </script>
 <table><%
 
-if (getRun() == null) 
+if (getRun() == null)
 {
     %><tr><td colspan="2">The run has been deleted.</td></tr><%
 }
 else 
 {
-    %><tr><td>Run Name:</td><td><%=h(getRun().getName())%></td></tr><%
+    %><tr><td>Run Name:</td><td><a href="<%=getRun().urlShow()%>"><%=(getRun().getName())%></a></td></tr><%
+
+    FlowExperiment experiment = getRun().getExperiment();
+    if (experiment != null)
+    {
+        %><tr><td>Analysis Folder:</td><td><a href="<%=experiment.urlShow()%>"><%=h(experiment.getName())%></a></td></tr><%
+    }
 }
     %><tr><td>Well Name:</td><td><%=h(well.getName())%></td></tr><%
 
@@ -435,7 +442,7 @@ List<FlowWell> analyses = getWell().getFCSAnalyses();
 if (analyses.size() > 0)
 {
     %><table><tr><th colspan="3">Analyses performed on this file:</th></tr>
-    <tr><th>FCS Analysis Name</th><th>Run Analysis Name</th><th>Analysis Name</th></tr><%
+    <tr><th>FCS Analysis Name</th><th>Run Name</th><th>Analysis Folder</th></tr><%
     for (FlowWell analysis : analyses)
     {
         FlowRun run = analysis.getRun();
@@ -454,7 +461,7 @@ if (analyses.size() > 0)
 URI fileURI = well.getFCSURI();
 if (null == fileURI)
 {
-    %>There is no file on disk for this well.<%
+    %>There is no file on disk for this well.<br><%
 }
 else
 {
@@ -493,6 +500,11 @@ else
     {
         %><a href="<%=well.urlFor(RunController.ExportAnalysis.class)%>" rel="nofollow">Download Analysis zip</a><br><%
     }
+}
+
+if (getRun() != null)
+{
+    %><a href="<%=PageFlowUtil.urlProvider(ExperimentUrls.class).getRunGraphDetailURL(getRun().getExperimentRun(), well.getData())%>">Experiment Run Graph Details</a><br><%
 }
 
 %></p><%

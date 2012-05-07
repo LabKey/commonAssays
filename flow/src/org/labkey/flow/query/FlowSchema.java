@@ -755,6 +755,7 @@ public class FlowSchema extends UserSchema
             ColumnInfo underlyingColumn = _flowObject.getColumn("rowid");
             ExprColumn ret = new ExprColumn(this, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".objectid"), underlyingColumn.getJdbcType());
             ret.copyAttributesFrom(underlyingColumn);
+            ret.setKeyField(false);
             addColumn(ret);
             return ret;
         }
