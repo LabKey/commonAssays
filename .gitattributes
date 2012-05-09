@@ -1531,7 +1531,9 @@ nab/src/org/labkey/nab/GetStudyNabRunsAction.java -text
 nab/src/org/labkey/nab/HighThroughputNabAssayProvider.java -text
 nab/src/org/labkey/nab/HighThroughputNabAssayRun.java -text
 nab/src/org/labkey/nab/HighThroughputNabDataHandler.java -text
+nab/src/org/labkey/nab/LegacyNAbUploadContext.java -text
 nab/src/org/labkey/nab/Luc5Assay.java -text
+nab/src/org/labkey/nab/MigrateNAbPipelineJob.java -text
 nab/src/org/labkey/nab/NabAssayController.java -text
 nab/src/org/labkey/nab/NabAssayProvider.java -text
 nab/src/org/labkey/nab/NabAssayRun.java -text
@@ -1559,6 +1561,7 @@ nab/src/org/labkey/nab/StudyNabGraphAction.java -text
 nab/src/org/labkey/nab/editRunProperties.jsp -text
 nab/src/org/labkey/nab/header.jsp -text
 nab/src/org/labkey/nab/legacyGraph.jsp -text
+nab/src/org/labkey/nab/migrateNAb.jsp -text
 nab/src/org/labkey/nab/multiRunGraph.jsp -text
 nab/src/org/labkey/nab/publishChooseStudy.jsp -text
 nab/src/org/labkey/nab/publishVerify.jsp -text

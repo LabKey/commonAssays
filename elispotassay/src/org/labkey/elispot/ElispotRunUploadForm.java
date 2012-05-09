@@ -17,7 +17,9 @@
 package org.labkey.elispot;
 
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.PlateUploadForm;
+import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 
 import java.util.Map;
 
@@ -26,10 +28,21 @@ import java.util.Map;
  * User: Karl Lum
  * Date: Jan 9, 2008
  */
-public class ElispotRunUploadForm extends PlateUploadForm<ElispotAssayProvider>
+public class ElispotRunUploadForm extends AssayRunUploadForm<ElispotAssayProvider> implements PlateUploadForm<ElispotAssayProvider>
 {
     private Map<String, Map<DomainProperty, String>> _antigenProperties;
     private Map<String, Map<DomainProperty, String>> _sampleProperties;
+    private PlateSamplePropertyHelper _samplePropertyHelper;
+
+    public PlateSamplePropertyHelper getSamplePropertyHelper()
+    {
+        return _samplePropertyHelper;
+    }
+
+    public void setSamplePropertyHelper(PlateSamplePropertyHelper helper)
+    {
+        _samplePropertyHelper = helper;
+    }
 
     public Map<String, Map<DomainProperty, String>> getSampleProperties()
     {

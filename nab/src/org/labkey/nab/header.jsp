@@ -21,6 +21,7 @@
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.api.data.DataRegion" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -50,6 +51,9 @@
     {
 %>
 <%=textLink("Download Datafile", bean.getDatafileURL())%>
+<% } %>
+<% if (me.getViewContext().getUser().isAdministrator()) { %>
+    <%= textLink("Migrate Legacy NAb Runs", new org.labkey.api.view.ActionURL(NabController.MigrateToAssayAction.class, me.getViewContext().getContainer())) %>
 <% } %>
 <br>
 <labkey:errors/>

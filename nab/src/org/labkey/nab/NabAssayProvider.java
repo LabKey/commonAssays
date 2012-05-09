@@ -105,6 +105,16 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String LOCK_AXES_PROPERTY_CAPTION = "Lock Graph Y-Axis";
     private static final String NAB_RUN_LSID_PREFIX = "NabAssayRun";
     private static final String NAB_ASSAY_PROTOCOL = "NabAssayProtocol";
+    public static final String VIRUS_NAME_PROPERTY_NAME = "VirusName";
+    public static final String VIRUS_ID_PROPERTY_NAME = "VirusID";
+    public static final String HOST_CELL_PROPERTY_NAME = "HostCell";
+    public static final String STUDY_NAME_PROPERTY_NAME = "StudyName";
+    public static final String EXPERIMENT_PERFORMER_PROPERTY_NAME = "ExperimentPerformer";
+    public static final String EXPERIMENT_ID_PROPERTY_NAME = "ExperimentID";
+    public static final String INCUBATION_TIME_PROPERTY_NAME = "IncubationTime";
+    public static final String PLATE_NUMBER_PROPERTY_NAME = "PlateNumber";
+    public static final String EXPERIMENT_DATE_PROPERTY_NAME = "ExperimentDate";
+    public static final String FILE_ID_PROPERTY_NAME = "FileID";
 
     public NabAssayProvider()
     {
@@ -192,16 +202,16 @@ public class NabAssayProvider extends AbstractPlateBasedAssayProvider
 
     protected void addPassThroughRunProperties(Domain runDomain)
     {
-        addProperty(runDomain, "VirusName", "Virus Name", PropertyType.STRING);
-        addProperty(runDomain, "VirusID", "Virus ID", PropertyType.STRING);
-        addProperty(runDomain, "HostCell", "Host Cell", PropertyType.STRING);
-        addProperty(runDomain, "StudyName", "Study Name", PropertyType.STRING);
-        addProperty(runDomain, "ExperimentPerformer", "Experiment Performer", PropertyType.STRING);
-        addProperty(runDomain, "ExperimentID", "Experiment ID", PropertyType.STRING);
-        addProperty(runDomain, "IncubationTime", "Incubation Time", PropertyType.STRING);
-        addProperty(runDomain, "PlateNumber", "Plate Number", PropertyType.STRING);
-        addProperty(runDomain, "ExperimentDate", "Experiment Date", PropertyType.DATE_TIME);
-        addProperty(runDomain, "FileID", "File ID", PropertyType.STRING);
+        addProperty(runDomain, VIRUS_NAME_PROPERTY_NAME, "Virus Name", PropertyType.STRING);
+        addProperty(runDomain, VIRUS_ID_PROPERTY_NAME, "Virus ID", PropertyType.STRING);
+        addProperty(runDomain, HOST_CELL_PROPERTY_NAME, "Host Cell", PropertyType.STRING);
+        addProperty(runDomain, STUDY_NAME_PROPERTY_NAME, "Study Name", PropertyType.STRING);
+        addProperty(runDomain, EXPERIMENT_PERFORMER_PROPERTY_NAME, "Experiment Performer", PropertyType.STRING);
+        addProperty(runDomain, EXPERIMENT_ID_PROPERTY_NAME, "Experiment ID", PropertyType.STRING);
+        addProperty(runDomain, INCUBATION_TIME_PROPERTY_NAME, "Incubation Time", PropertyType.STRING);
+        addProperty(runDomain, PLATE_NUMBER_PROPERTY_NAME, "Plate Number", PropertyType.STRING);
+        addProperty(runDomain, EXPERIMENT_DATE_PROPERTY_NAME, "Experiment Date", PropertyType.DATE_TIME);
+        addProperty(runDomain, FILE_ID_PROPERTY_NAME, "File ID", PropertyType.STRING);
         addProperty(runDomain, LOCK_AXES_PROPERTY_NAME, LOCK_AXES_PROPERTY_CAPTION, PropertyType.BOOLEAN);
     }
 

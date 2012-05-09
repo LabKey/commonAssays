@@ -52,9 +52,14 @@ import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.reports.report.view.ReportUtil;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermissionClass;
+import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -69,10 +74,12 @@ import org.labkey.api.study.Study;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
+import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayPublishService;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
@@ -82,6 +89,7 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.VBox;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewForm;
 import org.labkey.api.view.template.PageConfig.Template;
@@ -924,6 +932,72 @@ public class NabController extends SpringActionController
         public void setRowId(int rowId)
         {
             _rowId = rowId;
+        }
+    }
+
+    public static class MigrateToAssayForm
+    {
+        private int _protocolId;
+
+        public int getProtocolId()
+        {
+            return _protocolId;
+        }
+
+        public void setProtocolId(int protocolId)
+        {
+            _protocolId = protocolId;
+        }
+    }
+
+    @RequiresSiteAdmin
+    public class MigrateToAssayAction extends FormViewAction<MigrateToAssayForm>
+    {
+        @Override
+        public void validateCommand(MigrateToAssayForm target, Errors errors)
+        {
+        }
+
+        @Override
+        public ModelAndView getView(MigrateToAssayForm migrateToAssayForm, boolean reshow, BindException errors) throws Exception
+        {
+            List<ExpProtocol> allProtocols = AssayService.get().getAssayProtocols(getContainer());
+            List<ExpProtocol> nabProtocols = new ArrayList<ExpProtocol>();
+            for (ExpProtocol protocol : allProtocols)
+            {
+                AssayProvider provider = AssayService.get().getProvider(protocol);
+                if (provider instanceof NabAssayProvider && !(provider instanceof HighThroughputNabAssayProvider))
+                {
+                    nabProtocols.add(protocol);
+                }
+            }
+            return new JspView<List<ExpProtocol>>("/org/labkey/nab/migrateNAb.jsp", nabProtocols, errors);
+        }
+
+        @Override
+        public boolean handlePost(MigrateToAssayForm form, BindException errors) throws Exception
+        {
+            ViewBackgroundInfo info = new ViewBackgroundInfo(getViewContext().getContainer(), getViewContext().getUser(), getViewContext().getActionURL());
+            PipeRoot pipeRoot = PipelineService.get().findPipelineRoot(getContainer());
+            if (pipeRoot == null)
+            {
+                throw new NotFoundException("No pipeline configured");
+            }
+            MigrateNAbPipelineJob job = new MigrateNAbPipelineJob(info, form.getProtocolId(), pipeRoot);
+            PipelineService.get().queueJob(job);
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(MigrateToAssayForm migrateToAssayForm)
+        {
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Migrate legacy NAb data");
         }
     }
 

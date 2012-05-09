@@ -18,15 +18,16 @@ package org.labkey.nab;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.exp.*;
+import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayFileWriter;
-import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.study.actions.PlateUploadForm;
+import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.view.NotFoundException;
 
 import java.util.Map;
@@ -41,11 +42,22 @@ import java.io.File;
  * Date: Sep 27, 2007
  * Time: 4:00:02 PM
  */
-public class NabRunUploadForm extends PlateUploadForm<NabAssayProvider> implements AssayRunUploadContext<NabAssayProvider>
+public class NabRunUploadForm extends AssayRunUploadForm<NabAssayProvider> implements PlateUploadForm<NabAssayProvider>
 {
     private ExpRun _reRun;
     private Integer _reRunId;
     private Map<String, Map<DomainProperty, String>> _sampleProperties;
+    private PlateSamplePropertyHelper _samplePropertyHelper;
+
+    public PlateSamplePropertyHelper getSamplePropertyHelper()
+    {
+        return _samplePropertyHelper;
+    }
+
+    public void setSamplePropertyHelper(PlateSamplePropertyHelper helper)
+    {
+        _samplePropertyHelper = helper;
+    }
 
     public Integer getReRunId()
     {
