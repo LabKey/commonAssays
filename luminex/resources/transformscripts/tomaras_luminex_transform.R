@@ -23,9 +23,10 @@
 #  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
 #  - 2.2.20120217 : Issue 14070: Value out of range error when importing curve fit parameters for titrated unknown with flat dilution curve
 #  - 3.0.20120323 : Changes for LabKey server 12.1
+#  - 4.0.20120509 : Changes for LabKey server 12.2
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "3.0.20120323";
+transformVersion = "4.0.20120509";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -253,6 +254,13 @@ if (any(run.props$name == "CurveFitLogTransform")) {
     if (!is.na(propVal) & propVal != "1") curveFitLogTransform = FALSE;
 }
 
+# set the weighting variance variable for use in the non-log tranform curve fits
+drm.weights.var.power = -1.8;
+if (any(run.props$name == "WeightingPower")) {
+    propVal = getRunPropertyValue(run.props, "WeightingPower");
+    if (!is.na(propVal) & propVal != "") drm.weights.var.power = as.numeric(propVal);
+}
+
 # loop through the possible titrations and to see if it is a standard, qc control, or titrated unknown
 if (nrow(titration.data) > 0)
 {
@@ -375,6 +383,9 @@ if (nrow(titration.data) > 0)
                             } else {
                                 formula = fi~dose
                                 weighting = TRUE
+                                dat.avg=aggregate(dat$fi, by = list(dat$name, dat$dose, dat$dataId), mean)
+                                names(dat.avg) = c("name", "dose","dataId", "fi.avg")
+                                dat = merge(dat, dat.avg, by=c("name", "dose", "dataId"), all.x=T, all.y=T)
                             }
                             fit = fit.drc(formula, data=dat, weighting=weighting, force.fit=TRUE, fit.4pl=FALSE);
                             run.data[runDataIndex,]$Slope_5pl = maxValueConversion(as.numeric(coef(fit))[1]);
