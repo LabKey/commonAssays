@@ -40,6 +40,8 @@ public class AbstractNabManager
         SampleDescription(PropertyType.STRING, false),
         Factor(PropertyType.DOUBLE, false),
         Method(PropertyType.STRING, false),
+        Slope(PropertyType.DOUBLE, false),
+        EndpointsOptional(PropertyType.BOOLEAN, false),
         ReverseDilutionDirection(PropertyType.BOOLEAN, true),
         FitError(PropertyType.DOUBLE, false);
 

@@ -206,6 +206,10 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
             {
                 result.put(property, _legacyRun.getRenderedCurveFitType().getLabel());
             }
+            else if ("LegacyId".equalsIgnoreCase(property.getName()))
+            {
+                result.put(property, _legacyRun.getPlate().getRowId().toString());
+            }
             else
             {
                 for (int i = 0; i < NabAssayProvider.CUTOFF_PROPERTIES.length && i < _legacyRun.getCutoffs().length; i++)
@@ -261,6 +265,19 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
     public Map<String, File> getUploadedData() throws IOException, ExperimentException
     {
         return Collections.singletonMap(AssayDataCollector.PRIMARY_FILE, _dataFile);
+    }
+
+    public Map<String, String> getSpecimensToLSIDs()
+    {
+        Map<String, String> result = new HashMap<String, String>();
+        for (DilutionSummary dilutionSummary : _legacyRun.getSummaries())
+        {
+            for (WellGroup wellGroup : dilutionSummary.getWellGroups())
+            {
+                result.put(wellGroup.getName(), wellGroup.getLSID());
+            }
+        }
+        return result;
     }
 
     @Override
