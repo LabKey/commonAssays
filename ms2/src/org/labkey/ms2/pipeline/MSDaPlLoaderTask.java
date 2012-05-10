@@ -175,7 +175,7 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
             }
             FileUtils.copyFileToDirectory(inputFile, sequestDir);
             FileUtils.copyFile(UWSequestSearchTask.SEQUEST_DECOY_OUTPUT_FILE_TYPE.getFile(dir, getJob().getBaseName()), new File(decoyDir, sequestResultsFile.getName()));
-            FileUtils.copyFile(new File(dir, getJob().getBaseName() + ".result.xml"), new File(percolatorDir, "combined-results.xml"));
+            FileUtils.copyFile(new File(dir, getJob().getBaseName() + ".perc.xml"), new File(percolatorDir, "combined-results.xml"));
 
             changePermissions(sequestDir);
             changePermissions(percolatorDir);

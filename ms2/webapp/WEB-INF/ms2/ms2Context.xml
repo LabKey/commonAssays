@@ -1247,7 +1247,7 @@
     </bean>
 
     <bean id="resultsFileType" class="org.labkey.api.util.FileType">
-        <constructor-arg value=".result.xml" />
+        <constructor-arg value=".perc.xml" />
     </bean>
 
     <bean id="matchesFileType" class="org.labkey.api.util.FileType">
