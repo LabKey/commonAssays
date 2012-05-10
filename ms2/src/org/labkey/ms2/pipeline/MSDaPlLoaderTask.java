@@ -65,8 +65,6 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
         public Factory()
         {
             super(MSDaPlLoaderTask.class);
-
-            setJoin(true);  // Do this once per file-set.
         }
 
         public PipelineJob.Task createTask(PipelineJob job)
