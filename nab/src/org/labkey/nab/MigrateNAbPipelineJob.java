@@ -74,11 +74,14 @@ public class MigrateNAbPipelineJob extends PipelineJob
 {
     private final String _description;
     private final int _protocolId;
+    /** Non-standard NAb run field values that may be supplied by the admin who initiates the migration */
+    private final Map<String, String> _params;
 
-    public MigrateNAbPipelineJob(ViewBackgroundInfo info, int protocolId, PipeRoot root) throws SQLException
+    public MigrateNAbPipelineJob(ViewBackgroundInfo info, int protocolId, PipeRoot root, Map<String, String> params) throws SQLException
     {
         super("NAbUpgrade", info, root);
         _protocolId = protocolId;
+        _params = params;
         _description = "Migrate NAb runs to " + getAssayDesign().getName();
 
         // Create a unique file name for the log file
@@ -109,6 +112,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
         {
             return;
         }
+        int failedRuns = 0;
 
         ExpProtocol protocol = getAssayDesign();
         NabAssayProvider provider = (NabAssayProvider)AssayService.get().getProvider(protocol);
@@ -151,6 +155,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
                         }
                         catch (Exception e)
                         {
+                            failedRuns++;
                             getLogger().error("Failed to migrate run " + rowId, e);
                         }
                     }
@@ -159,12 +164,17 @@ public class MigrateNAbPipelineJob extends PipelineJob
                 }
                 else
                 {
-                    getLogger().info("No plate query found in " + getInfo().getContainer().getPath());
+                    throw new IllegalStateException("No plate query found in " + getInfo().getContainer().getPath());
                 }
             }
             else
             {
-                getLogger().info("No plate schema found in " + getInfo().getContainer().getPath());
+                throw new IllegalStateException("No plate schema found in " + getInfo().getContainer().getPath());
+            }
+
+            if (failedRuns > 0)
+            {
+                throw new IllegalStateException("Failed to migrate " + failedRuns + " runs. See above for errors");
             }
             setStatus(PipelineJob.COMPLETE_STATUS);
             completeStatus = true;
@@ -270,7 +280,7 @@ public class MigrateNAbPipelineJob extends PipelineJob
      */
     private Map<String, Integer> migrateRunData(ExpProtocol protocol, int rowId, int createdBy, Date created, NabAssayProvider provider, File migratedNAbDir) throws Exception
     {
-        LegacyNAbUploadContext context = new LegacyNAbUploadContext(protocol, provider, rowId, getInfo());
+        LegacyNAbUploadContext context = new LegacyNAbUploadContext(protocol, provider, rowId, getInfo(), _params);
         getLogger().info("Starting to migrate run " + rowId + ": " + context.getLegacyRun().getName());
         InputStream in = null;
         try
@@ -330,7 +340,10 @@ public class MigrateNAbPipelineJob extends PipelineJob
                     {
                         result.put(legacyLsid, newRowId);
                     }
-                    // TODO - blow up here?
+                    else
+                    {
+                        throw new IllegalStateException("Could not find new RowId for LSID " + legacyLsid);
+                    }
                 }
 
                 return result;

@@ -34,16 +34,19 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
 {
     private final ExpProtocol _protocol;
     private final NabAssayProvider _provider;
+    private final Map<String, String> _params;
     private final OldNabAssayRun _legacyRun;
     private final ViewBackgroundInfo _info;
     private File _dataFile;
     private PlateSamplePropertyHelper _samplePropertyHelper;
+    public static final String LEGACY_ID_PROPERTY_NAME = "LegacyId";
 
-    public LegacyNAbUploadContext(ExpProtocol protocol, NabAssayProvider provider, int plateRowId, ViewBackgroundInfo info) throws Exception
+    public LegacyNAbUploadContext(ExpProtocol protocol, NabAssayProvider provider, int plateRowId, ViewBackgroundInfo info, Map<String, String> params) throws Exception
     {
         _protocol = protocol;
         _info = info;
         _provider = provider;
+        _params = params;
 
         _legacyRun = OldNabManager.get().loadFromDatabase(info.getUser(), info.getContainer(), plateRowId);
     }
@@ -91,6 +94,11 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
                             {
                                 props.put(property, dilutionSummary.getSampleDescription());
                             }
+                            if (NabAssayProvider.SPECIMENID_PROPERTY_NAME.equalsIgnoreCase(property.getName()))
+                            {
+                                Object value = dilutionSummary.getWellGroups().get(0).getProperty(AbstractNabManager.SampleProperty.SampleId.name());
+                                props.put(property, value == null ? null : value.toString());
+                            }
                         }
 
                         result.put(getObject(index++, props), props);
@@ -110,7 +118,7 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
         {
             for (WellGroup wellGroup : dilutionSummary.getWellGroups())
             {
-                if (wellGroup.getName().equals(wellGroup.getName()))
+                if (wellGroup.getName().equals(sampleName))
                 {
                     return dilutionSummary;
                 }
@@ -206,17 +214,28 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
             {
                 result.put(property, _legacyRun.getRenderedCurveFitType().getLabel());
             }
-            else if ("LegacyId".equalsIgnoreCase(property.getName()))
+            else if (LEGACY_ID_PROPERTY_NAME.equalsIgnoreCase(property.getName()))
             {
                 result.put(property, _legacyRun.getPlate().getRowId().toString());
             }
             else
             {
+                boolean foundCutoff = false;
                 for (int i = 0; i < NabAssayProvider.CUTOFF_PROPERTIES.length && i < _legacyRun.getCutoffs().length; i++)
                 {
                     if (NabAssayProvider.CUTOFF_PROPERTIES[i].equalsIgnoreCase(property.getName()))
                     {
                         result.put(property, Integer.toString(_legacyRun.getCutoffs()[i]));
+                        foundCutoff = true;
+                    }
+                }
+                if (!foundCutoff)
+                {
+                    // Look at any values that might have been POSTed by the admin who initiated the migration
+                    String value = _params.get(property.getName());
+                    if (value != null)
+                    {
+                        result.put(property, value);
                     }
                 }
             }

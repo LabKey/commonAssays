@@ -43,16 +43,22 @@ import org.labkey.api.attachments.AttachmentFile;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.SpringAttachmentFile;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
@@ -76,6 +82,7 @@ import org.labkey.api.study.WellData;
 import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayPublishService;
+import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
@@ -962,28 +969,61 @@ public class NabController extends SpringActionController
         public ModelAndView getView(MigrateToAssayForm migrateToAssayForm, boolean reshow, BindException errors) throws Exception
         {
             List<ExpProtocol> allProtocols = AssayService.get().getAssayProtocols(getContainer());
-            List<ExpProtocol> nabProtocols = new ArrayList<ExpProtocol>();
+            Map<ExpProtocol, List<DisplayColumn>> nabProtocolsAndColumns = new LinkedHashMap<ExpProtocol, List<DisplayColumn>>();
+
+            // Find all of the NAb assay designs that are in scope
             for (ExpProtocol protocol : allProtocols)
             {
                 AssayProvider provider = AssayService.get().getProvider(protocol);
                 if (provider instanceof NabAssayProvider && !(provider instanceof HighThroughputNabAssayProvider))
                 {
-                    nabProtocols.add(protocol);
+                    TableInfo tableInfo = AssayService.get().createSchema(getUser(), getContainer()).getTable(AssaySchema.getRunsTableName(protocol));
+
+                    // Figure out the set of standard NAb property names
+                    NabAssayProvider nabProvider = (NabAssayProvider)provider;
+                    Set<String> defaultRunPropertyNames = new CaseInsensitiveHashSet();
+                    defaultRunPropertyNames.add(LegacyNAbUploadContext.LEGACY_ID_PROPERTY_NAME);
+                    for (DomainProperty defaultProp : nabProvider.createRunDomain(getContainer(), getUser()).getKey().getProperties())
+                    {
+                        defaultRunPropertyNames.add(defaultProp.getName());
+                    }
+
+                    // Look through all of the columns on the NAb run table
+                    List<DisplayColumn> columns = new ArrayList<DisplayColumn>();
+                    for (ColumnInfo columnInfo : tableInfo.getColumns())
+                    {
+                        // For ones that are admin-configurable, and that aren't part of the standard set of NAb columns,
+                        // ask for the Admin's input
+                        if (columnInfo instanceof org.labkey.api.exp.PropertyColumn && !defaultRunPropertyNames.contains(columnInfo.getName()))
+                        {
+                            columns.add(columnInfo.getDisplayColumnFactory().createRenderer(columnInfo));
+                        }
+                    }
+
+                    nabProtocolsAndColumns.put(protocol, columns);
                 }
             }
-            return new JspView<List<ExpProtocol>>("/org/labkey/nab/migrateNAb.jsp", nabProtocols, errors);
+            return new JspView<Map<ExpProtocol, List<DisplayColumn>>>("/org/labkey/nab/migrateNAb.jsp", nabProtocolsAndColumns, errors);
         }
 
         @Override
         public boolean handlePost(MigrateToAssayForm form, BindException errors) throws Exception
         {
+            // Propagate the admin-specified default run field values through 
+            Map<String, String> params = new CaseInsensitiveHashMap<String>();
+            Set<String> parameterNames = getViewContext().getRequest().getParameterMap().keySet();
+            for (String paramName : parameterNames)
+            {
+                params.put(paramName, getViewContext().getRequest().getParameter(paramName));
+            }
+            
             ViewBackgroundInfo info = new ViewBackgroundInfo(getViewContext().getContainer(), getViewContext().getUser(), getViewContext().getActionURL());
             PipeRoot pipeRoot = PipelineService.get().findPipelineRoot(getContainer());
             if (pipeRoot == null)
             {
                 throw new NotFoundException("No pipeline configured");
             }
-            MigrateNAbPipelineJob job = new MigrateNAbPipelineJob(info, form.getProtocolId(), pipeRoot);
+            MigrateNAbPipelineJob job = new MigrateNAbPipelineJob(info, form.getProtocolId(), pipeRoot, params);
             PipelineService.get().queueJob(job);
             return true;
         }

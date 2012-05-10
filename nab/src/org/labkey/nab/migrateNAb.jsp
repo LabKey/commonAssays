@@ -17,21 +17,26 @@
 %>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.nab.NabController"%>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.api.data.DataRegion" %>
 <%@ page import="org.labkey.api.exp.api.ExpProtocol" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.api.data.RenderContext" %>
+<%@ page import="org.labkey.api.data.DisplayColumn" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-JspView<java.util.List<org.labkey.api.exp.api.ExpProtocol>> me = (JspView<java.util.List<org.labkey.api.exp.api.ExpProtocol>>) HttpView.currentView();
-java.util.List<org.labkey.api.exp.api.ExpProtocol> protocols = me.getModelBean();
+JspView<Map<ExpProtocol, List<DisplayColumn>>> me = (JspView<Map<ExpProtocol, List<DisplayColumn>>>) HttpView.currentView();
+Map<ExpProtocol, List<DisplayColumn>> protocols = me.getModelBean();
+ViewContext context = me.getViewContext();
 %>
-<p>
-    This will migrated NAb runs created by the legacy implementation into the newer assay-based representation.
+<p style="width: 500px">
+    This will migrate NAb runs created by the legacy implementation into the newer assay-based representation. It will
+    also re-copy any data rows that have already been copied to a study dataset. It will not delete any legacy NAb
+    runs, nor will it delete any existing legacy NAb study datasets.
 </p>
 <p>
 <% if (protocols.isEmpty()) { %>
@@ -39,16 +44,28 @@ java.util.List<org.labkey.api.exp.api.ExpProtocol> protocols = me.getModelBean()
 <%
 }
 else
-{ %>
-    <form method="POST">
-        Target assay design:
-        <select name="protocolId">
-            <% for (ExpProtocol protocol : protocols) { %>
-                <option value="<%= protocol.getRowId() %>"><%= h(protocol.getName()) %></option>
-            <% } %>
-        </select>
-        <labkey:button text="Submit" />
-    </form>
-<% }%>
+{
+    RenderContext renderContext = new RenderContext(context);
+    renderContext.setMode(DataRegion.MODE_INSERT);
+    for (Map.Entry<ExpProtocol, List<DisplayColumn>> entry : protocols.entrySet())
+    {
+        ExpProtocol protocol = entry.getKey();
+        List<DisplayColumn> columns = entry.getValue(); %>
+            <h2><%= h(protocol.getName()) %></h2>
+            <form method="POST">
+                <input type="hidden" name="protocolId" value="<%= protocol.getRowId()%> " />
+                <table>
+                    <% for (DisplayColumn column : columns)
+                    { %>
+                    <tr>
+                        <% column.renderDetailsCaptionCell(renderContext, out); %>
+                        <% column.renderInputCell(renderContext, out, 1); %>
+                    </tr><%
 
-</p>
+                    } %>
+                </table>
+                <labkey:button text="Migrate" />
+            </form>
+        <hr/>
+    <% } %>
+<% }%>

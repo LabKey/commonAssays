@@ -71,7 +71,7 @@
             <table style="<%= dataTDStyle %>">
                 <tr>
                     <td align=top>
-                        Plate template:<br><select name="plateTemplate" onChange="document.location='begin.view?plateTemplate=' + escape(this.options[this.selectedIndex].value);">
+                        Plate template:<br><select name="plateTemplate" onChange="document.location='create.view?plateTemplate=' + escape(this.options[this.selectedIndex].value);">
                         <%
                             for (PlateTemplate current : templates)
                             {
