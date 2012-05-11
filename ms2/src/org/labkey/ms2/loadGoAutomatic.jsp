@@ -51,7 +51,7 @@ process by refreshing the status information on the next page.<br><br>
 <span class="labkey-error">Warning: This server is running Java 7 and Windows, a combination that has known firewall
 issues with FTP downloads. If the server's firewall has not been properly configured then the automatic GO download will
 fail, in which case you should switch to the "Manual" tab and follow the instructions there.</span> For more information,
-<%=helpLink("annotations", "visit the documentation")%>.<br><br>
+<%=helpLink("annotations#go", "visit the documentation")%>.<br><br>
 <% } %>
 
 If you wish to proceed, click the "Continue" button. Otherwise click "Cancel".<br><br>
