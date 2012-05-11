@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.apache.commons.lang3.SystemUtils" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.tools.GoLoader" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -46,6 +46,13 @@ Your LabKey Server must be able to connect via the Internet to ftp.geneontology.
 Internet connection, this process should take less than five minutes to complete. The loading will take place
 in the background and you can continue to use your LabKey Server normally. If you want, you can monitor the
 process by refreshing the status information on the next page.<br><br>
+
+<%if (SystemUtils.IS_JAVA_1_7 && SystemUtils.IS_OS_WINDOWS) { %>
+<span class="labkey-error">Warning: This server is running Java 7 and Windows, a combination that has known firewall
+issues with FTP downloads. If the server's firewall has not been properly configured then the automatic GO download will
+fail, in which case you should switch to the "Manual" tab and follow the instructions there.</span> For more information,
+<%=helpLink("annotations", "visit the documentation")%>.<br><br>
+<% } %>
 
 If you wish to proceed, click the "Continue" button. Otherwise click "Cancel".<br><br>
 <form action="loadGo.post" method="post">
