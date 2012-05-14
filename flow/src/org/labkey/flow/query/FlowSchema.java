@@ -606,6 +606,7 @@ public class FlowSchema extends UserSchema
 
         public void setContainerFilter(ContainerFilter filter)
         {
+            checkLocked();
             _expData.setContainerFilter(filter);
         }
 
@@ -880,6 +881,7 @@ public class FlowSchema extends UserSchema
 
         public void setContainerFilter(ContainerFilter filter)
         {
+            checkLocked();
             _expData.setContainerFilter(filter);
         }
 
@@ -900,6 +902,7 @@ public class FlowSchema extends UserSchema
 
         public ColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
         {
+            checkLocked();
             ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole,sampleSet);
             col.setParentTable(this);
             return addColumn(col);
@@ -915,6 +918,7 @@ public class FlowSchema extends UserSchema
 
         public ColumnInfo addInputRunCountColumn(String alias)
         {
+            checkLocked();
             ColumnInfo col = _expData.addInputRunCountColumn(alias);
             col.setParentTable(this);
             return addColumn(col);

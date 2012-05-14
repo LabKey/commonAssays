@@ -134,6 +134,7 @@ public class GuideSetCurveFitTable extends VirtualTable implements ContainerFilt
     @Override
     public void setContainerFilter(@NotNull ContainerFilter containerFilter)
     {
+        checkLocked();
         _containerFilter = containerFilter;
     }
 
