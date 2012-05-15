@@ -26,6 +26,8 @@
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -34,7 +36,7 @@
     ChooseRunsToAnalyzeForm form = me.getModelBean();
 %>
 <labkey:errors/>
-<form method="POST" action="analyzeSelectedRuns.post">
+<form method="POST" action="<%=h(buildURL(AnalysisScriptController.AnalyzeSelectedRunsAction.class))%>">
     <p>What do you want to call the new analysis folder?<br>
         <% String name = form.ff_analysisName;
             if (StringUtils.isEmpty(name))
@@ -58,8 +60,8 @@
         <input type="text" name="ff_analysisName" value="<%=h(name)%>">
     </p>
 
-    <labkey:button text="Analyze runs" action="<%=Action.analyzeSelectedRuns%>"/>
-    <labkey:button text="Go back" action="<%=Action.chooseRunsToAnalyze%>"/>
+    <labkey:button text="Analyze runs" action="<%=new ActionURL(AnalysisScriptController.AnalyzeSelectedRunsAction.class, context.getContainer())%>"/>
+    <labkey:button text="Go back" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, context.getContainer())%>"/>
     <% for (int runid : form.getSelectedRunIds()) { %>
     <input type="hidden" name="<%=DataRegion.SELECT_CHECKBOX_NAME%>" value="<%=runid%>">
     <% } %>

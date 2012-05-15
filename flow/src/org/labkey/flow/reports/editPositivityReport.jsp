@@ -100,7 +100,7 @@ function Form_onSave()
         success:function(form, action)
         {
             report.reportId = action.result.reportId;
-            window.location = <%=returnURL == null ? "\"begin.view\"" : PageFlowUtil.jsString(returnURL.getLocalURIString())%>;
+            window.location = <%=returnURL == null ? q(buildURL(ReportsController.BeginAction.class)) : q(returnURL.getLocalURIString())%>;
         },
         failure:function(form,action)
         {
@@ -112,7 +112,7 @@ function Form_onSave()
 
 function Form_onCancel()
 {
-    window.location = <%=returnURL == null ? "\"begin.view\"" : PageFlowUtil.jsString(returnURL.getLocalURIString())%>;
+    window.location = <%=returnURL == null ? q(buildURL(ReportsController.BeginAction.class)) : q(returnURL.getLocalURIString())%>;
 }
 
 
