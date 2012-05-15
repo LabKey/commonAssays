@@ -73,8 +73,17 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             scope: this
         });
 
+        // initialize the view curves button to the toolbar
+        this.viewCurvesButton = new Ext.Button({
+            disabled: true,
+            text: 'View Curves',
+            tooltip: 'Click to view overlapping curves for the selected runs.',
+            handler: this.viewCurvesClicked,
+            scope: this
+        });
+
         // if the user has permissions to update in this container, show them the Apply Guide Set button
-        this.tbar = this.userCanUpdate ? [this.exportButton, '-', this.applyGuideSetButton] : [this.exportButton];
+        this.tbar = this.userCanUpdate ? [this.exportButton, '-', this.applyGuideSetButton, '-', this.viewCurvesButton] : [this.exportButton, '-', this.viewCurvesButton];
 
         this.fbar = [{xtype:'label', text:'Bold values in the "Guide Set Date" column indicate assays that are members of a guide set.'}];
 
@@ -127,9 +136,15 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 scope: this,
                 'selectionchange': function(selectionModel){
                     if (selectionModel.hasSelection())
+                    {
                         this.applyGuideSetButton.enable();
+                        this.viewCurvesButton.enable();
+                    }
                     else
+                    {
                         this.applyGuideSetButton.disable();
+                        this.viewCurvesButton.disable();
+                    }
                 }
             }
         });
@@ -227,6 +242,74 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             })]
         });
         win.show(this);
+    },
+
+    viewCurvesClicked: function() {
+        // get the selected record list from the grid
+        var selection = this.selModel.getSelections();
+        var runIds = [];
+        Ext.each(selection, function(record){
+            runIds.push(record.get("Titration/Run/RowId"));
+        });
+
+        // build the config object of the properties that will be needed by the R report
+        var config = {reportId: 'module:luminex/CurveComparisonPlot.r', showSection: 'Overlapping Curves Plot'};
+        config['RunIds'] = runIds.join(";");
+        config['Protocol'] = this.assayName;
+        config['Titration'] = this.titration;
+        config['Analyte'] = this.analyte;
+        config['MainTitle'] = $h(this.titration) + ' 4PL for ' + $h(this.analyte)
+                + ' - ' + $h(this.isotype == '' ? '[None]' : this.isotype)
+                + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate);
+
+        // create a pop-up window to display the plot
+        var plotDiv = new Ext.Container({
+            height: 500,
+            width: 650,
+            autoEl: {tag: 'div'}
+        });
+        var win = new Ext.Window({
+            layout:'fit',
+            width:650,
+            height:550,
+            closeAction:'hide',
+            modal: true,
+            cls: 'extContainer',
+            bodyStyle: 'background-color: white;',
+            title: 'Curve Comparison',
+            items: [plotDiv],
+            buttons: [
+                {
+                    text: 'Export to PDF',
+                    disabled: true
+                },
+                {
+                    text: 'Close',
+                    handler: function(){win.hide();}
+                }
+            ]
+        });
+        win.show(this);
+        win.getEl().mask("loading curves...", "x-mask-loading");
+
+        // call and display the Report webpart
+        new LABKEY.WebPart({
+               partName: 'Report',
+               renderTo: plotDiv.getId(),
+               frame: 'none',
+               partConfig: config,
+               success: function() {
+                   this.getEl().unmask();
+               },
+               failure: function(response) {
+                   Ext.get(plotDiv.getId()).update("Error: " + response.statusText);
+                   this.getEl().unmask();
+               },
+               scope: win
+        }).render();
+
+        // TODO: add grid to window, export to PDF
+        // TODO: test with expConc, test w/out notebooknum and other run props, test with replicate data
     },
 
     exportExcelData: function() {

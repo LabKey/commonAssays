@@ -557,6 +557,7 @@ lab/src/org/labkey/lab/LabSchema.java -text
 lab/src/org/labkey/lab/audit/LabEventsAuditViewFactory.java -text
 lab/src/org/labkey/lab/history.jsp -text
 luminex/module.properties -text
+luminex/resources/reports/schemas/CurveComparisonPlot.r -text
 luminex/resources/reports/schemas/LeveyJenningsTrendPlot.r -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-10.10.sql -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-10.30-11.10.sql -text
