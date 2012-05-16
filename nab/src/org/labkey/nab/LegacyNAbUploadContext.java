@@ -16,6 +16,7 @@
 package org.labkey.nab;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -236,7 +237,7 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
             else
             {
                 boolean foundCutoff = false;
-                for (int i = 0; i < NabAssayProvider.CUTOFF_PROPERTIES.length && i < _legacyRun.getCutoffs().length; i++)
+                for (int i = 0; i < NabAssayProvider.CUTOFF_PROPERTIES.length && i < _legacyRun.getCutoffs().length && !foundCutoff; i++)
                 {
                     if (NabAssayProvider.CUTOFF_PROPERTIES[i].equalsIgnoreCase(property.getName()))
                     {
@@ -246,12 +247,7 @@ public class LegacyNAbUploadContext implements PlateUploadForm<NabAssayProvider>
                 }
                 if (!foundCutoff)
                 {
-                    // Look at any values that might have been POSTed by the admin who initiated the migration
-                    String value = _params.get(property.getName());
-                    if (value != null)
-                    {
-                        result.put(property, value);
-                    }
+                    result.put(property, _params.get(ColumnInfo.propNameFromName(property.getName())));
                 }
             }
         }
