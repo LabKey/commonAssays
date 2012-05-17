@@ -76,7 +76,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         // initialize the view curves button to the toolbar
         this.viewCurvesButton = new Ext.Button({
             disabled: true,
-            text: 'View Curves',
+            text: 'View 4PL Curves',
             tooltip: 'Click to view overlapping curves for the selected runs.',
             handler: this.viewCurvesClicked,
             scope: this
@@ -245,43 +245,43 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
     },
 
     viewCurvesClicked: function() {
-        // get the selected record list from the grid
-        var selection = this.selModel.getSelections();
-        var runIds = [];
-        Ext.each(selection, function(record){
-            runIds.push(record.get("Titration/Run/RowId"));
-        });
-
-        // build the config object of the properties that will be needed by the R report
-        var config = {reportId: 'module:luminex/CurveComparisonPlot.r', showSection: 'Overlapping Curves Plot'};
-        config['RunIds'] = runIds.join(";");
-        config['Protocol'] = this.assayName;
-        config['Titration'] = this.titration;
-        config['Analyte'] = this.analyte;
-        config['MainTitle'] = $h(this.titration) + ' 4PL for ' + $h(this.analyte)
-                + ' - ' + $h(this.isotype == '' ? '[None]' : this.isotype)
-                + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate);
-
         // create a pop-up window to display the plot
         var plotDiv = new Ext.Container({
-            height: 500,
-            width: 650,
+            height: 600,
+            width: 750,
+            autoEl: {tag: 'div'}
+        });
+        var pdfDiv = new Ext.Container({
+            hidden: true,
             autoEl: {tag: 'div'}
         });
         var win = new Ext.Window({
             layout:'fit',
-            width:650,
-            height:550,
+            width:750,
+            height:650,
             closeAction:'hide',
             modal: true,
             cls: 'extContainer',
             bodyStyle: 'background-color: white;',
             title: 'Curve Comparison',
-            items: [plotDiv],
+            items: [plotDiv, pdfDiv],
+            logComparisonPlot: false,
             buttons: [
                 {
                     text: 'Export to PDF',
-                    disabled: true
+                    handler: function(btn){
+                        this.updateCurvesPLot(win, pdfDiv.getId(), win.logComparisonPlot, true);
+                    },
+                    scope: this
+                },
+                {
+                    text: 'View Log Y-Axis',
+                    handler: function(btn){
+                        win.logComparisonPlot = !win.logComparisonPlot;
+                        this.updateCurvesPLot(win, plotDiv.getId(), win.logComparisonPlot, false);
+                        btn.setText(win.logComparisonPlot ? "View Linear Y-Axis" : "View Log Y-Axis");
+                    },
+                    scope: this
                 },
                 {
                     text: 'Close',
@@ -290,16 +290,53 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             ]
         });
         win.show(this);
+
+        this.updateCurvesPLot(win, plotDiv.getId(), false, false)
+    },
+
+    updateCurvesPLot: function(win, divId, logYaxis, outputPdf) {
         win.getEl().mask("loading curves...", "x-mask-loading");
+
+        // get the selected record list from the grid
+        var selection = this.selModel.getSelections();
+        var runIds = [];
+        Ext.each(selection, function(record){
+            runIds.push(record.get("Titration/Run/RowId"));
+        });        
+
+        // build the config object of the properties that will be needed by the R report
+        var config = {reportId: 'module:luminex/CurveComparisonPlot.r', showSection: 'Curve Comparison Plot'};
+        config['RunIds'] = runIds.join(";");
+        config['Protocol'] = this.assayName;
+        config['Titration'] = this.titration;
+        config['Analyte'] = this.analyte;
+        config['AsLog'] = logYaxis;
+        config['MainTitle'] = $h(this.titration) + ' 4PL for ' + $h(this.analyte)
+                + ' - ' + $h(this.isotype == '' ? '[None]' : this.isotype)
+                + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate);
+        if (outputPdf)
+            config['PdfOut'] = true;
 
         // call and display the Report webpart
         new LABKEY.WebPart({
                partName: 'Report',
-               renderTo: plotDiv.getId(),
+               renderTo: divId,
                frame: 'none',
                partConfig: config,
                success: function() {
                    this.getEl().unmask();
+
+                   if (outputPdf)
+                   {
+                       // ugly way of getting the href for the pdf file and open it
+                       if (Ext.getDom(divId))
+                       {
+                           var html = Ext.getDom(divId).innerHTML;
+                           var pdfHref = html.substring(html.indexOf('href="') + 6, html.indexOf('&amp;attachment=true'));
+                           window.location = pdfHref + "&attachment=true&deleteFile=false";
+                       }
+
+                   }
                },
                failure: function(response) {
                    Ext.get(plotDiv.getId()).update("Error: " + response.statusText);
@@ -308,8 +345,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                scope: win
         }).render();
 
-        // TODO: add grid to window, export to PDF
-        // TODO: test with expConc, test w/out notebooknum and other run props, test with replicate data
+        // TODO: test w/out notebooknum and other run props
     },
 
     exportExcelData: function() {

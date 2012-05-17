@@ -110,15 +110,34 @@ if (hasDilutions & hasExpConcs) {
 }
 
 # curve type variations on color, shape, and line type
-colors = rep(1:5, 6);
-shapes = rep(c(rep(1, 5), rep(4, 5), rep(3, 5)), 2);
-lineTypes = c(rep(1, 15), rep(5, 15));
+colors = rep(1:5, 8);
+shapes = rep(c(rep(1, 5), rep(4, 5), rep(3, 5), rep(5, 5)), 2);
+lineTypes = c(rep(1, 20), rep(5, 20));
 curveTypes = data.frame(col = colors, pch = shapes, lty = lineTypes);
 
+# set yaxis as log if requested by user
+logAxis = "x";
+legendYloc = (ymax - ymin) / 2;
+if (labkey.url.params$AsLog == "true"){
+    logAxis = "xy";
+    yLabel = paste("log(", yLabel, ")", sep="");
+
+    # if log y-axis, make sure axis limits are positive
+    if (ymin < 0) { ymin = 1; }
+    if (ymax < 0) { ymax = 1; }
+
+    legendYloc = exp((log(ymax) - log(ymin)) / 2);
+}
+
 # initialize the plot
-CairoPNG(filename="${imgout:Overlapping Curves Plot}", width=650, height=500);
+if (!is.null(labkey.url.params$PdfOut)) {
+    pdf(file="${pdfout:Curve Comparison Plot}", width=9, height=8);
+} else {
+    CairoPNG(filename="${imgout:Curve Comparison Plot}", width=750, height=600);
+}
+
 par(mar=c(5, 4, 4, 10) + 0.1);
-plot(NA, NA, main=labkey.url.params$MainTitle, ylab = yLabel, xlab = xLabel, xlim=c(xmin, xmax), ylim=c(ymin, ymax), log="x"); 
+plot(NA, NA, main=labkey.url.params$MainTitle, ylab = yLabel, xlab = xLabel, xlim=c(xmin, xmax), ylim=c(ymin, ymax), log=logAxis);
 
 # loop through the selected runs to plot the curve and the data points
 for (index in 1:nrow(runs))
@@ -140,7 +159,7 @@ for (index in 1:nrow(runs))
 	points(runData$dose, runData$fi, col=curveTypes$col[index %% nrow(curveTypes)], pch=curveTypes$pch[index %% nrow(curveTypes)]);
 }
 
-legend(exp(log(xmax) + 1), (ymax - ymin) / 2, legend=runs$data_run_notebookno, pch=curveTypes$pch, col=curveTypes$col, lty=curveTypes$lty,
-        yjust=0.5, bty="n", xpd=T);
+legend(exp(log(xmax) + 1), ymax, legend=runs$data_run_notebookno, pch=curveTypes$pch, col=curveTypes$col, lty=curveTypes$lty,
+        yjust=1, bty="n", xpd=T, cex=0.9);
 
 dev.off();
