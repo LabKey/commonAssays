@@ -376,8 +376,6 @@ public class ViabilityAssaySchema extends AssaySchema
                 ResultSpecimensTable rs = new ResultSpecimensTable();
                 // 9024: propogate container filter
                 rs.setContainerFilter(getContainerFilter());
-                SimpleFilter filter = new SimpleFilter();
-                filter.addCondition("SpecimenID/Specimen/VolumeUnits", "CEL");
                 List<FieldKey> fields = new ArrayList<FieldKey>();
                 FieldKey resultId = FieldKey.fromParts("ResultID");
                 FieldKey volume = FieldKey.fromParts("SpecimenID", "Volume");
@@ -386,7 +384,6 @@ public class ViabilityAssaySchema extends AssaySchema
                 fields.add(FieldKey.fromParts("SpecimenID"));
                 fields.add(volume);
                 fields.add(globalUniqueId);
-                fields.add(FieldKey.fromParts("SpecimenID", "Specimen", "VolumeUnits"));
 
                 // TargetStudy could be on the Results, Run, or Batch table.
                 fields.add(FieldKey.fromParts("ResultID", "TargetStudy"));
@@ -395,7 +392,7 @@ public class ViabilityAssaySchema extends AssaySchema
 
                 Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(rs, fields);
 
-                SQLFragment sub = QueryService.get().getSelectSQL(rs, columnMap.values(), filter, null, Table.ALL_ROWS, Table.NO_OFFSET, false);
+                SQLFragment sub = QueryService.get().getSelectSQL(rs, columnMap.values(), null, null, Table.ALL_ROWS, Table.NO_OFFSET, false);
                 SQLFragment groupFrag = new SQLFragment();
                 groupFrag.append("SELECT\n");
                 groupFrag.append("  " + columnMap.get(resultId).getAlias() + " as VolumeResultID,\n");
@@ -516,6 +513,8 @@ public class ViabilityAssaySchema extends AssaySchema
             specimenID.setLabel("Specimen");
             specimenID.setKeyField(true);
             SpecimenForeignKey fk = new SpecimenForeignKey(ViabilityAssaySchema.this, _provider, getProtocol(), new ViabilityAssayProvider.ResultsSpecimensAssayTableMetadata());
+            SimpleFilter filter = new SimpleFilter("volumeunits", "CEL");
+            fk.addSpecimenFilter(filter);
             specimenID.setFk(fk);
 
             ColumnInfo indexCol = addVisible(wrapColumn(getRealTable().getColumn("SpecimenIndex")));
