@@ -258,7 +258,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         var win = new Ext.Window({
             layout:'fit',
             width:750,
-            height:650,
+            height:660,
             closeAction:'hide',
             modal: true,
             cls: 'extContainer',
@@ -270,7 +270,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {
                     text: 'Export to PDF',
                     handler: function(btn){
-                        this.updateCurvesPLot(win, pdfDiv.getId(), win.logComparisonPlot, true);
+                        this.updateCurvesPLot(win, pdfDiv.getId(), false, true);
                     },
                     scope: this
                 },
@@ -344,8 +344,6 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                },
                scope: win
         }).render();
-
-        // TODO: test w/out notebooknum and other run props
     },
 
     exportExcelData: function() {
