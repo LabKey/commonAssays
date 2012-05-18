@@ -258,7 +258,9 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         var win = new Ext.Window({
             layout:'fit',
             width:750,
+            minWidth:400,
             height:660,
+            minHeight:300,
             closeAction:'hide',
             modal: true,
             cls: 'extContainer',
@@ -270,7 +272,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 {
                     text: 'Export to PDF',
                     handler: function(btn){
-                        this.updateCurvesPLot(win, pdfDiv.getId(), false, true);
+                        this.updateCurvesPlot(win, pdfDiv.getId(), false, true);
                     },
                     scope: this
                 },
@@ -278,7 +280,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                     text: 'View Log Y-Axis',
                     handler: function(btn){
                         win.logComparisonPlot = !win.logComparisonPlot;
-                        this.updateCurvesPLot(win, plotDiv.getId(), win.logComparisonPlot, false);
+                        this.updateCurvesPlot(win, plotDiv.getId(), win.logComparisonPlot, false);
                         btn.setText(win.logComparisonPlot ? "View Linear Y-Axis" : "View Log Y-Axis");
                     },
                     scope: this
@@ -287,14 +289,21 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                     text: 'Close',
                     handler: function(){win.hide();}
                 }
-            ]
+            ],
+            listeners: {
+                scope: this,
+                'resize': function(w, width, height) {
+                    // update the curve plot to the new size of the window
+                    this.updateCurvesPlot(win, plotDiv.getId(), win.logComparisonPlot, false);
+                }
+            }
         });
         win.show(this);
 
-        this.updateCurvesPLot(win, plotDiv.getId(), false, false)
+        this.updateCurvesPlot(win, plotDiv.getId(), false, false);
     },
 
-    updateCurvesPLot: function(win, divId, logYaxis, outputPdf) {
+    updateCurvesPlot: function(win, divId, logYaxis, outputPdf) {
         win.getEl().mask("loading curves...", "x-mask-loading");
 
         // get the selected record list from the grid
@@ -314,6 +323,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         config['MainTitle'] = $h(this.titration) + ' 4PL for ' + $h(this.analyte)
                 + ' - ' + $h(this.isotype == '' ? '[None]' : this.isotype)
                 + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate);
+        config['PlotHeight'] = win.getHeight();
+        config['PlotWidth'] = win.getWidth();
         if (outputPdf)
             config['PdfOut'] = true;
 

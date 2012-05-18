@@ -131,7 +131,7 @@ if (!is.null(labkey.url.params$PdfOut)) {
     layout(matrix(1:2, 2, 1));
     numPlots = 2;
 } else {
-    CairoPNG(filename="${imgout:Curve Comparison Plot}", width=750, height=600);
+    CairoPNG(filename="${imgout:Curve Comparison Plot}", width=as.numeric(labkey.url.params$PlotWidth), height=as.numeric(labkey.url.params$PlotHeight)-60);
     numPlots = 1;
 }
 
