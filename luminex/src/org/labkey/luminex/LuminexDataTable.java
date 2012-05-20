@@ -169,7 +169,7 @@ public class LuminexDataTable extends FilteredTable implements UpdateableTableIn
                 return table.getColumn("Analyte");
             }
         };
-        fk.addJoin(FieldKey.fromParts("Titration"), "Titration");
+        fk.addJoin(FieldKey.fromParts("Titration"), "Titration", false);
         analyteTitrationColumn.setFk(fk);
         addColumn(analyteTitrationColumn);
         addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
