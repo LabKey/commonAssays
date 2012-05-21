@@ -583,11 +583,11 @@ public class LuminexExcelParser
         @Test
         public void testRaw() throws ExperimentException
         {
-            LuminexExcelParser parser = createParser("plate 1_IgA-Biot (b12 IgA std).xls");
+            LuminexExcelParser parser = createParser("plate 1_IgA-Biot (Standard2).xls");
             if (parser == null) return;
             Map<Analyte, List<LuminexDataRow>> m = parser.getSheets();
             assertEquals("Wrong number of analytes", 5, m.size());
-            validateAnalyte(m.keySet(), "VRC A 5304 gp140 (62)", "FI = 0.582906 + (167.081 - 0.582906) / ((1 + (Conc / 0.531813)^-5.30023))^0.1", .4790, .8266);
+            validateAnalyte(m.keySet(), "ENV6 (97)", "FI = 0.582906 + (167.081 - 0.582906) / ((1 + (Conc / 0.531813)^-5.30023))^0.1", .4790, .8266);
             for (Map.Entry<Analyte, List<LuminexDataRow>> entry : m.entrySet())
             {
                 assertEquals("Wrong number of data rows", 34, entry.getValue().size());
