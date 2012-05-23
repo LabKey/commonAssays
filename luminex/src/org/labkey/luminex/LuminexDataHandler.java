@@ -144,7 +144,15 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 if ((type.startsWith("s") || type.startsWith("es")) && dataRow.getObsOverExp() != null && rowValue != null)
                 {
                     double obsOverExp = dataRow.getObsOverExp();
-                    if (obsOverExp >= analyte.getMinStandardRecovery() && obsOverExp <= analyte.getMaxStandardRecovery())
+                    int minRecovery = analyte.getMinStandardRecovery();
+                    int maxRecovery = analyte.getMaxStandardRecovery();
+                    if (minRecovery == 0 && maxRecovery == 0)
+                    {
+                        // Use reasonable default values if the data wasn't in the Excel file 
+                        minRecovery = 70;
+                        maxRecovery = 130;
+                    }
+                    if (obsOverExp >= minRecovery && obsOverExp <= maxRecovery)
                     {
                         if (min)
                         {
