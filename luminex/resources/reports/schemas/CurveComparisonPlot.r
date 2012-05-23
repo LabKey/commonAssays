@@ -63,10 +63,13 @@ runsParams = unique(subset(labkey.data, select=c("data_run", "analytetitration_f
 		"analytetitration_four_parametercurvefit_maxasymptote", "analytetitration_four_parametercurvefit_slope",
 		"analytetitration_four_parametercurvefit_inflection")));
 
-# process the data to set the proper FI and Dose values
+# default to using the FI-Bkgd values if no StndCurveFitInput run prop or if the value is NA
 if (!("data_run_stndcurvefitinput" %in% colnames(labkey.data))) {
     labkey.data$data_run_stndcurvefitinput = "FI-Bkgd";
 }
+labkey.data$data_run_stndcurvefitinput[is.na(labkey.data$data_run_stndcurvefitinput)] = "FI-Bkgd"; 
+
+# process the data to set the proper FI and Dose values
 runsData = subset(labkey.data, select=c("data_run", "data_run_notebookno", "data_run_stndcurvefitinput", "type"));
 runsData$fi = NA;
 runsData$dose = NA;
