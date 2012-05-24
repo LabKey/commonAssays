@@ -29,7 +29,9 @@ import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowManager;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,17 +82,37 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return ((FlowDataType) type).newInstance(data);
     }
 
-    static public FlowObject fromRowId(int id)
+    static public FlowDataObject fromRowId(int id)
     {
         return fromData(ExperimentService.get().getExpData(id));
     }
 
-    static public FlowObject fromLSID(String lsid)
+    static public FlowDataObject fromLSID(String lsid)
     {
         return fromData(ExperimentService.get().getExpData(lsid));
     }
 
-    static public FlowObject fromAttrObjectId(int id)
+    /** Get FlowObject from ExpData URL */
+    static public FlowDataObject fromURI(Container c, URI uri)
+    {
+        return fromData(ExperimentService.get().getExpDataByURL(uri.toString(), c));
+    }
+
+    /** Get FlowObjects that have the same flow.object.uri */
+    static public Collection<FlowDataObject> fromAttrObjectURI(Container c, URI uri)
+    {
+        Collection<AttrObject> objs = FlowManager.get().getAttrObjectsFromURI(c, uri);
+        Collection<FlowDataObject> ret = new ArrayList<FlowDataObject>(objs.size());
+        for (AttrObject obj : objs)
+        {
+            FlowDataObject flowDataObject = fromRowId(obj.getDataId());
+            if (flowDataObject != null)
+                ret.add(flowDataObject);
+        }
+        return ret;
+    }
+
+    static public FlowDataObject fromAttrObjectId(int id)
     {
         AttrObject obj = FlowManager.get().getAttrObjectFromRowId(id);
         if (obj == null)
@@ -98,7 +120,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return fromRowId(obj.getDataId());
     }
 
-    static public void addDataOfType(List<ExpData> datas, FlowDataType typeFilter, List list)
+    static public void addDataOfType(List<ExpData> datas, FlowDataType typeFilter, Collection list)
     {
         for (ExpData data : datas)
         {

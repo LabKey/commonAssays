@@ -46,6 +46,12 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 {
     private static final Logger _log = Logger.getLogger(FlowRun.class);
 
+    static public String getRunLSIDPrefix()
+    {
+        // See ExperimentServiceImpl.getNamespacePrefix(ExpRunImpl.class)
+        return "Run";
+    }
+
     static public FlowRun[] fromRuns(ExpRun[] runs)
     {
         FlowRun[] ret = new FlowRun[runs.length];

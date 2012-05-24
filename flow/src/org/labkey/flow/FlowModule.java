@@ -32,6 +32,7 @@ import org.labkey.api.query.QuerySchema;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.services.ServiceRegistry;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.DefaultWebPartFactory;
 import org.labkey.api.view.HttpView;
@@ -43,6 +44,7 @@ import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetParser;
 import org.labkey.flow.analysis.web.SubsetTests;
+import org.labkey.flow.data.FlowAssayProvider;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.ReportsController;
 import org.labkey.flow.controllers.compensation.CompensationController;
@@ -159,6 +161,8 @@ public class FlowModule extends DefaultModule
         FlowDataType.register();
         ExperimentService.get().registerExperimentDataHandler(FlowDataHandler.instance);
         FlowProtocolImplementation.register();
+        AssayService.get().registerAssayProvider(new FlowAssayProvider());
+
         ModuleLoader.getInstance().registerFolderType(this, new FlowFolderType(this));
         if (null != ServiceRegistry.get(SearchService.class))
             ServiceRegistry.get(SearchService.class).addDocumentParser(FCSHeader.documentParser);

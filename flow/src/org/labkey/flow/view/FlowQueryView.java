@@ -16,6 +16,7 @@
 
 package org.labkey.flow.view;
 
+import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
@@ -23,6 +24,7 @@ import org.labkey.api.data.MenuButton;
 import org.labkey.api.data.PanelButton;
 import org.labkey.api.data.TSVGridWriter;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.module.ModuleLoader;
@@ -30,6 +32,9 @@ import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
+import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.study.assay.AssayPublishService;
+import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -42,6 +47,7 @@ import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowQuerySettings;
@@ -74,6 +80,9 @@ public class FlowQueryView extends QueryView
         super(schema, settings, errors);
         setShadeAlternatingRows(true);
         setShowBorders(true);
+
+        // CONSIDER: Only show selectors if user can export, delete, or publish/copy-to-study
+        setShowRecordSelectors(true);
     }
 
 //    protected MenuButton createExportButton(boolean exportAsWebPage)
@@ -87,10 +96,10 @@ public class FlowQueryView extends QueryView
 //        return button;
 //    }
 
-    public boolean showRecordSelectors()
+
+    @Override
+    protected boolean canDelete()
     {
-        if (!getViewContext().hasPermission(DeletePermission.class))
-            return false;
         TableInfo mainTable = null;
         try
         {
@@ -98,12 +107,24 @@ public class FlowQueryView extends QueryView
         }
         catch (java.lang.IllegalArgumentException x)
         {
-             // see bug 9119
+            // see bug 9119
         }
         if (mainTable instanceof ExpRunTable)
         {
             return true;
         }
+        return false;
+    }
+
+    @Override
+    protected boolean canInsert()
+    {
+        return false;
+    }
+
+    @Override
+    protected boolean canUpdate()
+    {
         return false;
     }
 
@@ -235,7 +256,34 @@ public class FlowQueryView extends QueryView
             }
             bar.add(button);
         }
+
         super.populateButtonBar(view, bar, exportAsWebPage);
+
+        // UNDONE: refactor ResultsQueryView create "Copy to Study" button code so it can be re-used here
+        FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+        if (protocol != null && !AssayPublishService.get().getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
+        {
+            ExpProtocol expProtocol = protocol.getProtocol();
+            ActionURL publishURL = PageFlowUtil.urlProvider(AssayUrls.class).getCopyToStudyURL(getContainer(), expProtocol);
+            /*
+            for (Pair<String, String> param : publishURL.getParameters())
+            {
+                if (!"rowId".equalsIgnoreCase(param.getKey()))
+                    view.getDataRegion().addHiddenFormField(param.getKey(), param.getValue());
+            }
+            publishURL.deleteParameters();
+            */
+
+            if (getTable().getContainerFilter() != null)
+                publishURL.addParameter("containerFilterName", getTable().getContainerFilter().getType().name());
+
+            ActionButton publishButton = new ActionButton(publishURL,
+                    "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            publishButton.setDisplayPermission(InsertPermission.class);
+            publishButton.setRequiresSelection(true);
+
+            bar.add(publishButton);
+        }
     }
 
     @Override

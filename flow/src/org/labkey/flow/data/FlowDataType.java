@@ -16,13 +16,18 @@
 
 package org.labkey.flow.data;
 
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.LsidManager;
 import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExpDataRunInput;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.util.URLHelper;
 import org.labkey.flow.persist.ObjectType;
 
-abstract public class FlowDataType extends DataType
+abstract public class FlowDataType extends AssayDataType
 {
     // The prefix of the LSID namepsace prefix :)
     public static final String FLOW_DATA_PREFIX = "Flow-";
@@ -34,11 +39,34 @@ abstract public class FlowDataType extends DataType
 
     private FlowDataType(String type, String label, ObjectType objType, boolean requireAttrObject)
     {
-        super(FLOW_DATA_PREFIX + type);
+        super(FLOW_DATA_PREFIX + type, null, null);
         _name = type;
         _label = label;
         _objType = objType;
         _requireAttrObject = requireAttrObject;
+
+        LsidManager.get().registerHandler(getNamespacePrefix(), new LsidManager.ExpObjectLsidHandler()
+        {
+            @Override
+            public ExpData getObject(Lsid lsid)
+            {
+                FlowDataObject fdo = FlowDataObject.fromLSID(lsid.toString());
+                if (fdo != null)
+                    return fdo.getData();
+
+                return null;
+            }
+
+            @Override
+            public String getDisplayURL(Lsid lsid)
+            {
+                FlowDataObject fdo = FlowDataObject.fromLSID(lsid.toString());
+                if (fdo != null)
+                    return fdo.urlShow().toString();
+
+                return null;
+            }
+        });
     }
 
     static final public FlowDataType FCSFile = new FlowDataType("FCSFile", "FCS File", ObjectType.fcsKeywords, true)
@@ -110,6 +138,24 @@ abstract public class FlowDataType extends DataType
         return _name;
     }
 
+    @Override
+    public URLHelper getDetailsURL(ExpData dataObject)
+    {
+        FlowDataObject fdo = FlowDataObject.fromData(dataObject);
+        if (fdo != null)
+            return fdo.urlShow();
+
+        return null;
+    }
+
+    @Override
+    public String getRole()
+    {
+        if (_objType.getInputRole() != null)
+            return _objType.getInputRole().toString();
+        return ExpDataRunInput.DEFAULT_ROLE;
+    }
+
     public boolean isRequireAttrObject()
     {
         return _requireAttrObject;
@@ -142,5 +188,6 @@ abstract public class FlowDataType extends DataType
         }
         return null;
     }
+    
     abstract public FlowDataObject newInstance(ExpData data);
 }

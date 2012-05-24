@@ -60,7 +60,7 @@ public class FlowProtocolStep implements Serializable
 
     public String getLSID(Container container)
     {
-        return FlowObject.generateLSID(container, "Protocol", lsidName);
+        return FlowObject.generateLSID(container, FlowProtocol.getProtocolLSIDPrefix(), lsidName);
     }
 
     public String getLSID()

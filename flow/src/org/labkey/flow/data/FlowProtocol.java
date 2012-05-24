@@ -67,6 +67,13 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     static private final Logger _log = Logger.getLogger(FlowProtocol.class);
     static private final String DEFAULT_PROTOCOL_NAME = "Flow";
     static final private String SAMPLESET_NAME = "Samples";
+
+    static public String getProtocolLSIDPrefix()
+    {
+        // See ExperimentServiceImpl.getNamespacePrefix(ExpProtocolImpl.class)
+        return "Protocol";
+    }
+
     static public FlowProtocol ensureForContainer(User user, Container container) throws Exception
     {
         FlowProtocol ret = getForContainer(container);
@@ -89,6 +96,13 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     static public FlowProtocol getForContainer(Container container)
     {
         return getForContainer(container, DEFAULT_PROTOCOL_NAME);
+    }
+
+    static public boolean isDefaultProtocol(ExpProtocol protocol)
+    {
+        return protocol != null &&
+                getProtocolLSIDPrefix().equals(protocol.getLSIDNamespacePrefix()) &&
+                DEFAULT_PROTOCOL_NAME.equals(protocol.getName());
     }
 
     static public FlowProtocol fromURL(User user, ActionURL url, HttpServletRequest request) throws UnauthorizedException
