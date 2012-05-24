@@ -516,6 +516,15 @@ public class FlowManager
         return new TableSelector(getTinfoObject(), filter, null).getObject(AttrObject.class);
     }
 
+    public Collection<AttrObject> getAttrObjectsFromURI(Container c, URI uri)
+    {
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition("Container", c.getId());
+        filter.addCondition("URI", uri.toString());
+
+        return new TableSelector(getTinfoObject(), filter, null).getCollection(AttrObject.class);
+    }
+
 
     public AtomicLong flowObjectModificationCount = new AtomicLong();
 
