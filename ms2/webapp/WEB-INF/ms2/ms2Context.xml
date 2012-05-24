@@ -33,7 +33,8 @@
                 <bean class="org.labkey.ms2.pipeline.sequest.UWSequestSearchTask$Factory">
                     <property name="inputTypes">
                         <list>
-                            <ref bean="mzXMLFileType" />
+                            <ref bean="ms2MatchesFileType" />
+                            <ref bean="ms1FileType" />
                         </list>
                     </property>
                 </bean>
@@ -1186,10 +1187,6 @@
             <list>
                 <value>.msprefix.mzXML</value>
                 <value>.mzXML</value>
-                <value>.matches.cms2</value>
-                <value>.matches.ms2</value>
-                <value>.cms2</value>
-                <value>.ms2</value>
             </list>
         </constructor-arg>
         <constructor-arg value=".mzXML"/>
@@ -1219,6 +1216,18 @@
     <bean id="ms2FileType" class="org.labkey.api.util.FileType">
         <constructor-arg>
             <list>
+                <value>.cms2</value>
+                <value>.ms2</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg value=".ms2"/>
+    </bean>
+
+    <bean id="ms2MatchesFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg>
+            <list>
+                <value>.matches.cms2</value>
+                <value>.matches.ms2</value>
                 <value>.cms2</value>
                 <value>.ms2</value>
             </list>

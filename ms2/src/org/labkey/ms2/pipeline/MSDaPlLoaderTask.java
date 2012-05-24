@@ -31,6 +31,7 @@ import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.file.PathMapper;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineJob;
 import org.labkey.ms2.pipeline.sequest.UWSequestSearchTask;
 
@@ -174,7 +175,11 @@ public class MSDaPlLoaderTask extends PipelineJob.Task<MSDaPlLoaderTask.Factory>
                 }
             }
             FileUtils.copyFileToDirectory(inputFile, sequestDir);
-            FileUtils.copyFile(UWSequestSearchTask.SEQUEST_DECOY_OUTPUT_FILE_TYPE.getFile(dir, getJob().getBaseName()), new File(decoyDir, sequestResultsFile.getName()));
+            File decoySearchResultFile = UWSequestSearchTask.SEQUEST_DECOY_OUTPUT_FILE_TYPE.getFile(dir, getJob().getBaseName());
+            if (NetworkDrive.exists(decoySearchResultFile))
+            {
+                FileUtils.copyFile(decoySearchResultFile, new File(decoyDir, sequestResultsFile.getName()));
+            }
             FileUtils.copyFile(new File(dir, getJob().getBaseName() + ".perc.xml"), new File(percolatorDir, "combined-results.xml"));
 
             changePermissions(sequestDir);
