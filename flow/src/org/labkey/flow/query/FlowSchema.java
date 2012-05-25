@@ -63,6 +63,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.IdentifierString;
 import org.labkey.api.util.PageFlowUtil;
@@ -683,6 +684,25 @@ public class FlowSchema extends UserSchema
         {
             _expData.setDomain(domain);
         }
+
+        @Override
+        public boolean hasContainerContext()
+        {
+            return ((FilteredTable)_expData).hasContainerContext();
+        }
+
+        @Override
+        public ContainerContext getContainerContext()
+        {
+            return ((FilteredTable)_expData).getContainerContext();
+        }
+
+        @Override
+        public FieldKey getContainerFieldKey()
+        {
+            return _expData.getContainerFieldKey();
+        }
+
     }
 
 
@@ -1041,6 +1061,25 @@ public class FlowSchema extends UserSchema
         {
             _expData.setDomain(domain);
         }
+
+        @Override
+        public boolean hasContainerContext()
+        {
+            return ((FilteredTable)_expData).hasContainerContext();
+        }
+
+        @Override
+        public ContainerContext getContainerContext()
+        {
+            return ((FilteredTable)_expData).getContainerContext();
+        }
+
+        @Override
+        public FieldKey getContainerFieldKey()
+        {
+            return _expData.getContainerFieldKey();
+        }
+
     }
 
 
